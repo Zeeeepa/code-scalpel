@@ -1,10 +1,15 @@
 import pytest
 import asyncio
+import os
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    os.getenv("CI") == "true" or os.getenv("GITHUB_ACTIONS") == "true",
+    reason="MCP HTTP integration test requires running MCP server, skipped in CI"
+)
 async def test_mcp_http_connection():
     """Test connection to the running MCP server via HTTP SSE."""
     url = "http://localhost:8593/sse"

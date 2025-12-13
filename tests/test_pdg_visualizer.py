@@ -1,7 +1,11 @@
 import pytest
 import networkx as nx
-from code_scalpel.pdg_tools.visualizer import PDGVisualizer, VisualizationConfig, VisualizationFormat
+from code_scalpel.pdg_tools.visualizer import (
+    PDGVisualizer,
+    VisualizationConfig,
+)
 from unittest.mock import MagicMock, patch
+
 
 class TestPDGVisualizer:
     @pytest.fixture
@@ -24,9 +28,9 @@ class TestPDGVisualizer:
     def test_visualize(self, mock_digraph, visualizer, simple_pdg):
         mock_dot = MagicMock()
         mock_digraph.return_value = mock_dot
-        
+
         visualizer.visualize(simple_pdg, "output")
-        
+
         mock_dot.render.assert_called_once()
         mock_dot.node.assert_called()
         mock_dot.edge.assert_called()
@@ -35,9 +39,9 @@ class TestPDGVisualizer:
     def test_create_interactive_html(self, mock_open, visualizer, simple_pdg):
         mock_file = MagicMock()
         mock_open.return_value.__enter__.return_value = mock_file
-        
+
         visualizer.create_interactive_html(simple_pdg, "output.html")
-        
+
         mock_open.assert_called_with("output.html", "w")
         mock_file.write.assert_called()
         # Check if D3 script is included
@@ -46,16 +50,18 @@ class TestPDGVisualizer:
 
     @patch("builtins.open", new_callable=MagicMock)
     @patch("code_scalpel.pdg_tools.visualizer.Digraph")
-    def test_create_comparison_view(self, mock_digraph, mock_open, visualizer, simple_pdg):
+    def test_create_comparison_view(
+        self, mock_digraph, mock_open, visualizer, simple_pdg
+    ):
         mock_file = MagicMock()
         mock_open.return_value.__enter__.return_value = mock_file
-        
+
         mock_dot = MagicMock()
         mock_dot.pipe.return_value = b"fake_png_data"
         mock_digraph.return_value = mock_dot
-        
+
         visualizer.create_comparison_view(simple_pdg, simple_pdg, "comparison.html")
-        
+
         mock_open.assert_called_with("comparison.html", "w")
         mock_file.write.assert_called()
         # Check if base64 image is included
@@ -66,7 +72,7 @@ class TestPDGVisualizer:
         nodes = {"1", "2"}
         visualizer.highlight_subgraph(nodes, temporary=False)
         assert visualizer.config.highlight_nodes == nodes
-        
+
         visualizer.highlight_subgraph({"3"}, temporary=True)
         assert visualizer._temp_highlights == {"3"}
 
@@ -75,4 +81,3 @@ class TestPDGVisualizer:
         wrapped = PDGVisualizer._wrap_text(text, 10)
         assert "\\n" in wrapped
         assert len(wrapped.split("\\n")) > 1
-

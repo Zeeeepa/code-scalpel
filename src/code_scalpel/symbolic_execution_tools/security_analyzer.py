@@ -222,7 +222,7 @@ class SecurityAnalyzer:
 
         elif isinstance(node, ast.FunctionDef):
             result.functions_analyzed.append(node.name)
-            
+
             # Mark function parameters as taint sources (untrusted input)
             for arg in node.args.args:
                 param_name = arg.arg
@@ -234,7 +234,7 @@ class SecurityAnalyzer:
                 )
                 self._taint_tracker.mark_tainted(param_name, taint_info)
                 self._current_taint_map[param_name] = taint_info
-            
+
             for child in node.body:
                 self._analyze_node(child, result)
 
@@ -260,8 +260,10 @@ class SecurityAnalyzer:
             for item in node.items:
                 # First, analyze the context expression as a potential sink
                 if isinstance(item.context_expr, ast.Call):
-                    self._analyze_call(item.context_expr, (node.lineno, node.col_offset))
-                
+                    self._analyze_call(
+                        item.context_expr, (node.lineno, node.col_offset)
+                    )
+
                 # Then propagate taint to the bound variable
                 if item.optional_vars and isinstance(item.optional_vars, ast.Name):
                     target_var = item.optional_vars.id
@@ -270,8 +272,10 @@ class SecurityAnalyzer:
                     # Propagate taint from source variables to the target
                     # signature: propagate_assignment(target, source_names: List[str])
                     if source_vars:
-                        self._taint_tracker.propagate_assignment(target_var, source_vars)
-            
+                        self._taint_tracker.propagate_assignment(
+                            target_var, source_vars
+                        )
+
             for child in node.body:
                 self._analyze_node(child, result)
 

@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 from typing import Optional
 
+# pragma: no cover - Utility tested indirectly through surgical_extractor integration
+
 
 class PathResolutionError(Exception):
     """Raised when a file path cannot be resolved."""

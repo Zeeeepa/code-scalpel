@@ -276,7 +276,9 @@ def scan_security(filepath: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
+            print(
+                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
+            )
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -326,7 +328,9 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
+            print(
+                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
+            )
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -350,7 +354,9 @@ def start_server(host: str = "0.0.0.0", port: int = 5000) -> int:
     print(f"   Analyze endpoint: POST http://{host}:{port}/analyze")
     print(f"   Refactor endpoint: POST http://{host}:{port}/refactor")
     print(f"   Security endpoint: POST http://{host}:{port}/security")
-    print("\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'code-scalpel mcp' instead.")
+    print(
+        "\nNote: For MCP-compliant clients (Claude Desktop, Cursor), use 'code-scalpel mcp' instead."
+    )
     print("Press Ctrl+C to stop the server.\n")
 
     try:
@@ -385,7 +391,13 @@ def start_mcp_server(
         print("\nPress Ctrl+C to stop.\n")
 
     try:
-        run_server(transport=transport, host=host, port=port, allow_lan=allow_lan, root_path=root_path)
+        run_server(
+            transport=transport,
+            host=host,
+            port=port,
+            allow_lan=allow_lan,
+            root_path=root_path,
+        )
     except KeyboardInterrupt:
         print("\nMCP Server stopped.")
 
@@ -439,12 +451,12 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     )
     scan_parser.add_argument("file", nargs="?", help="Python file to scan")
     scan_parser.add_argument("--code", "-c", help="Code string to scan")
-    scan_parser.add_argument(
-        "--json", "-j", action="store_true", help="Output as JSON"
-    )
+    scan_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
 
     # Server command (REST API - legacy)
-    server_parser = subparsers.add_parser("server", help="Start REST API server (legacy)")
+    server_parser = subparsers.add_parser(
+        "server", help="Start REST API server (legacy)"
+    )
     server_parser.add_argument(
         "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
     )
@@ -453,7 +465,9 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     )
 
     # MCP command (Model Context Protocol - recommended)
-    mcp_parser = subparsers.add_parser("mcp", help="Start MCP server (for Claude Desktop, Cursor)")
+    mcp_parser = subparsers.add_parser(
+        "mcp", help="Start MCP server (for Claude Desktop, Cursor)"
+    )
     mcp_parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "streamable-http"],
@@ -461,13 +475,21 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         help="Transport type (default: stdio)",
     )
     mcp_parser.add_argument(
-        "--http", action="store_true", help="Use HTTP transport (alias for --transport sse)"
+        "--http",
+        action="store_true",
+        help="Use HTTP transport (alias for --transport sse)",
     )
     mcp_parser.add_argument(
-        "--host", default="127.0.0.1", help="Host to bind to for HTTP (default: 127.0.0.1)"
+        "--host",
+        default="127.0.0.1",
+        help="Host to bind to for HTTP (default: 127.0.0.1)",
     )
     mcp_parser.add_argument(
-        "--port", "-p", type=int, default=8080, help="Port for HTTP transport (default: 8080)"
+        "--port",
+        "-p",
+        type=int,
+        default=8080,
+        help="Port for HTTP transport (default: 8080)",
     )
     mcp_parser.add_argument(
         "--allow-lan",
@@ -514,7 +536,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         transport = args.transport
         if args.http:
             transport = "sse"
-        
+
         allow_lan = getattr(args, "allow_lan", False)
         root_path = getattr(args, "root", None)
 

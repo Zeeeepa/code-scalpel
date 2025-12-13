@@ -5,8 +5,6 @@ Directive 3: When calculate_tax imports TaxRate from models.py,
 the extractor should optionally grab the definition of TaxRate.
 """
 
-import os
-import tempfile
 import pytest
 from pathlib import Path
 
@@ -432,12 +430,12 @@ class TestImportMapBuilding:
         """Test mapping from 'from X import Y' syntax."""
         test_file = tmp_path / "test.py"
         test_file.write_text(
-            '''from models import User, Order
+            """from models import User, Order
 from utils import helper as h
 
 def func():
     pass
-'''
+"""
         )
 
         extractor = SurgicalExtractor.from_file(str(test_file))
@@ -451,12 +449,12 @@ def func():
         """Test mapping from 'import X' syntax."""
         test_file = tmp_path / "test.py"
         test_file.write_text(
-            '''import os
+            """import os
 import sys as system
 
 def func():
     pass
-'''
+"""
         )
 
         extractor = SurgicalExtractor.from_file(str(test_file))

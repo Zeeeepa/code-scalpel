@@ -66,7 +66,7 @@ class SecretScanner(ast.NodeVisitor):
     def string_patterns(self) -> List[tuple[str, Pattern[str]]]:
         """
         Backward compatibility property for tests.
-        
+
         Returns:
             List of (name, pattern) tuples
         """
@@ -167,7 +167,7 @@ class SecretScanner(ast.NodeVisitor):
 
         # Mask the secret in the description
         masked = self._mask_secret(matched_value)
-        
+
         # Get human-readable name and recommendation
         display_name, recommendation = self._get_recommendation(secret_type)
 
@@ -179,7 +179,7 @@ class SecretScanner(ast.NodeVisitor):
             source_location=loc,
             sanitizers_applied=set(),
         )
-        
+
         # Add recommendation to the vulnerability (stored in taint_path for now)
         vuln.taint_path.append(f"Recommendation: {recommendation}")
 
@@ -213,107 +213,110 @@ class SecretScanner(ast.NodeVisitor):
         recommendations = {
             "aws_access_key": (
                 "AWS Access Key",
-                "Use AWS IAM roles or environment variables with AWS Secrets Manager"
+                "Use AWS IAM roles or environment variables with AWS Secrets Manager",
             ),
             "aws_secret_key": (
                 "AWS Secret Key",
-                "Use AWS IAM roles or environment variables with AWS Secrets Manager"
+                "Use AWS IAM roles or environment variables with AWS Secrets Manager",
             ),
             "github_token": (
                 "GitHub Personal Access Token",
-                "Use GitHub Actions secrets or environment variables"
+                "Use GitHub Actions secrets or environment variables",
             ),
             "github_oauth": (
                 "GitHub OAuth Token",
-                "Use GitHub App authentication or OAuth flows with secure token storage"
+                "Use GitHub App authentication or OAuth flows with secure token storage",
             ),
             "github_app": (
                 "GitHub App Token",
-                "Store GitHub App private keys in secure key management systems"
+                "Store GitHub App private keys in secure key management systems",
             ),
             "github_fine_grained": (
                 "GitHub Fine-Grained Token",
-                "Use GitHub Actions secrets or environment variables with minimal permissions"
+                "Use GitHub Actions secrets or environment variables with minimal permissions",
             ),
             "gitlab_token": (
                 "GitLab Personal Access Token",
-                "Use GitLab CI/CD variables or environment variables"
+                "Use GitLab CI/CD variables or environment variables",
             ),
             "stripe_live": (
                 "Stripe Live Key",
-                "Use environment variables and never commit live keys to version control"
+                "Use environment variables and never commit live keys to version control",
             ),
             "stripe_test": (
                 "Stripe Test Key",
-                "Use environment variables even for test keys to maintain security practices"
+                "Use environment variables even for test keys to maintain security practices",
             ),
             "slack_token": (
                 "Slack Bot Token",
-                "Use environment variables or secure secret management"
+                "Use environment variables or secure secret management",
             ),
             "slack_webhook": (
                 "Slack Webhook URL",
-                "Store webhook URLs in environment variables or secret management systems"
+                "Store webhook URLs in environment variables or secret management systems",
             ),
             "google_api": (
                 "Google API Key",
-                "Use Google Cloud Secret Manager or environment variables"
+                "Use Google Cloud Secret Manager or environment variables",
             ),
             "firebase": (
                 "Firebase Key",
-                "Use Firebase environment config and restrict API key permissions"
+                "Use Firebase environment config and restrict API key permissions",
             ),
             "twilio_sid": (
                 "Twilio Account SID",
-                "Use environment variables for Twilio credentials"
+                "Use environment variables for Twilio credentials",
             ),
             "twilio_token": (
                 "Twilio Auth Token",
-                "Use environment variables and rotate tokens regularly"
+                "Use environment variables and rotate tokens regularly",
             ),
             "sendgrid": (
                 "SendGrid API Key",
-                "Use environment variables and restrict API key permissions"
+                "Use environment variables and restrict API key permissions",
             ),
             "mailgun": (
                 "Mailgun API Key",
-                "Use environment variables and secure key storage"
+                "Use environment variables and secure key storage",
             ),
             "square_token": (
                 "Square Access Token",
-                "Use environment variables and OAuth for production applications"
+                "Use environment variables and OAuth for production applications",
             ),
             "private_key_rsa": (
                 "RSA Private Key",
-                "Store private keys in secure key management systems, never in code"
+                "Store private keys in secure key management systems, never in code",
             ),
             "private_key_ec": (
                 "EC Private Key",
-                "Store private keys in secure key management systems, never in code"
+                "Store private keys in secure key management systems, never in code",
             ),
             "private_key_dsa": (
                 "DSA Private Key",
-                "Store private keys in secure key management systems, never in code"
+                "Store private keys in secure key management systems, never in code",
             ),
             "private_key_openssh": (
                 "OpenSSH Private Key",
-                "Store SSH keys in ~/.ssh with proper permissions (600), never in code"
+                "Store SSH keys in ~/.ssh with proper permissions (600), never in code",
             ),
             "private_key_generic": (
                 "Private Key",
-                "Store private keys in secure key management systems, never in code"
+                "Store private keys in secure key management systems, never in code",
             ),
             "generic_api_key": (
                 "Generic API Key",
-                "Use environment variables or secure secret management systems"
+                "Use environment variables or secure secret management systems",
             ),
             "generic_secret": (
                 "Generic Secret",
-                "Use environment variables or secure secret management systems"
+                "Use environment variables or secure secret management systems",
             ),
         }
-        
+
         return recommendations.get(
             secret_type,
-            ("Hardcoded Secret", "Use environment variables or secure secret management")
+            (
+                "Hardcoded Secret",
+                "Use environment variables or secure secret management",
+            ),
         )

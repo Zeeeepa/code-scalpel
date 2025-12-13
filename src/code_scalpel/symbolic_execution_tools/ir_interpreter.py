@@ -54,7 +54,6 @@ from z3 import (
     Or,
     Solver,
     Sort,
-    String,
     StringVal,
     sat,
 )

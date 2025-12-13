@@ -6,7 +6,7 @@ how AI agents can use Code Scalpel's MCP tools.
 """
 
 import pytest
-from typing import Dict, Any, List
+from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
 from code_scalpel.agents.base_agent import BaseCodeAnalysisAgent, AgentContext
@@ -20,16 +20,16 @@ class TestBaseCodeAnalysisAgent:
 
     class TestAgent(BaseCodeAnalysisAgent):
         """Concrete test agent implementation."""
-        
+
         async def observe(self, target: str) -> Dict[str, Any]:
             return {"success": True, "data": "test"}
-        
+
         async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
             return {"success": True, "analysis": "test"}
-        
+
         async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
             return {"success": True, "decisions": "test"}
-        
+
         async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
             return {"success": True, "actions": "test"}
 
@@ -56,14 +56,19 @@ class TestBaseCodeAnalysisAgent:
         """Test successful file observation."""
         # Mock the get_file_context function
         import code_scalpel.agents.base_agent as base_module
+
         original_get_file_context = base_module.get_file_context
-        base_module.get_file_context = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "file_path": "/test/file.py",
-                "complexity_score": 5
-            })
-        ))
+        base_module.get_file_context = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={
+                        "success": True,
+                        "file_path": "/test/file.py",
+                        "complexity_score": 5,
+                    }
+                )
+            )
+        )
 
         try:
             result = await agent.observe_file("/test/file.py")
@@ -77,13 +82,15 @@ class TestBaseCodeAnalysisAgent:
     async def test_observe_file_failure(self, agent):
         """Test file observation failure."""
         import code_scalpel.agents.base_agent as base_module
+
         original_get_file_context = base_module.get_file_context
-        base_module.get_file_context = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": False,
-                "error": "File not found"
-            })
-        ))
+        base_module.get_file_context = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={"success": False, "error": "File not found"}
+                )
+            )
+        )
 
         try:
             result = await agent.observe_file("/nonexistent/file.py")
@@ -96,14 +103,19 @@ class TestBaseCodeAnalysisAgent:
     async def test_find_symbol_usage_success(self, agent):
         """Test successful symbol reference finding."""
         import code_scalpel.agents.base_agent as base_module
+
         original_get_symbol_references = base_module.get_symbol_references
-        base_module.get_symbol_references = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "symbol_name": "test_function",
-                "total_references": 3
-            })
-        ))
+        base_module.get_symbol_references = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={
+                        "success": True,
+                        "symbol_name": "test_function",
+                        "total_references": 3,
+                    }
+                )
+            )
+        )
 
         try:
             result = await agent.find_symbol_usage("test_function")
@@ -116,13 +128,15 @@ class TestBaseCodeAnalysisAgent:
     async def test_analyze_security_success(self, agent):
         """Test successful security analysis."""
         import code_scalpel.agents.base_agent as base_module
+
         original_security_scan = base_module.security_scan
-        base_module.security_scan = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "vulnerabilities": []
-            })
-        ))
+        base_module.security_scan = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={"success": True, "vulnerabilities": []}
+                )
+            )
+        )
 
         try:
             result = await agent.analyze_code_security("test code")
@@ -135,13 +149,15 @@ class TestBaseCodeAnalysisAgent:
     async def test_extract_function_success(self, agent):
         """Test successful function extraction."""
         import code_scalpel.agents.base_agent as base_module
+
         original_extract_code = base_module.extract_code
-        base_module.extract_code = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "code": "def test():\n    pass"
-            })
-        ))
+        base_module.extract_code = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={"success": True, "code": "def test():\n    pass"}
+                )
+            )
+        )
 
         try:
             result = await agent.extract_function("/test/file.py", "test_function")
@@ -154,13 +170,13 @@ class TestBaseCodeAnalysisAgent:
     async def test_simulate_change_success(self, agent):
         """Test successful change simulation."""
         import code_scalpel.agents.base_agent as base_module
+
         original_simulate_refactor = base_module.simulate_refactor
-        base_module.simulate_refactor = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "safe": True
-            })
-        ))
+        base_module.simulate_refactor = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(return_value={"success": True, "safe": True})
+            )
+        )
 
         try:
             result = await agent.simulate_code_change("old code", "new code")
@@ -173,16 +189,20 @@ class TestBaseCodeAnalysisAgent:
     async def test_apply_safe_change_success(self, agent):
         """Test successful safe change application."""
         import code_scalpel.agents.base_agent as base_module
+
         original_update_symbol = base_module.update_symbol
-        base_module.update_symbol = AsyncMock(return_value=MagicMock(
-            model_dump=MagicMock(return_value={
-                "success": True,
-                "message": "Change applied"
-            })
-        ))
+        base_module.update_symbol = AsyncMock(
+            return_value=MagicMock(
+                model_dump=MagicMock(
+                    return_value={"success": True, "message": "Change applied"}
+                )
+            )
+        )
 
         try:
-            result = await agent.apply_safe_change("/test/file.py", "function", "test_func", "new code")
+            result = await agent.apply_safe_change(
+                "/test/file.py", "function", "test_func", "new code"
+            )
             assert result["success"] is True
             assert "message" in result
         finally:
@@ -207,13 +227,17 @@ class TestCodeReviewAgent:
     async def test_observe_success(self, agent):
         """Test successful observation phase."""
         # Mock dependencies
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "functions": ["func1", "func2"],
-            "complexity_score": 8
-        })
+        agent.observe_file = AsyncMock(
+            return_value={
+                "success": True,
+                "functions": ["func1", "func2"],
+                "complexity_score": 8,
+            }
+        )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
-        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 2})
+        agent.find_symbol_usage = AsyncMock(
+            return_value={"success": True, "total_references": 2}
+        )
 
         result = await agent.observe("/test/file.py")
 
@@ -226,7 +250,19 @@ class TestCodeReviewAgent:
         """Test file structure analysis."""
         file_info = {
             "complexity_score": 15,
-            "functions": ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11"]
+            "functions": [
+                "f1",
+                "f2",
+                "f3",
+                "f4",
+                "f5",
+                "f6",
+                "f7",
+                "f8",
+                "f9",
+                "f10",
+                "f11",
+            ],
         }
 
         issues = agent._analyze_file_structure(file_info)
@@ -240,7 +276,11 @@ class TestCodeReviewAgent:
         """Test security analysis."""
         security_info = {
             "vulnerabilities": [
-                {"type": "sql_injection", "severity": "high", "description": "SQL injection detected"}
+                {
+                    "type": "sql_injection",
+                    "severity": "high",
+                    "description": "SQL injection detected",
+                }
             ]
         }
 
@@ -254,7 +294,7 @@ class TestCodeReviewAgent:
         """Test quality score calculation."""
         issues = [
             {"severity": "high", "type": "security"},
-            {"severity": "medium", "type": "complexity"}
+            {"severity": "medium", "type": "complexity"},
         ]
         file_info = {"has_security_issues": False}
 
@@ -270,7 +310,7 @@ class TestCodeReviewAgent:
             {"severity": "high"},
             {"severity": "medium"},
             {"severity": "low"},
-            {"severity": "high"}
+            {"severity": "high"},
         ]
 
         breakdown = agent._categorize_issues(issues)
@@ -285,7 +325,7 @@ class TestCodeReviewAgent:
         observations = {
             "file_info": {"complexity_score": 12, "functions": ["f1"]},
             "security_scan": {"vulnerabilities": []},
-            "symbol_analysis": {}
+            "symbol_analysis": {},
         }
 
         result = await agent.orient(observations)
@@ -300,9 +340,14 @@ class TestCodeReviewAgent:
         """Test successful decision phase."""
         analysis = {
             "issues": [
-                {"type": "security", "severity": "high", "actionable": True, "confidence": 0.9}
+                {
+                    "type": "security",
+                    "severity": "high",
+                    "actionable": True,
+                    "confidence": 0.9,
+                }
             ],
-            "suggestions": ["Fix security issues"]
+            "suggestions": ["Fix security issues"],
         }
 
         result = await agent.decide(analysis)
@@ -320,7 +365,7 @@ class TestCodeReviewAgent:
                     "action": {"type": "refactor_function"},
                     "implementation_plan": {},
                     "verification_steps": [],
-                    "estimated_impact": {}
+                    "estimated_impact": {},
                 }
             ]
         }
@@ -355,7 +400,7 @@ class TestSecurityAgent:
         vulnerabilities = [
             {"type": "sql_injection", "severity": "high"},
             {"type": "xxe", "severity": "medium"},
-            {"type": "sql_injection", "severity": "low"}
+            {"type": "sql_injection", "severity": "low"},
         ]
 
         categorized = agent._categorize_vulnerabilities(vulnerabilities)
@@ -369,7 +414,7 @@ class TestSecurityAgent:
         """Test overall risk assessment."""
         categorized_vulns = {
             "sql_injection": [{"severity": "critical"}, {"severity": "high"}],
-            "xxe": [{"severity": "medium"}]
+            "xxe": [{"severity": "medium"}],
         }
         attack_vectors = []
 
@@ -401,10 +446,9 @@ class TestSecurityAgent:
     @pytest.mark.asyncio
     async def test_observe_success(self, agent):
         """Test successful security observation."""
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "functions": ["func1"]
-        })
+        agent.observe_file = AsyncMock(
+            return_value={"success": True, "functions": ["func1"]}
+        )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
         agent.find_symbol_usage = AsyncMock(return_value={"success": True})
 
@@ -417,10 +461,7 @@ class TestSecurityAgent:
     @pytest.mark.asyncio
     async def test_orient_success(self, agent):
         """Test successful security orientation."""
-        observations = {
-            "security_scan": {"vulnerabilities": []},
-            "symbol_analysis": {}
-        }
+        observations = {"security_scan": {"vulnerabilities": []}, "symbol_analysis": {}}
 
         result = await agent.orient(observations)
 
@@ -435,7 +476,7 @@ class TestSecurityAgent:
             "remediation_plan": {
                 "sql_injection": {
                     "priority": "high",
-                    "actions": [{"type": "input_validation"}]
+                    "actions": [{"type": "input_validation"}],
                 }
             }
         }
@@ -454,7 +495,7 @@ class TestSecurityAgent:
                     "action": {"type": "input_validation"},
                     "implementation_plan": {},
                     "verification_steps": [],
-                    "estimated_impact": {}
+                    "estimated_impact": {},
                 }
             ]
         }
@@ -486,7 +527,7 @@ class TestOptimizationAgent:
         """Test complexity analysis."""
         file_info = {
             "complexity_score": 20,
-            "functions": ["f1", "f2", "f3", "f4", "f5", "f6"]
+            "functions": ["f1", "f2", "f3", "f4", "f5", "f6"],
         }
 
         analysis = agent._analyze_complexity(file_info)
@@ -498,11 +539,15 @@ class TestOptimizationAgent:
     def test_identify_bottlenecks(self, agent):
         """Test bottleneck identification."""
         complexity_analysis = {
-            "issues": [{"type": "high_complexity", "severity": "high", "description": "High complexity"}]
+            "issues": [
+                {
+                    "type": "high_complexity",
+                    "severity": "high",
+                    "description": "High complexity",
+                }
+            ]
         }
-        symbol_analysis = {
-            "func1": {"total_references": 25}
-        }
+        symbol_analysis = {"func1": {"total_references": 25}}
 
         bottlenecks = agent._identify_bottlenecks(complexity_analysis, symbol_analysis)
 
@@ -512,10 +557,7 @@ class TestOptimizationAgent:
 
     def test_calculate_performance_score(self, agent):
         """Test performance score calculation."""
-        bottlenecks = [
-            {"severity": "high"},
-            {"severity": "medium"}
-        ]
+        bottlenecks = [{"severity": "high"}, {"severity": "medium"}]
         opportunities = [{"confidence": 0.8}]
 
         score = agent._calculate_performance_score(bottlenecks, opportunities)
@@ -527,7 +569,7 @@ class TestOptimizationAgent:
         """Test optimization recommendation generation."""
         opportunities = [
             {"type": "algorithmic", "target": "func1", "confidence": 0.7},
-            {"type": "caching", "target": "func2", "confidence": 0.8}
+            {"type": "caching", "target": "func2", "confidence": 0.8},
         ]
 
         recommendations = agent._generate_optimization_recommendations(opportunities)
@@ -539,11 +581,13 @@ class TestOptimizationAgent:
     @pytest.mark.asyncio
     async def test_observe_success(self, agent):
         """Test successful optimization observation."""
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "complexity_score": 10,
-            "functions": ["func1"]
-        })
+        agent.observe_file = AsyncMock(
+            return_value={
+                "success": True,
+                "complexity_score": 10,
+                "functions": ["func1"],
+            }
+        )
         agent.find_symbol_usage = AsyncMock(return_value={"success": True})
 
         result = await agent.observe("/test/file.py")
@@ -556,7 +600,7 @@ class TestOptimizationAgent:
         """Test successful optimization orientation."""
         observations = {
             "complexity_analysis": {"overall_complexity": 15, "issues": []},
-            "symbol_analysis": {}
+            "symbol_analysis": {},
         }
 
         result = await agent.orient(observations)
@@ -570,12 +614,14 @@ class TestOptimizationAgent:
         """Test successful optimization decision."""
         analysis = {
             "opportunities": [{"type": "caching"}],
-            "recommendations": [{
-                "title": "Add Caching",
-                "impact": "medium",
-                "risk": "low",
-                "category": "memory"
-            }]
+            "recommendations": [
+                {
+                    "title": "Add Caching",
+                    "impact": "medium",
+                    "risk": "low",
+                    "category": "memory",
+                }
+            ],
         }
 
         result = await agent.decide(analysis)
@@ -592,7 +638,7 @@ class TestOptimizationAgent:
                     "action": {"category": "memory"},
                     "implementation_plan": {},
                     "verification_steps": [],
-                    "estimated_impact": {}
+                    "estimated_impact": {},
                 }
             ]
         }
@@ -615,21 +661,20 @@ class TestAgentIntegration:
         agent = CodeReviewAgent()
 
         # Mock all the MCP tool calls
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "complexity_score": 5,
-            "functions": ["test_func"],
-            "classes": [],
-            "imports": ["os"],
-            "has_security_issues": False
-        })
-        agent.analyze_code_security = AsyncMock(return_value={
-            "vulnerabilities": []
-        })
-        agent.find_symbol_usage = AsyncMock(return_value={
-            "success": True,
-            "total_references": 1
-        })
+        agent.observe_file = AsyncMock(
+            return_value={
+                "success": True,
+                "complexity_score": 5,
+                "functions": ["test_func"],
+                "classes": [],
+                "imports": ["os"],
+                "has_security_issues": False,
+            }
+        )
+        agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
+        agent.find_symbol_usage = AsyncMock(
+            return_value={"success": True, "total_references": 1}
+        )
 
         result = await agent.execute_ooda_loop("/test/file.py")
 
@@ -646,17 +691,13 @@ class TestAgentIntegration:
         agent = SecurityAgent()
 
         # Mock MCP tool calls
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "functions": ["vulnerable_func"]
-        })
-        agent.analyze_code_security = AsyncMock(return_value={
-            "vulnerabilities": []
-        })
-        agent.find_symbol_usage = AsyncMock(return_value={
-            "success": True,
-            "total_references": 1
-        })
+        agent.observe_file = AsyncMock(
+            return_value={"success": True, "functions": ["vulnerable_func"]}
+        )
+        agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
+        agent.find_symbol_usage = AsyncMock(
+            return_value={"success": True, "total_references": 1}
+        )
 
         result = await agent.execute_ooda_loop("/test/file.py")
 
@@ -669,15 +710,16 @@ class TestAgentIntegration:
         agent = OptimizationAgent()
 
         # Mock MCP tool calls
-        agent.observe_file = AsyncMock(return_value={
-            "success": True,
-            "complexity_score": 8,
-            "functions": ["slow_func"]
-        })
-        agent.find_symbol_usage = AsyncMock(return_value={
-            "success": True,
-            "total_references": 1
-        })
+        agent.observe_file = AsyncMock(
+            return_value={
+                "success": True,
+                "complexity_score": 8,
+                "functions": ["slow_func"],
+            }
+        )
+        agent.find_symbol_usage = AsyncMock(
+            return_value={"success": True, "total_references": 1}
+        )
 
         result = await agent.execute_ooda_loop("/test/file.py")
 

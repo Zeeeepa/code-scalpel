@@ -32,28 +32,30 @@ from pathlib import Path
 from typing import Any
 
 # Default directories to exclude from crawling
-DEFAULT_EXCLUDE_DIRS: frozenset[str] = frozenset({
-    ".git",
-    ".hg",
-    ".svn",
-    "venv",
-    ".venv",
-    "env",
-    ".env",
-    "__pycache__",
-    ".pytest_cache",
-    ".mypy_cache",
-    ".ruff_cache",
-    "node_modules",
-    "dist",
-    "build",
-    "egg-info",
-    ".egg-info",
-    ".tox",
-    ".nox",
-    "htmlcov",
-    "site-packages",
-})
+DEFAULT_EXCLUDE_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        "venv",
+        ".venv",
+        "env",
+        ".env",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "node_modules",
+        "dist",
+        "build",
+        "egg-info",
+        ".egg-info",
+        ".tox",
+        ".nox",
+        "htmlcov",
+        "site-packages",
+    }
+)
 
 # Default complexity threshold for warnings
 DEFAULT_COMPLEXITY_THRESHOLD: int = 10
@@ -414,7 +416,9 @@ class ProjectCrawler:
         else:
             md_lines.append("| File | Function | Complexity | Line |")
             md_lines.append("|------|----------|------------|------|")
-            for file_path, func in sorted(warnings, key=lambda x: x[1].complexity, reverse=True):
+            for file_path, func in sorted(
+                warnings, key=lambda x: x[1].complexity, reverse=True
+            ):
                 rel_path = os.path.relpath(file_path, result.root_path)
                 md_lines.append(
                     f"| `{rel_path}` | `{func.qualified_name}` | **{func.complexity}** | {func.lineno} |"

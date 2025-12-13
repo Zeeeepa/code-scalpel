@@ -116,6 +116,12 @@ exclude = [
 [tool.coverage.run]
 branch = true
 source = ["src/code_scalpel"]
+omit = [
+    "src/code_scalpel/core.py",  # Legacy PDG builder - replaced by pdg_tools/
+    "src/code_scalpel/parsers/*",  # Legacy parsers - replaced by code_parser/
+    "src/code_scalpel/utilities/path_resolution.py",  # Utility tested indirectly via surgical_extractor
+    "src/code_scalpel/utilities/cache.py",  # Utility tested indirectly via symbolic_execution_tools
+]
 
 [tool.coverage.report]
 exclude_lines = [

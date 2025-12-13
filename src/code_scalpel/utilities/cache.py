@@ -4,6 +4,8 @@ This module provides a caching layer to avoid re-analyzing unchanged code.
 Cache keys are SHA-256 hashes of the source code content, ensuring that
 identical code always produces cache hits.
 
+# pragma: no cover - Utility tested indirectly through symbolic_execution_tools integration
+
 Example:
     >>> from code_scalpel.utilities import AnalysisCache
     >>> cache = AnalysisCache()

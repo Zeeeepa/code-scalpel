@@ -81,7 +81,9 @@ class FunctionInfo(BaseModel):
 
     name: str = Field(description="Function name")
     lineno: int = Field(description="Line number where function starts")
-    end_lineno: int | None = Field(default=None, description="Line number where function ends")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where function ends"
+    )
     is_async: bool = Field(default=False, description="Whether function is async")
 
 
@@ -90,8 +92,12 @@ class ClassInfo(BaseModel):
 
     name: str = Field(description="Class name")
     lineno: int = Field(description="Line number where class starts")
-    end_lineno: int | None = Field(default=None, description="Line number where class ends")
-    methods: list[str] = Field(default_factory=list, description="Method names in class")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where class ends"
+    )
+    methods: list[str] = Field(
+        default_factory=list, description="Method names in class"
+    )
 
 
 class AnalysisResult(BaseModel):
@@ -109,8 +115,12 @@ class AnalysisResult(BaseModel):
     issues: list[str] = Field(default_factory=list, description="Issues found")
     error: str | None = Field(default=None, description="Error message if failed")
     # v1.3.0: Detailed info with line numbers
-    function_details: list[FunctionInfo] = Field(default_factory=list, description="Detailed function info with line numbers")
-    class_details: list[ClassInfo] = Field(default_factory=list, description="Detailed class info with line numbers")
+    function_details: list[FunctionInfo] = Field(
+        default_factory=list, description="Detailed function info with line numbers"
+    )
+    class_details: list[ClassInfo] = Field(
+        default_factory=list, description="Detailed class info with line numbers"
+    )
 
 
 class VulnerabilityInfo(BaseModel):
@@ -357,6 +367,7 @@ class PatchResultModel(BaseModel):
 
 # [20251212_FEATURE] v1.4.0 - New MCP tool models for enhanced AI context
 
+
 class FileContextResult(BaseModel):
     """Result of get_file_context - file overview without full content."""
 
@@ -368,9 +379,15 @@ class FileContextResult(BaseModel):
     functions: list[str] = Field(default_factory=list, description="Function names")
     classes: list[str] = Field(default_factory=list, description="Class names")
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    exports: list[str] = Field(default_factory=list, description="Exported symbols (__all__)")
-    complexity_score: int = Field(default=0, description="Overall cyclomatic complexity")
-    has_security_issues: bool = Field(default=False, description="Whether file has security issues")
+    exports: list[str] = Field(
+        default_factory=list, description="Exported symbols (__all__)"
+    )
+    complexity_score: int = Field(
+        default=0, description="Overall cyclomatic complexity"
+    )
+    has_security_issues: bool = Field(
+        default=False, description="Whether file has security issues"
+    )
     summary: str = Field(default="", description="Brief description of file purpose")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -382,7 +399,9 @@ class SymbolReference(BaseModel):
     line: int = Field(description="Line number of the reference")
     column: int = Field(default=0, description="Column number")
     context: str = Field(description="Code snippet showing usage context")
-    is_definition: bool = Field(default=False, description="Whether this is the definition")
+    is_definition: bool = Field(
+        default=False, description="Whether this is the definition"
+    )
 
 
 class SymbolReferencesResult(BaseModel):
@@ -391,9 +410,15 @@ class SymbolReferencesResult(BaseModel):
     success: bool = Field(description="Whether search succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     symbol_name: str = Field(description="Name of the searched symbol")
-    definition_file: str | None = Field(default=None, description="File where symbol is defined")
-    definition_line: int | None = Field(default=None, description="Line where symbol is defined")
-    references: list[SymbolReference] = Field(default_factory=list, description="All references found")
+    definition_file: str | None = Field(
+        default=None, description="File where symbol is defined"
+    )
+    definition_line: int | None = Field(
+        default=None, description="Line where symbol is defined"
+    )
+    references: list[SymbolReference] = Field(
+        default_factory=list, description="All references found"
+    )
     total_references: int = Field(default=0, description="Total reference count")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -550,33 +575,43 @@ def _analyze_code_sync(code: str, language: str = "python") -> AnalysisResult:
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 functions.append(node.name)
-                function_details.append(FunctionInfo(
-                    name=node.name,
-                    lineno=node.lineno,
-                    end_lineno=getattr(node, 'end_lineno', None),
-                    is_async=False,
-                ))
+                function_details.append(
+                    FunctionInfo(
+                        name=node.name,
+                        lineno=node.lineno,
+                        end_lineno=getattr(node, "end_lineno", None),
+                        is_async=False,
+                    )
+                )
                 # Flag potential issues
                 if len(node.name) < 2:
                     issues.append(f"Function '{node.name}' has very short name")
             elif isinstance(node, ast.AsyncFunctionDef):
                 functions.append(f"async {node.name}")
-                function_details.append(FunctionInfo(
-                    name=node.name,
-                    lineno=node.lineno,
-                    end_lineno=getattr(node, 'end_lineno', None),
-                    is_async=True,
-                ))
+                function_details.append(
+                    FunctionInfo(
+                        name=node.name,
+                        lineno=node.lineno,
+                        end_lineno=getattr(node, "end_lineno", None),
+                        is_async=True,
+                    )
+                )
             elif isinstance(node, ast.ClassDef):
                 classes.append(node.name)
                 # Extract method names
-                methods = [n.name for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-                class_details.append(ClassInfo(
-                    name=node.name,
-                    lineno=node.lineno,
-                    end_lineno=getattr(node, 'end_lineno', None),
-                    methods=methods,
-                ))
+                methods = [
+                    n.name
+                    for n in node.body
+                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                ]
+                class_details.append(
+                    ClassInfo(
+                        name=node.name,
+                        lineno=node.lineno,
+                        end_lineno=getattr(node, "end_lineno", None),
+                        methods=methods,
+                    )
+                )
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     imports.append(alias.name)
@@ -692,8 +727,12 @@ def _security_scan_sync(code: str) -> SecurityResult:
         for vuln in result.get("vulnerabilities", []):
             # Extract line number from sink_location tuple (line, col)
             sink_loc = vuln.get("sink_location")
-            line_number = sink_loc[0] if sink_loc and isinstance(sink_loc, (list, tuple)) else None
-            
+            line_number = (
+                sink_loc[0]
+                if sink_loc and isinstance(sink_loc, (list, tuple))
+                else None
+            )
+
             vulnerabilities.append(
                 VulnerabilityInfo(
                     type=vuln.get("type", "Unknown"),
@@ -1968,7 +2007,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
     """Synchronous implementation of get_file_context."""
     try:
         path = Path(file_path)
-        
+
         # Try to resolve the path
         if not path.is_absolute():
             # Try relative to PROJECT_ROOT
@@ -1980,7 +2019,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 candidate = Path.cwd() / path
                 if candidate.exists():
                     path = candidate
-        
+
         if not path.exists():
             return FileContextResult(
                 success=False,
@@ -1988,10 +2027,10 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 line_count=0,
                 error=f"File not found: {file_path}",
             )
-        
+
         code = path.read_text(encoding="utf-8")
         lines = code.splitlines()
-        
+
         # Parse the code
         try:
             tree = ast.parse(code)
@@ -2002,21 +2041,21 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 line_count=len(lines),
                 error=f"Syntax error at line {e.lineno}: {e.msg}",
             )
-        
+
         functions = []
         classes = []
         imports = []
         exports = []
         complexity = 0
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 # Only top-level functions
-                if hasattr(node, 'col_offset') and node.col_offset == 0:
+                if hasattr(node, "col_offset") and node.col_offset == 0:
                     functions.append(node.name)
                     complexity += _count_complexity_node(node)
             elif isinstance(node, ast.ClassDef):
-                if hasattr(node, 'col_offset') and node.col_offset == 0:
+                if hasattr(node, "col_offset") and node.col_offset == 0:
                     classes.append(node.name)
             elif isinstance(node, ast.Import):
                 for alias in node.names:
@@ -2031,17 +2070,25 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                     if isinstance(target, ast.Name) and target.id == "__all__":
                         if isinstance(node.value, ast.List | ast.Tuple):
                             for elt in node.value.elts:
-                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                                if isinstance(elt, ast.Constant) and isinstance(
+                                    elt.value, str
+                                ):
                                     exports.append(elt.value)
-        
+
         # Quick security check
         has_security_issues = False
-        security_patterns = ["eval(", "exec(", "cursor.execute", "os.system(", "subprocess.call("]
+        security_patterns = [
+            "eval(",
+            "exec(",
+            "cursor.execute",
+            "os.system(",
+            "subprocess.call(",
+        ]
         for pattern in security_patterns:
             if pattern in code:
                 has_security_issues = True
                 break
-        
+
         # Generate summary based on content
         summary_parts = []
         if classes:
@@ -2054,9 +2101,9 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
             summary_parts.append("Django module")
         elif "test_" in path.name or "pytest" in code:
             summary_parts.append("Test module")
-        
+
         summary = ", ".join(summary_parts) if summary_parts else "Python module"
-        
+
         return FileContextResult(
             success=True,
             file_path=str(path),
@@ -2070,7 +2117,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
             has_security_issues=has_security_issues,
             summary=summary,
         )
-        
+
     except Exception as e:
         return FileContextResult(
             success=False,
@@ -2095,71 +2142,85 @@ def _count_complexity_node(node: ast.AST) -> int:
 async def get_file_context(file_path: str) -> FileContextResult:
     """
     Get a file overview without reading full content.
-    
+
     [v1.4.0] Use this tool to quickly assess if a file is relevant to your task
     without consuming tokens on full content. Returns functions, classes, imports,
     complexity score, and security warnings.
-    
+
     Why AI agents need this:
     - Quickly assess file relevance before extracting code
     - Understand file structure without token overhead
     - Make informed decisions about which functions to modify
-    
+
     Args:
         file_path: Path to the Python file (absolute or relative to project root)
-    
+
     Returns:
         FileContextResult with file overview and metadata
     """
     return await asyncio.to_thread(_get_file_context_sync, file_path)
 
 
-def _get_symbol_references_sync(symbol_name: str, project_root: str | None = None) -> SymbolReferencesResult:
+def _get_symbol_references_sync(
+    symbol_name: str, project_root: str | None = None
+) -> SymbolReferencesResult:
     """Synchronous implementation of get_symbol_references."""
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
-        
+
         if not root.exists():
             return SymbolReferencesResult(
                 success=False,
                 symbol_name=symbol_name,
                 error=f"Project root not found: {root}",
             )
-        
+
         references: list[SymbolReference] = []
         definition_file = None
         definition_line = None
-        
+
         # Walk through all Python files
         for py_file in root.rglob("*.py"):
             # Skip common non-source directories
-            if any(part.startswith('.') or part in ('__pycache__', 'node_modules', 'venv', '.venv', 'dist', 'build') 
-                   for part in py_file.parts):
+            if any(
+                part.startswith(".")
+                or part
+                in ("__pycache__", "node_modules", "venv", ".venv", "dist", "build")
+                for part in py_file.parts
+            ):
                 continue
-            
+
             try:
                 code = py_file.read_text(encoding="utf-8")
                 lines = code.splitlines()
                 tree = ast.parse(code)
-                
+
                 for node in ast.walk(tree):
                     # Check for function/class definitions
-                    if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+                    if isinstance(
+                        node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+                    ):
                         if node.name == symbol_name:
                             rel_path = str(py_file.relative_to(root))
                             if definition_file is None:
                                 definition_file = rel_path
                                 definition_line = node.lineno
-                            
-                            context = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
-                            references.append(SymbolReference(
-                                file=rel_path,
-                                line=node.lineno,
-                                column=node.col_offset,
-                                context=context.strip(),
-                                is_definition=True,
-                            ))
-                    
+
+                            context = (
+                                lines[node.lineno - 1]
+                                if node.lineno <= len(lines)
+                                else ""
+                            )
+                            references.append(
+                                SymbolReference(
+                                    file=rel_path,
+                                    line=node.lineno,
+                                    column=node.col_offset,
+                                    context=context.strip(),
+                                    is_definition=True,
+                                )
+                            )
+
                     # Check for function calls
                     elif isinstance(node, ast.Call):
                         func = node.func
@@ -2168,38 +2229,48 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
                             name = func.id
                         elif isinstance(func, ast.Attribute):
                             name = func.attr
-                        
+
                         if name == symbol_name:
                             rel_path = str(py_file.relative_to(root))
-                            line_no = getattr(node, 'lineno', 0)
-                            context = lines[line_no - 1] if 0 < line_no <= len(lines) else ""
-                            references.append(SymbolReference(
-                                file=rel_path,
-                                line=line_no,
-                                column=getattr(node, 'col_offset', 0),
-                                context=context.strip(),
-                                is_definition=False,
-                            ))
-                    
+                            line_no = getattr(node, "lineno", 0)
+                            context = (
+                                lines[line_no - 1] if 0 < line_no <= len(lines) else ""
+                            )
+                            references.append(
+                                SymbolReference(
+                                    file=rel_path,
+                                    line=line_no,
+                                    column=getattr(node, "col_offset", 0),
+                                    context=context.strip(),
+                                    is_definition=False,
+                                )
+                            )
+
                     # Check for name references
                     elif isinstance(node, ast.Name) and node.id == symbol_name:
                         rel_path = str(py_file.relative_to(root))
-                        line_no = getattr(node, 'lineno', 0)
-                        context = lines[line_no - 1] if 0 < line_no <= len(lines) else ""
+                        line_no = getattr(node, "lineno", 0)
+                        context = (
+                            lines[line_no - 1] if 0 < line_no <= len(lines) else ""
+                        )
                         # Avoid duplicates from Call nodes
-                        if not any(r.file == rel_path and r.line == line_no for r in references):
-                            references.append(SymbolReference(
-                                file=rel_path,
-                                line=line_no,
-                                column=getattr(node, 'col_offset', 0),
-                                context=context.strip(),
-                                is_definition=False,
-                            ))
-            
+                        if not any(
+                            r.file == rel_path and r.line == line_no for r in references
+                        ):
+                            references.append(
+                                SymbolReference(
+                                    file=rel_path,
+                                    line=line_no,
+                                    column=getattr(node, "col_offset", 0),
+                                    context=context.strip(),
+                                    is_definition=False,
+                                )
+                            )
+
             except (SyntaxError, UnicodeDecodeError):
                 # Skip files that can't be parsed
                 continue
-        
+
         # Remove duplicates and sort
         seen = set()
         unique_refs = []
@@ -2208,9 +2279,9 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
             if key not in seen:
                 seen.add(key)
                 unique_refs.append(ref)
-        
+
         unique_refs.sort(key=lambda r: (not r.is_definition, r.file, r.line))
-        
+
         return SymbolReferencesResult(
             success=True,
             symbol_name=symbol_name,
@@ -2219,7 +2290,7 @@ def _get_symbol_references_sync(symbol_name: str, project_root: str | None = Non
             references=unique_refs[:100],  # Limit to prevent token overflow
             total_references=len(unique_refs),
         )
-        
+
     except Exception as e:
         return SymbolReferencesResult(
             success=False,
@@ -2235,23 +2306,25 @@ async def get_symbol_references(
 ) -> SymbolReferencesResult:
     """
     Find all references to a symbol across the project.
-    
+
     [v1.4.0] Use this tool before modifying a function, class, or variable to
     understand its usage across the codebase. Essential for safe refactoring.
-    
+
     Why AI agents need this:
     - Safe refactoring: know all call sites before changing signatures
     - Impact analysis: understand blast radius of changes
     - No hallucination: real references, not guessed ones
-    
+
     Args:
         symbol_name: Name of the function, class, or variable to search for
         project_root: Project root directory (default: server's project root)
-    
+
     Returns:
         SymbolReferencesResult with definition location and all references
     """
-    return await asyncio.to_thread(_get_symbol_references_sync, symbol_name, project_root)
+    return await asyncio.to_thread(
+        _get_symbol_references_sync, symbol_name, project_root
+    )
 
 
 # ============================================================================

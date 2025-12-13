@@ -9,7 +9,6 @@ This module wires together the core components:
 
 PHASE 1 SCOPE (RFC-001): Integers and Booleans only.
 """
-import warnings
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
@@ -277,7 +276,7 @@ class SymbolicAnalyzer:
         if ir_module.body and isinstance(ir_module.body[0], IRFunctionDef):
             func_def = ir_module.body[0]
             logger.debug(f"Detected function definition: {func_def.name}")
-            
+
             # Create symbolic parameters for function arguments
             for param in func_def.params:
                 param_name = param.name
@@ -304,10 +303,10 @@ class SymbolicAnalyzer:
                     # Default to String for untyped parameters
                     param_sort = z3.StringSort()
                     sort_name = "String (untyped)"
-                
+
                 logger.debug(f"Creating symbolic parameter: {param_name} ({sort_name})")
                 self._interpreter.declare_symbolic(param_name, param_sort)
-            
+
             # Execute the function body instead of module body
             modified_ir = IRModule(
                 loc=ir_module.loc,
@@ -319,7 +318,7 @@ class SymbolicAnalyzer:
         else:
             # Normal module-level execution
             execution_result = self._interpreter.execute(ir_module)
-        
+
         terminal_states = execution_result.states
 
         # Step 3: Process each path through solver

@@ -307,15 +307,29 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     # [20251212_FEATURE] v1.4.0 - XXE Sanitizers (defusedxml is safe)
     "defusedxml.parse": SanitizerInfo("defusedxml.parse", {SecuritySink.XXE}),
     "defusedxml.fromstring": SanitizerInfo("defusedxml.fromstring", {SecuritySink.XXE}),
-    "defusedxml.ElementTree.parse": SanitizerInfo("defusedxml.ElementTree.parse", {SecuritySink.XXE}),
-    "defusedxml.ElementTree.fromstring": SanitizerInfo("defusedxml.ElementTree.fromstring", {SecuritySink.XXE}),
-    "defusedxml.minidom.parse": SanitizerInfo("defusedxml.minidom.parse", {SecuritySink.XXE}),
-    "defusedxml.minidom.parseString": SanitizerInfo("defusedxml.minidom.parseString", {SecuritySink.XXE}),
+    "defusedxml.ElementTree.parse": SanitizerInfo(
+        "defusedxml.ElementTree.parse", {SecuritySink.XXE}
+    ),
+    "defusedxml.ElementTree.fromstring": SanitizerInfo(
+        "defusedxml.ElementTree.fromstring", {SecuritySink.XXE}
+    ),
+    "defusedxml.minidom.parse": SanitizerInfo(
+        "defusedxml.minidom.parse", {SecuritySink.XXE}
+    ),
+    "defusedxml.minidom.parseString": SanitizerInfo(
+        "defusedxml.minidom.parseString", {SecuritySink.XXE}
+    ),
     "defusedxml.sax.parse": SanitizerInfo("defusedxml.sax.parse", {SecuritySink.XXE}),
     # [20251212_FEATURE] v1.4.0 - SSTI Sanitizers (file-based templates are safe)
-    "render_template": SanitizerInfo("render_template", {SecuritySink.SSTI}),  # Flask file-based
-    "flask.render_template": SanitizerInfo("flask.render_template", {SecuritySink.SSTI}),
-    "django.shortcuts.render": SanitizerInfo("django.shortcuts.render", {SecuritySink.SSTI}),
+    "render_template": SanitizerInfo(
+        "render_template", {SecuritySink.SSTI}
+    ),  # Flask file-based
+    "flask.render_template": SanitizerInfo(
+        "flask.render_template", {SecuritySink.SSTI}
+    ),
+    "django.shortcuts.render": SanitizerInfo(
+        "django.shortcuts.render", {SecuritySink.SSTI}
+    ),
 }
 
 

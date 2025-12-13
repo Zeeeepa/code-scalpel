@@ -12,7 +12,9 @@ from code_scalpel.symbolic_execution_tools.type_inference import (  # noqa: E402
     TypeInferenceEngine,
     InferredType,
 )
-from code_scalpel.symbolic_execution_tools.ir_interpreter import IRSymbolicInterpreter  # noqa: E402
+from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+    IRSymbolicInterpreter,
+)  # noqa: E402
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer  # noqa: E402
 
 
@@ -38,6 +40,7 @@ from code_scalpel.symbolic_execution_tools.security_analyzer import (  # noqa: E
 import z3  # noqa: E402
 
 import warnings
+
 # Suppress the BETA warning for cleaner test output
 warnings.filterwarnings("ignore", message="symbolic_execution_tools")
 
@@ -1305,8 +1308,6 @@ class TestTaintTrackerCoverage:
         from code_scalpel.symbolic_execution_tools.taint_tracker import (
             load_sanitizers_from_config,
         )
-        import tempfile
-        import os
 
         # Test with non-existent path returns 0
         count = load_sanitizers_from_config("/nonexistent/path/config.toml")
@@ -1647,7 +1648,6 @@ class TestTaintTrackerConfigEdgeCases:
     def test_load_sanitizers_from_config_none_config(self):
         """Test load_sanitizers_from_config returns 0 when config is None (line 383)."""
         from unittest.mock import patch
-        import os.path
         from code_scalpel.symbolic_execution_tools.taint_tracker import (
             load_sanitizers_from_config,
         )

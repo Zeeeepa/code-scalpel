@@ -408,19 +408,27 @@ class TestGenerator:
             ),
             (
                 rf"{var}\s*>=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) if should_satisfy else float(m.group(1)) - 1.0,
+                lambda m: float(m.group(1))
+                if should_satisfy
+                else float(m.group(1)) - 1.0,
             ),
             (
                 rf"{var}\s*<=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0,
+                lambda m: float(m.group(1))
+                if should_satisfy
+                else float(m.group(1)) + 1.0,
             ),
             (
                 rf"{var}\s*==\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0,
+                lambda m: float(m.group(1))
+                if should_satisfy
+                else float(m.group(1)) + 1.0,
             ),
             (
                 rf"{var}\s*!=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) + 1.0 if should_satisfy else float(m.group(1)),
+                lambda m: float(m.group(1)) + 1.0
+                if should_satisfy
+                else float(m.group(1)),
             ),
         ]
 
@@ -429,7 +437,7 @@ class TestGenerator:
             if match:
                 val = value_fn(match)
                 # Return int if it's a whole number without decimal in original
-                if '.' not in match.group(1) and val == int(val):
+                if "." not in match.group(1) and val == int(val):
                     return int(val)
                 return val
 
@@ -446,11 +454,10 @@ class TestGenerator:
         """Extract test cases from symbolic execution result."""
         test_cases = []
         paths = symbolic_result.get("paths", [])
-        symbolic_vars = symbolic_result.get("symbolic_vars", [])
 
         # Extract type hints from function signature
         param_types = self._extract_parameter_types(code, function_name, language)
-        
+
         # Analyze code to map path conditions to expected return values
         return_value_map = self._analyze_return_paths(code, function_name, language)
 
@@ -482,7 +489,7 @@ class TestGenerator:
                         # If no param_types available, still include but will be filtered later
                         expected_type = param_types.get(var)
                         inputs[var] = self._to_python_value(value, expected_type)
-            
+
             # If param_types is available, ensure we only have actual parameters
             if param_types:
                 inputs = {k: v for k, v in inputs.items() if k in param_types}
@@ -503,7 +510,9 @@ class TestGenerator:
                 description = "Default/linear execution path"
 
             # Infer expected result from path conditions
-            expected_result = self._infer_expected_result(conditions, return_value_map, inputs)
+            expected_result = self._infer_expected_result(
+                conditions, return_value_map, inputs
+            )
             expected_behavior = "Executes without error"
             if expected_result is True:
                 expected_behavior = "returns True"
@@ -541,13 +550,13 @@ class TestGenerator:
         self, code: str, function_name: str, language: str
     ) -> dict[str, str]:
         """Extract parameter type hints from function signature.
-        
+
         Returns:
             Dict mapping parameter names to their type annotations (e.g., {'role': 'str', 'level': 'int'})
         """
         if language != "python":
             return {}
-        
+
         try:
             tree = ast.parse(code)
             for node in ast.walk(tree):
@@ -563,16 +572,16 @@ class TestGenerator:
                     return param_types
         except Exception:
             pass
-        
+
         return {}
 
     def _to_python_value(self, value: Any, expected_type: str | None = None) -> Any:
         """Convert Z3 or other symbolic values to Python natives.
-        
+
         Args:
             value: The value to convert (Z3 object, int, str, etc.)
             expected_type: Expected Python type from type hint ('str', 'int', 'bool', 'float', etc.)
-        
+
         Returns:
             Python native value matching the expected type
         """
@@ -587,7 +596,7 @@ class TestGenerator:
                 # v1.3.0: Convert to float if expected
                 return float(int_val)
             return int_val
-        
+
         if hasattr(value, "as_fraction"):
             # Z3 RealNumRef (for floats)
             frac = value.as_fraction()
@@ -595,15 +604,15 @@ class TestGenerator:
             if expected_type == "int":
                 return int(float_val)
             return float_val
-        
+
         if hasattr(value, "as_string"):
             # Z3 StringVal
             return value.as_string()
-        
+
         if hasattr(value, "is_true"):
             # Z3 BoolRef
             return bool(value)
-        
+
         # Handle Python primitives with type coercion
         if isinstance(value, (int, float)):
             if expected_type == "str":
@@ -616,7 +625,7 @@ class TestGenerator:
             elif expected_type == "int":
                 return int(value)
             return value
-        
+
         if isinstance(value, str):
             # If we have a type hint, respect it
             if expected_type == "int":
@@ -633,22 +642,22 @@ class TestGenerator:
                 return value.lower() in ("true", "1", "yes")
             # For str or no hint, keep as string
             return value
-        
+
         return value
 
     def _analyze_return_paths(
         self, code: str, function_name: str, language: str
     ) -> dict[str, Any]:
         """Analyze code to map conditions to their return values.
-        
+
         For boolean functions, this maps branch conditions to True/False returns.
-        
+
         Returns:
             Dict mapping condition patterns to expected return values
         """
         if language != "python":
             return {}
-        
+
         try:
             tree = ast.parse(code)
             for node in ast.walk(tree):
@@ -656,16 +665,16 @@ class TestGenerator:
                     return self._extract_return_map(node)
         except Exception:
             pass
-        
+
         return {}
 
     def _extract_return_map(self, func_node: ast.FunctionDef) -> dict[str, Any]:
         """Extract mapping of conditions to return values from a function AST.
-        
+
         Analyzes if-else chains to determine which conditions lead to which returns.
         """
         return_map: dict[str, Any] = {}
-        
+
         def visit_body(body: list, condition_stack: list[str]):
             """Recursively visit function body, tracking conditions."""
             for stmt in body:
@@ -675,19 +684,27 @@ class TestGenerator:
                         ret_val = self._ast_value_to_python(stmt.value)
                         if ret_val is not None:
                             # Create key from conditions
-                            cond_key = " AND ".join(condition_stack) if condition_stack else "default"
+                            cond_key = (
+                                " AND ".join(condition_stack)
+                                if condition_stack
+                                else "default"
+                            )
                             return_map[cond_key] = ret_val
-                            
+
                 elif isinstance(stmt, ast.If):
                     # Analyze if branch
-                    condition_str = ast.unparse(stmt.test) if hasattr(ast, 'unparse') else str(stmt.test)
+                    condition_str = (
+                        ast.unparse(stmt.test)
+                        if hasattr(ast, "unparse")
+                        else str(stmt.test)
+                    )
                     visit_body(stmt.body, condition_stack + [condition_str])
-                    
+
                     # Analyze else/elif branches
                     if stmt.orelse:
                         negated = f"not ({condition_str})"
                         visit_body(stmt.orelse, condition_stack + [negated])
-        
+
         visit_body(func_node.body, [])
         return return_map
 
@@ -708,17 +725,17 @@ class TestGenerator:
         self, conditions: list[str], return_map: dict[str, Any], inputs: dict[str, Any]
     ) -> Any:
         """Infer expected return value from path conditions and return map.
-        
+
         Uses the analyzed return paths to determine what value should be returned
         for the given set of conditions.
         """
         if not return_map:
             return None
-        
+
         # Handle empty conditions - return default if available
         if not conditions:
             return return_map.get("default")
-        
+
         # Normalize all path conditions to a comparable form
         conditions_set = set()
         for c in conditions:
@@ -726,14 +743,14 @@ class TestGenerator:
             conditions_set.add(cond_str)
             # Also add normalized versions for comparison
             conditions_set.add(cond_str.replace(" ", ""))
-        
+
         best_match = None
         best_score = -1
-        
+
         for cond_key, ret_val in return_map.items():
             if cond_key == "default":
                 continue
-                
+
             # Parse the return map key into individual conditions
             # Keys are like "temp > 100" or "temp > 100 AND not (temp > 200)"
             key_parts = []
@@ -741,30 +758,30 @@ class TestGenerator:
                 part = part.strip()
                 if part:
                     key_parts.append(part)
-            
+
             if not key_parts:
                 continue
-            
+
             # Calculate match score
             match_score = 0
             mismatch_count = 0
-            
+
             for part in key_parts:
                 part_normalized = part.replace(" ", "")
                 is_negated = part.startswith("not (") and part.endswith(")")
-                
+
                 if is_negated:
                     # Extract the inner condition from "not (condition)"
                     inner = part[5:-1].strip()
                     inner_normalized = inner.replace(" ", "")
-                    
+
                     # Check if this negated condition matches a path condition negation
                     # Path conditions use operators like <= instead of "not (>)"
                     negated_match = False
                     for pc in conditions:
                         pc_str = str(pc).strip()
                         pc_normalized = pc_str.replace(" ", "")
-                        
+
                         # Check for direct match of negated form
                         if f"Not({inner_normalized})" in pc_normalized:
                             negated_match = True
@@ -774,15 +791,21 @@ class TestGenerator:
                             negated_match = True
                             break
                         # Check for explicit "not" in conditions
-                        if inner_normalized in pc_normalized and "not" in pc_str.lower():
+                        if (
+                            inner_normalized in pc_normalized
+                            and "not" in pc_str.lower()
+                        ):
                             negated_match = True
                             break
-                    
+
                     if negated_match:
                         match_score += 1
                     else:
                         # Check if the positive form is in conditions (mismatch)
-                        if any(inner_normalized in str(c).replace(" ", "") for c in conditions):
+                        if any(
+                            inner_normalized in str(c).replace(" ", "")
+                            for c in conditions
+                        ):
                             mismatch_count += 1
                 else:
                     # Non-negated condition - check for direct match
@@ -790,7 +813,7 @@ class TestGenerator:
                     for pc in conditions:
                         pc_str = str(pc).strip()
                         pc_normalized = pc_str.replace(" ", "")
-                        
+
                         if part_normalized in pc_normalized or part in pc_str:
                             direct_match = True
                             break
@@ -798,7 +821,7 @@ class TestGenerator:
                         if self._is_equivalent_condition(part, pc_str):
                             direct_match = True
                             break
-                    
+
                     if direct_match:
                         match_score += 1
                     else:
@@ -807,80 +830,85 @@ class TestGenerator:
                             if self._is_negation_match(part, str(pc)):
                                 mismatch_count += 1
                                 break
-            
+
             # Calculate final score - penalize mismatches heavily
             final_score = match_score - (mismatch_count * 2)
-            
+
             # Update best match if this is better
             if final_score > best_score:
                 best_score = final_score
                 best_match = ret_val
-        
+
         # Only return if we have a positive match
         if best_score > 0:
             return best_match
-        
+
         # Fall back to default if no good match
         return return_map.get("default")
-    
+
     def _is_negation_match(self, condition: str, path_condition: str) -> bool:
         """Check if path_condition is the negation of condition.
-        
+
         For example: "temp > 100" is negated by "temp <= 100"
         """
         # Extract operator and operands from conditions
         import re
-        
+
         # Pattern to match comparisons like "var > 100" or "var == 'value'"
         pattern = r"(\w+)\s*([<>=!]+)\s*(.+)"
-        
+
         cond_match = re.match(pattern, condition.strip())
         path_match = re.match(pattern, path_condition.strip())
-        
+
         if not cond_match or not path_match:
             return False
-        
+
         cond_var, cond_op, cond_val = cond_match.groups()
         path_var, path_op, path_val = path_match.groups()
-        
+
         # Variables must match
         if cond_var != path_var:
             return False
-        
+
         # Values must match (normalize)
         if cond_val.strip().strip("'\"") != path_val.strip().strip("'\""):
             return False
-        
+
         # Check if operators are negations of each other
         negation_pairs = {
-            ">": "<=", "<": ">=", ">=": "<", "<=": ">",
-            "==": "!=", "!=": "==",
+            ">": "<=",
+            "<": ">=",
+            ">=": "<",
+            "<=": ">",
+            "==": "!=",
+            "!=": "==",
         }
-        
+
         return negation_pairs.get(cond_op) == path_op
-    
+
     def _is_equivalent_condition(self, cond1: str, cond2: str) -> bool:
         """Check if two conditions are equivalent (same meaning, different format)."""
         # Normalize both conditions
         c1 = cond1.strip().replace(" ", "")
         c2 = cond2.strip().replace(" ", "")
-        
+
         if c1 == c2:
             return True
-        
+
         # Check for common equivalent patterns
         # e.g., "x>100" vs "100<x"
         import re
+
         pattern = r"(\w+)([<>=!]+)(\d+\.?\d*)"
-        
+
         m1 = re.match(pattern, c1)
         m2 = re.match(pattern, c2)
-        
+
         if m1 and m2:
             var1, op1, val1 = m1.groups()
             var2, op2, val2 = m2.groups()
-            
+
             if var1 == var2 and val1 == val2 and op1 == op2:
                 return True
-        
+
         return False

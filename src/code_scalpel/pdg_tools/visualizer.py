@@ -537,16 +537,18 @@ class PDGVisualizer:
         }
         """
 
-    def _highlight_graph_differences(self, graph1_data: dict, graph2_data: dict) -> None:
+    def _highlight_graph_differences(
+        self, graph1_data: dict, graph2_data: dict
+    ) -> None:
         """Highlight differences between two graphs."""
         nodes1 = {n["id"] for n in graph1_data["nodes"]}
         nodes2 = {n["id"] for n in graph2_data["nodes"]}
-        
+
         # Mark added/removed nodes
         for node in graph1_data["nodes"]:
             if node["id"] not in nodes2:
                 node["data"]["_status"] = "removed"
-                
+
         for node in graph2_data["nodes"]:
             if node["id"] not in nodes1:
                 node["data"]["_status"] = "added"
@@ -557,8 +559,7 @@ class PDGVisualizer:
         self._add_nodes(dot, pdg)
         self._add_edges(dot, pdg)
         self._apply_layout_settings(dot)
-        
+
         # Render to PNG data
         png_data = dot.pipe(format="png")
         return base64.b64encode(png_data).decode("utf-8")
-

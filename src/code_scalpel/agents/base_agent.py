@@ -39,12 +39,16 @@ class AgentContext:
 
     def add_operation(self, operation: str, result: Any, success: bool = True):
         """Record an operation and its result."""
-        self.recent_operations.append({
-            "operation": operation,
-            "result": result,
-            "success": success,
-            "timestamp": asyncio.get_event_loop().time() if asyncio.get_event_loop() else None
-        })
+        self.recent_operations.append(
+            {
+                "operation": operation,
+                "result": result,
+                "success": success,
+                "timestamp": asyncio.get_event_loop().time()
+                if asyncio.get_event_loop()
+                else None,
+            }
+        )
 
     def get_recent_context(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Get recent operations for context."""
@@ -72,7 +76,7 @@ class BaseCodeAnalysisAgent(ABC):
         """Setup logging for the agent."""
         handler = logging.StreamHandler()
         formatter = logging.Formatter(
-            f'%(asctime)s - {self.__class__.__name__} - %(levelname)s - %(message)s'
+            f"%(asctime)s - {self.__class__.__name__} - %(levelname)s - %(message)s"
         )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
@@ -91,7 +95,9 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("observe_file", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def find_symbol_usage(self, symbol_name: str, project_root: Optional[str] = None) -> Dict[str, Any]:
+    async def find_symbol_usage(
+        self, symbol_name: str, project_root: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Find all usages of a symbol using get_symbol_references tool."""
         try:
             result = await get_symbol_references(symbol_name, project_root)
@@ -113,7 +119,9 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("analyze_security", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def extract_function(self, file_path: str, function_name: str) -> Dict[str, Any]:
+    async def extract_function(
+        self, file_path: str, function_name: str
+    ) -> Dict[str, Any]:
         """Extract a specific function using extract_code tool."""
         try:
             result = await extract_code(file_path, "function", function_name)
@@ -124,7 +132,9 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("extract_function", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def simulate_code_change(self, original_code: str, new_code: str) -> Dict[str, Any]:
+    async def simulate_code_change(
+        self, original_code: str, new_code: str
+    ) -> Dict[str, Any]:
         """Simulate a code change to verify safety using simulate_refactor tool."""
         try:
             result = await simulate_refactor(original_code, new_code)
@@ -135,7 +145,9 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("simulate_change", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def apply_safe_change(self, file_path: str, target_type: str, target_name: str, new_code: str) -> Dict[str, Any]:
+    async def apply_safe_change(
+        self, file_path: str, target_type: str, target_name: str, new_code: str
+    ) -> Dict[str, Any]:
         """Apply a safe code change using update_symbol tool."""
         try:
             result = await update_symbol(file_path, target_type, target_name, new_code)
@@ -183,17 +195,29 @@ class BaseCodeAnalysisAgent(ABC):
             # Observe
             observations = await self.observe(target)
             if not observations.get("success", False):
-                return {"success": False, "phase": "observe", "error": observations.get("error")}
+                return {
+                    "success": False,
+                    "phase": "observe",
+                    "error": observations.get("error"),
+                }
 
             # Orient
             analysis = await self.orient(observations)
             if not analysis.get("success", False):
-                return {"success": False, "phase": "orient", "error": analysis.get("error")}
+                return {
+                    "success": False,
+                    "phase": "orient",
+                    "error": analysis.get("error"),
+                }
 
             # Decide
             decisions = await self.decide(analysis)
             if not decisions.get("success", False):
-                return {"success": False, "phase": "decide", "error": decisions.get("error")}
+                return {
+                    "success": False,
+                    "phase": "decide",
+                    "error": decisions.get("error"),
+                }
 
             # Act
             actions = await self.act(decisions)
@@ -205,9 +229,9 @@ class BaseCodeAnalysisAgent(ABC):
                     "observe": observations,
                     "orient": analysis,
                     "decide": decisions,
-                    "act": actions
+                    "act": actions,
                 },
-                "context": self.context.get_recent_context()
+                "context": self.context.get_recent_context(),
             }
 
             self.logger.info(f"OODA loop completed with success: {success}")
@@ -225,5 +249,5 @@ class BaseCodeAnalysisAgent(ABC):
             "workspace_root": self.context.workspace_root,
             "current_file": self.context.current_file,
             "recent_operations_count": len(self.context.recent_operations),
-            "knowledge_base_keys": list(self.context.knowledge_base.keys())
+            "knowledge_base_keys": list(self.context.knowledge_base.keys()),
         }

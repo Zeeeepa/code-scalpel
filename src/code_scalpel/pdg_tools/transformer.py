@@ -202,7 +202,9 @@ class PDGTransformer:
             metrics={"nodes_created": len(new_nodes)},
         )
 
-    def _reconnect_split_dependencies(self, original_node: str, new_nodes: list[str]) -> None:
+    def _reconnect_split_dependencies(
+        self, original_node: str, new_nodes: list[str]
+    ) -> None:
         """Reconnect dependencies for split nodes."""
         # Incoming edges go to the first new node
         for pred, _, data in list(self.pdg.in_edges(original_node, data=True)):

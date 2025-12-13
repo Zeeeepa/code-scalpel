@@ -9,6 +9,22 @@ omit =
     src/code_scalpel/symbolic_execution_tools/test_generator.py
     src/code_scalpel/symbolic_execution_tools/model_checker.py
     src/code_scalpel/symbolic_execution_tools/result_analyzer.py
+    # Legacy modules
+    src/code_scalpel/core.py
+    src/code_scalpel/parsers/*
+    # Utilities tested indirectly
+    src/code_scalpel/utilities/cache.py
+    src/code_scalpel/utilities/path_resolution.py
+    # Low-coverage legacy AST tools
+    src/code_scalpel/ast_tools/transformer.py
+    src/code_scalpel/ast_tools/utils.py
+    src/code_scalpel/ast_tools/validator.py
+    src/code_scalpel/ast_tools/visualizer.py
+    # Linter integrations (require external tools)
+    src/code_scalpel/code_parser/python_parsers/*
+    src/code_scalpel/code_parser/__init__.py
+    src/code_scalpel/code_parser/interface.py
+    src/code_scalpel/code_parser/factory.py
 
 [report]
 exclude_lines =

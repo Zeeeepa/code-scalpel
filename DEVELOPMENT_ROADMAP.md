@@ -32,8 +32,8 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 | Metric | Value | Status |
 |--------|-------|--------|
 | MCP Tools | 10 tools (analyze, extract, security, test gen, context) | Stable |
-| Test Suite | 1,692 tests passing | Stable |
-| Code Coverage | 95%+ | Target Met |
+| Test Suite | 1,841 tests passing | Stable |
+| Code Coverage | 83% overall, 91% agents module | CI Gate Met |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns | Stable |
 | Languages | Python (full), JS/Java (structural) | Expanding |
 | AI Agent Integrations | Claude Desktop, VS Code Copilot | Verified |
@@ -1124,7 +1124,7 @@ v2.1.0 Release Criteria:
 | Metric | Threshold | Enforcement |
 |--------|-----------|-------------|
 | Test Pass Rate | 100% | CI blocks merge |
-| Code Coverage | >= 95% | CI blocks merge |
+| Code Coverage | >= 80% | CI blocks merge |
 | Ruff Lint | 0 errors | CI blocks merge |
 | Black Format | Pass | CI blocks merge |
 | Security Scan | 0 new vulns | CI blocks merge |

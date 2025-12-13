@@ -683,9 +683,7 @@ class Calculator:
         from code_scalpel.mcp.server import extract_code
 
         code = "def foo(): pass"
-        result = await extract_code(
-            code=code, target_type="variable", target_name="x"
-        )
+        result = await extract_code(code=code, target_type="variable", target_name="x")
         assert result.success is False
         assert "unknown target_type" in result.error.lower()
 
@@ -746,9 +744,7 @@ class MyClass:
         """Test extraction fails when neither file_path nor code provided."""
         from code_scalpel.mcp.server import extract_code
 
-        result = await extract_code(
-            target_type="function", target_name="foo"
-        )
+        result = await extract_code(target_type="function", target_name="foo")
         assert result.success is False
         assert "file_path" in result.error.lower() or "code" in result.error.lower()
 
@@ -845,7 +841,7 @@ class AnotherClass:
         """Test extracting a specific method from a file."""
         from code_scalpel.mcp.server import extract_code
 
-        file_content = '''
+        file_content = """
 class Calculator:
     def add(self, a, b):
         return a + b
@@ -855,7 +851,7 @@ class Calculator:
 
     def multiply(self, a, b):
         return a * b
-'''
+"""
         test_file = tmp_path / "calc.py"
         test_file.write_text(file_content)
 
@@ -873,7 +869,7 @@ class Calculator:
         """Test extracting a function with its dependencies from a file."""
         from code_scalpel.mcp.server import extract_code
 
-        file_content = '''
+        file_content = """
 def helper():
     return 42
 
@@ -885,7 +881,7 @@ def main():
 
 def unrelated():
     return "not connected"
-'''
+"""
         test_file = tmp_path / "service.py"
         test_file.write_text(file_content)
 
@@ -937,7 +933,6 @@ def unrelated():
     async def test_token_savings_demonstration(self, tmp_path):
         """Demonstrate the token savings of file-based extraction."""
         from code_scalpel.mcp.server import extract_code
-
 
         # Create a "large" file with 100 lines
         lines = ["# Line of code"] * 100
@@ -1047,14 +1042,14 @@ def helper():
         """Test updating a method within a class."""
         from code_scalpel.mcp.server import update_symbol
 
-        file_content = '''
+        file_content = """
 class Calculator:
     def add(self, a, b):
         return a + b
 
     def subtract(self, a, b):
         return a - b
-'''
+"""
         test_file = tmp_path / "test.py"
         test_file.write_text(file_content)
 
@@ -1185,12 +1180,12 @@ class Calculator:
         test_file = tmp_path / "test.py"
         test_file.write_text("def short(): return 1")
 
-        new_code = '''def short():
+        new_code = """def short():
     x = 1
     y = 2
     z = 3
     return x + y + z
-'''
+"""
         result = await update_symbol(
             file_path=str(test_file),
             target_type="function",
@@ -1261,7 +1256,8 @@ class TestCrossFileDependenciesMCP:
         """Create a multi-file project for cross-file tests."""
         # models.py
         models_py = tmp_path / "models.py"
-        models_py.write_text('''"""Models module."""
+        models_py.write_text(
+            '''"""Models module."""
 
 class TaxRate:
     """Tax rate configuration."""
@@ -1276,11 +1272,13 @@ class TaxRate:
 def get_default_rate() -> float:
     """Get the default tax rate."""
     return 0.1
-''')
+'''
+        )
 
         # utils.py
         utils_py = tmp_path / "utils.py"
-        utils_py.write_text('''"""Utilities module."""
+        utils_py.write_text(
+            '''"""Utilities module."""
 
 from models import TaxRate, get_default_rate
 
@@ -1294,7 +1292,8 @@ def calculate_tax(amount: float) -> float:
 def simple_function():
     """No external dependencies."""
     return 42
-''')
+'''
+        )
 
         return tmp_path
 
@@ -1389,12 +1388,12 @@ def simple_function():
         """Test that cross-file deps requires file_path (not code)."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 from models import TaxRate
 
 def my_func():
     return TaxRate(0.1)
-'''
+"""
 
         result = await extract_code(
             code=code,  # Using code, not file_path
@@ -1430,6 +1429,7 @@ def my_func():
 
 # [20251212_TEST] v1.4.0 - Tests for new MCP tools
 
+
 class TestGetFileContext:
     """Tests for the get_file_context tool (v1.4.0)."""
 
@@ -1439,7 +1439,8 @@ class TestGetFileContext:
 
         # Create a test file
         test_file = tmp_path / "test_module.py"
-        test_file.write_text('''
+        test_file.write_text(
+            '''
 """A test module."""
 
 import os
@@ -1454,10 +1455,11 @@ class MyClass:
     
     def method(self):
         return "hello"
-''')
+'''
+        )
 
         result = await get_file_context(str(test_file))
-        
+
         assert result.success is True
         assert result.language == "python"
         assert result.line_count > 0
@@ -1471,13 +1473,15 @@ class MyClass:
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "vulnerable.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 def dangerous_eval(user_input):
     return eval(user_input)  # Security issue!
-''')
+"""
+        )
 
         result = await get_file_context(str(test_file))
-        
+
         assert result.success is True
         assert result.has_security_issues is True
 
@@ -1486,7 +1490,7 @@ def dangerous_eval(user_input):
         from code_scalpel.mcp.server import get_file_context
 
         result = await get_file_context("/nonexistent/path/file.py")
-        
+
         assert result.success is False
         assert result.error is not None
         assert "not found" in result.error.lower()
@@ -1499,7 +1503,7 @@ def dangerous_eval(user_input):
         test_file.write_text("def broken(")  # Invalid syntax
 
         result = await get_file_context(str(test_file))
-        
+
         assert result.success is False
         assert result.error is not None
         assert "syntax" in result.error.lower()
@@ -1509,7 +1513,8 @@ def dangerous_eval(user_input):
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "exports.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 __all__ = ["public_func", "PublicClass"]
 
 def public_func():
@@ -1520,10 +1525,11 @@ def _private_func():
 
 class PublicClass:
     pass
-''')
+"""
+        )
 
         result = await get_file_context(str(test_file))
-        
+
         assert result.success is True
         assert "public_func" in result.exports
         assert "PublicClass" in result.exports
@@ -1538,31 +1544,37 @@ class TestGetSymbolReferences:
 
         # Create multiple files that reference a function
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text('''
+        utils_file.write_text(
+            '''
 def helper_function():
     """The helper function definition."""
     return 42
-''')
+'''
+        )
 
         main_file = tmp_path / "main.py"
-        main_file.write_text('''
+        main_file.write_text(
+            """
 from utils import helper_function
 
 def main():
     result = helper_function()
     return result
-''')
+"""
+        )
 
         test_file = tmp_path / "test_utils.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 from utils import helper_function
 
 def test_helper():
     assert helper_function() == 42
-''')
+"""
+        )
 
         result = await get_symbol_references("helper_function", str(tmp_path))
-        
+
         assert result.success is True
         assert result.symbol_name == "helper_function"
         assert result.definition_file is not None
@@ -1573,22 +1585,26 @@ def test_helper():
         from code_scalpel.mcp.server import get_symbol_references
 
         models_file = tmp_path / "models.py"
-        models_file.write_text('''
+        models_file.write_text(
+            """
 class User:
     def __init__(self, name):
         self.name = name
-''')
+"""
+        )
 
         service_file = tmp_path / "service.py"
-        service_file.write_text('''
+        service_file.write_text(
+            """
 from models import User
 
 def create_user(name):
     return User(name)
-''')
+"""
+        )
 
         result = await get_symbol_references("User", str(tmp_path))
-        
+
         assert result.success is True
         assert result.total_references >= 2  # Definition + 1 usage
         assert any(ref.is_definition for ref in result.references)
@@ -1601,7 +1617,7 @@ def create_user(name):
         test_file.write_text("x = 1")
 
         result = await get_symbol_references("nonexistent_symbol", str(tmp_path))
-        
+
         assert result.success is True  # Search succeeded, just no results
         assert result.total_references == 0
 
@@ -1610,7 +1626,7 @@ def create_user(name):
         from code_scalpel.mcp.server import get_symbol_references
 
         result = await get_symbol_references("some_symbol", "/nonexistent/path")
-        
+
         assert result.success is False
         assert result.error is not None
 
@@ -1619,15 +1635,17 @@ def create_user(name):
         from code_scalpel.mcp.server import get_symbol_references
 
         test_file = tmp_path / "code.py"
-        test_file.write_text('''
+        test_file.write_text(
+            """
 def target_function():
     return "result"
 
 result = target_function()
-''')
+"""
+        )
 
         result = await get_symbol_references("target_function", str(tmp_path))
-        
+
         assert result.success is True
         # All references should have context
         for ref in result.references:

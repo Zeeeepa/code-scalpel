@@ -312,6 +312,7 @@ class TestTaintTrackerIntegration:
 
 # [20251212_TEST] v1.4.0 - Tests for XXE and SSTI vulnerability detection
 
+
 class TestXXEDetection:
     """Test detection of XML External Entity (XXE) vulnerabilities (CWE-611)."""
 
@@ -367,7 +368,7 @@ class TestXXEDetection:
         # defusedxml should be a sanitizer that clears XXE sink
         assert "defusedxml.parse" in SANITIZER_REGISTRY
         assert "defusedxml.ElementTree.parse" in SANITIZER_REGISTRY
-        
+
         sanitizer_info = SANITIZER_REGISTRY["defusedxml.parse"]
         assert SecuritySink.XXE in sanitizer_info.clears_sinks
 
@@ -440,7 +441,7 @@ class TestSSTIDetection:
         # File-based templates are safe
         assert "render_template" in SANITIZER_REGISTRY
         assert "flask.render_template" in SANITIZER_REGISTRY
-        
+
         sanitizer_info = SANITIZER_REGISTRY["render_template"]
         assert SecuritySink.SSTI in sanitizer_info.clears_sinks
 

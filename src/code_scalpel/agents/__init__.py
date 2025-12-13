@@ -32,5 +32,5 @@ __all__ = [
     "AgentContext",
     "CodeReviewAgent",
     "SecurityAgent",
-    "OptimizationAgent"
+    "OptimizationAgent",
 ]

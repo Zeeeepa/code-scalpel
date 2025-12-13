@@ -243,8 +243,9 @@ class TypeInferenceEngine:
             # v1.3.0: Float arithmetic
             if left == InferredType.FLOAT and right == InferredType.FLOAT:
                 return InferredType.FLOAT
-            if (left == InferredType.INT and right == InferredType.FLOAT) or \
-               (left == InferredType.FLOAT and right == InferredType.INT):
+            if (left == InferredType.INT and right == InferredType.FLOAT) or (
+                left == InferredType.FLOAT and right == InferredType.INT
+            ):
                 return InferredType.FLOAT
             # Mixed types → UNKNOWN (Python would convert, but we're strict)
             return InferredType.UNKNOWN
@@ -260,8 +261,9 @@ class TypeInferenceEngine:
             # v1.3.0: Float multiplication
             if left == InferredType.FLOAT and right == InferredType.FLOAT:
                 return InferredType.FLOAT
-            if (left == InferredType.INT and right == InferredType.FLOAT) or \
-               (left == InferredType.FLOAT and right == InferredType.INT):
+            if (left == InferredType.INT and right == InferredType.FLOAT) or (
+                left == InferredType.FLOAT and right == InferredType.INT
+            ):
                 return InferredType.FLOAT
             return InferredType.UNKNOWN
 
@@ -272,20 +274,23 @@ class TypeInferenceEngine:
             # v1.3.0: Float arithmetic (except FloorDiv which returns int for floats too)
             if isinstance(op, ast.FloorDiv):
                 # FloorDiv returns int in Python 3 for floats too
-                if (left == InferredType.FLOAT or right == InferredType.FLOAT):
+                if left == InferredType.FLOAT or right == InferredType.FLOAT:
                     return InferredType.FLOAT  # Actually returns float in Python
             if left == InferredType.FLOAT and right == InferredType.FLOAT:
                 return InferredType.FLOAT
-            if (left == InferredType.INT and right == InferredType.FLOAT) or \
-               (left == InferredType.FLOAT and right == InferredType.INT):
+            if (left == InferredType.INT and right == InferredType.FLOAT) or (
+                left == InferredType.FLOAT and right == InferredType.INT
+            ):
                 return InferredType.FLOAT
             return InferredType.UNKNOWN
 
         # True division always returns float
         if isinstance(op, ast.Div):
             # v1.3.0: True division always returns float
-            if (left in (InferredType.INT, InferredType.FLOAT) and 
-                right in (InferredType.INT, InferredType.FLOAT)):
+            if left in (InferredType.INT, InferredType.FLOAT) and right in (
+                InferredType.INT,
+                InferredType.FLOAT,
+            ):
                 return InferredType.FLOAT
             return InferredType.UNKNOWN
 
