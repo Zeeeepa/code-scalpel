@@ -146,8 +146,10 @@ def complex_function(x):
 
         assert result.success is False
         assert result.error is not None
+        # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
         assert (
-            "not found" in result.error.lower()
+            "cannot access file" in result.error.lower()
+            or "not found" in result.error.lower()
             or "no such file" in result.error.lower()
         )
 

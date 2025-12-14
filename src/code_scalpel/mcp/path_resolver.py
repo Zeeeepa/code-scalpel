@@ -1,0 +1,442 @@
+"""
+Path Resolution Module for Docker and Multi-Environment Deployments.
+
+[20251214_FEATURE] v1.5.3 - Intelligent path resolution for Docker deployments.
+
+This module provides intelligent path resolution that works seamlessly across:
+- Local development environments
+- Docker containers with volume mounts
+- Remote MCP servers
+- Various workspace configurations
+
+Key Features:
+- Automatic workspace root detection
+- Smart path resolution with multiple fallback strategies
+- Clear error messages with actionable suggestions
+- Docker volume mount recommendations
+"""
+
+import os
+from pathlib import Path
+from typing import List, Optional, Tuple
+from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class PathResolutionResult:
+    """Result of path resolution attempt."""
+
+    resolved_path: Optional[str]
+    success: bool
+    attempted_paths: List[str]
+    suggestion: Optional[str] = None
+    error_message: Optional[str] = None
+
+
+class PathResolver:
+    """
+    Intelligent path resolver for file-based operations.
+
+    Handles path resolution across different deployment contexts:
+    - Local filesystem
+    - Docker containers
+    - Remote servers
+    - Various workspace structures
+
+    [20251214_FEATURE] Core path resolution engine for v1.5.3
+    """
+
+    def __init__(
+        self,
+        workspace_roots: Optional[List[str]] = None,
+        enable_docker_detection: bool = True,
+    ):
+        """
+        Initialize PathResolver.
+
+        Args:
+            workspace_roots: List of potential workspace root directories.
+                           If None, uses common defaults.
+            enable_docker_detection: Whether to detect Docker environment
+                                   and provide Docker-specific suggestions.
+        """
+        self.workspace_roots = workspace_roots or self._detect_workspace_roots()
+        self.enable_docker_detection = enable_docker_detection
+        self.is_docker = self._is_running_in_docker()
+        self.path_cache = {}  # Cache for resolved paths
+
+    def _detect_workspace_roots(self) -> List[str]:
+        """
+        Detect potential workspace root directories.
+
+        [20251214_FEATURE] Auto-detection of workspace roots
+
+        Returns:
+            List of directories to search for files, in priority order.
+        """
+        roots = []
+
+        # Current working directory (highest priority)
+        roots.append(os.getcwd())
+
+        # Common Docker mount points
+        if os.path.exists("/workspace"):
+            roots.append("/workspace")
+        if os.path.exists("/app/code"):
+            roots.append("/app/code")
+        if os.path.exists("/app"):
+            roots.append("/app")
+
+        # User home directory projects
+        home = os.path.expanduser("~")
+        projects_dir = os.path.join(home, "projects")
+        if os.path.exists(projects_dir):
+            roots.append(projects_dir)
+
+        # Environment variable hints
+        if "WORKSPACE_ROOT" in os.environ:
+            roots.insert(0, os.environ["WORKSPACE_ROOT"])
+        if "PROJECT_ROOT" in os.environ:
+            roots.insert(0, os.environ["PROJECT_ROOT"])
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_roots = []
+        for root in roots:
+            normalized = os.path.normpath(root)
+            if normalized not in seen:
+                seen.add(normalized)
+                unique_roots.append(normalized)
+
+        logger.debug(f"Detected workspace roots: {unique_roots}")
+        return unique_roots
+
+    def _is_running_in_docker(self) -> bool:
+        """
+        Detect if code is running inside a Docker container.
+
+        [20251214_FEATURE] Docker environment detection
+
+        Returns:
+            True if running in Docker, False otherwise.
+        """
+        # Check for .dockerenv file
+        if os.path.exists("/.dockerenv"):
+            return True
+
+        # Check cgroup for docker
+        try:
+            with open("/proc/1/cgroup", "r") as f:
+                return "docker" in f.read() or "containerd" in f.read()
+        except (FileNotFoundError, PermissionError):
+            pass
+
+        return False
+
+    def resolve(self, path: str, project_root: Optional[str] = None) -> str:
+        """
+        Resolve a path to its accessible location.
+
+        [20251214_FEATURE] Main path resolution with comprehensive fallback
+
+        Args:
+            path: Path to resolve (absolute, relative, or basename)
+            project_root: Optional explicit project root to try first
+
+        Returns:
+            Resolved absolute path
+
+        Raises:
+            FileNotFoundError: If path cannot be resolved with helpful suggestions
+        """
+        # Check cache first
+        cache_key = (path, project_root)
+        if cache_key in self.path_cache:
+            cached = self.path_cache[cache_key]
+            if os.path.exists(cached):
+                return cached
+
+        result = self._attempt_resolution(path, project_root)
+
+        if result.success:
+            # Cache successful resolution
+            self.path_cache[cache_key] = result.resolved_path
+            return result.resolved_path
+        else:
+            # Raise with helpful error message
+            raise FileNotFoundError(self._format_error_message(path, result))
+
+    def _attempt_resolution(
+        self, path: str, project_root: Optional[str]
+    ) -> PathResolutionResult:
+        """
+        Attempt to resolve path with multiple strategies.
+
+        [20251214_FEATURE] Multi-strategy path resolution
+
+        Strategies (in order):
+        1. Direct access (absolute path exists)
+        2. Relative to explicit project_root
+        3. Relative to detected workspace roots
+        4. Basename search in workspace roots (recursive)
+        5. Parent directory search (for relative paths with subdirs)
+
+        Args:
+            path: Path to resolve
+            project_root: Optional explicit project root
+
+        Returns:
+            PathResolutionResult with resolution details
+        """
+        attempted_paths = []
+        path_obj = Path(path)
+
+        # Strategy 1: Direct access (absolute path)
+        if path_obj.is_absolute() and path_obj.exists():
+            return PathResolutionResult(
+                resolved_path=str(path_obj.resolve()),
+                success=True,
+                attempted_paths=[str(path_obj)],
+            )
+        attempted_paths.append(str(path_obj))
+
+        # Strategy 2: Relative to explicit project_root
+        if project_root:
+            candidate = Path(project_root) / path
+            if candidate.exists():
+                return PathResolutionResult(
+                    resolved_path=str(candidate.resolve()),
+                    success=True,
+                    attempted_paths=attempted_paths + [str(candidate)],
+                )
+            attempted_paths.append(str(candidate))
+
+        # Strategy 3: Relative to workspace roots
+        for root in self.workspace_roots:
+            candidate = Path(root) / path
+            if candidate.exists():
+                return PathResolutionResult(
+                    resolved_path=str(candidate.resolve()),
+                    success=True,
+                    attempted_paths=attempted_paths + [str(candidate)],
+                )
+            attempted_paths.append(str(candidate))
+
+        # Strategy 4: Basename search (for simple filenames)
+        if not os.path.dirname(path):
+            # It's just a filename, search workspace roots
+            for root in self.workspace_roots:
+                found = self._find_file_in_tree(root, os.path.basename(path))
+                if found:
+                    return PathResolutionResult(
+                        resolved_path=found,
+                        success=True,
+                        attempted_paths=attempted_paths + [found],
+                    )
+
+        # Strategy 5: Parent directory hints
+        if os.path.dirname(path):
+            dirname = os.path.dirname(path)
+            basename = os.path.basename(path)
+            for root in self.workspace_roots:
+                # Try finding the directory structure
+                candidate = Path(root) / dirname / basename
+                if candidate.exists():
+                    return PathResolutionResult(
+                        resolved_path=str(candidate.resolve()),
+                        success=True,
+                        attempted_paths=attempted_paths + [str(candidate)],
+                    )
+                attempted_paths.append(str(candidate))
+
+        # All strategies failed
+        return PathResolutionResult(
+            resolved_path=None,
+            success=False,
+            attempted_paths=attempted_paths,
+            suggestion=self._generate_suggestion(path, attempted_paths),
+        )
+
+    def _find_file_in_tree(
+        self, root: str, filename: str, max_depth: int = 5
+    ) -> Optional[str]:
+        """
+        Search for a file in directory tree.
+
+        [20251214_FEATURE] Recursive file search with depth limit
+
+        Args:
+            root: Root directory to search
+            filename: Filename to find
+            max_depth: Maximum directory depth to search
+
+        Returns:
+            Absolute path if found, None otherwise
+        """
+        try:
+            root_path = Path(root)
+            if not root_path.exists():
+                return None
+
+            # Use rglob with depth limitation
+            for path in root_path.rglob(filename):
+                # Calculate depth
+                relative = path.relative_to(root_path)
+                depth = len(relative.parts) - 1
+                if depth <= max_depth and path.is_file():
+                    return str(path.resolve())
+        except (PermissionError, OSError):
+            pass
+
+        return None
+
+    def _generate_suggestion(self, path: str, attempted_paths: List[str]) -> str:
+        """
+        Generate helpful suggestion for failed path resolution.
+
+        [20251214_FEATURE] Docker-aware error suggestions
+
+        Args:
+            path: Original path that failed
+            attempted_paths: List of paths that were tried
+
+        Returns:
+            Helpful suggestion string
+        """
+        suggestions = []
+
+        if self.is_docker:
+            # Docker-specific suggestions
+            suggestions.append(
+                "Running in Docker: Mount your project directory with:\n"
+                "  docker run -v /path/to/your/project:/workspace ... <image>"
+            )
+
+            # Try to infer host path from attempted path
+            if os.path.isabs(path):
+                parent = os.path.dirname(path)
+                suggestions.append(f"  docker run -v {parent}:/workspace ... <image>")
+
+        else:
+            # Local development suggestions
+            suggestions.append(
+                "Ensure the file exists and use an absolute path, or place it in:\n"
+            )
+            for root in self.workspace_roots[:3]:  # Top 3 roots
+                suggestions.append(f"  - {root}")
+
+        # Add workspace root hint
+        suggestions.append(
+            f"\nCurrent workspace roots: {', '.join(self.workspace_roots)}"
+        )
+        suggestions.append(
+            "Set WORKSPACE_ROOT environment variable to specify custom root."
+        )
+
+        return "\n".join(suggestions)
+
+    def _format_error_message(self, path: str, result: PathResolutionResult) -> str:
+        """
+        Format comprehensive error message.
+
+        [20251214_FEATURE] User-friendly error messages
+
+        Args:
+            path: Original path that failed
+            result: Resolution result with details
+
+        Returns:
+            Formatted error message
+        """
+        lines = [
+            f"Cannot access file: {path}",
+            "",
+            f"Attempted locations ({len(result.attempted_paths)}):",
+        ]
+
+        # Show up to 5 attempted paths
+        for attempted in result.attempted_paths[:5]:
+            lines.append(f"  [FAIL] {attempted}")
+
+        if len(result.attempted_paths) > 5:
+            lines.append(f"  ... and {len(result.attempted_paths) - 5} more")
+
+        if result.suggestion:
+            lines.append("")
+            lines.append("Suggestion:")
+            lines.append(result.suggestion)
+
+        return "\n".join(lines)
+
+    def validate_paths(
+        self, paths: List[str], project_root: Optional[str] = None
+    ) -> Tuple[List[str], List[str]]:
+        """
+        Validate multiple paths and return accessible/inaccessible lists.
+
+        [20251214_FEATURE] Batch path validation
+
+        Args:
+            paths: List of paths to validate
+            project_root: Optional project root
+
+        Returns:
+            Tuple of (accessible_paths, inaccessible_paths)
+        """
+        accessible = []
+        inaccessible = []
+
+        for path in paths:
+            try:
+                resolved = self.resolve(path, project_root)
+                accessible.append(resolved)
+            except FileNotFoundError:
+                inaccessible.append(path)
+
+        return accessible, inaccessible
+
+    def clear_cache(self):
+        """Clear the path resolution cache."""
+        self.path_cache.clear()
+        logger.debug("Path resolution cache cleared")
+
+
+# Global singleton instance for convenience
+_default_resolver: Optional[PathResolver] = None
+
+
+def get_default_resolver() -> PathResolver:
+    """
+    Get or create the default PathResolver instance.
+
+    [20251214_FEATURE] Singleton accessor for easy integration
+
+    Returns:
+        Default PathResolver instance
+    """
+    global _default_resolver
+    if _default_resolver is None:
+        _default_resolver = PathResolver()
+    return _default_resolver
+
+
+def resolve_path(path: str, project_root: Optional[str] = None) -> str:
+    """
+    Convenience function for path resolution using default resolver.
+
+    [20251214_FEATURE] Simple API for path resolution
+
+    Args:
+        path: Path to resolve
+        project_root: Optional project root
+
+    Returns:
+        Resolved absolute path
+
+    Raises:
+        FileNotFoundError: If path cannot be resolved
+    """
+    return get_default_resolver().resolve(path, project_root)

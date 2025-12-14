@@ -1331,9 +1331,12 @@ def _create_extractor(
     """
     Create a SurgicalExtractor from file_path or code.
 
+    [20251214_FEATURE] v1.5.3 - Integrated PathResolver for intelligent path resolution
+
     Returns (extractor, None) on success, (None, error_result) on failure.
     """
     from code_scalpel import SurgicalExtractor
+    from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
         return None, _extraction_error(
@@ -1342,9 +1345,12 @@ def _create_extractor(
 
     if file_path is not None:
         try:
-            return SurgicalExtractor.from_file(file_path), None
-        except FileNotFoundError:
-            return None, _extraction_error(target_name, f"File not found: {file_path}")
+            # [20251214_FEATURE] Use PathResolver for intelligent path resolution
+            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            return SurgicalExtractor.from_file(resolved_path), None
+        except FileNotFoundError as e:
+            # PathResolver provides helpful error messages
+            return None, _extraction_error(target_name, str(e))
         except ValueError as e:
             return None, _extraction_error(target_name, str(e))
     else:
@@ -2004,28 +2010,25 @@ Provide a risk assessment and remediation steps for each finding."""
 
 
 def _get_file_context_sync(file_path: str) -> FileContextResult:
-    """Synchronous implementation of get_file_context."""
+    """
+    Synchronous implementation of get_file_context.
+    
+    [20251214_FEATURE] v1.5.3 - Integrated PathResolver for intelligent path resolution
+    """
+    from code_scalpel.mcp.path_resolver import resolve_path
+
     try:
-        path = Path(file_path)
-
-        # Try to resolve the path
-        if not path.is_absolute():
-            # Try relative to PROJECT_ROOT
-            candidate = PROJECT_ROOT / path
-            if candidate.exists():
-                path = candidate
-            else:
-                # Try current working directory
-                candidate = Path.cwd() / path
-                if candidate.exists():
-                    path = candidate
-
-        if not path.exists():
+        # [20251214_FEATURE] Use PathResolver for intelligent path resolution
+        try:
+            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            path = Path(resolved_path)
+        except FileNotFoundError as e:
+            # PathResolver provides helpful error messages
             return FileContextResult(
                 success=False,
                 file_path=file_path,
                 line_count=0,
-                error=f"File not found: {file_path}",
+                error=str(e),
             )
 
         code = path.read_text(encoding="utf-8")
@@ -3450,6 +3453,118 @@ async def cross_file_security_scan(
         max_depth,
         include_diagram,
     )
+
+
+# ============================================================================
+# PATH VALIDATION (v1.5.3)
+# ============================================================================
+
+
+class PathValidationResult(BaseModel):
+    """Result of path validation."""
+
+    success: bool = Field(description="Whether all paths were accessible")
+    accessible: list[str] = Field(
+        default_factory=list, description="Paths that were successfully resolved"
+    )
+    inaccessible: list[str] = Field(
+        default_factory=list, description="Paths that could not be resolved"
+    )
+    suggestions: list[str] = Field(
+        default_factory=list, description="Suggestions for resolving inaccessible paths"
+    )
+    workspace_roots: list[str] = Field(
+        default_factory=list, description="Detected workspace root directories"
+    )
+    is_docker: bool = Field(
+        default=False, description="Whether running in Docker container"
+    )
+
+
+def _validate_paths_sync(
+    paths: list[str], project_root: str | None
+) -> PathValidationResult:
+    """Synchronous implementation of validate_paths."""
+    from code_scalpel.mcp.path_resolver import PathResolver
+
+    resolver = PathResolver()
+    accessible, inaccessible = resolver.validate_paths(paths, project_root)
+
+    suggestions = []
+    if inaccessible:
+        if resolver.is_docker:
+            suggestions.append(
+                "Running in Docker: Mount your project with -v /path/to/project:/workspace"
+            )
+            suggestions.append(
+                "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
+            )
+        else:
+            suggestions.append(
+                "Ensure files exist and use absolute paths or place in workspace roots:"
+            )
+            for root in resolver.workspace_roots[:3]:
+                suggestions.append(f"  - {root}")
+        suggestions.append("Set WORKSPACE_ROOT env variable to specify custom root")
+
+    return PathValidationResult(
+        success=len(inaccessible) == 0,
+        accessible=accessible,
+        inaccessible=inaccessible,
+        suggestions=suggestions,
+        workspace_roots=resolver.workspace_roots,
+        is_docker=resolver.is_docker,
+    )
+
+
+@mcp.tool()
+async def validate_paths(
+    paths: list[str], project_root: str | None = None
+) -> PathValidationResult:
+    """
+    Validate that paths are accessible before running file-based operations.
+
+    [v1.5.3] Use this tool to check path accessibility before attempting
+    file-based operations. Essential for Docker deployments where volume
+    mounts must be configured correctly.
+
+    Key capabilities:
+    - Check if files are accessible from the MCP server
+    - Detect Docker environment automatically
+    - Provide actionable suggestions for fixing path issues
+    - Report detected workspace roots
+    - Generate Docker volume mount commands
+
+    Why AI agents need this:
+    - Prevent failures: Check paths before expensive operations
+    - Debug deployment: Understand why paths aren't accessible
+    - Guide users: Provide specific Docker mount commands
+    - Environment awareness: Know if running in Docker vs local
+
+    Common scenarios:
+    - Before extract_code: Validate file exists and is accessible
+    - Before crawl_project: Check project root is mounted
+    - Troubleshooting: Help users configure Docker volumes
+
+    Example:
+        # Check if files are accessible
+        result = validate_paths([
+            "/home/user/project/main.py",
+            "utils/helpers.py"
+        ])
+        
+        if not result.success:
+            print("Inaccessible:", result.inaccessible)
+            print("Suggestions:", result.suggestions)
+
+    Args:
+        paths: List of file paths to validate
+        project_root: Optional explicit project root directory
+
+    Returns:
+        PathValidationResult with accessible/inaccessible paths and suggestions
+    """
+    return await asyncio.to_thread(_validate_paths_sync, paths, project_root)
 
 
 # ============================================================================

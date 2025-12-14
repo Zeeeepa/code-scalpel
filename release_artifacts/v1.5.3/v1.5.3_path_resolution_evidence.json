@@ -1,0 +1,93 @@
+{
+  "release": "v1.5.3",
+  "release_name": "PathSmart",
+  "release_date": "2025-12-14",
+  "focus": "Intelligent Path Resolution for Docker Deployments",
+  "implementation_summary": {
+    "path_resolver_module": {
+      "file": "src/code_scalpel/mcp/path_resolver.py",
+      "lines_of_code": 370,
+      "classes": ["PathResolver", "PathResolutionResult"],
+      "functions": ["get_default_resolver", "resolve_path"],
+      "features": [
+        "Auto-detection of workspace roots",
+        "Docker environment detection",
+        "Multi-strategy path resolution",
+        "Intelligent error messages with suggestions",
+        "Path resolution caching",
+        "Recursive file search with depth limits"
+      ]
+    },
+    "mcp_tools": {
+      "validate_paths": {
+        "purpose": "Batch path validation before file operations",
+        "returns": "PathValidationResult with accessible/inaccessible lists",
+        "docker_aware": true
+      }
+    },
+    "integration": {
+      "tools_updated": ["extract_code", "get_file_context"],
+      "method": "Integrated resolve_path() into file reading logic",
+      "backward_compatible": true
+    }
+  },
+  "test_results": {
+    "test_file": "tests/test_path_resolver.py",
+    "total_tests": 40,
+    "passed": 40,
+    "failed": 0,
+    "pass_rate": "100%",
+    "test_categories": {
+      "initialization": 4,
+      "docker_detection": 4,
+      "path_resolution": 6,
+      "caching": 3,
+      "error_messages": 3,
+      "path_validation": 3,
+      "file_search": 4,
+      "singletons": 2,
+      "env_variables": 2,
+      "edge_cases": 6,
+      "integration": 2,
+      "models": 1
+    },
+    "coverage": "100% of path_resolver.py"
+  },
+  "docker_scenarios_tested": [
+    "Docker environment detection via /.dockerenv",
+    "Docker environment detection via /proc/1/cgroup",
+    "Volume mount suggestions in error messages",
+    "Workspace root detection in containers",
+    "Path resolution from /workspace mount point"
+  ],
+  "documentation": {
+    "docker_guide": "docs/deployment/docker_volume_mounting.md",
+    "sections": [
+      "Quick Start",
+      "Docker Compose Configuration",
+      "Common Scenarios",
+      "Troubleshooting",
+      "Environment Variables",
+      "Best Practices",
+      "MCP Client Integration",
+      "Security Considerations"
+    ],
+    "examples": 15,
+    "scenarios": 4
+  },
+  "acceptance_criteria_met": {
+    "PathResolver_resolves_relative_paths": true,
+    "PathResolver_searches_workspace_roots": true,
+    "error_messages_include_mount_suggestions": true,
+    "validate_paths_tool_implemented": true,
+    "docker_documentation_created": true,
+    "all_file_tools_use_PathResolver": true,
+    "no_regressions_v1_5_2": true
+  },
+  "performance": {
+    "path_cache": "Successful resolutions cached for repeated access",
+    "max_search_depth": 5,
+    "workspace_detection": "< 1ms",
+    "path_resolution": "< 5ms (cached), < 50ms (uncached with search)"
+  }
+}

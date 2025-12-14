@@ -18,7 +18,7 @@
     "failed": 0,
     "errors": 0,
     "execution_time_seconds": 7.72,
-    "status": "PASS ✅",
+    "status": "PASS PASS",
     "test_classes": [
       {
         "name": "TestQueryPackage",
@@ -112,7 +112,7 @@
     }
   ],
   "ci_cd_compatibility": {
-    "github_actions": "✅ Ready",
+    "github_actions": "Ready",
     "pytest_versions": ["7.4.2"],
     "python_versions": ["3.9", "3.10", "3.11", "3.12", "3.13"],
     "test_isolation": "Function-scoped fixtures prevent state leakage"
@@ -134,27 +134,27 @@
   "acceptance_criteria": [
     {
       "criterion": "All 56 OSV client tests pass in full suite",
-      "status": "✅ PASS",
+      "status": "PASS",
       "evidence": "56 passed in 7.72s"
     },
     {
       "criterion": "No AttributeError during fixture setup",
-      "status": "✅ PASS",
+      "status": "PASS",
       "evidence": "0 errors reported in full suite"
     },
     {
       "criterion": "Full test suite runs without interruption",
-      "status": "✅ PASS",
+      "status": "PASS",
       "evidence": "2145 tests passed, 3 skipped (pre-existing)"
     },
     {
       "criterion": "Backward compatible with v1.5.2",
-      "status": "✅ PASS",
+      "status": "PASS",
       "evidence": "No API changes, all tests pass"
     },
     {
       "criterion": "Reproducible across Python versions",
-      "status": "✅ PASS",
+      "status": "PASS",
       "evidence": "Tested with Python 3.10, module import mechanism is version-agnostic"
     }
   ],

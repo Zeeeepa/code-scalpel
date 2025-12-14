@@ -911,7 +911,8 @@ def unrelated():
         )
 
         assert result.success is False
-        assert "not found" in result.error.lower()
+        # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
+        assert "cannot access file" in result.error.lower() or "not found" in result.error.lower()
 
     async def test_extract_function_not_found_in_file(self, tmp_path):
         """Test extraction of non-existent function from valid file."""
