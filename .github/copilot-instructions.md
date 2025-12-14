@@ -95,6 +95,33 @@ source .env && python -m twine upload dist/* -u __token__ -p "$PYPI_TOKEN"
 
 **Never** hardcode or expose the token. Always source from `.env`.
 
+### Release Documentation Structure
+
+**Release Notes Location:** `docs/release_notes/RELEASE_NOTES_v{VERSION}.md`
+- Comprehensive release documentation
+- Executive summary, features, metrics, acceptance criteria
+- Migration guide, use cases, known issues
+- Performance benchmarks and comparison with previous version
+
+**Release Artifacts Location:** `release_artifacts/v{VERSION}/`
+- Evidence files documenting feature quality
+- Test execution summaries
+- Code coverage reports
+- Performance metrics and logs
+
+**Evidence File Format:** `v{VERSION}_{type}_evidence.json`
+- `{type}` can be: `mcp_tools_evidence`, `test_evidence`, `performance_evidence`, etc.
+- Structured JSON with tool specs, test counts, coverage %, metrics
+- Matches previous release format for consistency
+- Serves as audit trail and release verification
+
+**Creating Release Documentation:**
+1. Generate comprehensive release notes in `docs/release_notes/RELEASE_NOTES_v{VERSION}.md`
+2. Create evidence files in `release_artifacts/v{VERSION}/` with tool specs and test data
+3. Include acceptance criteria verification checklist
+4. Add performance metrics and comparison with previous version
+5. Document any known issues or limitations
+
 ### Before You Code Checklist
 
 1. Read and understand the existing code before modifying
@@ -163,7 +190,7 @@ Key components:
 
 ## Project Context
 
-Code Scalpel v1.3.0 is an MCP server toolkit for AI-driven surgical code operations.
+Code Scalpel v1.5.0 is an MCP server toolkit for AI-driven surgical code operations.
 
 | Module | Status | Coverage |
 |--------|--------|----------|
@@ -173,12 +200,12 @@ Code Scalpel v1.3.0 is an MCP server toolkit for AI-driven surgical code operati
 | PDG Slicer | Stable | 100% |
 | Symbolic Engine | Stable | 100% |
 | Security Analysis | Stable | 100% |
-| MCP Server | Stable | 8 tools |
+| MCP Server | Stable | 13 tools |
 | Surgical Tools | Stable | 95%+ |
 
-**Test Suite:** 1,669 tests passing
+**Test Suite:** 2,045 tests passing (100% pass rate)
 
-**MCP Tools (Current):**
+**MCP Tools (Current - v1.5.0):**
 - `analyze_code` - Parse and extract code structure
 - `extract_code` - Surgical extraction by symbol name
 - `security_scan` - Taint-based vulnerability detection
@@ -186,6 +213,17 @@ Code Scalpel v1.3.0 is an MCP server toolkit for AI-driven surgical code operati
 - `simulate_refactor` - Verify refactor preserves behavior
 - `crawl_project` - Project-wide analysis
 - `update_symbol` - Safe symbol replacement
+- `get_project_map` - Analyze complete project structure and entry points
+- `get_call_graph` - Generate call graphs and trace execution flow
+- `scan_dependencies` - Scan for vulnerable dependencies (OSV API)
+- `get_file_context` - Get surrounding context for code locations
+- `get_symbol_references` - Find all uses of a symbol
+- `get_cross_file_dependencies` - Analyze cross-file dependency chains
+
+**Latest Release:** v1.5.0 "Project Intelligence"
+- Release Date: December 13, 2025
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.5.0.md`
+- Evidence Files: `release_artifacts/v1.5.0/`
 
 ## Communication
 
