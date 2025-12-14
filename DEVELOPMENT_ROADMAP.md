@@ -27,13 +27,13 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 - **Verify before applying** - Simulate refactors to detect behavior changes
 - **Analyze with certainty** - Real AST parsing, not regex pattern matching
 
-### Current State (v1.5.2)
+### Current State (v1.5.3)
 
 | Metric | Value | Status |
 |--------|-------|--------|
 | MCP Tools | 15 tools (analyze, extract, security, test gen, context, cross-file) | Stable |
-| Test Suite | 2,238 tests passing (98.7% pass rate) | Stable |
-| Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | NEW in v1.5.2 |
+| Test Suite | 2,145 tests passing (100% pass rate) | Stable |
+| Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |
 | Code Coverage | 100%+ on production code, 95%+ overall | CI Gate Met |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns, cross-file taint | Stable |
 | Languages | Python (full), JS/Java (structural) | Expanding |
