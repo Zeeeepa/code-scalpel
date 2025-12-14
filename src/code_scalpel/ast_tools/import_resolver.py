@@ -164,14 +164,14 @@ class ImportResolver:
         ...     print(f"Build failed: {result.errors}")
     
     Scope Limitations (v1.5.1):
-    - ✅ from module import func (direct imports)
-    - ✅ import module (module imports)
-    - ✅ from . import sibling (relative imports)
-    - ✅ from ..package import module (parent imports)
-    - ✅ from module import * (wildcard imports - partial resolution)
-    - ❌ importlib.import_module() (dynamic imports - skipped)
-    - ❌ __import__() (dynamic imports - skipped)
-    - ❌ sys.path manipulation (too complex - skipped)
+    - from module import func (direct imports)
+    - import module (module imports)
+    - from . import sibling (relative imports)
+    - from ..package import module (parent imports)
+    - from module import * (wildcard imports - partial resolution)
+    - importlib.import_module() (dynamic imports - skipped)
+    - __import__() (dynamic imports - skipped)
+    - sys.path manipulation (too complex - skipped)
     """
     
     # Directories to skip during file crawling

@@ -44,9 +44,9 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 
 | Metric | Target | Milestone |
 |--------|--------|-----------|
-| MCP Tools | 15+ tools | ✅ v1.5.2 |
+| MCP Tools | 15+ tools | DONE v1.5.2 |
 | Languages | Python, TypeScript, JavaScript, Java | v2.0.0 |
-| Cross-File Operations | Full project context | ✅ v1.5.2 |
+| Cross-File Operations | Full project context | DONE v1.5.2 |
 | Test Suite | 100% pass rate (full execution) | v1.5.3 |
 | AI Verification | Behavior-preserving refactor check | v2.1.0 |
 | Auto-Fix Generation | AI-verified security fixes | v2.1.0 |
@@ -372,7 +372,7 @@ v1.3.0 Release Criteria:
 [x] No regressions in existing detections (Gate) - Verified
 [x] Documentation updated (Gate) - README, copilot-instructions, RELEASE_NOTES_v1.3.0
 
-## v1.4.0 - "Context" ✅ RELEASED
+## v1.4.0 - "Context" RELEASED
 
 ### Overview
 
@@ -380,16 +380,16 @@ v1.3.0 Release Criteria:
 **Goal:** Give AI agents richer context about code and expand vulnerability detection  
 **Effort:** ~12 developer-days  
 **Risk Level:** Low (extends existing MCP tools)  
-**Status:** ✅ Released December 12, 2025
+**Status:** Released December 12, 2025
 
 ### Priorities
 
 | Priority | Feature | Owner | Effort | Status |
 |----------|---------|-------|--------|--------|
-| **P0** | `get_file_context` MCP tool | TDE | 3 days | ✅ Done |
-| **P0** | `get_symbol_references` MCP tool | TDE | 2 days | ✅ Done |
-| **P0** | XXE detection (CWE-611) | TDE | 2 days | ✅ Done |
-| **P0** | SSTI detection (CWE-1336) | TDE | 1 day | ✅ Done |
+| **P0** | `get_file_context` MCP tool | TDE | 3 days | DONE |
+| **P0** | `get_symbol_references` MCP tool | TDE | 2 days | DONE |
+| **P0** | XXE detection (CWE-611) | TDE | 2 days | DONE |
+| **P0** | SSTI detection (CWE-1336) | TDE | 1 day | DONE |
 | **P1** | JWT vulnerabilities | - | 2 days | Deferred to v1.5.0 |
 | **P1** | Mass assignment detection | - | 2 days | Deferred to v1.5.0 |
 
@@ -916,15 +916,15 @@ def mock_osv_client(self, mocker):
 
 v1.5.2 Release Criteria:
 
-[x] All 56 OSV tests passing in isolation (P0) - VERIFIED ✅
-[x] All 27 scan_dependencies tests passing in isolation (P0) - VERIFIED ✅
-[x] Combined execution: 83 tests passing (P0) - VERIFIED ✅
-[x] No mock state leakage in paired execution (P0) - VERIFIED ✅
-[x] pytest fixtures created and documented (P1) - 6 fixtures in conftest.py ✅
-[x] Test boilerplate reduced by 85% (P1) - 28 @patch decorators eliminated ✅
-[x] Known issue documented with workarounds (P1) - Full-suite issue documented ✅
-[x] Full test coverage >= 95% (Gate) - 100% production, 95%+ overall ✅
-[x] No regressions in v1.5.1 features (Gate) - 2,238 tests total, 98.7% pass ✅
+[x] All 56 OSV tests passing in isolation (P0) - VERIFIED
+[x] All 27 scan_dependencies tests passing in isolation (P0) - VERIFIED
+[x] Combined execution: 83 tests passing (P0) - VERIFIED
+[x] No mock state leakage in paired execution (P0) - VERIFIED
+[x] pytest fixtures created and documented (P1) - 6 fixtures in conftest.py
+[x] Test boilerplate reduced by 85% (P1) - 28 @patch decorators eliminated
+[x] Known issue documented with workarounds (P1) - Full-suite issue documented
+[x] Full test coverage >= 95% (Gate) - 100% production, 95%+ overall
+[x] No regressions in v1.5.1 features (Gate) - 2,238 tests total, 98.7% pass
 
 #### Required Evidence (Mandatory for All Releases)
 

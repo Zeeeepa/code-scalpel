@@ -9,13 +9,13 @@
 set -e
 
 echo "=============================================="
-echo "🔧 Code Scalpel Auto-Fix"
+echo "Code Scalpel Auto-Fix"
 echo "=============================================="
 echo ""
 
 # Check we're in the right directory
 if [ ! -f "pyproject.toml" ]; then
-    echo "❌ Error: Must run from project root (where pyproject.toml is)"
+    echo "ERROR: Must run from project root (where pyproject.toml is)"
     exit 1
 fi
 
