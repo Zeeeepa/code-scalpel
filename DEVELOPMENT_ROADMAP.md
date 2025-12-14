@@ -676,6 +676,37 @@ v1.5.0 Release Criteria:
 [x] Code coverage >= 90% for v1.5.0 modules (Gate) - call_graph: 96%, osv_client: 95% (isolated), dep_parser: 100%
 [x] No regressions in v1.4.0 detections (Gate) - Project-wide: 83% (healthy baseline)
 
+#### Required Evidence (Mandatory for All Releases)
+
+Evidence files must be generated and stored in `release_artifacts/v{VERSION}/` directory.
+
+[x] Release Notes
+  - Location: `docs/release_notes/RELEASE_NOTES_v1.5.0.md`
+  - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
+  - Format: Markdown with clear sections and code examples
+
+[x] MCP Tools Evidence
+  - File: `v1.5.0_mcp_tools_evidence.json`
+  - Contents: Tool specifications, capabilities, parameters, return types, test counts, coverage %
+  - Format: Structured JSON matching v1.4.0 format for consistency
+  - Required Fields: name, description, parameters, return_types, test_count, coverage_percent
+
+[x] Test Execution Evidence
+  - File: `v1.5.0_test_evidence.json`
+  - Contents: Total test count, pass/fail rates, test breakdown by component, feature coverage matrix
+  - Format: Structured JSON with audit trail
+  - Required Fields: total_tests, pass_rate, failures, test_breakdown, feature_matrix
+
+[x] Performance Metrics (included in Release Notes)
+  - Tool performance vs targets
+  - Comparison with previous version
+  - Bottleneck analysis
+
+[x] No Breaking Changes Verification
+  - All v1.4.0 APIs unchanged
+  - All v1.4.0 security detections still working
+  - Backward compatibility verified
+
 ---
 
 ## v1.5.1 - "CrossFile"
@@ -798,6 +829,29 @@ v1.5.1 Release Criteria:
 [ ] Code coverage >= 95% (Gate)
 [ ] No regressions in v1.5.0 detections (Gate)
 [ ] Cross-file taint documented with examples (Gate)
+
+#### Required Evidence (Mandatory for All Releases)
+
+[ ] Release Notes
+  - Location: `docs/release_notes/RELEASE_NOTES_v1.5.1.md`
+  - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
+
+[ ] MCP Tools Evidence
+  - File: `v1.5.1_mcp_tools_evidence.json`
+  - Contents: Tool specifications, capabilities, parameters, return types, test counts, coverage %
+
+[ ] Test Execution Evidence
+  - File: `v1.5.1_test_evidence.json`
+  - Contents: Total test count, pass/fail rates, test breakdown by component, feature coverage matrix
+
+[ ] Performance Metrics
+  - Tool performance vs targets
+  - Comparison with previous version (v1.5.0)
+
+[ ] No Breaking Changes Verification
+  - All v1.5.0 APIs unchanged
+  - All v1.5.0 detections still working
+  - Backward compatibility verified
 
 ---
 
@@ -934,6 +988,35 @@ v2.0.0 Release Criteria:
 [ ] All MCP tools work identically across languages (Gate)
 [ ] All tests passing (Gate)
 [ ] Code coverage >= 95% (Gate)
+
+#### Required Evidence (Mandatory for All Releases)
+
+[ ] Release Notes
+  - Location: `docs/release_notes/RELEASE_NOTES_v2.0.0.md`
+  - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
+  - Language-specific examples for TS/JS/Java
+
+[ ] MCP Tools Evidence
+  - File: `v2.0.0_mcp_tools_evidence.json`
+  - Contents: Tool specifications across all languages, test counts, coverage % per language
+
+[ ] Test Execution Evidence
+  - File: `v2.0.0_test_evidence.json`
+  - Contents: Total test count, pass/fail rates, test breakdown by language and component
+
+[ ] Language Support Matrix
+  - File: `v2.0.0_language_support_evidence.json`
+  - Contents: Language coverage, syntax features tested, known limitations
+
+[ ] Performance Metrics
+  - Tool performance across languages
+  - Comparison with v1.5.1 and v1.5.0
+  - Language-specific performance analysis
+
+[ ] No Breaking Changes Verification
+  - All v1.5.1 APIs unchanged
+  - All v1.5.0 and v1.4.0 detections still working
+  - Backward compatibility verified across versions
 [ ] No regressions in Python detections (Gate)
 
 ---
@@ -1101,6 +1184,37 @@ v2.1.0 Release Criteria:
 [ ] All tests passing (Gate)
 [ ] Code coverage >= 95% (Gate)
 [ ] No regressions in polyglot detections (Gate)
+
+#### Required Evidence (Mandatory for All Releases)
+
+[ ] Release Notes
+  - Location: `docs/release_notes/RELEASE_NOTES_v2.1.0.md`
+  - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
+  - AI verification workflow examples
+
+[ ] MCP Tools Evidence
+  - File: `v2.1.0_mcp_tools_evidence.json`
+  - Contents: verify_behavior, suggest_fix, apply_verified_fix specifications
+  - Test counts, coverage %, confidence scoring methodology
+
+[ ] Test Execution Evidence
+  - File: `v2.1.0_test_evidence.json`
+  - Contents: Total test count, pass/fail rates, test breakdown by tool
+  - Verification accuracy metrics
+
+[ ] Verification Accuracy Metrics
+  - File: `v2.1.0_verification_evidence.json`
+  - Contents: False positive rates, confidence score calibration, behavior detection accuracy
+
+[ ] Performance Metrics
+  - Tool performance for different code sizes
+  - Comparison with v2.0.0 and v1.5.1
+  - Verification execution time analysis
+
+[ ] No Breaking Changes Verification
+  - All v2.0.0 APIs unchanged
+  - All previous detection capabilities intact
+  - Backward compatibility verified across all versions
 
 ---
 
