@@ -264,13 +264,16 @@ class TestFixedVersionParsing:
 
 
 class TestQueryPackage:
-    """Tests for single package queries."""
+    """Tests for single package queries.
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_package_success(self, mock_urlopen):
+    [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures
+    for mock isolation instead of @patch decorators.
+    """
+    
+    def test_query_package_success(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test successful package query."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        # Set up mock response
+        mock_response = mock_osv_response({
             "vulns": [
                 {
                     "id": "CVE-2023-32681",
@@ -286,13 +289,11 @@ class TestQueryPackage:
                     "references": [{"url": "https://example.com"}]
                 }
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("requests", "2.25.0", "PyPI")
+        # Test
+        vulns = osv_client_no_cache.query_package("requests", "2.25.0", "PyPI")
         
         assert len(vulns) == 1
         assert vulns[0].id == "CVE-2023-32681"
@@ -300,90 +301,71 @@ class TestQueryPackage:
         assert vulns[0].fixed_version == "2.31.0"
         assert "GHSA-j8r2-6x86-q33q" in vulns[0].aliases
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_package_no_vulns(self, mock_urlopen):
+    def test_query_package_no_vulns(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test query returning no vulnerabilities."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({"vulns": []}).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        mock_response = mock_osv_response({"vulns": []})
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("safe-package", "1.0.0")
+        vulns = osv_client_no_cache.query_package("safe-package", "1.0.0")
         
         assert vulns == []
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_package_empty_response(self, mock_urlopen):
+    def test_query_package_empty_response(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test query with empty response body."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({}).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        mock_response = mock_osv_response({})
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("package", "1.0.0")
+        vulns = osv_client_no_cache.query_package("package", "1.0.0")
         
         assert vulns == []
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_package_caching(self, mock_urlopen):
+    def test_query_package_caching(self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response):
         """Test that results are cached."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "vulns": [{"id": "CVE-123", "summary": "Test"}]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
-        
-        client = OSVClient(cache_enabled=True)
+        })
+        osv_mock_urlopen.return_value = mock_response
         
         # First call
-        vulns1 = client.query_package("requests", "2.25.0")
+        vulns1 = osv_client_with_cache.query_package("requests", "2.25.0")
         # Second call (should use cache)
-        vulns2 = client.query_package("requests", "2.25.0")
+        vulns2 = osv_client_with_cache.query_package("requests", "2.25.0")
         
         # Should only make one HTTP request
-        assert mock_urlopen.call_count == 1
+        assert osv_mock_urlopen.call_count == 1
         assert len(vulns1) == len(vulns2)
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_package_error_returns_empty(self, mock_urlopen):
+    def test_query_package_error_returns_empty(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error):
         """Test that errors return empty list (fail open)."""
-        mock_urlopen.side_effect = urllib.error.URLError("Connection failed")
+        osv_mock_urlopen.side_effect = mock_osv_error("URLError")
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("requests", "2.25.0")
+        vulns = osv_client_no_cache.query_package("requests", "2.25.0")
         
         assert vulns == []
 
 
 class TestQueryBatch:
-    """Tests for batch package queries."""
+    """Tests for batch package queries.
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_batch_success(self, mock_urlopen):
+    [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures
+    for mock isolation instead of @patch decorators.
+    """
+    
+    def test_query_batch_success(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test successful batch query."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "results": [
                 {"vulns": [{"id": "CVE-1", "summary": "Vuln 1"}]},
                 {"vulns": []},
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
         packages = [
             {"name": "requests", "version": "2.25.0"},
             {"name": "flask", "version": "2.0.0"},
         ]
-        results = client.query_batch(packages)
+        results = osv_client_no_cache.query_batch(packages)
         
         assert "requests:2.25.0" in results
         assert "flask:2.0.0" in results
@@ -396,70 +378,59 @@ class TestQueryBatch:
         results = client.query_batch([])
         assert results == {}
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_batch_with_ecosystem(self, mock_urlopen):
+    def test_query_batch_with_ecosystem(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test batch query with explicit ecosystems."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "results": [
                 {"vulns": []},
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
         packages = [
             {"name": "lodash", "version": "4.17.0", "ecosystem": "npm"},
         ]
-        results = client.query_batch(packages)
+        results = osv_client_no_cache.query_batch(packages)
         
         assert "lodash:4.17.0" in results
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_query_batch_error_returns_empty(self, mock_urlopen):
+    def test_query_batch_error_returns_empty(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error):
         """Test batch query error returns empty dict."""
-        mock_urlopen.side_effect = urllib.error.URLError("Connection failed")
+        osv_mock_urlopen.side_effect = mock_osv_error("URLError")
         
-        client = OSVClient(cache_enabled=False)
         packages = [{"name": "requests", "version": "2.25.0"}]
-        results = client.query_batch(packages)
+        results = osv_client_no_cache.query_batch(packages)
         
         assert results == {}
 
 
 class TestMakeRequest:
-    """Tests for HTTP request handling."""
+    """Tests for HTTP request handling.
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_successful_request(self, mock_urlopen):
+    [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures
+    for mock isolation instead of @patch decorators.
+    """
+    
+    def test_successful_request(self, osv_mock_urlopen, mock_osv_response):
         """Test successful HTTP request."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = b'{"vulns": []}'
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        mock_response = mock_osv_response({"vulns": []})
+        osv_mock_urlopen.return_value = mock_response
         
         client = OSVClient()
         result = client._make_request(OSV_API_URL, {"test": "data"})
         
         assert result == {"vulns": []}
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
     @patch("code_scalpel.ast_tools.osv_client.time.sleep")
-    def test_retry_on_rate_limit(self, mock_sleep, mock_urlopen):
+    def test_retry_on_rate_limit(self, mock_sleep, osv_mock_urlopen, mock_osv_response):
         """Test retry on 429 rate limit."""
         # First call: rate limited, second call: success
         mock_rate_limit = urllib.error.HTTPError(
             url="", code=429, msg="Too Many Requests", hdrs={}, fp=None
         )
-        mock_success = MagicMock()
-        mock_success.read.return_value = b'{"vulns": []}'
-        mock_success.__enter__ = lambda s: s
-        mock_success.__exit__ = MagicMock(return_value=False)
+        mock_success = mock_osv_response({"vulns": []})
         
-        mock_urlopen.side_effect = [mock_rate_limit, mock_success]
+        osv_mock_urlopen.side_effect = [mock_rate_limit, mock_success]
         
         client = OSVClient()
         result = client._make_request(OSV_API_URL, {})
@@ -467,32 +438,27 @@ class TestMakeRequest:
         assert result == {"vulns": []}
         assert mock_sleep.called
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
     @patch("code_scalpel.ast_tools.osv_client.time.sleep")
-    def test_retry_on_server_error(self, mock_sleep, mock_urlopen):
+    def test_retry_on_server_error(self, mock_sleep, osv_mock_urlopen, mock_osv_response):
         """Test retry on 5xx server errors."""
         mock_error = urllib.error.HTTPError(
             url="", code=500, msg="Internal Server Error", hdrs={}, fp=None
         )
-        mock_success = MagicMock()
-        mock_success.read.return_value = b'{"vulns": []}'
-        mock_success.__enter__ = lambda s: s
-        mock_success.__exit__ = MagicMock(return_value=False)
+        mock_success = mock_osv_response({"vulns": []})
         
-        mock_urlopen.side_effect = [mock_error, mock_success]
+        osv_mock_urlopen.side_effect = [mock_error, mock_success]
         
         client = OSVClient()
         result = client._make_request(OSV_API_URL, {})
         
         assert result == {"vulns": []}
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_raise_on_client_error(self, mock_urlopen):
+    def test_raise_on_client_error(self, osv_mock_urlopen):
         """Test OSVError raised on 4xx errors (except 429)."""
         mock_error = urllib.error.HTTPError(
             url="", code=400, msg="Bad Request", hdrs={}, fp=None
         )
-        mock_urlopen.side_effect = mock_error
+        osv_mock_urlopen.side_effect = mock_error
         
         client = OSVClient()
         with pytest.raises(OSVError) as exc_info:
@@ -500,11 +466,10 @@ class TestMakeRequest:
         
         assert "400" in str(exc_info.value)
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
     @patch("code_scalpel.ast_tools.osv_client.time.sleep")
-    def test_max_retries_exceeded(self, mock_sleep, mock_urlopen):
+    def test_max_retries_exceeded(self, mock_sleep, osv_mock_urlopen, mock_osv_error):
         """Test OSVError raised after max retries."""
-        mock_urlopen.side_effect = urllib.error.URLError("Connection refused")
+        osv_mock_urlopen.side_effect = mock_osv_error("URLError")
         
         client = OSVClient()
         with pytest.raises(OSVError) as exc_info:
@@ -512,14 +477,13 @@ class TestMakeRequest:
         
         assert "retries" in str(exc_info.value).lower()
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_invalid_json_response(self, mock_urlopen):
+    def test_invalid_json_response(self, osv_mock_urlopen, mock_osv_response):
         """Test OSVError on invalid JSON response."""
         mock_response = MagicMock()
         mock_response.read.return_value = b"not valid json"
         mock_response.__enter__ = lambda s: s
         mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        osv_mock_urlopen.return_value = mock_response
         
         client = OSVClient()
         with pytest.raises(OSVError) as exc_info:
@@ -529,36 +493,34 @@ class TestMakeRequest:
 
 
 class TestClearCache:
-    """Tests for cache management."""
+    """Tests for cache management.
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_clear_cache(self, mock_urlopen):
+    [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures.
+    """
+    
+    def test_clear_cache(self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response):
         """Test clearing the cache."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({"vulns": []}).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
-        
-        client = OSVClient(cache_enabled=True)
+        mock_response = mock_osv_response({"vulns": []})
+        osv_mock_urlopen.return_value = mock_response
         
         # Populate cache
-        client.query_package("requests", "2.25.0")
-        assert len(client._cache) == 1
+        osv_client_with_cache.query_package("requests", "2.25.0")
+        assert len(osv_client_with_cache._cache) == 1
         
         # Clear cache
-        client.clear_cache()
-        assert client._cache == {}
+        osv_client_with_cache.clear_cache()
+        assert osv_client_with_cache._cache == {}
 
 
 class TestIntegrationScenarios:
-    """Integration-style tests for realistic scenarios."""
+    """Integration-style tests for realistic scenarios.
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_multiple_vulns_in_package(self, mock_urlopen):
+    [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures.
+    """
+    
+    def test_multiple_vulns_in_package(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test handling multiple vulnerabilities in one package."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "vulns": [
                 {
                     "id": "CVE-2023-001",
@@ -571,24 +533,19 @@ class TestIntegrationScenarios:
                     "database_specific": {"severity": "CRITICAL"},
                 },
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("vulnerable-pkg", "1.0.0")
+        vulns = osv_client_no_cache.query_package("vulnerable-pkg", "1.0.0")
         
         assert len(vulns) == 2
         severities = {v.severity for v in vulns}
         assert "HIGH" in severities
         assert "CRITICAL" in severities
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_references_limited_to_five(self, mock_urlopen):
+    def test_references_limited_to_five(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test that references are limited to 5."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "vulns": [
                 {
                     "id": "CVE-123",
@@ -599,34 +556,26 @@ class TestIntegrationScenarios:
                     ]
                 }
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("test", "1.0.0")
+        vulns = osv_client_no_cache.query_package("test", "1.0.0")
         
         assert len(vulns[0].references) == 5
     
-    @patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
-    def test_missing_fields_handled_gracefully(self, mock_urlopen):
+    def test_missing_fields_handled_gracefully(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test handling of vulnerabilities with missing fields."""
-        mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({
+        mock_response = mock_osv_response({
             "vulns": [
                 {
                     "id": "CVE-MINIMAL",
                     # No summary, severity, affected, aliases, or references
                 }
             ]
-        }).encode()
-        mock_response.__enter__ = lambda s: s
-        mock_response.__exit__ = MagicMock(return_value=False)
-        mock_urlopen.return_value = mock_response
+        })
+        osv_mock_urlopen.return_value = mock_response
         
-        client = OSVClient(cache_enabled=False)
-        vulns = client.query_package("test", "1.0.0")
+        vulns = osv_client_no_cache.query_package("test", "1.0.0")
         
         assert len(vulns) == 1
         assert vulns[0].id == "CVE-MINIMAL"

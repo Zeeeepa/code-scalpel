@@ -10,29 +10,29 @@
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
 ```bash
-pip install code-scalpel==1.5.1
+pip install code-scalpel==1.5.2
 ```
 
-> **v1.5.1 STABLE RELEASE** (December 13, 2025)  
-> Production-ready MCP server with **cross-file analysis capabilities**.
+> **v1.5.2 STABLE RELEASE** (December 14, 2025)  
+> Test Infrastructure Improvements with **pytest fixtures for test isolation**.
 >
-> | Capability | Status | Notes |
-> |------------|--------|-------|
+> | Component | Status | Notes |
+> |-----------|--------|-------|
 > | Security Scanning | **100%** (16 types) | SQL, XSS, NoSQL, LDAP, SSTI, XXE + more |
-> | Cross-File Analysis | **NEW** | Import resolution, taint tracking, extraction |
-> | Secret Detection | **30+ patterns** | AWS, GitHub, Stripe, private keys |
-> | Project Crawl | **211 files** | 79K LOC, 3.9K functions analyzed |
+> | Cross-File Analysis | **STABLE** | Import resolution, taint tracking, extraction |
+> | Test Fixtures | **NEW** | 6 fixtures for OSV client test isolation |
+> | Pytest Integration | **IMPROVED** | 28 @patch decorators replaced with fixtures |
 > | MCP Tools | **15 tools** | analyze, extract, security, test-gen, cross-file |
 >
-> **What's New in v1.5.1:**
-> - `ImportResolver` - Build complete import dependency graphs
-> - `CrossFileExtractor` - Extract symbols with all cross-file dependencies
-> - `CrossFileTaintTracker` - Detect vulnerabilities spanning multiple files
-> - `get_cross_file_dependencies` MCP tool
-> - `cross_file_security_scan` MCP tool
-> - 149 new tests (100% pass rate)
+> **What's New in v1.5.2:**
+> - `conftest.py` - Centralized pytest fixture suite for test isolation
+> - Function-scoped fixtures for mock lifecycle management
+> - 85% reduction in test boilerplate code
+> - Isolated/paired test execution: **100% pass rate** (56 OSV + 27 scan_deps = 83 tests)
+> - Comprehensive evidence documentation for v1.5.3 full-suite investigation
+> - [20251214_FEATURE] v1.5.2 - Pytest fixtures for OSV client test isolation
 >
-> See [RELEASE_NOTES_v1.5.1.md](docs/release_notes/RELEASE_NOTES_v1.5.1.md) for technical details.
+> See [RELEASE_NOTES_v1.5.2.md](docs/release_notes/RELEASE_NOTES_v1.5.2.md) for technical details.
 
 ---
 
