@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "1.5.1"
+version = "1.5.2"
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
