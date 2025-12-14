@@ -53,6 +53,37 @@ def visualize_ast(tree, output_file="ast_visualization", format="png", view=True
     raise ImportError("ASTVisualizer not available")
 
 
+# [20251213_FEATURE] v1.5.1 - Import resolution for cross-file analysis
+try:
+    from .import_resolver import (
+        ImportResolver,
+        ImportInfo,
+        ImportType,
+        SymbolDefinition,
+        CircularImport,
+        ImportGraphResult,
+    )
+except ImportError:
+    ImportResolver = None
+    ImportInfo = None
+    ImportType = None
+    SymbolDefinition = None
+    CircularImport = None
+    ImportGraphResult = None
+
+# [20251213_FEATURE] v1.5.1 - Cross-file extraction
+try:
+    from .cross_file_extractor import (
+        CrossFileExtractor,
+        ExtractedSymbol,
+        ExtractionResult,
+    )
+except ImportError:
+    CrossFileExtractor = None
+    ExtractedSymbol = None
+    ExtractionResult = None
+
+
 __all__ = [
     "ASTAnalyzer",
     "FunctionMetrics",
@@ -67,4 +98,15 @@ __all__ = [
     "build_ast",
     "build_ast_from_file",
     "visualize_ast",
+    # v1.5.1 - Import resolution
+    "ImportResolver",
+    "ImportInfo",
+    "ImportType",
+    "SymbolDefinition",
+    "CircularImport",
+    "ImportGraphResult",
+    # v1.5.1 - Cross-file extraction
+    "CrossFileExtractor",
+    "ExtractedSymbol",
+    "ExtractionResult",
 ]

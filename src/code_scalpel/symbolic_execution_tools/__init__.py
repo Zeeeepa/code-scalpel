@@ -93,6 +93,24 @@ from .security_analyzer import (
     find_path_traversals,
 )
 
+# [20251213_FEATURE] v1.5.1: Cross-File Taint Analysis
+try:
+    from .cross_file_taint import (
+        CrossFileTaintTracker,
+        CrossFileTaintResult,
+        CrossFileTaintFlow,
+        CrossFileVulnerability,
+        TaintedParameter,
+        CrossFileSink,
+    )
+except ImportError:
+    CrossFileTaintTracker = None
+    CrossFileTaintResult = None
+    CrossFileTaintFlow = None
+    CrossFileVulnerability = None
+    TaintedParameter = None
+    CrossFileSink = None
+
 # Emit info on import so users know about limitations
 warnings.warn(
     "symbolic_execution_tools v1.2.0 (Stable). "
@@ -126,4 +144,11 @@ __all__ = [
     "SANITIZER_REGISTRY",
     "register_sanitizer",
     "load_sanitizers_from_config",
+    # v1.5.1: Cross-File Taint Analysis
+    "CrossFileTaintTracker",
+    "CrossFileTaintResult",
+    "CrossFileTaintFlow",
+    "CrossFileVulnerability",
+    "TaintedParameter",
+    "CrossFileSink",
 ]

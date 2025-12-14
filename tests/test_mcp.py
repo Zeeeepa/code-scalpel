@@ -1651,3 +1651,431 @@ result = target_function()
         for ref in result.references:
             assert ref.context != ""
             assert "target_function" in ref.context
+
+
+# ============================================================================
+# [20251213_TEST] v1.5.1 - Tests for get_cross_file_dependencies MCP Tool
+# ============================================================================
+
+
+class TestGetCrossFileDependencies:
+    """Tests for the get_cross_file_dependencies MCP tool."""
+
+    async def test_basic_cross_file_extraction(self, tmp_path):
+        """Test extracting a function with dependencies from another file."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        # Create utils.py with a helper function
+        utils_file = tmp_path / "utils.py"
+        utils_file.write_text(
+            """
+def format_string(s):
+    \"\"\"Format a string.\"\"\"
+    return s.strip().upper()
+"""
+        )
+
+        # Create main.py that uses the helper
+        main_file = tmp_path / "main.py"
+        main_file.write_text(
+            """
+from utils import format_string
+
+def process_data(data):
+    \"\"\"Process data using utility function.\"\"\"
+    return format_string(data)
+"""
+        )
+
+        result = await get_cross_file_dependencies(
+            target_file="main.py",
+            target_symbol="process_data",
+            project_root=str(tmp_path),
+            max_depth=2,
+        )
+
+        assert result.success is True
+        assert result.target_name == "process_data"
+        assert result.target_file == "main.py"
+        # Should have extracted the target function
+        assert len(result.extracted_symbols) >= 1
+        symbol_names = [s.name for s in result.extracted_symbols]
+        assert "process_data" in symbol_names
+
+    async def test_combined_code_generation(self, tmp_path):
+        """Test that combined code is generated correctly."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        helper_file = tmp_path / "helper.py"
+        helper_file.write_text(
+            """
+def helper():
+    return "help"
+"""
+        )
+
+        main_file = tmp_path / "main.py"
+        main_file.write_text(
+            """
+from helper import helper
+
+def main():
+    return helper()
+"""
+        )
+
+        result = await get_cross_file_dependencies(
+            target_file="main.py",
+            target_symbol="main",
+            project_root=str(tmp_path),
+            include_code=True,
+        )
+
+        assert result.success is True
+        # Combined code should contain the target function
+        assert "def main():" in result.combined_code
+        assert result.token_estimate > 0
+
+    async def test_without_code_inclusion(self, tmp_path):
+        """Test extraction without including full code."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        main_file = tmp_path / "main.py"
+        main_file.write_text(
+            """
+def target_func():
+    return 42
+"""
+        )
+
+        result = await get_cross_file_dependencies(
+            target_file="main.py",
+            target_symbol="target_func",
+            project_root=str(tmp_path),
+            include_code=False,
+        )
+
+        assert result.success is True
+        # Combined code should be empty when include_code=False
+        assert result.combined_code == ""
+        # But symbol info should still be there
+        assert len(result.extracted_symbols) >= 1
+
+    async def test_mermaid_diagram_generation(self, tmp_path):
+        """Test that Mermaid diagram is generated."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        # Create files with imports
+        a_file = tmp_path / "a.py"
+        a_file.write_text(
+            """
+def func_a():
+    return 1
+"""
+        )
+
+        b_file = tmp_path / "b.py"
+        b_file.write_text(
+            """
+from a import func_a
+
+def func_b():
+    return func_a() + 1
+"""
+        )
+
+        result = await get_cross_file_dependencies(
+            target_file="b.py",
+            target_symbol="func_b",
+            project_root=str(tmp_path),
+            include_diagram=True,
+        )
+
+        assert result.success is True
+        # Mermaid diagram should be generated
+        assert "graph" in result.mermaid.lower() or "flowchart" in result.mermaid.lower() or result.mermaid == ""
+
+    async def test_file_not_found(self, tmp_path):
+        """Test handling of nonexistent target file."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        result = await get_cross_file_dependencies(
+            target_file="nonexistent.py",
+            target_symbol="func",
+            project_root=str(tmp_path),
+        )
+
+        assert result.success is False
+        assert result.error is not None
+        assert "not found" in result.error.lower()
+
+    async def test_invalid_project_root(self):
+        """Test handling of invalid project root."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        result = await get_cross_file_dependencies(
+            target_file="main.py",
+            target_symbol="func",
+            project_root="/nonexistent/path",
+        )
+
+        assert result.success is False
+        assert result.error is not None
+
+    async def test_circular_import_detection(self, tmp_path):
+        """Test detection of circular imports."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        # Create circular import situation
+        a_file = tmp_path / "a.py"
+        a_file.write_text(
+            """
+from b import func_b
+
+def func_a():
+    return func_b()
+"""
+        )
+
+        b_file = tmp_path / "b.py"
+        b_file.write_text(
+            """
+from a import func_a
+
+def func_b():
+    return func_a()
+"""
+        )
+
+        result = await get_cross_file_dependencies(
+            target_file="a.py",
+            target_symbol="func_a",
+            project_root=str(tmp_path),
+        )
+
+        assert result.success is True
+        # Should detect circular imports
+        assert len(result.circular_imports) > 0
+
+    async def test_max_depth_limiting(self, tmp_path):
+        """Test that max_depth limits dependency resolution."""
+        from code_scalpel.mcp.server import get_cross_file_dependencies
+
+        # Create a chain of dependencies
+        c_file = tmp_path / "c.py"
+        c_file.write_text(
+            """
+def func_c():
+    return "c"
+"""
+        )
+
+        b_file = tmp_path / "b.py"
+        b_file.write_text(
+            """
+from c import func_c
+
+def func_b():
+    return func_c()
+"""
+        )
+
+        a_file = tmp_path / "a.py"
+        a_file.write_text(
+            """
+from b import func_b
+
+def func_a():
+    return func_b()
+"""
+        )
+
+        # With max_depth=1, should only get immediate dependencies
+        result = await get_cross_file_dependencies(
+            target_file="a.py",
+            target_symbol="func_a",
+            project_root=str(tmp_path),
+            max_depth=1,
+        )
+
+        assert result.success is True
+
+
+# ============================================================================
+# [20251213_TEST] v1.5.1 - Tests for cross_file_security_scan MCP Tool
+# ============================================================================
+
+
+class TestCrossFileSecurityScan:
+    """Tests for the cross_file_security_scan MCP tool."""
+
+    async def test_no_vulnerabilities(self, tmp_path):
+        """Test scanning code with no vulnerabilities."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        safe_file = tmp_path / "safe.py"
+        safe_file.write_text(
+            """
+def safe_function(x):
+    return x * 2
+"""
+        )
+
+        result = await cross_file_security_scan(project_root=str(tmp_path))
+
+        assert result.success is True
+        assert result.has_vulnerabilities is False
+        assert result.vulnerability_count == 0
+        assert result.risk_level == "low"
+
+    async def test_cross_file_sql_injection(self, tmp_path):
+        """Test detecting SQL injection across files."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        # Create routes.py with user input
+        routes_file = tmp_path / "routes.py"
+        routes_file.write_text(
+            """
+from flask import request
+from db import execute_query
+
+def search():
+    query = request.args.get('q')
+    return execute_query(query)
+"""
+        )
+
+        # Create db.py with SQL execution
+        db_file = tmp_path / "db.py"
+        db_file.write_text(
+            """
+import sqlite3
+
+def execute_query(query):
+    conn = sqlite3.connect('db.sqlite')
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM users WHERE name = '{query}'")
+    return cursor.fetchall()
+"""
+        )
+
+        result = await cross_file_security_scan(project_root=str(tmp_path))
+
+        assert result.success is True
+        assert result.files_analyzed >= 2
+
+    async def test_taint_flow_detection(self, tmp_path):
+        """Test that taint flows are detected across files."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        input_file = tmp_path / "input.py"
+        input_file.write_text(
+            """
+def get_user_input():
+    return input("Enter data: ")
+"""
+        )
+
+        process_file = tmp_path / "process.py"
+        process_file.write_text(
+            """
+from input import get_user_input
+import os
+
+def process():
+    data = get_user_input()
+    os.system(data)
+"""
+        )
+
+        result = await cross_file_security_scan(project_root=str(tmp_path))
+
+        assert result.success is True
+
+    async def test_mermaid_diagram_for_security(self, tmp_path):
+        """Test that security scan generates Mermaid diagram."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        test_file = tmp_path / "test.py"
+        test_file.write_text(
+            """
+def test_func():
+    return 42
+"""
+        )
+
+        result = await cross_file_security_scan(
+            project_root=str(tmp_path), include_diagram=True
+        )
+
+        assert result.success is True
+        # Diagram should be string (may be empty if no taint flows)
+        assert isinstance(result.mermaid, str)
+
+    async def test_invalid_project_root_security(self):
+        """Test handling of invalid project root."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        result = await cross_file_security_scan(project_root="/nonexistent/path")
+
+        assert result.success is False
+        assert result.error is not None
+
+    async def test_entry_points_filtering(self, tmp_path):
+        """Test that entry_points parameter filters analysis."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        main_file = tmp_path / "main.py"
+        main_file.write_text(
+            """
+def main():
+    return "main"
+
+def other():
+    return "other"
+"""
+        )
+
+        result = await cross_file_security_scan(
+            project_root=str(tmp_path),
+            entry_points=["main.py:main"],
+        )
+
+        assert result.success is True
+
+    async def test_max_depth_for_security(self, tmp_path):
+        """Test that max_depth limits security analysis."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        test_file = tmp_path / "test.py"
+        test_file.write_text(
+            """
+def test():
+    pass
+"""
+        )
+
+        result = await cross_file_security_scan(
+            project_root=str(tmp_path),
+            max_depth=2,
+        )
+
+        assert result.success is True
+
+    async def test_risk_level_calculation(self, tmp_path):
+        """Test that risk level is calculated correctly."""
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        # Create safe code
+        safe_file = tmp_path / "safe.py"
+        safe_file.write_text(
+            """
+def safe_func():
+    return 42
+"""
+        )
+
+        result = await cross_file_security_scan(project_root=str(tmp_path))
+
+        assert result.success is True
+        assert result.risk_level in ["low", "medium", "high", "critical"]

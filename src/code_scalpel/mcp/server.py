@@ -2931,6 +2931,528 @@ async def get_project_map(
 
 
 # ============================================================================
+# [20251213_FEATURE] v1.5.1 - get_cross_file_dependencies MCP Tool
+# ============================================================================
+
+
+class ImportNodeModel(BaseModel):
+    """Information about an import in the import graph."""
+
+    module: str = Field(description="Module name (e.g., 'os', 'mypackage.utils')")
+    import_type: str = Field(description="Import type: 'direct', 'from', or 'star'")
+    names: list[str] = Field(default_factory=list, description="Imported names (for 'from' imports)")
+    alias: str | None = Field(default=None, description="Alias if import uses 'as'")
+    line: int = Field(default=0, description="Line number of import")
+
+
+class SymbolDefinitionModel(BaseModel):
+    """Information about a symbol defined in a file."""
+
+    name: str = Field(description="Symbol name")
+    file: str = Field(description="File where symbol is defined (relative path)")
+    line: int = Field(default=0, description="Line number of definition")
+    symbol_type: str = Field(description="Type: 'function', 'class', or 'variable'")
+    is_exported: bool = Field(default=False, description="Whether symbol is in __all__")
+
+
+class ExtractedSymbolModel(BaseModel):
+    """An extracted symbol with its code and dependencies."""
+
+    name: str = Field(description="Symbol name")
+    code: str = Field(description="Full source code of the symbol")
+    file: str = Field(description="Source file (relative path)")
+    line_start: int = Field(default=0, description="Starting line number")
+    line_end: int = Field(default=0, description="Ending line number")
+    dependencies: list[str] = Field(default_factory=list, description="Names of symbols this depends on")
+
+
+class CrossFileDependenciesResult(BaseModel):
+    """Result of cross-file dependency analysis."""
+
+    success: bool = Field(description="Whether analysis succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+
+    # Target symbol info
+    target_name: str = Field(default="", description="Name of the analyzed symbol")
+    target_file: str = Field(default="", description="File containing the target symbol")
+
+    # Dependency info
+    extracted_symbols: list[ExtractedSymbolModel] = Field(
+        default_factory=list, description="All symbols extracted (target + dependencies)"
+    )
+    total_dependencies: int = Field(default=0, description="Number of dependencies resolved")
+    unresolved_imports: list[str] = Field(
+        default_factory=list, description="External imports that could not be resolved"
+    )
+
+    # Import graph info
+    import_graph: dict[str, list[str]] = Field(
+        default_factory=dict, description="Import graph: file -> list of imported files"
+    )
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Detected circular import cycles"
+    )
+
+    # Combined code for AI consumption
+    combined_code: str = Field(
+        default="", description="All extracted code combined, ready for AI consumption"
+    )
+    token_estimate: int = Field(default=0, description="Estimated token count for combined code")
+
+    # Mermaid diagram
+    mermaid: str = Field(default="", description="Mermaid diagram of import relationships")
+
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _get_cross_file_dependencies_sync(
+    project_root: str | None,
+    target_file: str,
+    target_symbol: str,
+    max_depth: int,
+    include_code: bool,
+    include_diagram: bool,
+) -> CrossFileDependenciesResult:
+    """Synchronous implementation of get_cross_file_dependencies."""
+    from code_scalpel.ast_tools.import_resolver import ImportResolver
+    from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
+
+    root_path = Path(project_root) if project_root else PROJECT_ROOT
+
+    if not root_path.exists():
+        return CrossFileDependenciesResult(
+            success=False,
+            error=f"Project root not found: {root_path}",
+        )
+
+    # Resolve target file path
+    target_path = Path(target_file)
+    if not target_path.is_absolute():
+        target_path = root_path / target_file
+
+    if not target_path.exists():
+        return CrossFileDependenciesResult(
+            success=False,
+            error=f"Target file not found: {target_path}",
+        )
+
+    try:
+        # Build import graph
+        resolver = ImportResolver(root_path)
+        import_result = resolver.build()
+
+        # Extract cross-file dependencies
+        extractor = CrossFileExtractor(root_path)
+        extractor.build()
+
+        # Note: extract() signature is (file_path, symbol_name, depth, include_stdlib)
+        extraction_result = extractor.extract(
+            str(target_path),
+            target_symbol,
+            depth=max_depth,
+        )
+
+        # Check for extraction errors
+        if not extraction_result.success:
+            return CrossFileDependenciesResult(
+                success=False,
+                error=f"Extraction failed: {'; '.join(extraction_result.errors)}",
+            )
+
+        # Build the list of all symbols (target + dependencies)
+        all_symbols = []
+        if extraction_result.target:
+            all_symbols.append(extraction_result.target)
+        all_symbols.extend(extraction_result.dependencies)
+
+        # Convert extracted symbols to models
+        extracted_symbols = []
+        combined_parts = []
+
+        for sym in all_symbols:
+            rel_file = str(Path(sym.file).relative_to(root_path)) if Path(sym.file).is_absolute() else sym.file
+            extracted_symbols.append(
+                ExtractedSymbolModel(
+                    name=sym.name,
+                    code=sym.code if include_code else "",
+                    file=rel_file,
+                    line_start=sym.line,  # ExtractedSymbol uses 'line' not 'line_start'
+                    line_end=sym.end_line or 0,  # ExtractedSymbol uses 'end_line'
+                    dependencies=list(sym.dependencies),
+                )
+            )
+            if include_code:
+                combined_parts.append(f"# From {rel_file}")
+                combined_parts.append(sym.code)
+
+        combined_code = "\n\n".join(combined_parts) if include_code else ""
+
+        # Use the extractor's combined code if available (includes proper ordering)
+        if include_code and extraction_result.combined_code:
+            combined_code = extraction_result.combined_code
+
+        # Get unresolved imports from extraction result
+        unresolved_imports = extraction_result.module_imports  # These are imports that couldn't be resolved
+
+        # Build import graph dict (file -> list of imported files)
+        # Uses resolver.imports which is Dict[module_name, List[ImportInfo]]
+        import_graph = {}
+        for module_name, imports in resolver.imports.items():
+            # Get file path for this module
+            if module_name in resolver.module_to_file:
+                file_path = resolver.module_to_file[module_name]
+                rel_path = str(Path(file_path).relative_to(root_path)) if Path(file_path).is_absolute() else file_path
+            else:
+                rel_path = module_name.replace(".", "/") + ".py"  # Best guess
+            
+            imported_files = []
+            for imp in imports:
+                # Try to resolve module to file using module_to_file mapping
+                if imp.module in resolver.module_to_file:
+                    resolved_file = resolver.module_to_file[imp.module]
+                    resolved_rel = str(Path(resolved_file).relative_to(root_path)) if Path(resolved_file).is_absolute() else resolved_file
+                    if resolved_rel not in imported_files:
+                        imported_files.append(resolved_rel)
+            if imported_files:
+                import_graph[rel_path] = imported_files
+
+        # Detect circular imports using get_circular_imports()
+        circular_import_objs = resolver.get_circular_imports()
+        circular_import_lists = [ci.cycle for ci in circular_import_objs]  # CircularImport uses 'cycle'
+
+        # Generate Mermaid diagram
+        mermaid = ""
+        if include_diagram:
+            mermaid = resolver.generate_mermaid()
+
+        # Calculate token estimate (rough: 4 chars per token)
+        token_estimate = len(combined_code) // 4 if combined_code else 0
+
+        # Make target file relative
+        target_rel = str(target_path.relative_to(root_path)) if target_path.is_absolute() else target_file
+
+        return CrossFileDependenciesResult(
+            success=True,
+            target_name=target_symbol,
+            target_file=target_rel,
+            extracted_symbols=extracted_symbols,
+            total_dependencies=len(extracted_symbols) - 1,  # Exclude target itself
+            unresolved_imports=unresolved_imports,  # Use local variable set from module_imports
+            import_graph=import_graph,
+            circular_imports=circular_import_lists,
+            combined_code=combined_code,
+            token_estimate=token_estimate,
+            mermaid=mermaid,
+        )
+
+    except Exception as e:
+        return CrossFileDependenciesResult(
+            success=False,
+            error=f"Cross-file dependency analysis failed: {str(e)}",
+        )
+
+
+@mcp.tool()
+async def get_cross_file_dependencies(
+    target_file: str,
+    target_symbol: str,
+    project_root: str | None = None,
+    max_depth: int = 3,
+    include_code: bool = True,
+    include_diagram: bool = True,
+) -> CrossFileDependenciesResult:
+    """
+    Analyze and extract cross-file dependencies for a symbol.
+
+    [v1.5.1] Use this tool to understand all dependencies a function/class needs
+    from other files in the project. It recursively resolves imports and extracts
+    the complete dependency chain with source code.
+
+    Key capabilities:
+    - Resolve imports to their source files
+    - Extract code for all dependent symbols
+    - Detect circular import cycles
+    - Generate import relationship diagrams
+    - Provide combined code block ready for AI analysis
+
+    Why AI agents need this:
+    - Complete Context: Get all code needed to understand a function
+    - Safe Refactoring: Know what depends on what before making changes
+    - Debugging: Trace data flow across file boundaries
+    - Code Review: Understand the full impact of changes
+
+    Example:
+        # Analyze 'process_order' function in 'services/order.py'
+        result = get_cross_file_dependencies(
+            target_file="services/order.py",
+            target_symbol="process_order",
+            max_depth=2
+        )
+        # Returns code for process_order plus all functions it calls from other files
+
+    Args:
+        target_file: Path to file containing the target symbol (relative to project root)
+        target_symbol: Name of the function or class to analyze
+        project_root: Project root directory (default: server's project root)
+        max_depth: Maximum depth of dependency resolution (default: 3)
+        include_code: Include full source code in result (default: True)
+        include_diagram: Include Mermaid diagram of imports (default: True)
+
+    Returns:
+        CrossFileDependenciesResult with extracted symbols, dependency graph, and combined code
+    """
+    return await asyncio.to_thread(
+        _get_cross_file_dependencies_sync,
+        project_root,
+        target_file,
+        target_symbol,
+        max_depth,
+        include_code,
+        include_diagram,
+    )
+
+
+# ============================================================================
+# [20251213_FEATURE] v1.5.1 - cross_file_security_scan MCP Tool
+# ============================================================================
+
+
+class TaintFlowModel(BaseModel):
+    """Model for a taint flow across files."""
+
+    source_function: str = Field(description="Function where taint originates")
+    source_file: str = Field(description="File containing taint source")
+    source_line: int = Field(default=0, description="Line number of taint source")
+    sink_function: str = Field(description="Function where taint reaches sink")
+    sink_file: str = Field(description="File containing sink")
+    sink_line: int = Field(default=0, description="Line number of sink")
+    flow_path: list[str] = Field(default_factory=list, description="Path: file:function -> file:function")
+    taint_type: str = Field(description="Type of taint source (e.g., 'request_input')")
+
+
+class CrossFileVulnerabilityModel(BaseModel):
+    """Model for a cross-file vulnerability."""
+
+    type: str = Field(description="Vulnerability type (e.g., 'SQL Injection')")
+    cwe: str = Field(description="CWE identifier")
+    severity: str = Field(description="Severity: low, medium, high, critical")
+    source_file: str = Field(description="File where taint originates")
+    sink_file: str = Field(description="File where vulnerability manifests")
+    description: str = Field(description="Human-readable description")
+    flow: TaintFlowModel = Field(description="The taint flow that causes this vulnerability")
+
+
+class CrossFileSecurityResult(BaseModel):
+    """Result of cross-file security analysis."""
+
+    success: bool = Field(description="Whether analysis succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+
+    # Summary
+    files_analyzed: int = Field(default=0, description="Number of files analyzed")
+    has_vulnerabilities: bool = Field(default=False, description="Whether vulnerabilities were found")
+    vulnerability_count: int = Field(default=0, description="Total vulnerabilities found")
+    risk_level: str = Field(default="low", description="Overall risk level")
+
+    # Detailed findings
+    vulnerabilities: list[CrossFileVulnerabilityModel] = Field(
+        default_factory=list, description="Cross-file vulnerabilities found"
+    )
+    taint_flows: list[TaintFlowModel] = Field(
+        default_factory=list, description="All taint flows detected"
+    )
+
+    # Entry points and sinks
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Functions containing taint sources"
+    )
+    dangerous_sinks: list[str] = Field(
+        default_factory=list, description="Functions containing dangerous sinks"
+    )
+
+    # Visualization
+    mermaid: str = Field(default="", description="Mermaid diagram of taint flows")
+
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _cross_file_security_scan_sync(
+    project_root: str | None,
+    entry_points: list[str] | None,
+    max_depth: int,
+    include_diagram: bool,
+) -> CrossFileSecurityResult:
+    """Synchronous implementation of cross_file_security_scan."""
+    from code_scalpel.symbolic_execution_tools.cross_file_taint import (
+        CrossFileTaintTracker,
+    )
+
+    root_path = Path(project_root) if project_root else PROJECT_ROOT
+
+    if not root_path.exists():
+        return CrossFileSecurityResult(
+            success=False,
+            error=f"Project root not found: {root_path}",
+        )
+
+    try:
+        tracker = CrossFileTaintTracker(root_path)
+        result = tracker.analyze(entry_points=entry_points, max_depth=max_depth)
+
+        # Convert vulnerabilities to models
+        vulnerabilities = []
+        for vuln in result.vulnerabilities:
+            flow_model = TaintFlowModel(
+                source_function=vuln.flow.source_function,
+                source_file=str(Path(vuln.flow.source_file).relative_to(root_path))
+                if Path(vuln.flow.source_file).is_absolute()
+                else vuln.flow.source_file,
+                source_line=vuln.flow.source_line,
+                sink_function=vuln.flow.sink_function,
+                sink_file=str(Path(vuln.flow.sink_file).relative_to(root_path))
+                if Path(vuln.flow.sink_file).is_absolute()
+                else vuln.flow.sink_file,
+                sink_line=vuln.flow.sink_line,
+                flow_path=vuln.flow.flow_path,
+                taint_type=vuln.flow.taint_type,
+            )
+            vulnerabilities.append(
+                CrossFileVulnerabilityModel(
+                    type=vuln.vulnerability_type,
+                    cwe=vuln.cwe,
+                    severity=vuln.severity,
+                    source_file=flow_model.source_file,
+                    sink_file=flow_model.sink_file,
+                    description=vuln.description,
+                    flow=flow_model,
+                )
+            )
+
+        # Convert taint flows to models
+        taint_flows = []
+        for flow in result.taint_flows:
+            taint_flows.append(
+                TaintFlowModel(
+                    source_function=flow.source_function,
+                    source_file=str(Path(flow.source_file).relative_to(root_path))
+                    if Path(flow.source_file).is_absolute()
+                    else flow.source_file,
+                    source_line=flow.source_line,
+                    sink_function=flow.sink_function,
+                    sink_file=str(Path(flow.sink_file).relative_to(root_path))
+                    if Path(flow.sink_file).is_absolute()
+                    else flow.sink_file,
+                    sink_line=flow.sink_line,
+                    flow_path=flow.flow_path,
+                    taint_type=flow.taint_type,
+                )
+            )
+
+        # Determine risk level
+        vuln_count = len(vulnerabilities)
+        if vuln_count == 0:
+            risk_level = "low"
+        elif vuln_count <= 2:
+            risk_level = "medium"
+        elif vuln_count <= 5:
+            risk_level = "high"
+        else:
+            risk_level = "critical"
+
+        # Generate Mermaid diagram
+        mermaid = ""
+        if include_diagram:
+            mermaid = tracker.get_taint_graph_mermaid()
+
+        # Extract taint sources from tracker's internal state
+        taint_sources = []
+        dangerous_sinks = []
+        
+        # Get taint sources if available
+        if hasattr(tracker, 'module_taint_sources'):
+            for module, sources in tracker.module_taint_sources.items():
+                for src in sources:
+                    taint_sources.append(f"{module}:{src.function}")
+        
+        # Get sinks from taint flows
+        for flow in result.taint_flows:
+            sink_key = f"{flow.sink_function}"
+            if sink_key not in dangerous_sinks:
+                dangerous_sinks.append(sink_key)
+
+        return CrossFileSecurityResult(
+            success=True,
+            files_analyzed=result.modules_analyzed,  # Use modules_analyzed
+            has_vulnerabilities=vuln_count > 0,
+            vulnerability_count=vuln_count,
+            risk_level=risk_level,
+            vulnerabilities=vulnerabilities,
+            taint_flows=taint_flows,
+            taint_sources=taint_sources,
+            dangerous_sinks=dangerous_sinks,
+            mermaid=mermaid,
+        )
+
+    except Exception as e:
+        return CrossFileSecurityResult(
+            success=False,
+            error=f"Cross-file security analysis failed: {str(e)}",
+        )
+
+
+@mcp.tool()
+async def cross_file_security_scan(
+    project_root: str | None = None,
+    entry_points: list[str] | None = None,
+    max_depth: int = 5,
+    include_diagram: bool = True,
+) -> CrossFileSecurityResult:
+    """
+    Perform cross-file security analysis tracking taint flow across module boundaries.
+
+    [v1.5.1] Use this tool to detect vulnerabilities where tainted data crosses
+    file boundaries before reaching a dangerous sink. This catches security
+    issues that single-file analysis would miss.
+
+    Key capabilities:
+    - Track taint flow through function calls across files
+    - Detect vulnerabilities where source and sink are in different files
+    - Identify all taint entry points (web inputs, file reads, etc.)
+    - Map dangerous sinks (SQL execution, command execution, etc.)
+    - Generate taint flow diagrams
+
+    Detects cross-file patterns like:
+    - User input in routes.py -> SQL execution in db.py (SQL Injection)
+    - Request data in views.py -> os.system() in utils.py (Command Injection)
+    - Form input in handlers.py -> open() in storage.py (Path Traversal)
+
+    Why AI agents need this:
+    - Defense in depth: Find vulnerabilities that span multiple files
+    - Architecture review: Understand how untrusted data flows through the app
+    - Code audit: Generate security reports for compliance
+    - Risk assessment: Identify highest-risk code paths
+
+    Args:
+        project_root: Project root directory (default: server's project root)
+        entry_points: Optional list of entry point functions to start from
+                     (e.g., ["app.py:main", "routes.py:index"])
+                     If None, analyzes all detected entry points
+        max_depth: Maximum call depth to trace (default: 5)
+        include_diagram: Include Mermaid diagram of taint flows (default: True)
+
+    Returns:
+        CrossFileSecurityResult with vulnerabilities, taint flows, and risk assessment
+    """
+    return await asyncio.to_thread(
+        _cross_file_security_scan_sync,
+        project_root,
+        entry_points,
+        max_depth,
+        include_diagram,
+    )
+
+
+# ============================================================================
 # ENTRYPOINT
 # ============================================================================
 

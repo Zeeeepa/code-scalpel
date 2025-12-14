@@ -3,34 +3,36 @@
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-1669%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Tests](https://img.shields.io/badge/tests-2238%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
 
 **MCP Server Toolkit for AI Agents**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
 ```bash
-pip install code-scalpel
+pip install code-scalpel==1.5.1
 ```
 
-> **v1.3.0 STABLE RELEASE** (December 12, 2025)  
-> Production-ready MCP server for AI agents with **100% vulnerability detection rate**.
+> **v1.5.1 STABLE RELEASE** (December 13, 2025)  
+> Production-ready MCP server with **cross-file analysis capabilities**.
 >
 > | Capability | Status | Notes |
 > |------------|--------|-------|
-> | Security Scanning | **100%** (15+ types) | SQL, XSS, NoSQL, LDAP injection, secrets |
+> | Security Scanning | **100%** (16 types) | SQL, XSS, NoSQL, LDAP, SSTI, XXE + more |
+> | Cross-File Analysis | **NEW** | Import resolution, taint tracking, extraction |
 > | Secret Detection | **30+ patterns** | AWS, GitHub, Stripe, private keys |
-> | Test Generation | **Float support** | Int, str, bool, float properly inferred |
-> | Surgical Extraction | **95%+ coverage** | Extract by symbol name, not line guessing |
+> | Project Crawl | **211 files** | 79K LOC, 3.9K functions analyzed |
+> | MCP Tools | **15 tools** | analyze, extract, security, test-gen, cross-file |
 >
-> **What's New in v1.3.0:**
-> - NoSQL injection detection (MongoDB find, aggregate, update, delete)
-> - LDAP injection detection (python-ldap, ldap3)
-> - Hardcoded secret scanning (30+ patterns including AWS, GitHub, Stripe)
-> - Float type inference for symbolic execution
-> - Path resolution improvements for extract_code
+> **What's New in v1.5.1:**
+> - `ImportResolver` - Build complete import dependency graphs
+> - `CrossFileExtractor` - Extract symbols with all cross-file dependencies
+> - `CrossFileTaintTracker` - Detect vulnerabilities spanning multiple files
+> - `get_cross_file_dependencies` MCP tool
+> - `cross_file_security_scan` MCP tool
+> - 149 new tests (100% pass rate)
 >
-> See [RELEASE_NOTES_v1.3.0.md](docs/RELEASE_NOTES_v1.3.0.md) for technical details.
+> See [RELEASE_NOTES_v1.5.1.md](docs/release_notes/RELEASE_NOTES_v1.5.1.md) for technical details.
 
 ---
 
@@ -180,8 +182,9 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-### MCP Tools Available
+### MCP Tools Available (15 Total)
 
+**Core Tools (v1.0.0)**
 | Tool | Description |
 |------|-------------|
 | `analyze_code` | Parse structure, extract functions/classes/imports |
@@ -189,9 +192,24 @@ Add to `claude_desktop_config.json`:
 | `symbolic_execute` | Explore all execution paths with Z3 |
 | `generate_unit_tests` | Create pytest/unittest from symbolic paths |
 | `simulate_refactor` | Verify changes are safe before applying |
-| `extract_code` | **NEW** Surgically extract functions/classes with cross-file deps |
-| `update_symbol` | **NEW** Safely replace functions/classes in files |
-| `crawl_project` | **NEW** Discover project structure and file analysis |
+| `extract_code` | Surgically extract functions/classes with dependencies |
+| `update_symbol` | Safely replace functions/classes in files |
+| `crawl_project` | Discover project structure and file analysis |
+
+**Context Tools (v1.5.0)**
+| Tool | Description |
+|------|-------------|
+| `get_file_context` | Retrieve surrounding code for specific locations |
+| `get_symbol_references` | Find all usages of a symbol across project |
+| `get_call_graph` | Generate call graphs and trace execution flow |
+| `get_project_map` | Build complete project map and entry points |
+| `scan_dependencies` | Scan for vulnerable dependencies (OSV API) |
+
+**Cross-File Tools (v1.5.1) - NEW**
+| Tool | Description |
+|------|-------------|
+| `get_cross_file_dependencies` | Build import graphs and resolve symbols |
+| `cross_file_security_scan` | Detect vulnerabilities spanning modules |
 
 ## Features
 
@@ -269,26 +287,31 @@ See [Contributing Guide](docs/guides/CONTRIBUTING.md) for details.
 
 See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 
-| Version | Status | Highlights |
-|---------|--------|------------|
-| **v1.3.0** | Current | NoSQL/LDAP injection, hardcoded secrets, 95% coverage |
-| **v1.4.0** | Next | Context MCP tools (get_file_context, get_symbol_references) |
-| **v1.5.0** | Planned | Project intelligence (get_project_map, get_call_graph) |
-| **v2.0.0** | Planned | TypeScript/JavaScript full support |
-| **v2.1.0** | Planned | AI verification tools (verify_behavior, suggest_fix) |
+| Version | Status | Release Date | Highlights |
+|---------|--------|--------------|------------|
+| **v1.3.0** | ✅ Released | Dec 7, 2025 | NoSQL/LDAP injection, hardcoded secrets |
+| **v1.4.0** | ✅ Released | Dec 10, 2025 | Context tools (file_context, symbol_references, call_graph) |
+| **v1.5.0** | ✅ Released | Dec 12, 2025 | Project intelligence (project_map, call_graph, scan_dependencies) |
+| **v1.5.1** | ✅ Current | Dec 13, 2025 | **Cross-file analysis** (ImportResolver, CrossFileExtractor, CrossFileTaintTracker) |
+| **v1.5.2** | Planned | Dec 16, 2025 | TestFix - Fix OSV client test isolation |
+| **v1.5.3** | Planned | Dec 21, 2025 | PathSmart - Docker path resolution middleware |
+| **v1.5.4** | Planned | Dec 29, 2025 | DynamicImports - Track importlib.import_module() |
+| **v1.5.5** | Planned | Jan 8, 2026 | ScaleUp - Performance optimization for 1000+ file projects |
+| **v2.0.0** | Planned | Q1 2026 | Polyglot (TypeScript/JavaScript full support) |
 
 **Strategic Focus:** MCP server toolkit enabling AI agents to perform surgical code operations without hallucination.
 
 ## Stats
 
-- **1,669** tests passing
-- **100%** coverage: PDG, AST, Symbolic Execution, Security Analysis
+- **2,238** tests passing (149 new in v1.5.1)
+- **100%** coverage: PDG, AST, Symbolic Execution, Security Analysis, Cross-File Analysis
 - **95%+** coverage: Surgical Tools (SurgicalExtractor 95%, SurgicalPatcher 96%)
 - **3** languages supported (Python full, JS/Java structural)
-- **8** MCP tools for AI agents
-- **15+** vulnerability types detected (SQL, XSS, NoSQL, LDAP, command injection, path traversal, secrets)
+- **15** MCP tools for AI agents
+- **16** vulnerability types detected (SQL, XSS, NoSQL, LDAP, command injection, path traversal, secrets, XXE)
 - **30+** secret detection patterns (AWS, GitHub, Stripe, private keys)
 - **200x** cache speedup
+- **100%** external testing validation (16/16 vulnerabilities detected)
 
 ## License
 
