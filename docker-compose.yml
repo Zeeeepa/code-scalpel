@@ -1,47 +1,97 @@
-# Code Scalpel Server - Docker Compose
+# Code Scalpel Server - Docker Compose v1.5.3
 # Supports both MCP-compliant server and REST API server
+# [20251214_FEATURE] Updated for v1.5.3 with PathSmart path resolution
+
+version: '3.8'
 
 services:
   # Real MCP-compliant server (streamable-http transport)
   # Use this with MCP clients that support HTTP transport
+  # v1.5.3 includes PathResolver for Docker-aware path resolution
   mcp-server:
     build:
       context: .
       dockerfile: Dockerfile
+    image: code-scalpel:1.5.3
     container_name: code-scalpel-mcp
     restart: unless-stopped
     ports:
-      - "8593:8080"
+      - "8593:8593"
+    volumes:
+      # Mount your project directory to /workspace for analysis
+      # Change $(pwd) to your project directory path
+      - ${CODE_SCALPEL_WORKSPACE:-.}:/workspace
     networks:
-      - nginx-proxy-manager_default
+      - code-scalpel-network
+    environment:
+      # v1.5.3 PathResolver uses these environment variables
+      - WORKSPACE_ROOT=/workspace
+      - PROJECT_ROOT=/workspace
+      - PYTHONUNBUFFERED=1
+      # Optional: Force Docker detection if auto-detection fails
+      # - FORCE_DOCKER=1
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/sse"]
+      # Check MCP HTTP SSE endpoint (v1.5.3 health endpoint)
+      test: ["CMD", "curl", "-f", "http://localhost:8593/sse"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    # Optional: Set resource limits for large projects
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # REST API server (legacy, for non-MCP clients)
   # Provides simple HTTP endpoints for code analysis
+  # v1.5.3: Still available but MCP HTTP transport recommended
   rest-api:
     build:
       context: .
       dockerfile: Dockerfile.rest
+    image: code-scalpel-rest:1.5.3
     container_name: code-scalpel-rest
     restart: unless-stopped
     ports:
       - "8594:5000"
+    volumes:
+      # Mount your project directory for REST API analysis
+      - ${CODE_SCALPEL_WORKSPACE:-.}:/workspace
     networks:
-      - nginx-proxy-manager_default
+      - code-scalpel-network
     environment:
       - FLASK_ENV=production
+      - WORKSPACE_ROOT=/workspace
+      - PYTHONUNBUFFERED=1
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
-  nginx-proxy-manager_default:
-    external: true
+  # Local network for service-to-service communication
+  # Use this for Docker Compose deployments without external proxy
+  code-scalpel-network:
+    driver: bridge
+  
+  # External network for nginx-proxy-manager integration (optional)
+  # Uncomment below if using nginx-proxy-manager for reverse proxy
+  # nginx-proxy-manager_default:
+  #   external: true
