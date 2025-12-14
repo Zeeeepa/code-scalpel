@@ -2,6 +2,8 @@
 
 This guide helps diagnose and resolve connection issues when using Code Scalpel MCP server in Docker containers.
 
+**NEW:** For LAN/remote device connection issues, see [LAN_CONNECTION_TROUBLESHOOTING.md](LAN_CONNECTION_TROUBLESHOOTING.md)
+
 ## Quick Diagnostics
 
 ### Check if container is running
