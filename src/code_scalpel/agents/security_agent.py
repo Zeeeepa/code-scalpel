@@ -28,7 +28,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "command_injection": ["SHELL_COMMAND"],
             "xxe": ["XXE"],
             "ssti": ["SSTI"],
-            "hardcoded_secrets": ["HARDCODED_SECRET"],
+            "hardcoded_secrets": ["HARDCODED_SECRET"]
         }
         self.risk_levels = {"critical": 9, "high": 7, "medium": 5, "low": 3, "info": 1}
 
@@ -57,7 +57,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "file_info": file_info,
             "security_scan": security_scan,
             "symbol_analysis": symbol_analysis,
-            "target": target,
+            "target": target
         }
 
     async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
@@ -77,9 +77,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         risk_assessment = self._assess_overall_risk(categorized_vulns, attack_vectors)
 
         # Generate remediation strategies
-        remediation_plan = self._generate_remediation_plan(
-            categorized_vulns, attack_vectors
-        )
+        remediation_plan = self._generate_remediation_plan(categorized_vulns, attack_vectors)
 
         return {
             "success": True,
@@ -87,7 +85,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "attack_vectors": attack_vectors,
             "risk_assessment": risk_assessment,
             "remediation_plan": remediation_plan,
-            "total_vulnerabilities": len(vulnerabilities),
+            "total_vulnerabilities": len(vulnerabilities)
         }
 
     async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
@@ -110,21 +108,19 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         # Create detailed action plans
         detailed_actions = []
         for action in prioritized_actions:
-            detailed_actions.append(
-                {
-                    "action": action,
-                    "implementation_plan": self._create_implementation_plan(action),
-                    "verification_steps": self._create_verification_steps(action),
-                    "estimated_risk": self._estimate_remediation_risk(action),
-                }
-            )
+            detailed_actions.append({
+                "action": action,
+                "implementation_plan": self._create_implementation_plan(action),
+                "verification_steps": self._create_verification_steps(action),
+                "estimated_risk": self._estimate_remediation_risk(action)
+            })
 
         return {
             "success": True,
             "prioritized_actions": detailed_actions,
             "total_actions": len(prioritized_actions),
             "risk_level": risk_assessment.get("overall_level", "unknown"),
-            "estimated_effort": self._estimate_security_effort(detailed_actions),
+            "estimated_effort": self._estimate_security_effort(detailed_actions)
         }
 
     async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
@@ -141,45 +137,35 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             # Verify the fix won't break anything
             verification = await self._verify_security_fix(action, implementation)
             if not verification.get("safe", False):
-                results.append(
-                    {
-                        "action": action,
-                        "result": {
-                            "success": False,
-                            "error": "Fix verification failed",
-                        },
-                        "verification": verification,
-                    }
-                )
+                results.append({
+                    "action": action,
+                    "result": {"success": False, "error": "Fix verification failed"},
+                    "verification": verification
+                })
                 continue
 
             # Execute the fix
             result = await self._execute_security_fix(action, implementation)
-            results.append(
-                {
-                    "action": action,
-                    "result": result,
-                    "verification": verification,
-                    "success": result.get("success", False),
-                }
-            )
+            results.append({
+                "action": action,
+                "result": result,
+                "verification": verification,
+                "success": result.get("success", False)
+            })
 
         success_count = sum(1 for r in results if r["success"])
         total_count = len(results)
 
         return {
-            "success": success_count > 0
-            or total_count == 0,  # Success if actions succeeded or no actions needed
+            "success": success_count > 0 or total_count == 0,  # Success if actions succeeded or no actions needed
             "results": results,
             "success_rate": success_count / total_count if total_count > 0 else 1.0,
-            "summary": f"Successfully remediated {success_count}/{total_count} security issues",
+            "summary": f"Successfully remediated {success_count}/{total_count} security issues"
         }
 
     # Security Analysis Methods
 
-    def _categorize_vulnerabilities(
-        self, vulnerabilities: List[Dict[str, Any]]
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    def _categorize_vulnerabilities(self, vulnerabilities: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """Categorize vulnerabilities by type and severity."""
         categorized = {}
         for vuln in vulnerabilities:
@@ -191,9 +177,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
 
         return categorized
 
-    def _analyze_attack_vectors(
-        self, vulnerabilities: List[Dict[str, Any]], symbol_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_attack_vectors(self, vulnerabilities: List[Dict[str, Any]], symbol_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze potential attack vectors."""
         vectors = []
 
@@ -205,27 +189,17 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             refs = symbol_analysis.get(function_name, {})
             usage_count = refs.get("total_references", 0)
 
-            vectors.append(
-                {
-                    "vulnerability": vuln,
-                    "function": function_name,
-                    "usage_count": usage_count,
-                    "exposure_level": "high"
-                    if usage_count > 10
-                    else "medium"
-                    if usage_count > 3
-                    else "low",
-                    "attack_surface": self._calculate_attack_surface(vuln, usage_count),
-                }
-            )
+            vectors.append({
+                "vulnerability": vuln,
+                "function": function_name,
+                "usage_count": usage_count,
+                "exposure_level": "high" if usage_count > 10 else "medium" if usage_count > 3 else "low",
+                "attack_surface": self._calculate_attack_surface(vuln, usage_count)
+            })
 
         return vectors
 
-    def _assess_overall_risk(
-        self,
-        categorized_vulns: Dict[str, List[Dict[str, Any]]],
-        attack_vectors: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+    def _assess_overall_risk(self, categorized_vulns: Dict[str, List[Dict[str, Any]]], attack_vectors: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Assess overall security risk."""
         total_vulns = sum(len(vulns) for vulns in categorized_vulns.values())
         high_risk_vulns = 0
@@ -256,14 +230,10 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "risk_score": risk_score,
             "critical_count": critical_vulns,
             "high_count": high_risk_vulns,
-            "total_count": total_vulns,
+            "total_count": total_vulns
         }
 
-    def _generate_remediation_plan(
-        self,
-        categorized_vulns: Dict[str, List[Dict[str, Any]]],
-        attack_vectors: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+    def _generate_remediation_plan(self, categorized_vulns: Dict[str, List[Dict[str, Any]]], attack_vectors: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate a comprehensive remediation plan."""
         plan = {}
 
@@ -272,7 +242,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
                 plan[vuln_type] = {
                     "priority": self._determine_priority(vulns),
                     "actions": self._create_remediation_actions(vuln_type, vulns),
-                    "estimated_effort": self._estimate_vuln_effort(vulns),
+                    "estimated_effort": self._estimate_vuln_effort(vulns)
                 }
 
         return plan
@@ -289,44 +259,34 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         else:
             return "low"
 
-    def _create_remediation_actions(
-        self, vuln_type: str, vulns: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _create_remediation_actions(self, vuln_type: str, vulns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Create specific remediation actions."""
         actions = []
 
         if vuln_type == "sql_injection":
-            actions.append(
-                {
-                    "type": "input_validation",
-                    "description": "Add parameterized queries or input validation",
-                    "pattern": "Use prepared statements or ORM methods",
-                }
-            )
+            actions.append({
+                "type": "input_validation",
+                "description": "Add parameterized queries or input validation",
+                "pattern": "Use prepared statements or ORM methods"
+            })
         elif vuln_type == "command_injection":
-            actions.append(
-                {
-                    "type": "sanitize_input",
-                    "description": "Sanitize shell command inputs",
-                    "pattern": "Use shlex.quote() or avoid shell=True",
-                }
-            )
+            actions.append({
+                "type": "sanitize_input",
+                "description": "Sanitize shell command inputs",
+                "pattern": "Use shlex.quote() or avoid shell=True"
+            })
         elif vuln_type == "xxe":
-            actions.append(
-                {
-                    "type": "disable_external_entities",
-                    "description": "Disable XML external entity processing",
-                    "pattern": "Use defusedxml or disable entity processing",
-                }
-            )
+            actions.append({
+                "type": "disable_external_entities",
+                "description": "Disable XML external entity processing",
+                "pattern": "Use defusedxml or disable entity processing"
+            })
         elif vuln_type == "ssti":
-            actions.append(
-                {
-                    "type": "sanitize_templates",
-                    "description": "Prevent user-controlled template content",
-                    "pattern": "Use file-based templates only",
-                }
-            )
+            actions.append({
+                "type": "sanitize_templates",
+                "description": "Prevent user-controlled template content",
+                "pattern": "Use file-based templates only"
+            })
 
         return actions
 
@@ -360,10 +320,10 @@ class SecurityAgent(BaseCodeAnalysisAgent):
                     "Identify vulnerable SQL queries",
                     "Replace with parameterized queries",
                     "Add input validation",
-                    "Test for SQL injection prevention",
+                    "Test for SQL injection prevention"
                 ],
                 "tools_needed": ["sqlalchemy", "prepared statements"],
-                "estimated_time": "2-4 hours",
+                "estimated_time": "2-4 hours"
             }
         elif action_type == "sanitize_input":
             return {
@@ -371,16 +331,16 @@ class SecurityAgent(BaseCodeAnalysisAgent):
                     "Identify shell command executions",
                     "Replace with safe alternatives",
                     "Add input sanitization",
-                    "Test command injection prevention",
+                    "Test command injection prevention"
                 ],
                 "tools_needed": ["shlex", "subprocess"],
-                "estimated_time": "1-3 hours",
+                "estimated_time": "1-3 hours"
             }
 
         return {
             "steps": ["Analyze vulnerability", "Implement fix", "Test fix"],
             "tools_needed": [],
-            "estimated_time": "1-2 hours",
+            "estimated_time": "1-2 hours"
         }
 
     def _create_verification_steps(self, action: Dict[str, Any]) -> List[str]:
@@ -392,20 +352,20 @@ class SecurityAgent(BaseCodeAnalysisAgent):
                 "Test with malicious SQL payloads",
                 "Verify parameterized queries work",
                 "Check for performance impact",
-                "Run existing test suite",
+                "Run existing test suite"
             ]
         elif action_type == "sanitize_input":
             return [
                 "Test with command injection payloads",
                 "Verify shell escaping works",
                 "Check for functionality regression",
-                "Run security test suite",
+                "Run security test suite"
             ]
 
         return [
             "Test fix with attack payloads",
             "Verify no regression",
-            "Run relevant test cases",
+            "Run relevant test cases"
         ]
 
     def _estimate_remediation_risk(self, action: Dict[str, Any]) -> str:
@@ -431,9 +391,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         else:
             return "high"
 
-    async def _verify_security_fix(
-        self, action: Dict[str, Any], implementation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _verify_security_fix(self, action: Dict[str, Any], implementation: Dict[str, Any]) -> Dict[str, Any]:
         """Verify that a security fix is safe to implement."""
         # This would use simulate_refactor to test the change
         # For demo purposes, assume it's safe
@@ -441,12 +399,10 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "safe": True,
             "confidence": 0.85,
             "potential_issues": [],
-            "recommendations": ["Test thoroughly after implementation"],
+            "recommendations": ["Test thoroughly after implementation"]
         }
 
-    async def _execute_security_fix(
-        self, action: Dict[str, Any], implementation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _execute_security_fix(self, action: Dict[str, Any], implementation: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a security fix."""
         # This would use update_symbol to apply the fix
         # For demo purposes, return success
@@ -454,5 +410,5 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         return {
             "success": True,
             "message": f"Security fix for {action.get('type')} implemented",
-            "changes_made": ["Updated vulnerable code", "Added validation"],
+            "changes_made": ["Updated vulnerable code", "Added validation"]
         }

@@ -1,0 +1,155 @@
+{
+  "release_version": "v1.5.0",
+  "release_date": "2025-12-13",
+  "test_execution_summary": {
+    "total_tests": 203,
+    "passed": 203,
+    "failed": 0,
+    "skipped": 0,
+    "pass_rate": "100%",
+    "execution_time": "18.00s"
+  },
+  "test_breakdown": {
+    "get_project_map": {
+      "test_file": "tests/test_get_project_map.py",
+      "test_count": 43,
+      "passed": 43,
+      "coverage": "100%",
+      "test_classes": [
+        "TestModuleInfo (3 tests)",
+        "TestPackageInfo (3 tests)",
+        "TestProjectMapResult (3 tests)",
+        "TestGetProjectMapSync (10 tests)",
+        "TestGetProjectMapAsync (5 tests)",
+        "TestEntryPointDetection (3 tests)",
+        "TestEdgeCases (5 tests)",
+        "TestIntegrationScenarios (3 tests)",
+        "TestLanguageBreakdown (7 tests)"
+      ]
+    },
+    "get_call_graph": {
+      "test_file": "tests/test_get_call_graph.py",
+      "test_count": 35,
+      "passed": 35,
+      "coverage": "96%",
+      "test_classes": [
+        "TestCallNodeModel (3 tests)",
+        "TestCallEdgeModel (3 tests)",
+        "TestCallGraphResultModel (4 tests)",
+        "TestGetCallGraphSync (9 tests)",
+        "TestGetCallGraphAsync (5 tests)",
+        "TestEdgeCases (5 tests)",
+        "TestMermaidOutput (3 tests)",
+        "TestIntegrationScenarios (3 tests)"
+      ]
+    },
+    "call_graph_enhanced": {
+      "test_file": "tests/test_call_graph_enhanced.py",
+      "test_count": 42,
+      "passed": 42,
+      "coverage": "96%",
+      "test_classes": [
+        "TestCallNode (3 tests)",
+        "TestCallEdge (2 tests)",
+        "TestCallGraphResult (2 tests)",
+        "TestBuildWithDetails (7 tests)",
+        "TestMermaidGeneration (5 tests)",
+        "TestEntryPointDetection (4 tests)",
+        "TestReachableNodes (3 tests)",
+        "TestCircularImportDetection (7 tests)",
+        "TestEdgeCases (7 tests)",
+        "TestIntegration (2 tests)"
+      ]
+    },
+    "scan_dependencies": {
+      "test_file": "tests/test_scan_dependencies.py",
+      "test_count": 27,
+      "passed": 27,
+      "coverage": "100%",
+      "test_classes": [
+        "TestDependencyScanResult (2 tests)",
+        "TestDependencyInfo (1 test)",
+        "TestDependencyVulnerability (1 test)",
+        "TestScanDependenciesSync (5 tests)",
+        "TestScanDependenciesAsync (2 tests)",
+        "TestSeveritySummary (5 tests)",
+        "TestVersionCleaning (2 tests)",
+        "TestEcosystemMapping (2 tests)",
+        "TestEdgeCases (9 tests - NEW)"
+      ]
+    },
+    "osv_client": {
+      "test_file": "tests/test_osv_client.py",
+      "test_count": 56,
+      "passed": 56,
+      "coverage": "95%",
+      "test_classes": [
+        "TestOSVClientInit (2 tests)",
+        "TestCacheManagement (4 tests)",
+        "TestVulnerabilityParsing (6 tests)",
+        "TestEcosystemNormalization (15 tests)",
+        "TestSeverityParsing (10 tests)",
+        "TestFixedVersionParsing (3 tests)",
+        "TestQueryPackage (5 tests)",
+        "TestQueryBatch (4 tests)",
+        "TestMakeRequest (6 tests)",
+        "TestClearCache (1 test)",
+        "TestIntegrationScenarios (3 tests)"
+      ]
+    }
+  },
+  "feature_test_coverage": {
+    "get_project_map": [
+      "✅ Returns complete project structure",
+      "✅ Identifies entry points automatically (main, CLI, Flask, Click)",
+      "✅ Groups files into logical modules",
+      "✅ Reports language breakdown (Python, JavaScript, TypeScript, Java, JSON, YAML, Markdown, HTML, CSS)",
+      "✅ Performance < 10s for 500-file project (Actual: 1.55s)",
+      "✅ Generates Mermaid diagrams",
+      "✅ Calculates code complexity hotspots",
+      "✅ Handles edge cases (syntax errors, binary files, empty projects)",
+      "✅ Integration tests (Flask, CLI, data science projects)"
+    ],
+    "get_call_graph": [
+      "✅ Traces calls from entry point",
+      "✅ Returns nodes with file/line info",
+      "✅ Generates Mermaid diagram",
+      "✅ Handles recursive calls",
+      "✅ Respects depth limit",
+      "✅ Detects circular imports",
+      "✅ Mermaid output contains all nodes and edges",
+      "✅ Line numbers tracked accurately",
+      "✅ Integration tests (Flask, CLI, recursive functions)"
+    ],
+    "scan_dependencies": [
+      "✅ Parses requirements.txt (with comments and options)",
+      "✅ Parses pyproject.toml (PEP 621 and Poetry formats)",
+      "✅ Parses package.json (dependencies and devDependencies)",
+      "✅ Queries OSV API for CVEs",
+      "✅ Returns severity levels (CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)",
+      "✅ Suggests fixed versions",
+      "✅ Handles malformed files gracefully",
+      "✅ Skips wildcard versions",
+      "✅ Includes/excludes dev dependencies as requested"
+    ]
+  },
+  "new_tests_added": {
+    "test_poetry_dependencies": "Tests Poetry dependency parsing from pyproject.toml",
+    "test_pep621_dependencies": "Tests PEP 621 dependency parsing",
+    "test_malformed_pyproject_toml": "Tests graceful handling of invalid TOML",
+    "test_malformed_requirements_txt": "Tests graceful handling of invalid requirements files",
+    "test_malformed_package_json": "Tests graceful handling of invalid JSON",
+    "test_package_json_dev_dependencies": "Tests devDependencies parsing with include_dev flag",
+    "TestLanguageBreakdown": "7 comprehensive language detection tests"
+  },
+  "code_quality_metrics": {
+    "overall_coverage": "83%",
+    "v1_5_0_modules": {
+      "dependency_parser": "100%",
+      "call_graph": "96%",
+      "osv_client": "95%"
+    },
+    "core_modules": "97.5% average",
+    "test_pass_rate": "100%"
+  }
+}

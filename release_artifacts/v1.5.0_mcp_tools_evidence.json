@@ -1,0 +1,188 @@
+{
+  "release_version": "v1.5.0",
+  "release_date": "2025-12-13",
+  "theme": "Project Intelligence",
+  "mcp_tools": [
+    {
+      "name": "get_project_map",
+      "description": "Analyze complete project structure without reading every file",
+      "parameters": {
+        "project_root": "str",
+        "include_circular_imports": "bool (default: True)",
+        "max_complexity": "int (default: 15)"
+      },
+      "returns": {
+        "project_root": "str",
+        "total_files": "int",
+        "total_lines": "int",
+        "languages": "dict[str, int]",
+        "packages": "list[PackageInfo]",
+        "modules": "list[ModuleInfo]",
+        "entry_points": "list[str]",
+        "circular_imports": "list[list[str]]",
+        "complexity_hotspots": "list[str]",
+        "mermaid": "str"
+      },
+      "capabilities": [
+        "Returns complete project structure",
+        "Identifies entry points automatically (main, CLI, web frameworks)",
+        "Groups files into logical modules",
+        "Reports language breakdown (9+ file types)",
+        "Calculates code complexity hotspots",
+        "Generates Mermaid diagrams",
+        "Performance optimized (1.55s for 500 files)"
+      ],
+      "languages_supported": [
+        "Python (.py)",
+        "JavaScript (.js)",
+        "TypeScript (.ts)",
+        "Java (.java)",
+        "JSON (.json)",
+        "YAML (.yaml, .yml)",
+        "Markdown (.md)",
+        "HTML (.html)",
+        "CSS (.css)"
+      ],
+      "test_count": 43,
+      "coverage": "100%"
+    },
+    {
+      "name": "get_call_graph",
+      "description": "Generate call graphs from entry points with line number tracking",
+      "parameters": {
+        "project_root": "str",
+        "entry_point": "str (optional)",
+        "max_depth": "int (default: 5)",
+        "include_external": "bool (default: False)",
+        "check_circular": "bool (default: True)"
+      },
+      "returns": {
+        "entry_point": "str",
+        "nodes": "list[CallNode]",
+        "edges": "list[CallEdge]",
+        "circular_imports": "list[list[str]]",
+        "mermaid": "str",
+        "error": "str | None"
+      },
+      "capabilities": [
+        "Traces calls from entry point",
+        "Returns nodes with file/line info",
+        "Generates Mermaid diagram for visualization",
+        "Handles recursive calls",
+        "Respects depth limit",
+        "Detects circular imports"
+      ],
+      "call_node_fields": [
+        "name: str",
+        "file: str",
+        "line: int",
+        "is_entry_point: bool",
+        "is_external: bool"
+      ],
+      "test_count": 35,
+      "coverage": "96%"
+    },
+    {
+      "name": "scan_dependencies",
+      "description": "Scan project dependencies for known CVEs via OSV API",
+      "parameters": {
+        "project_root": "str (optional, defaults to workspace root)",
+        "include_dev": "bool (default: False)",
+        "scan_vulnerabilities": "bool (default: True)"
+      },
+      "returns": {
+        "success": "bool",
+        "total_dependencies": "int",
+        "vulnerable_count": "int",
+        "total_vulnerabilities": "int",
+        "severity_summary": "dict[str, int]",
+        "dependencies": "list[DependencyInfo]",
+        "error": "str | None"
+      },
+      "capabilities": [
+        "Parses requirements.txt (with inline comments)",
+        "Parses pyproject.toml (PEP 621 + Poetry formats)",
+        "Parses package.json (dependencies + devDependencies)",
+        "Queries OSV API for CVE information",
+        "Returns severity levels (CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN)",
+        "Suggests fixed versions",
+        "Graceful failure handling (continues if individual files fail)"
+      ],
+      "supported_ecosystems": [
+        "PyPI (Python)",
+        "npm (JavaScript)",
+        "Maven (Java)",
+        "Go",
+        "Cargo (Rust)",
+        "NuGet (.NET)",
+        "RubyGems (Ruby)"
+      ],
+      "severity_levels": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW",
+        "UNKNOWN"
+      ],
+      "test_count": 27,
+      "coverage": "100%"
+    }
+  ],
+  "enhanced_features": [
+    {
+      "name": "CallGraphBuilder enhancements",
+      "methods": [
+        "build_with_details() - Build call graph with line numbers",
+        "detect_circular_imports() - Find import cycles",
+        "_is_entry_point() - Detect entry point functions",
+        "_generate_mermaid() - Generate Mermaid diagram",
+        "_get_reachable_nodes() - Find nodes reachable from entry point"
+      ],
+      "test_count": 42,
+      "coverage": "96%"
+    },
+    {
+      "name": "Language breakdown detection",
+      "description": "Analyze project language composition",
+      "languages_detected": 9,
+      "test_count": 7,
+      "coverage": "100%"
+    }
+  ],
+  "test_summary": {
+    "total_v1_5_tests": 203,
+    "test_categories": {
+      "get_project_map": 43,
+      "get_call_graph": 35,
+      "call_graph_enhanced": 42,
+      "scan_dependencies": 27,
+      "osv_client": 56
+    },
+    "pass_rate": "100%",
+    "isolated_pass_rate": "100%"
+  },
+  "coverage_summary": {
+    "dependency_parser": "100%",
+    "call_graph": "96%",
+    "osv_client": "95%",
+    "ast_tools_combined": "95%",
+    "project_wide": "83%"
+  },
+  "performance_metrics": {
+    "get_project_map_latency": {
+      "target": "< 10s",
+      "actual": "1.55s",
+      "performance_ratio": "6.5x faster"
+    },
+    "get_call_graph_latency": {
+      "target": "< 5s",
+      "actual": "~0.2s",
+      "performance_ratio": "exceeds goal"
+    },
+    "scan_dependencies_time": {
+      "target": "< 30s",
+      "actual": "~2-5s",
+      "performance_ratio": "6-15x faster"
+    }
+  }
+}

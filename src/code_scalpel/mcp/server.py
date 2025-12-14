@@ -2328,6 +2328,609 @@ async def get_symbol_references(
 
 
 # ============================================================================
+# v1.5.0 MCP TOOLS - Project Intelligence
+# ============================================================================
+
+
+class DependencyVulnerability(BaseModel):
+    """A vulnerability found in a dependency."""
+
+    id: str = Field(description="CVE or GHSA identifier")
+    summary: str = Field(description="Brief description of the vulnerability")
+    severity: str = Field(description="Severity level: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    package: str = Field(description="Affected package name")
+    vulnerable_version: str = Field(description="The vulnerable version installed")
+    fixed_version: str | None = Field(default=None, description="Version where vulnerability is fixed")
+    aliases: list[str] = Field(default_factory=list, description="Alternative identifiers (e.g., GHSA)")
+    references: list[str] = Field(default_factory=list, description="URLs with more information")
+
+
+class DependencyInfo(BaseModel):
+    """Information about a single dependency."""
+
+    name: str = Field(description="Package name")
+    version: str = Field(description="Installed/required version")
+    ecosystem: str = Field(description="Package ecosystem (PyPI, npm, etc.)")
+    vulnerabilities: list[DependencyVulnerability] = Field(
+        default_factory=list, description="Known vulnerabilities"
+    )
+
+
+class DependencyScanResult(BaseModel):
+    """Result of dependency vulnerability scan."""
+
+    success: bool = Field(description="Whether scan succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    total_dependencies: int = Field(description="Total number of dependencies scanned")
+    vulnerable_count: int = Field(description="Number of dependencies with vulnerabilities")
+    total_vulnerabilities: int = Field(description="Total number of vulnerabilities found")
+    severity_summary: dict[str, int] = Field(
+        default_factory=dict, description="Count by severity level"
+    )
+    dependencies: list[DependencyInfo] = Field(
+        default_factory=list, description="All scanned dependencies"
+    )
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _scan_dependencies_sync(
+    project_root: str | None = None,
+    include_dev: bool = False,
+    scan_vulnerabilities: bool = True,
+) -> DependencyScanResult:
+    """
+    Synchronous implementation of scan_dependencies.
+    
+    [20251213_FEATURE] v1.5.0 - Scan project dependencies for vulnerabilities.
+    """
+    from code_scalpel.ast_tools.dependency_parser import DependencyParser
+    from code_scalpel.ast_tools.osv_client import OSVClient, OSVError
+    
+    try:
+        root = Path(project_root) if project_root else PROJECT_ROOT
+        
+        if not root.exists():
+            return DependencyScanResult(
+                success=False,
+                total_dependencies=0,
+                vulnerable_count=0,
+                total_vulnerabilities=0,
+                error=f"Project root not found: {root}",
+            )
+        
+        # Parse dependencies from project files
+        parser = DependencyParser(str(root))
+        raw_deps = parser.get_dependencies()
+        
+        dependencies: list[DependencyInfo] = []
+        severity_summary: dict[str, int] = {
+            "CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "UNKNOWN": 0
+        }
+        total_vulns = 0
+        vulnerable_count = 0
+        
+        # Process each ecosystem
+        for ecosystem, pkg_list in raw_deps.items():
+            # Map ecosystem to OSV format
+            osv_ecosystem = "PyPI" if ecosystem == "python" else "npm" if ecosystem == "javascript" else ecosystem
+            
+            for pkg in pkg_list:
+                name = pkg.get("name", "")
+                version = pkg.get("version", "*")
+                is_dev = pkg.get("type") == "dev"
+                
+                if not name:
+                    continue
+                    
+                # Skip dev dependencies if not requested
+                if is_dev and not include_dev:
+                    continue
+                
+                dep_info = DependencyInfo(
+                    name=name,
+                    version=version,
+                    ecosystem=osv_ecosystem,
+                    vulnerabilities=[],
+                )
+                
+                # Query OSV for vulnerabilities if enabled and version is specific
+                if scan_vulnerabilities and version not in ("*", "", "latest"):
+                    # Clean version string for OSV query
+                    clean_version = version.lstrip(">=<~^")
+                    if clean_version:
+                        try:
+                            client = OSVClient(timeout=5)
+                            vulns = client.query_package(name, clean_version, osv_ecosystem)
+                            
+                            for v in vulns:
+                                dep_vuln = DependencyVulnerability(
+                                    id=v.id,
+                                    summary=v.summary,
+                                    severity=v.severity,
+                                    package=v.package,
+                                    vulnerable_version=v.vulnerable_version,
+                                    fixed_version=v.fixed_version,
+                                    aliases=v.aliases,
+                                    references=v.references,
+                                )
+                                dep_info.vulnerabilities.append(dep_vuln)
+                                severity_summary[v.severity] = severity_summary.get(v.severity, 0) + 1
+                                total_vulns += 1
+                        except OSVError:
+                            # Continue scanning other dependencies even if one fails
+                            pass
+                
+                if dep_info.vulnerabilities:
+                    vulnerable_count += 1
+                
+                dependencies.append(dep_info)
+        
+        return DependencyScanResult(
+            success=True,
+            total_dependencies=len(dependencies),
+            vulnerable_count=vulnerable_count,
+            total_vulnerabilities=total_vulns,
+            severity_summary=severity_summary,
+            dependencies=dependencies,
+        )
+        
+    except Exception as e:
+        return DependencyScanResult(
+            success=False,
+            total_dependencies=0,
+            vulnerable_count=0,
+            total_vulnerabilities=0,
+            error=f"Scan failed: {str(e)}",
+        )
+
+
+@mcp.tool()
+async def scan_dependencies(
+    project_root: str | None = None,
+    include_dev: bool = False,
+    scan_vulnerabilities: bool = True,
+) -> DependencyScanResult:
+    """
+    Scan project dependencies for known vulnerabilities.
+
+    [v1.5.0] Use this tool to identify vulnerable dependencies before deployment.
+    Parses requirements.txt, pyproject.toml, and package.json, then queries the
+    OSV (Open Source Vulnerabilities) database for known CVEs.
+
+    Why AI agents need this:
+    - Security: Identify vulnerable packages before they become exploits
+    - Compliance: Generate reports for security audits
+    - Upgrade guidance: Know which versions fix vulnerabilities
+
+    Args:
+        project_root: Project root directory (default: server's project root)
+        include_dev: Include development dependencies (default: False)
+        scan_vulnerabilities: Query OSV for vulnerabilities (default: True)
+
+    Returns:
+        DependencyScanResult with dependency list and vulnerability details
+    """
+    return await asyncio.to_thread(
+        _scan_dependencies_sync, project_root, include_dev, scan_vulnerabilities
+    )
+
+
+# ============================================================================
+# [20251213_FEATURE] v1.5.0 - get_call_graph MCP Tool
+# ============================================================================
+
+
+class CallNodeModel(BaseModel):
+    """Node in the call graph representing a function."""
+
+    name: str = Field(description="Function name")
+    file: str = Field(description="File path (relative) or '<external>'")
+    line: int = Field(description="Line number (0 if unknown)")
+    end_line: int | None = Field(default=None, description="End line number")
+    is_entry_point: bool = Field(default=False, description="Whether function is an entry point")
+
+
+class CallEdgeModel(BaseModel):
+    """Edge in the call graph representing a function call."""
+
+    caller: str = Field(description="Caller function (file:name)")
+    callee: str = Field(description="Callee function (file:name or external name)")
+
+
+class CallGraphResultModel(BaseModel):
+    """Result of call graph analysis."""
+
+    nodes: list[CallNodeModel] = Field(default_factory=list, description="Functions in the graph")
+    edges: list[CallEdgeModel] = Field(default_factory=list, description="Call relationships")
+    entry_point: str | None = Field(default=None, description="Entry point used for filtering")
+    depth_limit: int | None = Field(default=None, description="Depth limit used")
+    mermaid: str = Field(default="", description="Mermaid diagram representation")
+    circular_imports: list[list[str]] = Field(default_factory=list, description="Detected import cycles")
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _get_call_graph_sync(
+    project_root: str | None,
+    entry_point: str | None,
+    depth: int,
+    include_circular_import_check: bool,
+) -> CallGraphResultModel:
+    """Synchronous implementation of get_call_graph."""
+    from code_scalpel.ast_tools.call_graph import CallGraphBuilder
+
+    root_path = Path(project_root) if project_root else PROJECT_ROOT
+
+    if not root_path.exists():
+        return CallGraphResultModel(
+            error=f"Project root not found: {root_path}",
+        )
+
+    try:
+        builder = CallGraphBuilder(root_path)
+        result = builder.build_with_details(entry_point=entry_point, depth=depth)
+
+        # Convert dataclasses to Pydantic models
+        nodes = [
+            CallNodeModel(
+                name=n.name,
+                file=n.file,
+                line=n.line,
+                end_line=n.end_line,
+                is_entry_point=n.is_entry_point,
+            )
+            for n in result.nodes
+        ]
+
+        edges = [
+            CallEdgeModel(caller=e.caller, callee=e.callee) for e in result.edges
+        ]
+
+        # Optionally check for circular imports
+        circular_imports = []
+        if include_circular_import_check:
+            circular_imports = builder.detect_circular_imports()
+
+        return CallGraphResultModel(
+            nodes=nodes,
+            edges=edges,
+            entry_point=result.entry_point,
+            depth_limit=result.depth_limit,
+            mermaid=result.mermaid,
+            circular_imports=circular_imports,
+        )
+
+    except Exception as e:
+        return CallGraphResultModel(
+            error=f"Call graph analysis failed: {str(e)}",
+        )
+
+
+@mcp.tool()
+async def get_call_graph(
+    project_root: str | None = None,
+    entry_point: str | None = None,
+    depth: int = 10,
+    include_circular_import_check: bool = True,
+) -> CallGraphResultModel:
+    """
+    Build a call graph showing function relationships in the project.
+
+    [v1.5.0] Use this tool to understand code flow and function dependencies.
+    Analyzes Python source files to build a static call graph with:
+    - Line number tracking for each function
+    - Entry point detection (main, CLI commands, routes)
+    - Depth-limited traversal from any starting function
+    - Mermaid diagram generation for visualization
+    - Circular import detection
+
+    Why AI agents need this:
+    - Navigation: Quickly understand how functions connect
+    - Impact analysis: See what breaks if you change a function
+    - Refactoring: Identify tightly coupled code
+    - Documentation: Generate visual diagrams of code flow
+
+    Args:
+        project_root: Project root directory (default: server's project root)
+        entry_point: Starting function name (e.g., "main" or "app.py:main")
+                    If None, includes all functions
+        depth: Maximum depth to traverse from entry point (default: 10)
+        include_circular_import_check: Check for circular imports (default: True)
+
+    Returns:
+        CallGraphResultModel with nodes, edges, Mermaid diagram, and any circular imports
+    """
+    return await asyncio.to_thread(
+        _get_call_graph_sync, project_root, entry_point, depth, include_circular_import_check
+    )
+
+
+# ============================================================================
+# [20251213_FEATURE] v1.5.0 - get_project_map MCP Tool
+# ============================================================================
+
+
+class ModuleInfo(BaseModel):
+    """Information about a Python module/file."""
+
+    path: str = Field(description="Relative file path")
+    functions: list[str] = Field(default_factory=list, description="Function names in the module")
+    classes: list[str] = Field(default_factory=list, description="Class names in the module")
+    imports: list[str] = Field(default_factory=list, description="Import statements")
+    entry_points: list[str] = Field(default_factory=list, description="Detected entry points")
+    line_count: int = Field(default=0, description="Number of lines in file")
+    complexity_score: int = Field(default=0, description="Cyclomatic complexity score")
+
+
+class PackageInfo(BaseModel):
+    """Information about a Python package (directory with __init__.py)."""
+
+    name: str = Field(description="Package name")
+    path: str = Field(description="Relative path to package")
+    modules: list[str] = Field(default_factory=list, description="Module names in package")
+    subpackages: list[str] = Field(default_factory=list, description="Subpackage names")
+
+
+class ProjectMapResult(BaseModel):
+    """Result of project map analysis."""
+
+    project_root: str = Field(description="Absolute path to project root")
+    total_files: int = Field(default=0, description="Total Python files")
+    total_lines: int = Field(default=0, description="Total lines of code")
+    languages: dict[str, int] = Field(default_factory=dict, description="Language breakdown by file count")
+    packages: list[PackageInfo] = Field(default_factory=list, description="Detected packages")
+    modules: list[ModuleInfo] = Field(default_factory=list, description="All modules analyzed")
+    entry_points: list[str] = Field(default_factory=list, description="All detected entry points")
+    circular_imports: list[list[str]] = Field(default_factory=list, description="Circular import cycles")
+    complexity_hotspots: list[str] = Field(default_factory=list, description="Files with high complexity")
+    mermaid: str = Field(default="", description="Mermaid diagram of package structure")
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _get_project_map_sync(
+    project_root: str | None,
+    include_complexity: bool,
+    complexity_threshold: int,
+    include_circular_check: bool,
+) -> ProjectMapResult:
+    """Synchronous implementation of get_project_map."""
+    import ast
+    from code_scalpel.ast_tools.call_graph import CallGraphBuilder
+
+    root_path = Path(project_root) if project_root else PROJECT_ROOT
+
+    if not root_path.exists():
+        return ProjectMapResult(
+            project_root=str(root_path),
+            error=f"Project root not found: {root_path}",
+        )
+
+    try:
+        modules: list[ModuleInfo] = []
+        packages: dict[str, PackageInfo] = {}
+        all_entry_points: list[str] = []
+        complexity_hotspots: list[str] = []
+        total_lines = 0
+
+        # Entry point detection patterns
+        entry_decorators = {"command", "main", "cli", "app", "route", "get", "post", "put", "delete"}
+
+        def is_entry_point(func_node: ast.AST) -> bool:
+            """Check if function is an entry point."""
+            if func_node.name == "main":
+                return True
+            for dec in getattr(func_node, 'decorator_list', []):
+                dec_name = ""
+                if isinstance(dec, ast.Name):
+                    dec_name = dec.id
+                elif isinstance(dec, ast.Attribute):
+                    dec_name = dec.attr
+                elif isinstance(dec, ast.Call):
+                    if isinstance(dec.func, ast.Attribute):
+                        dec_name = dec.func.attr
+                    elif isinstance(dec.func, ast.Name):
+                        dec_name = dec.func.id
+                if dec_name in entry_decorators:
+                    return True
+            return False
+
+        def calculate_complexity(tree: ast.AST) -> int:
+            """Calculate cyclomatic complexity of a module."""
+            complexity = 1  # Base complexity
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor,
+                                    ast.ExceptHandler, ast.With, ast.AsyncWith,
+                                    ast.Assert, ast.comprehension)):
+                    complexity += 1
+                elif isinstance(node, (ast.And, ast.Or)):
+                    complexity += 1
+                elif isinstance(node, ast.BoolOp):
+                    complexity += len(node.values) - 1
+            return complexity
+
+        # Collect all Python files
+        python_files = list(root_path.rglob("*.py"))
+
+        # Filter out common excluded directories
+        exclude_patterns = {"__pycache__", ".git", "venv", ".venv", "env", ".env",
+                          "node_modules", "dist", "build", ".tox", ".pytest_cache",
+                          "htmlcov", ".mypy_cache"}
+
+        for file_path in python_files:
+            # Skip excluded directories
+            if any(part in exclude_patterns for part in file_path.parts):
+                continue
+
+            rel_path = str(file_path.relative_to(root_path))
+
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    code = f.read()
+
+                lines = code.count("\n") + 1
+                total_lines += lines
+
+                tree = ast.parse(code)
+
+                # Extract module info
+                functions = []
+                classes = []
+                imports = []
+                entry_points = []
+
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        functions.append(node.name)
+                        if is_entry_point(node):
+                            entry_points.append(f"{rel_path}:{node.name}")
+                    elif isinstance(node, ast.ClassDef):
+                        classes.append(node.name)
+                    elif isinstance(node, ast.Import):
+                        for alias in node.names:
+                            imports.append(alias.name)
+                    elif isinstance(node, ast.ImportFrom):
+                        if node.module:
+                            imports.append(node.module)
+
+                # Calculate complexity if requested
+                complexity = 0
+                if include_complexity:
+                    complexity = calculate_complexity(tree)
+                    if complexity >= complexity_threshold:
+                        complexity_hotspots.append(f"{rel_path} (complexity: {complexity})")
+
+                all_entry_points.extend(entry_points)
+
+                modules.append(ModuleInfo(
+                    path=rel_path,
+                    functions=functions,
+                    classes=classes,
+                    imports=list(set(imports)),  # Dedupe
+                    entry_points=entry_points,
+                    line_count=lines,
+                    complexity_score=complexity,
+                ))
+
+                # Track packages
+                parent = file_path.parent
+                while parent != root_path and parent.exists():
+                    init_file = parent / "__init__.py"
+                    if init_file.exists():
+                        pkg_path = str(parent.relative_to(root_path))
+                        pkg_name = parent.name
+                        if pkg_path not in packages:
+                            packages[pkg_path] = PackageInfo(
+                                name=pkg_name,
+                                path=pkg_path,
+                                modules=[],
+                                subpackages=[],
+                            )
+                        # Add module to package
+                        if rel_path not in packages[pkg_path].modules:
+                            packages[pkg_path].modules.append(rel_path)
+                    parent = parent.parent
+
+            except Exception:
+                # Skip files with errors
+                continue
+
+        # Organize package hierarchy
+        pkg_list = list(packages.values())
+        for pkg in pkg_list:
+            for other_pkg in pkg_list:
+                if other_pkg.path.startswith(pkg.path + "/") and other_pkg.name not in pkg.subpackages:
+                    pkg.subpackages.append(other_pkg.name)
+
+        # Check for circular imports
+        circular_imports = []
+        if include_circular_check:
+            builder = CallGraphBuilder(root_path)
+            circular_imports = builder.detect_circular_imports()
+
+        # [20251213_FEATURE] Calculate language breakdown
+        languages: dict[str, int] = {"python": len(modules)}
+        # Also count other common file types
+        for ext, lang in [(".js", "javascript"), (".ts", "typescript"), (".java", "java"),
+                         (".json", "json"), (".yaml", "yaml"), (".yml", "yaml"),
+                         (".md", "markdown"), (".html", "html"), (".css", "css")]:
+            count = len(list(root_path.rglob(f"*{ext}")))
+            # Exclude common ignored dirs
+            actual_count = sum(1 for f in root_path.rglob(f"*{ext}")
+                             if not any(p in exclude_patterns for p in f.parts))
+            if actual_count > 0:
+                languages[lang] = languages.get(lang, 0) + actual_count
+
+        # Generate Mermaid package diagram
+        mermaid_lines = ["graph TD"]
+        mermaid_lines.append("    subgraph Project")
+        for i, mod in enumerate(modules[:50]):  # Limit to 50 modules
+            mod_id = f"M{i}"
+            label = mod.path.replace("/", "_").replace(".", "_")
+            if mod.entry_points:
+                mermaid_lines.append(f"        {mod_id}[[\"{label}\"]]")  # Stadium for entry
+            else:
+                mermaid_lines.append(f"        {mod_id}[\"{label}\"]")
+        mermaid_lines.append("    end")
+
+        return ProjectMapResult(
+            project_root=str(root_path),
+            total_files=len(modules),
+            total_lines=total_lines,
+            languages=languages,
+            packages=pkg_list,
+            modules=modules,
+            entry_points=all_entry_points,
+            circular_imports=circular_imports,
+            complexity_hotspots=complexity_hotspots,
+            mermaid="\n".join(mermaid_lines),
+        )
+
+    except Exception as e:
+        return ProjectMapResult(
+            project_root=str(root_path),
+            error=f"Project map analysis failed: {str(e)}",
+        )
+
+
+@mcp.tool()
+async def get_project_map(
+    project_root: str | None = None,
+    include_complexity: bool = True,
+    complexity_threshold: int = 10,
+    include_circular_check: bool = True,
+) -> ProjectMapResult:
+    """
+    Generate a comprehensive map of the project structure.
+
+    [v1.5.0] Use this tool to get a high-level overview of a codebase before diving in.
+    Analyzes all Python files to provide:
+    - Package and module structure
+    - Function and class inventory per file
+    - Entry point detection (main, CLI commands, routes)
+    - Complexity hotspots (files that need attention)
+    - Circular import detection
+    - Mermaid diagram of project structure
+
+    Why AI agents need this:
+    - Orientation: Understand project structure before making changes
+    - Navigation: Know where to find specific functionality
+    - Risk assessment: Identify complex areas that need careful handling
+    - Architecture: See how packages and modules are organized
+
+    Args:
+        project_root: Project root directory (default: server's project root)
+        include_complexity: Calculate cyclomatic complexity (default: True)
+        complexity_threshold: Threshold for flagging hotspots (default: 10)
+        include_circular_check: Check for circular imports (default: True)
+
+    Returns:
+        ProjectMapResult with comprehensive project overview
+    """
+    return await asyncio.to_thread(
+        _get_project_map_sync, project_root, include_complexity, complexity_threshold, include_circular_check
+    )
+
+
+# ============================================================================
 # ENTRYPOINT
 # ============================================================================
 
