@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from src.code_scalpel.mcp.server import (
+from code_scalpel.mcp.server import (
     get_project_map,
     _get_project_map_sync,
     ModuleInfo,

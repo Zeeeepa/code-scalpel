@@ -16,7 +16,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from src.code_scalpel.ast_tools.call_graph import (
+from code_scalpel.ast_tools.call_graph import (
     CallGraphBuilder,
     CallNode,
     CallEdge,

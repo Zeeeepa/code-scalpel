@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from src.code_scalpel.mcp.server import (
+from code_scalpel.mcp.server import (
     get_call_graph,
     _get_call_graph_sync,
     CallNodeModel,

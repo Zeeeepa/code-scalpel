@@ -83,6 +83,12 @@ except ImportError:
     ExtractedSymbol = None
     ExtractionResult = None
 
+# [20251214_FEATURE] v1.5.3 - OSV Client for vulnerability scanning
+try:
+    from . import osv_client
+except ImportError:
+    osv_client = None
+
 
 __all__ = [
     "ASTAnalyzer",
@@ -109,4 +115,6 @@ __all__ = [
     "CrossFileExtractor",
     "ExtractedSymbol",
     "ExtractionResult",
+    # v1.5.3 - OSV Client
+    "osv_client",
 ]

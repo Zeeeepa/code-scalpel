@@ -2,6 +2,7 @@
 Pytest configuration and fixtures for Code Scalpel tests.
 
 [20251213_FEATURE] v1.5.2 - OSV client test isolation fixtures with proper mock cleanup.
+[20251214_FEATURE] v1.5.3 - OSV client import in ast_tools __init__ for full-suite fix.
 """
 import os
 import sys
@@ -16,12 +17,12 @@ src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-# [20251213_FEATURE] Pre-import osv_client to ensure it's available for patching
-# This prevents AttributeError when test_scan_dependencies.py patches the module
+# [20251214_FEATURE] v1.5.3 - Ensure osv_client is imported early
+# Now that ast_tools.__init__ imports osv_client, this will automatically
+# make osv_client available in the ast_tools namespace
 try:
-    import code_scalpel.ast_tools.osv_client  # noqa
-except (ImportError, AttributeError):
-    # If import fails for any reason, continue - it will be imported when needed
+    import code_scalpel.ast_tools  # noqa
+except ImportError:
     pass
 
 
@@ -40,15 +41,12 @@ def osv_mock_urlopen():
     This prevents mock state leakage which was the root cause of test failures when
     running the full test suite.
     
+    Now that osv_client is imported in ast_tools.__init__, the patch target
+    'code_scalpel.ast_tools.osv_client.urllib.request.urlopen' is always valid.
+    
     Yields:
         MagicMock: A mock object configured to behave like urlopen.
     """
-    # Ensure osv_client module is imported before patching
-    try:
-        from code_scalpel.ast_tools import osv_client  # noqa
-    except ImportError:
-        pass
-    
     patcher = patch("code_scalpel.ast_tools.osv_client.urllib.request.urlopen")
     mock = patcher.start()
     yield mock
