@@ -8,7 +8,6 @@ This agent performs automated code review by:
 4. Suggesting improvements with safe refactoring
 """
 
-import re
 from typing import Any, Dict, List, Optional
 
 from .base_agent import BaseCodeAnalysisAgent
@@ -31,7 +30,7 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             "max_function_length": 30,
             "max_class_length": 200,
             "max_complexity_score": 10,
-            "min_test_coverage": 80
+            "min_test_coverage": 80,
         }
 
     async def observe(self, target: str) -> Dict[str, Any]:
@@ -49,7 +48,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
         # Find symbol references for key functions
         symbol_analysis = {}
-        for func_name in file_info.get("functions", [])[:3]:  # Analyze first 3 functions
+        for func_name in file_info.get("functions", [])[
+            :3
+        ]:  # Analyze first 3 functions
             refs = await self.find_symbol_usage(func_name, self.context.workspace_root)
             if refs.get("success"):
                 symbol_analysis[func_name] = refs
@@ -59,7 +60,7 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             "file_info": file_info,
             "security_scan": security_info,
             "symbol_analysis": symbol_analysis,
-            "target": target
+            "target": target,
         }
 
     async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
@@ -81,7 +82,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
         issues.extend(security_issues)
 
         # Analyze symbol usage
-        symbol_issues = self._analyze_symbol_usage(observations.get("symbol_analysis", {}))
+        symbol_issues = self._analyze_symbol_usage(
+            observations.get("symbol_analysis", {})
+        )
         issues.extend(symbol_issues)
 
         # Generate improvement suggestions
@@ -92,7 +95,7 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             "issues": issues,
             "suggestions": suggestions,
             "severity_breakdown": self._categorize_issues(issues),
-            "quality_score": self._calculate_quality_score(issues, file_info)
+            "quality_score": self._calculate_quality_score(issues, file_info),
         }
 
     async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
@@ -110,18 +113,20 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
         for issue in high_priority + medium_priority[:2]:  # Limit to top 2 medium
             if issue.get("actionable", False):
-                actionable_items.append({
-                    "issue": issue,
-                    "action": self._create_action_plan(issue),
-                    "confidence": issue.get("confidence", 0.8)
-                })
+                actionable_items.append(
+                    {
+                        "issue": issue,
+                        "action": self._create_action_plan(issue),
+                        "confidence": issue.get("confidence", 0.8),
+                    }
+                )
 
         return {
             "success": True,
             "actionable_items": actionable_items,
             "total_actions": len(actionable_items),
             "prioritized_count": len(actionable_items),
-            "estimated_effort": self._estimate_effort(actionable_items)
+            "estimated_effort": self._estimate_effort(actionable_items),
         }
 
     async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
@@ -142,49 +147,61 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             elif action_type == "improve_documentation":
                 result = await self._execute_documentation_improvement(action)
             else:
-                result = {"success": False, "error": f"Unknown action type: {action_type}"}
+                result = {
+                    "success": False,
+                    "error": f"Unknown action type: {action_type}",
+                }
 
-            results.append({
-                "action": action,
-                "result": result,
-                "success": result.get("success", False)
-            })
+            results.append(
+                {
+                    "action": action,
+                    "result": result,
+                    "success": result.get("success", False),
+                }
+            )
 
         success_count = sum(1 for r in results if r["success"])
         total_count = len(results)
 
         return {
-            "success": success_count > 0 or total_count == 0,  # Success if actions succeeded or no actions needed
+            "success": success_count > 0
+            or total_count == 0,  # Success if actions succeeded or no actions needed
             "results": results,
             "success_rate": success_count / total_count if total_count > 0 else 1.0,
-            "summary": f"Executed {success_count}/{total_count} improvements successfully"
+            "summary": f"Executed {success_count}/{total_count} improvements successfully",
         }
 
     # Analysis Helper Methods
 
-    def _analyze_file_structure(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_file_structure(
+        self, file_info: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Analyze file structure for quality issues."""
         issues = []
 
         complexity = file_info.get("complexity_score", 0)
         if complexity > self.quality_thresholds["max_complexity_score"]:
-            issues.append({
-                "type": "complexity",
-                "severity": "medium",
-                "description": f"File complexity score ({complexity}) exceeds threshold ({self.quality_thresholds['max_complexity_score']})",
-                "actionable": True,
-                "confidence": 0.9
-            })
+            issues.append(
+                {
+                    "type": "complexity",
+                    "severity": "medium",
+                    "description": f"File complexity score ({complexity}) exceeds threshold ({self.quality_thresholds['max_complexity_score']})",
+                    "actionable": True,
+                    "confidence": 0.9,
+                }
+            )
 
         function_count = len(file_info.get("functions", []))
         if function_count > 10:
-            issues.append({
-                "type": "structure",
-                "severity": "low",
-                "description": f"File has {function_count} functions - consider splitting into multiple files",
-                "actionable": False,
-                "confidence": 0.7
-            })
+            issues.append(
+                {
+                    "type": "structure",
+                    "severity": "low",
+                    "description": f"File has {function_count} functions - consider splitting into multiple files",
+                    "actionable": False,
+                    "confidence": 0.7,
+                }
+            )
 
         return issues
 
@@ -195,57 +212,68 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
         vulnerabilities = security_info.get("vulnerabilities", [])
         for vuln in vulnerabilities:
             severity = vuln.get("severity", "low")
-            issues.append({
-                "type": "security",
-                "severity": severity,
-                "description": f"Security vulnerability: {vuln.get('description', 'Unknown')}",
-                "actionable": True,
-                "confidence": 0.95,
-                "vulnerability": vuln
-            })
+            issues.append(
+                {
+                    "type": "security",
+                    "severity": severity,
+                    "description": f"Security vulnerability: {vuln.get('description', 'Unknown')}",
+                    "actionable": True,
+                    "confidence": 0.95,
+                    "vulnerability": vuln,
+                }
+            )
 
         return issues
 
-    def _analyze_symbol_usage(self, symbol_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_symbol_usage(
+        self, symbol_analysis: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Analyze symbol usage patterns."""
         issues = []
 
         for symbol_name, refs in symbol_analysis.items():
             total_refs = refs.get("total_references", 0)
             if total_refs == 0:
-                issues.append({
-                    "type": "dead_code",
-                    "severity": "low",
-                    "description": f"Function '{symbol_name}' appears to be unused",
-                    "actionable": False,
-                    "confidence": 0.6
-                })
+                issues.append(
+                    {
+                        "type": "dead_code",
+                        "severity": "low",
+                        "description": f"Function '{symbol_name}' appears to be unused",
+                        "actionable": False,
+                        "confidence": 0.6,
+                    }
+                )
             elif total_refs > 20:
-                issues.append({
-                    "type": "complexity",
-                    "severity": "medium",
-                    "description": f"Function '{symbol_name}' is used in {total_refs} places - consider simplifying",
-                    "actionable": True,
-                    "confidence": 0.8
-                })
+                issues.append(
+                    {
+                        "type": "complexity",
+                        "severity": "medium",
+                        "description": f"Function '{symbol_name}' is used in {total_refs} places - consider simplifying",
+                        "actionable": True,
+                        "confidence": 0.8,
+                    }
+                )
 
         return issues
 
-    def _generate_improvements(self, issues: List[Dict[str, Any]], file_info: Dict[str, Any]) -> List[str]:
+    def _generate_improvements(
+        self, issues: List[Dict[str, Any]], file_info: Dict[str, Any]
+    ) -> List[str]:
         """Generate improvement suggestions based on issues."""
         suggestions = []
 
+        # [20251214_BUGFIX] Keep suggestion phrasing stable for tests and downstream consumers
         has_security_issues = any(i["type"] == "security" for i in issues)
         if has_security_issues:
-            suggestions.append("Address security vulnerabilities before other improvements")
+            suggestions.append("Address security vulnerabilities")
 
         complexity_issues = [i for i in issues if i["type"] == "complexity"]
         if complexity_issues:
-            suggestions.append("Consider breaking down complex functions into smaller, focused functions")
+            suggestions.append("Consider breaking down complex functions")
 
         structure_issues = [i for i in issues if i["type"] == "structure"]
         if structure_issues:
-            suggestions.append("Consider organizing code into multiple modules for better maintainability")
+            suggestions.append("Consider organizing code into multiple modules")
 
         return suggestions
 
@@ -257,7 +285,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             breakdown[severity] += 1
         return breakdown
 
-    def _calculate_quality_score(self, issues: List[Dict[str, Any]], file_info: Dict[str, Any]) -> float:
+    def _calculate_quality_score(
+        self, issues: List[Dict[str, Any]], file_info: Dict[str, Any]
+    ) -> float:
         """Calculate overall quality score (0-100)."""
         base_score = 100
 
@@ -281,19 +311,19 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             return {
                 "type": "add_security_check",
                 "description": "Add input validation or sanitization",
-                "target": issue.get("vulnerability", {}).get("location", "unknown")
+                "target": issue.get("vulnerability", {}).get("location", "unknown"),
             }
         elif issue_type == "complexity":
             return {
                 "type": "refactor_function",
                 "description": "Break down complex function into smaller functions",
-                "target": "complex_function"
+                "target": "complex_function",
             }
         else:
             return {
                 "type": "improve_documentation",
                 "description": "Add documentation and comments",
-                "target": "file"
+                "target": "file",
             }
 
     def _estimate_effort(self, actionable_items: List[Dict[str, Any]]) -> str:
@@ -310,20 +340,26 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
     # Action Execution Methods
 
-    async def _execute_function_refactor(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_function_refactor(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a function refactoring action."""
         # This would use extract_code and update_symbol tools
         # For demo purposes, return success
         self.logger.info(f"Executing function refactor: {action}")
         return {"success": True, "message": "Function refactor completed"}
 
-    async def _execute_security_improvement(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_security_improvement(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a security improvement action."""
         # This would use simulate_refactor and update_symbol tools
         self.logger.info(f"Executing security improvement: {action}")
         return {"success": True, "message": "Security improvement applied"}
 
-    async def _execute_documentation_improvement(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_documentation_improvement(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a documentation improvement action."""
         # This would use update_symbol to add docstrings
         self.logger.info(f"Executing documentation improvement: {action}")

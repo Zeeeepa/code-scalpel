@@ -19,7 +19,7 @@ Usage:
         query = "SELECT * FROM users WHERE id=" + user_id
         cursor.execute(query)
     ''')
-    
+
     for v in vulns:
         print(f"{v.vulnerability_type} at line {v.sink_location[0]}")
 """

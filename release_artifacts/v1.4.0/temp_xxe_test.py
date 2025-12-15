@@ -11,11 +11,11 @@ app = Flask(__name__)
 def parse_xml():
     """Vulnerable: Parses user-supplied XML with dangerous parser."""
     user_xml = request.args.get("xml")
-    
+
     # VULNERABLE: Direct XML parsing of user input
     tree = ET.parse(user_xml)  # XXE SINK - should be detected
     root = tree.getroot()
-    
+
     return f"Parsed: {root.tag}"
 
 
@@ -23,8 +23,8 @@ def parse_xml():
 def parse_string():
     """Vulnerable: Parses user-supplied XML string."""
     xml_data = request.data
-    
+
     # VULNERABLE: fromstring with user input
     root = ET.fromstring(xml_data)  # XXE SINK - should be detected
-    
+
     return f"Root tag: {root.tag}"

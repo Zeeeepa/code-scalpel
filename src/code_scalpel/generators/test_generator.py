@@ -396,39 +396,43 @@ class TestGenerator:
             # Float patterns (must come before int patterns)
             (
                 rf"{var}\s*>\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) + 1.0
-                if should_satisfy
-                else float(m.group(1)) - 1.0,
+                lambda m: (
+                    float(m.group(1)) + 1.0
+                    if should_satisfy
+                    else float(m.group(1)) - 1.0
+                ),
             ),
             (
                 rf"{var}\s*<\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) - 1.0
-                if should_satisfy
-                else float(m.group(1)) + 1.0,
+                lambda m: (
+                    float(m.group(1)) - 1.0
+                    if should_satisfy
+                    else float(m.group(1)) + 1.0
+                ),
             ),
             (
                 rf"{var}\s*>=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1))
-                if should_satisfy
-                else float(m.group(1)) - 1.0,
+                lambda m: (
+                    float(m.group(1)) if should_satisfy else float(m.group(1)) - 1.0
+                ),
             ),
             (
                 rf"{var}\s*<=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1))
-                if should_satisfy
-                else float(m.group(1)) + 1.0,
+                lambda m: (
+                    float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0
+                ),
             ),
             (
                 rf"{var}\s*==\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1))
-                if should_satisfy
-                else float(m.group(1)) + 1.0,
+                lambda m: (
+                    float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0
+                ),
             ),
             (
                 rf"{var}\s*!=\s*(\d+\.?\d*)",
-                lambda m: float(m.group(1)) + 1.0
-                if should_satisfy
-                else float(m.group(1)),
+                lambda m: (
+                    float(m.group(1)) + 1.0 if should_satisfy else float(m.group(1))
+                ),
             ),
         ]
 

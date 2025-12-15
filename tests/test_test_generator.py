@@ -293,3 +293,79 @@ def another_func():
 
         # Should handle gracefully
         assert result.function_name == "broken"
+
+
+# [20251214_TEST] Additional edge coverage for detection and value generation.
+def test_detect_main_function_supports_js_and_java():
+    from code_scalpel.generators.test_generator import TestGenerator
+
+    js_code = """
+function pick(x) {
+    return x;
+}
+"""
+    java_code = """
+public int calc(int a){
+    return a;
+}
+"""
+
+    generator = TestGenerator()
+    assert generator._detect_main_function(js_code, "javascript") == "pick"
+    assert generator._detect_main_function(java_code, "java") == "calc"
+
+
+def test_generate_satisfying_value_handles_comparators():
+    from code_scalpel.generators.test_generator import TestGenerator
+
+    generator = TestGenerator()
+    # Greater-than int returns int offset
+    assert generator._generate_satisfying_value("x > 5", "x", True) == 6
+    # Less-than float returns float offset
+    assert generator._generate_satisfying_value("x < 3.5", "x", True) == 2.5
+    # Equality false branch nudges value
+    assert generator._generate_satisfying_value("x == 2", "x", False) == 3
+
+
+# [20251214_TEST] Cover value coercion and default test-case creation paths.
+def test_to_python_value_coercions_and_defaults():
+    from types import SimpleNamespace
+    from code_scalpel.generators.test_generator import TestGenerator
+
+    generator = TestGenerator()
+
+    class FakeInt:
+        def __init__(self, val):
+            self._val = val
+
+        def as_long(self):
+            return self._val
+
+    class FakeReal:
+        def __init__(self, num, den):
+            self.numerator = num
+            self.denominator = den
+
+        def as_fraction(self):
+            return SimpleNamespace(
+                numerator=self.numerator, denominator=self.denominator
+            )
+
+    assert generator._to_python_value(FakeInt(3), expected_type="str") == "value_3"
+    assert generator._to_python_value(FakeReal(1, 2), expected_type="float") == 0.5
+    assert generator._to_python_value("true", expected_type="bool") is True
+    assert generator._to_python_value("7", expected_type="int") == 7
+
+
+def test_extract_test_cases_creates_default_when_no_paths():
+    from code_scalpel.generators.test_generator import TestGenerator
+
+    generator = TestGenerator()
+    suite = generator.generate_from_symbolic_result(
+        symbolic_result={"paths": [], "symbolic_vars": [], "constraints": []},
+        code="def noop():\n    return None\n",
+        function_name="noop",
+    )
+
+    assert suite.test_cases
+    assert suite.test_cases[0].description.lower().startswith("basic")

@@ -85,9 +85,11 @@ class TestTaintTrackerPerfectCoverage:
             # Return a different path each time (never equal to input = never at root)
             return f"/fake/path/level{call_count[0]}"
 
-        with patch("os.getcwd", return_value="/fake/start/path"), patch(
-            "os.path.exists", return_value=False
-        ), patch("os.path.dirname", side_effect=mock_dirname):
+        with (
+            patch("os.getcwd", return_value="/fake/start/path"),
+            patch("os.path.exists", return_value=False),
+            patch("os.path.dirname", side_effect=mock_dirname),
+        ):
             result = _find_config_file()
 
             # Should return None after exhausting loop

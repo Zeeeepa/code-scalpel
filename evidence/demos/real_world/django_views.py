@@ -10,6 +10,7 @@ Proves: Code Scalpel understands framework patterns
 Run:
     code-scalpel scan demos/real_world/django_views.py
 """
+
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.db import connection

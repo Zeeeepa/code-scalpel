@@ -3,7 +3,7 @@ Sample Data Processing Library for benchmarking CodeAnalyzer.
 
 This simulates a real-world data processing library with:
 - Data structures
-- Processing utilities  
+- Processing utilities
 - IO operations
 - Some intentional dead code
 """
@@ -374,9 +374,9 @@ class DataAggregator:
 
     def __init__(self, group_by: List[str]):
         self.group_by = group_by
-        self._aggregations: Dict[
-            str, Tuple[str, str]
-        ] = {}  # field -> (agg_type, source)
+        self._aggregations: Dict[str, Tuple[str, str]] = (
+            {}
+        )  # field -> (agg_type, source)
 
     def add_aggregation(
         self, name: str, agg_type: str, source_field: str

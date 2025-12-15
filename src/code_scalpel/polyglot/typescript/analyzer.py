@@ -358,9 +358,11 @@ def normalize_typescript_class(ts_class: dict[str, Any]) -> NormalizedClass:
     return NormalizedClass(
         name=ts_class.get("name", "Anonymous"),
         base_classes=[ts_class["extends"]] if ts_class.get("extends") else [],
-        interfaces=ts_class.get("implements", "").split(",")
-        if ts_class.get("implements")
-        else [],
+        interfaces=(
+            ts_class.get("implements", "").split(",")
+            if ts_class.get("implements")
+            else []
+        ),
         methods=[],  # Would extract from class body
         properties=[],
         start_line=ts_class.get("line", 0),

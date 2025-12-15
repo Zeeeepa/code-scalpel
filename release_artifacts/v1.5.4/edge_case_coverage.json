@@ -1,0 +1,12 @@
+{
+  "variable_imports": {
+    "simple_string_vars": "resolved",
+    "unknown_or_complex": "marked LAZY"
+  },
+  "frameworks": {
+    "django_installed_apps": "list/tuple string literals supported",
+    "flask_blueprints": "Blueprint construction + register_blueprint supported"
+  },
+  "conditional_imports": "not fully resolved; fall back to LAZY",
+  "security_considerations": "No execution; static analysis only"
+}

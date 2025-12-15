@@ -7,6 +7,7 @@ Goal: Get cli.py from 0% to at least 50% coverage.
 
 import subprocess
 import sys
+from types import SimpleNamespace
 
 
 class TestCLIBasics:
@@ -200,6 +201,330 @@ class TestCLIEdgeCases:
             or "usage" in combined.lower()
         )
 
+
+# [20251214_TEST] In-process coverage for cli helpers without subprocess overhead.
+class TestCLIInProcess:
+    def test_analyze_file_defaults_to_python_for_unknown_extension(
+        self, tmp_path, monkeypatch
+    ):
+        from code_scalpel import cli
+
+        test_file = tmp_path / "sample.unknown"
+        test_file.write_text("x = 1")
+
+        captured = {}
+
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
+            captured["code"] = code
+            captured["source"] = source
+            captured["language"] = language
+            return 0
+
+        monkeypatch.setattr(cli, "analyze_code", fake_analyze_code)
+
+        exit_code = cli.analyze_file(
+            str(test_file), output_format="json", language=None
+        )
+
+        assert exit_code == 0
+        assert captured["language"] == "python"
+
+    def test_analyze_file_missing_returns_error(self, tmp_path):
+        from code_scalpel import cli
+
+        missing = tmp_path / "does_not_exist.py"
+        exit_code = cli.analyze_file(str(missing))
+        assert exit_code == 1
+
+    # [20251214_TEST] Ensure explicit language bypasses auto-detect branch.
+    def test_analyze_file_respects_explicit_language(self, tmp_path, monkeypatch):
+        from code_scalpel import cli
+
+        target = tmp_path / "explicit.src"
+        target.write_text("x = 1")
+
+        captured = {}
+
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
+            captured["language"] = language
+            return 0
+
+        monkeypatch.setattr(cli, "analyze_code", fake_analyze_code)
+
+        exit_code = cli.analyze_file(str(target), output_format="text", language="java")
+
+        assert exit_code == 0
+        assert captured["language"] == "java"
+
+    # [20251214_TEST] Exercise .js and .java extension paths in auto-detection.
+    def test_analyze_file_detects_js_and_java_extensions(self, tmp_path, monkeypatch):
+        from code_scalpel import cli
+
+        languages_seen = []
+
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
+            languages_seen.append(language)
+            return 0
+
+        monkeypatch.setattr(cli, "analyze_code", fake_analyze_code)
+
+        js_file = tmp_path / "script.js"
+        js_file.write_text("console.log('hi')")
+
+        java_file = tmp_path / "Main.java"
+        java_file.write_text("class Main {}")
+
+        assert cli.analyze_file(str(js_file), output_format="text", language=None) == 0
+        assert (
+            cli.analyze_file(str(java_file), output_format="text", language=None) == 0
+        )
+
+        assert languages_seen == ["javascript", "java"]
+
+    # [20251214_TEST] Capture read failures to cover error branch in analyze_file.
+    def test_analyze_file_read_error_returns_failure(self, tmp_path, monkeypatch):
+        from code_scalpel import cli
+        from pathlib import Path
+
+        target = tmp_path / "bad.py"
+        target.write_text("print('hi')")
+
+        def boom(self, *args, **kwargs):
+            raise OSError("boom")
+
+        monkeypatch.setattr(Path, "read_text", boom)
+
+        # Analyze code should not be invoked when read fails; would raise if called.
+        monkeypatch.setattr(cli, "analyze_code", lambda *a, **k: 999)
+
+        exit_code = cli.analyze_file(str(target), output_format="text", language=None)
+
+        assert exit_code == 1
+
+    def test_analyze_code_json_uses_analyzer(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import sys
+        from code_scalpel import cli
+
+        class DummyMetrics:
+            lines_of_code = 1
+            num_functions = 0
+            num_classes = 0
+            cyclomatic_complexity = 0
+            analysis_time_seconds = 0.01
+
+        class DummyResult:
+            metrics = DummyMetrics()
+            dead_code = []
+            security_issues = []
+            refactor_suggestions = []
+            errors = []
+
+        class DummyAnalyzer:
+            def __init__(self, level):
+                self.level = level
+
+            def analyze(self, code: str):
+                return DummyResult()
+
+        dummy_module = SimpleNamespace(
+            CodeAnalyzer=DummyAnalyzer,
+            AnalysisLevel=SimpleNamespace(STANDARD="STANDARD"),
+        )
+        monkeypatch.setitem(sys.modules, "code_scalpel.code_analyzer", dummy_module)
+
+        exit_code = cli.analyze_code(
+            "x = 1", output_format="json", source="inline", language="python"
+        )
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "lines_of_code" in captured
+
+    # [20251214_TEST] Verify language dispatch to JavaScript helper from analyze_code.
+    def test_analyze_code_dispatches_javascript_helper(self, monkeypatch):
+        from code_scalpel import cli
+
+        called = {}
+        monkeypatch.setattr(
+            cli,
+            "_analyze_javascript",
+            lambda code, output_format, source: called.update(
+                code=code, output=output_format, source=source
+            )
+            or 0,
+        )
+
+        exit_code = cli.analyze_code(
+            "console.log('hi')",
+            output_format="text",
+            source="inline",
+            language="javascript",
+        )
+
+        assert exit_code == 0
+        assert called == {
+            "code": "console.log('hi')",
+            "output": "text",
+            "source": "inline",
+        }
+
+    # [20251214_TEST] Verify language dispatch to Java helper from analyze_code.
+    def test_analyze_code_dispatches_java_helper(self, monkeypatch):
+        from code_scalpel import cli
+
+        called = {}
+        monkeypatch.setattr(
+            cli,
+            "_analyze_java",
+            lambda code, output_format, source: called.update(
+                code=code, output=output_format, source=source
+            )
+            or 0,
+        )
+
+        exit_code = cli.analyze_code(
+            "class Main {}", output_format="json", source="inline", language="java"
+        )
+
+        assert exit_code == 0
+        assert called == {"code": "class Main {}", "output": "json", "source": "inline"}
+
+    # [20251214_TEST] Exercise security_issues text branch in analyze_code output.
+    def test_analyze_code_text_reports_security_issues(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import sys
+        from code_scalpel import cli
+
+        class DummyMetrics:
+            lines_of_code = 1
+            num_functions = 0
+            num_classes = 0
+            cyclomatic_complexity = 0
+            analysis_time_seconds = 0.01
+
+        class DummyResult:
+            metrics = DummyMetrics()
+            dead_code = []
+            security_issues = [
+                {"type": "SQL Injection", "description": "unescaped input"}
+            ]
+            refactor_suggestions = []
+            errors = []
+
+        class DummyAnalyzer:
+            def __init__(self, level):
+                self.level = level
+
+            def analyze(self, code: str):
+                return DummyResult()
+
+        dummy_module = SimpleNamespace(
+            CodeAnalyzer=DummyAnalyzer,
+            AnalysisLevel=SimpleNamespace(STANDARD="STANDARD"),
+        )
+        monkeypatch.setitem(sys.modules, "code_scalpel.code_analyzer", dummy_module)
+
+        exit_code = cli.analyze_code(
+            "print('hi')", output_format="text", source="inline", language="python"
+        )
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "Security Issues" in captured
+
+    def test_analyze_javascript_reports_paths(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyPath:
+            def __init__(self):
+                self.path_id = 1
+                self.status = SimpleNamespace(value="feasible")
+                self.model = {"x": 1}
+
+        class DummyResult:
+            paths = [DummyPath()]
+            feasible_count = 1
+            infeasible_count = 0
+
+            def get_feasible_paths(self):
+                return self.paths
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):  # noqa: D401 - simple stub
+                return DummyResult()
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_javascript(
+            "code", output_format="json", source="inline"
+        )
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "feasible_count" in captured
+
+    # [20251214_TEST] Cover text output branch for JavaScript analysis.
+    def test_analyze_javascript_text_output(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyPath:
+            def __init__(self, path_id: int, model):
+                self.path_id = path_id
+                self.status = SimpleNamespace(value="ok")
+                self.model = model
+
+        class DummyResult:
+            paths = [DummyPath(3, None), DummyPath(4, {"a": 1})]
+            feasible_count = 2
+            infeasible_count = 0
+
+            def get_feasible_paths(self):
+                return self.paths
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):
+                return DummyResult()
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_javascript(
+            "code", output_format="text", source="inline"
+        )
+        output = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "Feasible paths" in output
+
+    # [20251214_TEST] Cover JavaScript analyzer exception handling.
+    def test_analyze_javascript_handles_exception(self, capsys, monkeypatch):
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):
+                raise RuntimeError("fail")
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_javascript(
+            "code", output_format="text", source="inline"
+        )
+        output = capsys.readouterr().err
+
+        assert exit_code == 1
+        assert "Error analyzing JavaScript code" in output
+
     def test_analyze_non_python_file(self, tmp_path):
         """Test analyzing a non-Python file (should warn)."""
         test_file = tmp_path / "test.txt"
@@ -235,6 +560,227 @@ def main():
         assert result.returncode == 0
         # Should show metrics at minimum
         assert "Metrics" in result.stdout or "lines" in result.stdout.lower()
+
+    # [20251214_TEST] Additional in-process coverage for CLI helpers and error paths.
+    def test_analyze_code_handles_analyzer_error(self, monkeypatch):
+        from types import SimpleNamespace
+        import sys
+        from code_scalpel import cli
+
+        class DummyAnalyzer:
+            def __init__(self, level):
+                self.level = level
+
+            def analyze(self, code: str):
+                raise RuntimeError("boom")
+
+        dummy_module = SimpleNamespace(
+            CodeAnalyzer=DummyAnalyzer,
+            AnalysisLevel=SimpleNamespace(STANDARD="STANDARD"),
+        )
+        monkeypatch.setitem(sys.modules, "code_scalpel.code_analyzer", dummy_module)
+
+        exit_code = cli.analyze_code(
+            "x = 1", output_format="text", source="inline", language="python"
+        )
+
+        assert exit_code == 1
+
+    def test_analyze_java_reports_paths(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyPath:
+            def __init__(self):
+                self.path_id = 2
+                self.status = SimpleNamespace(value="ok")
+                self.model = None
+
+        class DummyResult:
+            paths = [DummyPath()]
+            feasible_count = 0
+            infeasible_count = 0
+
+            def get_feasible_paths(self):
+                return self.paths
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):
+                return DummyResult()
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_java("code", output_format="json", source="inline")
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "feasible_count" in captured
+
+    # [20251214_TEST] Cover text output branch for Java analysis.
+    def test_analyze_java_text_output(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyPath:
+            def __init__(self, path_id: int, model):
+                self.path_id = path_id
+                self.status = SimpleNamespace(value="ok")
+                self.model = model
+
+        class DummyResult:
+            paths = [DummyPath(4, None), DummyPath(5, {"b": 2})]
+            feasible_count = 2
+            infeasible_count = 0
+
+            def get_feasible_paths(self):
+                return self.paths
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):
+                return DummyResult()
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_java("code", output_format="text", source="inline")
+        output = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "Code Scalpel Analysis (Java)" in output
+
+    # [20251214_TEST] Cover Java analyzer exception handling branch.
+    def test_analyze_java_handles_exception(self, capsys, monkeypatch):
+        import code_scalpel.symbolic_execution_tools as symbolic_tools
+        from code_scalpel import cli
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):
+                raise RuntimeError("fail-java")
+
+        monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
+
+        exit_code = cli._analyze_java("code", output_format="text", source="inline")
+        output = capsys.readouterr().err
+
+        assert exit_code == 1
+        assert "Error analyzing Java code" in output
+
+    def test_scan_code_security_json_branch(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        import sys
+        from code_scalpel import cli
+
+        class DummyVuln:
+            vulnerability_type = "SQL Injection"
+            cwe_id = "CWE-89"
+            taint_source = SimpleNamespace(name="request")
+            sink_type = SimpleNamespace(name="execute")
+            sink_location = (10,)
+            taint_path = ["src", "sink"]
+
+        class DummyResult:
+            has_vulnerabilities = True
+            vulnerability_count = 1
+            vulnerabilities = [DummyVuln()]
+
+        fake_module = SimpleNamespace(analyze_security=lambda code: DummyResult())
+        monkeypatch.setitem(
+            sys.modules, "code_scalpel.symbolic_execution_tools", fake_module
+        )
+
+        exit_code = cli.scan_code_security("print('hi')", output_format="json")
+        captured = capsys.readouterr().out
+
+        assert exit_code == 2
+        assert "SQL Injection" in captured
+
+    def test_scan_code_security_error_path(self, monkeypatch):
+        import sys
+        from code_scalpel import cli
+
+        def explode(code: str):
+            raise RuntimeError("scan-error")
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.symbolic_execution_tools",
+            __import__("types").SimpleNamespace(analyze_security=explode),
+        )
+
+        exit_code = cli.scan_code_security("print('hi')", output_format="text")
+        assert exit_code == 1
+
+    def test_scan_security_missing_file_returns_error(self, tmp_path):
+        from code_scalpel import cli
+
+        missing = tmp_path / "nope.py"
+        assert cli.scan_security(str(missing)) == 1
+
+    def test_start_server_handles_keyboard_interrupt(self, monkeypatch):
+        import sys
+        from types import SimpleNamespace
+        from code_scalpel import cli
+
+        def fake_run_server(**kwargs):
+            raise KeyboardInterrupt()
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.integrations.rest_api_server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
+
+        assert cli.start_server("0.0.0.0", 9000) == 0
+
+    def test_start_mcp_server_http_and_lan(self, capsys, monkeypatch):
+        import sys
+        from types import SimpleNamespace
+        from code_scalpel import cli
+
+        captured = {}
+
+        def fake_run_server(**kwargs):
+            captured.update(kwargs)
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.mcp.server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
+
+        exit_code = cli.start_mcp_server(
+            transport="sse", host="127.0.0.1", port=7777, allow_lan=True, root_path=None
+        )
+        output = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert captured.get("allow_lan") is True
+        assert "LAN access" in output
+
+    # [20251214_TEST] Cover stdio transport path for MCP server startup.
+    def test_start_mcp_server_stdio(self, capsys, monkeypatch):
+        import sys
+        from types import SimpleNamespace
+        from code_scalpel import cli
+
+        called = {}
+
+        def fake_run_server(**kwargs):
+            called.update(kwargs)
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.mcp.server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
+
+        exit_code = cli.start_mcp_server()
+        output = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert called.get("transport") == "stdio"
+        assert "stdio transport" in output
 
     def test_analyze_file_json_output(self, tmp_path):
         """Test file analysis with JSON output."""
@@ -385,6 +931,183 @@ class TestCLIDirectImport:
         # May succeed (with error in result) or fail
         captured.out + captured.err
         assert result in [0, 1]
+
+    # [20251214_TEST] Exercise Java branch through direct helper to lift cli.py coverage.
+    def test_analyze_java_json_reports_paths(self, capsys, monkeypatch):
+        from types import SimpleNamespace
+        from code_scalpel import cli
+
+        class DummyPath:
+            def __init__(self):
+                self.path_id = 7
+                self.status = SimpleNamespace(value="feasible")
+                self.model = {"x": 2}
+
+        class DummyResult:
+            paths = [DummyPath()]
+            feasible_count = 1
+            infeasible_count = 0
+
+            def get_feasible_paths(self):
+                return self.paths
+
+        class DummyAnalyzer:
+            def analyze(self, code: str, language: str):  # noqa: D401 simple stub
+                return DummyResult()
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.symbolic_execution_tools",
+            SimpleNamespace(SymbolicAnalyzer=lambda: DummyAnalyzer()),
+        )
+
+        exit_code = cli._analyze_java("code", output_format="json", source="inline")
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "feasible_count" in captured
+
+    # [20251214_TEST] Cover scan_security and scan_code_security without invoking real analyzer.
+    def test_scan_security_json_output(self, tmp_path, capsys, monkeypatch):
+        from code_scalpel import cli
+
+        class DummyVulnerability:
+            vulnerability_type = "SQLi"
+            cwe_id = "CWE-89"
+            taint_source = SimpleNamespace(name="user")
+            sink_type = SimpleNamespace(name="execute")
+            sink_location = (10,)
+            taint_path = ["user", "execute"]
+
+        class DummySecurityResult:
+            has_vulnerabilities = True
+            vulnerability_count = 1
+            vulnerabilities = [DummyVulnerability()]
+
+            def summary(self):  # noqa: D401 - test stub
+                return "summary"
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.symbolic_execution_tools",
+            SimpleNamespace(analyze_security=lambda code: DummySecurityResult()),
+        )
+
+        target = tmp_path / "vuln.py"
+        target.write_text("print('hi')")
+
+        exit_code = cli.scan_security(str(target), output_format="json")
+        captured = capsys.readouterr().out
+
+        assert exit_code == 2  # returns 2 when vulnerabilities found
+        assert "vulnerabilities" in captured
+
+    def test_scan_code_security_json_output(self, capsys, monkeypatch):
+        from code_scalpel import cli
+
+        class DummySecurityResult:
+            has_vulnerabilities = False
+            vulnerability_count = 0
+            vulnerabilities = []
+
+            def summary(self):
+                return "ok"
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.symbolic_execution_tools",
+            SimpleNamespace(analyze_security=lambda code: DummySecurityResult()),
+        )
+
+        exit_code = cli.scan_code_security("print('hi')", output_format="json")
+        captured = capsys.readouterr().out
+
+        assert exit_code == 0
+        assert "has_vulnerabilities" in captured
+
+    # [20251214_TEST] Cover start_server/start_mcp_server argument plumbing without real servers.
+    def test_start_server_invokes_run_server(self, capsys, monkeypatch):
+        from code_scalpel import cli
+
+        calls = {}
+
+        def fake_run_server(host: str, port: int, debug: bool):
+            calls["host"] = host
+            calls["port"] = port
+            calls["debug"] = debug
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.integrations.rest_api_server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
+
+        exit_code = cli.start_server(host="127.0.0.1", port=1234)
+        capsys.readouterr()
+
+        assert exit_code == 0
+        assert calls == {"host": "127.0.0.1", "port": 1234, "debug": False}
+
+    def test_start_mcp_server_http_allows_lan_host_rewrite(self, capsys, monkeypatch):
+        from code_scalpel import cli
+
+        calls = {}
+
+        def fake_run_server(
+            transport: str, host: str, port: int, allow_lan: bool, root_path
+        ):
+            calls.update(
+                {
+                    "transport": transport,
+                    "host": host,
+                    "port": port,
+                    "allow_lan": allow_lan,
+                    "root_path": root_path,
+                }
+            )
+
+        monkeypatch.setitem(
+            sys.modules,
+            "code_scalpel.mcp.server",
+            SimpleNamespace(run_server=fake_run_server),
+        )
+
+        exit_code = cli.start_mcp_server(
+            transport="sse",
+            host="127.0.0.1",
+            port=8081,
+            allow_lan=True,
+            root_path="/tmp",
+        )
+        capsys.readouterr()
+
+        assert exit_code == 0
+        assert calls["host"] == "127.0.0.1"
+        assert calls["allow_lan"] is True
+        assert calls["transport"] == "sse"
+
+    def test_main_scan_code_json_uses_scan_code_security(self, capsys, monkeypatch):
+        from code_scalpel import cli
+        import sys
+
+        monkeypatch.setattr(
+            sys, "argv", ["code-scalpel", "scan", "--code", "print('hi')", "--json"]
+        )
+
+        called = {}
+
+        def fake_scan_code_security(code: str, output_format: str):
+            called["code"] = code
+            called["output_format"] = output_format
+            return 0
+
+        monkeypatch.setattr(cli, "scan_code_security", fake_scan_code_security)
+
+        exit_code = cli.main()
+        capsys.readouterr()
+
+        assert exit_code == 0
+        assert called == {"code": "print('hi')", "output_format": "json"}
 
     def test_main_no_args(self, capsys, monkeypatch):
         """Test main with no arguments shows help."""

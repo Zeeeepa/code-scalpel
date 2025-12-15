@@ -44,9 +44,11 @@ class AgentContext:
                 "operation": operation,
                 "result": result,
                 "success": success,
-                "timestamp": asyncio.get_event_loop().time()
-                if asyncio.get_event_loop()
-                else None,
+                "timestamp": (
+                    asyncio.get_event_loop().time()
+                    if asyncio.get_event_loop()
+                    else None
+                ),
             }
         )
 

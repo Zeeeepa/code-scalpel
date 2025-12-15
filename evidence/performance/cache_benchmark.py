@@ -29,7 +29,6 @@ from dataclasses import dataclass, asdict
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.code_scalpel.code_analyzer import CodeAnalyzer
-from src.code_scalpel.utilities.cache import CacheConfig, AnalysisCache
 
 
 # Sample code snippets of varying complexity
@@ -47,8 +46,7 @@ def multiply(a, b):
     """Multiply two numbers."""
     return a * b
 ''',
-
-    "medium": '''
+    "medium": """
 import hashlib
 from typing import Optional, List
 from dataclasses import dataclass
@@ -99,9 +97,8 @@ class UserRepository:
 
     def find_all(self) -> List[User]:
         return list(self.users.values())
-''',
-
-    "large": '''
+""",
+    "large": """
 import os
 import jwt
 import hashlib
@@ -309,13 +306,14 @@ class AuthService:
             return False
         except jwt.InvalidTokenError:
             return False
-'''
+""",
 }
 
 
 @dataclass
 class CacheBenchmarkResult:
     """Result from a single cache benchmark run."""
+
     code_size: str
     code_lines: int
     cold_time_ms: float
@@ -342,7 +340,9 @@ class CachePerformanceBenchmark:
         if self.temp_dir and Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
-    def measure_analysis_time(self, code: str, use_cache: bool, analyzer: CodeAnalyzer = None) -> float:
+    def measure_analysis_time(
+        self, code: str, use_cache: bool, analyzer: CodeAnalyzer = None
+    ) -> float:
         """Measure time to analyze code with or without cache."""
         if analyzer is None:
             analyzer = CodeAnalyzer(cache_enabled=use_cache)
@@ -355,13 +355,16 @@ class CachePerformanceBenchmark:
 
     def run_single_benchmark(self, code_size: str, code: str) -> CacheBenchmarkResult:
         """Run benchmark for a single code sample."""
-        lines = len([l for l in code.split('\n') if l.strip()])
+        # [20251214_BUGFIX] Use descriptive variable names to satisfy lint and improve clarity
+        lines = len([line for line in code.split("\n") if line.strip()])
 
         # Cold cache measurements - fresh analyzer each time
         cold_times = []
         for _ in range(self.iterations):
             analyzer = CodeAnalyzer(cache_enabled=True)  # Fresh analyzer = cold cache
-            cold_time = self.measure_analysis_time(code, use_cache=True, analyzer=analyzer)
+            cold_time = self.measure_analysis_time(
+                code, use_cache=True, analyzer=analyzer
+            )
             cold_times.append(cold_time)
 
         # Warm cache measurements - reuse same analyzer
@@ -371,7 +374,9 @@ class CachePerformanceBenchmark:
         self.measure_analysis_time(code, use_cache=True, analyzer=analyzer)
         # Now measure with warm cache
         for _ in range(self.iterations):
-            warm_time = self.measure_analysis_time(code, use_cache=True, analyzer=analyzer)
+            warm_time = self.measure_analysis_time(
+                code, use_cache=True, analyzer=analyzer
+            )
             warm_times.append(warm_time)
 
         avg_cold = statistics.mean(cold_times)
@@ -384,7 +389,7 @@ class CachePerformanceBenchmark:
             cold_time_ms=round(avg_cold, 2),
             warm_time_ms=round(avg_warm, 2),
             speedup_ratio=round(speedup, 1),
-            cache_hit=avg_warm < avg_cold
+            cache_hit=avg_warm < avg_cold,
         )
 
     def run_all_benchmarks(self) -> Dict[str, Any]:
@@ -403,7 +408,9 @@ class CachePerformanceBenchmark:
             print(f"Testing {size_name} code sample...")
             result = self.run_single_benchmark(size_name, code)
             self.results.append(result)
-            print(f"  Cold: {result.cold_time_ms}ms, Warm: {result.warm_time_ms}ms, Speedup: {result.speedup_ratio}x")
+            print(
+                f"  Cold: {result.cold_time_ms}ms, Warm: {result.warm_time_ms}ms, Speedup: {result.speedup_ratio}x"
+            )
 
         total_time = time.time() - start_time
 
@@ -424,7 +431,7 @@ class CachePerformanceBenchmark:
                 "version": "1.0.0",
                 "timestamp": datetime.now().isoformat(),
                 "total_execution_time_seconds": round(total_time, 2),
-                "iterations_per_test": self.iterations
+                "iterations_per_test": self.iterations,
             },
             "summary": {
                 "average_speedup_ratio": round(avg_speedup, 1),
@@ -432,7 +439,7 @@ class CachePerformanceBenchmark:
                 "min_speedup_ratio": round(min_speedup, 1),
                 "average_cold_time_ms": round(avg_cold, 2),
                 "average_warm_time_ms": round(avg_warm, 2),
-                "all_cache_hits": all(r.cache_hit for r in self.results)
+                "all_cache_hits": all(r.cache_hit for r in self.results),
             },
             "by_code_size": {
                 r.code_size: {
@@ -440,7 +447,7 @@ class CachePerformanceBenchmark:
                     "cold_time_ms": r.cold_time_ms,
                     "warm_time_ms": r.warm_time_ms,
                     "speedup_ratio": r.speedup_ratio,
-                    "cache_hit": r.cache_hit
+                    "cache_hit": r.cache_hit,
                 }
                 for r in self.results
             },
@@ -450,8 +457,8 @@ class CachePerformanceBenchmark:
                 "measured_average": f"{round(avg_speedup, 1)}x",
                 "measured_max": f"{round(max_speedup, 1)}x",
                 "validated": avg_speedup >= 10,  # Realistic threshold
-                "notes": self._get_claim_notes(avg_speedup, max_speedup)
-            }
+                "notes": self._get_claim_notes(avg_speedup, max_speedup),
+            },
         }
 
         return report
@@ -469,7 +476,7 @@ class CachePerformanceBenchmark:
         else:
             notes.append("Moderate: Cache provides <10x speedup (still beneficial)")
 
-        notes.append(f"The '200x' claim refers to peak performance on larger codebases.")
+        notes.append("The '200x' claim refers to peak performance on larger codebases.")
         notes.append(f"In this benchmark, max speedup was {max_speedup}x.")
 
         return " ".join(notes)
@@ -491,11 +498,15 @@ class CachePerformanceBenchmark:
         print("BY CODE SIZE")
         print(f"{'='*70}\n")
 
-        print(f"{'Size':<10} {'Lines':<8} {'Cold (ms)':<12} {'Warm (ms)':<12} {'Speedup':<10}")
+        print(
+            f"{'Size':<10} {'Lines':<8} {'Cold (ms)':<12} {'Warm (ms)':<12} {'Speedup':<10}"
+        )
         print("-" * 55)
 
         for size, data in report["by_code_size"].items():
-            print(f"{size:<10} {data['lines']:<8} {data['cold_time_ms']:<12} {data['warm_time_ms']:<12} {data['speedup_ratio']}x")
+            print(
+                f"{size:<10} {data['lines']:<8} {data['cold_time_ms']:<12} {data['warm_time_ms']:<12} {data['speedup_ratio']}x"
+            )
 
         print(f"\n{'='*70}")
         print("CLAIM VALIDATION")
@@ -514,9 +525,16 @@ class CachePerformanceBenchmark:
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Run Code Scalpel cache performance benchmark")
-    parser.add_argument("--output", "-o", default="results.json", help="Output file for JSON results")
-    parser.add_argument("--iterations", "-n", type=int, default=5, help="Iterations per test")
+
+    parser = argparse.ArgumentParser(
+        description="Run Code Scalpel cache performance benchmark"
+    )
+    parser.add_argument(
+        "--output", "-o", default="results.json", help="Output file for JSON results"
+    )
+    parser.add_argument(
+        "--iterations", "-n", type=int, default=5, help="Iterations per test"
+    )
     args = parser.parse_args()
 
     benchmark = CachePerformanceBenchmark(iterations=args.iterations)
@@ -525,7 +543,7 @@ def main():
 
     # Save results
     output_path = Path(__file__).parent / args.output
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(report, f, indent=2)
 
     print(f"Detailed results saved to: {output_path}")

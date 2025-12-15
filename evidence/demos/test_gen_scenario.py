@@ -6,7 +6,7 @@ branching logic and generate concrete test inputs for EVERY path.
 
 Run:
     code-scalpel analyze demos/test_gen_scenario.py
-    
+
 Then use the MCP server:
     generate_unit_tests(code, function_name="loan_approval")
 

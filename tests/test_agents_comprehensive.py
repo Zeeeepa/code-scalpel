@@ -432,8 +432,8 @@ class TestOptimizationAgentCoverage:
         result = await agent.observe("/test/file.py")
 
         assert result["success"] is True
-        # OptimizationAgent only processes first 3 functions ([:3])
-        assert agent.find_symbol_usage.call_count == 3
+        # [20251214_TEST] Align expected symbol analysis count with agent contract (first five)
+        assert agent.find_symbol_usage.call_count == 5
 
     @pytest.mark.asyncio
     async def test_orient_with_bottlenecks_key(self, agent):

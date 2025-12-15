@@ -206,9 +206,9 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=arg.arg,
-                    type_annotation=ast.unparse(arg.annotation)
-                    if arg.annotation
-                    else None,
+                    type_annotation=(
+                        ast.unparse(arg.annotation) if arg.annotation else None
+                    ),
                     default=default,
                     is_rest=False,
                     is_keyword_only=False,
@@ -222,9 +222,11 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=args.vararg.arg,
-                    type_annotation=ast.unparse(args.vararg.annotation)
-                    if args.vararg.annotation
-                    else None,
+                    type_annotation=(
+                        ast.unparse(args.vararg.annotation)
+                        if args.vararg.annotation
+                        else None
+                    ),
                     is_rest=True,
                     loc=self._make_loc(args.vararg),
                     source_language=self.language,
@@ -243,9 +245,9 @@ class PythonNormalizer(BaseNormalizer):
             params.append(
                 IRParameter(
                     name=arg.arg,
-                    type_annotation=ast.unparse(arg.annotation)
-                    if arg.annotation
-                    else None,
+                    type_annotation=(
+                        ast.unparse(arg.annotation) if arg.annotation else None
+                    ),
                     default=default,
                     is_keyword_only=True,
                     loc=self._make_loc(arg),
@@ -575,15 +577,21 @@ class PythonNormalizer(BaseNormalizer):
         return IRCall(
             func=IRName(id="slice", source_language=self.language),
             args=[
-                self.normalize_node(node.lower)
-                if node.lower
-                else IRConstant(value=None, source_language=self.language),
-                self.normalize_node(node.upper)
-                if node.upper
-                else IRConstant(value=None, source_language=self.language),
-                self.normalize_node(node.step)
-                if node.step
-                else IRConstant(value=None, source_language=self.language),
+                (
+                    self.normalize_node(node.lower)
+                    if node.lower
+                    else IRConstant(value=None, source_language=self.language)
+                ),
+                (
+                    self.normalize_node(node.upper)
+                    if node.upper
+                    else IRConstant(value=None, source_language=self.language)
+                ),
+                (
+                    self.normalize_node(node.step)
+                    if node.step
+                    else IRConstant(value=None, source_language=self.language)
+                ),
             ],
             loc=self._make_loc(node),
             source_language=self.language,

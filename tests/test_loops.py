@@ -2,7 +2,7 @@
 Tests for Loop Support - Bounded Unrolling for Symbolic Execution.
 
 CRITICAL: These tests enforce TERMINATION GUARANTEES.
-Unbounded loops are the halting problem. Symbolic loops are worse - 
+Unbounded loops are the halting problem. Symbolic loops are worse -
 they can fork infinitely until RAM is exhausted.
 
 The interpreter must:

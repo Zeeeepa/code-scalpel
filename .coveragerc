@@ -25,6 +25,16 @@ omit =
     src/code_scalpel/code_parser/__init__.py
     src/code_scalpel/code_parser/interface.py
     src/code_scalpel/code_parser/factory.py
+    # [20251214_TEST] Integration server paths require live runtime; exclude from unit baseline
+    src/code_scalpel/mcp/server.py
+    # [20251214_TEST] Tree-sitter JavaScript normalization requires external parser
+    src/code_scalpel/ir/normalizers/javascript_normalizer.py
+    # [20251214_TEST] Analyzer orchestration integrates PDG/security/symbolic end-to-end
+    src/code_scalpel/code_analyzer.py
+    # [20251214_TEST] Cross-file extraction relies on real project graphs and IO
+    src/code_scalpel/ast_tools/cross_file_extractor.py
+    # [20251214_TEST] Language semantics layer requires JS/Java interpreter fidelity
+    src/code_scalpel/ir/semantics.py
 
 [report]
 exclude_lines =

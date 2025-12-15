@@ -407,7 +407,7 @@ def demo_without_code_scalpel():
     print("The LLM receives the ENTIRE FILE as context:")
     print("-" * 70)
 
-    lines = ECOMMERCE_CODE.strip().split('\n')
+    lines = ECOMMERCE_CODE.strip().split("\n")
     total_chars = len(ECOMMERCE_CODE)
     total_tokens = total_chars // 4  # Rough estimate
 
@@ -422,11 +422,7 @@ def demo_without_code_scalpel():
     print("4. May accidentally modify unrelated code")
     print()
 
-    return {
-        "lines": len(lines),
-        "chars": total_chars,
-        "tokens": total_tokens
-    }
+    return {"lines": len(lines), "chars": total_chars, "tokens": total_tokens}
 
 
 def demo_with_code_scalpel():
@@ -473,13 +469,13 @@ def demo_with_code_scalpel():
     if caller_result and caller_result.code:
         surgical_context.append(caller_result.code)
 
-    surgical_code = '\n'.join(surgical_context)
+    surgical_code = "\n".join(surgical_context)
 
     print(surgical_code)
     print()
     print("-" * 70)
 
-    lines = surgical_code.strip().split('\n')
+    lines = surgical_code.strip().split("\n")
     total_chars = len(surgical_code)
     total_tokens = total_chars // 4
 
@@ -494,11 +490,7 @@ def demo_with_code_scalpel():
     print("4. Lower risk of unintended modifications")
     print()
 
-    return {
-        "lines": len(lines),
-        "chars": total_chars,
-        "tokens": total_tokens
-    }
+    return {"lines": len(lines), "chars": total_chars, "tokens": total_tokens}
 
 
 def demo_security_scan():
@@ -508,7 +500,7 @@ def demo_security_scan():
     print("=" * 70)
     print()
 
-    vulnerable_code = '''
+    vulnerable_code = """
 import sqlite3
 from flask import request
 
@@ -522,7 +514,7 @@ def get_user(username):
 def search():
     term = request.args.get('q')
     return get_user(term)
-'''
+"""
 
     print("Analyzing potentially vulnerable code:")
     print("-" * 70)
@@ -555,7 +547,11 @@ def main():
     print()
     print("*" * 70)
     print("*" + " " * 68 + "*")
-    print("*" + "    CODE SCALPEL DEMONSTRATION: SURGICAL CODE EXTRACTION    ".center(68) + "*")
+    print(
+        "*"
+        + "    CODE SCALPEL DEMONSTRATION: SURGICAL CODE EXTRACTION    ".center(68)
+        + "*"
+    )
     print("*" + " " * 68 + "*")
     print("*" * 70)
     print()
@@ -575,9 +571,15 @@ def main():
     print()
     print(f"{'Metric':<25} {'Without CS':<15} {'With CS':<15} {'Savings':<15}")
     print("-" * 70)
-    print(f"{'Lines':<25} {without_results['lines']:<15} {with_results['lines']:<15} {without_results['lines'] - with_results['lines']:<15}")
-    print(f"{'Characters':<25} {without_results['chars']:<15,} {with_results['chars']:<15,} {without_results['chars'] - with_results['chars']:<15,}")
-    print(f"{'Tokens (est.)':<25} {without_results['tokens']:<15,} {with_results['tokens']:<15,} {token_savings:<15,}")
+    print(
+        f"{'Lines':<25} {without_results['lines']:<15} {with_results['lines']:<15} {without_results['lines'] - with_results['lines']:<15}"
+    )
+    print(
+        f"{'Characters':<25} {without_results['chars']:<15,} {with_results['chars']:<15,} {without_results['chars'] - with_results['chars']:<15,}"
+    )
+    print(
+        f"{'Tokens (est.)':<25} {without_results['tokens']:<15,} {with_results['tokens']:<15,} {token_savings:<15,}"
+    )
     print(f"{'Token Savings %':<25} {'-':<15} {'-':<15} {savings_percentage:.1f}%")
     print()
 
@@ -590,7 +592,7 @@ def main():
     print()
     print("Key Takeaways:")
     print(f"1. Token reduction: {savings_percentage:.1f}% fewer tokens needed")
-    print(f"2. Precision: Only relevant code extracted with dependencies")
+    print("2. Precision: Only relevant code extracted with dependencies")
     print("3. Security: Built-in vulnerability detection")
     print()
 

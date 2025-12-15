@@ -912,7 +912,10 @@ def unrelated():
 
         assert result.success is False
         # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
-        assert "cannot access file" in result.error.lower() or "not found" in result.error.lower()
+        assert (
+            "cannot access file" in result.error.lower()
+            or "not found" in result.error.lower()
+        )
 
     async def test_extract_function_not_found_in_file(self, tmp_path):
         """Test extraction of non-existent function from valid file."""
@@ -1794,7 +1797,11 @@ def func_b():
 
         assert result.success is True
         # Mermaid diagram should be generated
-        assert "graph" in result.mermaid.lower() or "flowchart" in result.mermaid.lower() or result.mermaid == ""
+        assert (
+            "graph" in result.mermaid.lower()
+            or "flowchart" in result.mermaid.lower()
+            or result.mermaid == ""
+        )
 
     async def test_file_not_found(self, tmp_path):
         """Test handling of nonexistent target file."""

@@ -15,10 +15,9 @@ Usage:
 import sys
 import json
 import time
-import os
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from dataclasses import dataclass, asdict
 
 # Add project root to path
@@ -31,6 +30,7 @@ from src.code_scalpel.surgical_extractor import SurgicalExtractor
 @dataclass
 class ExtractionTask:
     """A code extraction task for benchmarking."""
+
     name: str
     description: str
     target_symbol: str
@@ -41,6 +41,7 @@ class ExtractionTask:
 @dataclass
 class ExtractionResult:
     """Results from a single extraction task."""
+
     task_name: str
     target_symbol: str
 
@@ -76,70 +77,70 @@ class TokenEfficiencyBenchmark:
             description="Change password hashing algorithm in User model",
             target_symbol="User.hash_password",
             file_path="models/user.py",
-            task_type="refactor"
+            task_type="refactor",
         ),
         ExtractionTask(
             name="Fix login validation",
             description="Debug authentication logic",
             target_symbol="AuthService.authenticate",
             file_path="services/auth_service.py",
-            task_type="debug"
+            task_type="debug",
         ),
         ExtractionTask(
             name="Add 2FA verification",
             description="Understand 2FA flow for enhancement",
             target_symbol="AuthService.authenticate_with_2fa",
             file_path="services/auth_service.py",
-            task_type="understand"
+            task_type="understand",
         ),
         ExtractionTask(
             name="Test token generation",
             description="Write tests for JWT token generation",
             target_symbol="AuthService._generate_tokens",
             file_path="services/auth_service.py",
-            task_type="test"
+            task_type="test",
         ),
         ExtractionTask(
             name="Refactor user preferences",
             description="Add new preference field to UserPreferences",
             target_symbol="UserPreferences",
             file_path="models/user.py",
-            task_type="refactor"
+            task_type="refactor",
         ),
         ExtractionTask(
             name="Fix permission check",
             description="Debug permission validation logic",
             target_symbol="PermissionService.has_permission",
             file_path="services/auth_service.py",
-            task_type="debug"
+            task_type="debug",
         ),
         ExtractionTask(
             name="Understand user serialization",
             description="Review user to_dict method",
             target_symbol="User.to_dict",
             file_path="models/user.py",
-            task_type="understand"
+            task_type="understand",
         ),
         ExtractionTask(
             name="Add login endpoint validation",
             description="Review login endpoint for security",
             target_symbol="login",
             file_path="api/routes.py",
-            task_type="understand"
+            task_type="understand",
         ),
         ExtractionTask(
             name="Refactor user repository",
             description="Add caching to UserRepository",
             target_symbol="UserRepository.find_by_id",
             file_path="models/user.py",
-            task_type="refactor"
+            task_type="refactor",
         ),
         ExtractionTask(
             name="Test password change",
             description="Write tests for password change flow",
             target_symbol="AuthService.change_password",
             file_path="services/auth_service.py",
-            task_type="test"
+            task_type="test",
         ),
     ]
 
@@ -153,7 +154,8 @@ class TokenEfficiencyBenchmark:
 
     def count_lines(self, text: str) -> int:
         """Count non-empty lines."""
-        return len([l for l in text.split('\n') if l.strip()])
+        # [20251214_BUGFIX] Avoid ambiguous loop variable for lint compliance
+        return len([line for line in text.split("\n") if line.strip()])
 
     def get_full_file_content(self, file_path: str) -> str:
         """Read entire file content."""
@@ -185,7 +187,9 @@ class TokenEfficiencyBenchmark:
                 for py_file in related_path.glob("*.py"):
                     if not py_file.name.startswith("__"):
                         rel_path = py_file.relative_to(self.SAMPLE_CODEBASE)
-                        content_parts.append(f"# File: {rel_path}\n{py_file.read_text()}")
+                        content_parts.append(
+                            f"# File: {rel_path}\n{py_file.read_text()}"
+                        )
 
         return "\n\n".join(content_parts)
 
@@ -201,8 +205,8 @@ class TokenEfficiencyBenchmark:
             extractor = SurgicalExtractor(code)
 
             # Extract the target symbol
-            if '.' in target_symbol:
-                class_name, method_name = target_symbol.split('.', 1)
+            if "." in target_symbol:
+                class_name, method_name = target_symbol.split(".", 1)
                 result = extractor.get_method(class_name, method_name)
             else:
                 result = extractor.get_function(target_symbol)
@@ -215,7 +219,7 @@ class TokenEfficiencyBenchmark:
                 dep_count = 0
 
                 # Add dependencies
-                if hasattr(result, 'dependencies') and result.dependencies:
+                if hasattr(result, "dependencies") and result.dependencies:
                     for dep in result.dependencies:
                         dep_code = extractor.get_function(dep)
                         if dep_code and dep_code.code:
@@ -223,7 +227,7 @@ class TokenEfficiencyBenchmark:
                             dep_count += 1
 
                 # Add required imports
-                if hasattr(result, 'imports_needed') and result.imports_needed:
+                if hasattr(result, "imports_needed") and result.imports_needed:
                     imports_str = "\n".join(result.imports_needed)
                     parts.insert(0, f"# Required imports:\n{imports_str}")
 
@@ -246,7 +250,9 @@ class TokenEfficiencyBenchmark:
         full_file_tokens = self.estimate_tokens(full_content)
 
         # Get surgical extraction
-        surgical_content, dep_count = self.surgical_extract(task.file_path, task.target_symbol)
+        surgical_content, dep_count = self.surgical_extract(
+            task.file_path, task.target_symbol
+        )
         surgical_lines = self.count_lines(surgical_content)
         surgical_chars = len(surgical_content)
         surgical_tokens = self.estimate_tokens(surgical_content)
@@ -271,7 +277,7 @@ class TokenEfficiencyBenchmark:
             line_reduction_ratio=round(line_ratio, 4),
             token_reduction_ratio=round(token_ratio, 4),
             token_savings_percentage=round(savings_pct, 2),
-            extraction_time_ms=round(extraction_time, 2)
+            extraction_time_ms=round(extraction_time, 2),
         )
 
     def run_all_tasks(self) -> Dict[str, Any]:
@@ -291,7 +297,9 @@ class TokenEfficiencyBenchmark:
             print(f"[{i}/{len(self.TASKS)}] {task.name}: {task.target_symbol}")
             result = self.run_single_task(task)
             self.results.append(result)
-            print(f"         Full: {result.full_file_tokens} tokens -> Surgical: {result.surgical_tokens} tokens ({result.token_savings_percentage}% saved)")
+            print(
+                f"         Full: {result.full_file_tokens} tokens -> Surgical: {result.surgical_tokens} tokens ({result.token_savings_percentage}% saved)"
+            )
 
         total_time = time.time() - start_time
 
@@ -302,8 +310,12 @@ class TokenEfficiencyBenchmark:
         # Aggregate metrics
         total_full_tokens = sum(r.full_file_tokens for r in self.results)
         total_surgical_tokens = sum(r.surgical_tokens for r in self.results)
-        avg_savings = sum(r.token_savings_percentage for r in self.results) / len(self.results)
-        avg_ratio = sum(r.token_reduction_ratio for r in self.results) / len(self.results)
+        avg_savings = sum(r.token_savings_percentage for r in self.results) / len(
+            self.results
+        )
+        avg_ratio = sum(r.token_reduction_ratio for r in self.results) / len(
+            self.results
+        )
 
         # Best and worst cases
         best_case = max(self.results, key=lambda r: r.token_savings_percentage)
@@ -316,7 +328,7 @@ class TokenEfficiencyBenchmark:
                 "timestamp": datetime.now().isoformat(),
                 "total_execution_time_seconds": round(total_time, 2),
                 "codebase_path": str(self.SAMPLE_CODEBASE),
-                "total_tasks": len(self.TASKS)
+                "total_tasks": len(self.TASKS),
             },
             "summary": {
                 "total_tokens_naive_approach": total_full_tokens,
@@ -324,21 +336,21 @@ class TokenEfficiencyBenchmark:
                 "total_tokens_saved": total_full_tokens - total_surgical_tokens,
                 "average_token_savings_percentage": round(avg_savings, 2),
                 "average_reduction_ratio": round(avg_ratio, 4),
-                "compression_factor": round(1 / avg_ratio, 1) if avg_ratio > 0 else 0
+                "compression_factor": round(1 / avg_ratio, 1) if avg_ratio > 0 else 0,
             },
             "best_case": {
                 "task": best_case.task_name,
                 "target": best_case.target_symbol,
                 "savings_percentage": best_case.token_savings_percentage,
                 "full_tokens": best_case.full_file_tokens,
-                "surgical_tokens": best_case.surgical_tokens
+                "surgical_tokens": best_case.surgical_tokens,
             },
             "worst_case": {
                 "task": worst_case.task_name,
                 "target": worst_case.target_symbol,
                 "savings_percentage": worst_case.token_savings_percentage,
                 "full_tokens": worst_case.full_file_tokens,
-                "surgical_tokens": worst_case.surgical_tokens
+                "surgical_tokens": worst_case.surgical_tokens,
             },
             "by_task_type": self._aggregate_by_task_type(),
             "detailed_results": [asdict(r) for r in self.results],
@@ -346,8 +358,8 @@ class TokenEfficiencyBenchmark:
                 "claim": "Feed the LLM 50 lines, not 5,000 lines",
                 "validated": avg_savings >= 70,
                 "evidence": f"Average token reduction: {round(avg_savings, 1)}%",
-                "interpretation": self._get_interpretation(avg_savings)
-            }
+                "interpretation": self._get_interpretation(avg_savings),
+            },
         }
 
         return report
@@ -363,7 +375,9 @@ class TokenEfficiencyBenchmark:
             task_types[t_type]["total_savings"] += result.token_savings_percentage
 
         for t_type, data in task_types.items():
-            data["average_savings_percentage"] = round(data["total_savings"] / data["count"], 2)
+            data["average_savings_percentage"] = round(
+                data["total_savings"] / data["count"], 2
+            )
             del data["total_savings"]
 
         return task_types
@@ -388,10 +402,18 @@ class TokenEfficiencyBenchmark:
         print(f"{'='*70}\n")
 
         summary = report["summary"]
-        print(f"Total tokens (naive RAG approach):     {summary['total_tokens_naive_approach']:,}")
-        print(f"Total tokens (surgical extraction):   {summary['total_tokens_surgical_approach']:,}")
-        print(f"Tokens saved:                         {summary['total_tokens_saved']:,}")
-        print(f"Average token savings:                {summary['average_token_savings_percentage']}%")
+        print(
+            f"Total tokens (naive RAG approach):     {summary['total_tokens_naive_approach']:,}"
+        )
+        print(
+            f"Total tokens (surgical extraction):   {summary['total_tokens_surgical_approach']:,}"
+        )
+        print(
+            f"Tokens saved:                         {summary['total_tokens_saved']:,}"
+        )
+        print(
+            f"Average token savings:                {summary['average_token_savings_percentage']}%"
+        )
         print(f"Compression factor:                   {summary['compression_factor']}x")
 
         print(f"\n{'='*70}")
@@ -401,16 +423,22 @@ class TokenEfficiencyBenchmark:
         best = report["best_case"]
         worst = report["worst_case"]
         print(f"Best case:  {best['task']} - {best['savings_percentage']}% saved")
-        print(f"            ({best['full_tokens']} -> {best['surgical_tokens']} tokens)")
+        print(
+            f"            ({best['full_tokens']} -> {best['surgical_tokens']} tokens)"
+        )
         print(f"Worst case: {worst['task']} - {worst['savings_percentage']}% saved")
-        print(f"            ({worst['full_tokens']} -> {worst['surgical_tokens']} tokens)")
+        print(
+            f"            ({worst['full_tokens']} -> {worst['surgical_tokens']} tokens)"
+        )
 
         print(f"\n{'='*70}")
         print("BY TASK TYPE")
         print(f"{'='*70}\n")
 
         for task_type, data in report["by_task_type"].items():
-            print(f"{task_type:<12}: {data['average_savings_percentage']}% avg savings ({data['count']} tasks)")
+            print(
+                f"{task_type:<12}: {data['average_savings_percentage']}% avg savings ({data['count']} tasks)"
+            )
 
         print(f"\n{'='*70}")
         print("CLAIM VALIDATION")
@@ -431,15 +459,22 @@ class TokenEfficiencyBenchmark:
         print("-" * 70)
 
         for result in self.results:
-            print(f"{result.task_name:<35} {result.full_file_tokens:<12} {result.surgical_tokens:<12} {result.token_savings_percentage}%")
+            print(
+                f"{result.task_name:<35} {result.full_file_tokens:<12} {result.surgical_tokens:<12} {result.token_savings_percentage}%"
+            )
 
         print(f"\n{'='*70}\n")
 
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Run Code Scalpel token efficiency benchmark")
-    parser.add_argument("--output", "-o", default="results.json", help="Output file for JSON results")
+
+    parser = argparse.ArgumentParser(
+        description="Run Code Scalpel token efficiency benchmark"
+    )
+    parser.add_argument(
+        "--output", "-o", default="results.json", help="Output file for JSON results"
+    )
     args = parser.parse_args()
 
     benchmark = TokenEfficiencyBenchmark()
@@ -448,7 +483,7 @@ def main():
 
     # Save results
     output_path = Path(__file__).parent / args.output
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(report, f, indent=2)
 
     print(f"Detailed results saved to: {output_path}")

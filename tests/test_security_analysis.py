@@ -1166,7 +1166,7 @@ class TestTaintTrackerCoverage:
         finally:
             os.unlink(temp_path)
 
-    def test_find_config_file_not_found(self):
+    def test_find_config_file_not_found(self, tmp_path):
         """Test _find_config_file when no config exists."""
         import os
         from code_scalpel.symbolic_execution_tools.taint_tracker import (
@@ -1176,7 +1176,8 @@ class TestTaintTrackerCoverage:
         # Change to temp directory with no pyproject.toml
         original_cwd = os.getcwd()
         try:
-            os.chdir("/tmp")
+            # [20251214_BUGFIX] Use per-test temp directory to avoid platform-specific /tmp assumptions
+            os.chdir(tmp_path)
             result = _find_config_file()
             # May or may not find one depending on /tmp contents
             assert result is None or isinstance(result, str)
@@ -1653,9 +1654,12 @@ class TestTaintTrackerConfigEdgeCases:
         )
 
         # Mock both os.path.exists and _load_toml
-        with patch("os.path.exists", return_value=True), patch(
-            "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
-            return_value=None,
+        with (
+            patch("os.path.exists", return_value=True),
+            patch(
+                "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
+                return_value=None,
+            ),
         ):
             result = load_sanitizers_from_config("fake_path.toml")
 
@@ -1679,9 +1683,12 @@ class TestTaintTrackerConfigEdgeCases:
             }
         }
 
-        with patch("os.path.exists", return_value=True), patch(
-            "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
-            return_value=fake_config,
+        with (
+            patch("os.path.exists", return_value=True),
+            patch(
+                "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
+                return_value=fake_config,
+            ),
         ):
             result = load_sanitizers_from_config("fake_path.toml")
 

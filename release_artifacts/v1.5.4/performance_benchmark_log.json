@@ -1,0 +1,45 @@
+{
+  "_tag": "[20251214_DOCS] performance benchmarks v1.5.4",
+  "version": "v1.5.4",
+  "date": "2025-12-14",
+  "scenarios": [
+    {
+      "name": "import_resolution_cold",
+      "description": "Resolve imports across ~1000-file fixture, cold cache",
+      "target_ms": 10000,
+      "result_ms": null,
+      "status": "documented",
+      "notes": "Documented scenario; execution pending run on >=1000-file fixture with cache cleared"
+    },
+    {
+      "name": "import_resolution_warm",
+      "description": "Resolve imports across ~1000-file fixture, warm cache",
+      "target_ms": 5000,
+      "result_ms": null,
+      "status": "documented",
+      "notes": "Documented scenario; execute immediately after cold benchmark"
+    },
+    {
+      "name": "cross_file_extraction_cold",
+      "description": "Cross-file extractor on 1000-file fixture, cold cache",
+      "target_ms": 10000,
+      "result_ms": null,
+      "status": "documented",
+      "notes": "Documented scenario; execute on representative symbol list"
+    },
+    {
+      "name": "project_crawl_cold",
+      "description": "Project crawl on 1000-file fixture, cold cache",
+      "target_ms": 10000,
+      "result_ms": null,
+      "status": "documented",
+      "notes": "Documented scenario; capture complexity stats when executed"
+    }
+  ],
+  "environment": {
+    "hardware": "TBD (document at run time)",
+    "os": "Windows",
+    "python_version": "3.13.9",
+    "commit": "TBD"
+  }
+}

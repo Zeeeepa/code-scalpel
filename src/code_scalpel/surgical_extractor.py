@@ -11,13 +11,13 @@ Usage:
     from code_scalpel.surgical_extractor import SurgicalExtractor
 
     extractor = SurgicalExtractor(code)
-    
+
     # Extract just one function (saves tokens)
     func_code = extractor.get_function("calculate_tax")
-    
+
     # Extract with context (dependencies)
     func_with_deps = extractor.get_function_with_context("calculate_tax")
-    
+
     # Extract a class method
     method_code = extractor.get_method("Calculator", "add")
 """

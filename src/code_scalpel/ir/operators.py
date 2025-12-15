@@ -7,7 +7,7 @@ The STRUCTURE is normalized here, but SEMANTICS are handled by LanguageSemantics
 Example:
     Python `ast.Add` -> BinaryOperator.ADD
     JS `+` token -> BinaryOperator.ADD
-    
+
 But the BEHAVIOR of ADD differs:
     Python: "5" + 3 -> TypeError
     JS: "5" + 3 -> "53"

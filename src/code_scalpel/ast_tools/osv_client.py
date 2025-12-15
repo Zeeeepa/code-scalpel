@@ -20,7 +20,6 @@ import urllib.request
 import urllib.error
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-from functools import lru_cache
 import time
 
 
@@ -35,7 +34,7 @@ RETRY_DELAY = 1  # seconds
 @dataclass
 class Vulnerability:
     """Represents a security vulnerability from OSV."""
-    
+
     id: str  # e.g., "CVE-2023-32681" or "GHSA-xxx"
     summary: str
     severity: str  # "CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"
@@ -44,7 +43,7 @@ class Vulnerability:
     fixed_version: Optional[str]
     aliases: List[str] = field(default_factory=list)
     references: List[str] = field(default_factory=list)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
@@ -62,11 +61,11 @@ class Vulnerability:
 class OSVClient:
     """
     Client for querying the OSV (Open Source Vulnerabilities) API.
-    
+
     Supports querying individual packages or batches of packages for
     known security vulnerabilities with CVE/GHSA identifiers.
     """
-    
+
     # [20251213_FEATURE] Ecosystem mapping for different package managers
     ECOSYSTEM_MAP = {
         "pypi": "PyPI",
@@ -85,11 +84,11 @@ class OSVClient:
         "rubygems": "RubyGems",
         "ruby": "RubyGems",
     }
-    
+
     def __init__(self, timeout: int = DEFAULT_TIMEOUT, cache_enabled: bool = True):
         """
         Initialize OSV client.
-        
+
         Args:
             timeout: Request timeout in seconds
             cache_enabled: Whether to cache results (default: True)
@@ -97,28 +96,28 @@ class OSVClient:
         self.timeout = timeout
         self.cache_enabled = cache_enabled
         self._cache: Dict[str, List[Vulnerability]] = {}
-    
+
     def _normalize_ecosystem(self, ecosystem: str) -> str:
         """Normalize ecosystem name to OSV format."""
         return self.ECOSYSTEM_MAP.get(ecosystem.lower(), ecosystem)
-    
+
     def _make_request(self, url: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Make HTTP POST request to OSV API with retry logic.
-        
+
         Args:
             url: API endpoint URL
             data: Request payload
-            
+
         Returns:
             Parsed JSON response
-            
+
         Raises:
             OSVError: If request fails after retries
         """
         payload = json.dumps(data).encode("utf-8")
         headers = {"Content-Type": "application/json"}
-        
+
         last_error = None
         for attempt in range(MAX_RETRIES):
             try:
@@ -142,18 +141,19 @@ class OSVClient:
                 continue
             except json.JSONDecodeError as e:
                 raise OSVError(f"Invalid JSON response: {e}") from e
-        
+
         raise OSVError(f"Request failed after {MAX_RETRIES} retries: {last_error}")
-    
+
     def _parse_severity(self, vuln_data: Dict[str, Any]) -> str:
         """
         Extract severity from OSV vulnerability data.
-        
+
         OSV uses CVSS scores in the 'severity' field or 'database_specific'.
         """
         import re
+
         # [20251213_FEATURE] Parse CVSS severity from multiple possible locations
-        
+
         def score_to_severity(score: float) -> str:
             """Convert numeric CVSS score to severity level."""
             if score >= 9.0:
@@ -164,7 +164,7 @@ class OSVClient:
                 return "MEDIUM"
             else:
                 return "LOW"
-        
+
         # Check severity array first (OSV format) - look for numeric scores
         if "severity" in vuln_data:
             for sev in vuln_data["severity"]:
@@ -187,21 +187,21 @@ class OSVClient:
                             return score_to_severity(float(match.group(1)))
                         except ValueError:
                             pass
-        
+
         # Check database_specific for severity
         db_specific = vuln_data.get("database_specific", {})
         if "severity" in db_specific:
             sev = db_specific["severity"].upper()
             if sev in ("CRITICAL", "HIGH", "MEDIUM", "LOW"):
                 return sev
-        
+
         # Check ecosystem_specific
         eco_specific = vuln_data.get("ecosystem_specific", {})
         if "severity" in eco_specific:
             sev = eco_specific["severity"].upper()
             if sev in ("CRITICAL", "HIGH", "MEDIUM", "LOW"):
                 return sev
-        
+
         # Fallback: try to parse score from any remaining severity entries
         for sev in vuln_data.get("severity", []):
             if "score" in sev:
@@ -218,13 +218,11 @@ class OSVClient:
                             return score_to_severity(float(match.group(1)))
                 except (ValueError, TypeError):
                     continue
-        
+
         return "UNKNOWN"
-    
+
     def _parse_fixed_version(
-        self, 
-        affected: List[Dict[str, Any]], 
-        package_name: str
+        self, affected: List[Dict[str, Any]], package_name: str
     ) -> Optional[str]:
         """Extract the fixed version from affected ranges."""
         # [20251213_FEATURE] Parse fixed version from OSV affected ranges
@@ -236,37 +234,34 @@ class OSVClient:
                         if "fixed" in event:
                             return event["fixed"]
                 # Also check versions array
-                versions = aff.get("versions", [])
+                aff.get("versions", [])
                 # The fixed version is typically not in the versions list,
                 # but we might find it in database_specific
         return None
-    
+
     def query_package(
-        self, 
-        package: str, 
-        version: str, 
-        ecosystem: str = "PyPI"
+        self, package: str, version: str, ecosystem: str = "PyPI"
     ) -> List[Vulnerability]:
         """
         Query OSV for vulnerabilities affecting a specific package version.
-        
+
         Args:
             package: Package name (e.g., "requests")
             version: Package version (e.g., "2.25.0")
             ecosystem: Package ecosystem (e.g., "PyPI", "npm")
-            
+
         Returns:
             List of Vulnerability objects
         """
         # [20251213_FEATURE] Query single package for vulnerabilities
-        
+
         # Check cache first
         cache_key = f"{ecosystem}:{package}:{version}"
         if self.cache_enabled and cache_key in self._cache:
             return self._cache[cache_key]
-        
+
         ecosystem = self._normalize_ecosystem(ecosystem)
-        
+
         payload = {
             "package": {
                 "name": package,
@@ -274,13 +269,13 @@ class OSVClient:
             },
             "version": version,
         }
-        
+
         try:
             response = self._make_request(OSV_API_URL, payload)
         except OSVError:
             # Return empty list on error (fail open for availability)
             return []
-        
+
         vulnerabilities = []
         for vuln in response.get("vulns", []):
             v = Vulnerability(
@@ -294,66 +289,69 @@ class OSVClient:
                 ),
                 aliases=vuln.get("aliases", []),
                 references=[
-                    ref.get("url", "") 
-                    for ref in vuln.get("references", []) 
+                    ref.get("url", "")
+                    for ref in vuln.get("references", [])
                     if ref.get("url")
-                ][:5],  # Limit to 5 references
+                ][
+                    :5
+                ],  # Limit to 5 references
             )
             vulnerabilities.append(v)
-        
+
         # Cache result
         if self.cache_enabled:
             self._cache[cache_key] = vulnerabilities
-        
+
         return vulnerabilities
-    
+
     def query_batch(
-        self, 
-        packages: List[Dict[str, str]]
+        self, packages: List[Dict[str, str]]
     ) -> Dict[str, List[Vulnerability]]:
         """
         Query OSV for vulnerabilities in multiple packages at once.
-        
+
         Args:
             packages: List of dicts with 'name', 'version', and optionally 'ecosystem'
                       Example: [{"name": "requests", "version": "2.25.0", "ecosystem": "PyPI"}]
-        
+
         Returns:
             Dict mapping "package:version" to list of vulnerabilities
         """
         # [20251213_FEATURE] Batch query for efficiency with many dependencies
-        
+
         if not packages:
             return {}
-        
+
         # Build batch query
         queries = []
         for pkg in packages:
             ecosystem = self._normalize_ecosystem(pkg.get("ecosystem", "PyPI"))
-            queries.append({
-                "package": {
-                    "name": pkg["name"],
-                    "ecosystem": ecosystem,
-                },
-                "version": pkg["version"],
-            })
-        
+            queries.append(
+                {
+                    "package": {
+                        "name": pkg["name"],
+                        "ecosystem": ecosystem,
+                    },
+                    "version": pkg["version"],
+                }
+            )
+
         payload = {"queries": queries}
-        
+
         try:
             response = self._make_request(OSV_BATCH_URL, payload)
         except OSVError:
             return {}
-        
+
         results = {}
         for i, result in enumerate(response.get("results", [])):
             if i >= len(packages):
                 break
-            
+
             pkg = packages[i]
             key = f"{pkg['name']}:{pkg['version']}"
             vulnerabilities = []
-            
+
             for vuln in result.get("vulns", []):
                 v = Vulnerability(
                     id=vuln.get("id", "UNKNOWN"),
@@ -366,17 +364,17 @@ class OSVClient:
                     ),
                     aliases=vuln.get("aliases", []),
                     references=[
-                        ref.get("url", "") 
-                        for ref in vuln.get("references", []) 
+                        ref.get("url", "")
+                        for ref in vuln.get("references", [])
                         if ref.get("url")
                     ][:5],
                 )
                 vulnerabilities.append(v)
-            
+
             results[key] = vulnerabilities
-        
+
         return results
-    
+
     def clear_cache(self):
         """Clear the vulnerability cache."""
         self._cache.clear()
@@ -384,4 +382,5 @@ class OSVClient:
 
 class OSVError(Exception):
     """Exception raised for OSV API errors."""
+
     pass

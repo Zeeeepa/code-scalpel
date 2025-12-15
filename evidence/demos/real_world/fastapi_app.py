@@ -10,6 +10,7 @@ Proves: Code Scalpel works on real-world web frameworks, not just snippets
 Run:
     code-scalpel scan demos/real_world/fastapi_app.py
 """
+
 from fastapi import FastAPI, Query, Request, HTTPException
 from fastapi.responses import HTMLResponse
 import sqlite3

@@ -22,17 +22,16 @@ import os
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from src.code_scalpel.code_analyzer import CodeAnalyzer
 
 
 @dataclass
 class ComparisonTestCase:
     """A test case for tool comparison."""
+
     id: str
     cwe_id: str
     name: str
@@ -48,7 +47,7 @@ COMPARISON_TEST_CASES = [
         id="SQL-001",
         cwe_id="CWE-89",
         name="SQL injection via string concatenation",
-        code='''
+        code="""
 import sqlite3
 
 def get_user(username):
@@ -57,15 +56,15 @@ def get_user(username):
     query = "SELECT * FROM users WHERE name = '" + username + "'"
     cursor.execute(query)
     return cursor.fetchone()
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="sql_injection"
+        vulnerability_type="sql_injection",
     ),
     ComparisonTestCase(
         id="SQL-002",
         cwe_id="CWE-89",
         name="SQL injection via f-string",
-        code='''
+        code="""
 import sqlite3
 
 def search_products(term):
@@ -73,15 +72,15 @@ def search_products(term):
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM products WHERE name LIKE '%{term}%'")
     return cursor.fetchall()
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="sql_injection"
+        vulnerability_type="sql_injection",
     ),
     ComparisonTestCase(
         id="SQL-003",
         cwe_id="CWE-89",
         name="Safe parameterized query",
-        code='''
+        code="""
 import sqlite3
 
 def get_user_safe(username):
@@ -89,200 +88,193 @@ def get_user_safe(username):
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE name = ?", (username,))
     return cursor.fetchone()
-''',
+""",
         is_vulnerable=False,
-        vulnerability_type="sql_injection"
+        vulnerability_type="sql_injection",
     ),
-
     # Command Injection
     ComparisonTestCase(
         id="CMD-001",
         cwe_id="CWE-78",
         name="Command injection via os.system",
-        code='''
+        code="""
 import os
 
 def ping_host(hostname):
     os.system("ping -c 4 " + hostname)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="command_injection"
+        vulnerability_type="command_injection",
     ),
     ComparisonTestCase(
         id="CMD-002",
         cwe_id="CWE-78",
         name="Command injection via subprocess shell=True",
-        code='''
+        code="""
 import subprocess
 
 def run_command(user_input):
     subprocess.run(f"echo {user_input}", shell=True)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="command_injection"
+        vulnerability_type="command_injection",
     ),
     ComparisonTestCase(
         id="CMD-003",
         cwe_id="CWE-78",
         name="Safe subprocess without shell",
-        code='''
+        code="""
 import subprocess
 
 def run_command_safe(args):
     subprocess.run(["echo", args])
-''',
+""",
         is_vulnerable=False,
-        vulnerability_type="command_injection"
+        vulnerability_type="command_injection",
     ),
-
     # Code Injection
     ComparisonTestCase(
         id="CODE-001",
         cwe_id="CWE-94",
         name="Code injection via eval",
-        code='''
+        code="""
 def calculate(expression):
     return eval(expression)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="code_injection"
+        vulnerability_type="code_injection",
     ),
     ComparisonTestCase(
         id="CODE-002",
         cwe_id="CWE-94",
         name="Code injection via exec",
-        code='''
+        code="""
 def run_code(code):
     exec(code)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="code_injection"
+        vulnerability_type="code_injection",
     ),
-
     # Insecure Deserialization
     ComparisonTestCase(
         id="DESER-001",
         cwe_id="CWE-502",
         name="Insecure pickle deserialization",
-        code='''
+        code="""
 import pickle
 
 def load_data(data):
     return pickle.loads(data)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="insecure_deserialization"
+        vulnerability_type="insecure_deserialization",
     ),
     ComparisonTestCase(
         id="DESER-002",
         cwe_id="CWE-502",
         name="Insecure yaml.load",
-        code='''
+        code="""
 import yaml
 
 def parse_yaml(content):
     return yaml.load(content)
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="insecure_deserialization"
+        vulnerability_type="insecure_deserialization",
     ),
     ComparisonTestCase(
         id="DESER-003",
         cwe_id="CWE-502",
         name="Safe yaml.safe_load",
-        code='''
+        code="""
 import yaml
 
 def parse_yaml_safe(content):
     return yaml.safe_load(content)
-''',
+""",
         is_vulnerable=False,
-        vulnerability_type="insecure_deserialization"
+        vulnerability_type="insecure_deserialization",
     ),
-
     # Weak Cryptography
     ComparisonTestCase(
         id="CRYPTO-001",
         cwe_id="CWE-327",
         name="Weak MD5 hashing",
-        code='''
+        code="""
 import hashlib
 
 def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="weak_cryptography"
+        vulnerability_type="weak_cryptography",
     ),
     ComparisonTestCase(
         id="CRYPTO-002",
         cwe_id="CWE-327",
         name="Weak SHA1 hashing",
-        code='''
+        code="""
 import hashlib
 
 def create_token(data):
     return hashlib.sha1(data.encode()).hexdigest()
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="weak_cryptography"
+        vulnerability_type="weak_cryptography",
     ),
-
     # Hardcoded Secrets
     ComparisonTestCase(
         id="SECRET-001",
         cwe_id="CWE-798",
         name="Hardcoded API key",
-        code='''
+        code="""
 API_KEY = "AKIAIOSFODNN7EXAMPLE"  # AWS-style key format
 
 def make_request():
     return {"Authorization": f"Bearer {API_KEY}"}
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="hardcoded_secret"
+        vulnerability_type="hardcoded_secret",
     ),
     ComparisonTestCase(
         id="SECRET-002",
         cwe_id="CWE-798",
         name="Hardcoded password",
-        code='''
+        code="""
 DATABASE_PASSWORD = "super_secret_password123"
 
 def connect():
     return {"password": DATABASE_PASSWORD}
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="hardcoded_secret"
+        vulnerability_type="hardcoded_secret",
     ),
-
     # Path Traversal
     ComparisonTestCase(
         id="PATH-001",
         cwe_id="CWE-22",
         name="Path traversal via file read",
-        code='''
+        code="""
 def read_file(filename):
     with open("/var/data/" + filename, 'r') as f:
         return f.read()
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="path_traversal"
+        vulnerability_type="path_traversal",
     ),
-
     # SSRF
     ComparisonTestCase(
         id="SSRF-001",
         cwe_id="CWE-918",
         name="SSRF via requests.get",
-        code='''
+        code="""
 import requests
 
 def fetch_url(url):
     return requests.get(url).text
-''',
+""",
         is_vulnerable=True,
-        vulnerability_type="ssrf"
+        vulnerability_type="ssrf",
     ),
 ]
 
@@ -290,6 +282,7 @@ def fetch_url(url):
 @dataclass
 class ToolResult:
     """Result from running a tool on a test case."""
+
     tool: str
     detected: bool
     findings: List[Dict[str, Any]]
@@ -301,7 +294,10 @@ class ToolRunner:
     """Runs security analysis tools on code."""
 
     def __init__(self):
-        from src.code_scalpel.symbolic_execution_tools.security_analyzer import SecurityAnalyzer
+        from src.code_scalpel.symbolic_execution_tools.security_analyzer import (
+            SecurityAnalyzer,
+        )
+
         self.security_analyzer = SecurityAnalyzer()
 
     def check_tool_available(self, tool: str) -> bool:
@@ -315,6 +311,7 @@ class ToolRunner:
     def run_code_scalpel(self, code: str) -> ToolResult:
         """Run Code Scalpel analysis."""
         import time
+
         start = time.time()
 
         try:
@@ -328,11 +325,11 @@ class ToolRunner:
                     {
                         "type": getattr(v, "vulnerability_type", "unknown"),
                         "line": getattr(v, "line_number", None),
-                        "message": getattr(v, "description", "")
+                        "message": getattr(v, "description", ""),
                     }
                     for v in vulnerabilities
                 ],
-                execution_time_ms=round((time.time() - start) * 1000, 2)
+                execution_time_ms=round((time.time() - start) * 1000, 2),
             )
         except Exception as e:
             return ToolResult(
@@ -340,7 +337,7 @@ class ToolRunner:
                 detected=False,
                 findings=[],
                 execution_time_ms=round((time.time() - start) * 1000, 2),
-                error=str(e)
+                error=str(e),
             )
 
     def run_bandit(self, code: str) -> ToolResult:
@@ -353,20 +350,18 @@ class ToolRunner:
                 detected=False,
                 findings=[],
                 execution_time_ms=0,
-                error="Bandit not installed"
+                error="Bandit not installed",
             )
 
         start = time.time()
 
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
                 f.write(code)
                 temp_file = f.name
 
             result = subprocess.run(
-                ["bandit", "-f", "json", temp_file],
-                capture_output=True,
-                text=True
+                ["bandit", "-f", "json", temp_file], capture_output=True, text=True
             )
 
             os.unlink(temp_file)
@@ -376,7 +371,11 @@ class ToolRunner:
                 try:
                     bandit_result = json.loads(result.stdout)
                     findings = [
-                        {"type": r.get("test_id"), "line": r.get("line_number"), "message": r.get("issue_text")}
+                        {
+                            "type": r.get("test_id"),
+                            "line": r.get("line_number"),
+                            "message": r.get("issue_text"),
+                        }
                         for r in bandit_result.get("results", [])
                     ]
                 except json.JSONDecodeError:
@@ -386,7 +385,7 @@ class ToolRunner:
                 tool="bandit",
                 detected=len(findings) > 0,
                 findings=findings,
-                execution_time_ms=round((time.time() - start) * 1000, 2)
+                execution_time_ms=round((time.time() - start) * 1000, 2),
             )
 
         except Exception as e:
@@ -395,7 +394,7 @@ class ToolRunner:
                 detected=False,
                 findings=[],
                 execution_time_ms=round((time.time() - start) * 1000, 2),
-                error=str(e)
+                error=str(e),
             )
 
     def run_semgrep(self, code: str) -> ToolResult:
@@ -408,20 +407,20 @@ class ToolRunner:
                 detected=False,
                 findings=[],
                 execution_time_ms=0,
-                error="Semgrep not installed"
+                error="Semgrep not installed",
             )
 
         start = time.time()
 
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
                 f.write(code)
                 temp_file = f.name
 
             result = subprocess.run(
                 ["semgrep", "--config", "auto", "--json", temp_file],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             os.unlink(temp_file)
@@ -434,7 +433,7 @@ class ToolRunner:
                         {
                             "type": r.get("check_id"),
                             "line": r.get("start", {}).get("line"),
-                            "message": r.get("extra", {}).get("message", "")
+                            "message": r.get("extra", {}).get("message", ""),
                         }
                         for r in semgrep_result.get("results", [])
                     ]
@@ -445,7 +444,7 @@ class ToolRunner:
                 tool="semgrep",
                 detected=len(findings) > 0,
                 findings=findings,
-                execution_time_ms=round((time.time() - start) * 1000, 2)
+                execution_time_ms=round((time.time() - start) * 1000, 2),
             )
 
         except Exception as e:
@@ -454,7 +453,7 @@ class ToolRunner:
                 detected=False,
                 findings=[],
                 execution_time_ms=round((time.time() - start) * 1000, 2),
-                error=str(e)
+                error=str(e),
             )
 
 
@@ -492,7 +491,9 @@ class ComparisonBenchmark:
         self.results = {tool: [] for tool in tools}
 
         for i, test_case in enumerate(COMPARISON_TEST_CASES, 1):
-            print(f"[{i}/{len(COMPARISON_TEST_CASES)}] {test_case.id}: {test_case.name}")
+            print(
+                f"[{i}/{len(COMPARISON_TEST_CASES)}] {test_case.id}: {test_case.name}"
+            )
 
             for tool in tools:
                 if tool == "code_scalpel":
@@ -508,18 +509,22 @@ class ComparisonBenchmark:
                 if test_case.is_vulnerable:
                     correct = result.detected  # Should detect
                 else:
-                    correct = not result.detected  # Should not detect (no false positive)
+                    correct = (
+                        not result.detected
+                    )  # Should not detect (no false positive)
 
-                self.results[tool].append({
-                    "test_id": test_case.id,
-                    "cwe_id": test_case.cwe_id,
-                    "is_vulnerable": test_case.is_vulnerable,
-                    "detected": result.detected,
-                    "correct": correct,
-                    "findings_count": len(result.findings),
-                    "execution_time_ms": result.execution_time_ms,
-                    "error": result.error
-                })
+                self.results[tool].append(
+                    {
+                        "test_id": test_case.id,
+                        "cwe_id": test_case.cwe_id,
+                        "is_vulnerable": test_case.is_vulnerable,
+                        "detected": result.detected,
+                        "correct": correct,
+                        "findings_count": len(result.findings),
+                        "execution_time_ms": result.execution_time_ms,
+                        "error": result.error,
+                    }
+                )
 
             # Print quick status
             cs_result = self.results["code_scalpel"][-1]
@@ -547,9 +552,21 @@ class ComparisonBenchmark:
             true_negatives = sum(1 for r in safe_cases if not r["detected"])
             false_positives = sum(1 for r in safe_cases if r["detected"])
 
-            precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-            recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
-            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+            precision = (
+                true_positives / (true_positives + false_positives)
+                if (true_positives + false_positives) > 0
+                else 0
+            )
+            recall = (
+                true_positives / (true_positives + false_negatives)
+                if (true_positives + false_negatives) > 0
+                else 0
+            )
+            f1 = (
+                2 * (precision * recall) / (precision + recall)
+                if (precision + recall) > 0
+                else 0
+            )
 
             avg_time = sum(r["execution_time_ms"] for r in results) / total
 
@@ -564,9 +581,17 @@ class ComparisonBenchmark:
                 "precision": round(precision, 3),
                 "recall": round(recall, 3),
                 "f1_score": round(f1, 3),
-                "detection_rate_percentage": round(true_positives / len(vulnerable_cases) * 100, 1) if vulnerable_cases else 100,
-                "false_positive_rate_percentage": round(false_positives / len(safe_cases) * 100, 1) if safe_cases else 0,
-                "avg_execution_time_ms": round(avg_time, 2)
+                "detection_rate_percentage": (
+                    round(true_positives / len(vulnerable_cases) * 100, 1)
+                    if vulnerable_cases
+                    else 100
+                ),
+                "false_positive_rate_percentage": (
+                    round(false_positives / len(safe_cases) * 100, 1)
+                    if safe_cases
+                    else 0
+                ),
+                "avg_execution_time_ms": round(avg_time, 2),
             }
 
         # Create comparison table
@@ -576,10 +601,14 @@ class ComparisonBenchmark:
         for cwe in sorted(cwe_types):
             row = {"cwe_id": cwe}
             cwe_cases = [t for t in COMPARISON_TEST_CASES if t.cwe_id == cwe]
-            cwe_vulnerable = [t for t in cwe_cases if t.is_vulnerable]
+            [t for t in cwe_cases if t.is_vulnerable]
 
             for tool in self.results.keys():
-                tool_cwe_results = [r for r in self.results[tool] if r["cwe_id"] == cwe and r["is_vulnerable"]]
+                tool_cwe_results = [
+                    r
+                    for r in self.results[tool]
+                    if r["cwe_id"] == cwe and r["is_vulnerable"]
+                ]
                 detected = sum(1 for r in tool_cwe_results if r["detected"])
                 row[tool] = f"{detected}/{len(tool_cwe_results)}"
 
@@ -591,12 +620,12 @@ class ComparisonBenchmark:
                 "version": "1.0.0",
                 "timestamp": datetime.now().isoformat(),
                 "total_test_cases": len(COMPARISON_TEST_CASES),
-                "tools_compared": list(self.results.keys())
+                "tools_compared": list(self.results.keys()),
             },
             "tool_summaries": tool_summaries,
             "comparison_by_cwe": comparison_table,
             "detailed_results": self.results,
-            "conclusion": self._generate_conclusion(tool_summaries)
+            "conclusion": self._generate_conclusion(tool_summaries),
         }
 
         return report
@@ -607,17 +636,25 @@ class ComparisonBenchmark:
             return "Code Scalpel results not available"
 
         cs = summaries["code_scalpel"]
-        conclusions = [f"Code Scalpel achieved {cs['accuracy_percentage']}% accuracy with {cs['detection_rate_percentage']}% detection rate."]
+        conclusions = [
+            f"Code Scalpel achieved {cs['accuracy_percentage']}% accuracy with {cs['detection_rate_percentage']}% detection rate."
+        ]
 
         for tool in ["bandit", "semgrep"]:
             if tool in summaries:
                 t = summaries[tool]
                 if cs["detection_rate_percentage"] > t["detection_rate_percentage"]:
-                    conclusions.append(f"Code Scalpel outperformed {tool.capitalize()} in detection rate ({cs['detection_rate_percentage']}% vs {t['detection_rate_percentage']}%).")
+                    conclusions.append(
+                        f"Code Scalpel outperformed {tool.capitalize()} in detection rate ({cs['detection_rate_percentage']}% vs {t['detection_rate_percentage']}%)."
+                    )
                 elif cs["detection_rate_percentage"] < t["detection_rate_percentage"]:
-                    conclusions.append(f"{tool.capitalize()} had higher detection rate ({t['detection_rate_percentage']}% vs {cs['detection_rate_percentage']}%).")
+                    conclusions.append(
+                        f"{tool.capitalize()} had higher detection rate ({t['detection_rate_percentage']}% vs {cs['detection_rate_percentage']}%)."
+                    )
                 else:
-                    conclusions.append(f"Code Scalpel matched {tool.capitalize()} in detection rate.")
+                    conclusions.append(
+                        f"Code Scalpel matched {tool.capitalize()} in detection rate."
+                    )
 
         return " ".join(conclusions)
 
@@ -628,11 +665,15 @@ class ComparisonBenchmark:
         print(f"{'='*70}\n")
 
         # Tool comparison table
-        print(f"{'Tool':<15} {'Accuracy':<10} {'Precision':<10} {'Recall':<10} {'F1':<10} {'Detect%':<10} {'FP%':<8}")
+        print(
+            f"{'Tool':<15} {'Accuracy':<10} {'Precision':<10} {'Recall':<10} {'F1':<10} {'Detect%':<10} {'FP%':<8}"
+        )
         print("-" * 73)
 
         for tool, summary in report["tool_summaries"].items():
-            print(f"{tool:<15} {summary['accuracy_percentage']:<10} {summary['precision']:<10} {summary['recall']:<10} {summary['f1_score']:<10} {summary['detection_rate_percentage']:<10} {summary['false_positive_rate_percentage']:<8}")
+            print(
+                f"{tool:<15} {summary['accuracy_percentage']:<10} {summary['precision']:<10} {summary['recall']:<10} {summary['f1_score']:<10} {summary['detection_rate_percentage']:<10} {summary['false_positive_rate_percentage']:<8}"
+            )
 
         print(f"\n{'='*70}")
         print("DETECTION BY CWE TYPE")
@@ -658,8 +699,13 @@ class ComparisonBenchmark:
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Compare Code Scalpel with other security tools")
-    parser.add_argument("--output", "-o", default="comparison_results.json", help="Output file")
+
+    parser = argparse.ArgumentParser(
+        description="Compare Code Scalpel with other security tools"
+    )
+    parser.add_argument(
+        "--output", "-o", default="comparison_results.json", help="Output file"
+    )
     args = parser.parse_args()
 
     benchmark = ComparisonBenchmark()
@@ -668,7 +714,7 @@ def main():
 
     # Save results
     output_path = Path(__file__).parent / args.output
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(report, f, indent=2)
 
     print(f"Detailed results saved to: {output_path}")

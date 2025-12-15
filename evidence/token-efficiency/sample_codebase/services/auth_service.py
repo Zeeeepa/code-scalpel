@@ -12,6 +12,7 @@ from ..models.user import User, UserRepository
 @dataclass
 class TokenPair:
     """Access and refresh token pair."""
+
     access_token: str
     refresh_token: str
     expires_at: datetime
@@ -21,6 +22,7 @@ class TokenPair:
 @dataclass
 class AuthResult:
     """Result of authentication attempt."""
+
     success: bool
     user: Optional[User] = None
     token_pair: Optional[TokenPair] = None
@@ -129,7 +131,9 @@ class AuthService:
         except jwt.InvalidTokenError:
             return False
 
-    def change_password(self, user: User, old_password: str, new_password: str) -> Tuple[bool, str]:
+    def change_password(
+        self, user: User, old_password: str, new_password: str
+    ) -> Tuple[bool, str]:
         """Change user password."""
         if not user.verify_password(old_password):
             return False, "Current password is incorrect"
@@ -178,7 +182,7 @@ class AuthService:
             "roles": user.roles,
             "exp": access_expiry,
             "iat": now,
-            "type": "access"
+            "type": "access",
         }
 
         token_id = secrets.token_hex(16)
@@ -187,7 +191,7 @@ class AuthService:
             "token_id": token_id,
             "exp": refresh_expiry,
             "iat": now,
-            "type": "refresh"
+            "type": "refresh",
         }
 
         access_token = jwt.encode(access_payload, self.JWT_SECRET, algorithm="HS256")
@@ -198,7 +202,7 @@ class AuthService:
         return TokenPair(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_at=access_expiry
+            expires_at=access_expiry,
         )
 
     def _verify_2fa_code(self, user: User, code: str) -> bool:
@@ -209,8 +213,7 @@ class AuthService:
     def _invalidate_user_tokens(self, user_id: int):
         """Invalidate all refresh tokens for a user."""
         tokens_to_remove = [
-            token_id for token_id, uid in self._refresh_tokens.items()
-            if uid == user_id
+            token_id for token_id, uid in self._refresh_tokens.items() if uid == user_id
         ]
         for token_id in tokens_to_remove:
             del self._refresh_tokens[token_id]
@@ -222,7 +225,7 @@ class PermissionService:
     PERMISSIONS = {
         "admin": ["read", "write", "delete", "manage_users"],
         "editor": ["read", "write"],
-        "viewer": ["read"]
+        "viewer": ["read"],
     }
 
     def __init__(self, user_repository: UserRepository):
@@ -256,7 +259,9 @@ class PermissionService:
         if not self.has_permission(user, permission):
             raise PermissionError(f"User lacks '{permission}' permission")
 
-    def can_access_resource(self, user: User, resource_owner_id: int, permission: str) -> bool:
+    def can_access_resource(
+        self, user: User, resource_owner_id: int, permission: str
+    ) -> bool:
         """Check if user can access a specific resource."""
         # Users can always access their own resources
         if user.id == resource_owner_id:

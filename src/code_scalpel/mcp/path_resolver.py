@@ -152,6 +152,10 @@ class PathResolver:
         Raises:
             FileNotFoundError: If path cannot be resolved with helpful suggestions
         """
+        # [20251214_BUGFIX] Reject empty or whitespace-only paths to avoid platform-specific normalization quirks
+        if not path or not str(path).strip():
+            raise FileNotFoundError("Cannot access file: empty or whitespace-only path")
+
         # Check cache first
         cache_key = (path, project_root)
         if cache_key in self.path_cache:
@@ -351,8 +355,9 @@ class PathResolver:
         Returns:
             Formatted error message
         """
+        # [20251214_BUGFIX] Include explicit 'not found' wording for compatibility with callers/tests
         lines = [
-            f"Cannot access file: {path}",
+            f"Cannot access file: {path} (not found)",
             "",
             f"Attempted locations ({len(result.attempted_paths)}):",
         ]

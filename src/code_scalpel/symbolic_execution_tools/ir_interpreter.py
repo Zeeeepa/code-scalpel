@@ -13,7 +13,7 @@ Key Design Decisions:
    - Same execution logic for all source languages
 
 2. SEMANTIC DELEGATION: Language-specific behavior is delegated
-   - Python: "5" + 3 -> TypeError  
+   - Python: "5" + 3 -> TypeError
    - JavaScript: "5" + 3 -> "53"
    - The interpreter calls self.semantics.binary_add(left, right)
    - LanguageSemantics implementations handle the differences
@@ -29,7 +29,7 @@ Key Design Decisions:
 Usage:
     from code_scalpel.ir.normalizers import PythonNormalizer
     from code_scalpel.symbolic_execution_tools.ir_interpreter import IRSymbolicInterpreter
-    
+
     code = "x = 1 + 2"
     ir = PythonNormalizer().normalize(code)
     interp = IRSymbolicInterpreter()

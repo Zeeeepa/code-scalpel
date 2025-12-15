@@ -5,6 +5,7 @@
 # This script must pass before any commit or PyPI publication.
 # Run with: ./scripts/verify.sh
 # =============================================================================
+# [20251214_REFACTOR] Normalize line endings for bash portability on Windows.
 
 set -e  # Exit on any error
 
@@ -19,9 +20,17 @@ if [ ! -f "pyproject.toml" ]; then
     exit 1
 fi
 
+# [20251214_REFACTOR] Resolve Python executable for cross-shell portability.
+PYTHON_BIN=$(command -v python.exe || command -v py.exe || command -v py || command -v python || command -v python3 || true)
+if [ -z "$PYTHON_BIN" ]; then
+    echo "ERROR: Python executable not found in PATH"
+    exit 1
+fi
+
 echo "Step 1/4: Running Formatter (Black)..."
 echo "----------------------------------------------"
-black src tests examples --check --diff 2>&1 || {
+# [20251214_REFACTOR] Use python -m to avoid PATH issues in bash on Windows.
+$PYTHON_BIN -m black src tests examples --check --diff 2>&1 || {
     echo ""
     echo "WARNING: Formatting issues found. Run 'black src tests examples' to fix."
     echo "    Or run './scripts/verify.sh --fix' to auto-fix."
@@ -32,7 +41,7 @@ echo ""
 
 echo "🧹 Step 2/4: Running Linter (Ruff)..."
 echo "----------------------------------------------"
-ruff check src tests examples 2>&1 || {
+$PYTHON_BIN -m ruff check src tests examples 2>&1 || {
     echo ""
     echo "WARNING: Linting issues found. Run 'ruff check src tests examples --fix' to auto-fix."
     echo "    Or run './scripts/verify.sh --fix' to auto-fix."
@@ -43,7 +52,7 @@ echo ""
 
 echo "🧪 Step 3/4: Running Tests with Coverage..."
 echo "----------------------------------------------"
-pytest --cov=code_scalpel --cov-report=term-missing --cov-fail-under=24 tests/ 2>&1 || {
+$PYTHON_BIN -m pytest --cov=code_scalpel --cov-report=term-missing --cov-fail-under=24 tests/ 2>&1 || {
     echo ""
     echo "ERROR: Tests failed or coverage below 24%"
     exit 1
@@ -53,7 +62,7 @@ echo ""
 
 echo "📦 Step 4/4: Verifying Package Build..."
 echo "----------------------------------------------"
-python -m build --sdist --wheel --outdir /tmp/code-scalpel-test-build 2>&1 || {
+$PYTHON_BIN -m build --sdist --wheel --outdir /tmp/code-scalpel-test-build 2>&1 || {
     echo ""
     echo "ERROR: Package build failed"
     exit 1

@@ -258,9 +258,9 @@ class CrewAIScalpel:
             for i, path in enumerate(result.paths[:10]):  # Limit to 10 paths
                 path_data = {
                     "path_id": i,
-                    "feasible": path.is_feasible
-                    if hasattr(path, "is_feasible")
-                    else True,
+                    "feasible": (
+                        path.is_feasible if hasattr(path, "is_feasible") else True
+                    ),
                 }
                 # Try to get variables from path
                 if hasattr(path, "variables"):
@@ -281,9 +281,11 @@ class CrewAIScalpel:
                 "feasible_paths": result.feasible_count,
                 "infeasible_paths": result.infeasible_count,
                 "paths": paths_info,
-                "all_variables": {k: str(v) for k, v in result.all_variables.items()}
-                if result.all_variables
-                else {},
+                "all_variables": (
+                    {k: str(v) for k, v in result.all_variables.items()}
+                    if result.all_variables
+                    else {}
+                ),
                 "analyzer": "z3-symbolic",
             }
         except ImportError as e:
@@ -351,9 +353,11 @@ class CrewAIScalpel:
                     "command_injections": len(result.get_command_injections()),
                     "path_traversals": len(result.get_path_traversals()),
                     "risk_level": self._calculate_risk_from_vulns(vulnerabilities),
-                    "summary": result.summary()
-                    if result.has_vulnerabilities
-                    else "No vulnerabilities detected",
+                    "summary": (
+                        result.summary()
+                        if result.has_vulnerabilities
+                        else "No vulnerabilities detected"
+                    ),
                 }
             except ImportError:
                 # Fallback to AST-based analysis if symbolic tools not available

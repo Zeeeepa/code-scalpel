@@ -405,9 +405,9 @@ class CodeAnalyzer:
                     name = alias.asname or alias.name
                     definitions["imports"][name] = {
                         "line": node.lineno,
-                        "module": f"{node.module}.{alias.name}"
-                        if node.module
-                        else alias.name,
+                        "module": (
+                            f"{node.module}.{alias.name}" if node.module else alias.name
+                        ),
                     }
 
         return definitions
@@ -502,9 +502,11 @@ class CodeAnalyzer:
                     if name not in used_names and alias.name != "*":
                         dead_code.append(
                             DeadCodeItem(
-                                name=f"{node.module}.{alias.name}"
-                                if node.module
-                                else alias.name,
+                                name=(
+                                    f"{node.module}.{alias.name}"
+                                    if node.module
+                                    else alias.name
+                                ),
                                 code_type="import",
                                 line_start=node.lineno,
                                 line_end=node.lineno,

@@ -253,6 +253,24 @@ class myclass:
 
         assert "long_functions" in issues
 
+    def test_analyze_code_style_deep_nesting(self):
+        """Test detection of deep nesting beyond threshold."""
+        analyzer = ASTAnalyzer()
+        code = """
+def nested():
+    if True:
+        if True:
+            while True:
+                for i in range(1):
+                    return i
+"""
+
+        tree = analyzer.parse_to_ast(code)
+        issues = analyzer.analyze_code_style(tree)
+
+        # [20251214_TEST] Ensure deep nesting is flagged when depth > 3
+        assert "deep_nesting" in issues
+
     def test_find_security_issues(self):
         """Test security issue detection."""
         analyzer = ASTAnalyzer()
@@ -280,6 +298,21 @@ cursor.execute(query)
         sql_issues = [i for i in issues if i["type"] == "sql_injection"]
         # Should detect potential SQL injection
         assert isinstance(sql_issues, list)
+
+    def test_find_security_issues_sql_injection_flag(self):
+        """Ensure SQL injection issues include line metadata."""
+        analyzer = ASTAnalyzer()
+        code = """
+def run(cursor, user_id):
+    cursor.execute("SELECT * FROM accounts WHERE id = " + user_id)
+"""
+        tree = analyzer.parse_to_ast(code)
+        issues = analyzer.find_security_issues(tree)
+
+        # [20251214_TEST] Confirm sql_injection issue is surfaced with a line number
+        sql_issues = [i for i in issues if i.get("type") == "sql_injection"]
+        assert sql_issues, "Expected sql_injection issue to be detected"
+        assert sql_issues[0].get("line") is not None
 
     def test_calculate_complexity(self):
         """Test cyclomatic complexity calculation."""

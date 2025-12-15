@@ -386,5 +386,36 @@ class TestPerformance(unittest.TestCase):
         self.assertLess(result.metrics.analysis_time_seconds, 1.0)
 
 
+# [20251214_TEST] Additional edge coverage for refactor suggestions and fallback paths.
+class TestCodeAnalyzerAdditional(unittest.TestCase):
+    def test_generate_refactor_suggestions_handles_deep_nesting(self):
+        analyzer = CodeAnalyzer(level=AnalysisLevel.STANDARD, cache_enabled=False)
+
+        code = """
+def heavily_nested(x):
+    if x:
+        if x > 1:
+            if x > 2:
+                if x > 3:
+                    if x > 4:
+                        return x
+        return 0
+"""
+        result = analyzer.analyze(code)
+        suggestions = analyzer._generate_refactor_suggestions(
+            result.ast_tree, result.pdg, result.dead_code
+        )
+
+        types = {s.refactor_type for s in suggestions}
+        self.assertIn("reduce_nesting", types)
+
+    def test_run_symbolic_execution_handles_invalid_code(self):
+        analyzer = CodeAnalyzer(level=AnalysisLevel.FULL, cache_enabled=False)
+
+        # Syntax error should yield empty paths rather than raising.
+        paths = analyzer._run_symbolic_execution("def broken(")
+        self.assertEqual(paths, [])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -17,7 +17,7 @@ Example:
     >>> semantics = JavaScriptSemantics()
     >>> semantics.binary_add("5", 3)
     "53"
-    
+
     >>> semantics = PythonSemantics()
     >>> semantics.binary_add("5", 3)
     TypeError: can only concatenate str (not "int") to str
@@ -49,11 +49,13 @@ class LanguageSemantics(ABC):
     This allows symbolic execution across languages.
     """
 
+    # [20250105_REFACTOR] Abstract stubs are excluded from coverage; implementations live in concrete semantics classes.
+
     @property
     @abstractmethod
     def name(self) -> str:
         """Return the language name."""
-        pass
+        pass  # pragma: no cover
 
     # =========================================================================
     # Binary Arithmetic Operations
@@ -68,12 +70,12 @@ class LanguageSemantics(ABC):
             Python: str + int -> TypeError
             JavaScript: str + int -> string concatenation
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_sub(self, left: Any, right: Any) -> Any:
         """Implement the - operator."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_mul(self, left: Any, right: Any) -> Any:
@@ -84,7 +86,7 @@ class LanguageSemantics(ABC):
             Python: "ab" * 3 -> "ababab"
             JavaScript: "ab" * 3 -> NaN
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_div(self, left: Any, right: Any) -> Any:
@@ -95,7 +97,7 @@ class LanguageSemantics(ABC):
             Python 3: 5 / 2 -> 2.5 (true division)
             JavaScript: 5 / 2 -> 2.5
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_floor_div(self, left: Any, right: Any) -> Any:
@@ -105,7 +107,7 @@ class LanguageSemantics(ABC):
         Python: 5 // 2 -> 2
         JavaScript: Math.floor(5 / 2) -> 2 (no // operator)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_mod(self, left: Any, right: Any) -> Any:
@@ -116,12 +118,12 @@ class LanguageSemantics(ABC):
             Python: -7 % 3 -> 2 (result has sign of divisor)
             JavaScript: -7 % 3 -> -1 (result has sign of dividend)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def binary_pow(self, left: Any, right: Any) -> Any:
         """Implement the ** operator."""
-        pass
+        pass  # pragma: no cover
 
     # =========================================================================
     # Comparison Operations
@@ -136,7 +138,7 @@ class LanguageSemantics(ABC):
             Python: 1 == "1" -> False
             JavaScript: 1 == "1" -> True (type coercion)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def compare_strict_eq(self, left: Any, right: Any) -> Any:
@@ -146,27 +148,27 @@ class LanguageSemantics(ABC):
         JavaScript: 1 === "1" -> False (no type coercion)
         Python: N/A (always strict)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def compare_lt(self, left: Any, right: Any) -> Any:
         """Implement < comparison."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def compare_le(self, left: Any, right: Any) -> Any:
         """Implement <= comparison."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def compare_gt(self, left: Any, right: Any) -> Any:
         """Implement > comparison."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def compare_ge(self, left: Any, right: Any) -> Any:
         """Implement >= comparison."""
-        pass
+        pass  # pragma: no cover
 
     # =========================================================================
     # Boolean Operations
@@ -181,7 +183,7 @@ class LanguageSemantics(ABC):
             Python: 0 and "hello" -> 0 (returns first falsy)
             JavaScript: 0 && "hello" -> 0 (same behavior)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def bool_or(self, left: Any, right: Any) -> Any:
@@ -192,7 +194,7 @@ class LanguageSemantics(ABC):
             Python: 0 or "hello" -> "hello"
             JavaScript: 0 || "hello" -> "hello"
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def bool_not(self, operand: Any) -> Any:
@@ -203,7 +205,7 @@ class LanguageSemantics(ABC):
             Python: not [] -> True (empty list is falsy)
             JavaScript: ![] -> False (empty array is truthy!)
         """
-        pass
+        pass  # pragma: no cover
 
     # =========================================================================
     # Type Coercion
@@ -219,12 +221,12 @@ class LanguageSemantics(ABC):
             JavaScript falsy: null, undefined, false, 0, "", NaN
             JavaScript truthy: [], {} (empty array/object are truthy!)
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def to_string(self, value: Any) -> Any:
         """Convert value to string."""
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def to_number(self, value: Any) -> Any:
@@ -234,7 +236,7 @@ class LanguageSemantics(ABC):
         JavaScript: Number("42") -> 42, Number("hello") -> NaN
         Python: int("42") -> 42, int("hello") -> ValueError
         """
-        pass
+        pass  # pragma: no cover
 
 
 class PythonSemantics(LanguageSemantics):

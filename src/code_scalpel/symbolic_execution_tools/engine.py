@@ -9,6 +9,7 @@ This module wires together the core components:
 
 PHASE 1 SCOPE (RFC-001): Integers and Booleans only.
 """
+
 import logging
 from dataclasses import dataclass, field
 from enum import Enum

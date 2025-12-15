@@ -74,5 +74,35 @@ class TestCodeParser(unittest.TestCase):
         self.assertNotIn("  ", preprocessed_code)
 
 
+# [20251214_TEST] Added syntax error and preprocessing coverage.
+class TestCodeParserAdditional(unittest.TestCase):
+    def setUp(self):
+        self.parser = CodeParser()
+
+    def test_parse_python_syntax_error(self):
+        code = "def broken(:\n    return 42"
+        result = self.parser.parse_code(code, Language.PYTHON)
+        self.assertEqual(result.ast, None)
+        self.assertEqual(len(result.errors), 1)
+        self.assertEqual(result.errors[0]["type"], "SyntaxError")
+
+    def test_remove_comments_python_string_protected(self):
+        code = "value = '# not a comment'\n# real comment\nvalue2 = 2"
+        cleaned = self.parser._remove_comments(code, Language.PYTHON)
+        self.assertIn("# not a comment", cleaned)
+        self.assertNotIn("# real comment", cleaned)
+
+    def test_normalize_whitespace_preserves_indent(self):
+        code = "def f():\n    x  =  1\n      y   =   2"
+        normalized = self.parser._normalize_whitespace(code)
+        lines = normalized.split("\n")
+        self.assertTrue(lines[1].startswith("    x"))
+        self.assertTrue(lines[2].startswith("      y"))
+
+    def test_parse_code_invalid_language(self):
+        with self.assertRaises(ValueError):
+            self.parser.parse_code("", "not-a-language")
+
+
 if __name__ == "__main__":
     unittest.main()

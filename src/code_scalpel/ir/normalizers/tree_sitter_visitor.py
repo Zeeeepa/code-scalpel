@@ -21,7 +21,7 @@ Design Philosophy:
 Usage:
     class JavaScriptVisitor(TreeSitterVisitor):
         language = "javascript"
-        
+
         def visit_function_declaration(self, node):
             # node.children contains: 'function', name, params, body
             name = self.get_child_by_field(node, 'name')
@@ -33,7 +33,7 @@ Node Field Access:
     Tree-sitter nodes have TWO access patterns:
     1. Positional: node.children[i]
     2. Named fields: node.child_by_field_name('name')
-    
+
     Always prefer named fields - they're stable across grammar versions.
 """
 

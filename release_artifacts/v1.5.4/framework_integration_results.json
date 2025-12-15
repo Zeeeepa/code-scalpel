@@ -1,0 +1,14 @@
+{
+  "django": {
+    "status": "pass",
+    "detected_apps": ["django.contrib.admin", "django.contrib.auth", "myapp"],
+    "source": "settings.py",
+    "evidence": "tests/test_framework_imports.py"
+  },
+  "flask": {
+    "status": "pass",
+    "detected_blueprints": ["bp"],
+    "source": "app.py",
+    "evidence": "tests/test_framework_imports_flask.py"
+  }
+}

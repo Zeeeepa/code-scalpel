@@ -28,8 +28,8 @@ class TestJavaNormalizer(unittest.TestCase):
 
         name_node = MagicMock()
         visitor.get_text = MagicMock(return_value="myMethod")
-        mock_method.child_by_field_name.side_effect = (
-            lambda name: name_node if name == "name" else None
+        mock_method.child_by_field_name.side_effect = lambda name: (
+            name_node if name == "name" else None
         )
 
         result = visitor.visit_method_declaration(mock_method)

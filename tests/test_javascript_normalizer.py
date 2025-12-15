@@ -3,6 +3,7 @@ Tests for JavaScript Normalizer.
 
 This module tests the tree-sitter based JavaScript to IR normalization.
 """
+
 import pytest
 
 # Check if tree-sitter-javascript is available

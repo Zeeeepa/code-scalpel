@@ -8,9 +8,11 @@ from collections import deque
 
 # [20251213_FEATURE] v1.5.0 - Enhanced call graph with line numbers and Mermaid support
 
+
 @dataclass
 class CallNode:
     """A node in the call graph with location information."""
+
     name: str
     file: str
     line: int
@@ -18,9 +20,10 @@ class CallNode:
     is_entry_point: bool = False
 
 
-@dataclass  
+@dataclass
 class CallEdge:
     """An edge in the call graph representing a call relationship."""
+
     caller: str
     callee: str
     call_line: Optional[int] = None
@@ -29,6 +32,7 @@ class CallEdge:
 @dataclass
 class CallGraphResult:
     """Result of call graph analysis."""
+
     nodes: List[CallNode] = field(default_factory=list)
     edges: List[CallEdge] = field(default_factory=list)
     entry_point: Optional[str] = None
@@ -43,15 +47,15 @@ class CallGraphBuilder:
 
     def __init__(self, root_path: Path):
         self.root_path = root_path
-        self.definitions: Dict[
-            str, Set[str]
-        ] = {}  # file_path -> set of defined functions/classes
-        self.calls: Dict[
-            str, List[str]
-        ] = {}  # "file:function" -> list of called function names
-        self.imports: Dict[
-            str, Dict[str, str]
-        ] = {}  # file_path -> { alias -> full_name }
+        self.definitions: Dict[str, Set[str]] = (
+            {}
+        )  # file_path -> set of defined functions/classes
+        self.calls: Dict[str, List[str]] = (
+            {}
+        )  # "file:function" -> list of called function names
+        self.imports: Dict[str, Dict[str, str]] = (
+            {}
+        )  # file_path -> { alias -> full_name }
 
     def build(self) -> Dict[str, List[str]]:
         """
@@ -208,7 +212,7 @@ class CallGraphBuilder:
         return file_graph
 
     # [20251213_FEATURE] v1.5.0 - Enhanced call graph methods
-    
+
     def build_with_details(
         self,
         entry_point: Optional[str] = None,
@@ -216,18 +220,18 @@ class CallGraphBuilder:
     ) -> CallGraphResult:
         """
         Build call graph with detailed node and edge information.
-        
+
         Args:
             entry_point: Starting function (e.g., "main" or "src/app.py:main")
                         If None, includes all functions
             depth: Maximum depth to traverse from entry point (default: 10)
-            
+
         Returns:
             CallGraphResult with nodes, edges, and Mermaid diagram
         """
         # Build the base graph first
         base_graph = self.build()
-        
+
         # Collect node information with line numbers
         node_info: Dict[str, CallNode] = {}
         for file_path in self._iter_python_files():
@@ -236,7 +240,7 @@ class CallGraphBuilder:
                 with open(file_path, "r", encoding="utf-8") as f:
                     code = f.read()
                 tree = ast.parse(code)
-                
+
                 for node in ast.walk(tree):
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                         key = f"{rel_path}:{node.name}"
@@ -244,18 +248,18 @@ class CallGraphBuilder:
                             name=node.name,
                             file=rel_path,
                             line=node.lineno,
-                            end_line=getattr(node, 'end_lineno', None),
+                            end_line=getattr(node, "end_lineno", None),
                             is_entry_point=self._is_entry_point(node, tree),
                         )
             except Exception:
                 continue
-        
+
         # If entry_point is specified, filter to reachable nodes
         if entry_point:
             reachable = self._get_reachable_nodes(base_graph, entry_point, depth)
         else:
             reachable = set(base_graph.keys())
-        
+
         # Build nodes list
         nodes = []
         seen_nodes = set()
@@ -265,13 +269,15 @@ class CallGraphBuilder:
                 seen_nodes.add(key)
             else:
                 # External or built-in function
-                nodes.append(CallNode(
-                    name=key.split(":")[-1] if ":" in key else key,
-                    file="<external>" if ":" not in key else key.split(":")[0],
-                    line=0,
-                ))
+                nodes.append(
+                    CallNode(
+                        name=key.split(":")[-1] if ":" in key else key,
+                        file="<external>" if ":" not in key else key.split(":")[0],
+                        line=0,
+                    )
+                )
                 seen_nodes.add(key)
-        
+
         # Build edges list
         edges = []
         for caller, callees in base_graph.items():
@@ -280,10 +286,10 @@ class CallGraphBuilder:
             for callee in callees:
                 # Include edge if both ends are in reachable set (or external)
                 edges.append(CallEdge(caller=caller, callee=callee))
-        
+
         # Generate Mermaid diagram
         mermaid = self._generate_mermaid(nodes, edges, entry_point)
-        
+
         return CallGraphResult(
             nodes=nodes,
             edges=edges,
@@ -291,11 +297,11 @@ class CallGraphBuilder:
             depth_limit=depth,
             mermaid=mermaid,
         )
-    
+
     def _is_entry_point(self, func_node: ast.AST, tree: ast.AST) -> bool:
         """
         Detect if a function is likely an entry point.
-        
+
         Entry point heuristics:
         - Function named "main"
         - Function decorated with CLI decorators (click.command, etc.)
@@ -303,9 +309,9 @@ class CallGraphBuilder:
         """
         if func_node.name == "main":
             return True
-        
+
         # Check for CLI decorators
-        for decorator in getattr(func_node, 'decorator_list', []):
+        for decorator in getattr(func_node, "decorator_list", []):
             dec_name = ""
             if isinstance(decorator, ast.Name):
                 dec_name = decorator.id
@@ -316,15 +322,15 @@ class CallGraphBuilder:
                     dec_name = decorator.func.attr
                 elif isinstance(decorator.func, ast.Name):
                     dec_name = decorator.func.id
-            
+
             if dec_name in ("command", "main", "cli", "app", "route", "get", "post"):
                 return True
-        
+
         return False
-    
+
     def _get_reachable_nodes(
-        self, 
-        graph: Dict[str, List[str]], 
+        self,
+        graph: Dict[str, List[str]],
         entry_point: str,
         max_depth: int,
     ) -> Set[str]:
@@ -339,28 +345,28 @@ class CallGraphBuilder:
                 if key.endswith(f":{entry_point}"):
                     entry_point = key
                     break
-        
+
         reachable = set()
         queue = deque([(entry_point, 0)])
-        
+
         while queue:
             node, depth = queue.popleft()
-            
+
             if node in reachable:
                 continue  # Already visited (handles cycles)
-            
+
             reachable.add(node)
-            
+
             if depth >= max_depth:
                 continue  # Don't explore further
-            
+
             # Add callees to queue
             for callee in graph.get(node, []):
                 if callee not in reachable:
                     queue.append((callee, depth + 1))
-        
+
         return reachable
-    
+
     def _generate_mermaid(
         self,
         nodes: List[CallNode],
@@ -369,61 +375,69 @@ class CallGraphBuilder:
     ) -> str:
         """Generate Mermaid flowchart diagram."""
         lines = ["graph TD"]
-        
+
         # Create node ID mapping (Mermaid doesn't like special chars)
         node_ids: Dict[str, str] = {}
         for i, node in enumerate(nodes):
-            full_name = f"{node.file}:{node.name}" if node.file != "<external>" else node.name
+            full_name = (
+                f"{node.file}:{node.name}" if node.file != "<external>" else node.name
+            )
             node_id = f"N{i}"
             node_ids[full_name] = node_id
             # Also map short names for external refs
             node_ids[node.name] = node_ids.get(node.name, node_id)
-        
+
         # Add nodes with labels
         for i, node in enumerate(nodes):
             node_id = f"N{i}"
             label = node.name
             if node.line > 0:
                 label = f"{node.name}:L{node.line}"
-            
+
             # Style entry points differently
-            if node.is_entry_point or (entry_point and entry_point.endswith(f":{node.name}")):
-                lines.append(f"    {node_id}[[\"{label}\"]]")  # Stadium shape for entry
+            if node.is_entry_point or (
+                entry_point and entry_point.endswith(f":{node.name}")
+            ):
+                lines.append(f'    {node_id}[["{label}"]]')  # Stadium shape for entry
             elif node.file == "<external>":
                 lines.append(f"    {node_id}({label})")  # Round for external
             else:
-                lines.append(f"    {node_id}[\"{label}\"]")  # Rectangle for internal
-        
+                lines.append(f'    {node_id}["{label}"]')  # Rectangle for internal
+
         # Add edges
         for edge in edges:
-            caller_id = node_ids.get(edge.caller) or node_ids.get(edge.caller.split(":")[-1])
-            callee_id = node_ids.get(edge.callee) or node_ids.get(edge.callee.split(":")[-1])
-            
+            caller_id = node_ids.get(edge.caller) or node_ids.get(
+                edge.caller.split(":")[-1]
+            )
+            callee_id = node_ids.get(edge.callee) or node_ids.get(
+                edge.callee.split(":")[-1]
+            )
+
             if caller_id and callee_id:
                 lines.append(f"    {caller_id} --> {callee_id}")
-        
+
         return "\n".join(lines)
-    
+
     def detect_circular_imports(self) -> List[List[str]]:
         """
         Detect circular import cycles in the project.
-        
+
         [20251213_FEATURE] P1 - Circular dependency detection
-        
+
         Returns:
             List of cycles, where each cycle is a list of module paths
             e.g., [["a.py", "b.py", "a.py"], ["c.py", "d.py", "e.py", "c.py"]]
         """
         # Build import graph: module -> modules it imports
         import_graph: Dict[str, Set[str]] = {}
-        
+
         for file_path in self._iter_python_files():
             rel_path = str(file_path.relative_to(self.root_path))
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     code = f.read()
                 tree = ast.parse(code)
-                
+
                 imports = set()
                 for node in ast.walk(tree):
                     if isinstance(node, ast.Import):
@@ -435,17 +449,17 @@ class CallGraphBuilder:
                         if node.module:
                             mod_path = node.module.replace(".", "/") + ".py"
                             imports.add(mod_path)
-                
+
                 import_graph[rel_path] = imports
             except Exception:
                 continue
-        
+
         # Find cycles using DFS with coloring
         cycles = []
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {node: WHITE for node in import_graph}
         path = []
-        
+
         def dfs(node: str):
             if color[node] == GRAY:
                 # Found a cycle - extract it
@@ -453,22 +467,22 @@ class CallGraphBuilder:
                 cycle = path[cycle_start:] + [node]
                 cycles.append(cycle)
                 return
-            
+
             if color[node] == BLACK:
                 return
-            
+
             color[node] = GRAY
             path.append(node)
-            
+
             for neighbor in import_graph.get(node, set()):
                 if neighbor in import_graph:  # Only follow internal imports
                     dfs(neighbor)
-            
+
             path.pop()
             color[node] = BLACK
-        
+
         for node in import_graph:
             if color[node] == WHITE:
                 dfs(node)
-        
+
         return cycles

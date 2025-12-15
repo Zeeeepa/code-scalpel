@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "1.5.3"
+version = "1.5.4"
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
@@ -38,7 +38,10 @@ dependencies = [
     "graphviz>=0.16",
     "flask>=2.0.0",
     "tomli>=2.0.0; python_version < '3.11'",
-    "mcp>=1.0.0",
+    # [20251214_SECURITY] Bump MCP to include default DNS rebinding protection for FastMCP HTTP transport
+    "mcp>=1.23.0",
+    # [20251214_SECURITY] Ensure redirect/decompression protections for HTTP clients
+    "urllib3>=2.6.0",
     "tree-sitter>=0.21.0",
     "tree-sitter-java>=0.21.0",
     "tree-sitter-javascript>=0.21.0",

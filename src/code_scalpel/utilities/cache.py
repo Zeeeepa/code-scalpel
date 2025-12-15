@@ -9,7 +9,7 @@ identical code always produces cache hits.
 Example:
     >>> from code_scalpel.utilities import AnalysisCache
     >>> cache = AnalysisCache()
-    >>> 
+    >>>
     >>> # Check cache before expensive operation
     >>> code = "def foo(): return 1"
     >>> cached = cache.get(code, "analysis")
@@ -21,7 +21,7 @@ Example:
 
 The cache supports multiple result types per code hash:
 - "analysis": AnalysisResult from analyze_code
-- "security": SecurityResult from security_scan  
+- "security": SecurityResult from security_scan
 - "symbolic": SymbolicResult from symbolic_execute
 - "tests": TestGenerationResult from generate_unit_tests
 """

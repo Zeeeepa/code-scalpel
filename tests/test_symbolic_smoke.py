@@ -504,9 +504,11 @@ while x < 5:
         result = interp.execute(code)
         assert result is not None
 
-    @pytest.mark.skip(reason="Try/Except not supported in IR engine yet")
     def test_try_except(self):
         """Test try-except handling."""
+
+        # [20251214_TEST] Run and xfail until IR try/except support ships
+        pytest.xfail("Try/except not yet supported in IR engine; tracked for v2.0.0")
 
         interp = SymbolicInterpreter()
         code = """

@@ -504,9 +504,9 @@ class JavaScriptNormalizer(BaseNormalizer):
                 params.append(
                     IRParameter(
                         name=self._get_text(name_node) if name_node else "",
-                        default=self.normalize_node(default_node)
-                        if default_node
-                        else None,
+                        default=(
+                            self.normalize_node(default_node) if default_node else None
+                        ),
                     )
                 )
             elif child.type == "rest_pattern":
@@ -667,7 +667,8 @@ class JavaScriptNormalizer(BaseNormalizer):
                     c for c in left_node.children if c.type == "variable_declarator"
                 ][0]
                 name_node = self._child_by_field(declarator, "name")
-                target = IRName(name=self._get_text(name_node)) if name_node else None
+                # [20251214_BUGFIX] IRName constructor uses 'id' rather than 'name'.
+                target = IRName(id=self._get_text(name_node)) if name_node else None
             else:
                 target = self.normalize_node(left_node)
         else:
@@ -1039,9 +1040,10 @@ class JavaScriptNormalizer(BaseNormalizer):
             if elem:
                 elements.append(elem)
 
+        # [20251214_BUGFIX] IRList expects 'elements', not legacy 'elts' keyword.
         return self._set_language(
             IRList(
-                elts=elements,
+                elements=elements,
                 loc=self._make_loc(node),
             )
         )
@@ -1069,7 +1071,8 @@ class JavaScriptNormalizer(BaseNormalizer):
                 # { foo } -> { foo: foo }
                 name = self._get_text(child)
                 keys.append(IRConstant(value=name))
-                values.append(IRName(name=name))
+                # [20251214_BUGFIX] Align IRName construction with dataclass field 'id'.
+                values.append(IRName(id=name))
 
         return self._set_language(
             IRDict(

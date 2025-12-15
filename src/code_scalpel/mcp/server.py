@@ -2012,7 +2012,7 @@ Provide a risk assessment and remediation steps for each finding."""
 def _get_file_context_sync(file_path: str) -> FileContextResult:
     """
     Synchronous implementation of get_file_context.
-    
+
     [20251214_FEATURE] v1.5.3 - Integrated PathResolver for intelligent path resolution
     """
     from code_scalpel.mcp.path_resolver import resolve_path
@@ -2340,12 +2340,20 @@ class DependencyVulnerability(BaseModel):
 
     id: str = Field(description="CVE or GHSA identifier")
     summary: str = Field(description="Brief description of the vulnerability")
-    severity: str = Field(description="Severity level: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    severity: str = Field(
+        description="Severity level: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package: str = Field(description="Affected package name")
     vulnerable_version: str = Field(description="The vulnerable version installed")
-    fixed_version: str | None = Field(default=None, description="Version where vulnerability is fixed")
-    aliases: list[str] = Field(default_factory=list, description="Alternative identifiers (e.g., GHSA)")
-    references: list[str] = Field(default_factory=list, description="URLs with more information")
+    fixed_version: str | None = Field(
+        default=None, description="Version where vulnerability is fixed"
+    )
+    aliases: list[str] = Field(
+        default_factory=list, description="Alternative identifiers (e.g., GHSA)"
+    )
+    references: list[str] = Field(
+        default_factory=list, description="URLs with more information"
+    )
 
 
 class DependencyInfo(BaseModel):
@@ -2365,8 +2373,12 @@ class DependencyScanResult(BaseModel):
     success: bool = Field(description="Whether scan succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     total_dependencies: int = Field(description="Total number of dependencies scanned")
-    vulnerable_count: int = Field(description="Number of dependencies with vulnerabilities")
-    total_vulnerabilities: int = Field(description="Total number of vulnerabilities found")
+    vulnerable_count: int = Field(
+        description="Number of dependencies with vulnerabilities"
+    )
+    total_vulnerabilities: int = Field(
+        description="Total number of vulnerabilities found"
+    )
     severity_summary: dict[str, int] = Field(
         default_factory=dict, description="Count by severity level"
     )
@@ -2383,15 +2395,15 @@ def _scan_dependencies_sync(
 ) -> DependencyScanResult:
     """
     Synchronous implementation of scan_dependencies.
-    
+
     [20251213_FEATURE] v1.5.0 - Scan project dependencies for vulnerabilities.
     """
     from code_scalpel.ast_tools.dependency_parser import DependencyParser
     from code_scalpel.ast_tools.osv_client import OSVClient, OSVError
-    
+
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
-        
+
         if not root.exists():
             return DependencyScanResult(
                 success=False,
@@ -2400,42 +2412,50 @@ def _scan_dependencies_sync(
                 total_vulnerabilities=0,
                 error=f"Project root not found: {root}",
             )
-        
+
         # Parse dependencies from project files
         parser = DependencyParser(str(root))
         raw_deps = parser.get_dependencies()
-        
+
         dependencies: list[DependencyInfo] = []
         severity_summary: dict[str, int] = {
-            "CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "UNKNOWN": 0
+            "CRITICAL": 0,
+            "HIGH": 0,
+            "MEDIUM": 0,
+            "LOW": 0,
+            "UNKNOWN": 0,
         }
         total_vulns = 0
         vulnerable_count = 0
-        
+
         # Process each ecosystem
         for ecosystem, pkg_list in raw_deps.items():
             # Map ecosystem to OSV format
-            osv_ecosystem = "PyPI" if ecosystem == "python" else "npm" if ecosystem == "javascript" else ecosystem
-            
+            osv_ecosystem = (
+                "PyPI"
+                if ecosystem == "python"
+                else "npm" if ecosystem == "javascript" else ecosystem
+            )
+
             for pkg in pkg_list:
                 name = pkg.get("name", "")
                 version = pkg.get("version", "*")
                 is_dev = pkg.get("type") == "dev"
-                
+
                 if not name:
                     continue
-                    
+
                 # Skip dev dependencies if not requested
                 if is_dev and not include_dev:
                     continue
-                
+
                 dep_info = DependencyInfo(
                     name=name,
                     version=version,
                     ecosystem=osv_ecosystem,
                     vulnerabilities=[],
                 )
-                
+
                 # Query OSV for vulnerabilities if enabled and version is specific
                 if scan_vulnerabilities and version not in ("*", "", "latest"):
                     # Clean version string for OSV query
@@ -2443,8 +2463,10 @@ def _scan_dependencies_sync(
                     if clean_version:
                         try:
                             client = OSVClient(timeout=5)
-                            vulns = client.query_package(name, clean_version, osv_ecosystem)
-                            
+                            vulns = client.query_package(
+                                name, clean_version, osv_ecosystem
+                            )
+
                             for v in vulns:
                                 dep_vuln = DependencyVulnerability(
                                     id=v.id,
@@ -2457,17 +2479,19 @@ def _scan_dependencies_sync(
                                     references=v.references,
                                 )
                                 dep_info.vulnerabilities.append(dep_vuln)
-                                severity_summary[v.severity] = severity_summary.get(v.severity, 0) + 1
+                                severity_summary[v.severity] = (
+                                    severity_summary.get(v.severity, 0) + 1
+                                )
                                 total_vulns += 1
                         except OSVError:
                             # Continue scanning other dependencies even if one fails
                             pass
-                
+
                 if dep_info.vulnerabilities:
                     vulnerable_count += 1
-                
+
                 dependencies.append(dep_info)
-        
+
         return DependencyScanResult(
             success=True,
             total_dependencies=len(dependencies),
@@ -2476,7 +2500,7 @@ def _scan_dependencies_sync(
             severity_summary=severity_summary,
             dependencies=dependencies,
         )
-        
+
     except Exception as e:
         return DependencyScanResult(
             success=False,
@@ -2530,7 +2554,9 @@ class CallNodeModel(BaseModel):
     file: str = Field(description="File path (relative) or '<external>'")
     line: int = Field(description="Line number (0 if unknown)")
     end_line: int | None = Field(default=None, description="End line number")
-    is_entry_point: bool = Field(default=False, description="Whether function is an entry point")
+    is_entry_point: bool = Field(
+        default=False, description="Whether function is an entry point"
+    )
 
 
 class CallEdgeModel(BaseModel):
@@ -2543,12 +2569,20 @@ class CallEdgeModel(BaseModel):
 class CallGraphResultModel(BaseModel):
     """Result of call graph analysis."""
 
-    nodes: list[CallNodeModel] = Field(default_factory=list, description="Functions in the graph")
-    edges: list[CallEdgeModel] = Field(default_factory=list, description="Call relationships")
-    entry_point: str | None = Field(default=None, description="Entry point used for filtering")
+    nodes: list[CallNodeModel] = Field(
+        default_factory=list, description="Functions in the graph"
+    )
+    edges: list[CallEdgeModel] = Field(
+        default_factory=list, description="Call relationships"
+    )
+    entry_point: str | None = Field(
+        default=None, description="Entry point used for filtering"
+    )
     depth_limit: int | None = Field(default=None, description="Depth limit used")
     mermaid: str = Field(default="", description="Mermaid diagram representation")
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Detected import cycles")
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Detected import cycles"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -2584,9 +2618,7 @@ def _get_call_graph_sync(
             for n in result.nodes
         ]
 
-        edges = [
-            CallEdgeModel(caller=e.caller, callee=e.callee) for e in result.edges
-        ]
+        edges = [CallEdgeModel(caller=e.caller, callee=e.callee) for e in result.edges]
 
         # Optionally check for circular imports
         circular_imports = []
@@ -2643,7 +2675,11 @@ async def get_call_graph(
         CallGraphResultModel with nodes, edges, Mermaid diagram, and any circular imports
     """
     return await asyncio.to_thread(
-        _get_call_graph_sync, project_root, entry_point, depth, include_circular_import_check
+        _get_call_graph_sync,
+        project_root,
+        entry_point,
+        depth,
+        include_circular_import_check,
     )
 
 
@@ -2656,10 +2692,16 @@ class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
 
     path: str = Field(description="Relative file path")
-    functions: list[str] = Field(default_factory=list, description="Function names in the module")
-    classes: list[str] = Field(default_factory=list, description="Class names in the module")
+    functions: list[str] = Field(
+        default_factory=list, description="Function names in the module"
+    )
+    classes: list[str] = Field(
+        default_factory=list, description="Class names in the module"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    entry_points: list[str] = Field(default_factory=list, description="Detected entry points")
+    entry_points: list[str] = Field(
+        default_factory=list, description="Detected entry points"
+    )
     line_count: int = Field(default=0, description="Number of lines in file")
     complexity_score: int = Field(default=0, description="Cyclomatic complexity score")
 
@@ -2669,7 +2711,9 @@ class PackageInfo(BaseModel):
 
     name: str = Field(description="Package name")
     path: str = Field(description="Relative path to package")
-    modules: list[str] = Field(default_factory=list, description="Module names in package")
+    modules: list[str] = Field(
+        default_factory=list, description="Module names in package"
+    )
     subpackages: list[str] = Field(default_factory=list, description="Subpackage names")
 
 
@@ -2679,12 +2723,24 @@ class ProjectMapResult(BaseModel):
     project_root: str = Field(description="Absolute path to project root")
     total_files: int = Field(default=0, description="Total Python files")
     total_lines: int = Field(default=0, description="Total lines of code")
-    languages: dict[str, int] = Field(default_factory=dict, description="Language breakdown by file count")
-    packages: list[PackageInfo] = Field(default_factory=list, description="Detected packages")
-    modules: list[ModuleInfo] = Field(default_factory=list, description="All modules analyzed")
-    entry_points: list[str] = Field(default_factory=list, description="All detected entry points")
-    circular_imports: list[list[str]] = Field(default_factory=list, description="Circular import cycles")
-    complexity_hotspots: list[str] = Field(default_factory=list, description="Files with high complexity")
+    languages: dict[str, int] = Field(
+        default_factory=dict, description="Language breakdown by file count"
+    )
+    packages: list[PackageInfo] = Field(
+        default_factory=list, description="Detected packages"
+    )
+    modules: list[ModuleInfo] = Field(
+        default_factory=list, description="All modules analyzed"
+    )
+    entry_points: list[str] = Field(
+        default_factory=list, description="All detected entry points"
+    )
+    circular_imports: list[list[str]] = Field(
+        default_factory=list, description="Circular import cycles"
+    )
+    complexity_hotspots: list[str] = Field(
+        default_factory=list, description="Files with high complexity"
+    )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -2715,13 +2771,23 @@ def _get_project_map_sync(
         total_lines = 0
 
         # Entry point detection patterns
-        entry_decorators = {"command", "main", "cli", "app", "route", "get", "post", "put", "delete"}
+        entry_decorators = {
+            "command",
+            "main",
+            "cli",
+            "app",
+            "route",
+            "get",
+            "post",
+            "put",
+            "delete",
+        }
 
         def is_entry_point(func_node: ast.AST) -> bool:
             """Check if function is an entry point."""
             if func_node.name == "main":
                 return True
-            for dec in getattr(func_node, 'decorator_list', []):
+            for dec in getattr(func_node, "decorator_list", []):
                 dec_name = ""
                 if isinstance(dec, ast.Name):
                     dec_name = dec.id
@@ -2740,9 +2806,20 @@ def _get_project_map_sync(
             """Calculate cyclomatic complexity of a module."""
             complexity = 1  # Base complexity
             for node in ast.walk(tree):
-                if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor,
-                                    ast.ExceptHandler, ast.With, ast.AsyncWith,
-                                    ast.Assert, ast.comprehension)):
+                if isinstance(
+                    node,
+                    (
+                        ast.If,
+                        ast.While,
+                        ast.For,
+                        ast.AsyncFor,
+                        ast.ExceptHandler,
+                        ast.With,
+                        ast.AsyncWith,
+                        ast.Assert,
+                        ast.comprehension,
+                    ),
+                ):
                     complexity += 1
                 elif isinstance(node, (ast.And, ast.Or)):
                     complexity += 1
@@ -2754,9 +2831,21 @@ def _get_project_map_sync(
         python_files = list(root_path.rglob("*.py"))
 
         # Filter out common excluded directories
-        exclude_patterns = {"__pycache__", ".git", "venv", ".venv", "env", ".env",
-                          "node_modules", "dist", "build", ".tox", ".pytest_cache",
-                          "htmlcov", ".mypy_cache"}
+        exclude_patterns = {
+            "__pycache__",
+            ".git",
+            "venv",
+            ".venv",
+            "env",
+            ".env",
+            "node_modules",
+            "dist",
+            "build",
+            ".tox",
+            ".pytest_cache",
+            "htmlcov",
+            ".mypy_cache",
+        }
 
         for file_path in python_files:
             # Skip excluded directories
@@ -2799,19 +2888,23 @@ def _get_project_map_sync(
                 if include_complexity:
                     complexity = calculate_complexity(tree)
                     if complexity >= complexity_threshold:
-                        complexity_hotspots.append(f"{rel_path} (complexity: {complexity})")
+                        complexity_hotspots.append(
+                            f"{rel_path} (complexity: {complexity})"
+                        )
 
                 all_entry_points.extend(entry_points)
 
-                modules.append(ModuleInfo(
-                    path=rel_path,
-                    functions=functions,
-                    classes=classes,
-                    imports=list(set(imports)),  # Dedupe
-                    entry_points=entry_points,
-                    line_count=lines,
-                    complexity_score=complexity,
-                ))
+                modules.append(
+                    ModuleInfo(
+                        path=rel_path,
+                        functions=functions,
+                        classes=classes,
+                        imports=list(set(imports)),  # Dedupe
+                        entry_points=entry_points,
+                        line_count=lines,
+                        complexity_score=complexity,
+                    )
+                )
 
                 # Track packages
                 parent = file_path.parent
@@ -2840,7 +2933,10 @@ def _get_project_map_sync(
         pkg_list = list(packages.values())
         for pkg in pkg_list:
             for other_pkg in pkg_list:
-                if other_pkg.path.startswith(pkg.path + "/") and other_pkg.name not in pkg.subpackages:
+                if (
+                    other_pkg.path.startswith(pkg.path + "/")
+                    and other_pkg.name not in pkg.subpackages
+                ):
                     pkg.subpackages.append(other_pkg.name)
 
         # Check for circular imports
@@ -2852,13 +2948,24 @@ def _get_project_map_sync(
         # [20251213_FEATURE] Calculate language breakdown
         languages: dict[str, int] = {"python": len(modules)}
         # Also count other common file types
-        for ext, lang in [(".js", "javascript"), (".ts", "typescript"), (".java", "java"),
-                         (".json", "json"), (".yaml", "yaml"), (".yml", "yaml"),
-                         (".md", "markdown"), (".html", "html"), (".css", "css")]:
-            count = len(list(root_path.rglob(f"*{ext}")))
+        for ext, lang in [
+            (".js", "javascript"),
+            (".ts", "typescript"),
+            (".java", "java"),
+            (".json", "json"),
+            (".yaml", "yaml"),
+            (".yml", "yaml"),
+            (".md", "markdown"),
+            (".html", "html"),
+            (".css", "css"),
+        ]:
+            len(list(root_path.rglob(f"*{ext}")))
             # Exclude common ignored dirs
-            actual_count = sum(1 for f in root_path.rglob(f"*{ext}")
-                             if not any(p in exclude_patterns for p in f.parts))
+            actual_count = sum(
+                1
+                for f in root_path.rglob(f"*{ext}")
+                if not any(p in exclude_patterns for p in f.parts)
+            )
             if actual_count > 0:
                 languages[lang] = languages.get(lang, 0) + actual_count
 
@@ -2869,9 +2976,11 @@ def _get_project_map_sync(
             mod_id = f"M{i}"
             label = mod.path.replace("/", "_").replace(".", "_")
             if mod.entry_points:
-                mermaid_lines.append(f"        {mod_id}[[\"{label}\"]]")  # Stadium for entry
+                mermaid_lines.append(
+                    f'        {mod_id}[["{label}"]]'
+                )  # Stadium for entry
             else:
-                mermaid_lines.append(f"        {mod_id}[\"{label}\"]")
+                mermaid_lines.append(f'        {mod_id}["{label}"]')
         mermaid_lines.append("    end")
 
         return ProjectMapResult(
@@ -2929,7 +3038,11 @@ async def get_project_map(
         ProjectMapResult with comprehensive project overview
     """
     return await asyncio.to_thread(
-        _get_project_map_sync, project_root, include_complexity, complexity_threshold, include_circular_check
+        _get_project_map_sync,
+        project_root,
+        include_complexity,
+        complexity_threshold,
+        include_circular_check,
     )
 
 
@@ -2943,7 +3056,9 @@ class ImportNodeModel(BaseModel):
 
     module: str = Field(description="Module name (e.g., 'os', 'mypackage.utils')")
     import_type: str = Field(description="Import type: 'direct', 'from', or 'star'")
-    names: list[str] = Field(default_factory=list, description="Imported names (for 'from' imports)")
+    names: list[str] = Field(
+        default_factory=list, description="Imported names (for 'from' imports)"
+    )
     alias: str | None = Field(default=None, description="Alias if import uses 'as'")
     line: int = Field(default=0, description="Line number of import")
 
@@ -2966,7 +3081,9 @@ class ExtractedSymbolModel(BaseModel):
     file: str = Field(description="Source file (relative path)")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of symbols this depends on")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of symbols this depends on"
+    )
 
 
 class CrossFileDependenciesResult(BaseModel):
@@ -2977,13 +3094,18 @@ class CrossFileDependenciesResult(BaseModel):
 
     # Target symbol info
     target_name: str = Field(default="", description="Name of the analyzed symbol")
-    target_file: str = Field(default="", description="File containing the target symbol")
+    target_file: str = Field(
+        default="", description="File containing the target symbol"
+    )
 
     # Dependency info
     extracted_symbols: list[ExtractedSymbolModel] = Field(
-        default_factory=list, description="All symbols extracted (target + dependencies)"
+        default_factory=list,
+        description="All symbols extracted (target + dependencies)",
     )
-    total_dependencies: int = Field(default=0, description="Number of dependencies resolved")
+    total_dependencies: int = Field(
+        default=0, description="Number of dependencies resolved"
+    )
     unresolved_imports: list[str] = Field(
         default_factory=list, description="External imports that could not be resolved"
     )
@@ -3000,10 +3122,14 @@ class CrossFileDependenciesResult(BaseModel):
     combined_code: str = Field(
         default="", description="All extracted code combined, ready for AI consumption"
     )
-    token_estimate: int = Field(default=0, description="Estimated token count for combined code")
+    token_estimate: int = Field(
+        default=0, description="Estimated token count for combined code"
+    )
 
     # Mermaid diagram
-    mermaid: str = Field(default="", description="Mermaid diagram of import relationships")
+    mermaid: str = Field(
+        default="", description="Mermaid diagram of import relationships"
+    )
 
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -3042,7 +3168,7 @@ def _get_cross_file_dependencies_sync(
     try:
         # Build import graph
         resolver = ImportResolver(root_path)
-        import_result = resolver.build()
+        resolver.build()
 
         # Extract cross-file dependencies
         extractor = CrossFileExtractor(root_path)
@@ -3073,7 +3199,11 @@ def _get_cross_file_dependencies_sync(
         combined_parts = []
 
         for sym in all_symbols:
-            rel_file = str(Path(sym.file).relative_to(root_path)) if Path(sym.file).is_absolute() else sym.file
+            rel_file = (
+                str(Path(sym.file).relative_to(root_path))
+                if Path(sym.file).is_absolute()
+                else sym.file
+            )
             extracted_symbols.append(
                 ExtractedSymbolModel(
                     name=sym.name,
@@ -3095,7 +3225,9 @@ def _get_cross_file_dependencies_sync(
             combined_code = extraction_result.combined_code
 
         # Get unresolved imports from extraction result
-        unresolved_imports = extraction_result.module_imports  # These are imports that couldn't be resolved
+        unresolved_imports = (
+            extraction_result.module_imports
+        )  # These are imports that couldn't be resolved
 
         # Build import graph dict (file -> list of imported files)
         # Uses resolver.imports which is Dict[module_name, List[ImportInfo]]
@@ -3104,16 +3236,24 @@ def _get_cross_file_dependencies_sync(
             # Get file path for this module
             if module_name in resolver.module_to_file:
                 file_path = resolver.module_to_file[module_name]
-                rel_path = str(Path(file_path).relative_to(root_path)) if Path(file_path).is_absolute() else file_path
+                rel_path = (
+                    str(Path(file_path).relative_to(root_path))
+                    if Path(file_path).is_absolute()
+                    else file_path
+                )
             else:
                 rel_path = module_name.replace(".", "/") + ".py"  # Best guess
-            
+
             imported_files = []
             for imp in imports:
                 # Try to resolve module to file using module_to_file mapping
                 if imp.module in resolver.module_to_file:
                     resolved_file = resolver.module_to_file[imp.module]
-                    resolved_rel = str(Path(resolved_file).relative_to(root_path)) if Path(resolved_file).is_absolute() else resolved_file
+                    resolved_rel = (
+                        str(Path(resolved_file).relative_to(root_path))
+                        if Path(resolved_file).is_absolute()
+                        else resolved_file
+                    )
                     if resolved_rel not in imported_files:
                         imported_files.append(resolved_rel)
             if imported_files:
@@ -3121,7 +3261,9 @@ def _get_cross_file_dependencies_sync(
 
         # Detect circular imports using get_circular_imports()
         circular_import_objs = resolver.get_circular_imports()
-        circular_import_lists = [ci.cycle for ci in circular_import_objs]  # CircularImport uses 'cycle'
+        circular_import_lists = [
+            ci.cycle for ci in circular_import_objs
+        ]  # CircularImport uses 'cycle'
 
         # Generate Mermaid diagram
         mermaid = ""
@@ -3132,7 +3274,11 @@ def _get_cross_file_dependencies_sync(
         token_estimate = len(combined_code) // 4 if combined_code else 0
 
         # Make target file relative
-        target_rel = str(target_path.relative_to(root_path)) if target_path.is_absolute() else target_file
+        target_rel = (
+            str(target_path.relative_to(root_path))
+            if target_path.is_absolute()
+            else target_file
+        )
 
         return CrossFileDependenciesResult(
             success=True,
@@ -3229,7 +3375,9 @@ class TaintFlowModel(BaseModel):
     sink_function: str = Field(description="Function where taint reaches sink")
     sink_file: str = Field(description="File containing sink")
     sink_line: int = Field(default=0, description="Line number of sink")
-    flow_path: list[str] = Field(default_factory=list, description="Path: file:function -> file:function")
+    flow_path: list[str] = Field(
+        default_factory=list, description="Path: file:function -> file:function"
+    )
     taint_type: str = Field(description="Type of taint source (e.g., 'request_input')")
 
 
@@ -3242,7 +3390,9 @@ class CrossFileVulnerabilityModel(BaseModel):
     source_file: str = Field(description="File where taint originates")
     sink_file: str = Field(description="File where vulnerability manifests")
     description: str = Field(description="Human-readable description")
-    flow: TaintFlowModel = Field(description="The taint flow that causes this vulnerability")
+    flow: TaintFlowModel = Field(
+        description="The taint flow that causes this vulnerability"
+    )
 
 
 class CrossFileSecurityResult(BaseModel):
@@ -3253,8 +3403,12 @@ class CrossFileSecurityResult(BaseModel):
 
     # Summary
     files_analyzed: int = Field(default=0, description="Number of files analyzed")
-    has_vulnerabilities: bool = Field(default=False, description="Whether vulnerabilities were found")
-    vulnerability_count: int = Field(default=0, description="Total vulnerabilities found")
+    has_vulnerabilities: bool = Field(
+        default=False, description="Whether vulnerabilities were found"
+    )
+    vulnerability_count: int = Field(
+        default=0, description="Total vulnerabilities found"
+    )
     risk_level: str = Field(default="low", description="Overall risk level")
 
     # Detailed findings
@@ -3307,14 +3461,18 @@ def _cross_file_security_scan_sync(
         for vuln in result.vulnerabilities:
             flow_model = TaintFlowModel(
                 source_function=vuln.flow.source_function,
-                source_file=str(Path(vuln.flow.source_file).relative_to(root_path))
-                if Path(vuln.flow.source_file).is_absolute()
-                else vuln.flow.source_file,
+                source_file=(
+                    str(Path(vuln.flow.source_file).relative_to(root_path))
+                    if Path(vuln.flow.source_file).is_absolute()
+                    else vuln.flow.source_file
+                ),
                 source_line=vuln.flow.source_line,
                 sink_function=vuln.flow.sink_function,
-                sink_file=str(Path(vuln.flow.sink_file).relative_to(root_path))
-                if Path(vuln.flow.sink_file).is_absolute()
-                else vuln.flow.sink_file,
+                sink_file=(
+                    str(Path(vuln.flow.sink_file).relative_to(root_path))
+                    if Path(vuln.flow.sink_file).is_absolute()
+                    else vuln.flow.sink_file
+                ),
                 sink_line=vuln.flow.sink_line,
                 flow_path=vuln.flow.flow_path,
                 taint_type=vuln.flow.taint_type,
@@ -3337,14 +3495,18 @@ def _cross_file_security_scan_sync(
             taint_flows.append(
                 TaintFlowModel(
                     source_function=flow.source_function,
-                    source_file=str(Path(flow.source_file).relative_to(root_path))
-                    if Path(flow.source_file).is_absolute()
-                    else flow.source_file,
+                    source_file=(
+                        str(Path(flow.source_file).relative_to(root_path))
+                        if Path(flow.source_file).is_absolute()
+                        else flow.source_file
+                    ),
                     source_line=flow.source_line,
                     sink_function=flow.sink_function,
-                    sink_file=str(Path(flow.sink_file).relative_to(root_path))
-                    if Path(flow.sink_file).is_absolute()
-                    else flow.sink_file,
+                    sink_file=(
+                        str(Path(flow.sink_file).relative_to(root_path))
+                        if Path(flow.sink_file).is_absolute()
+                        else flow.sink_file
+                    ),
                     sink_line=flow.sink_line,
                     flow_path=flow.flow_path,
                     taint_type=flow.taint_type,
@@ -3370,13 +3532,13 @@ def _cross_file_security_scan_sync(
         # Extract taint sources from tracker's internal state
         taint_sources = []
         dangerous_sinks = []
-        
+
         # Get taint sources if available
-        if hasattr(tracker, 'module_taint_sources'):
+        if hasattr(tracker, "module_taint_sources"):
             for module, sources in tracker.module_taint_sources.items():
                 for src in sources:
                     taint_sources.append(f"{module}:{src.function}")
-        
+
         # Get sinks from taint flows
         for flow in result.taint_flows:
             sink_key = f"{flow.sink_function}"
@@ -3552,7 +3714,7 @@ async def validate_paths(
             "/home/user/project/main.py",
             "utils/helpers.py"
         ])
-        
+
         if not result.success:
             print("Inaccessible:", result.inaccessible)
             print("Suggestions:", result.suggestions)

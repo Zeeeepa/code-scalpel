@@ -20,7 +20,7 @@ The RIGHT way (this implementation):
     state_b.set_variable("x", 5)  # state_a is untouched
 
 Z3 objects (ExprRef, BoolRef, Sort) are IMMUTABLE (C++ bindings).
-They can be safely shared. Only the Python containers (dict, list) 
+They can be safely shared. Only the Python containers (dict, list)
 need to be copied.
 """
 

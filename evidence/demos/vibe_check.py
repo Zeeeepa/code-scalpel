@@ -8,9 +8,10 @@ through multiple variable assignments.
 Run:
     code-scalpel scan demos/vibe_check.py
 
-Expected: Code Scalpel detects SQL Injection at cursor.execute() 
+Expected: Code Scalpel detects SQL Injection at cursor.execute()
           by tracing: request.args -> user_id -> query_base -> final_query
 """
+
 import sqlite3
 from flask import request
 

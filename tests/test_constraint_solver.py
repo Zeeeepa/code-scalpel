@@ -6,14 +6,28 @@ Raw Z3 objects are useless for JSON serialization and user display.
 
 The solver must return:
 - Python int, not z3.IntNumRef
-- Python bool, not z3.BoolRef  
+- Python bool, not z3.BoolRef
 - Python dict, not z3.ModelRef
 
 If the Type Marshaling tests fail, the MCP server will crash
 when trying to serialize results.
 """
 
-from z3 import Int, Bool, IntSort, Or, Not, Implies
+import math
+
+from z3 import (
+    BitVec,
+    Bool,
+    Implies,
+    Int,
+    IntSort,
+    Not,
+    Or,
+    Real,
+    RealVal,
+    String,
+    StringVal,
+)
 
 from code_scalpel.symbolic_execution_tools.constraint_solver import (
     ConstraintSolver,
@@ -258,6 +272,45 @@ class TestTypeMarshaling:
         parsed = json.loads(json_str)
         assert parsed["x"] == 42
         assert parsed["flag"] is True
+
+    def test_string_value_is_python_str(self):
+        """
+        [20251214_TEST] Ensure string models are Python str, not Z3 wrappers.
+        """
+        solver = ConstraintSolver()
+        s = String("s")
+
+        result = solver.solve([s == StringVal("hello")], [s])
+
+        assert result.status == SolverStatus.SAT
+        assert isinstance(result.model["s"], str)
+        assert result.model["s"] == "hello"
+
+    def test_real_value_is_python_float(self):
+        """
+        [20251214_TEST] Ensure real models are converted to float.
+        """
+        solver = ConstraintSolver()
+        r = Real("r")
+
+        result = solver.solve([r == RealVal("1/3")], [r])
+
+        assert result.status == SolverStatus.SAT
+        assert isinstance(result.model["r"], float)
+        assert math.isclose(result.model["r"], 1 / 3, rel_tol=1e-6)
+
+    def test_bitvector_value_is_python_int(self):
+        """
+        [20251214_TEST] Ensure bitvectors marshal to Python int.
+        """
+        solver = ConstraintSolver()
+        bv = BitVec("bv", 8)
+
+        result = solver.solve([bv == 0xF0], [bv])
+
+        assert result.status == SolverStatus.SAT
+        assert isinstance(result.model["bv"], int)
+        assert result.model["bv"] == 0xF0
 
 
 # =============================================================================
@@ -868,10 +921,11 @@ class TestCoverageCompleteness:
         mock_value.denominator_as_long.return_value = 2
 
         # Patch z3.is_real to return True for our mock
-        with patch("z3.is_int_value", return_value=False), patch(
-            "z3.is_bool", return_value=False
-        ), patch("z3.is_string_value", return_value=False), patch(
-            "z3.is_real", return_value=True
+        with (
+            patch("z3.is_int_value", return_value=False),
+            patch("z3.is_bool", return_value=False),
+            patch("z3.is_string_value", return_value=False),
+            patch("z3.is_real", return_value=True),
         ):
             result = solver._z3_to_python(mock_value)
 
@@ -903,12 +957,12 @@ class TestCoverageCompleteness:
         mock_value.__str__ = MagicMock(return_value="unknown_type_42")
 
         # Patch all Z3 type checks to return False
-        with patch("z3.is_int_value", return_value=False), patch(
-            "z3.is_bool", return_value=False
-        ), patch("z3.is_string_value", return_value=False), patch(
-            "z3.is_real", return_value=False
-        ), patch(
-            "z3.is_bv_value", return_value=False
+        with (
+            patch("z3.is_int_value", return_value=False),
+            patch("z3.is_bool", return_value=False),
+            patch("z3.is_string_value", return_value=False),
+            patch("z3.is_real", return_value=False),
+            patch("z3.is_bv_value", return_value=False),
         ):
             result = solver._z3_to_python(mock_value)
 
