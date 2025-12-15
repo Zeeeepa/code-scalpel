@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251214_RELEASE] Updated version for v1.5.3 "FullSuite" release
-__version__ = "1.5.3"
+# [20251215_RELEASE] Updated version for v2.0.0 "Polyglot" release
+__version__ = "2.0.0"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

@@ -1,0 +1,172 @@
+{
+  "release": "v2.0.0",
+  "codename": "Edge Cases",
+  "date": "2025-12-15",
+  "summary": "Adversarial edge case hardening release",
+  
+  "edge_cases_fixed": [
+    {
+      "id": 1,
+      "name": "Deeply Nested Extraction",
+      "description": "Extract classes nested 10+ levels deep",
+      "file_modified": "src/code_scalpel/surgical/surgical_extractor.py",
+      "fix": "Added index_class_recursively() helper in _ensure_parsed()",
+      "test": "test_adversarial.py::TestDeeplyNestedCode::test_deeply_nested_class_extraction",
+      "status": "PASS"
+    },
+    {
+      "id": 2,
+      "name": "Java Record Class (Java 16+)",
+      "description": "Support Java record keyword as class-like structure",
+      "file_modified": "src/code_scalpel/ir/normalizers/java_normalizer.py",
+      "fix": "Added visit_record_declaration() and visit_compact_constructor_declaration()",
+      "test": "test_polyglot_edge_cases.py::TestJavaEdgeCases::test_record_class",
+      "status": "PASS"
+    },
+    {
+      "id": 3,
+      "name": "Java Pattern Matching Switch (Java 21+)",
+      "description": "Support Java 21 switch expressions with pattern matching",
+      "file_modified": "src/code_scalpel/ir/normalizers/java_normalizer.py",
+      "fix": "Fixed _normalize_switch() to use discriminant field and tuple cases",
+      "test": "test_polyglot_edge_cases.py::TestJavaEdgeCases::test_pattern_matching_switch",
+      "status": "PASS"
+    },
+    {
+      "id": 4,
+      "name": "TSX Generic Component with JSX",
+      "description": "Parse TSX generic functions containing JSX elements",
+      "file_modified": "src/code_scalpel/polyglot/extractor.py",
+      "fix": "Added JSX auto-detection regex in _parse_typescript()",
+      "test": "test_polyglot_edge_cases.py::TestTSXEdgeCases::test_generic_component",
+      "status": "PASS"
+    },
+    {
+      "id": 5,
+      "name": "Cross-File Import Chain Taint (3+ Files)",
+      "description": "Track taint through multi-hop import chains A→B→C",
+      "file_modified": "src/code_scalpel/symbolic_execution_tools/cross_file_taint.py",
+      "fix": "Added _propagate_taint_through_imports() and multi-pass analysis",
+      "test": "test_adversarial_security.py::TestCrossFileTaintTracking::test_taint_through_import_chain",
+      "status": "PASS"
+    },
+    {
+      "id": 6,
+      "name": "Cross-File Callback Taint Tracking",
+      "description": "Track taint through callback patterns with_callback(data, handler)",
+      "file_modified": "src/code_scalpel/symbolic_execution_tools/cross_file_taint.py",
+      "fix": "Added _check_callback_taint_pattern() for callback detection",
+      "test": "test_adversarial_security.py::TestCrossFileTaintTracking::test_taint_through_callback",
+      "status": "PASS"
+    }
+  ],
+  
+  "test_results": {
+    "adversarial_tests": {
+      "test_adversarial.py": 43,
+      "test_adversarial_security.py": 19,
+      "test_polyglot_edge_cases.py": 26,
+      "total": 88,
+      "passed": 88,
+      "failed": 0,
+      "pass_rate": "100%"
+    },
+    "full_suite": {
+      "total": 2669,
+      "passed": 2668,
+      "xfailed": 1,
+      "failed": 0,
+      "pass_rate": "100%"
+    }
+  },
+  
+  "files_modified": [
+    {
+      "path": "src/code_scalpel/surgical/surgical_extractor.py",
+      "changes": ["index_class_recursively() helper for nested class indexing"]
+    },
+    {
+      "path": "src/code_scalpel/ir/normalizers/java_normalizer.py",
+      "changes": [
+        "visit_record_declaration() for Java 16+ records",
+        "visit_compact_constructor_declaration() for record constructors",
+        "_normalize_switch() fix for IRSwitch discriminant field"
+      ]
+    },
+    {
+      "path": "src/code_scalpel/polyglot/extractor.py",
+      "changes": ["JSX auto-detection in _parse_typescript() for content without file path"]
+    },
+    {
+      "path": "src/code_scalpel/symbolic_execution_tools/cross_file_taint.py",
+      "changes": [
+        "_propagate_taint_through_imports() for multi-hop taint",
+        "_is_imported_tainted_function() for import-based taint",
+        "_check_callback_taint_pattern() for callback detection",
+        "_extract_tainted_vars_from_arg() for f-string/format handling",
+        "_create_flows_from_local_sinks() for vulnerability creation",
+        "visit_Return() enhanced for direct taint source returns",
+        "visit_Assign() enhanced for imported function assignments"
+      ]
+    },
+    {
+      "path": "src/code_scalpel/mcp/server.py",
+      "changes": ["Fixed source_module/source_file mapping in cross_file_security_scan()"]
+    }
+  ],
+  
+  "tests_added": [
+    {
+      "file": "tests/test_adversarial.py",
+      "count": 43,
+      "categories": [
+        "TestDeeplyNestedCode (6 tests)",
+        "TestMalformedInputs (12 tests)",
+        "TestResourceExhaustion (6 tests)",
+        "TestUnicodeEdgeCases (8 tests)",
+        "TestConcurrencyEdgeCases (5 tests)",
+        "TestBoundaryConditions (6 tests)"
+      ]
+    },
+    {
+      "file": "tests/test_adversarial_security.py",
+      "count": 19,
+      "categories": [
+        "TestCrossFileTaintTracking (7 tests)",
+        "TestComplexVulnerabilityPatterns (6 tests)",
+        "TestObfuscatedVulnerabilities (6 tests)"
+      ]
+    },
+    {
+      "file": "tests/test_polyglot_edge_cases.py",
+      "count": 26,
+      "categories": [
+        "TestJavaEdgeCases (6 tests)",
+        "TestTypeScriptEdgeCases (6 tests)",
+        "TestJSXEdgeCases (6 tests)",
+        "TestTSXEdgeCases (5 tests)",
+        "TestCrossLanguageEdgeCases (3 tests)"
+      ]
+    }
+  ],
+  
+  "docker": {
+    "image": "code-scalpel:v2.0.0",
+    "also_tagged": "code-scalpel:latest",
+    "size": "1.42GB (320MB compressed)",
+    "base": "python:3.10-slim",
+    "verified": true
+  },
+  
+  "acceptance_criteria": {
+    "P0_deeply_nested_extraction": "PASS",
+    "P0_java_record_class": "PASS",
+    "P0_java_pattern_matching_switch": "PASS",
+    "P0_tsx_generic_component": "PASS",
+    "P1_cross_file_import_chain": "PASS",
+    "P1_cross_file_callback_taint": "PASS",
+    "gate_adversarial_tests": "88/88 PASS",
+    "gate_no_regressions": "2668 pass, 1 xfail",
+    "gate_100_percent_pass": "VERIFIED"
+  }
+}

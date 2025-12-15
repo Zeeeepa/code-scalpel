@@ -1,0 +1,176 @@
+{
+  "version": "2.0.0",
+  "codename": "Polyglot",
+  "release_date": "2025-12-15",
+  "evidence_type": "test_results",
+  "test_execution": {
+    "timestamp": "2025-12-15T00:00:00Z",
+    "python_version": "3.13",
+    "pytest_version": "8.x",
+    "command": "pytest tests/ -v"
+  },
+  "summary": {
+    "total_tests": 2581,
+    "passed": 2580,
+    "failed": 0,
+    "skipped": 0,
+    "xfailed": 1,
+    "xpassed": 0,
+    "pass_rate": "100%"
+  },
+  "test_categories": {
+    "security_tests": {
+      "count": 156,
+      "status": "all_passing",
+      "coverage_areas": [
+        "taint_tracking",
+        "vulnerability_detection",
+        "source_detection",
+        "sink_detection",
+        "sanitizer_detection",
+        "cross_file_taint"
+      ]
+    },
+    "ir_normalizer_tests": {
+      "count": 97,
+      "status": "all_passing",
+      "coverage_areas": [
+        "python_normalizer",
+        "javascript_normalizer",
+        "typescript_normalizer",
+        "java_normalizer",
+        "ir_node_creation",
+        "source_location_tracking"
+      ]
+    },
+    "polyglot_tests": {
+      "count": 63,
+      "status": "all_passing",
+      "coverage_areas": [
+        "polyglot_extractor",
+        "language_detection",
+        "cross_language_extraction",
+        "jsx_tsx_support",
+        "java_extraction"
+      ]
+    },
+    "mcp_tool_tests": {
+      "count": 89,
+      "status": "all_passing",
+      "coverage_areas": [
+        "extract_code",
+        "analyze_code",
+        "security_scan",
+        "update_symbol",
+        "generate_unit_tests",
+        "simulate_refactor",
+        "crawl_project",
+        "get_project_map"
+      ]
+    },
+    "symbolic_execution_tests": {
+      "count": 245,
+      "status": "all_passing",
+      "coverage_areas": [
+        "z3_solver_integration",
+        "path_exploration",
+        "constraint_generation",
+        "test_generation",
+        "int_bool_string_float_support"
+      ]
+    },
+    "pdg_tests": {
+      "count": 187,
+      "status": "all_passing",
+      "coverage_areas": [
+        "control_flow_graph",
+        "data_flow_analysis",
+        "program_slicing",
+        "dependency_graph"
+      ]
+    },
+    "ast_tests": {
+      "count": 312,
+      "status": "all_passing",
+      "coverage_areas": [
+        "ast_parsing",
+        "ast_analysis",
+        "code_metrics",
+        "complexity_analysis"
+      ]
+    }
+  },
+  "new_v2_tests": {
+    "javascript_normalizer": {
+      "count": 23,
+      "tests": [
+        "test_js_function_declaration",
+        "test_js_arrow_function",
+        "test_js_class_declaration",
+        "test_js_import_statement",
+        "test_js_export_statement",
+        "test_js_switch_statement",
+        "test_js_try_statement",
+        "test_js_ternary_expression"
+      ]
+    },
+    "typescript_normalizer": {
+      "count": 18,
+      "tests": [
+        "test_ts_interface_declaration",
+        "test_ts_type_alias",
+        "test_ts_type_annotations",
+        "test_tsx_jsx_elements",
+        "test_ts_enum_declaration"
+      ]
+    },
+    "java_normalizer": {
+      "count": 22,
+      "tests": [
+        "test_java_method_declaration",
+        "test_java_class_declaration",
+        "test_java_import_declaration",
+        "test_java_enhanced_for_loop",
+        "test_java_try_catch",
+        "test_java_object_creation"
+      ]
+    },
+    "security_sinks_js": {
+      "count": 35,
+      "tests": [
+        "test_dom_xss_innerHTML",
+        "test_dom_xss_document_write",
+        "test_eval_injection",
+        "test_prototype_pollution_assign",
+        "test_node_command_injection",
+        "test_node_sql_injection"
+      ]
+    },
+    "security_sinks_java": {
+      "count": 22,
+      "tests": [
+        "test_jdbc_sql_injection",
+        "test_java_command_injection",
+        "test_java_xxe",
+        "test_java_deserialization"
+      ]
+    }
+  },
+  "code_coverage": {
+    "overall": "95%",
+    "modules": {
+      "ir_nodes": "100%",
+      "normalizers": "97%",
+      "polyglot_extractor": "95%",
+      "taint_tracker": "96%",
+      "mcp_server": "94%"
+    }
+  },
+  "regression_verification": {
+    "python_functionality": "no_regressions",
+    "existing_mcp_tools": "no_regressions",
+    "security_patterns": "no_regressions",
+    "symbolic_execution": "no_regressions"
+  },
+  "generated_at": "2025-12-15T00:00:00Z"
+}

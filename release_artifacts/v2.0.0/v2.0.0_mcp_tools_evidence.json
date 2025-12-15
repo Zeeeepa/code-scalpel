@@ -1,0 +1,143 @@
+{
+  "version": "2.0.0",
+  "codename": "Polyglot",
+  "release_date": "2025-12-15",
+  "evidence_type": "mcp_tools",
+  "mcp_tools": {
+    "total_count": 13,
+    "tools": [
+      {
+        "name": "extract_code",
+        "status": "stable",
+        "description": "Surgically extract functions/classes/methods by name",
+        "v2_enhancements": [
+          "JavaScript/TypeScript support via tree-sitter",
+          "Java support via tree-sitter",
+          "Language auto-detection from file extension",
+          "JSX/TSX component extraction"
+        ],
+        "supported_languages": ["python", "javascript", "typescript", "java"]
+      },
+      {
+        "name": "analyze_code",
+        "status": "stable",
+        "description": "Parse and extract code structure",
+        "v2_enhancements": [
+          "Multi-language AST parsing",
+          "ES6+ syntax support",
+          "TypeScript type annotations"
+        ],
+        "supported_languages": ["python", "javascript", "typescript", "java"]
+      },
+      {
+        "name": "security_scan",
+        "status": "stable",
+        "description": "Taint-based vulnerability detection",
+        "v2_enhancements": [
+          "DOM XSS detection (innerHTML, document.write, jQuery.html)",
+          "Eval injection detection (eval, Function, setTimeout)",
+          "Prototype pollution detection (Object.assign, _.merge)",
+          "Node.js command injection (child_process.exec, spawn)",
+          "Node.js SQL injection (mysql, pg, sequelize, prisma)",
+          "Java JDBC injection (Statement.execute, JdbcTemplate)",
+          "Java command injection (Runtime.exec, ProcessBuilder)",
+          "Java XXE detection (DocumentBuilderFactory, SAXParser)",
+          "Java deserialization (ObjectInputStream, XStream)",
+          "Spring Data JPA patterns (@Query, Specification)",
+          "Spring Security annotations (@PreAuthorize, @PostAuthorize)",
+          "Spring view resolution (ModelAndView, RedirectView)",
+          "Open Redirect detection (CWE-601)",
+          "Hibernate/MyBatis ORM patterns"
+        ],
+        "new_sinks_count": 190,
+        "new_sources_count": 80,
+        "new_sanitizers_count": 50,
+        "new_sink_types": ["REDIRECT"],
+        "p1_enhancements": [
+          "JSX file routing to TSX parser",
+          "TSX file routing to TSX normalizer",
+          "Spring Security SpEL injection patterns",
+          "Spring Batch file path injection",
+          "MyBatis SQL injection patterns"
+        ]
+      },
+      {
+        "name": "update_symbol",
+        "status": "stable",
+        "description": "Safe symbol replacement with backup",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "generate_unit_tests",
+        "status": "stable",
+        "description": "Symbolic execution test generation",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "simulate_refactor",
+        "status": "stable",
+        "description": "Verify refactor preserves behavior",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "crawl_project",
+        "status": "stable",
+        "description": "Project-wide analysis",
+        "v2_enhancements": [
+          "Multi-language file scanning",
+          "Cross-language metrics"
+        ],
+        "supported_languages": ["python", "javascript", "typescript", "java"]
+      },
+      {
+        "name": "get_project_map",
+        "status": "stable",
+        "description": "Analyze project structure and entry points",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "get_call_graph",
+        "status": "stable",
+        "description": "Generate call graphs",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "scan_dependencies",
+        "status": "stable",
+        "description": "Scan for vulnerable dependencies",
+        "v2_enhancements": [
+          "npm package.json scanning",
+          "Java pom.xml scanning"
+        ],
+        "supported_languages": ["python", "javascript", "java"]
+      },
+      {
+        "name": "get_file_context",
+        "status": "stable",
+        "description": "Get surrounding context for code locations",
+        "v2_enhancements": [],
+        "supported_languages": ["python", "javascript", "typescript", "java"]
+      },
+      {
+        "name": "get_symbol_references",
+        "status": "stable",
+        "description": "Find all uses of a symbol",
+        "v2_enhancements": [],
+        "supported_languages": ["python"]
+      },
+      {
+        "name": "validate_paths",
+        "status": "stable",
+        "description": "Validate file paths are accessible",
+        "v2_enhancements": [],
+        "supported_languages": ["all"]
+      }
+    ]
+  },
+  "generated_at": "2025-12-15T00:00:00Z"
+}

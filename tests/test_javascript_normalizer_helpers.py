@@ -187,16 +187,19 @@ def test_class_and_method_definitions(normalizer):
 
 
 def test_try_and_throw_emit_warnings(normalizer):
+    # [20251215_REFACTOR] v2.0.0 - try/throw now properly implemented with IRTry/IRRaise
+    # This test now verifies the implementations work correctly rather than stub warnings
     try_node = FakeNode("try_statement", start=(1, 0), end=(1, 5))
     throw_node = FakeNode("throw_statement", start=(2, 0), end=(2, 5))
 
-    with warnings.catch_warnings(record=True) as caught:
-        assert normalizer.normalize_node(try_node) is None
-        assert any("try/catch" in str(w.message) for w in caught)
+    # try_statement should now return IRTry (not None with warning)
+    from code_scalpel.ir.nodes import IRTry, IRRaise
+    try_result = normalizer.normalize_node(try_node)
+    assert isinstance(try_result, IRTry), f"Expected IRTry, got {type(try_result)}"
 
-    with warnings.catch_warnings(record=True) as caught_throw:
-        assert normalizer.normalize_node(throw_node) is None
-        assert any("throw" in str(w.message) for w in caught_throw)
+    # throw_statement should now return IRRaise (not None with warning)
+    throw_result = normalizer.normalize_node(throw_node)
+    assert isinstance(throw_result, IRRaise), f"Expected IRRaise, got {type(throw_result)}"
 
 
 # [20251214_REFACTOR] Remove duplicate imports and keep helper stubs lint-clean.

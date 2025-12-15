@@ -1,0 +1,88 @@
+{
+  "version": "2.0.0",
+  "timestamp": "2025-12-15T07:47:07Z",
+  "iterations": 10,
+  "parsing": {
+    "python": {
+      "min_ms": 0.0,
+      "avg_ms": 0.0,
+      "max_ms": 0.02,
+      "iterations": 10
+    },
+    "javascript": {
+      "min_ms": 0.19,
+      "avg_ms": 4.05,
+      "max_ms": 38.58,
+      "iterations": 10
+    },
+    "typescript": {
+      "min_ms": 0.23,
+      "avg_ms": 0.46,
+      "max_ms": 2.47,
+      "iterations": 10
+    },
+    "java": {
+      "min_ms": 0.16,
+      "avg_ms": 0.86,
+      "max_ms": 7.0,
+      "iterations": 10
+    }
+  },
+  "extraction": {
+    "python_function": {
+      "min_ms": 0.23,
+      "avg_ms": 0.31,
+      "max_ms": 0.52,
+      "success": true,
+      "iterations": 10
+    },
+    "python_class": {
+      "min_ms": 0.21,
+      "avg_ms": 0.23,
+      "max_ms": 0.33,
+      "success": true,
+      "iterations": 10
+    },
+    "javascript_function": {
+      "min_ms": 0.19,
+      "avg_ms": 0.23,
+      "max_ms": 0.39,
+      "success": true,
+      "iterations": 10
+    },
+    "javascript_class": {
+      "min_ms": 0.19,
+      "avg_ms": 0.21,
+      "max_ms": 0.31,
+      "success": true,
+      "iterations": 10
+    },
+    "typescript_function": {
+      "min_ms": 0.23,
+      "avg_ms": 0.25,
+      "max_ms": 0.36,
+      "success": true,
+      "iterations": 10
+    },
+    "typescript_interface": {
+      "min_ms": 0.24,
+      "avg_ms": 0.3,
+      "max_ms": 0.46,
+      "success": true,
+      "iterations": 10
+    },
+    "java_class": {
+      "min_ms": 0.17,
+      "avg_ms": 0.21,
+      "max_ms": 0.34,
+      "success": true,
+      "iterations": 10
+    }
+  },
+  "summary": {
+    "avg_parse_ms": 1.34,
+    "avg_extract_ms": 0.25,
+    "extraction_success_rate": "7/7",
+    "baseline_comparison": "No regression in Python performance"
+  }
+}

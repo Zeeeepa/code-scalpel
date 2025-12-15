@@ -20,6 +20,7 @@ from typing import Dict, List, Pattern
 
 from .taint_tracker import (
     HARDCODED_SECRET_PATTERNS,
+    SECRET_VARIABLE_PATTERNS,  # [20251214_FEATURE] v2.0.0 - Variable name patterns
     Vulnerability,
     SecuritySink,
     TaintSource,
@@ -29,6 +30,10 @@ from .taint_tracker import (
 class SecretScanner(ast.NodeVisitor):
     """
     Scans AST for hardcoded secrets using comprehensive pattern matching.
+    
+    [20251214_FEATURE] v2.0.0 - Also detects secrets based on variable names
+    (e.g., DEFAULT_ADMIN_PASSWORD = "admin123" is flagged even without
+    pattern match on the value).
     """
 
     def __init__(self) -> None:
@@ -38,6 +43,12 @@ class SecretScanner(ast.NodeVisitor):
         self.compiled_patterns: Dict[str, Pattern] = {
             name: re.compile(pattern)
             for name, pattern in HARDCODED_SECRET_PATTERNS.items()
+        }
+        
+        # [20251214_FEATURE] v2.0.0 - Compile variable name patterns
+        self.compiled_var_patterns: Dict[str, Pattern] = {
+            name: re.compile(pattern)
+            for name, pattern in SECRET_VARIABLE_PATTERNS.items()
         }
 
         # Placeholder patterns to ignore (not real secrets)
@@ -115,6 +126,49 @@ class SecretScanner(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """
+        [20251214_FEATURE] v2.0.0 - Check assignments for secret variable names.
+        
+        Detects patterns like:
+            DEFAULT_ADMIN_PASSWORD = "admin123"
+            JWT_SECRET = "super_secret_key"
+            api_key = "sk_live_abc123"
+        """
+        # Check if any target is a secret-like variable name
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                var_name = target.id
+                self._check_variable_name(var_name, node.value, node)
+        
+        self.generic_visit(node)
+
+    def _check_variable_name(
+        self, var_name: str, value_node: ast.expr, node: ast.AST
+    ) -> None:
+        """
+        Check if a variable name suggests it holds a secret.
+        
+        Args:
+            var_name: Name of the variable
+            value_node: AST node for the assigned value
+            node: AST node for location info
+        """
+        # Check variable name against secret patterns
+        for secret_type, pattern in self.compiled_var_patterns.items():
+            if pattern.match(var_name):
+                # Only flag if the value is a non-empty string constant
+                if isinstance(value_node, ast.Constant) and isinstance(
+                    value_node.value, str
+                ):
+                    value = value_node.value
+                    # Skip obvious placeholders and empty strings
+                    # [20251214_BUGFIX] v2.0.0 - Require minimum 8 chars for var name detection
+                    # to reduce false positives from short placeholder strings
+                    if value and not self._is_placeholder(value) and len(value) >= 8:
+                        self._add_var_vuln(var_name, value, secret_type, node)
+                        return
+
     def _is_placeholder(self, value: str) -> bool:
         """
         Check if a string is a placeholder value that should be ignored.
@@ -183,6 +237,43 @@ class SecretScanner(ast.NodeVisitor):
         # Add recommendation to the vulnerability (stored in taint_path for now)
         vuln.taint_path.append(f"Recommendation: {recommendation}")
 
+        self.vulnerabilities.append(vuln)
+
+    def _add_var_vuln(
+        self, var_name: str, value: str, secret_type: str, node: ast.AST
+    ) -> None:
+        """
+        [20251214_FEATURE] v2.0.0 - Add vulnerability for secret-named variable.
+        
+        Args:
+            var_name: Name of the variable (e.g., "JWT_SECRET")
+            value: The actual value assigned
+            secret_type: Type of secret detected
+            node: AST node for location info
+        """
+        loc = (node.lineno, node.col_offset) if hasattr(node, "lineno") else (0, 0)
+
+        # Check for duplicates
+        for v in self.vulnerabilities:
+            if v.sink_location == loc and v.sink_type == SecuritySink.HARDCODED_SECRET:
+                return
+
+        # Mask the secret value
+        masked = self._mask_secret(value)
+
+        # Get display name and recommendation
+        display_name, recommendation = self._get_recommendation(secret_type)
+
+        vuln = Vulnerability(
+            sink_type=SecuritySink.HARDCODED_SECRET,
+            taint_source=TaintSource.HARDCODED,
+            taint_path=[f"{var_name} = {masked}"],
+            sink_location=loc,
+            source_location=loc,
+            sanitizers_applied=set(),
+        )
+
+        vuln.taint_path.append(f"Recommendation: {recommendation}")
         self.vulnerabilities.append(vuln)
 
     def _mask_secret(self, value: str, show_chars: int = 4) -> str:
@@ -310,6 +401,27 @@ class SecretScanner(ast.NodeVisitor):
             "generic_secret": (
                 "Generic Secret",
                 "Use environment variables or secure secret management systems",
+            ),
+            # [20251214_FEATURE] v2.0.0 - Variable name patterns
+            "password_var": (
+                "Password in Variable",
+                "Never hardcode passwords. Use environment variables or secret management systems",
+            ),
+            "secret_var": (
+                "Secret in Variable",
+                "Use environment variables or secure secret management (e.g., HashiCorp Vault)",
+            ),
+            "api_key_var": (
+                "API Key in Variable",
+                "Use environment variables. Never commit API keys to version control",
+            ),
+            "connection_string": (
+                "Connection String",
+                "Use environment variables for database credentials. Consider AWS Secrets Manager",
+            ),
+            "credentials": (
+                "Credentials in Variable",
+                "Use secure credential storage. Never hardcode authentication data",
             ),
         }
 

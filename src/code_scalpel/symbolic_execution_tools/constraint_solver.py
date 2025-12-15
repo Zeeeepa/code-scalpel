@@ -119,7 +119,10 @@ class ConstraintSolver:
     # =========================================================================
 
     def solve(
-        self, constraints: List[BoolRef], variables: List[ExprRef]
+        self,
+        constraints: List[BoolRef],
+        variables: List[ExprRef],
+        variable_names: Optional[List[str]] = None,
     ) -> SolverResult:
         """
         Find a model satisfying all constraints.
@@ -144,7 +147,7 @@ class ConstraintSolver:
         if check_result == sat:
             # Extract and convert model
             z3_model = solver.model()
-            model = self._extract_model(z3_model, variables)
+            model = self._extract_model(z3_model, variables, variable_names)
             return SolverResult(status=SolverStatus.SAT, model=model)
         elif check_result == unsat:
             return SolverResult(status=SolverStatus.UNSAT, model=None)
@@ -199,7 +202,10 @@ class ConstraintSolver:
     # =========================================================================
 
     def _extract_model(
-        self, z3_model: z3.ModelRef, variables: List[ExprRef]
+        self,
+        z3_model: z3.ModelRef,
+        variables: List[ExprRef],
+        variable_names: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Extract variable values from Z3 model as Python-native types.
@@ -213,8 +219,11 @@ class ConstraintSolver:
         """
         result: Dict[str, Any] = {}
 
-        for var in variables:
-            name = str(var)
+        for idx, var in enumerate(variables):
+            if variable_names and idx < len(variable_names):
+                name = variable_names[idx]
+            else:
+                name = str(var)
 
             # Get value from model (with model completion for unconstrained vars)
             z3_value = z3_model.eval(var, model_completion=True)

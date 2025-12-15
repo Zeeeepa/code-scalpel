@@ -54,6 +54,13 @@ from ..nodes import (
     IRNode,
     IRExpr,
     SourceLocation,
+    # [20251215_FEATURE] v2.0.0 - New IR nodes for polyglot support
+    IRImport,
+    IRExport,
+    IRSwitch,
+    IRTry,
+    IRRaise,
+    IRTernary,
 )
 from ..operators import (
     BinaryOperator,
@@ -1152,34 +1159,270 @@ class JavaScriptNormalizer(BaseNormalizer):
         )
 
     # =========================================================================
-    # Try/Catch/Finally (Stub - IRTry not yet in IR)
+    # Try/Catch/Finally - [20251215_FEATURE] v2.0.0 - IRTry now implemented
     # =========================================================================
 
-    def _normalize_try_statement(self, node) -> None:
+    def _normalize_try_statement(self, node) -> IRTry:
         """
         Normalize try statement.
 
-        NOTE: IRTry/IRRaise not yet implemented in IR.
-        For now, we skip try/catch blocks and return None.
-        TODO: Add IRTry, IRRaise to ir/nodes.py
+        [20251215_FEATURE] v2.0.0 - Full try/catch/finally support.
+
+        CST structure:
+            try_statement:
+                body: statement_block
+                handler: catch_clause (optional)
+                finalizer: finally_clause (optional)
         """
-        import warnings
+        body_node = self._child_by_field(node, "body")
+        handler_node = self._child_by_field(node, "handler")
+        finalizer_node = self._child_by_field(node, "finalizer")
 
-        warnings.warn(
-            f"try/catch not yet supported in IR. Skipping at {self._make_loc(node)}"
+        body = self._normalize_block(body_node) if body_node else []
+
+        handlers = []
+        if handler_node:
+            # catch_clause has optional parameter and body
+            param_node = self._child_by_field(handler_node, "parameter")
+            catch_body_node = self._child_by_field(handler_node, "body")
+
+            param_name = self._get_text(param_node) if param_node else None
+            catch_body = self._normalize_block(catch_body_node) if catch_body_node else []
+
+            # (exception_type, name, body) - JS doesn't have typed exceptions
+            handlers.append((None, param_name, catch_body))
+
+        finalbody = []
+        if finalizer_node:
+            # finally_clause just has body
+            finally_body_node = self._child_by_field(finalizer_node, "body")
+            finalbody = self._normalize_block(finally_body_node) if finally_body_node else []
+
+        return self._set_language(
+            IRTry(
+                body=body,
+                handlers=handlers,
+                orelse=[],  # JS doesn't have try-else
+                finalbody=finalbody,
+                loc=self._make_loc(node),
+            )
         )
-        return None
 
-    def _normalize_throw_statement(self, node) -> None:
+    def _normalize_throw_statement(self, node) -> IRRaise:
         """
         Normalize throw statement.
 
-        NOTE: IRRaise not yet implemented in IR.
-        TODO: Add IRRaise to ir/nodes.py
-        """
-        import warnings
+        [20251215_FEATURE] v2.0.0 - IRRaise support.
 
-        warnings.warn(
-            f"throw not yet supported in IR. Skipping at {self._make_loc(node)}"
+        CST structure:
+            throw_statement:
+                expression
+        """
+        named_children = self._get_named_children(node)
+        exc = self.normalize_node(named_children[0]) if named_children else None
+
+        return self._set_language(
+            IRRaise(
+                exc=exc,
+                cause=None,  # JS doesn't have 'from' clause
+                loc=self._make_loc(node),
+            )
         )
-        return None
+
+    # =========================================================================
+    # Import/Export - [20251215_FEATURE] v2.0.0 - ES6 module support
+    # =========================================================================
+
+    def _normalize_import_statement(self, node) -> IRImport:
+        """
+        Normalize ES6 import statement.
+
+        CST examples:
+            import foo from 'foo'           -> default import
+            import { bar } from 'foo'       -> named import
+            import { bar as baz } from 'foo' -> aliased import
+            import * as foo from 'foo'      -> namespace import
+            import 'foo'                    -> side-effect import
+        """
+        source_node = self._child_by_field(node, "source")
+        module = ""
+        if source_node:
+            module = self._get_text(source_node).strip("'\"")
+
+        names = []
+        alias = None
+        is_default = False
+        is_star = False
+
+        for child in node.children:
+            if child.type == "import_clause":
+                # Process import clause
+                for clause_child in child.children:
+                    if clause_child.type == "identifier":
+                        # Default import: import foo from 'foo'
+                        is_default = True
+                        names.append(self._get_text(clause_child))
+                    elif clause_child.type == "namespace_import":
+                        # import * as foo from 'foo'
+                        is_star = True
+                        alias_node = self._child_by_field(clause_child, "alias")
+                        if alias_node:
+                            alias = self._get_text(alias_node)
+                    elif clause_child.type == "named_imports":
+                        # import { bar, baz } from 'foo'
+                        for spec in self._get_named_children(clause_child):
+                            if spec.type == "import_specifier":
+                                name_node = self._child_by_field(spec, "name")
+                                alias_node = self._child_by_field(spec, "alias")
+                                if name_node:
+                                    names.append(self._get_text(name_node))
+                                    if alias_node:
+                                        alias = self._get_text(alias_node)
+
+        return self._set_language(
+            IRImport(
+                module=module,
+                names=names,
+                alias=alias,
+                is_default=is_default,
+                is_star=is_star,
+                loc=self._make_loc(node),
+            )
+        )
+
+    def _normalize_export_statement(self, node) -> IRExport:
+        """
+        Normalize ES6 export statement.
+
+        CST examples:
+            export default function() {}
+            export { foo, bar }
+            export const x = 1
+            export { x } from 'y'
+        """
+        names = []
+        declaration = None
+        is_default = False
+        source = None
+
+        for child in node.children:
+            if not child.is_named:
+                text = self._get_text(child)
+                if text == "default":
+                    is_default = True
+            elif child.type == "export_clause":
+                # export { foo, bar }
+                for spec in self._get_named_children(child):
+                    if spec.type == "export_specifier":
+                        name_node = self._child_by_field(spec, "name")
+                        if name_node:
+                            names.append(self._get_text(name_node))
+            elif child.type == "string":
+                # Re-export source: export { x } from 'y'
+                source = self._get_text(child).strip("'\"")
+            elif child.type in (
+                "function_declaration",
+                "class_declaration",
+                "lexical_declaration",
+                "variable_declaration",
+            ):
+                # export const x = 1, export function foo() {}
+                declaration = self.normalize_node(child)
+
+        return self._set_language(
+            IRExport(
+                names=names,
+                declaration=declaration,
+                is_default=is_default,
+                source=source,
+                loc=self._make_loc(node),
+            )
+        )
+
+    # =========================================================================
+    # Switch Statement - [20251215_FEATURE] v2.0.0
+    # =========================================================================
+
+    def _normalize_switch_statement(self, node) -> IRSwitch:
+        """
+        Normalize switch statement.
+
+        CST structure:
+            switch_statement:
+                value: parenthesized_expression
+                body: switch_body
+        """
+        value_node = self._child_by_field(node, "value")
+        body_node = self._child_by_field(node, "body")
+
+        discriminant = self._unwrap_expression(value_node) if value_node else None
+
+        cases = []
+        if body_node:
+            for child in self._get_named_children(body_node):
+                if child.type == "switch_case":
+                    # case x: ...
+                    test_node = self._child_by_field(child, "value")
+                    test = self.normalize_node(test_node) if test_node else None
+                    body = self._normalize_case_body(child)
+                    cases.append((test, body))
+                elif child.type == "switch_default":
+                    # default: ...
+                    body = self._normalize_case_body(child)
+                    cases.append((None, body))
+
+        return self._set_language(
+            IRSwitch(
+                discriminant=discriminant,
+                cases=cases,
+                loc=self._make_loc(node),
+            )
+        )
+
+    def _normalize_case_body(self, node) -> List[IRNode]:
+        """Extract statements from a switch case/default."""
+        body = []
+        for child in self._get_named_children(node):
+            # Skip the case value node
+            if child.type not in ("number", "string", "identifier"):
+                normalized = self.normalize_node(child)
+                if normalized:
+                    if isinstance(normalized, list):
+                        body.extend(normalized)
+                    else:
+                        body.append(normalized)
+        return body
+
+    # =========================================================================
+    # Ternary Expression - [20251215_FEATURE] v2.0.0
+    # =========================================================================
+
+    def _normalize_ternary_expression(self, node) -> IRTernary:
+        """
+        Normalize ternary/conditional expression (condition ? true : false).
+
+        CST structure:
+            ternary_expression:
+                condition: expression
+                consequence: expression
+                alternative: expression
+        """
+        cond_node = self._child_by_field(node, "condition")
+        cons_node = self._child_by_field(node, "consequence")
+        alt_node = self._child_by_field(node, "alternative")
+
+        test = self.normalize_node(cond_node) if cond_node else None
+        body = self.normalize_node(cons_node) if cons_node else None
+        orelse = self.normalize_node(alt_node) if alt_node else None
+
+        return self._set_language(
+            IRTernary(
+                test=test,
+                body=body,
+                orelse=orelse,
+                loc=self._make_loc(node),
+            )
+        )
+
+    # Alias for common tree-sitter name
+    _normalize_conditional_expression = _normalize_ternary_expression

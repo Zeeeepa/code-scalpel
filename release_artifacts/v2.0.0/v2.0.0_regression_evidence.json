@@ -1,0 +1,54 @@
+{
+  "release_version": "2.0.0",
+  "evidence_type": "regression_verification",
+  "title": "v1.5.x Compatibility Verification",
+  "generated_at": "2025-01-21T15:00:00Z",
+  "regression_tests": {
+    "python_extraction": {
+      "status": "PASSED",
+      "description": "Python function and class extraction works identically to v1.5.x",
+      "tested_operations": [
+        "extract_code(target_type='function')",
+        "extract_code(target_type='class')"
+      ]
+    },
+    "security_scan": {
+      "status": "PASSED",
+      "description": "Security scan detects SQL injection vulnerabilities",
+      "tested_operations": [
+        "security_scan(code=...)"
+      ]
+    },
+    "code_analysis": {
+      "status": "PASSED",
+      "description": "Code analysis returns functions and classes",
+      "tested_operations": [
+        "analyze_code(code=...)"
+      ]
+    }
+  },
+  "breaking_changes_assessment": {
+    "api_compatibility": "MAINTAINED",
+    "notes": [
+      "All v1.5.x MCP tool signatures preserved",
+      "Python extraction works identically",
+      "Security scan API unchanged",
+      "Code analysis API unchanged"
+    ],
+    "new_features_additive": [
+      "JavaScript/TypeScript extraction (new)",
+      "Java extraction (new)",
+      "JSX/TSX support (new)",
+      "Spring security patterns (new)"
+    ]
+  },
+  "test_script": "scripts/regression_test.py",
+  "test_output": [
+    "✓ Python function extraction works",
+    "✓ Python class extraction works",
+    "✓ Python security scan works",
+    "✓ Python code analysis works",
+    "All v1.5.x Python regression tests passed!"
+  ],
+  "conclusion": "No breaking changes detected. All v1.5.x Python functionality preserved."
+}

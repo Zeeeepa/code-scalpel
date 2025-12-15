@@ -76,6 +76,9 @@ class SecuritySink(Enum):
     - SSRF: Server-Side Request Forgery (CWE-918)
     - XXE: XML External Entity Injection (CWE-611) [v1.4.0]
     - SSTI: Server-Side Template Injection (CWE-1336) [v1.4.0]
+    - DOM_XSS: DOM-based Cross-Site Scripting (CWE-79) [v2.0.0]
+    - PROTOTYPE_POLLUTION: Prototype Pollution (CWE-1321) [v2.0.0]
+    - REDIRECT: Open Redirect (CWE-601) [v2.0.0 P1]
     """
 
     SQL_QUERY = auto()  # cursor.execute(), Session.execute()
@@ -92,6 +95,11 @@ class SecuritySink(Enum):
     # [20251212_FEATURE] v1.4.0 - New vulnerability types
     XXE = auto()  # xml.etree.ElementTree.parse(), lxml.etree.parse()
     SSTI = auto()  # jinja2.Template(), mako.template.Template()
+    # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript vulnerability types
+    DOM_XSS = auto()  # innerHTML, document.write, outerHTML
+    PROTOTYPE_POLLUTION = auto()  # Object.assign, _.merge with user input
+    # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
+    REDIRECT = auto()  # Open Redirect (redirect to user-controlled URL)
 
 
 class TaintLevel(Enum):
@@ -330,6 +338,74 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "django.shortcuts.render": SanitizerInfo(
         "django.shortcuts.render", {SecuritySink.SSTI}
     ),
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Sanitizers
+    # ==========================================================================
+    # DOM XSS Sanitizers
+    "DOMPurify.sanitize": SanitizerInfo("DOMPurify.sanitize", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "sanitize-html": SanitizerInfo("sanitize-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "xss": SanitizerInfo("xss", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "xss-filters": SanitizerInfo("xss-filters", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "he.encode": SanitizerInfo("he.encode", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "he.escape": SanitizerInfo("he.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "escape-html": SanitizerInfo("escape-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "validator.escape": SanitizerInfo("validator.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "textContent": SanitizerInfo("textContent", {SecuritySink.DOM_XSS}),  # Safe DOM API
+    "innerText": SanitizerInfo("innerText", {SecuritySink.DOM_XSS}),  # Safe DOM API
+    "createTextNode": SanitizerInfo("createTextNode", {SecuritySink.DOM_XSS}),  # Safe DOM API
+    # SQL Sanitizers (Node.js)
+    "mysql.escape": SanitizerInfo("mysql.escape", {SecuritySink.SQL_QUERY}),
+    "mysql2.escape": SanitizerInfo("mysql2.escape", {SecuritySink.SQL_QUERY}),
+    "pg.escapeLiteral": SanitizerInfo("pg.escapeLiteral", {SecuritySink.SQL_QUERY}),
+    "pg.escapeIdentifier": SanitizerInfo("pg.escapeIdentifier", {SecuritySink.SQL_QUERY}),
+    "sqlstring.escape": SanitizerInfo("sqlstring.escape", {SecuritySink.SQL_QUERY}),
+    # Path Sanitizers (Node.js)
+    "path.basename": SanitizerInfo("path.basename", {SecuritySink.FILE_PATH}),
+    "path.normalize": SanitizerInfo("path.normalize", {SecuritySink.FILE_PATH}),
+    "sanitize-filename": SanitizerInfo("sanitize-filename", {SecuritySink.FILE_PATH}),
+    # Shell Sanitizers (Node.js)
+    "shell-escape": SanitizerInfo("shell-escape", {SecuritySink.SHELL_COMMAND}),
+    "shell-quote.quote": SanitizerInfo("shell-quote.quote", {SecuritySink.SHELL_COMMAND}),
+    # URL Sanitizers
+    "encodeURIComponent": SanitizerInfo("encodeURIComponent", {SecuritySink.SSRF}),
+    "encodeURI": SanitizerInfo("encodeURI", {SecuritySink.SSRF}),
+    # Type coercion in JavaScript
+    "Number": SanitizerInfo("Number", set(), full_clear=True),
+    "parseInt": SanitizerInfo("parseInt", set(), full_clear=True),
+    "parseFloat": SanitizerInfo("parseFloat", set(), full_clear=True),
+    "Boolean": SanitizerInfo("Boolean", set(), full_clear=True),
+    # JSON parse with validation
+    "JSON.parse": SanitizerInfo("JSON.parse", set()),  # Not a sanitizer by itself
+    "ajv.validate": SanitizerInfo("ajv.validate", {SecuritySink.DESERIALIZATION}),  # Schema validation
+    "joi.validate": SanitizerInfo("joi.validate", {SecuritySink.DESERIALIZATION}),
+    "yup.validate": SanitizerInfo("yup.validate", {SecuritySink.DESERIALIZATION}),
+    "zod.parse": SanitizerInfo("zod.parse", {SecuritySink.DESERIALIZATION}),
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - Java Sanitizers
+    # ==========================================================================
+    # XSS Sanitizers
+    "StringEscapeUtils.escapeHtml4": SanitizerInfo("StringEscapeUtils.escapeHtml4", {SecuritySink.HTML_OUTPUT}),
+    "HtmlUtils.htmlEscape": SanitizerInfo("HtmlUtils.htmlEscape", {SecuritySink.HTML_OUTPUT}),  # Spring
+    "OWASP.encoder": SanitizerInfo("OWASP.encoder", {SecuritySink.HTML_OUTPUT, SecuritySink.DOM_XSS}),
+    "Encode.forHtml": SanitizerInfo("Encode.forHtml", {SecuritySink.HTML_OUTPUT}),  # OWASP Java Encoder
+    "Encode.forJavaScript": SanitizerInfo("Encode.forJavaScript", {SecuritySink.DOM_XSS}),
+    "Encode.forCssString": SanitizerInfo("Encode.forCssString", {SecuritySink.DOM_XSS}),
+    # SQL Sanitizers (parameterized queries)
+    "PreparedStatement.setString": SanitizerInfo("PreparedStatement.setString", {SecuritySink.SQL_QUERY}),
+    "PreparedStatement.setInt": SanitizerInfo("PreparedStatement.setInt", {SecuritySink.SQL_QUERY}),
+    "PreparedStatement.setObject": SanitizerInfo("PreparedStatement.setObject", {SecuritySink.SQL_QUERY}),
+    # Path Sanitizers
+    "FilenameUtils.getName": SanitizerInfo("FilenameUtils.getName", {SecuritySink.FILE_PATH}),
+    "Paths.get": SanitizerInfo("Paths.get", set()),  # Not a sanitizer, but commonly used
+    # XXE Safe Parsers
+    "DocumentBuilderFactory.setFeature": SanitizerInfo("DocumentBuilderFactory.setFeature", {SecuritySink.XXE}),
+    "SAXParserFactory.setFeature": SanitizerInfo("SAXParserFactory.setFeature", {SecuritySink.XXE}),
+    # Input validation
+    "StringUtils.isNumeric": SanitizerInfo("StringUtils.isNumeric", set(), full_clear=True),
+    "StringUtils.isAlphanumeric": SanitizerInfo("StringUtils.isAlphanumeric", {SecuritySink.SQL_QUERY, SecuritySink.SHELL_COMMAND}),
+    "Integer.parseInt": SanitizerInfo("Integer.parseInt", set(), full_clear=True),
+    "Long.parseLong": SanitizerInfo("Long.parseLong", set(), full_clear=True),
+    "UUID.fromString": SanitizerInfo("UUID.fromString", set(), full_clear=True),
 }
 
 
@@ -779,6 +855,11 @@ class Vulnerability:
             # [20251212_FEATURE] v1.4.0 vulnerability types
             SecuritySink.XXE: "XML External Entity Injection (XXE)",
             SecuritySink.SSTI: "Server-Side Template Injection (SSTI)",
+            # [20251215_FEATURE] v2.0.0 JavaScript vulnerability types
+            SecuritySink.DOM_XSS: "DOM-based Cross-Site Scripting (DOM XSS)",
+            SecuritySink.PROTOTYPE_POLLUTION: "Prototype Pollution",
+            # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
+            SecuritySink.REDIRECT: "Open Redirect",
         }
         return mapping.get(self.sink_type, "Unknown Vulnerability")
 
@@ -800,8 +881,55 @@ class Vulnerability:
             # [20251212_FEATURE] v1.4.0 CWE mappings
             SecuritySink.XXE: "CWE-611",
             SecuritySink.SSTI: "CWE-1336",
+            # [20251215_FEATURE] v2.0.0 JavaScript CWE mappings
+            SecuritySink.DOM_XSS: "CWE-79",
+            SecuritySink.PROTOTYPE_POLLUTION: "CWE-1321",
+            # [20251215_FEATURE] v2.0.0 P1 - Additional CWE mappings
+            SecuritySink.REDIRECT: "CWE-601",
         }
         return mapping.get(self.sink_type, "CWE-Unknown")
+
+    @property
+    def description(self) -> str:
+        """
+        [20251214_FEATURE] v2.0.0 - Generate human-readable vulnerability description.
+        
+        Returns a description that explains:
+        - What kind of vulnerability was found
+        - Where the tainted data came from
+        - How it flowed to the dangerous sink
+        """
+        # Build data flow description
+        if self.taint_path:
+            if len(self.taint_path) == 1:
+                # Single item - might be a direct dangerous pattern
+                flow_desc = self.taint_path[0]
+            else:
+                # Multiple items - show the flow
+                flow_desc = f"'{self.taint_path[0]}' flows to {self.taint_path[-1]}"
+                if len(self.taint_path) > 2:
+                    middle = " → ".join(self.taint_path[1:-1])
+                    flow_desc = f"'{self.taint_path[0]}' flows through {middle} to {self.taint_path[-1]}"
+        else:
+            flow_desc = "Dangerous pattern detected"
+        
+        # Source description - use actual TaintSource enum values
+        source_desc = {
+            TaintSource.USER_INPUT: "user input",
+            TaintSource.FILE_CONTENT: "file contents",
+            TaintSource.NETWORK_DATA: "network data",
+            TaintSource.DATABASE: "database query result",
+            TaintSource.ENVIRONMENT: "environment variable",
+            TaintSource.HARDCODED: "hardcoded value",
+            TaintSource.UNKNOWN: "untrusted data",
+        }.get(self.taint_source, "tainted data")
+        
+        # Build final description
+        if self.taint_source == TaintSource.UNKNOWN and len(self.taint_path) == 1:
+            # Likely a dangerous pattern without taint tracking
+            return flow_desc
+        else:
+            return f"{self.vulnerability_type}: {source_desc} ({flow_desc})"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -811,10 +939,76 @@ class Vulnerability:
             "sink": self.sink_type.name,
             "source": self.taint_source.name,
             "taint_path": self.taint_path,
+            "taint_flow": self.taint_path,  # Alias for clearer API
             "sink_location": self.sink_location,
             "source_location": self.source_location,
             "sanitizers": list(self.sanitizers_applied),
+            # [20251214_FEATURE] v2.0.0 - Enhanced vulnerability report
+            "description": self.description,
+            "severity": self._calculate_severity(),
+            "recommendation": self._get_recommendation(),
+            "cwe_link": f"https://cwe.mitre.org/data/definitions/{self.cwe_id.replace('CWE-', '')}.html",
         }
+
+    def _get_recommendation(self) -> str:
+        """
+        [20251214_FEATURE] v2.0.0 - Get fix recommendation for vulnerability.
+        """
+        recommendations = {
+            SecuritySink.SQL_QUERY: "Use parameterized queries: cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))",
+            SecuritySink.HTML_OUTPUT: "Escape output using html.escape() or a template engine's auto-escape feature",
+            SecuritySink.FILE_PATH: "Use os.path.basename() to strip directory traversal, validate against allowed paths",
+            SecuritySink.SHELL_COMMAND: "Use subprocess.run() with a list of arguments instead of shell=True",
+            SecuritySink.EVAL: "Avoid eval()/exec(). Use ast.literal_eval() for data, or a safe parser",
+            SecuritySink.DESERIALIZATION: "Use JSON instead of pickle. If pickle required, use hmac verification",
+            SecuritySink.LOG_OUTPUT: "Sanitize sensitive data before logging, redact credentials",
+            SecuritySink.HEADER: "Validate header values, remove newline characters",
+            SecuritySink.WEAK_CRYPTO: "Use SHA-256 or stronger (hashlib.sha256). For passwords, use bcrypt or argon2",
+            SecuritySink.SSRF: "Validate URLs against allowlist, block internal IP ranges",
+            SecuritySink.HARDCODED_SECRET: "Use environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault)",
+            SecuritySink.XXE: "Disable external entity processing: parser.setFeature(feature_external_ges, False)",
+            SecuritySink.SSTI: "Use auto-escaping templates, avoid render_template_string() with user input",
+            # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript recommendations
+            SecuritySink.DOM_XSS: "Use textContent instead of innerHTML, or sanitize with DOMPurify.sanitize()",
+            SecuritySink.PROTOTYPE_POLLUTION: "Use Object.create(null) for dictionaries, validate merge sources, use Map instead of Object",
+            # [20251215_FEATURE] v2.0.0 P1 - Additional recommendations
+            SecuritySink.REDIRECT: "Validate redirect URLs against allowlist, use relative paths, or verify same-origin",
+        }
+        return recommendations.get(self.sink_type, "Review the code for potential security issues")
+
+    def _calculate_severity(self) -> str:
+        """
+        [20251214_FEATURE] v2.0.0 - Calculate vulnerability severity.
+        
+        Based on:
+        - Sink type (some are more dangerous than others)
+        - Whether sanitizers were bypassed
+        - Source type (user input is more risky than env vars)
+        """
+        high_risk_sinks = {
+            SecuritySink.SQL_QUERY,
+            SecuritySink.SHELL_COMMAND,
+            SecuritySink.EVAL,
+            SecuritySink.DESERIALIZATION,
+        }
+        medium_risk_sinks = {
+            SecuritySink.FILE_PATH,
+            SecuritySink.HTML_OUTPUT,
+            SecuritySink.SSRF,
+            SecuritySink.XXE,
+            SecuritySink.SSTI,
+        }
+        
+        if self.sink_type in high_risk_sinks:
+            return "high"
+        elif self.sink_type == SecuritySink.HARDCODED_SECRET:
+            return "high"
+        elif self.sink_type == SecuritySink.WEAK_CRYPTO:
+            return "medium"
+        elif self.sink_type in medium_risk_sinks:
+            return "medium"
+        else:
+            return "low"
 
     def __repr__(self) -> str:  # pragma: no cover
         path_str = " → ".join(self.taint_path)
@@ -862,6 +1056,100 @@ TAINT_SOURCE_PATTERNS: Dict[str, TaintSource] = {
     # Environment
     "os.environ.get": TaintSource.ENVIRONMENT,
     "os.getenv": TaintSource.ENVIRONMENT,
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Taint Sources
+    # ==========================================================================
+    # Express.js request handling
+    "req.query": TaintSource.USER_INPUT,
+    "req.body": TaintSource.USER_INPUT,
+    "req.params": TaintSource.USER_INPUT,
+    "req.headers": TaintSource.USER_INPUT,
+    "req.cookies": TaintSource.USER_INPUT,
+    "req.get": TaintSource.USER_INPUT,
+    "req.param": TaintSource.USER_INPUT,
+    "request.query": TaintSource.USER_INPUT,
+    "request.body": TaintSource.USER_INPUT,
+    "request.params": TaintSource.USER_INPUT,
+    # Koa.js
+    "ctx.query": TaintSource.USER_INPUT,
+    "ctx.request.body": TaintSource.USER_INPUT,
+    "ctx.params": TaintSource.USER_INPUT,
+    # Fastify
+    "request.query": TaintSource.USER_INPUT,
+    "request.body": TaintSource.USER_INPUT,
+    "request.params": TaintSource.USER_INPUT,
+    # Browser DOM
+    "document.location": TaintSource.USER_INPUT,
+    "document.URL": TaintSource.USER_INPUT,
+    "document.documentURI": TaintSource.USER_INPUT,
+    "document.referrer": TaintSource.USER_INPUT,
+    "document.cookie": TaintSource.USER_INPUT,
+    "location.href": TaintSource.USER_INPUT,
+    "location.search": TaintSource.USER_INPUT,
+    "location.hash": TaintSource.USER_INPUT,
+    "location.pathname": TaintSource.USER_INPUT,
+    "window.location": TaintSource.USER_INPUT,
+    "window.name": TaintSource.USER_INPUT,
+    "URLSearchParams": TaintSource.USER_INPUT,
+    "postMessage": TaintSource.USER_INPUT,
+    # Form inputs
+    "document.getElementById": TaintSource.USER_INPUT,
+    "document.querySelector": TaintSource.USER_INPUT,
+    "element.value": TaintSource.USER_INPUT,
+    "input.value": TaintSource.USER_INPUT,
+    "textarea.value": TaintSource.USER_INPUT,
+    # LocalStorage/SessionStorage (may contain tainted data)
+    "localStorage.getItem": TaintSource.USER_INPUT,
+    "sessionStorage.getItem": TaintSource.USER_INPUT,
+    # Node.js environment
+    "process.env": TaintSource.ENVIRONMENT,
+    "process.argv": TaintSource.USER_INPUT,
+    # Node.js file system
+    "fs.readFile": TaintSource.FILE_CONTENT,
+    "fs.readFileSync": TaintSource.FILE_CONTENT,
+    "fs.createReadStream": TaintSource.FILE_CONTENT,
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - Java Taint Sources
+    # ==========================================================================
+    # Servlet API
+    "request.getParameter": TaintSource.USER_INPUT,
+    "request.getParameterValues": TaintSource.USER_INPUT,
+    "request.getParameterMap": TaintSource.USER_INPUT,
+    "request.getQueryString": TaintSource.USER_INPUT,
+    "request.getHeader": TaintSource.USER_INPUT,
+    "request.getHeaders": TaintSource.USER_INPUT,
+    "request.getCookies": TaintSource.USER_INPUT,
+    "request.getInputStream": TaintSource.USER_INPUT,
+    "request.getReader": TaintSource.USER_INPUT,
+    "request.getPathInfo": TaintSource.USER_INPUT,
+    "request.getRequestURI": TaintSource.USER_INPUT,
+    "request.getRequestURL": TaintSource.USER_INPUT,
+    "HttpServletRequest.getParameter": TaintSource.USER_INPUT,
+    # Spring MVC
+    "@RequestParam": TaintSource.USER_INPUT,
+    "@PathVariable": TaintSource.USER_INPUT,
+    "@RequestBody": TaintSource.USER_INPUT,
+    "@RequestHeader": TaintSource.USER_INPUT,
+    "@CookieValue": TaintSource.USER_INPUT,
+    "@ModelAttribute": TaintSource.USER_INPUT,
+    "WebRequest.getParameter": TaintSource.USER_INPUT,
+    # JAX-RS
+    "@QueryParam": TaintSource.USER_INPUT,
+    "@PathParam": TaintSource.USER_INPUT,
+    "@FormParam": TaintSource.USER_INPUT,
+    "@HeaderParam": TaintSource.USER_INPUT,
+    "@CookieParam": TaintSource.USER_INPUT,
+    # File operations
+    "FileInputStream": TaintSource.FILE_CONTENT,
+    "Files.readAllBytes": TaintSource.FILE_CONTENT,
+    "Files.readAllLines": TaintSource.FILE_CONTENT,
+    "BufferedReader.readLine": TaintSource.FILE_CONTENT,
+    # Database results
+    "ResultSet.getString": TaintSource.DATABASE,
+    "ResultSet.getObject": TaintSource.DATABASE,
+    # System properties and environment
+    "System.getProperty": TaintSource.ENVIRONMENT,
+    "System.getenv": TaintSource.ENVIRONMENT,
 }
 
 # Function calls that are security sinks
@@ -871,6 +1159,14 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "connection.execute": SecuritySink.SQL_QUERY,
     "session.execute": SecuritySink.SQL_QUERY,
     "engine.execute": SecuritySink.SQL_QUERY,
+    # [20251214_FEATURE] v2.0.0 - Additional SQL execute patterns
+    "db.execute": SecuritySink.SQL_QUERY,
+    "database.execute": SecuritySink.SQL_QUERY,
+    "conn.execute": SecuritySink.SQL_QUERY,
+    "cur.execute": SecuritySink.SQL_QUERY,
+    "execute": SecuritySink.SQL_QUERY,  # Generic execute
+    "executemany": SecuritySink.SQL_QUERY,
+    "cursor.executemany": SecuritySink.SQL_QUERY,
     "RawSQL": SecuritySink.SQL_QUERY,
     "django.db.models.expressions.RawSQL": SecuritySink.SQL_QUERY,
     "django.db.models.RawSQL": SecuritySink.SQL_QUERY,
@@ -1018,37 +1314,307 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "tornado.template.Template": SecuritySink.SSTI,
     "chameleon.PageTemplate": SecuritySink.SSTI,
     "genshi.template.MarkupTemplate": SecuritySink.SSTI,
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Security Sinks
+    # ==========================================================================
+    # DOM XSS - Direct DOM manipulation with user input (CWE-79)
+    "innerHTML": SecuritySink.DOM_XSS,
+    "outerHTML": SecuritySink.DOM_XSS,
+    "document.write": SecuritySink.DOM_XSS,
+    "document.writeln": SecuritySink.DOM_XSS,
+    "insertAdjacentHTML": SecuritySink.DOM_XSS,
+    "element.innerHTML": SecuritySink.DOM_XSS,
+    "element.outerHTML": SecuritySink.DOM_XSS,
+    "document.body.innerHTML": SecuritySink.DOM_XSS,
+    "jQuery.html": SecuritySink.DOM_XSS,
+    "$.html": SecuritySink.DOM_XSS,
+    "$().html": SecuritySink.DOM_XSS,
+    "React.dangerouslySetInnerHTML": SecuritySink.DOM_XSS,
+    "dangerouslySetInnerHTML": SecuritySink.DOM_XSS,
+    "v-html": SecuritySink.DOM_XSS,  # Vue.js
+    "[innerHTML]": SecuritySink.DOM_XSS,  # Angular
+    # JavaScript Eval Injection (CWE-94)
+    "eval": SecuritySink.EVAL,
+    "Function": SecuritySink.EVAL,
+    "new Function": SecuritySink.EVAL,
+    "setTimeout": SecuritySink.EVAL,  # When called with string argument
+    "setInterval": SecuritySink.EVAL,  # When called with string argument
+    "setImmediate": SecuritySink.EVAL,
+    "execScript": SecuritySink.EVAL,
+    "vm.runInThisContext": SecuritySink.EVAL,
+    "vm.runInNewContext": SecuritySink.EVAL,
+    "vm.runInContext": SecuritySink.EVAL,
+    # Prototype Pollution (CWE-1321)
+    "Object.assign": SecuritySink.PROTOTYPE_POLLUTION,
+    "_.merge": SecuritySink.PROTOTYPE_POLLUTION,
+    "_.extend": SecuritySink.PROTOTYPE_POLLUTION,
+    "_.defaultsDeep": SecuritySink.PROTOTYPE_POLLUTION,
+    "$.extend": SecuritySink.PROTOTYPE_POLLUTION,
+    "jQuery.extend": SecuritySink.PROTOTYPE_POLLUTION,
+    "lodash.merge": SecuritySink.PROTOTYPE_POLLUTION,
+    "lodash.extend": SecuritySink.PROTOTYPE_POLLUTION,
+    "lodash.defaultsDeep": SecuritySink.PROTOTYPE_POLLUTION,
+    "deepmerge": SecuritySink.PROTOTYPE_POLLUTION,
+    "merge-deep": SecuritySink.PROTOTYPE_POLLUTION,
+    "object-path.set": SecuritySink.PROTOTYPE_POLLUTION,
+    # Node.js Command Injection (CWE-78)
+    "child_process.exec": SecuritySink.SHELL_COMMAND,
+    "child_process.execSync": SecuritySink.SHELL_COMMAND,
+    "child_process.spawn": SecuritySink.SHELL_COMMAND,
+    "child_process.spawnSync": SecuritySink.SHELL_COMMAND,
+    "child_process.execFile": SecuritySink.SHELL_COMMAND,
+    "child_process.execFileSync": SecuritySink.SHELL_COMMAND,
+    "child_process.fork": SecuritySink.SHELL_COMMAND,
+    "exec": SecuritySink.SHELL_COMMAND,
+    "execSync": SecuritySink.SHELL_COMMAND,
+    "spawn": SecuritySink.SHELL_COMMAND,
+    "spawnSync": SecuritySink.SHELL_COMMAND,
+    "shelljs.exec": SecuritySink.SHELL_COMMAND,
+    "execa": SecuritySink.SHELL_COMMAND,
+    # Node.js File System (Path Traversal - CWE-22)
+    "fs.readFile": SecuritySink.FILE_PATH,
+    "fs.readFileSync": SecuritySink.FILE_PATH,
+    "fs.writeFile": SecuritySink.FILE_PATH,
+    "fs.writeFileSync": SecuritySink.FILE_PATH,
+    "fs.createReadStream": SecuritySink.FILE_PATH,
+    "fs.createWriteStream": SecuritySink.FILE_PATH,
+    "fs.unlink": SecuritySink.FILE_PATH,
+    "fs.unlinkSync": SecuritySink.FILE_PATH,
+    "fs.rmdir": SecuritySink.FILE_PATH,
+    "fs.rmdirSync": SecuritySink.FILE_PATH,
+    "fs.rename": SecuritySink.FILE_PATH,
+    "fs.renameSync": SecuritySink.FILE_PATH,
+    "path.join": SecuritySink.FILE_PATH,
+    "path.resolve": SecuritySink.FILE_PATH,
+    "require": SecuritySink.FILE_PATH,  # Dynamic require with user input
+    # Node.js SQL Injection (CWE-89)
+    "connection.query": SecuritySink.SQL_QUERY,
+    "pool.query": SecuritySink.SQL_QUERY,
+    "mysql.query": SecuritySink.SQL_QUERY,
+    "mysql2.query": SecuritySink.SQL_QUERY,
+    "pg.query": SecuritySink.SQL_QUERY,
+    "client.query": SecuritySink.SQL_QUERY,
+    "knex.raw": SecuritySink.SQL_QUERY,
+    "knex.whereRaw": SecuritySink.SQL_QUERY,
+    "knex.havingRaw": SecuritySink.SQL_QUERY,
+    "sequelize.query": SecuritySink.SQL_QUERY,
+    "Sequelize.query": SecuritySink.SQL_QUERY,
+    "prisma.$queryRaw": SecuritySink.SQL_QUERY,
+    "prisma.$executeRaw": SecuritySink.SQL_QUERY,
+    "typeorm.query": SecuritySink.SQL_QUERY,
+    "mongoose.aggregate": SecuritySink.SQL_QUERY,
+    "Model.find": SecuritySink.SQL_QUERY,  # MongoDB with user input
+    "Model.findOne": SecuritySink.SQL_QUERY,
+    "Model.updateOne": SecuritySink.SQL_QUERY,
+    "Model.deleteOne": SecuritySink.SQL_QUERY,
+    # Node.js SSRF (CWE-918)
+    "axios.get": SecuritySink.SSRF,
+    "axios.post": SecuritySink.SSRF,
+    "axios.put": SecuritySink.SSRF,
+    "axios.delete": SecuritySink.SSRF,
+    "axios.request": SecuritySink.SSRF,
+    "fetch": SecuritySink.SSRF,
+    "node-fetch": SecuritySink.SSRF,
+    "got": SecuritySink.SSRF,
+    "got.get": SecuritySink.SSRF,
+    "superagent.get": SecuritySink.SSRF,
+    "http.get": SecuritySink.SSRF,
+    "https.get": SecuritySink.SSRF,
+    "http.request": SecuritySink.SSRF,
+    "https.request": SecuritySink.SSRF,
+    "request": SecuritySink.SSRF,
+    "request.get": SecuritySink.SSRF,
+    # Node.js Deserialization (CWE-502)
+    "JSON.parse": SecuritySink.DESERIALIZATION,  # When used with untrusted data without validation
+    "serialize-javascript": SecuritySink.DESERIALIZATION,
+    "node-serialize.unserialize": SecuritySink.DESERIALIZATION,
+    "js-yaml.load": SecuritySink.DESERIALIZATION,
+    "yaml.load": SecuritySink.DESERIALIZATION,
+    "flatted.parse": SecuritySink.DESERIALIZATION,
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 - Java Security Sinks
+    # ==========================================================================
+    # Java SQL Injection (CWE-89)
+    "Statement.execute": SecuritySink.SQL_QUERY,
+    "Statement.executeQuery": SecuritySink.SQL_QUERY,
+    "Statement.executeUpdate": SecuritySink.SQL_QUERY,
+    "PreparedStatement.execute": SecuritySink.SQL_QUERY,
+    "createStatement": SecuritySink.SQL_QUERY,
+    "createQuery": SecuritySink.SQL_QUERY,  # JPA
+    "createNativeQuery": SecuritySink.SQL_QUERY,  # JPA
+    "entityManager.createQuery": SecuritySink.SQL_QUERY,
+    "entityManager.createNativeQuery": SecuritySink.SQL_QUERY,
+    "jdbcTemplate.query": SecuritySink.SQL_QUERY,  # Spring
+    "jdbcTemplate.queryForObject": SecuritySink.SQL_QUERY,
+    "jdbcTemplate.queryForList": SecuritySink.SQL_QUERY,
+    "jdbcTemplate.update": SecuritySink.SQL_QUERY,
+    "jdbcTemplate.execute": SecuritySink.SQL_QUERY,
+    "namedParameterJdbcTemplate.query": SecuritySink.SQL_QUERY,
+    # Java Command Injection (CWE-78)
+    "Runtime.exec": SecuritySink.SHELL_COMMAND,
+    "Runtime.getRuntime().exec": SecuritySink.SHELL_COMMAND,
+    "ProcessBuilder": SecuritySink.SHELL_COMMAND,
+    "ProcessBuilder.command": SecuritySink.SHELL_COMMAND,
+    "ProcessBuilder.start": SecuritySink.SHELL_COMMAND,
+    # Java Path Traversal (CWE-22)
+    "new File": SecuritySink.FILE_PATH,
+    "File": SecuritySink.FILE_PATH,
+    "FileInputStream": SecuritySink.FILE_PATH,
+    "FileOutputStream": SecuritySink.FILE_PATH,
+    "FileReader": SecuritySink.FILE_PATH,
+    "FileWriter": SecuritySink.FILE_PATH,
+    "Files.readAllBytes": SecuritySink.FILE_PATH,
+    "Files.readAllLines": SecuritySink.FILE_PATH,
+    "Files.write": SecuritySink.FILE_PATH,
+    "Paths.get": SecuritySink.FILE_PATH,
+    # Java XXE (CWE-611)
+    "DocumentBuilderFactory.newInstance": SecuritySink.XXE,
+    "SAXParserFactory.newInstance": SecuritySink.XXE,
+    "XMLInputFactory.newInstance": SecuritySink.XXE,
+    "TransformerFactory.newInstance": SecuritySink.XXE,
+    "SchemaFactory.newInstance": SecuritySink.XXE,
+    "XMLReader.parse": SecuritySink.XXE,
+    # Java Deserialization (CWE-502)
+    "ObjectInputStream.readObject": SecuritySink.DESERIALIZATION,
+    "ObjectInputStream": SecuritySink.DESERIALIZATION,
+    "readObject": SecuritySink.DESERIALIZATION,
+    "XMLDecoder": SecuritySink.DESERIALIZATION,
+    "XStream.fromXML": SecuritySink.DESERIALIZATION,
+    "ObjectMapper.readValue": SecuritySink.DESERIALIZATION,  # Jackson
+    "Gson.fromJson": SecuritySink.DESERIALIZATION,
+    # Java SSRF (CWE-918)
+    "URL.openConnection": SecuritySink.SSRF,
+    "URL.openStream": SecuritySink.SSRF,
+    "HttpURLConnection": SecuritySink.SSRF,
+    "HttpClient.send": SecuritySink.SSRF,
+    "RestTemplate.getForObject": SecuritySink.SSRF,  # Spring
+    "RestTemplate.postForObject": SecuritySink.SSRF,
+    "RestTemplate.exchange": SecuritySink.SSRF,
+    "WebClient.get": SecuritySink.SSRF,  # Spring WebFlux
+    "WebClient.post": SecuritySink.SSRF,
+    # Java LDAP Injection
+    "DirContext.search": SecuritySink.SQL_QUERY,
+    "InitialDirContext.search": SecuritySink.SQL_QUERY,
+    "LdapTemplate.search": SecuritySink.SQL_QUERY,  # Spring LDAP
+    # Java Expression Language Injection (similar to SSTI)
+    "ExpressionParser.parseExpression": SecuritySink.SSTI,  # Spring SpEL
+    "SpelExpressionParser": SecuritySink.SSTI,
+    "OGNL.getValue": SecuritySink.SSTI,  # Struts
+    "MVEL.eval": SecuritySink.SSTI,
+    # ==========================================================================
+    # [20251215_FEATURE] v2.0.0 P1 - Additional Spring Security Patterns
+    # ==========================================================================
+    # Spring Data JPA (CWE-89)
+    "JpaRepository.findBy": SecuritySink.SQL_QUERY,  # Custom query methods
+    "@Query": SecuritySink.SQL_QUERY,  # JPQL annotation
+    "Specification.where": SecuritySink.SQL_QUERY,  # Criteria API
+    "CriteriaBuilder.createQuery": SecuritySink.SQL_QUERY,
+    # Spring Security expression injection
+    "@PreAuthorize": SecuritySink.SSTI,  # SpEL in security annotations
+    "@PostAuthorize": SecuritySink.SSTI,
+    "@Secured": SecuritySink.SSTI,
+    "SecurityExpressionHandler": SecuritySink.SSTI,
+    # Spring View resolution (Server-Side Template Injection)
+    "ModelAndView": SecuritySink.SSTI,  # View name from user input
+    "RedirectView": SecuritySink.REDIRECT,  # Open redirect
+    "redirect:": SecuritySink.REDIRECT,
+    "forward:": SecuritySink.FILE_PATH,  # Path traversal via forward
+    # Spring Messaging (WebSocket)
+    "@MessageMapping": SecuritySink.SSTI,  # Message handler
+    "SimpMessagingTemplate.convertAndSend": SecuritySink.SSTI,
+    # Spring Cloud (SSRF)
+    "DiscoveryClient.getInstances": SecuritySink.SSRF,
+    "LoadBalancerClient.choose": SecuritySink.SSRF,
+    "RestTemplate.getForEntity": SecuritySink.SSRF,
+    "WebClient.uri": SecuritySink.SSRF,
+    # Spring Batch (File/Path injection)
+    "FlatFileItemReader.setResource": SecuritySink.FILE_PATH,
+    "FlatFileItemWriter.setResource": SecuritySink.FILE_PATH,
+    # Hibernate (CWE-89)
+    "Session.createQuery": SecuritySink.SQL_QUERY,
+    "Session.createSQLQuery": SecuritySink.SQL_QUERY,
+    "Session.createNativeQuery": SecuritySink.SQL_QUERY,
+    "Criteria.add": SecuritySink.SQL_QUERY,
+    # MyBatis (CWE-89) - ${}  interpolation is vulnerable
+    "SqlSession.selectOne": SecuritySink.SQL_QUERY,
+    "SqlSession.selectList": SecuritySink.SQL_QUERY,
+    "SqlSession.update": SecuritySink.SQL_QUERY,
+    "SqlSession.delete": SecuritySink.SQL_QUERY,
+    "SqlSession.insert": SecuritySink.SQL_QUERY,
 }
-# Hardcoded Secret Patterns (v1.3.0)
+# Hardcoded Secret Patterns (v1.3.0, enhanced v2.0.0)
 # These are regex patterns for detecting hardcoded secrets in string literals
 HARDCODED_SECRET_PATTERNS: Dict[str, str] = {
+    # AWS (enhanced patterns)
     "aws_access_key": r"(?i)AKIA[A-Z0-9]{16}",
     "aws_secret_key": r"(?i)aws[_-]?secret[_-]?access[_-]?key\s*[=:]\s*['\"][A-Za-z0-9/+=]{40}['\"]",
+    "aws_session_token": r"(?i)aws[_-]?session[_-]?token\s*[=:]\s*['\"][A-Za-z0-9/+=]{100,}['\"]",
+    # GitHub
     "github_token": r"ghp_[a-zA-Z0-9]{36}",
     "github_oauth": r"gho_[a-zA-Z0-9]{36}",
     "github_app": r"ghu_[a-zA-Z0-9]{36}",
     "github_fine_grained": r"github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}",
+    # GitLab
     "gitlab_token": r"glpat-[a-zA-Z0-9\-]{20,}",
+    "gitlab_runner": r"GR1348941[a-zA-Z0-9\-_]{20,}",
+    # [20251214_FEATURE] v2.0.0 - Stripe patterns (enhanced per evaluation report)
     "stripe_live": r"sk_live_[a-zA-Z0-9]{24,}",
     "stripe_test": r"sk_test_[a-zA-Z0-9]{24,}",
     "stripe_restricted": r"rk_live_[a-zA-Z0-9]{24,}",
+    "stripe_pk_live": r"pk_live_[a-zA-Z0-9]{24,}",
+    "stripe_pk_test": r"pk_test_[a-zA-Z0-9]{24,}",
+    # Slack
     "slack_token": r"xox[baprs]-[a-zA-Z0-9\-]{10,}",
     "slack_webhook": r"https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+",
+    # Google/Firebase
     "google_api": r"AIza[0-9A-Za-z\-_]{35}",
     "firebase": r"AAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}",
+    "google_oauth": r"[0-9]+-[a-z0-9_]{32}\.apps\.googleusercontent\.com",
+    # Twilio
     "twilio_sid": r"AC[a-z0-9]{32}",
     "twilio_token": r"SK[a-z0-9]{32}",
+    # SendGrid/Mailgun
     "sendgrid": r"SG\.[a-zA-Z0-9\-_]{22}\.[a-zA-Z0-9\-_]{43}",
     "mailgun": r"key-[a-zA-Z0-9]{32}",
+    # Square
     "square_token": r"sq0atp-[a-zA-Z0-9\-_]{22}",
     "square_oauth": r"sq0csp-[a-zA-Z0-9\-_]{43}",
+    # Private Keys
     "private_key_rsa": r"-----BEGIN\s+RSA\s+PRIVATE\s+KEY-----",
     "private_key_ec": r"-----BEGIN\s+EC\s+PRIVATE\s+KEY-----",
     "private_key_dsa": r"-----BEGIN\s+DSA\s+PRIVATE\s+KEY-----",
     "private_key_openssh": r"-----BEGIN\s+OPENSSH\s+PRIVATE\s+KEY-----",
     "private_key_generic": r"-----BEGIN\s+PRIVATE\s+KEY-----",
+    "private_key_encrypted": r"-----BEGIN\s+ENCRYPTED\s+PRIVATE\s+KEY-----",
+    # [20251214_FEATURE] v2.0.0 - JWT tokens (per evaluation report request)
+    "jwt_token": r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}",
+    # [20251214_FEATURE] v2.0.0 - Additional cloud providers
+    "azure_storage": r"DefaultEndpointsProtocol=https;AccountName=[a-z0-9]+;AccountKey=[A-Za-z0-9+/=]{88}",
+    "azure_connection": r"(?i)azure[_-]?connection[_-]?string\s*[=:]\s*['\"][^'\"]{50,}['\"]",
+    "heroku_api": r"(?i)heroku[_-]?api[_-]?key\s*[=:]\s*['\"][a-f0-9\-]{36}['\"]",
+    "digitalocean": r"(?i)do[_-]?api[_-]?token\s*[=:]\s*['\"][a-f0-9]{64}['\"]",
+    # [20251214_FEATURE] v2.0.0 - Database connection strings
+    "postgres_url": r"postgres(?:ql)?://[^:]+:[^@]+@[^/]+/[^\s'\"]+",
+    "mysql_url": r"mysql://[^:]+:[^@]+@[^/]+/[^\s'\"]+",
+    "mongodb_url": r"mongodb(?:\+srv)?://[^:]+:[^@]+@[^\s'\"]+",
+    "redis_url": r"redis://[^:]*:[^@]+@[^/]+(?:/[0-9]+)?",
+    # [20251214_FEATURE] v2.0.0 - NPM/PyPI tokens
+    "npm_token": r"npm_[a-zA-Z0-9]{36}",
+    "pypi_token": r"pypi-[a-zA-Z0-9]{64,}",
+    # Generic patterns (keep at end, more permissive)
     "generic_api_key": r"(?i)(api[_-]?key|apikey)\s*[=:]\s*['\"][a-zA-Z0-9]{20,}['\"]",
     "generic_secret": r"(?i)(secret|password|passwd|pwd|token)\s*[=:]\s*['\"][a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;:,.<>?]{8,}['\"]",
+    "generic_bearer": r"(?i)bearer\s+[a-zA-Z0-9\-_\.]{20,}",
+}
+
+# [20251214_FEATURE] v2.0.0 - Variable name patterns for detecting secret assignments
+# These match variable names that typically hold secrets
+SECRET_VARIABLE_PATTERNS: Dict[str, str] = {
+    "password_var": r"(?i)^(password|passwd|pwd|pass|admin_password|default_password|db_password|user_password|root_password)$",
+    "secret_var": r"(?i)^(secret|secret_key|jwt_secret|app_secret|session_secret|encryption_key|private_key|signing_key)$",
+    "api_key_var": r"(?i)^(api_key|apikey|api_secret|access_key|access_token|auth_token|bearer_token)$",
+    "connection_string": r"(?i)^(connection_string|database_url|db_url|redis_url|mongo_uri)$",
+    "credentials": r"(?i)^(credentials|creds|auth|authentication)$",
 }
 # Sanitizer function patterns
 SANITIZER_PATTERNS: Dict[str, str] = {

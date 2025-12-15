@@ -312,6 +312,101 @@ class IRContinue(IRNode):
     pass
 
 
+# [20251215_FEATURE] v2.0.0 - Import/Export support for polyglot extraction
+@dataclass
+class IRImport(IRNode):
+    """
+    Import statement (ES6 modules, Python imports, Java imports).
+
+    Examples:
+        Python: import foo, from foo import bar
+        JavaScript: import { bar } from 'foo', import foo from 'foo'
+        Java: import com.example.Foo
+
+    Attributes:
+        module: Module path/name being imported
+        names: List of imported names (empty for default import)
+        alias: Alias for the import (as name)
+        is_default: True for default import (JS: import x from 'y')
+        is_star: True for star import (from x import *)
+    """
+
+    module: str = ""
+    names: List[str] = field(default_factory=list)
+    alias: Optional[str] = None
+    is_default: bool = False
+    is_star: bool = False
+
+
+@dataclass
+class IRExport(IRNode):
+    """
+    Export statement (ES6 modules).
+
+    Examples:
+        export default function() {}
+        export { foo, bar }
+        export const x = 1
+
+    Attributes:
+        names: List of exported names
+        declaration: Exported declaration (function, class, variable)
+        is_default: True for default export
+        source: Re-export source module (export { x } from 'y')
+    """
+
+    names: List[str] = field(default_factory=list)
+    declaration: Optional["IRNode"] = None
+    is_default: bool = False
+    source: Optional[str] = None
+
+
+@dataclass
+class IRSwitch(IRNode):
+    """
+    Switch statement.
+
+    Attributes:
+        discriminant: Expression being switched on
+        cases: List of (test, body) tuples. test=None for default case.
+    """
+
+    discriminant: "IRExpr" = None
+    cases: List[tuple] = field(default_factory=list)  # [(test, [body]), ...]
+
+
+@dataclass
+class IRTry(IRNode):
+    """
+    Try/catch/finally statement.
+
+    Attributes:
+        body: Try block statements
+        handlers: List of (exception_type, name, body) tuples
+        orelse: Else block (Python only)
+        finalbody: Finally block statements
+    """
+
+    body: List["IRNode"] = field(default_factory=list)
+    handlers: List[tuple] = field(default_factory=list)  # [(type, name, body), ...]
+    orelse: List["IRNode"] = field(default_factory=list)
+    finalbody: List["IRNode"] = field(default_factory=list)
+
+
+@dataclass
+class IRRaise(IRNode):
+    """
+    Raise/throw statement.
+
+    Attributes:
+        exc: Exception expression to raise
+        cause: Exception cause (Python 'from' clause)
+    """
+
+    exc: Optional["IRExpr"] = None
+    cause: Optional["IRExpr"] = None
+
+
 # =============================================================================
 # Expression Nodes
 # =============================================================================
@@ -399,6 +494,26 @@ class IRBoolOp(IRExpr):
 
     op: BoolOperator = None
     values: List[IRExpr] = field(default_factory=list)
+
+
+# [20251215_FEATURE] v2.0.0 - Ternary/conditional expression for polyglot support
+@dataclass
+class IRTernary(IRExpr):
+    """
+    Ternary/conditional expression.
+
+    Python: x if condition else y
+    JavaScript/Java: condition ? x : y
+
+    Attributes:
+        test: Condition expression
+        body: Value if true
+        orelse: Value if false
+    """
+
+    test: IRExpr = None
+    body: IRExpr = None
+    orelse: IRExpr = None
 
 
 @dataclass
@@ -542,6 +657,12 @@ IRStmt = Union[
     IRPass,
     IRBreak,
     IRContinue,
+    # [20251215_FEATURE] v2.0.0 - New statement types
+    IRImport,
+    IRExport,
+    IRSwitch,
+    IRTry,
+    IRRaise,
 ]
 
 # Any node

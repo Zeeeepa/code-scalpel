@@ -201,6 +201,8 @@ class SymbolicAnalyzer:
             "language": language,
             "max_loop_iterations": self.max_loop_iterations,
             "solver_timeout": self.solver_timeout,
+            # [20251214_FEATURE] Cache-bust when model schema changes (friendly names)
+            "model_schema": "friendly_names_v20251214",
         }
 
     def analyze(self, code: str, language: str = "python") -> AnalysisResult:
@@ -350,16 +352,22 @@ class SymbolicAnalyzer:
         # Get variables from state
         state_vars = state.variables
         variables_list = list(state_vars.values())
+        variable_names = list(state_vars.keys())
 
         # Check satisfiability
-        solver_result = self._solver.solve(constraints, variables_list)
+        solver_result = self._solver.solve(
+            constraints, variables_list, variable_names
+        )
 
         if solver_result.status == SolverStatus.SAT:
             # Extract variable values (already marshaled to Python natives)
             variables = {}
-            for name in state_vars.keys():
+            for name, expr in state_vars.items():
                 if solver_result.model and name in solver_result.model:
                     variables[name] = solver_result.model[name]
+                elif solver_result.model and str(expr) in solver_result.model:
+                    # [20251214_FEATURE] Fall back to expression key if solver named it
+                    variables[name] = solver_result.model[str(expr)]
                 else:
                     # Variable not in model - might be unconstrained
                     variables[name] = None
@@ -457,7 +465,8 @@ class SymbolicAnalyzer:
         constraints = list(self._preconditions) + [target_condition]
         # Extract variables from declared symbols for model extraction
         variables = list(self._declared_symbols.values())
-        solver_result = self._solver.solve(constraints, variables)
+        variable_names = list(self._declared_symbols.keys())
+        solver_result = self._solver.solve(constraints, variables, variable_names)
 
         if solver_result.status == SolverStatus.SAT:
             return solver_result.model

@@ -29,7 +29,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from code_scalpel import SurgicalExtractor
@@ -685,8 +685,53 @@ async def analyze_code(code: str, language: str = "python") -> AnalysisResult:
     return await asyncio.to_thread(_analyze_code_sync, code, language)
 
 
-def _security_scan_sync(code: str) -> SecurityResult:
-    """Synchronous implementation of security_scan."""
+def _security_scan_sync(
+    code: Optional[str] = None, file_path: Optional[str] = None
+) -> SecurityResult:
+    """
+    Synchronous implementation of security_scan.
+    
+    [20251214_FEATURE] v2.0.0 - Added file_path parameter support.
+    """
+    # Handle file_path parameter
+    if file_path is not None:
+        try:
+            path = Path(file_path)
+            if not path.exists():
+                return SecurityResult(
+                    success=False,
+                    has_vulnerabilities=False,
+                    vulnerability_count=0,
+                    risk_level="unknown",
+                    error=f"File not found: {file_path}",
+                )
+            if not path.is_file():
+                return SecurityResult(
+                    success=False,
+                    has_vulnerabilities=False,
+                    vulnerability_count=0,
+                    risk_level="unknown",
+                    error=f"Path is not a file: {file_path}",
+                )
+            code = path.read_text(encoding="utf-8")
+        except Exception as e:
+            return SecurityResult(
+                success=False,
+                has_vulnerabilities=False,
+                vulnerability_count=0,
+                risk_level="unknown",
+                error=f"Failed to read file: {str(e)}",
+            )
+    
+    if code is None:
+        return SecurityResult(
+            success=False,
+            has_vulnerabilities=False,
+            vulnerability_count=0,
+            risk_level="unknown",
+            error="Either 'code' or 'file_path' must be provided",
+        )
+    
     valid, error = _validate_code(code)
     if not valid:
         return SecurityResult(
@@ -785,12 +830,16 @@ def _security_scan_sync(code: str) -> SecurityResult:
 
 
 @mcp.tool()
-async def security_scan(code: str) -> SecurityResult:
+async def security_scan(
+    code: Optional[str] = None, file_path: Optional[str] = None
+) -> SecurityResult:
     """
     Scan Python code for security vulnerabilities using taint analysis.
 
     Use this tool to audit code for security vulnerabilities before deploying
     or committing changes. It tracks data flow from sources to sinks.
+    
+    [20251214_FEATURE] v2.0.0 - Now accepts file_path parameter to scan files directly.
 
     Detects:
     - SQL Injection (CWE-89)
@@ -802,14 +851,17 @@ async def security_scan(code: str) -> SecurityResult:
     - XXE - XML External Entity (CWE-611) [v1.4.0]
     - SSTI - Server-Side Template Injection (CWE-1336) [v1.4.0]
     - Hardcoded Secrets (CWE-798) - 30+ patterns
+    - Weak Cryptography (CWE-327) - MD5, SHA-1 [v2.0.0]
+    - Dangerous Patterns - shell=True, eval(), pickle [v2.0.0]
 
     Args:
-        code: Python source code to scan
+        code: Python source code to scan (provide either code or file_path)
+        file_path: Path to Python file to scan (provide either code or file_path)
 
     Returns:
         Security analysis result with vulnerabilities and risk assessment
     """
-    return await asyncio.to_thread(_security_scan_sync, code)
+    return await asyncio.to_thread(_security_scan_sync, code, file_path)
 
 
 def _basic_security_scan(code: str) -> SecurityResult:
@@ -892,7 +944,8 @@ def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
 
     # Check cache first (symbolic execution is expensive!)
     cache = _get_cache()
-    cache_config = {"max_paths": max_paths}
+    # [20251214_FEATURE] Include schema to bust caches when model format changes
+    cache_config = {"max_paths": max_paths, "model_schema": "friendly_names_v20251214"}
     if cache:
         cached = cache.get(code, "symbolic", cache_config)
         if cached is not None:
@@ -1325,6 +1378,73 @@ def _extraction_error(target_name: str, error: str) -> ContextualExtractionResul
     )
 
 
+async def _extract_polyglot(
+    target_type: str,
+    target_name: str,
+    file_path: str | None,
+    code: str | None,
+    language: "Language",
+    include_token_estimate: bool,
+) -> ContextualExtractionResult:
+    """
+    [20251214_FEATURE] v2.0.0 - Multi-language extraction using PolyglotExtractor.
+    
+    Handles extraction for JavaScript, TypeScript, and Java using tree-sitter
+    and the Unified IR system.
+    
+    Args:
+        target_type: "function", "class", or "method"
+        target_name: Name of element to extract
+        file_path: Path to source file
+        code: Source code string (if file_path not provided)
+        language: Language enum value
+        include_token_estimate: Include token count estimate
+        
+    Returns:
+        ContextualExtractionResult with extracted code
+    """
+    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.mcp.path_resolver import resolve_path
+    
+    if file_path is None and code is None:
+        return _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
+    
+    try:
+        # Create extractor from file or code
+        if file_path is not None:
+            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            extractor = PolyglotExtractor.from_file(resolved_path, language)
+        else:
+            extractor = PolyglotExtractor(code, language=language)
+        
+        # Perform extraction
+        result = extractor.extract(target_type, target_name)
+        
+        if not result.success:
+            return _extraction_error(target_name, result.error or "Extraction failed")
+        
+        token_estimate = result.token_estimate if include_token_estimate else 0
+        
+        return ContextualExtractionResult(
+            success=True,
+            target_name=target_name,
+            target_code=result.code,
+            context_code="",  # Cross-file deps not yet supported for non-Python
+            full_code=result.code,
+            context_items=[],
+            total_lines=result.end_line - result.start_line + 1,
+            line_start=result.start_line,
+            line_end=result.end_line,
+            token_estimate=token_estimate,
+        )
+    except FileNotFoundError as e:
+        return _extraction_error(target_name, str(e))
+    except Exception as e:
+        return _extraction_error(target_name, f"Polyglot extraction failed: {str(e)}")
+
+
 def _create_extractor(
     file_path: str | None, code: str | None, target_name: str
 ) -> tuple["SurgicalExtractor | None", ContextualExtractionResult | None]:
@@ -1482,6 +1602,7 @@ async def extract_code(
     target_name: str,
     file_path: str | None = None,
     code: str | None = None,
+    language: str | None = None,
     include_context: bool = False,
     context_depth: int = 1,
     include_cross_file_deps: bool = False,
@@ -1493,6 +1614,10 @@ async def extract_code(
     **TOKEN-EFFICIENT MODE (RECOMMENDED):**
     Provide `file_path` - the server reads the file directly. The Agent
     never sees the full file content, saving potentially thousands of tokens.
+
+    **MULTI-LANGUAGE SUPPORT (v2.0.0):**
+    Supports Python, JavaScript, TypeScript, and Java. Language is auto-detected
+    from file extension, or specify explicitly with `language` parameter.
 
     **CROSS-FILE DEPENDENCIES:**
     Set `include_cross_file_deps=True` to automatically resolve imports.
@@ -1507,6 +1632,8 @@ async def extract_code(
         target_name: Name of the element. For methods, use "ClassName.method_name".
         file_path: Path to the source file (TOKEN SAVER - server reads file).
         code: Source code string (fallback if file_path not provided).
+        language: Language override: "python", "javascript", "typescript", "java".
+                  If None, auto-detects from file extension.
         include_context: If True, also extract intra-file dependencies.
         context_depth: How deep to traverse dependencies (1=direct, 2=transitive).
         include_cross_file_deps: If True, resolve imports from external files.
@@ -1522,6 +1649,20 @@ async def extract_code(
             target_name="calculate_tax"
         )
 
+    Example (JavaScript extraction):
+        extract_code(
+            file_path="/project/src/utils.js",
+            target_type="function",
+            target_name="calculateTax"
+        )
+
+    Example (Java method extraction):
+        extract_code(
+            file_path="/project/src/Calculator.java",
+            target_type="method",
+            target_name="Calculator.add"
+        )
+
     Example (With cross-file dependencies):
         extract_code(
             file_path="/project/src/services/order.py",
@@ -1531,7 +1672,37 @@ async def extract_code(
         )
     """
     from code_scalpel.surgical_extractor import ContextualExtraction, ExtractionResult
+    from code_scalpel.polyglot import PolyglotExtractor, Language, detect_language
 
+    # [20251214_FEATURE] v2.0.0 - Multi-language support
+    # Determine language from parameter, file extension, or code content
+    detected_lang = Language.AUTO
+    if language:
+        lang_map = {
+            "python": Language.PYTHON,
+            "javascript": Language.JAVASCRIPT,
+            "js": Language.JAVASCRIPT,
+            "typescript": Language.TYPESCRIPT,
+            "ts": Language.TYPESCRIPT,
+            "java": Language.JAVA,
+        }
+        detected_lang = lang_map.get(language.lower(), Language.AUTO)
+    
+    if detected_lang == Language.AUTO:
+        detected_lang = detect_language(file_path, code)
+
+    # [20251214_FEATURE] Route to polyglot extractor for non-Python languages
+    if detected_lang != Language.PYTHON:
+        return await _extract_polyglot(
+            target_type=target_type,
+            target_name=target_name,
+            file_path=file_path,
+            code=code,
+            language=detected_lang,
+            include_token_estimate=include_token_estimate,
+        )
+
+    # Python path - use existing SurgicalExtractor with full context support
     # Step 1: Create extractor
     extractor, error = _create_extractor(file_path, code, target_name)
     if error:
@@ -3456,34 +3627,45 @@ def _cross_file_security_scan_sync(
         tracker = CrossFileTaintTracker(root_path)
         result = tracker.analyze(entry_points=entry_points, max_depth=max_depth)
 
+        # Helper to get file path from module name
+        def get_file_for_module(module: str) -> str:
+            """Get file path for a module, falling back to module name if not found."""
+            file_path = tracker.resolver.module_to_file.get(module, module)
+            if isinstance(file_path, Path):
+                file_path = str(file_path)
+            # Make relative if absolute
+            try:
+                p = Path(file_path)
+                if p.is_absolute():
+                    return str(p.relative_to(root_path))
+            except (ValueError, TypeError):
+                pass
+            return file_path
+
         # Convert vulnerabilities to models
         vulnerabilities = []
         for vuln in result.vulnerabilities:
+            # [20251215_BUGFIX] v2.0.1 - Use source_module not source_file
+            source_file = get_file_for_module(vuln.flow.source_module)
+            sink_file = get_file_for_module(vuln.flow.sink_module)
+            
             flow_model = TaintFlowModel(
                 source_function=vuln.flow.source_function,
-                source_file=(
-                    str(Path(vuln.flow.source_file).relative_to(root_path))
-                    if Path(vuln.flow.source_file).is_absolute()
-                    else vuln.flow.source_file
-                ),
+                source_file=source_file,
                 source_line=vuln.flow.source_line,
                 sink_function=vuln.flow.sink_function,
-                sink_file=(
-                    str(Path(vuln.flow.sink_file).relative_to(root_path))
-                    if Path(vuln.flow.sink_file).is_absolute()
-                    else vuln.flow.sink_file
-                ),
+                sink_file=sink_file,
                 sink_line=vuln.flow.sink_line,
-                flow_path=vuln.flow.flow_path,
-                taint_type=vuln.flow.taint_type,
+                flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path],
+                taint_type=str(vuln.flow.sink_type.name if hasattr(vuln.flow.sink_type, 'name') else vuln.flow.sink_type),
             )
             vulnerabilities.append(
                 CrossFileVulnerabilityModel(
                     type=vuln.vulnerability_type,
-                    cwe=vuln.cwe,
+                    cwe=vuln.cwe_id,
                     severity=vuln.severity,
-                    source_file=flow_model.source_file,
-                    sink_file=flow_model.sink_file,
+                    source_file=source_file,
+                    sink_file=sink_file,
                     description=vuln.description,
                     flow=flow_model,
                 )
@@ -3492,24 +3674,20 @@ def _cross_file_security_scan_sync(
         # Convert taint flows to models
         taint_flows = []
         for flow in result.taint_flows:
+            # [20251215_BUGFIX] v2.0.1 - Use source_module not source_file
+            source_file = get_file_for_module(flow.source_module)
+            sink_file = get_file_for_module(flow.sink_module)
+            
             taint_flows.append(
                 TaintFlowModel(
                     source_function=flow.source_function,
-                    source_file=(
-                        str(Path(flow.source_file).relative_to(root_path))
-                        if Path(flow.source_file).is_absolute()
-                        else flow.source_file
-                    ),
+                    source_file=source_file,
                     source_line=flow.source_line,
                     sink_function=flow.sink_function,
-                    sink_file=(
-                        str(Path(flow.sink_file).relative_to(root_path))
-                        if Path(flow.sink_file).is_absolute()
-                        else flow.sink_file
-                    ),
+                    sink_file=sink_file,
                     sink_line=flow.sink_line,
-                    flow_path=flow.flow_path,
-                    taint_type=flow.taint_type,
+                    flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path],
+                    taint_type=str(flow.sink_type.name if hasattr(flow.sink_type, 'name') else flow.sink_type),
                 )
             )
 

@@ -218,6 +218,14 @@ class SurgicalExtractor:
         except SyntaxError as e:
             raise ValueError(f"Invalid Python code: {e}")
 
+        # [20251215_BUGFIX] Index all definitions including nested classes
+        def index_class_recursively(class_node: ast.ClassDef) -> None:
+            """Recursively index nested classes."""
+            self._classes[class_node.name] = class_node
+            for child in class_node.body:
+                if isinstance(child, ast.ClassDef):
+                    index_class_recursively(child)
+
         # Index top-level definitions
         for node in self._tree.body:
             if isinstance(node, ast.FunctionDef):
@@ -225,7 +233,7 @@ class SurgicalExtractor:
             elif isinstance(node, ast.AsyncFunctionDef):
                 self._functions[node.name] = node
             elif isinstance(node, ast.ClassDef):
-                self._classes[node.name] = node
+                index_class_recursively(node)
             elif isinstance(node, (ast.Import, ast.ImportFrom)):
                 self._imports.append(node)
             elif isinstance(node, ast.Assign):

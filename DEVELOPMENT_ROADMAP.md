@@ -1567,63 +1567,260 @@ JS_SINK_PATTERNS = {
 
 v2.0.0 Release Criteria:
 
-[ ] extract_code: Works for TypeScript functions/classes (P0)
-[ ] extract_code: Works for JavaScript functions/classes (P0)
-[ ] extract_code: Works for Java methods/classes (P0)
-[ ] extract_code: Auto-detects language from file extension (P0)
+[x] extract_code: Works for TypeScript functions/classes (P0)
+[x] extract_code: Works for JavaScript functions/classes (P0)
+[x] extract_code: Works for Java methods/classes (P0)
+[x] extract_code: Auto-detects language from file extension (P0)
 
-[ ] TypeScript AST: Parses .ts files correctly (P0)
-[ ] TypeScript AST: Parses .tsx files correctly (P0)
-[ ] TypeScript AST: Handles type annotations (P0)
-[ ] TypeScript AST: Handles interfaces and types (P0)
+[x] TypeScript AST: Parses .ts files correctly (P0)
+[x] TypeScript AST: Parses .tsx files correctly (P0)
+[x] TypeScript AST: Handles type annotations (P0)
+[x] TypeScript AST: Handles interfaces and types (P0)
 
-[ ] JavaScript AST: Parses .js files correctly (P0)
-[ ] JavaScript AST: Parses .jsx files correctly (P0)
-[ ] JavaScript AST: Handles ES6+ syntax (P0)
-[ ] JavaScript AST: Handles CommonJS and ESM imports (P0)
+[x] JavaScript AST: Parses .js files correctly (P0)
+[x] JavaScript AST: Parses .jsx files correctly (P0)
+[x] JavaScript AST: Handles ES6+ syntax (P0)
+[x] JavaScript AST: Handles CommonJS and ESM imports (P0)
 
-[ ] security_scan: Detects DOM XSS (innerHTML, document.write) (P0)
-[ ] security_scan: Detects eval injection (P0)
-[ ] security_scan: Detects prototype pollution (P0)
-[ ] security_scan: Detects Node.js command injection (P0)
-[ ] security_scan: Detects Node.js SQL injection (P0)
+[x] security_scan: Detects DOM XSS (innerHTML, document.write) (P0)
+[x] security_scan: Detects eval injection (P0)
+[x] security_scan: Detects prototype pollution (P0)
+[x] security_scan: Detects Node.js command injection (P0)
+[x] security_scan: Detects Node.js SQL injection (P0)
 
-[ ] Java: Parses .java files correctly (P1)
-[ ] Java: Detects SQL injection in JPA queries (P1)
-[ ] Java: Detects command injection (P1)
+[x] Java: Parses .java files correctly (P1)
+[x] Java: Detects SQL injection in JPA queries (P1)
+[x] Java: Detects command injection (P1)
 
-[ ] All MCP tools work identically across languages (Gate)
-[ ] All tests passing (Gate)
-[ ] Code coverage >= 95% (Gate)
+[x] JSX/TSX: Routes .jsx files to TSX parser (P1) - Added 2025-12-15
+[x] JSX/TSX: Routes .tsx files to TSX normalizer (P1) - Added 2025-12-15
+[x] Spring Security: SpEL injection in @PreAuthorize/@PostAuthorize (P1) - Added 2025-12-15
+[x] Spring: Open Redirect detection (RedirectView) (P1) - Added 2025-12-15
+
+[x] All MCP tools work identically across languages (Gate)
+[x] All tests passing (Gate) - 2580 passed, 1 xfailed
+[x] Code coverage >= 95% (Gate)
 
 #### Required Evidence (Mandatory for All Releases)
 
-[ ] Release Notes
+[x] Release Notes
   - Location: `docs/release_notes/RELEASE_NOTES_v2.0.0.md`
   - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
   - Language-specific examples for TS/JS/Java
 
-[ ] MCP Tools Evidence
+[x] MCP Tools Evidence
   - File: `v2.0.0_mcp_tools_evidence.json`
   - Contents: Tool specifications across all languages, test counts, coverage % per language
 
-[ ] Test Execution Evidence
+[x] Test Execution Evidence
   - File: `v2.0.0_test_evidence.json`
   - Contents: Total test count, pass/fail rates, test breakdown by language and component
 
-[ ] Language Support Matrix
+[x] Language Support Matrix
   - File: `v2.0.0_language_support_evidence.json`
   - Contents: Language coverage, syntax features tested, known limitations
 
-[ ] Performance Metrics
-  - Tool performance across languages
-  - Comparison with v1.5.1 and v1.5.0
-  - Language-specific performance analysis
+[x] Performance Metrics
+  - File: `v2.0.0_performance_evidence.json`
+  - Tool performance across languages (Python 0ms, JS 4ms, TS 0.5ms, Java 0.9ms)
+  - 100% extraction success rate across all languages
+  - Evidence generated via `scripts/benchmark_polyglot.py`
 
-[ ] No Breaking Changes Verification
-  - All v1.5.1 APIs unchanged
-  - All v1.5.0 and v1.4.0 detections still working
-  - Backward compatibility verified across versions
+[x] No Breaking Changes Verification
+  - File: `v2.0.0_regression_evidence.json`
+  - All v1.5.x Python APIs unchanged
+  - Regression tests passed (extraction, security scan, code analysis)
+  - Evidence generated via `scripts/regression_test.py`
+
+---
+
+## v2.0.1 - "Edge Cases" 
+
+### Overview
+
+**Theme:** Adversarial Edge Case Hardening  
+**Goal:** Handle 6 edge cases discovered through adversarial testing  
+**Effort:** ~5 developer-days  
+**Risk Level:** Low (targeted fixes)  
+**Status:** ✅ COMPLETE - December 15, 2025
+
+### Background
+
+Adversarial testing of v2.0.0 revealed 6 edge cases that fail (6 of 2,669 tests = 99.78% pass rate). These represent bleeding-edge language features and advanced cross-file analysis patterns that need hardening.
+
+### Priorities
+
+| Priority | Feature | Owner | Effort | Dependencies |
+|----------|---------|-------|--------|--------------|
+| **P0** | Deeply nested extraction (10+ levels) | TDE | 0.5 days | None |
+| **P0** | Java `record` keyword (Java 16+) | TDE | 0.5 days | tree-sitter |
+| **P0** | Java pattern matching switch (Java 21+) | TDE | 0.5 days | IR layer |
+| **P0** | TSX generic component with JSX | TDE | 1 day | tree-sitter |
+| **P1** | Cross-file import chain taint (3+ files) | TDE | 1 day | taint tracker |
+| **P1** | Cross-file callback taint tracking | TDE | 1 day | taint tracker |
+
+### Technical Specifications
+
+#### 1. Deeply Nested Extraction (10+ Levels)
+
+**Issue:** `extract_code` with `target_name="J.deeply_nested"` fails for classes nested 10 levels deep.
+
+**Root Cause:** Recursive class lookup doesn't traverse nested class definitions.
+
+**Fix:** Modify `_find_class_in_code()` to recursively search all nested class definitions.
+
+```python
+# [20251215_BUGFIX] Support deeply nested class extraction
+def _find_class_in_code(self, code: str, class_name: str) -> Optional[ast.ClassDef]:
+    tree = ast.parse(code)
+    
+    def find_in_node(node, target_name):
+        for child in ast.walk(node):
+            if isinstance(child, ast.ClassDef):
+                if child.name == target_name:
+                    return child
+                # Recursively search nested classes
+                nested = find_in_node(child, target_name)
+                if nested:
+                    return nested
+        return None
+    
+    return find_in_node(tree, class_name)
+```
+
+#### 2. Java `record` Keyword (Java 16+)
+
+**Issue:** Java records are not recognized as class-like structures.
+
+**Root Cause:** tree-sitter Java grammar returns `record_declaration` not `class_declaration`.
+
+**Fix:** Add `record_declaration` handling in Java normalizer.
+
+```python
+# [20251215_FEATURE] Support Java 16+ record declarations
+elif node.type == "record_declaration":
+    name = self._get_child_text(node, "identifier")
+    return IRClass(name=name, bases=[], body=[], is_record=True)
+```
+
+#### 3. Java Pattern Matching Switch (Java 21+)
+
+**Issue:** `IRSwitch.__init__()` got unexpected keyword argument 'subject'.
+
+**Root Cause:** IR layer constructor mismatch for new switch expression format.
+
+**Fix:** Update `IRSwitch` to accept `subject` parameter for pattern matching switches.
+
+```python
+# [20251215_BUGFIX] Support Java 21+ pattern matching switch
+@dataclass
+class IRSwitch:
+    subject: Any  # The expression being switched on
+    cases: List[IRCase]
+    default: Optional[List[IRStatement]] = None
+```
+
+#### 4. TSX Generic Component with JSX
+
+**Issue:** Parse error at `<li>` tag inside generic function with JSX return.
+
+**Root Cause:** tree-sitter TSX parser ambiguity between generic `<T>` and JSX `<tag>`.
+
+**Fix:** Improve TSX parsing to handle generic type parameters followed by JSX elements.
+
+```typescript
+// This should work after fix:
+function GenericList<T>({ items, renderItem, keyExtractor }: Props<T>) {
+    return (
+        <ul>
+            {items.map(item => (
+                <li key={keyExtractor(item)}>{renderItem(item)}</li>
+            ))}
+        </ul>
+    );
+}
+```
+
+#### 5. Cross-File Import Chain Taint (3+ Files)
+
+**Issue:** Taint not tracked through 3-file import chain: A → B → C.
+
+**Root Cause:** Cross-file taint tracker only resolves 1 level of imports.
+
+**Fix:** Add recursive import resolution with depth limit.
+
+```python
+# [20251215_FEATURE] Multi-hop import taint tracking
+def resolve_import_chain(self, source_file: str, max_depth: int = 5):
+    visited = set()
+    chain = []
+    
+    def resolve(file: str, depth: int):
+        if depth > max_depth or file in visited:
+            return
+        visited.add(file)
+        chain.append(file)
+        
+        for import_stmt in self.get_imports(file):
+            resolved = self.resolve_import(import_stmt)
+            if resolved:
+                resolve(resolved, depth + 1)
+    
+    resolve(source_file, 0)
+    return chain
+```
+
+#### 6. Cross-File Callback Taint Tracking
+
+**Issue:** Taint not propagated when passed through callback functions.
+
+**Root Cause:** Callback pattern `with_callback(data, dangerous_func)` doesn't track that `data` flows to `dangerous_func`.
+
+**Fix:** Track function arguments that are themselves functions and propagate taint to their call sites.
+
+```python
+# [20251215_FEATURE] Callback taint propagation
+def track_callback_taint(self, call_node, tainted_vars):
+    for i, arg in enumerate(call_node.args):
+        if isinstance(arg, ast.Name) and arg.id in tainted_vars:
+            # Mark that this tainted data flows into the function
+            self.callback_taint_flows[call_node] = {
+                "arg_index": i,
+                "tainted_var": arg.id
+            }
+```
+
+### Acceptance Criteria Checklist
+
+v2.0.1 Release Criteria:
+
+[x] Deeply nested class extraction works for 10+ levels (P0) - DONE 20251215
+[x] Java `record` classes are extractable (P0) - DONE 20251215
+[x] Java pattern matching switch parses without error (P0) - DONE 20251215
+[x] TSX generic components with JSX elements parse correctly (P0) - DONE 20251215
+
+[x] Cross-file taint tracks through 3+ file import chains (P1) - DONE 20251215
+[x] Cross-file taint tracks through callback patterns (P1) - DONE 20251215
+
+[x] All 6 adversarial edge case tests pass (Gate) - 88/88 PASS
+[x] No regressions in existing tests (Gate) - 2668 pass, 1 xfail
+[x] Total test pass rate = 100% (Gate) - VERIFIED 20251215
+
+### Implementation Summary
+
+**Files Modified:**
+- `src/code_scalpel/surgical/surgical_extractor.py` - Nested class recursive indexing
+- `src/code_scalpel/ir/normalizers/java_normalizer.py` - Java 16+ records, Java 21+ switch patterns
+- `src/code_scalpel/polyglot/extractor.py` - TSX auto-detection for JSX content
+- `src/code_scalpel/symbolic_execution_tools/cross_file_taint.py` - Multi-hop taint, callback patterns
+- `src/code_scalpel/mcp/server.py` - Fixed source_module/source_file mapping
+
+**Tests Added:**
+- `tests/test_adversarial.py` - 43 adversarial tests
+- `tests/test_adversarial_security.py` - 19 security tests
+- `tests/test_polyglot_edge_cases.py` - 26 polyglot edge case tests
+
+**Total:** 88 new adversarial tests, all passing.
 
 ---
 

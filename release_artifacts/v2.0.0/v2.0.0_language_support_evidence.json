@@ -1,0 +1,141 @@
+{
+  "version": "2.0.0",
+  "codename": "Polyglot",
+  "release_date": "2025-12-15",
+  "evidence_type": "language_support",
+  "languages": {
+    "python": {
+      "status": "stable",
+      "parser": "ast (stdlib)",
+      "features": {
+        "extraction": true,
+        "security_scan": true,
+        "symbolic_execution": true,
+        "pdg_analysis": true,
+        "cross_file_taint": true
+      }
+    },
+    "javascript": {
+      "status": "stable",
+      "parser": "tree-sitter-javascript",
+      "features": {
+        "extraction": true,
+        "security_scan": true,
+        "symbolic_execution": false,
+        "pdg_analysis": false,
+        "cross_file_taint": false
+      },
+      "normalizer_handlers": [
+        "function_declaration",
+        "arrow_function",
+        "class_declaration",
+        "method_definition",
+        "variable_declaration",
+        "assignment_expression",
+        "return_statement",
+        "if_statement",
+        "while_statement",
+        "for_statement",
+        "for_in_statement",
+        "call_expression",
+        "import_statement",
+        "export_statement",
+        "switch_statement",
+        "try_statement",
+        "throw_statement",
+        "conditional_expression"
+      ],
+      "security_sinks": {
+        "dom_xss": ["innerHTML", "outerHTML", "document.write", "insertAdjacentHTML", "$.html", "dangerouslySetInnerHTML"],
+        "eval_injection": ["eval", "Function", "setTimeout", "setInterval", "vm.runInThisContext", "vm.runInNewContext"],
+        "prototype_pollution": ["Object.assign", "_.merge", "_.extend", "$.extend", "merge-deep"],
+        "command_injection": ["exec", "execSync", "spawn", "spawnSync", "execFile", "shelljs.exec"],
+        "sql_injection": ["connection.query", "knex.raw", "sequelize.query", "prisma.$queryRaw", "pg.query"],
+        "ssrf": ["fetch", "axios", "got", "request", "http.get", "https.get"]
+      },
+      "taint_sources": {
+        "express": ["req.query", "req.body", "req.params", "req.headers", "req.cookies"],
+        "browser": ["location.search", "location.hash", "document.cookie", "localStorage", "sessionStorage", "window.name"]
+      },
+      "sanitizers": ["DOMPurify.sanitize", "sanitize-html", "he.encode", "escapeHtml", "mysql.escape", "pg.escapeLiteral"]
+    },
+    "typescript": {
+      "status": "stable",
+      "parser": "tree-sitter-typescript",
+      "features": {
+        "extraction": true,
+        "security_scan": true,
+        "symbolic_execution": false,
+        "pdg_analysis": false,
+        "cross_file_taint": false
+      },
+      "additional_handlers": [
+        "interface_declaration",
+        "type_alias_declaration",
+        "enum_declaration",
+        "type_annotation"
+      ],
+      "notes": "Extends JavaScript normalizer with TypeScript-specific handlers"
+    },
+    "java": {
+      "status": "stable",
+      "parser": "tree-sitter-java",
+      "features": {
+        "extraction": true,
+        "security_scan": true,
+        "symbolic_execution": false,
+        "pdg_analysis": false,
+        "cross_file_taint": false
+      },
+      "normalizer_handlers": [
+        "method_declaration",
+        "constructor_declaration",
+        "class_declaration",
+        "interface_declaration",
+        "local_variable_declaration",
+        "assignment_expression",
+        "return_statement",
+        "if_statement",
+        "while_statement",
+        "for_statement",
+        "enhanced_for_statement",
+        "method_invocation",
+        "import_declaration",
+        "package_declaration",
+        "switch_statement",
+        "try_statement",
+        "throw_statement",
+        "object_creation_expression"
+      ],
+      "security_sinks": {
+        "sql_injection": ["Statement.executeQuery", "Statement.executeUpdate", "JdbcTemplate.query", "entityManager.createNativeQuery"],
+        "command_injection": ["Runtime.exec", "ProcessBuilder.start"],
+        "xxe": ["DocumentBuilderFactory.parse", "SAXParserFactory.parse", "XMLInputFactory.createXMLStreamReader"],
+        "deserialization": ["ObjectInputStream.readObject", "XStream.fromXML", "ObjectMapper.readValue"],
+        "ssrf": ["URL.openConnection", "HttpClient.send", "RestTemplate.getForObject"]
+      },
+      "taint_sources": {
+        "servlet": ["request.getParameter", "request.getHeader", "request.getCookies", "request.getInputStream"],
+        "spring": ["@RequestParam", "@PathVariable", "@RequestBody", "@RequestHeader"]
+      },
+      "sanitizers": ["StringEscapeUtils.escapeHtml4", "Encode.forHtml", "PreparedStatement", "ESAPI.encoder"]
+    }
+  },
+  "ir_nodes": {
+    "new_in_v2": [
+      {"name": "IRImport", "description": "ES6/Python/Java import statements"},
+      {"name": "IRExport", "description": "ES6 export statements"},
+      {"name": "IRSwitch", "description": "Switch/case statements"},
+      {"name": "IRTry", "description": "Try/catch/finally blocks"},
+      {"name": "IRRaise", "description": "Throw/raise statements"},
+      {"name": "IRTernary", "description": "Ternary conditional expressions"}
+    ],
+    "existing": [
+      "IRModule", "IRFunctionDef", "IRClassDef", "IRMethodDef",
+      "IRAssignment", "IRCall", "IRIf", "IRWhile", "IRFor",
+      "IRReturn", "IRBinOp", "IRUnaryOp", "IRCompare",
+      "IRName", "IRConstant", "IRAttribute", "IRSubscript"
+    ]
+  },
+  "generated_at": "2025-12-15T00:00:00Z"
+}

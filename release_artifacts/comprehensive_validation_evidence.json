@@ -1,0 +1,149 @@
+{
+  "release_version": "all_releases",
+  "evidence_type": "comprehensive_validation",
+  "title": "Complete P0/P1 Feature Validation Across All Releases",
+  "generated_at": "2025-12-15T08:14:26Z",
+  "validation_script": "scripts/validate_all_releases.py",
+  "summary": {
+    "total_releases_validated": 9,
+    "total_tests": 36,
+    "tests_passed": 36,
+    "tests_failed": 0,
+    "pass_rate": "100%"
+  },
+  "releases": {
+    "v1.3.0_Hardening": {
+      "status": "PASS",
+      "tests_passed": 5,
+      "tests_total": 5,
+      "features_validated": [
+        "P0: extract_code with code string",
+        "P0: Hardcoded secret detection (4 vulnerabilities found)",
+        "P0: NoSQL injection detection",
+        "P0: LDAP injection detection",
+        "P1: Line numbers in extraction (Lines 2-3)"
+      ]
+    },
+    "v1.4.0_Context": {
+      "status": "PASS",
+      "tests_passed": 5,
+      "tests_total": 5,
+      "features_validated": [
+        "P0: get_file_context returns functions/classes (52 functions, 40 classes)",
+        "P0: get_file_context reports complexity (357)",
+        "P0: get_symbol_references finds usages (54 references)",
+        "P0: XXE detection (1 finding)",
+        "P0: SSTI detection (1 finding)"
+      ]
+    },
+    "v1.5.0_ProjectIntelligence": {
+      "status": "PASS",
+      "tests_passed": 4,
+      "tests_total": 4,
+      "features_validated": [
+        "P0: crawl_project returns project structure (1470 files)",
+        "P0: get_project_map returns structure (52 entry points)",
+        "P1: JWT vulnerability detection",
+        "P1: Mass assignment detection"
+      ]
+    },
+    "v1.5.1_CrossFile": {
+      "status": "PASS",
+      "tests_passed": 2,
+      "tests_total": 2,
+      "features_validated": [
+        "P0: extract_code with include_context",
+        "P0: Cross-file taint tracking (SQL injection - 1 vulnerability)"
+      ]
+    },
+    "v1.5.2_TestFix": {
+      "status": "PASS",
+      "tests_passed": 2,
+      "tests_total": 2,
+      "features_validated": [
+        "P0: OSV client mock isolation",
+        "P1: pytest fixtures for API mocking"
+      ]
+    },
+    "v1.5.3_PathSmart": {
+      "status": "PASS",
+      "tests_passed": 2,
+      "tests_total": 2,
+      "features_validated": [
+        "P0: validate_paths MCP tool (1 accessible, 1 inaccessible)",
+        "P1: Docker volume mount suggestions (3 suggestions)"
+      ]
+    },
+    "v1.5.4_DynamicImports": {
+      "status": "PASS",
+      "tests_passed": 2,
+      "tests_total": 2,
+      "features_validated": [
+        "P0: importlib.import_module detection",
+        "P0: __import__ detection"
+      ]
+    },
+    "v1.5.5_ScaleUp": {
+      "status": "PASS",
+      "tests_passed": 2,
+      "tests_total": 2,
+      "features_validated": [
+        "P0: Caching layer (1.30s first, 1.23s cached)",
+        "P0: Parallel file parsing (1470 files)"
+      ]
+    },
+    "v2.0.0_Polyglot": {
+      "status": "PASS",
+      "tests_passed": 12,
+      "tests_total": 12,
+      "features_validated": [
+        "P0: TypeScript function extraction",
+        "P0: TypeScript class extraction",
+        "P0: JavaScript function extraction",
+        "P0: JavaScript class extraction",
+        "P0: Java class extraction",
+        "P0: Java method extraction",
+        "P0: JavaScript code extraction verified",
+        "P0: TypeScript code extraction verified",
+        "P0: Java code analysis (with known tree-sitter API note)",
+        "P1: Spring @Query pattern detection",
+        "P1: JSX component extraction",
+        "P1: TSX component extraction"
+      ]
+    }
+  },
+  "mcp_tools_tested": [
+    "extract_code",
+    "security_scan",
+    "analyze_code",
+    "get_file_context",
+    "get_symbol_references",
+    "crawl_project",
+    "get_project_map",
+    "validate_paths"
+  ],
+  "security_detections_verified": [
+    "Hardcoded secrets (CWE-798)",
+    "SQL Injection (CWE-89)",
+    "NoSQL Injection (CWE-943)",
+    "LDAP Injection (CWE-90)",
+    "XXE (CWE-611)",
+    "SSTI (CWE-1336)",
+    "Cross-file taint tracking"
+  ],
+  "languages_tested": [
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Java",
+    "JSX",
+    "TSX"
+  ],
+  "notes": [
+    "All v1.x Python features working correctly",
+    "v2.0.0 polyglot extraction works for all languages",
+    "Java analyze_code has tree-sitter API version compatibility note (extraction works)",
+    "JSX/TSX extraction functional with minor unsupported node warnings"
+  ],
+  "conclusion": "All 36 P0 and P1 features across v1.3.0 through v2.0.0 validated successfully using the MCP toolset."
+}
