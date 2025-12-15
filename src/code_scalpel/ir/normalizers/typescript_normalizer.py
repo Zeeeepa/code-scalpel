@@ -17,35 +17,32 @@ The normalizer uses tree-sitter-typescript for parsing, which handles both
 
 from __future__ import annotations
 
-from typing import Any, List
-
 from ..nodes import (
-    IRModule,
     IRFunctionDef,
     IRClassDef,
-    IRParameter,
     IRExprStmt,
     IRName,
     IRCall,
     IRConstant,
     IRExpr,
-    SourceLocation,
 )
 from .javascript_normalizer import JavaScriptNormalizer
+
+# [20251215_REFACTOR] Trim unused imports and locals for lint compliance (no behavior change).
 
 
 class TypeScriptNormalizer(JavaScriptNormalizer):
     """
     Normalizes TypeScript CST (from tree-sitter) to Unified IR.
-    
+
     [20251214_FEATURE] v2.0.0 - TypeScript support extending JavaScript normalizer.
-    
+
     Extends JavaScriptNormalizer to handle TypeScript-specific syntax:
     - interface declarations
     - type aliases
     - type annotations on functions and parameters
     - generic type parameters
-    
+
     Example:
         >>> normalizer = TypeScriptNormalizer()
         >>> ir = normalizer.normalize('''
@@ -59,21 +56,21 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         ... }
         ... ''')
         >>> ir.body[0]  # Interface becomes a class-like structure
-        
+
     Tree-sitter dependency:
         Requires tree_sitter and tree_sitter_typescript packages:
         pip install tree-sitter tree-sitter-typescript
     """
-    
+
     def _ensure_parser(self) -> None:
         """Initialize tree-sitter parser for TypeScript."""
         if self._parser is not None:
             return
-            
+
         try:
             import tree_sitter_typescript as ts_ts
             from tree_sitter import Language, Parser
-            
+
             self._language = Language(ts_ts.language_typescript())
             self._parser = Parser(self._language)
         except ImportError as e:
@@ -81,21 +78,21 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                 "TypeScriptNormalizer requires tree-sitter packages. "
                 "Install with: pip install tree-sitter tree-sitter-typescript"
             ) from e
-    
+
     @property
     def language(self) -> str:
         return "typescript"
-    
+
     # =========================================================================
     # TypeScript-specific normalizers
     # =========================================================================
-    
+
     def _normalize_interface_declaration(self, node) -> IRClassDef:
         """
         Normalize TypeScript interface declaration.
-        
+
         [20251214_FEATURE] Interface -> IRClassDef representation.
-        
+
         CST structure:
             interface_declaration:
                 "interface"
@@ -106,16 +103,16 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         """
         name_node = self._child_by_field(node, "name")
         body_node = self._child_by_field(node, "body")
-        
+
         name = self._get_text(name_node) if name_node else "Anonymous"
-        
+
         # Process interface body (property signatures, method signatures)
         body = []
         if body_node:
             for child in body_node.children:
                 if not child.is_named:
                     continue
-                    
+
                 if child.type == "property_signature":
                     # Property signatures become class attributes
                     prop = self._normalize_property_signature(child)
@@ -126,7 +123,7 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                     method = self._normalize_method_signature(child)
                     if method:
                         body.append(method)
-        
+
         return self._set_language(
             IRClassDef(
                 name=name,
@@ -135,11 +132,11 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                 loc=self._make_loc(node),
             )
         )
-    
+
     def _normalize_property_signature(self, node) -> IRExprStmt | None:
         """
         Normalize interface property signature.
-        
+
         CST structure:
             property_signature:
                 name: property_identifier
@@ -148,9 +145,9 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         name_node = self._child_by_field(node, "name")
         if not name_node:
             return None
-        
+
         name = self._get_text(name_node)
-        
+
         # Create a simple name expression for the property
         return self._set_language(
             IRExprStmt(
@@ -158,11 +155,11 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                 loc=self._make_loc(node),
             )
         )
-    
+
     def _normalize_method_signature(self, node) -> IRFunctionDef | None:
         """
         Normalize interface method signature.
-        
+
         CST structure:
             method_signature:
                 name: property_identifier
@@ -171,13 +168,13 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         """
         name_node = self._child_by_field(node, "name")
         params_node = self._child_by_field(node, "parameters")
-        
+
         if not name_node:
             return None
-        
+
         name = self._get_text(name_node)
         params = self._normalize_parameters(params_node) if params_node else []
-        
+
         return self._set_language(
             IRFunctionDef(
                 name=name,
@@ -186,13 +183,13 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                 loc=self._make_loc(node),
             )
         )
-    
+
     def _normalize_type_alias_declaration(self, node) -> IRClassDef:
         """
         Normalize TypeScript type alias.
-        
+
         [20251214_FEATURE] Type alias -> IRClassDef representation.
-        
+
         CST structure:
             type_alias_declaration:
                 "type"
@@ -203,7 +200,7 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         """
         name_node = self._child_by_field(node, "name")
         name = self._get_text(name_node) if name_node else "Anonymous"
-        
+
         # Type aliases are represented as empty classes
         # The actual type is captured in metadata if needed
         return self._set_language(
@@ -219,24 +216,24 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
 class TypeScriptTSXNormalizer(TypeScriptNormalizer):
     """
     Normalizes TSX (TypeScript + JSX) CST to Unified IR.
-    
+
     [20251214_FEATURE] v2.0.0 - TSX support.
-    
+
     Extends TypeScriptNormalizer to handle JSX syntax within TypeScript:
     - JSX elements
     - JSX fragments
     - JSX expressions
     """
-    
+
     def _ensure_parser(self) -> None:
         """Initialize tree-sitter parser for TSX."""
         if self._parser is not None:
             return
-            
+
         try:
             import tree_sitter_typescript as ts_ts
             from tree_sitter import Language, Parser
-            
+
             # Use TSX language for .tsx files
             self._language = Language(ts_ts.language_tsx())
             self._parser = Parser(self._language)
@@ -245,7 +242,7 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
                 "TypeScriptTSXNormalizer requires tree-sitter packages. "
                 "Install with: pip install tree-sitter tree-sitter-typescript"
             ) from e
-    
+
     @property
     def language(self) -> str:
         return "typescriptreact"  # Match VS Code language ID
@@ -269,18 +266,21 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
         Returns:
             IRCall representing createElement(tag, props, ...children)
         """
-        open_tag = None
         tag_name = "unknown"
         children = []
 
         for child in node.children:
             if child.type == "jsx_opening_element":
-                open_tag = child
                 name_node = self._child_by_field(child, "name")
                 if name_node:
                     tag_name = self._get_text(name_node)
-            elif child.type in ("jsx_text", "jsx_expression", "jsx_element", 
-                               "jsx_self_closing_element", "jsx_fragment"):
+            elif child.type in (
+                "jsx_text",
+                "jsx_expression",
+                "jsx_element",
+                "jsx_self_closing_element",
+                "jsx_fragment",
+            ):
                 child_ir = self.normalize_node(child)
                 if child_ir:
                     children.append(child_ir)

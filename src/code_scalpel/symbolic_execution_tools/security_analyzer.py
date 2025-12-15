@@ -167,14 +167,30 @@ class SecurityAnalyzer:
     # [20251214_FEATURE] v2.0.0 - Web framework route decorators
     WEB_ROUTE_DECORATORS = {
         # Flask
-        "route", "get", "post", "put", "delete", "patch",
-        "app.route", "app.get", "app.post", "app.put", "app.delete",
-        "blueprint.route", "bp.route",
+        "route",
+        "get",
+        "post",
+        "put",
+        "delete",
+        "patch",
+        "app.route",
+        "app.get",
+        "app.post",
+        "app.put",
+        "app.delete",
+        "blueprint.route",
+        "bp.route",
         # FastAPI
-        "app.api_route", "router.get", "router.post", "router.put",
-        "router.delete", "router.patch", "router.api_route",
+        "app.api_route",
+        "router.get",
+        "router.post",
+        "router.put",
+        "router.delete",
+        "router.patch",
+        "router.api_route",
         # Django (class-based views handled separately)
-        "api_view", "action",
+        "api_view",
+        "action",
         # Starlette
         "Route",
     }
@@ -188,15 +204,15 @@ class SecurityAnalyzer:
     def _is_web_framework_route(self, func_node: ast.FunctionDef) -> bool:
         """
         [20251214_FEATURE] v2.0.0 - Check if function is a web framework route.
-        
+
         Detects:
         - Flask: @app.route, @app.get, @bp.route
         - FastAPI: @app.get, @router.post, etc.
         - Django: @api_view, @action
-        
+
         Args:
             func_node: FunctionDef AST node
-            
+
         Returns:
             True if this function appears to be a web route handler
         """
@@ -215,7 +231,7 @@ class SecurityAnalyzer:
     def _get_decorator_name(self, decorator: ast.expr) -> Optional[str]:
         """
         Extract the name of a decorator.
-        
+
         Handles:
         - @decorator
         - @decorator(args)
@@ -372,19 +388,19 @@ class SecurityAnalyzer:
     def _check_html_return(self, node: ast.Return) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Check for XSS in return statements.
-        
+
         Detects patterns like:
         - return f"<html>{user_input}</html>"
         - return "<div>" + user_input + "</div>"
-        
+
         Args:
             node: Return AST node
         """
         if not node.value:
             return
-        
+
         location = (node.lineno, node.col_offset)
-        
+
         # Check for JoinedStr (f-string)
         if isinstance(node.value, ast.JoinedStr):
             self._check_fstring_html_xss(node.value, location)
@@ -397,17 +413,17 @@ class SecurityAnalyzer:
     ) -> None:
         """
         Check f-string return for XSS vulnerability.
-        
+
         Detects: return f"<html>{tainted_var}</html>"
         """
         # Check if the f-string contains HTML-like content
         has_html = False
         tainted_vars = []
-        
+
         for value in fstring.values:
             if isinstance(value, ast.Constant) and isinstance(value.value, str):
                 # Check for HTML tags in the constant parts
-                if '<' in value.value or '>' in value.value:
+                if "<" in value.value or ">" in value.value:
                     has_html = True
             elif isinstance(value, ast.FormattedValue):
                 # Extract variable names from formatted values
@@ -415,7 +431,7 @@ class SecurityAnalyzer:
                 for var in var_names:
                     if var in self._current_taint_map:
                         tainted_vars.append(var)
-        
+
         # If we have HTML and tainted variables, flag as XSS
         if has_html and tainted_vars:
             for var in tainted_vars:
@@ -435,27 +451,27 @@ class SecurityAnalyzer:
     ) -> None:
         """
         Check string concatenation return for XSS vulnerability.
-        
+
         Detects: return "<div>" + user_input + "</div>"
         """
         if not isinstance(binop.op, ast.Add):
             return
-        
+
         # Collect all parts of the concatenation
         parts = []
         self._collect_concat_parts(binop, parts)
-        
+
         has_html = False
         tainted_vars = []
-        
+
         for part in parts:
             if isinstance(part, ast.Constant) and isinstance(part.value, str):
-                if '<' in part.value or '>' in part.value:
+                if "<" in part.value or ">" in part.value:
                     has_html = True
             elif isinstance(part, ast.Name):
                 if part.id in self._current_taint_map:
                     tainted_vars.append(part.id)
-        
+
         if has_html and tainted_vars:
             for var in tainted_vars:
                 taint_info = self._current_taint_map[var]
@@ -469,9 +485,7 @@ class SecurityAnalyzer:
                 )
                 self._taint_tracker._vulnerabilities.append(vuln)
 
-    def _collect_concat_parts(
-        self, node: ast.expr, parts: List[ast.expr]
-    ) -> None:
+    def _collect_concat_parts(self, node: ast.expr, parts: List[ast.expr]) -> None:
         """Recursively collect parts of string concatenation."""
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             self._collect_concat_parts(node.left, parts)
@@ -703,14 +717,14 @@ class SecurityAnalyzer:
     ) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Check for dangerous patterns regardless of taint.
-        
+
         These patterns are always dangerous and should be flagged even without
         explicit taint tracking:
         - subprocess.run(..., shell=True) - command injection risk
         - eval() / exec() - code injection risk
         - pickle.loads() - deserialization attack risk
         - hashlib.md5() / hashlib.sha1() - weak cryptography
-        
+
         Args:
             func_name: Name of the function being called
             node: AST Call node
@@ -721,7 +735,10 @@ class SecurityAnalyzer:
             for keyword in node.keywords:
                 if keyword.arg == "shell":
                     # Check if shell=True
-                    if isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+                    if (
+                        isinstance(keyword.value, ast.Constant)
+                        and keyword.value.value is True
+                    ):
                         self._add_dangerous_pattern_vuln(
                             sink_type=SecuritySink.SHELL_COMMAND,
                             description=f"{func_name}(shell=True) is dangerous - command injection risk",
@@ -734,23 +751,47 @@ class SecurityAnalyzer:
                             description=f"{func_name}(shell=...) with variable shell argument - verify it's not True",
                             location=location,
                         )
-        
+
         # Check for always-dangerous functions
         dangerous_funcs = {
-            "eval": (SecuritySink.EVAL, "eval() executes arbitrary code - use ast.literal_eval() for data"),
-            "exec": (SecuritySink.EVAL, "exec() executes arbitrary code - avoid if possible"),
-            "pickle.loads": (SecuritySink.DESERIALIZATION, "pickle.loads() can execute arbitrary code on untrusted data"),
-            "pickle.load": (SecuritySink.DESERIALIZATION, "pickle.load() can execute arbitrary code on untrusted data"),
-            "_pickle.loads": (SecuritySink.DESERIALIZATION, "pickle deserialization on untrusted data is dangerous"),
-            "_pickle.load": (SecuritySink.DESERIALIZATION, "pickle deserialization on untrusted data is dangerous"),
-            "yaml.load": (SecuritySink.DESERIALIZATION, "yaml.load() is unsafe - use yaml.safe_load()"),
-            "yaml.unsafe_load": (SecuritySink.DESERIALIZATION, "yaml.unsafe_load() can execute arbitrary code"),
+            "eval": (
+                SecuritySink.EVAL,
+                "eval() executes arbitrary code - use ast.literal_eval() for data",
+            ),
+            "exec": (
+                SecuritySink.EVAL,
+                "exec() executes arbitrary code - avoid if possible",
+            ),
+            "pickle.loads": (
+                SecuritySink.DESERIALIZATION,
+                "pickle.loads() can execute arbitrary code on untrusted data",
+            ),
+            "pickle.load": (
+                SecuritySink.DESERIALIZATION,
+                "pickle.load() can execute arbitrary code on untrusted data",
+            ),
+            "_pickle.loads": (
+                SecuritySink.DESERIALIZATION,
+                "pickle deserialization on untrusted data is dangerous",
+            ),
+            "_pickle.load": (
+                SecuritySink.DESERIALIZATION,
+                "pickle deserialization on untrusted data is dangerous",
+            ),
+            "yaml.load": (
+                SecuritySink.DESERIALIZATION,
+                "yaml.load() is unsafe - use yaml.safe_load()",
+            ),
+            "yaml.unsafe_load": (
+                SecuritySink.DESERIALIZATION,
+                "yaml.unsafe_load() can execute arbitrary code",
+            ),
         }
-        
+
         if func_name in dangerous_funcs:
             sink_type, description = dangerous_funcs[func_name]
             self._add_dangerous_pattern_vuln(sink_type, description, location)
-        
+
         # Check for weak cryptography (always flag, not just when used for passwords)
         weak_crypto_funcs = {
             "hashlib.md5": "MD5 is cryptographically broken - use SHA-256 or better",
@@ -760,7 +801,7 @@ class SecurityAnalyzer:
             "Crypto.Hash.MD5": "MD5 is cryptographically broken",
             "Crypto.Hash.SHA": "SHA-1 is cryptographically weak",
         }
-        
+
         if func_name in weak_crypto_funcs:
             self._add_dangerous_pattern_vuln(
                 sink_type=SecuritySink.WEAK_CRYPTO,
@@ -773,7 +814,7 @@ class SecurityAnalyzer:
     ) -> None:
         """
         Add a vulnerability for a dangerous pattern (without taint tracking).
-        
+
         Args:
             sink_type: Type of security sink
             description: Human-readable description of the issue
@@ -783,7 +824,7 @@ class SecurityAnalyzer:
         for v in self._taint_tracker.get_vulnerabilities():
             if v.sink_location == location and v.sink_type == sink_type:
                 return  # Already reported
-        
+
         vuln = Vulnerability(
             sink_type=sink_type,
             taint_source=TaintSource.UNKNOWN,

@@ -40,9 +40,12 @@ ENV PATH=/root/.local/bin:$PATH
 # Expose the MCP server port
 EXPOSE 8593
 
-# Health check for HTTP transport
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8593/sse -H "Accept: text/event-stream" || exit 1
+# [20251215_BUGFIX] Health check using dedicated /health endpoint
+# The SSE endpoint stays open indefinitely, causing health checks to timeout.
+# The health endpoint returns immediately with server status.
+# Health server runs on MCP port + 1 (8594 by default)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8594/health || exit 1
 
 # Default project root inside container
 ENV SCALPEL_ROOT=/app/code

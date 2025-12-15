@@ -106,7 +106,7 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_package_declaration(self, node: Any) -> IRImport:
         """
         package com.example.app;
-        
+
         [20251215_FEATURE] Package declarations become IRImport with is_package=True.
         """
         # package_declaration has identifier children for the package path
@@ -116,9 +116,9 @@ class JavaVisitor(TreeSitterVisitor):
                 name_parts.append(self.get_text(child))
             elif child.type == "identifier":
                 name_parts.append(self.get_text(child))
-        
+
         package_name = ".".join(name_parts) if name_parts else self.get_text(node)
-        
+
         return IRImport(
             module=package_name,
             names=[],
@@ -131,15 +131,13 @@ class JavaVisitor(TreeSitterVisitor):
         import java.util.List;
         import java.util.*;
         import static java.lang.Math.PI;
-        
+
         [20251215_FEATURE] Java imports mapped to IRImport.
         """
-        # Check for static import
-        is_static = any(c.type == "static" for c in node.children)
-        
+        # [20251215_REFACTOR] Remove unused locals while preserving import handling semantics.
         # Check for wildcard import (import x.*)
         is_star = any(c.type == "asterisk" for c in node.children)
-        
+
         # Get the import path
         module_path = ""
         for child in node.children:
@@ -147,7 +145,7 @@ class JavaVisitor(TreeSitterVisitor):
                 module_path = self.get_text(child)
             elif child.type == "identifier":
                 module_path = self.get_text(child)
-        
+
         # For "import java.util.List", module is "java.util", name is "List"
         # For "import java.util.*", module is "java.util", is_star=True
         parts = module_path.rsplit(".", 1)
@@ -157,7 +155,7 @@ class JavaVisitor(TreeSitterVisitor):
         else:
             module = module_path
             names = []
-        
+
         return IRImport(
             module=module,
             names=names,
@@ -200,7 +198,9 @@ class JavaVisitor(TreeSitterVisitor):
             bases=[],  # Java extends/implements logic could go here
             body=body,
             source_language=self.language,
-            loc=self._get_location(node),  # [20251214_FEATURE] Add location for extraction
+            loc=self._get_location(
+                node
+            ),  # [20251214_FEATURE] Add location for extraction
         )
 
     # =========================================================================
@@ -210,7 +210,7 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_record_declaration(self, node: Any) -> IRClassDef:
         """
         public record Point(int x, int y) { ... }
-        
+
         [20251215_FEATURE] Java 16+ record declarations become IRClassDef.
         Records are immutable data classes with auto-generated methods.
         """
@@ -218,22 +218,23 @@ class JavaVisitor(TreeSitterVisitor):
         name = self.get_text(name_node) if name_node else "Anonymous"
 
         body = []
-        
+
         # Record parameters become fields (in the formal_parameters node)
         params_node = node.child_by_field_name("parameters")
         if params_node:
             for child in params_node.children:
                 if child.type == "formal_parameter":
                     p_name = child.child_by_field_name("name")
-                    p_type = child.child_by_field_name("type")
                     if p_name:
                         # Create a field assignment for each record component
-                        body.append(IRAssign(
-                            targets=[IRName(id=self.get_text(p_name))],
-                            value=IRConstant(value=None),
-                            loc=self._get_location(child),
-                        ))
-        
+                        body.append(
+                            IRAssign(
+                                targets=[IRName(id=self.get_text(p_name))],
+                                value=IRConstant(value=None),
+                                loc=self._get_location(child),
+                            )
+                        )
+
         # Process body if it exists (compact constructor, methods)
         body_node = node.child_by_field_name("body")
         if body_node:
@@ -259,21 +260,25 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_compact_constructor_declaration(self, node: Any) -> IRFunctionDef:
         """
         public Point { ... }  // Compact constructor for records
-        
+
         [20251215_FEATURE] Compact constructors in Java 16+ records.
         """
         name_node = node.child_by_field_name("name")
         name = self.get_text(name_node) if name_node else "Unknown"
-        
+
         body_node = node.child_by_field_name("body")
         body_stmts = []
         if body_node:
             body_stmts = self.visit(body_node)
-        
+
         return IRFunctionDef(
             name="__init__",
             params=[],  # Compact constructors have implicit params
-            body=body_stmts if isinstance(body_stmts, list) else [body_stmts] if body_stmts else [],
+            body=(
+                body_stmts
+                if isinstance(body_stmts, list)
+                else [body_stmts] if body_stmts else []
+            ),
             return_type=name,
             source_language=self.language,
             loc=self._get_location(node),
@@ -286,12 +291,12 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_constructor_declaration(self, node: Any) -> IRFunctionDef:
         """
         public MyClass(int x, String y) { ... }
-        
+
         [20251215_FEATURE] Constructors become IRFunctionDef with name "__init__".
         """
         name_node = node.child_by_field_name("name")
         class_name = self.get_text(name_node) if name_node else "Unknown"
-        
+
         # Parameters
         params = []
         params_node = node.child_by_field_name("parameters")
@@ -302,21 +307,29 @@ class JavaVisitor(TreeSitterVisitor):
                     p_type = child.child_by_field_name("type")
                     if p_name:
                         # [20251215_BUGFIX] v2.0.0 - Use type_annotation not annotation
-                        params.append(IRParameter(
-                            name=self.get_text(p_name),
-                            type_annotation=self.get_text(p_type) if p_type else None,
-                        ))
-        
+                        params.append(
+                            IRParameter(
+                                name=self.get_text(p_name),
+                                type_annotation=(
+                                    self.get_text(p_type) if p_type else None
+                                ),
+                            )
+                        )
+
         # Body
         body_node = node.child_by_field_name("body")
         body_stmts = []
         if body_node:
             body_stmts = self.visit(body_node)
-        
+
         return IRFunctionDef(
             name="__init__",  # Use Python convention for constructors
             params=params,
-            body=body_stmts if isinstance(body_stmts, list) else [body_stmts] if body_stmts else [],
+            body=(
+                body_stmts
+                if isinstance(body_stmts, list)
+                else [body_stmts] if body_stmts else []
+            ),
             return_type=class_name,  # Constructor "returns" instance of class
             source_language=self.language,
             loc=self._get_location(node),
@@ -326,17 +339,17 @@ class JavaVisitor(TreeSitterVisitor):
         """
         private int x = 5;
         public String name, value;
-        
+
         [20251215_FEATURE] Field declarations become IRAssign statements.
         """
         assignments = []
-        
+
         for child in node.children:
             if child.type == "variable_declarator":
                 assign = self.visit(child)
                 if assign:
                     assignments.append(assign)
-        
+
         return assignments if assignments else None
 
     def visit_method_declaration(self, node: Any) -> IRFunctionDef:
@@ -369,7 +382,9 @@ class JavaVisitor(TreeSitterVisitor):
             body=body_stmts,
             return_type=None,  # TODO: Extract return type
             source_language=self.language,
-            loc=self._get_location(node),  # [20251214_FEATURE] Add location for extraction
+            loc=self._get_location(
+                node
+            ),  # [20251214_FEATURE] Add location for extraction
         )
 
     def visit_block(self, node: Any) -> List[IRNode]:
@@ -541,13 +556,13 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_try_statement(self, node: Any) -> IRTry:
         """
         try { ... } catch (Exception e) { ... } finally { ... }
-        
+
         [20251215_FEATURE] Java try/catch/finally mapped to IRTry.
         """
         body = []
         handlers = []
         finalbody = []
-        
+
         for child in node.children:
             if child.type == "block" and not handlers and not finalbody:
                 # This is the try block (first block before any catch/finally)
@@ -557,39 +572,52 @@ class JavaVisitor(TreeSitterVisitor):
                 catch_body = []
                 exc_type = None
                 exc_name = None
-                
+
                 for cc in child.children:
                     if cc.type == "catch_formal_parameter":
                         for param in cc.children:
-                            if param.type in ("type_identifier", "scoped_type_identifier"):
+                            if param.type in (
+                                "type_identifier",
+                                "scoped_type_identifier",
+                            ):
                                 exc_type = self.get_text(param)
                             elif param.type == "identifier":
                                 exc_name = self.get_text(param)
                     elif cc.type == "block":
                         catch_body = self.visit(cc)
-                
-                handlers.append({
-                    "type": exc_type,
-                    "name": exc_name,
-                    "body": catch_body if isinstance(catch_body, list) else [catch_body] if catch_body else [],
-                })
+
+                handlers.append(
+                    {
+                        "type": exc_type,
+                        "name": exc_name,
+                        "body": (
+                            catch_body
+                            if isinstance(catch_body, list)
+                            else [catch_body] if catch_body else []
+                        ),
+                    }
+                )
             elif child.type == "finally_clause":
                 for fc in child.children:
                     if fc.type == "block":
                         finalbody = self.visit(fc)
-        
+
         return IRTry(
             body=body if isinstance(body, list) else [body] if body else [],
             handlers=handlers,
             orelse=[],  # Java doesn't have try/else
-            finalbody=finalbody if isinstance(finalbody, list) else [finalbody] if finalbody else [],
+            finalbody=(
+                finalbody
+                if isinstance(finalbody, list)
+                else [finalbody] if finalbody else []
+            ),
             loc=self._get_location(node),
         )
 
     def visit_throw_statement(self, node: Any) -> IRRaise:
         """
         throw new Exception("error");
-        
+
         [20251215_FEATURE] Java throw mapped to IRRaise.
         """
         exc = None
@@ -597,7 +625,7 @@ class JavaVisitor(TreeSitterVisitor):
             if child.is_named and child.type != ";":
                 exc = self.visit(child)
                 break
-        
+
         return IRRaise(
             exc=exc,
             cause=None,
@@ -611,7 +639,7 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_switch_expression(self, node: Any) -> IRSwitch:
         """
         switch (x) { case 1: ...; default: ...; }
-        
+
         [20251215_FEATURE] Java switch mapped to IRSwitch.
         """
         return self._normalize_switch(node)
@@ -624,7 +652,7 @@ class JavaVisitor(TreeSitterVisitor):
         """Internal switch normalization."""
         discriminant = None
         cases = []
-        
+
         for child in node.children:
             if child.type == "parenthesized_expression":
                 # The switch subject: switch (x)
@@ -635,11 +663,14 @@ class JavaVisitor(TreeSitterVisitor):
             elif child.type == "switch_block":
                 # Process cases
                 for block_child in child.children:
-                    if block_child.type in ("switch_block_statement_group", "switch_rule"):
+                    if block_child.type in (
+                        "switch_block_statement_group",
+                        "switch_rule",
+                    ):
                         case_values = []
                         case_body = []
                         is_default = False
-                        
+
                         for item in block_child.children:
                             if item.type == "switch_label":
                                 label_text = self.get_text(item)
@@ -657,14 +688,14 @@ class JavaVisitor(TreeSitterVisitor):
                                         case_body.extend(stmt)
                                     else:
                                         case_body.append(stmt)
-                        
+
                         if is_default:
                             # Default case has test=None
                             cases.append((None, case_body))
                         else:
                             for cv in case_values:
                                 cases.append((cv, case_body))
-        
+
         return IRSwitch(
             discriminant=discriminant,
             cases=cases,
@@ -678,14 +709,13 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_for_statement(self, node: Any) -> IRFor:
         """
         for (int i = 0; i < n; i++) { ... }
-        
+
         [20251215_FEATURE] Java for loops mapped to IRFor.
         """
         init = None
         condition = None
-        update = None
         body = []
-        
+
         for child in node.children:
             if child.type == "local_variable_declaration":
                 init = self.visit(child)
@@ -694,10 +724,10 @@ class JavaVisitor(TreeSitterVisitor):
             elif child.type == "binary_expression" and condition is None:
                 condition = self.visit(child)
             elif child.type == "update_expression":
-                update = self.visit(child)
+                self.visit(child)
             elif child.type in ("block", "expression_statement"):
                 body = self.visit(child)
-        
+
         return IRFor(
             target=init.targets[0] if isinstance(init, IRAssign) else IRName(id="_"),
             iter=condition,  # Condition acts as iteration bound
@@ -709,22 +739,26 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_enhanced_for_statement(self, node: Any) -> IRFor:
         """
         for (String item : items) { ... }
-        
+
         [20251215_FEATURE] Java enhanced for (foreach) loops.
         """
         target = None
         iterable = None
         body = []
-        
+
         for child in node.children:
             if child.type == "identifier" and target is None:
                 target = IRName(id=self.get_text(child))
-            elif child.is_named and child.type not in ("type_identifier", "block", "identifier"):
+            elif child.is_named and child.type not in (
+                "type_identifier",
+                "block",
+                "identifier",
+            ):
                 if iterable is None:
                     iterable = self.visit(child)
             elif child.type == "block":
                 body = self.visit(child)
-        
+
         return IRFor(
             target=target or IRName(id="_"),
             iter=iterable,
@@ -736,18 +770,18 @@ class JavaVisitor(TreeSitterVisitor):
     def visit_update_expression(self, node: Any) -> IRAssign:
         """
         i++ or ++i
-        
+
         [20251215_FEATURE] Update expressions become augmented assignments.
         """
         operand = None
         operator = None
-        
+
         for child in node.children:
             if child.type == "identifier":
                 operand = IRName(id=self.get_text(child))
             elif child.type in ("++", "--"):
                 operator = self.get_text(child)
-        
+
         if operand:
             # i++ becomes i = i + 1
             op = BinaryOperator.ADD if operator == "++" else BinaryOperator.SUB
@@ -761,20 +795,20 @@ class JavaVisitor(TreeSitterVisitor):
         """
         new ArrayList<>()
         new Exception("error")
-        
+
         [20251215_FEATURE] Object creation becomes IRCall.
         """
         type_node = node.child_by_field_name("type")
         args_node = node.child_by_field_name("arguments")
-        
+
         type_name = self.get_text(type_node) if type_node else "Object"
-        
+
         args = []
         if args_node:
             for child in args_node.children:
                 if child.is_named:
                     args.append(self.visit(child))
-        
+
         return IRCall(
             func=IRName(id=type_name),
             args=args,

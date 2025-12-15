@@ -63,8 +63,6 @@ Example (Custom Sanitizer):
     ... )
 """
 
-import warnings
-
 from .constraint_solver import ConstraintSolver
 from .engine import SymbolicExecutionEngine, SymbolicAnalyzer
 
@@ -91,6 +89,15 @@ from .security_analyzer import (
     find_xss,
     find_command_injections,
     find_path_traversals,
+)
+
+import warnings
+
+# [20251215_REFACTOR] Move warning configuration after imports to satisfy import-order lint rules.
+warnings.filterwarnings(
+    "ignore",
+    message="ast.(Num|Str) is deprecated and will be removed in Python 3.14",
+    category=DeprecationWarning,
 )
 
 # [20251213_FEATURE] v1.5.1: Cross-File Taint Analysis

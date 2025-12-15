@@ -6,8 +6,17 @@ These tests use obviously fake/example credentials that are documented as safe:
 - Clearly fake patterns that won't trigger secret scanners
 """
 
+import warnings
+
 from code_scalpel.symbolic_execution_tools.security_analyzer import SecurityAnalyzer
 from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+
+# [20251215_TEST] Suppress ast.Str deprecation during legacy coverage check
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    message=r".*ast\.Str is deprecated.*",
+)
 
 
 def test_aws_key_detection():
@@ -275,7 +284,11 @@ def test_deprecated_ast_str_node():
     scanner = SecretScanner()
 
     # Create a fake ast.Str node
-    str_node = ast.Str(s="AKIAIOSFODNN7EXAMPLE")
+    with warnings.catch_warnings():
+        # [20251215_TEST] Allow legacy ast.Str construction under -W error
+        warnings.simplefilter("ignore", category=DeprecationWarning)
+        str_node = ast.Str(s="AKIAIOSFODNN7EXAMPLE")
+
     str_node.lineno = 1
     str_node.col_offset = 0
 

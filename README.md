@@ -3,37 +3,39 @@
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-2530%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](release_artifacts/v1.5.4/coverage_20251214.xml)
+[![Tests](https://img.shields.io/badge/tests-2580%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](release_artifacts/v2.0.0/)
 
 **MCP Server Toolkit for AI Agents**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
 ```bash
-pip install code-scalpel==1.5.4
+pip install code-scalpel==2.0.0
 ```
 
-> **v1.5.2 STABLE RELEASE** (December 14, 2025)  
-> Test Infrastructure Improvements with **pytest fixtures for test isolation**.
+> **v2.0.0 "POLYGLOT" RELEASE** (December 15, 2025)  
+> Multi-Language Support + Advanced MCP Protocol Features
 >
 > | Component | Status | Notes |
 > |-----------|--------|-------|
-> | Security Scanning | **100%** (16 types) | SQL, XSS, NoSQL, LDAP, SSTI, XXE + more |
+> | Languages | **4** | Python, TypeScript, JavaScript, Java |
+> | Security Scanning | **17+ types** | SQL, XSS, NoSQL, LDAP, DOM XSS, Prototype Pollution |
 > | Cross-File Analysis | **STABLE** | Import resolution, taint tracking, extraction |
-> | Test Fixtures | **NEW** | 6 fixtures for OSV client test isolation |
-> | Pytest Integration | **IMPROVED** | 28 @patch decorators replaced with fixtures |
+> | MCP Protocol | **COMPLETE** | Health endpoint, Progress tokens, Roots capability |
+> | Token Efficiency | **99%** | Surgical extraction vs full file |
+> | Performance | **20,000+ LOC/sec** | Project-wide analysis |
 > | MCP Tools | **15 tools** | analyze, extract, security, test-gen, cross-file |
 >
-> **What's New in v1.5.2:**
-> - `conftest.py` - Centralized pytest fixture suite for test isolation
-> - Function-scoped fixtures for mock lifecycle management
-> - 85% reduction in test boilerplate code
-> - Isolated/paired test execution: **100% pass rate** (56 OSV + 27 scan_deps = 83 tests)
-> - Comprehensive evidence documentation for v1.5.3 full-suite investigation
-> - [20251214_FEATURE] v1.5.2 - Pytest fixtures for OSV client test isolation
+> **What's New in v2.0.0:**
+> - **Multi-Language**: TypeScript, JavaScript, Java extraction and security scanning
+> - **Health Endpoint**: `/health` for Docker container monitoring (port 8594)
+> - **Progress Tokens**: Real-time progress for `crawl_project`, `cross_file_security_scan`
+> - **Roots Capability**: Workspace discovery via `ctx.list_roots()`
+> - **Windows Path Support**: Full backslash handling across all tools
+> - **Best-in-Class Validated**: F1=1.0 security detection, 99% token reduction
 >
-> See [RELEASE_NOTES_v1.5.2.md](docs/release_notes/RELEASE_NOTES_v1.5.2.md) for technical details.
+> See [RELEASE_NOTES_v2.0.0.md](docs/release_notes/RELEASE_NOTES_v2.0.0.md) for technical details.
 
 ---
 

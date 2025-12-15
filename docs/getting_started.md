@@ -6,12 +6,14 @@ Welcome to Code Scalpel! This guide will help you get up and running with MCP-po
 
 Code Scalpel is an **MCP server toolkit** designed for AI agents (Claude, Copilot, Cursor) to perform surgical code operations. It provides:
 
-- **MCP Server** - 8 tools for AI agents via Model Context Protocol
+- **MCP Server** - 15 tools for AI agents via Model Context Protocol
+- **Multi-Language Support** - Python, TypeScript, JavaScript, Java (v2.0.0+)
 - **AST Analysis** - Parse and analyze code structure (100% coverage)
 - **PDG Analysis** - Build Program Dependence Graphs for data/control flow (100% coverage)
-- **Security Analysis** - Detect 15+ vulnerability types including SQLi, NoSQL injection, LDAP injection, XSS, and 30+ secret patterns
+- **Security Analysis** - Detect 17+ vulnerability types including SQLi, NoSQL injection, DOM XSS, Prototype Pollution, and 30+ secret patterns
 - **Symbolic Execution** - Explore all execution paths with Z3 constraint solver
-- **Surgical Tools** - Token-efficient extraction and safe modification
+- **Surgical Tools** - 99% token-efficient extraction and safe modification
+- **MCP Protocol** - Health endpoint, progress tokens, roots capability (v2.0.0+)
 
 ## Installation
 
@@ -27,6 +29,17 @@ pip install code-scalpel
 git clone https://github.com/tescolopio/code-scalpel.git
 cd code-scalpel
 pip install -e .
+```
+
+### Docker (v2.0.0+)
+
+```bash
+# Pull and run with health check
+docker run -p 8593:8593 -p 8594:8594 code-scalpel:2.0.0
+
+# Verify health
+curl http://localhost:8594/health
+```
 ```
 
 ### With Optional Dependencies

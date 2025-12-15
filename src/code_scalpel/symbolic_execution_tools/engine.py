@@ -355,9 +355,7 @@ class SymbolicAnalyzer:
         variable_names = list(state_vars.keys())
 
         # Check satisfiability
-        solver_result = self._solver.solve(
-            constraints, variables_list, variable_names
-        )
+        solver_result = self._solver.solve(constraints, variables_list, variable_names)
 
         if solver_result.status == SolverStatus.SAT:
             # Extract variable values (already marshaled to Python natives)

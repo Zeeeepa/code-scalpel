@@ -357,7 +357,9 @@ class ImportResolver:
                 python_files, parse_fn=_parse_for_imports
             )
             for err_path in parse_errors:
-                self._warnings.append(f"Error analyzing {err_path}: parallel parse failed")
+                self._warnings.append(
+                    f"Error analyzing {err_path}: parallel parse failed"
+                )
 
             for file_path in python_files:
                 parsed_entry = parsed.get(str(file_path.resolve()))

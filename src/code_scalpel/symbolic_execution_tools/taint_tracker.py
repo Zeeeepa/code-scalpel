@@ -342,22 +342,40 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Sanitizers
     # ==========================================================================
     # DOM XSS Sanitizers
-    "DOMPurify.sanitize": SanitizerInfo("DOMPurify.sanitize", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "sanitize-html": SanitizerInfo("sanitize-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "DOMPurify.sanitize": SanitizerInfo(
+        "DOMPurify.sanitize", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
+    "sanitize-html": SanitizerInfo(
+        "sanitize-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
     "xss": SanitizerInfo("xss", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "xss-filters": SanitizerInfo("xss-filters", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "he.encode": SanitizerInfo("he.encode", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "he.escape": SanitizerInfo("he.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "escape-html": SanitizerInfo("escape-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "validator.escape": SanitizerInfo("validator.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "xss-filters": SanitizerInfo(
+        "xss-filters", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
+    "he.encode": SanitizerInfo(
+        "he.encode", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
+    "he.escape": SanitizerInfo(
+        "he.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
+    "escape-html": SanitizerInfo(
+        "escape-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
+    "validator.escape": SanitizerInfo(
+        "validator.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
+    ),
     "textContent": SanitizerInfo("textContent", {SecuritySink.DOM_XSS}),  # Safe DOM API
     "innerText": SanitizerInfo("innerText", {SecuritySink.DOM_XSS}),  # Safe DOM API
-    "createTextNode": SanitizerInfo("createTextNode", {SecuritySink.DOM_XSS}),  # Safe DOM API
+    "createTextNode": SanitizerInfo(
+        "createTextNode", {SecuritySink.DOM_XSS}
+    ),  # Safe DOM API
     # SQL Sanitizers (Node.js)
     "mysql.escape": SanitizerInfo("mysql.escape", {SecuritySink.SQL_QUERY}),
     "mysql2.escape": SanitizerInfo("mysql2.escape", {SecuritySink.SQL_QUERY}),
     "pg.escapeLiteral": SanitizerInfo("pg.escapeLiteral", {SecuritySink.SQL_QUERY}),
-    "pg.escapeIdentifier": SanitizerInfo("pg.escapeIdentifier", {SecuritySink.SQL_QUERY}),
+    "pg.escapeIdentifier": SanitizerInfo(
+        "pg.escapeIdentifier", {SecuritySink.SQL_QUERY}
+    ),
     "sqlstring.escape": SanitizerInfo("sqlstring.escape", {SecuritySink.SQL_QUERY}),
     # Path Sanitizers (Node.js)
     "path.basename": SanitizerInfo("path.basename", {SecuritySink.FILE_PATH}),
@@ -365,7 +383,9 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "sanitize-filename": SanitizerInfo("sanitize-filename", {SecuritySink.FILE_PATH}),
     # Shell Sanitizers (Node.js)
     "shell-escape": SanitizerInfo("shell-escape", {SecuritySink.SHELL_COMMAND}),
-    "shell-quote.quote": SanitizerInfo("shell-quote.quote", {SecuritySink.SHELL_COMMAND}),
+    "shell-quote.quote": SanitizerInfo(
+        "shell-quote.quote", {SecuritySink.SHELL_COMMAND}
+    ),
     # URL Sanitizers
     "encodeURIComponent": SanitizerInfo("encodeURIComponent", {SecuritySink.SSRF}),
     "encodeURI": SanitizerInfo("encodeURI", {SecuritySink.SSRF}),
@@ -376,7 +396,9 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "Boolean": SanitizerInfo("Boolean", set(), full_clear=True),
     # JSON parse with validation
     "JSON.parse": SanitizerInfo("JSON.parse", set()),  # Not a sanitizer by itself
-    "ajv.validate": SanitizerInfo("ajv.validate", {SecuritySink.DESERIALIZATION}),  # Schema validation
+    "ajv.validate": SanitizerInfo(
+        "ajv.validate", {SecuritySink.DESERIALIZATION}
+    ),  # Schema validation
     "joi.validate": SanitizerInfo("joi.validate", {SecuritySink.DESERIALIZATION}),
     "yup.validate": SanitizerInfo("yup.validate", {SecuritySink.DESERIALIZATION}),
     "zod.parse": SanitizerInfo("zod.parse", {SecuritySink.DESERIALIZATION}),
@@ -384,25 +406,54 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     # [20251215_FEATURE] v2.0.0 - Java Sanitizers
     # ==========================================================================
     # XSS Sanitizers
-    "StringEscapeUtils.escapeHtml4": SanitizerInfo("StringEscapeUtils.escapeHtml4", {SecuritySink.HTML_OUTPUT}),
-    "HtmlUtils.htmlEscape": SanitizerInfo("HtmlUtils.htmlEscape", {SecuritySink.HTML_OUTPUT}),  # Spring
-    "OWASP.encoder": SanitizerInfo("OWASP.encoder", {SecuritySink.HTML_OUTPUT, SecuritySink.DOM_XSS}),
-    "Encode.forHtml": SanitizerInfo("Encode.forHtml", {SecuritySink.HTML_OUTPUT}),  # OWASP Java Encoder
-    "Encode.forJavaScript": SanitizerInfo("Encode.forJavaScript", {SecuritySink.DOM_XSS}),
+    "StringEscapeUtils.escapeHtml4": SanitizerInfo(
+        "StringEscapeUtils.escapeHtml4", {SecuritySink.HTML_OUTPUT}
+    ),
+    "HtmlUtils.htmlEscape": SanitizerInfo(
+        "HtmlUtils.htmlEscape", {SecuritySink.HTML_OUTPUT}
+    ),  # Spring
+    "OWASP.encoder": SanitizerInfo(
+        "OWASP.encoder", {SecuritySink.HTML_OUTPUT, SecuritySink.DOM_XSS}
+    ),
+    "Encode.forHtml": SanitizerInfo(
+        "Encode.forHtml", {SecuritySink.HTML_OUTPUT}
+    ),  # OWASP Java Encoder
+    "Encode.forJavaScript": SanitizerInfo(
+        "Encode.forJavaScript", {SecuritySink.DOM_XSS}
+    ),
     "Encode.forCssString": SanitizerInfo("Encode.forCssString", {SecuritySink.DOM_XSS}),
     # SQL Sanitizers (parameterized queries)
-    "PreparedStatement.setString": SanitizerInfo("PreparedStatement.setString", {SecuritySink.SQL_QUERY}),
-    "PreparedStatement.setInt": SanitizerInfo("PreparedStatement.setInt", {SecuritySink.SQL_QUERY}),
-    "PreparedStatement.setObject": SanitizerInfo("PreparedStatement.setObject", {SecuritySink.SQL_QUERY}),
+    "PreparedStatement.setString": SanitizerInfo(
+        "PreparedStatement.setString", {SecuritySink.SQL_QUERY}
+    ),
+    "PreparedStatement.setInt": SanitizerInfo(
+        "PreparedStatement.setInt", {SecuritySink.SQL_QUERY}
+    ),
+    "PreparedStatement.setObject": SanitizerInfo(
+        "PreparedStatement.setObject", {SecuritySink.SQL_QUERY}
+    ),
     # Path Sanitizers
-    "FilenameUtils.getName": SanitizerInfo("FilenameUtils.getName", {SecuritySink.FILE_PATH}),
-    "Paths.get": SanitizerInfo("Paths.get", set()),  # Not a sanitizer, but commonly used
+    "FilenameUtils.getName": SanitizerInfo(
+        "FilenameUtils.getName", {SecuritySink.FILE_PATH}
+    ),
+    "Paths.get": SanitizerInfo(
+        "Paths.get", set()
+    ),  # Not a sanitizer, but commonly used
     # XXE Safe Parsers
-    "DocumentBuilderFactory.setFeature": SanitizerInfo("DocumentBuilderFactory.setFeature", {SecuritySink.XXE}),
-    "SAXParserFactory.setFeature": SanitizerInfo("SAXParserFactory.setFeature", {SecuritySink.XXE}),
+    "DocumentBuilderFactory.setFeature": SanitizerInfo(
+        "DocumentBuilderFactory.setFeature", {SecuritySink.XXE}
+    ),
+    "SAXParserFactory.setFeature": SanitizerInfo(
+        "SAXParserFactory.setFeature", {SecuritySink.XXE}
+    ),
     # Input validation
-    "StringUtils.isNumeric": SanitizerInfo("StringUtils.isNumeric", set(), full_clear=True),
-    "StringUtils.isAlphanumeric": SanitizerInfo("StringUtils.isAlphanumeric", {SecuritySink.SQL_QUERY, SecuritySink.SHELL_COMMAND}),
+    "StringUtils.isNumeric": SanitizerInfo(
+        "StringUtils.isNumeric", set(), full_clear=True
+    ),
+    "StringUtils.isAlphanumeric": SanitizerInfo(
+        "StringUtils.isAlphanumeric",
+        {SecuritySink.SQL_QUERY, SecuritySink.SHELL_COMMAND},
+    ),
     "Integer.parseInt": SanitizerInfo("Integer.parseInt", set(), full_clear=True),
     "Long.parseLong": SanitizerInfo("Long.parseLong", set(), full_clear=True),
     "UUID.fromString": SanitizerInfo("UUID.fromString", set(), full_clear=True),
@@ -893,7 +944,7 @@ class Vulnerability:
     def description(self) -> str:
         """
         [20251214_FEATURE] v2.0.0 - Generate human-readable vulnerability description.
-        
+
         Returns a description that explains:
         - What kind of vulnerability was found
         - Where the tainted data came from
@@ -912,7 +963,7 @@ class Vulnerability:
                     flow_desc = f"'{self.taint_path[0]}' flows through {middle} to {self.taint_path[-1]}"
         else:
             flow_desc = "Dangerous pattern detected"
-        
+
         # Source description - use actual TaintSource enum values
         source_desc = {
             TaintSource.USER_INPUT: "user input",
@@ -923,7 +974,7 @@ class Vulnerability:
             TaintSource.HARDCODED: "hardcoded value",
             TaintSource.UNKNOWN: "untrusted data",
         }.get(self.taint_source, "tainted data")
-        
+
         # Build final description
         if self.taint_source == TaintSource.UNKNOWN and len(self.taint_path) == 1:
             # Likely a dangerous pattern without taint tracking
@@ -974,12 +1025,14 @@ class Vulnerability:
             # [20251215_FEATURE] v2.0.0 P1 - Additional recommendations
             SecuritySink.REDIRECT: "Validate redirect URLs against allowlist, use relative paths, or verify same-origin",
         }
-        return recommendations.get(self.sink_type, "Review the code for potential security issues")
+        return recommendations.get(
+            self.sink_type, "Review the code for potential security issues"
+        )
 
     def _calculate_severity(self) -> str:
         """
         [20251214_FEATURE] v2.0.0 - Calculate vulnerability severity.
-        
+
         Based on:
         - Sink type (some are more dangerous than others)
         - Whether sanitizers were bypassed
@@ -998,7 +1051,7 @@ class Vulnerability:
             SecuritySink.XXE,
             SecuritySink.SSTI,
         }
-        
+
         if self.sink_type in high_risk_sinks:
             return "high"
         elif self.sink_type == SecuritySink.HARDCODED_SECRET:
@@ -1067,9 +1120,6 @@ TAINT_SOURCE_PATTERNS: Dict[str, TaintSource] = {
     "req.cookies": TaintSource.USER_INPUT,
     "req.get": TaintSource.USER_INPUT,
     "req.param": TaintSource.USER_INPUT,
-    "request.query": TaintSource.USER_INPUT,
-    "request.body": TaintSource.USER_INPUT,
-    "request.params": TaintSource.USER_INPUT,
     # Koa.js
     "ctx.query": TaintSource.USER_INPUT,
     "ctx.request.body": TaintSource.USER_INPUT,
@@ -1185,7 +1235,6 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "Markup": SecuritySink.HTML_OUTPUT,
     "flask.Markup": SecuritySink.HTML_OUTPUT,
     "markupsafe.Markup": SecuritySink.HTML_OUTPUT,
-    "innerHTML": SecuritySink.HTML_OUTPUT,
     # File paths
     "open": SecuritySink.FILE_PATH,
     "os.path.join": SecuritySink.FILE_PATH,
@@ -1316,6 +1365,7 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "genshi.template.MarkupTemplate": SecuritySink.SSTI,
     # ==========================================================================
     # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Security Sinks
+    # [20251215_BUGFIX] Deduplicate overlapping sink keys across languages.
     # ==========================================================================
     # DOM XSS - Direct DOM manipulation with user input (CWE-79)
     "innerHTML": SecuritySink.DOM_XSS,
@@ -1334,7 +1384,6 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "v-html": SecuritySink.DOM_XSS,  # Vue.js
     "[innerHTML]": SecuritySink.DOM_XSS,  # Angular
     # JavaScript Eval Injection (CWE-94)
-    "eval": SecuritySink.EVAL,
     "Function": SecuritySink.EVAL,
     "new Function": SecuritySink.EVAL,
     "setTimeout": SecuritySink.EVAL,  # When called with string argument
@@ -1365,8 +1414,6 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "child_process.execFile": SecuritySink.SHELL_COMMAND,
     "child_process.execFileSync": SecuritySink.SHELL_COMMAND,
     "child_process.fork": SecuritySink.SHELL_COMMAND,
-    "exec": SecuritySink.SHELL_COMMAND,
-    "execSync": SecuritySink.SHELL_COMMAND,
     "spawn": SecuritySink.SHELL_COMMAND,
     "spawnSync": SecuritySink.SHELL_COMMAND,
     "shelljs.exec": SecuritySink.SHELL_COMMAND,
@@ -1429,7 +1476,6 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "serialize-javascript": SecuritySink.DESERIALIZATION,
     "node-serialize.unserialize": SecuritySink.DESERIALIZATION,
     "js-yaml.load": SecuritySink.DESERIALIZATION,
-    "yaml.load": SecuritySink.DESERIALIZATION,
     "flatted.parse": SecuritySink.DESERIALIZATION,
     # ==========================================================================
     # [20251215_FEATURE] v2.0.0 - Java Security Sinks

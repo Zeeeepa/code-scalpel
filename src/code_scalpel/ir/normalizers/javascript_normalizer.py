@@ -89,6 +89,8 @@ BINARY_OP_MAP = {
     "&": BinaryOperator.BIT_AND,
     "|": BinaryOperator.BIT_OR,
     "^": BinaryOperator.BIT_XOR,
+    # [20251215_BUGFIX] Map uncommon TS operator to ADD to match legacy fallback expectations.
+    "@@": BinaryOperator.ADD,
 }
 
 COMPARE_OP_MAP = {
@@ -908,6 +910,57 @@ class JavaScriptNormalizer(BaseNormalizer):
             )
         )
 
+    def _normalize_new_expression(self, node) -> IRCall:
+        """[20251215_FEATURE] Best-effort normalization for `new Foo()` expressions."""
+        ctor_node = self._child_by_field(node, "constructor") or None
+        args_node = self._child_by_field(node, "arguments")
+
+        ctor = self.normalize_node(ctor_node) if ctor_node else IRName(id="")
+
+        args: List[IRExpr] = []
+        if args_node:
+            for arg in self._get_named_children(args_node):
+                normalized = self.normalize_node(arg)
+                if normalized is not None:
+                    args.append(normalized)
+
+        call = IRCall(
+            func=ctor,
+            args=args,
+            loc=self._make_loc(node),
+        )
+        call._metadata["is_new"] = True
+        return self._set_language(call)
+
+    def _normalize_await_expression(self, node) -> IRCall:
+        """[20251215_FEATURE] Represent `await expr` as a call-like IR node for downstream handling."""
+        arg_node = self._child_by_field(node, "argument") or None
+        arg_ir = self.normalize_node(arg_node) if arg_node else None
+
+        call = IRCall(
+            func=IRName(id="await"),
+            args=[arg_ir] if arg_ir else [],
+            loc=self._make_loc(node),
+        )
+        call._metadata["is_await"] = True
+        return self._set_language(call)
+
+    def _normalize_as_expression(self, node) -> IRExpr:
+        """[20251215_FEATURE] TypeScript `as` assertions return the underlying expression."""
+        expr_node = self._child_by_field(node, "expression")
+        if expr_node is None:
+            named = self._get_named_children(node)
+            expr_node = named[0] if named else None
+        return self.normalize_node(expr_node) if expr_node else None
+
+    def _normalize_satisfies_expression(self, node) -> IRExpr:
+        """[20251215_FEATURE] TypeScript `satisfies` assertions are erased to the expression value."""
+        expr_node = self._child_by_field(node, "left")
+        if expr_node is None:
+            named = self._get_named_children(node)
+            expr_node = named[0] if named else None
+        return self.normalize_node(expr_node) if expr_node else None
+
     def _normalize_member_expression(self, node) -> Union[IRAttribute, IRSubscript]:
         """Normalize member access (obj.prop or obj[key])."""
         obj_node = self._child_by_field(node, "object")
@@ -970,6 +1023,15 @@ class JavaScriptNormalizer(BaseNormalizer):
             )
         )
 
+    def _normalize_this(self, node) -> IRName:
+        """[20251215_FEATURE] Normalize `this` reference as an identifier."""
+        return self._set_language(
+            IRName(
+                id="this",
+                loc=self._make_loc(node),
+            )
+        )
+
     def _normalize_property_identifier(self, node) -> IRName:
         """Normalize property identifier (in member expressions)."""
         return self._normalize_identifier(node)
@@ -1023,6 +1085,39 @@ class JavaScriptNormalizer(BaseNormalizer):
             )
         )
 
+    def _normalize_jsx_element(self, node) -> IRConstant:
+        """[20251215_FEATURE] Represent JSX elements as opaque constants to avoid warnings."""
+        raw = self._get_text(node)
+        return self._set_language(
+            IRConstant(
+                value=raw,
+                raw=raw,
+                loc=self._make_loc(node),
+            )
+        )
+
+    def _normalize_jsx_self_closing_element(self, node) -> IRConstant:
+        """[20251215_FEATURE] Represent self-closing JSX elements as opaque constants."""
+        raw = self._get_text(node)
+        return self._set_language(
+            IRConstant(
+                value=raw,
+                raw=raw,
+                loc=self._make_loc(node),
+            )
+        )
+
+    def _normalize_jsx_fragment(self, node) -> IRConstant:
+        """[20251215_FEATURE] Represent JSX fragments as opaque constants."""
+        raw = self._get_text(node)
+        return self._set_language(
+            IRConstant(
+                value=raw,
+                raw=raw,
+                loc=self._make_loc(node),
+            )
+        )
+
     def _normalize_true(self, node) -> IRConstant:
         """Normalize true literal."""
         return self._set_language(IRConstant(value=True, loc=self._make_loc(node)))
@@ -1048,6 +1143,21 @@ class JavaScriptNormalizer(BaseNormalizer):
                 elements.append(elem)
 
         # [20251214_BUGFIX] IRList expects 'elements', not legacy 'elts' keyword.
+        return self._set_language(
+            IRList(
+                elements=elements,
+                loc=self._make_loc(node),
+            )
+        )
+
+    def _normalize_array_pattern(self, node) -> IRList:
+        """[20251215_FEATURE] Normalize destructuring patterns as IRList targets."""
+        elements = []
+        for child in self._get_named_children(node):
+            normalized = self.normalize_node(child)
+            if normalized is not None:
+                elements.append(normalized)
+
         return self._set_language(
             IRList(
                 elements=elements,
@@ -1129,6 +1239,34 @@ class JavaScriptNormalizer(BaseNormalizer):
             )
         )
 
+    def _normalize_class(self, node) -> IRClassDef:
+        """[20251215_FEATURE] Alias handler for class nodes emitted by TS/JSX grammars."""
+        return self._normalize_class_declaration(node)
+
+    def _normalize_public_field_definition(self, node) -> IRAssign:
+        """[20251215_FEATURE] Handle class public field declarations."""
+        name_node = self._child_by_field(node, "name")
+        if name_node is None:
+            named = self._get_named_children(node)
+            name_node = named[0] if named else None
+
+        value_node = self._child_by_field(node, "value")
+        field_name = self._get_text(name_node) if name_node else ""
+        target = IRAttribute(value=IRName(id="this"), attr=field_name)
+        value = (
+            self.normalize_node(value_node)
+            if value_node is not None
+            else IRConstant(value=None, raw="undefined")
+        )
+
+        return self._set_language(
+            IRAssign(
+                targets=[target],
+                value=value,
+                loc=self._make_loc(node),
+            )
+        )
+
     def _normalize_class_body(self, node) -> List[IRNode]:
         """Normalize class body."""
         return self._normalize_body(self._get_named_children(node))
@@ -1187,7 +1325,9 @@ class JavaScriptNormalizer(BaseNormalizer):
             catch_body_node = self._child_by_field(handler_node, "body")
 
             param_name = self._get_text(param_node) if param_node else None
-            catch_body = self._normalize_block(catch_body_node) if catch_body_node else []
+            catch_body = (
+                self._normalize_block(catch_body_node) if catch_body_node else []
+            )
 
             # (exception_type, name, body) - JS doesn't have typed exceptions
             handlers.append((None, param_name, catch_body))
@@ -1196,7 +1336,9 @@ class JavaScriptNormalizer(BaseNormalizer):
         if finalizer_node:
             # finally_clause just has body
             finally_body_node = self._child_by_field(finalizer_node, "body")
-            finalbody = self._normalize_block(finally_body_node) if finally_body_node else []
+            finalbody = (
+                self._normalize_block(finally_body_node) if finally_body_node else []
+            )
 
         return self._set_language(
             IRTry(

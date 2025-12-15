@@ -49,11 +49,35 @@ Create `.vscode/mcp.json` in your workspace:
 For team or remote deployment:
 
 ```bash
-# Start HTTP server
-docker run -p 8593:8593 -v /path/to/project:/app/code code-scalpel
+# Start HTTP server with SSE (port 8593) and health endpoint (port 8594)
+docker run -p 8593:8593 -p 8594:8594 -v /path/to/project:/app/code code-scalpel:2.0.0
 
 # Or directly
 code-scalpel mcp --http --port 8593 --allow-lan
+```
+
+**Health Check (v2.0.0+)**:
+```bash
+# Verify container is healthy
+curl http://localhost:8594/health
+# {"status": "healthy", "version": "2.0.0", "timestamp": "2025-12-15T12:00:00Z"}
+```
+
+**Docker Compose** (recommended for production):
+```yaml
+services:
+  code-scalpel:
+    image: code-scalpel:2.0.0
+    ports:
+      - "8593:8593"  # SSE endpoint
+      - "8594:8594"  # Health endpoint
+    volumes:
+      - ./:/app/code
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8594/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 ```
 
 ## Available Tools
@@ -62,10 +86,12 @@ code-scalpel mcp --http --port 8593 --allow-lan
 
 **Purpose**: Extract specific code elements without sending entire files.
 
-**Token Savings**: Instead of sending a 5000-line file (~50k tokens), send only the function you need (~200 tokens).
+**Token Savings**: Instead of sending a 5000-line file (~50k tokens), send only the function you need (~200 tokens). **Validated: 99% token reduction.**
+
+**Multi-Language Support (v2.0.0+)**: Works identically across Python, TypeScript, JavaScript, and Java.
 
 ```python
-# Example: Agent wants to refactor calculate_tax
+# Python extraction
 result = extract_code(
     file_path="/project/src/billing/calculator.py",
     target_type="function",
@@ -73,9 +99,30 @@ result = extract_code(
     include_cross_file_deps=True  # Also gets TaxRate from models.py
 )
 
+# TypeScript extraction (NEW v2.0.0)
+result = extract_code(
+    file_path="/project/src/services/UserService.ts",
+    target_type="class",
+    target_name="UserService"
+)
+
+# JavaScript extraction (NEW v2.0.0)
+result = extract_code(
+    file_path="/project/src/api/handler.js",
+    target_type="function",
+    target_name="handleRequest"
+)
+
+# Java extraction (NEW v2.0.0)
+result = extract_code(
+    file_path="/project/src/main/java/AuthController.java",
+    target_type="method",
+    target_name="AuthController.authenticate"
+)
+
 # Agent receives:
 # - target_code: The function (~50 lines)
-# - context_code: External dependencies (TaxRate class from models.py)
+# - context_code: External dependencies
 # - token_estimate: ~150 tokens instead of 50,000
 ```
 

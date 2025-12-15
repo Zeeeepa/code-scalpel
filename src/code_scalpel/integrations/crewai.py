@@ -8,6 +8,7 @@ v0.3.1: Now includes taint-based SecurityAnalyzer and SymbolicAnalyzer.
 """
 
 import asyncio
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -205,7 +206,10 @@ class CrewAIScalpel:
         try:
             tree = self.analyzer.parse_to_ast(code)
             # Return regenerated code - refactoring logic can be extended
-            result.refactored_code = self.analyzer.ast_to_code(tree)
+            # [20251216_BUGFIX] Suppress upstream ast.* deprecations during regeneration on Python 3.13
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                result.refactored_code = self.analyzer.ast_to_code(tree)
         except Exception as e:
             result.success = False
             result.error = f"Refactoring error: {str(e)}"

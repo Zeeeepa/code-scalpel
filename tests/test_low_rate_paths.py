@@ -156,7 +156,8 @@ def test_run_server_stdio_with_missing_root(monkeypatch, tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert stub.run_calls[-1][0] == ()
-    assert "Warning: Root path" in captured.out
+    # [20251216_TEST] stdio transport now emits warnings to stderr to avoid JSON-RPC interference
+    assert "Warning: Root path" in captured.err
 
 
 def test_python_normalizer_unsupported_node():

@@ -388,7 +388,7 @@ class CrossFileTaintTracker:
     def _create_flows_from_local_sinks(self, result: CrossFileTaintResult) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Create taint flows from local_sinks.
-        
+
         This handles cases where a tainted variable is used directly in a dangerous sink
         within the same function, especially when the taint comes from cross-file imports.
         """
@@ -399,7 +399,7 @@ class CrossFileTaintTracker:
                     source_module, source_func, source_line = self._trace_taint_origin(
                         module, func_name, var_name
                     )
-                    
+
                     flow = CrossFileTaintFlow(
                         source_module=source_module,
                         source_function=source_func,
@@ -408,8 +408,10 @@ class CrossFileTaintTracker:
                         sink_function=func_name,
                         sink_line=sink_info.line,
                         sink_type=sink_info.sink_type,
-                        flow_path=[(source_module, source_func, source_line),
-                                   (module, func_name, sink_info.line)],
+                        flow_path=[
+                            (source_module, source_func, source_line),
+                            (module, func_name, sink_info.line),
+                        ],
                         tainted_data=var_name,
                     )
                     result.taint_flows.append(flow)
@@ -419,13 +421,13 @@ class CrossFileTaintTracker:
     ) -> Tuple[str, str, int]:
         """
         [20251215_BUGFIX] v2.0.1 - Trace back to find where the taint originated.
-        
+
         Returns (source_module, source_function, source_line).
         """
         # Look at the function and try to find where var_name got its taint
         # For now, return the current function as source (local taint)
         # A more sophisticated version would trace through the call graph
-        
+
         func_info = self.function_taint_info.get(module, {}).get(func_name)
         if func_info:
             return (module, func_name, func_info.line)
@@ -436,36 +438,41 @@ class CrossFileTaintTracker:
     ) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Multi-pass propagation of returns_tainted through import chains.
-        
+
         This handles cases like:
             source.py: get_user_input() -> returns request.args.get() [tainted]
             processor.py: process_input() -> returns source.get_user_input() [should be tainted]
             executor.py: execute() -> uses processor.process_input() in SQL [vulnerability]
-        
+
         We iterate until no new taints are discovered (fixpoint).
         """
         for iteration in range(max_iterations):
             changed = False
-            
+
             # For each module, re-analyze functions that call imported tainted functions
             for module, file_path in self.resolver.module_to_file.items():
                 tree = self._get_file_ast(file_path)
                 if not tree:
                     continue
-                    
+
                 for node in ast.walk(tree):
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        func_info = self.function_taint_info.get(module, {}).get(node.name)
+                        func_info = self.function_taint_info.get(module, {}).get(
+                            node.name
+                        )
                         if func_info and not func_info.returns_tainted:
                             # Re-analyze with updated taint info
                             old_tainted_vars = len(func_info.tainted_variables)
                             visitor = FunctionTaintVisitor(func_info, self)
                             visitor.visit(node)
-                            
+
                             # Check if taint status changed
-                            if func_info.returns_tainted or len(func_info.tainted_variables) > old_tainted_vars:
+                            if (
+                                func_info.returns_tainted
+                                or len(func_info.tainted_variables) > old_tainted_vars
+                            ):
                                 changed = True
-            
+
             # Fixpoint reached - no new taints discovered
             if not changed:
                 break
@@ -968,29 +975,29 @@ class FunctionTaintVisitor(ast.NodeVisitor):
     def _is_imported_tainted_function(self, callee: str) -> bool:
         """
         [20251215_BUGFIX] Check if a callee is an imported function that returns tainted data.
-        
+
         This enables multi-hop taint tracking through import chains.
         """
         if not self.tracker:
             return False
-            
+
         # Check if this function is imported
         module = self.func_info.module
         imports = self.tracker.resolver.imports.get(module, [])
-        
+
         for imp in imports:
             if imp.effective_name == callee:
                 # Found the import - check if target function returns tainted
                 target_module = imp.module
                 target_func = imp.name if imp.name != "*" else callee
-                
+
                 # Look up the function in our taint info
                 target_funcs = self.tracker.function_taint_info.get(target_module, {})
                 target_info = target_funcs.get(target_func)
-                
+
                 if target_info and target_info.returns_tainted:
                     return True
-                    
+
         return False
 
     def visit_Call(self, node: ast.Call) -> None:
@@ -1003,7 +1010,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             # Check if any argument is tainted
             for i, arg in enumerate(node.args):
                 tainted_vars_in_arg = self._extract_tainted_vars_from_arg(arg)
-                
+
                 for arg_name in tainted_vars_in_arg:
                     # Check if parameter or tainted variable
                     if arg_name in self.func_info.parameters:
@@ -1030,38 +1037,44 @@ class FunctionTaintVisitor(ast.NodeVisitor):
     def _check_callback_taint_pattern(self, node: ast.Call) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Detect callback taint pattern.
-        
+
         Pattern: with_callback(tainted_data, dangerous_callback)
-        
+
         If:
         1. One argument is tainted (tainted_data)
         2. Another argument is a function name (dangerous_callback)
         3. That function has parameters_reaching_sinks
-        
+
         Then the tainted data flows to the callback's sink.
         """
         if not self.tracker:
             return
-            
+
         # Find tainted arguments and callback function arguments
         tainted_args = []
         callback_funcs = []
-        
+
         for i, arg in enumerate(node.args):
             if isinstance(arg, ast.Name):
                 # Check if this is a tainted variable
-                if arg.id in self.func_info.tainted_variables or arg.id in self.func_info.parameters:
+                if (
+                    arg.id in self.func_info.tainted_variables
+                    or arg.id in self.func_info.parameters
+                ):
                     tainted_args.append((i, arg.id))
                 # Check if this is a function name with dangerous sinks
                 func_info = self._get_function_info_by_name(arg.id)
                 if func_info and func_info.parameters_reaching_sinks:
                     callback_funcs.append((i, arg.id, func_info))
-        
+
         # If we have both tainted args and callback functions, create a flow
         if tainted_args and callback_funcs:
             for _, tainted_var in tainted_args:
                 for _, callback_name, callback_info in callback_funcs:
-                    for param, sink_info in callback_info.parameters_reaching_sinks.items():
+                    for (
+                        param,
+                        sink_info,
+                    ) in callback_info.parameters_reaching_sinks.items():
                         # The tainted data flows through the callback to the sink
                         self.func_info.local_sinks[tainted_var] = SinkInfo(
                             sink_type=sink_info.sink_type,
@@ -1069,33 +1082,35 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                             function_call=f"{callback_name} (callback)",
                         )
 
-    def _get_function_info_by_name(self, func_name: str) -> Optional["FunctionTaintInfo"]:
+    def _get_function_info_by_name(
+        self, func_name: str
+    ) -> Optional["FunctionTaintInfo"]:
         """
         [20251215_BUGFIX] v2.0.1 - Look up function taint info by name.
-        
+
         Checks both local module and imported functions.
         """
         if not self.tracker:
             return None
-            
+
         # Check local module first
         local_funcs = self.tracker.function_taint_info.get(self.func_info.module, {})
         if func_name in local_funcs:
             return local_funcs[func_name]
-        
+
         # Check imported functions
         imports = self.tracker.resolver.imports.get(self.func_info.module, [])
         for imp in imports:
             if imp.effective_name == func_name:
                 target_funcs = self.tracker.function_taint_info.get(imp.module, {})
                 return target_funcs.get(imp.name)
-        
+
         return None
 
     def _extract_tainted_vars_from_arg(self, arg: ast.expr) -> List[str]:
         """
         [20251215_BUGFIX] v2.0.1 - Extract variable names from an argument expression.
-        
+
         Handles:
         - Simple names: x
         - F-strings: f"SELECT * FROM users WHERE id = {user_id}"
@@ -1103,7 +1118,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         - Format strings: "SELECT * FROM users WHERE id = {}".format(user_id)
         """
         result = []
-        
+
         if isinstance(arg, ast.Name):
             result.append(arg.id)
         elif isinstance(arg, ast.JoinedStr):
@@ -1125,7 +1140,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         elif isinstance(arg, ast.Mod):
             # Old-style formatting: "..." % x
             result.extend(self._extract_tainted_vars_from_arg(arg))
-            
+
         return result
 
     def visit_Return(self, node: ast.Return) -> None:
@@ -1154,14 +1169,17 @@ class FunctionTaintVisitor(ast.NodeVisitor):
     def _is_method_on_tainted_var(self, call_node: ast.Call) -> bool:
         """
         [20251215_BUGFIX] v2.0.1 - Check if a call is a method on a tainted variable.
-        
+
         e.g., data.strip() where data is in tainted_variables
         """
         if isinstance(call_node.func, ast.Attribute):
             # Get the object the method is called on
             value = call_node.func.value
             if isinstance(value, ast.Name):
-                return value.id in self.func_info.tainted_variables or value.id in self.func_info.parameters
+                return (
+                    value.id in self.func_info.tainted_variables
+                    or value.id in self.func_info.parameters
+                )
         return False
 
     def _is_taint_source(self, node: ast.expr) -> bool:

@@ -2,27 +2,35 @@
 Path Resolution Module for Docker and Multi-Environment Deployments.
 
 [20251214_FEATURE] v1.5.3 - Intelligent path resolution for Docker deployments.
+[20251215_FEATURE] v2.0.0 - Added Windows path resolution support.
 
 This module provides intelligent path resolution that works seamlessly across:
 - Local development environments
 - Docker containers with volume mounts
 - Remote MCP servers
 - Various workspace configurations
+- Windows paths (drive letters, UNC paths)
+- WSL mount points (/mnt/c/, etc.)
+- Docker Desktop mounts (/c/, etc.)
 
 Key Features:
 - Automatic workspace root detection
 - Smart path resolution with multiple fallback strategies
 - Clear error messages with actionable suggestions
 - Docker volume mount recommendations
+- Cross-platform Windows/Linux path translation
 """
 
 import os
+import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 from dataclasses import dataclass
 import logging
 
 logger = logging.getLogger(__name__)
+
+# [20251215_REFACTOR] Remove unused path helper imports (PureWindowsPath/PurePosixPath) for lint compliance.
 
 
 @dataclass
@@ -136,6 +144,80 @@ class PathResolver:
 
         return False
 
+    def _parse_windows_path(self, path: str) -> Optional[Tuple[str, str]]:
+        r"""
+        Parse a Windows-style path and extract drive letter and relative path.
+
+        [20251215_FEATURE] v2.0.0 - Windows path parsing
+
+        Handles formats:
+        - C:\\Users\\... (backslash)
+        - C:/Users/... (forward slash)
+        - c:\\users\\... (lowercase drive)
+
+        Args:
+            path: Path string to parse
+
+        Returns:
+            Tuple of (drive_letter, relative_path) or None if not a Windows path
+        """
+        # Match Windows drive letter pattern: C:\ or C:/
+        win_match = re.match(r"^([A-Za-z]):[/\\](.*)$", path)
+        if win_match:
+            drive = win_match.group(1).lower()
+            rel_path = win_match.group(2).replace("\\", "/")
+            return (drive, rel_path)
+        return None
+
+    def _translate_windows_path(self, path: str) -> List[str]:
+        """
+        Translate a Windows path to potential Linux/Docker equivalents.
+
+        [20251215_FEATURE] v2.0.0 - Windows to Linux path translation
+
+        Generates candidate paths for:
+        - WSL-style mounts: /mnt/c/Users/...
+        - Docker Desktop mounts: /c/Users/...
+        - Custom WINDOWS_DRIVE_MAP mappings
+        - Workspace-relative paths
+
+        Args:
+            path: Windows path to translate
+
+        Returns:
+            List of candidate Linux paths to try
+        """
+        candidates = []
+        parsed = self._parse_windows_path(path)
+
+        if not parsed:
+            return candidates
+
+        drive, rel_path = parsed
+
+        # Strategy 1: WSL-style mount (/mnt/c/...)
+        candidates.append(f"/mnt/{drive}/{rel_path}")
+
+        # Strategy 2: Docker Desktop mount (/c/...)
+        candidates.append(f"/{drive}/{rel_path}")
+
+        # Strategy 3: Custom drive mapping from environment
+        # Format: WINDOWS_DRIVE_MAP="C=/data,D=/backup"
+        drive_map = os.environ.get("WINDOWS_DRIVE_MAP", "")
+        if drive_map:
+            for mapping in drive_map.split(","):
+                if "=" in mapping:
+                    map_drive, map_path = mapping.split("=", 1)
+                    if map_drive.strip().upper() == drive.upper():
+                        candidates.append(f"{map_path.strip()}/{rel_path}")
+
+        # Strategy 4: Relative to workspace roots (strip drive, use relative)
+        for root in self.workspace_roots:
+            candidates.append(f"{root}/{rel_path}")
+
+        logger.debug(f"Windows path '{path}' translated to candidates: {candidates}")
+        return candidates
+
     def resolve(self, path: str, project_root: Optional[str] = None) -> str:
         """
         Resolve a path to its accessible location.
@@ -180,8 +262,10 @@ class PathResolver:
         Attempt to resolve path with multiple strategies.
 
         [20251214_FEATURE] Multi-strategy path resolution
+        [20251215_FEATURE] v2.0.0 - Added Windows path translation
 
         Strategies (in order):
+        0. Windows path translation (if Windows path detected)
         1. Direct access (absolute path exists)
         2. Relative to explicit project_root
         3. Relative to detected workspace roots
@@ -196,6 +280,37 @@ class PathResolver:
             PathResolutionResult with resolution details
         """
         attempted_paths = []
+
+        # [20251215_FEATURE] Strategy 0: Windows path handling
+        # Detect Windows-style paths (C:\... or C:/...) and handle them appropriately
+        if self._parse_windows_path(path):
+            # First, try the original Windows path directly (works on Windows)
+            original_windows_path = path.replace("/", os.sep).replace("\\", os.sep)
+            if os.path.exists(original_windows_path):
+                return PathResolutionResult(
+                    resolved_path=os.path.normpath(original_windows_path),
+                    success=True,
+                    attempted_paths=[original_windows_path],
+                )
+            attempted_paths.append(original_windows_path)
+
+            # If direct access fails (e.g., running in Docker/Linux), try translations
+            windows_candidates = self._translate_windows_path(path)
+            for candidate in windows_candidates:
+                attempted_paths.append(candidate)
+                if os.path.exists(candidate):
+                    return PathResolutionResult(
+                        resolved_path=os.path.normpath(candidate),
+                        success=True,
+                        attempted_paths=attempted_paths,
+                    )
+            # Continue with other strategies using the relative portion
+            parsed = self._parse_windows_path(path)
+            if parsed:
+                _, rel_path = parsed
+                # Try the relative path with other strategies
+                path = rel_path
+
         path_obj = Path(path)
 
         # Strategy 1: Direct access (absolute path)
@@ -203,7 +318,7 @@ class PathResolver:
             return PathResolutionResult(
                 resolved_path=str(path_obj.resolve()),
                 success=True,
-                attempted_paths=[str(path_obj)],
+                attempted_paths=attempted_paths + [str(path_obj)],
             )
         attempted_paths.append(str(path_obj))
 
@@ -302,6 +417,7 @@ class PathResolver:
         Generate helpful suggestion for failed path resolution.
 
         [20251214_FEATURE] Docker-aware error suggestions
+        [20251215_FEATURE] v2.0.0 - Windows path suggestions
 
         Args:
             path: Original path that failed
@@ -311,6 +427,7 @@ class PathResolver:
             Helpful suggestion string
         """
         suggestions = []
+        is_windows_path = self._parse_windows_path(path) is not None
 
         if self.is_docker:
             # Docker-specific suggestions
@@ -319,18 +436,43 @@ class PathResolver:
                 "  docker run -v /path/to/your/project:/workspace ... <image>"
             )
 
-            # Try to infer host path from attempted path
-            if os.path.isabs(path):
+            # [20251215_FEATURE] Windows-specific Docker suggestions
+            if is_windows_path:
+                parsed = self._parse_windows_path(path)
+                if parsed:
+                    drive, rel_path = parsed
+                    parent = os.path.dirname(rel_path) if "/" in rel_path else ""
+                    suggestions.append(
+                        f"\nWindows path detected. For Docker Desktop on Windows:\n"
+                        f"  docker run -v {drive.upper()}:/{parent}:/workspace ... <image>\n"
+                        f"  Or use WSL path: /mnt/{drive}/{parent}"
+                    )
+                    suggestions.append(
+                        f"\nYou can also set WINDOWS_DRIVE_MAP environment variable:\n"
+                        f"  -e WINDOWS_DRIVE_MAP='{drive.upper()}=/workspace'"
+                    )
+            elif os.path.isabs(path):
                 parent = os.path.dirname(path)
                 suggestions.append(f"  docker run -v {parent}:/workspace ... <image>")
 
         else:
             # Local development suggestions
-            suggestions.append(
-                "Ensure the file exists and use an absolute path, or place it in:\n"
-            )
-            for root in self.workspace_roots[:3]:  # Top 3 roots
-                suggestions.append(f"  - {root}")
+            if is_windows_path:
+                # [20251215_FEATURE] Windows local development suggestions
+                suggestions.append(
+                    "Windows path detected but file not accessible.\n"
+                    "If running in WSL, the path should be accessible at:\n"
+                )
+                parsed = self._parse_windows_path(path)
+                if parsed:
+                    drive, rel_path = parsed
+                    suggestions.append(f"  /mnt/{drive}/{rel_path}")
+            else:
+                suggestions.append(
+                    "Ensure the file exists and use an absolute path, or place it in:\n"
+                )
+                for root in self.workspace_roots[:3]:  # Top 3 roots
+                    suggestions.append(f"  - {root}")
 
         # Add workspace root hint
         suggestions.append(

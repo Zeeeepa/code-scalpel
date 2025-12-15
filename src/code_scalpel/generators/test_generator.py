@@ -22,6 +22,8 @@ from typing import Any
 class TestCase:
     """A single generated test case."""
 
+    __test__ = False  # [20251215_BUGFIX] Exclude from pytest collection
+
     path_id: int
     function_name: str
     inputs: dict[str, Any]
@@ -190,6 +192,8 @@ class TestGenerator:
     - JavaScript (planned)
     - Java (planned)
     """
+
+    __test__ = False  # [20251215_BUGFIX] Exclude from pytest collection
 
     def __init__(self, framework: str = "pytest"):
         """Initialize the test generator.
@@ -716,13 +720,16 @@ class TestGenerator:
         """Convert AST constant/name to Python value."""
         if isinstance(node, ast.Constant):
             return node.value
-        elif isinstance(node, ast.NameConstant):  # Python 3.7 compatibility
-            return node.value
-        elif isinstance(node, ast.Name):
+
+        # [20251215_BUGFIX] Avoid deprecated ast.NameConstant checks on Python 3.13+
+        if isinstance(node, ast.Name):
             if node.id == "True":
                 return True
-            elif node.id == "False":
+            if node.id == "False":
                 return False
+            if node.id == "None":
+                return None
+
         return None
 
     def _infer_expected_result(

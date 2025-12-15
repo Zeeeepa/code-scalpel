@@ -28,6 +28,7 @@ import ast
 import asyncio
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import Any, Optional, TYPE_CHECKING
 
@@ -36,11 +37,36 @@ if TYPE_CHECKING:
 
 from pydantic import BaseModel, Field
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 
-__version__ = "1.0.2"
+__version__ = "2.0.0"
 
-# Setup logging
+
+# [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport corruption
+# When using stdio transport, stdout must contain ONLY valid JSON-RPC messages.
+# Any logging to stdout will corrupt the protocol stream.
+def _configure_logging(transport: str = "stdio"):
+    """Configure logging based on transport type."""
+    root_logger = logging.getLogger()
+
+    # Remove any existing handlers
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    # Always log to stderr to avoid corrupting stdio transport
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+
+    # Set level based on environment
+    level = logging.DEBUG if os.environ.get("SCALPEL_DEBUG") else logging.WARNING
+    handler.setLevel(level)
+    root_logger.setLevel(level)
+    root_logger.addHandler(handler)
+
+
+# Setup logging (default to stderr)
 logger = logging.getLogger(__name__)
 
 # Maximum code size to prevent resource exhaustion
@@ -49,8 +75,122 @@ MAX_CODE_SIZE = 100_000
 # Project root for resources (default to current directory)
 PROJECT_ROOT = Path.cwd()
 
+# [20251215_FEATURE] v2.0.0 - Roots capability for file system boundaries
+# Client-specified allowed directories. If empty, PROJECT_ROOT is used.
+ALLOWED_ROOTS: list[Path] = []
+
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
+
+
+def _is_path_allowed(path: Path) -> bool:
+    """
+    Check if a path is within allowed roots.
+
+    [20251215_FEATURE] v2.0.0 - Security boundary enforcement
+
+    Args:
+        path: Path to validate
+
+    Returns:
+        True if path is within allowed roots, False otherwise
+    """
+    resolved = path.resolve()
+
+    # If no roots specified, use PROJECT_ROOT
+    roots_to_check = ALLOWED_ROOTS if ALLOWED_ROOTS else [PROJECT_ROOT]
+
+    for root in roots_to_check:
+        try:
+            resolved.relative_to(root.resolve())
+            return True
+        except ValueError:
+            continue
+
+    return False
+
+
+def _validate_path_security(path: Path) -> Path:
+    """
+    Validate path is within allowed roots and return resolved path.
+
+    [20251215_FEATURE] v2.0.0 - Security validation with helpful errors
+
+    Args:
+        path: Path to validate
+
+    Returns:
+        Resolved path if valid
+
+    Raises:
+        PermissionError: If path is outside allowed roots
+    """
+    resolved = path.resolve()
+
+    if not _is_path_allowed(resolved):
+        roots_str = ", ".join(str(r) for r in (ALLOWED_ROOTS or [PROJECT_ROOT]))
+        raise PermissionError(
+            f"Access denied: {path} is outside allowed roots.\n"
+            f"Allowed roots: {roots_str}\n"
+            f"Set roots via the roots/list capability or SCALPEL_ROOT environment variable."
+        )
+
+
+async def _fetch_and_cache_roots(ctx: Context | None) -> list[Path]:
+    """
+    Fetch roots from client via MCP context and cache in ALLOWED_ROOTS.
+
+    [20251215_FEATURE] v2.0.0 - Dynamic roots capability support
+
+    This function requests the list of allowed filesystem roots from the
+    MCP client. Roots define the boundaries where the server can operate.
+
+    Args:
+        ctx: MCP Context object (from tool execution)
+
+    Returns:
+        List of allowed root paths
+
+    Note:
+        If ctx is None or client doesn't support roots, returns PROJECT_ROOT.
+        Roots are cached in ALLOWED_ROOTS global for subsequent calls.
+    """
+    global ALLOWED_ROOTS
+
+    if ctx is None:
+        return [PROJECT_ROOT]
+
+    try:
+        # Request roots from client via MCP protocol
+        roots = await ctx.list_roots()
+
+        if roots:
+            # Convert file:// URIs to Path objects
+            ALLOWED_ROOTS = []
+            for root in roots:
+                uri = str(root.uri)
+                if uri.startswith("file://"):
+                    # Handle file:// URIs (e.g., file:///home/user/project)
+                    # Remove 'file://' prefix and handle Windows paths
+                    path_str = uri[7:]  # Remove 'file://'
+                    # Windows paths may have extra slash: file:///C:/path
+                    if len(path_str) >= 3 and path_str[0] == "/" and path_str[2] == ":":
+                        path_str = path_str[1:]  # Remove leading /
+                    ALLOWED_ROOTS.append(Path(path_str))
+                else:
+                    # Non-file URIs - log warning but try as path
+                    logger.warning(f"Non-file root URI: {uri}")
+                    ALLOWED_ROOTS.append(Path(uri))
+
+            logger.debug(f"Updated ALLOWED_ROOTS from client: {ALLOWED_ROOTS}")
+            return ALLOWED_ROOTS
+        else:
+            return [PROJECT_ROOT]
+
+    except Exception as e:
+        # Client may not support roots capability
+        logger.debug(f"Could not fetch roots from client: {e}")
+        return [PROJECT_ROOT]
 
 
 # ============================================================================
@@ -690,7 +830,7 @@ def _security_scan_sync(
 ) -> SecurityResult:
     """
     Synchronous implementation of security_scan.
-    
+
     [20251214_FEATURE] v2.0.0 - Added file_path parameter support.
     """
     # Handle file_path parameter
@@ -722,7 +862,7 @@ def _security_scan_sync(
                 risk_level="unknown",
                 error=f"Failed to read file: {str(e)}",
             )
-    
+
     if code is None:
         return SecurityResult(
             success=False,
@@ -731,7 +871,7 @@ def _security_scan_sync(
             risk_level="unknown",
             error="Either 'code' or 'file_path' must be provided",
         )
-    
+
     valid, error = _validate_code(code)
     if not valid:
         return SecurityResult(
@@ -838,7 +978,7 @@ async def security_scan(
 
     Use this tool to audit code for security vulnerabilities before deploying
     or committing changes. It tracks data flow from sources to sinks.
-    
+
     [20251214_FEATURE] v2.0.0 - Now accepts file_path parameter to scan files directly.
 
     Detects:
@@ -1383,15 +1523,15 @@ async def _extract_polyglot(
     target_name: str,
     file_path: str | None,
     code: str | None,
-    language: "Language",
+    language: Any,
     include_token_estimate: bool,
 ) -> ContextualExtractionResult:
     """
     [20251214_FEATURE] v2.0.0 - Multi-language extraction using PolyglotExtractor.
-    
+
     Handles extraction for JavaScript, TypeScript, and Java using tree-sitter
     and the Unified IR system.
-    
+
     Args:
         target_type: "function", "class", or "method"
         target_name: Name of element to extract
@@ -1399,18 +1539,18 @@ async def _extract_polyglot(
         code: Source code string (if file_path not provided)
         language: Language enum value
         include_token_estimate: Include token count estimate
-        
+
     Returns:
         ContextualExtractionResult with extracted code
     """
-    from code_scalpel.polyglot import PolyglotExtractor, Language
+    from code_scalpel.polyglot import PolyglotExtractor
     from code_scalpel.mcp.path_resolver import resolve_path
-    
+
     if file_path is None and code is None:
         return _extraction_error(
             target_name, "Must provide either 'file_path' or 'code' argument"
         )
-    
+
     try:
         # Create extractor from file or code
         if file_path is not None:
@@ -1418,15 +1558,15 @@ async def _extract_polyglot(
             extractor = PolyglotExtractor.from_file(resolved_path, language)
         else:
             extractor = PolyglotExtractor(code, language=language)
-        
+
         # Perform extraction
         result = extractor.extract(target_type, target_name)
-        
+
         if not result.success:
             return _extraction_error(target_name, result.error or "Extraction failed")
-        
+
         token_estimate = result.token_estimate if include_token_estimate else 0
-        
+
         return ContextualExtractionResult(
             success=True,
             target_name=target_name,
@@ -1607,6 +1747,7 @@ async def extract_code(
     context_depth: int = 1,
     include_cross_file_deps: bool = False,
     include_token_estimate: bool = True,
+    ctx: Context | None = None,
 ) -> ContextualExtractionResult:
     """
     Surgically extract specific code elements (functions, classes, methods).
@@ -1671,8 +1812,13 @@ async def extract_code(
             include_cross_file_deps=True
         )
     """
+    # [20251215_FEATURE] v2.0.0 - Roots capability support
+    # Fetch allowed roots from client for security boundary enforcement
+    if ctx and file_path:
+        await _fetch_and_cache_roots(ctx)
+
     from code_scalpel.surgical_extractor import ContextualExtraction, ExtractionResult
-    from code_scalpel.polyglot import PolyglotExtractor, Language, detect_language
+    from code_scalpel.polyglot import Language, detect_language
 
     # [20251214_FEATURE] v2.0.0 - Multi-language support
     # Determine language from parameter, file extension, or code content
@@ -1687,7 +1833,7 @@ async def extract_code(
             "java": Language.JAVA,
         }
         detected_lang = lang_map.get(language.lower(), Language.AUTO)
-    
+
     if detected_lang == Language.AUTO:
         detected_lang = detect_language(file_path, code)
 
@@ -1962,12 +2108,16 @@ async def crawl_project(
     exclude_dirs: list[str] | None = None,
     complexity_threshold: int = 10,
     include_report: bool = True,
+    ctx: Context | None = None,
 ) -> ProjectCrawlResult:
     """
     Crawl an entire project directory and analyze all Python files.
 
     Use this tool to get a comprehensive overview of a project's structure,
     complexity hotspots, and code metrics before diving into specific files.
+
+    [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
+    Reports progress as files are discovered and analyzed.
 
     Args:
         root_path: Path to project root (defaults to current working directory)
@@ -1981,13 +2131,24 @@ async def crawl_project(
     if root_path is None:
         root_path = str(PROJECT_ROOT)
 
-    return await asyncio.to_thread(
+    # [20251215_FEATURE] v2.0.0 - Progress token support
+    # Report initial progress
+    if ctx:
+        await ctx.report_progress(progress=0, total=100)
+
+    result = await asyncio.to_thread(
         _crawl_project_sync,
         root_path,
         exclude_dirs,
         complexity_threshold,
         include_report,
     )
+
+    # Report completion
+    if ctx:
+        await ctx.report_progress(progress=100, total=100)
+
+    return result
 
 
 # ============================================================================
@@ -2085,6 +2246,30 @@ Supported Languages:
 """
 
 
+@mcp.resource("scalpel://health")
+def get_health() -> str:
+    """
+    Health check endpoint for Docker and orchestration systems.
+
+    [20251215_FEATURE] v2.0.0 - Added health endpoint for Docker health checks.
+
+    Returns immediately with server status. Use this instead of SSE endpoint
+    for health checks as SSE connections stay open indefinitely.
+
+    Returns:
+        JSON string with health status
+    """
+    import json
+
+    return json.dumps(
+        {
+            "status": "healthy",
+            "version": __version__,
+            "project_root": str(PROJECT_ROOT),
+        }
+    )
+
+
 @mcp.resource("scalpel://capabilities")
 def get_capabilities() -> str:
     """Get information about Code Scalpel's capabilities."""
@@ -2123,6 +2308,296 @@ Explores execution paths:
 - No filesystem access from analyzed code
 - No network access from analyzed code
 """
+
+
+# ============================================================================
+# RESOURCE TEMPLATES - Dynamic URI-based Context
+# [20251215_FEATURE] v2.0.0 - MCP Resource Templates for dynamic content access
+# ============================================================================
+
+
+@mcp.resource("scalpel://file/{path}")
+def get_file_resource(path: str) -> str:
+    """
+    Read file contents by path (Resource Template).
+
+    [20251215_FEATURE] v2.0.0 - Dynamic file access via URI template.
+
+    This resource template allows clients to construct URIs dynamically
+    to access any file within the allowed roots.
+
+    Example URIs:
+    - scalpel://file/src/main.py
+    - scalpel://file/tests/test_utils.py
+
+    Security: Path must be within allowed roots (PROJECT_ROOT or client-specified roots).
+
+    Args:
+        path: Relative or absolute path to the file
+
+    Returns:
+        File contents as text
+    """
+    from code_scalpel.mcp.path_resolver import resolve_path
+
+    try:
+        resolved = resolve_path(path, str(PROJECT_ROOT))
+        file_path = Path(resolved)
+
+        # Security check
+        _validate_path_security(file_path)
+
+        return file_path.read_text(encoding="utf-8")
+    except FileNotFoundError as e:
+        return f"Error: {e}"
+    except PermissionError as e:
+        return f"Error: {e}"
+    except Exception as e:
+        return f"Error reading file: {e}"
+
+
+@mcp.resource("scalpel://analysis/{path}")
+def get_analysis_resource(path: str) -> str:
+    """
+    Get code analysis for a file by path (Resource Template).
+
+    [20251215_FEATURE] v2.0.0 - Dynamic analysis access via URI template.
+
+    Returns a JSON analysis including:
+    - Functions and classes
+    - Imports
+    - Complexity metrics
+    - Security warnings (if any)
+
+    Example URIs:
+    - scalpel://analysis/src/utils.py
+    - scalpel://analysis/app/models.py
+
+    Args:
+        path: Path to the Python file to analyze
+
+    Returns:
+        JSON string with analysis results
+    """
+    import json
+    from code_scalpel.mcp.path_resolver import resolve_path
+
+    try:
+        resolved = resolve_path(path, str(PROJECT_ROOT))
+        file_path = Path(resolved)
+
+        # Security check
+        _validate_path_security(file_path)
+
+        code = file_path.read_text(encoding="utf-8")
+
+        # Run analysis
+        result = _analyze_code_sync(code, "python")
+
+        # Run quick security check
+        security = _security_scan_sync(code)
+
+        return json.dumps(
+            {
+                "file": str(file_path),
+                "analysis": result.model_dump(),
+                "security_summary": {
+                    "has_vulnerabilities": security.has_vulnerabilities,
+                    "vulnerability_count": security.vulnerability_count,
+                    "risk_level": security.risk_level,
+                },
+            },
+            indent=2,
+        )
+    except FileNotFoundError as e:
+        return json.dumps({"error": str(e)})
+    except PermissionError as e:
+        return json.dumps({"error": str(e)})
+    except Exception as e:
+        return json.dumps({"error": f"Analysis failed: {e}"})
+
+
+# [20251215_BUGFIX] Provide synchronous extraction helper for URI templates using SurgicalExtractor.
+def _extract_code_sync(
+    target_type: str,
+    target_name: str,
+    file_path: str | None,
+    code: str | None = None,
+    include_context: bool = True,
+    include_token_estimate: bool = True,
+) -> ContextualExtractionResult:
+    from code_scalpel.surgical_extractor import SurgicalExtractor
+
+    if not file_path and not code:
+        return _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
+
+    extractor = (
+        SurgicalExtractor.from_file(file_path)
+        if file_path is not None
+        else SurgicalExtractor(code or "")
+    )
+
+    context = None
+    if target_type == "class":
+        target = extractor.get_class(target_name)
+        if include_context:
+            context = extractor.get_class_with_context(target_name)
+    elif target_type == "method":
+        if "." not in target_name:
+            return _extraction_error(
+                target_name, "Method targets must use Class.method format"
+            )
+        class_name, method_name = target_name.split(".", 1)
+        target = extractor.get_method(class_name, method_name)
+        if include_context:
+            context = extractor.get_method_with_context(class_name, method_name)
+    else:
+        target = extractor.get_function(target_name)
+        if include_context:
+            context = extractor.get_function_with_context(target_name)
+
+    if not target.success:
+        return _extraction_error(target_name, target.error or "Extraction failed")
+
+    context_code = context.context_code if context else ""
+    context_items = context.context_items if context else (target.dependencies or [])
+    full_code = context.full_code if context else target.code
+    total_lines = (
+        context.total_lines
+        if context
+        else (
+            target.line_end - target.line_start + 1
+            if target.line_end and target.line_start
+            else max(1, full_code.count("\n") + 1)
+        )
+    )
+    token_estimate = context.token_estimate if context and include_token_estimate else 0
+
+    return ContextualExtractionResult(
+        success=True,
+        server_version=__version__,
+        target_name=target_name,
+        target_code=target.code,
+        context_code=context_code,
+        full_code=full_code,
+        context_items=context_items,
+        total_lines=total_lines,
+        line_start=target.line_start,
+        line_end=target.line_end,
+        token_estimate=token_estimate,
+        error=None,
+    )
+
+
+@mcp.resource("scalpel://symbol/{file_path}/{symbol_name}")
+def get_symbol_resource(file_path: str, symbol_name: str) -> str:
+    """
+    Extract a specific symbol (function/class) from a file (Resource Template).
+
+    [20251215_FEATURE] v2.0.0 - Surgical symbol extraction via URI template.
+
+    This is more efficient than reading the entire file when you only
+    need a specific function or class definition.
+
+    Example URIs:
+    - scalpel://symbol/src/utils.py/calculate_tax
+    - scalpel://symbol/app/models.py/User
+    - scalpel://symbol/services/auth.py/AuthService.validate
+
+    Args:
+        file_path: Path to the file
+        symbol_name: Name of the function, class, or method (use Class.method for methods)
+
+    Returns:
+        JSON with extracted code and metadata
+    """
+    import json
+    from code_scalpel.mcp.path_resolver import resolve_path
+
+    try:
+        resolved = resolve_path(file_path, str(PROJECT_ROOT))
+        path = Path(resolved)
+
+        # Security check
+        _validate_path_security(path)
+
+        # Determine target type
+        if "." in symbol_name:
+            target_type = "method"
+        else:
+            # Try to detect from code
+            code = path.read_text(encoding="utf-8")
+            tree = ast.parse(code)
+
+            target_type = "function"
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name == symbol_name:
+                    target_type = "class"
+                    break
+
+        # Use extraction logic
+        result = _extract_code_sync(
+            target_type=target_type,
+            target_name=symbol_name,
+            file_path=str(path),
+            include_context=True,
+            include_token_estimate=True,
+        )
+
+        return json.dumps(result.model_dump(), indent=2)
+    except FileNotFoundError as e:
+        return json.dumps({"error": str(e)})
+    except PermissionError as e:
+        return json.dumps({"error": str(e)})
+    except Exception as e:
+        return json.dumps({"error": f"Extraction failed: {e}"})
+
+
+@mcp.resource("scalpel://security/{path}")
+def get_security_resource(path: str) -> str:
+    """
+    Get security scan results for a file (Resource Template).
+
+    [20251215_FEATURE] v2.0.0 - Security analysis via URI template.
+
+    Returns detailed vulnerability information including:
+    - Vulnerability type and CWE
+    - Line numbers
+    - Severity levels
+    - Taint flow information
+
+    Example URIs:
+    - scalpel://security/src/api.py
+    - scalpel://security/app/views.py
+
+    Args:
+        path: Path to the Python file to scan
+
+    Returns:
+        JSON string with security scan results
+    """
+    import json
+    from code_scalpel.mcp.path_resolver import resolve_path
+
+    try:
+        resolved = resolve_path(path, str(PROJECT_ROOT))
+        file_path = Path(resolved)
+
+        # Security check
+        _validate_path_security(file_path)
+
+        # Run security scan
+        result = _security_scan_sync(file_path=str(file_path))
+
+        return json.dumps(result.model_dump(), indent=2)
+    except FileNotFoundError as e:
+        return json.dumps({"error": str(e)})
+    except PermissionError as e:
+        return json.dumps({"error": str(e)})
+    except Exception as e:
+        return json.dumps({"error": f"Security scan failed: {e}"})
 
 
 # ============================================================================
@@ -2173,6 +2648,400 @@ Code to audit:
 ```
 
 Provide a risk assessment and remediation steps for each finding."""
+
+
+# ============================================================================
+# WORKFLOW PROMPTS - Orchestrated Multi-Tool Workflows
+# [20251215_FEATURE] v2.0.0 - Advanced workflow prompts combining tools + resources
+# ============================================================================
+
+
+@mcp.prompt(title="Refactor Function")
+def refactor_function_prompt(
+    file_path: str, function_name: str, refactor_goal: str
+) -> str:
+    """
+    Safe refactoring workflow with validation.
+
+    [20251215_FEATURE] v2.0.0 - Orchestrated refactor workflow.
+
+    This prompt guides through a safe refactoring process:
+    1. Extract the target function
+    2. Analyze its structure and dependencies
+    3. Simulate the refactor to verify safety
+    4. Apply the change with backup
+
+    Args:
+        file_path: Path to the file containing the function
+        function_name: Name of the function to refactor
+        refactor_goal: Description of what the refactoring should achieve
+    """
+    return f"""# Safe Refactoring Workflow
+
+## Target
+- **File**: `{file_path}`
+- **Function**: `{function_name}`
+- **Goal**: {refactor_goal}
+
+## Workflow Steps
+
+### Step 1: Extract Current Implementation
+First, use `extract_code` to get the current function:
+```
+extract_code(
+    file_path="{file_path}",
+    target_type="function",
+    target_name="{function_name}",
+    include_context=True,
+    include_cross_file_deps=True
+)
+```
+
+### Step 2: Analyze Dependencies
+Check what depends on this function using `get_symbol_references`:
+```
+get_symbol_references(
+    symbol_name="{function_name}",
+    project_root="<project_root>"
+)
+```
+
+### Step 3: Create Refactored Version
+Based on the goal "{refactor_goal}", create the new implementation.
+Ensure it maintains the same function signature if there are external callers.
+
+### Step 4: Validate Safety
+Before applying, use `simulate_refactor` to verify the change is safe:
+```
+simulate_refactor(
+    original_code=<extracted_code>,
+    new_code=<your_refactored_code>,
+    strict_mode=True
+)
+```
+
+### Step 5: Apply the Change
+If simulation passes, use `update_symbol` to apply:
+```
+update_symbol(
+    file_path="{file_path}",
+    target_type="function",
+    target_name="{function_name}",
+    new_code=<your_refactored_code>,
+    create_backup=True
+)
+```
+
+## Safety Notes
+- Always check the simulation result before applying
+- A backup file (.bak) will be created
+- If anything goes wrong, restore from backup
+
+Please proceed with Step 1 to begin the refactoring process."""
+
+
+@mcp.prompt(title="Debug Vulnerability")
+def debug_vulnerability_prompt(file_path: str, vulnerability_type: str = "any") -> str:
+    """
+    Security vulnerability investigation and remediation workflow.
+
+    [20251215_FEATURE] v2.0.0 - Security debugging workflow.
+
+    This prompt guides through investigating and fixing security issues:
+    1. Scan for vulnerabilities
+    2. Trace taint flow across files
+    3. Identify the root cause
+    4. Generate and validate fixes
+
+    Args:
+        file_path: Path to the file to investigate
+        vulnerability_type: Type of vulnerability (sql_injection, xss, command_injection, etc.) or "any"
+    """
+    vuln_filter = (
+        f"Focus specifically on **{vulnerability_type}** vulnerabilities."
+        if vulnerability_type != "any"
+        else "Check for all vulnerability types."
+    )
+
+    return f"""# Security Vulnerability Investigation
+
+## Target
+- **File**: `{file_path}`
+- **Focus**: {vuln_filter}
+
+## Investigation Workflow
+
+### Step 1: Initial Security Scan
+Run a security scan on the target file:
+```
+security_scan(file_path="{file_path}")
+```
+
+### Step 2: Cross-File Taint Analysis
+If vulnerabilities are found, trace the taint flow across files:
+```
+cross_file_security_scan(
+    project_root="<project_root>",
+    entry_points=["{file_path}:<function_name>"],
+    include_diagram=True
+)
+```
+
+### Step 3: Understand the Data Flow
+For each vulnerability found:
+1. Identify the **taint source** (user input, request data, etc.)
+2. Trace the flow through function calls
+3. Find the **sink** where the vulnerability occurs
+
+### Step 4: Extract Vulnerable Code
+Use `extract_code` to get the vulnerable function(s):
+```
+extract_code(
+    file_path="{file_path}",
+    target_type="function",
+    target_name="<vulnerable_function>",
+    include_cross_file_deps=True
+)
+```
+
+### Step 5: Generate Fix
+Create a fixed version that:
+- Adds proper input validation/sanitization
+- Uses parameterized queries for SQL
+- Escapes output for XSS
+- Validates file paths for traversal
+
+### Step 6: Validate Fix
+Use `simulate_refactor` to ensure the fix:
+- Doesn't introduce new vulnerabilities
+- Preserves the function's behavior
+```
+simulate_refactor(
+    original_code=<vulnerable_code>,
+    new_code=<fixed_code>,
+    strict_mode=True
+)
+```
+
+### Step 7: Apply Fix
+If validation passes, apply with `update_symbol`.
+
+## Common Fixes by Vulnerability Type
+- **SQL Injection**: Use parameterized queries, ORM methods
+- **XSS**: HTML escape output, use template auto-escaping
+- **Command Injection**: Use subprocess with list args, avoid shell=True
+- **Path Traversal**: Use pathlib, validate against allowed directories
+
+Please proceed with Step 1 to begin the investigation."""
+
+
+@mcp.prompt(title="Analyze Codebase")
+def analyze_codebase_prompt(project_description: str = "Python project") -> str:
+    """
+    Comprehensive codebase analysis workflow.
+
+    [20251215_FEATURE] v2.0.0 - Full project analysis workflow.
+
+    This prompt guides through a complete project analysis:
+    1. Crawl and map the project structure
+    2. Build call graphs
+    3. Identify complexity hotspots
+    4. Run security audit
+    5. Generate improvement recommendations
+
+    Args:
+        project_description: Brief description of what the project does
+    """
+    return f"""# Comprehensive Codebase Analysis
+
+## Project
+{project_description}
+
+## Analysis Workflow
+
+### Step 1: Project Structure Overview
+Start by understanding the project layout:
+```
+# Read the project structure resource
+# URI: scalpel://project/structure
+```
+
+Then crawl for detailed metrics:
+```
+crawl_project(
+    complexity_threshold=10,
+    include_report=True
+)
+```
+
+### Step 2: Dependency Analysis
+Check project dependencies for vulnerabilities:
+```
+scan_dependencies(scan_vulnerabilities=True)
+```
+
+Also check internal dependencies:
+```
+# Read the dependencies resource
+# URI: scalpel://project/dependencies
+```
+
+### Step 3: Call Graph Analysis
+Understand how code flows through the project:
+```
+# Read the call graph resource
+# URI: scalpel://project/call-graph
+```
+
+Or use the tool for specific functions:
+```
+get_call_graph(
+    target_function="<main_entry_point>",
+    include_diagram=True
+)
+```
+
+### Step 4: Identify Hotspots
+From the crawl results, identify:
+1. **High Complexity Functions** (complexity > 10)
+2. **Large Files** (> 500 lines)
+3. **Deeply Nested Code**
+
+For each hotspot, get detailed analysis:
+```
+# URI: scalpel://analysis/<file_path>
+```
+
+### Step 5: Security Assessment
+Run cross-file security scan:
+```
+cross_file_security_scan(
+    include_diagram=True,
+    max_depth=5
+)
+```
+
+### Step 6: Generate Report
+Compile findings into:
+
+1. **Architecture Overview**
+   - Key modules and their responsibilities
+   - Data flow patterns
+   - External dependencies
+
+2. **Quality Metrics**
+   - Total lines of code
+   - Average complexity
+   - Test coverage (if detectable)
+
+3. **Security Posture**
+   - Vulnerabilities found
+   - Risk level assessment
+   - Remediation priorities
+
+4. **Recommendations**
+   - Refactoring candidates
+   - Security fixes needed
+   - Code quality improvements
+
+Please proceed with Step 1 to begin the analysis."""
+
+
+@mcp.prompt(title="Extract and Test")
+def extract_and_test_prompt(file_path: str, function_name: str) -> str:
+    """
+    Extract a function and generate comprehensive tests.
+
+    [20251215_FEATURE] v2.0.0 - Test generation workflow.
+
+    This prompt guides through:
+    1. Extracting a function with its dependencies
+    2. Analyzing its execution paths
+    3. Generating test cases that cover all paths
+    4. Creating a test file
+
+    Args:
+        file_path: Path to the file containing the function
+        function_name: Name of the function to test
+    """
+    return f"""# Extract and Generate Tests Workflow
+
+## Target
+- **File**: `{file_path}`
+- **Function**: `{function_name}`
+
+## Workflow Steps
+
+### Step 1: Extract the Function
+Get the function with all dependencies:
+```
+extract_code(
+    file_path="{file_path}",
+    target_type="function",
+    target_name="{function_name}",
+    include_context=True,
+    include_cross_file_deps=True
+)
+```
+
+### Step 2: Analyze Execution Paths
+Run symbolic execution to discover all paths:
+```
+symbolic_execute(
+    code=<extracted_code>,
+    max_paths=20
+)
+```
+
+### Step 3: Generate Test Cases
+Create tests covering each path:
+```
+generate_unit_tests(
+    code=<extracted_code>,
+    function_name="{function_name}",
+    framework="pytest"
+)
+```
+
+### Step 4: Review Generated Tests
+The generated tests will include:
+- **Happy path tests**: Normal expected inputs
+- **Edge case tests**: Boundary conditions
+- **Error path tests**: Invalid inputs, exceptions
+
+For each test case, verify:
+1. The input values make sense for the path
+2. The expected behavior is correct
+3. Assertions are meaningful
+
+### Step 5: Enhance Tests
+Consider adding:
+- **Property-based tests** for functions with numeric inputs
+- **Mock tests** for external dependencies
+- **Integration tests** if the function calls other modules
+
+### Step 6: Create Test File
+Save the tests to `tests/test_{function_name}.py`:
+```python
+# tests/test_{function_name}.py
+import pytest
+from {file_path.replace('/', '.').replace('.py', '')} import {function_name}
+
+<generated_test_code>
+```
+
+### Step 7: Verify Tests Pass
+Run the tests to ensure they work:
+```bash
+pytest tests/test_{function_name}.py -v
+```
+
+## Coverage Goals
+- Aim for 100% branch coverage
+- Each path from symbolic execution should have a test
+- Edge cases should be explicitly tested
+
+Please proceed with Step 1 to begin extracting the function."""
 
 
 # ============================================================================
@@ -2687,6 +3556,7 @@ async def scan_dependencies(
     project_root: str | None = None,
     include_dev: bool = False,
     scan_vulnerabilities: bool = True,
+    ctx: Context | None = None,
 ) -> DependencyScanResult:
     """
     Scan project dependencies for known vulnerabilities.
@@ -2694,6 +3564,9 @@ async def scan_dependencies(
     [v1.5.0] Use this tool to identify vulnerable dependencies before deployment.
     Parses requirements.txt, pyproject.toml, and package.json, then queries the
     OSV (Open Source Vulnerabilities) database for known CVEs.
+
+    [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
+    Reports progress during dependency parsing and vulnerability scanning.
 
     Why AI agents need this:
     - Security: Identify vulnerable packages before they become exploits
@@ -2708,9 +3581,18 @@ async def scan_dependencies(
     Returns:
         DependencyScanResult with dependency list and vulnerability details
     """
-    return await asyncio.to_thread(
+    # [20251215_FEATURE] v2.0.0 - Progress token support
+    if ctx:
+        await ctx.report_progress(progress=0, total=100)
+
+    result = await asyncio.to_thread(
         _scan_dependencies_sync, project_root, include_dev, scan_vulnerabilities
     )
+
+    if ctx:
+        await ctx.report_progress(progress=100, total=100)
+
+    return result
 
 
 # ============================================================================
@@ -3648,7 +4530,7 @@ def _cross_file_security_scan_sync(
             # [20251215_BUGFIX] v2.0.1 - Use source_module not source_file
             source_file = get_file_for_module(vuln.flow.source_module)
             sink_file = get_file_for_module(vuln.flow.sink_module)
-            
+
             flow_model = TaintFlowModel(
                 source_function=vuln.flow.source_function,
                 source_file=source_file,
@@ -3656,8 +4538,14 @@ def _cross_file_security_scan_sync(
                 sink_function=vuln.flow.sink_function,
                 sink_file=sink_file,
                 sink_line=vuln.flow.sink_line,
-                flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path],
-                taint_type=str(vuln.flow.sink_type.name if hasattr(vuln.flow.sink_type, 'name') else vuln.flow.sink_type),
+                flow_path=[
+                    f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path
+                ],
+                taint_type=str(
+                    vuln.flow.sink_type.name
+                    if hasattr(vuln.flow.sink_type, "name")
+                    else vuln.flow.sink_type
+                ),
             )
             vulnerabilities.append(
                 CrossFileVulnerabilityModel(
@@ -3677,7 +4565,7 @@ def _cross_file_security_scan_sync(
             # [20251215_BUGFIX] v2.0.1 - Use source_module not source_file
             source_file = get_file_for_module(flow.source_module)
             sink_file = get_file_for_module(flow.sink_module)
-            
+
             taint_flows.append(
                 TaintFlowModel(
                     source_function=flow.source_function,
@@ -3686,8 +4574,14 @@ def _cross_file_security_scan_sync(
                     sink_function=flow.sink_function,
                     sink_file=sink_file,
                     sink_line=flow.sink_line,
-                    flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path],
-                    taint_type=str(flow.sink_type.name if hasattr(flow.sink_type, 'name') else flow.sink_type),
+                    flow_path=[
+                        f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path
+                    ],
+                    taint_type=str(
+                        flow.sink_type.name
+                        if hasattr(flow.sink_type, "name")
+                        else flow.sink_type
+                    ),
                 )
             )
 
@@ -3749,6 +4643,7 @@ async def cross_file_security_scan(
     entry_points: list[str] | None = None,
     max_depth: int = 5,
     include_diagram: bool = True,
+    ctx: Context | None = None,
 ) -> CrossFileSecurityResult:
     """
     Perform cross-file security analysis tracking taint flow across module boundaries.
@@ -3756,6 +4651,9 @@ async def cross_file_security_scan(
     [v1.5.1] Use this tool to detect vulnerabilities where tainted data crosses
     file boundaries before reaching a dangerous sink. This catches security
     issues that single-file analysis would miss.
+
+    [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
+    Reports progress during file discovery and taint analysis phases.
 
     Key capabilities:
     - Track taint flow through function calls across files
@@ -3786,13 +4684,24 @@ async def cross_file_security_scan(
     Returns:
         CrossFileSecurityResult with vulnerabilities, taint flows, and risk assessment
     """
-    return await asyncio.to_thread(
+    # [20251215_FEATURE] v2.0.0 - Progress token support
+    # Report initial progress (discovery phase)
+    if ctx:
+        await ctx.report_progress(progress=0, total=100)
+
+    result = await asyncio.to_thread(
         _cross_file_security_scan_sync,
         project_root,
         entry_points,
         max_depth,
         include_diagram,
     )
+
+    # Report completion
+    if ctx:
+        await ctx.report_progress(progress=100, total=100)
+
+    return result
 
 
 # ============================================================================
@@ -3935,17 +4844,24 @@ def run_server(
         protection and allows connections from any host. Only use on trusted
         networks.
     """
+    # [20251215_BUGFIX] Configure logging to stderr before anything else
+    _configure_logging(transport)
+
     global PROJECT_ROOT
     if root_path:
         PROJECT_ROOT = Path(root_path).resolve()
         if not PROJECT_ROOT.exists():
+            # Use stderr for warnings to avoid corrupting stdio transport
             print(
-                f"Warning: Root path {PROJECT_ROOT} does not exist. Using current directory."
+                f"Warning: Root path {PROJECT_ROOT} does not exist. Using current directory.",
+                file=sys.stderr,
             )
             PROJECT_ROOT = Path.cwd()
 
-    print(f"Code Scalpel MCP Server v{__version__}")
-    print(f"Project Root: {PROJECT_ROOT}")
+    # [20251215_BUGFIX] Print to stderr for stdio transport
+    output = sys.stderr if transport == "stdio" else sys.stdout
+    print(f"Code Scalpel MCP Server v{__version__}", file=output)
+    print(f"Project Root: {PROJECT_ROOT}", file=output)
 
     if transport == "streamable-http" or transport == "sse":
         from mcp.server.transport_security import TransportSecuritySettings
@@ -3961,12 +4877,68 @@ def run_server(
                 allowed_hosts=["*"],
                 allowed_origins=["*"],
             )
-            print("WARNING: LAN access enabled. Host validation disabled.")
-            print("Only use on trusted networks!")
+            print("WARNING: LAN access enabled. Host validation disabled.", file=output)
+            print("Only use on trusted networks!", file=output)
+
+        # [20251215_FEATURE] Register HTTP health endpoint for Docker health checks
+        _register_http_health_endpoint(mcp, host, port)
 
         mcp.run(transport=transport)
     else:
         mcp.run()
+
+
+def _register_http_health_endpoint(mcp_instance, host: str, port: int):
+    """
+    Register a simple HTTP /health endpoint for Docker health checks.
+
+    [20251215_FEATURE] v2.0.0 - HTTP health endpoint that returns immediately.
+
+    This endpoint is separate from the MCP protocol and provides a simple
+    200 OK response for container orchestration health checks.
+    """
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    import json
+
+    class HealthHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/health":
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                response = json.dumps(
+                    {
+                        "status": "healthy",
+                        "version": __version__,
+                        "transport": "http",
+                    }
+                )
+                self.wfile.write(response.encode())
+            else:
+                # Let other paths fall through to MCP handler
+                self.send_response(404)
+                self.end_headers()
+
+        def log_message(self, format, *args):
+            # Suppress HTTP access logs to stderr
+            pass
+
+    def run_health_server():
+        # Run on a different port (health_port = mcp_port + 1)
+        health_port = port + 1
+        try:
+            server = HTTPServer((host, health_port), HealthHandler)
+            logger.info(
+                f"Health endpoint available at http://{host}:{health_port}/health"
+            )
+            server.serve_forever()
+        except Exception as e:
+            logger.warning(f"Could not start health server: {e}")
+
+    # Start health server in background thread
+    health_thread = threading.Thread(target=run_health_server, daemon=True)
+    health_thread.start()
 
 
 if __name__ == "__main__":

@@ -575,7 +575,7 @@ class PythonNormalizer(BaseNormalizer):
     def _normalize_ListComp(self, node: ast.ListComp) -> IRCall:
         """
         Normalize list comprehension to IR.
-        
+
         [x * 2 for x in items if x > 0] becomes:
         __listcomp__(
             element=BinaryOp(Name('x'), MUL, Constant(2)),
@@ -583,7 +583,7 @@ class PythonNormalizer(BaseNormalizer):
             iter=Name('items'),
             conditions=[Compare(Name('x'), [GT], [Constant(0)])]
         )
-        
+
         This representation preserves the semantic structure for:
         - Test generation (can analyze the element expression and conditions)
         - Type inference (can determine output type from element type)
@@ -599,39 +599,45 @@ class PythonNormalizer(BaseNormalizer):
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
-        
+
         gen = node.generators[0]
-        
+
         # Normalize the comprehension components
         element_expr = self.normalize_node(node.elt)
         target_expr = self.normalize_node(gen.target)
         iter_expr = self.normalize_node(gen.iter)
-        
+
         # Normalize filter conditions (if any)
         conditions = [self.normalize_node(cond) for cond in gen.ifs]
-        
+
         # For nested generators, we can chain them
         # But for v2.0.0, focus on single-level comprehensions
         call = IRCall(
             func=IRName(id="__listcomp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs={"conditions": IRList(elements=conditions, source_language=self.language)}
-            if conditions
-            else {},
+            kwargs=(
+                {
+                    "conditions": IRList(
+                        elements=conditions, source_language=self.language
+                    )
+                }
+                if conditions
+                else {}
+            ),
             loc=self._make_loc(node),
             source_language=self.language,
         )
-        
+
         # Mark metadata for nested generators
         if len(node.generators) > 1:
             call._metadata["nested_generators"] = len(node.generators)
-        
+
         return call
 
     def _normalize_SetComp(self, node: ast.SetComp) -> IRCall:
         """
         [20251214_FEATURE] v2.0.0 - Normalize set comprehension.
-        
+
         {x for x in items} -> __setcomp__(element, target, iter)
         """
         if not node.generators:
@@ -641,19 +647,25 @@ class PythonNormalizer(BaseNormalizer):
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
-        
+
         gen = node.generators[0]
         element_expr = self.normalize_node(node.elt)
         target_expr = self.normalize_node(gen.target)
         iter_expr = self.normalize_node(gen.iter)
         conditions = [self.normalize_node(cond) for cond in gen.ifs]
-        
+
         return IRCall(
             func=IRName(id="__setcomp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs={"conditions": IRList(elements=conditions, source_language=self.language)}
-            if conditions
-            else {},
+            kwargs=(
+                {
+                    "conditions": IRList(
+                        elements=conditions, source_language=self.language
+                    )
+                }
+                if conditions
+                else {}
+            ),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -661,7 +673,7 @@ class PythonNormalizer(BaseNormalizer):
     def _normalize_DictComp(self, node: ast.DictComp) -> IRCall:
         """
         [20251214_FEATURE] v2.0.0 - Normalize dict comprehension.
-        
+
         {k: v for k, v in items} -> __dictcomp__(key, value, target, iter)
         """
         if not node.generators:
@@ -671,20 +683,26 @@ class PythonNormalizer(BaseNormalizer):
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
-        
+
         gen = node.generators[0]
         key_expr = self.normalize_node(node.key)
         value_expr = self.normalize_node(node.value)
         target_expr = self.normalize_node(gen.target)
         iter_expr = self.normalize_node(gen.iter)
         conditions = [self.normalize_node(cond) for cond in gen.ifs]
-        
+
         return IRCall(
             func=IRName(id="__dictcomp__", source_language=self.language),
             args=[key_expr, value_expr, target_expr, iter_expr],
-            kwargs={"conditions": IRList(elements=conditions, source_language=self.language)}
-            if conditions
-            else {},
+            kwargs=(
+                {
+                    "conditions": IRList(
+                        elements=conditions, source_language=self.language
+                    )
+                }
+                if conditions
+                else {}
+            ),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -692,7 +710,7 @@ class PythonNormalizer(BaseNormalizer):
     def _normalize_GeneratorExp(self, node: ast.GeneratorExp) -> IRCall:
         """
         [20251214_FEATURE] v2.0.0 - Normalize generator expression.
-        
+
         (x for x in items) -> __genexp__(element, target, iter)
         """
         if not node.generators:
@@ -702,19 +720,25 @@ class PythonNormalizer(BaseNormalizer):
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
-        
+
         gen = node.generators[0]
         element_expr = self.normalize_node(node.elt)
         target_expr = self.normalize_node(gen.target)
         iter_expr = self.normalize_node(gen.iter)
         conditions = [self.normalize_node(cond) for cond in gen.ifs]
-        
+
         return IRCall(
             func=IRName(id="__genexp__", source_language=self.language),
             args=[element_expr, target_expr, iter_expr],
-            kwargs={"conditions": IRList(elements=conditions, source_language=self.language)}
-            if conditions
-            else {},
+            kwargs=(
+                {
+                    "conditions": IRList(
+                        elements=conditions, source_language=self.language
+                    )
+                }
+                if conditions
+                else {}
+            ),
             loc=self._make_loc(node),
             source_language=self.language,
         )

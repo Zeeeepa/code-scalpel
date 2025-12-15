@@ -10,13 +10,14 @@
     "command": "pytest tests/ -v"
   },
   "summary": {
-    "total_tests": 2581,
-    "passed": 2580,
+    "total_tests": 2669,
+    "passed": 2668,
     "failed": 0,
     "skipped": 0,
     "xfailed": 1,
     "xpassed": 0,
-    "pass_rate": "100%"
+    "pass_rate": "100%",
+    "note": "[20251215_DOCS] Updated after Python 3.13 DeprecationWarning fixes"
   },
   "test_categories": {
     "security_tests": {

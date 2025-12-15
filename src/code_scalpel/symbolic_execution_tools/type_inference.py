@@ -135,12 +135,10 @@ class TypeInferenceEngine:
         """Infer the type of an expression."""
 
         # Integer literals
-        if isinstance(node, ast.Constant):
+        if isinstance(
+            node, ast.Constant
+        ):  # [20251216_BUGFIX] Rely on Constant to avoid deprecated ast.Num/Str warnings
             return self._infer_constant_type(node.value)
-
-        # Legacy Num node (Python 3.7 compat, but we're 3.9+)
-        if isinstance(node, ast.Num):  # pragma: no cover
-            return self._infer_constant_type(node.n)
 
         # Name reference: look up in our type map
         if isinstance(node, ast.Name):

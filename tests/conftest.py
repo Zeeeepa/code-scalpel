@@ -8,9 +8,22 @@ Pytest configuration and fixtures for Code Scalpel tests.
 import os
 import sys
 import json
+import warnings
 import pytest
 from unittest.mock import MagicMock, patch
 import urllib.error
+
+# [20251216_TEST] Silence upstream astor ast.Num deprecation noise on Python 3.13
+warnings.filterwarnings(
+    "ignore",
+    message="ast.Num is deprecated and will be removed in Python 3.14",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="ast.Str is deprecated and will be removed in Python 3.14",
+    category=DeprecationWarning,
+)
 
 # Add the src directory to the path so tests can import code_scalpel
 # This allows tests to run both before and after pip install

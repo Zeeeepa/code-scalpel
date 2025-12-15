@@ -194,12 +194,15 @@ def test_try_and_throw_emit_warnings(normalizer):
 
     # try_statement should now return IRTry (not None with warning)
     from code_scalpel.ir.nodes import IRTry, IRRaise
+
     try_result = normalizer.normalize_node(try_node)
     assert isinstance(try_result, IRTry), f"Expected IRTry, got {type(try_result)}"
 
     # throw_statement should now return IRRaise (not None with warning)
     throw_result = normalizer.normalize_node(throw_node)
-    assert isinstance(throw_result, IRRaise), f"Expected IRRaise, got {type(throw_result)}"
+    assert isinstance(
+        throw_result, IRRaise
+    ), f"Expected IRRaise, got {type(throw_result)}"
 
 
 # [20251214_REFACTOR] Remove duplicate imports and keep helper stubs lint-clean.

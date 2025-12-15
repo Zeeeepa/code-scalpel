@@ -10,9 +10,11 @@ import pytest
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from code_scalpel.mcp.server import extract_code, analyze_code
+from code_scalpel.mcp.server import extract_code
+
+# [20251215_TEST] Lint cleanup for polyglot edge case tests (remove unused imports).
 
 
 class TestPythonEdgeCases:
@@ -21,20 +23,22 @@ class TestPythonEdgeCases:
     @pytest.mark.asyncio
     async def test_walrus_operator(self):
         """Assignment expression (walrus operator)."""
-        code = '''
+        code = """
 def process(data):
     if (n := len(data)) > 10:
         return n
     return 0
-'''
-        result = await extract_code(code=code, target_type="function", target_name="process")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="process"
+        )
         assert result.success
         assert ":=" in result.target_code
 
     @pytest.mark.asyncio
     async def test_match_statement(self):
         """Python 3.10 match statement."""
-        code = '''
+        code = """
 def handle_command(command):
     match command:
         case "quit" | "exit":
@@ -45,62 +49,74 @@ def handle_command(command):
             return f"Attacking {target}"
         case _:
             return "Unknown command"
-'''
-        result = await extract_code(code=code, target_type="function", target_name="handle_command")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="handle_command"
+        )
         assert result.success
         assert "match" in result.target_code
 
     @pytest.mark.asyncio
     async def test_positional_only_params(self):
         """Positional-only parameters (/)."""
-        code = '''
+        code = """
 def divmod_custom(a, b, /):
     return a // b, a % b
-'''
-        result = await extract_code(code=code, target_type="function", target_name="divmod_custom")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="divmod_custom"
+        )
         assert result.success
         assert "/" in result.target_code
 
     @pytest.mark.asyncio
     async def test_keyword_only_params(self):
         """Keyword-only parameters (*)."""
-        code = '''
+        code = """
 def configure(*, debug=False, timeout=30):
     return {"debug": debug, "timeout": timeout}
-'''
-        result = await extract_code(code=code, target_type="function", target_name="configure")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="configure"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_all_param_types(self):
         """Function with all parameter types."""
-        code = '''
+        code = """
 def complex_params(pos_only, /, normal, *args, kw_only, **kwargs):
     return (pos_only, normal, args, kw_only, kwargs)
-'''
-        result = await extract_code(code=code, target_type="function", target_name="complex_params")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="complex_params"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_nested_f_strings(self):
         """Nested f-strings."""
-        code = '''
+        code = """
 def nested_fstring(items):
     return f"{len(items)} items: {', '.join(f'{i}: {v}' for i, v in enumerate(items))}"
-'''
-        result = await extract_code(code=code, target_type="function", target_name="nested_fstring")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="nested_fstring"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_async_generator(self):
         """Async generator function."""
-        code = '''
+        code = """
 async def async_range(n):
     for i in range(n):
         await asyncio.sleep(0.1)
         yield i
-'''
-        result = await extract_code(code=code, target_type="function", target_name="async_range")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="async_range"
+        )
         assert result.success
         assert "async def" in result.target_code
         assert "yield" in result.target_code
@@ -108,7 +124,7 @@ async def async_range(n):
     @pytest.mark.asyncio
     async def test_dataclass_with_field(self):
         """Dataclass with field defaults."""
-        code = '''
+        code = """
 from dataclasses import dataclass, field
 from typing import List
 
@@ -117,8 +133,10 @@ class Config:
     name: str
     values: List[int] = field(default_factory=list)
     _cache: dict = field(default_factory=dict, repr=False)
-'''
-        result = await extract_code(code=code, target_type="class", target_name="Config")
+"""
+        result = await extract_code(
+            code=code, target_type="class", target_name="Config"
+        )
         assert result.success
         assert "@dataclass" in result.target_code
 
@@ -129,7 +147,7 @@ class TestTypeScriptEdgeCases:
     @pytest.mark.asyncio
     async def test_conditional_types(self):
         """Conditional types."""
-        code = '''
+        code = """
 type TypeName<T> =
     T extends string ? "string" :
     T extends number ? "number" :
@@ -141,19 +159,19 @@ type TypeName<T> =
 function getTypeName<T>(value: T): TypeName<T> {
     return typeof value as TypeName<T>;
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="getTypeName",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_mapped_types(self):
         """Mapped types."""
-        code = '''
+        code = """
 type Readonly<T> = {
     readonly [P in keyof T]: T[P];
 };
@@ -165,19 +183,19 @@ type Mutable<T> = {
 function freeze<T>(obj: T): Readonly<T> {
     return Object.freeze(obj);
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="freeze",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_template_literal_types(self):
         """Template literal types."""
-        code = '''
+        code = """
 type EventName<T extends string> = `on${Capitalize<T>}`;
 type Handler = EventName<"click" | "focus" | "blur">;
 
@@ -187,38 +205,38 @@ function handleEvent<T extends string>(
 ): void {
     console.log(event);
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="handleEvent",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_infer_keyword(self):
         """Infer keyword in conditional types."""
-        code = '''
+        code = """
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 type ArrayElement<T> = T extends (infer E)[] ? E : never;
 
 async function unwrap<T>(promise: Promise<T>): Promise<UnwrapPromise<Promise<T>>> {
     return await promise;
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="unwrap",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_satisfies_operator(self):
         """TypeScript satisfies operator (4.9+)."""
-        code = '''
+        code = """
 type Colors = "red" | "green" | "blue";
 type RGB = [red: number, green: number, blue: number];
 
@@ -231,19 +249,19 @@ const palette = {
 function getColor(name: Colors): RGB | string {
     return palette[name];
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="getColor",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_decorator_factory(self):
         """TypeScript decorator factory."""
-        code = '''
+        code = """
 function log(prefix: string) {
     return function <T extends { new (...args: any[]): {} }>(
         target: T
@@ -261,12 +279,9 @@ function log(prefix: string) {
 class UserService {
     constructor(private name: string) {}
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
-            target_name="log",
-            language="typescript"
+            code=code, target_type="function", target_name="log", language="typescript"
         )
         assert result.success
 
@@ -277,7 +292,7 @@ class TestJavaEdgeCases:
     @pytest.mark.asyncio
     async def test_record_class(self):
         """Java record class (Java 16+)."""
-        code = '''
+        code = """
 public record Point(int x, int y) {
     public Point {
         if (x < 0 || y < 0) {
@@ -289,12 +304,9 @@ public record Point(int x, int y) {
         return Math.sqrt(x * x + y * y);
     }
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="class", 
-            target_name="Point",
-            language="java"
+            code=code, target_type="class", target_name="Point", language="java"
         )
         assert result.success
         assert "record" in result.target_code
@@ -302,7 +314,7 @@ public record Point(int x, int y) {
     @pytest.mark.asyncio
     async def test_sealed_class(self):
         """Java sealed class (Java 17+)."""
-        code = '''
+        code = """
 public sealed class Shape permits Circle, Rectangle, Triangle {
     protected final String color;
     
@@ -326,12 +338,9 @@ final class Circle extends Shape {
         return Math.PI * radius * radius;
     }
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="class", 
-            target_name="Shape",
-            language="java"
+            code=code, target_type="class", target_name="Shape", language="java"
         )
         assert result.success
         assert "sealed" in result.target_code
@@ -339,7 +348,7 @@ final class Circle extends Shape {
     @pytest.mark.asyncio
     async def test_pattern_matching_switch(self):
         """Java pattern matching in switch (Java 21+)."""
-        code = '''
+        code = """
 public class PatternMatcher {
     public static String describe(Object obj) {
         return switch (obj) {
@@ -352,19 +361,19 @@ public class PatternMatcher {
         };
     }
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="class", 
+            code=code,
+            target_type="class",
             target_name="PatternMatcher",
-            language="java"
+            language="java",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_var_keyword(self):
         """Java var keyword (Java 10+)."""
-        code = '''
+        code = """
 public class VarExample {
     public void process() {
         var list = new ArrayList<String>();
@@ -374,12 +383,9 @@ public class VarExample {
         }
     }
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="class", 
-            target_name="VarExample",
-            language="java"
+            code=code, target_type="class", target_name="VarExample", language="java"
         )
         assert result.success
 
@@ -399,10 +405,10 @@ public class TextBlocks {
 }
 '''
         result = await extract_code(
-            code=code, 
-            target_type="method", 
+            code=code,
+            target_type="method",
             target_name="TextBlocks.getQuery",
-            language="java"
+            language="java",
         )
         assert result.success
         assert '"""' in result.target_code
@@ -414,7 +420,7 @@ class TestJSXEdgeCases:
     @pytest.mark.asyncio
     async def test_fragments(self):
         """JSX fragments."""
-        code = '''
+        code = """
 function FragmentExample({ items }) {
     return (
         <>
@@ -424,12 +430,12 @@ function FragmentExample({ items }) {
         </>
     );
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="FragmentExample",
-            language="javascript"
+            language="javascript",
         )
         assert result.success
         assert "<>" in result.target_code
@@ -437,16 +443,16 @@ function FragmentExample({ items }) {
     @pytest.mark.asyncio
     async def test_spread_props(self):
         """JSX spread props."""
-        code = '''
+        code = """
 function SpreadComponent({ className, ...restProps }) {
     return <div className={`base ${className}`} {...restProps} />;
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="SpreadComponent",
-            language="javascript"
+            language="javascript",
         )
         assert result.success
         assert "...restProps" in result.target_code
@@ -454,7 +460,7 @@ function SpreadComponent({ className, ...restProps }) {
     @pytest.mark.asyncio
     async def test_render_props(self):
         """Render props pattern."""
-        code = '''
+        code = """
 function DataProvider({ render }) {
     const [data, setData] = useState(null);
     
@@ -464,19 +470,19 @@ function DataProvider({ render }) {
     
     return render(data);
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="DataProvider",
-            language="javascript"
+            language="javascript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_conditional_rendering(self):
         """Complex conditional rendering."""
-        code = '''
+        code = """
 function ConditionalComponent({ status, user, items }) {
     return (
         <div>
@@ -495,12 +501,12 @@ function ConditionalComponent({ status, user, items }) {
         </div>
     );
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="ConditionalComponent",
-            language="javascript"
+            language="javascript",
         )
         assert result.success
 
@@ -511,7 +517,7 @@ class TestTSXEdgeCases:
     @pytest.mark.asyncio
     async def test_generic_component(self):
         """Generic TSX component."""
-        code = '''
+        code = """
 interface ListProps<T> {
     items: T[];
     renderItem: (item: T) => React.ReactNode;
@@ -527,19 +533,19 @@ function GenericList<T>({ items, renderItem, keyExtractor }: ListProps<T>) {
         </ul>
     );
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="GenericList",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_forward_ref(self):
         """forwardRef with TypeScript."""
-        code = '''
+        code = """
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label: string;
 }
@@ -552,12 +558,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         </div>
     )
 );
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="variable", 
+            code=code,
+            target_type="variable",
             target_name="Input",
-            language="typescript"
+            language="typescript",
         )
         # Should extract the forwardRef assignment
         assert result is not None
@@ -565,7 +571,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     @pytest.mark.asyncio
     async def test_context_with_types(self):
         """React Context with TypeScript."""
-        code = '''
+        code = """
 interface ThemeContextType {
     theme: 'light' | 'dark';
     toggleTheme: () => void;
@@ -580,12 +586,12 @@ function useTheme(): ThemeContextType {
     }
     return context;
 }
-'''
+"""
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="useTheme",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 

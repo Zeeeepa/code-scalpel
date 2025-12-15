@@ -101,8 +101,15 @@ def link_stdlib() -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate benchmark fixtures")
-    parser.add_argument("--synthetic", type=int, metavar="N", help="Generate N-file synthetic project")
-    parser.add_argument("--clone", type=str, metavar="REPO", help="Clone real repo (django, flask, requests)")
+    parser.add_argument(
+        "--synthetic", type=int, metavar="N", help="Generate N-file synthetic project"
+    )
+    parser.add_argument(
+        "--clone",
+        type=str,
+        metavar="REPO",
+        help="Clone real repo (django, flask, requests)",
+    )
     parser.add_argument("--stdlib", action="store_true", help="Link Python stdlib")
     args = parser.parse_args()
 

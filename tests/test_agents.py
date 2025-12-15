@@ -21,6 +21,8 @@ class TestBaseCodeAnalysisAgent:
     class TestAgent(BaseCodeAnalysisAgent):
         """Concrete test agent implementation."""
 
+        __test__ = False  # [20251215_BUGFIX] Exclude from pytest collection
+
         async def observe(self, target: str) -> Dict[str, Any]:
             return {"success": True, "data": "test"}
 

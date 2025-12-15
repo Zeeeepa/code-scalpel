@@ -21,20 +21,22 @@ import asyncio
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from code_scalpel.mcp.server import (
     extract_code,
     security_scan,
     analyze_code,
-    get_file_context,
     validate_paths,
 )
+
+# [20251215_TEST] Lint cleanup for adversarial tests (remove unused imports).
 
 
 # ============================================================================
 # 1. MALFORMED INPUT HANDLING
 # ============================================================================
+
 
 class TestMalformedInputs:
     """Tests for handling malformed, incomplete, or invalid inputs."""
@@ -49,14 +51,18 @@ class TestMalformedInputs:
     @pytest.mark.asyncio
     async def test_extract_whitespace_only(self):
         """Whitespace-only code should fail gracefully."""
-        result = await extract_code(code="   \n\t\n   ", target_type="function", target_name="foo")
+        result = await extract_code(
+            code="   \n\t\n   ", target_type="function", target_name="foo"
+        )
         assert not result.success
 
     @pytest.mark.asyncio
     async def test_extract_incomplete_function(self):
         """Incomplete function definition should be handled."""
         code = "def incomplete_func("
-        result = await extract_code(code=code, target_type="function", target_name="incomplete_func")
+        result = await extract_code(
+            code=code, target_type="function", target_name="incomplete_func"
+        )
         # Should either fail gracefully or handle partial parse
         assert result.error is not None or not result.success
 
@@ -68,14 +74,18 @@ def broken():
     x = [1, 2, 3
     return x
 """
-        result = await extract_code(code=code, target_type="function", target_name="broken")
+        result = await extract_code(
+            code=code, target_type="function", target_name="broken"
+        )
         assert not result.success
 
     @pytest.mark.asyncio
     async def test_extract_null_bytes(self):
         """Code with null bytes should be handled."""
         code = "def foo():\x00\n    pass"
-        result = await extract_code(code=code, target_type="function", target_name="foo")
+        result = await extract_code(
+            code=code, target_type="function", target_name="foo"
+        )
         # Should either clean or reject
         assert result is not None
 
@@ -83,14 +93,18 @@ def broken():
     async def test_extract_mixed_indentation(self):
         """Mixed tabs and spaces should be handled."""
         code = "def mixed():\n\treturn 1\n    return 2"
-        result = await extract_code(code=code, target_type="function", target_name="mixed")
+        result = await extract_code(
+            code=code, target_type="function", target_name="mixed"
+        )
         # Python would reject this, so should we
         assert not result.success or "indent" in str(result.error).lower()
 
     @pytest.mark.asyncio
     async def test_security_scan_binary_content(self):
         """Binary content should be rejected gracefully."""
-        binary = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]).decode('latin-1')
+        binary = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]).decode(
+            "latin-1"
+        )
         result = await security_scan(code=binary)
         # Should not crash
         assert result is not None
@@ -99,6 +113,7 @@ def broken():
 # ============================================================================
 # 2. UNICODE AND ENCODING EDGE CASES
 # ============================================================================
+
 
 class TestUnicodeEdgeCases:
     """Tests for Unicode handling and encoding edge cases."""
@@ -110,30 +125,36 @@ class TestUnicodeEdgeCases:
 def 计算税(金额, 税率=0.1):
     return 金额 * 税率
 """
-        result = await extract_code(code=code, target_type="function", target_name="计算税")
+        result = await extract_code(
+            code=code, target_type="function", target_name="计算税"
+        )
         # Python 3 supports Unicode identifiers
         assert result.success or "unicode" in str(result.error).lower()
 
     @pytest.mark.asyncio
     async def test_extract_emoji_in_string(self):
         """Code with emoji in strings should be handled."""
-        code = '''
+        code = """
 def greet():
     return "Hello 👋 World 🌍!"
-'''
-        result = await extract_code(code=code, target_type="function", target_name="greet")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="greet"
+        )
         assert result.success
         assert "👋" in result.target_code or result.success
 
     @pytest.mark.asyncio
     async def test_extract_rtl_characters(self):
         """Right-to-left characters should be handled."""
-        code = '''
+        code = """
 def test_rtl():
     # مرحبا
     return "שלום"
-'''
-        result = await extract_code(code=code, target_type="function", target_name="test_rtl")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="test_rtl"
+        )
         assert result.success
 
     @pytest.mark.asyncio
@@ -141,7 +162,9 @@ def test_rtl():
         """Zero-width characters should not break parsing."""
         # Zero-width space and zero-width joiner
         code = "def foo\u200b\u200c():\n    pass"
-        result = await extract_code(code=code, target_type="function", target_name="foo")
+        result = await extract_code(
+            code=code, target_type="function", target_name="foo"
+        )
         # Should either succeed or fail gracefully
         assert result is not None
 
@@ -149,9 +172,9 @@ def test_rtl():
     async def test_security_scan_homoglyph_attack(self):
         """Homoglyph attack (lookalike characters) should be detected."""
         # Using Cyrillic 'а' (U+0430) instead of Latin 'a'
-        code = '''
+        code = """
 pаssword = "secret123"  # Cyrillic 'а' in password
-'''
+"""
         result = await security_scan(code=code)
         # Should detect the secret even with homoglyph
         assert result.success
@@ -160,6 +183,7 @@ pаssword = "secret123"  # Cyrillic 'а' in password
 # ============================================================================
 # 3. DEEPLY NESTED STRUCTURES
 # ============================================================================
+
 
 class TestDeeplyNestedStructures:
     """Tests for handling deeply nested code structures."""
@@ -182,9 +206,7 @@ class A:
                                             return "found"
 """
         result = await extract_code(
-            code=code, 
-            target_type="method", 
-            target_name="J.deeply_nested"
+            code=code, target_type="method", target_name="J.deeply_nested"
         )
         assert result.success
         assert "deeply_nested" in result.target_code
@@ -196,7 +218,9 @@ class A:
 def matrix_cube():
     return [[[[[x*y*z*w*v for v in range(2)] for w in range(2)] for z in range(2)] for y in range(2)] for x in range(2)]
 """
-        result = await extract_code(code=code, target_type="function", target_name="matrix_cube")
+        result = await extract_code(
+            code=code, target_type="function", target_name="matrix_cube"
+        )
         assert result.success
 
     @pytest.mark.asyncio
@@ -219,6 +243,7 @@ class Node:
 # 4. EXTREMELY LARGE INPUTS
 # ============================================================================
 
+
 class TestLargeInputs:
     """Tests for handling extremely large inputs."""
 
@@ -227,9 +252,11 @@ class TestLargeInputs:
         """Extract from a file with 10,000 functions."""
         functions = [f"def func_{i}():\n    return {i}\n" for i in range(1000)]
         code = "\n".join(functions)
-        
+
         # Extract function from middle
-        result = await extract_code(code=code, target_type="function", target_name="func_500")
+        result = await extract_code(
+            code=code, target_type="function", target_name="func_500"
+        )
         assert result.success
         assert "500" in result.target_code
 
@@ -238,8 +265,10 @@ class TestLargeInputs:
         """Function with 1000+ lines should be extractable."""
         lines = ["    x = " + str(i) for i in range(500)]
         code = "def huge_function():\n" + "\n".join(lines) + "\n    return x"
-        
-        result = await extract_code(code=code, target_type="function", target_name="huge_function")
+
+        result = await extract_code(
+            code=code, target_type="function", target_name="huge_function"
+        )
         assert result.success
         assert result.line_end - result.line_start >= 500
 
@@ -248,7 +277,7 @@ class TestLargeInputs:
         """Analyze code with 100 classes."""
         classes = [f"class Class{i}:\n    pass\n" for i in range(100)]
         code = "\n".join(classes)
-        
+
         result = await analyze_code(code=code)
         assert result.success
         assert result.class_count == 100
@@ -259,13 +288,15 @@ class TestLargeInputs:
         # Generate code with many potential vulnerabilities
         vulnerable_funcs = []
         for i in range(50):
-            vulnerable_funcs.append(f'''
+            vulnerable_funcs.append(
+                f"""
 def vulnerable_{i}(user_input):
     query = f"SELECT * FROM table WHERE id={{user_input}}"
     cursor.execute(query)
-''')
+"""
+            )
         code = "\n".join(vulnerable_funcs)
-        
+
         result = await security_scan(code=code)
         assert result.success
         assert result.vulnerability_count > 0
@@ -274,6 +305,7 @@ def vulnerable_{i}(user_input):
 # ============================================================================
 # 5. PATHOLOGICAL PATTERNS
 # ============================================================================
+
 
 class TestPathologicalPatterns:
     """Tests for pathological patterns that could cause performance issues."""
@@ -287,27 +319,31 @@ class TestPathologicalPatterns:
 def heavily_decorated():
     pass
 """
-        result = await extract_code(code=code, target_type="function", target_name="heavily_decorated")
+        result = await extract_code(
+            code=code, target_type="function", target_name="heavily_decorated"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_extract_with_long_string_literal(self):
         """Function with 10KB string literal should be handled."""
         long_string = "x" * 10000
-        code = f'''
+        code = f"""
 def with_long_string():
     return "{long_string}"
-'''
-        result = await extract_code(code=code, target_type="function", target_name="with_long_string")
+"""
+        result = await extract_code(
+            code=code, target_type="function", target_name="with_long_string"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_security_scan_regex_bomb(self):
         """Input that could cause regex catastrophic backtracking."""
         # Pattern that could cause ReDoS if not handled properly
-        code = '''
+        code = """
 password = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
-'''
+"""
         result = await security_scan(code=code)
         # Should complete without hanging
         assert result is not None
@@ -317,14 +353,17 @@ password = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
         """Function with 100 parameters should be extractable."""
         params = ", ".join([f"arg{i}=None" for i in range(100)])
         code = f"def many_params({params}):\n    return locals()"
-        
-        result = await extract_code(code=code, target_type="function", target_name="many_params")
+
+        result = await extract_code(
+            code=code, target_type="function", target_name="many_params"
+        )
         assert result.success
 
 
 # ============================================================================
 # 6. CROSS-LANGUAGE EDGE CASES
 # ============================================================================
+
 
 class TestCrossLanguageEdgeCases:
     """Tests for polyglot extraction edge cases."""
@@ -341,10 +380,10 @@ function complexGeneric<T extends Record<string, unknown>, K extends keyof T>(
 }
 """
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="complexGeneric",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
         assert "complexGeneric" in result.target_code
@@ -373,10 +412,7 @@ public class User extends BaseEntity {
 }
 """
         result = await extract_code(
-            code=code, 
-            target_type="class", 
-            target_name="User",
-            language="java"
+            code=code, target_type="class", target_name="User", language="java"
         )
         assert result.success
         assert "@Entity" in result.target_code
@@ -395,10 +431,10 @@ function buildQuery(table, conditions) {
 }
 """
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="buildQuery",
-            language="javascript"
+            language="javascript",
         )
         assert result.success
 
@@ -417,10 +453,10 @@ function GenericList<T>({ items, renderItem, keyExtractor }: Props<T>) {
 }
 """
         result = await extract_code(
-            code=code, 
-            target_type="function", 
+            code=code,
+            target_type="function",
             target_name="GenericList",
-            language="typescript"
+            language="typescript",
         )
         assert result.success
 
@@ -429,20 +465,21 @@ function GenericList<T>({ items, renderItem, keyExtractor }: Props<T>) {
 # 7. SECURITY BYPASS ATTEMPTS
 # ============================================================================
 
+
 class TestSecurityBypassAttempts:
     """Tests for attempted security scanner bypasses."""
 
     @pytest.mark.asyncio
     async def test_detect_obfuscated_sql_injection(self):
         """Detect SQL injection with string concatenation obfuscation."""
-        code = '''
+        code = """
 def sneaky_sql(user_id):
     part1 = "SELECT * FROM "
     part2 = "users WHERE "
     part3 = "id = "
     query = part1 + part2 + part3 + user_id
     cursor.execute(query)
-'''
+"""
         result = await security_scan(code=code)
         # Should detect this pattern
         assert result.success
@@ -450,11 +487,11 @@ def sneaky_sql(user_id):
     @pytest.mark.asyncio
     async def test_detect_encoded_secret(self):
         """Detect base64-encoded secrets."""
-        code = '''
+        code = """
 import base64
 # This is "password123" base64 encoded
 secret = base64.b64decode("cGFzc3dvcmQxMjM=").decode()
-'''
+"""
         result = await security_scan(code=code)
         # May or may not detect, but should not crash
         assert result.success
@@ -462,13 +499,13 @@ secret = base64.b64decode("cGFzc3dvcmQxMjM=").decode()
     @pytest.mark.asyncio
     async def test_detect_eval_injection(self):
         """Detect eval-based code injection."""
-        code = '''
+        code = """
 def dynamic_exec(user_code):
     eval(user_code)  # Code injection
     
 def also_dangerous(cmd):
     exec(cmd)  # Also code injection
-'''
+"""
         result = await security_scan(code=code)
         assert result.success
         assert result.vulnerability_count > 0
@@ -476,24 +513,24 @@ def also_dangerous(cmd):
     @pytest.mark.asyncio
     async def test_detect_pickle_deserialization(self):
         """Detect unsafe pickle deserialization."""
-        code = '''
+        code = """
 import pickle
 
 def load_data(user_data):
     return pickle.loads(user_data)  # Unsafe deserialization
-'''
+"""
         result = await security_scan(code=code)
         assert result.success
 
     @pytest.mark.asyncio
     async def test_detect_yaml_load(self):
         """Detect unsafe YAML load."""
-        code = '''
+        code = """
 import yaml
 
 def parse_config(user_yaml):
     return yaml.load(user_yaml)  # Unsafe without Loader
-'''
+"""
         result = await security_scan(code=code)
         assert result.success
 
@@ -501,6 +538,7 @@ def parse_config(user_yaml):
 # ============================================================================
 # 8. CONCURRENT ACCESS PATTERNS
 # ============================================================================
+
 
 class TestConcurrentAccess:
     """Tests for concurrent access to tools."""
@@ -511,14 +549,14 @@ class TestConcurrentAccess:
         code1 = "def func1():\n    return 1"
         code2 = "def func2():\n    return 2"
         code3 = "def func3():\n    return 3"
-        
+
         # Run concurrently
         results = await asyncio.gather(
             extract_code(code=code1, target_type="function", target_name="func1"),
             extract_code(code=code2, target_type="function", target_name="func2"),
             extract_code(code=code3, target_type="function", target_name="func3"),
         )
-        
+
         assert all(r.success for r in results)
         assert "func1" in results[0].target_code
         assert "func2" in results[1].target_code
@@ -528,14 +566,11 @@ class TestConcurrentAccess:
     async def test_concurrent_security_scans(self):
         """Multiple concurrent security scans should complete."""
         codes = [
-            f"def vuln_{i}(x):\n    cursor.execute(f'SELECT {{x}}')" 
-            for i in range(10)
+            f"def vuln_{i}(x):\n    cursor.execute(f'SELECT {{x}}')" for i in range(10)
         ]
-        
-        results = await asyncio.gather(*[
-            security_scan(code=code) for code in codes
-        ])
-        
+
+        results = await asyncio.gather(*[security_scan(code=code) for code in codes])
+
         assert all(r.success for r in results)
 
     @pytest.mark.asyncio
@@ -544,13 +579,25 @@ class TestConcurrentAccess:
         python_code = "def py_func():\n    return 'python'"
         ts_code = "function tsFunc(): string { return 'typescript'; }"
         java_code = "public class JavaClass { void method() {} }"
-        
+
         results = await asyncio.gather(
-            extract_code(code=python_code, target_type="function", target_name="py_func"),
-            extract_code(code=ts_code, target_type="function", target_name="tsFunc", language="typescript"),
-            extract_code(code=java_code, target_type="class", target_name="JavaClass", language="java"),
+            extract_code(
+                code=python_code, target_type="function", target_name="py_func"
+            ),
+            extract_code(
+                code=ts_code,
+                target_type="function",
+                target_name="tsFunc",
+                language="typescript",
+            ),
+            extract_code(
+                code=java_code,
+                target_type="class",
+                target_name="JavaClass",
+                language="java",
+            ),
         )
-        
+
         assert all(r.success for r in results)
 
 
@@ -558,13 +605,14 @@ class TestConcurrentAccess:
 # 9. REAL-WORLD COMPLEX PATTERNS
 # ============================================================================
 
+
 class TestRealWorldPatterns:
     """Tests based on real-world complex code patterns."""
 
     @pytest.mark.asyncio
     async def test_extract_async_context_manager(self):
         """Async context manager should be extractable."""
-        code = '''
+        code = """
 class AsyncDBConnection:
     async def __aenter__(self):
         self.conn = await create_connection()
@@ -573,15 +621,17 @@ class AsyncDBConnection:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.conn.close()
         return False
-'''
-        result = await extract_code(code=code, target_type="class", target_name="AsyncDBConnection")
+"""
+        result = await extract_code(
+            code=code, target_type="class", target_name="AsyncDBConnection"
+        )
         assert result.success
         assert "__aenter__" in result.target_code
 
     @pytest.mark.asyncio
     async def test_extract_metaclass(self):
         """Metaclass should be extractable."""
-        code = '''
+        code = """
 class SingletonMeta(type):
     _instances = {}
     
@@ -589,14 +639,16 @@ class SingletonMeta(type):
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
-'''
-        result = await extract_code(code=code, target_type="class", target_name="SingletonMeta")
+"""
+        result = await extract_code(
+            code=code, target_type="class", target_name="SingletonMeta"
+        )
         assert result.success
 
     @pytest.mark.asyncio
     async def test_extract_property_decorator(self):
         """Property with getter/setter/deleter should be extractable."""
-        code = '''
+        code = """
 class Temperature:
     def __init__(self):
         self._celsius = 0
@@ -612,15 +664,17 @@ class Temperature:
     @fahrenheit.deleter
     def fahrenheit(self):
         del self._celsius
-'''
-        result = await extract_code(code=code, target_type="class", target_name="Temperature")
+"""
+        result = await extract_code(
+            code=code, target_type="class", target_name="Temperature"
+        )
         assert result.success
         assert "@property" in result.target_code
 
     @pytest.mark.asyncio
     async def test_security_scan_sqlalchemy_patterns(self):
         """Detect vulnerabilities in SQLAlchemy patterns."""
-        code = '''
+        code = """
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -633,7 +687,7 @@ def safe_query(session: Session, user_id: str):
     # Safe - parameterized
     query = text("SELECT * FROM users WHERE id = :id")
     return session.execute(query, {"id": user_id})
-'''
+"""
         result = await security_scan(code=code)
         assert result.success
         # Should detect the unsafe pattern
@@ -644,6 +698,7 @@ def safe_query(session: Session, user_id: str):
 # 10. ERROR RECOVERY
 # ============================================================================
 
+
 class TestErrorRecovery:
     """Tests for graceful error recovery."""
 
@@ -652,21 +707,20 @@ class TestErrorRecovery:
         """Extracting non-existent function should fail gracefully."""
         code = "def actual_function():\n    pass"
         result = await extract_code(
-            code=code, 
-            target_type="function", 
-            target_name="nonexistent_function"
+            code=code, target_type="function", target_name="nonexistent_function"
         )
         assert not result.success
-        assert "not found" in result.error.lower() or "nonexistent" in str(result.error).lower()
+        assert (
+            "not found" in result.error.lower()
+            or "nonexistent" in str(result.error).lower()
+        )
 
     @pytest.mark.asyncio
     async def test_extract_wrong_type(self):
         """Extracting wrong type should fail gracefully."""
         code = "class MyClass:\n    pass"
         result = await extract_code(
-            code=code, 
-            target_type="function", 
-            target_name="MyClass"
+            code=code, target_type="function", target_name="MyClass"
         )
         # Should either succeed (finding nothing) or fail gracefully
         assert result is not None
@@ -685,7 +739,7 @@ class TestErrorRecovery:
         paths = [
             "/path/with spaces/file.py",
             "/path/with'quotes/file.py",
-            "/path/with\"doublequotes/file.py",
+            '/path/with"doublequotes/file.py',
             "../relative/../path/file.py",
             "//network/share/file.py",
         ]

@@ -4,8 +4,7 @@ Tests for v2.0.0 Polyglot Extraction - Multi-language support.
 [20251214_TEST] v2.0.0 - Test JavaScript, TypeScript, and Java extraction.
 """
 
-import pytest
-import asyncio
+# [20251215_TEST] Lint cleanup for polyglot extractor tests (remove unused imports).
 
 from code_scalpel.polyglot import (
     PolyglotExtractor,
@@ -74,7 +73,7 @@ function greet(user: User): string {
 class TestJavaExtraction:
     """Test Java code extraction."""
 
-    JAVA_CODE = '''
+    JAVA_CODE = """
 public class Calculator {
     private int result;
     
@@ -90,12 +89,12 @@ public class Calculator {
         this.result = 0;
     }
 }
-'''
+"""
 
     def test_extract_java_class(self):
         extractor = PolyglotExtractor(self.JAVA_CODE, language=Language.JAVA)
         result = extractor.extract("class", "Calculator")
-        
+
         assert result.success
         assert result.language == "java"
         assert "public class Calculator" in result.code
@@ -105,7 +104,7 @@ public class Calculator {
     def test_extract_java_method(self):
         extractor = PolyglotExtractor(self.JAVA_CODE, language=Language.JAVA)
         result = extractor.extract("method", "Calculator.add")
-        
+
         assert result.success
         assert result.language == "java"
         assert "public int add" in result.code
@@ -114,14 +113,14 @@ public class Calculator {
     def test_extract_java_method_multiply(self):
         extractor = PolyglotExtractor(self.JAVA_CODE, language=Language.JAVA)
         result = extractor.extract("method", "Calculator.multiply")
-        
+
         assert result.success
         assert "public int multiply" in result.code
 
     def test_extract_nonexistent_java_method(self):
         extractor = PolyglotExtractor(self.JAVA_CODE, language=Language.JAVA)
         result = extractor.extract("method", "Calculator.notexists")
-        
+
         assert not result.success
         assert "not found" in result.error.lower()
 
@@ -129,7 +128,7 @@ public class Calculator {
 class TestJavaScriptExtraction:
     """Test JavaScript code extraction."""
 
-    JS_CODE = '''
+    JS_CODE = """
 function add(a, b) {
     return a + b;
 }
@@ -150,12 +149,12 @@ class Calculator {
         return a - b;
     }
 }
-'''
+"""
 
     def test_extract_js_function(self):
         extractor = PolyglotExtractor(self.JS_CODE, language=Language.JAVASCRIPT)
         result = extractor.extract("function", "add")
-        
+
         assert result.success
         assert result.language == "javascript"
         assert "function add" in result.code
@@ -164,14 +163,14 @@ class Calculator {
     def test_extract_js_async_function(self):
         extractor = PolyglotExtractor(self.JS_CODE, language=Language.JAVASCRIPT)
         result = extractor.extract("function", "fetchData")
-        
+
         assert result.success
         assert "async function fetchData" in result.code
 
     def test_extract_js_class(self):
         extractor = PolyglotExtractor(self.JS_CODE, language=Language.JAVASCRIPT)
         result = extractor.extract("class", "Calculator")
-        
+
         assert result.success
         assert "class Calculator" in result.code
         assert "constructor" in result.code
@@ -179,7 +178,7 @@ class Calculator {
     def test_extract_nonexistent_js_function(self):
         extractor = PolyglotExtractor(self.JS_CODE, language=Language.JAVASCRIPT)
         result = extractor.extract("function", "notexists")
-        
+
         assert not result.success
         assert "not found" in result.error.lower()
 
@@ -190,21 +189,21 @@ class TestExtractFromCode:
     def test_auto_detect_python(self):
         code = "def hello(): pass"
         result = extract_from_code(code, "function", "hello")
-        
+
         assert result.success
         assert result.language == "python"
 
     def test_auto_detect_java(self):
         code = "public class Test { public void test() {} }"
         result = extract_from_code(code, "class", "Test")
-        
+
         assert result.success
         assert result.language == "java"
 
     def test_explicit_language(self):
         code = "function test() { return 42; }"
         result = extract_from_code(code, "function", "test", Language.JAVASCRIPT)
-        
+
         assert result.success
         assert result.language == "javascript"
 
@@ -216,7 +215,7 @@ class TestTokenEstimate:
         code = "public class Test { public int add(int a, int b) { return a + b; } }"
         extractor = PolyglotExtractor(code, language=Language.JAVA)
         result = extractor.extract("class", "Test")
-        
+
         assert result.success
         assert result.token_estimate > 0
         # Token estimate is len(code) // 4

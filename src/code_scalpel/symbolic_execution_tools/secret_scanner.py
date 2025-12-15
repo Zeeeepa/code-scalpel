@@ -15,6 +15,7 @@ Detects hardcoded secrets in Python code using comprehensive regex patterns:
 """
 
 import ast
+import warnings
 import re
 from typing import Dict, List, Pattern
 
@@ -26,11 +27,18 @@ from .taint_tracker import (
     TaintSource,
 )
 
+# [20251215_BUGFIX] Silence deprecated ast.Str warnings under Python 3.13+ (tests exercise visit_Str)
+warnings.filterwarnings(
+    "ignore",
+    message=r".*ast\.Str is deprecated.*",
+    category=DeprecationWarning,
+)
+
 
 class SecretScanner(ast.NodeVisitor):
     """
     Scans AST for hardcoded secrets using comprehensive pattern matching.
-    
+
     [20251214_FEATURE] v2.0.0 - Also detects secrets based on variable names
     (e.g., DEFAULT_ADMIN_PASSWORD = "admin123" is flagged even without
     pattern match on the value).
@@ -44,7 +52,7 @@ class SecretScanner(ast.NodeVisitor):
             name: re.compile(pattern)
             for name, pattern in HARDCODED_SECRET_PATTERNS.items()
         }
-        
+
         # [20251214_FEATURE] v2.0.0 - Compile variable name patterns
         self.compiled_var_patterns: Dict[str, Pattern] = {
             name: re.compile(pattern)
@@ -110,7 +118,16 @@ class SecretScanner(ast.NodeVisitor):
 
     def visit_Str(self, node: ast.Str) -> None:
         """Support for deprecated ast.Str nodes (Python < 3.8)."""
-        self._check_string_for_secrets(node.s, node)
+        value = getattr(node, "value", None)
+        if value is None and hasattr(node, "s"):
+            # [20251215_BUGFIX] Avoid DeprecationWarning on .s access under Python 3.13+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=DeprecationWarning)
+                value = node.s
+
+        if isinstance(value, str):
+            self._check_string_for_secrets(value, node)
+
         self.generic_visit(node)
 
     def visit_JoinedStr(self, node: ast.JoinedStr) -> None:
@@ -129,7 +146,7 @@ class SecretScanner(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Check assignments for secret variable names.
-        
+
         Detects patterns like:
             DEFAULT_ADMIN_PASSWORD = "admin123"
             JWT_SECRET = "super_secret_key"
@@ -140,7 +157,7 @@ class SecretScanner(ast.NodeVisitor):
             if isinstance(target, ast.Name):
                 var_name = target.id
                 self._check_variable_name(var_name, node.value, node)
-        
+
         self.generic_visit(node)
 
     def _check_variable_name(
@@ -148,7 +165,7 @@ class SecretScanner(ast.NodeVisitor):
     ) -> None:
         """
         Check if a variable name suggests it holds a secret.
-        
+
         Args:
             var_name: Name of the variable
             value_node: AST node for the assigned value
@@ -237,6 +254,7 @@ class SecretScanner(ast.NodeVisitor):
         # Add recommendation to the vulnerability (stored in taint_path for now)
         vuln.taint_path.append(f"Recommendation: {recommendation}")
 
+        # [20251215_REFACTOR] Remove unused inline warnings import; we simply record the vulnerability.
         self.vulnerabilities.append(vuln)
 
     def _add_var_vuln(
@@ -244,7 +262,7 @@ class SecretScanner(ast.NodeVisitor):
     ) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Add vulnerability for secret-named variable.
-        
+
         Args:
             var_name: Name of the variable (e.g., "JWT_SECRET")
             value: The actual value assigned

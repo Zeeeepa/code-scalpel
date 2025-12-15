@@ -1,8 +1,8 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 1.6  
-**Last Updated:** December 14, 2025  
-**Current Release:** v1.5.5 (Released)  <!-- [20251214_DOCS] ScaleUp performance + CI/CD reliability -->
+**Document Version:** 2.0  
+**Last Updated:** December 15, 2025  
+**Current Release:** v2.0.0 (Released)  <!-- [20251215_DOCS] Polyglot + MCP Protocol Features -->
 **Maintainer:** 3D Tech Solutions LLC
 
 ---
@@ -27,29 +27,32 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 - **Verify before applying** - Simulate refactors to detect behavior changes
 - **Analyze with certainty** - Real AST parsing, not regex pattern matching
 
-### Current State (v1.5.3)
+### Current State (v2.0.0)
 
 | Metric | Value | Status |
 |--------|-------|--------|
 | MCP Tools | 15 tools (analyze, extract, security, test gen, context, cross-file) | Stable |
-| Test Suite | 2,145 tests passing (100% pass rate) | Stable |
+| MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | v2.0.0 |
+| Test Suite | 2,668 tests passing (100% pass rate) | Stable |
 | Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |
 | Code Coverage | 100%+ on production code, 95%+ overall | CI Gate Met |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns, cross-file taint | Stable |
-| Languages | Python (full), JS/Java (structural) | Expanding |
-| AI Agent Integrations | Claude Desktop, VS Code Copilot | Verified |
-| Cross-File Operations | Import resolution, taint tracking, dependency extraction | Stable since v1.5.1 |
+| Languages | Python (full), TypeScript, JavaScript, Java | v2.0.0 |
+| AI Agent Integrations | Claude Desktop, VS Code Copilot, Docker | Verified |
+| Cross-File Operations | Import resolution, taint tracking, dependency extraction | Stable |
 
 ### Target State
 
 | Metric | Target | Milestone |
 |--------|--------|-----------|
-| MCP Tools | 15+ tools | DONE v1.5.2 |
-| Languages | Python, TypeScript, JavaScript, Java | v2.0.0 |
-| Cross-File Operations | Full project context | DONE v1.5.2 |
-| Test Suite | 100% pass rate (full execution) | v1.5.3 |
-| AI Verification | Behavior-preserving refactor check | v2.1.0 |
-| Auto-Fix Generation | AI-verified security fixes | v2.1.0 |
+| MCP Tools | 15+ tools | ✅ DONE v2.0.0 |
+| Languages | Python, TypeScript, JavaScript, Java | ✅ DONE v2.0.0 |
+| Cross-File Operations | Full project context | ✅ DONE v2.0.0 |
+| MCP Protocol Features | Progress Tokens, Roots, Health | ✅ DONE v2.0.0 |
+| Resource Templates | Parameterized resource access | v2.1.0 |
+| Workflow Prompts | Guided security/refactor workflows | v2.1.0 |
+| AI Verification | Behavior-preserving refactor check | v2.2.0 |
+| Auto-Fix Generation | AI-verified security fixes | v2.2.0 |
 
 ---
 
@@ -67,16 +70,20 @@ v1.x Series (Python Excellence)
    Secrets     Patterns    Call Graph   Taint Flow   Isolation    Paths       __import__   Parallel
    Coverage    SSTI/XXE    Project Map  Multi-File   Mocking      Resolver    Lazy Load    10s/1000
 
-v2.x Series (Multi-Language)
-┌─────────┐  ┌─────────┐
-│ v2.0.0  │  │ v2.1.0  │
-│ Poly-   │─>│ AI      │
-│ glot    │  │ Verify  │
-└─────────┘  └─────────┘
-     │            │
-  TypeScript   Behavior
-  JavaScript   Verify
-  Java         Auto-Fix
+v2.x Series (Multi-Language + MCP Protocol)
+┌─────────┐  ┌─────────┐  ┌─────────┐
+│ v2.0.0  │  │ v2.1.0  │  │ v2.2.0  │
+│ Poly-   │─>│ MCP     │─>│ AI      │
+│ glot    │  │ Enhance │  │ Verify  │
+│  DONE   │  │         │  │         │
+└─────────┘  └─────────┘  └─────────┘
+     │            │            │
+  TypeScript   Resource     Behavior
+  JavaScript   Templates    Verify
+  Java         Workflows    Auto-Fix
+  Progress     Prompts      Sampling
+  Roots        Logging      
+  Health       
 ```
 
 ## v1.3.0 - "Hardening"
@@ -1462,14 +1469,15 @@ v1.5.5 Release Criteria:
 
 ---
 
-## v2.0.0 - "Polyglot"
+## v2.0.0 - "Polyglot + MCP Protocol" ✅ COMPLETE
 
 ### Overview
 
-**Theme:** Multi-Language MCP Tools for AI Agents  
-**Goal:** Enable AI agents to work surgically on TypeScript, JavaScript, and Java projects  
-**Effort:** ~25 developer-days  
-**Risk Level:** High (new language architecture)
+**Theme:** Multi-Language MCP Tools + Advanced MCP Protocol Features  
+**Goal:** Enable AI agents to work surgically on TypeScript, JavaScript, and Java projects with full MCP protocol compliance  
+**Effort:** ~30 developer-days  
+**Risk Level:** High (new language architecture + protocol features)  
+**Status:** ✅ COMPLETE - December 15, 2025
 
 ### Why Polyglot Matters for AI Agents
 
@@ -1480,15 +1488,111 @@ AI agents today are asked to work on full-stack projects: Python backends, TypeS
 
 **Solution:** Extend all MCP tools to support TypeScript, JavaScript, and Java with the same surgical precision as Python.
 
+### v2.0.0 Feature Summary
+
+| Category | Features | Status |
+|----------|----------|--------|
+| **Multi-Language** | TypeScript, JavaScript, Java extraction and analysis | ✅ Complete |
+| **MCP Protocol P0** | Health endpoint (`/health`) for container monitoring | ✅ Complete |
+| **MCP Protocol P0** | Windows path compatibility (backslash handling) | ✅ Complete |
+| **MCP Protocol P0** | Stderr logging for MCP compliance | ✅ Complete |
+| **MCP Protocol P1** | Progress Tokens (`ctx.report_progress()`) | ✅ Complete |
+| **MCP Protocol P1** | Roots Capability (`ctx.list_roots()`) | ✅ Complete |
+| **Security** | DOM XSS, eval injection, prototype pollution, Spring patterns | ✅ Complete |
+| **Performance** | 20,000+ LOC/sec throughput, 99% token reduction | ✅ Verified |
+
 ### Priorities
 
-| Priority | Feature | Owner | Effort | Dependencies |
-|----------|---------|-------|--------|--------------|
-| **P0** | TypeScript/JavaScript AST support | TBD | 10 days | tree-sitter |
-| **P0** | `extract_code` for TS/JS/Java | TBD | 5 days | AST support |
-| **P0** | `security_scan` for TS/JS/Java | TBD | 8 days | AST support |
-| **P1** | Java Spring security patterns | TBD | 5 days | tree-sitter |
-| **P1** | JSX/TSX support | TBD | 3 days | TS support |
+| Priority | Feature | Owner | Effort | Status |
+|----------|---------|-------|--------|--------|
+| **P0** | TypeScript/JavaScript AST support | TDE | 10 days | ✅ Done |
+| **P0** | `extract_code` for TS/JS/Java | TDE | 5 days | ✅ Done |
+| **P0** | `security_scan` for TS/JS/Java | TDE | 8 days | ✅ Done |
+| **P0** | Health endpoint for Docker monitoring | TDE | 0.5 days | ✅ Done |
+| **P0** | Windows path backslash handling | TDE | 0.5 days | ✅ Done |
+| **P0** | Stderr logging (MCP compliance) | TDE | 0.5 days | ✅ Done |
+| **P1** | Progress Tokens for long operations | TDE | 1 day | ✅ Done |
+| **P1** | Roots Capability for workspace discovery | TDE | 1 day | ✅ Done |
+| **P1** | Java Spring security patterns | TDE | 5 days | ✅ Done |
+| **P1** | JSX/TSX support | TDE | 3 days | ✅ Done |
+
+### MCP Protocol Features (v2.0.0)
+
+#### 1. Health Endpoint (P0)
+
+**Purpose:** Enable container orchestration health checks for Docker deployments.
+
+```python
+# GET http://localhost:8594/health
+{
+    "status": "healthy",
+    "version": "2.0.0",
+    "timestamp": "2025-12-15T12:00:00Z"
+}
+```
+
+**Implementation:**
+- Runs on separate port (8594) to avoid conflicts with SSE (8593)
+- Thread-safe with dedicated asyncio event loop
+- Returns version for deployment verification
+
+#### 2. Windows Path Compatibility (P0)
+
+**Purpose:** Support Windows file paths with backslashes across all tools.
+
+```python
+# [20251215_BUGFIX] Normalize Windows paths
+def _normalize_path(self, path: str) -> str:
+    """Convert Windows backslashes to forward slashes for AST parsing."""
+    return path.replace("\\", "/") if "\\" in path else path
+```
+
+**Acceptance:**
+- `extract_code("K:\\project\\src\\utils.py", ...)` works correctly
+- Docker volume mounts with Windows paths resolve properly
+
+#### 3. Stderr Logging (P0)
+
+**Purpose:** MCP protocol requires stdout for JSON-RPC, stderr for logs.
+
+```python
+# All logging now goes to stderr
+import sys
+logging.basicConfig(stream=sys.stderr, ...)
+```
+
+#### 4. Progress Tokens (P1)
+
+**Purpose:** Report progress during long-running operations for better UX.
+
+**Tools Enhanced:**
+- `crawl_project` - Reports files scanned
+- `cross_file_security_scan` - Reports analysis progress  
+- `scan_dependencies` - Reports packages checked
+
+```python
+@mcp.tool()
+async def crawl_project(root_path: str = None, ctx: Context = None) -> ...:
+    if ctx:
+        await ctx.report_progress(progress=i, total=len(files))
+```
+
+#### 5. Roots Capability (P1)
+
+**Purpose:** Discover workspace roots from MCP clients for intelligent path resolution.
+
+```python
+async def _fetch_and_cache_roots(ctx: Context) -> list[str]:
+    """Fetch workspace roots from MCP client."""
+    global _cached_roots
+    if _cached_roots is None:
+        try:
+            roots = await ctx.list_roots()
+            _cached_roots = [str(r.uri).replace("file://", "") for r in roots]
+        except Exception:
+            _cached_roots = []
+    return _cached_roots
+```
 
 ### Technical Specifications
 
@@ -1567,6 +1671,7 @@ JS_SINK_PATTERNS = {
 
 v2.0.0 Release Criteria:
 
+**Multi-Language Support:**
 [x] extract_code: Works for TypeScript functions/classes (P0)
 [x] extract_code: Works for JavaScript functions/classes (P0)
 [x] extract_code: Works for Java methods/classes (P0)
@@ -1597,9 +1702,29 @@ v2.0.0 Release Criteria:
 [x] Spring Security: SpEL injection in @PreAuthorize/@PostAuthorize (P1) - Added 2025-12-15
 [x] Spring: Open Redirect detection (RedirectView) (P1) - Added 2025-12-15
 
+**MCP Protocol Features:**
+[x] Health Endpoint: GET /health returns status, version, timestamp (P0) - Added 2025-12-15
+[x] Health Endpoint: Runs on separate port (8594) for Docker (P0) - Added 2025-12-15
+[x] Windows Paths: Backslash normalization in all file operations (P0) - Added 2025-12-15
+[x] Stderr Logging: All logs to stderr, stdout reserved for JSON-RPC (P0) - Added 2025-12-15
+[x] Progress Tokens: crawl_project reports file progress (P1) - Added 2025-12-15
+[x] Progress Tokens: cross_file_security_scan reports analysis progress (P1) - Added 2025-12-15
+[x] Progress Tokens: scan_dependencies reports package progress (P1) - Added 2025-12-15
+[x] Roots Capability: extract_code uses ctx.list_roots() for path resolution (P1) - Added 2025-12-15
+
+**Quality Gates:**
 [x] All MCP tools work identically across languages (Gate)
 [x] All tests passing (Gate) - 2580 passed, 1 xfailed
 [x] Code coverage >= 95% (Gate)
+
+**Adversarial Edge Case Hardening:**
+[x] Deeply nested class extraction works for 10+ levels (P0)
+[x] Java `record` classes are extractable (Java 16+) (P0)
+[x] Java pattern matching switch parses without error (Java 21+) (P0)
+[x] TSX generic components with JSX elements parse correctly (P0)
+[x] Cross-file taint tracks through 3+ file import chains (P1)
+[x] Cross-file taint tracks through callback patterns (P1)
+[x] All 88 adversarial edge case tests pass (Gate)
 
 #### Required Evidence (Mandatory for All Releases)
 
@@ -1607,6 +1732,7 @@ v2.0.0 Release Criteria:
   - Location: `docs/release_notes/RELEASE_NOTES_v2.0.0.md`
   - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
   - Language-specific examples for TS/JS/Java
+  - MCP protocol features documentation
 
 [x] MCP Tools Evidence
   - File: `v2.0.0_mcp_tools_evidence.json`
@@ -1626,205 +1752,244 @@ v2.0.0 Release Criteria:
   - 100% extraction success rate across all languages
   - Evidence generated via `scripts/benchmark_polyglot.py`
 
+[x] Best-in-Class Validation Evidence
+  - File: `v2.0.0_best_in_class_evidence.json`
+  - Token efficiency: 99.0% reduction (verified)
+  - Security detection: F1 = 1.0 across 7 vulnerability types
+  - Performance: 20,639 LOC/sec throughput
+  - Cross-file analysis: 100% detection rate
+  - Surgical precision: 100% zero-collateral edits
+  - Evidence generated via `evidence/best_in_class_validation.py`
+
 [x] No Breaking Changes Verification
   - File: `v2.0.0_regression_evidence.json`
   - All v1.5.x Python APIs unchanged
   - Regression tests passed (extraction, security scan, code analysis)
   - Evidence generated via `scripts/regression_test.py`
 
+[x] Adversarial Test Evidence
+  - File: `v2.0.0_adversarial_test_evidence.json`
+  - 88 adversarial tests (43 general, 19 security, 26 polyglot edge cases)
+  - Deeply nested extraction, Java 16+ records, Java 21+ switch, TSX generics
+  - Cross-file import chain taint tracking (3+ files)
+  - Cross-file callback taint propagation
+
 ---
 
-## v2.0.1 - "Edge Cases" 
+## v2.1.0 - "MCP Enhance"
 
 ### Overview
 
-**Theme:** Adversarial Edge Case Hardening  
-**Goal:** Handle 6 edge cases discovered through adversarial testing  
-**Effort:** ~5 developer-days  
-**Risk Level:** Low (targeted fixes)  
-**Status:** ✅ COMPLETE - December 15, 2025
+**Theme:** Advanced MCP Protocol Features  
+**Goal:** Resource Templates for parameterized access, Workflow Prompts for guided operations  
+**Effort:** ~15 developer-days  
+**Risk Level:** Medium (protocol extension)
 
-### Background
+### Why These Features Matter
 
-Adversarial testing of v2.0.0 revealed 6 edge cases that fail (6 of 2,669 tests = 99.78% pass rate). These represent bleeding-edge language features and advanced cross-file analysis patterns that need hardening.
+AI agents need more than just tools - they need:
+- **Parameterized Resources:** Access code elements without knowing exact paths
+- **Guided Workflows:** Step-by-step prompts for complex operations like security audits
+- **Structured Logging:** Analytics and debugging for MCP tool usage
 
 ### Priorities
 
 | Priority | Feature | Owner | Effort | Dependencies |
 |----------|---------|-------|--------|--------------|
-| **P0** | Deeply nested extraction (10+ levels) | TDE | 0.5 days | None |
-| **P0** | Java `record` keyword (Java 16+) | TDE | 0.5 days | tree-sitter |
-| **P0** | Java pattern matching switch (Java 21+) | TDE | 0.5 days | IR layer |
-| **P0** | TSX generic component with JSX | TDE | 1 day | tree-sitter |
-| **P1** | Cross-file import chain taint (3+ files) | TDE | 1 day | taint tracker |
-| **P1** | Cross-file callback taint tracking | TDE | 1 day | taint tracker |
+| **P0** | Resource Templates (parameterized URIs) | TBD | 5 days | FastMCP |
+| **P0** | Workflow Prompts (security audit, refactor) | TBD | 5 days | None |
+| **P1** | Structured MCP Logging | TBD | 3 days | None |
+| **P1** | Tool Analytics & Metrics | TBD | 2 days | Logging |
+| **P2** | JS Normalizer: `super` keyword support | TBD | 1 day | None |
+| **P2** | JS Normalizer: `spread_element` support | TBD | 1 day | None |
+| **P2** | Suppress symbolic_execution version warning | TBD | 0.5 days | None |
 
 ### Technical Specifications
 
-#### 1. Deeply Nested Extraction (10+ Levels)
+#### 1. Resource Templates
 
-**Issue:** `extract_code` with `target_name="J.deeply_nested"` fails for classes nested 10 levels deep.
-
-**Root Cause:** Recursive class lookup doesn't traverse nested class definitions.
-
-**Fix:** Modify `_find_class_in_code()` to recursively search all nested class definitions.
+**Purpose:** Allow agents to access code elements via parameterized URIs without knowing exact file paths.
 
 ```python
-# [20251215_BUGFIX] Support deeply nested class extraction
-def _find_class_in_code(self, code: str, class_name: str) -> Optional[ast.ClassDef]:
-    tree = ast.parse(code)
+# Resource Template definition
+@mcp.resource("code:///{language}/{module}/{symbol}")
+async def get_code_resource(language: str, module: str, symbol: str) -> Resource:
+    """
+    Access code elements via parameterized URI.
     
-    def find_in_node(node, target_name):
-        for child in ast.walk(node):
-            if isinstance(child, ast.ClassDef):
-                if child.name == target_name:
-                    return child
-                # Recursively search nested classes
-                nested = find_in_node(child, target_name)
-                if nested:
-                    return nested
-        return None
+    Examples:
+        code:///python/utils/calculate_tax
+        code:///typescript/components/UserCard
+        code:///java/services/AuthService.authenticate
+    """
+    # Resolve module to file path
+    file_path = await resolve_module_path(language, module)
     
-    return find_in_node(tree, class_name)
-```
-
-#### 2. Java `record` Keyword (Java 16+)
-
-**Issue:** Java records are not recognized as class-like structures.
-
-**Root Cause:** tree-sitter Java grammar returns `record_declaration` not `class_declaration`.
-
-**Fix:** Add `record_declaration` handling in Java normalizer.
-
-```python
-# [20251215_FEATURE] Support Java 16+ record declarations
-elif node.type == "record_declaration":
-    name = self._get_child_text(node, "identifier")
-    return IRClass(name=name, bases=[], body=[], is_record=True)
-```
-
-#### 3. Java Pattern Matching Switch (Java 21+)
-
-**Issue:** `IRSwitch.__init__()` got unexpected keyword argument 'subject'.
-
-**Root Cause:** IR layer constructor mismatch for new switch expression format.
-
-**Fix:** Update `IRSwitch` to accept `subject` parameter for pattern matching switches.
-
-```python
-# [20251215_BUGFIX] Support Java 21+ pattern matching switch
-@dataclass
-class IRSwitch:
-    subject: Any  # The expression being switched on
-    cases: List[IRCase]
-    default: Optional[List[IRStatement]] = None
-```
-
-#### 4. TSX Generic Component with JSX
-
-**Issue:** Parse error at `<li>` tag inside generic function with JSX return.
-
-**Root Cause:** tree-sitter TSX parser ambiguity between generic `<T>` and JSX `<tag>`.
-
-**Fix:** Improve TSX parsing to handle generic type parameters followed by JSX elements.
-
-```typescript
-// This should work after fix:
-function GenericList<T>({ items, renderItem, keyExtractor }: Props<T>) {
-    return (
-        <ul>
-            {items.map(item => (
-                <li key={keyExtractor(item)}>{renderItem(item)}</li>
-            ))}
-        </ul>
-    );
-}
-```
-
-#### 5. Cross-File Import Chain Taint (3+ Files)
-
-**Issue:** Taint not tracked through 3-file import chain: A → B → C.
-
-**Root Cause:** Cross-file taint tracker only resolves 1 level of imports.
-
-**Fix:** Add recursive import resolution with depth limit.
-
-```python
-# [20251215_FEATURE] Multi-hop import taint tracking
-def resolve_import_chain(self, source_file: str, max_depth: int = 5):
-    visited = set()
-    chain = []
+    # Extract symbol
+    result = await extract_code(
+        file_path=file_path,
+        target_type="function" if "." not in symbol else "method",
+        target_name=symbol,
+        language=language
+    )
     
-    def resolve(file: str, depth: int):
-        if depth > max_depth or file in visited:
-            return
-        visited.add(file)
-        chain.append(file)
+    return Resource(
+        uri=f"code:///{language}/{module}/{symbol}",
+        mimeType="text/x-python",  # or appropriate type
+        text=result.code
+    )
+```
+
+**Why AI Agents Need This:**
+- Natural language: "Get the calculate_tax function from utils"
+- No file path guessing or hallucination
+- Language-agnostic interface
+
+#### 2. Workflow Prompts
+
+**Purpose:** Guided multi-step workflows for common AI agent tasks.
+
+```python
+# Security Audit Workflow
+@mcp.prompt("security-audit")
+async def security_audit_prompt(project_path: str) -> list[Message]:
+    """
+    Guide an AI agent through a comprehensive security audit.
+    
+    Steps:
+    1. Crawl project to understand structure
+    2. Scan for known vulnerabilities
+    3. Check dependencies for CVEs
+    4. Generate report with prioritized findings
+    """
+    return [
+        Message(role="user", content=f"""
+## Security Audit Workflow for {project_path}
+
+Follow these steps to perform a comprehensive security audit:
+
+### Step 1: Project Analysis
+Use `crawl_project` to understand the codebase structure.
+
+### Step 2: Vulnerability Scan
+Use `security_scan` on each Python/JavaScript/TypeScript file.
+Use `cross_file_security_scan` for multi-file taint analysis.
+
+### Step 3: Dependency Check
+Use `scan_dependencies` to check for known CVEs.
+
+### Step 4: Report Generation
+Compile findings into a prioritized report:
+- CRITICAL: Immediate action required
+- HIGH: Address within 1 week
+- MEDIUM: Address within 1 month
+- LOW: Nice to fix
+
+Begin by running `crawl_project("{project_path}")`.
+        """)
+    ]
+
+# Refactor Workflow
+@mcp.prompt("safe-refactor")
+async def safe_refactor_prompt(file_path: str, symbol_name: str) -> list[Message]:
+    """
+    Guide an AI agent through a safe refactoring operation.
+    """
+    return [
+        Message(role="user", content=f"""
+## Safe Refactor Workflow for {symbol_name} in {file_path}
+
+### Step 1: Extract Current Implementation
+Use `extract_code` to get the current implementation.
+
+### Step 2: Find All Usages
+Use `get_symbol_references` to find all call sites.
+
+### Step 3: Plan Changes
+List all changes needed across files.
+
+### Step 4: Simulate Refactor
+Use `simulate_refactor` to verify changes are safe.
+
+### Step 5: Apply Changes
+Only if simulation passes, use `update_symbol` to apply.
+
+Begin by running `extract_code(file_path="{file_path}", target_name="{symbol_name}")`.
+        """)
+    ]
+```
+
+#### 3. Structured MCP Logging
+
+**Purpose:** Analytics and debugging for MCP tool usage.
+
+```python
+# [20251215_FEATURE] Structured logging for MCP tools
+import structlog
+
+mcp_logger = structlog.get_logger("code_scalpel.mcp")
+
+@mcp.tool()
+async def extract_code(...):
+    start_time = time.time()
+    
+    mcp_logger.info(
+        "tool_invoked",
+        tool="extract_code",
+        file_path=file_path,
+        target_type=target_type,
+        target_name=target_name,
+        language=language
+    )
+    
+    try:
+        result = await _extract_code_impl(...)
         
-        for import_stmt in self.get_imports(file):
-            resolved = self.resolve_import(import_stmt)
-            if resolved:
-                resolve(resolved, depth + 1)
-    
-    resolve(source_file, 0)
-    return chain
-```
-
-#### 6. Cross-File Callback Taint Tracking
-
-**Issue:** Taint not propagated when passed through callback functions.
-
-**Root Cause:** Callback pattern `with_callback(data, dangerous_func)` doesn't track that `data` flows to `dangerous_func`.
-
-**Fix:** Track function arguments that are themselves functions and propagate taint to their call sites.
-
-```python
-# [20251215_FEATURE] Callback taint propagation
-def track_callback_taint(self, call_node, tainted_vars):
-    for i, arg in enumerate(call_node.args):
-        if isinstance(arg, ast.Name) and arg.id in tainted_vars:
-            # Mark that this tainted data flows into the function
-            self.callback_taint_flows[call_node] = {
-                "arg_index": i,
-                "tainted_var": arg.id
-            }
+        mcp_logger.info(
+            "tool_success",
+            tool="extract_code",
+            duration_ms=(time.time() - start_time) * 1000,
+            tokens_saved=result.tokens_saved,
+            lines_extracted=result.lines
+        )
+        
+        return result
+    except Exception as e:
+        mcp_logger.error(
+            "tool_error",
+            tool="extract_code",
+            error=str(e),
+            error_type=type(e).__name__
+        )
+        raise
 ```
 
 ### Acceptance Criteria Checklist
 
-v2.0.1 Release Criteria:
+v2.1.0 Release Criteria:
 
-[x] Deeply nested class extraction works for 10+ levels (P0) - DONE 20251215
-[x] Java `record` classes are extractable (P0) - DONE 20251215
-[x] Java pattern matching switch parses without error (P0) - DONE 20251215
-[x] TSX generic components with JSX elements parse correctly (P0) - DONE 20251215
+[ ] Resource Templates: `code:///{language}/{module}/{symbol}` works (P0)
+[ ] Resource Templates: Module resolution finds correct files (P0)
+[ ] Resource Templates: Language detection auto-applies (P0)
 
-[x] Cross-file taint tracks through 3+ file import chains (P1) - DONE 20251215
-[x] Cross-file taint tracks through callback patterns (P1) - DONE 20251215
+[ ] Workflow Prompts: `security-audit` guides through full audit (P0)
+[ ] Workflow Prompts: `safe-refactor` guides through refactor (P0)
+[ ] Workflow Prompts: Prompts are discoverable via MCP (P0)
 
-[x] All 6 adversarial edge case tests pass (Gate) - 88/88 PASS
-[x] No regressions in existing tests (Gate) - 2668 pass, 1 xfail
-[x] Total test pass rate = 100% (Gate) - VERIFIED 20251215
+[ ] Structured Logging: All tool invocations logged (P1)
+[ ] Structured Logging: Success/failure metrics tracked (P1)
+[ ] Structured Logging: Duration and token metrics recorded (P1)
 
-### Implementation Summary
+[ ] Tool Analytics: Usage counts per tool (P1)
+[ ] Tool Analytics: Error rate tracking (P1)
 
-**Files Modified:**
-- `src/code_scalpel/surgical/surgical_extractor.py` - Nested class recursive indexing
-- `src/code_scalpel/ir/normalizers/java_normalizer.py` - Java 16+ records, Java 21+ switch patterns
-- `src/code_scalpel/polyglot/extractor.py` - TSX auto-detection for JSX content
-- `src/code_scalpel/symbolic_execution_tools/cross_file_taint.py` - Multi-hop taint, callback patterns
-- `src/code_scalpel/mcp/server.py` - Fixed source_module/source_file mapping
-
-**Tests Added:**
-- `tests/test_adversarial.py` - 43 adversarial tests
-- `tests/test_adversarial_security.py` - 19 security tests
-- `tests/test_polyglot_edge_cases.py` - 26 polyglot edge case tests
-
-**Total:** 88 new adversarial tests, all passing.
+[ ] All tests passing (Gate)
+[ ] Code coverage >= 95% (Gate)
+[ ] No regressions in existing tools (Gate)
 
 ---
 
-## v2.1.0 - "AI Verify"
+## v2.2.0 - "AI Verify"
 
 ### Overview
 
@@ -1961,7 +2126,7 @@ async def apply_verified_fix(
 
 ### Acceptance Criteria Checklist
 
-v2.1.0 Release Criteria:
+v2.2.0 Release Criteria:
 
 [ ] verify_behavior: Detects signature changes (P0)
 [ ] verify_behavior: Detects return type changes (P0)
@@ -1991,27 +2156,27 @@ v2.1.0 Release Criteria:
 #### Required Evidence (Mandatory for All Releases)
 
 [ ] Release Notes
-  - Location: `docs/release_notes/RELEASE_NOTES_v2.1.0.md`
+  - Location: `docs/release_notes/RELEASE_NOTES_v2.2.0.md`
   - Contents: Executive summary, features, metrics, acceptance criteria, migration guide, use cases
   - AI verification workflow examples
 
 [ ] MCP Tools Evidence
-  - File: `v2.1.0_mcp_tools_evidence.json`
+  - File: `v2.2.0_mcp_tools_evidence.json`
   - Contents: verify_behavior, suggest_fix, apply_verified_fix specifications
   - Test counts, coverage %, confidence scoring methodology
 
 [ ] Test Execution Evidence
-  - File: `v2.1.0_test_evidence.json`
+  - File: `v2.2.0_test_evidence.json`
   - Contents: Total test count, pass/fail rates, test breakdown by tool
   - Verification accuracy metrics
 
 [ ] Verification Accuracy Metrics
-  - File: `v2.1.0_verification_evidence.json`
+  - File: `v2.2.0_verification_evidence.json`
   - Contents: False positive rates, confidence score calibration, behavior detection accuracy
 
 [ ] Performance Metrics
   - Tool performance for different code sizes
-  - Comparison with v2.0.0 and v1.5.1
+  - Comparison with v2.1.0 and v2.0.0
   - Verification execution time analysis
 
 [ ] No Breaking Changes Verification
@@ -2048,18 +2213,23 @@ v2.1.0 Release Criteria:
 
 ### Release-Specific KPIs
 
-| Version | KPI | Target |
-|---------|-----|--------|
-| v1.3.0 | Detection coverage | 95%+ vulnerability types |
-| v1.3.0 | extract_code success rate | 100% for valid paths |
-| v1.4.0 | New MCP tools functional | get_file_context, get_symbol_references |
-| v1.4.0 | XXE/SSTI false negative rate | 0% |
-| v1.5.0 | Project map accuracy | Correctly identifies 95%+ of modules |
-| v1.5.0 | CVE scan accuracy | 95%+ vs safety-db |
-| v2.0.0 | TypeScript extraction parity | Match Python extract_code |
-| v2.0.0 | Polyglot security scan | Same detection rate as Python |
-| v2.1.0 | Behavior verification accuracy | 95%+ correct verdicts |
-| v2.1.0 | Fix suggestion acceptance | 80%+ fixes are valid |
+| Version | KPI | Target | Status |
+|---------|-----|--------|--------|
+| v1.3.0 | Detection coverage | 95%+ vulnerability types | ✅ Achieved |
+| v1.3.0 | extract_code success rate | 100% for valid paths | ✅ Achieved |
+| v1.4.0 | New MCP tools functional | get_file_context, get_symbol_references | ✅ Achieved |
+| v1.4.0 | XXE/SSTI false negative rate | 0% | ✅ Achieved |
+| v1.5.0 | Project map accuracy | Correctly identifies 95%+ of modules | ✅ Achieved |
+| v1.5.0 | CVE scan accuracy | 95%+ vs safety-db | ✅ Achieved |
+| v2.0.0 | TypeScript extraction parity | Match Python extract_code | ✅ Achieved |
+| v2.0.0 | Polyglot security scan | Same detection rate as Python | ✅ Achieved |
+| v2.0.0 | Token efficiency | 99%+ reduction | ✅ Achieved |
+| v2.0.0 | Performance throughput | 20,000+ LOC/sec | ✅ Achieved |
+| v2.0.0 | MCP protocol compliance | Health, Progress, Roots | ✅ Achieved |
+| v2.1.0 | Resource Templates | Parameterized access | Planned |
+| v2.1.0 | Workflow Prompts | Guided operations | Planned |
+| v2.2.0 | Behavior verification accuracy | 95%+ correct verdicts | Planned |
+| v2.2.0 | Fix suggestion acceptance | 80%+ fixes are valid | Planned |
 
 ---
 
