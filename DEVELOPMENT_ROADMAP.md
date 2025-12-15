@@ -1,8 +1,9 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 2.0  
+**Document Version:** 2.1  
 **Last Updated:** December 15, 2025  
-**Current Release:** v2.0.0 (Released)  <!-- [20251215_DOCS] Polyglot + MCP Protocol Features -->
+**Current Release:** v2.0.0 (Released Dec 15, 2025)  <!-- [20251215_DOCS] Polyglot + MCP Protocol Features -->
+**Next Release:** v2.1.0 (MCP Enhance, Q1 2026)  <!-- [20251215_DOCS] Resource Templates and Workflow Prompts -->
 **Maintainer:** 3D Tech Solutions LLC
 
 ---
@@ -31,15 +32,15 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| MCP Tools | 15 tools (analyze, extract, security, test gen, context, cross-file) | Stable |
-| MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | v2.0.0 |
+| MCP Tools | 18 tools (analyze, extract, security, test gen, context, cross-file) | Released v2.0.0 |
+| MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | Released v2.0.0 |
 | Test Suite | 2,668 tests passing (100% pass rate) | Stable |
 | Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |
-| Code Coverage | 100%+ on production code, 95%+ overall | CI Gate Met |
+| Code Coverage | 100%+ on production code, 89% overall | CI Gate Met |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns, cross-file taint | Stable |
-| Languages | Python (full), TypeScript, JavaScript, Java | v2.0.0 |
-| AI Agent Integrations | Claude Desktop, VS Code Copilot, Docker | Verified |
-| Cross-File Operations | Import resolution, taint tracking, dependency extraction | Stable |
+| Languages | Python (full), TypeScript, JavaScript, Java | Released v2.0.0 |
+| AI Agent Integrations | Claude Desktop, VS Code Copilot, Cursor, Docker | Verified v2.0.0 |
+| Cross-File Operations | Import resolution, taint tracking, dependency extraction | Stable v2.0.0 |
 
 ### Target State
 
@@ -71,19 +72,19 @@ v1.x Series (Python Excellence)
    Coverage    SSTI/XXE    Project Map  Multi-File   Mocking      Resolver    Lazy Load    10s/1000
 
 v2.x Series (Multi-Language + MCP Protocol)
-┌─────────┐  ┌─────────┐  ┌─────────┐
-│ v2.0.0  │  │ v2.1.0  │  │ v2.2.0  │
-│ Poly-   │─>│ MCP     │─>│ AI      │
-│ glot    │  │ Enhance │  │ Verify  │
-│  DONE   │  │         │  │         │
-└─────────┘  └─────────┘  └─────────┘
-     │            │            │
-  TypeScript   Resource     Behavior
-  JavaScript   Templates    Verify
-  Java         Workflows    Auto-Fix
-  Progress     Prompts      Sampling
-  Roots        Logging      
-  Health       
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│   v2.0.0        │  │   v2.1.0        │  │   v2.2.0        │
+│   Polyglot      │─>│   MCP Enhance   │─>│   AI Verify     │
+│   RELEASED      │  │   Planned Q1    │  │   Planned Q2    │
+│  Dec 15, 2025   │  │     2026        │  │     2026        │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+     │                    │                    │
+  TypeScript          Resource            Behavior
+  JavaScript          Templates           Verification
+  Java                Workflow            Auto-Fix
+  Progress Tokens     Prompts             Generation
+  Roots Capability    Structured          Sampling
+  Health Endpoint     Logging       
 ```
 
 ## v1.3.0 - "Hardening"
