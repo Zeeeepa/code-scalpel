@@ -384,8 +384,8 @@ See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 
 | Version | Status | Release Date | Highlights |
 |---------|--------|--------------|------------|
-| **v1.5.x** | ✅ Released | Dec 13, 2025 | Cross-file analysis, context tools, project intelligence |
-| **v2.0.0** | ✅ Current | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
+| **v1.5.x** | Released | Dec 13, 2025 | Cross-file analysis, context tools, project intelligence |
+| **v2.0.0** | Current | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
 | **v2.1.0** | Planned | Q1 2026 | Enhanced JS/TS - spread operators, super calls |
 | **v2.2.0** | Planned | Q2 2026 | IDE Extensions - VS Code marketplace |
 

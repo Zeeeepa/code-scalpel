@@ -156,7 +156,7 @@ The stdio transport communicates via standard input/output streams. This is the 
 ```
 
 3. Restart Claude Desktop
-4. Look for the hammer icon (🔨) indicating tools are available
+4. Look for the hammer icon indicating tools are available
 
 #### Cursor IDE
 
@@ -405,7 +405,7 @@ Once connected to Claude or Copilot, ask:
 The AI will use the `security_scan` tool to detect vulnerabilities:
 
 ```
-🔍 Security Analysis Results:
+Security Analysis Results:
 - SQL Injection (CWE-89) at line 45
   Taint path: request.args['id'] → user_id → query → cursor.execute()
 - Hardcoded Secret (AWS Key) at line 12
@@ -450,7 +450,7 @@ uvx code-scalpel --help
 
 ### Claude Desktop Not Showing Tools
 
-**Symptom:** No hammer icon (🔨) in Claude Desktop
+**Symptom:** No hammer icon in Claude Desktop
 
 **Solutions:**
 1. Restart Claude Desktop completely
