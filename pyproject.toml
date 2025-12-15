@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "1.5.4"
+version = "1.5.5" # [20251214_RELEASE] v1.5.5 ScaleUp - Performance + CI/CD reliability
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

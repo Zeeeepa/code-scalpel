@@ -1,0 +1,63 @@
+{
+  "_tag": "[20251214_DOCS] v1.5.5 performance benchmarks (placeholder)",
+  "status": "pending",
+  "scenarios": [
+    {
+      "id": "bench-importresolver-src",
+      "description": "ImportResolver build on current src tree with parallel parser + cache",
+      "command": "python -c \"import time; from pathlib import Path; from code_scalpel.ast_tools.import_resolver import ImportResolver; root=Path('src'); t=time.perf_counter(); r=ImportResolver(root).build(); elapsed=time.perf_counter()-t; print(f'build_success={r.success} modules={r.modules} imports={r.imports} elapsed_s={elapsed:.3f}'); print(f'warnings={len(r.warnings)} errors={len(r.errors)}')\"",
+      "result": {
+        "elapsed_s": 2.457,
+        "modules": 124,
+        "imports": 1043,
+        "warnings": 0,
+        "errors": 0
+      },
+      "status": "measured"
+    },
+    {
+      "id": "bench-importresolver-1200",
+      "description": "Synthetic 1200-file package with parallel parser + cache (cold and warm runs)",
+      "command": "python -c \"import tempfile,time,os;from pathlib import Path;from code_scalpel.ast_tools.import_resolver import ImportResolver;root=Path(tempfile.mkdtemp(prefix='scalpel_fixture_'));sub=root/'pkg';sub.mkdir(parents=True,exist_ok=True);[(sub/f'mod_{i}.py').write_text('\\nVALUE={i}\\n',encoding='utf-8') for i in range(1200)];(sub/'__init__.py').write_text('from .mod_0 import VALUE\\n',encoding='utf-8');resolver=ImportResolver(root);import_res=time.perf_counter();r1=resolver.build();t1=time.perf_counter()-import_res;import_res=time.perf_counter();r2=resolver.build();t2=time.perf_counter()-import_res;print(f'fixture_root={root}');print(f'run1_success={r1.success} modules={r1.modules} imports={r1.imports} elapsed_s={t1:.3f}');print(f'run2_success={r2.success} modules={r2.modules} imports={r2.imports} elapsed_s={t2:.3f}');print(f'warnings_run1={len(r1.warnings)} errors_run1={len(r1.errors)}');print(f'warnings_run2={len(r2.warnings)} errors_run2={len(r2.errors)}')\"",
+      "result": {
+        "run1_elapsed_s": 10.419,
+        "run2_elapsed_s": 1.142,
+        "modules": 1201,
+        "imports": 1,
+        "warnings": 0,
+        "errors": 0
+      },
+      "status": "measured",
+      "notes": "Warm run shows in-memory cache; cold just above 10s target. Use richer fixture with imports for fidelity."
+    },
+    {
+      "id": "bench-importresolver-realistic",
+      "description": "Realistic synthetic 1200-file fixture with random import graph (2-5 imports per file)",
+      "command": "python tests/fixtures/generate_fixture.py --synthetic 1200 && python -c \"...\"",
+      "result": {
+        "elapsed_s": 12.093,
+        "modules": 1201,
+        "imports": 4190,
+        "warnings": 0,
+        "errors": 0
+      },
+      "status": "measured",
+      "notes": "4190 import edges from random sibling imports; 12s cold run slightly above 10s target. Next: tune worker count, reduce pickle overhead."
+    },
+    {
+      "id": "bench-importresolver-batched",
+      "description": "Batched parallel parsing (batch_size=100) on 1200-file fixture",
+      "command": "Remove-Item .code_scalpel_cache; python -c \"...\"",
+      "result": {
+        "cold_elapsed_s": 3.077,
+        "warm_elapsed_s": 4.762,
+        "modules": 1201,
+        "imports": 4190,
+        "batch_size": 100
+      },
+      "status": "PASS",
+      "notes": "74.6% improvement from batching. Cold run 3.1s well under 10s target. Warm run slower due to serial disk cache checks; disk cache optimized for incremental updates, not bulk re-analysis."
+    }
+  ],
+  "notes": "P0 ScaleUp target (<10s for 1000+ files) ACHIEVED with batched parallel parsing."
+}

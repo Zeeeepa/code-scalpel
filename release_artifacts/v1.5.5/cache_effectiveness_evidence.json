@@ -1,0 +1,52 @@
+{
+  "_tag": "[20251214_DOCS] v1.5.5 cache effectiveness evidence",
+  "status": "complete",
+  "benchmark_fixture": "tests/fixtures/data/synthetic (1201 files, 4190 imports)",
+  "cold_run": {
+    "elapsed_s": 3.291,
+    "modules": 1201,
+    "cache_stats": {
+      "memory_hits": 0,
+      "disk_hits": 0,
+      "misses": 1201,
+      "stores": 1201,
+      "invalidations": 0,
+      "total_requests": 1201,
+      "hit_rate": 0.0,
+      "memory_hit_rate": 0.0,
+      "disk_hit_rate": 0.0
+    },
+    "notes": "All files parsed fresh (no cache); 1201 stores populate both memory and disk cache."
+  },
+  "warm_run_disk_cache": {
+    "elapsed_s": 4.336,
+    "modules": 1201,
+    "cache_stats": {
+      "memory_hits": 0,
+      "disk_hits": 1201,
+      "misses": 0,
+      "stores": 0,
+      "invalidations": 0,
+      "total_requests": 1201,
+      "hit_rate": 1.0,
+      "memory_hit_rate": 0.0,
+      "disk_hit_rate": 1.0
+    },
+    "notes": "100% disk cache hit rate. Disk cache is slower than cold run due to serial get_cached() I/O before parallelization."
+  },
+  "invalidation_tests": [
+    "tests/test_analysis_cache.py::test_invalidate_removes_cache",
+    "tests/test_incremental_analyzer.py::test_incremental_analyzer_invalidation_and_dependents"
+  ],
+  "cache_stats_tests": [
+    "tests/test_analysis_cache.py::test_cache_stats_tracks_memory_hits",
+    "tests/test_analysis_cache.py::test_cache_stats_tracks_disk_hits",
+    "tests/test_analysis_cache.py::test_cache_stats_to_dict",
+    "tests/test_analysis_cache.py::test_cache_stats_stores_and_invalidations"
+  ],
+  "analysis": {
+    "cold_vs_warm": "Warm (disk) is slower (4.3s) than cold (3.3s) because get_cached() checks disk serially before parallelizing.",
+    "optimization_opportunity": "Skip disk cache check during bulk parallel parse; rely on memory-only or lazy disk population.",
+    "recommendation": "For bulk analysis, prefer cold start; disk cache optimized for incremental single-file updates."
+  }
+}

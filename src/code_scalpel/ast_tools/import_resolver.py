@@ -29,8 +29,18 @@ from typing import Dict, List, Set, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from collections import defaultdict
 
+from code_scalpel.cache import AnalysisCache, ParallelParser, IncrementalAnalyzer
+
 
 logger = logging.getLogger(__name__)
+
+
+# [20251214_FEATURE] Top-level parse fn for parallel workers (picklable on Windows spawn)
+def _parse_for_imports(file_path: Path) -> Tuple[str, ast.AST]:
+    with file_path.open("r", encoding="utf-8") as f:
+        source = f.read()
+    tree = ast.parse(source)
+    return source, tree
 
 
 # [20251214_FEATURE] Import types for classification including dynamic/framework imports
@@ -288,6 +298,15 @@ class ImportResolver:
         """
         self.project_root = Path(project_root).resolve()
 
+        # [20251214_FEATURE] Reusable parse cache + parallel parser and incremental graph
+        self._parse_cache: AnalysisCache[Tuple[str, ast.AST]] = AnalysisCache()
+        self._parallel_parser: ParallelParser[Tuple[str, ast.AST]] = ParallelParser(
+            cache=self._parse_cache
+        )
+        self._incremental: IncrementalAnalyzer[Tuple[str, ast.AST]] = (
+            IncrementalAnalyzer(self._parse_cache)
+        )
+
         # Core data structures
         self.edges: Dict[str, Set[str]] = defaultdict(
             set
@@ -333,12 +352,22 @@ class ImportResolver:
                 self.file_to_module[str(file_path)] = module_name
                 self.module_to_file[module_name] = str(file_path)
 
-            # Phase 2: Parse each file for imports and definitions
+            # Phase 2: Parse each file (parallel) for imports and definitions
+            parsed, parse_errors = self._parallel_parser.parse_files(
+                python_files, parse_fn=_parse_for_imports
+            )
+            for err_path in parse_errors:
+                self._warnings.append(f"Error analyzing {err_path}: parallel parse failed")
+
             for file_path in python_files:
-                self._analyze_file(file_path)
+                parsed_entry = parsed.get(str(file_path.resolve()))
+                self._analyze_file(file_path, parsed_entry)
 
             # Phase 3: Detect circular imports
             self._detect_circular_imports()
+
+            # Phase 4: Record dependencies for incremental updates
+            self._record_dependencies()
 
             self._built = True
 
@@ -454,21 +483,26 @@ class ImportResolver:
 
         return None
 
-    def _analyze_file(self, file_path: Path) -> None:
+    def _analyze_file(
+        self, file_path: Path, parsed: Optional[Tuple[str, ast.AST]] = None
+    ) -> None:
         """
         Analyze a single Python file for imports and definitions.
 
         Args:
             file_path: Path to the .py file to analyze
+            parsed: Optional (source, AST) pre-parsed tuple
         """
         rel_path = str(file_path.relative_to(self.project_root))
         module_name = self.file_to_module.get(str(file_path), rel_path)
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                source = f.read()
-
-            tree = ast.parse(source)
+            if parsed:
+                source, tree = parsed
+            else:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    source = f.read()
+                tree = ast.parse(source)
 
             # Extract imports
             self._extract_imports(tree, module_name, rel_path)
@@ -486,6 +520,17 @@ class ImportResolver:
             self._warnings.append(f"Syntax error in {rel_path}: {e}")
         except Exception as e:
             self._warnings.append(f"Error analyzing {rel_path}: {e}")
+
+    def _record_dependencies(self) -> None:
+        """Populate incremental dependency graph mapping files to dependents."""
+        for module_name, targets in self.edges.items():
+            source_path = self.module_to_file.get(module_name)
+            if not source_path:
+                continue
+            for target_module in targets:
+                target_path = self.module_to_file.get(target_module)
+                if target_path:
+                    self._incremental.record_dependency(source_path, target_path)
 
     def _extract_imports(self, tree: ast.AST, module_name: str, file_path: str) -> None:
         """

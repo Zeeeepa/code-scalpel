@@ -1,0 +1,25 @@
+[20251214_DOCS] v1.5.5 accuracy regression testing results
+
+Cache Module Tests (13 tests):
+- test_memory_cache_hits_without_reparsing: PASS
+- test_disk_cache_persists_across_instances: PASS
+- test_invalidate_removes_cache: PASS
+- test_corrupt_cache_file_triggers_reparse: PASS
+- test_cache_stats_tracks_memory_hits: PASS
+- test_cache_stats_tracks_disk_hits: PASS
+- test_cache_stats_to_dict: PASS
+- test_cache_stats_stores_and_invalidations: PASS
+- test_parallel_parser_uses_cache_and_parses_misses: PASS
+- test_parallel_parser_collects_errors: PASS
+- test_parallel_parser_handles_unpicklable_callable: PASS
+- test_incremental_analyzer_invalidation_and_dependents: PASS
+- test_incremental_analyzer_no_dependents: PASS
+
+Summary: 13/13 tests passing (100%)
+
+Analysis Accuracy Verification:
+- ImportResolver on synthetic 1201-file fixture: SUCCESS (modules=1201, imports=4190)
+- Cache hit rates verified: memory and disk hits tracked correctly
+- Invalidation correctly removes cache entries and dependents
+
+No regressions detected in analysis accuracy after performance optimizations.
