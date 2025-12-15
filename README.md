@@ -10,9 +10,141 @@
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
+## Installation
+
 ```bash
-pip install code-scalpel==2.0.0
+pip install code-scalpel
 ```
+
+Or with [uv](https://docs.astral.sh/uv/) (recommended for MCP):
+```bash
+uvx code-scalpel --help
+```
+
+---
+
+## Quick Start by Server Type
+
+Code Scalpel supports multiple transport methods. Choose based on your use case:
+
+| Transport | Best For | Command |
+|-----------|----------|---------|
+| **stdio** | Claude Desktop, VS Code, Cursor | `uvx code-scalpel mcp` |
+| **HTTP** | Remote access, team servers | `code-scalpel mcp --http --port 8593` |
+| **Docker** | Isolated environments, CI/CD | `docker run -p 8593:8593 code-scalpel` |
+
+### Option 1: VS Code / GitHub Copilot (stdio)
+
+Create `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "code-scalpel": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["code-scalpel", "mcp", "--root", "${workspaceFolder}"]
+    }
+  }
+}
+```
+
+Then in VS Code: `Ctrl+Shift+P` → "MCP: List Servers" → Start code-scalpel
+
+### Option 2: Claude Desktop (stdio)
+
+Add to `claude_desktop_config.json`:
+
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`  
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "code-scalpel": {
+      "command": "uvx",
+      "args": ["code-scalpel", "mcp", "--root", "C:\\Projects\\myapp"]
+    }
+  }
+}
+```
+
+### Option 3: HTTP Server (Remote/Team)
+
+```bash
+# Start HTTP server on port 8593
+code-scalpel mcp --http --port 8593
+
+# With LAN access for team
+code-scalpel mcp --http --port 8593 --allow-lan
+
+# Health check endpoint (port 8594)
+curl http://localhost:8594/health
+```
+
+Connect from VS Code:
+```json
+{
+  "servers": {
+    "code-scalpel": {
+      "type": "http",
+      "url": "http://localhost:8593/mcp"
+    }
+  }
+}
+```
+
+### Option 4: Docker (Isolated/CI)
+
+```bash
+# Run with project mounted
+docker run -d \
+  --name code-scalpel \
+  -p 8593:8593 \
+  -p 8594:8594 \
+  -v /path/to/project:/project \
+  ghcr.io/tescolopio/code-scalpel:2.0.0
+
+# Verify health
+curl http://localhost:8594/health
+# {"status":"healthy","version":"2.0.0","tools":18}
+
+# Connect via HTTP transport
+```
+
+**Docker Compose:**
+```yaml
+services:
+  code-scalpel:
+    image: ghcr.io/tescolopio/code-scalpel:2.0.0
+    ports:
+      - "8593:8593"
+      - "8594:8594"
+    volumes:
+      - ./:/project
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8594/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+### Option 5: Cursor IDE
+
+Add to Cursor settings (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "code-scalpel": {
+      "command": "uvx",
+      "args": ["code-scalpel", "mcp"]
+    }
+  }
+}
+```
+
+---
 
 > **v2.0.0 "POLYGLOT" RELEASE** (December 15, 2025)  
 > Multi-Language Support + Advanced MCP Protocol Features
@@ -25,17 +157,9 @@ pip install code-scalpel==2.0.0
 > | MCP Protocol | **COMPLETE** | Health endpoint, Progress tokens, Roots capability |
 > | Token Efficiency | **99%** | Surgical extraction vs full file |
 > | Performance | **20,000+ LOC/sec** | Project-wide analysis |
-> | MCP Tools | **15 tools** | analyze, extract, security, test-gen, cross-file |
+> | MCP Tools | **18 tools** | analyze, extract, security, test-gen, cross-file |
 >
-> **What's New in v2.0.0:**
-> - **Multi-Language**: TypeScript, JavaScript, Java extraction and security scanning
-> - **Health Endpoint**: `/health` for Docker container monitoring (port 8594)
-> - **Progress Tokens**: Real-time progress for `crawl_project`, `cross_file_security_scan`
-> - **Roots Capability**: Workspace discovery via `ctx.list_roots()`
-> - **Windows Path Support**: Full backslash handling across all tools
-> - **Best-in-Class Validated**: F1=1.0 security detection, 99% token reduction
->
-> See [RELEASE_NOTES_v2.0.0.md](docs/release_notes/RELEASE_NOTES_v2.0.0.md) for technical details.
+> See [RELEASE_NOTES_v2.0.0.md](docs/release_notes/RELEASE_NOTES_v2.0.0.md) for full details.
 
 ---
 
@@ -153,39 +277,7 @@ code-scalpel analyze demos/test_gen_scenario.py
 # - test_standard: income=50000, debt=20000, credit_score=700
 ```
 
-## AI Agent Integration
-
-### GitHub Copilot (VS Code)
-
-Create `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "code-scalpel": {
-      "command": "uvx",
-      "args": ["code-scalpel", "mcp", "--root", "${workspaceFolder}"]
-    }
-  }
-}
-```
-
-### Claude Desktop
-
-Add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "code-scalpel": {
-      "command": "uvx",
-      "args": ["code-scalpel", "mcp", "--root", "/path/to/project"]
-    }
-  }
-}
-```
-
-### MCP Tools Available (15 Total)
+## MCP Tools Reference (18 Total)
 
 **Core Tools (v1.0.0)**
 | Tool | Description |
@@ -292,29 +384,25 @@ See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 
 | Version | Status | Release Date | Highlights |
 |---------|--------|--------------|------------|
-| **v1.3.0** | ✅ Released | Dec 7, 2025 | NoSQL/LDAP injection, hardcoded secrets |
-| **v1.4.0** | ✅ Released | Dec 10, 2025 | Context tools (file_context, symbol_references, call_graph) |
-| **v1.5.0** | ✅ Released | Dec 12, 2025 | Project intelligence (project_map, call_graph, scan_dependencies) |
-| **v1.5.1** | ✅ Current | Dec 13, 2025 | **Cross-file analysis** (ImportResolver, CrossFileExtractor, CrossFileTaintTracker) |
-| **v1.5.2** | Planned | Dec 16, 2025 | TestFix - Fix OSV client test isolation |
-| **v1.5.3** | Planned | Dec 21, 2025 | PathSmart - Docker path resolution middleware |
-| **v1.5.4** | Planned | Dec 29, 2025 | DynamicImports - Track importlib.import_module() |
-| **v1.5.5** | Planned | Jan 8, 2026 | ScaleUp - Performance optimization for 1000+ file projects |
-| **v2.0.0** | Planned | Q1 2026 | Polyglot (TypeScript/JavaScript full support) |
+| **v1.5.x** | ✅ Released | Dec 13, 2025 | Cross-file analysis, context tools, project intelligence |
+| **v2.0.0** | ✅ Current | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
+| **v2.1.0** | Planned | Q1 2026 | Enhanced JS/TS - spread operators, super calls |
+| **v2.2.0** | Planned | Q2 2026 | IDE Extensions - VS Code marketplace |
 
 **Strategic Focus:** MCP server toolkit enabling AI agents to perform surgical code operations without hallucination.
 
 ## Stats
 
-- **2,238** tests passing (149 new in v1.5.1)
+- **2,668** tests passing (100% pass rate)
+- **89%** overall coverage (TypeScript parser stubs at 0% reduce total)
 - **100%** coverage: PDG, AST, Symbolic Execution, Security Analysis, Cross-File Analysis
-- **95%+** coverage: Surgical Tools (SurgicalExtractor 95%, SurgicalPatcher 96%)
-- **3** languages supported (Python full, JS/Java structural)
-- **15** MCP tools for AI agents
-- **16** vulnerability types detected (SQL, XSS, NoSQL, LDAP, command injection, path traversal, secrets, XXE)
+- **4** languages supported (Python, TypeScript, JavaScript, Java)
+- **18** MCP tools for AI agents
+- **17+** vulnerability types detected (SQL, XSS, NoSQL, LDAP, DOM XSS, Prototype Pollution, secrets)
 - **30+** secret detection patterns (AWS, GitHub, Stripe, private keys)
 - **200x** cache speedup
-- **100%** external testing validation (16/16 vulnerabilities detected)
+- **99%** token reduction via surgical extraction
+- **Python 3.13** compatible
 
 ## License
 
