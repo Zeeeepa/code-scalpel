@@ -290,6 +290,36 @@ class SecurityResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
 
+class UnifiedSinkInfo(BaseModel):
+    """[20251216_FEATURE] v2.3.0 - Information about a detected security sink."""
+    
+    pattern: str = Field(description="Matched pattern (e.g., cursor.execute)")
+    sink_type: str = Field(description="Type of sink (e.g., SQL_QUERY)")
+    confidence: float = Field(description="Confidence score 0.0-1.0")
+    line: int = Field(description="Line number in code")
+    column: int = Field(description="Column number in code")
+    code_snippet: str = Field(description="Matched code snippet")
+    vulnerability_type: str = Field(description="Vulnerability category")
+    owasp_category: str | None = Field(default=None, description="OWASP Top 10 category")
+
+
+class UnifiedSinkResult(BaseModel):
+    """[20251216_FEATURE] v2.3.0 - Result of unified sink detection."""
+    
+    success: bool = Field(description="Whether detection succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    language: str = Field(description="Language analyzed")
+    sink_count: int = Field(description="Number of sinks detected")
+    sinks: list[UnifiedSinkInfo] = Field(
+        default_factory=list, description="Detected security sinks"
+    )
+    min_confidence: float = Field(description="Minimum confidence threshold used")
+    coverage_summary: dict[str, Any] = Field(
+        default_factory=dict, description="Coverage statistics"
+    )
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
 class PathCondition(BaseModel):
     """A condition along an execution path."""
 
@@ -1099,6 +1129,117 @@ def _basic_security_scan(code: str) -> SecurityResult:
         vulnerabilities=vulnerabilities,
         taint_sources=taint_sources,
     )
+
+
+@mcp.tool()
+async def unified_sink_detect(
+    code: str,
+    language: str = "python",
+    min_confidence: float = 0.8
+) -> UnifiedSinkResult:
+    """
+    Detect security sinks using unified polyglot detection with confidence scoring.
+    
+    [20251216_FEATURE] v2.3.0 - Unified cross-language sink detection
+    
+    This tool provides language-agnostic security sink detection with explicit
+    confidence scores for each pattern. It supports Python, Java, TypeScript,
+    and JavaScript with complete OWASP Top 10 2021 coverage.
+    
+    Features:
+    - Multi-language support (Python, Java, TypeScript, JavaScript)
+    - Confidence-based detection (0.0-1.0 scale)
+    - OWASP Top 10 2021 mapping
+    - Context-aware vulnerability assessment
+    
+    Detects:
+    - SQL Injection (A03:2021)
+    - Cross-Site Scripting (A03:2021)
+    - Command Injection (A03:2021)
+    - Path Traversal (A01:2021)
+    - SSRF (A10:2021)
+    - And more...
+    
+    Args:
+        code: Source code to analyze
+        language: Programming language (python, java, typescript, javascript)
+        min_confidence: Minimum confidence threshold (0.0-1.0, default: 0.8)
+    
+    Returns:
+        Unified sink detection result with all detected sinks
+    """
+    return await asyncio.to_thread(
+        _unified_sink_detect_sync, code, language, min_confidence
+    )
+
+
+def _unified_sink_detect_sync(
+    code: str, language: str, min_confidence: float
+) -> UnifiedSinkResult:
+    """Synchronous implementation of unified_sink_detect."""
+    # Validate language
+    if language not in ["python", "java", "typescript", "javascript"]:
+        return UnifiedSinkResult(
+            success=False,
+            language=language,
+            sink_count=0,
+            min_confidence=min_confidence,
+            error=f"Unsupported language: {language}. Must be one of: python, java, typescript, javascript"
+        )
+    
+    # Validate confidence
+    if not 0.0 <= min_confidence <= 1.0:
+        return UnifiedSinkResult(
+            success=False,
+            language=language,
+            sink_count=0,
+            min_confidence=min_confidence,
+            error="Confidence must be between 0.0 and 1.0"
+        )
+    
+    try:
+        from code_scalpel.symbolic_execution_tools import UnifiedSinkDetector
+        
+        detector = UnifiedSinkDetector()
+        detected_sinks = detector.detect_sinks(code, language, min_confidence)
+        
+        # Convert to result format
+        sink_infos = []
+        for sink in detected_sinks:
+            owasp_cat = detector.get_owasp_category(sink.vulnerability_type)
+            
+            sink_infos.append(UnifiedSinkInfo(
+                pattern=sink.pattern,
+                sink_type=sink.sink_type.name,
+                confidence=sink.confidence,
+                line=sink.line,
+                column=sink.column,
+                code_snippet=sink.code_snippet,
+                vulnerability_type=sink.vulnerability_type,
+                owasp_category=owasp_cat
+            ))
+        
+        # Get coverage summary
+        coverage = detector.get_coverage_report()
+        
+        return UnifiedSinkResult(
+            success=True,
+            language=language,
+            sink_count=len(sink_infos),
+            sinks=sink_infos,
+            min_confidence=min_confidence,
+            coverage_summary=coverage
+        )
+        
+    except Exception as e:
+        logger.error(f"Unified sink detection failed: {e}", exc_info=True)
+        return UnifiedSinkResult(
+            success=False,
+            language=language,
+            sink_count=0,
+            min_confidence=min_confidence,
+            error=f"Detection failed: {str(e)}"
+        )
 
 
 def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
