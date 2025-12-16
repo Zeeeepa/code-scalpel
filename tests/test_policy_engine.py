@@ -19,11 +19,8 @@ from datetime import datetime, timedelta
 
 from code_scalpel.policy_engine import (
     PolicyEngine,
-    Policy,
     PolicyDecision,
-    PolicyViolation,
     Operation,
-    OverrideDecision,
     PolicyError,
     SemanticAnalyzer,
 )
