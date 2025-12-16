@@ -5,7 +5,7 @@ Tests for universal graph structure.
 """
 
 import json
-from code_scalpel.graph_engine.node_id import UniversalNodeID, NodeType, create_node_id
+from code_scalpel.graph_engine.node_id import create_node_id  # [20240613_REFACTOR] Remove unused imports UniversalNodeID, NodeType per CodeQL warning
 from code_scalpel.graph_engine.confidence import EdgeType
 from code_scalpel.graph_engine.graph import (
     GraphNode,
