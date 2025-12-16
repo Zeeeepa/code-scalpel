@@ -404,7 +404,6 @@ class TestPerformance:
         # First parse (cold cache)
         start1 = time.time()
         cache.get_or_parse(test_file, "python")
-        time1 = time.time() - start1
         
         # Second parse (warm cache)
         start2 = time.time()
