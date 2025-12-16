@@ -542,6 +542,12 @@ class PolicyEngine:
         }
         
         # In production, this should write to a secure audit log
-        # For now, we'll just structure it for later implementation
+        # For now, we'll log to a local file as a placeholder
         # TODO: Implement secure audit logging
-        pass
+        # [20251216_FEATURE] Minimal file-based audit logging for override requests
+        try:
+            with open("policy_override_audit.log", "a", encoding="utf-8") as f:
+                f.write(json.dumps(audit_entry) + "\n")
+        except Exception as e:
+            # In production, escalate/log this error securely
+            print(f"[WARN] Failed to write audit log entry: {e}")
