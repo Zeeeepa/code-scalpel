@@ -13,7 +13,6 @@ from code_scalpel.symbolic_execution_tools import (
     SecurityAnalyzer,
     detect_ssr_framework,
     detect_ssr_vulnerabilities,
-    TaintTracker,
 )
 import ast
 
