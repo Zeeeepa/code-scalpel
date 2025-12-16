@@ -1,10 +1,11 @@
 """
 Policy Engine Example - v2.5.0 "Guardian"
 
-[20251216_FEATURE] Demonstrates declarative policy enforcement using OPA/Rego
-
-This example shows how to use the Policy Engine to enforce security policies
-on code operations, with semantic analysis and human override capabilities.
+[20251216_FEATURE] Demonstrates complete policy enforcement for AI agents:
+- Part 1: PolicyEngine - OPA/Rego declarative policies
+- Part 2: SemanticAnalyzer - SQL injection detection
+- Part 3: TamperResistance - Tamper-resistant controls
+- Part 4: AuditLog - HMAC-signed audit trail
 
 Prerequisites:
     - Install OPA CLI: https://www.openpolicyagent.org/docs/latest/#running-opa
@@ -21,17 +22,28 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from code_scalpel.policy_engine import (
+    # Policy Engine core
     PolicyEngine,
     Operation,
     SemanticAnalyzer,
     PolicyError,
+    PolicyDecision,
+    # Tamper Resistance
+    TamperResistance,
+    AuditLog,
+    TamperDetectedError,
+    PolicyModificationError,
 )
 
 
+# =============================================================================
+# Part 1: PolicyEngine - OPA/Rego Integration
+# =============================================================================
+
 def example_1_basic_policy_evaluation():
-    """Example 1: Basic policy evaluation."""
+    """Example 1: Basic policy evaluation with OPA/Rego."""
     print("=" * 70)
-    print("Example 1: Basic Policy Evaluation")
+    print("Example 1: Basic Policy Evaluation (OPA/Rego)")
     print("=" * 70)
     
     try:
@@ -122,9 +134,9 @@ def example_2_semantic_analysis():
 
 
 def example_3_human_override():
-    """Example 3: Human override system."""
+    """Example 3: Human override system with PolicyEngine."""
     print("\n" + "=" * 70)
-    print("Example 3: Human Override System")
+    print("Example 3: Human Override System (PolicyEngine)")
     print("=" * 70)
     
     try:
@@ -190,27 +202,195 @@ def example_4_fail_closed_demonstration():
     
     print("\nTesting with nonexistent policy file:")
     try:
-        # [20240613_BUGFIX] Remove unused variable assignment; call constructor for side effect only
         PolicyEngine("nonexistent.yaml")
         print("✗ Should have failed!")
     except PolicyError as e:
         print(f"✓ Correctly failed CLOSED: {str(e)[:50]}...")
 
 
+# =============================================================================
+# Part 2: TamperResistance - Tamper-Proof Controls
+# =============================================================================
+
+def example_5_tamper_resistance():
+    """Example 5: Tamper-resistant policy enforcement."""
+    print("\n" + "=" * 70)
+    print("Example 5: Tamper-Resistant Policy Enforcement")
+    print("=" * 70)
+
+    # Create a temporary policy file
+    policy_path = Path(".scalpel/policy.yaml")
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Only write if it doesn't exist or is empty
+    if not policy_path.exists() or policy_path.stat().st_size == 0:
+        policy_path.write_text("# Policy v1.0\nmax_complexity: 10\n")
+
+    try:
+        # Initialize tamper resistance
+        tr = TamperResistance(policy_path=str(policy_path))
+        print(f"✓ Policy file locked: {policy_path}")
+
+        # Verify policy integrity
+        if tr.verify_policy_integrity():
+            print("✓ Policy integrity verified")
+
+        # Try to modify protected policy file (will be blocked)
+        tamper_operation = Operation(
+            type="file_write",
+            file_path=str(policy_path),
+        )
+
+        try:
+            tr.prevent_policy_modification(tamper_operation)
+            print("✗ Policy modification was NOT blocked (should not reach here)")
+        except PolicyModificationError as e:
+            print(f"✓ Policy modification blocked: {e}")
+
+    except Exception as e:
+        print(f"✗ Tamper resistance error: {e}")
+
+
+def example_6_audit_logging():
+    """Example 6: HMAC-signed audit logging."""
+    print("\n" + "=" * 70)
+    print("Example 6: Tamper-Resistant Audit Logging")
+    print("=" * 70)
+
+    # Create audit log
+    audit_log = AuditLog(log_path=".scalpel/audit.log")
+
+    # Record security events
+    audit_log.record_event(
+        event_type="POLICY_CHECK",
+        severity="LOW",
+        details={"operation": "file_read", "file": "src/main.py"},
+    )
+    print("✓ Event recorded: POLICY_CHECK")
+
+    audit_log.record_event(
+        event_type="POLICY_VIOLATION",
+        severity="HIGH",
+        details={"operation": "file_delete", "file": "critical_config.yaml"},
+    )
+    print("✓ Event recorded: POLICY_VIOLATION")
+
+    # Verify log integrity
+    if audit_log.verify_integrity():
+        print("✓ Audit log integrity verified")
+
+    # Retrieve events
+    events = audit_log.get_events(severity="HIGH")
+    print(f"✓ Found {len(events)} HIGH severity events")
+
+
+def example_7_tampering_detection():
+    """Example 7: Detecting policy tampering."""
+    print("\n" + "=" * 70)
+    print("Example 7: Policy Tampering Detection")
+    print("=" * 70)
+
+    # Create policy file
+    policy_path = Path(".scalpel/policy_test.yaml")
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    policy_path.write_text("# Original policy\nversion: 1.0\n")
+
+    try:
+        # Initialize tamper resistance
+        tr = TamperResistance(policy_path=str(policy_path))
+        original_hash = tr.policy_hash
+        print(f"✓ Original policy hash: {original_hash[:16]}...")
+
+        # Make policy writable and tamper with it
+        policy_path.chmod(0o644)
+        policy_path.write_text("# TAMPERED policy\nversion: 2.0\n")
+        print("⚠ Policy file modified externally")
+
+        # Try to verify integrity (should detect tampering)
+        try:
+            tr.verify_policy_integrity()
+            print("✗ Tampering NOT detected (should not reach here)")
+        except TamperDetectedError as e:
+            print(f"✓ Tampering detected: {e}")
+
+    except Exception as e:
+        print(f"Note: {e}")
+
+
+def example_8_audit_filtering():
+    """Example 8: Filtering audit log events."""
+    print("\n" + "=" * 70)
+    print("Example 8: Audit Log Event Filtering")
+    print("=" * 70)
+
+    # Create audit log
+    audit_log = AuditLog(log_path=".scalpel/audit_filter.log")
+
+    # Record various events
+    events_to_record = [
+        ("POLICY_CHECK", "LOW", {"file": "file1.py"}),
+        ("POLICY_VIOLATION", "HIGH", {"file": "file2.py"}),
+        ("POLICY_CHECK", "LOW", {"file": "file3.py"}),
+        ("OVERRIDE_APPROVED", "MEDIUM", {"user": "admin"}),
+        ("POLICY_TAMPERING_DETECTED", "CRITICAL", {"hash": "abc123"}),
+    ]
+
+    for event_type, severity, details in events_to_record:
+        audit_log.record_event(event_type, severity, details)
+
+    print(f"✓ Recorded {len(events_to_record)} events")
+
+    # Filter by event type
+    violations = audit_log.get_events(event_type="POLICY_VIOLATION")
+    print(f"✓ POLICY_VIOLATION events: {len(violations)}")
+
+    # Filter by severity
+    critical_events = audit_log.get_events(severity="CRITICAL")
+    print(f"✓ CRITICAL severity events: {len(critical_events)}")
+
+    # Get all events with limit
+    recent_events = audit_log.get_events(limit=3)
+    print(f"✓ Most recent 3 events retrieved")
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
 def main():
     """Run all examples."""
-    print("\n" + "=" * 70)
-    print("Policy Engine Examples - Code Scalpel v2.5.0 Guardian")
-    print("=" * 70)
+    print("\n")
+    print("╔" + "=" * 68 + "╗")
+    print("║" + " " * 10 + "POLICY ENGINE EXAMPLES - v2.5.0 GUARDIAN" + " " * 17 + "║")
+    print("║" + " " * 68 + "║")
+    print("║  Part 1: PolicyEngine (OPA/Rego)" + " " * 35 + "║")
+    print("║  Part 2: TamperResistance (Tamper-Proof Controls)" + " " * 19 + "║")
+    print("╚" + "=" * 68 + "╝")
+    print()
     
-    # Run examples
+    # Part 1: PolicyEngine Examples
+    print("─" * 70)
+    print("PART 1: PolicyEngine - Declarative Policy Enforcement")
+    print("─" * 70)
+    
     example_1_basic_policy_evaluation()
     example_2_semantic_analysis()
     example_3_human_override()
     example_4_fail_closed_demonstration()
     
+    # Part 2: TamperResistance Examples
+    print("\n" + "─" * 70)
+    print("PART 2: TamperResistance - Tamper-Proof Controls")
+    print("─" * 70)
+    
+    example_5_tamper_resistance()
+    example_6_audit_logging()
+    example_7_tampering_detection()
+    example_8_audit_filtering()
+    
+    # Summary
     print("\n" + "=" * 70)
-    print("Examples Complete")
+    print("All Examples Complete")
     print("=" * 70)
     print("\nNext Steps:")
     print("  1. Install OPA CLI: https://www.openpolicyagent.org/docs/latest/#running-opa")
