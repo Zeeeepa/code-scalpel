@@ -2596,11 +2596,13 @@ async def extract_code(
 ```
 
 **Acceptance Criteria:**
-- [ ] Extract functional React components with JSX
-- [ ] Extract class components with JSX
-- [ ] Detect and flag Server Components (`async` function components)
-- [ ] Detect and flag Server Actions (`'use server'` directive)
-- [ ] Normalize JSX syntax for consistent analysis
+- [x] Extract functional React components with JSX
+- [x] Extract class components with JSX
+- [x] Detect and flag Server Components (`async` function components)
+- [x] Detect and flag Server Actions (`'use server'` directive)
+- [x] Normalize JSX syntax for consistent analysis
+
+**Status:** ✅ COMPLETE (v2.0.2, Dec 16, 2025)
 
 #### 6. Resource Templates (P0, from v2.1.0)
 
@@ -2642,11 +2644,13 @@ async def get_code_resource(language: str, module: str, symbol: str) -> Resource
 ```
 
 **Acceptance Criteria:**
-- [ ] Resource template URI parsing works
-- [ ] Module path resolution across languages
-- [ ] Symbol extraction via resource URIs
-- [ ] Proper MIME types for each language
-- [ ] Error handling for invalid URIs
+- [x] Resource template URI parsing works
+- [x] Module path resolution across languages
+- [x] Symbol extraction via resource URIs
+- [x] Proper MIME types for each language
+- [x] Error handling for invalid URIs
+
+**Status:** ✅ COMPLETE (v2.0.2, Dec 16, 2025)
 
 #### 7. TypeScript Decorators + Metadata (P1, from v2.0.2)
 
