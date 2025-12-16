@@ -4,7 +4,6 @@ Tests for Contract Breach Detector.
 [20251216_TEST] Tests for Feature 11: Contract Breach Detector
 """
 
-import pytest
 
 from code_scalpel.polyglot.contract_breach_detector import (
     ContractBreach,
