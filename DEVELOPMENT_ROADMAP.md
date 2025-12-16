@@ -3338,7 +3338,8 @@ v2.2.0 "Nexus" Release Criteria:
 **Theme:** Restraint as a Feature  
 **Goal:** Enterprise-grade control over what agents can touch. Trust is earned by restraint.  
 **Effort:** ~35 developer-days  
-**Risk Level:** High (security-critical)
+**Risk Level:** High (security-critical)  
+**Timeline:** Q1-Q2 2026 (Target: End of March 2026)  
 **North Star:** "You can enforce 'Thou Shalt Not' rules on the Agent."
 
 ### Priorities
@@ -3350,6 +3351,1195 @@ v2.2.0 "Nexus" Release Criteria:
 | **P0** | Change Budgeting | TBD | 8 days | Policy Engine |
 | **P0** | Tamper Resistance | TBD | 5 days | Policy Engine |
 | **P1** | Compliance Reporting | TBD | 5 days | All P0 |
+
+### Technical Specifications
+
+#### 1. Policy Engine (OPA/Rego Integration)
+
+**Purpose:** Declarative policy enforcement using Open Policy Agent's Rego language for enterprise governance.
+
+```yaml
+# .scalpel/policy.yaml
+version: "1.0"
+policies:
+  - name: "no-raw-sql"
+    description: "Prevent agents from introducing raw SQL queries"
+    rule: |
+      package scalpel.security
+      
+      deny[msg] {
+        input.operation == "code_edit"
+        contains_sql_sink(input.code)
+        not has_parameterization(input.code)
+        msg = "Raw SQL detected without parameterized queries"
+      }
+    severity: "CRITICAL"
+    action: "DENY"
+  
+  - name: "spring-security-required"
+    description: "All Java controllers must use Spring Security"
+    rule: |
+      package scalpel.security
+      
+      deny[msg] {
+        input.language == "java"
+        has_annotation(input.code, "@RestController")
+        not has_annotation(input.code, "@PreAuthorize")
+        msg = "REST controller missing @PreAuthorize annotation"
+      }
+    severity: "HIGH"
+    action: "DENY"
+  
+  - name: "safe-file-operations"
+    description: "File operations must not use user-controlled paths"
+    rule: |
+      package scalpel.security
+      
+      deny[msg] {
+        input.operation == "code_edit"
+        has_file_operation(input.code)
+        tainted_path_input(input.code)
+        msg = "File operation uses user-controlled path without validation"
+      }
+    severity: "HIGH"
+    action: "DENY"
+```
+
+**Implementation:**
+
+```python
+# New module: src/code_scalpel/policy_engine/opa_engine.py
+from typing import Optional
+import subprocess
+import json
+import tempfile
+from pathlib import Path
+
+class PolicyEngine:
+    """OPA/Rego policy enforcement engine."""
+    
+    def __init__(self, policy_path: str = ".scalpel/policy.yaml"):
+        self.policy_path = Path(policy_path)
+        self.policies = self._load_policies()
+        self._validate_policies()
+    
+    def _load_policies(self) -> list[Policy]:
+        """Load and parse policy definitions."""
+        if not self.policy_path.exists():
+            raise PolicyError(f"Policy file not found: {self.policy_path}")
+        
+        try:
+            with open(self.policy_path) as f:
+                config = yaml.safe_load(f)
+            
+            return [Policy(**p) for p in config.get("policies", [])]
+        except Exception as e:
+            # Fail CLOSED - deny all if policy parsing fails
+            raise PolicyError(f"Policy parsing failed: {e}. Failing CLOSED.")
+    
+    def _validate_policies(self):
+        """Validate Rego syntax using OPA CLI."""
+        for policy in self.policies:
+            result = subprocess.run(
+                ["opa", "check", "-"],
+                input=policy.rule.encode(),
+                capture_output=True
+            )
+            if result.returncode != 0:
+                raise PolicyError(
+                    f"Invalid Rego in policy '{policy.name}': "
+                    f"{result.stderr.decode()}"
+                )
+    
+    def evaluate(self, operation: Operation) -> PolicyDecision:
+        """
+        Evaluate operation against all policies.
+        
+        Args:
+            operation: The operation to evaluate (code_edit, file_access, etc.)
+        
+        Returns:
+            PolicyDecision with allow/deny and reasons
+        """
+        input_data = {
+            "operation": operation.type,
+            "code": operation.code,
+            "language": operation.language,
+            "file_path": operation.file_path,
+            "metadata": operation.metadata
+        }
+        
+        violations = []
+        
+        for policy in self.policies:
+            # Write Rego policy and input to temp files
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.rego') as policy_file:
+                policy_file.write(policy.rule)
+                policy_file.flush()
+                
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.json') as input_file:
+                    json.dump(input_data, input_file)
+                    input_file.flush()
+                    
+                    # Evaluate with OPA
+                    result = subprocess.run(
+                        ["opa", "eval", 
+                         "-d", policy_file.name,
+                         "-i", input_file.name,
+                         "data.scalpel.security.deny"],
+                        capture_output=True,
+                        text=True
+                    )
+                    
+                    if result.returncode != 0:
+                        # Policy evaluation error - fail CLOSED
+                        return PolicyDecision(
+                            allowed=False,
+                            reason="Policy evaluation error - failing CLOSED",
+                            violated_policies=[policy.name],
+                            requires_override=False  # No override for errors
+                        )
+                    
+                    # Parse OPA output
+                    output = json.loads(result.stdout)
+                    if output.get("result"):
+                        # Policy denied the operation
+                        violations.append(PolicyViolation(
+                            policy_name=policy.name,
+                            severity=policy.severity,
+                            message=output["result"][0]["expressions"][0]["value"][0],
+                            action=policy.action
+                        ))
+        
+        if violations:
+            return PolicyDecision(
+                allowed=False,
+                reason=f"Violated {len(violations)} policy(ies)",
+                violated_policies=[v.policy_name for v in violations],
+                violations=violations,
+                requires_override=True
+            )
+        
+        return PolicyDecision(
+            allowed=True,
+            reason="No policy violations detected",
+            violated_policies=[],
+            violations=[]
+        )
+    
+    def request_override(
+        self,
+        operation: Operation,
+        decision: PolicyDecision,
+        justification: str,
+        human_code: str
+    ) -> OverrideDecision:
+        """
+        Request human override for denied operation.
+        
+        Args:
+            operation: The denied operation
+            decision: The original policy decision
+            justification: Human justification for override
+            human_code: One-time code from human approver
+        
+        Returns:
+            OverrideDecision with approval status
+        """
+        # Verify human code (time-based OTP or similar)
+        if not self._verify_human_code(human_code):
+            return OverrideDecision(
+                approved=False,
+                reason="Invalid override code"
+            )
+        
+        # Log override request for audit trail
+        self._log_override_request(
+            operation=operation,
+            decision=decision,
+            justification=justification,
+            human_code=human_code  # Store hash, not plaintext
+        )
+        
+        return OverrideDecision(
+            approved=True,
+            reason="Human override approved",
+            override_id=self._generate_override_id(),
+            expires_at=datetime.now() + timedelta(hours=1)
+        )
+```
+
+**Semantic Blocking (Advanced):**
+
+```python
+class SemanticAnalyzer:
+    """Semantic analysis for policy enforcement."""
+    
+    def contains_sql_sink(self, code: str, language: str) -> bool:
+        """
+        Detect SQL operations semantically, not just syntactically.
+        
+        Examples that must be caught:
+        - Direct: cursor.execute("SELECT * FROM users WHERE id=" + user_id)
+        - StringBuilder: query = new StringBuilder(); query.append("SELECT * FROM users WHERE id="); query.append(userId);
+        - Concatenation: sql = f"SELECT * FROM {table} WHERE id={user_id}"
+        - String format: sql = "SELECT * FROM users WHERE id=%s" % user_id
+        """
+        tree = parse_code(code, language)
+        
+        # Track string building across multiple statements
+        string_builders = {}
+        
+        for node in ast.walk(tree):
+            # Detect string concatenation patterns
+            if self._is_string_concatenation(node):
+                if self._contains_sql_keywords(node):
+                    return True
+            
+            # Detect StringBuilder/StringBuffer (Java)
+            if language == "java":
+                if self._is_string_builder_sql(node, string_builders):
+                    return True
+            
+            # Detect template strings (Python f-strings, JS template literals)
+            if self._is_template_with_sql(node):
+                return True
+        
+        return False
+    
+    def _is_string_concatenation(self, node: ast.AST) -> bool:
+        """Check if node is string concatenation."""
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return (isinstance(node.left, ast.Constant) or 
+                   isinstance(node.right, ast.Constant))
+        return False
+    
+    def _contains_sql_keywords(self, node: ast.AST) -> bool:
+        """Check if concatenation contains SQL keywords."""
+        sql_keywords = {"SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "CREATE"}
+        
+        for child in ast.walk(node):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                if any(kw in child.value.upper() for kw in sql_keywords):
+                    return True
+        
+        return False
+    
+    def _is_string_builder_sql(
+        self,
+        node: ast.AST,
+        builders: dict[str, list[str]]
+    ) -> bool:
+        """
+        Track StringBuilder/StringBuffer patterns in Java.
+        
+        Example:
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT * FROM users");
+            query.append(" WHERE id=");
+            query.append(userId);
+        """
+        # Track new StringBuilder() instances
+        if isinstance(node, ast.Assign):
+            if self._is_string_builder_init(node.value):
+                var_name = node.target.id
+                builders[var_name] = []
+        
+        # Track append() calls
+        if isinstance(node, ast.Call):
+            if self._is_append_call(node):
+                var_name = node.func.value.id
+                if var_name in builders:
+                    # Extract appended value
+                    if node.args and isinstance(node.args[0], ast.Constant):
+                        builders[var_name].append(node.args[0].value)
+                    
+                    # Check if accumulated string contains SQL
+                    accumulated = "".join(builders[var_name])
+                    if self._contains_sql_keywords_str(accumulated):
+                        return True
+        
+        return False
+```
+
+**Acceptance Criteria:**
+
+- [ ] Policy Engine: Loads and parses `.scalpel/policy.yaml` (P0)
+- [ ] Policy Engine: Validates Rego syntax at startup (P0)
+- [ ] Policy Engine: Evaluates operations against all policies (P0)
+- [ ] Policy Engine: Fails CLOSED on policy parsing error (P0)
+- [ ] Policy Engine: Fails CLOSED on policy evaluation error (P0)
+
+- [ ] Semantic Blocking: Detects SQL via string concatenation (P0)
+- [ ] Semantic Blocking: Detects SQL via StringBuilder/StringBuffer (P0)
+- [ ] Semantic Blocking: Detects SQL via f-strings/template literals (P0)
+- [ ] Semantic Blocking: Detects SQL via string.format() (P0)
+
+- [ ] Override System: Requires valid human code (P0)
+- [ ] Override System: Logs all override requests (P0)
+- [ ] Override System: Override expires after time limit (P0)
+- [ ] Override System: Override cannot be reused (P0)
+
+#### 2. Security Sinks (Polyglot Unified)
+
+**Purpose:** Unified security sink definitions across Python, Java, TypeScript, JavaScript with consistent enforcement.
+
+```python
+# Unified sink registry with confidence scores
+UNIFIED_SINKS = {
+    "sql_injection": {
+        "python": [
+            {"pattern": "cursor.execute", "confidence": 1.0},
+            {"pattern": "connection.execute", "confidence": 1.0},
+            {"pattern": "session.execute", "confidence": 0.95},  # SQLAlchemy
+        ],
+        "java": [
+            {"pattern": "Statement.executeQuery", "confidence": 1.0},
+            {"pattern": "PreparedStatement.executeQuery", "confidence": 0.5},  # Safer if used correctly
+            {"pattern": "EntityManager.createQuery", "confidence": 0.8},
+        ],
+        "typescript": [
+            {"pattern": "connection.query", "confidence": 1.0},
+            {"pattern": "pool.query", "confidence": 1.0},
+            {"pattern": "knex.raw", "confidence": 1.0},
+        ],
+        "javascript": [
+            {"pattern": "db.query", "confidence": 0.9},
+            {"pattern": "sequelize.query", "confidence": 0.8},
+        ]
+    },
+    
+    "command_injection": {
+        "python": [
+            {"pattern": "os.system", "confidence": 1.0},
+            {"pattern": "subprocess.call", "confidence": 0.9},
+            {"pattern": "eval", "confidence": 1.0},
+        ],
+        "java": [
+            {"pattern": "Runtime.getRuntime().exec", "confidence": 1.0},
+            {"pattern": "ProcessBuilder.command", "confidence": 0.9},
+        ],
+        "typescript": [
+            {"pattern": "child_process.exec", "confidence": 1.0},
+            {"pattern": "child_process.spawn", "confidence": 0.9},
+        ],
+    },
+    
+    "xss": {
+        "typescript": [
+            {"pattern": "innerHTML", "confidence": 1.0},
+            {"pattern": "outerHTML", "confidence": 1.0},
+            {"pattern": "dangerouslySetInnerHTML", "confidence": 1.0},
+        ],
+        "javascript": [
+            {"pattern": "document.write", "confidence": 1.0},
+            {"pattern": "element.innerHTML", "confidence": 1.0},
+        ],
+        "java": [
+            {"pattern": "response.getWriter().write", "confidence": 0.8},
+            {"pattern": "PrintWriter.println", "confidence": 0.7},
+        ]
+    },
+    
+    "path_traversal": {
+        "python": [
+            {"pattern": "open", "confidence": 0.8},  # Context-dependent
+            {"pattern": "os.path.join", "confidence": 0.6},
+        ],
+        "java": [
+            {"pattern": "new File", "confidence": 0.8},
+            {"pattern": "Files.readString", "confidence": 0.8},
+            {"pattern": "FileInputStream", "confidence": 0.9},
+        ],
+        "typescript": [
+            {"pattern": "fs.readFile", "confidence": 0.8},
+            {"pattern": "fs.readFileSync", "confidence": 0.8},
+        ]
+    }
+}
+
+class UnifiedSinkDetector:
+    """Polyglot security sink detection with confidence scoring."""
+    
+    def __init__(self):
+        self.sinks = UNIFIED_SINKS
+    
+    def detect_sinks(
+        self,
+        code: str,
+        language: str,
+        min_confidence: float = 0.8
+    ) -> list[SecuritySink]:
+        """
+        Detect security sinks with confidence scores.
+        
+        Returns only sinks above minimum confidence threshold.
+        """
+        tree = parse_code(code, language)
+        detected = []
+        
+        for vuln_type, lang_sinks in self.sinks.items():
+            if language not in lang_sinks:
+                continue
+            
+            for sink_def in lang_sinks[language]:
+                pattern = sink_def["pattern"]
+                confidence = sink_def["confidence"]
+                
+                if confidence < min_confidence:
+                    continue
+                
+                # Find matches in AST
+                matches = self._find_pattern_matches(tree, pattern, language)
+                
+                for match in matches:
+                    detected.append(SecuritySink(
+                        type=vuln_type,
+                        pattern=pattern,
+                        confidence=confidence,
+                        line=match.lineno,
+                        column=match.col_offset,
+                        code_snippet=self._extract_snippet(code, match.lineno)
+                    ))
+        
+        return detected
+    
+    def is_vulnerable(
+        self,
+        sink: SecuritySink,
+        data_flow: TaintFlow
+    ) -> tuple[bool, str]:
+        """
+        Determine if sink is vulnerable based on data flow.
+        
+        Returns:
+            (is_vulnerable, explanation)
+        """
+        # Check if tainted data reaches sink
+        if not data_flow.reaches_sink(sink.line):
+            return False, "No tainted data reaches this sink"
+        
+        # Check for sanitizers
+        sanitizers = data_flow.get_sanitizers_between(
+            data_flow.source_line,
+            sink.line
+        )
+        
+        if sanitizers:
+            return False, f"Data sanitized by: {', '.join(s.name for s in sanitizers)}"
+        
+        # Check for parameterization
+        if self._is_parameterized(sink):
+            return False, "Parameterized query detected"
+        
+        return True, f"Tainted data flows from line {data_flow.source_line} to sink at line {sink.line}"
+```
+
+**OWASP Top 10 Coverage:**
+
+```python
+# Complete mapping to OWASP Top 10 2021
+OWASP_COVERAGE = {
+    "A01:2021 – Broken Access Control": [
+        "path_traversal",
+        "unauthorized_file_access",
+        "missing_authorization",
+    ],
+    
+    "A02:2021 – Cryptographic Failures": [
+        "weak_crypto",
+        "hardcoded_secrets",
+        "insecure_random",
+    ],
+    
+    "A03:2021 – Injection": [
+        "sql_injection",
+        "nosql_injection",
+        "command_injection",
+        "ldap_injection",
+        "xpath_injection",
+        "ssti",
+        "xxe",
+    ],
+    
+    "A04:2021 – Insecure Design": [
+        "missing_rate_limiting",
+        "insecure_defaults",
+    ],
+    
+    "A05:2021 – Security Misconfiguration": [
+        "debug_mode_enabled",
+        "verbose_errors",
+        "default_credentials",
+    ],
+    
+    "A06:2021 – Vulnerable and Outdated Components": [
+        "outdated_dependencies",  # Via scan_dependencies
+    ],
+    
+    "A07:2021 – Identification and Authentication Failures": [
+        "weak_password_policy",
+        "missing_mfa",
+        "session_fixation",
+    ],
+    
+    "A08:2021 – Software and Data Integrity Failures": [
+        "unsigned_code",
+        "deserialization",
+    ],
+    
+    "A09:2021 – Security Logging and Monitoring Failures": [
+        "missing_audit_log",
+        "insufficient_logging",
+    ],
+    
+    "A10:2021 – Server-Side Request Forgery": [
+        "ssrf",
+        "unvalidated_redirect",
+    ]
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Unified Sinks: All OWASP Top 10 categories mapped (P0)
+- [ ] Unified Sinks: Python sinks defined with confidence (P0)
+- [ ] Unified Sinks: Java sinks defined with confidence (P0)
+- [ ] Unified Sinks: TypeScript sinks defined with confidence (P0)
+- [ ] Unified Sinks: JavaScript sinks defined with confidence (P0)
+
+- [ ] Detection: 100% block rate for SQL injection (P0)
+- [ ] Detection: 100% block rate for XSS (P0)
+- [ ] Detection: 100% block rate for Command Injection (P0)
+- [ ] Detection: 100% block rate for Path Traversal (P0)
+- [ ] Detection: 100% block rate for SSRF (P0)
+
+- [ ] Detection: < 5% false positive rate on clean code (P0)
+- [ ] Detection: Respects sanitizers (e.g., escaping, parameterization) (P0)
+
+#### 3. Change Budgeting (Blast Radius Control)
+
+**Purpose:** Limit the scope of agent modifications to prevent runaway changes.
+
+```python
+# Budget configuration
+class ChangeBudget:
+    """Budget constraints for agent operations."""
+    
+    def __init__(self, config: dict):
+        self.max_files = config.get("max_files", 5)
+        self.max_lines_per_file = config.get("max_lines_per_file", 100)
+        self.max_total_lines = config.get("max_total_lines", 300)
+        self.max_complexity_increase = config.get("max_complexity_increase", 10)
+        self.allowed_file_patterns = config.get("allowed_file_patterns", ["*.py", "*.ts", "*.java"])
+        self.forbidden_paths = config.get("forbidden_paths", [".git/", "node_modules/", "__pycache__/"])
+    
+    def validate_operation(self, operation: Operation) -> BudgetDecision:
+        """
+        Validate operation against budget constraints.
+        
+        Returns:
+            BudgetDecision with allow/deny and reasons
+        """
+        violations = []
+        
+        # Check file count
+        if len(operation.affected_files) > self.max_files:
+            violations.append(BudgetViolation(
+                rule="max_files",
+                limit=self.max_files,
+                actual=len(operation.affected_files),
+                severity="HIGH",
+                message=f"Operation affects {len(operation.affected_files)} files, exceeds limit of {self.max_files}"
+            ))
+        
+        # Check lines per file
+        for file_change in operation.changes:
+            lines_changed = len(file_change.added_lines) + len(file_change.removed_lines)
+            if lines_changed > self.max_lines_per_file:
+                violations.append(BudgetViolation(
+                    rule="max_lines_per_file",
+                    limit=self.max_lines_per_file,
+                    actual=lines_changed,
+                    file=file_change.file_path,
+                    severity="MEDIUM",
+                    message=f"Changes to {file_change.file_path} exceed {self.max_lines_per_file} line limit"
+                ))
+        
+        # Check total lines
+        total_lines = sum(
+            len(c.added_lines) + len(c.removed_lines)
+            for c in operation.changes
+        )
+        if total_lines > self.max_total_lines:
+            violations.append(BudgetViolation(
+                rule="max_total_lines",
+                limit=self.max_total_lines,
+                actual=total_lines,
+                severity="HIGH",
+                message=f"Total lines changed ({total_lines}) exceeds limit of {self.max_total_lines}"
+            ))
+        
+        # Check complexity increase
+        complexity_delta = self._calculate_complexity_delta(operation)
+        if complexity_delta > self.max_complexity_increase:
+            violations.append(BudgetViolation(
+                rule="max_complexity_increase",
+                limit=self.max_complexity_increase,
+                actual=complexity_delta,
+                severity="MEDIUM",
+                message=f"Complexity increase ({complexity_delta}) exceeds limit of {self.max_complexity_increase}"
+            ))
+        
+        # Check file patterns
+        for file_path in operation.affected_files:
+            if not self._matches_allowed_pattern(file_path):
+                violations.append(BudgetViolation(
+                    rule="allowed_file_patterns",
+                    file=file_path,
+                    severity="HIGH",
+                    message=f"File {file_path} does not match allowed patterns: {self.allowed_file_patterns}"
+                ))
+            
+            if self._matches_forbidden_path(file_path):
+                violations.append(BudgetViolation(
+                    rule="forbidden_paths",
+                    file=file_path,
+                    severity="CRITICAL",
+                    message=f"File {file_path} is in forbidden path"
+                ))
+        
+        if violations:
+            return BudgetDecision(
+                allowed=False,
+                reason="Budget constraints violated",
+                violations=violations,
+                requires_review=True
+            )
+        
+        return BudgetDecision(
+            allowed=True,
+            reason="Within budget constraints",
+            violations=[]
+        )
+    
+    def _calculate_complexity_delta(self, operation: Operation) -> int:
+        """
+        Calculate change in cyclomatic complexity.
+        
+        Uses AST analysis to measure complexity before and after.
+        """
+        total_delta = 0
+        
+        for change in operation.changes:
+            before_complexity = self._measure_complexity(change.original_code)
+            after_complexity = self._measure_complexity(change.modified_code)
+            total_delta += (after_complexity - before_complexity)
+        
+        return total_delta
+    
+    def _measure_complexity(self, code: str) -> int:
+        """Measure cyclomatic complexity of code."""
+        tree = ast.parse(code)
+        complexity = 1  # Base complexity
+        
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.If, ast.For, ast.While, ast.ExceptHandler)):
+                complexity += 1
+            elif isinstance(node, ast.BoolOp):
+                complexity += len(node.values) - 1
+        
+        return complexity
+```
+
+**Budget Policy Example:**
+
+```yaml
+# .scalpel/budget.yaml
+budgets:
+  default:
+    max_files: 5
+    max_lines_per_file: 100
+    max_total_lines: 300
+    max_complexity_increase: 10
+    allowed_file_patterns:
+      - "src/**/*.py"
+      - "src/**/*.ts"
+      - "src/**/*.java"
+    forbidden_paths:
+      - ".git/"
+      - "node_modules/"
+      - "venv/"
+      - "target/"
+      - "build/"
+  
+  critical_files:
+    # Stricter budget for sensitive files
+    max_files: 1
+    max_lines_per_file: 20
+    max_total_lines: 20
+    max_complexity_increase: 0
+    files:
+      - "src/security/**"
+      - "src/authentication/**"
+      - "config/production.yaml"
+```
+
+**Acceptance Criteria:**
+
+- [ ] Budget Validation: Enforces max_files limit (P0)
+- [ ] Budget Validation: Enforces max_lines_per_file limit (P0)
+- [ ] Budget Validation: Enforces max_total_lines limit (P0)
+- [ ] Budget Validation: Enforces max_complexity_increase limit (P0)
+- [ ] Budget Validation: Respects allowed_file_patterns (P0)
+- [ ] Budget Validation: Blocks forbidden_paths (P0)
+
+- [ ] Budget Policies: Default budget applied to all operations (P0)
+- [ ] Budget Policies: Critical files budget stricter than default (P0)
+- [ ] Budget Policies: Budget can be customized per project (P0)
+
+- [ ] Error Messages: Clear explanation of violated constraint (P0)
+- [ ] Error Messages: Suggests how to reduce scope (P0)
+- [ ] Error Messages: Reports "Complexity Limit Exceeded" correctly (P0)
+
+#### 4. Tamper Resistance
+
+**Purpose:** Prevent agents from circumventing policy enforcement.
+
+```python
+class TamperResistance:
+    """Tamper-resistant policy enforcement."""
+    
+    def __init__(self, policy_path: str = ".scalpel/policy.yaml"):
+        self.policy_path = Path(policy_path)
+        self.policy_hash = self._hash_policy_file()
+        self.audit_log = AuditLog()
+        self._lock_policy_files()
+    
+    def _lock_policy_files(self):
+        """Make policy files read-only to agent."""
+        policy_files = [
+            self.policy_path,
+            Path(".scalpel/budget.yaml"),
+            Path(".scalpel/overrides.yaml")
+        ]
+        
+        for policy_file in policy_files:
+            if policy_file.exists():
+                # Set read-only permissions
+                policy_file.chmod(0o444)
+    
+    def verify_policy_integrity(self) -> bool:
+        """
+        Verify policy file has not been tampered with.
+        
+        Returns:
+            True if policy is intact, False if tampered
+        """
+        current_hash = self._hash_policy_file()
+        
+        if current_hash != self.policy_hash:
+            self.audit_log.record_event(
+                event_type="POLICY_TAMPERING_DETECTED",
+                severity="CRITICAL",
+                details={
+                    "expected_hash": self.policy_hash,
+                    "actual_hash": current_hash,
+                    "timestamp": datetime.now().isoformat()
+                }
+            )
+            
+            # Fail CLOSED - deny all operations
+            raise TamperDetectedError(
+                "Policy file integrity check failed. All operations denied."
+            )
+        
+        return True
+    
+    def _hash_policy_file(self) -> str:
+        """Calculate SHA-256 hash of policy file."""
+        if not self.policy_path.exists():
+            return ""
+        
+        hasher = hashlib.sha256()
+        with open(self.policy_path, 'rb') as f:
+            hasher.update(f.read())
+        return hasher.hexdigest()
+    
+    def prevent_policy_modification(self, operation: Operation) -> bool:
+        """
+        Prevent agent from modifying policy files.
+        
+        Returns:
+            True if operation is allowed, raises error if blocked
+        """
+        protected_paths = [
+            ".scalpel/",
+            "scalpel.policy.yaml",
+            "budget.yaml",
+            "overrides.yaml"
+        ]
+        
+        for file_path in operation.affected_files:
+            if any(str(file_path).startswith(p) for p in protected_paths):
+                self.audit_log.record_event(
+                    event_type="POLICY_MODIFICATION_ATTEMPTED",
+                    severity="CRITICAL",
+                    details={
+                        "file": str(file_path),
+                        "operation": operation.type,
+                        "timestamp": datetime.now().isoformat()
+                    }
+                )
+                
+                raise PolicyModificationError(
+                    f"Agent attempted to modify protected policy file: {file_path}"
+                )
+        
+        return True
+    
+    def require_human_override(
+        self,
+        operation: Operation,
+        policy_decision: PolicyDecision
+    ) -> OverrideDecision:
+        """
+        Require human approval for policy overrides.
+        
+        Uses time-based one-time password (TOTP) for verification.
+        """
+        # Generate challenge
+        challenge = self._generate_challenge()
+        
+        # Wait for human response (with timeout)
+        response = self._wait_for_human_response(
+            challenge=challenge,
+            timeout_seconds=300  # 5 minutes
+        )
+        
+        if not response:
+            self.audit_log.record_event(
+                event_type="OVERRIDE_TIMEOUT",
+                severity="HIGH",
+                details={
+                    "operation": operation.type,
+                    "policy_violated": policy_decision.violated_policies
+                }
+            )
+            return OverrideDecision(
+                approved=False,
+                reason="Override request timed out"
+            )
+        
+        # Verify human code
+        if not self._verify_totp(response.code):
+            self.audit_log.record_event(
+                event_type="INVALID_OVERRIDE_CODE",
+                severity="HIGH",
+                details={
+                    "operation": operation.type,
+                    "attempted_code": "***"  # Never log actual code
+                }
+            )
+            return OverrideDecision(
+                approved=False,
+                reason="Invalid override code"
+            )
+        
+        # Record approval
+        self.audit_log.record_event(
+            event_type="OVERRIDE_APPROVED",
+            severity="MEDIUM",
+            details={
+                "operation": operation.type,
+                "policy_violated": policy_decision.violated_policies,
+                "justification": response.justification,
+                "approved_by": response.human_id
+            }
+        )
+        
+        return OverrideDecision(
+            approved=True,
+            reason="Human override approved",
+            override_id=self._generate_override_id(),
+            expires_at=datetime.now() + timedelta(minutes=30)
+        )
+
+class AuditLog:
+    """Tamper-resistant audit logging."""
+    
+    def __init__(self, log_path: str = ".scalpel/audit.log"):
+        self.log_path = Path(log_path)
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    def record_event(
+        self,
+        event_type: str,
+        severity: str,
+        details: dict
+    ):
+        """
+        Record security event to tamper-resistant log.
+        
+        Uses append-only file with cryptographic signatures.
+        """
+        event = {
+            "timestamp": datetime.now().isoformat(),
+            "event_type": event_type,
+            "severity": severity,
+            "details": details
+        }
+        
+        # Sign event
+        signature = self._sign_event(event)
+        event["signature"] = signature
+        
+        # Append to log (append-only)
+        with open(self.log_path, 'a') as f:
+            f.write(json.dumps(event) + "\n")
+    
+    def _sign_event(self, event: dict) -> str:
+        """Sign event with HMAC."""
+        # Use secret key stored securely (environment variable, keyring, etc.)
+        secret = os.environ.get("SCALPEL_AUDIT_SECRET", "default-secret")
+        
+        message = json.dumps(event, sort_keys=True)
+        signature = hmac.new(
+            secret.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return signature
+    
+    def verify_integrity(self) -> bool:
+        """Verify audit log has not been tampered with."""
+        if not self.log_path.exists():
+            return True
+        
+        with open(self.log_path, 'r') as f:
+            for line in f:
+                event = json.loads(line)
+                signature = event.pop("signature")
+                
+                # Verify signature
+                expected_signature = self._sign_event(event)
+                if signature != expected_signature:
+                    raise TamperDetectedError(
+                        f"Audit log tampering detected at timestamp: {event['timestamp']}"
+                    )
+        
+        return True
+```
+
+**Acceptance Criteria:**
+
+- [ ] Tamper Resistance: Policy files set to read-only (P0)
+- [ ] Tamper Resistance: Policy integrity verified on startup (P0)
+- [ ] Tamper Resistance: Agent blocked from modifying policy files (P0)
+- [ ] Tamper Resistance: Policy modification attempts logged (P0)
+
+- [ ] Override System: TOTP-based human verification (P0)
+- [ ] Override System: Override expires after time limit (P0)
+- [ ] Override System: Override cannot be reused (P0)
+- [ ] Override System: All overrides logged with justification (P0)
+
+- [ ] Audit Log: Events signed with HMAC (P0)
+- [ ] Audit Log: Log integrity verifiable (P0)
+- [ ] Audit Log: Tampering detected and reported (P0)
+- [ ] Audit Log: Append-only (no deletion or modification) (P0)
+
+#### 5. Compliance Reporting
+
+**Purpose:** Generate audit reports for enterprise compliance and security reviews.
+
+```python
+class ComplianceReporter:
+    """Generate compliance reports for governance audits."""
+    
+    def __init__(self, audit_log: AuditLog, policy_engine: PolicyEngine):
+        self.audit_log = audit_log
+        self.policy_engine = policy_engine
+    
+    def generate_report(
+        self,
+        time_range: tuple[datetime, datetime],
+        format: str = "pdf"
+    ) -> ComplianceReport:
+        """
+        Generate compliance report for specified time range.
+        
+        Args:
+            time_range: (start, end) datetime tuple
+            format: "pdf", "json", or "html"
+        
+        Returns:
+            ComplianceReport with statistics and evidence
+        """
+        events = self._load_events(time_range)
+        
+        report = ComplianceReport(
+            generated_at=datetime.now(),
+            time_range=time_range,
+            summary=self._generate_summary(events),
+            policy_violations=self._analyze_violations(events),
+            override_analysis=self._analyze_overrides(events),
+            security_posture=self._assess_security_posture(events),
+            recommendations=self._generate_recommendations(events)
+        )
+        
+        if format == "pdf":
+            return self._render_pdf(report)
+        elif format == "json":
+            return self._render_json(report)
+        else:
+            return self._render_html(report)
+    
+    def _generate_summary(self, events: list[dict]) -> ReportSummary:
+        """Generate executive summary statistics."""
+        return ReportSummary(
+            total_operations=len([e for e in events if e["event_type"].startswith("OPERATION_")]),
+            blocked_operations=len([e for e in events if e["event_type"] == "POLICY_VIOLATION"]),
+            allowed_operations=len([e for e in events if e["event_type"] == "OPERATION_ALLOWED"]),
+            overrides_requested=len([e for e in events if e["event_type"] == "OVERRIDE_REQUESTED"]),
+            overrides_approved=len([e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]),
+            tamper_attempts=len([e for e in events if "TAMPER" in e["event_type"]]),
+            most_violated_policies=self._rank_violated_policies(events)
+        )
+    
+    def _analyze_violations(self, events: list[dict]) -> ViolationAnalysis:
+        """Analyze policy violations in detail."""
+        violations = [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
+        
+        by_severity = defaultdict(list)
+        by_policy = defaultdict(list)
+        by_operation_type = defaultdict(list)
+        
+        for violation in violations:
+            severity = violation["details"].get("severity", "UNKNOWN")
+            policy = violation["details"].get("policy_name", "unknown")
+            operation = violation["details"].get("operation_type", "unknown")
+            
+            by_severity[severity].append(violation)
+            by_policy[policy].append(violation)
+            by_operation_type[operation].append(violation)
+        
+        return ViolationAnalysis(
+            total=len(violations),
+            by_severity=dict(by_severity),
+            by_policy=dict(by_policy),
+            by_operation_type=dict(by_operation_type),
+            critical_violations=by_severity.get("CRITICAL", [])
+        )
+    
+    def _assess_security_posture(self, events: list[dict]) -> SecurityPosture:
+        """Assess overall security posture."""
+        violations = [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
+        overrides = [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
+        
+        # Calculate security score (0-100)
+        total_ops = len([e for e in events if e["event_type"].startswith("OPERATION_")])
+        blocked_ops = len(violations)
+        
+        if total_ops == 0:
+            security_score = 100
+        else:
+            # Score based on block rate and override frequency
+            block_rate = blocked_ops / total_ops
+            override_rate = len(overrides) / max(blocked_ops, 1)
+            
+            # High block rate = good, high override rate = concerning
+            security_score = int(
+                (block_rate * 50) + ((1 - override_rate) * 50)
+            )
+        
+        return SecurityPosture(
+            score=security_score,
+            grade=self._score_to_grade(security_score),
+            strengths=self._identify_strengths(events),
+            weaknesses=self._identify_weaknesses(events),
+            risk_level=self._assess_risk_level(security_score)
+        )
+    
+    def _generate_recommendations(self, events: list[dict]) -> list[Recommendation]:
+        """Generate actionable recommendations."""
+        recommendations = []
+        
+        violations = [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
+        overrides = [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
+        
+        # Frequent violations suggest policy needs tuning
+        policy_counts = defaultdict(int)
+        for v in violations:
+            policy = v["details"].get("policy_name")
+            policy_counts[policy] += 1
+        
+        for policy, count in policy_counts.items():
+            if count > 10:  # Threshold for "frequent"
+                recommendations.append(Recommendation(
+                    priority="HIGH",
+                    category="Policy Tuning",
+                    title=f"Review frequently violated policy: {policy}",
+                    description=f"Policy '{policy}' was violated {count} times. Consider if this policy is too strict or if agent behavior needs adjustment.",
+                    action="Review policy definition and agent training"
+                ))
+        
+        # High override rate suggests policies are too restrictive
+        if len(overrides) > len(violations) * 0.3:  # >30% override rate
+            recommendations.append(Recommendation(
+                priority="MEDIUM",
+                category="Policy Adjustment",
+                title="High override rate detected",
+                description=f"{len(overrides)} overrides for {len(violations)} violations. Policies may be too restrictive.",
+                action="Review policies for unnecessary restrictions"
+            ))
+        
+        return recommendations
+    
+    def _render_pdf(self, report: ComplianceReport) -> bytes:
+        """Render report as PDF."""
+        # Use reportlab or similar to generate PDF
+        # Include: Executive summary, charts, detailed tables, recommendations
+        pass
+    
+    def _render_json(self, report: ComplianceReport) -> str:
+        """Render report as JSON."""
+        return json.dumps(
+            {
+                "generated_at": report.generated_at.isoformat(),
+                "time_range": {
+                    "start": report.time_range[0].isoformat(),
+                    "end": report.time_range[1].isoformat()
+                },
+                "summary": asdict(report.summary),
+                "violations": asdict(report.policy_violations),
+                "overrides": asdict(report.override_analysis),
+                "security_posture": asdict(report.security_posture),
+                "recommendations": [asdict(r) for r in report.recommendations]
+            },
+            indent=2
+        )
+```
+
+**Acceptance Criteria:**
+
+- [ ] Compliance Reports: Generate PDF reports (P1)
+- [ ] Compliance Reports: Generate JSON reports (P1)
+- [ ] Compliance Reports: Generate HTML reports (P1)
+
+- [ ] Report Content: Executive summary with statistics (P1)
+- [ ] Report Content: Policy violation analysis (P1)
+- [ ] Report Content: Override analysis (P1)
+- [ ] Report Content: Security posture assessment (P1)
+- [ ] Report Content: Actionable recommendations (P1)
+
+- [ ] Report Metrics: Security score (0-100) (P1)
+- [ ] Report Metrics: Grade (A-F) (P1)
+- [ ] Report Metrics: Risk level assessment (P1)
+
+- [ ] Report Export: PDF includes charts and tables (P1)
+- [ ] Report Export: JSON machine-readable (P1)
+- [ ] Report Export: HTML viewable in browser (P1)
 
 ### Adversarial Validation Checklist (v2.5.0)
 
@@ -3363,50 +4553,116 @@ v2.2.0 "Nexus" Release Criteria:
 
 **Expected:** No. Semantic blocking tracks data flow through StringBuilder and flags SQL construction.
 
+**Proof Required:**
+```python
+# Test: test_policy_sql_via_stringbuilder.py
+def test_blocks_sql_via_stringbuilder():
+    code = """
+    StringBuilder query = new StringBuilder();
+    query.append("SELECT * FROM users WHERE id=");
+    query.append(userId);  // Tainted
+    statement.execute(query.toString());
+    """
+    result = policy_engine.evaluate(Operation(code=code, language="java"))
+    assert not result.allowed
+    assert "Raw SQL detected" in result.reason
+```
+
 > *Does the policy engine fail "Open" or "Closed"? (Must fail Closed).*
 
 **Expected:** Closed. Any policy parsing error results in DENY ALL.
+
+**Proof Required:**
+```python
+# Test: test_policy_fails_closed.py
+def test_policy_engine_fails_closed_on_error():
+    # Corrupt policy file
+    with open(".scalpel/policy.yaml", "w") as f:
+        f.write("invalid: yaml: syntax:")
+    
+    # Attempt operation
+    with pytest.raises(PolicyError) as exc_info:
+        policy_engine.evaluate(Operation(...))
+    
+    assert "Failing CLOSED" in str(exc_info.value)
+```
 
 #### Enforcement Gates
 
 | Criterion | Proof Command | Expected Result |
 |-----------|---------------|-----------------|
-| **Semantic Blocking** | Attempt SQL via StringBuilder, Concatenation | Policy violation detected |
+| **Semantic Blocking** | `pytest tests/test_policy_semantic_blocking.py -v` | SQL via StringBuilder, concatenation, format all blocked |
 | **Path Protection** | Rename file, attempt edit | DENY rule follows content, not filename |
 | **Budgeting** | Edit exceeding `max_complexity` | Rejected with "Complexity Limit Exceeded" |
 | **Fail Closed** | Corrupt policy file, attempt edit | All edits DENIED |
 
-- [ ] **Semantic Blocking:** Blocks logic that *looks* like disallowed pattern even if syntax varies
-- [ ] **Path Protection:** DENY rules apply to file *content* identity, not just names
-- [ ] **Budgeting:** Edits exceeding `max_complexity` are strictly rejected
-- [ ] **Fail Closed:** Policy engine denies ALL on error (never fails open)
+- [ ] **Semantic Blocking:** Blocks SQL via StringBuilder (Java) (P0)
+- [ ] **Semantic Blocking:** Blocks SQL via string concatenation (all languages) (P0)
+- [ ] **Semantic Blocking:** Blocks SQL via f-strings/template literals (P0)
+- [ ] **Semantic Blocking:** Blocks SQL via string.format() (P0)
+
+- [ ] **Path Protection:** DENY rules apply to content, not filename (P0)
+- [ ] **Path Protection:** Renaming file doesn't bypass policy (P0)
+
+- [ ] **Budgeting:** Rejects edits exceeding max_files (P0)
+- [ ] **Budgeting:** Rejects edits exceeding max_lines_per_file (P0)
+- [ ] **Budgeting:** Rejects edits exceeding max_complexity_increase (P0)
+- [ ] **Budgeting:** Error message says "Complexity Limit Exceeded" (P0)
+
+- [ ] **Fail Closed:** Policy parsing error denies all operations (P0)
+- [ ] **Fail Closed:** Policy evaluation error denies all operations (P0)
+- [ ] **Fail Closed:** Error message explains failure mode (P0)
 
 #### Tamper Resistance
 
 | Criterion | Proof Command | Expected Result |
 |-----------|---------------|-----------------|
-| **Read-Only Policies** | Agent attempts to modify `.scalpel/policy.yaml` | Edit rejected |
-| **Override Codes** | Attempt override without human code | Override fails |
-| **Audit Trail** | Check logs after enforcement | All decisions logged |
+| **Read-Only Policies** | `ls -l .scalpel/policy.yaml` | Permissions: -r--r--r-- |
+| **Policy Modification** | Agent attempts to edit policy | `PolicyModificationError` raised |
+| **Integrity Check** | Modify policy manually, restart server | Tampering detected, all operations denied |
+| **Override Codes** | Attempt override without valid TOTP | Override fails, event logged |
+| **Audit Trail** | `cat .scalpel/audit.log` | All decisions logged with signatures |
 
-- [ ] Policy files are read-only to the Agent
-- [ ] Override codes require Human-in-the-loop approval
-- [ ] All enforcement decisions are audited
+- [ ] Policy files have read-only permissions (0444) (P0)
+- [ ] Agent cannot modify policy files (exception raised) (P0)
+- [ ] Policy integrity verified on startup via hash (P0)
+- [ ] Policy tampering detected and logged (P0)
+
+- [ ] Override requires valid TOTP code (P0)
+- [ ] Invalid override attempts logged (P0)
+- [ ] Override expires after time limit (30 minutes) (P0)
+- [ ] Override cannot be reused (P0)
+
+- [ ] All enforcement decisions logged (P0)
+- [ ] Audit log entries signed with HMAC (P0)
+- [ ] Audit log tampering detectable (P0)
+- [ ] Audit log append-only (deletion blocked) (P0)
 
 #### OWASP Top 10 Block Rate
 
-| Vulnerability | Pattern | Block Rate Target |
-|--------------|---------|-------------------|
-| SQL Injection (A03) | Raw SQL, ORM bypass | 100% |
-| XSS (A03) | Unescaped output, innerHTML | 100% |
-| Command Injection (A03) | exec, system, popen | 100% |
-| Path Traversal (A01) | File path from user input | 100% |
-| SSRF (A10) | User-controlled URLs | 100% |
-| XXE (A05) | XML parsing without defused | 100% |
-| SSTI (A03) | Template from user input | 100% |
-| Hardcoded Secrets (A07) | API keys, passwords | 100% |
-| LDAP Injection (A03) | Unescaped LDAP filters | 100% |
-| NoSQL Injection (A03) | MongoDB query injection | 100% |
+| Vulnerability | Pattern | Block Rate Target | Proof Command |
+|--------------|---------|-------------------|---------------|
+| SQL Injection (A03) | Raw SQL, ORM bypass | 100% | `pytest tests/test_owasp_sql_injection.py -v` |
+| XSS (A03) | Unescaped output, innerHTML | 100% | `pytest tests/test_owasp_xss.py -v` |
+| Command Injection (A03) | exec, system, popen | 100% | `pytest tests/test_owasp_command_injection.py -v` |
+| Path Traversal (A01) | File path from user input | 100% | `pytest tests/test_owasp_path_traversal.py -v` |
+| SSRF (A10) | User-controlled URLs | 100% | `pytest tests/test_owasp_ssrf.py -v` |
+| XXE (A05) | XML parsing without defused | 100% | `pytest tests/test_owasp_xxe.py -v` |
+| SSTI (A03) | Template from user input | 100% | `pytest tests/test_owasp_ssti.py -v` |
+| Hardcoded Secrets (A07) | API keys, passwords | 100% | `pytest tests/test_owasp_secrets.py -v` |
+| LDAP Injection (A03) | Unescaped LDAP filters | 100% | `pytest tests/test_owasp_ldap.py -v` |
+| NoSQL Injection (A03) | MongoDB query injection | 100% | `pytest tests/test_owasp_nosql.py -v` |
+
+- [ ] SQL Injection: 100% block rate across Python/Java/TS/JS (P0)
+- [ ] XSS: 100% block rate across TS/JS/Python (P0)
+- [ ] Command Injection: 100% block rate across all languages (P0)
+- [ ] Path Traversal: 100% block rate across all languages (P0)
+- [ ] SSRF: 100% block rate across all languages (P0)
+- [ ] XXE: 100% block rate in Python (P0)
+- [ ] SSTI: 100% block rate in Python (P0)
+- [ ] Hardcoded Secrets: 100% detection rate across all languages (P0)
+- [ ] LDAP Injection: 100% block rate in Python/Java (P0)
+- [ ] NoSQL Injection: 100% block rate in Python/TS/JS (P0)
 
 🚫 **Fail Condition:** If an agent can execute a forbidden action by "tricking" the parser
 
@@ -3416,37 +4672,133 @@ v2.2.0 "Nexus" Release Criteria:
 
 v2.5.0 "Guardian" Release Criteria:
 
-[ ] Policy Engine: Loads scalpel.policy.yaml (P0)
-[ ] Policy Engine: Enforces file pattern rules (P0)
-[ ] Policy Engine: Enforces annotation rules (P0)
-[ ] Policy Engine: Enforces semantic rules (P0)
-[ ] Policy Engine: Fails CLOSED (deny on error) (P0)
+**Policy Engine (P0):**
+- [ ] Loads and parses `.scalpel/policy.yaml`
+- [ ] Validates Rego syntax at startup
+- [ ] Evaluates operations against all policies
+- [ ] Fails CLOSED on policy parsing error
+- [ ] Fails CLOSED on policy evaluation error
+- [ ] Enforces file pattern rules
+- [ ] Enforces annotation rules (Java @PreAuthorize, etc.)
+- [ ] Enforces semantic rules (SQL construction detection)
 
-[ ] Security Sinks: Unified definitions across Py/Java/TS/JS (P0)
-[ ] Security Sinks: Blocks agent from introducing raw SQL (P0)
-[ ] Security Sinks: 100% block rate on OWASP Top 10 (P0)
+**Semantic Blocking (P0):**
+- [ ] Detects SQL via string concatenation (all languages)
+- [ ] Detects SQL via StringBuilder/StringBuffer (Java)
+- [ ] Detects SQL via f-strings (Python)
+- [ ] Detects SQL via template literals (JavaScript/TypeScript)
+- [ ] Detects SQL via string.format() (Python/Java)
+- [ ] Respects parameterized queries as safe
+- [ ] Respects ORM methods as safe (with caveats)
 
-[ ] Change Budgeting: Enforces max_files limit (P0)
-[ ] Change Budgeting: Enforces max_lines limit (P0)
-[ ] Change Budgeting: Rejects with "Complexity Limit Exceeded" (P0)
+**Security Sinks (P0):**
+- [ ] Unified definitions across Python/Java/TS/JS
+- [ ] All OWASP Top 10 categories mapped
+- [ ] Confidence scores assigned to all sinks
+- [ ] 100% block rate for SQL injection
+- [ ] 100% block rate for XSS
+- [ ] 100% block rate for Command Injection
+- [ ] 100% block rate for Path Traversal
+- [ ] 100% block rate for SSRF
+- [ ] 100% block rate for XXE
+- [ ] 100% block rate for SSTI
+- [ ] 100% detection for Hardcoded Secrets
+- [ ] 100% block rate for LDAP Injection
+- [ ] 100% block rate for NoSQL Injection
+- [ ] < 5% false positive rate on clean code
 
-[ ] Tamper Resistance: Policies read-only to agent (P0)
-[ ] Tamper Resistance: Override requires human code (P0)
-[ ] Tamper Resistance: All checks audited (P0)
+**Change Budgeting (P0):**
+- [ ] Enforces max_files limit
+- [ ] Enforces max_lines_per_file limit
+- [ ] Enforces max_total_lines limit
+- [ ] Enforces max_complexity_increase limit
+- [ ] Respects allowed_file_patterns
+- [ ] Blocks forbidden_paths
+- [ ] Rejects with "Complexity Limit Exceeded" message
+- [ ] Error message explains violated constraint
+- [ ] Error message suggests how to reduce scope
+- [ ] Budget policies customizable per project
+- [ ] Critical files have stricter budgets than default
 
-[ ] Compliance Report: PDF/JSON generation (P1)
-[ ] Compliance Report: Explains allow/deny decisions (P1)
+**Tamper Resistance (P0):**
+- [ ] Policy files set to read-only (0444 permissions)
+- [ ] Policy integrity verified on startup via SHA-256
+- [ ] Agent blocked from modifying policy files
+- [ ] Policy modification attempts logged to audit trail
+- [ ] Override requires valid TOTP code
+- [ ] Invalid override attempts logged
+- [ ] Override expires after time limit (30 minutes)
+- [ ] Override cannot be reused
+- [ ] All overrides logged with justification and approver ID
+- [ ] Audit log entries signed with HMAC-SHA256
+- [ ] Audit log tampering detectable
+- [ ] Audit log append-only (no deletion/modification)
 
-[ ] All tests passing (Gate)
-[ ] Code coverage >= 95% (Gate)
-[ ] Zero policy bypasses (Gate)
+**Compliance Reporting (P1):**
+- [ ] Generate PDF reports
+- [ ] Generate JSON reports
+- [ ] Generate HTML reports
+- [ ] Executive summary with statistics
+- [ ] Policy violation analysis (by severity, policy, operation type)
+- [ ] Override analysis (frequency, approval rate)
+- [ ] Security posture assessment (score 0-100, grade A-F)
+- [ ] Actionable recommendations
+- [ ] Report includes charts and visualizations (PDF)
+- [ ] JSON output is machine-readable
+- [ ] HTML output viewable in browser
+
+**Quality Gates:**
+- [ ] All tests passing (100% pass rate)
+- [ ] Code coverage >= 95%
+- [ ] Zero policy bypasses (adversarial tests)
+- [ ] Zero regressions in v2.2.0 features
+- [ ] Performance: Policy evaluation < 100ms per operation
 
 #### Required Evidence (v2.5.0)
 
-[ ] Release Notes: `docs/release_notes/RELEASE_NOTES_v2.5.0.md`
-[ ] Policy Evidence: `v2.5.0_policy_evidence.json` (enforcement proofs, OWASP block rate)
+- [ ] Release Notes
+  - Location: `docs/release_notes/RELEASE_NOTES_v2.5.0.md`
+  - Contents: Policy engine architecture, governance features, compliance reporting
 
----
+- [ ] Policy Engine Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_policy_evidence.json`
+  - Contents: Policy definitions, evaluation proofs, fail-closed tests
+
+- [ ] OWASP Coverage Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_owasp_coverage.json`
+  - Contents: Block rates for all OWASP Top 10, test results, false positive rates
+
+- [ ] Semantic Blocking Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_semantic_blocking_evidence.json`
+  - Contents: StringBuilder tests, concatenation tests, format string tests
+
+- [ ] Budget Enforcement Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_budget_evidence.json`
+  - Contents: Budget violation tests, complexity measurements, error messages
+
+- [ ] Tamper Resistance Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_tamper_resistance_evidence.json`
+  - Contents: File permission tests, integrity checks, override system tests
+
+- [ ] Audit Trail Evidence
+  - File: `release_artifacts/v2.5.0/v2.5.0_audit_evidence.json`
+  - Contents: Event logging tests, HMAC signature tests, tampering detection
+
+- [ ] Compliance Reports
+  - Files: `release_artifacts/v2.5.0/sample_compliance_report.{pdf,json,html}`
+  - Contents: Sample reports demonstrating all reporting features
+
+- [ ] Adversarial Test Results
+  - File: `release_artifacts/v2.5.0/v2.5.0_adversarial_results.json`
+  - Contents: All adversarial tests passed, bypass attempts blocked
+
+- [ ] Performance Benchmarks
+  - File: `release_artifacts/v2.5.0/v2.5.0_performance_benchmarks.json`
+  - Contents: Policy evaluation latency, throughput measurements
+
+- [ ] No Breaking Changes Verification
+  - File: `release_artifacts/v2.5.0/v2.5.0_regression_tests.json`
+  - Contents: All v2.2.0 features still working, API compatibility verified
 
 ## v3.0.0 - "Autonomy" (Self-Correction Loop)
 
@@ -3455,8 +4807,19 @@ v2.5.0 "Guardian" Release Criteria:
 **Theme:** Supervised Repair  
 **Goal:** Agents rely on Code Scalpel to fix their own mistakes under strict supervision  
 **Effort:** ~40 developer-days  
-**Risk Level:** Critical (autonomous operation)
+**Risk Level:** Critical (autonomous operation)  
+**Timeline:** Q2 2026 (Target: End of June 2026)  
 **North Star:** "The system teaches the agent how to fix itself."
+
+### Why Self-Correction Matters
+
+Current AI agents fail silently and require human intervention for every error:
+- **Build failures** - Agent breaks compilation, developer must diagnose
+- **Test regressions** - Agent introduces bugs, CI catches them too late
+- **Infinite retry loops** - Agent tries the same broken approach repeatedly
+- **No learning** - Each failure starts from scratch
+
+**Solution:** A feedback loop that converts errors into actionable diffs, validates fixes in a sandbox, and terminates safely when stuck.
 
 ### Priorities
 
@@ -3467,6 +4830,1405 @@ v2.5.0 "Guardian" Release Criteria:
 | **P0** | Fix Loop Termination | TBD | 5 days | Error-to-Diff |
 | **P0** | Ecosystem Integration | TBD | 8 days | All above |
 | **P1** | Full Audit Trail | TBD | 5 days | All above |
+
+### Technical Specifications
+
+#### 1. Error-to-Diff Engine
+
+**Purpose:** Convert compiler errors, linter warnings, and test failures into actionable code diffs that agents can apply.
+
+```python
+# New module: src/code_scalpel/autonomy/error_to_diff.py
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
+import ast
+import re
+
+class ErrorType(Enum):
+    """Categories of errors we can convert to diffs."""
+    SYNTAX_ERROR = "syntax_error"
+    TYPE_ERROR = "type_error"
+    NAME_ERROR = "name_error"
+    IMPORT_ERROR = "import_error"
+    LINT_WARNING = "lint_warning"
+    TEST_FAILURE = "test_failure"
+    RUNTIME_ERROR = "runtime_error"
+
+@dataclass
+class FixHint:
+    """A suggested fix for an error."""
+    diff: str                     # Unified diff format
+    confidence: float             # 0.0-1.0 confidence in fix
+    explanation: str              # Human-readable explanation
+    ast_valid: bool              # True if diff produces valid AST
+    alternative_fixes: list["FixHint"]  # Other possible fixes
+
+@dataclass
+class ErrorAnalysis:
+    """Analysis of an error with fix suggestions."""
+    error_type: ErrorType
+    message: str
+    file_path: str
+    line: int
+    column: Optional[int]
+    fixes: list[FixHint]
+    requires_human_review: bool
+
+class ErrorToDiffEngine:
+    """
+    Convert errors to actionable diffs.
+    
+    Supports:
+    - Python syntax errors → missing colons, parentheses, indentation
+    - Python NameError → import suggestions, typo corrections
+    - Python TypeError → argument fixes, type conversions
+    - TypeScript/JavaScript compile errors → type annotations, imports
+    - Java compile errors → missing imports, type mismatches
+    - Test failures → assertion fixes, mock corrections
+    - Lint warnings → style fixes, best practices
+    """
+    
+    def __init__(self, project_root: str):
+        self.project_root = Path(project_root)
+        self.parsers = {
+            "python": PythonErrorParser(),
+            "typescript": TypeScriptErrorParser(),
+            "javascript": JavaScriptErrorParser(),
+            "java": JavaErrorParser(),
+        }
+        self.fix_generators = {
+            ErrorType.SYNTAX_ERROR: SyntaxFixGenerator(),
+            ErrorType.TYPE_ERROR: TypeFixGenerator(),
+            ErrorType.NAME_ERROR: NameFixGenerator(),
+            ErrorType.IMPORT_ERROR: ImportFixGenerator(),
+            ErrorType.TEST_FAILURE: TestFixGenerator(),
+            ErrorType.LINT_WARNING: LintFixGenerator(),
+        }
+    
+    def analyze_error(
+        self,
+        error_output: str,
+        language: str,
+        source_code: str
+    ) -> ErrorAnalysis:
+        """
+        Parse error output and generate fix suggestions.
+        
+        Args:
+            error_output: Raw error message from compiler/linter/test
+            language: Programming language
+            source_code: The code that produced the error
+        
+        Returns:
+            ErrorAnalysis with categorized error and fix suggestions
+        """
+        # Parse error using language-specific parser
+        parser = self.parsers.get(language)
+        if not parser:
+            return ErrorAnalysis(
+                error_type=ErrorType.RUNTIME_ERROR,
+                message=error_output,
+                file_path="unknown",
+                line=0,
+                column=None,
+                fixes=[],
+                requires_human_review=True
+            )
+        
+        parsed = parser.parse(error_output)
+        
+        # Generate fixes
+        generator = self.fix_generators.get(parsed.error_type)
+        if not generator:
+            return ErrorAnalysis(
+                **parsed.__dict__,
+                fixes=[],
+                requires_human_review=True
+            )
+        
+        fixes = generator.generate_fixes(
+            parsed=parsed,
+            source_code=source_code,
+            language=language
+        )
+        
+        # Validate fixes produce valid AST
+        validated_fixes = []
+        for fix in fixes:
+            try:
+                patched_code = self._apply_diff(source_code, fix.diff)
+                ast.parse(patched_code)  # Validate syntax
+                fix.ast_valid = True
+                validated_fixes.append(fix)
+            except SyntaxError:
+                fix.ast_valid = False
+                # Include invalid fixes with low confidence
+                fix.confidence *= 0.3
+                validated_fixes.append(fix)
+        
+        # Sort by confidence
+        validated_fixes.sort(key=lambda f: f.confidence, reverse=True)
+        
+        return ErrorAnalysis(
+            error_type=parsed.error_type,
+            message=parsed.message,
+            file_path=parsed.file_path,
+            line=parsed.line,
+            column=parsed.column,
+            fixes=validated_fixes,
+            requires_human_review=not any(f.confidence > 0.8 for f in validated_fixes)
+        )
+    
+    def _apply_diff(self, source: str, diff: str) -> str:
+        """Apply unified diff to source code."""
+        import subprocess
+        result = subprocess.run(
+            ["patch", "-p0", "--quiet"],
+            input=f"{source}\n---\n{diff}".encode(),
+            capture_output=True
+        )
+        return result.stdout.decode()
+
+
+class SyntaxFixGenerator:
+    """Generate fixes for syntax errors."""
+    
+    SYNTAX_PATTERNS = {
+        r"expected ':' after .* definition": {
+            "fix": "add_colon",
+            "confidence": 0.95
+        },
+        r"unexpected indent": {
+            "fix": "fix_indentation",
+            "confidence": 0.9
+        },
+        r"unmatched '\)'": {
+            "fix": "balance_parentheses",
+            "confidence": 0.85
+        },
+        r"invalid syntax": {
+            "fix": "general_syntax",
+            "confidence": 0.5
+        }
+    }
+    
+    def generate_fixes(
+        self,
+        parsed: ParsedError,
+        source_code: str,
+        language: str
+    ) -> list[FixHint]:
+        """Generate syntax fix suggestions."""
+        fixes = []
+        
+        for pattern, fix_info in self.SYNTAX_PATTERNS.items():
+            if re.search(pattern, parsed.message, re.IGNORECASE):
+                fix_method = getattr(self, f"_fix_{fix_info['fix']}", None)
+                if fix_method:
+                    diff = fix_method(source_code, parsed.line, parsed.column)
+                    if diff:
+                        fixes.append(FixHint(
+                            diff=diff,
+                            confidence=fix_info["confidence"],
+                            explanation=f"Fix: {fix_info['fix'].replace('_', ' ')}",
+                            ast_valid=False,  # Will be validated later
+                            alternative_fixes=[]
+                        ))
+        
+        return fixes
+    
+    def _fix_add_colon(self, source: str, line: int, col: int) -> str:
+        """Add missing colon after function/class definition."""
+        lines = source.split('\n')
+        target_line = lines[line - 1]
+        
+        # Find end of definition (before newline or comment)
+        if not target_line.rstrip().endswith(':'):
+            lines[line - 1] = target_line.rstrip() + ':'
+        
+        return self._create_diff(source, '\n'.join(lines), line)
+    
+    def _fix_indentation(self, source: str, line: int, col: int) -> str:
+        """Fix indentation issues."""
+        lines = source.split('\n')
+        target_line = lines[line - 1]
+        
+        # Detect expected indentation from previous non-empty line
+        expected_indent = 0
+        for i in range(line - 2, -1, -1):
+            if lines[i].strip():
+                expected_indent = len(lines[i]) - len(lines[i].lstrip())
+                if lines[i].rstrip().endswith(':'):
+                    expected_indent += 4  # Python standard
+                break
+        
+        # Fix indentation
+        lines[line - 1] = ' ' * expected_indent + target_line.lstrip()
+        
+        return self._create_diff(source, '\n'.join(lines), line)
+
+
+class TestFixGenerator:
+    """Generate fixes for test failures."""
+    
+    def generate_fixes(
+        self,
+        parsed: ParsedError,
+        source_code: str,
+        language: str
+    ) -> list[FixHint]:
+        """Generate test fix suggestions."""
+        fixes = []
+        
+        # Assertion failures
+        if "AssertionError" in parsed.message or "assert" in parsed.message.lower():
+            fixes.extend(self._fix_assertion(parsed, source_code))
+        
+        # Mock-related failures
+        if "mock" in parsed.message.lower() or "MagicMock" in parsed.message:
+            fixes.extend(self._fix_mock(parsed, source_code))
+        
+        # Missing attribute/method
+        if "AttributeError" in parsed.message:
+            fixes.extend(self._fix_attribute(parsed, source_code))
+        
+        return fixes
+    
+    def _fix_assertion(
+        self,
+        parsed: ParsedError,
+        source_code: str
+    ) -> list[FixHint]:
+        """
+        Fix assertion failures by updating expected values.
+        
+        Example:
+            AssertionError: assert 42 == 41
+            Fix: Update expected value from 41 to 42
+        """
+        fixes = []
+        
+        # Extract actual vs expected from assertion message
+        match = re.search(r"assert (\S+) == (\S+)", parsed.message)
+        if match:
+            actual, expected = match.groups()
+            
+            # Find assertion line and update expected value
+            lines = source_code.split('\n')
+            if 0 < parsed.line <= len(lines):
+                line = lines[parsed.line - 1]
+                if expected in line:
+                    new_line = line.replace(expected, actual, 1)
+                    lines[parsed.line - 1] = new_line
+                    
+                    fixes.append(FixHint(
+                        diff=self._create_diff(
+                            source_code,
+                            '\n'.join(lines),
+                            parsed.line
+                        ),
+                        confidence=0.7,
+                        explanation=f"Update expected value from {expected} to {actual}",
+                        ast_valid=False,
+                        alternative_fixes=[]
+                    ))
+        
+        return fixes
+```
+
+**Error Pattern Examples:**
+
+```python
+# Python syntax error
+# Input: "def foo()\n    pass"
+# Error: "SyntaxError: expected ':' after function definition"
+# Fix:   "def foo():\n    pass"
+
+# Python NameError
+# Input: "result = calcualte_total(items)"
+# Error: "NameError: name 'calcualte_total' is not defined"
+# Fixes: [
+#   {"diff": "s/calcualte_total/calculate_total/", "confidence": 0.9},  # Typo correction
+#   {"diff": "from utils import calcualte_total", "confidence": 0.5}   # Import suggestion
+# ]
+
+# TypeScript type error
+# Input: "const user: User = { name: 'John' }"
+# Error: "Property 'email' is missing in type '{ name: string }'"
+# Fix:   "const user: User = { name: 'John', email: '' }"
+
+# Test failure
+# Input: "assert calculate_tax(100) == 15"
+# Error: "AssertionError: assert 10 == 15"
+# Fix:   "assert calculate_tax(100) == 10"  # Or fix calculate_tax function
+```
+
+**Acceptance Criteria:**
+
+- [ ] Error-to-Diff: Parses Python syntax errors (P0)
+- [ ] Error-to-Diff: Parses Python runtime errors (P0)
+- [ ] Error-to-Diff: Parses TypeScript compile errors (P0)
+- [ ] Error-to-Diff: Parses Java compile errors (P0)
+- [ ] Error-to-Diff: Parses test assertion failures (P0)
+- [ ] Error-to-Diff: Parses linter warnings (P0)
+
+- [ ] Fix Generation: Generates valid AST diffs (P0)
+- [ ] Fix Generation: Includes confidence scores (P0)
+- [ ] Fix Generation: Provides explanation strings (P0)
+- [ ] Fix Generation: Suggests alternatives (P0)
+
+- [ ] Validation: All generated diffs are AST-validated (P0)
+- [ ] Validation: Invalid diffs marked with low confidence (P0)
+
+#### 2. Speculative Execution (Sandboxed)
+
+**Purpose:** Test proposed changes in an isolated environment before applying to main codebase.
+
+```python
+# New module: src/code_scalpel/autonomy/sandbox.py
+import tempfile
+import subprocess
+import shutil
+import os
+from pathlib import Path
+from dataclasses import dataclass
+from typing import Optional
+import docker
+
+@dataclass
+class SandboxResult:
+    """Result of sandboxed execution."""
+    success: bool
+    test_results: list["TestResult"]
+    lint_results: list["LintResult"]
+    build_success: bool
+    side_effects_detected: bool
+    execution_time_ms: int
+    stdout: str
+    stderr: str
+
+@dataclass 
+class TestResult:
+    """Individual test result."""
+    name: str
+    passed: bool
+    duration_ms: int
+    error_message: Optional[str]
+
+class SandboxExecutor:
+    """
+    Execute code changes in isolated sandbox.
+    
+    Security guarantees:
+    - No network access (by default)
+    - No filesystem access outside sandbox
+    - Resource limits (CPU, memory, time)
+    - Process isolation via containers or chroot
+    """
+    
+    def __init__(
+        self,
+        isolation_level: str = "container",  # "container", "process", "chroot"
+        network_enabled: bool = False,
+        max_memory_mb: int = 512,
+        max_cpu_seconds: int = 60,
+        max_disk_mb: int = 100
+    ):
+        self.isolation_level = isolation_level
+        self.network_enabled = network_enabled
+        self.max_memory_mb = max_memory_mb
+        self.max_cpu_seconds = max_cpu_seconds
+        self.max_disk_mb = max_disk_mb
+        
+        if isolation_level == "container":
+            self.docker_client = docker.from_env()
+    
+    def execute_with_changes(
+        self,
+        project_path: str,
+        changes: list["FileChange"],
+        test_command: str = "pytest",
+        lint_command: str = "ruff check",
+        build_command: Optional[str] = None
+    ) -> SandboxResult:
+        """
+        Apply changes and run tests in sandbox.
+        
+        Args:
+            project_path: Path to project root
+            changes: List of file changes to apply
+            test_command: Command to run tests
+            lint_command: Command to run linter
+            build_command: Optional build command
+        
+        Returns:
+            SandboxResult with test results and side effect detection
+        """
+        # Create isolated sandbox
+        sandbox_path = self._create_sandbox(project_path)
+        
+        try:
+            # Apply changes to sandbox
+            self._apply_changes(sandbox_path, changes)
+            
+            # Run in isolated environment
+            if self.isolation_level == "container":
+                return self._execute_in_container(
+                    sandbox_path, test_command, lint_command, build_command
+                )
+            else:
+                return self._execute_in_process(
+                    sandbox_path, test_command, lint_command, build_command
+                )
+        
+        finally:
+            # Clean up sandbox
+            self._cleanup_sandbox(sandbox_path)
+    
+    def _create_sandbox(self, project_path: str) -> Path:
+        """
+        Create isolated copy of project.
+        
+        Uses copy-on-write where supported for efficiency.
+        """
+        sandbox_dir = Path(tempfile.mkdtemp(prefix="scalpel_sandbox_"))
+        
+        # Copy project files (excluding .git, node_modules, etc.)
+        for item in Path(project_path).iterdir():
+            if item.name in {".git", "node_modules", "__pycache__", "venv", ".venv"}:
+                continue
+            
+            dest = sandbox_dir / item.name
+            if item.is_dir():
+                shutil.copytree(item, dest, symlinks=True)
+            else:
+                shutil.copy2(item, dest)
+        
+        return sandbox_dir
+    
+    def _apply_changes(self, sandbox_path: Path, changes: list["FileChange"]):
+        """Apply file changes to sandbox."""
+        for change in changes:
+            file_path = sandbox_path / change.relative_path
+            
+            if change.operation == "create":
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+                file_path.write_text(change.new_content)
+            
+            elif change.operation == "modify":
+                file_path.write_text(change.new_content)
+            
+            elif change.operation == "delete":
+                file_path.unlink(missing_ok=True)
+    
+    def _execute_in_container(
+        self,
+        sandbox_path: Path,
+        test_command: str,
+        lint_command: str,
+        build_command: Optional[str]
+    ) -> SandboxResult:
+        """Execute in Docker container for full isolation."""
+        
+        # Build container command
+        commands = []
+        if build_command:
+            commands.append(build_command)
+        commands.append(lint_command)
+        commands.append(test_command)
+        
+        full_command = " && ".join(commands)
+        
+        # Run in container
+        container = self.docker_client.containers.run(
+            image="python:3.11-slim",
+            command=f"/bin/sh -c '{full_command}'",
+            volumes={str(sandbox_path): {"bind": "/workspace", "mode": "rw"}},
+            working_dir="/workspace",
+            network_disabled=not self.network_enabled,
+            mem_limit=f"{self.max_memory_mb}m",
+            cpu_period=100000,
+            cpu_quota=self.max_cpu_seconds * 100000,
+            remove=True,
+            detach=False,
+            stdout=True,
+            stderr=True
+        )
+        
+        # Parse results
+        return self._parse_execution_results(container)
+    
+    def _execute_in_process(
+        self,
+        sandbox_path: Path,
+        test_command: str,
+        lint_command: str,
+        build_command: Optional[str]
+    ) -> SandboxResult:
+        """Execute in subprocess with resource limits."""
+        import resource
+        
+        def set_limits():
+            """Set resource limits for child process."""
+            # Memory limit
+            resource.setrlimit(
+                resource.RLIMIT_AS,
+                (self.max_memory_mb * 1024 * 1024, self.max_memory_mb * 1024 * 1024)
+            )
+            # CPU time limit
+            resource.setrlimit(
+                resource.RLIMIT_CPU,
+                (self.max_cpu_seconds, self.max_cpu_seconds)
+            )
+        
+        results = []
+        
+        # Run build if specified
+        if build_command:
+            build_result = subprocess.run(
+                build_command,
+                shell=True,
+                cwd=sandbox_path,
+                capture_output=True,
+                timeout=self.max_cpu_seconds,
+                preexec_fn=set_limits
+            )
+            if build_result.returncode != 0:
+                return SandboxResult(
+                    success=False,
+                    test_results=[],
+                    lint_results=[],
+                    build_success=False,
+                    side_effects_detected=False,
+                    execution_time_ms=0,
+                    stdout=build_result.stdout.decode(),
+                    stderr=build_result.stderr.decode()
+                )
+        
+        # Run linter
+        lint_result = subprocess.run(
+            lint_command,
+            shell=True,
+            cwd=sandbox_path,
+            capture_output=True,
+            timeout=self.max_cpu_seconds,
+            preexec_fn=set_limits
+        )
+        
+        # Run tests
+        test_result = subprocess.run(
+            f"{test_command} --tb=short -q",
+            shell=True,
+            cwd=sandbox_path,
+            capture_output=True,
+            timeout=self.max_cpu_seconds,
+            preexec_fn=set_limits
+        )
+        
+        return self._parse_subprocess_results(
+            lint_result, test_result, build_success=True
+        )
+    
+    def _detect_side_effects(self, sandbox_path: Path) -> bool:
+        """
+        Detect if execution had unintended side effects.
+        
+        Checks:
+        - Files created outside project directory
+        - Network connections attempted
+        - System calls blocked
+        """
+        # Check for files created outside sandbox
+        # This is handled by container isolation, but double-check
+        
+        # Check audit log for blocked operations
+        audit_log = sandbox_path / ".scalpel_sandbox_audit.log"
+        if audit_log.exists():
+            content = audit_log.read_text()
+            if "BLOCKED" in content:
+                return True
+        
+        return False
+```
+
+**Sandbox Isolation Diagram:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        HOST SYSTEM                              │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │                  SANDBOX CONTAINER                        │  │
+│  │                                                           │  │
+│  │  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐    │  │
+│  │  │   Project   │   │    Tests    │   │   Linter    │    │  │
+│  │  │    Copy     │──>│   (pytest)  │──>│   (ruff)    │    │  │
+│  │  └─────────────┘   └─────────────┘   └─────────────┘    │  │
+│  │         │                 │                 │            │  │
+│  │         ▼                 ▼                 ▼            │  │
+│  │  ┌─────────────────────────────────────────────────┐    │  │
+│  │  │              SANDBOX RESULTS                     │    │  │
+│  │  │  - Test pass/fail                               │    │  │
+│  │  │  - Lint warnings                                │    │  │
+│  │  │  - Build success                                │    │  │
+│  │  │  - Side effects detected                        │    │  │
+│  │  └─────────────────────────────────────────────────┘    │  │
+│  │                                                           │  │
+│  │  🚫 No network access                                    │  │
+│  │  🚫 No filesystem outside sandbox                        │  │
+│  │  🚫 Resource limits enforced                             │  │
+│  │  ✅ Changes never affect main codebase                   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Acceptance Criteria:**
+
+- [ ] Sandbox: Creates isolated copy of project (P0)
+- [ ] Sandbox: Network access blocked by default (P0)
+- [ ] Sandbox: Filesystem access limited to sandbox (P0)
+- [ ] Sandbox: Resource limits enforced (CPU, memory) (P0)
+- [ ] Sandbox: Changes never affect main codebase (P0)
+
+- [ ] Execution: Runs build command if specified (P0)
+- [ ] Execution: Runs linter and reports results (P0)
+- [ ] Execution: Runs tests and reports pass/fail (P0)
+- [ ] Execution: Detects side effects (P0)
+
+- [ ] Results: Returns structured test results (P0)
+- [ ] Results: Includes execution time (P0)
+- [ ] Results: Includes stdout/stderr (P0)
+
+#### 3. Fix Loop Termination
+
+**Purpose:** Prevent infinite retry loops and ensure safe escalation to humans.
+
+```python
+# New module: src/code_scalpel/autonomy/fix_loop.py
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Optional, Callable
+import logging
+
+@dataclass
+class FixAttempt:
+    """Record of a single fix attempt."""
+    attempt_number: int
+    timestamp: datetime
+    error_analysis: "ErrorAnalysis"
+    fix_applied: "FixHint"
+    sandbox_result: "SandboxResult"
+    success: bool
+    duration_ms: int
+
+@dataclass
+class FixLoopResult:
+    """Final result of fix loop."""
+    success: bool
+    final_fix: Optional["FixHint"]
+    attempts: list[FixAttempt]
+    termination_reason: str  # "success", "max_attempts", "timeout", "no_fixes", "human_escalation"
+    escalated_to_human: bool
+    total_duration_ms: int
+
+class FixLoop:
+    """
+    Supervised fix loop with termination guarantees.
+    
+    Safety features:
+    - Hard limit on retry attempts
+    - Timeout for total loop duration
+    - Detection of repeated failures
+    - Automatic human escalation
+    - Full audit trail
+    """
+    
+    def __init__(
+        self,
+        max_attempts: int = 5,
+        max_duration_seconds: int = 300,
+        min_confidence_threshold: float = 0.5,
+        on_escalate: Optional[Callable] = None
+    ):
+        self.max_attempts = max_attempts
+        self.max_duration = timedelta(seconds=max_duration_seconds)
+        self.min_confidence = min_confidence_threshold
+        self.on_escalate = on_escalate
+        self.logger = logging.getLogger("scalpel.fix_loop")
+    
+    def run(
+        self,
+        initial_error: str,
+        source_code: str,
+        language: str,
+        sandbox: "SandboxExecutor",
+        error_engine: "ErrorToDiffEngine",
+        project_path: str
+    ) -> FixLoopResult:
+        """
+        Run fix loop until success or termination.
+        
+        Args:
+            initial_error: The error message to fix
+            source_code: Current source code
+            language: Programming language
+            sandbox: Sandbox executor for testing fixes
+            error_engine: Error-to-diff engine
+            project_path: Path to project
+        
+        Returns:
+            FixLoopResult with success/failure and full history
+        """
+        attempts = []
+        start_time = datetime.now()
+        current_code = source_code
+        current_error = initial_error
+        seen_errors = set()  # Track unique errors to detect loops
+        
+        for attempt_num in range(1, self.max_attempts + 1):
+            # Check timeout
+            if datetime.now() - start_time > self.max_duration:
+                self.logger.warning(f"Fix loop timeout after {attempt_num - 1} attempts")
+                return self._create_result(
+                    attempts=attempts,
+                    success=False,
+                    reason="timeout",
+                    escalated=self._escalate("Timeout exceeded", attempts)
+                )
+            
+            # Analyze current error
+            analysis = error_engine.analyze_error(
+                error_output=current_error,
+                language=language,
+                source_code=current_code
+            )
+            
+            # Check for fix availability
+            valid_fixes = [f for f in analysis.fixes if f.confidence >= self.min_confidence]
+            if not valid_fixes:
+                self.logger.warning(f"No valid fixes available (attempt {attempt_num})")
+                return self._create_result(
+                    attempts=attempts,
+                    success=False,
+                    reason="no_fixes",
+                    escalated=self._escalate("No valid fixes available", attempts)
+                )
+            
+            # Detect repeated errors (stuck in loop)
+            error_hash = hash(current_error)
+            if error_hash in seen_errors:
+                self.logger.warning(f"Repeated error detected (attempt {attempt_num})")
+                return self._create_result(
+                    attempts=attempts,
+                    success=False,
+                    reason="repeated_error",
+                    escalated=self._escalate("Stuck in error loop", attempts)
+                )
+            seen_errors.add(error_hash)
+            
+            # Try best fix
+            best_fix = valid_fixes[0]
+            self.logger.info(
+                f"Attempt {attempt_num}: Applying fix "
+                f"(confidence={best_fix.confidence:.2f})"
+            )
+            
+            # Apply fix and test in sandbox
+            patched_code = self._apply_fix(current_code, best_fix)
+            
+            sandbox_result = sandbox.execute_with_changes(
+                project_path=project_path,
+                changes=[FileChange(
+                    relative_path="target_file",  # Would be actual path
+                    operation="modify",
+                    new_content=patched_code
+                )],
+                test_command="pytest -x",  # Stop on first failure
+                lint_command="ruff check"
+            )
+            
+            # Record attempt
+            attempt = FixAttempt(
+                attempt_number=attempt_num,
+                timestamp=datetime.now(),
+                error_analysis=analysis,
+                fix_applied=best_fix,
+                sandbox_result=sandbox_result,
+                success=sandbox_result.success,
+                duration_ms=sandbox_result.execution_time_ms
+            )
+            attempts.append(attempt)
+            
+            # Check success
+            if sandbox_result.success:
+                self.logger.info(f"Fix successful on attempt {attempt_num}")
+                return self._create_result(
+                    attempts=attempts,
+                    success=True,
+                    reason="success",
+                    final_fix=best_fix
+                )
+            
+            # Update state for next iteration
+            current_code = patched_code
+            current_error = sandbox_result.stderr
+        
+        # Max attempts reached
+        self.logger.warning(f"Max attempts ({self.max_attempts}) reached")
+        return self._create_result(
+            attempts=attempts,
+            success=False,
+            reason="max_attempts",
+            escalated=self._escalate("Max attempts exceeded", attempts)
+        )
+    
+    def _escalate(self, reason: str, attempts: list[FixAttempt]) -> bool:
+        """Escalate to human when loop fails."""
+        if self.on_escalate:
+            self.on_escalate(reason, attempts)
+            return True
+        
+        self.logger.error(
+            f"HUMAN ESCALATION REQUIRED: {reason}\n"
+            f"Attempts: {len(attempts)}\n"
+            f"Last error: {attempts[-1].error_analysis.message if attempts else 'N/A'}"
+        )
+        return True
+    
+    def _create_result(
+        self,
+        attempts: list[FixAttempt],
+        success: bool,
+        reason: str,
+        final_fix: Optional["FixHint"] = None,
+        escalated: bool = False
+    ) -> FixLoopResult:
+        """Create fix loop result."""
+        total_duration = sum(a.duration_ms for a in attempts)
+        
+        return FixLoopResult(
+            success=success,
+            final_fix=final_fix,
+            attempts=attempts,
+            termination_reason=reason,
+            escalated_to_human=escalated,
+            total_duration_ms=total_duration
+        )
+```
+
+**Fix Loop State Machine:**
+
+```
+                    ┌─────────────────────────────────────┐
+                    │           START                     │
+                    └──────────────┬──────────────────────┘
+                                   │
+                                   ▼
+                    ┌─────────────────────────────────────┐
+                    │      Analyze Error                  │
+                    │   (Error-to-Diff Engine)            │
+                    └──────────────┬──────────────────────┘
+                                   │
+                         ┌─────────┴─────────┐
+                         │   Fixes found?    │
+                         └─────────┬─────────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │ No           │              │ Yes
+                    ▼              │              ▼
+         ┌──────────────────┐     │    ┌──────────────────────┐
+         │  ESCALATE        │     │    │   Apply Best Fix     │
+         │  (no_fixes)      │     │    │   in Sandbox         │
+         └──────────────────┘     │    └──────────┬───────────┘
+                                  │               │
+                                  │               ▼
+                                  │    ┌──────────────────────┐
+                                  │    │   Tests Pass?        │
+                                  │    └──────────┬───────────┘
+                                  │               │
+                                  │    ┌──────────┼──────────┐
+                                  │    │ Yes      │          │ No
+                                  │    ▼          │          ▼
+                           ┌────────────────┐    │   ┌─────────────────┐
+                           │    SUCCESS     │    │   │ attempt < max?  │
+                           └────────────────┘    │   └────────┬────────┘
+                                                 │            │
+                                      ┌──────────┼────────────┼──────────┐
+                                      │ Yes      │            │          │ No
+                                      ▼          │            │          ▼
+                           ┌───────────────────┐ │         ┌────────────────┐
+                           │ Update error      │ │         │   ESCALATE     │
+                           │ Loop back         │◄┘         │  (max_attempts)│
+                           └───────────────────┘           └────────────────┘
+```
+
+**Acceptance Criteria:**
+
+- [ ] Fix Loop: Terminates after max_attempts (P0)
+- [ ] Fix Loop: Terminates on timeout (P0)
+- [ ] Fix Loop: Detects and exits on repeated errors (P0)
+- [ ] Fix Loop: Escalates to human on failure (P0)
+
+- [ ] Success Detection: Returns on first successful fix (P0)
+- [ ] Success Detection: Validates fix in sandbox before returning (P0)
+
+- [ ] Audit Trail: Records all fix attempts (P0)
+- [ ] Audit Trail: Includes timing information (P0)
+- [ ] Audit Trail: Includes error analysis and fix applied (P0)
+
+#### 4. Ecosystem Integration
+
+**Purpose:** Provide native integrations with popular AI agent frameworks.
+
+```python
+# New module: src/code_scalpel/autonomy/integrations/
+
+# LangGraph Integration
+# src/code_scalpel/autonomy/integrations/langgraph.py
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+
+class ScalpelState(TypedDict):
+    """State for Code Scalpel LangGraph integration."""
+    code: str
+    language: str
+    error: str | None
+    fix_attempts: list[dict]
+    success: bool
+
+def create_scalpel_fix_graph() -> StateGraph:
+    """
+    Create LangGraph for Code Scalpel fix loop.
+    
+    Usage:
+        from code_scalpel.autonomy.integrations.langgraph import create_scalpel_fix_graph
+        
+        graph = create_scalpel_fix_graph()
+        result = graph.invoke({
+            "code": buggy_code,
+            "language": "python",
+            "error": error_message
+        })
+    """
+    graph = StateGraph(ScalpelState)
+    
+    # Add nodes
+    graph.add_node("analyze_error", analyze_error_node)
+    graph.add_node("generate_fix", generate_fix_node)
+    graph.add_node("validate_fix", validate_fix_node)
+    graph.add_node("apply_fix", apply_fix_node)
+    graph.add_node("escalate", escalate_node)
+    
+    # Add edges
+    graph.add_edge("analyze_error", "generate_fix")
+    graph.add_conditional_edges(
+        "generate_fix",
+        has_valid_fixes,
+        {
+            True: "validate_fix",
+            False: "escalate"
+        }
+    )
+    graph.add_conditional_edges(
+        "validate_fix",
+        fix_passed,
+        {
+            True: "apply_fix",
+            False: "analyze_error"  # Loop back
+        }
+    )
+    graph.add_edge("apply_fix", END)
+    graph.add_edge("escalate", END)
+    
+    # Set entry point
+    graph.set_entry_point("analyze_error")
+    
+    return graph.compile()
+
+
+# CrewAI Integration
+# src/code_scalpel/autonomy/integrations/crewai.py
+from crewai import Agent, Task, Crew
+
+def create_scalpel_fix_crew() -> Crew:
+    """
+    Create CrewAI crew for Code Scalpel operations.
+    
+    Usage:
+        from code_scalpel.autonomy.integrations.crewai import create_scalpel_fix_crew
+        
+        crew = create_scalpel_fix_crew()
+        result = crew.kickoff(inputs={
+            "code": buggy_code,
+            "error": error_message
+        })
+    """
+    # Error Analyzer Agent
+    error_analyzer = Agent(
+        role="Error Analyzer",
+        goal="Analyze code errors and identify root causes",
+        backstory="Expert at parsing error messages and understanding code issues",
+        tools=[
+            ScalpelAnalyzeTool(),
+            ScalpelErrorToDiffTool()
+        ]
+    )
+    
+    # Fix Generator Agent
+    fix_generator = Agent(
+        role="Fix Generator",
+        goal="Generate correct code fixes based on error analysis",
+        backstory="Expert at writing minimal, correct code patches",
+        tools=[
+            ScalpelGenerateFixTool(),
+            ScalpelValidateASTTool()
+        ]
+    )
+    
+    # Validator Agent
+    validator = Agent(
+        role="Fix Validator",
+        goal="Validate fixes don't break existing functionality",
+        backstory="Expert at testing code changes in isolation",
+        tools=[
+            ScalpelSandboxTool(),
+            ScalpelSecurityScanTool()
+        ]
+    )
+    
+    # Tasks
+    analyze_task = Task(
+        description="Analyze the error message and identify the root cause",
+        agent=error_analyzer,
+        expected_output="Error analysis with categorization and affected code location"
+    )
+    
+    generate_task = Task(
+        description="Generate a fix for the identified error",
+        agent=fix_generator,
+        expected_output="Code diff that fixes the error"
+    )
+    
+    validate_task = Task(
+        description="Validate the fix in a sandbox environment",
+        agent=validator,
+        expected_output="Validation result with test outcomes"
+    )
+    
+    return Crew(
+        agents=[error_analyzer, fix_generator, validator],
+        tasks=[analyze_task, generate_task, validate_task],
+        verbose=True
+    )
+
+
+# AutoGen Integration
+# src/code_scalpel/autonomy/integrations/autogen.py
+from autogen import AssistantAgent, UserProxyAgent
+
+def create_scalpel_autogen_agents():
+    """
+    Create AutoGen agents with Code Scalpel tools.
+    
+    Usage:
+        from code_scalpel.autonomy.integrations.autogen import create_scalpel_autogen_agents
+        
+        coder, reviewer = create_scalpel_autogen_agents()
+        reviewer.initiate_chat(
+            coder,
+            message="Fix this error: ..."
+        )
+    """
+    # Coder agent with fix generation tools
+    coder = AssistantAgent(
+        name="ScalpelCoder",
+        system_message="""You are a code fixer that uses Code Scalpel tools.
+        
+Available tools:
+- scalpel_analyze_error: Analyze an error and get fix suggestions
+- scalpel_apply_fix: Apply a fix to code
+- scalpel_validate: Validate fix in sandbox
+
+Always validate fixes before returning them.""",
+        llm_config={
+            "functions": [
+                scalpel_analyze_error_schema,
+                scalpel_apply_fix_schema,
+                scalpel_validate_schema
+            ]
+        }
+    )
+    
+    # Reviewer agent
+    reviewer = UserProxyAgent(
+        name="CodeReviewer",
+        human_input_mode="NEVER",
+        code_execution_config={
+            "work_dir": ".scalpel_sandbox",
+            "use_docker": True
+        }
+    )
+    
+    # Register function implementations
+    reviewer.register_function(
+        function_map={
+            "scalpel_analyze_error": scalpel_analyze_error_impl,
+            "scalpel_apply_fix": scalpel_apply_fix_impl,
+            "scalpel_validate": scalpel_validate_impl
+        }
+    )
+    
+    return coder, reviewer
+```
+
+**Acceptance Criteria:**
+
+- [ ] LangGraph: Native StateGraph integration (P0)
+- [ ] LangGraph: Fix loop as graph nodes (P0)
+- [ ] LangGraph: Conditional routing based on fix success (P0)
+
+- [ ] CrewAI: Native Crew with Scalpel agents (P0)
+- [ ] CrewAI: Agent roles (Analyzer, Generator, Validator) (P0)
+- [ ] CrewAI: Task pipeline for fix workflow (P0)
+
+- [ ] AutoGen: AssistantAgent with Scalpel tools (P0)
+- [ ] AutoGen: Function schemas for all operations (P0)
+- [ ] AutoGen: Docker-based code execution (P0)
+
+- [ ] All: 3+ frameworks with working examples (P0)
+- [ ] All: Documentation with quickstart guides (P0)
+
+#### 5. Full Audit Trail
+
+**Purpose:** Complete history of all autonomous operations for debugging, compliance, and learning.
+
+```python
+# New module: src/code_scalpel/autonomy/audit.py
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Optional
+import json
+import hashlib
+from pathlib import Path
+
+@dataclass
+class AuditEntry:
+    """Single entry in audit trail."""
+    id: str
+    timestamp: datetime
+    event_type: str
+    operation: str
+    input_hash: str
+    output_hash: str
+    success: bool
+    duration_ms: int
+    metadata: dict[str, Any]
+    parent_id: Optional[str] = None  # For nested operations
+
+@dataclass
+class AutonomyAuditTrail:
+    """
+    Complete audit trail for autonomous operations.
+    
+    Features:
+    - Immutable entries with cryptographic hashes
+    - Parent-child relationships for nested operations
+    - Export to multiple formats (JSON, CSV, HTML)
+    - Query by time range, event type, success/failure
+    """
+    
+    def __init__(self, storage_path: str = ".scalpel/autonomy_audit"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.current_session_id = self._generate_session_id()
+    
+    def record(
+        self,
+        event_type: str,
+        operation: str,
+        input_data: Any,
+        output_data: Any,
+        success: bool,
+        duration_ms: int,
+        metadata: Optional[dict] = None,
+        parent_id: Optional[str] = None
+    ) -> str:
+        """
+        Record an audit entry.
+        
+        Returns:
+            Entry ID for reference
+        """
+        entry_id = self._generate_entry_id()
+        
+        entry = AuditEntry(
+            id=entry_id,
+            timestamp=datetime.now(),
+            event_type=event_type,
+            operation=operation,
+            input_hash=self._hash_data(input_data),
+            output_hash=self._hash_data(output_data),
+            success=success,
+            duration_ms=duration_ms,
+            metadata=metadata or {},
+            parent_id=parent_id
+        )
+        
+        # Store entry
+        self._store_entry(entry, input_data, output_data)
+        
+        return entry_id
+    
+    def export(
+        self,
+        format: str = "json",
+        time_range: Optional[tuple[datetime, datetime]] = None,
+        event_types: Optional[list[str]] = None,
+        success_only: bool = False
+    ) -> str:
+        """
+        Export audit trail to specified format.
+        
+        Args:
+            format: "json", "csv", "html"
+            time_range: Optional filter by time
+            event_types: Optional filter by event type
+            success_only: Only include successful operations
+        
+        Returns:
+            Exported data as string
+        """
+        entries = self._load_entries()
+        
+        # Apply filters
+        if time_range:
+            start, end = time_range
+            entries = [e for e in entries if start <= e.timestamp <= end]
+        
+        if event_types:
+            entries = [e for e in entries if e.event_type in event_types]
+        
+        if success_only:
+            entries = [e for e in entries if e.success]
+        
+        # Export
+        if format == "json":
+            return self._export_json(entries)
+        elif format == "csv":
+            return self._export_csv(entries)
+        elif format == "html":
+            return self._export_html(entries)
+        else:
+            raise ValueError(f"Unknown format: {format}")
+    
+    def get_operation_trace(self, entry_id: str) -> list[AuditEntry]:
+        """
+        Get full trace of an operation including all nested operations.
+        
+        Returns entries in execution order.
+        """
+        entries = self._load_entries()
+        
+        # Find root entry
+        root = next((e for e in entries if e.id == entry_id), None)
+        if not root:
+            return []
+        
+        # Find all children
+        trace = [root]
+        children = [e for e in entries if e.parent_id == entry_id]
+        for child in children:
+            trace.extend(self.get_operation_trace(child.id))
+        
+        return sorted(trace, key=lambda e: e.timestamp)
+    
+    def _store_entry(
+        self,
+        entry: AuditEntry,
+        input_data: Any,
+        output_data: Any
+    ):
+        """Store entry and associated data."""
+        session_dir = self.storage_path / self.current_session_id
+        session_dir.mkdir(exist_ok=True)
+        
+        # Store entry metadata
+        entry_file = session_dir / f"{entry.id}.json"
+        with open(entry_file, 'w') as f:
+            json.dump(self._entry_to_dict(entry), f, indent=2, default=str)
+        
+        # Store input/output (for debugging)
+        data_dir = session_dir / "data"
+        data_dir.mkdir(exist_ok=True)
+        
+        with open(data_dir / f"{entry.id}_input.json", 'w') as f:
+            json.dump({"data": str(input_data)[:10000]}, f)  # Truncate large inputs
+        
+        with open(data_dir / f"{entry.id}_output.json", 'w') as f:
+            json.dump({"data": str(output_data)[:10000]}, f)
+```
+
+**Audit Report Example:**
+
+```json
+{
+  "session_id": "20260615_143022_abc123",
+  "summary": {
+    "total_operations": 15,
+    "successful": 12,
+    "failed": 3,
+    "escalated": 1,
+    "total_duration_ms": 45230
+  },
+  "operations": [
+    {
+      "id": "op_001",
+      "timestamp": "2026-06-15T14:30:22Z",
+      "event_type": "FIX_LOOP_START",
+      "operation": "fix_syntax_error",
+      "success": true,
+      "duration_ms": 3200,
+      "children": [
+        {
+          "id": "op_001_a",
+          "event_type": "ERROR_ANALYSIS",
+          "success": true,
+          "duration_ms": 120
+        },
+        {
+          "id": "op_001_b", 
+          "event_type": "FIX_GENERATION",
+          "success": true,
+          "duration_ms": 450
+        },
+        {
+          "id": "op_001_c",
+          "event_type": "SANDBOX_EXECUTION",
+          "success": true,
+          "duration_ms": 2500
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Audit: Records all fix loop operations (P0)
+- [ ] Audit: Includes input/output hashes (P0)
+- [ ] Audit: Tracks parent-child relationships (P0)
+- [ ] Audit: Immutable entries (no modification) (P0)
+
+- [ ] Export: JSON format (P0)
+- [ ] Export: CSV format (P0)
+- [ ] Export: HTML report format (P1)
+- [ ] Export: Filter by time, type, success (P0)
+
+- [ ] Query: Get full operation trace (P0)
+- [ ] Query: Get session summary (P0)
 
 ### Adversarial Validation Checklist (v3.0.0)
 
@@ -3543,6 +6305,7 @@ v3.0.0 "Autonomy" Release Criteria:
 
 [ ] Ecosystem: LangGraph integration working (P0)
 [ ] Ecosystem: CrewAI integration working (P0)
+[ ] Ecosystem: AutoGen integration working (P0)
 [ ] Ecosystem: 3+ agent frameworks supported (P0)
 
 [ ] Audit Trail: Full history exportable (P1)
