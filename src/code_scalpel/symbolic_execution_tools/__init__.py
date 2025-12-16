@@ -100,6 +100,15 @@ from .security_analyzer import (
     find_command_injections,
     find_path_traversals,
 )
+# [20251216_FEATURE] v2.3.0: Unified Polyglot Sink Detection
+from .unified_sink_detector import (
+    UnifiedSinkDetector,
+    SinkDefinition,
+    DetectedSink,
+    Language,
+    UNIFIED_SINKS,
+    OWASP_COVERAGE,
+)
 
 import warnings
 
@@ -165,6 +174,13 @@ __all__ = [
     "SSR_SINK_PATTERNS",
     "detect_ssr_vulnerabilities",
     "detect_ssr_framework",
+    # [20251216_FEATURE] v2.3.0: Unified Polyglot Sink Detection
+    "UnifiedSinkDetector",
+    "SinkDefinition",
+    "DetectedSink",
+    "Language",
+    "UNIFIED_SINKS",
+    "OWASP_COVERAGE",
     # v1.5.1: Cross-File Taint Analysis
     "CrossFileTaintTracker",
     "CrossFileTaintResult",
