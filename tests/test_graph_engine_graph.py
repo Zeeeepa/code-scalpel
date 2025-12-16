@@ -5,8 +5,6 @@ Tests for universal graph structure.
 """
 
 import json
-import pytest
-
 from code_scalpel.graph_engine.node_id import UniversalNodeID, NodeType, create_node_id
 from code_scalpel.graph_engine.confidence import EdgeType
 from code_scalpel.graph_engine.graph import (
