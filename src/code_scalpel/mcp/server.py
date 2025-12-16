@@ -2673,8 +2673,13 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
         # Security check
         _validate_path_security(file_path)
 
-        # Determine target type (function, class, or method)
-        target_type = "method" if "." in symbol else "function"
+        # [20240613_BUGFIX] Enhanced target_type logic to handle class symbols
+        if "." in symbol:
+            target_type = "method"
+        elif symbol and symbol[0].isupper():
+            target_type = "class"
+        else:
+            target_type = "function"
 
         # Extract the symbol using extract_code
         result = await extract_code(
