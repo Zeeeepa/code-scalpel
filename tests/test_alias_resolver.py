@@ -5,7 +5,6 @@ Tests for Bundler/Module Alias Resolver.
 """
 
 import json
-from pathlib import Path
 
 import pytest
 
