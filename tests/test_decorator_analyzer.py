@@ -4,7 +4,6 @@ Tests for TypeScript Decorator Analyzer.
 [20251216_TEST] Tests for Feature 7: TypeScript Decorators + Metadata
 """
 
-import pytest
 
 from code_scalpel.polyglot.typescript.decorator_analyzer import (
     DecoratorAnalyzer,
