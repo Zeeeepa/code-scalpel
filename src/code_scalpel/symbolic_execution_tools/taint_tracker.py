@@ -1828,41 +1828,56 @@ def is_server_action(node: ast.AST) -> bool:
     return False
 
 
-def has_input_validation(node: ast.FunctionDef) -> bool:
+def has_input_validation(node: ast.AST) -> bool:
     """
-    [20251216_FEATURE] v2.2.0 - Check if function has input validation.
-    
-    Looks for common validation patterns:
+    [20251216_BUGFIX] Accepts both FunctionDef and Lambda nodes for input validation detection.
+
+    Checks for common input validation patterns in function or lambda:
     - Type checking (isinstance, type)
     - Schema validation (zod, joi, yup)
     - Manual validation (if checks on inputs)
-    
+
     Args:
-        node: FunctionDef node to check
-        
+        node: FunctionDef or Lambda node to check
+
     Returns:
         True if validation is present
     """
-    for stmt in ast.walk(node):
-        # Check for isinstance or type checks
-        if isinstance(stmt, ast.Call):
-            if isinstance(stmt.func, ast.Name):
-                if stmt.func.id in {"isinstance", "type"}:
-                    return True
-            # Check for schema validators
-            if isinstance(stmt.func, ast.Attribute):
-                if stmt.func.attr in {"parse", "validate", "safeParse"}:
-                    return True
-        
-        # Check for if statements that validate parameters
-        if isinstance(stmt, ast.If):
-            # Look for parameter checks in the condition
-            if isinstance(stmt.test, ast.Compare):
-                return True
-    
-    return False
+    if isinstance(node, ast.FunctionDef):
+        for stmt in ast.walk(node):
+            # Check for isinstance or type checks
+            if isinstance(stmt, ast.Call):
+                if isinstance(stmt.func, ast.Name):
+                    if stmt.func.id in {"isinstance", "type", "int", "float", "bool", "str"}:
+                        return True
+                # Check for schema validators
+                if isinstance(stmt.func, ast.Attribute):
+                    if stmt.func.attr in {"parse", "validate", "safeParse"}:
+                        return True
 
-
+            # Check for if statements that validate parameters
+            if isinstance(stmt, ast.If):
+                # Look for parameter checks in the condition
+                if isinstance(stmt.test, ast.Compare):
+                    return True
+        return False
+    elif isinstance(node, ast.Lambda):
+        # For lambdas, only check the body expression for type checks
+        expr = node.body
+        # Check for isinstance or type checks in the lambda body
+        if isinstance(expr, ast.Call):
+            if isinstance(expr.func, ast.Name):
+                if expr.func.id in {"isinstance", "type", "int", "float", "bool", "str"}:
+                    return True
+            if isinstance(expr.func, ast.Attribute):
+                if expr.func.attr in {"parse", "validate", "safeParse"}:
+                    return True
+        # Check for comparison in lambda body
+        if isinstance(expr, ast.Compare):
+            return True
+        return False
+    else:
+        return False
 def is_dangerous_html(node: ast.AST) -> bool:
     """
     [20251216_FEATURE] v2.2.0 - Check if node uses dangerouslySetInnerHTML.
