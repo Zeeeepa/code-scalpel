@@ -41,6 +41,8 @@ from .taint_tracker import (
     SANITIZER_PATTERNS,
     SANITIZER_REGISTRY,
     load_sanitizers_from_config,
+    SSR_SINK_PATTERNS,  # [20251216_FEATURE] v2.2.0
+    detect_ssr_vulnerabilities,  # [20251216_FEATURE] v2.2.0
 )
 from .secret_scanner import SecretScanner
 
@@ -288,7 +290,9 @@ class SecurityAnalyzer:
         # Collect results
         taint_vulns = self._taint_tracker.get_vulnerabilities()
         secret_vulns = self._secret_scanner.scan(tree)
-        result.vulnerabilities = taint_vulns + secret_vulns
+        # [20251216_FEATURE] v2.2.0 - SSR vulnerability detection
+        ssr_vulns = detect_ssr_vulnerabilities(tree, framework=None, taint_tracker=self._taint_tracker)
+        result.vulnerabilities = taint_vulns + secret_vulns + ssr_vulns
 
         result.taint_flows = {
             name: self._taint_tracker.get_taint(name)
