@@ -10,7 +10,6 @@ from code_scalpel.polyglot.typescript.decorator_analyzer import (
     DecoratorAnalyzer,
     extract_decorators_from_code,
     Decorator,
-    SECURITY_SINK_DECORATORS,
 )
 
 
