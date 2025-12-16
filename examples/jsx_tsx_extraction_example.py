@@ -19,7 +19,7 @@ async def example_functional_component():
     print("Example 1: Functional React Component")
     print("=" * 60)
 
-    jsx_code = '''
+    jsx_code = """
 export function UserCard({ user }) {
   return (
     <div className="card">
@@ -28,7 +28,7 @@ export function UserCard({ user }) {
     </div>
   );
 }
-'''
+"""
 
     result = await extract_code(
         target_type="function",
@@ -50,7 +50,7 @@ async def example_server_component():
     print("Example 2: Next.js Server Component")
     print("=" * 60)
 
-    tsx_code = '''
+    tsx_code = """
 async function UserList() {
   const users = await fetchUsers();
   return (
@@ -59,7 +59,7 @@ async function UserList() {
     </div>
   );
 }
-'''
+"""
 
     result = await extract_code(
         target_type="function",
@@ -82,14 +82,14 @@ async def example_server_action():
     print("Example 3: Next.js Server Action")
     print("=" * 60)
 
-    tsx_code = '''
+    tsx_code = """
 async function updateUser(formData) {
   'use server';
   const id = formData.get('id');
   await db.users.update({ id }, formData);
   revalidatePath('/users');
 }
-'''
+"""
 
     result = await extract_code(
         target_type="function",
@@ -110,7 +110,7 @@ async def example_typescript_component():
     print("Example 4: TypeScript React Component")
     print("=" * 60)
 
-    tsx_code = '''
+    tsx_code = """
 interface User {
   name: string;
   email: string;
@@ -124,7 +124,7 @@ export function UserCard({ user }: { user: User }) {
     </div>
   );
 }
-'''
+"""
 
     result = await extract_code(
         target_type="function",

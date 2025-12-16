@@ -22,7 +22,8 @@ async def setup_example_project():
     project_root = Path(tmpdir)
 
     # Create Python module
-    (project_root / "utils.py").write_text('''
+    (project_root / "utils.py").write_text(
+        '''
 def calculate_tax(amount):
     """Calculate tax on an amount."""
     return amount * 0.1
@@ -30,12 +31,14 @@ def calculate_tax(amount):
 def format_currency(value):
     """Format value as currency."""
     return f"${value:.2f}"
-''')
+'''
+    )
 
     # Create TypeScript component
     components_dir = project_root / "components"
     components_dir.mkdir()
-    (components_dir / "Button.tsx").write_text('''
+    (components_dir / "Button.tsx").write_text(
+        """
 interface ButtonProps {
   label: string;
   onClick: () => void;
@@ -44,17 +47,20 @@ interface ButtonProps {
 export function Button({ label, onClick }: ButtonProps) {
   return <button onClick={onClick}>{label}</button>;
 }
-''')
+"""
+    )
 
     # Create JavaScript module
     services_dir = project_root / "services"
     services_dir.mkdir()
-    (services_dir / "auth.js").write_text('''
+    (services_dir / "auth.js").write_text(
+        """
 export function authenticate(username, password) {
   // Authentication logic here
   return { token: "example-token", user: { username } };
 }
-''')
+"""
+    )
 
     return project_root
 
@@ -72,7 +78,9 @@ async def example_python_resource():
         print(f"✓ URI: {result['uri']}")
         print(f"✓ MIME Type: {result['mimeType']}")
         print(f"✓ File Path: {result['metadata']['file_path']}")
-        print(f"✓ Lines: {result['metadata']['line_start']} - {result['metadata']['line_end']}")
+        print(
+            f"✓ Lines: {result['metadata']['line_start']} - {result['metadata']['line_end']}"
+        )
         print(f"✓ Code:\n{result['code']}")
     else:
         print(f"✗ Error: {result['error']}")

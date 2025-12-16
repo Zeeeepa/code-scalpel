@@ -20,7 +20,7 @@ For AI agent integrations:
 """
 
 # [20251215_RELEASE] Updated version for v2.0.0 "Polyglot" release
-__version__ = "2.0.1"  # [20251216_DOCS] v2.0.1 Java Complete
+__version__ = "2.2.0"  # [20251216_DOCS] v2.2.0 Nexus - Unified Cross-Language Graph
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

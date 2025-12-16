@@ -1617,38 +1617,32 @@ SSR_SINK_PATTERNS: Dict[str, SecuritySink] = {
     "getStaticProps": SecuritySink.SSTI,
     "getInitialProps": SecuritySink.SSTI,
     "dangerouslySetInnerHTML": SecuritySink.DOM_XSS,
-    
     # Next.js - App Router (React Server Components)
     "generateMetadata": SecuritySink.SSTI,
     "generateStaticParams": SecuritySink.SSTI,
-    
     # Next.js - Server Actions
     "revalidatePath": SecuritySink.FILE_PATH,
     "revalidateTag": SecuritySink.SSTI,
     "cookies().set": SecuritySink.HEADER,
     "cookies().delete": SecuritySink.HEADER,
     "headers().set": SecuritySink.HEADER,
-    
     # Remix
     "loader": SecuritySink.SSTI,
     "action": SecuritySink.SSTI,
     "headers": SecuritySink.HEADER,
     "json": SecuritySink.HTML_OUTPUT,
     "redirect": SecuritySink.REDIRECT,
-    
     # Nuxt 3
     "useAsyncData": SecuritySink.SSTI,
     "useFetch": SecuritySink.SSRF,
     "defineEventHandler": SecuritySink.SSTI,
     "setResponseHeader": SecuritySink.HEADER,
     "H3Event.node.res.setHeader": SecuritySink.HEADER,
-    
     # SvelteKit
     "load": SecuritySink.SSTI,
     "+page.server.ts": SecuritySink.SSTI,
     "+layout.server.ts": SecuritySink.SSTI,
     "setHeaders": SecuritySink.HEADER,
-    
     # Astro
     "Astro.props": SecuritySink.SSTI,
     "set:html": SecuritySink.DOM_XSS,
@@ -1730,23 +1724,19 @@ SSR_FRAMEWORK_IMPORTS: Dict[str, str] = {
     "next/headers": "nextjs",
     "next/cache": "nextjs",
     "next": "nextjs",
-    
     # Remix
     "@remix-run/node": "remix",
     "@remix-run/react": "remix",
     "@remix-run/server-runtime": "remix",
-    
     # Nuxt
     "nuxt": "nuxt",
     "nuxt/app": "nuxt",
     "#app": "nuxt",  # Nuxt 3 auto-imports
-    "h3": "nuxt",     # Nuxt 3 uses h3 for server
-    
+    "h3": "nuxt",  # Nuxt 3 uses h3 for server
     # SvelteKit
     "@sveltejs/kit": "sveltekit",
     "$app/environment": "sveltekit",
     "$app/stores": "sveltekit",
-    
     # Astro
     "astro": "astro",
     "astro:content": "astro",
@@ -1777,15 +1767,16 @@ SANITIZER_PATTERNS: Dict[str, str] = {
 # [20251216_FEATURE] v2.2.0 - SSR Framework Detection and Vulnerability Analysis
 # =============================================================================
 
+
 def detect_ssr_framework(tree: ast.AST) -> Optional[str]:
     """
     [20251216_FEATURE] v2.2.0 - Auto-detect SSR framework from imports.
-    
+
     Analyzes import statements to determine which SSR framework is being used.
-    
+
     Args:
         tree: AST tree of the code
-        
+
     Returns:
         Framework name ("nextjs", "remix", "nuxt", "sveltekit", "astro") or None
     """
@@ -1803,28 +1794,30 @@ def detect_ssr_framework(tree: ast.AST) -> Optional[str]:
 def is_server_action(node: ast.AST) -> bool:
     """
     [20251216_FEATURE] v2.2.0 - Check if node is a Next.js Server Action.
-    
+
     Server Actions are marked with 'use server' directive at the top of a function.
-    
+
     Args:
         node: AST node to check
-        
+
     Returns:
         True if node is a server action
     """
     if not isinstance(node, ast.FunctionDef):
         return False
-    
+
     # Check for 'use server' directive in function docstring or first statement
     if node.body:
         first_stmt = node.body[0]
-        if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Constant):
+        if isinstance(first_stmt, ast.Expr) and isinstance(
+            first_stmt.value, ast.Constant
+        ):
             if isinstance(first_stmt.value.value, str):
                 # Check for 'use server' or "use server" (without quotes)
                 content = first_stmt.value.value.strip()
                 if content == "use server":
                     return True
-    
+
     return False
 
 
@@ -1848,7 +1841,14 @@ def has_input_validation(node: ast.AST) -> bool:
             # Check for isinstance or type checks
             if isinstance(stmt, ast.Call):
                 if isinstance(stmt.func, ast.Name):
-                    if stmt.func.id in {"isinstance", "type", "int", "float", "bool", "str"}:
+                    if stmt.func.id in {
+                        "isinstance",
+                        "type",
+                        "int",
+                        "float",
+                        "bool",
+                        "str",
+                    }:
                         return True
                 # Check for schema validators
                 if isinstance(stmt.func, ast.Attribute):
@@ -1867,7 +1867,14 @@ def has_input_validation(node: ast.AST) -> bool:
         # Check for isinstance or type checks in the lambda body
         if isinstance(expr, ast.Call):
             if isinstance(expr.func, ast.Name):
-                if expr.func.id in {"isinstance", "type", "int", "float", "bool", "str"}:
+                if expr.func.id in {
+                    "isinstance",
+                    "type",
+                    "int",
+                    "float",
+                    "bool",
+                    "str",
+                }:
                     return True
             if isinstance(expr.func, ast.Attribute):
                 if expr.func.attr in {"parse", "validate", "safeParse"}:
@@ -1878,13 +1885,15 @@ def has_input_validation(node: ast.AST) -> bool:
         return False
     else:
         return False
+
+
 def is_dangerous_html(node: ast.AST) -> bool:
     """
     [20251216_FEATURE] v2.2.0 - Check if node uses dangerouslySetInnerHTML.
-    
+
     Args:
         node: AST node to check
-        
+
     Returns:
         True if node uses dangerouslySetInnerHTML
     """
@@ -1894,44 +1903,44 @@ def is_dangerous_html(node: ast.AST) -> bool:
         if isinstance(node.func, ast.Attribute):
             if node.func.attr == "dangerouslySetInnerHTML":
                 return True
-    
+
     return False
 
 
 def detect_ssr_vulnerabilities(
     tree: ast.AST,
     framework: Optional[str] = None,
-    taint_tracker: Optional[TaintTracker] = None
+    taint_tracker: Optional[TaintTracker] = None,
 ) -> List[Vulnerability]:
     """
     [20251216_FEATURE] v2.2.0 - Detect SSR-specific vulnerabilities.
-    
+
     Analyzes code for server-side rendering vulnerabilities specific to
     modern web frameworks like Next.js, Remix, Nuxt, etc.
-    
+
     Args:
         tree: AST tree to analyze
         framework: Framework name or None for auto-detection
         taint_tracker: Optional TaintTracker instance for taint analysis
-        
+
     Returns:
         List of detected vulnerabilities
     """
     vulnerabilities: List[Vulnerability] = []
-    
+
     # Auto-detect framework if not provided
     if framework is None:
         framework = detect_ssr_framework(tree)
-    
+
     if framework is None:
         # No SSR framework detected, skip SSR-specific checks
         return vulnerabilities
-    
+
     # Track if we're using an external taint tracker
     internal_tracker = taint_tracker is None
     if internal_tracker:
         taint_tracker = TaintTracker()
-    
+
     # Walk the AST looking for SSR vulnerabilities
     for node in ast.walk(tree):
         # Check for unvalidated Server Actions (Next.js)
@@ -1942,11 +1951,19 @@ def detect_ssr_vulnerabilities(
                         sink_type=SecuritySink.SSTI,
                         taint_source=TaintSource.USER_INPUT,
                         taint_path=["Server Action", node.name],
-                        sink_location=(node.lineno, node.col_offset) if hasattr(node, 'lineno') else None,
-                        source_location=(node.lineno, node.col_offset) if hasattr(node, 'lineno') else None,
+                        sink_location=(
+                            (node.lineno, node.col_offset)
+                            if hasattr(node, "lineno")
+                            else None
+                        ),
+                        source_location=(
+                            (node.lineno, node.col_offset)
+                            if hasattr(node, "lineno")
+                            else None
+                        ),
                     )
                 )
-        
+
         # Check for dangerouslySetInnerHTML with tainted data
         if isinstance(node, ast.Call):
             if is_dangerous_html(node):
@@ -1959,10 +1976,14 @@ def detect_ssr_vulnerabilities(
                                     sink_type=SecuritySink.DOM_XSS,
                                     taint_source=TaintSource.USER_INPUT,
                                     taint_path=["dangerouslySetInnerHTML", arg.id],
-                                    sink_location=(node.lineno, node.col_offset) if hasattr(node, 'lineno') else None,
+                                    sink_location=(
+                                        (node.lineno, node.col_offset)
+                                        if hasattr(node, "lineno")
+                                        else None
+                                    ),
                                 )
                             )
-        
+
         # Check for unvalidated Remix loaders/actions
         if framework == "remix" and isinstance(node, ast.FunctionDef):
             if node.name in {"loader", "action"} and not has_input_validation(node):
@@ -1971,10 +1992,14 @@ def detect_ssr_vulnerabilities(
                         sink_type=SecuritySink.SSTI,
                         taint_source=TaintSource.USER_INPUT,
                         taint_path=["Remix", node.name],
-                        sink_location=(node.lineno, node.col_offset) if hasattr(node, 'lineno') else None,
+                        sink_location=(
+                            (node.lineno, node.col_offset)
+                            if hasattr(node, "lineno")
+                            else None
+                        ),
                     )
                 )
-        
+
         # Check for unvalidated Nuxt server handlers
         if framework == "nuxt" and isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name):
@@ -1987,8 +2012,12 @@ def detect_ssr_vulnerabilities(
                                     sink_type=SecuritySink.SSTI,
                                     taint_source=TaintSource.USER_INPUT,
                                     taint_path=["Nuxt", "defineEventHandler"],
-                                    sink_location=(node.lineno, node.col_offset) if hasattr(node, 'lineno') else None,
+                                    sink_location=(
+                                        (node.lineno, node.col_offset)
+                                        if hasattr(node, "lineno")
+                                        else None
+                                    ),
                                 )
                             )
-    
+
     return vulnerabilities

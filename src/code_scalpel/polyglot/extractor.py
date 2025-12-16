@@ -71,7 +71,7 @@ class PolyglotExtractionResult:
     # Metadata
     file_path: str | None = None
     token_estimate: int = 0
-    
+
     # [20251216_FEATURE] v2.0.2 - JSX/TSX metadata
     jsx_normalized: bool = False
     is_server_component: bool = False
@@ -398,7 +398,7 @@ class PolyglotExtractor:
         for node in self._ir_module.body:
             # [20251216_BUGFIX] Unwrap IRExport nodes
             actual_node = node.declaration if isinstance(node, IRExport) else node
-            
+
             if target_type == "function" and isinstance(actual_node, IRFunctionDef):
                 if actual_node.name == target_name:
                     target_node = actual_node
@@ -452,13 +452,13 @@ class PolyglotExtractor:
 
                 # Analyze for React component patterns
                 react_info = is_react_component(target_node, code)
-                
+
                 # [20251216_BUGFIX] Set metadata even for non-component functions
                 # (e.g., Server Actions without JSX)
                 component_type = react_info.component_type
                 is_server_component = react_info.is_server_component
                 is_server_action = react_info.is_server_action
-                
+
                 # Mark as JSX normalized if it has JSX or is a React component
                 if react_info.has_jsx or react_info.component_type:
                     jsx_normalized = True

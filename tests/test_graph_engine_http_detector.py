@@ -4,7 +4,6 @@ Tests for HTTP link detector.
 [20251216_FEATURE] v2.1.0 - Test HTTP link detection between client and server
 """
 
-
 from code_scalpel.graph_engine.http_detector import (
     HTTPLinkDetector,
     HTTPMethod,
@@ -99,7 +98,9 @@ class TestRoutePatternMatcher:
         )
 
         # Should detect as dynamic match only
-        assert match_type == "dynamic"  # [20251216_BUGFIX] Test must require dynamic match type for dynamic routes
+        assert (
+            match_type == "dynamic"
+        )  # [20251216_BUGFIX] Test must require dynamic match type for dynamic routes
 
     def test_no_match_different_routes(self):
         """Test non-matching routes."""
@@ -446,12 +447,12 @@ class TestIntegrationScenarios:
         assert len(links) == 2
 
         # Check GET link
-        get_links = [l for l in links if l.method == HTTPMethod.GET]
+        get_links = [link for link in links if link.method == HTTPMethod.GET]
         assert len(get_links) == 1
         assert get_links[0].confidence >= 0.9
 
         # Check POST link
-        post_links = [l for l in links if l.method == HTTPMethod.POST]
+        post_links = [link for link in links if link.method == HTTPMethod.POST]
         assert len(post_links) == 1
         assert post_links[0].confidence >= 0.9
 

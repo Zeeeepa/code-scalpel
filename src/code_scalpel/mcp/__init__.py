@@ -28,7 +28,7 @@ from .logging import (
 )
 
 __all__ = [
-    "mcp", 
+    "mcp",
     "run_server",
     # [20251216_FEATURE] v2.2.0 - Logging exports
     "MCPAnalytics",

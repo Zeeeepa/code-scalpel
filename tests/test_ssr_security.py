@@ -36,12 +36,6 @@ def handler(request):
 
     def test_detect_remix_from_import(self):
         """Detect Remix from import statements."""
-        code = """
-from @remix-run/node import json
-
-def loader():
-    return json({"data": "test"})
-"""
         # Note: Python ast can't parse TypeScript imports directly,
         # but we test the pattern
         code_python_style = """
@@ -96,7 +90,7 @@ def update_user(user_id, name):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="nextjs")
-        
+
         # Should detect unvalidated server action
         assert len(vulnerabilities) > 0
         assert any("Server Action" in v.taint_path for v in vulnerabilities)
@@ -117,9 +111,11 @@ def update_user(user_id, name):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="nextjs")
-        
+
         # Should not detect vulnerability (has validation)
-        server_action_vulns = [v for v in vulnerabilities if "Server Action" in v.taint_path]
+        server_action_vulns = [
+            v for v in vulnerabilities if "Server Action" in v.taint_path
+        ]
         assert len(server_action_vulns) == 0
 
 
@@ -135,10 +131,12 @@ render_html = dangerouslySetInnerHTML(user_input)
 """
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        
+
         # Should detect DOM XSS vulnerability
         assert result.has_vulnerabilities
-        dom_xss_vulns = [v for v in result.vulnerabilities if "XSS" in v.vulnerability_type]
+        dom_xss_vulns = [
+            v for v in result.vulnerabilities if "XSS" in v.vulnerability_type
+        ]
         assert len(dom_xss_vulns) > 0
 
     def test_dangerous_html_with_safe_data(self):
@@ -149,11 +147,14 @@ render_html = dangerouslySetInnerHTML(safe_html)
 """
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        
+
         # Should not detect vulnerability (hardcoded content)
         # Note: This test validates that we don't flag ALL dangerouslySetInnerHTML usage
-        dangerous_html_vulns = [v for v in result.vulnerabilities 
-                                if "dangerouslySetInnerHTML" in v.taint_path]
+        dangerous_html_vulns = [
+            v
+            for v in result.vulnerabilities
+            if "dangerouslySetInnerHTML" in v.taint_path
+        ]
         # If taint tracking works, should be 0
         assert len(dangerous_html_vulns) == 0
 
@@ -174,7 +175,7 @@ def loader(request):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="remix")
-        
+
         # Should detect unvalidated loader
         assert len(vulnerabilities) > 0
         remix_vulns = [v for v in vulnerabilities if "Remix" in v.taint_path]
@@ -193,7 +194,7 @@ def action(request):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="remix")
-        
+
         # Should detect unvalidated action
         assert len(vulnerabilities) > 0
         remix_vulns = [v for v in vulnerabilities if "Remix" in v.taint_path]
@@ -215,10 +216,13 @@ def loader(request):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="remix")
-        
+
         # Should not detect vulnerability (has validation)
-        loader_vulns = [v for v in vulnerabilities 
-                       if "Remix" in v.taint_path and "loader" in v.taint_path]
+        loader_vulns = [
+            v
+            for v in vulnerabilities
+            if "Remix" in v.taint_path and "loader" in v.taint_path
+        ]
         assert len(loader_vulns) == 0
 
 
@@ -239,7 +243,7 @@ def handle_event(event):
 """
         tree = ast.parse(code)
         vulnerabilities = detect_ssr_vulnerabilities(tree, framework="nuxt")
-        
+
         # Should detect unvalidated handler
         assert len(vulnerabilities) > 0
         nuxt_vulns = [v for v in vulnerabilities if "Nuxt" in v.taint_path]
@@ -251,11 +255,13 @@ class TestSSRSinkPatterns:
 
     def test_ssr_sink_patterns_imported(self):
         """Verify SSR_SINK_PATTERNS are available."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SSR_SINK_PATTERNS
-        
+        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+            SSR_SINK_PATTERNS,
+        )
+
         assert SSR_SINK_PATTERNS is not None
         assert len(SSR_SINK_PATTERNS) > 0
-        
+
         # Check key patterns are present
         assert "getServerSideProps" in SSR_SINK_PATTERNS
         assert "dangerouslySetInnerHTML" in SSR_SINK_PATTERNS
@@ -264,11 +270,13 @@ class TestSSRSinkPatterns:
 
     def test_ssr_framework_imports_available(self):
         """Verify SSR framework detection patterns are available."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SSR_FRAMEWORK_IMPORTS
-        
+        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+            SSR_FRAMEWORK_IMPORTS,
+        )
+
         assert SSR_FRAMEWORK_IMPORTS is not None
         assert len(SSR_FRAMEWORK_IMPORTS) > 0
-        
+
         # Check key frameworks are present
         assert "next/server" in SSR_FRAMEWORK_IMPORTS
         assert "@remix-run/node" in SSR_FRAMEWORK_IMPORTS
@@ -295,7 +303,7 @@ def process_data(data):
 """
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        
+
         # Should detect SSR vulnerabilities
         assert result.has_vulnerabilities
         # At least one vulnerability should be SSR-related

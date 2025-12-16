@@ -43,9 +43,7 @@ class TestUniversalNodeID:
             method="getUser",
         )
 
-        assert (
-            str(node_id) == "java::com.example.api::method::UserController:getUser"
-        )
+        assert str(node_id) == "java::com.example.api::method::UserController:getUser"
         assert node_id.method == "getUser"
 
     def test_create_typescript_function(self):

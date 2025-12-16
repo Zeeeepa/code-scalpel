@@ -71,12 +71,13 @@ class TSNodeType(Enum):
 class Decorator:
     """
     Represents a TypeScript decorator.
-    
+
     Example:
         @Controller('users')
         @UseGuards(AuthGuard)
         class UserController {}
     """
+
     name: str
     arguments: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)

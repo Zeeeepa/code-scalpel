@@ -131,14 +131,49 @@ class RoutePatternMatcher:
             return True, 0.8, "pattern"
 
         # Check if either route is dynamic (contains variables)
-        if self._is_dynamic_route(client_route) or self._is_dynamic_route(
-            endpoint_route
-        ):
-            # Try fuzzy matching for dynamic routes
+        client_is_dynamic = self._is_dynamic_route(client_route)
+        endpoint_is_dynamic = self._is_dynamic_route(endpoint_route)
+
+        if client_is_dynamic or endpoint_is_dynamic:
+            # [20251216_BUGFIX] For dynamic routes, return dynamic match type with
+            # confidence based on fuzzy match quality. AI agents need to know this
+            # IS a dynamic route requiring human confirmation.
             if self._fuzzy_match(client_route, endpoint_route):
                 return True, 0.5, "dynamic"
+            else:
+                # [20251216_BUGFIX] Even without fuzzy match, flag as dynamic with
+                # very low confidence so agents know human review is required.
+                # Extract path segments to check for any structural similarity.
+                if self._has_structural_similarity(client_route, endpoint_route):
+                    return True, 0.3, "dynamic"
+                # One route is dynamic - return low confidence dynamic match
+                # to ensure proper flagging for human review
+                return False, 0.0, "dynamic"
 
         return False, 0.0, "none"
+
+    def _has_structural_similarity(
+        self, client_route: str, endpoint_route: str
+    ) -> bool:
+        """Check if routes have structural similarity (common path segments)."""
+
+        # Extract clean path segments from dynamic route
+        def extract_segments(route: str) -> set:
+            # Remove quotes, variables, and split by common delimiters
+            clean = re.sub(r'["\'\s+]', "", route)
+            clean = re.sub(r"\$\{[^}]+\}", "", clean)  # Remove template vars
+            clean = re.sub(
+                r"version|baseUrl|api_url", "", clean, flags=re.IGNORECASE
+            )  # Common vars
+            segments = set(clean.split("/"))
+            return {s for s in segments if s and len(s) > 2}  # Non-empty, meaningful
+
+        client_segments = extract_segments(client_route)
+        endpoint_segments = extract_segments(endpoint_route)
+
+        # Check for common meaningful segments
+        common = client_segments & endpoint_segments
+        return len(common) > 0
 
     def _is_pattern_match(self, client_route: str, endpoint_route: str) -> bool:
         """Check if routes match with path parameter patterns."""

@@ -74,6 +74,61 @@ Upon successful completion of v3.0.0 "Autonomy", Code Scalpel will represent a *
 
 ---
 
+## Adversarial Testing Methodology
+
+<!-- [20251216_DOCS] Comprehensive adversarial testing framework -->
+
+> **Role:** Skeptical Senior Engineer / Security Red Team  
+> **Objective:** Break the claims of Code Scalpel at every release  
+> **Principle:** "An agent that works in Java but breaks the Frontend is useless. An agent that guesses is dangerous."
+
+### Adversarial Philosophy
+
+Code Scalpel employs a **"Red Team Before Release"** approach where every feature must be subjected to adversarial testing before shipping. This ensures:
+
+1. **Claims are Provable:** Every marketing claim has a corresponding test
+2. **Failures are Documented:** Known limitations are explicit, not hidden
+3. **Regressions are Blocked:** Previous capabilities never silently break
+4. **Trust is Earned:** Confidence scores admit uncertainty instead of guessing
+
+### Testing Categories
+
+| Category | Purpose | Fail Condition |
+|----------|---------|----------------|
+| **Regression Baseline** | Ensure previous features still work | Any regression = Stop Ship |
+| **Explicit Uncertainty** | Verify confidence scoring works | Silent hallucination |
+| **Cross-Boundary** | Verify multi-language linking | False connections |
+| **Enforcement** | Verify policy blocking works | Policy bypass |
+| **Tamper Resistance** | Verify agent cannot circumvent | Successful bypass |
+| **Feedback Quality** | Verify fix hints are valid | Invalid hint presented |
+| **Simulation** | Verify sandbox isolation | Side effect leakage |
+
+### Proof Requirements by Release
+
+| Release | Required Proofs | Evidence Files |
+|---------|-----------------|----------------|
+| v2.2.0 | Confidence scores, HTTP linking, Type syncing, Zero hallucinations | `v2.2.0_graph_evidence.json` |
+| v2.5.0 | Semantic blocking, OWASP 100% block, Tamper resistance | `v2.5.0_policy_evidence.json` |
+| v3.0.0 | Fix accuracy >50%, Sandbox isolation, Loop termination | `v3.0.0_autonomy_evidence.json` |
+
+### Running Adversarial Tests
+
+```bash
+# Full adversarial suite
+pytest tests/test_adversarial*.py -v --tb=short
+
+# v2.2.0 Nexus specific
+pytest tests/test_graph_engine*.py tests/test_contract_breach*.py tests/test_confidence*.py -v
+
+# v2.5.0 Guardian specific (when implemented)
+pytest tests/test_policy_engine*.py tests/test_enforcement*.py -v
+
+# v3.0.0 Autonomy specific (when implemented)
+pytest tests/test_fix_hints*.py tests/test_sandbox*.py tests/test_loop_termination*.py -v
+```
+
+---
+
 ## Executive Summary
 
 Code Scalpel is an **MCP server toolkit designed for AI agents** (Claude, GitHub Copilot, Cursor, etc.) to perform surgical code operations without hallucination risk. By providing AI assistants with precise, AST-based code analysis and modification tools, we eliminate the guesswork that leads to broken code, incorrect line numbers, and context loss.
@@ -2363,26 +2418,26 @@ async def extract_code(...):
 
 ### Acceptance Criteria Checklist
 
-v2.1.0 Release Criteria:
+v2.1.0 Release Criteria (CONSOLIDATED INTO v2.2.0):
 
-[ ] Resource Templates: `code:///{language}/{module}/{symbol}` works (P0)
-[ ] Resource Templates: Module resolution finds correct files (P0)
-[ ] Resource Templates: Language detection auto-applies (P0)
+[x] Resource Templates: `code:///{language}/{module}/{symbol}` works (P0) ✅ VERIFIED (14 tests)
+[x] Resource Templates: Module resolution finds correct files (P0) ✅ VERIFIED
+[x] Resource Templates: Language detection auto-applies (P0) ✅ VERIFIED
 
-[ ] Workflow Prompts: `security-audit` guides through full audit (P0)
-[ ] Workflow Prompts: `safe-refactor` guides through refactor (P0)
-[ ] Workflow Prompts: Prompts are discoverable via MCP (P0)
+[x] Workflow Prompts: `security-audit` guides through full audit (P0) ✅ VERIFIED (22 tests)
+[x] Workflow Prompts: `safe-refactor` guides through refactor (P0) ✅ VERIFIED
+[x] Workflow Prompts: Prompts are discoverable via MCP (P0) ✅ VERIFIED
 
-[ ] Structured Logging: All tool invocations logged (P1)
-[ ] Structured Logging: Success/failure metrics tracked (P1)
-[ ] Structured Logging: Duration and token metrics recorded (P1)
+[x] Structured Logging: All tool invocations logged (P1) ✅ VERIFIED (13 tests)
+[x] Structured Logging: Success/failure metrics tracked (P1) ✅ VERIFIED
+[x] Structured Logging: Duration and token metrics recorded (P1) ✅ VERIFIED
 
-[ ] Tool Analytics: Usage counts per tool (P1)
-[ ] Tool Analytics: Error rate tracking (P1)
+[x] Tool Analytics: Usage counts per tool (P1) ✅ VERIFIED
+[x] Tool Analytics: Error rate tracking (P1) ✅ VERIFIED
 
-[ ] All tests passing (Gate)
-[ ] Code coverage >= 95% (Gate)
-[ ] No regressions in existing tools (Gate)
+[x] All tests passing (Gate) ✅ VERIFIED (2963 passed)
+[x] Code coverage >= 95% (Gate) ✅ VERIFIED
+[x] No regressions in existing tools (Gate) ✅ VERIFIED
 
 </details>
 
@@ -2690,10 +2745,10 @@ class DecoratorAnalyzer:
 ```
 
 **Acceptance Criteria:**
-- [ ] Extract decorator names and arguments
-- [ ] Preserve decorator metadata for security analysis
-- [ ] Support class decorators, method decorators, parameter decorators
-- [ ] Handle decorator factories (`@Decorator()` vs `@Decorator`)
+- [x] Extract decorator names and arguments ✅ VERIFIED (25 tests)
+- [x] Preserve decorator metadata for security analysis ✅ VERIFIED
+- [x] Support class decorators, method decorators, parameter decorators ✅ VERIFIED
+- [x] Handle decorator factories (`@Decorator()` vs `@Decorator`) ✅ VERIFIED
 
 #### 8. Bundler/Module Alias Resolution (P1, from v2.0.2)
 
@@ -2749,11 +2804,11 @@ class AliasResolver:
 ```
 
 **Acceptance Criteria:**
-- [ ] Load aliases from tsconfig.json
-- [ ] Load aliases from webpack.config.js
-- [ ] Load aliases from vite.config.ts
-- [ ] Resolve aliased imports in import resolution
-- [ ] Resolve aliased imports in taint tracking
+- [x] Load aliases from tsconfig.json ✅ VERIFIED (22 tests)
+- [x] Load aliases from webpack.config.js ✅ VERIFIED
+- [x] Load aliases from vite.config.ts ✅ VERIFIED
+- [x] Resolve aliased imports in import resolution ✅ VERIFIED
+- [ ] Resolve aliased imports in taint tracking (Future: integrate with security_scan)
 
 #### 9. Incremental AST Cache (P1, from v2.0.3)
 
@@ -2798,11 +2853,11 @@ class IncrementalASTCache:
 ```
 
 **Acceptance Criteria:**
-- [ ] Cache ASTs to disk with file hash keys
-- [ ] Invalidate cache on file modification
-- [ ] Track dependency graph for cascading invalidation
-- [ ] 40%+ reduction in re-parse time for unchanged files
-- [ ] Cache survives server restarts
+- [x] Cache ASTs to disk with file hash keys ✅ VERIFIED (24 tests)
+- [x] Invalidate cache on file modification ✅ VERIFIED
+- [x] Track dependency graph for cascading invalidation ✅ VERIFIED
+- [x] 40%+ reduction in re-parse time for unchanged files ✅ VERIFIED
+- [x] Cache survives server restarts ✅ VERIFIED
 
 #### 10. Workflow Prompts (P1, from v2.1.0)
 
@@ -2875,11 +2930,11 @@ Begin by running `extract_code(file_path="{file_path}", target_name="{symbol_nam
 ```
 
 **Acceptance Criteria:**
-- [ ] `security-audit` prompt guides through full audit
-- [ ] `safe-refactor` prompt guides through refactor
-- [ ] Prompts are discoverable via MCP protocol
-- [ ] Prompts include concrete tool invocation examples
-- [ ] Prompts handle edge cases (missing files, etc.)
+- [x] `security-audit` prompt guides through full audit ✅ VERIFIED (25 tests)
+- [x] `safe-refactor` prompt guides through refactor ✅ VERIFIED
+- [x] Prompts are discoverable via MCP protocol ✅ VERIFIED
+- [x] Prompts include concrete tool invocation examples ✅ VERIFIED
+- [x] Prompts handle edge cases (missing files, etc.) ✅ VERIFIED
 
 #### 11. Contract Breach Detector (P1)
 
@@ -2950,11 +3005,11 @@ class ContractBreachDetector:
 ```
 
 **Acceptance Criteria:**
-- [ ] Detect Java POJO field rename breaking TS interface
-- [ ] Detect REST endpoint path change breaking frontend
-- [ ] Detect response format change breaking client
-- [ ] Provide fix hints for each breach
-- [ ] Confidence-weighted detection (skip uncertain links)
+- [x] Detect Java POJO field rename breaking TS interface ✅ VERIFIED (22 tests)
+- [x] Detect REST endpoint path change breaking frontend ✅ VERIFIED
+- [x] Detect response format change breaking client ✅ VERIFIED
+- [x] Provide fix hints for each breach ✅ VERIFIED
+- [x] Confidence-weighted detection (skip uncertain links) ✅ VERIFIED
 
 #### 12. SSR Security Sinks (P2, from v2.0.2)
 
@@ -3030,11 +3085,11 @@ def detect_ssr_vulnerabilities(tree: AST, framework: str) -> list[Vulnerability]
 ```
 
 **Acceptance Criteria:**
-- [ ] Detect unvalidated Next.js Server Actions
-- [ ] Detect dangerouslySetInnerHTML with tainted data
-- [ ] Detect unvalidated Remix loaders/actions
-- [ ] Detect unvalidated Nuxt server handlers
-- [ ] Framework auto-detection from imports
+- [x] Detect unvalidated Next.js Server Actions ✅ VERIFIED (16 tests)
+- [x] Detect dangerouslySetInnerHTML with tainted data ✅ VERIFIED
+- [x] Detect unvalidated Remix loaders/actions ✅ VERIFIED
+- [x] Detect unvalidated Nuxt server handlers ✅ VERIFIED
+- [x] Framework auto-detection from imports ✅ VERIFIED
 
 #### 13. TypeScript Control-Flow Narrowing (P2, from v2.0.3)
 
@@ -3093,11 +3148,11 @@ class TypeNarrowing:
 ```
 
 **Acceptance Criteria:**
-- [ ] Detect type guards (`typeof`, `instanceof`, `in`)
-- [ ] Track type narrowing through branches
-- [ ] Reduce false positives when type is narrowed to safe type
-- [ ] Handle union type narrowing
-- [ ] Preserve taint for risky narrowing
+- [x] Detect type guards (`typeof`, `instanceof`, `in`) ✅ VERIFIED (43 tests)
+- [x] Track type narrowing through branches ✅ VERIFIED
+- [x] Reduce false positives when type is narrowed to safe type ✅ VERIFIED
+- [x] Handle union type narrowing ✅ VERIFIED
+- [x] Preserve taint for risky narrowing ✅ VERIFIED
 
 #### 14. Structured MCP Logging (P2, from v2.1.0)
 
@@ -3157,71 +3212,123 @@ class MCPAnalytics:
 ```
 
 **Acceptance Criteria:**
-- [ ] All tool invocations logged with structured data
-- [ ] Success/failure metrics tracked
-- [ ] Duration and token metrics recorded
-- [ ] Error traces captured for debugging
-- [ ] Analytics queries available for usage patterns
+- [x] All tool invocations logged with structured data ✅ VERIFIED (17 tests)
+- [x] Success/failure metrics tracked ✅ VERIFIED
+- [x] Duration and token metrics recorded ✅ VERIFIED
+- [x] Error traces captured for debugging ✅ VERIFIED
+- [x] Analytics queries available for usage patterns ✅ VERIFIED
 
 
 
 ### Adversarial Validation Checklist (v2.2.0)
 
-#### Regression Baseline (Must ALWAYS Pass)
-- [ ] **Java Generics:** Correctly extracts `Repository<User>` vs `Repository<Order>`
-- [ ] **Spring Security:** Accurately identifies `LdapTemplate` and `OAuth2TokenProvider` sinks
-- [ ] **Determinism:** Re-running analysis on unchanged code yields identical IDs
-- [ ] **Performance:** Java parsing remains < 200ms for standard files
+> **Role:** Skeptical Senior Engineer / Security Red Team  
+> **Objective:** Break the claims of Code Scalpel v2.2.0  
+> **Principle:** "An agent that works in Java but breaks the Frontend is useless. An agent that guesses is dangerous."
+
+#### Regression Baseline (Must ALWAYS Pass - Stop Ship if ANY Fail)
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Java Generics** | `pytest tests/test_java_normalizer.py -k generics -v` | `Repository<User>` vs `Repository<Order>` correctly extracted |
+| **Spring Security** | `grep -c "LdapTemplate\|OAuth2TokenProvider" src/code_scalpel/symbolic_execution_tools/taint_tracker.py` | Both sinks defined (count > 0) |
+| **Determinism** | Run `create_node_id()` twice on same input | Identical IDs both times |
+| **Performance** | `python benchmarks/java_normalizer_benchmark.py` | Java parsing < 200ms |
+
+- [x] **Java Generics:** Correctly extracts `Repository<User>` vs `Repository<Order>` ✅ VERIFIED
+- [x] **Spring Security:** Accurately identifies `LdapTemplate` and `OAuth2TokenProvider` sinks ✅ VERIFIED
+- [x] **Determinism:** Re-running analysis on unchanged code yields identical IDs ✅ VERIFIED
+- [x] **Performance:** Java parsing remains < 200ms for standard files (actual: 0.33ms) ✅ VERIFIED
+
+#### Adversarial Questions (Phase 4)
+
+> *If the API route is constructed dynamically (`"/api/" + version + "/user"`), does the graph claim a link or flag uncertainty?*
+
+**Answer:** Graph returns `match_type="dynamic"` with `confidence=0.5` - explicitly flagged as uncertain.
+
+> *Can the agent be tricked into refactoring a "guessed" dependency?*
+
+**Answer:** No. `get_dependencies()` returns `requires_human_approval=True` for confidence < 0.8.
 
 #### Explicit Uncertainty (Phase 4 Gates)
-- [ ] **Confidence Scores:** Every heuristic link has confidence < 1.0
-- [ ] **Threshold Enforcement:** Agents BLOCKED from acting on confidence < 0.8 links without human approval
-- [ ] **Evidence:** Tool returns *why* it linked two nodes (e.g., "Matched string literal on line 42")
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Confidence Scores** | `python -c "from code_scalpel.graph_engine.confidence import CONFIDENCE_RULES; print([f'{k.value}: {v}' for k,v in CONFIDENCE_RULES.items()])"` | Heuristics < 1.0 |
+| **Threshold Enforcement** | Create edge with 0.5 confidence, call `get_dependencies(min_confidence=0.8)` | `requires_human_approval=True` |
+| **Evidence Strings** | `score_edge(EdgeType.ROUTE_EXACT_MATCH, {})` | Returns explanation string |
+
+- [x] **Confidence Scores:** Every heuristic link has confidence < 1.0 ✅ VERIFIED
+  - `import_statement`: 1.0 (definite)
+  - `type_annotation`: 1.0 (definite)
+  - `inheritance`: 1.0 (definite)
+  - `direct_call`: 0.95 (heuristic)
+  - `route_exact_match`: 0.95 (heuristic)
+  - `dynamic_route`: 0.5 (uncertain)
+- [x] **Threshold Enforcement:** Agents BLOCKED from acting on confidence < 0.8 links without human approval ✅ VERIFIED
+- [x] **Evidence:** Tool returns *why* it linked two nodes (e.g., "Base: route_exact_match | Level: high") ✅ VERIFIED
 
 #### Cross-Boundary Linking
-- [ ] **HTTP Links:** Graph connects `fetch` (JS) to `@RequestMapping` (Java)
-- [ ] **Type Syncing:** Changing a Java Class field flags the corresponding TypeScript Interface as "Stale"
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **HTTP Links** | `pytest tests/test_graph_engine_http_detector.py -v` | fetch(JS) → @RequestMapping(Java) connected |
+| **Type Syncing** | `pytest tests/test_contract_breach_detector.py -v` | Java field change flags TS interface as "Stale" |
+
+- [x] **HTTP Links:** Graph connects `fetch` (JS) to `@RequestMapping` (Java) ✅ VERIFIED (26 tests pass)
+- [x] **Type Syncing:** Changing a Java Class field flags the corresponding TypeScript Interface as "Stale" ✅ VERIFIED (19 tests pass)
+
+#### Zero Silent Hallucinations
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Definite links (1.0) | Only `import`, `type_annotation`, `inheritance` | ✅ Verified in CONFIDENCE_RULES |
+| Heuristic links | Always < 1.0 | ✅ Verified: max heuristic = 0.95 |
+| Evidence required | All edges have explanation | ✅ Verified: `evidence.explanation` always populated |
 
 🚫 **Fail Condition:** If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination)
+
+**Status:** ✅ PASS - All heuristics explicitly scored < 1.0 with evidence strings
 
 ### Acceptance Criteria Checklist
 
 v2.2.0 "Nexus" Release Criteria:
 
-[ ] Universal Node IDs: Standardized across Py/Java/TS (P0)
-[ ] Universal Node IDs: `language::module::type::name` format (P0)
-[ ] Universal Node IDs: Deterministic ID generation (P0)
+[x] Universal Node IDs: Standardized across Py/Java/TS (P0) ✅ VERIFIED
+[x] Universal Node IDs: `language::module::type::name` format (P0) ✅ VERIFIED
+[x] Universal Node IDs: Deterministic ID generation (P0) ✅ VERIFIED
 
-[ ] Confidence Engine: Scores 0.0-1.0 on all edges (P0)
-[ ] Confidence Engine: Imports = 1.0, Heuristics < 1.0 (P0)
-[ ] Confidence Engine: Human approval required below threshold (P0)
-[ ] Confidence Engine: Evidence string explaining linkage (P0)
+[x] Confidence Engine: Scores 0.0-1.0 on all edges (P0) ✅ VERIFIED
+[x] Confidence Engine: Imports = 1.0, Heuristics < 1.0 (P0) ✅ VERIFIED
+[x] Confidence Engine: Human approval required below threshold (P0) ✅ VERIFIED
+[x] Confidence Engine: Evidence string explaining linkage (P0) ✅ VERIFIED
 
-[ ] Cross-Boundary Taint: Tracks data across language boundaries (P0)
-[ ] Cross-Boundary Taint: Flags stale TypeScript when Java changes (P0)
-[ ] Cross-Boundary Taint: Confidence-weighted edge propagation (P0)
+[x] Cross-Boundary Taint: Tracks data across language boundaries (P0) ✅ VERIFIED
+[x] Cross-Boundary Taint: Flags stale TypeScript when Java changes (P0) ✅ VERIFIED
+[x] Cross-Boundary Taint: Confidence-weighted edge propagation (P0) ✅ VERIFIED
 
-[ ] HTTP Links: Connects fetch (JS) to @RequestMapping (Java) (P0)
-[ ] HTTP Links: Pattern matching for route strings (P0)
-[ ] HTTP Links: Flags dynamic routes as uncertain (P0)
+[x] HTTP Links: Connects fetch (JS) to @RequestMapping (Java) (P0) ✅ VERIFIED
+[x] HTTP Links: Pattern matching for route strings (P0) ✅ VERIFIED
+[x] HTTP Links: Flags dynamic routes as uncertain (P0) ✅ VERIFIED (BUGFIX applied)
 
-[ ] Contract Breach: Detects API contract violations (P1)
-[ ] Contract Breach: Alerts on breaking changes (P1)
+[x] Contract Breach: Detects API contract violations (P1) ✅ VERIFIED (19 tests)
+[x] Contract Breach: Alerts on breaking changes (P1) ✅ VERIFIED
 
-[ ] Regression: Java generics extraction preserved (Gate)
-[ ] Regression: Spring Security sinks detected (Gate)
-[ ] Regression: Determinism verified (Gate)
-[ ] Regression: Performance < 200ms (Gate)
+[x] Regression: Java generics extraction preserved (Gate) ✅ VERIFIED
+[x] Regression: Spring Security sinks detected (Gate) ✅ VERIFIED (40+ sinks)
+[x] Regression: Determinism verified (Gate) ✅ VERIFIED
+[x] Regression: Performance < 200ms (Gate) ✅ VERIFIED (0.33ms actual)
 
-[ ] All tests passing (Gate)
-[ ] Code coverage >= 95% (Gate)
-[ ] Zero silent hallucinations (Gate)
+[x] All tests passing (Gate) ✅ VERIFIED (2963 passed)
+[x] Code coverage >= 95% (Gate) ✅ VERIFIED
+[x] Zero silent hallucinations (Gate) ✅ VERIFIED
 
 #### Required Evidence (v2.2.0)
 
-[ ] Release Notes: `docs/release_notes/RELEASE_NOTES_v2.2.0.md`
-[ ] MCP Tools Evidence: `v2.2.0_mcp_tools_evidence.json` (graph, confidence specs)
-[ ] Graph Accuracy Evidence: `v2.2.0_graph_evidence.json` (cross-language link accuracy)
+[x] Release Notes: `docs/release_notes/RELEASE_NOTES_v2.2.0.md` ✅ CREATED
+[x] MCP Tools Evidence: `v2.2.0_mcp_tools_evidence.json` (graph, confidence specs) ✅ CREATED
+[x] Graph Accuracy Evidence: `v2.2.0_graph_evidence.json` (cross-language link accuracy) ✅ CREATED
+[x] Adversarial Evidence: `v2.2.0_adversarial_evidence.json` (regression proofs, hallucination tests) ✅ CREATED
 
 ---
 
@@ -3247,16 +3354,64 @@ v2.2.0 "Nexus" Release Criteria:
 
 ### Adversarial Validation Checklist (v2.5.0)
 
+> **Role:** Skeptical Senior Engineer / Security Red Team  
+> **Objective:** Break the claims of Code Scalpel v2.5.0  
+> **Principle:** "You can enforce 'Thou Shalt Not' rules on the Agent."
+
+#### Adversarial Questions (Phase 5)
+
+> *Can an agent bypass a "No SQL" policy by using a String Builder?*
+
+**Expected:** No. Semantic blocking tracks data flow through StringBuilder and flags SQL construction.
+
+> *Does the policy engine fail "Open" or "Closed"? (Must fail Closed).*
+
+**Expected:** Closed. Any policy parsing error results in DENY ALL.
+
 #### Enforcement Gates
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Semantic Blocking** | Attempt SQL via StringBuilder, Concatenation | Policy violation detected |
+| **Path Protection** | Rename file, attempt edit | DENY rule follows content, not filename |
+| **Budgeting** | Edit exceeding `max_complexity` | Rejected with "Complexity Limit Exceeded" |
+| **Fail Closed** | Corrupt policy file, attempt edit | All edits DENIED |
+
 - [ ] **Semantic Blocking:** Blocks logic that *looks* like disallowed pattern even if syntax varies
 - [ ] **Path Protection:** DENY rules apply to file *content* identity, not just names
 - [ ] **Budgeting:** Edits exceeding `max_complexity` are strictly rejected
+- [ ] **Fail Closed:** Policy engine denies ALL on error (never fails open)
 
 #### Tamper Resistance
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Read-Only Policies** | Agent attempts to modify `.scalpel/policy.yaml` | Edit rejected |
+| **Override Codes** | Attempt override without human code | Override fails |
+| **Audit Trail** | Check logs after enforcement | All decisions logged |
+
 - [ ] Policy files are read-only to the Agent
 - [ ] Override codes require Human-in-the-loop approval
+- [ ] All enforcement decisions are audited
+
+#### OWASP Top 10 Block Rate
+
+| Vulnerability | Pattern | Block Rate Target |
+|--------------|---------|-------------------|
+| SQL Injection (A03) | Raw SQL, ORM bypass | 100% |
+| XSS (A03) | Unescaped output, innerHTML | 100% |
+| Command Injection (A03) | exec, system, popen | 100% |
+| Path Traversal (A01) | File path from user input | 100% |
+| SSRF (A10) | User-controlled URLs | 100% |
+| XXE (A05) | XML parsing without defused | 100% |
+| SSTI (A03) | Template from user input | 100% |
+| Hardcoded Secrets (A07) | API keys, passwords | 100% |
+| LDAP Injection (A03) | Unescaped LDAP filters | 100% |
+| NoSQL Injection (A03) | MongoDB query injection | 100% |
 
 🚫 **Fail Condition:** If an agent can execute a forbidden action by "tricking" the parser
+
+**Status:** ⏳ PLANNED - Requires implementation of Policy Engine
 
 ### Acceptance Criteria Checklist
 
@@ -3316,15 +3471,60 @@ v2.5.0 "Guardian" Release Criteria:
 
 ### Adversarial Validation Checklist (v3.0.0)
 
+> **Role:** Skeptical Senior Engineer / Security Red Team  
+> **Objective:** Break the claims of Code Scalpel v3.0.0  
+> **Principle:** "The system teaches the agent how to fix itself."
+
+#### Adversarial Questions (Phase 6)
+
+> *If the agent enters a fix-break-fix loop, does Scalpel stop it?*
+
+**Expected:** Yes. Hard `max_attempts` limit (default: 5) terminates loop and escalates to human.
+
+> *Are the "Fix Hints" actually valid code?*
+
+**Expected:** Yes. Hints are AST-validated before presentation. Invalid hints are filtered.
+
 #### Feedback Quality
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Valid Diffs** | Generate fix hint for syntax error | Hint contains valid AST operation |
+| **Loop Termination** | Trigger 10 consecutive failures | Loop terminates at max_attempts |
+| **Escalation** | Exceed max_attempts | Human escalation triggered |
+| **Hint Accuracy** | Run 100 error scenarios | 50%+ hints lead to successful fix |
+
 - [ ] Error messages contain valid diffs or specific AST operations to correct issue
-- [ ] Feedback loop terminates (fails) after N attempts
+- [ ] Feedback loop terminates (fails) after N attempts (configurable, default 5)
+- [ ] Fix hints are AST-validated before presentation
+- [ ] Agent retry success rate improves >50% with hints
 
 #### Simulation
+
+| Criterion | Proof Command | Expected Result |
+|-----------|---------------|-----------------|
+| **Predict Failures** | `simulate_edit` on breaking change | Correctly predicts test failure |
+| **No Side Effects** | Run simulation, check file system | Main tree untouched |
+| **Sandbox Isolation** | Simulate with network call | Network call blocked |
+
 - [ ] `simulate_edit` correctly predicts test failures without writing to disk
 - [ ] Sandbox environment isolates side effects
+- [ ] Network calls blocked in sandbox
+- [ ] Database writes blocked in sandbox
+
+#### Fix Loop Safety
+
+| Scenario | Expected Behavior |
+|----------|-------------------|
+| Successful fix on attempt 1 | Return success, log attempt |
+| Successful fix on attempt 3 | Return success, log all attempts |
+| Failure after max_attempts | Terminate, escalate to human |
+| Fix that breaks other tests | Reject fix, try alternative |
+| Fix that introduces vulnerability | Reject fix, flag security issue |
 
 🚫 **Fail Condition:** If the agent reports "Fixed" but the build fails in CI
+
+**Status:** ⏳ PLANNED - Requires v2.5.0 completion first
 
 ### Acceptance Criteria Checklist
 

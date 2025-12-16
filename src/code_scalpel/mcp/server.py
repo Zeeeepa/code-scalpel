@@ -488,12 +488,20 @@ class ContextualExtractionResult(BaseModel):
     line_end: int = Field(default=0, description="Ending line number of target")
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
-    
+
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
-    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
-    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
-    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
+    jsx_normalized: bool = Field(
+        default=False, description="Whether JSX syntax was normalized"
+    )
+    is_server_component: bool = Field(
+        default=False, description="Next.js Server Component (async)"
+    )
+    is_server_action: bool = Field(
+        default=False, description="Next.js Server Action ('use server')"
+    )
+    component_type: str | None = Field(
+        default=None, description="React component type: 'functional', 'class', or None"
+    )
 
 
 class PatchResultModel(BaseModel):
@@ -2663,77 +2671,97 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
         file_path = resolve_module_path(language, module, PROJECT_ROOT)
 
         if file_path is None:
-            return json.dumps({
-                "error": f"Module '{module}' not found for language '{language}'",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            })
+            return json.dumps(
+                {
+                    "error": f"Module '{module}' not found for language '{language}'",
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                }
+            )
 
         # Security check
         _validate_path_security(file_path)
 
-        # [20240613_BUGFIX] Enhanced target_type logic to handle class symbols
+        # [20251216_BUGFIX] Fallback type detection for uppercase function names
+        # React components are often functions starting with uppercase (e.g., function Button)
+        # Try class first for uppercase names, fall back to function if not found
         if "." in symbol:
-            target_type = "method"
+            target_types_to_try = ["method"]
         elif symbol and symbol[0].isupper():
-            target_type = "class"
+            # Uppercase: could be class OR function (React components)
+            target_types_to_try = ["class", "function"]
         else:
-            target_type = "function"
+            target_types_to_try = ["function"]
 
-        # Extract the symbol using extract_code
-        result = await extract_code(
-            target_type=target_type,
-            target_name=symbol,
-            file_path=str(file_path),
-            language=language,
-            include_context=True,
-            include_token_estimate=True,
-        )
+        # Extract the symbol using extract_code with fallback
+        result = None
+        last_error = None
+        for target_type in target_types_to_try:
+            result = await extract_code(
+                target_type=target_type,
+                target_name=symbol,
+                file_path=str(file_path),
+                language=language,
+                include_context=True,
+                include_token_estimate=True,
+            )
+            if result.success:
+                break
+            last_error = result.error
 
-        if not result.success:
-            return json.dumps({
-                "error": result.error or "Extraction failed",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            })
+        if result is None or not result.success:
+            return json.dumps(
+                {
+                    "error": last_error or "Extraction failed",
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                }
+            )
 
         # Return full result with metadata
-        return json.dumps({
-            "uri": f"code:///{language}/{module}/{symbol}",
-            "mimeType": get_mime_type(language),
-            "code": result.full_code,
-            "metadata": {
-                "file_path": str(file_path),
+        return json.dumps(
+            {
+                "uri": f"code:///{language}/{module}/{symbol}",
+                "mimeType": get_mime_type(language),
+                "code": result.full_code,
+                "metadata": {
+                    "file_path": str(file_path),
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                    "line_start": result.line_start,
+                    "line_end": result.line_end,
+                    "token_estimate": result.token_estimate,
+                    # JSX/TSX metadata
+                    "jsx_normalized": result.jsx_normalized,
+                    "is_server_component": result.is_server_component,
+                    "is_server_action": result.is_server_action,
+                    "component_type": result.component_type,
+                },
+            },
+            indent=2,
+        )
+
+    except PermissionError as e:
+        return json.dumps(
+            {
+                "error": str(e),
                 "language": language,
                 "module": module,
                 "symbol": symbol,
-                "line_start": result.line_start,
-                "line_end": result.line_end,
-                "token_estimate": result.token_estimate,
-                # JSX/TSX metadata
-                "jsx_normalized": result.jsx_normalized,
-                "is_server_component": result.is_server_component,
-                "is_server_action": result.is_server_action,
-                "component_type": result.component_type,
-            },
-        }, indent=2)
-
-    except PermissionError as e:
-        return json.dumps({
-            "error": str(e),
-            "language": language,
-            "module": module,
-            "symbol": symbol,
-        })
+            }
+        )
     except Exception as e:
-        return json.dumps({
-            "error": f"Resource access failed: {str(e)}",
-            "language": language,
-            "module": module,
-            "symbol": symbol,
-        })
+        return json.dumps(
+            {
+                "error": f"Resource access failed: {str(e)}",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            }
+        )
 
 
 # ============================================================================
@@ -3190,13 +3218,13 @@ Please proceed with Step 1 to begin extracting the function."""
 def security_audit_workflow_prompt(project_path: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a comprehensive security audit.
-    
+
     This is a complete workflow prompt that guides through:
     1. Project structure analysis
     2. Vulnerability scanning
     3. Dependency checking
     4. Report generation
-    
+
     Args:
         project_path: Path to the project root
     """
@@ -3289,14 +3317,14 @@ Begin by running `crawl_project("{project_path}")` to start the audit.
 def safe_refactor_workflow_prompt(file_path: str, symbol_name: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a safe refactoring operation.
-    
+
     This workflow ensures refactoring is done safely with validation:
     1. Extract current implementation
     2. Find all usages
     3. Plan changes
     4. Simulate refactor
     5. Apply changes (only if safe)
-    
+
     Args:
         file_path: Path to the file containing the symbol
         symbol_name: Name of the function/class to refactor

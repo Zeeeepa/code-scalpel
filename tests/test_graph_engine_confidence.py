@@ -4,7 +4,6 @@ Tests for confidence scoring engine.
 [20251216_FEATURE] v2.1.0 - Test confidence scoring for graph edges
 """
 
-
 from code_scalpel.graph_engine.confidence import (
     ConfidenceEngine,
     ConfidenceLevel,

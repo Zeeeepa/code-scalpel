@@ -15,20 +15,14 @@ class TestTsconfigAliases:
 
     def test_load_simple_alias(self, tmp_path):
         """Test loading a simple alias from tsconfig.json."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@utils": ["./src/utils"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@utils")
         assert "src/utils" in resolver.resolve("@utils")
 
@@ -36,19 +30,16 @@ class TestTsconfigAliases:
         """Test loading wildcard aliases from tsconfig.json."""
         tsconfig = {
             "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"],
-                    "@data/*": ["./packages/data/src/*"]
-                }
+                "paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/src/*"]}
             }
         }
-        
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@ui")
         assert resolver.has_alias("@data")
 
@@ -57,18 +48,16 @@ class TestTsconfigAliases:
         tsconfig = {
             "compilerOptions": {
                 "baseUrl": "./src",
-                "paths": {
-                    "@utils": ["./common/utils"]
-                }
+                "paths": {"@utils": ["./common/utils"]},
             }
         }
-        
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@utils")
         # Should resolve relative to baseUrl
         resolved = resolver.resolve("@utils")
@@ -77,19 +66,15 @@ class TestTsconfigAliases:
     def test_multiple_targets_uses_first(self, tmp_path):
         """Test that multiple targets use the first one."""
         tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@utils": ["./src/utils", "./lib/utils"]
-                }
-            }
+            "compilerOptions": {"paths": {"@utils": ["./src/utils", "./lib/utils"]}}
         }
-        
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         resolved = resolver.resolve("@utils")
         assert "src/utils" in resolved
         assert "lib/utils" not in resolved
@@ -97,7 +82,7 @@ class TestTsconfigAliases:
     def test_missing_tsconfig(self, tmp_path):
         """Test that missing tsconfig.json doesn't cause errors."""
         resolver = AliasResolver(tmp_path)
-        
+
         # Should not have any aliases
         assert len(resolver.get_all_aliases()) == 0
 
@@ -106,9 +91,9 @@ class TestTsconfigAliases:
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             f.write("{ invalid json }")
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Should not crash, just have no aliases
         assert len(resolver.get_all_aliases()) == 0
 
@@ -130,13 +115,13 @@ class TestWebpackAliases:
           }
         };
         """
-        
+
         webpack_path = tmp_path / "webpack.config.js"
         with open(webpack_path, "w") as f:
             f.write(webpack_config)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@ui")
         assert resolver.has_alias("@data")
         assert "src/ui" in resolver.resolve("@ui")
@@ -144,7 +129,7 @@ class TestWebpackAliases:
     def test_missing_webpack_config(self, tmp_path):
         """Test that missing webpack config doesn't cause errors."""
         resolver = AliasResolver(tmp_path)
-        
+
         # Should not crash
         assert isinstance(resolver.get_all_aliases(), dict)
 
@@ -164,13 +149,13 @@ class TestViteAliases:
           }
         };
         """
-        
+
         vite_path = tmp_path / "vite.config.ts"
         with open(vite_path, "w") as f:
             f.write(vite_config)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@ui")
         assert resolver.has_alias("@data")
         assert "src/ui" in resolver.resolve("@ui")
@@ -187,13 +172,13 @@ class TestViteAliases:
           }
         };
         """
-        
+
         vite_path = tmp_path / "vite.config.ts"
         with open(vite_path, "w") as f:
             f.write(vite_config)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         assert resolver.has_alias("@ui")
         assert "src/ui" in resolver.resolve("@ui")
 
@@ -203,66 +188,48 @@ class TestAliasResolution:
 
     def test_resolve_exact_match(self, tmp_path):
         """Test resolving an exact alias match."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@utils": ["./src/utils"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         resolved = resolver.resolve("@utils")
         assert resolved.endswith("src/utils")
 
     def test_resolve_with_subpath(self, tmp_path):
         """Test resolving an alias with a subpath."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         resolved = resolver.resolve("@ui/components/Button")
         assert "src/ui/components/Button" in resolved
 
     def test_resolve_no_match(self, tmp_path):
         """Test that unmatched paths are returned as-is."""
         resolver = AliasResolver(tmp_path)
-        
+
         # No aliases defined, should return as-is
         assert resolver.resolve("./relative/path") == "./relative/path"
         assert resolver.resolve("module-name") == "module-name"
 
     def test_resolve_partial_match_not_triggered(self, tmp_path):
         """Test that partial matches don't trigger resolution."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@ui": ["./src/ui"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@ui": ["./src/ui"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # @uicomponents should not match @ui
         assert resolver.resolve("@uicomponents") == "@uicomponents"
 
@@ -275,29 +242,23 @@ class TestFileResolution:
         # Create directory structure
         src_dir = tmp_path / "src" / "ui"
         src_dir.mkdir(parents=True)
-        
+
         # Create file
         button_file = src_dir / "Button.ts"
         button_file.write_text("export class Button {}")
-        
+
         # Create tsconfig
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Resolve to file
         resolved_file = resolver.resolve_to_file("@ui/Button")
-        
+
         assert resolved_file is not None
         assert resolved_file.name == "Button.ts"
         assert resolved_file.exists()
@@ -307,51 +268,39 @@ class TestFileResolution:
         # Create directory structure
         components_dir = tmp_path / "src" / "components"
         components_dir.mkdir(parents=True)
-        
+
         # Create index file
         index_file = components_dir / "index.ts"
         index_file.write_text("export * from './Button';")
-        
+
         # Create tsconfig
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@components": ["./src/components"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@components": ["./src/components"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Resolve to directory (should find index.ts)
         resolved_file = resolver.resolve_to_file("@components")
-        
+
         assert resolved_file is not None
         assert resolved_file.name == "index.ts"
 
     def test_resolve_to_nonexistent_file(self, tmp_path):
         """Test that resolving to nonexistent file returns None."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@utils": ["./src/utils"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # File doesn't exist
         resolved_file = resolver.resolve_to_file("@utils/nonexistent")
-        
+
         assert resolved_file is None
 
 
@@ -365,17 +314,17 @@ class TestAcceptanceCriteria:
                 "paths": {
                     "@ui/*": ["./src/ui/*"],
                     "@data/*": ["./packages/data/src/*"],
-                    "@utils": ["./src/common/utils"]
+                    "@utils": ["./src/common/utils"],
                 }
             }
         }
-        
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Check all aliases are loaded
         assert resolver.has_alias("@ui")
         assert resolver.has_alias("@data")
@@ -383,40 +332,28 @@ class TestAcceptanceCriteria:
 
     def test_resolve_aliased_imports(self, tmp_path):
         """Acceptance: Resolve aliased imports in import resolution."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Test resolution
         resolved = resolver.resolve("@ui/components")
         assert "src/ui/components" in resolved
 
     def test_convenience_function(self, tmp_path):
         """Test the convenience function for creating resolvers."""
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@utils": ["./src/utils"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = create_alias_resolver(tmp_path)
-        
+
         assert isinstance(resolver, AliasResolver)
         assert resolver.has_alias("@utils")
 
@@ -427,18 +364,12 @@ class TestMultiSourceAliases:
     def test_aliases_from_multiple_sources(self, tmp_path):
         """Test that aliases are loaded from all available sources."""
         # Create tsconfig with some aliases
-        tsconfig = {
-            "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"]
-                }
-            }
-        }
-        
+        tsconfig = {"compilerOptions": {"paths": {"@ui/*": ["./src/ui/*"]}}}
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         # Create vite config with additional aliases
         vite_config = """
         export default {
@@ -449,13 +380,13 @@ class TestMultiSourceAliases:
           }
         };
         """
-        
+
         vite_path = tmp_path / "vite.config.ts"
         with open(vite_path, "w") as f:
             f.write(vite_config)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         # Should have aliases from both sources
         assert resolver.has_alias("@ui")
         assert resolver.has_alias("@components")
@@ -464,21 +395,18 @@ class TestMultiSourceAliases:
         """Test retrieving all loaded aliases."""
         tsconfig = {
             "compilerOptions": {
-                "paths": {
-                    "@ui/*": ["./src/ui/*"],
-                    "@data/*": ["./packages/data/*"]
-                }
+                "paths": {"@ui/*": ["./src/ui/*"], "@data/*": ["./packages/data/*"]}
             }
         }
-        
+
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:
             json.dump(tsconfig, f)
-        
+
         resolver = AliasResolver(tmp_path)
-        
+
         aliases = resolver.get_all_aliases()
-        
+
         assert "@ui" in aliases
         assert "@data" in aliases
         assert len(aliases) >= 2

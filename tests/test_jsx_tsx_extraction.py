@@ -18,7 +18,7 @@ class TestJSXExtractionBasic:
         """Test extracting a functional React component."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 export function UserCard({ user }) {
   return (
     <div className="card">
@@ -27,7 +27,7 @@ export function UserCard({ user }) {
     </div>
   );
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="UserCard",
@@ -45,7 +45,7 @@ export function UserCard({ user }) {
         """Test extracting a TypeScript React component."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 interface User {
   name: string;
   email: string;
@@ -59,7 +59,7 @@ export function UserCard({ user }: { user: User }) {
     </div>
   );
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="UserCard",
@@ -76,7 +76,7 @@ export function UserCard({ user }: { user: User }) {
         """Test extracting a class-based React component."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 import React from 'react';
 
 export class UserProfile extends React.Component {
@@ -88,7 +88,7 @@ export class UserProfile extends React.Component {
     );
   }
 }
-'''
+"""
         result = await extract_code(
             target_type="class",
             target_name="UserProfile",
@@ -110,7 +110,7 @@ class TestServerComponentDetection:
         """Test detecting an async Server Component."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 async function UserList() {
   const users = await fetchUsers();
   return (
@@ -119,7 +119,7 @@ async function UserList() {
     </div>
   );
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="UserList",
@@ -137,11 +137,11 @@ async function UserList() {
         """Test that non-async components are not marked as Server Components."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 function RegularComponent() {
   return <div>Hello</div>;
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="RegularComponent",
@@ -160,13 +160,13 @@ class TestServerActionDetection:
         """Test detecting a Server Action with 'use server' directive."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 async function updateUser(formData) {
   'use server';
   const id = formData.get('id');
   await db.users.update({ id }, formData);
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="updateUser",
@@ -182,12 +182,12 @@ async function updateUser(formData) {
         """Test detecting Server Action with double quotes."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 async function deleteUser(id) {
   "use server";
   await db.users.delete(id);
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="deleteUser",
@@ -202,11 +202,11 @@ async function deleteUser(id) {
         """Test that regular functions are not marked as Server Actions."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 function regularFunction() {
   return "hello";
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="regularFunction",
@@ -225,7 +225,7 @@ class TestJSXNormalization:
         """Test that JSX syntax is detected and normalized."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 function App() {
   return (
     <div>
@@ -235,7 +235,7 @@ function App() {
     </div>
   );
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="App",
@@ -253,11 +253,11 @@ function App() {
         """Test that non-JSX code is not marked as normalized."""
         from code_scalpel.mcp.server import extract_code
 
-        code = '''
+        code = """
 function add(a, b) {
   return a + b;
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="add",

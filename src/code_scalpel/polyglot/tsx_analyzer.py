@@ -73,10 +73,10 @@ def has_jsx_syntax(code: str) -> bool:
     # This reduces matches on expressions like `x < y` or `a < b > c`.
     jsx_patterns = [
         r"(?<![\w$])<[A-Z][A-Za-z0-9]*[\s/>]",  # Component tags (uppercase)
-        r"(?<![\w$])<[a-z][a-z0-9]*[\s/>]",      # HTML tags (lowercase)
-        r"(?<![\w$])</[A-Za-z]",                 # Closing tags
-        r"(?<![\w$])<>",                         # Fragment opening
-        r"(?<![\w$])</>",                        # Fragment closing
+        r"(?<![\w$])<[a-z][a-z0-9]*[\s/>]",  # HTML tags (lowercase)
+        r"(?<![\w$])</[A-Za-z]",  # Closing tags
+        r"(?<![\w$])<>",  # Fragment opening
+        r"(?<![\w$])</>",  # Fragment closing
     ]
 
     for pattern in jsx_patterns:
@@ -86,7 +86,9 @@ def has_jsx_syntax(code: str) -> bool:
     return False
 
 
-def is_react_component(node: IRFunctionDef | IRClassDef, code: str) -> ReactComponentInfo:
+def is_react_component(
+    node: IRFunctionDef | IRClassDef, code: str
+) -> ReactComponentInfo:
     """
     Detect if a function or class is a React component.
 

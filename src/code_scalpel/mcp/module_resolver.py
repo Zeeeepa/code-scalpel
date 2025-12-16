@@ -30,10 +30,10 @@ def resolve_module_path(
     Examples:
         >>> resolve_module_path("python", "utils", Path("/project"))
         Path("/project/utils.py")
-        
+
         >>> resolve_module_path("typescript", "components/UserCard", Path("/project"))
         Path("/project/components/UserCard.tsx")
-        
+
         >>> resolve_module_path("java", "services.AuthService", Path("/project"))
         Path("/project/services/AuthService.java")
     """
@@ -237,5 +237,5 @@ def get_mime_type(language: str) -> str:
         "jsx": "text/x-jsx",
         "java": "text/x-java",
     }
-    
+
     return mime_types.get(language.lower(), "text/plain")
