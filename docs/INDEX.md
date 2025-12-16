@@ -167,10 +167,11 @@ code-scalpel mcp --transport http --port 8593
 
 ## Version History
 
-> [20251215_DOCS] Add v2.0.1 coverage-focused release entry
+> [20251216_DOCS] Add v2.2.0 Nexus release entry
 
 | Version | Codename | Highlights |
 |---------|----------|------------|
+| v2.2.0 | "Nexus" | Unified Graph Engine, Cross-Language Dependencies, Type Narrowing |
 | v2.0.1 | "Coverage Lock" | Coverage policy/exclusions documented; warning-path tests for RefactorSimulator |
 | v1.3.0 | "Hardening" | NoSQL/LDAP injection, secret detection, Float support |
 | v1.2.3 | - | Path resolution, FunctionInfo/ClassInfo models |

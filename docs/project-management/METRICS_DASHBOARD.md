@@ -10,7 +10,7 @@ This document defines key metrics tracked for Code Scalpel development and relea
 
 ### Test Coverage
 
-| Metric | Target | Current (v2.0.1) | Trend |
+| Metric | Target | Current (v2.2.0) | Trend |
 |--------|--------|------------------|-------|
 | Line Coverage | ≥95% | 95% | → |
 | Branch Coverage | ≥90% | 92% | ↑ |
@@ -23,13 +23,14 @@ v1.5.1: 95.1%
 v1.5.2: 95.0%
 v2.0.0: 95.0%
 v2.0.1: 95.0%
+v2.2.0: 93.0%
 ```
 
 ### Test Suite Health
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Total Tests | - | 2,698 | - |
+| Total Tests | - | 3,006 | - |
 | Pass Rate | 100% | 100% | ✅ |
 | XFail Tests | <5 | 1 | ✅ |
 | Flaky Tests | 0 | 0 | ✅ |
@@ -75,6 +76,7 @@ v2.0.1: 95.0%
 | v1.5.1 | 0 | No | 0 |
 | v2.0.0 | 1 | Yes (v2.0.1) | 3 |
 | v2.0.1 | 0 | No | 0 |
+| v2.2.0 | 0 | No | 0 |
 
 ---
 
@@ -120,6 +122,7 @@ v2.0.1: 95.0%
 | v1.5.0 | 13 | 3 | 0 |
 | v2.0.0 | 15 | 2 | 0 |
 | v2.0.1 | 15 | 0 | 0 |
+| v2.2.0 | 17 | 2 | 0 |
 
 ---
 
@@ -185,6 +188,7 @@ v2.0.1: 95.0%
 | v1.5.1 | 2 | 0.10 |
 | v2.0.0 | 5 | 0.20 |
 | v2.0.1 | 1 | 0.04 |
+| v2.2.0 | 2 | 0.07 |
 
 ---
 

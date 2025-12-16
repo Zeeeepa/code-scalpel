@@ -1,6 +1,6 @@
-# Code Scalpel Server - Docker Compose v2.0.1
+# Code Scalpel Server - Docker Compose v2.2.0
 # Supports MCP-compliant server with HTTP and HTTPS
-# [20251216_DOCS] Updated to v2.0.1 Java Complete release
+# [20251216_DOCS] Updated to v2.2.0 Nexus release
 
 version: '3.8'
 
@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: code-scalpel:2.0.1
+    image: code-scalpel:2.2.0
     container_name: code-scalpel-mcp
     restart: unless-stopped
     ports:
@@ -46,7 +46,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: code-scalpel:2.0.1
+    image: code-scalpel:2.2.0
     container_name: code-scalpel-mcp-https
     restart: unless-stopped
     ports:
@@ -86,7 +86,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.rest
-    image: code-scalpel-rest:2.0.1
+    image: code-scalpel-rest:2.2.0
     container_name: code-scalpel-rest
     restart: unless-stopped
     ports:

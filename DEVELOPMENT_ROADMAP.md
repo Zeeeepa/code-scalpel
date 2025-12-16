@@ -2,11 +2,10 @@
 
 **Document Version:** 3.1 (Revolution Edition)  
 **Last Updated:** December 16, 2025  <!-- [20251216_DOCS] Integrated Revolution Roadmap -->
-**Current Release:** v2.0.1 (Released Dec 15, 2025)  <!-- [20251215_DOCS] Java Complete, 95% Coverage -->
-**Next Release:** v2.2.0 "Nexus" (Unified Graph, Q1 2026)  <!-- [20251215_DOCS] Cross-language graph with confidence scoring -->
+**Current Release:** v2.2.0 "Nexus" (Released Dec 16, 2025)  <!-- [20251216_DOCS] Unified Graph, 93% Coverage -->
+**Next Release:** v2.5.0 "Guardian" (Governance & Policy, Q1 2026)  <!-- [20251216_DOCS] Policy engine + security blocking -->
 **Future Releases:**
-- v2.5.0 "Guardian" (Governance & Policy, Q1 2026)  <!-- [20251215_DOCS] Policy engine + security blocking -->
-- v3.0.0 "Autonomy" (Self-Correction Loop, Q2 2026)  <!-- [20251215_DOCS] Error-to-diff + speculative execution -->
+- v3.0.0 "Autonomy" (Self-Correction Loop, Q2 2026)  <!-- [20251216_DOCS] Error-to-diff + speculative execution -->
 **Maintainer:** 3D Tech Solutions LLC
 
 ---
