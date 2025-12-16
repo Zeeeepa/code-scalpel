@@ -118,10 +118,6 @@ class SemanticAnalyzer:
                         return True
                 
                 # Check % formatting
-                if isinstance(node.func, ast.Attribute):
-                    if node.func.attr == "__mod__":
-                        if self._contains_sql_keywords_in_node(node):
-                            return True
             
             # Check binary operations with % (old-style formatting)
             if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod):
