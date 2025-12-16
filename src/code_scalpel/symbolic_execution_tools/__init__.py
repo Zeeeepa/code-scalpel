@@ -86,6 +86,10 @@ from .taint_tracker import (
     SANITIZER_REGISTRY,
     register_sanitizer,
     load_sanitizers_from_config,
+    # [20251216_FEATURE] v2.2.0: SSR Security
+    SSR_SINK_PATTERNS,
+    detect_ssr_vulnerabilities,
+    detect_ssr_framework,
 )
 from .security_analyzer import (
     SecurityAnalyzer,
@@ -157,6 +161,10 @@ __all__ = [
     "SANITIZER_REGISTRY",
     "register_sanitizer",
     "load_sanitizers_from_config",
+    # [20251216_FEATURE] v2.2.0: SSR Security
+    "SSR_SINK_PATTERNS",
+    "detect_ssr_vulnerabilities",
+    "detect_ssr_framework",
     # v1.5.1: Cross-File Taint Analysis
     "CrossFileTaintTracker",
     "CrossFileTaintResult",
