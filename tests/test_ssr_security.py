@@ -155,8 +155,7 @@ render_html = dangerouslySetInnerHTML(safe_html)
         dangerous_html_vulns = [v for v in result.vulnerabilities 
                                 if "dangerouslySetInnerHTML" in v.taint_path]
         # If taint tracking works, should be 0
-        # But even if detected, it's expected behavior to warn about this pattern
-        assert True  # Test structure validated
+        assert len(dangerous_html_vulns) == 0
 
 
 class TestRemixVulnerabilities:
