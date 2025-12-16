@@ -38,6 +38,9 @@ class HTTPMethod(Enum):
     PATCH = "PATCH"
     HEAD = "HEAD"
     OPTIONS = "OPTIONS"
+    # [20251216_BUGFIX] Add missing standard HTTP methods CONNECT and TRACE for completeness
+    CONNECT = "CONNECT"
+    TRACE = "TRACE"
 
 
 # [20251216_FEATURE] Client-side HTTP patterns as per problem statement
