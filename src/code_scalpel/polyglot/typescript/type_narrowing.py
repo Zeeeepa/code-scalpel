@@ -86,9 +86,7 @@ class TypeGuard:
     """Represents a detected type guard in code."""
 
     variable: str
-    guard_type: (
-        str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
-    )
+    guard_type: str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
     narrowed_to: NarrowedType
     condition_text: str
     line: int
@@ -218,7 +216,9 @@ class TypeNarrowing:
             taint_reduced=taint_reduced,
             analysis_summary={
                 "total_guards": len(type_guards),
-                "variables_narrowed": len(set(g.variable for g in type_guards)),
+                "variables_narrowed": len(
+                    set(g.variable for g in type_guards)
+                ),
                 "taint_eliminated_count": sum(taint_eliminated.values()),
                 "taint_reduced_count": sum(taint_reduced.values()),
             },
@@ -282,6 +282,7 @@ class TypeNarrowing:
                 condition = child
             elif child.type == "statement_block" and consequence is None:
                 consequence = child
+            # Note: else_clause handled in future branch analysis
 
         if condition is None:
             return
@@ -413,6 +414,7 @@ class TypeNarrowing:
         match = re.search(pattern, condition)
 
         if match:
+            # match.group(1) is the property name, group(2) is the object
             variable = match.group(2)
 
             return TypeGuard(
@@ -645,9 +647,7 @@ class TypeNarrowing:
         """
         # Find the most recent type guard for this variable before the line
         relevant_guards = [
-            g
-            for g in result.type_guards
-            if g.variable == variable and g.line <= at_line
+            g for g in result.type_guards if g.variable == variable and g.line <= at_line
         ]
 
         if not relevant_guards:

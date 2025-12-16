@@ -1,4 +1,4 @@
-# Code Scalpel v1.3.0 - Comprehensive Documentation
+# Code Scalpel v2.2.0 - Comprehensive Documentation
 
 **MCP Server Toolkit for AI Agents - Surgical Code Analysis**
 
@@ -35,17 +35,19 @@ Code Scalpel is a precision toolkit for AI-driven code analysis. Unlike general-
 |--------|---------|----------|
 | **AST Tools** | Parse code into Abstract Syntax Trees | Stable (100% coverage) |
 | **PDG Tools** | Build Program Dependence Graphs | Stable (100% coverage) |
-| **Surgical Extractor** | Token-efficient code extraction with cross-file deps | Stable (94% coverage) |
+| **Surgical Extractor** | Token-efficient code extraction with cross-file deps | Stable (95% coverage) |
 | **Surgical Patcher** | Safe, atomic code modifications | Stable (96% coverage) |
 | **Symbolic Execution** | Explore execution paths with Z3 | Stable (100% coverage) |
 | **Security Analysis** | Taint-based vulnerability detection | Stable (100% coverage) |
-| **MCP Server** | Model Context Protocol integration (8 tools) | Stable |
+| **Graph Engine** | Unified cross-language dependency graph | Stable (v2.2.0) |
+| **MCP Server** | Model Context Protocol integration (17 tools) | Stable |
 
 ### Supported Languages
 
-- **Python**: Full support (AST, PDG, Symbolic, Security, Surgical Tools)
-- **JavaScript/JSX**: Structural parsing (via tree-sitter)
-- **Java**: Structural parsing (via tree-sitter)
+- **Python**: Full support (AST, PDG, Symbolic, Security, Surgical Tools, Graph)
+- **TypeScript/TSX**: Full support (AST, Security, Surgical Tools, Graph)
+- **JavaScript/JSX**: Full support (AST, Security, Surgical Tools, Graph)
+- **Java**: Full support (AST, Security, Surgical Tools, Graph)
 
 ---
 

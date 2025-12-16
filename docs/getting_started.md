@@ -1,17 +1,18 @@
 # Getting Started with Code Scalpel
 
-Welcome to Code Scalpel v2.0.0! This guide covers installation, configuration, and your first analysis.
+Welcome to Code Scalpel v2.2.0 "Nexus"! This guide covers installation, configuration, and your first analysis.
 
 ## What is Code Scalpel?
 
 Code Scalpel is an **MCP server toolkit** for AI agents (Claude, GitHub Copilot, Cursor) to perform surgical code operations. Instead of stuffing entire files into context, Code Scalpel extracts *exactly* what's needed—saving 99% of tokens while improving accuracy.
 
 **Key Capabilities:**
-- **18 MCP Tools** for AI agents via Model Context Protocol
-- **4 Languages** - Python (full), TypeScript, JavaScript, Java
+- **17 MCP Tools** for AI agents via Model Context Protocol
+- **4 Languages** - Python, TypeScript, JavaScript, Java (all full support)
 - **Security Analysis** - 17+ vulnerability types including SQLi, NoSQL, DOM XSS
 - **Symbolic Execution** - Z3-powered path exploration and test generation
 - **Cross-File Analysis** - Import resolution and taint tracking across modules
+- **Unified Graph Engine** - Cross-language dependency tracking with confidence scoring
 
 ---
 
@@ -50,7 +51,7 @@ pip install -e ".[dev]"
 
 ```bash
 # Pull from GitHub Container Registry
-docker pull ghcr.io/tescolopio/code-scalpel:2.0.0
+docker pull ghcr.io/tescolopio/code-scalpel:2.2.0
 
 # Or build locally
 docker build -t code-scalpel .

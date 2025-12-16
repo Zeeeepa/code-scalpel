@@ -1,6 +1,6 @@
 # Code Scalpel Documentation
 
-**v1.3.0 - MCP Server Toolkit for AI Agents**
+**v2.2.0 "Nexus" - MCP Server Toolkit for AI Agents**
 
 ---
 
@@ -10,7 +10,8 @@
 |----------|-------------|
 | [**COMPREHENSIVE_GUIDE.md**](COMPREHENSIVE_GUIDE.md) | Full documentation with examples |
 | [**README.md**](../README.md) | Project overview and quick start |
-| [**RELEASE_NOTES_v2.0.1.md**](release_notes/RELEASE_NOTES_v2.0.1.md) | Coverage policy and exclusions for v2.0.1 |
+| [**graph_engine_guide.md**](graph_engine_guide.md) | Unified Graph Engine documentation (v2.2.0) |
+| [**RELEASE_NOTES_v2.2.0.md**](release_notes/RELEASE_NOTES_v2.2.0.md) | Nexus release - Unified Graph Engine |
 
 ---
 
@@ -45,7 +46,7 @@ code-scalpel/
 │   └── internal/           # Team documentation
 ├── demos/                  # Example code
 │   └── real_world/         # Real-world vulnerability demos
-└── tests/                  # Test suite (1,669 tests)
+└── tests/                  # Test suite (3,006 tests)
 ```
 
 ---

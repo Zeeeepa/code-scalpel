@@ -1,6 +1,6 @@
 # JSX/TSX Extraction + Resource Templates Implementation
 
-**Version:** v2.0.2  
+**Version:** v2.2.0  
 **Date:** December 16, 2025  
 **Status:** ✅ Complete  
 

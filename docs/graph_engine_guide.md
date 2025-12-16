@@ -1,6 +1,6 @@
 # Graph Engine Guide
 
-**Version:** 2.1.0  
+**Version:** 2.2.0  
 **Date:** December 16, 2025  
 **Status:** Production Ready
 

@@ -50,7 +50,7 @@ For team or remote deployment:
 
 ```bash
 # Start HTTP server with SSE (port 8593) and health endpoint (port 8594)
-docker run -p 8593:8593 -p 8594:8594 -v /path/to/project:/app/code code-scalpel:2.0.0
+docker run -p 8593:8593 -p 8594:8594 -v /path/to/project:/app/code code-scalpel:2.2.0
 
 # Or directly
 code-scalpel mcp --http --port 8593 --allow-lan
@@ -60,14 +60,14 @@ code-scalpel mcp --http --port 8593 --allow-lan
 ```bash
 # Verify container is healthy
 curl http://localhost:8594/health
-# {"status": "healthy", "version": "2.0.0", "timestamp": "2025-12-15T12:00:00Z"}
+# {"status": "healthy", "version": "2.2.0", "timestamp": "2025-12-16T12:00:00Z"}
 ```
 
 **Docker Compose** (recommended for production):
 ```yaml
 services:
   code-scalpel:
-    image: code-scalpel:2.0.0
+    image: code-scalpel:2.2.0
     ports:
       - "8593:8593"  # SSE endpoint
       - "8594:8594"  # Health endpoint
