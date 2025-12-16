@@ -71,6 +71,12 @@ class PolyglotExtractionResult:
     # Metadata
     file_path: str | None = None
     token_estimate: int = 0
+    
+    # [20251216_FEATURE] v2.0.2 - JSX/TSX metadata
+    jsx_normalized: bool = False
+    is_server_component: bool = False
+    is_server_action: bool = False
+    component_type: str | None = None
 
 
 def detect_language(file_path: str | None, code: str | None = None) -> Language:
@@ -373,8 +379,9 @@ class PolyglotExtractor:
         Extract from IR (for JS/TS/Java).
 
         [20251214_FEATURE] IR-based extraction for non-Python languages.
+        [20251216_BUGFIX] Handle IRExport nodes wrapping functions/classes.
         """
-        from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef
+        from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef, IRExport
 
         if not self._ir_module:
             return PolyglotExtractionResult(
@@ -389,20 +396,23 @@ class PolyglotExtractor:
         target_node = None
 
         for node in self._ir_module.body:
-            if target_type == "function" and isinstance(node, IRFunctionDef):
-                if node.name == target_name:
-                    target_node = node
+            # [20251216_BUGFIX] Unwrap IRExport nodes
+            actual_node = node.declaration if isinstance(node, IRExport) else node
+            
+            if target_type == "function" and isinstance(actual_node, IRFunctionDef):
+                if actual_node.name == target_name:
+                    target_node = actual_node
                     break
-            elif target_type == "class" and isinstance(node, IRClassDef):
-                if node.name == target_name:
-                    target_node = node
+            elif target_type == "class" and isinstance(actual_node, IRClassDef):
+                if actual_node.name == target_name:
+                    target_node = actual_node
                     break
-            elif target_type == "method" and isinstance(node, IRClassDef):
+            elif target_type == "method" and isinstance(actual_node, IRClassDef):
                 # Search within class
                 if "." in target_name:
                     class_name, method_name = target_name.split(".", 1)
-                    if node.name == class_name:
-                        for member in node.body:
+                    if actual_node.name == class_name:
+                        for member in actual_node.body:
                             if (
                                 isinstance(member, IRFunctionDef)
                                 and member.name == method_name
@@ -428,6 +438,33 @@ class PolyglotExtractor:
             code_lines = self.source_lines[start_line - 1 : end_line]
             code = "\n".join(code_lines)
 
+            # [20251216_FEATURE] v2.0.2 - Detect React components for TSX/JSX
+            jsx_normalized = False
+            is_server_component = False
+            is_server_action = False
+            component_type = None
+
+            if self.language in (Language.TYPESCRIPT, Language.JAVASCRIPT):
+                from code_scalpel.polyglot.tsx_analyzer import (
+                    is_react_component,
+                    normalize_jsx_syntax,
+                )
+
+                # Analyze for React component patterns
+                react_info = is_react_component(target_node, code)
+                
+                # [20251216_BUGFIX] Set metadata even for non-component functions
+                # (e.g., Server Actions without JSX)
+                component_type = react_info.component_type
+                is_server_component = react_info.is_server_component
+                is_server_action = react_info.is_server_action
+                
+                # Mark as JSX normalized if it has JSX or is a React component
+                if react_info.has_jsx or react_info.component_type:
+                    jsx_normalized = True
+                    # Normalize JSX if present
+                    code = normalize_jsx_syntax(code)
+
             return PolyglotExtractionResult(
                 success=True,
                 code=code,
@@ -439,6 +476,10 @@ class PolyglotExtractor:
                 dependencies=[],  # TODO: Extract dependencies from IR
                 file_path=self.file_path,
                 token_estimate=len(code) // 4,
+                jsx_normalized=jsx_normalized,
+                is_server_component=is_server_component,
+                is_server_action=is_server_action,
+                component_type=component_type,
             )
         else:
             return PolyglotExtractionResult(
