@@ -129,36 +129,38 @@ else:
 
 Budget configurations can be loaded from YAML files:
 
-### `.scalpel/budget.yaml`
+### `.scalpel/budget.toml`
 
-```yaml
-budgets:
-  default:
-    max_files: 5
-    max_lines_per_file: 100
-    max_total_lines: 300
-    max_complexity_increase: 10
-    allowed_file_patterns:
-      - "src/**/*.py"
-      - "src/**/*.ts"
-      - "src/**/*.java"
-    forbidden_paths:
-      - ".git/"
-      - "node_modules/"
-      - "venv/"
-      - "target/"
-      - "build/"
-  
-  critical_files:
-    # Stricter budget for sensitive files
-    max_files: 1
-    max_lines_per_file: 20
-    max_total_lines: 20
-    max_complexity_increase: 0
-    files:
-      - "src/security/**"
-      - "src/authentication/**"
-      - "config/production.yaml"
+```toml
+[default]
+max_files = 5
+max_lines_per_file = 100
+max_total_lines = 300
+max_complexity_increase = 10
+allowed_file_patterns = [
+  "src/**/*.py",
+  "src/**/*.ts",
+  "src/**/*.java"
+]
+forbidden_paths = [
+  ".git/",
+  "node_modules/",
+  "venv/",
+  "target/",
+  "build/"
+]
+
+[critical_files]
+# Stricter budget for sensitive files
+max_files = 1
+max_lines_per_file = 20
+max_total_lines = 20
+max_complexity_increase = 0
+files = [
+  "src/security/**",
+  "src/authentication/**",
+  "config/production.yaml"
+]
 ```
 
 ### Loading Configuration
