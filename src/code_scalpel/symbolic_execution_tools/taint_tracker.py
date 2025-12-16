@@ -1873,15 +1873,12 @@ def is_dangerous_html(node: ast.AST) -> bool:
     Returns:
         True if node uses dangerouslySetInnerHTML
     """
+    # [20240613_SECURITY] Removed redundant ast.Name check for dangerouslySetInnerHTML (see CodeQL warning)
     if isinstance(node, ast.Call):
         # Check for dangerouslySetInnerHTML in React/JSX context
         if isinstance(node.func, ast.Attribute):
             if node.func.attr == "dangerouslySetInnerHTML":
                 return True
-    
-    if isinstance(node, ast.Name):
-        if node.id == "dangerouslySetInnerHTML":
-            return True
     
     return False
 
