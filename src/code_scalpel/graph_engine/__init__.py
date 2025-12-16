@@ -21,31 +21,28 @@ Example:
     >>> print(graph.to_json())
 """
 
-from .node_id import (
-    UniversalNodeID,
-    NodeType,
-    parse_node_id,
-    create_node_id,
-)
-
 from .confidence import (
+    CONFIDENCE_RULES,
     ConfidenceEngine,
     ConfidenceLevel,
     EdgeType,
-    CONFIDENCE_RULES,
 )
-
 from .graph import (
-    GraphNode,
-    GraphEdge,
-    UniversalGraph,
     GraphBuilder,
+    GraphEdge,
+    GraphNode,
+    UniversalGraph,
 )
-
 from .http_detector import (
+    HTTPLink,
     HTTPLinkDetector,
     HTTPMethod,
-    HTTPLink,
+)
+from .node_id import (
+    NodeType,
+    UniversalNodeID,
+    create_node_id,
+    parse_node_id,
 )
 
 __all__ = [

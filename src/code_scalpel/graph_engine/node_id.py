@@ -194,7 +194,9 @@ def create_node_id(
 
     Examples:
         >>> create_node_id("python", "app.handlers", "class", "RequestHandler")
-        >>> create_node_id("java", "com.example", NodeType.METHOD, "UserController", "getUser")
+        >>> create_node_id(
+        ...     "java", "com.example", NodeType.METHOD, "UserController", "getUser"
+        ... )
     """
     if isinstance(node_type, str):
         node_type = NodeType(node_type)

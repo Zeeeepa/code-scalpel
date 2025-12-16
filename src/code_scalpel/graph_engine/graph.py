@@ -33,10 +33,10 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
-from .node_id import UniversalNodeID, NodeType
-from .confidence import ConfidenceEngine, ConfidenceEvidence, EdgeType
+from .confidence import ConfidenceEngine, EdgeType
+from .node_id import UniversalNodeID
 
 
 # [20251216_FEATURE] Graph node representation
@@ -64,7 +64,16 @@ class GraphNode:
         """Create from dictionary."""
         node_id = UniversalNodeID.from_dict(data)
         # Extract metadata (everything except node_id fields)
-        node_id_keys = {"id", "language", "module", "type", "name", "method", "line", "file"}
+        node_id_keys = {
+            "id",
+            "language",
+            "module",
+            "type",
+            "name",
+            "method",
+            "line",
+            "file",
+        }
         metadata = {k: v for k, v in data.items() if k not in node_id_keys}
         return GraphNode(id=node_id, metadata=metadata)
 

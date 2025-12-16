@@ -24,9 +24,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Set
-
-from .confidence import EdgeType
+from typing import Dict, List, Optional
 
 
 # [20251216_FEATURE] HTTP methods for route matching
