@@ -190,7 +190,8 @@ def example_4_fail_closed_demonstration():
     
     print("\nTesting with nonexistent policy file:")
     try:
-        engine = PolicyEngine("nonexistent.yaml")
+        # [20240613_BUGFIX] Remove unused variable assignment; call constructor for side effect only
+        PolicyEngine("nonexistent.yaml")
         print("✗ Should have failed!")
     except PolicyError as e:
         print(f"✓ Correctly failed CLOSED: {str(e)[:50]}...")
