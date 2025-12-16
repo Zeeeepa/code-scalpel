@@ -46,10 +46,7 @@ class SemanticAnalyzer:
         "ALTER", "TRUNCATE", "REPLACE", "MERGE", "GRANT", "REVOKE"
     }
     
-    def __init__(self):
-        """Initialize semantic analyzer."""
-        pass
-    
+# [20240613_REFACTOR] Removed empty __init__ method; default constructor is sufficient.
     def contains_sql_sink(self, code: str, language: str) -> bool:
         """
         Detect SQL operations semantically, not just syntactically.
