@@ -488,6 +488,12 @@ class ContextualExtractionResult(BaseModel):
     line_end: int = Field(default=0, description="Ending line number of target")
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
+    
+    # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
+    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
+    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
+    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
+    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
 
 
 class PatchResultModel(BaseModel):
@@ -1567,6 +1573,7 @@ async def _extract_polyglot(
 
         token_estimate = result.token_estimate if include_token_estimate else 0
 
+        # [20251216_FEATURE] v2.0.2 - Include JSX/TSX metadata in result
         return ContextualExtractionResult(
             success=True,
             target_name=target_name,
@@ -1578,6 +1585,10 @@ async def _extract_polyglot(
             line_start=result.start_line,
             line_end=result.end_line,
             token_estimate=token_estimate,
+            jsx_normalized=result.jsx_normalized,
+            is_server_component=result.is_server_component,
+            is_server_action=result.is_server_action,
+            component_type=result.component_type,
         )
     except FileNotFoundError as e:
         return _extraction_error(target_name, str(e))
@@ -1828,8 +1839,10 @@ async def extract_code(
             "python": Language.PYTHON,
             "javascript": Language.JAVASCRIPT,
             "js": Language.JAVASCRIPT,
+            "jsx": Language.JAVASCRIPT,  # [20251216_FEATURE] JSX is JavaScript with JSX syntax
             "typescript": Language.TYPESCRIPT,
             "ts": Language.TYPESCRIPT,
+            "tsx": Language.TYPESCRIPT,  # [20251216_FEATURE] TSX is TypeScript with JSX syntax
             "java": Language.JAVA,
         }
         detected_lang = lang_map.get(language.lower(), Language.AUTO)
@@ -2598,6 +2611,109 @@ def get_security_resource(path: str) -> str:
         return json.dumps({"error": str(e)})
     except Exception as e:
         return json.dumps({"error": f"Security scan failed: {e}"})
+
+
+@mcp.resource("code:///{language}/{module}/{symbol}")
+async def get_code_resource(language: str, module: str, symbol: str) -> str:
+    """
+    Access code elements via parameterized URI (Resource Template).
+
+    [20251216_FEATURE] v2.0.2 - Universal code access via code:/// URIs.
+
+    This resource template allows AI agents to access code elements by
+    specifying language, module, and symbol without knowing exact file paths.
+
+    URI Format:
+        code:///{language}/{module}/{symbol}
+
+    Examples:
+        - code:///python/utils/calculate_tax
+        - code:///typescript/components/UserCard
+        - code:///javascript/services/auth/authenticate
+        - code:///java/services.AuthService/validateToken
+
+    Args:
+        language: Programming language ("python", "javascript", "typescript", "java")
+        module: Module name (e.g., "utils", "components/Button", "services.auth")
+        symbol: Symbol name (function, class, or method with Class.method notation)
+
+    Returns:
+        JSON with extracted code, metadata, and JSX/TSX information
+    """
+    import json
+    from code_scalpel.mcp.module_resolver import resolve_module_path, get_mime_type
+
+    try:
+        # Resolve module to file path
+        file_path = resolve_module_path(language, module, PROJECT_ROOT)
+
+        if file_path is None:
+            return json.dumps({
+                "error": f"Module '{module}' not found for language '{language}'",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            })
+
+        # Security check
+        _validate_path_security(file_path)
+
+        # Determine target type (function, class, or method)
+        target_type = "method" if "." in symbol else "function"
+
+        # Extract the symbol using extract_code
+        result = await extract_code(
+            target_type=target_type,
+            target_name=symbol,
+            file_path=str(file_path),
+            language=language,
+            include_context=True,
+            include_token_estimate=True,
+        )
+
+        if not result.success:
+            return json.dumps({
+                "error": result.error or "Extraction failed",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            })
+
+        # Return full result with metadata
+        return json.dumps({
+            "uri": f"code:///{language}/{module}/{symbol}",
+            "mimeType": get_mime_type(language),
+            "code": result.full_code,
+            "metadata": {
+                "file_path": str(file_path),
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+                "line_start": result.line_start,
+                "line_end": result.line_end,
+                "token_estimate": result.token_estimate,
+                # JSX/TSX metadata
+                "jsx_normalized": result.jsx_normalized,
+                "is_server_component": result.is_server_component,
+                "is_server_action": result.is_server_action,
+                "component_type": result.component_type,
+            },
+        }, indent=2)
+
+    except PermissionError as e:
+        return json.dumps({
+            "error": str(e),
+            "language": language,
+            "module": module,
+            "symbol": symbol,
+        })
+    except Exception as e:
+        return json.dumps({
+            "error": f"Resource access failed: {str(e)}",
+            "language": language,
+            "module": module,
+            "symbol": symbol,
+        })
 
 
 # ============================================================================
