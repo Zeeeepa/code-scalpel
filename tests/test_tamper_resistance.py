@@ -471,6 +471,76 @@ def test_audit_log_handles_corrupted_json(audit_log):
     assert "corrupted" in str(exc_info.value).lower()
 
 
+def test_audit_log_get_events_nonexistent_log(tmp_path):
+    """Test get_events with non-existent log file."""
+    # [20251216_TEST] Edge case coverage
+
+    log_path = tmp_path / "nonexistent" / "audit.log"
+    audit_log = AuditLog(log_path=str(log_path))
+
+    # Should return empty list, not error
+    events = audit_log.get_events()
+    assert events == []
+
+
+def test_audit_log_get_events_with_corrupted_lines(audit_log):
+    """Test get_events skips corrupted JSON lines."""
+    # [20251216_TEST] Edge case coverage
+
+    # Record valid events
+    audit_log.record_event("EVENT_1", "LOW", {"test": 1})
+    audit_log.record_event("EVENT_2", "HIGH", {"test": 2})
+
+    # Add corrupted line
+    with open(audit_log.log_path, "a") as f:
+        f.write("CORRUPTED JSON LINE\n")
+
+    # Add another valid event
+    audit_log.record_event("EVENT_3", "MEDIUM", {"test": 3})
+
+    # get_events should skip corrupted line and return valid events
+    events = audit_log.get_events()
+    assert len(events) == 3  # Only valid events
+    assert events[0]["event_type"] == "EVENT_1"
+    assert events[1]["event_type"] == "EVENT_2"
+    assert events[2]["event_type"] == "EVENT_3"
+
+
+def test_audit_log_verify_integrity_empty_log(tmp_path):
+    """Test verify_integrity with empty/non-existent log."""
+    # [20251216_TEST] Edge case coverage
+
+    log_path = tmp_path / "empty_audit.log"
+    audit_log = AuditLog(log_path=str(log_path))
+
+    # Should succeed for empty log
+    assert audit_log.verify_integrity() is True
+
+
+def test_audit_log_missing_signature(audit_log):
+    """Test that audit log detects missing signature."""
+    # [20251216_TEST] Edge case coverage
+
+    # Record valid event first
+    audit_log.record_event("VALID_EVENT", "LOW", {"test": 1})
+
+    # Add event without signature
+    with open(audit_log.log_path, "a") as f:
+        event_without_sig = {
+            "timestamp": datetime.now().isoformat(),
+            "event_type": "NO_SIGNATURE",
+            "severity": "HIGH",
+            "details": {},
+        }
+        f.write(json.dumps(event_without_sig) + "\n")
+
+    # Verify missing signature is detected
+    with pytest.raises(TamperDetectedError) as exc_info:
+        audit_log.verify_integrity()
+
+    assert "missing signature" in str(exc_info.value).lower()
+
+
 # =============================================================================
 # Integration Tests
 # =============================================================================
