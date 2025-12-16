@@ -580,7 +580,22 @@ mcp = FastMCP(
 **TOKEN-EFFICIENT EXTRACTION (READ):**
 - extract_code: Surgically extract functions/classes/methods by FILE PATH.
   The SERVER reads the file - YOU pay ~50 tokens instead of ~10,000.
+  Supports Python, JavaScript, TypeScript, Java, JSX, TSX (React components).
   Example: extract_code(file_path="/src/utils.py", target_type="function", target_name="calculate_tax")
+  React: extract_code(file_path="/components/Button.tsx", target_type="function", target_name="Button", language="tsx")
+
+**JSX/TSX EXTRACTION (v2.0.2):**
+- Extract React components with full metadata
+- Detects Server Components (Next.js async components)
+- Detects Server Actions ('use server' directive)
+- Normalizes JSX for consistent analysis
+- Returns component_type: "functional" or "class"
+
+**RESOURCE TEMPLATES (v2.0.2):**
+Access code via URIs without knowing file paths:
+- code:///python/utils/calculate_tax
+- code:///typescript/components/UserCard
+- code:///java/services.AuthService/authenticate
 
 **SURGICAL MODIFICATION (WRITE):**
 - update_symbol: Replace a function/class/method in a file with new code.
