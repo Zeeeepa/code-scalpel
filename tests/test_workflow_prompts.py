@@ -4,7 +4,6 @@ Tests for Workflow Prompts.
 [20251216_TEST] Tests for Feature 10: Workflow Prompts
 """
 
-import pytest
 
 
 class TestSecurityAuditPrompt:
