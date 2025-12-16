@@ -4,7 +4,6 @@ Tests for HTTP link detector.
 [20251216_FEATURE] v2.1.0 - Test HTTP link detection between client and server
 """
 
-import pytest
 
 from code_scalpel.graph_engine.http_detector import (
     HTTPLinkDetector,
