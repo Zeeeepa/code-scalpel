@@ -406,9 +406,9 @@ FileChange(
 
 **Symptom:** Files in forbidden paths are not blocked
 
-**Solution:** Ensure paths end with `/`:
+**Solution:** In your `.scalpel/budget.toml` configuration file, ensure paths end with `/`:
 
-```python
+```toml
 # Wrong: Missing trailing slash
 forbidden_paths = [".git", "node_modules"]
 
