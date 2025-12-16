@@ -99,8 +99,8 @@ class TestRoutePatternMatcher:
             "/api/v1/users", '"/api/" + version + "/users"'
         )
 
-        # Should detect as dynamic or fuzzy match
-        assert match_type in ["dynamic", "none", "exact"]  # Exact if strings happen to match after eval
+        # Should detect as dynamic match only
+        assert match_type == "dynamic"  # [20251216_BUGFIX] Test must require dynamic match type for dynamic routes
 
     def test_no_match_different_routes(self):
         """Test non-matching routes."""
