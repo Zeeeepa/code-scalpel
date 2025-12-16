@@ -68,12 +68,15 @@ def has_jsx_syntax(code: str) -> bool:
     # - Closing tags: </Component>, </div>
     # - Self-closing: <Component />, <div />
     # - Fragments: <>, </>
+    # [20240613_BUGFIX] Hardened JSX detection regex to avoid false positives with comparison operators.
+    # Require that the tag is not immediately preceded by an identifier character (using negative lookbehind).
+    # This reduces matches on expressions like `x < y` or `a < b > c`.
     jsx_patterns = [
-        r"<[A-Z][A-Za-z0-9]*[\s/>]",  # Component tags (uppercase)
-        r"<[a-z][a-z0-9]*[\s/>]",  # HTML tags (lowercase)
-        r"</[A-Za-z]",  # Closing tags
-        r"<>",  # Fragment opening
-        r"</>",  # Fragment closing
+        r"(?<![\w$])<[A-Z][A-Za-z0-9]*[\s/>]",  # Component tags (uppercase)
+        r"(?<![\w$])<[a-z][a-z0-9]*[\s/>]",      # HTML tags (lowercase)
+        r"(?<![\w$])</[A-Za-z]",                 # Closing tags
+        r"(?<![\w$])<>",                         # Fragment opening
+        r"(?<![\w$])</>",                        # Fragment closing
     ]
 
     for pattern in jsx_patterns:
