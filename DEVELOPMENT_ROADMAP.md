@@ -110,24 +110,23 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 
 ### Target State
 
+<!-- [20251216_DOCS] Consolidated interim versions (v2.0.2, v2.0.3, v2.1.0) into v2.2.0 "Nexus" -->
+
 | Metric | Target | Milestone |
 |--------|--------|-----------|
 | MCP Tools | 18+ tools | ✅ DONE v2.0.0 |
-| Languages | Python, TypeScript, JavaScript, Java (complete) | v2.0.1 |
+| Languages | Python, TypeScript, JavaScript, Java (complete) | ✅ DONE v2.0.1 |
 | Cross-File Operations | Full project context | ✅ DONE v2.0.0 |
 | MCP Protocol Features | Progress Tokens, Roots, Health | ✅ DONE v2.0.0 |
-| JS/TS Framework Coverage | JSX/TSX, decorators, SSR sinks | v2.0.2 |
-| Polyglot Reliability | Incremental AST caches, bundler aliases, Gradle/Vite configs | v2.0.3 |
-| Resource Templates | Parameterized resource access | v2.1.0 |
-| Workflow Prompts | Guided security/refactor workflows | v2.1.0 |
-| Structured Logging | JSON-based observability | v2.1.0 |
-| AI Verification | Behavior-preserving refactor check | v2.2.0 |
-| Auto-Fix Generation | AI-verified security fixes | v2.2.0 |
-| Unified Graph | Cross-language service graph with confidence | v2.2.0 |
-| Policy Engine | Enterprise-grade governance controls | v2.5.0 |
-| Security Blocking | OWASP Top 10 agent prevention | v2.5.0 |
-| Self-Correction | Error-to-diff engine with fix hints | v3.0.0 |
-| Speculative Execution | Sandboxed test verification | v3.0.0 |
+| **Unified Graph** | Cross-language service graph with confidence | **v2.2.0 "Nexus"** |
+| **JS/TS Framework Coverage** | JSX/TSX, decorators, SSR sinks | **v2.2.0 "Nexus"** |
+| **Resource Templates** | Parameterized resource access | **v2.2.0 "Nexus"** |
+| **Workflow Prompts** | Guided security/refactor workflows | **v2.2.0 "Nexus"** |
+| **Confidence Engine** | Explicit uncertainty with human-in-the-loop | **v2.2.0 "Nexus"** |
+| Policy Engine | Enterprise-grade governance controls | v2.5.0 "Guardian" |
+| Security Blocking | OWASP Top 10 agent prevention | v2.5.0 "Guardian" |
+| Self-Correction | Error-to-diff engine with fix hints | v3.0.0 "Autonomy" |
+| Speculative Execution | Sandboxed test verification | v3.0.0 "Autonomy" |
 
 ---
 
@@ -210,20 +209,21 @@ v1.x Series (Python Excellence)
    Secrets     Patterns    Call Graph   Taint Flow   Isolation    Paths       __import__   Parallel
    Coverage    SSTI/XXE    Project Map  Multi-File   Mocking      Resolver    Lazy Load    10s/1000
 
-v2.x Series (Multi-Language + MCP Protocol)
+v2.x Series (Multi-Language + Revolution)
+<!-- [20251216_DOCS] Streamlined: v2.0.2, v2.0.3, v2.1.0 DEPRECATED and consolidated into v2.2.0 -->
 ┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
 │   v2.0.0        │  │   v2.0.1         │  │   v2.2.0         │  │   v2.5.0         │  │   v3.0.0         │
-│   Polyglot      │─>│   Java           │─>│   "Nexus"        │─>│   "Guardian"     │─>│   "Autonomy"     │
-│   RELEASED      │  │   Complete       │  │   Unified Graph  │  │   Governance     │  │   Self-Correct   │
-│  Dec 15, 2025   │  │   RELEASED       │  │   PLANNED Q1     │  │   PLANNED Q1     │  │   PLANNED Q2     │
+│   Polyglot      │─>│   Java Complete  │─>│   "Nexus"        │─>│   "Guardian"     │─>│   "Autonomy"     │
+│   RELEASED      │  │   RELEASED       │  │   Unified Graph  │  │   Governance     │  │   Self-Correct   │
+│  Dec 15, 2025   │  │  Dec 16, 2025    │  │   PLANNED Q1     │  │   PLANNED Q1-Q2  │  │   PLANNED Q2     │
 └─────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
       │                    │                    │                    │                    │
-  TypeScript          Java                 Cross-Language       Policy Engine        Error-to-Diff
-  JavaScript          Generics             Confidence           Security Block       Speculative Exec
-  Java               Spring                Contract Breach      Change Budget        Agent Templates
-  Progress Tokens     Security             HTTP Links           Compliance           Full Audit
-  Roots              JPA/ORM               Omni-Schema          Tamper-Resist        Ecosystem Lock
-  Health Endpoint     95% Coverage         Type Sync            OWASP Block          Singularity Demo
+  TypeScript          Java                 **Consolidated:**    Policy Engine        Error-to-Diff
+  JavaScript          Generics             Unified Graph        Security Block       Speculative Exec
+  Java               Spring                Confidence Engine    Change Budget        Agent Templates
+  Progress Tokens     Security             JSX/TSX Support      Compliance           Full Audit
+  Roots              JPA/ORM               Resource Templates   Tamper-Resist        Ecosystem Lock
+  Health Endpoint     95% Coverage         Workflow Prompts     OWASP Block          Singularity Demo
 ```
 
 ## v1.3.0 - "Hardening"
@@ -669,38 +669,38 @@ def render_safe():
 
 v1.4.0 Release Criteria:
 
-[x] get_file_context: Returns file overview without full content (P0)
-[x] get_file_context: Lists functions, classes, imports (P0)
-[x] get_file_context: Reports complexity score (P0)
-[x] get_file_context: Flags files with security issues (P0)
+- [x] get_file_context: Returns file overview without full content (P0)
+- [x] get_file_context: Lists functions, classes, imports (P0)
+- [x] get_file_context: Reports complexity score (P0)
+- [x] get_file_context: Flags files with security issues (P0)
 
-[x] get_symbol_references: Finds all usages across project (P0)
-[x] get_symbol_references: Returns file, line, and context snippet (P0)
-[x] get_symbol_references: Works for functions, classes, variables (P0)
-[x] get_symbol_references: Performance < 5s for 100-file project (P0)
+- [x] get_symbol_references: Finds all usages across project (P0)
+- [x] get_symbol_references: Returns file, line, and context snippet (P0)
+- [x] get_symbol_references: Works for functions, classes, variables (P0)
+- [x] get_symbol_references: Performance < 5s for 100-file project (P0)
 
-[x] XXE: Detects xml.etree.ElementTree.parse with tainted input (P0)
-[x] XXE: Detects xml.dom.minidom.parse with tainted input (P0)
-[x] XXE: Detects lxml.etree.parse with tainted input (P0)
-[x] XXE: Recognizes defusedxml.* as safe sanitizers (P0)
+- [x] XXE: Detects xml.etree.ElementTree.parse with tainted input (P0)
+- [x] XXE: Detects xml.dom.minidom.parse with tainted input (P0)
+- [x] XXE: Detects lxml.etree.parse with tainted input (P0)
+- [x] XXE: Recognizes defusedxml.* as safe sanitizers (P0)
 
-[x] SSTI: Detects jinja2.Template with user-controlled string (P0)
-[x] SSTI: Detects Environment.from_string injection (P0)
-[x] SSTI: Detects mako.template.Template injection (P0)
+- [x] SSTI: Detects jinja2.Template with user-controlled string (P0)
+- [x] SSTI: Detects Environment.from_string injection (P0)
+- [x] SSTI: Detects mako.template.Template injection (P0)
 
-[x] Agents: Base agent framework with MCP tool integration (P0)
-[x] Agents: Code review agent implementation (P0)
-[x] Agents: Security agent implementation (P0)
-[x] Agents: Optimization agent implementation (P0)
+- [x] Agents: Base agent framework with MCP tool integration (P0)
+- [x] Agents: Code review agent implementation (P0)
+- [x] Agents: Security agent implementation (P0)
+- [x] Agents: Optimization agent implementation (P0)
 
 DEFERRED TO v1.5.0 - JWT: Detects algorithm confusion vulnerabilities (P1)
 DEFERRED TO v1.5.0 - JWT: Detects missing signature verification (P1)
 DEFERRED TO v1.5.0 - Mass Assignment: Detects unfiltered request.json usage (P1)
 
-[x] MCP tools registered and documented (Gate)
-[x] All tests passing (Gate)
-[x] Code coverage >= 95% (Gate)
-[x] No regressions in v1.3.0 detections (Gate)
+- [x] MCP tools registered and documented (Gate)
+- [x] All tests passing (Gate)
+- [x] Code coverage >= 95% (Gate)
+- [x] No regressions in v1.3.0 detections (Gate)
 
 ---
 
@@ -1315,51 +1315,50 @@ class ImportType(Enum):
 
 v1.5.4 Release Criteria:
 
-[x] Detects `importlib.import_module()` with string literals (P0)
-[x] Detects `__import__()` calls (P0)
-[x] Reports dynamic imports in ImportGraphResult (P0)
-[x] Handles variable module names gracefully (marks as LAZY) (P1)
-[x] Django `INSTALLED_APPS` parsing (P1)
-[x] Flask blueprint registration detection (P2)
-[x] All dynamic import tests passing (Gate)
-[x] No regressions in static import resolution (Gate)
-
+- [x] Detects `importlib.import_module()` with string literals (P0)
+- [x] Detects `__import__()` calls (P0)
+- [x] Reports dynamic imports in ImportGraphResult (P0)
+- [x] Handles variable module names gracefully (marks as LAZY) (P1)
+- [x] Django `INSTALLED_APPS` parsing (P1)
+- [x] Flask blueprint registration detection (P2)
+- [x] All dynamic import tests passing (Gate)
+- [x] No regressions in static import resolution (Gate)
 #### [20251214_DOCS] Credibility & Transparency Acceptance Criteria
 
-[x] Governance published (SECURITY.md with SLA, release gate checklist, roles/approvals) — see SECURITY.md (SLA, roles, gate checklist)
-[x] [20251214_DOCS] Coverage ramp: full suite line coverage 95.00% (branch 88.41%) via `python -m pytest --maxfail=1 --disable-warnings --cov=src --cov-report=xml:release_artifacts/v1.5.4/coverage_20251214.xml`; badge update pending; mutation smoke and parser/interpreter fuzz logging tracked separately
-[x] [20251214_DOCS] Agent-first MCP contract validation (Copilot/Claude/ChatGPT/OpenAI clients) with schema version pinning and deprecation notes — documented in docs/getting_started/interop_and_dx_playbook.md; validation log: release_artifacts/v1.5.4/interop_validation_log.json (execution pending)
-[x] [20251214_SECURITY] SBOM + dependency vuln scan attached; artifacts signed (Sigstore/Cosign) and verification docs published — SBOM: release_artifacts/v1.5.4/sbom.json; vuln scan: release_artifacts/v1.5.4/vuln_scan_report.json; signing verified via cosign v3.0.2 using bundle+pubkey (`cosign verify-blob --key ... --bundle ...`); see release_artifacts/v1.5.4/signing_verification.log
-[x] Benchmark log (≥1000 files) with thresholds and trend; import/cross-file/crawl meet budgets — scenarios documented in release_artifacts/v1.5.4/performance_benchmark_log.json (execution pending)
-[x] Interop recipes validated for LangChain, LlamaIndex, Autogen, Claude Tools, OpenAI client, VS Code/CI — documented in docs/getting_started/interop_and_dx_playbook.md; validation log release_artifacts/v1.5.4/interop_validation_log.json (execution pending)
-[x] DX bootstrap + smoke-test script shipped; error messages include remediation hints; examples updated — DX playbook docs/getting_started/interop_and_dx_playbook.md; smoke script scripts/smoke.ps1
-[x] Evidence bundle attached with acceptance checklist completed — release_artifacts/v1.5.4/v1.5.4_credibility_evidence.json updated with gates, sbom/vuln/interop/benchmarks/dx smoke
-[x] “Who’s using”/case studies page refreshed; contributing guide current — documented in interop/dx playbook; no external names listed
+- [x] Governance published (SECURITY.md with SLA, release gate checklist, roles/approvals) — see SECURITY.md (SLA, roles, gate checklist)
+- [x] [20251214_DOCS] Coverage ramp: full suite line coverage 95.00% (branch 88.41%) via `python -m pytest --maxfail=1 --disable-warnings --cov=src --cov-report=xml:release_artifacts/v1.5.4/coverage_20251214.xml`; badge update pending; mutation smoke and parser/interpreter fuzz logging tracked separately
+- [x] [20251214_DOCS] Agent-first MCP contract validation (Copilot/Claude/ChatGPT/OpenAI clients) with schema version pinning and deprecation notes — documented in docs/getting_started/interop_and_dx_playbook.md; validation log: release_artifacts/v1.5.4/interop_validation_log.json (execution pending)
+- [x] [20251214_SECURITY] SBOM + dependency vuln scan attached; artifacts signed (Sigstore/Cosign) and verification docs published — SBOM: release_artifacts/v1.5.4/sbom.json; vuln scan: release_artifacts/v1.5.4/vuln_scan_report.json; signing verified via cosign v3.0.2 using bundle+pubkey (`cosign verify-blob --key ... --bundle ...`); see release_artifacts/v1.5.4/signing_verification.log
+- [x] Benchmark log (≥1000 files) with thresholds and trend; import/cross-file/crawl meet budgets — scenarios documented in release_artifacts/v1.5.4/performance_benchmark_log.json (execution pending)
+- [x] Interop recipes validated for LangChain, LlamaIndex, Autogen, Claude Tools, OpenAI client, VS Code/CI — documented in docs/getting_started/interop_and_dx_playbook.md; validation log release_artifacts/v1.5.4/interop_validation_log.json (execution pending)
+- [x] DX bootstrap + smoke-test script shipped; error messages include remediation hints; examples updated — DX playbook docs/getting_started/interop_and_dx_playbook.md; smoke script scripts/smoke.ps1
+- [x] Evidence bundle attached with acceptance checklist completed — release_artifacts/v1.5.4/v1.5.4_credibility_evidence.json updated with gates, sbom/vuln/interop/benchmarks/dx smoke
+- [x] “Who’s using”/case studies page refreshed; contributing guide current — documented in interop/dx playbook; no external names listed
 [x] License scan summary + data-boundary doc published; telemetry (if present) opt-in and documented — data boundary docs/compliance/data_boundary.md; telemetry opt-in only; license scan summary via SBOM/vuln scan references
 
 #### Required Evidence (Mandatory for All Releases)
 
-[x] Release Notes
+- [x] Release Notes
   - Location: `docs/release_notes/RELEASE_NOTES_v1.5.4.md`
   - Contents: Dynamic import detection architecture, framework integration examples
 
-[x] Dynamic Import Evidence
+- [x] Dynamic Import Evidence
   - File: `release_artifacts/v1.5.4/v1.5.4_dynamic_import_evidence.json`
   - Contents: Detected dynamic import patterns, framework coverage, edge cases handled
 
-[x] Test Results
+- [x] Test Results
   - File: `release_artifacts/v1.5.4/dynamic_import_tests.log`
   - Contents: pytest output for dynamic import detection, importlib coverage, __import__ tests
 
-[x] Framework Integration Evidence
+- [x] Framework Integration Evidence
   - File: `release_artifacts/v1.5.4/framework_integration_results.json`
   - Contents: Django INSTALLED_APPS detection, Flask blueprint discovery, detection accuracy
 
-[x] Static vs Dynamic Comparison
+- [x] Static vs Dynamic Comparison
   - File: `release_artifacts/v1.5.4/import_resolution_comparison.json`
   - Contents: Before/after comparison, static import regressions check, LAZY marker evidence
 
-[x] Edge Case Handling
+- [x] Edge Case Handling
   - File: `release_artifacts/v1.5.4/edge_case_coverage.json`
   - Contents: Variable module names, conditional imports, security considerations
 
@@ -1542,42 +1541,40 @@ class IncrementalAnalyzer:
 
 v1.5.5 Release Criteria:
 
-[x] AnalysisCache with memory + disk caching (P0) - analysis_cache.py with CacheStats
-[x] Parallel file parsing with ProcessPoolExecutor (P0) - parallel_parser.py with batching
-[x] Incremental analysis for single-file updates (P0) - incremental_analyzer.py
-[x] 1000-file project analyzed in <10s (P0) - 3.1s on 1201-file fixture (PASS)
-[x] Cache invalidation on file modification (P0) - invalidate() method tested
-[x] Memory-mapped reading for large files (P1) - _hash_file_mmap for files >1MB
-[x] Cache persistence across server restarts (P1) - disk cache in .code_scalpel_cache/
-[x] Performance benchmark suite (Gate) - v1.5.5_performance_benchmarks.json
-[x] No regressions in analysis accuracy (Gate) - 15 cache tests + full suite passing
+- [x] AnalysisCache with memory + disk caching (P0) - analysis_cache.py with CacheStats
+- [x] Parallel file parsing with ProcessPoolExecutor (P0) - parallel_parser.py with batching
+- [x] Incremental analysis for single-file updates (P0) - incremental_analyzer.py
+- [x] 1000-file project analyzed in <10s (P0) - 3.1s on 1201-file fixture (PASS)
+- [x] Cache invalidation on file modification (P0) - invalidate() method tested
+- [x] Memory-mapped reading for large files (P1) - _hash_file_mmap for files >1MB
+- [x] Cache persistence across server restarts (P1) - disk cache in .code_scalpel_cache/
+- [x] Performance benchmark suite (Gate) - v1.5.5_performance_benchmarks.json
+- [x] No regressions in analysis accuracy (Gate) - 15 cache tests + full suite passing
 
 #### [20251214_DOCS] CI/CD Reliability Acceptance Criteria (v1.5.5)
 
-[x] All CI jobs green on main; flaky stages resolved or quarantined with owner and issue link (P0) - monitoring
-[x] Flaky test rerun detector enabled; quarantine list documented with exit criteria (P0) - deferred (no flaky tests found)
-[x] CI cache priming for deps/wheels; documented warm paths and cache keys (P0) - pip cache in ci.yml
-[x] Smoke gate in CI (fast lint/build/test) with remediation hints (P1) - smoke job in ci.yml
-[x] CI troubleshooting guide published and linked from release notes (P1) - docs/ci_cd/troubleshooting.md
-
+- [x] All CI jobs green on main; flaky stages resolved or quarantined with owner and issue link (P0) - monitoring
+- [x] Flaky test rerun detector enabled; quarantine list documented with exit criteria (P0) - deferred (no flaky tests found)
+- [x] CI cache priming for deps/wheels; documented warm paths and cache keys (P0) - pip cache in ci.yml
+- [x] Smoke gate in CI (fast lint/build/test) with remediation hints (P1) - smoke job in ci.yml
+- [x] CI troubleshooting guide published and linked from release notes (P1) - docs/ci_cd/troubleshooting.md
 #### Required Evidence (Mandatory for All Releases)
 
-[x] Release Notes
+- [x] Release Notes
   - Location: `docs/release_notes/RELEASE_NOTES_v1.5.5.md`
   - Contents: Performance architecture, caching strategy, parallelization details
-
-[x] Performance Benchmarks
+- [x] Performance Benchmarks
   - File: `release_artifacts/v1.5.5/v1.5.5_performance_benchmarks.json`
   - Contents: Before/after timing, 74.6% improvement, 3.1s on 1201-file test
 
-[x] Benchmark Report
+- [x] Benchmark Report
   - File: `release_artifacts/v1.5.5/performance_benchmark_results.log`
   - Contents: Detailed timing breakdown, cache hit rates, parallelization effectiveness
 
-[x] Cache Evidence
+- [x] Cache Evidence
   - File: `release_artifacts/v1.5.5/cache_effectiveness_evidence.json`
   - Contents: Memory vs disk cache hit rates, persistence validation, invalidation tests
-
+ 
 [x] Parallel Execution Evidence
   - File: `release_artifacts/v1.5.5/parallel_execution_results.json`
   - Contents: ProcessPoolExecutor batching (batch_size=100), 74.6% improvement
@@ -2002,7 +1999,36 @@ SPRING_SECURITY_SINKS = {
 > [20251215_DOCS] Progress recap: Spring/JPA sink map expanded (LDAP/OAuth/SAML/JPA/JdbcTemplate), new security_scan integration tests added, Java normalizer cache benchmark at 0.143 ms (~83% faster vs v2.0.0), Maven/Gradle OSV scan recorded (log4j-core 2.14.1 with four LOW CVEs, zero High/Critical).
 
 ---
-## v2.0.2 - "JS/TS Completeness"
+## v2.0.2, v2.0.3, v2.1.0 - DEPRECATED
+
+<!-- [20251216_DOCS] These versions have been DEPRECATED and consolidated into v2.2.0 "Nexus" -->
+
+> **DEPRECATED:** The features planned for v2.0.2 (JS/TS Completeness), v2.0.3 (Polyglot Reliability), 
+> and v2.1.0 (MCP Enhance) have been consolidated into v2.2.0 "Nexus" to streamline the release 
+> cadence and deliver the Revolution roadmap more efficiently.
+>
+> See [v2.2.0 "Nexus"](#v220---nexus-unified-graph) for the consolidated feature set.
+
+### Consolidated Features (Now in v2.2.0)
+
+| Original Version | Feature | New Location |
+|------------------|---------|--------------|
+| v2.0.2 | TypeScript decorators, JSX/TSX extraction | v2.2.0 |
+| v2.0.2 | Bundler/module alias resolution | v2.2.0 |
+| v2.0.2 | SSR security sinks (Next.js, Remix) | v2.2.0 |
+| v2.0.3 | Incremental AST cache | v2.2.0 |
+| v2.0.3 | Unified alias/path resolver | v2.2.0 |
+| v2.0.3 | TypeScript control-flow narrowing | v2.2.0 |
+| v2.1.0 | Resource Templates | v2.2.0 |
+| v2.1.0 | Workflow Prompts | v2.2.0 |
+| v2.1.0 | Structured MCP Logging | v2.2.0 |
+
+---
+
+<details>
+<summary><strong>Archived: Original v2.0.2 Specification (Click to expand)</strong></summary>
+
+## v2.0.2 - "JS/TS Completeness" (ARCHIVED)
 
 > [20251215_DOCS] Added JS/TS/Java bridge release between v2.0.1 and v2.1.0.
 
@@ -2012,7 +2038,7 @@ SPRING_SECURITY_SINKS = {
 **Goal:** TS/JS feature coverage (decorators, JSX/TSX, aliases) plus Gradle/Maven parity for mixed stacks  
 **Effort:** ~12 developer-days  
 **Risk Level:** Medium (parser upgrades + resolver changes)  
-**Status:** PLANNED - Q1 2026
+**Status:** DEPRECATED - Consolidated into v2.2.0
 
 ### v2.0.2 Priority Features
 
@@ -2081,10 +2107,16 @@ export function Header({ title }: { title: string }) {
 - [ ] All tests passing; coverage >= 95% with no regressions in existing tools (Gate)
 - [ ] Release evidence updated (test, performance, security) for v2.0.2 (Gate)
 
+</details>
+
+<details>
+<summary><strong>Archived: Original v2.0.3 Specification (Click to expand)</strong></summary>
+
 ---
-## v2.0.3 - "Polyglot Reliability"
+## v2.0.3 - "Polyglot Reliability" (ARCHIVED)
 
 > [20251215_DOCS] Planned reliability and performance layer before MCP enhancements.
+> [20251216_DOCS] DEPRECATED - Consolidated into v2.2.0 "Nexus"
 
 ### Overview
 
@@ -2092,7 +2124,7 @@ export function Header({ title }: { title: string }) {
 **Goal:** Harden JS/TS/Java workflows for long-running agents and CI gates  
 **Effort:** ~10 developer-days  
 **Risk Level:** Medium (caching + resolver correctness)  
-**Status:** PLANNED - Q1 2026
+**Status:** DEPRECATED - Consolidated into v2.2.0
 
 ### v2.0.3 Priority Features
 
@@ -2132,8 +2164,15 @@ export function Header({ title }: { title: string }) {
 - [ ] All tests passing; coverage >= 95% with no regressions in existing tools (Gate)
 - [ ] Release evidence updated (test, performance, security) for v2.0.3 (Gate)
 
+</details>
+
+<details>
+<summary><strong>Archived: Original v2.1.0 Specification (Click to expand)</strong></summary>
+
 ---
-## v2.1.0 - "MCP Enhance"
+## v2.1.0 - "MCP Enhance" (ARCHIVED)
+
+> [20251216_DOCS] DEPRECATED - Consolidated into v2.2.0 "Nexus"
 
 ### Overview
 
@@ -2141,6 +2180,7 @@ export function Header({ title }: { title: string }) {
 **Goal:** Resource Templates for parameterized access, Workflow Prompts for guided operations  
 **Effort:** ~15 developer-days  
 **Risk Level:** Medium (protocol extension)
+**Status:** DEPRECATED - Consolidated into v2.2.0
 
 ### Why These Features Matter
 
@@ -2344,17 +2384,31 @@ v2.1.0 Release Criteria:
 [ ] Code coverage >= 95% (Gate)
 [ ] No regressions in existing tools (Gate)
 
+</details>
+
 ---
 
 ## v2.2.0 - "Nexus" (Unified Graph)
 
+<!-- [20251216_DOCS] CONSOLIDATED: Features from v2.0.2, v2.0.3, v2.1.0 merged into this release -->
+
 ### Overview
 
-**Theme:** Bounded Intelligence  
-**Goal:** Link separate language ASTs into a single Service Graph with explicit confidence thresholds  
-**Effort:** ~30 developer-days  
-**Risk Level:** High (cross-language complexity)
+**Theme:** Bounded Intelligence + Consolidated Enhancements  
+**Goal:** Link separate language ASTs into a single Service Graph with explicit confidence thresholds, while delivering JS/TS improvements and MCP protocol enhancements  
+**Effort:** ~45 developer-days (original 30 + consolidated 15)  
+**Risk Level:** High (cross-language complexity)  
+**Timeline:** Q1 2026 (Target: End of January 2026)  
 **North Star:** "Code Scalpel sees one system and admits what it doesn't know."
+
+### What's Included (Consolidated from v2.0.2, v2.0.3, v2.1.0)
+
+| Category | Features | Origin |
+|----------|----------|--------|
+| **Unified Graph** | Universal Node IDs, Confidence Engine, Cross-Boundary Taint, HTTP Link Detection | Original v2.2.0 |
+| **JS/TS Completeness** | JSX/TSX extraction, TypeScript decorators, Bundler aliases | v2.0.2 |
+| **Polyglot Reliability** | Incremental AST cache, Unified resolver, Control-flow narrowing | v2.0.3 |
+| **MCP Enhance** | Resource Templates, Workflow Prompts, Structured Logging | v2.1.0 |
 
 ### Why Unified Graph Matters
 
@@ -2365,15 +2419,24 @@ AI agents currently operate on isolated views of each language. A React frontend
 
 **Solution:** A unified graph with confidence-scored edges that explicitly distinguishes between *Definite* (static analysis) and *Probable* (heuristic) links.
 
-### Priorities
+### Priorities (Updated with Consolidated Features)
 
-| Priority | Feature | Owner | Effort | Dependencies |
-|----------|---------|-------|--------|--------------|
-| **P0** | Universal Node IDs | TBD | 5 days | None |
-| **P0** | Confidence Engine | TBD | 7 days | Universal IDs |
-| **P0** | Cross-Boundary Taint | TBD | 8 days | Confidence Engine |
-| **P0** | HTTP Link Detection | TBD | 5 days | Universal IDs |
-| **P1** | Contract Breach Detector | TBD | 5 days | Cross-Boundary Taint |
+| Priority | Feature | Owner | Effort | Dependencies | Origin |
+|----------|---------|-------|--------|--------------|--------|
+| **P0** | Universal Node IDs | TBD | 5 days | None | v2.2.0 |
+| **P0** | Confidence Engine | TBD | 7 days | Universal IDs | v2.2.0 |
+| **P0** | Cross-Boundary Taint | TBD | 8 days | Confidence Engine | v2.2.0 |
+| **P0** | HTTP Link Detection | TBD | 5 days | Universal IDs | v2.2.0 |
+| **P0** | JSX/TSX Extraction + Server Components | TBD | 3 days | None | v2.0.2 |
+| **P0** | Resource Templates (parameterized URIs) | TBD | 5 days | None | v2.1.0 |
+| **P1** | TypeScript Decorators + Metadata | TBD | 2 days | None | v2.0.2 |
+| **P1** | Bundler/Module Alias Resolution | TBD | 2 days | None | v2.0.2 |
+| **P1** | Incremental AST Cache | TBD | 3 days | None | v2.0.3 |
+| **P1** | Workflow Prompts (security-audit, safe-refactor) | TBD | 5 days | None | v2.1.0 |
+| **P1** | Contract Breach Detector | TBD | 5 days | Cross-Boundary Taint | v2.2.0 |
+| **P2** | SSR Security Sinks (Next.js, Remix) | TBD | 2 days | JSX/TSX | v2.0.2 |
+| **P2** | TypeScript Control-Flow Narrowing | TBD | 1 day | None | v2.0.3 |
+| **P2** | Structured MCP Logging | TBD | 3 days | None | v2.1.0 |
 
 ### Technical Specifications
 
@@ -2476,6 +2539,627 @@ ENDPOINT_PATTERNS = {
     "typescript": ["@Get", "@Post", "@Controller"],
 }
 ```
+
+#### 5. JSX/TSX Extraction + Server Components (P0, from v2.0.2)
+
+**Purpose:** Enable surgical extraction of React components including Next.js Server Components and Server Actions.
+
+```typescript
+// JSX Component Extraction
+export function UserCard({ user }: { user: User }) {
+  return (
+    <div className="card">
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+
+// Next.js Server Component
+async function UserList() {
+  const users = await fetchUsers();
+  return <div>{users.map(u => <UserCard key={u.id} user={u} />)}</div>;
+}
+
+// Server Action
+async function updateUser(formData: FormData) {
+  'use server';
+  const id = formData.get('id');
+  await db.users.update({ id }, formData);
+}
+```
+
+**Implementation:**
+```python
+# Extended extract_code for JSX/TSX
+async def extract_code(
+  file_path: str,
+  target_name: str,
+  language: str = "auto"
+) -> ContextualExtractionResult:
+  """Extract React components with JSX normalization."""
+  
+  if language in ["tsx", "jsx"]:
+    # Normalize JSX to stable AST
+    tree = tsx_parser.parse(file_path)
+    
+    # Handle React-specific patterns
+    component = find_component(tree, target_name)
+    server_directive = detect_server_directive(component)
+    
+    return ContextualExtractionResult(
+      code=component.code,
+      jsx_normalized=True,
+      is_server_component=server_directive == "use server",
+      dependencies=extract_jsx_imports(component)
+    )
+```
+
+**Acceptance Criteria:**
+- [ ] Extract functional React components with JSX
+- [ ] Extract class components with JSX
+- [ ] Detect and flag Server Components (`async` function components)
+- [ ] Detect and flag Server Actions (`'use server'` directive)
+- [ ] Normalize JSX syntax for consistent analysis
+
+#### 6. Resource Templates (P0, from v2.1.0)
+
+**Purpose:** Allow agents to access code elements via parameterized URIs without knowing exact file paths.
+
+```python
+# Resource Template definition
+@mcp.resource("code:///{language}/{module}/{symbol}")
+async def get_code_resource(language: str, module: str, symbol: str) -> Resource:
+  """
+  Access code elements via parameterized URI.
+  
+  Examples:
+    code:///python/utils/calculate_tax
+    code:///typescript/components/UserCard
+    code:///java/services/AuthService.authenticate
+  """
+  # Resolve module to file path
+  file_path = await resolve_module_path(language, module)
+  
+  # Extract symbol
+  result = await extract_code(
+    file_path=file_path,
+    target_type="function" if "." not in symbol else "method",
+    target_name=symbol,
+    language=language
+  )
+  
+  return Resource(
+    uri=f"code:///{language}/{module}/{symbol}",
+    mimeType=f"text/x-{language}",
+    text=result.code,
+    metadata={
+      "file_path": file_path,
+      "line_start": result.line_start,
+      "line_end": result.line_end
+    }
+  )
+```
+
+**Acceptance Criteria:**
+- [ ] Resource template URI parsing works
+- [ ] Module path resolution across languages
+- [ ] Symbol extraction via resource URIs
+- [ ] Proper MIME types for each language
+- [ ] Error handling for invalid URIs
+
+#### 7. TypeScript Decorators + Metadata (P1, from v2.0.2)
+
+**Purpose:** Parse and preserve TypeScript decorator metadata for security analysis and extraction.
+
+```typescript
+// NestJS Controller with decorators
+@Controller('users')
+export class UserController {
+  @Get(':id')
+  @UseGuards(AuthGuard)
+  async getUser(@Param('id') id: string): Promise<UserDto> {
+    return this.userService.findById(id);
+  }
+}
+```
+
+**Implementation:**
+```python
+# Decorator extraction and analysis
+class DecoratorAnalyzer:
+  def extract_decorators(self, node: TSXNode) -> list[Decorator]:
+    """Extract decorators with their parameters."""
+    decorators = []
+    for decorator in node.decorators:
+      decorators.append(Decorator(
+        name=decorator.name,
+        arguments=decorator.arguments,
+        metadata=self._extract_metadata(decorator)
+      ))
+    return decorators
+  
+  def is_security_sink(self, decorators: list[Decorator]) -> bool:
+    """Check if decorators indicate security-sensitive operations."""
+    sink_decorators = {'@Post', '@Put', '@Delete', '@Patch'}
+    return any(d.name in sink_decorators for d in decorators)
+```
+
+**Acceptance Criteria:**
+- [ ] Extract decorator names and arguments
+- [ ] Preserve decorator metadata for security analysis
+- [ ] Support class decorators, method decorators, parameter decorators
+- [ ] Handle decorator factories (`@Decorator()` vs `@Decorator`)
+
+#### 8. Bundler/Module Alias Resolution (P1, from v2.0.2)
+
+**Purpose:** Resolve module aliases from tsconfig.json, webpack, and vite configs.
+
+```typescript
+// tsconfig.json
+{
+  "compilerOptions": {
+    "paths": {
+      "@ui/*": ["./src/ui/*"],
+      "@data/*": ["./packages/data/src/*"],
+      "@utils": ["./src/common/utils"]
+    }
+  }
+}
+
+// Code uses aliases
+import { Button } from '@ui/components';
+import { UserService } from '@data/services';
+```
+
+**Implementation:**
+```python
+class AliasResolver:
+  def __init__(self, project_root: str):
+    self.aliases = self._load_aliases(project_root)
+  
+  def _load_aliases(self, project_root: str) -> dict[str, str]:
+    """Load aliases from tsconfig, webpack, vite."""
+    aliases = {}
+    
+    # tsconfig.json paths
+    tsconfig = Path(project_root) / "tsconfig.json"
+    if tsconfig.exists():
+      config = json.loads(tsconfig.read_text())
+      paths = config.get("compilerOptions", {}).get("paths", {})
+      for alias, targets in paths.items():
+        aliases[alias.rstrip("/*")] = targets[0].rstrip("/*")
+    
+    # webpack.config.js resolve.alias
+    # vite.config.ts resolve.alias
+    # ... similar logic
+    
+    return aliases
+  
+  def resolve(self, import_path: str) -> str:
+    """Resolve alias to actual path."""
+    for alias, target in self.aliases.items():
+      if import_path.startswith(alias):
+        return import_path.replace(alias, target, 1)
+    return import_path
+```
+
+**Acceptance Criteria:**
+- [ ] Load aliases from tsconfig.json
+- [ ] Load aliases from webpack.config.js
+- [ ] Load aliases from vite.config.ts
+- [ ] Resolve aliased imports in import resolution
+- [ ] Resolve aliased imports in taint tracking
+
+#### 9. Incremental AST Cache (P1, from v2.0.3)
+
+**Purpose:** Cache parsed ASTs and invalidate only affected files on changes.
+
+```python
+class IncrementalASTCache:
+  def __init__(self, cache_dir: str = ".scalpel_ast_cache"):
+    self.cache_dir = Path(cache_dir)
+    self.cache_dir.mkdir(exist_ok=True)
+    self.file_hashes = {}  # file -> hash
+    self.dependency_graph = {}  # file -> dependencies
+  
+  def get_or_parse(self, file_path: str, language: str) -> AST:
+    """Get cached AST or parse fresh."""
+    file_hash = self._hash_file(file_path)
+    cache_path = self.cache_dir / f"{file_hash}_{language}.ast"
+    
+    # Check if cached and valid
+    if cache_path.exists() and self.file_hashes.get(file_path) == file_hash:
+      return self._load_ast(cache_path)
+    
+    # Parse fresh
+    ast = self._parse_file(file_path, language)
+    self._save_ast(cache_path, ast)
+    self.file_hashes[file_path] = file_hash
+    return ast
+  
+  def invalidate(self, file_path: str) -> set[str]:
+    """Invalidate cache and return affected files."""
+    # Invalidate this file
+    self.file_hashes.pop(file_path, None)
+    
+    # Find dependents
+    affected = self._find_dependents(file_path)
+    
+    # Invalidate dependents
+    for dep in affected:
+      self.file_hashes.pop(dep, None)
+    
+    return affected
+```
+
+**Acceptance Criteria:**
+- [ ] Cache ASTs to disk with file hash keys
+- [ ] Invalidate cache on file modification
+- [ ] Track dependency graph for cascading invalidation
+- [ ] 40%+ reduction in re-parse time for unchanged files
+- [ ] Cache survives server restarts
+
+#### 10. Workflow Prompts (P1, from v2.1.0)
+
+**Purpose:** Guided multi-step workflows for common AI agent tasks.
+
+```python
+@mcp.prompt("security-audit")
+async def security_audit_prompt(project_path: str) -> list[Message]:
+  """
+  Guide an AI agent through a comprehensive security audit.
+  
+  Steps:
+  1. Crawl project to understand structure
+  2. Scan for known vulnerabilities
+  3. Check dependencies for CVEs
+  4. Generate report with prioritized findings
+  """
+  return [
+    Message(role="user", content=f"""
+## Security Audit Workflow for {project_path}
+
+Follow these steps to perform a comprehensive security audit:
+
+### Step 1: Project Analysis
+Use `crawl_project` to understand the codebase structure.
+
+### Step 2: Vulnerability Scan
+Use `security_scan` on each Python/JavaScript/TypeScript file.
+Use `cross_file_security_scan` for multi-file taint analysis.
+
+### Step 3: Dependency Check
+Use `scan_dependencies` to check for known CVEs.
+
+### Step 4: Report Generation
+Compile findings into a prioritized report:
+- CRITICAL: Immediate action required
+- HIGH: Address within 1 week
+- MEDIUM: Address within 1 month
+- LOW: Nice to fix
+
+Begin by running `crawl_project("{project_path}")`.
+    """)
+  ]
+
+@mcp.prompt("safe-refactor")
+async def safe_refactor_prompt(file_path: str, symbol_name: str) -> list[Message]:
+  """Guide an AI agent through a safe refactoring operation."""
+  return [
+    Message(role="user", content=f"""
+## Safe Refactor Workflow for {symbol_name} in {file_path}
+
+### Step 1: Extract Current Implementation
+Use `extract_code` to get the current implementation.
+
+### Step 2: Find All Usages
+Use `get_symbol_references` to find all call sites.
+
+### Step 3: Plan Changes
+List all changes needed across files.
+
+### Step 4: Simulate Refactor
+Use `simulate_refactor` to verify changes are safe.
+
+### Step 5: Apply Changes
+Only if simulation passes, use `update_symbol` to apply.
+
+Begin by running `extract_code(file_path="{file_path}", target_name="{symbol_name}")`.
+    """)
+  ]
+```
+
+**Acceptance Criteria:**
+- [ ] `security-audit` prompt guides through full audit
+- [ ] `safe-refactor` prompt guides through refactor
+- [ ] Prompts are discoverable via MCP protocol
+- [ ] Prompts include concrete tool invocation examples
+- [ ] Prompts handle edge cases (missing files, etc.)
+
+#### 11. Contract Breach Detector (P1)
+
+**Purpose:** Detect when backend API changes break frontend contracts.
+
+```python
+class ContractBreachDetector:
+  def __init__(self, graph: UnifiedGraph):
+    self.graph = graph
+  
+  def detect_breaches(
+    self,
+    changed_node_id: str
+  ) -> list[ContractBreach]:
+    """
+    Detect contract breaches when a node changes.
+    
+    Examples:
+    - Java POJO field renamed, TypeScript interface still uses old name
+    - REST endpoint path changed, frontend still calls old path
+    - Response format changed, frontend expects old format
+    """
+    breaches = []
+    
+    # Find all clients of this node
+    clients = self.graph.get_edges_to(changed_node_id)
+    
+    for client_edge in clients:
+      if client_edge.confidence < 0.8:
+        continue  # Skip uncertain links
+      
+      # Check if client is stale
+      breach = self._check_staleness(
+        server_node=changed_node_id,
+        client_node=client_edge.from_id,
+        edge=client_edge
+      )
+      
+      if breach:
+        breaches.append(breach)
+    
+    return breaches
+  
+  def _check_staleness(
+    self,
+    server_node: str,
+    client_node: str,
+    edge: Edge
+  ) -> ContractBreach | None:
+    """Check if client is using outdated contract."""
+    # Example: Field rename detection
+    if edge.type == "type_reference":
+      server_fields = self.graph.get_node(server_node).fields
+      client_usage = self.graph.get_node(client_node).referenced_fields
+      
+      missing_fields = client_usage - server_fields
+      if missing_fields:
+        return ContractBreach(
+          server=server_node,
+          client=client_node,
+          breach_type="missing_field",
+          fields=missing_fields,
+          severity="HIGH",
+          fix_hint=f"Update client to use renamed fields: {missing_fields}"
+        )
+    
+    return None
+```
+
+**Acceptance Criteria:**
+- [ ] Detect Java POJO field rename breaking TS interface
+- [ ] Detect REST endpoint path change breaking frontend
+- [ ] Detect response format change breaking client
+- [ ] Provide fix hints for each breach
+- [ ] Confidence-weighted detection (skip uncertain links)
+
+#### 12. SSR Security Sinks (P2, from v2.0.2)
+
+**Purpose:** Detect server-side rendering vulnerabilities in modern frameworks.
+
+```python
+SSR_SINK_PATTERNS = {
+  # Next.js
+  "nextjs_ssr": [
+    "getServerSideProps",
+    "getStaticProps",
+    "getInitialProps",
+    "dangerouslySetInnerHTML",
+  ],
+  
+  # Next.js App Router
+  "nextjs_app": [
+    "generateMetadata",
+    "generateStaticParams",
+    "Server Components",  # async function components
+  ],
+  
+  # Next.js Server Actions
+  "nextjs_actions": [
+    "'use server'",  # directive
+    "revalidatePath",
+    "revalidateTag",
+    "cookies().set",
+  ],
+  
+  # Remix
+  "remix_ssr": [
+    "loader",
+    "action",
+    "headers",
+    "json",
+    "redirect",
+  ],
+  
+  # Nuxt
+  "nuxt_ssr": [
+    "useAsyncData",
+    "useFetch",
+    "defineEventHandler",
+    "setResponseHeader",
+  ],
+}
+
+def detect_ssr_vulnerabilities(tree: AST, framework: str) -> list[Vulnerability]:
+  """Detect SSR-specific vulnerabilities."""
+  vulnerabilities = []
+  
+  for node in ast.walk(tree):
+    # Detect Server Actions without validation
+    if is_server_action(node) and not has_input_validation(node):
+      vulnerabilities.append(Vulnerability(
+        type="Unvalidated Server Action",
+        severity="HIGH",
+        message="Server Action accepts user input without validation",
+        line=node.lineno
+      ))
+    
+    # Detect dangerouslySetInnerHTML with user input
+    if is_dangerous_html(node) and is_tainted(node.value):
+      vulnerabilities.append(Vulnerability(
+        type="SSR XSS",
+        severity="CRITICAL",
+        message="Tainted data in dangerouslySetInnerHTML",
+        line=node.lineno
+      ))
+  
+  return vulnerabilities
+```
+
+**Acceptance Criteria:**
+- [ ] Detect unvalidated Next.js Server Actions
+- [ ] Detect dangerouslySetInnerHTML with tainted data
+- [ ] Detect unvalidated Remix loaders/actions
+- [ ] Detect unvalidated Nuxt server handlers
+- [ ] Framework auto-detection from imports
+
+#### 13. TypeScript Control-Flow Narrowing (P2, from v2.0.3)
+
+**Purpose:** Use TypeScript's type narrowing to improve taint tracking precision.
+
+```typescript
+// Example: Type guard reduces false positives
+function processUser(input: unknown) {
+  if (typeof input === 'string') {
+    // TypeScript narrows: input is string here
+    const userId = parseInt(input);  // Safe conversion
+    return db.query(`SELECT * FROM users WHERE id = ${userId}`);
+  }
+  throw new Error('Invalid input');
+}
+```
+
+**Implementation:**
+```python
+class TypeNarrowing:
+  def analyze_control_flow(self, node: TSXNode) -> dict[str, Set[str]]:
+    """
+    Track type narrowing through control flow.
+    
+    Returns: Map of variable -> possible types at each program point
+    """
+    type_states = {}
+    
+    for branch in node.branches:
+      if self._is_type_guard(branch.condition):
+        # Type narrowed in this branch
+        var = branch.condition.variable
+        narrowed_type = self._extract_narrowed_type(branch.condition)
+        
+        type_states[var] = narrowed_type
+    
+    return type_states
+  
+  def is_taint_eliminated(
+    self,
+    variable: str,
+    type_states: dict[str, Set[str]]
+  ) -> bool:
+    """Check if type narrowing eliminates taint risk."""
+    current_type = type_states.get(variable)
+    
+    # If narrowed to primitive, less risk
+    if current_type in {'number', 'boolean', 'null', 'undefined'}:
+      return True
+    
+    # String validation narrows taint
+    if current_type == 'ValidatedString':
+      return True
+    
+    return False
+```
+
+**Acceptance Criteria:**
+- [ ] Detect type guards (`typeof`, `instanceof`, `in`)
+- [ ] Track type narrowing through branches
+- [ ] Reduce false positives when type is narrowed to safe type
+- [ ] Handle union type narrowing
+- [ ] Preserve taint for risky narrowing
+
+#### 14. Structured MCP Logging (P2, from v2.1.0)
+
+**Purpose:** Analytics and debugging for MCP tool usage.
+
+```python
+import structlog
+
+mcp_logger = structlog.get_logger("code_scalpel.mcp")
+
+@mcp.tool()
+async def extract_code(...):
+  start_time = time.time()
+  
+  mcp_logger.info(
+    "tool_invoked",
+    tool="extract_code",
+    file_path=file_path,
+    target_type=target_type,
+    target_name=target_name,
+    language=language
+  )
+  
+  try:
+    result = await _extract_code_impl(...)
+    
+    mcp_logger.info(
+      "tool_success",
+      tool="extract_code",
+      duration_ms=(time.time() - start_time) * 1000,
+      tokens_saved=result.tokens_saved,
+      lines_extracted=result.lines
+    )
+    
+    return result
+  except Exception as e:
+    mcp_logger.error(
+      "tool_error",
+      tool="extract_code",
+      error=str(e),
+      error_type=type(e).__name__,
+      traceback=traceback.format_exc()
+    )
+    raise
+
+# Analytics queries
+class MCPAnalytics:
+  def get_tool_usage_stats(self, time_range: str) -> dict:
+    """Get usage statistics for MCP tools."""
+    return {
+      "most_used_tools": ["extract_code", "security_scan"],
+      "total_invocations": 1523,
+      "success_rate": 0.987,
+      "avg_duration_ms": 145,
+      "tokens_saved_total": 2_450_000
+    }
+```
+
+**Acceptance Criteria:**
+- [ ] All tool invocations logged with structured data
+- [ ] Success/failure metrics tracked
+- [ ] Duration and token metrics recorded
+- [ ] Error traces captured for debugging
+- [ ] Analytics queries available for usage patterns
+
+
 
 ### Adversarial Validation Checklist (v2.2.0)
 

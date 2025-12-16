@@ -577,26 +577,27 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         ssl_certfile = getattr(args, "ssl_cert", None)
         ssl_keyfile = getattr(args, "ssl_key", None)
 
+        # [20251216_BUGFIX] Only override host if allow_lan and host is default
         if allow_lan and args.host == "127.0.0.1":
             args.host = "0.0.0.0"
 
-            # [20251216_BUGFIX] Align call signature with tests and avoid passing SSL args when not configured
-            start_kwargs = {
-                "transport": transport,
-                "host": args.host,
-                "port": args.port,
-                "allow_lan": allow_lan,
-                "root_path": root_path,
-            }
-            if ssl_certfile and ssl_keyfile:
-                start_kwargs.update(
-                    {
-                        "ssl_certfile": ssl_certfile,
-                        "ssl_keyfile": ssl_keyfile,
-                    }
-                )
+        # Build kwargs for server startup
+        start_kwargs = {
+            "transport": transport,
+            "host": args.host,
+            "port": args.port,
+            "allow_lan": allow_lan,
+            "root_path": root_path,
+        }
+        if ssl_certfile and ssl_keyfile:
+            start_kwargs.update(
+                {
+                    "ssl_certfile": ssl_certfile,
+                    "ssl_keyfile": ssl_keyfile,
+                }
+            )
 
-            return start_mcp_server(**start_kwargs)
+        return start_mcp_server(**start_kwargs)
 
     elif args.command == "version":
         print(f"Code Scalpel v{__version__}")

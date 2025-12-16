@@ -1,6 +1,6 @@
-# Code Scalpel Server - Docker Compose v2.0.0
+# Code Scalpel Server - Docker Compose v2.0.1
 # Supports MCP-compliant server with HTTP and HTTPS
-# [20251215_FEATURE] Added HTTPS support for production/Claude API deployments
+# [20251216_DOCS] Updated to v2.0.1 Java Complete release
 
 version: '3.8'
 
@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: code-scalpel:2.0.0
+    image: code-scalpel:2.0.1
     container_name: code-scalpel-mcp
     restart: unless-stopped
     ports:
@@ -39,14 +39,14 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # [20251215_FEATURE] MCP server with HTTPS (for production/Claude API)
+  # [20251216_DOCS] MCP server with HTTPS (for production/Claude API)
   # Requires SSL certificates mounted to /certs
   # Generate self-signed certs: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem
   mcp-server-https:
     build:
       context: .
       dockerfile: Dockerfile
-    image: code-scalpel:2.0.0
+    image: code-scalpel:2.0.1
     container_name: code-scalpel-mcp-https
     restart: unless-stopped
     ports:
@@ -86,7 +86,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.rest
-    image: code-scalpel-rest:2.0.0
+    image: code-scalpel-rest:2.0.1
     container_name: code-scalpel-rest
     restart: unless-stopped
     ports:
