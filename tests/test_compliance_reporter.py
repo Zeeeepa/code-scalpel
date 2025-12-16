@@ -9,7 +9,6 @@ including report generation, analysis, and export in multiple formats.
 
 import pytest
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
 
 from code_scalpel.governance import (
     ComplianceReporter,

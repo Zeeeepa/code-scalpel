@@ -7,7 +7,6 @@ Shows how to generate comprehensive compliance reports in JSON, HTML, and PDF fo
 
 # [20251216_FEATURE] Compliance reporting demonstration
 
-import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -191,7 +190,7 @@ def main():
     )
 
     # Generate reports
-    report = generate_reports(audit_log, policy_engine)
+    generate_reports(audit_log, policy_engine)
 
     print("\n" + "=" * 70)
     print("Demo completed successfully!")
