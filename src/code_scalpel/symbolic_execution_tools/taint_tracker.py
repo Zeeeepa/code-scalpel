@@ -1847,7 +1847,7 @@ def has_input_validation(node: ast.FunctionDef) -> bool:
         # Check for isinstance or type checks
         if isinstance(stmt, ast.Call):
             if isinstance(stmt.func, ast.Name):
-                if stmt.func.id in {"isinstance", "type", "int", "float", "bool", "str"}:
+                if stmt.func.id in {"isinstance", "type"}:
                     return True
             # Check for schema validators
             if isinstance(stmt.func, ast.Attribute):
