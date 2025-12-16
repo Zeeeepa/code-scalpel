@@ -6,7 +6,6 @@ Tests for Bundler/Module Alias Resolver.
 
 import json
 
-import pytest
 
 from code_scalpel.polyglot.alias_resolver import AliasResolver, create_alias_resolver
 
