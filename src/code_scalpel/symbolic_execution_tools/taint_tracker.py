@@ -1822,7 +1822,7 @@ def is_server_action(node: ast.AST) -> bool:
             if isinstance(first_stmt.value.value, str):
                 # Check for 'use server' or "use server" (without quotes)
                 content = first_stmt.value.value.strip()
-                if content == "use server" or content == "'use server'" or content == '"use server"':
+                if content == "use server":
                     return True
     
     return False
