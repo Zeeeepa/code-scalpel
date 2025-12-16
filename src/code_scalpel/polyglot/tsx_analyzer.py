@@ -117,10 +117,8 @@ def is_react_component(node: IRFunctionDef | IRClassDef, code: str) -> ReactComp
         # - Function name starts with uppercase (React convention)
         # - Contains JSX return
         # - Has JSX syntax
-        is_functional_component = (
-            name[0].isupper() if name else False
-        ) and has_jsx
-
+        # [20240613_BUGFIX] Use idiomatic and safe check for uppercase initial (avoids IndexError on empty string)
+        is_functional_component = (name and name[0].isupper()) and has_jsx
         if is_functional_component:
             component_type = "functional"
 
