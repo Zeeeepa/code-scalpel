@@ -15,7 +15,9 @@ Features:
 
 from __future__ import annotations
 
-import logging
+# [20251216_BUGFIX] Avoid self-import: explicitly import stdlib logging
+import importlib
+logging = importlib.import_module("logging")
 import time
 import traceback
 from dataclasses import dataclass, field
