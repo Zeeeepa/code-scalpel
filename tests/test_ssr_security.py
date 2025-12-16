@@ -9,7 +9,6 @@ This module tests detection of SSR-specific vulnerabilities in modern web framew
 - Astro
 """
 
-import pytest
 from code_scalpel.symbolic_execution_tools import (
     SecurityAnalyzer,
     detect_ssr_framework,
