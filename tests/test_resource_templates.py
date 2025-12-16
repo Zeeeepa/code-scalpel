@@ -7,7 +7,6 @@ Tests for Resource Template feature.
 import pytest
 from pathlib import Path
 import tempfile
-import os
 
 # Mark entire module as async
 pytestmark = pytest.mark.asyncio
