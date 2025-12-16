@@ -22,7 +22,7 @@ Integration Difficulty Assessment:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any  # [20251216_REFACTOR] Remove unused Optional import (CodeQL)
 
 
 class TSNodeType(Enum):
