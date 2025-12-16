@@ -22,7 +22,7 @@ Integration Difficulty Assessment:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any  # [20251216_REFACTOR] Remove unused Optional import (CodeQL)
 
 
 class TSNodeType(Enum):
@@ -58,10 +58,30 @@ class TSNodeType(Enum):
     INTERFACE_DECLARATION = "interface_declaration"
     TYPE_ALIAS_DECLARATION = "type_alias_declaration"
     ENUM_DECLARATION = "enum_declaration"
+    # [20251216_FEATURE] Decorator support for security analysis
+    DECORATOR = "decorator"
 
     # Imports/Exports
     IMPORT_STATEMENT = "import_statement"
     EXPORT_STATEMENT = "export_statement"
+
+
+# [20251216_FEATURE] Decorator dataclass for TypeScript decorator metadata
+@dataclass
+class Decorator:
+    """
+    Represents a TypeScript decorator.
+    
+    Example:
+        @Controller('users')
+        @UseGuards(AuthGuard)
+        class UserController {}
+    """
+    name: str
+    arguments: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    is_factory: bool = False  # True if @Decorator(), False if @Decorator
+    line: int = 0
 
 
 @dataclass
@@ -81,6 +101,8 @@ class TSNode:
     type_annotation: str | None = None
     is_async: bool = False
     is_exported: bool = False
+    # [20251216_FEATURE] Decorator support
+    decorators: list[Decorator] = field(default_factory=list)
 
 
 @dataclass
