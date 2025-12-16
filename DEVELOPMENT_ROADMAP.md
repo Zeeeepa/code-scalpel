@@ -3354,7 +3354,7 @@ v2.2.0 "Nexus" Release Criteria:
 
 ### Technical Specifications
 
-#### 1. Policy Engine (OPA/Rego Integration)
+#### 1. P0: Policy Engine (OPA/Rego Integration)
 
 **Purpose:** Declarative policy enforcement using Open Policy Agent's Rego language for enterprise governance.
 
@@ -3680,7 +3680,7 @@ class SemanticAnalyzer:
 - [ ] Override System: Override expires after time limit (P0)
 - [ ] Override System: Override cannot be reused (P0)
 
-#### 2. Security Sinks (Polyglot Unified)
+#### 2. P0: Security Sinks (Polyglot Unified)
 
 **Purpose:** Unified security sink definitions across Python, Java, TypeScript, JavaScript with consistent enforcement.
 
@@ -3917,7 +3917,7 @@ OWASP_COVERAGE = {
 - [ ] Detection: < 5% false positive rate on clean code (P0)
 - [ ] Detection: Respects sanitizers (e.g., escaping, parameterization) (P0)
 
-#### 3. Change Budgeting (Blast Radius Control)
+#### 3. P0: Change Budgeting (Blast Radius Control)
 
 **Purpose:** Limit the scope of agent modifications to prevent runaway changes.
 
@@ -4102,7 +4102,7 @@ budgets:
 - [ ] Error Messages: Suggests how to reduce scope (P0)
 - [ ] Error Messages: Reports "Complexity Limit Exceeded" correctly (P0)
 
-#### 4. Tamper Resistance
+#### 4. P0: Tamper Resistance
 
 **Purpose:** Prevent agents from circumventing policy enforcement.
 
@@ -4349,7 +4349,7 @@ class AuditLog:
 - [ ] Audit Log: Tampering detected and reported (P0)
 - [ ] Audit Log: Append-only (no deletion or modification) (P0)
 
-#### 5. Compliance Reporting
+#### 5. P1: Compliance Reporting
 
 **Purpose:** Generate audit reports for enterprise compliance and security reviews.
 
