@@ -37,8 +37,6 @@ from code_scalpel.graph_engine import (
     create_node_id,
     EdgeType,
     HTTPLinkDetector,
-    HTTPMethod,
-    NodeType,
     ConfidenceEngine,
 )
 
