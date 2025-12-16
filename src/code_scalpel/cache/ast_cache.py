@@ -268,8 +268,9 @@ class IncrementalASTCache:
         try:
             with open(cache_path, "wb") as f:
                 pickle.dump(ast, f)
-        except Exception as e:
-            logger.warning(f"Failed to save AST to {cache_path}: {e}")
+        except (pickle.PicklingError, OSError, TypeError) as e:
+            # [20240613_BUGFIX] Restrict exception handler to expected pickle/file errors and log full traceback
+            logger.exception(f"Failed to save AST to {cache_path}: {e}")
 
     def invalidate(self, file_path: str | Path) -> Set[str]:
         """
