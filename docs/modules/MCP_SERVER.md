@@ -109,15 +109,44 @@ run_server(transport="streamable-http", port=8593)
 
 ## Available Tools
 
-The MCP server exposes 5 tools:
+The MCP server exposes 17 tools for AI agents (v2.2.0):
+
+### Core Analysis Tools
 
 | Tool | Description | Best For |
 |------|-------------|----------|
 | `analyze_code` | Parse code structure | Understanding code organization |
-| `security_scan` | Detect vulnerabilities | Security audits |
-| `symbolic_execute` | Explore execution paths | Edge case discovery |
-| `generate_unit_tests` | Create test cases | Automated testing |
+| `extract_code` | Surgical extraction by symbol name | Token-efficient code retrieval |
+| `security_scan` | Detect vulnerabilities via taint analysis | Security audits |
+| `symbolic_execute` | Explore execution paths with Z3 | Edge case discovery |
+| `generate_unit_tests` | Create test cases from symbolic execution | Automated testing |
 | `simulate_refactor` | Verify safe refactoring | Code changes |
+
+### Project Intelligence Tools
+
+| Tool | Description | Best For |
+|------|-------------|----------|
+| `crawl_project` | Analyze entire project structure | Project overview |
+| `get_file_context` | Get file overview without full content | Quick file assessment |
+| `get_symbol_references` | Find all usages of a symbol | Safe refactoring |
+| `get_call_graph` | Build function relationship graph | Impact analysis |
+| `get_cross_file_dependencies` | Trace cross-file dependencies | Module relationships |
+| `scan_dependencies` | Scan for vulnerable dependencies (OSV) | Security compliance |
+
+### Graph Engine Tools (v2.2.0)
+
+| Tool | Description | Best For |
+|------|-------------|----------|
+| `build_unified_graph` | Create cross-language dependency graph | Monorepo analysis |
+| `detect_http_links` | Link frontend calls to backend endpoints | Full-stack tracing |
+| `detect_contract_breaches` | Find breaking API changes | Client/server sync |
+
+### Symbol Modification Tools
+
+| Tool | Description | Best For |
+|------|-------------|----------|
+| `update_symbol` | Safe symbol replacement with backup | Code modifications |
+| `get_project_map` | Complete project structure analysis | Navigation |
 
 ---
 

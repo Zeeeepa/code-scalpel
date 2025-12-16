@@ -14,6 +14,7 @@
    - [PDG Tools](#pdg-tools)
    - [Symbolic Execution](#symbolic-execution)
    - [Security Analysis](#security-analysis)
+   - [Graph Engine](#graph-engine)
 5. [MCP Server](#mcp-server)
 6. [Surgical Tools](#surgical-tools)
 7. [AI Agent Integrations](#ai-agent-integrations)
@@ -22,6 +23,8 @@
 10. [API Reference](#api-reference)
 11. [Performance & Caching](#performance--caching)
 12. [Troubleshooting](#troubleshooting)
+
+**See Also:** [Graph Engine Guide](graph_engine_guide.md) for detailed cross-language graph documentation.
 
 ---
 
