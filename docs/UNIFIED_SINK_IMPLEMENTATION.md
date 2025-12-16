@@ -171,8 +171,8 @@ DetectedSink
 
 ### Accuracy (based on test suite)
 - True positive rate: 100% (all known vulnerabilities detected)
-- False positive rate: 0% (clean code produces no alerts)
-- Confidence calibration: High-confidence patterns (1.0) never produce false positives
+- False positive rate: 0% (in test suite: clean code produces no alerts)
+- Confidence calibration: High-confidence patterns (1.0) never produce false positives in test suite
 
 ## Security Considerations
 

@@ -1194,7 +1194,7 @@ def _unified_sink_detect_sync(
             language=language,
             sink_count=0,
             min_confidence=min_confidence,
-            error="Confidence must be between 0.0 and 1.0"
+            error="min_confidence must be between 0.0 and 1.0"  # [20240613_BUGFIX] Clarified error message to specify parameter name for easier debugging
         )
     
     try:

@@ -639,9 +639,8 @@ class UnifiedSinkDetector:
             def visit_Call(self, node):
                 # Extract function name from call
                 func_name = self._get_call_name(node)
-                if func_name == pattern or func_name.endswith(
-                    "." + pattern.split(".")[-1]
-                ):
+                # [20240613_BUGFIX] Ensure pattern matches only at proper boundaries (exact or dot-qualified)
+                if func_name == pattern or func_name.endswith("." + pattern):
                     matches.append(node)
                 self.generic_visit(node)
 
@@ -697,11 +696,28 @@ class UnifiedSinkDetector:
         return detected
 
     def _extract_snippet(self, code: str, line_no: int, context: int = 0) -> str:
-        """Extract code snippet around a line number."""
+        """
+        [20240613_BUGFIX] Implement context-aware snippet extraction for vulnerability reporting.
+
+        Extract code snippet around a line number, including `context` lines before and after.
+
+        Args:
+            code: The full source code as a string.
+            line_no: 1-based line number to center the snippet on.
+            context: Number of lines before and after to include (default: 0).
+
+        Returns:
+            String containing the snippet, or empty string if line_no is out of range.
+        """
         lines = code.split("\n")
-        if 1 <= line_no <= len(lines):
-            return lines[line_no - 1].strip()
-        return ""
+        n_lines = len(lines)
+        if not (1 <= line_no <= n_lines):
+            return ""
+        # Calculate start and end indices (0-based, inclusive)
+        start = max(0, line_no - 1 - context)
+        end = min(n_lines, line_no + context)
+        snippet_lines = lines[start:end]
+        return "\n".join(snippet_lines).strip()
 
     def is_vulnerable(
         self, sink: DetectedSink, taint_info: Optional[TaintInfo] = None

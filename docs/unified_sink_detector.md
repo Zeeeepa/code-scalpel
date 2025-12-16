@@ -386,17 +386,20 @@ pytest tests/test_mcp_unified_sink.py -v
 
 ## Performance Considerations
 
-- **Python**: AST-based detection (fast, accurate)
-- **Other languages**: Pattern-based detection (fast, good accuracy)
+- **Python**: AST-based detection (fast, highly accurate, near 0% false positive rate)
+- **TypeScript/JavaScript**: Pattern-based detection (fast, but may have higher false positive rates due to lack of full AST analysis)
+- **Java**: Pattern-based detection (good accuracy, but not as robust as Python AST-based)
 - **Caching**: Results are cached when using MCP tools
 - **Large codebases**: Detection scales linearly with code size
+
+> **[20251216_DOCS] Disclaimer:** The 0% false positive rate and highest accuracy claims apply only to Python (AST-based detection). For TypeScript/JavaScript, which use pattern matching (not full AST), the false positive rate may be higher and accuracy may be lower, especially for complex or obfuscated code. Users should review results for these languages with additional scrutiny.
 
 ## Limitations
 
 1. **Pattern matching**: May miss obfuscated or dynamically constructed patterns
 2. **Context-dependent**: Some patterns require runtime context for accurate assessment
-3. **Language support**: TypeScript/JavaScript use pattern matching (not full AST)
-4. **False positives**: Low-confidence patterns may require manual review
+3. **Language support**: TypeScript/JavaScript use pattern matching (not full AST), which may result in higher false positive rates and lower accuracy compared to Python.
+4. **False positives**: Low-confidence patterns and all TypeScript/JavaScript detections may require manual review. The 0% false positive rate does **not** apply to TypeScript/JavaScript.
 
 ## Future Enhancements
 
