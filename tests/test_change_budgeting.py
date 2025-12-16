@@ -720,6 +720,20 @@ class TestEdgeCases:
 
         assert decision.allowed
 
+    def test_error_message_for_allowed_operation(self):
+        """[20251216_TEST] Error message for allowed operation just returns reason."""
+        budget = ChangeBudget({})
+
+        operation = Operation(
+            changes=[FileChange(file_path="src/test.py", added_lines=["x = 1"])]
+        )
+
+        decision = budget.validate_operation(operation)
+
+        assert decision.allowed
+        error_msg = decision.get_error_message()
+        assert error_msg == "Within budget constraints"
+
     def test_zero_line_change(self):
         """[20251216_TEST] File with no line changes is allowed."""
         budget = ChangeBudget({"max_lines_per_file": 10})
@@ -807,3 +821,45 @@ def complex():
         decision = budget.validate_operation(operation)
 
         assert not decision.allowed
+
+    def test_complexity_with_both_syntax_errors(self):
+        """[20251216_TEST] Handle case where both original and modified have syntax errors."""
+        budget = ChangeBudget({"max_complexity_increase": 5})
+
+        # Both have syntax errors - should not cause delta
+        operation = Operation(
+            changes=[
+                FileChange(
+                    file_path="src/broken.py",
+                    original_code="def broken(:",
+                    modified_code="def still_broken(:",
+                )
+            ]
+        )
+
+        decision = budget.validate_operation(operation)
+
+        # Should not have complexity violation (both treated as 0)
+        complexity_violations = [
+            v for v in decision.violations if v.rule == "max_complexity_increase"
+        ]
+        assert len(complexity_violations) == 0
+
+    def test_operation_missing_code_for_complexity(self):
+        """[20251216_TEST] File changes without original/modified code don't affect complexity."""
+        budget = ChangeBudget({"max_complexity_increase": 5})
+
+        # File change without original/modified code
+        operation = Operation(
+            changes=[
+                FileChange(file_path="src/example.py", added_lines=["x = 1"]),
+            ]
+        )
+
+        decision = budget.validate_operation(operation)
+
+        # Should not have complexity violation (no code to analyze)
+        complexity_violations = [
+            v for v in decision.violations if v.rule == "max_complexity_increase"
+        ]
+        assert len(complexity_violations) == 0
