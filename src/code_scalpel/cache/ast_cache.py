@@ -199,8 +199,8 @@ class IncrementalASTCache:
                 ast = self._load_ast(cache_path)
                 self.ast_cache[path_str] = ast
                 return ast
-            except Exception as e:
-                logger.warning(f"Failed to load cached AST from {cache_path}: {e}")
+            except (pickle.UnpicklingError, EOFError, OSError) as e:
+                logger.exception(f"Failed to load cached AST from {cache_path}: {e}")
 
         # Parse fresh
         if parse_fn is None:
