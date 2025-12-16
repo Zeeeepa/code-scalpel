@@ -161,7 +161,8 @@ class IncrementalASTCache:
                 json.dump(metadata, f, indent=2)
 
         except Exception as e:
-            logger.warning(f"Failed to save cache metadata: {e}")
+            # [20240613_BUGFIX] Log full stack trace for cache metadata save failures
+            logger.exception(f"Failed to save cache metadata: {e}")
 
     def get_or_parse(
         self, file_path: str | Path, language: str, parse_fn: Optional[Any] = None
