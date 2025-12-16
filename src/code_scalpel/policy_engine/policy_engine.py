@@ -209,13 +209,41 @@ class PolicyEngine:
         """
         self.policy_path = Path(policy_path)
         self.policies: List[Policy] = []
-        self._used_override_codes: set[str] = set()
+        # [20240613_SECURITY] Persist used override codes to disk to enforce single-use guarantee across restarts
+        self._used_override_codes_path = self.policy_path.parent / "used_override_codes.json"
+        self._used_override_codes: set[str] = self._load_used_override_codes()
         
         # Load and validate policies
         self.policies = self._load_policies()
         self._validate_opa_available()
         self._validate_policies()
     
+    def _load_used_override_codes(self) -> set[str]:
+        """
+        [20240613_SECURITY] Load used override codes from disk to enforce single-use guarantee across restarts.
+        """
+        if self._used_override_codes_path.exists():
+            try:
+                with open(self._used_override_codes_path, "r") as f:
+                    codes = json.load(f)
+                if not isinstance(codes, list):
+                    raise ValueError("used_override_codes.json is not a list")
+                return set(codes)
+            except Exception as e:
+                # Fail CLOSED - if we can't read the file, deny all overrides
+                raise PolicyError(f"Failed to load used override codes: {e}. Failing CLOSED.")
+        return set()
+
+    def _save_used_override_codes(self) -> None:
+        """
+        [20240613_SECURITY] Save used override codes to disk after each update.
+        """
+        try:
+            with open(self._used_override_codes_path, "w") as f:
+                json.dump(list(self._used_override_codes), f)
+        except Exception as e:
+            # Fail CLOSED - if we can't write the file, deny all overrides
+            raise PolicyError(f"Failed to save used override codes: {e}. Failing CLOSED.")
     def _load_policies(self) -> List[Policy]:
         """
         Load and parse policy definitions.
