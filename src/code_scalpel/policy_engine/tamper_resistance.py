@@ -145,7 +145,14 @@ class TamperResistance:
             "overrides.yaml",
         ]
 
-        for file_path in operation.affected_files:
+        # Support both single file_path and affected_files list
+        files_to_check = []
+        if hasattr(operation, 'affected_files') and operation.affected_files:
+            files_to_check = operation.affected_files
+        elif hasattr(operation, 'file_path') and operation.file_path:
+            files_to_check = [operation.file_path]
+
+        for file_path in files_to_check:
             file_str = str(file_path)
             if any(file_str.startswith(p) or p in file_str for p in protected_paths):
                 self.audit_log.record_event(
