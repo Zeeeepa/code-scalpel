@@ -39,6 +39,7 @@ pdg_visualizations/
 analysis_results/
 .scalpel_cache/
 .code_scalpel_cache/
+compliance_reports/
 
 # Benchmark fixtures (generated/cloned data)
 tests/fixtures/data/
