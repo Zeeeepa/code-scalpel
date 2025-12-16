@@ -10,6 +10,7 @@
 |----------|-------------|
 | [**COMPREHENSIVE_GUIDE.md**](COMPREHENSIVE_GUIDE.md) | Full documentation with examples |
 | [**README.md**](../README.md) | Project overview and quick start |
+| [**RELEASE_NOTES_v2.0.1.md**](release_notes/RELEASE_NOTES_v2.0.1.md) | Coverage policy and exclusions for v2.0.1 |
 
 ---
 
@@ -166,8 +167,11 @@ code-scalpel mcp --transport http --port 8593
 
 ## Version History
 
+> [20251215_DOCS] Add v2.0.1 coverage-focused release entry
+
 | Version | Codename | Highlights |
 |---------|----------|------------|
+| v2.0.1 | "Coverage Lock" | Coverage policy/exclusions documented; warning-path tests for RefactorSimulator |
 | v1.3.0 | "Hardening" | NoSQL/LDAP injection, secret detection, Float support |
 | v1.2.3 | - | Path resolution, FunctionInfo/ClassInfo models |
 | v1.2.2 | - | Bug fixes, stability improvements |

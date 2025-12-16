@@ -5,9 +5,15 @@ These tests verify that the command-line interface works correctly.
 Goal: Get cli.py from 0% to at least 50% coverage.
 """
 
+import os
 import subprocess
 import sys
 from types import SimpleNamespace
+
+# [20251215_TEST] Ensure CLI subprocess invocations can import code_scalpel without editable install
+os.environ["PYTHONPATH"] = os.pathsep.join(
+    [os.path.abspath("src"), os.environ.get("PYTHONPATH", "")]
+).rstrip(os.pathsep)
 
 
 class TestCLIBasics:

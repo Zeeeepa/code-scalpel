@@ -189,9 +189,10 @@ class TypeScriptParser:
 
         lines = code.split("\n")
 
+        # [20251215_FEATURE] Broaden fallback parsing to handle export default/functions
         # Function patterns (regular and arrow)
         func_pattern = re.compile(
-            r"^(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*"
+            r"^(?:export\s+(?:default\s+)?)?(?:async\s+)?function\s+(\w+)\s*"
             r"(?:<[^>]*>)?\s*"  # Optional generics
             r"\(([^)]*)\)"  # Parameters
             r"(?:\s*:\s*([^\{]+))?"  # Optional return type
@@ -213,9 +214,10 @@ class TypeScriptParser:
         )
 
         # Import pattern
+        # [20251215_FEATURE] Support `import type` fallback handling
         import_pattern = re.compile(
-            r"^import\s+(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))"
-            r'\s+from\s+[\'"]([^\'"]+)[\'"]'
+            r"^import\s+(?:type\s+)?(?:{([^}]+)}|(\w+)|\*\s+as\s+(\w+))"
+            r"\s+from\s+[\'\"]([^\'\"]+)[\'\"]"
         )
 
         # Export pattern
@@ -397,38 +399,7 @@ export class UserController {
         res.json(user);
     }
 }
-
-export async function createRouter(): Promise<Router> {
-    const router = Router();
-    const controller = new UserController(new UserService());
-    
-    router.get('/users/:id', (req, res) => controller.getUser(req, res));
-    
-    return router;
-}
-
-const helper = (x: number): number => x * 2;
 """
 
-    result = parser.parse(test_code)
-
-    print("TypeScript Parser Stub - Test Results")
-    print("=" * 50)
-    print(f"Success: {result.success}")
-    print(f"Language: {result.language}")
-    print(f"\nFunctions ({len(result.functions)}):")
-    for fn in result.functions:
-        print(
-            f"  - {fn['name']} (line {fn['line']}, async={fn.get('is_async', False)})"
-        )
-    print(f"\nClasses ({len(result.classes)}):")
-    for cls in result.classes:
-        print(f"  - {cls['name']} (line {cls['line']}, extends={cls.get('extends')})")
-    print(f"\nImports ({len(result.imports)}):")
-    for imp in result.imports:
-        print(f"  - from '{imp['source']}' (line {imp['line']})")
-    print(f"\nExports ({len(result.exports)}):")
-    for exp in result.exports:
-        print(f"  - {exp['name']} (line {exp['line']})")
-
-    print("\n" + INTEGRATION_ASSESSMENT)
+    parse_result = parser.parse(test_code, filename="demo.ts")
+    print(parse_result)

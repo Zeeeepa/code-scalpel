@@ -3,6 +3,12 @@
 #
 # This container runs the MCP-compliant server using streamable-http transport.
 # For local development, use stdio transport directly (no container needed).
+#
+# [20251215_FEATURE] HTTPS Support:
+# Mount SSL certificates and set environment variables:
+#   -v /path/to/certs:/certs:ro
+#   -e SSL_CERT=/certs/cert.pem
+#   -e SSL_KEY=/certs/key.pem
 
 FROM python:3.10-slim as builder
 
@@ -37,8 +43,15 @@ COPY --from=builder /app /app
 # Make sure scripts in .local are usable
 ENV PATH=/root/.local/bin:$PATH
 
-# Expose the MCP server port
-EXPOSE 8593
+# Expose the MCP server port (8593) and health port (8594)
+EXPOSE 8593 8594
+
+# [20251215_FEATURE] SSL certificate paths (optional, for HTTPS)
+# Set these environment variables to enable HTTPS:
+#   SSL_CERT=/certs/cert.pem
+#   SSL_KEY=/certs/key.pem
+ENV SSL_CERT=""
+ENV SSL_KEY=""
 
 # [20251215_BUGFIX] Health check using dedicated /health endpoint
 # The SSE endpoint stays open indefinitely, causing health checks to timeout.
@@ -50,8 +63,8 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 # Default project root inside container
 ENV SCALPEL_ROOT=/app/code
 
-# Run the MCP server with HTTP transport
-# Host 0.0.0.0 is required for Docker networking
-# --allow-lan disables host validation for external access
-# --root points to the mounted code directory
-CMD ["code-scalpel", "mcp", "--http", "--host", "0.0.0.0", "--port", "8593", "--root", "/app/code", "--allow-lan"]
+# [20251215_FEATURE] Entrypoint script to handle SSL configuration
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

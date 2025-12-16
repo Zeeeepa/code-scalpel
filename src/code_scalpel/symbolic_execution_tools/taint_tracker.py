@@ -1490,6 +1490,14 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "createNativeQuery": SecuritySink.SQL_QUERY,  # JPA
     "entityManager.createQuery": SecuritySink.SQL_QUERY,
     "entityManager.createNativeQuery": SecuritySink.SQL_QUERY,
+    # [20251215_FEATURE] v2.0.1 Spring Data / JPA expansion
+    "entityManager.createNamedQuery": SecuritySink.SQL_QUERY,
+    "entityManager.createStoredProcedureQuery": SecuritySink.SQL_QUERY,
+    "Query.setParameter": SecuritySink.SQL_QUERY,
+    "TypedQuery.setParameter": SecuritySink.SQL_QUERY,
+    "JpaRepository.deleteBy": SecuritySink.SQL_QUERY,
+    "JpaRepository.removeBy": SecuritySink.SQL_QUERY,
+    "JdbcTemplate.batchUpdate": SecuritySink.SQL_QUERY,
     "jdbcTemplate.query": SecuritySink.SQL_QUERY,  # Spring
     "jdbcTemplate.queryForObject": SecuritySink.SQL_QUERY,
     "jdbcTemplate.queryForList": SecuritySink.SQL_QUERY,
@@ -1542,6 +1550,8 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "DirContext.search": SecuritySink.SQL_QUERY,
     "InitialDirContext.search": SecuritySink.SQL_QUERY,
     "LdapTemplate.search": SecuritySink.SQL_QUERY,  # Spring LDAP
+    "LdapTemplate.authenticate": SecuritySink.SQL_QUERY,  # [20251215_FEATURE] LDAP auth
+    "BindAuthenticator.authenticate": SecuritySink.SQL_QUERY,
     # Java Expression Language Injection (similar to SSTI)
     "ExpressionParser.parseExpression": SecuritySink.SSTI,  # Spring SpEL
     "SpelExpressionParser": SecuritySink.SSTI,
@@ -1560,6 +1570,12 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "@PostAuthorize": SecuritySink.SSTI,
     "@Secured": SecuritySink.SSTI,
     "SecurityExpressionHandler": SecuritySink.SSTI,
+    # [20251215_FEATURE] v2.0.1 Spring Security OAuth/SAML coverage
+    "JwtDecoder.decode": SecuritySink.SSTI,
+    "JwtEncoder.encode": SecuritySink.SSTI,
+    "OAuth2AuthorizedClientManager.authorize": SecuritySink.SSTI,
+    "Saml2AuthenticationRequestFactory.createAuthenticationRequest": SecuritySink.SSTI,
+    "Saml2AuthenticationRequestContext": SecuritySink.SSTI,
     # Spring View resolution (Server-Side Template Injection)
     "ModelAndView": SecuritySink.SSTI,  # View name from user input
     "RedirectView": SecuritySink.REDIRECT,  # Open redirect

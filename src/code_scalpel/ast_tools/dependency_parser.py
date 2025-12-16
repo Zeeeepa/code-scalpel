@@ -2,6 +2,7 @@ import os
 import json
 import re
 from typing import List, Dict
+import xml.etree.ElementTree as ET
 
 try:
     import tomllib
@@ -20,6 +21,7 @@ class DependencyParser:
         deps = {
             "python": self._parse_python_deps(),
             "javascript": self._parse_javascript_deps(),
+            "maven": self._parse_maven_deps(),  # [20251215_FEATURE] v2.0.1 Maven/Gradle support
         }
         return {k: v for k, v in deps.items() if v}
 
@@ -82,6 +84,59 @@ class DependencyParser:
             except Exception:
                 pass
         return deps
+
+    def _parse_maven_deps(self) -> List[Dict[str, str]]:
+        deps: List[Dict[str, str]] = []
+
+        # Minimal pom.xml parsing for groupId/artifactId/version triples
+        pom_path = os.path.join(self.root_path, "pom.xml")
+        if os.path.exists(pom_path):
+            try:
+                tree = ET.parse(pom_path)
+                root = tree.getroot()
+                ns = {"m": root.tag.split("}")[0].strip("{")}
+
+                for dep in root.findall(".//m:dependencies/m:dependency", ns):
+                    gid = dep.findtext("m:groupId", default="", namespaces=ns)
+                    aid = dep.findtext("m:artifactId", default="", namespaces=ns)
+                    ver = dep.findtext("m:version", default="*", namespaces=ns)
+                    scope = dep.findtext("m:scope", default="", namespaces=ns)
+                    if gid and aid:
+                        name = f"{gid}:{aid}"
+                        entry = {"name": name, "version": ver or "*"}
+                        if scope in {"test", "provided"}:
+                            entry["type"] = "dev"
+                        deps.append(entry)
+            except Exception:
+                pass
+
+        # Gradle build.gradle/build.gradle.kts minimal grep
+        for gradle_file in ("build.gradle", "build.gradle.kts"):
+            g_path = os.path.join(self.root_path, gradle_file)
+            if os.path.exists(g_path):
+                try:
+                    with open(g_path, "r", encoding="utf-8") as f:
+                        for line in f:
+                            line = line.strip()
+                            if not line or line.startswith("//"):
+                                continue
+                            match = re.search(
+                                r"['\"]([\w\-.]+:[\w\-.]+):([\w\-.]+)['\"]", line
+                            )
+                            if match:
+                                coords = match.group(1)
+                                ver = match.group(2)
+                                entry = {"name": coords, "version": ver}
+                                if any(
+                                    k in line
+                                    for k in ("testImplementation", "testCompile")
+                                ):
+                                    entry["type"] = "dev"
+                                deps.append(entry)
+                except Exception:
+                    pass
+
+        return self._deduplicate(deps)
 
     def _parse_pep508(self, s: str) -> Dict[str, str]:
         # Basic parsing: "requests>=2.0" -> name="requests", version=">=2.0"

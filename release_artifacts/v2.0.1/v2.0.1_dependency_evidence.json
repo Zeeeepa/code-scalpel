@@ -1,0 +1,19 @@
+{
+  "version": "2.0.1",
+  "timestamp": "2025-12-15T00:00:00Z",
+  "scans": [
+    {
+      "ecosystem": "Maven",
+      "files": ["pom.xml", "build.gradle", "build.gradle.kts"],
+      "include_dev": false,
+      "critical_or_high_cves": 0,
+      "total_dependencies": 1,
+      "vulnerable_dependencies": 1,
+      "total_vulnerabilities": 4,
+      "tool": "scan_dependencies",
+      "notes": "scan_vulnerabilities=true on sample log4j-core 2.14.1; OSV returned four LOW advisories (CVE-2021-45046, CVE-2021-44832, CVE-2021-44228, CVE-2021-45105)."
+    }
+  ],
+  "status": "IN_PROGRESS",
+  "notes": "Real OSV lookup against Maven/Gradle sample containing log4j-core 2.14.1 (scan_vulnerabilities=true)"
+}

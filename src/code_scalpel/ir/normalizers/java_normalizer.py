@@ -13,7 +13,7 @@ Key Mappings:
 - for_statement -> IRFor
 """
 
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ..nodes import (
     IRAssign,
@@ -173,6 +173,25 @@ class JavaVisitor(TreeSitterVisitor):
         body_node = node.child_by_field_name("body")
         body = []
 
+        # [20251215_FEATURE] Capture inheritance, interfaces, annotations, and type params
+        bases: List[Any] = []
+        superclass_node = node.child_by_field_name("superclass")
+        if superclass_node:
+            bases.extend(
+                IRName(id=b) for b in self._extract_type_names(superclass_node)
+            )
+
+        interfaces_node = node.child_by_field_name("interfaces")
+        if interfaces_node:
+            bases.extend(
+                IRName(id=b) for b in self._extract_type_names(interfaces_node)
+            )
+
+        decorators = self._collect_annotations(node)
+        type_params = self._extract_type_params(
+            node.child_by_field_name("type_parameters")
+        )
+
         if body_node:
             for child in body_node.children:
                 if child.type == "method_declaration":
@@ -192,16 +211,24 @@ class JavaVisitor(TreeSitterVisitor):
                             body.extend(fields)
                         else:
                             body.append(fields)
+                elif child.type in ("class_declaration", "record_declaration"):
+                    nested = self.visit(child)
+                    if nested:
+                        body.append(nested)
 
-        return IRClassDef(
+        class_ir = IRClassDef(
             name=name,
-            bases=[],  # Java extends/implements logic could go here
+            bases=bases,
             body=body,
+            decorators=decorators,
             source_language=self.language,
-            loc=self._get_location(
-                node
-            ),  # [20251214_FEATURE] Add location for extraction
+            loc=self._get_location(node),
         )
+
+        if type_params:
+            class_ir._metadata["type_params"] = type_params
+
+        return class_ir
 
     # =========================================================================
     # Record Declaration Handler - [20251215_FEATURE] v2.0.1 Java 16+ records
@@ -297,6 +324,11 @@ class JavaVisitor(TreeSitterVisitor):
         name_node = node.child_by_field_name("name")
         class_name = self.get_text(name_node) if name_node else "Unknown"
 
+        decorators = self._collect_annotations(node)
+        type_params = self._extract_type_params(
+            node.child_by_field_name("type_parameters")
+        )
+
         # Parameters
         params = []
         params_node = node.child_by_field_name("parameters")
@@ -305,16 +337,19 @@ class JavaVisitor(TreeSitterVisitor):
                 if child.type == "formal_parameter":
                     p_name = child.child_by_field_name("name")
                     p_type = child.child_by_field_name("type")
+                    annotations = self._collect_annotations(child)
                     if p_name:
                         # [20251215_BUGFIX] v2.0.0 - Use type_annotation not annotation
-                        params.append(
-                            IRParameter(
-                                name=self.get_text(p_name),
-                                type_annotation=(
-                                    self.get_text(p_type) if p_type else None
-                                ),
-                            )
+                        param = IRParameter(
+                            name=self.get_text(p_name),
+                            type_annotation=(self.get_text(p_type) if p_type else None),
                         )
+                        if annotations:
+                            param._metadata["annotations"] = [
+                                a.id if isinstance(a, IRName) else a
+                                for a in annotations
+                            ]
+                        params.append(param)
 
         # Body
         body_node = node.child_by_field_name("body")
@@ -322,7 +357,7 @@ class JavaVisitor(TreeSitterVisitor):
         if body_node:
             body_stmts = self.visit(body_node)
 
-        return IRFunctionDef(
+        constructor = IRFunctionDef(
             name="__init__",  # Use Python convention for constructors
             params=params,
             body=(
@@ -333,7 +368,13 @@ class JavaVisitor(TreeSitterVisitor):
             return_type=class_name,  # Constructor "returns" instance of class
             source_language=self.language,
             loc=self._get_location(node),
+            decorators=decorators,
         )
+
+        if type_params:
+            constructor._metadata["type_params"] = type_params
+
+        return constructor
 
     def visit_field_declaration(self, node: Any) -> List[IRAssign]:
         """
@@ -359,6 +400,13 @@ class JavaVisitor(TreeSitterVisitor):
         name_node = node.child_by_field_name("name")
         name = self.get_text(name_node)
 
+        decorators = self._collect_annotations(node)
+        type_params = self._extract_type_params(
+            node.child_by_field_name("type_parameters")
+        )
+        return_type_node = node.child_by_field_name("type")
+        return_type = self.get_text(return_type_node) if return_type_node else None
+
         # Parameters
         params = []
         params_node = node.child_by_field_name("parameters")
@@ -366,8 +414,19 @@ class JavaVisitor(TreeSitterVisitor):
             for child in params_node.children:
                 if child.type == "formal_parameter":
                     p_name = child.child_by_field_name("name")
+                    p_type = child.child_by_field_name("type")
+                    annotations = self._collect_annotations(child)
                     if p_name:
-                        params.append(IRParameter(name=self.get_text(p_name)))
+                        param = IRParameter(
+                            name=self.get_text(p_name),
+                            type_annotation=(self.get_text(p_type) if p_type else None),
+                        )
+                        if annotations:
+                            param._metadata["annotations"] = [
+                                a.id if isinstance(a, IRName) else a
+                                for a in annotations
+                            ]
+                        params.append(param)
 
         # Body
         body_node = node.child_by_field_name("body")
@@ -376,16 +435,22 @@ class JavaVisitor(TreeSitterVisitor):
             # visit_block returns List[IRNode]
             body_stmts = self.visit(body_node)
 
-        return IRFunctionDef(
+        func = IRFunctionDef(
             name=name,
             params=params,
             body=body_stmts,
-            return_type=None,  # TODO: Extract return type
+            return_type=return_type,
             source_language=self.language,
             loc=self._get_location(
                 node
             ),  # [20251214_FEATURE] Add location for extraction
+            decorators=decorators,
         )
+
+        if type_params:
+            func._metadata["type_params"] = type_params
+
+        return func
 
     def visit_block(self, node: Any) -> List[IRNode]:
         """{ stmt1; stmt2; }"""
@@ -815,11 +880,51 @@ class JavaVisitor(TreeSitterVisitor):
             kwargs={},
         )
 
+    # [20251215_FEATURE] Helpers for annotations, types, and generics
+    def _collect_annotations(self, node: Any) -> List[IRName]:
+        annotations: List[IRName] = []
+        for child in node.children:
+            if child.type in ("annotation", "marker_annotation"):
+                name_node = child.child_by_field_name("name")
+                name_text = (
+                    self.get_text(name_node) if name_node else self.get_text(child)
+                )
+                annotations.append(IRName(id=name_text.lstrip("@")))
+            elif child.type == "modifiers":
+                annotations.extend(self._collect_annotations(child))
+        return annotations
+
+    def _extract_type_params(self, node: Optional[Any]) -> List[str]:
+        if node is None:
+            return []
+        text = self.get_text(node).strip()
+        if text.startswith("<") and text.endswith(">"):
+            text = text[1:-1]
+        return [part.strip() for part in text.split(",") if part.strip()]
+
+    def _extract_type_names(self, node: Optional[Any]) -> List[str]:
+        if node is None:
+            return []
+        text = (
+            self.get_text(node)
+            .replace("implements", " ")
+            .replace("extends", " ")
+            .replace(",", " ")
+        )
+        names = []
+        for part in text.split():
+            cleaned = part.strip()
+            if cleaned:
+                names.append(cleaned)
+        return names
+
 
 class JavaNormalizer(BaseNormalizer):
     """Normalizes Java source code to Unified IR."""
 
     language = "java"
+    _MAX_CACHE = 16  # [20251215_PERF] Bound cached parse trees for Java throughput
+    _tree_cache: Dict[int, Any] = {}
 
     def __init__(self):
         self.JAVA_LANGUAGE = Language(tree_sitter_java.language())
@@ -828,9 +933,22 @@ class JavaNormalizer(BaseNormalizer):
         self._visitor: Optional[JavaVisitor] = None
 
     def normalize(self, source: str, filename: str = "<string>") -> IRModule:
-        tree = self.parser.parse(bytes(source, "utf8"))
+        tree = self._parse_cached(source)
         self._visitor = JavaVisitor(source)
         return self._visitor.visit(tree.root_node)
+
+    def _parse_cached(self, source: str):
+        """Parse with a small eviction cache to improve repeated Java runs."""
+        key = hash(source)
+        cached = self._tree_cache.get(key)
+        if cached is not None:
+            return cached
+
+        tree = self.parser.parse(bytes(source, "utf8"))
+        if len(self._tree_cache) >= self._MAX_CACHE:
+            self._tree_cache.pop(next(iter(self._tree_cache)))
+        self._tree_cache[key] = tree
+        return tree
 
     def normalize_node(self, node: Any) -> Any:
         """Normalize a single tree-sitter node to IR."""

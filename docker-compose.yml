@@ -1,51 +1,79 @@
-# Code Scalpel Server - Docker Compose v1.5.3
-# Supports both MCP-compliant server and REST API server
-# [20251214_FEATURE] Updated for v1.5.3 with PathSmart path resolution
+# Code Scalpel Server - Docker Compose v2.0.0
+# Supports MCP-compliant server with HTTP and HTTPS
+# [20251215_FEATURE] Added HTTPS support for production/Claude API deployments
 
 version: '3.8'
 
 services:
-  # Real MCP-compliant server (streamable-http transport)
-  # Use this with MCP clients that support HTTP transport
-  # v1.5.3 includes PathResolver for Docker-aware path resolution
+  # MCP server with HTTP (for local development)
+  # Use this for local testing without SSL certificates
   mcp-server:
     build:
       context: .
       dockerfile: Dockerfile
-    image: code-scalpel:1.5.3
+    image: code-scalpel:2.0.0
     container_name: code-scalpel-mcp
     restart: unless-stopped
     ports:
       - "8593:8593"
+      - "8594:8594"  # Health endpoint
     volumes:
       # Mount your project directory to /workspace for analysis
-      # Change $(pwd) to your project directory path
       - ${CODE_SCALPEL_WORKSPACE:-.}:/workspace
     networks:
       - code-scalpel-network
     environment:
-      # v1.5.3 PathResolver uses these environment variables
       - WORKSPACE_ROOT=/workspace
       - PROJECT_ROOT=/workspace
+      - SCALPEL_ROOT=/workspace
       - PYTHONUNBUFFERED=1
-      # Optional: Force Docker detection if auto-detection fails
-      # - FORCE_DOCKER=1
     healthcheck:
-      # Check MCP HTTP SSE endpoint (v1.5.3 health endpoint)
-      test: ["CMD", "curl", "-f", "http://localhost:8593/sse"]
+      test: ["CMD", "curl", "-f", "http://localhost:8594/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-    # Optional: Set resource limits for large projects
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '2'
-    #       memory: 2G
-    #     reservations:
-    #       cpus: '1'
-    #       memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # [20251215_FEATURE] MCP server with HTTPS (for production/Claude API)
+  # Requires SSL certificates mounted to /certs
+  # Generate self-signed certs: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout key.pem -out cert.pem
+  mcp-server-https:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: code-scalpel:2.0.0
+    container_name: code-scalpel-mcp-https
+    restart: unless-stopped
+    ports:
+      - "8443:8593"   # HTTPS MCP endpoint
+      - "8444:8594"   # HTTPS Health endpoint
+    volumes:
+      # Mount your project directory
+      - ${CODE_SCALPEL_WORKSPACE:-.}:/workspace
+      # Mount SSL certificates (required for HTTPS)
+      - ${SSL_CERT_DIR:-./certs}:/certs:ro
+    networks:
+      - code-scalpel-network
+    environment:
+      - WORKSPACE_ROOT=/workspace
+      - PROJECT_ROOT=/workspace
+      - SCALPEL_ROOT=/workspace
+      - PYTHONUNBUFFERED=1
+      # SSL certificate paths inside container
+      - SSL_CERT=/certs/cert.pem
+      - SSL_KEY=/certs/key.pem
+    healthcheck:
+      # Use HTTPS for health check when SSL is enabled
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8594/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     logging:
       driver: "json-file"
       options:
@@ -54,18 +82,16 @@ services:
 
   # REST API server (legacy, for non-MCP clients)
   # Provides simple HTTP endpoints for code analysis
-  # v1.5.3: Still available but MCP HTTP transport recommended
   rest-api:
     build:
       context: .
       dockerfile: Dockerfile.rest
-    image: code-scalpel-rest:1.5.3
+    image: code-scalpel-rest:2.0.0
     container_name: code-scalpel-rest
     restart: unless-stopped
     ports:
-      - "8594:5000"
+      - "8595:5000"
     volumes:
-      # Mount your project directory for REST API analysis
       - ${CODE_SCALPEL_WORKSPACE:-.}:/workspace
     networks:
       - code-scalpel-network
@@ -86,12 +112,5 @@ services:
         max-file: "3"
 
 networks:
-  # Local network for service-to-service communication
-  # Use this for Docker Compose deployments without external proxy
   code-scalpel-network:
     driver: bridge
-  
-  # External network for nginx-proxy-manager integration (optional)
-  # Uncomment below if using nginx-proxy-manager for reverse proxy
-  # nginx-proxy-manager_default:
-  #   external: true

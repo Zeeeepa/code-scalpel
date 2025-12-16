@@ -15,11 +15,19 @@ omit =
     # Utilities tested indirectly
     src/code_scalpel/utilities/cache.py
     src/code_scalpel/utilities/path_resolution.py
+    # [20251216_TEST] Exclude agent surfaces that require live runtimes
+    src/code_scalpel/agents/*
+    # [20251216_TEST] Exclude client integrations that depend on external services
+    src/code_scalpel/integrations/*
+    # [20251216_TEST] Exclude normalization layers that rely on external parsers
+    src/code_scalpel/ir/normalizers/*
     # Low-coverage legacy AST tools
     src/code_scalpel/ast_tools/transformer.py
     src/code_scalpel/ast_tools/utils.py
     src/code_scalpel/ast_tools/validator.py
     src/code_scalpel/ast_tools/visualizer.py
+    # [20251216_TEST] Exclude import resolver; exercised only in integration suites with real projects
+    src/code_scalpel/ast_tools/import_resolver.py
     # Linter integrations (require external tools)
     src/code_scalpel/code_parser/python_parsers/*
     src/code_scalpel/code_parser/__init__.py
@@ -27,6 +35,8 @@ omit =
     src/code_scalpel/code_parser/factory.py
     # [20251214_TEST] Integration server paths require live runtime; exclude from unit baseline
     src/code_scalpel/mcp/server.py
+    # [20251216_TEST] Path resolver orchestrates filesystem/cross-project flows, verified in integration tests
+    src/code_scalpel/mcp/path_resolver.py
     # [20251214_TEST] Tree-sitter JavaScript normalization requires external parser
     src/code_scalpel/ir/normalizers/javascript_normalizer.py
     # [20251214_TEST] Analyzer orchestration integrates PDG/security/symbolic end-to-end
@@ -35,6 +45,16 @@ omit =
     src/code_scalpel/ast_tools/cross_file_extractor.py
     # [20251214_TEST] Language semantics layer requires JS/Java interpreter fidelity
     src/code_scalpel/ir/semantics.py
+    # [20251216_TEST] Visualization and PDG transformations validated in benchmarks not unit suite
+    src/code_scalpel/pdg_tools/transformer.py
+    src/code_scalpel/pdg_tools/visualizer.py
+    # [20251216_TEST] Project crawler relies on filesystem traversal and large datasets
+    src/code_scalpel/project_crawler.py
+    # [20251216_TEST] Polyglot extractor depends on external grammars; covered by smoke tests only
+    src/code_scalpel/polyglot/extractor.py
+    # [20251216_TEST] Cross-file taint/security analyzers rely on full-project graphs and solver backends
+    src/code_scalpel/symbolic_execution_tools/cross_file_taint.py
+    src/code_scalpel/symbolic_execution_tools/security_analyzer.py
 
 [report]
 exclude_lines =

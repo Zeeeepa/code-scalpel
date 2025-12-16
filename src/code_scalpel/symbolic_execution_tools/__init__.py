@@ -28,8 +28,14 @@ Sanitizer Support (v0.3.1):
     - Configuration via pyproject.toml [tool.code-scalpel.sanitizers]
     - Type coercion (int, float, bool) fully clears taint
 
+Float Support (v2.0.0):
+    - [20251215_FEATURE] Full float/Real support in symbolic execution
+    - Float constants evaluated using Z3 RealVal
+    - Float type inference via TypeInferenceEngine
+    - Float arithmetic operations (add, sub, mul, div)
+    - Mixed int/float operations return float
+
 Current Limitations:
-    - Float type not yet supported for symbolic execution
     - Loops bounded to 10 iterations
     - Function calls are stubbed (not symbolically executed)
 

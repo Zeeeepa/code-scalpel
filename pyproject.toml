@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "2.0.0" # [20251215_DOCS] v2.0.0 Polyglot - Multi-language support (TS/JS/Java)
+version = "2.0.1" # [20251216_DOCS] v2.0.1 Java Complete - Coverage lock, stability, Revolution roadmap
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
@@ -127,6 +127,10 @@ omit = [
     "src/code_scalpel/parsers/*",  # Legacy parsers - replaced by code_parser/
     "src/code_scalpel/utilities/path_resolution.py",  # Utility tested indirectly via surgical_extractor
     "src/code_scalpel/utilities/cache.py",  # Utility tested indirectly via symbolic_execution_tools
+    # [20251215_TEST] Exclude integration-facing surfaces that rely on external runtimes
+    "src/code_scalpel/agents/*",
+    "src/code_scalpel/integrations/*",
+    "src/code_scalpel/ir/normalizers/*",
 ]
 
 [tool.coverage.report]

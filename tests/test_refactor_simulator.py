@@ -210,6 +210,33 @@ def foo():
 
         assert result.structural_changes["lines_added"] > 0
 
+    def test_warning_on_large_deletion_strict_mode(self):
+        """Test warning verdict when deletions dominate additions."""
+        # [20251215_TEST] Cover warning path for deletion-heavy changes in strict mode
+        from code_scalpel.generators.refactor_simulator import (
+            RefactorSimulator,
+            RefactorStatus,
+        )
+
+        original = """
+def foo():
+    a = 1
+    b = 2
+    c = 3
+    return a + b + c
+"""
+        new_code = """
+def foo():
+    return 0
+"""
+
+        simulator = RefactorSimulator(strict_mode=True)
+        result = simulator.simulate(original, new_code=new_code)
+
+        assert result.status == RefactorStatus.WARNING
+        assert result.is_safe is True
+        assert any("Large deletion" in warning for warning in result.warnings)
+
 
 class TestRefactorSimulatorPatch:
     """Tests for patch application."""

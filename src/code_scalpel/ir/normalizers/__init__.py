@@ -16,6 +16,7 @@ Base Classes:
 from .base import BaseNormalizer
 from .python_normalizer import PythonNormalizer
 from .tree_sitter_visitor import TreeSitterVisitor, VisitorContext
+from .java_normalizer import JavaNormalizer  # [20251215_FEATURE] Export Java normalizer
 
 # JavaScript normalizer requires tree-sitter, import conditionally
 try:
@@ -29,6 +30,7 @@ except ImportError:
 __all__ = [
     "BaseNormalizer",
     "PythonNormalizer",
+    "JavaNormalizer",
     "TreeSitterVisitor",
     "VisitorContext",
 ]

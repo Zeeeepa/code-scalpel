@@ -1,0 +1,24 @@
+{
+  "version": "2.0.1",
+  "timestamp": "2025-12-15T00:00:00Z",
+  "benchmarks": [
+    {
+      "name": "java_normalizer_sample",
+      "source": "benchmarks/sample_java_service.java",
+      "runs": 20,
+      "metrics": {
+        "avg_ms": 0.143,
+        "throughput_loc_per_s": 196022.4,
+        "baseline_avg_ms_v2_0_0": 0.86,
+        "speedup_vs_v2_0_0_pct": 83.37
+      },
+      "notes": "Measured via benchmarks/java_normalizer_benchmark.py on 2025-12-15; ~6.0x faster than v2.0.0 baseline (0.86 ms)."
+    }
+  ],
+  "acceptance_criteria": {
+    "java_parse_speedup_target": "50%+ vs v2.0.0",
+    "cache_enabled": true
+  },
+  "status": "IN_PROGRESS",
+  "evidence_owner": "Copilot"
+}

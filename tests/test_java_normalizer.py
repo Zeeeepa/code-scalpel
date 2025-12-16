@@ -14,6 +14,7 @@ from code_scalpel.ir.nodes import (
     IRReturn,
 )
 from code_scalpel.ir.operators import BinaryOperator
+from code_scalpel.ir.normalizers import JavaNormalizer
 
 
 class TestJavaNormalizer(unittest.TestCase):
@@ -313,6 +314,65 @@ class TestJavaNormalizer(unittest.TestCase):
 
             result = visitor.visit_binary_expression(mock_node)
             self.assertEqual(result.op, expected_op, f"Failed for operator {op_str}")
+
+
+# [20251215_TEST] Java generics, nested classes, annotations integration tests
+class TestJavaNormalizerIntegration(unittest.TestCase):
+    def test_class_extends_implements_and_nested_with_generics(self):
+        source = """
+        package com.acme;
+        public class Outer<T extends Entity> extends Base implements One, Two {
+            class Inner {
+                public void ping() {}
+            }
+
+            public <R extends Number> R compute(T input) { return null; }
+        }
+        """
+
+        ir = JavaNormalizer().normalize(source)
+        outer = next(n for n in ir.body if isinstance(n, IRClassDef))
+
+        base_names = [b.id if hasattr(b, "id") else b for b in outer.bases]
+        self.assertEqual(base_names, ["Base", "One", "Two"])
+        self.assertEqual(outer._metadata.get("type_params"), ["T extends Entity"])
+
+        inner = next(n for n in outer.body if isinstance(n, IRClassDef))
+        self.assertEqual(inner.name, "Inner")
+
+        compute = next(
+            n
+            for n in outer.body
+            if isinstance(n, IRFunctionDef) and n.name == "compute"
+        )
+        self.assertEqual(compute.return_type, "R")
+        self.assertEqual(compute._metadata.get("type_params"), ["R extends Number"])
+        self.assertEqual([p.name for p in compute.params], ["input"])
+        self.assertEqual([p.type_annotation for p in compute.params], ["T"])
+
+    def test_method_and_parameter_annotations_preserved(self):
+        source = """
+        import org.springframework.transaction.annotation.Transactional;
+        import jakarta.validation.Valid;
+
+        public class Service {
+            @Transactional
+            public void save(@Valid User user) {}
+        }
+        """
+
+        ir = JavaNormalizer().normalize(source)
+        svc = next(n for n in ir.body if isinstance(n, IRClassDef))
+        save = next(n for n in svc.body if isinstance(n, IRFunctionDef))
+
+        decorator_ids = [d.id if hasattr(d, "id") else d for d in save.decorators]
+        self.assertIn("Transactional", decorator_ids)
+
+        self.assertEqual(len(save.params), 1)
+        param = save.params[0]
+        self.assertEqual(param.name, "user")
+        self.assertEqual(param.type_annotation, "User")
+        self.assertEqual(param._metadata.get("annotations"), ["Valid"])
 
 
 if __name__ == "__main__":

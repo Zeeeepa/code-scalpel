@@ -318,6 +318,60 @@ def handle():
 
         assert result.success
 
+    # [20251215_TEST] Ensure cross-file Spring/JPA sinks are detected
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "sink_call",
+        [
+            'entityManager.createNamedQuery(f"select * from users where name = {name}")',
+            'JdbcTemplate.batchUpdate(f"delete from users where name = {name}")',
+        ],
+    )
+    async def test_spring_jpa_cross_file_sink_detected(self, temp_project, sink_call):
+        controller = temp_project / "controller.py"
+        controller.write_text(
+            """
+from flask import request
+from repo import run_query
+
+
+def handler():
+    name = request.args.get("name")  # SOURCE
+    return run_query(name)
+"""
+        )
+
+        repo = temp_project / "repo.py"
+        repo.write_text(
+            f"""
+class EntityManager:
+    def createNamedQuery(self, query):
+        return query
+
+
+class JdbcTemplate:
+    def batchUpdate(self, query):
+        return query
+
+
+entityManager = EntityManager()
+jdbcTemplate = JdbcTemplate()
+
+
+def run_query(name):
+    # [20251215_TEST] Taint should reach Spring/JPA sink
+    return {sink_call}
+"""
+        )
+
+        result = await cross_file_security_scan(
+            project_root=str(temp_project), entry_points=["controller.py"]
+        )
+
+        assert result.success
+        assert result.has_vulnerabilities
+        assert any(v.flow.taint_type == "SQL_QUERY" for v in result.vulnerabilities)
+
 
 class TestComplexVulnerabilityPatterns:
     """Tests for complex vulnerability patterns that are hard to detect."""

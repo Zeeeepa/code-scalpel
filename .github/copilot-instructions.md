@@ -173,6 +173,198 @@ Key components:
 - Mark taint sources explicitly (request.args, user input, etc.)
 - Check sinks at dangerous operations (execute, system, open, render)
 
+## Documentation Management and Organization
+
+### Document Taxonomy
+
+**Project documents are organized into the following structure:**
+
+#### Root-Level Documents (Project Status & Governance)
+Located directly in `/` root:
+- `README.md` - Project overview and quick start guide
+- `SECURITY.md` - Security policies, reporting, and advisories
+- `DEVELOPMENT_ROADMAP.md` - Future features, milestones, and strategic direction
+- `LICENSE` - Legal licensing terms (MIT)
+- `DOCKER_QUICK_START.md` - Quick Docker deployment guide
+
+**Detailed documentation:** 
+- Deployment procedures: `docs/deployment/`
+- Release documentation: `docs/release_notes/`
+
+**Purpose:** Accessibility and project visibility for new contributors and stakeholders.
+
+#### docs/ Directory (Comprehensive Documentation)
+Organized into topical subdirectories:
+
+**Core Documentation:**
+- `docs/INDEX.md` - Master table of contents for all documentation
+- `docs/COMPREHENSIVE_GUIDE.md` - End-to-end guide for all features
+- `docs/DOCUMENT_ORGANIZATION.md` - Documentation organization reference guide
+- `docs/QUICK_REFERENCE_DOCS.md` - Quick lookup guide for finding documentation
+- `docs/getting_started.md` - Getting started for developers
+- `docs/CONTRIBUTING_TO_MCP_REGISTRY.md` - MCP registry contribution guide
+
+**Structured Subdirectories:**
+- `docs/architecture/` - System design, module descriptions, data flows
+- `docs/guides/` - How-to guides and tutorials for specific features
+- `docs/modules/` - Per-module API reference and internal design
+- `docs/parsers/` - Parser implementation details and language support
+- `docs/ci_cd/` - CI/CD pipeline configuration and automation
+- `docs/deployment/` - Deployment procedures, troubleshooting, and infrastructure
+- `docs/compliance/` - Regulatory, security, and audit documentation
+- `docs/release_notes/` - Version-specific release documentation (see below)
+- `docs/release_gate_checklist.md` - Pre-release verification checklist
+- `docs/examples.md` - Code examples and use case demonstrations
+- `docs/agent_integration.md` - Integration guide for AI agents and MCP clients
+- `docs/V1.5.1_TEAM_ONBOARDING.md` - Onboarding guide for team members
+- `docs/internal/` - Internal team documentation, design discussions
+- `docs/research/` - Research findings, benchmarks, experimental work
+
+**Purpose:** Organized, discoverable, topic-specific documentation.
+
+#### docs/release_notes/ (Version-Specific Documentation)
+Format: `RELEASE_NOTES_v{VERSION}.md`
+
+**Content Requirements:**
+- Executive summary of the release
+- New features with examples
+- Bug fixes and improvements
+- Performance metrics and benchmarks
+- Breaking changes and migration guide
+- Known issues and limitations
+- Contributors and acknowledgments
+
+**Examples:**
+- `docs/release_notes/RELEASE_NOTES_v1.5.0.md`
+- `docs/release_notes/RELEASE_NOTES_v1.5.1.md`
+- `docs/release_notes/RELEASE_NOTES_v2.0.0.md`
+
+**Purpose:** Historical record and migration guide for users upgrading versions.
+
+#### release_artifacts/ (Structured Evidence and Validation)
+Organized by version: `release_artifacts/v{VERSION}/`
+
+**Standard Contents:**
+- `v{VERSION}_mcp_tools_evidence.json` - MCP tool specifications and inventory
+- `v{VERSION}_test_evidence.json` - Test execution results, coverage metrics
+- `v{VERSION}_performance_evidence.json` - Benchmark results and comparisons
+- `v{VERSION}_security_evidence.json` - Security scan results and vulnerability status
+- `v{VERSION}_deployment_evidence.json` - Deployment validation results
+
+**Evidence File Structure (JSON):**
+```json
+{
+  "version": "1.5.0",
+  "timestamp": "2025-12-13T10:00:00Z",
+  "metrics": {
+    "test_count": 2045,
+    "coverage_percentage": 95.2,
+    "passing_tests": 2045
+  },
+  "tools_inventory": [
+    {
+      "name": "analyze_code",
+      "status": "stable",
+      "description": "Parse and extract code structure"
+    }
+  ],
+  "acceptance_criteria": {
+    "coverage_threshold_met": true,
+    "security_scan_passed": true,
+    "all_tests_passing": true
+  }
+}
+```
+
+**Purpose:** Audit trail, verification records, and reproducible evidence.
+
+#### examples/ (Code Examples and Demonstrations)
+Contains runnable example code for all integrations:
+- `examples/claude_example.py` - Claude API integration
+- `examples/autogen_example.py` - AutoGen framework example
+- `examples/langchain_example.py` - LangChain integration
+- `examples/crewai_example.py` - CrewAI framework example
+- `examples/security_analysis_example.py` - Security scanning demo
+- `examples/symbolic_execution_example.py` - Symbolic execution demo
+
+**Purpose:** Concrete, executable demonstrations of Code Scalpel capabilities.
+
+### Document Maintenance Rules
+
+**When Adding New Documentation:**
+1. **Classify first:** Determine if document is:
+   - Root-level (project status, governance)
+   - Docs subdirectory (feature/topic documentation)
+   - Release artifacts (evidence and validation)
+   - Examples (runnable code)
+
+2. **File naming:** Use descriptive names with underscores or version tags:
+   - Topics: `TOPIC_DESCRIPTION.md` (e.g., `agent_integration.md`)
+   - Versions: `DOCUMENT_NAME_v{VERSION}.md` (e.g., `RELEASE_NOTES_v1.5.0.md`)
+   - Evidence: `v{VERSION}_{type}_evidence.json` (e.g., `v1.5.0_test_evidence.json`)
+
+3. **Index updates:** 
+   - Update `docs/INDEX.md` to list new documents
+   - Update root `README.md` if document affects project overview
+   - Add to relevant section headers in all-encompassing guides
+
+4. **Cross-references:** Link between documents using markdown relative paths:
+   - Same directory: `[Link text](document.md)`
+   - Different directory: `[Link text](../other_dir/document.md)`
+   - With sections: `[Link text](../path/document.md#section-heading)`
+
+**When Updating Documentation:**
+1. **Change tagging:** Mark documentation updates with version/date:
+   ```markdown
+   > [20251215_DOCS] Updated agent integration examples
+   ```
+
+2. **Consistency check:** Ensure terminology and examples match current codebase
+3. **Link validation:** Test that relative links still work after changes
+4. **TOC updates:** Update table of contents if headers change
+
+**Document Lifecycle:**
+- **Active:** Current version guides, latest release notes
+- **Archived:** Previous release notes (kept for historical reference)
+- **Deprecated:** Old documentation marked as such, kept for reference only
+  ```markdown
+  > **DEPRECATED:** This documentation is outdated. See [new guide](link.md) instead.
+  ```
+
+### Document Quality Standards
+
+**Style Consistency:**
+- Professional, clinical tone (no emojis, no casual language)
+- Markdown headers hierarchically: `#` → `##` → `###`
+- Use code blocks with language specification: ` ```python`
+- Include table of contents in long documents
+
+**Content Accuracy:**
+- Code examples must be tested against current codebase
+- Version numbers must match actual releases
+- API documentation must match actual function signatures
+- Feature claims must be verified against source code
+
+**Accessibility:**
+- Clear section headings for scannability
+- Bullet points for lists (not numbered unless order matters)
+- Tables for comparing options
+- "See also" sections linking related documents
+- Plain English; avoid jargon without explanation
+
+### Documentation Tools and Automation
+
+**Verify Documentation:**
+- Before committing, check all relative links work: `grep -r "\[.*\](.*\.md)" docs/`
+- Validate JSON evidence files: `python -m json.tool release_artifacts/v*/\*.json`
+- Ensure all release notes are in `docs/release_notes/` directory
+
+**Keep Updated:**
+- When releasing a new version, create corresponding release notes and evidence files
+- Update `docs/INDEX.md` to reflect new documentation
+- Archive old release notes (don't delete)
+- Update version references in example files
+
 ## Documentation Style
 
 - **NO EMOJIS:** Professional, clinical tone only.

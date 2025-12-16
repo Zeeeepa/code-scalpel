@@ -373,9 +373,15 @@ def start_mcp_server(
     port: int = 8080,
     allow_lan: bool = False,
     root_path: str | None = None,
+    ssl_certfile: str | None = None,
+    ssl_keyfile: str | None = None,
 ) -> int:
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
     from .mcp.server import run_server
+
+    # [20251215_FEATURE] Determine protocol based on SSL config
+    use_https = ssl_certfile and ssl_keyfile
+    protocol = "https" if use_https else "http"
 
     if transport == "stdio":
         print("Starting Code Scalpel MCP Server (stdio transport)")
@@ -383,21 +389,35 @@ def start_mcp_server(
         print("   Add to your Claude Desktop config or use with MCP Inspector.")
         print("\nPress Ctrl+C to stop.\n")
     else:
-        print(f"Starting Code Scalpel MCP Server (HTTP transport) on {host}:{port}")
-        print(f"   MCP endpoint: http://{host}:{port}/mcp")
+        print(
+            f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}"
+        )
+        print(f"   MCP endpoint: {protocol}://{host}:{port}/sse")
+        if use_https:
+            print("   SSL/TLS: ENABLED")
         if allow_lan:
             print("   LAN access: ENABLED (host validation disabled)")
             print("   WARNING: Only use on trusted networks!")
         print("\nPress Ctrl+C to stop.\n")
 
-    try:
-        run_server(
-            transport=transport,
-            host=host,
-            port=port,
-            allow_lan=allow_lan,
-            root_path=root_path,
+    # [20251216_BUGFIX] Avoid passing SSL kwargs when not configured to maintain compatibility with minimal run_server signatures
+    server_kwargs = {
+        "transport": transport,
+        "host": host,
+        "port": port,
+        "allow_lan": allow_lan,
+        "root_path": root_path,
+    }
+    if use_https:
+        server_kwargs.update(
+            {
+                "ssl_certfile": ssl_certfile,
+                "ssl_keyfile": ssl_keyfile,
+            }
         )
+
+    try:
+        run_server(**server_kwargs)
     except KeyboardInterrupt:
         print("\nMCP Server stopped.")
 
@@ -422,8 +442,12 @@ Examples:
   code-scalpel mcp                            Start MCP server (stdio, for Claude Desktop)
   code-scalpel mcp --http --port 8080         Start MCP server (HTTP transport)
   code-scalpel mcp --http --allow-lan         Start MCP server with LAN access
+  code-scalpel mcp --http --ssl-cert cert.pem --ssl-key key.pem  HTTPS for production/Claude
   code-scalpel server --port 5000             Start REST API server (legacy)
   code-scalpel version                        Show version info
+
+For production deployments with Claude API, use HTTPS:
+  code-scalpel mcp --http --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem
 
 For more information, visit: https://github.com/tescolopio/code-scalpel
         """,
@@ -501,6 +525,17 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         default=None,
         help="Project root directory for context resources (default: current directory)",
     )
+    # [20251215_FEATURE] SSL/TLS support for HTTPS - required for Claude API and production
+    mcp_parser.add_argument(
+        "--ssl-cert",
+        default=None,
+        help="Path to SSL certificate file for HTTPS (required for Claude API)",
+    )
+    mcp_parser.add_argument(
+        "--ssl-key",
+        default=None,
+        help="Path to SSL private key file for HTTPS (required for Claude API)",
+    )
 
     # Version command
     subparsers.add_parser("version", help="Show version information")
@@ -539,11 +574,29 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
 
         allow_lan = getattr(args, "allow_lan", False)
         root_path = getattr(args, "root", None)
+        ssl_certfile = getattr(args, "ssl_cert", None)
+        ssl_keyfile = getattr(args, "ssl_key", None)
 
         if allow_lan and args.host == "127.0.0.1":
             args.host = "0.0.0.0"
 
-        return start_mcp_server(transport, args.host, args.port, allow_lan, root_path)
+            # [20251216_BUGFIX] Align call signature with tests and avoid passing SSL args when not configured
+            start_kwargs = {
+                "transport": transport,
+                "host": args.host,
+                "port": args.port,
+                "allow_lan": allow_lan,
+                "root_path": root_path,
+            }
+            if ssl_certfile and ssl_keyfile:
+                start_kwargs.update(
+                    {
+                        "ssl_certfile": ssl_certfile,
+                        "ssl_keyfile": ssl_keyfile,
+                    }
+                )
+
+            return start_mcp_server(**start_kwargs)
 
     elif args.command == "version":
         print(f"Code Scalpel v{__version__}")

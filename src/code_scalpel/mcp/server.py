@@ -579,7 +579,7 @@ mcp = FastMCP(
 **SURGICAL MODIFICATION (WRITE):**
 - update_symbol: Replace a function/class/method in a file with new code.
   YOU provide only the new symbol - the SERVER handles safe replacement.
-  Example: update_symbol(file_path="/src/utils.py", target_type="function", 
+  Example: update_symbol(file_path="/src/utils.py", target_type="function",
            target_name="calculate_tax", new_code="def calculate_tax(amount): ...")
   Creates backup, validates syntax, preserves surrounding code.
 
@@ -3474,7 +3474,11 @@ def _scan_dependencies_sync(
             osv_ecosystem = (
                 "PyPI"
                 if ecosystem == "python"
-                else "npm" if ecosystem == "javascript" else ecosystem
+                else (
+                    "npm"
+                    if ecosystem == "javascript"
+                    else "Maven" if ecosystem == "maven" else ecosystem
+                )
             )
 
             for pkg in pkg_list:
@@ -4827,6 +4831,8 @@ def run_server(
     port: int = 8080,
     allow_lan: bool = False,
     root_path: str | None = None,
+    ssl_certfile: str | None = None,
+    ssl_keyfile: str | None = None,
 ):
     """
     Run the Code Scalpel MCP server.
@@ -4837,12 +4843,19 @@ def run_server(
         port: Port to bind to (HTTP only)
         allow_lan: Allow connections from LAN (disables host validation)
         root_path: Project root directory (default: current directory)
+        ssl_certfile: Path to SSL certificate file for HTTPS (optional)
+        ssl_keyfile: Path to SSL private key file for HTTPS (optional)
 
     Security Note:
         By default, the HTTP transport only allows connections from localhost.
         Use --allow-lan to enable LAN access. This disables DNS rebinding
         protection and allows connections from any host. Only use on trusted
         networks.
+
+    HTTPS Note:
+        [20251215_FEATURE] For production deployments (especially with Claude API),
+        provide ssl_certfile and ssl_keyfile to enable HTTPS. Both must be specified
+        for HTTPS to be enabled.
     """
     # [20251215_BUGFIX] Configure logging to stderr before anything else
     _configure_logging(transport)
@@ -4863,11 +4876,30 @@ def run_server(
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
     print(f"Project Root: {PROJECT_ROOT}", file=output)
 
+    # [20251215_FEATURE] SSL/HTTPS support for production deployments
+    use_https = ssl_certfile and ssl_keyfile
+    if use_https:
+        print(f"SSL/TLS: ENABLED (cert: {ssl_certfile})", file=output)
+    else:
+        if transport in ("streamable-http", "sse"):
+            print(
+                "SSL/TLS: DISABLED (use --ssl-cert and --ssl-key for HTTPS)",
+                file=output,
+            )
+
     if transport == "streamable-http" or transport == "sse":
         from mcp.server.transport_security import TransportSecuritySettings
 
         mcp.settings.host = host
         mcp.settings.port = port
+
+        # [20251215_FEATURE] Configure SSL if certificates provided
+        if use_https:
+            mcp.settings.ssl_certfile = ssl_certfile
+            mcp.settings.ssl_keyfile = ssl_keyfile
+            protocol = "https"
+        else:
+            protocol = "http"
 
         if allow_lan or host == "0.0.0.0":
             # Disable host validation for LAN access
@@ -4880,19 +4912,28 @@ def run_server(
             print("WARNING: LAN access enabled. Host validation disabled.", file=output)
             print("Only use on trusted networks!", file=output)
 
+        print(f"MCP endpoint: {protocol}://{host}:{port}/sse", file=output)
+
         # [20251215_FEATURE] Register HTTP health endpoint for Docker health checks
-        _register_http_health_endpoint(mcp, host, port)
+        _register_http_health_endpoint(mcp, host, port, ssl_certfile, ssl_keyfile)
 
         mcp.run(transport=transport)
     else:
         mcp.run()
 
 
-def _register_http_health_endpoint(mcp_instance, host: str, port: int):
+def _register_http_health_endpoint(
+    mcp_instance,
+    host: str,
+    port: int,
+    ssl_certfile: str | None = None,
+    ssl_keyfile: str | None = None,
+):
     """
-    Register a simple HTTP /health endpoint for Docker health checks.
+    Register a simple HTTP/HTTPS /health endpoint for Docker health checks.
 
     [20251215_FEATURE] v2.0.0 - HTTP health endpoint that returns immediately.
+    [20251215_FEATURE] HTTPS support for production deployments.
 
     This endpoint is separate from the MCP protocol and provides a simple
     200 OK response for container orchestration health checks.
@@ -4900,6 +4941,8 @@ def _register_http_health_endpoint(mcp_instance, host: str, port: int):
     import threading
     from http.server import HTTPServer, BaseHTTPRequestHandler
     import json
+
+    use_https = ssl_certfile and ssl_keyfile
 
     class HealthHandler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -4911,7 +4954,7 @@ def _register_http_health_endpoint(mcp_instance, host: str, port: int):
                     {
                         "status": "healthy",
                         "version": __version__,
-                        "transport": "http",
+                        "transport": "https" if use_https else "http",
                     }
                 )
                 self.wfile.write(response.encode())
@@ -4929,8 +4972,20 @@ def _register_http_health_endpoint(mcp_instance, host: str, port: int):
         health_port = port + 1
         try:
             server = HTTPServer((host, health_port), HealthHandler)
+
+            # [20251215_FEATURE] Wrap with SSL if certificates provided
+            if use_https:
+                import ssl
+
+                ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                ssl_context.load_cert_chain(ssl_certfile, ssl_keyfile)
+                server.socket = ssl_context.wrap_socket(server.socket, server_side=True)
+                protocol = "https"
+            else:
+                protocol = "http"
+
             logger.info(
-                f"Health endpoint available at http://{host}:{health_port}/health"
+                f"Health endpoint available at {protocol}://{host}:{health_port}/health"
             )
             server.serve_forever()
         except Exception as e:
@@ -4971,6 +5026,15 @@ if __name__ == "__main__":
         "--root",
         help="Project root directory for resources (default: current directory)",
     )
+    # [20251215_FEATURE] SSL/TLS support for HTTPS
+    parser.add_argument(
+        "--ssl-cert",
+        help="Path to SSL certificate file for HTTPS (required for production/Claude)",
+    )
+    parser.add_argument(
+        "--ssl-key",
+        help="Path to SSL private key file for HTTPS (required for production/Claude)",
+    )
 
     args = parser.parse_args()
     run_server(
@@ -4979,4 +5043,6 @@ if __name__ == "__main__":
         port=args.port,
         allow_lan=args.allow_lan,
         root_path=args.root,
+        ssl_certfile=args.ssl_cert,
+        ssl_keyfile=args.ssl_key,
     )

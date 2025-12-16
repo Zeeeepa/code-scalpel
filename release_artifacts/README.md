@@ -17,7 +17,27 @@ release_artifacts/
 │
 └── v1.5.0/          # v1.5.0 "Project Intelligence" release artifacts
     ├── v1.5.0_mcp_tools_evidence.json
-    └── v1.5.0_test_evidence.json
+  └── v1.5.0_test_evidence.json
+    
+  [20251215_DOCS] Added post-v1.5 directories and evidence
+  ├── v2.0.0/          # v2.0.0 "Polyglot" release artifacts
+  │   ├── coverage.xml
+  │   ├── pytest_full.log
+  │   ├── ruff_black.log
+  │   ├── v2.0.0_adversarial_test_evidence.json
+  │   ├── v2.0.0_best_in_class_evidence.json
+  │   ├── v2.0.0_edge_case_evidence.json
+  │   ├── v2.0.0_language_support_evidence.json
+  │   ├── v2.0.0_mcp_tools_evidence.json
+  │   ├── v2.0.0_performance_evidence.json
+  │   ├── v2.0.0_regression_evidence.json
+  │   ├── v2.0.0_test_evidence.json
+  │   └── v2.0.0_vuln_scan_evidence.json
+  │
+  └── v2.0.1/          # v2.0.1 "Maintenance" release artifacts
+    ├── coverage.xml
+    ├── pytest_full.log
+    └── v2.0.1_test_evidence.json
 ```
 
 ## Release Evidence Files

@@ -1,0 +1,60 @@
+{
+  "version": "2.0.1",
+  "timestamp": "2025-12-15T00:00:00Z",
+  "scans": [
+    {
+      "type": "single_file_security_scan",
+      "scenario": "JdbcTemplate.batchUpdate with tainted request param",
+      "tool": "security_scan",
+      "vulnerability_count": 1,
+      "risk_level": "medium",
+      "vulnerabilities": [
+        {
+          "type": "SQL Injection",
+          "cwe": "CWE-89",
+          "severity": "high",
+          "line": 7,
+          "description": "SQL Injection: user input (Dangerous pattern detected)"
+        }
+      ]
+    },
+    {
+      "type": "cross_file_security_scan",
+      "scenario": "controller -> repo -> entityManager.createNamedQuery",
+      "tool": "cross_file_security_scan",
+      "files_analyzed": 2,
+      "vulnerability_count": 1,
+      "risk_level": "medium",
+      "vulnerabilities": [
+        {
+          "type": "SQL Injection",
+          "cwe": "CWE-89",
+          "severity": "HIGH",
+          "source_file": "controller.py",
+          "sink_file": "repo.py",
+          "description": "SQL Injection: Tainted data 'name' flows from controller:7 to dangerous sink at repo:14",
+          "flow": {
+            "source_function": "handler",
+            "source_file": "controller.py",
+            "source_line": 7,
+            "sink_function": "run_query",
+            "sink_file": "repo.py",
+            "sink_line": 14,
+            "flow_path": [
+              "controller.py:handler",
+              "repo.py:run_query"
+            ],
+            "taint_type": "SQL_QUERY"
+          }
+        }
+      ]
+    }
+  ],
+  "acceptance_criteria": {
+    "spring_jpa_single_file_validated": true,
+    "spring_jpa_cross_file_validated": true,
+    "critical_or_high_cves": 0
+  },
+  "status": "IN_PROGRESS",
+  "notes": "Spring/JPA sink validation recorded; no Critical/High CVEs observed in security scan scenarios."
+}

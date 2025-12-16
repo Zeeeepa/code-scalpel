@@ -52,6 +52,7 @@ from z3 import (
     IntVal,
     Not,
     Or,
+    RealVal,
     Solver,
     Sort,
     StringVal,
@@ -1064,7 +1065,11 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         """Evaluate a constant literal."""
         value = expr.value
         if isinstance(value, bool):
+            # [20251215_BUGFIX] Check bool BEFORE int - isinstance(True, int) is True!
             return BoolVal(value)
+        elif isinstance(value, float):
+            # [20251215_FEATURE] Float support using Z3 Real sort
+            return RealVal(value)
         elif isinstance(value, int):
             return IntVal(value)
         elif isinstance(value, str):

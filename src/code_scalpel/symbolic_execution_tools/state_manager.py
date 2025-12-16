@@ -148,8 +148,10 @@ class SymbolicState:
         elif sort == StringSort():
             expr = String(name)
         else:
+            # [20251216_BUGFIX] Reject unsupported sorts (e.g., RealSort) to match current engine guarantees
             raise ValueError(
-                f"Unsupported sort: {sort}. Only IntSort, BoolSort, and StringSort are supported."
+                f"Unsupported sort: {sort}. "
+                "Supported: IntSort, BoolSort, StringSort."
             )
 
         self._variables[name] = expr

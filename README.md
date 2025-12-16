@@ -362,10 +362,27 @@ docker run -p 8593:8593 -v $(pwd):/app/code code-scalpel
 
 ## Documentation
 
-- [Getting Started](docs/getting_started.md)
-- [API Reference](docs/api_reference.md)
-- [Agent Integration Guide](docs/agent_integration.md)
-- [Demo Suite](demos/README.md)
+**Getting Started:**
+- [docs/getting_started.md](docs/getting_started.md) - Step-by-step developer guide
+- [docs/QUICK_REFERENCE_DOCS.md](docs/QUICK_REFERENCE_DOCS.md) - Quick lookup guide for finding documentation
+
+**Organization & Guidelines:**
+- [docs/DOCUMENT_ORGANIZATION.md](docs/DOCUMENT_ORGANIZATION.md) - Complete documentation organization reference
+- [docs/BEFORE_AFTER_ORGANIZATION.md](docs/BEFORE_AFTER_ORGANIZATION.md) - Visual before/after of documentation structure
+- [docs/INDEX.md](docs/INDEX.md) - Master table of contents for all documentation
+
+**Integration & Examples:**
+- [docs/agent_integration.md](docs/agent_integration.md) - AI agent integration guide
+- [docs/examples.md](docs/examples.md) - Code examples and use cases
+- [examples/](examples/) - Runnable integration examples
+
+**Deployment:**
+- [DOCKER_QUICK_START.md](DOCKER_QUICK_START.md) - Quick Docker deployment
+- [docs/deployment/](docs/deployment/) - Comprehensive deployment procedures and troubleshooting
+
+**Security & Compliance:**
+- [SECURITY.md](SECURITY.md) - Security policies and reporting
+- [docs/compliance/](docs/compliance/) - Regulatory and audit documentation
 
 ## Contributing
 

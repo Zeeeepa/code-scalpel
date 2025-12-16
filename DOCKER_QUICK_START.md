@@ -1,19 +1,19 @@
-# Code Scalpel v1.5.3 "PathSmart" - Docker Deployment Quick Start
+# Code Scalpel v2.0.0 - Docker Deployment Quick Start
 
-**Release Date:** December 14, 2025  
-**Version:** 1.5.3  
-**Docker Image:** code-scalpel:1.5.3  
+**Release Date:** December 15, 2025  
+**Version:** 2.0.0  
+**Docker Image:** code-scalpel:2.0.0  
 **Status:** FULLY DEPLOYED AND TESTED
 
 ## One-Command Quick Start
 
 ```bash
-# Single command to get Code Scalpel running
+# Single command to get Code Scalpel running (HTTP)
 docker run -d \
   --name code-scalpel-mcp \
   -p 8593:8593 \
   -v $(pwd):/workspace \
-  code-scalpel:1.5.3
+  code-scalpel:2.0.0
 
 # Verify it's running
 curl http://localhost:8593/sse
@@ -21,23 +21,58 @@ curl http://localhost:8593/sse
 # Connect your MCP client to: http://localhost:8593
 ```
 
-## What's New in v1.5.3 "PathSmart"
+## HTTPS Quick Start (For Claude API / Production)
+
+```bash
+# Generate self-signed certificates (or use your own)
+mkdir -p certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=localhost"
+
+# Run with HTTPS enabled
+docker run -d \
+  --name code-scalpel-mcp-https \
+  -p 8443:8593 \
+  -v $(pwd):/workspace \
+  -v $(pwd)/certs:/certs:ro \
+  -e SSL_CERT=/certs/cert.pem \
+  -e SSL_KEY=/certs/key.pem \
+  code-scalpel:2.0.0
+
+# Verify HTTPS is working
+curl -k https://localhost:8443/sse
+
+# Connect Claude API to: https://localhost:8443
+```
+
+## What's New in v2.0.0
 
 ### Key Features
 
-1. **Intelligent Path Resolution** - PathResolver module handles paths across:
+1. **HTTPS/SSL Support** - Production-ready secure connections:
+   - Mount SSL certificates to enable HTTPS
+   - Required for Claude API integration
+   - Self-signed or CA-signed certificates supported
+
+2. **Full Float Support** - Symbolic execution now handles floats:
+   - Float constants (3.14159)
+   - Float function parameters
+   - Mixed int/float arithmetic
+
+3. **Intelligent Path Resolution** - PathResolver module handles paths across:
    - Local development environments
    - Docker containers (auto-detected)
    - Remote systems
    - Multi-project workspaces
 
-2. **Docker-Aware Error Messages** - When files aren't found, get helpful suggestions:
+4. **Docker-Aware Error Messages** - When files aren't found, get helpful suggestions:
    ```
    Suggestion: Mount your project root:
-     docker run -v /path/to/project:/workspace code-scalpel:1.5.3
+     docker run -v /path/to/project:/workspace code-scalpel:2.0.0
    ```
 
-3. **validate_paths MCP Tool** - New tool to check path accessibility before analysis:
+5. **validate_paths MCP Tool** - Check path accessibility before analysis:
    ```python
    # Check multiple paths at once
    result = validate_paths(["/workspace/main.py", "/workspace/utils.py"])
@@ -45,23 +80,42 @@ curl http://localhost:8593/sse
        print(f"Inaccessible: {result.inaccessible}")
    ```
 
-4. **Path Caching** - 10x faster repeated path resolutions
-
-5. **Auto-Docker Detection** - Automatically detects and adjusts for Docker environment
-
 ## Deployment Options
 
-### Option 1: Simple Docker Run (Recommended for local development)
+### Option 1: Simple Docker Run (HTTP - Local Development)
 
 ```bash
 docker run -d \
   --name code-scalpel-mcp \
   -p 8593:8593 \
   -v $(pwd):/workspace \
-  code-scalpel:1.5.3
+  code-scalpel:2.0.0
 ```
 
-### Option 2: Docker Compose (Recommended for production)
+### Option 2: HTTPS with Docker Run (Production / Claude API)
+
+```bash
+# Step 1: Create certificates directory and generate certs
+mkdir -p certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=your-domain.com"
+
+# Step 2: Run with HTTPS
+docker run -d \
+  --name code-scalpel-mcp-https \
+  -p 8443:8593 \
+  -p 8444:8594 \
+  -v $(pwd):/workspace \
+  -v $(pwd)/certs:/certs:ro \
+  -e SSL_CERT=/certs/cert.pem \
+  -e SSL_KEY=/certs/key.pem \
+  code-scalpel:2.0.0
+
+# Connect Claude to: https://your-domain.com:8443
+```
+
+### Option 3: Docker Compose (HTTP)
 
 ```bash
 # Using included docker-compose.yml
@@ -77,19 +131,36 @@ docker compose logs -f mcp-server
 docker compose down
 ```
 
-### Option 3: Custom Port or Directory
+### Option 4: Docker Compose (HTTPS)
 
 ```bash
-# Use different port on host
-docker run -d \
-  -p 9999:8593 \
-  -v /path/to/project:/workspace \
-  code-scalpel:1.5.3
+# Set up certificates first
+mkdir -p certs
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=localhost"
 
-# Then connect to http://localhost:9999
+# Start HTTPS server
+SSL_CERT_DIR=./certs docker compose up -d mcp-server-https
+
+# Connect to: https://localhost:8443
 ```
 
-### Option 4: With Resource Limits
+### Option 5: Custom Port with HTTPS
+
+```bash
+docker run -d \
+  -p 443:8593 \
+  -v /path/to/project:/workspace \
+  -v /etc/letsencrypt/live/yourdomain.com:/certs:ro \
+  -e SSL_CERT=/certs/fullchain.pem \
+  -e SSL_KEY=/certs/privkey.pem \
+  code-scalpel:2.0.0
+
+# Connect to: https://yourdomain.com
+```
+
+### Option 6: With Resource Limits
 
 ```bash
 docker run -d \
