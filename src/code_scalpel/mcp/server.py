@@ -3045,6 +3045,253 @@ Please proceed with Step 1 to begin extracting the function."""
 
 
 # ============================================================================
+# v2.2.0 WORKFLOW PROMPTS - Guided Multi-Step Workflows
+# [20251216_FEATURE] Feature 10: Workflow Prompts for common AI agent tasks
+# ============================================================================
+
+
+@mcp.prompt(title="Security Audit Workflow")
+def security_audit_workflow_prompt(project_path: str) -> str:
+    """
+    [20251216_FEATURE] Guide an AI agent through a comprehensive security audit.
+    
+    This is a complete workflow prompt that guides through:
+    1. Project structure analysis
+    2. Vulnerability scanning
+    3. Dependency checking
+    4. Report generation
+    
+    Args:
+        project_path: Path to the project root
+    """
+    return f"""## Security Audit Workflow for {project_path}
+
+Follow these steps to perform a comprehensive security audit:
+
+### Step 1: Project Analysis
+Use `crawl_project` to understand the codebase structure:
+```
+crawl_project(
+    project_root="{project_path}"
+)
+```
+
+This will identify:
+- All Python/JavaScript/TypeScript files
+- Entry points and main modules
+- Overall project structure
+
+### Step 2: Vulnerability Scan
+Use `security_scan` on each Python/JavaScript/TypeScript file discovered.
+For each file with potential security issues:
+```
+security_scan(
+    code=<file_contents>,
+    filename=<file_path>
+)
+```
+
+For multi-file taint analysis, use:
+```
+cross_file_security_scan(
+    project_root="{project_path}",
+    entry_point=<main_file>
+)
+```
+
+### Step 3: Dependency Check
+Use `scan_dependencies` to check for known CVEs:
+```
+scan_dependencies(
+    project_path="{project_path}"
+)
+```
+
+This checks:
+- Python: requirements.txt, Pipfile, poetry.lock
+- JavaScript/TypeScript: package.json, package-lock.json
+- Known vulnerabilities from OSV database
+
+### Step 4: Report Generation
+Compile findings into a prioritized report with:
+
+**CRITICAL** (Immediate action required):
+- SQL Injection vulnerabilities
+- Command Injection vulnerabilities
+- Hardcoded secrets/credentials
+- Known CVEs with exploit availability
+
+**HIGH** (Address within 1 week):
+- XSS vulnerabilities
+- Path Traversal issues
+- Insecure deserialization
+- Authentication bypasses
+
+**MEDIUM** (Address within 1 month):
+- Information disclosure
+- Weak cryptography
+- Missing input validation
+
+**LOW** (Nice to fix):
+- Code quality issues
+- Minor security improvements
+- Best practice recommendations
+
+For each finding, include:
+- **Location**: File path and line number
+- **Severity**: CRITICAL/HIGH/MEDIUM/LOW
+- **Description**: What the vulnerability is
+- **Impact**: What could go wrong
+- **Remediation**: How to fix it
+- **Code Example**: Show the vulnerable code and fixed version
+
+Begin by running `crawl_project("{project_path}")` to start the audit.
+"""
+
+
+@mcp.prompt(title="Safe Refactor Workflow")
+def safe_refactor_workflow_prompt(file_path: str, symbol_name: str) -> str:
+    """
+    [20251216_FEATURE] Guide an AI agent through a safe refactoring operation.
+    
+    This workflow ensures refactoring is done safely with validation:
+    1. Extract current implementation
+    2. Find all usages
+    3. Plan changes
+    4. Simulate refactor
+    5. Apply changes (only if safe)
+    
+    Args:
+        file_path: Path to the file containing the symbol
+        symbol_name: Name of the function/class to refactor
+    """
+    return f"""## Safe Refactor Workflow for {symbol_name} in {file_path}
+
+### Step 1: Extract Current Implementation
+Use `extract_code` to get the current implementation:
+```
+extract_code(
+    file_path="{file_path}",
+    target_name="{symbol_name}",
+    include_context=True
+)
+```
+
+Review the extracted code to understand:
+- Current function signature
+- Dependencies (imports, other functions)
+- Complexity and structure
+- Existing patterns
+
+### Step 2: Find All Usages
+Use `get_symbol_references` to find all call sites:
+```
+get_symbol_references(
+    symbol_name="{symbol_name}",
+    project_root="<project_root>"
+)
+```
+
+Document all locations where {symbol_name} is:
+- Called/invoked
+- Imported
+- Referenced in type annotations
+- Used in tests
+
+### Step 3: Plan Changes
+List all changes needed across files:
+
+**Primary Changes** (in {file_path}):
+- [ ] Function signature modifications
+- [ ] Logic improvements
+- [ ] Error handling updates
+- [ ] Documentation updates
+
+**Secondary Changes** (in dependent files):
+- [ ] Update imports if renaming
+- [ ] Update call sites if signature changes
+- [ ] Update type annotations if types change
+- [ ] Update tests to match new behavior
+
+**Risk Assessment**:
+- Breaking changes: YES/NO
+- Number of dependent files: <count>
+- Test coverage: <percentage>
+
+### Step 4: Simulate Refactor
+Use `simulate_refactor` to verify changes are safe:
+```
+simulate_refactor(
+    original_code=<current_implementation>,
+    new_code=<your_refactored_code>,
+    strict_mode=True
+)
+```
+
+The simulation will check:
+- Function signature compatibility
+- Return type consistency
+- Exception handling preservation
+- Side effect changes
+
+**DO NOT PROCEED** if simulation fails or shows warnings.
+
+### Step 5: Apply Changes
+Only if simulation passes with no warnings:
+
+For the primary file:
+```
+update_symbol(
+    file_path="{file_path}",
+    target_type="function",  # or "class"
+    target_name="{symbol_name}",
+    new_code=<your_refactored_code>,
+    create_backup=True
+)
+```
+
+For dependent files (if needed):
+- Update each file manually or with update_symbol
+- Update imports using extract_code + update_symbol
+- Verify each change with simulation
+
+### Step 6: Verify
+After applying changes:
+
+1. **Run Tests**:
+   - Unit tests for {symbol_name}
+   - Integration tests for dependent code
+   - Full test suite if breaking changes
+
+2. **Check Linters**:
+   - Run static analysis tools
+   - Check type checking (mypy, TypeScript)
+   - Verify code formatting
+
+3. **Review Changes**:
+   - Use git diff to review all changes
+   - Verify backup files were created
+   - Check that all usages were updated
+
+### Rollback Plan
+If anything goes wrong:
+1. Restore from .bak backup files
+2. Run tests to verify rollback
+3. Investigate what went wrong before retrying
+
+### Safety Checklist
+- [ ] Step 1: Current code extracted
+- [ ] Step 2: All usages found
+- [ ] Step 3: Changes planned and reviewed
+- [ ] Step 4: Simulation passed
+- [ ] Step 5: Changes applied with backups
+- [ ] Step 6: Tests passing
+
+Begin by running `extract_code(file_path="{file_path}", target_name="{symbol_name}")` to extract the current implementation.
+"""
+
+
+# ============================================================================
 # v1.4.0 MCP TOOLS - Enhanced AI Context
 # ============================================================================
 
