@@ -10,7 +10,6 @@ This module provides CrewAI agents and tools that:
 - Apply fixes with security scanning
 """
 
-
 try:
     from crewai import Agent, Task, Crew
     from crewai.tools import BaseTool
