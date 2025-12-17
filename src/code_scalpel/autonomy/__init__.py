@@ -26,6 +26,7 @@ Features:
 Usage:
     from code_scalpel.autonomy import (
         ErrorToDiffEngine,
+        ErrorAnalysis,
         FixLoop,
         MutationTestGate,
     )
@@ -36,39 +37,17 @@ Usage:
     
     # Create fix loop for automated repair
     fix_loop = FixLoop(max_attempts=5, max_duration_seconds=300)
-    
-    # Run fix loop
-    result = fix_loop.run(
-        initial_error="NameError: name 'x' is not defined",
-        source_code=buggy_code,
-        language="python",
-        sandbox=sandbox_executor,
-        error_engine=error_to_diff_engine,
-        project_path="/path/to/project"
-    )
-    
-    # Validate fix with mutation testing
-    mutation_gate = MutationTestGate(sandbox=sandbox_executor)
-    gate_result = mutation_gate.validate_fix(
-        original_code=buggy_code,
-        fixed_code=fixed_code,
-        test_files=["tests/test_feature.py"],
-        language="python"
-    )
-    
-    if gate_result.hollow_fix_detected:
-        print("ALERT: Hollow fix detected!")
 
 References:
 - DEVELOPMENT_ROADMAP.md: v3.0.0 Autonomy specifications
 - docs/: Architecture and design documentation
 """
 
-# [20251217_FEATURE] Error-to-Diff Engine (merged from main)
+# [20251217_FEATURE] Error-to-Diff Engine (primary exports)
 from code_scalpel.autonomy.error_to_diff import (
     ErrorType,
-    FixHint as ErrorToFixHint,
-    ErrorAnalysis as ErrorToAnalysis,
+    FixHint,
+    ErrorAnalysis,
     ErrorToDiffEngine,
     ParsedError,
 )
@@ -89,10 +68,10 @@ from code_scalpel.autonomy.mutation_gate import (
     MutationType,
 )
 
-# [20251217_FEATURE] Stubs for external implementations
+# [20251217_FEATURE] Stubs for external implementations (aliased to avoid conflicts)
 from code_scalpel.autonomy.stubs import (
-    ErrorAnalysis,
-    FixHint,
+    ErrorAnalysis as StubErrorAnalysis,
+    FixHint as StubFixHint,
     FileChange,
     ExecutionTestResult,
     SandboxResult,
@@ -101,12 +80,12 @@ from code_scalpel.autonomy.stubs import (
 )
 
 __all__ = [
-    # Error-to-Diff Engine
+    # Error-to-Diff Engine (primary)
     "ErrorType",
+    "FixHint",
+    "ErrorAnalysis",
     "ErrorToDiffEngine",
     "ParsedError",
-    "ErrorToFixHint",
-    "ErrorToAnalysis",
     # Fix Loop
     "FixLoop",
     "FixLoopResult",
@@ -117,9 +96,9 @@ __all__ = [
     "MutationResult",
     "Mutation",
     "MutationType",
-    # Stubs (for external implementations)
-    "ErrorAnalysis",
-    "FixHint",
+    # Stubs (aliased for advanced usage)
+    "StubErrorAnalysis",
+    "StubFixHint",
     "FileChange",
     "ExecutionTestResult",
     "SandboxResult",
