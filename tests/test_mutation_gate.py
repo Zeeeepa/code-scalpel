@@ -46,6 +46,41 @@ def create_passing_result():
     )
 
 
+def create_responses(fixed_passes=True, revert_fails=True, additional_caught=5):
+    """
+    Helper to create standard mutation test response sequence.
+
+    [20251217_REFACTOR] Reduce test setup verbosity per PR review comment.
+
+    Args:
+        fixed_passes: Whether fixed code passes tests (sanity check)
+        revert_fails: Whether reverting fix causes tests to fail (genuine fix)
+        additional_caught: Number of additional mutations that should be caught
+
+    Returns:
+        List of SandboxResult objects for mock side_effect
+    """
+    responses = []
+
+    # First response: fixed code
+    if fixed_passes:
+        responses.append(create_passing_result())
+    else:
+        responses.append(create_failing_result())
+
+    # Second response: revert test
+    if revert_fails:
+        responses.append(create_failing_result())
+    else:
+        responses.append(create_passing_result())
+
+    # Additional mutation responses (caught = fail, survived = pass)
+    for _ in range(additional_caught):
+        responses.append(create_failing_result())
+
+    return responses
+
+
 class TestMutationGateHollowFixDetection:
     """Test hollow fix detection (P0)."""
 
@@ -86,49 +121,10 @@ class TestMutationGateHollowFixDetection:
         # Setup - fixed code passes, original code fails (genuine fix!)
         sandbox = Mock(spec=SandboxExecutor)
 
-        # Provide enough responses for revert + potential additional mutations
-        responses = [
-            # First call: fixed_code passes
-            SandboxResult(
-                success=True,
-                all_passed=True,
-                stdout="All tests passed",
-                stderr="",
-                execution_time_ms=100,
-                tests=[
-                    ExecutionTestResult(
-                        name="test_feature", passed=True, duration_ms=50
-                    )
-                ],
-            ),
-            # Second call: original_code fails (revert)
-            SandboxResult(
-                success=False,
-                all_passed=False,
-                stdout="",
-                stderr="Test failed",
-                execution_time_ms=100,
-                tests=[
-                    ExecutionTestResult(
-                        name="test_feature", passed=False, duration_ms=50
-                    )
-                ],
-            ),
-        ]
-        # Add up to 5 more responses for additional mutations (all caught)
-        for _ in range(5):
-            responses.append(
-                SandboxResult(
-                    success=False,
-                    all_passed=False,
-                    stdout="",
-                    stderr="",
-                    execution_time_ms=100,
-                    tests=[],
-                )
-            )
-
-        sandbox.run_tests.side_effect = responses
+        # [20251217_REFACTOR] Use helper to reduce verbosity
+        sandbox.run_tests.side_effect = create_responses(
+            fixed_passes=True, revert_fails=True, additional_caught=5
+        )
 
         # Execute
         gate = MutationTestGate(sandbox=sandbox, min_mutation_score=1.0)

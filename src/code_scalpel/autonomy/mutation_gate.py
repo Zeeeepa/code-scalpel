@@ -129,6 +129,7 @@ class MutationTestGate:
         self,
         sandbox: SandboxExecutor,
         min_mutation_score: float = 0.8,  # 80% of mutations must be caught
+        max_additional_mutations: int = 5,  # [20251217_FEATURE] Configurable per PR review
     ):
         """
         Initialize mutation test gate.
@@ -136,9 +137,11 @@ class MutationTestGate:
         Args:
             sandbox: Sandbox executor for running tests
             min_mutation_score: Minimum mutation score to pass (default: 0.8)
+            max_additional_mutations: Maximum additional mutations to test (default: 5)
         """
         self.sandbox = sandbox
         self.min_mutation_score = min_mutation_score
+        self.max_additional_mutations = max_additional_mutations
 
     def validate_fix(
         self,
@@ -212,7 +215,7 @@ class MutationTestGate:
         # [20251217_FEATURE] P0: Step 3: Additional mutations for thoroughness
         additional_mutations = self._generate_mutations(fixed_code, language)
 
-        for mutation in additional_mutations[:5]:  # Limit to 5 additional mutations
+        for mutation in additional_mutations[: self.max_additional_mutations]:
             result = self._test_mutation(
                 mutated_code=mutation.code,
                 test_files=test_files,
@@ -285,21 +288,35 @@ class MutationTestGate:
                 # Cannot parse - return empty list
                 return mutations
 
+            # [20251217_BUGFIX] Track node identity to avoid duplicate mutations
+            # per PR review - ast.walk() returns nodes in arbitrary order
+            seen_nodes: set[int] = set()
+
             # [20251217_FEATURE] P0: Mutation: Negate conditions
             for node in ast.walk(tree):
                 if isinstance(node, ast.If):
+                    node_id = id(node)
+                    if node_id in seen_nodes:
+                        continue
+                    seen_nodes.add(node_id)
+
                     mutated_tree = copy.deepcopy(tree)
-                    # Find and negate the condition
+                    # Find the matching node in the copy by line and col offset
                     for m_node in ast.walk(mutated_tree):
-                        if isinstance(m_node, ast.If) and m_node.lineno == node.lineno:
+                        if (
+                            isinstance(m_node, ast.If)
+                            and m_node.lineno == node.lineno
+                            and m_node.col_offset == node.col_offset
+                        ):
                             m_node.test = ast.UnaryOp(op=ast.Not(), operand=m_node.test)
+                            break
 
                     try:
                         mutations.append(
                             Mutation(
                                 type=MutationType.NEGATE_CONDITION,
                                 code=ast.unparse(mutated_tree),
-                                description=f"Negated condition at line {node.lineno}",
+                                description=f"Negated condition at line {node.lineno}:{node.col_offset}",
                             )
                         )
                     except Exception:
@@ -307,22 +324,31 @@ class MutationTestGate:
                         pass
 
             # [20251217_FEATURE] P0: Mutation: Change return values
+            seen_nodes.clear()  # Reset for next mutation type
             for node in ast.walk(tree):
                 if isinstance(node, ast.Return) and node.value:
+                    node_id = id(node)
+                    if node_id in seen_nodes:
+                        continue
+                    seen_nodes.add(node_id)
+
                     mutated_tree = copy.deepcopy(tree)
+                    # Find the matching node in the copy by line and col offset
                     for m_node in ast.walk(mutated_tree):
                         if (
                             isinstance(m_node, ast.Return)
                             and m_node.lineno == node.lineno
+                            and m_node.col_offset == node.col_offset
                         ):
                             m_node.value = ast.Constant(value=None)
+                            break
 
                     try:
                         mutations.append(
                             Mutation(
                                 type=MutationType.NULL_RETURN,
                                 code=ast.unparse(mutated_tree),
-                                description=f"Changed return to None at line {node.lineno}",
+                                description=f"Changed return to None at line {node.lineno}:{node.col_offset}",
                             )
                         )
                     except Exception:
