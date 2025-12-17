@@ -16,6 +16,9 @@ safety guarantees:
 4. Audit Trail: Cryptographically-hashed immutable audit log of all
    autonomous operations for compliance and debugging.
 
+5. Framework Integrations: LangGraph state machines, CrewAI tools,
+   and AutoGen function schemas for multi-agent workflows.
+
 Features:
 - Multi-language error parsing (Python, TypeScript, Java)
 - Confidence-scored fix generation
@@ -25,6 +28,7 @@ Features:
 - Full audit trail with SHA-256 hashing
 - Hollow fix detection via mutation testing
 - Mutation score calculation
+- LangGraph, CrewAI, AutoGen integrations
 
 Usage:
     from code_scalpel.autonomy import (
@@ -33,6 +37,13 @@ Usage:
         FixLoop,
         MutationTestGate,
         AutonomyAuditTrail,
+    )
+    
+    # For framework integrations:
+    from code_scalpel.autonomy.integrations import (
+        create_scalpel_fix_graph,  # LangGraph
+        create_scalpel_fix_crew,   # CrewAI
+        create_scalpel_autogen_agents,  # AutoGen
     )
 
 References:
