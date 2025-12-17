@@ -21,16 +21,28 @@ try:
 
     print("=== CrewAI Autonomy Integration Demo ===\n")
 
-    # Create the crew
-    crew = create_scalpel_fix_crew()
+    # Try to create the crew (requires LLM configuration)
+    try:
+        crew = create_scalpel_fix_crew()
+        crew_created = True
+    except Exception as e:
+        crew_created = False
+        print("Note: Crew creation requires LLM configuration (e.g., OPENAI_API_KEY)")
+        print(f"Error: {e}\n")
 
-    print("Crew created with agents:")
-    for agent in crew.agents:
-        print(f"  - {agent.role}: {agent.goal}")
+    if crew_created:
+        print("Crew created with agents:")
+        for agent in crew.agents:
+            print(f"  - {agent.role}: {agent.goal}")
 
-    print("\nTasks:")
-    for i, task in enumerate(crew.tasks):
-        print(f"  {i+1}. {task.description}")
+        print("\nTasks:")
+        for i, task in enumerate(crew.tasks):
+            print(f"  {i+1}. {task.description}")
+    else:
+        print("Crew structure (would be created with proper configuration):")
+        print("  - Error Analyzer: Analyze code errors and identify root causes")
+        print("  - Fix Generator: Generate correct code fixes based on error analysis")
+        print("  - Fix Validator: Validate fixes don't break existing functionality")
 
     # Example 1: Simple syntax error
     print("\n=== Example 1: Syntax Error ===")
@@ -42,9 +54,7 @@ def greet(name)
     # Note: Running the crew requires LLM configuration (OpenAI API key, etc.)
     # This is a demonstration of the structure
     print(f"Code to fix:\n{buggy_code}")
-    print(
-        "\nTo run this crew, you need to configure an LLM (OpenAI, Anthropic, etc.)"
-    )
+    print("\nTo run this crew, you need to configure an LLM (OpenAI, Anthropic, etc.)")
     print("Set environment variables like OPENAI_API_KEY")
 
     # Example 2: Security vulnerability
@@ -57,15 +67,9 @@ def run_query(user_input):
 
     print(f"Code to fix:\n{vulnerable_code}")
     print("\nThe crew would:")
-    print(
-        "  1. Error Analyzer: Identify SQL injection vulnerability (CWE-89)"
-    )
-    print(
-        "  2. Fix Generator: Generate parameterized query using ? placeholders"
-    )
-    print(
-        "  3. Fix Validator: Validate fix is secure and functionally correct"
-    )
+    print("  1. Error Analyzer: Identify SQL injection vulnerability (CWE-89)")
+    print("  2. Fix Generator: Generate parameterized query using ? placeholders")
+    print("  3. Fix Validator: Validate fix is secure and functionally correct")
 
     # Example 3: Demonstrating the tools
     print("\n=== Available Tools ===")

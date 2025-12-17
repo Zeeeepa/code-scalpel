@@ -33,9 +33,7 @@ def calculate(x, y)
 
     # Analyze error
     print("1. Analyzing error...")
-    analysis = scalpel_analyze_error_impl(
-        buggy_code, "SyntaxError: invalid syntax"
-    )
+    analysis = scalpel_analyze_error_impl(buggy_code, "SyntaxError: invalid syntax")
     print(f"   Analysis: {analysis}")
 
     # Apply fix (in real scenario, would apply actual fix)
@@ -70,19 +68,17 @@ def calculate(x, y):
             }
         )
 
-        print(f"Created agents:")
+        print("Created agents:")
         print(f"  - Coder: {coder.name}")
         print(f"  - Reviewer: {reviewer.name}")
 
         print("\nAgent capabilities:")
-        print(f"  Coder system message preview:")
+        print("  Coder system message preview:")
         print(f"    {coder.system_message[:100]}...")
 
-        print(f"\n  Reviewer config:")
+        print("\n  Reviewer config:")
         print(f"    Work dir: {reviewer.code_execution_config.get('work_dir')}")
-        print(
-            f"    Use Docker: {reviewer.code_execution_config.get('use_docker')}"
-        )
+        print(f"    Use Docker: {reviewer.code_execution_config.get('use_docker')}")
 
         print("\n  Available functions:")
         print("    - scalpel_analyze_error")
@@ -116,17 +112,13 @@ def run_command(user_input):
     print(vulnerable_code)
 
     validation = scalpel_validate_impl(vulnerable_code)
-    print(f"\nValidation result:")
+    print("\nValidation result:")
     print(f"  Safe to apply: {validation.get('safe_to_apply')}")
-    print(
-        f"  Vulnerabilities found: {validation.get('vulnerabilities', 0)}"
-    )
+    print(f"  Vulnerabilities found: {validation.get('vulnerabilities', 0)}")
 
     print("\n=== AutoGen Integration Demo Complete ===")
     print("The agents use function calling to work with Code Scalpel tools")
-    print(
-        "Docker sandbox execution provides isolation for testing code changes"
-    )
+    print("Docker sandbox execution provides isolation for testing code changes")
 
 except ImportError as e:
     print(f"Error: {e}")

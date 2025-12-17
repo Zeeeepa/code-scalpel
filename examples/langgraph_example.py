@@ -97,9 +97,7 @@ def execute_command(user_input):
     for i, attempt in enumerate(result["fix_attempts"]):
         step = attempt.get("step")
         vulnerabilities = attempt.get("vulnerabilities", "N/A")
-        print(
-            f"  Attempt {i+1}: {step} (vulnerabilities: {vulnerabilities})"
-        )
+        print(f"  Attempt {i+1}: {step} (vulnerabilities: {vulnerabilities})")
 
     print("\n=== LangGraph Integration Demo Complete ===")
     print(

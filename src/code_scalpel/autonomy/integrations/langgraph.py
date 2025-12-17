@@ -10,7 +10,7 @@ This module provides a LangGraph-based fix loop that:
 - Applies fixes or escalates to human
 """
 
-from typing import Annotated, TypedDict
+from typing import TypedDict
 
 try:
     from langgraph.graph import StateGraph, END
@@ -46,7 +46,7 @@ def analyze_error_node(state: ScalpelState) -> ScalpelState:
 
         # Parse code to detect syntax errors
         try:
-            tree = analyzer.parse_to_ast(code)
+            analyzer.parse_to_ast(code)
             analysis = {
                 "type": "runtime_error",
                 "message": error,
@@ -90,15 +90,11 @@ def generate_fix_node(state: ScalpelState) -> ScalpelState:
     [20251217_FEATURE] Fix generation using symbolic execution.
     """
     try:
-        from ...symbolic_execution_tools import SymbolicAnalyzer
-
-        code = state["code"]
+        # code = state["code"]  # Reserved for future use
         fix_attempts = state.get("fix_attempts", [])
 
         # Get last analysis
-        last_analysis = (
-            fix_attempts[-1].get("analysis") if fix_attempts else None
-        )
+        last_analysis = fix_attempts[-1].get("analysis") if fix_attempts else None
 
         if not last_analysis:
             fix_attempts.append(
@@ -188,9 +184,7 @@ def validate_fix_node(state: ScalpelState) -> ScalpelState:
         validation = {
             "step": "validate_fix",
             "validation": (
-                "passed"
-                if not result.has_vulnerabilities
-                else "failed_security"
+                "passed" if not result.has_vulnerabilities else "failed_security"
             ),
             "vulnerabilities": result.vulnerability_count,
         }

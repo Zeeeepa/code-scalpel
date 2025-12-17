@@ -9,7 +9,7 @@ This module provides AutoGen agents with Code Scalpel tools that:
 - Validate fixes in Docker sandbox
 """
 
-from typing import Any, Callable
+from typing import Any
 
 try:
     from autogen import AssistantAgent, UserProxyAgent
