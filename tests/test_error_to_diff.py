@@ -302,18 +302,19 @@ class TestExplanations:
     def test_explanation_is_descriptive(self):
         """[P0] Test that explanations are descriptive."""
         engine = ErrorToDiffEngine(project_root="/tmp")
-        error_output = """NameError: name 'typo' is not defined"""
+        # [20251217_BUGFIX] Use similar names so typo correction can find a match
+        error_output = """NameError: name 'vaule' is not defined"""
 
-        source_code = """correct = 42
-result = typo"""
+        source_code = """value = 42
+result = vaule"""
 
         analysis = engine.analyze_error(error_output, "python", source_code)
 
-        # Should have at least one explanation mentioning the issue
+        # Should have at least one explanation mentioning the fix
         assert any(
-            "typo" in fix.explanation.lower() or "fix" in fix.explanation.lower()
+            "vaule" in fix.explanation.lower() or "fix" in fix.explanation.lower()
             for fix in analysis.fixes
-        )
+        ), f"Expected fix explanation, got: {[f.explanation for f in analysis.fixes]}"
 
 
 class TestAlternativeFixes:
