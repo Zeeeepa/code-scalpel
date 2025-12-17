@@ -41,6 +41,8 @@ class FileChange:
 
 
 @dataclass
+# [20251217_DOCS] Keep this name (not "TestResult") to avoid pytest collection
+# conflicts with common TestResult types during test discovery.
 class ExecutionTestResult:
     """Result of a single test execution."""
 

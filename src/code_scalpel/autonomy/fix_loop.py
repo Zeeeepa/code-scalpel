@@ -98,9 +98,7 @@ class FixLoopResult:
     success: bool
     final_fix: Optional[FixHint]
     attempts: List[FixAttempt]
-    termination_reason: (
-        str  # "success", "max_attempts", "timeout", "no_fixes", "human_escalation"
-    )
+    termination_reason: str  # "success", "max_attempts", "timeout", "no_fixes", "human_escalation"  # [20251217_BUGFIX] Normalize annotation layout for parser compatibility
     escalated_to_human: bool
     total_duration_ms: int
 

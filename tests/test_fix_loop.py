@@ -550,7 +550,7 @@ class TestFixLoopAuditTrail:
         )
 
         # Assert
-        assert result.total_duration_ms == 300  # 2 attempts * 150ms
+        assert result.total_duration_ms == 300  # [20251217_REFACTOR] 2 attempts × 150ms
         for attempt in result.attempts:
             assert attempt.duration_ms == 150
             assert isinstance(attempt.timestamp, datetime)
