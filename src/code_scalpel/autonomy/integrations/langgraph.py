@@ -289,7 +289,7 @@ def fix_passed(state: ScalpelState) -> bool:
     return last_attempt.get("validation") == "passed"
 
 
-def create_scalpel_fix_graph() -> StateGraph:
+def create_scalpel_fix_graph():
     """
     Create LangGraph for Code Scalpel fix loop.
 
