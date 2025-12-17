@@ -381,8 +381,8 @@ class AutonomyAuditTrail:
         # [20251217_BUGFIX] Make summary statistics consistent with filtered export entries
         summary = {
             "total_operations": len(entries),
-            "successful_operations": sum(1 for e in entries if e.success),
-            "failed_operations": sum(1 for e in entries if not e.success),
+            "successful": sum(1 for e in entries if e.success),
+            "failed": sum(1 for e in entries if not e.success),
             "total_duration_ms": sum(e.duration_ms for e in entries),
         }
 
@@ -474,8 +474,8 @@ class AutonomyAuditTrail:
         success_rate = (success_ops / total_ops * 100.0) if total_ops else 0.0
         summary = {
             "total_operations": total_ops,
-            "success_count": success_ops,
-            "failure_count": failure_ops,
+            "successful": success_ops,
+            "failed": failure_ops,
             "success_rate": success_rate,
             "total_duration_ms": total_duration_ms,
             "avg_duration_ms": avg_duration_ms,
