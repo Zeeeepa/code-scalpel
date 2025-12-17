@@ -149,10 +149,15 @@ class ErrorToDiffEngine:
                     ast.parse(patched_code)  # Validate syntax
                     fix.ast_valid = True
                     validated_fixes.append(fix)
-                except (SyntaxError, Exception):
+                except SyntaxError:
+                    # [20251217_FEATURE] Invalid fix - reduce confidence
                     fix.ast_valid = False
-                    # Include invalid fixes with low confidence
                     fix.confidence *= 0.3
+                    validated_fixes.append(fix)
+                except (ValueError, TypeError):
+                    # [20251217_FEATURE] Diff application error - skip fix
+                    fix.ast_valid = False
+                    fix.confidence *= 0.1
                     validated_fixes.append(fix)
             else:
                 # For non-Python languages, mark as valid (no AST validation)
@@ -177,12 +182,19 @@ class ErrorToDiffEngine:
         Apply simple diff to source code.
 
         This is a simplified diff application that handles line replacements.
+
+        WARNING: Uses first-match string replacement which could cause incorrect
+        replacements if old_part appears multiple times. For production use,
+        consider implementing line-number-based or context-aware diff application.
+
+        [20251217_FEATURE] Simplified diff for v3.0.0, can be enhanced in v3.1.0
         """
         # For now, treat diff as a simple replacement instruction
         # Format: "old_line -> new_line"
         if " -> " in diff:
             old_part, new_part = diff.split(" -> ", 1)
-            return source.replace(old_part.strip(), new_part.strip())
+            # Use replace with count=1 to only replace first occurrence
+            return source.replace(old_part.strip(), new_part.strip(), 1)
         return source
 
 
@@ -485,7 +497,10 @@ class NameFixGenerator:
         fixes = []
 
         # Extract undefined name
-        name_match = re.search(r"name '(\w+)' is not defined", parsed.message)
+        # [20251217_FEATURE] Enhanced regex to capture complex identifiers
+        name_match = re.search(
+            r"name '([a-zA-Z_][\w.]*)' is not defined", parsed.message
+        )
         if name_match:
             undefined_name = name_match.group(1)
 
@@ -518,7 +533,8 @@ class NameFixGenerator:
 
     def _find_similar_names(self, source_code: str, target: str) -> list[str]:
         """Find similar variable/function names in source code."""
-        # Extract identifiers using regex
+        # [20251217_FEATURE] Extract identifiers - works for Python, JS, TS, Java
+        # Pattern matches: alphanumeric + underscore (Python/Java/JS/TS conventions)
         identifiers = set(re.findall(r"\b[a-zA-Z_]\w*\b", source_code))
 
         # Calculate similarity and sort
