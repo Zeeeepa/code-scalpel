@@ -183,21 +183,47 @@ class ErrorToDiffEngine:
 
         This is a simplified diff application that handles line replacements.
 
-        WARNING: Uses first-match string replacement which could cause incorrect
-        replacements if old_part appears multiple times. For production use,
-        consider implementing line-number-based or context-aware diff application.
+        For v3.0.0, we support a minimal "old_line -> new_line" format but apply
+        it in a line-aware and ambiguity-checked way:
+        - If the old fragment does not appear, we return the source unchanged.
+        - If it appears on exactly one line, we replace it only on that line.
+        - If it appears on multiple lines, we *do not* apply the diff to avoid
+          silently modifying the wrong location.
 
         [20251217_FEATURE] Simplified diff for v3.0.0, can be enhanced in v3.1.0
+        [20251217_BUGFIX] Make diff application line-aware and avoid ambiguous edits
         """
         # For now, treat diff as a simple replacement instruction
         # Format: "old_line -> new_line"
-        if " -> " in diff:
-            old_part, new_part = diff.split(" -> ", 1)
-            # Use replace with count=1 to only replace first occurrence
-            return source.replace(old_part.strip(), new_part.strip(), 1)
-        return source
+        if " -> " not in diff:
+            return source
 
+        old_part, new_part = diff.split(" -> ", 1)
+        old_part = old_part.strip()
+        new_part = new_part.strip()
 
+        # Split into lines while preserving original line endings
+        lines = source.splitlines(keepends=True)
+
+        # Find all line indices that contain the old_part
+        matching_indices: list[int] = []
+        for idx, line in enumerate(lines):
+            if old_part and old_part in line:
+                matching_indices.append(idx)
+
+        # No matches: return source unchanged
+        if not matching_indices:
+            return source
+
+        # Ambiguous matches on multiple lines: fail safe, do not modify
+        if len(matching_indices) > 1:
+            return source
+
+        # Single unambiguous match: replace only within that line
+        target_idx = matching_indices[0]
+        lines[target_idx] = lines[target_idx].replace(old_part, new_part)
+
+        return "".join(lines)
 class PythonErrorParser:
     """Parse Python error messages."""
 
