@@ -19,6 +19,9 @@ safety guarantees:
 5. Framework Integrations: LangGraph state machines, CrewAI tools,
    and AutoGen function schemas for multi-agent workflows.
 
+6. Sandboxed Execution: Speculative execution in isolated temp directories
+   with automatic cleanup, resource limits, and side effect detection.
+
 Features:
 - Multi-language error parsing (Python, TypeScript, Java)
 - Confidence-scored fix generation
@@ -27,7 +30,7 @@ Features:
 - Human escalation on failure
 - Full audit trail with SHA-256 hashing
 - Hollow fix detection via mutation testing
-- Mutation score calculation
+- Speculative execution in isolated sandbox
 - LangGraph, CrewAI, AutoGen integrations
 
 Usage:
@@ -37,13 +40,7 @@ Usage:
         FixLoop,
         MutationTestGate,
         AutonomyAuditTrail,
-    )
-    
-    # For framework integrations:
-    from code_scalpel.autonomy.integrations import (
-        create_scalpel_fix_graph,  # LangGraph
-        create_scalpel_fix_crew,   # CrewAI
-        create_scalpel_autogen_agents,  # AutoGen
+        SandboxExecutor,
     )
 
 References:
@@ -82,14 +79,23 @@ from code_scalpel.autonomy.audit import (
     AutonomyAuditTrail,
 )
 
+# [20251217_FEATURE] Sandboxed Execution
+from code_scalpel.autonomy.sandbox import (
+    SandboxExecutor as SandboxExecutorImpl,
+    SandboxResult as SandboxResultImpl,
+    FileChange,
+    ExecutionTestResult,
+    LintResult,
+)
+
 # [20251217_FEATURE] Stubs for external implementations (aliased to avoid conflicts)
 from code_scalpel.autonomy.stubs import (
     ErrorAnalysis as StubErrorAnalysis,
     FixHint as StubFixHint,
-    FileChange,
-    ExecutionTestResult,
-    SandboxResult,
-    SandboxExecutor,
+    FileChange as StubFileChange,
+    ExecutionTestResult as StubExecutionTestResult,
+    SandboxResult as StubSandboxResult,
+    SandboxExecutor as StubSandboxExecutor,
     ErrorToDiffEngine as StubErrorToDiffEngine,
 )
 
@@ -113,13 +119,19 @@ __all__ = [
     # Audit Trail
     "AuditEntry",
     "AutonomyAuditTrail",
-    # Stubs (aliased for advanced usage)
-    "StubErrorAnalysis",
-    "StubFixHint",
+    # Sandbox (implementation)
+    "SandboxExecutorImpl",
+    "SandboxResultImpl",
     "FileChange",
     "ExecutionTestResult",
-    "SandboxResult",
-    "SandboxExecutor",
+    "LintResult",
+    # Stubs (for fix_loop/mutation_gate internal use)
+    "StubErrorAnalysis",
+    "StubFixHint",
+    "StubFileChange",
+    "StubExecutionTestResult",
+    "StubSandboxResult",
+    "StubSandboxExecutor",
     "StubErrorToDiffEngine",
 ]
 
