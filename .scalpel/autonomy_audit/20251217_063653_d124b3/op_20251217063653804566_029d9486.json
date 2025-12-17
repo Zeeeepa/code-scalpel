@@ -1,0 +1,15 @@
+{
+  "id": "op_20251217063653804566_029d9486",
+  "timestamp": "2025-12-17T06:36:53.804577",
+  "event_type": "ROLLBACK",
+  "operation": "undo_changes",
+  "input_hash": "762ce7eaa19b80188cee3479697230d3c6010b0adc3f20403ca41ac952eb3c4a",
+  "output_hash": "078c46f78d1805940b676b6d560b33a895d2d118b8cf139d29d9e86c7961ff34",
+  "success": true,
+  "duration_ms": 120,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

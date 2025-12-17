@@ -1,0 +1,15 @@
+{
+  "id": "op_20251217063653802570_912445e1",
+  "timestamp": "2025-12-17T06:36:53.802578",
+  "event_type": "CODE_REVIEW",
+  "operation": "review_pr",
+  "input_hash": "074ffae2ebbb94c41b6866258a1c7befdd7e5c7ad29d917361afeae04770ad53",
+  "output_hash": "078c46f78d1805940b676b6d560b33a895d2d118b8cf139d29d9e86c7961ff34",
+  "success": true,
+  "duration_ms": 450,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

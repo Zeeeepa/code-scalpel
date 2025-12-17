@@ -1,0 +1,12 @@
+{
+  "id": "op_20251217063653794111_7a3f550a",
+  "timestamp": "2025-12-17T06:36:53.794125",
+  "event_type": "FIX_GENERATION",
+  "operation": "generate_fix",
+  "input_hash": "6cfa674bc4983928ff77a7bcef2631cdd21b4c13a16a092b7951a33fdf2ca78e",
+  "output_hash": "472c7ae5941ca82f27128c25730a810576912ebb869161e6c44c8df9f76cf716",
+  "success": true,
+  "duration_ms": 0,
+  "metadata": {},
+  "parent_id": "op_20251217063653793267_118578dd"
+}

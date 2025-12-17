@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audit Report - 20251217_063653_748ad1</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .summary { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .summary-item { display: inline-block; margin-right: 30px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .success { color: green; }
+        .failure { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Autonomy Audit Report</h1>
+    <p>Session ID: 20251217_063653_748ad1</p>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <div class="summary-item"><strong>Total Operations:</strong> 5</div>
+        <div class="summary-item"><strong>Successful:</strong> <span class="success">4</span></div>
+        <div class="summary-item"><strong>Failed:</strong> <span class="failure">1</span></div>
+        <div class="summary-item"><strong>Total Duration:</strong> 0 ms</div>
+    </div>
+    
+    <h2>Operations</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>Event Type</th>
+            <th>Operation</th>
+            <th>Success</th>
+            <th>Duration (ms)</th>
+            <th>Parent ID</th>
+        </tr>
+        <tr>
+            <td>op_20251217063653793267_118578dd</td>
+            <td>2025-12-17 06:36:53</td>
+            <td>FIX_LOOP_START</td>
+            <td>fix_syntax_error</td>
+            <td class="success">✓</td>
+            <td>0</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>op_20251217063653793740_c477c2a2</td>
+            <td>2025-12-17 06:36:53</td>
+            <td>ERROR_ANALYSIS</td>
+            <td>analyze_syntax_error</td>
+            <td class="success">✓</td>
+            <td>0</td>
+            <td>op_20251217063653793267_118578dd</td>
+        </tr>
+        <tr>
+            <td>op_20251217063653794111_7a3f550a</td>
+            <td>2025-12-17 06:36:53</td>
+            <td>FIX_GENERATION</td>
+            <td>generate_fix</td>
+            <td class="success">✓</td>
+            <td>0</td>
+            <td>op_20251217063653793267_118578dd</td>
+        </tr>
+        <tr>
+            <td>op_20251217063653794485_dcd8d973</td>
+            <td>2025-12-17 06:36:53</td>
+            <td>SANDBOX_EXECUTION</td>
+            <td>verify_fix</td>
+            <td class="success">✓</td>
+            <td>0</td>
+            <td>op_20251217063653793267_118578dd</td>
+        </tr>
+        <tr>
+            <td>op_20251217063653794833_8947072e</td>
+            <td>2025-12-17 06:36:53</td>
+            <td>FIX_LOOP_START</td>
+            <td>fix_type_error</td>
+            <td class="failure">✗</td>
+            <td>0</td>
+            <td>-</td>
+        </tr>
+    </table>
+</body>
+</html>

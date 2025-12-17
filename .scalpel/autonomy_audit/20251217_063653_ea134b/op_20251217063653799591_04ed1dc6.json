@@ -1,0 +1,12 @@
+{
+  "id": "op_20251217063653799591_04ed1dc6",
+  "timestamp": "2025-12-17T06:36:53.799604",
+  "event_type": "ERROR_ANALYSIS",
+  "operation": "analyze_1",
+  "input_hash": "5f0789bb21c765332b2d69e5d1bb5c273e5e6bf367febe6b388f413b69edff46",
+  "output_hash": "709de0a9774762160a6434d36e1814afe5162de7c21e5e8224b4edb56eb5734d",
+  "success": true,
+  "duration_ms": 110,
+  "metadata": {},
+  "parent_id": null
+}
