@@ -544,16 +544,32 @@ class NameFixGenerator:
                     )
                 )
 
-            # Suggest import
-            fixes.append(
-                FixHint(
-                    diff=f"from module import {undefined_name}",
-                    confidence=0.5,
-                    explanation=f"Import '{undefined_name}' from a module",
-                    ast_valid=False,
-                    alternative_fixes=[],
+            # [20251217_BUGFIX] Emit actionable import hints only for common stdlib modules
+            common_stdlib_modules = {
+                "os",
+                "sys",
+                "re",
+                "json",
+                "pathlib",
+                "math",
+                "itertools",
+                "collections",
+                "typing",
+                "datetime",
+                "subprocess",
+                "logging",
+                "functools",
+            }
+            if undefined_name in common_stdlib_modules:
+                fixes.append(
+                    FixHint(
+                        diff=f"import {undefined_name}",
+                        confidence=0.6,
+                        explanation=f"Import standard library module '{undefined_name}'",
+                        ast_valid=False,
+                        alternative_fixes=[],
+                    )
                 )
-            )
 
         return fixes
 
