@@ -88,6 +88,16 @@ from .surgical_patcher import (
     update_method_in_file,
 )
 
+# Autonomy (Error-to-Diff Engine) - v3.0.0
+# [20251217_FEATURE] v3.0.0 Autonomy - Error-to-Diff Engine
+from .autonomy import (
+    ErrorToDiffEngine,
+    ErrorType,
+    ErrorAnalysis,
+    FixHint,
+    ParsedError,
+)
+
 __all__ = [
     # Version info
     "__version__",
@@ -137,4 +147,10 @@ __all__ = [
     "create_app",
     "run_server",
     "MCPServerConfig",
+    # Autonomy (v3.0.0)
+    "ErrorToDiffEngine",
+    "ErrorType",
+    "ErrorAnalysis",
+    "FixHint",
+    "ParsedError",
 ]
