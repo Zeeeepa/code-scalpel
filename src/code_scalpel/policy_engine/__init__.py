@@ -13,6 +13,10 @@ Key Features:
 - Semantic code analysis (SQL injection, etc.)
 - Fail CLOSED security model
 - Human override with audit trail
+- Tamper-resistant policy enforcement
+- HMAC-signed audit logging
+- TOTP-based human override system
+- Policy file integrity verification
 
 Example:
     from code_scalpel.policy_engine import PolicyEngine, Operation
@@ -30,6 +34,7 @@ Example:
         print(f"Policy violation: {decision.reason}")
 """
 
+# Policy Engine core
 from .policy_engine import (
     PolicyEngine,
     Policy,
@@ -42,7 +47,20 @@ from .policy_engine import (
 
 from .semantic_analyzer import SemanticAnalyzer
 
+# Tamper Resistance (v2.5.0 Guardian P0)
+from .tamper_resistance import TamperResistance
+from .audit_log import AuditLog
+from .exceptions import (
+    PolicyEngineError,
+    TamperDetectedError,
+    PolicyModificationError,
+    OverrideTimeoutError,
+    InvalidOverrideCodeError,
+)
+from .models import HumanResponse
+
 __all__ = [
+    # Policy Engine core
     "PolicyEngine",
     "Policy",
     "PolicyDecision",
@@ -51,4 +69,15 @@ __all__ = [
     "OverrideDecision",
     "PolicyError",
     "SemanticAnalyzer",
+    # Tamper Resistance
+    "TamperResistance",
+    "AuditLog",
+    # Exceptions
+    "PolicyEngineError",
+    "TamperDetectedError",
+    "PolicyModificationError",
+    "OverrideTimeoutError",
+    "InvalidOverrideCodeError",
+    # Models
+    "HumanResponse",
 ]

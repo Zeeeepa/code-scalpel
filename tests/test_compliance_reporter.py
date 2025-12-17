@@ -312,6 +312,12 @@ class TestComplianceReporter:
 
     def test_pdf_export(self, reporter):
         """Test PDF report export."""
+        # [20251216_BUGFIX] Skip test if reportlab is not installed
+        try:
+            import reportlab
+        except ImportError:
+            pytest.skip("reportlab package not installed")
+        
         time_range = (datetime.now() - timedelta(hours=1), datetime.now())
         pdf_report = reporter.generate_report(time_range, format="pdf")
 

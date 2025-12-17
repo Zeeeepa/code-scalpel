@@ -40,6 +40,7 @@ analysis_results/
 .scalpel_cache/
 .code_scalpel_cache/
 compliance_reports/
+.scalpel/  # Policy engine runtime files
 
 # Benchmark fixtures (generated/cloned data)
 tests/fixtures/data/

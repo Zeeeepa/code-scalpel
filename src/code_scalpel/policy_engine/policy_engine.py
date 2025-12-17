@@ -122,6 +122,8 @@ class PolicyDecision:
     Result of policy evaluation.
     
     [20251216_FEATURE] Decision on whether to allow an operation
+    [20251216_REFACTOR] Added severity field for compatibility with TamperResistance
+    [20251216_REFACTOR] Made reason optional with default for backward compatibility
     
     Attributes:
         allowed: Whether operation is allowed
@@ -129,12 +131,14 @@ class PolicyDecision:
         violated_policies: Names of violated policies
         violations: Detailed violation information
         requires_override: Whether human override is possible
+        severity: Overall severity level (CRITICAL, HIGH, MEDIUM, LOW, INFO)
     """
     allowed: bool
-    reason: str
+    reason: str = ""
     violated_policies: List[str] = field(default_factory=list)
     violations: List[PolicyViolation] = field(default_factory=list)
     requires_override: bool = False
+    severity: str = "MEDIUM"
 
 
 @dataclass
@@ -143,19 +147,24 @@ class Operation:
     An operation to be evaluated against policies.
     
     [20251216_FEATURE] Represents a code operation (edit, file access, etc.)
+    [20251216_REFACTOR] Extended to support both PolicyEngine and TamperResistance use cases
     
     Attributes:
-        type: Operation type (code_edit, file_access, etc.)
-        code: Code content being operated on
-        language: Programming language
-        file_path: Path to file being operated on
+        type: Operation type (code_edit, file_access, file_write, etc.)
+        code: Code content being operated on (for code operations)
+        language: Programming language (for code operations)
+        file_path: Path to file being operated on (single file)
+        affected_files: List of files affected (for multi-file operations)
         metadata: Additional context
+        timestamp: When operation was created (for audit purposes)
     """
     type: str
     code: str = ""
     language: str = ""
     file_path: str = ""
+    affected_files: List[Path] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
 
 
 @dataclass
@@ -164,17 +173,22 @@ class OverrideDecision:
     Result of override request.
     
     [20251216_FEATURE] Human approval for policy-violating operations
+    [20251216_REFACTOR] Added justification and approved_by for TamperResistance compatibility
     
     Attributes:
         approved: Whether override was approved
         reason: Explanation of decision
         override_id: Unique ID for this override (if approved)
         expires_at: When override expires (if approved)
+        justification: Reason provided by human for override
+        approved_by: Identity of human who approved override
     """
     approved: bool
     reason: str
     override_id: Optional[str] = None
     expires_at: Optional[datetime] = None
+    justification: Optional[str] = None
+    approved_by: Optional[str] = None
 
 
 class PolicyEngine:
