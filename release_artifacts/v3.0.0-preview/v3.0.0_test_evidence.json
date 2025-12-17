@@ -1,0 +1,131 @@
+{
+  "version": "3.0.0-preview",
+  "test_execution_date": "2025-12-17",
+  "test_environment": {
+    "python_version": "3.12.3",
+    "pytest_version": "9.0.2",
+    "platform": "Linux"
+  },
+  "test_results": {
+    "audit_trail_module": {
+      "test_file": "tests/test_autonomy_audit.py",
+      "total": 28,
+      "passed": 28,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.65,
+      "test_classes": [
+        {"name": "TestBasicRecording", "tests": 4, "passed": 4},
+        {"name": "TestParentChildRelationships", "tests": 2, "passed": 2},
+        {"name": "TestCryptographicHashes", "tests": 4, "passed": 4},
+        {"name": "TestExportFormats", "tests": 4, "passed": 4},
+        {"name": "TestFiltering", "tests": 3, "passed": 3},
+        {"name": "TestQueryOperations", "tests": 4, "passed": 4},
+        {"name": "TestEdgeCases", "tests": 5, "passed": 5},
+        {"name": "TestImmutability", "tests": 2, "passed": 2}
+      ]
+    },
+    "langgraph_integration": {
+      "test_file": "tests/test_autonomy_langgraph.py",
+      "total": 13,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.45
+    },
+    "crewai_integration": {
+      "test_file": "tests/test_autonomy_crewai.py",
+      "total": 16,
+      "passed": 13,
+      "failed": 0,
+      "skipped": 3,
+      "skip_reason": "CrewAI Crew tests require API key",
+      "duration_seconds": 0.35
+    },
+    "autogen_integration": {
+      "test_file": "tests/test_autonomy_autogen.py",
+      "total": 16,
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.55
+    },
+    "sandbox_module": {
+      "test_file": "tests/test_sandbox.py",
+      "total": 42,
+      "passed": 41,
+      "failed": 0,
+      "skipped": 1,
+      "skip_reason": "Docker mock test requires Docker daemon",
+      "duration_seconds": 2.02,
+      "test_classes": [
+        {"name": "TestFileChange", "tests": 3, "passed": 3},
+        {"name": "TestTestResult", "tests": 2, "passed": 2},
+        {"name": "TestLintResult", "tests": 1, "passed": 1},
+        {"name": "TestSandboxResult", "tests": 2, "passed": 2},
+        {"name": "TestSandboxExecutorInit", "tests": 3, "passed": 3},
+        {"name": "TestSandboxCreation", "tests": 4, "passed": 4},
+        {"name": "TestFileChanges", "tests": 5, "passed": 5},
+        {"name": "TestCleanup", "tests": 2, "passed": 2},
+        {"name": "TestProcessExecution", "tests": 4, "passed": 4},
+        {"name": "TestSideEffectDetection", "tests": 2, "passed": 2},
+        {"name": "TestIntegration", "tests": 4, "passed": 4},
+        {"name": "TestContainerExecution", "tests": 2, "passed": 1, "skipped": 1},
+        {"name": "TestErrorHandling", "tests": 4, "passed": 4},
+        {"name": "TestParseSubprocessResults", "tests": 2, "passed": 2},
+        {"name": "TestResourceLimits", "tests": 2, "passed": 2}
+      ]
+    },
+    "error_to_diff": {
+      "test_file": "tests/test_error_to_diff.py",
+      "total": 27,
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.52,
+      "test_classes": [
+        {"name": "TestErrorParsing", "tests": 7, "passed": 7},
+        {"name": "TestFixGeneration", "tests": 5, "passed": 5},
+        {"name": "TestValidation", "tests": 4, "passed": 4},
+        {"name": "TestExplanations", "tests": 2, "passed": 2},
+        {"name": "TestAlternativeFixes", "tests": 2, "passed": 2},
+        {"name": "TestHumanReviewFlag", "tests": 2, "passed": 2},
+        {"name": "TestUnsupportedLanguage", "tests": 1, "passed": 1},
+        {"name": "TestEdgeCases", "tests": 4, "passed": 4}
+      ]
+    },
+    "adversarial_security": {
+      "test_file": "tests/test_adversarial_security.py",
+      "total": 21,
+      "passed": 21,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 1.2
+    },
+    "adversarial_v25": {
+      "test_file": "tests/test_adversarial_v25.py",
+      "total": 44,
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 2.8
+    },
+    "adversarial_v30": {
+      "test_file": "tests/test_adversarial_v30.py",
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.87
+    }
+  },
+  "totals": {
+    "total_tests": 213,
+    "passed": 209,
+    "failed": 0,
+    "skipped": 4,
+    "pass_rate": "98.1%",
+    "adversarial_tests": 71,
+    "adversarial_pass_rate": "100%"
+  }
+}
