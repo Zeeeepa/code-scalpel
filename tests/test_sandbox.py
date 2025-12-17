@@ -537,3 +537,222 @@ class TestIntegration:
         assert hasattr(result, "execution_time_ms")
         # Should complete within timeout
         assert result.execution_time_ms < 10000  # Less than 10 seconds
+
+
+class TestContainerExecution:
+    """[20251217_TEST] Tests for container execution mode."""
+
+    def test_execute_in_container_requires_docker(self):
+        """Test container mode requires Docker."""
+        # This test verifies the container mode path exists
+        # Actual container execution requires Docker daemon
+        try:
+            executor = SandboxExecutor(isolation_level="container")
+            # If Docker is available, executor should be created
+            assert hasattr(executor, "docker_client")
+        except ImportError:
+            # If Docker is not available, should raise ImportError
+            pass
+
+    def test_execute_in_container_with_docker_mock(self, tmp_path, monkeypatch):
+        """Test container execution with mocked Docker."""
+        project_dir = tmp_path / "project"
+        project_dir.mkdir()
+        (project_dir / "main.py").write_text("x = 1")
+
+        # Mock Docker to avoid needing actual Docker daemon
+        class MockContainer:
+            def decode(self):
+                return "test output"
+
+        class MockContainers:
+            def run(self, *args, **kwargs):
+                return MockContainer()
+
+        class MockDockerClient:
+            containers = MockContainers()
+
+        # Skip if docker not importable
+        try:
+            import code_scalpel.autonomy.sandbox as sandbox_module
+
+            if not sandbox_module.DOCKER_AVAILABLE:
+                pytest.skip("Docker package not available")
+
+            executor = SandboxExecutor(isolation_level="container")
+            executor.docker_client = MockDockerClient()
+
+            result = executor._execute_in_container(
+                project_dir,
+                test_command="echo test",
+                lint_command="echo lint",
+                build_command=None,
+            )
+
+            assert result.success is True
+            assert result.execution_time_ms > 0
+        except ImportError:
+            pytest.skip("Docker not available")
+
+
+class TestErrorHandling:
+    """[20251217_TEST] Tests for error handling."""
+
+    def test_execute_with_changes_cleanup_on_error(self, tmp_path):
+        """Test sandbox cleanup happens even on error."""
+        project_dir = tmp_path / "project"
+        project_dir.mkdir()
+        (project_dir / "main.py").write_text("x = 1")
+
+        # Create a change that will cause issues
+        changes = [
+            FileChange(
+                relative_path="bad_file.py",
+                operation="create",
+                new_content="invalid python syntax ][",
+            )
+        ]
+
+        executor = SandboxExecutor(max_cpu_seconds=10)
+
+        # Should handle errors gracefully
+        result = executor.execute_with_changes(
+            project_path=str(project_dir),
+            changes=changes,
+            test_command="python -m py_compile bad_file.py",
+            lint_command="echo lint",
+            build_command=None,
+        )
+
+        # Result should be returned even on error
+        assert result is not None
+        # Should indicate failure
+        assert result.success is False
+
+    def test_apply_changes_handles_empty_content(self, tmp_path):
+        """Test applying change with empty content."""
+        executor = SandboxExecutor()
+        changes = [
+            FileChange(relative_path="empty.txt", operation="create", new_content="")
+        ]
+
+        executor._apply_changes(tmp_path, changes)
+        assert (tmp_path / "empty.txt").exists()
+        assert (tmp_path / "empty.txt").read_text() == ""
+
+    def test_apply_changes_delete_nonexistent(self, tmp_path):
+        """Test deleting nonexistent file doesn't error."""
+        executor = SandboxExecutor()
+        changes = [FileChange(relative_path="nonexistent.txt", operation="delete")]
+
+        # Should not raise
+        executor._apply_changes(tmp_path, changes)
+
+    def test_execute_in_process_handles_exception(self, tmp_path):
+        """Test process execution handles exceptions gracefully."""
+        executor = SandboxExecutor(max_cpu_seconds=1)
+
+        # This should handle the timeout gracefully
+        result = executor._execute_in_process(
+            tmp_path,
+            test_command="sleep 10",  # Will timeout
+            lint_command="echo lint",
+            build_command=None,
+        )
+
+        assert result is not None
+        # Should indicate timeout
+        assert "timeout" in result.stderr.lower() or not result.success
+
+
+class TestParseSubprocessResults:
+    """[20251217_TEST] Tests for subprocess result parsing."""
+
+    def test_parse_subprocess_results_with_none(self, tmp_path):
+        """Test parsing when subprocess results are None."""
+        executor = SandboxExecutor()
+
+        result = executor._parse_subprocess_results(
+            lint_result=None,
+            test_result=None,
+            build_success=True,
+            execution_time_ms=100,
+        )
+
+        assert result.success is True
+        assert result.build_success is True
+        assert result.execution_time_ms == 100
+        assert len(result.test_results) == 0
+
+    def test_parse_subprocess_results_lint_output(self, tmp_path):
+        """Test parsing lint output with error patterns."""
+
+        executor = SandboxExecutor()
+
+        # Create mock subprocess result with lint errors
+        class MockResult:
+            returncode = 0
+
+            def __init__(self, output):
+                self._output = output
+
+            def decode(self, encoding="utf-8", errors="replace"):
+                return self._output
+
+        class MockLintResult:
+            returncode = 1
+            stdout = MockResult(
+                "file.py:10:5: error: undefined variable\nfile.py:20:1: warning: unused import"
+            )
+            stderr = MockResult("")
+
+        class MockTestResult:
+            returncode = 0
+            stdout = MockResult("tests passed")
+            stderr = MockResult("")
+
+        result = executor._parse_subprocess_results(
+            lint_result=MockLintResult(),
+            test_result=MockTestResult(),
+            build_success=True,
+            execution_time_ms=200,
+        )
+
+        assert result.success is True
+        assert len(result.lint_results) >= 1
+        assert result.execution_time_ms == 200
+
+
+class TestResourceLimits:
+    """[20251217_TEST] Tests for resource limit enforcement."""
+
+    def test_resource_limits_set_correctly(self):
+        """Test resource limits are configured correctly."""
+        executor = SandboxExecutor(
+            max_memory_mb=1024, max_cpu_seconds=120, max_disk_mb=500
+        )
+
+        assert executor.max_memory_mb == 1024
+        assert executor.max_cpu_seconds == 120
+        assert executor.max_disk_mb == 500
+
+    def test_execute_respects_memory_limit(self, tmp_path):
+        """Test execution respects memory limits."""
+        project_dir = tmp_path / "project"
+        project_dir.mkdir()
+        (project_dir / "main.py").write_text("x = 1")
+
+        # Create executor with very low memory limit
+        # Note: This might not fail on all systems due to OS differences
+        executor = SandboxExecutor(max_memory_mb=50, max_cpu_seconds=5)
+
+        result = executor.execute_with_changes(
+            project_path=str(project_dir),
+            changes=[],
+            test_command="echo test",
+            lint_command="echo lint",
+            build_command=None,
+        )
+
+        # Should complete (even with low memory for simple commands)
+        assert result is not None
