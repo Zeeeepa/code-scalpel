@@ -203,6 +203,7 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 <!-- [20251216_DOCS] Release gate checklist for v2.5.0 "Guardian" - Governance Phase (Revolution Edition) -->
 
 # Release Gate Checklist (v2.5.0 "Guardian")
+<!-- [20251216_DOCS] Linked in v2.5.0 release notes -->
 
 > **Phase Theme:** "Restraint as a Feature" – Zero unauthorized changes  
 > **Target Timeline:** Days 31-60 (Q1 2026)  
@@ -246,7 +247,14 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] **Safe Mode Toggle:** MCP Tool flag to run in "ReadOnly" or "Sandboxed" mode.
 - [ ] **Definition of Done:** Sleep-at-Night case study: Agent running unsupervised on legacy codebase with strict budgets.
 
-### Week 8: v2.5.0 Release & Compliance
+### Week 8: New Features from 3rd Party Review
+<!-- [20251216_FEATURE] Added per 3rd party review feedback -->
+- [ ] **Confidence Decay:** Exponential decay applied to dependency chains ($C_{effective} = C_{base} × 0.9^{depth}$).
+- [ ] **Graph Neighborhood View:** k-hop subgraph extraction for LLM context window optimization (max 100 nodes).
+- [ ] **Cryptographic Policy Verification:** SHA-256 signed policy manifests stored in git history.
+- [ ] **Definition of Done:** Agent cannot bypass policy via `chmod +w`; manifest signature required.
+
+### Week 9: v2.5.0 Release & Compliance
 - [ ] **Compliance Report:** Generate a PDF/JSON report of *why* an agent's change was allowed or blocked.
 - [ ] **OWASP Block Rate:** 100% block rate on the "OWASP Top 10" injection attempts by agents.
 - [ ] **Marketing Asset:** "The ISO Compliant Agent" positioning for regulated industries.
@@ -262,22 +270,31 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] **ADV-2.5.4:** Policy file tampering detected (checksum mismatch) and operation aborted.
 - [ ] **ADV-2.5.5:** Agent attempts to bypass "No SQL" policy using StringBuilder → semantic blocking catches it.
 - [ ] **ADV-2.5.6:** Path protection validates file *content* identity, not just names (rename attack blocked).
+- [ ] **ADV-2.5.7:** (NEW) `chmod +w` bypass attempt → cryptographic verification catches modification.
+- [ ] **ADV-2.5.8:** (NEW) 5-hop dependency chain with 0.9 confidence → decayed to 0.59, triggers human review.
 
 ### Security Sink Coverage
 - [ ] **Python sinks:** `eval`, `exec`, `os.system`, `subprocess.call`, `pickle.loads` all detected.
 - [ ] **JavaScript sinks:** `eval`, `Function()`, `child_process.exec`, `innerHTML` all detected.
 - [ ] **TypeScript sinks:** Same as JavaScript, plus `dangerouslySetInnerHTML` in JSX.
 - [ ] **Java sinks:** `Runtime.exec`, `ProcessBuilder`, `ScriptEngine.eval`, `JNDI lookup` all detected.
+- [ ] **Dynamic loading patterns:** `Class.forName`, `__import__`, `importlib` flagged with warnings.
+
+### Graph Neighborhood Validation
+- [ ] **ADV-2.5.9:** (NEW) 50,000 node graph → neighborhood extraction returns ≤ 100 nodes.
+- [ ] **ADV-2.5.10:** (NEW) Low-confidence edges filtered at k-hop boundary.
 
 ### Tamper Resistance
 - [ ] **Stale Analysis:** File modified between analysis and edit → stale analysis error raised.
 - [ ] **Hash Collision:** Hash collision attempt (unlikely but tested) → operation blocked.
 - [ ] **Policy Read-Only:** Policy files are read-only to the Agent (cannot self-modify).
 - [ ] **Override Codes:** Human-in-the-loop approval required for policy overrides.
+- [ ] **Crypto Verification:** (NEW) Policy manifest signature verified on every operation.
 
 ### Fail Mode Testing
 - [ ] Policy engine fails **CLOSED** (deny by default), not OPEN.
 - [ ] Unknown file types are blocked, not allowed.
+- [ ] (NEW) Missing manifest secret → operation denied with clear error.
 
 ### 🚫 Fail Condition
 **If an agent can execute a forbidden action by "tricking" the parser, STOP SHIP.**
@@ -288,6 +305,7 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] Artifact signing completed with Sigstore/Cosign.
 - [ ] LICENSE and third-party notices validated.
 - [ ] Policy engine security review completed (no policy bypass vectors).
+- [ ] (NEW) Cryptographic verification review completed.
 
 ## Documentation & Evidence
 - [ ] Release notes `docs/release_notes/RELEASE_NOTES_v2.5.0.md` covers Governance features.
@@ -347,6 +365,14 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] **`verify_edit` Tool:** Runs tests related to the changed graph nodes.
 - [ ] **Definition of Done:** Edits are only applied if the affected subgraph's tests pass.
 
+### Week 10.5: Mutation Test Gate (From 3rd Party Review)
+<!-- [20251216_FEATURE] Added per 3rd party review feedback - prevents hollow fixes -->
+- [ ] **Revert Validation:** After fix, revert to original code and verify tests fail again.
+- [ ] **Hollow Fix Detection:** `def test(): pass` pattern detected and rejected.
+- [ ] **Mutation Score:** At least 80% of mutations must be caught by tests.
+- [ ] **Weak Test Identification:** Tests that pass with reversed logic flagged.
+- [ ] **Definition of Done:** Fix rejected if reverting the fix doesn't cause tests to fail.
+
 ### Week 11: Ecosystem Integration (Scalpel-Native Agents)
 - [ ] **LangGraph Adapter:** `@tool` decorators for LangGraph compatibility.
 - [ ] **CrewAI Adapter:** CrewAI agent integration example working.
@@ -370,6 +396,8 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] **ADV-3.0.3:** Fix introduces new vulnerability (suggested fix adds `eval`) → blocked by policy engine.
 - [ ] **ADV-3.0.4:** Resource exhaustion attack (fix generates infinite output) → timeout kills speculative execution.
 - [ ] **ADV-3.0.5:** Fix-break-fix loop detected and terminated by Scalpel (not infinite cycling).
+- [ ] **ADV-3.0.6:** (NEW) Hollow fix (`def test(): pass`) detected by mutation gate and rejected.
+- [ ] **ADV-3.0.7:** (NEW) Fix that deletes test assertions → mutation gate detects weak coverage.
 
 ### Error-to-Diff Quality
 - [ ] Simple `NameError` (undefined variable) → correct import suggestion.
@@ -377,6 +405,12 @@ These requirements apply to ALL releases v2.0.1 and beyond:
 - [ ] `SyntaxError` (missing colon) → correct syntax fix.
 - [ ] Complex error (circular import) → appropriate diagnostic, NOT an incorrect fix.
 - [ ] **Validation:** Fix Hints are actually valid code (parseable, syntactically correct).
+
+### Mutation Test Gate Validation
+<!-- [20251216_FEATURE] New section per 3rd party review -->
+- [ ] **ADV-3.0.8:** Revert-fix test (fix reversal fails tests) passes for all accepted fixes.
+- [ ] **ADV-3.0.9:** Mutation score ≥ 80% for accepted fixes.
+- [ ] **ADV-3.0.10:** Weak tests identified and flagged in audit trail.
 
 ### Feedback Loop Termination
 - [ ] Feedback loop terminates (fails) after N attempts (default: 3).

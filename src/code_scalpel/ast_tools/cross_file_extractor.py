@@ -46,6 +46,8 @@ class ExtractedSymbol:
         line: Start line in original file
         end_line: End line in original file
         dependencies: Names of symbols this depends on
+        depth: Depth from original target (0 = target itself)
+        confidence: Confidence score with decay applied (0.0-1.0)
     """
 
     name: str
@@ -56,6 +58,9 @@ class ExtractedSymbol:
     line: int
     end_line: Optional[int] = None
     dependencies: Set[str] = field(default_factory=set)
+    # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
+    depth: int = 0
+    confidence: float = 1.0
 
     def __hash__(self):
         return hash((self.module, self.name))
@@ -64,6 +69,40 @@ class ExtractedSymbol:
         if not isinstance(other, ExtractedSymbol):
             return False
         return self.module == other.module and self.name == other.name
+
+
+# [20251216_FEATURE] v2.5.0 - Confidence decay constants
+DEFAULT_CONFIDENCE_DECAY_FACTOR = 0.9
+DEFAULT_LOW_CONFIDENCE_THRESHOLD = 0.5
+
+
+def calculate_confidence(depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR) -> float:
+    """
+    Calculate confidence score with exponential decay based on depth.
+
+    Formula: C_effective = C_base × decay_factor^depth
+
+    Args:
+        depth: Depth from original target (0 = target itself)
+        decay_factor: Decay rate per depth level (default: 0.9)
+
+    Returns:
+        Confidence score between 0.0 and 1.0
+    """
+    # [20251216_BUGFIX] Clamp/validate to prevent amplification or negative confidence
+    if depth < 0:
+        raise ValueError("depth must be >= 0")
+    if decay_factor < 0:
+        raise ValueError("decay_factor must be >= 0")
+    # Clamp >1 to 1.0 to prevent confidence amplification attacks
+    safe_decay = min(decay_factor, 1.0)
+
+    # Compute with clamp; guard against float domain issues
+    conf = 1.0 * (safe_decay ** depth)
+    if conf != conf or conf == float("inf") or conf < 0:  # NaN or Inf or negative
+        raise ValueError("invalid confidence result")
+
+    return round(conf, 4)
 
 
 @dataclass
@@ -81,6 +120,8 @@ class ExtractionResult:
         warnings: Non-fatal warnings
         depth_reached: Maximum depth of dependency chain
         files_touched: Set of files that were read
+        confidence_decay_factor: Decay factor used for confidence calculation
+        low_confidence_count: Number of symbols below low confidence threshold
     """
 
     success: bool = True
@@ -92,6 +133,9 @@ class ExtractionResult:
     warnings: List[str] = field(default_factory=list)
     depth_reached: int = 0
     files_touched: Set[str] = field(default_factory=set)
+    # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
+    confidence_decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR
+    low_confidence_count: int = 0
 
     @property
     def total_symbols(self) -> int:
@@ -105,6 +149,21 @@ class ExtractionResult:
     def total_lines(self) -> int:
         """Total lines of code extracted."""
         return self.combined_code.count("\n") + 1 if self.combined_code else 0
+    
+    @property
+    def has_low_confidence_symbols(self) -> bool:
+        """Check if any extracted symbols have low confidence."""
+        return self.low_confidence_count > 0
+    
+    def get_low_confidence_symbols(self, threshold: float = DEFAULT_LOW_CONFIDENCE_THRESHOLD) -> List[ExtractedSymbol]:
+        """Get all symbols below the confidence threshold."""
+        low_conf = []
+        if self.target and self.target.confidence < threshold:
+            low_conf.append(self.target)
+        for dep in self.dependencies:
+            if dep.confidence < threshold:
+                low_conf.append(dep)
+        return low_conf
 
 
 @dataclass
@@ -187,6 +246,7 @@ class CrossFileExtractor:
         symbol_name: str,
         depth: int = 2,
         include_stdlib: bool = False,
+        confidence_decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR,
     ) -> ExtractionResult:
         """
         Extract a symbol with its cross-file dependencies.
@@ -196,9 +256,11 @@ class CrossFileExtractor:
             symbol_name: Name of the function/class to extract
             depth: How many levels of imports to follow (default: 2)
             include_stdlib: Whether to include stdlib symbols (default: False)
+            confidence_decay_factor: Decay factor for confidence calculation (default: 0.9)
+                                    Formula: C_effective = 1.0 × decay_factor^depth
 
         Returns:
-            ExtractionResult with extracted code and metadata
+            ExtractionResult with extracted code and metadata, including confidence scores
         """
         if not self._built:
             if not self.build():
@@ -207,6 +269,8 @@ class CrossFileExtractor:
                 )
 
         result = ExtractionResult()
+        # [20251216_FEATURE] v2.5.0 - Store decay factor for confidence calculation
+        result.confidence_decay_factor = confidence_decay_factor
 
         # Normalize file path
         if os.path.isabs(file_path):
@@ -243,6 +307,10 @@ class CrossFileExtractor:
                 errors=[f"Symbol '{symbol_name}' not found in {file_path}"],
             )
 
+        # [20251216_FEATURE] v2.5.0 - Target has depth 0 and confidence 1.0
+        target_symbol.depth = 0
+        target_symbol.confidence = 1.0
+        
         result.target = target_symbol
         result.files_touched.add(str(abs_path))
 
@@ -261,6 +329,16 @@ class CrossFileExtractor:
 
         # Generate combined code
         self._generate_combined_code(result)
+        
+        # [20251216_FEATURE] v2.5.0 - Add warning if low confidence symbols found
+        if result.has_low_confidence_symbols:
+            low_conf_symbols = result.get_low_confidence_symbols()
+            result.warnings.append(
+                f"⚠️ {result.low_confidence_count} symbol(s) have low confidence "
+                f"(below {DEFAULT_LOW_CONFIDENCE_THRESHOLD}): "
+                f"{', '.join(s.name for s in low_conf_symbols[:5])}"
+                + ("..." if len(low_conf_symbols) > 5 else "")
+            )
 
         result.success = len(result.errors) == 0
         return result
@@ -660,6 +738,15 @@ class CrossFileExtractor:
                 extracted = self._find_symbol_in_file(file_path, node.symbol_name)
 
             if extracted:
+                # [20251216_FEATURE] v2.5.0 - Set depth and calculate confidence with decay
+                extracted.depth = node.depth
+                extracted.confidence = calculate_confidence(
+                    node.depth, result.confidence_decay_factor
+                )
+                # Track low confidence symbols
+                if extracted.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD:
+                    result.low_confidence_count += 1
+                
                 result.dependencies.append(extracted)
                 result.files_touched.add(file_path)
 

@@ -12,6 +12,7 @@
 | [**README.md**](../README.md) | Project overview and quick start |
 | [**graph_engine_guide.md**](graph_engine_guide.md) | Unified Graph Engine documentation (v2.2.0) |
 | [**RELEASE_NOTES_v2.2.0.md**](release_notes/RELEASE_NOTES_v2.2.0.md) | Nexus release - Unified Graph Engine |
+| [**RELEASE_NOTES_v2.5.0.md**](release_notes/RELEASE_NOTES_v2.5.0.md) | Guardian release - Policy, semantic blocking, tamper resistance |  <!-- [20251216_DOCS] Added v2.5 notes link -->
 
 ---
 
@@ -168,10 +169,12 @@ code-scalpel mcp --transport http --port 8593
 
 ## Version History
 
-> [20251216_DOCS] Add v2.2.0 Nexus release entry
+<!-- [20251216_DOCS] Add v2.5.0 and v3.0.0 planned features from 3rd party review -->
 
 | Version | Codename | Highlights |
 |---------|----------|------------|
+| v3.0.0 | "Autonomy" | (Planned) Mutation Test Gate, Self-Correction Loop |
+| v2.5.0 | "Guardian" | (In Progress) Policy Engine, Confidence Decay, Graph Neighborhood View, Cryptographic Policy Verification |
 | v2.2.0 | "Nexus" | Unified Graph Engine, Cross-Language Dependencies, Type Narrowing |
 | v2.0.1 | "Coverage Lock" | Coverage policy/exclusions documented; warning-path tests for RefactorSimulator |
 | v1.3.0 | "Hardening" | NoSQL/LDAP injection, secret detection, Float support |

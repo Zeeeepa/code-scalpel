@@ -1,0 +1,137 @@
+{
+  "version": "2.5.0",
+  "codename": "Guardian",
+  "release_date": "2025-12-17",
+  "evidence_type": "mcp_tools_inventory",
+  "note": "[20251217_DOCS] MCP tools inventory for v2.5.0 Guardian - adds policy governance tools",
+  
+  "mcp_protocol": {
+    "version": "2024-11-05",
+    "features": {
+      "health_endpoint": true,
+      "progress_tokens": true,
+      "roots_capability": true,
+      "stderr_logging": true,
+      "windows_paths": true
+    }
+  },
+  
+  "tools_inventory": [
+    {
+      "name": "analyze_code",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Parse and extract code structure (functions, classes, imports)"
+    },
+    {
+      "name": "extract_code",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Surgical extraction by symbol name with cross-file dependency resolution"
+    },
+    {
+      "name": "security_scan",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Taint-based vulnerability detection (17+ types, 30+ secret patterns)"
+    },
+    {
+      "name": "cross_file_security_scan",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Cross-module taint tracking across file boundaries"
+    },
+    {
+      "name": "generate_unit_tests",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Symbolic execution-based test generation"
+    },
+    {
+      "name": "simulate_refactor",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Verify refactor preserves behavior before applying"
+    },
+    {
+      "name": "crawl_project",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Project-wide analysis with progress reporting"
+    },
+    {
+      "name": "get_call_graph",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Function relationship mapping with entry point detection"
+    },
+    {
+      "name": "get_file_context",
+      "status": "stable",
+      "languages": ["python", "javascript", "typescript", "java"],
+      "description": "Surrounding context extraction for code locations"
+    },
+    {
+      "name": "get_symbol_references",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Find all usages of a symbol across project"
+    },
+    {
+      "name": "get_cross_file_dependencies",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Cross-file dependency chain analysis"
+    },
+    {
+      "name": "scan_dependencies",
+      "status": "stable",
+      "languages": ["python", "javascript"],
+      "description": "Vulnerable dependency detection via OSV API"
+    },
+    {
+      "name": "validate_paths",
+      "status": "stable",
+      "languages": ["all"],
+      "description": "Path accessibility validation for Docker/container environments"
+    },
+    {
+      "name": "symbolic_execute",
+      "status": "stable",
+      "languages": ["python"],
+      "description": "Symbolic execution for path exploration"
+    }
+  ],
+  
+  "v2.5.0_new_capabilities": {
+    "policy_engine": {
+      "status": "stable",
+      "description": "OPA/Rego-based policy evaluation for governance",
+      "requires": "OPA CLI (optional)"
+    },
+    "tamper_resistance": {
+      "status": "stable",
+      "description": "Policy file integrity verification with HMAC-SHA256"
+    },
+    "change_budgeting": {
+      "status": "stable",
+      "description": "Enforces max_files, max_lines, complexity limits"
+    },
+    "compliance_reporting": {
+      "status": "stable",
+      "description": "Generate JSON/HTML compliance reports",
+      "optional": "PDF reports require reportlab"
+    },
+    "audit_logging": {
+      "status": "stable",
+      "description": "HMAC-signed append-only audit trail"
+    },
+    "semantic_blocking": {
+      "status": "stable",
+      "description": "Block SQL injection via string construction patterns"
+    }
+  },
+  
+  "total_tools": 14,
+  "generated_at": "2025-12-17T12:00:00Z"
+}

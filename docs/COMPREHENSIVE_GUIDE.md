@@ -1174,6 +1174,62 @@ from code_scalpel.integrations import (
 
 ---
 
+## What's New in v2.2.0
+
+**December 16, 2025 - "Nexus" Release**
+
+### Unified Graph Engine
+- **Cross-Language Dependency Graph**: Single unified graph spanning Python, Java, TypeScript, JavaScript
+- **Type Narrowing**: Intelligent filtering by node/edge types
+- **Mermaid Export**: Visual graph diagrams with `to_mermaid()`
+- **Configurable Depth**: Control traversal depth for large codebases
+
+### Enhanced MCP Tools
+- **17 MCP Tools**: Up from 13 in v1.5.0
+- **`get_call_graph`**: Generate call graphs with entry point detection
+- **`get_cross_file_dependencies`**: Trace dependencies across module boundaries
+
+### Performance
+- **Lazy Loading**: Graph nodes loaded on-demand
+- **Caching**: LRU cache for repeated queries
+- **Memory Optimization**: Large graphs handled efficiently
+
+### Stats
+- 3,006+ tests passing
+- 95%+ code coverage
+- 4 languages supported
+- 17 MCP tools
+
+---
+
+## Coming in v2.5.0
+
+**Planned - "Guardian" Release**
+
+<!-- [20251216_DOCS] Added per 3rd party security review feedback -->
+
+### Policy Engine (P0 - Complete)
+- **OPA/Rego Integration**: Declarative policy enforcement
+- **Semantic Blocking**: Blocks SQL injection patterns regardless of syntax variation
+- **Fail-Closed Security**: Invalid policies reject all operations
+
+### Confidence Decay (From 3rd Party Review)
+- **Formula**: `C_effective = C_base × 0.9^depth`
+- **Low-Confidence Flagging**: Results at depth 10+ marked with warning
+- **Configurable Decay Factor**: Default 0.9, adjustable per use case
+
+### Graph Neighborhood View (From 3rd Party Review)
+- **k-hop Subgraph Extraction**: Prevent graph explosion on large codebases
+- **Max Node Limit**: Default 100 nodes with truncation warning
+- **Focused Analysis**: Extract only relevant neighborhood around target
+
+### Cryptographic Policy Verification (From 3rd Party Review)
+- **SHA-256 Signed Manifests**: Policy files cryptographically signed
+- **chmod Bypass Prevention**: Integrity verified regardless of file permissions
+- **Fail-Closed on Invalid Signature**: Tampered policies rejected
+
+---
+
 ## What's New in v1.3.0
 
 **December 12, 2025 - "Hardening" Release**
@@ -1198,6 +1254,6 @@ from code_scalpel.integrations import (
 
 ---
 
-*Code Scalpel v1.3.0 - MCP Server Toolkit for AI Agents*
+*Code Scalpel v2.2.0 - MCP Server Toolkit for AI Agents*
 
 *"Code Scalpel" is a trademark of 3D Tech Solutions LLC.*

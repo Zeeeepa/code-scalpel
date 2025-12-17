@@ -399,6 +399,10 @@ See [Contributing Guide](docs/guides/CONTRIBUTING.md) for details.
 
 See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 
+> [20251216_DOCS] Release notes pointer updated for v2.5.0 "Guardian"
+
+- Latest release notes: [docs/release_notes/RELEASE_NOTES_v2.5.0.md](docs/release_notes/RELEASE_NOTES_v2.5.0.md)
+
 | Version | Status | Release Date | Highlights |
 |---------|--------|--------------|------------|
 | **v1.5.x** | Released | Dec 13, 2025 | Cross-file analysis, context tools, project intelligence |

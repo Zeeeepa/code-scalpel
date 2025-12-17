@@ -39,6 +39,11 @@ from pydantic import BaseModel, Field
 
 from mcp.server.fastmcp import FastMCP, Context
 
+# [20251216_FEATURE] v2.5.0 - Unified sink detection MCP tool
+from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+    UnifiedSinkDetector,
+)
+
 __version__ = "2.0.0"
 
 
@@ -290,32 +295,36 @@ class SecurityResult(BaseModel):
     error: str | None = Field(default=None, description="Error message if failed")
 
 
-class UnifiedSinkInfo(BaseModel):
-    """[20251216_FEATURE] v2.3.0 - Information about a detected security sink."""
-    
-    pattern: str = Field(description="Matched pattern (e.g., cursor.execute)")
-    sink_type: str = Field(description="Type of sink (e.g., SQL_QUERY)")
-    confidence: float = Field(description="Confidence score 0.0-1.0")
-    line: int = Field(description="Line number in code")
-    column: int = Field(description="Column number in code")
-    code_snippet: str = Field(description="Matched code snippet")
-    vulnerability_type: str = Field(description="Vulnerability category")
-    owasp_category: str | None = Field(default=None, description="OWASP Top 10 category")
+# [20251216_FEATURE] Unified sink detection result model
+class UnifiedDetectedSink(BaseModel):
+    """Detected sink with confidence and OWASP mapping."""
+
+    pattern: str = Field(description="Sink pattern matched")
+    sink_type: str = Field(description="Sink type classification")
+    confidence: float = Field(description="Confidence score (0.0-1.0)")
+    line: int = Field(default=0, description="Line number of sink occurrence")
+    column: int = Field(default=0, description="Column offset of sink occurrence")
+    code_snippet: str = Field(default="", description="Snippet around the sink")
+    vulnerability_type: str | None = Field(
+        default=None, description="Vulnerability category key"
+    )
+    owasp_category: str | None = Field(
+        default=None, description="Mapped OWASP Top 10 category"
+    )
 
 
 class UnifiedSinkResult(BaseModel):
-    """[20251216_FEATURE] v2.3.0 - Result of unified sink detection."""
-    
+    """Result of unified polyglot sink detection."""
+
     success: bool = Field(description="Whether detection succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
-    sinks: list[UnifiedSinkInfo] = Field(
-        default_factory=list, description="Detected security sinks"
+    sinks: list[UnifiedDetectedSink] = Field(
+        default_factory=list, description="Detected sinks meeting threshold"
     )
-    min_confidence: float = Field(description="Minimum confidence threshold used")
     coverage_summary: dict[str, Any] = Field(
-        default_factory=dict, description="Coverage statistics"
+        default_factory=dict, description="Summary of sink pattern coverage"
     )
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -518,20 +527,12 @@ class ContextualExtractionResult(BaseModel):
     line_end: int = Field(default=0, description="Ending line number of target")
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
-
+    
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(
-        default=False, description="Whether JSX syntax was normalized"
-    )
-    is_server_component: bool = Field(
-        default=False, description="Next.js Server Component (async)"
-    )
-    is_server_action: bool = Field(
-        default=False, description="Next.js Server Action ('use server')"
-    )
-    component_type: str | None = Field(
-        default=None, description="React component type: 'functional', 'class', or None"
-    )
+    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
+    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
+    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
+    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
 
 
 class PatchResultModel(BaseModel):
@@ -1028,6 +1029,113 @@ def _security_scan_sync(
         )
 
 
+# ==========================================================================
+# [20251216_FEATURE] v2.5.0 - Unified sink detection MCP tool
+# ==========================================================================
+
+
+def _sink_coverage_summary(detector: UnifiedSinkDetector) -> dict[str, Any]:
+    """Compute coverage summary across languages."""
+
+    by_language: dict[str, int] = {}
+    total_patterns = 0
+
+    for vuln_sinks in detector.sinks.values():
+        for lang, sink_list in vuln_sinks.items():
+            by_language[lang] = by_language.get(lang, 0) + len(sink_list)
+            total_patterns += len(sink_list)
+
+    return {
+        "total_patterns": total_patterns,
+        "by_language": by_language,
+    }
+
+
+def _unified_sink_detect_sync(
+    code: str, language: str, min_confidence: float
+) -> UnifiedSinkResult:
+    """Synchronous unified sink detection wrapper."""
+
+    lang = (language or "").lower()
+
+    if code is None or code.strip() == "":
+        return UnifiedSinkResult(
+            success=False,
+            language=lang,
+            sink_count=0,
+            error="code is required",
+            coverage_summary={},
+        )
+
+    if not 0.0 <= min_confidence <= 1.0:
+        return UnifiedSinkResult(
+            success=False,
+            language=lang,
+            sink_count=0,
+            error="min_confidence must be between 0.0 and 1.0",
+            coverage_summary={},
+        )
+
+    detector = UnifiedSinkDetector()
+    try:
+        detected = detector.detect_sinks(code, lang, min_confidence)
+    except ValueError as e:
+        return UnifiedSinkResult(
+            success=False,
+            language=lang,
+            sink_count=0,
+            error=str(e),
+            coverage_summary=_sink_coverage_summary(detector),
+        )
+
+    sinks: list[UnifiedDetectedSink] = []
+    for sink in detected:
+        owasp = detector.get_owasp_category(sink.vulnerability_type)
+        sinks.append(
+            UnifiedDetectedSink(
+                pattern=sink.pattern,
+                sink_type=getattr(sink.sink_type, "name", str(sink.sink_type)),
+                confidence=sink.confidence,
+                line=sink.line,
+                column=getattr(sink, "column", 0),
+                code_snippet=getattr(sink, "code_snippet", ""),
+                vulnerability_type=getattr(sink, "vulnerability_type", None),
+                owasp_category=owasp,
+            )
+        )
+
+    return UnifiedSinkResult(
+        success=True,
+        language=lang,
+        sink_count=len(sinks),
+        sinks=sinks,
+        coverage_summary=_sink_coverage_summary(detector),
+    )
+
+
+@mcp.tool()
+async def unified_sink_detect(
+    code: str, language: str, min_confidence: float = 0.8
+) -> UnifiedSinkResult:
+    """
+    Unified polyglot sink detection with confidence thresholds.
+
+    [20251216_FEATURE] v2.5.0 "Guardian" - Expose unified sink detector via MCP.
+
+    Args:
+        code: Source code to analyze
+        language: Programming language (python, java, typescript, javascript)
+        min_confidence: Minimum confidence threshold (0.0-1.0)
+
+    Returns:
+        UnifiedSinkResult with detected sinks and coverage summary.
+    """
+
+    return await asyncio.to_thread(
+        _unified_sink_detect_sync, code, language, min_confidence
+    )
+
+
 @mcp.tool()
 async def security_scan(
     code: Optional[str] = None, file_path: Optional[str] = None
@@ -1129,117 +1237,6 @@ def _basic_security_scan(code: str) -> SecurityResult:
         vulnerabilities=vulnerabilities,
         taint_sources=taint_sources,
     )
-
-
-@mcp.tool()
-async def unified_sink_detect(
-    code: str,
-    language: str = "python",
-    min_confidence: float = 0.8
-) -> UnifiedSinkResult:
-    """
-    Detect security sinks using unified polyglot detection with confidence scoring.
-    
-    [20251216_FEATURE] v2.3.0 - Unified cross-language sink detection
-    
-    This tool provides language-agnostic security sink detection with explicit
-    confidence scores for each pattern. It supports Python, Java, TypeScript,
-    and JavaScript with complete OWASP Top 10 2021 coverage.
-    
-    Features:
-    - Multi-language support (Python, Java, TypeScript, JavaScript)
-    - Confidence-based detection (0.0-1.0 scale)
-    - OWASP Top 10 2021 mapping
-    - Context-aware vulnerability assessment
-    
-    Detects:
-    - SQL Injection (A03:2021)
-    - Cross-Site Scripting (A03:2021)
-    - Command Injection (A03:2021)
-    - Path Traversal (A01:2021)
-    - SSRF (A10:2021)
-    - And more...
-    
-    Args:
-        code: Source code to analyze
-        language: Programming language (python, java, typescript, javascript)
-        min_confidence: Minimum confidence threshold (0.0-1.0, default: 0.8)
-    
-    Returns:
-        Unified sink detection result with all detected sinks
-    """
-    return await asyncio.to_thread(
-        _unified_sink_detect_sync, code, language, min_confidence
-    )
-
-
-def _unified_sink_detect_sync(
-    code: str, language: str, min_confidence: float
-) -> UnifiedSinkResult:
-    """Synchronous implementation of unified_sink_detect."""
-    # Validate language
-    if language not in ["python", "java", "typescript", "javascript"]:
-        return UnifiedSinkResult(
-            success=False,
-            language=language,
-            sink_count=0,
-            min_confidence=min_confidence,
-            error=f"Unsupported language: {language}. Must be one of: python, java, typescript, javascript"
-        )
-    
-    # Validate confidence
-    if not 0.0 <= min_confidence <= 1.0:
-        return UnifiedSinkResult(
-            success=False,
-            language=language,
-            sink_count=0,
-            min_confidence=min_confidence,
-            error="min_confidence must be between 0.0 and 1.0"  # [20240613_BUGFIX] Clarified error message to specify parameter name for easier debugging
-        )
-    
-    try:
-        from code_scalpel.symbolic_execution_tools import UnifiedSinkDetector
-        
-        detector = UnifiedSinkDetector()
-        detected_sinks = detector.detect_sinks(code, language, min_confidence)
-        
-        # Convert to result format
-        sink_infos = []
-        for sink in detected_sinks:
-            owasp_cat = detector.get_owasp_category(sink.vulnerability_type)
-            
-            sink_infos.append(UnifiedSinkInfo(
-                pattern=sink.pattern,
-                sink_type=sink.sink_type.name,
-                confidence=sink.confidence,
-                line=sink.line,
-                column=sink.column,
-                code_snippet=sink.code_snippet,
-                vulnerability_type=sink.vulnerability_type,
-                owasp_category=owasp_cat
-            ))
-        
-        # Get coverage summary
-        coverage = detector.get_coverage_report()
-        
-        return UnifiedSinkResult(
-            success=True,
-            language=language,
-            sink_count=len(sink_infos),
-            sinks=sink_infos,
-            min_confidence=min_confidence,
-            coverage_summary=coverage
-        )
-        
-    except Exception as e:
-        logger.error(f"Unified sink detection failed: {e}", exc_info=True)
-        return UnifiedSinkResult(
-            success=False,
-            language=language,
-            sink_count=0,
-            min_confidence=min_confidence,
-            error=f"Detection failed: {str(e)}"
-        )
 
 
 def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
@@ -2812,14 +2809,12 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
         file_path = resolve_module_path(language, module, PROJECT_ROOT)
 
         if file_path is None:
-            return json.dumps(
-                {
-                    "error": f"Module '{module}' not found for language '{language}'",
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                }
-            )
+            return json.dumps({
+                "error": f"Module '{module}' not found for language '{language}'",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            })
 
         # Security check
         _validate_path_security(file_path)
@@ -2852,57 +2847,48 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
             last_error = result.error
 
         if result is None or not result.success:
-            return json.dumps(
-                {
-                    "error": last_error or "Extraction failed",
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                }
-            )
+            return json.dumps({
+                "error": last_error or "Extraction failed",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            })
 
         # Return full result with metadata
-        return json.dumps(
-            {
-                "uri": f"code:///{language}/{module}/{symbol}",
-                "mimeType": get_mime_type(language),
-                "code": result.full_code,
-                "metadata": {
-                    "file_path": str(file_path),
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                    "line_start": result.line_start,
-                    "line_end": result.line_end,
-                    "token_estimate": result.token_estimate,
-                    # JSX/TSX metadata
-                    "jsx_normalized": result.jsx_normalized,
-                    "is_server_component": result.is_server_component,
-                    "is_server_action": result.is_server_action,
-                    "component_type": result.component_type,
-                },
+        return json.dumps({
+            "uri": f"code:///{language}/{module}/{symbol}",
+            "mimeType": get_mime_type(language),
+            "code": result.full_code,
+            "metadata": {
+                "file_path": str(file_path),
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+                "line_start": result.line_start,
+                "line_end": result.line_end,
+                "token_estimate": result.token_estimate,
+                # JSX/TSX metadata
+                "jsx_normalized": result.jsx_normalized,
+                "is_server_component": result.is_server_component,
+                "is_server_action": result.is_server_action,
+                "component_type": result.component_type,
             },
-            indent=2,
-        )
+        }, indent=2)
 
     except PermissionError as e:
-        return json.dumps(
-            {
-                "error": str(e),
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            }
-        )
+        return json.dumps({
+            "error": str(e),
+            "language": language,
+            "module": module,
+            "symbol": symbol,
+        })
     except Exception as e:
-        return json.dumps(
-            {
-                "error": f"Resource access failed: {str(e)}",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            }
-        )
+        return json.dumps({
+            "error": f"Resource access failed: {str(e)}",
+            "language": language,
+            "module": module,
+            "symbol": symbol,
+        })
 
 
 # ============================================================================
@@ -3359,13 +3345,13 @@ Please proceed with Step 1 to begin extracting the function."""
 def security_audit_workflow_prompt(project_path: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a comprehensive security audit.
-
+    
     This is a complete workflow prompt that guides through:
     1. Project structure analysis
     2. Vulnerability scanning
     3. Dependency checking
     4. Report generation
-
+    
     Args:
         project_path: Path to the project root
     """
@@ -3458,14 +3444,14 @@ Begin by running `crawl_project("{project_path}")` to start the audit.
 def safe_refactor_workflow_prompt(file_path: str, symbol_name: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a safe refactoring operation.
-
+    
     This workflow ensures refactoring is done safely with validation:
     1. Extract current implementation
     2. Find all usages
     3. Plan changes
     4. Simulate refactor
     5. Apply changes (only if safe)
-
+    
     Args:
         file_path: Path to the file containing the symbol
         symbol_name: Name of the function/class to refactor
@@ -4293,6 +4279,299 @@ async def get_call_graph(
 
 
 # ============================================================================
+# [20251216_FEATURE] v2.5.0 - get_graph_neighborhood MCP Tool
+# ============================================================================
+
+
+class NeighborhoodNodeModel(BaseModel):
+    """A node in the neighborhood subgraph."""
+    
+    id: str = Field(description="Node ID (language::module::type::name)")
+    depth: int = Field(description="Distance from center node (0 = center)")
+    metadata: dict = Field(default_factory=dict, description="Additional node metadata")
+
+
+class NeighborhoodEdgeModel(BaseModel):
+    """An edge in the neighborhood subgraph."""
+    
+    from_id: str = Field(description="Source node ID")
+    to_id: str = Field(description="Target node ID")
+    edge_type: str = Field(description="Type of relationship")
+    confidence: float = Field(description="Confidence score (0.0-1.0)")
+
+
+class GraphNeighborhoodResult(BaseModel):
+    """Result of k-hop neighborhood extraction."""
+    
+    success: bool = Field(description="Whether extraction succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    
+    # Center node info
+    center_node_id: str = Field(default="", description="ID of the center node")
+    k: int = Field(default=0, description="Number of hops used")
+    
+    # Subgraph
+    nodes: list[NeighborhoodNodeModel] = Field(
+        default_factory=list, description="Nodes in the neighborhood"
+    )
+    edges: list[NeighborhoodEdgeModel] = Field(
+        default_factory=list, description="Edges in the neighborhood"
+    )
+    total_nodes: int = Field(default=0, description="Number of nodes in subgraph")
+    total_edges: int = Field(default=0, description="Number of edges in subgraph")
+    
+    # Truncation info
+    max_depth_reached: int = Field(default=0, description="Maximum depth actually reached")
+    truncated: bool = Field(default=False, description="Whether graph was truncated")
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if truncated"
+    )
+    
+    # Mermaid diagram
+    mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
+    
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _generate_neighborhood_mermaid(
+    nodes: list[NeighborhoodNodeModel],
+    edges: list[NeighborhoodEdgeModel],
+    center_node_id: str,
+) -> str:
+    """Generate Mermaid diagram for neighborhood."""
+    lines = ["graph TD"]
+    
+    # Add nodes with depth-based styling
+    for node in nodes:
+        # Sanitize node ID for Mermaid
+        safe_id = node.id.replace("::", "_").replace(".", "_").replace("-", "_")
+        label = node.id.split("::")[-1] if "::" in node.id else node.id
+        
+        if node.depth == 0:
+            # Center node - special styling
+            lines.append(f'    {safe_id}["{label}"]:::center')
+        elif node.depth == 1:
+            lines.append(f'    {safe_id}["{label}"]:::depth1')
+        else:
+            lines.append(f'    {safe_id}["{label}"]:::depth2plus')
+    
+    # Add edges
+    for edge in edges:
+        from_safe = edge.from_id.replace("::", "_").replace(".", "_").replace("-", "_")
+        to_safe = edge.to_id.replace("::", "_").replace(".", "_").replace("-", "_")
+        lines.append(f'    {from_safe} --> {to_safe}')
+    
+    # Add style definitions
+    lines.append('    classDef center fill:#f9f,stroke:#333,stroke-width:3px')
+    lines.append('    classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px')
+    lines.append('    classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px')
+    
+    return "\n".join(lines)
+
+
+@mcp.tool()
+async def get_graph_neighborhood(
+    center_node_id: str,
+    k: int = 2,
+    max_nodes: int = 100,
+    direction: str = "both",
+    min_confidence: float = 0.0,
+    project_root: str | None = None,
+) -> GraphNeighborhoodResult:
+    """
+    Extract k-hop neighborhood subgraph around a center node.
+    
+    [v2.5.0] Use this tool to prevent graph explosion when analyzing large
+    codebases. Instead of loading the entire graph, extract only the nodes
+    within k hops of a specific node.
+    
+    **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
+    
+    This extracts all nodes u where the shortest path from center v to u
+    is at most k hops.
+    
+    **Truncation Protection:**
+    If the neighborhood exceeds max_nodes, the graph is truncated and
+    a warning is returned. This prevents memory exhaustion on dense graphs.
+    
+    Key capabilities:
+    - Extract focused subgraph around any node
+    - Control traversal depth with k parameter
+    - Limit graph size with max_nodes
+    - Filter by edge direction (incoming, outgoing, both)
+    - Filter by minimum confidence score
+    - Generate Mermaid visualization
+    
+    Why AI agents need this:
+    - **Focused Analysis:** Analyze only relevant code, not entire codebase
+    - **Memory Safety:** Prevent OOM on large graphs
+    - **Honest Uncertainty:** Know when graph is incomplete
+    
+    Example:
+        # Get 2-hop neighborhood around a function
+        result = get_graph_neighborhood(
+            center_node_id="python::services::function::process_order",
+            k=2,
+            max_nodes=50
+        )
+        if result.truncated:
+            print(f"Warning: {result.truncation_warning}")
+    
+    Args:
+        center_node_id: ID of the center node (format: language::module::type::name)
+        k: Maximum hops from center (default: 2)
+        max_nodes: Maximum nodes to include (default: 100)
+        direction: "outgoing", "incoming", or "both" (default: "both")
+        min_confidence: Minimum edge confidence to follow (default: 0.0)
+        project_root: Project root directory (default: server's project root)
+    
+    Returns:
+        GraphNeighborhoodResult with subgraph, truncation info, and Mermaid diagram
+    """
+    from code_scalpel.graph_engine import UniversalGraph
+    
+    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    
+    if not root_path.exists():
+        return GraphNeighborhoodResult(
+            success=False,
+            error=f"Project root not found: {root_path}",
+        )
+    
+    # Validate parameters
+    if k < 1:
+        return GraphNeighborhoodResult(
+            success=False,
+            error="k must be at least 1",
+        )
+    
+    if max_nodes < 1:
+        return GraphNeighborhoodResult(
+            success=False,
+            error="max_nodes must be at least 1",
+        )
+    
+    if direction not in ("outgoing", "incoming", "both"):
+        return GraphNeighborhoodResult(
+            success=False,
+            error=f"direction must be 'outgoing', 'incoming', or 'both', got '{direction}'",
+        )
+    
+    try:
+        # Try to load existing graph from project
+        # For now, we'll build a simple graph from the call graph
+        from code_scalpel.ast_tools.call_graph import CallGraphBuilder
+        
+        builder = CallGraphBuilder(root_path)
+        call_graph_result = builder.build_with_details(entry_point=None, depth=10)
+        
+        # Convert call graph to UniversalGraph
+        from code_scalpel.graph_engine import (
+            GraphNode, GraphEdge, UniversalNodeID, NodeType, EdgeType
+        )
+        
+        graph = UniversalGraph()
+        
+        # Add nodes
+        for node in call_graph_result.nodes:
+            node_id = UniversalNodeID(
+                language="python",
+                module=node.file.replace("/", ".").replace(".py", "") if node.file != "<external>" else "external",
+                node_type=NodeType.FUNCTION,
+                name=node.name,
+                line=node.line,
+            )
+            graph.add_node(GraphNode(id=node_id, metadata={
+                "file": node.file,
+                "line": node.line,
+                "is_entry_point": node.is_entry_point,
+            }))
+        
+        # Add edges
+        for edge in call_graph_result.edges:
+            # Parse caller/callee into node IDs
+            caller_parts = edge.caller.split(":")
+            callee_parts = edge.callee.split(":")
+            
+            caller_file = caller_parts[0] if len(caller_parts) > 1 else ""
+            caller_name = caller_parts[-1]
+            callee_file = callee_parts[0] if len(callee_parts) > 1 else ""
+            callee_name = callee_parts[-1]
+            
+            caller_module = caller_file.replace("/", ".").replace(".py", "") if caller_file else "unknown"
+            callee_module = callee_file.replace("/", ".").replace(".py", "") if callee_file else "external"
+            
+            caller_id = f"python::{caller_module}::function::{caller_name}"
+            callee_id = f"python::{callee_module}::function::{callee_name}"
+            
+            graph.add_edge(GraphEdge(
+                from_id=caller_id,
+                to_id=callee_id,
+                edge_type=EdgeType.DIRECT_CALL,
+                confidence=0.9,
+                evidence="Direct function call",
+            ))
+        
+        # Extract neighborhood
+        result = graph.get_neighborhood(
+            center_node_id=center_node_id,
+            k=k,
+            max_nodes=max_nodes,
+            direction=direction,
+            min_confidence=min_confidence,
+        )
+        
+        if not result.success:
+            return GraphNeighborhoodResult(
+                success=False,
+                error=result.error,
+            )
+        
+        # Convert to response models
+        nodes = []
+        for node_id, depth in result.node_depths.items():
+            node = result.subgraph.get_node(node_id) if result.subgraph else None
+            nodes.append(NeighborhoodNodeModel(
+                id=node_id,
+                depth=depth,
+                metadata=node.metadata if node else {},
+            ))
+        
+        edges = []
+        if result.subgraph:
+            for edge in result.subgraph.edges:
+                edges.append(NeighborhoodEdgeModel(
+                    from_id=edge.from_id,
+                    to_id=edge.to_id,
+                    edge_type=edge.edge_type.value,
+                    confidence=edge.confidence,
+                ))
+        
+        # Generate Mermaid diagram
+        mermaid = _generate_neighborhood_mermaid(nodes, edges, center_node_id)
+        
+        return GraphNeighborhoodResult(
+            success=True,
+            center_node_id=center_node_id,
+            k=k,
+            nodes=nodes,
+            edges=edges,
+            total_nodes=result.total_nodes,
+            total_edges=result.total_edges,
+            max_depth_reached=result.max_depth_reached,
+            truncated=result.truncated,
+            truncation_warning=result.truncation_warning,
+            mermaid=mermaid,
+        )
+        
+    except Exception as e:
+        return GraphNeighborhoodResult(
+            success=False,
+            error=f"Graph neighborhood extraction failed: {str(e)}",
+        )
+
+
+# ============================================================================
 # [20251213_FEATURE] v1.5.0 - get_project_map MCP Tool
 # ============================================================================
 
@@ -4693,6 +4972,16 @@ class ExtractedSymbolModel(BaseModel):
     dependencies: list[str] = Field(
         default_factory=list, description="Names of symbols this depends on"
     )
+    # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
+    depth: int = Field(default=0, description="Depth from original target (0 = target)")
+    confidence: float = Field(
+        default=1.0,
+        description="Confidence score with decay applied (0.0-1.0). Formula: C_base × 0.9^depth"
+    )
+    low_confidence: bool = Field(
+        default=False,
+        description="True if confidence is below threshold (0.5)"
+    )
 
 
 class CrossFileDependenciesResult(BaseModel):
@@ -4740,6 +5029,20 @@ class CrossFileDependenciesResult(BaseModel):
         default="", description="Mermaid diagram of import relationships"
     )
 
+    # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
+    confidence_decay_factor: float = Field(
+        default=0.9,
+        description="Decay factor used: C_effective = C_base × decay_factor^depth"
+    )
+    low_confidence_count: int = Field(
+        default=0,
+        description="Number of symbols below confidence threshold (0.5)"
+    )
+    low_confidence_warning: str | None = Field(
+        default=None,
+        description="Warning message if low-confidence symbols detected"
+    )
+
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -4750,6 +5053,7 @@ def _get_cross_file_dependencies_sync(
     max_depth: int,
     include_code: bool,
     include_diagram: bool,
+    confidence_decay_factor: float = 0.9,
 ) -> CrossFileDependenciesResult:
     """Synchronous implementation of get_cross_file_dependencies."""
     from code_scalpel.ast_tools.import_resolver import ImportResolver
@@ -4783,11 +5087,12 @@ def _get_cross_file_dependencies_sync(
         extractor = CrossFileExtractor(root_path)
         extractor.build()
 
-        # Note: extract() signature is (file_path, symbol_name, depth, include_stdlib)
+        # [20251216_FEATURE] v2.5.0 - Pass confidence_decay_factor to extractor
         extraction_result = extractor.extract(
             str(target_path),
             target_symbol,
             depth=max_depth,
+            confidence_decay_factor=confidence_decay_factor,
         )
 
         # Check for extraction errors
@@ -4806,6 +5111,9 @@ def _get_cross_file_dependencies_sync(
         # Convert extracted symbols to models
         extracted_symbols = []
         combined_parts = []
+        
+        # [20251216_FEATURE] v2.5.0 - Low confidence threshold
+        LOW_CONFIDENCE_THRESHOLD = 0.5
 
         for sym in all_symbols:
             rel_file = (
@@ -4813,6 +5121,7 @@ def _get_cross_file_dependencies_sync(
                 if Path(sym.file).is_absolute()
                 else sym.file
             )
+            # [20251216_FEATURE] v2.5.0 - Include depth and confidence in symbol model
             extracted_symbols.append(
                 ExtractedSymbolModel(
                     name=sym.name,
@@ -4821,6 +5130,9 @@ def _get_cross_file_dependencies_sync(
                     line_start=sym.line,  # ExtractedSymbol uses 'line' not 'line_start'
                     line_end=sym.end_line or 0,  # ExtractedSymbol uses 'end_line'
                     dependencies=list(sym.dependencies),
+                    depth=sym.depth,
+                    confidence=sym.confidence,
+                    low_confidence=sym.confidence < LOW_CONFIDENCE_THRESHOLD,
                 )
             )
             if include_code:
@@ -4889,6 +5201,16 @@ def _get_cross_file_dependencies_sync(
             else target_file
         )
 
+        # [20251216_FEATURE] v2.5.0 - Build low confidence warning if needed
+        low_confidence_warning = None
+        if extraction_result.low_confidence_count > 0:
+            low_conf_names = [s.name for s in extraction_result.get_low_confidence_symbols()[:5]]
+            low_confidence_warning = (
+                f"⚠️ {extraction_result.low_confidence_count} symbol(s) have low confidence "
+                f"(below 0.5): {', '.join(low_conf_names)}"
+                + ("..." if extraction_result.low_confidence_count > 5 else "")
+            )
+
         return CrossFileDependenciesResult(
             success=True,
             target_name=target_symbol,
@@ -4901,6 +5223,10 @@ def _get_cross_file_dependencies_sync(
             combined_code=combined_code,
             token_estimate=token_estimate,
             mermaid=mermaid,
+            # [20251216_FEATURE] v2.5.0 - Confidence decay fields
+            confidence_decay_factor=confidence_decay_factor,
+            low_confidence_count=extraction_result.low_confidence_count,
+            low_confidence_warning=low_confidence_warning,
         )
 
     except Exception as e:
@@ -4918,13 +5244,28 @@ async def get_cross_file_dependencies(
     max_depth: int = 3,
     include_code: bool = True,
     include_diagram: bool = True,
+    confidence_decay_factor: float = 0.9,
 ) -> CrossFileDependenciesResult:
     """
     Analyze and extract cross-file dependencies for a symbol.
 
-    [v1.5.1] Use this tool to understand all dependencies a function/class needs
+    [v2.5.0] Use this tool to understand all dependencies a function/class needs
     from other files in the project. It recursively resolves imports and extracts
     the complete dependency chain with source code.
+
+    **Confidence Decay (v2.5.0):**
+    Deep dependency chains get exponentially decaying confidence scores.
+    Formula: C_effective = 1.0 × confidence_decay_factor^depth
+
+    | Depth | Confidence (factor=0.9) |
+    |-------|------------------------|
+    | 0     | 1.000 (target)         |
+    | 1     | 0.900                  |
+    | 2     | 0.810                  |
+    | 5     | 0.590                  |
+    | 10    | 0.349                  |
+
+    Symbols with confidence < 0.5 are flagged as "low confidence".
 
     Key capabilities:
     - Resolve imports to their source files
@@ -4932,21 +5273,26 @@ async def get_cross_file_dependencies(
     - Detect circular import cycles
     - Generate import relationship diagrams
     - Provide combined code block ready for AI analysis
+    - **Confidence scoring** for each symbol based on depth
 
     Why AI agents need this:
     - Complete Context: Get all code needed to understand a function
     - Safe Refactoring: Know what depends on what before making changes
     - Debugging: Trace data flow across file boundaries
     - Code Review: Understand the full impact of changes
+    - **Honest Uncertainty**: Know when deep dependencies may be unreliable
 
     Example:
         # Analyze 'process_order' function in 'services/order.py'
         result = get_cross_file_dependencies(
             target_file="services/order.py",
             target_symbol="process_order",
-            max_depth=2
+            max_depth=5,
+            confidence_decay_factor=0.9
         )
-        # Returns code for process_order plus all functions it calls from other files
+        # Check for low-confidence symbols
+        if result.low_confidence_count > 0:
+            print(f"Warning: {result.low_confidence_warning}")
 
     Args:
         target_file: Path to file containing the target symbol (relative to project root)
@@ -4955,9 +5301,12 @@ async def get_cross_file_dependencies(
         max_depth: Maximum depth of dependency resolution (default: 3)
         include_code: Include full source code in result (default: True)
         include_diagram: Include Mermaid diagram of imports (default: True)
+        confidence_decay_factor: Decay factor per depth level (default: 0.9).
+                                 Lower values = faster decay. Range: 0.0-1.0
 
     Returns:
-        CrossFileDependenciesResult with extracted symbols, dependency graph, and combined code
+        CrossFileDependenciesResult with extracted symbols, dependency graph, combined code,
+        and confidence scores for each symbol
     """
     return await asyncio.to_thread(
         _get_cross_file_dependencies_sync,
@@ -4967,6 +5316,7 @@ async def get_cross_file_dependencies(
         max_depth,
         include_code,
         include_diagram,
+        confidence_decay_factor,
     )
 
 
@@ -5370,6 +5720,142 @@ async def validate_paths(
         PathValidationResult with accessible/inaccessible paths and suggestions
     """
     return await asyncio.to_thread(_validate_paths_sync, paths, project_root)
+
+
+# ============================================================================
+# POLICY VERIFICATION TOOL
+# ============================================================================
+
+
+# [20250108_FEATURE] v2.5.0 Guardian - Policy verification models
+class PolicyVerificationResult(BaseModel):
+    """Result of cryptographic policy verification."""
+    success: bool = Field(description="Whether all policy files verified successfully")
+    manifest_valid: bool = Field(default=False, description="Whether manifest signature is valid")
+    files_verified: int = Field(default=0, description="Number of files successfully verified")
+    files_failed: list[str] = Field(default_factory=list, description="List of files that failed verification")
+    error: str | None = Field(default=None, description="Error message if verification failed")
+    manifest_source: str | None = Field(default=None, description="Source of the policy manifest")
+    policy_dir: str | None = Field(default=None, description="Policy directory that was verified")
+
+
+def _verify_policy_integrity_sync(
+    policy_dir: str | None = None,
+    manifest_source: str = "file",
+) -> PolicyVerificationResult:
+    """
+    Synchronous implementation of policy integrity verification.
+    
+    [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
+    """
+    try:
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
+        
+        dir_path = policy_dir or ".scalpel"
+        
+        verifier = CryptographicPolicyVerifier(
+            manifest_source=manifest_source,
+            policy_dir=dir_path,
+        )
+        
+        result = verifier.verify_all_policies()
+        
+        return PolicyVerificationResult(
+            success=result.success,
+            manifest_valid=result.manifest_valid,
+            files_verified=result.files_verified,
+            files_failed=result.files_failed,
+            error=result.error,
+            manifest_source=manifest_source,
+            policy_dir=dir_path,
+        )
+        
+    except SecurityError as e:
+        return PolicyVerificationResult(
+            success=False,
+            error=str(e),
+            manifest_source=manifest_source,
+            policy_dir=policy_dir,
+        )
+    except Exception as e:
+        return PolicyVerificationResult(
+            success=False,
+            error=f"Verification failed: {e}",
+            manifest_source=manifest_source,
+            policy_dir=policy_dir,
+        )
+
+
+@mcp.tool()
+async def verify_policy_integrity(
+    policy_dir: str | None = None,
+    manifest_source: str = "file",
+) -> PolicyVerificationResult:
+    """
+    Verify policy file integrity using cryptographic signatures.
+    
+    [v2.5.0] Use this tool to verify that policy files have not been tampered
+    with since they were signed. This is essential for tamper-resistant
+    governance in enterprise deployments.
+    
+    **Security Model: FAIL CLOSED**
+    - Missing manifest → DENY ALL
+    - Invalid signature → DENY ALL
+    - Hash mismatch → DENY ALL
+    
+    **How it works:**
+    1. Load policy manifest from configured source (git, env, file)
+    2. Verify HMAC-SHA256 signature using secret key
+    3. Verify SHA-256 hash of each policy file matches manifest
+    4. Any failure results in security error
+    
+    **Bypass Prevention:**
+    This addresses the 3rd party review feedback that file permissions
+    (chmod 0444) can be bypassed. Even if an agent runs `chmod +w` and
+    modifies a policy file, the hash verification will detect the change.
+    
+    Key capabilities:
+    - Verify manifest signature integrity
+    - Detect tampered policy files
+    - Detect missing policy files  
+    - Report detailed verification status
+    - Fail closed on any error
+    
+    Why AI agents need this:
+    - **Trust Verification:** Confirm policies haven't been modified
+    - **Audit Trail:** Verify policy integrity before operations
+    - **Security Compliance:** Meet enterprise security requirements
+    
+    Example:
+        # Verify policy integrity before operations
+        result = verify_policy_integrity(policy_dir=".scalpel")
+        
+        if not result.success:
+            print(f"SECURITY: {result.error}")
+            # Fail closed - do not proceed
+        else:
+            print(f"Verified {result.files_verified} policy files")
+    
+    Args:
+        policy_dir: Directory containing policy files (default: .scalpel)
+        manifest_source: Where to load manifest from - "git", "env", or "file"
+            - "git": Load from committed version in git history (most secure)
+            - "env": Load from SCALPEL_POLICY_MANIFEST environment variable
+            - "file": Load from local policy.manifest.json file
+    
+    Returns:
+        PolicyVerificationResult with verification status and details
+    
+    Note:
+        Requires SCALPEL_MANIFEST_SECRET environment variable to be set.
+        This secret should be managed by administrators, not agents.
+    """
+    return await asyncio.to_thread(
+        _verify_policy_integrity_sync, policy_dir, manifest_source
+    )
 
 
 # ============================================================================

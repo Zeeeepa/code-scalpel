@@ -46,6 +46,9 @@ If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination).
 
 * Can an agent bypass a "No SQL" policy by using a String Builder?  
 * Does the policy engine fail "Open" or "Closed"? (Must fail Closed).
+* Can an agent bypass policy files via chmod/chown? (Must verify cryptographic signatures)
+* Does confidence decay for deep dependency chains? (10+ hops should trigger low-confidence warning)
+* Does graph explosion occur with large call graphs? (Must have neighborhood pruning)
 
 ### **✅ Must‑Pass Checklist**
 
@@ -59,6 +62,15 @@ If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination).
 
 * \[ \] Policy files are read-only to the Agent.  
 * \[ \] Override codes require Human-in-the-loop approval.
+* \[ \] **Cryptographic Verification:** Policy files signed with SHA-256; invalid signature → fail closed.
+* \[ \] **chmod Bypass Prevention:** Policy integrity verified regardless of file permissions.
+
+**Confidence & Scaling (3rd Party Review)**
+<!-- [20251216_DOCS] Added per 3rd party security review -->
+
+* \[ \] **Confidence Decay:** Results at depth 10+ marked as "low confidence" (formula: C_effective = C_base × 0.9^depth).
+* \[ \] **Graph Neighborhood View:** k-hop subgraph extraction with max 100 nodes.
+* \[ \] **Truncation Warning:** When graph is pruned, return explicit warning to agent.
 
 🚫 Fail Condition:  
 If an agent can execute a forbidden action by "tricking" the parser.
@@ -71,6 +83,8 @@ If an agent can execute a forbidden action by "tricking" the parser.
 
 * If the agent enters a fix-break-fix loop, does Scalpel stop it?  
 * Are the "Fix Hints" actually valid code?
+* Can an agent submit a "hollow fix" (`def test(): pass`) and claim success?
+* Does reverting a fix cause tests to fail again? (Mutation Test Gate)
 
 ### **✅ Must‑Pass Checklist**
 
@@ -83,6 +97,14 @@ If an agent can execute a forbidden action by "tricking" the parser.
 
 * \[ \] simulate\_edit correctly predicts test failures without writing to disk.  
 * \[ \] Sandbox environment isolates side effects.
+
+**Mutation Test Gate (3rd Party Review)**
+<!-- [20251216_DOCS] Added per 3rd party security review -->
+
+* \[ \] **Hollow Fix Detection:** `def test(): pass` pattern rejected.
+* \[ \] **Revert Validation:** Fix reversal must cause tests to fail.
+* \[ \] **Mutation Score:** At least 80% of mutations caught by tests.
+* \[ \] **Weak Test Flagging:** Tests that pass with reversed logic flagged.
 
 🚫 Fail Condition:  
 If the agent reports "Fixed" but the build fails in CI.

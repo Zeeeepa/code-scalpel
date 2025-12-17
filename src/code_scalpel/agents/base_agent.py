@@ -14,6 +14,7 @@ The base agent provides:
 
 import asyncio
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
@@ -39,16 +40,18 @@ class AgentContext:
 
     def add_operation(self, operation: str, result: Any, success: bool = True):
         """Record an operation and its result."""
+        # [20251215_BUGFIX] Use a monotonic clock even when no asyncio loop is running
+        try:
+            timestamp = asyncio.get_running_loop().time()
+        except RuntimeError:
+            timestamp = time.monotonic()
+
         self.recent_operations.append(
             {
                 "operation": operation,
                 "result": result,
                 "success": success,
-                "timestamp": (
-                    asyncio.get_event_loop().time()
-                    if asyncio.get_event_loop()
-                    else None
-                ),
+                "timestamp": timestamp,
             }
         )
 

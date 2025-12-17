@@ -31,6 +31,7 @@ from .graph import (
     GraphBuilder,
     GraphEdge,
     GraphNode,
+    NeighborhoodResult,
     UniversalGraph,
 )
 from .http_detector import (
@@ -61,6 +62,8 @@ __all__ = [
     "GraphEdge",
     "UniversalGraph",
     "GraphBuilder",
+    # [20251216_FEATURE] v2.5.0 - Graph Neighborhood View
+    "NeighborhoodResult",
     # HTTP detection
     "HTTPLinkDetector",
     "HTTPMethod",

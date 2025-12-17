@@ -185,3 +185,31 @@ def reset_osv_cache():
         client.clear_cache()
     except Exception:
         pass  # Ignore errors on cleanup
+
+
+# [20251217_BUGFIX] Prevent health server bind conflicts during tests
+@pytest.fixture(autouse=True)
+def disable_health_server(monkeypatch):
+    """
+    Auto-used fixture to prevent health server startup during tests.
+
+    The health server can cause "Address already in use" warnings when
+    running the full test suite, as multiple test modules try to start
+    servers on the same port. This fixture patches the thread start
+    to be a no-op during tests.
+
+    [20251217_BUGFIX] Silence health server bind warnings in test runs
+    """
+    # Patch threading.Thread.start to skip health server startup
+    import threading
+    original_start = threading.Thread.start
+
+    def patched_start(self):
+        # Skip starting threads named with "run_health_server" target
+        if hasattr(self, '_target') and self._target:
+            target_name = getattr(self._target, '__name__', '')
+            if 'health_server' in target_name.lower():
+                return  # Skip health server threads
+        original_start(self)
+
+    monkeypatch.setattr(threading.Thread, 'start', patched_start)

@@ -14,12 +14,15 @@ Test Categories:
 import pytest
 import tempfile
 import os
+import subprocess
+import json
 from pathlib import Path
 from datetime import datetime, timedelta
 
 from code_scalpel.policy_engine import (
     PolicyEngine,
     PolicyDecision,
+    Policy,
     Operation,
     PolicyError,
     SemanticAnalyzer,
@@ -342,6 +345,64 @@ class TestSemanticAnalyzer:
         """
         assert semantic_analyzer.tainted_path_input(code)
 
+    def test_invalid_syntax_falls_back_to_text_search(self, semantic_analyzer):
+        """[20251216_TEST] Syntax errors should still detect SQL via text search."""
+        code = 'query = SELECT * FROM users WHERE id='  # invalid Python but contains SQL
+        assert semantic_analyzer.contains_sql_sink(code, "python")
+
+    def test_tainted_path_false_when_no_user_input(self, semantic_analyzer):
+        """[20251216_TEST] File operations without user input are not flagged as tainted."""
+        code = "with open('/tmp/file.txt') as f:\n    data = f.read()"
+        assert not semantic_analyzer.tainted_path_input(code)
+
+    def test_contains_sql_fallback_for_unknown_language(self, semantic_analyzer):
+        """[20251216_TEST] Unsupported language falls back to text search for SQL."""
+        code = "query = 'SELECT * FROM table WHERE id=' + user_id"
+        assert semantic_analyzer.contains_sql_sink(code, "go")
+
+    def test_python_format_without_sql_is_safe(self, semantic_analyzer):
+        """[20251216_TEST] Format strings without SQL keywords are ignored."""
+        code = "value = '{}'.format(user_id)"
+        assert not semantic_analyzer.contains_sql_sink(code, "python")
+
+    def test_parameterization_false_for_other_language(self, semantic_analyzer):
+        """[20251216_TEST] Non-supported languages do not report parameterization."""
+        code = "execute('SELECT * FROM users WHERE id=?', user_id)"
+        assert not semantic_analyzer.has_parameterization(code, "ruby")
+
+    def test_java_stringbuilder_without_sql_is_safe(self, semantic_analyzer):
+        """[20251216_TEST] StringBuilder without SQL keywords should not trigger detection."""
+        code = """
+        StringBuilder sb = new StringBuilder();
+        sb.append("hello");
+        """
+        assert not semantic_analyzer.contains_sql_sink(code, "java")
+
+    def test_python_binop_mod_without_sql_keywords(self, semantic_analyzer):
+        """[20251217_TEST] BinOp Mod without SQL keywords returns False."""
+        code = "value = 'age: %s' % user_age"
+        assert not semantic_analyzer.contains_sql_sink(code, "python")
+
+    def test_python_format_call_detects_sql(self, semantic_analyzer):
+        """[20251217_TEST] .format() with SQL keyword triggers detection."""
+        code = "query = 'SELECT * FROM users WHERE id={}'.format(user_id)"
+        assert semantic_analyzer.contains_sql_sink(code, "python")
+
+    def test_javascript_template_literal_without_sql(self, semantic_analyzer):
+        """[20251217_TEST] Template literal without SQL keywords is safe."""
+        code = "const msg = `Hello ${name}`;"
+        assert not semantic_analyzer.contains_sql_sink(code, "javascript")
+
+    def test_has_annotation_negative(self, semantic_analyzer):
+        """[20251217_TEST] Missing annotation returns False."""
+        code = "public class MyClass { }"
+        assert not semantic_analyzer.has_annotation(code, "@NotPresent")
+
+    def test_has_file_operation_negative(self, semantic_analyzer):
+        """[20251217_TEST] Code without file operations returns False."""
+        code = "value = 42"
+        assert not semantic_analyzer.has_file_operation(code)
+
 
 # =============================================================================
 # Fail CLOSED Tests
@@ -562,3 +623,267 @@ policies:
         )
         decision = engine.evaluate(operation)
         assert decision.allowed, "Incorrectly blocked safe parameterized query"
+
+
+class TestPolicyEngineFailurePaths:
+    """[20251216_TEST] Cover failure branches without requiring real OPA."""
+
+    def _fake_policy(self) -> Policy:
+        return Policy(
+            name="p1",
+            description="d",
+            rule="package scalpel.security\ndeny[msg]{ msg = \"deny\" }",
+            severity="HIGH",
+            action="DENY",
+        )
+
+    def test_validate_opa_available_nonzero(self, tmp_path, monkeypatch):
+        """[20251216_TEST] Non-zero OPA version exit fails closed."""
+
+        def _fake_run(*_args, **_kwargs):
+            class Result:
+                returncode = 1
+            return Result()
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = tmp_path / "policy.yaml"
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        with pytest.raises(PolicyError, match="Failing CLOSED"):
+            engine._validate_opa_available()
+
+    def test_validate_policies_timeout(self, tmp_path, monkeypatch):
+        """[20251216_TEST] Rego validation timeout raises PolicyError."""
+
+        def _raise_timeout(*_args, **_kwargs):
+            raise subprocess.TimeoutExpired(cmd=["opa"], timeout=1)
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = tmp_path / "policy.yaml"
+        engine.policies = [self._fake_policy()]
+        monkeypatch.setattr(subprocess, "run", _raise_timeout)
+
+        with pytest.raises(PolicyError, match="timeout"):
+            engine._validate_policies()
+
+    def test_validate_opa_available_timeout(self, tmp_path, monkeypatch):
+        """[20251216_TEST] OPA version timeout fails closed."""
+
+        def _raise_timeout(*_args, **_kwargs):
+            raise subprocess.TimeoutExpired(cmd=["opa"], timeout=1)
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = tmp_path / "policy.yaml"
+        monkeypatch.setattr(subprocess, "run", _raise_timeout)
+
+        with pytest.raises(PolicyError, match="timeout"):
+            engine._validate_opa_available()
+
+    def test_validate_opa_available_not_found(self, tmp_path, monkeypatch):
+        """[20251216_TEST] Missing OPA binary raises PolicyError."""
+
+        def _raise_not_found(*_args, **_kwargs):
+            raise FileNotFoundError()
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = tmp_path / "policy.yaml"
+        monkeypatch.setattr(subprocess, "run", _raise_not_found)
+
+        with pytest.raises(PolicyError, match="OPA CLI not found"):
+            engine._validate_opa_available()
+
+    def test_validate_policies_invalid_rego(self, tmp_path, monkeypatch):
+        """[20251216_TEST] Non-zero check result raises PolicyError."""
+
+        class Result:
+            returncode = 1
+            stderr = b"invalid rego"
+
+        def _fake_run(*_args, **_kwargs):
+            return Result()
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = tmp_path / "policy.yaml"
+        engine.policies = [self._fake_policy()]
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        with pytest.raises(PolicyError, match="Invalid Rego"):
+            engine._validate_policies()
+
+    def test_evaluate_fail_closed_on_opa_error(self, monkeypatch, tmp_path):
+        """[20251216_TEST] Evaluation error returns denied decision."""
+
+        class Result:
+            returncode = 1
+            stdout = ""
+            stderr = "error"
+
+        def _fake_run(*_args, **_kwargs):
+            return Result()
+
+        engine = object.__new__(PolicyEngine)
+        engine.policies = [self._fake_policy()]
+        engine._used_override_codes = set()
+        engine._used_override_codes_path = tmp_path / "codes.json"
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        op = Operation(type="code_edit", code="print('hi')", language="python")
+        decision = engine.evaluate(op)
+        assert decision.allowed is False
+        assert "Policy evaluation error" in decision.reason
+
+    def test_evaluate_timeout_returns_fail_closed(self, monkeypatch, tmp_path):
+        """[20251216_TEST] Timeout during evaluation denies operation."""
+
+        def _raise_timeout(*_args, **_kwargs):
+            raise subprocess.TimeoutExpired(cmd=["opa"], timeout=1)
+
+        engine = object.__new__(PolicyEngine)
+        engine.policies = [self._fake_policy()]
+        engine._used_override_codes = set()
+        engine._used_override_codes_path = tmp_path / "codes.json"
+        monkeypatch.setattr(subprocess, "run", _raise_timeout)
+
+        decision = engine.evaluate(Operation(type="code_edit", code="code"))
+        assert decision.allowed is False
+        assert "timeout" in decision.reason.lower()
+
+    def test_evaluate_warn_action_allows_with_warning(self, monkeypatch, tmp_path):
+        """[20251216_TEST] WARN action yields allowed decision with warning count."""
+
+        class Result:
+            returncode = 0
+            stdout = json.dumps({"result": [{"expressions": [{"value": ["warn"]}]}]})
+            stderr = ""
+
+        def _fake_run(*_args, **_kwargs):
+            return Result()
+
+        policy = Policy(
+            name="warn-policy",
+            description="warn only",
+            rule="package scalpel.security\ndeny[msg]{ msg = \"warn\" }",
+            severity="LOW",
+            action="WARN",
+        )
+
+        engine = object.__new__(PolicyEngine)
+        engine.policies = [policy]
+        engine._used_override_codes = set()
+        engine._used_override_codes_path = tmp_path / "codes.json"
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        decision = engine.evaluate(Operation(type="code_edit", code="code"))
+        assert decision.allowed is True
+        assert "warning" in decision.reason
+
+    def test_evaluate_denies_when_policy_violation(self, monkeypatch, tmp_path):
+        """[20251216_TEST] DENY action returns override-required decision."""
+
+        class Result:
+            returncode = 0
+            stdout = json.dumps({"result": [{"expressions": [{"value": ["deny message"]}]}]})
+            stderr = ""
+
+        def _fake_run(*_args, **_kwargs):
+            return Result()
+
+        policy = Policy(
+            name="deny-policy",
+            description="deny",
+            rule="package scalpel.security\ndeny[msg]{ msg = \"deny\" }",
+            severity="HIGH",
+            action="DENY",
+        )
+
+        engine = object.__new__(PolicyEngine)
+        engine.policies = [policy]
+        engine._used_override_codes = set()
+        engine._used_override_codes_path = tmp_path / "codes.json"
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        decision = engine.evaluate(Operation(type="code_edit", code="code"))
+        assert decision.allowed is False
+        assert decision.requires_override is True
+
+    def test_save_and_load_used_override_codes_success(self, tmp_path):
+        """[20251216_TEST] Persist and reload override codes without error."""
+
+        engine = object.__new__(PolicyEngine)
+        engine._used_override_codes_path = tmp_path / "used_override_codes.json"
+        engine._used_override_codes = {"abc123"}
+        engine._save_used_override_codes()
+
+        # Now load from disk and ensure round trip
+        engine.policy_path = engine._used_override_codes_path
+        loaded = engine._load_used_override_codes()
+        assert "abc123" in loaded
+
+    def test_evaluate_exception_in_parse_returns_fail_closed(self, monkeypatch, tmp_path):
+        """[20251217_TEST] Exception during JSON parsing fails closed."""
+
+        class Result:
+            returncode = 0
+            stdout = "invalid json"
+            stderr = ""
+
+        def _fake_run(*_args, **_kwargs):
+            return Result()
+
+        engine = object.__new__(PolicyEngine)
+        engine.policies = [self._fake_policy()]
+        engine._used_override_codes = set()
+        engine._used_override_codes_path = tmp_path / "codes.json"
+        monkeypatch.setattr(subprocess, "run", _fake_run)
+
+        decision = engine.evaluate(Operation(type="code_edit", code="code"))
+        assert decision.allowed is False
+        assert "Unexpected error" in decision.reason
+
+    def test_load_used_override_codes_invalid_type(self, tmp_path):
+        """[20251216_TEST] Invalid JSON structure raises PolicyError."""
+
+        codes_file = tmp_path / "used_override_codes.json"
+        codes_file.write_text("{}")
+
+        engine = object.__new__(PolicyEngine)
+        engine.policy_path = codes_file
+        engine._used_override_codes_path = codes_file
+
+        with pytest.raises(PolicyError, match="not a list"):
+            engine._load_used_override_codes()
+
+    def test_save_used_override_codes_failure(self, tmp_path, monkeypatch):
+        """[20251216_TEST] Write errors fail closed when persisting overrides."""
+
+        engine = object.__new__(PolicyEngine)
+        engine._used_override_codes = {"abc"}
+        engine._used_override_codes_path = tmp_path / "used_override_codes.json"
+
+        def _raise_io(*_args, **_kwargs):
+            raise OSError("disk full")
+
+        monkeypatch.setattr("builtins.open", _raise_io)
+
+        with pytest.raises(PolicyError, match="Failed to save used override codes"):
+            engine._save_used_override_codes()
+
+    def test_log_override_request_handles_io_errors(self, monkeypatch, tmp_path):
+        """[20251216_TEST] Audit logging failures do not raise."""
+
+        engine = object.__new__(PolicyEngine)
+        op = Operation(type="code_edit", code="code")
+        decision = PolicyDecision(allowed=False, reason="deny")
+
+        def _raise_io(*_args, **_kwargs):
+            raise OSError("cannot write")
+
+        monkeypatch.setattr("builtins.open", _raise_io)
+
+        engine._log_override_request(
+            operation=op,
+            decision=decision,
+            justification="test",
+            human_code_hash="hash",
+            override_id="override-1",
+        )

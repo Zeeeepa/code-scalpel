@@ -59,6 +59,15 @@ from .exceptions import (
 )
 from .models import HumanResponse
 
+# [20250108_FEATURE] Cryptographic Policy Verification (v2.5.0 Guardian)
+from .crypto_verify import (
+    CryptographicPolicyVerifier,
+    PolicyManifest,
+    VerificationResult,
+    SecurityError,
+    verify_policy_integrity_crypto,
+)
+
 __all__ = [
     # Policy Engine core
     "PolicyEngine",
@@ -72,6 +81,12 @@ __all__ = [
     # Tamper Resistance
     "TamperResistance",
     "AuditLog",
+    # Cryptographic Verification (v2.5.0)
+    "CryptographicPolicyVerifier",
+    "PolicyManifest",
+    "VerificationResult",
+    "SecurityError",
+    "verify_policy_integrity_crypto",
     # Exceptions
     "PolicyEngineError",
     "TamperDetectedError",

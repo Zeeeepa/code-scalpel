@@ -126,6 +126,27 @@ pytest tests/test_policy_engine*.py tests/test_enforcement*.py -v
 pytest tests/test_fix_hints*.py tests/test_sandbox*.py tests/test_loop_termination*.py -v
 ```
 
+> [20251216_DOCS] V3.0 adversarial suite blueprint and release gates
+
+### v3.0.0 "Autonomy" Adversarial Suite (draft)
+
+- **Error-to-Diff Fidelity:** Seed agent with a failing patch; adversarial harness asserts fix-hint accuracy ≥50% and rejects hallucinated diffs. Includes perturbations: truncated stack traces, reordered hunks, and duplicate hints.
+- **Sandbox Containment:** Run edits through speculative execution harness; verify no filesystem/network side effects escape sandbox (temp dirs auto-cleaned, network calls patched). Assert mutated files are limited to allowed subgraph only.
+- **Loop Termination Guardrails:** Force infinite-loop candidates (while True, recursive without base, unbounded retries). Assert loop fuel budget is enforced, solver short-circuits, and agent receives explicit termination reason.
+- **Cross-Language Self-Repair:** Break linked JS↔Java or Py↔TS contracts; adversarial test checks that error-to-diff proposes aligned multi-language edits and refuses unsafe partial fixes if only one side is updated.
+- **Confidence Transparency:** Ensure `calculate_confidence` and downstream scoring never exceed 1.0 or go negative in self-repair flows; low-confidence hints must be flagged and blocked from auto-apply.
+
+### v3.0.0 Release Gate Checklist
+
+- [ ] Adversarial suite above implemented and passing (pytest selectors: tests/test_fix_hints*.py, tests/test_sandbox*.py, tests/test_loop_termination*.py, tests/test_adversarial_v30*.py)
+- [ ] Fix-hint accuracy evidence ≥50% on curated failure corpus (attach to release_artifacts/v3.0.0/v3.0.0_autonomy_evidence.json)
+- [ ] Sandbox isolation verified: no writes outside target subgraph, no outbound network, temp artifacts cleaned
+- [ ] Loop termination enforced: bounded fuel, explicit error surfaced to agent, no hung processes in CI
+- [ ] Cross-language self-repair validated on JS↔Java and Py↔TS contract drifts with deterministic outputs
+- [ ] Full regression sweep: all v2.5.0 "Guardian" adversarial tests passing with zero skips
+- [ ] Quality gates: ruff + black clean, coverage ≥95% overall and 100% on new autonomy modules
+- [ ] Evidence bundle published with acceptance checklist completed and linked from release notes
+
 ---
 
 ## Executive Summary
@@ -3350,6 +3371,9 @@ v2.2.0 "Nexus" Release Criteria:
 | **P0** | Security Sinks (Polyglot) | TBD | 7 days | Policy Engine |
 | **P0** | Change Budgeting | TBD | 8 days | Policy Engine |
 | **P0** | Tamper Resistance | TBD | 5 days | Policy Engine |
+| **P0** | Confidence Decay | TBD | 3 days | v2.2.0 Confidence Engine | <!-- [20251216_FEATURE] 3rd party review feedback -->
+| **P0** | Graph Neighborhood View | TBD | 5 days | v2.2.0 Unified Graph | <!-- [20251216_FEATURE] 3rd party review feedback -->
+| **P0** | Cryptographic Policy Verification | TBD | 3 days | Tamper Resistance | <!-- [20251216_FEATURE] 3rd party review feedback -->
 | **P1** | Compliance Reporting | TBD | 5 days | All P0 |
 
 ### Technical Specifications
@@ -4349,7 +4373,614 @@ class AuditLog:
 - [x] Audit Log: Tampering detected and reported (P0) ✅ [20251216_FEATURE]
 - [x] Audit Log: Append-only (no deletion or modification) (P0) ✅ [20251216_FEATURE]
 
-#### 5. P1: Compliance Reporting
+#### 5. P0: Confidence Decay (From 3rd Party Review)
+
+<!-- [20251216_FEATURE] Added per 3rd party security review feedback -->
+
+**Purpose:** Prevent false confidence in long dependency chains. Without decay, an agent might claim 90% confidence on a 5-hop chain where each hop is 90% confident, when the actual confidence is only 59%.
+
+**Problem Statement:**
+```
+A -> B -> C -> D -> E (5 hops, each 0.9 confidence)
+Naive calculation: "I'm 90% confident" 
+Reality: 0.9^5 = 0.59 (barely above uncertainty threshold)
+```
+
+**Implementation:**
+
+```python
+# src/code_scalpel/confidence/decay.py
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class ConfidenceConfig:
+    """Configuration for confidence decay."""
+    decay_factor: float = 0.9      # Multiplier per hop
+    auto_apply_threshold: float = 0.95
+    suggest_threshold: float = 0.8
+    human_review_threshold: float = 0.6
+    refuse_threshold: float = 0.4
+
+class ConfidenceDecayEngine:
+    """
+    Apply exponential decay to confidence based on dependency chain depth.
+    
+    Formula: C_effective = C_base × decay_factor^depth
+    """
+    
+    def __init__(self, config: ConfidenceConfig = None):
+        self.config = config or ConfidenceConfig()
+    
+    def calculate_effective_confidence(
+        self,
+        base_confidence: float,
+        depth: int
+    ) -> float:
+        """
+        Calculate effective confidence with decay applied.
+        
+        Args:
+            base_confidence: Initial confidence score (0.0-1.0)
+            depth: Number of hops in dependency chain
+        
+        Returns:
+            Decayed confidence score
+        
+        Examples:
+            >>> engine = ConfidenceDecayEngine()
+            >>> engine.calculate_effective_confidence(0.9, 1)
+            0.81  # Direct dependency
+            >>> engine.calculate_effective_confidence(0.9, 3)
+            0.66  # 3-hop transitive
+            >>> engine.calculate_effective_confidence(0.9, 5)
+            0.53  # Deep chain, needs human review
+        """
+        return base_confidence * (self.config.decay_factor ** depth)
+    
+    def calculate_chain_confidence(
+        self,
+        confidences: List[float]
+    ) -> float:
+        """
+        Calculate overall confidence for a chain of links.
+        
+        Args:
+            confidences: List of confidence scores for each link
+        
+        Returns:
+            Combined confidence (product of all confidences)
+        """
+        result = 1.0
+        for conf in confidences:
+            result *= conf
+        return result
+    
+    def get_recommendation(
+        self,
+        effective_confidence: float
+    ) -> str:
+        """
+        Get action recommendation based on effective confidence.
+        
+        Returns:
+            One of: 'auto_apply', 'suggest', 'human_review', 'refuse'
+        """
+        if effective_confidence >= self.config.auto_apply_threshold:
+            return "auto_apply"
+        elif effective_confidence >= self.config.suggest_threshold:
+            return "suggest"
+        elif effective_confidence >= self.config.human_review_threshold:
+            return "human_review"
+        else:
+            return "refuse"
+```
+
+**Acceptance Criteria:**
+
+- [ ] Confidence Decay: Exponential decay applied to chain depth (P0)
+- [ ] Confidence Decay: Chain confidence calculated as product (P0)
+- [ ] Confidence Decay: Recommendations generated from thresholds (P0)
+- [ ] Confidence Decay: Configurable decay factor (P0)
+- [ ] Confidence Decay: Integration with Graph Neighborhood View (P0)
+
+**Adversarial Tests:**
+
+- [ ] **ADV-2.5.1 "Telephone Game" Test:** Create a 10-hop dependency chain where each link is 90% confident. Verify the reported confidence at the end is ~34% ($0.9^{10} \approx 0.349$), not 90%. This validates that confidence compounds correctly across transitive dependencies.
+- [ ] **ADV-2.5.2 Threshold Rejection:** Verify that an agent is blocked from acting on a deep transitive dependency that falls below the `min_confidence` threshold (e.g., depth 7+ with 0.9 decay → confidence < 0.5). The system must refuse to provide context for low-confidence symbols.
+
+#### 6. P0: Graph Neighborhood View (From 3rd Party Review)
+
+<!-- [20251216_FEATURE] Added per 3rd party security review feedback - R-02 Graph Explosion mitigation -->
+
+**Purpose:** LLM context windows are limited (typically 8K-128K tokens). A full project graph can have 50,000+ nodes. This feature extracts a k-hop subgraph centered on a target node, optimized for AI agent consumption.
+
+**Problem Statement:**
+```
+Full graph: 50,000 nodes, 200,000 edges → Exceeds context window
+Agent needs: Only the 50-100 nodes relevant to current task
+Solution: k-hop neighborhood extraction with confidence filtering
+```
+
+**Implementation:**
+
+```python
+# src/code_scalpel/graph/neighborhood.py
+from dataclasses import dataclass
+from typing import List, Set, Optional
+from enum import Enum
+
+class PruningStrategy(Enum):
+    """Strategies for reducing graph size."""
+    NONE = "none"                    # Include all nodes in k-hop radius
+    CONFIDENCE_THRESHOLD = "confidence"  # Filter by confidence score
+    TOP_N = "top_n"                  # Keep only top N by relevance
+    DEGREE_CENTRALITY = "degree"    # Prioritize highly connected nodes
+
+@dataclass
+class NeighborhoodConfig:
+    """Configuration for neighborhood extraction."""
+    max_hops: int = 3               # Maximum distance from center
+    max_nodes: int = 100            # Hard limit for context window
+    min_confidence: float = 0.6     # Filter low-confidence edges
+    pruning_strategy: PruningStrategy = PruningStrategy.CONFIDENCE_THRESHOLD
+    include_types: Optional[List[str]] = None  # Filter by node type
+
+@dataclass
+class GraphNeighborhood:
+    """Result of neighborhood extraction."""
+    center_node: str
+    nodes: List["GraphNode"]
+    edges: List["GraphEdge"]
+    total_nodes_in_full_graph: int
+    pruned_count: int
+    max_depth_reached: int
+    confidence_summary: dict
+
+class GraphNeighborhoodExtractor:
+    """
+    Extract k-hop neighborhoods from large graphs for LLM consumption.
+    
+    Addresses Risk R-02 (Graph Explosion) from 3rd party review.
+    """
+    
+    def __init__(self, graph: "UnifiedGraph", config: NeighborhoodConfig = None):
+        self.graph = graph
+        self.config = config or NeighborhoodConfig()
+        self.confidence_engine = ConfidenceDecayEngine()
+    
+    def extract_neighborhood(
+        self,
+        center_node_id: str,
+        context: Optional[str] = None
+    ) -> GraphNeighborhood:
+        """
+        Extract k-hop neighborhood centered on a node.
+        
+        Args:
+            center_node_id: Universal Node ID (e.g., "python::utils::function::calculate_tax")
+            context: Optional context hint to prioritize relevant nodes
+        
+        Returns:
+            GraphNeighborhood optimized for LLM context window
+        """
+        visited: Set[str] = set()
+        nodes: List[GraphNode] = []
+        edges: List[GraphEdge] = []
+        
+        # BFS with depth tracking
+        queue = [(center_node_id, 0)]  # (node_id, depth)
+        visited.add(center_node_id)
+        
+        while queue and len(nodes) < self.config.max_nodes:
+            current_id, depth = queue.pop(0)
+            
+            # Get node from graph
+            node = self.graph.get_node(current_id)
+            if node:
+                nodes.append(node)
+            
+            # Stop if max depth reached
+            if depth >= self.config.max_hops:
+                continue
+            
+            # Get neighbors with confidence filtering
+            neighbors = self.graph.get_neighbors(current_id)
+            
+            for neighbor_id, edge in neighbors:
+                # Apply confidence decay
+                effective_confidence = self.confidence_engine.calculate_effective_confidence(
+                    edge.confidence,
+                    depth + 1
+                )
+                
+                # Filter by minimum confidence
+                if effective_confidence < self.config.min_confidence:
+                    continue
+                
+                # Filter by node type if specified
+                if self.config.include_types:
+                    neighbor_node = self.graph.get_node(neighbor_id)
+                    if neighbor_node and neighbor_node.type not in self.config.include_types:
+                        continue
+                
+                if neighbor_id not in visited:
+                    visited.add(neighbor_id)
+                    queue.append((neighbor_id, depth + 1))
+                    
+                    # Add edge with decayed confidence
+                    edges.append(GraphEdge(
+                        source=current_id,
+                        target=neighbor_id,
+                        confidence=effective_confidence,
+                        original_confidence=edge.confidence,
+                        depth=depth + 1,
+                        edge_type=edge.edge_type
+                    ))
+        
+        # Apply pruning strategy if still over limit
+        if len(nodes) > self.config.max_nodes:
+            nodes, edges = self._apply_pruning(nodes, edges, center_node_id)
+        
+        return GraphNeighborhood(
+            center_node=center_node_id,
+            nodes=nodes,
+            edges=edges,
+            total_nodes_in_full_graph=self.graph.node_count(),
+            pruned_count=len(visited) - len(nodes),
+            max_depth_reached=max(e.depth for e in edges) if edges else 0,
+            confidence_summary=self._summarize_confidence(edges)
+        )
+    
+    def _apply_pruning(
+        self,
+        nodes: List[GraphNode],
+        edges: List[GraphEdge],
+        center_id: str
+    ) -> tuple:
+        """Apply pruning strategy to fit context window."""
+        
+        if self.config.pruning_strategy == PruningStrategy.CONFIDENCE_THRESHOLD:
+            # Sort by confidence, keep top N
+            node_confidence = {}
+            for edge in edges:
+                node_confidence[edge.target] = max(
+                    node_confidence.get(edge.target, 0),
+                    edge.confidence
+                )
+            
+            sorted_nodes = sorted(
+                nodes,
+                key=lambda n: node_confidence.get(n.id, 1.0 if n.id == center_id else 0),
+                reverse=True
+            )
+            kept_nodes = set(n.id for n in sorted_nodes[:self.config.max_nodes])
+            
+            nodes = [n for n in nodes if n.id in kept_nodes]
+            edges = [e for e in edges if e.source in kept_nodes and e.target in kept_nodes]
+        
+        return nodes, edges
+    
+    def _summarize_confidence(self, edges: List[GraphEdge]) -> dict:
+        """Generate confidence summary for the neighborhood."""
+        if not edges:
+            return {"min": 1.0, "max": 1.0, "avg": 1.0, "below_threshold": 0}
+        
+        confidences = [e.confidence for e in edges]
+        return {
+            "min": min(confidences),
+            "max": max(confidences),
+            "avg": sum(confidences) / len(confidences),
+            "below_threshold": sum(1 for c in confidences if c < self.config.min_confidence)
+        }
+```
+
+**MCP Tool Integration:**
+
+```python
+@mcp_tool("get_graph_neighborhood")
+async def get_graph_neighborhood(
+    center_node: str,
+    max_hops: int = 3,
+    max_nodes: int = 100,
+    min_confidence: float = 0.6
+) -> GraphNeighborhood:
+    """
+    Extract k-hop neighborhood from unified graph.
+    
+    Use this when you need to understand dependencies of a specific
+    function/class without loading the entire project graph.
+    
+    Args:
+        center_node: Universal Node ID to center on
+        max_hops: Maximum distance to traverse (default: 3)
+        max_nodes: Maximum nodes to return (default: 100)
+        min_confidence: Minimum confidence threshold (default: 0.6)
+    
+    Returns:
+        GraphNeighborhood with nodes, edges, and confidence summary
+    """
+    config = NeighborhoodConfig(
+        max_hops=max_hops,
+        max_nodes=max_nodes,
+        min_confidence=min_confidence
+    )
+    extractor = GraphNeighborhoodExtractor(unified_graph, config)
+    return extractor.extract_neighborhood(center_node)
+```
+
+**Acceptance Criteria:**
+
+- [ ] Graph Neighborhood: k-hop BFS extraction works (P0)
+- [ ] Graph Neighborhood: Respects max_nodes limit (P0)
+- [ ] Graph Neighborhood: Applies confidence decay to depth (P0)
+- [ ] Graph Neighborhood: Filters by min_confidence (P0)
+- [ ] Graph Neighborhood: Multiple pruning strategies available (P1)
+- [ ] Graph Neighborhood: MCP tool exposed for agents (P0)
+- [ ] Graph Neighborhood: Confidence summary included (P0)
+
+**Adversarial Tests:**
+
+- [ ] **ADV-2.5.3 Context Explosion Test:** Request a neighborhood on a dense "hub" node (e.g., `Object` class, common utility function called by 500+ callers). Verify that the result contains exactly `max_nodes` (default 100) and NOT the entire graph. Assert `truncated=True` and `truncation_warning` is present.
+- [ ] **ADV-2.5.4 Relevance Test:** When truncation occurs, ensure the pruned nodes are the LOWEST confidence ones, not randomly selected. Create a graph with known confidence values and verify the retained nodes are the highest-confidence paths from center.
+
+#### 7. P0: Cryptographic Policy Verification (From 3rd Party Review)
+
+<!-- [20251216_FEATURE] Added per 3rd party security review feedback - strengthens Tamper Resistance -->
+
+**Purpose:** File permissions (chmod 0444) can be bypassed by a smart agent using `chmod +w`. This feature adds cryptographic verification using SHA-256 signed manifests stored outside the agent's control.
+
+**Problem Statement:**
+```
+Current: policy.yaml protected by file permissions
+Bypass:  Agent runs `chmod +w .scalpel/policy.yaml && echo "allow_all" > policy.yaml`
+Solution: Verify SHA-256 hash against signed manifest in git history or external store
+```
+
+**Implementation:**
+
+```python
+# src/code_scalpel/policy_engine/crypto_verify.py
+import hashlib
+import hmac
+import json
+from pathlib import Path
+from typing import Optional
+from dataclasses import dataclass
+
+@dataclass
+class PolicyManifest:
+    """Signed manifest for policy files."""
+    version: str
+    files: dict[str, str]  # filename -> SHA-256 hash
+    signature: str         # HMAC signature of the manifest
+    created_at: str
+    signed_by: str
+
+class CryptographicPolicyVerifier:
+    """
+    Verify policy files against cryptographically signed manifests.
+    
+    Addresses 3rd party review feedback on Tamper Resistance:
+    "File permissions are bypassable. Agent can `chmod +w`."
+    
+    Solution: Hash verification against manifest stored in:
+    1. Git commit history (can't be modified without visible commit)
+    2. External secret store (HashiCorp Vault, AWS Secrets Manager)
+    3. Environment variable (set by CI/CD, not accessible to agent)
+    """
+    
+    def __init__(
+        self,
+        manifest_source: str = "git",  # "git", "env", "vault"
+        secret_key: Optional[str] = None
+    ):
+        self.manifest_source = manifest_source
+        self.secret_key = secret_key or self._get_secret_from_env()
+        self.manifest = self._load_manifest()
+    
+    def _get_secret_from_env(self) -> str:
+        """Get signing secret from environment."""
+        import os
+        secret = os.environ.get("SCALPEL_MANIFEST_SECRET")
+        if not secret:
+            raise SecurityError(
+                "SCALPEL_MANIFEST_SECRET not set. "
+                "Policy verification requires a signing secret."
+            )
+        return secret
+    
+    def _load_manifest(self) -> PolicyManifest:
+        """Load policy manifest from configured source."""
+        if self.manifest_source == "git":
+            return self._load_from_git()
+        elif self.manifest_source == "env":
+            return self._load_from_env()
+        elif self.manifest_source == "vault":
+            return self._load_from_vault()
+        else:
+            raise ValueError(f"Unknown manifest source: {self.manifest_source}")
+    
+    def _load_from_git(self) -> PolicyManifest:
+        """
+        Load manifest from git history.
+        
+        The manifest is stored in a signed commit that the agent
+        cannot modify without creating a visible commit.
+        """
+        import subprocess
+        
+        # Get manifest from the latest tagged release
+        result = subprocess.run(
+            ["git", "show", "HEAD:.scalpel/policy.manifest.json"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            raise SecurityError(
+                "Policy manifest not found in git. "
+                "Run `scalpel policy sign` to create one."
+            )
+        
+        data = json.loads(result.stdout)
+        return PolicyManifest(**data)
+    
+    def verify_all_policies(self) -> bool:
+        """
+        Verify all policy files match their manifest hashes.
+        
+        Returns:
+            True if all files match, raises SecurityError otherwise
+        """
+        # First verify manifest signature
+        if not self._verify_manifest_signature():
+            raise SecurityError(
+                "Policy manifest signature invalid. "
+                "Manifest may have been tampered with."
+            )
+        
+        # Then verify each file
+        for filename, expected_hash in self.manifest.files.items():
+            actual_hash = self._hash_file(filename)
+            
+            if actual_hash != expected_hash:
+                raise SecurityError(
+                    f"Policy file tampered: {filename}\n"
+                    f"Expected: {expected_hash}\n"
+                    f"Actual:   {actual_hash}\n"
+                    "All operations DENIED until policy integrity restored."
+                )
+        
+        return True
+    
+    def _verify_manifest_signature(self) -> bool:
+        """Verify HMAC signature of the manifest."""
+        # Reconstruct the signed data
+        signed_data = {
+            "version": self.manifest.version,
+            "files": self.manifest.files,
+            "created_at": self.manifest.created_at,
+            "signed_by": self.manifest.signed_by
+        }
+        
+        message = json.dumps(signed_data, sort_keys=True)
+        expected_signature = hmac.new(
+            self.secret_key.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(expected_signature, self.manifest.signature)
+    
+    def _hash_file(self, filename: str) -> str:
+        """Calculate SHA-256 hash of a file."""
+        path = Path(".scalpel") / filename
+        
+        if not path.exists():
+            raise SecurityError(f"Policy file missing: {filename}")
+        
+        hasher = hashlib.sha256()
+        with open(path, 'rb') as f:
+            for chunk in iter(lambda: f.read(8192), b''):
+                hasher.update(chunk)
+        
+        return hasher.hexdigest()
+    
+    @staticmethod
+    def create_manifest(
+        policy_files: list[str],
+        secret_key: str,
+        signed_by: str
+    ) -> PolicyManifest:
+        """
+        Create a new signed manifest for policy files.
+        
+        This should be run by a human administrator, not an agent.
+        """
+        from datetime import datetime
+        
+        files = {}
+        for filename in policy_files:
+            path = Path(".scalpel") / filename
+            if path.exists():
+                hasher = hashlib.sha256()
+                with open(path, 'rb') as f:
+                    hasher.update(f.read())
+                files[filename] = hasher.hexdigest()
+        
+        manifest_data = {
+            "version": "1.0",
+            "files": files,
+            "created_at": datetime.now().isoformat(),
+            "signed_by": signed_by
+        }
+        
+        message = json.dumps(manifest_data, sort_keys=True)
+        signature = hmac.new(
+            secret_key.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        return PolicyManifest(
+            **manifest_data,
+            signature=signature
+        )
+
+
+# CLI command for administrators
+def sign_policies_command():
+    """CLI command to sign policy files."""
+    import os
+    import click
+    
+    @click.command()
+    @click.option('--secret', envvar='SCALPEL_MANIFEST_SECRET', required=True)
+    @click.option('--signed-by', required=True, help='Your name/email')
+    def sign_policies(secret: str, signed_by: str):
+        """Sign policy files and create manifest."""
+        policy_files = ["policy.yaml", "budget.yaml", "overrides.yaml"]
+        
+        manifest = CryptographicPolicyVerifier.create_manifest(
+            policy_files=policy_files,
+            secret_key=secret,
+            signed_by=signed_by
+        )
+        
+        # Write manifest
+        manifest_path = Path(".scalpel/policy.manifest.json")
+        with open(manifest_path, 'w') as f:
+            json.dump({
+                "version": manifest.version,
+                "files": manifest.files,
+                "created_at": manifest.created_at,
+                "signed_by": manifest.signed_by,
+                "signature": manifest.signature
+            }, f, indent=2)
+        
+        click.echo(f"✓ Policy manifest created: {manifest_path}")
+        click.echo(f"  Files signed: {len(manifest.files)}")
+        click.echo(f"  Signed by: {signed_by}")
+        click.echo("\nCommit this manifest to git to enable verification.")
+```
+
+**Acceptance Criteria:**
+
+- [ ] Crypto Verification: SHA-256 hashes calculated correctly (P0)
+- [ ] Crypto Verification: HMAC signature verification works (P0)
+- [ ] Crypto Verification: Manifest loaded from git history (P0)
+- [ ] Crypto Verification: Tampering detected and reported (P0)
+- [ ] Crypto Verification: CLI command for signing policies (P0)
+- [ ] Crypto Verification: Fails CLOSED on verification failure (P0)
+- [ ] Crypto Verification: Environment variable for secret (P0)
+
+**Adversarial Tests:**
+
+- [ ] **ADV-2.5.5 chmod Bypass Test:** Simulate an agent attack: `chmod +w .scalpel/policy.yaml`, edit the file to add `allow_all: true`, then attempt to use Code Scalpel. Assert that the system refuses to start or allow edits because SHA-256 hash no longer matches the signed manifest.
+- [ ] **ADV-2.5.6 Manifest Tamper Test:** Edit `policy.manifest.json` to change the signature to match a fake/modified policy. Assert that HMAC signature verification fails with `SecurityError` and all operations are DENIED (fail closed).
+
+#### 8. P1: Compliance Reporting
 
 **Purpose:** Generate audit reports for enterprise compliance and security reviews.
 
@@ -4828,6 +5459,7 @@ Current AI agents fail silently and require human intervention for every error:
 | **P0** | Error-to-Diff Engine | TBD | 12 days | v2.5.0 |
 | **P0** | Speculative Execution (Sandboxed) | TBD | 10 days | Error-to-Diff |
 | **P0** | Fix Loop Termination | TBD | 5 days | Error-to-Diff |
+| **P0** | Mutation Test Gate | TBD | 5 days | Speculative Execution | <!-- [20251216_FEATURE] 3rd party review feedback -->
 | **P0** | Ecosystem Integration | TBD | 8 days | All above |
 | **P1** | Full Audit Trail | TBD | 5 days | All above |
 
@@ -5778,7 +6410,267 @@ class FixLoop:
 - [ ] Audit Trail: Includes timing information (P0)
 - [ ] Audit Trail: Includes error analysis and fix applied (P0)
 
-#### 4. Ecosystem Integration
+#### 4. P0: Mutation Test Gate (From 3rd Party Review)
+
+<!-- [20251216_FEATURE] Added per 3rd party security review feedback -->
+
+**Purpose:** Prevent "hollow fixes" where an agent claims success because tests pass, but the fix actually deleted functionality (e.g., `def test(): pass`). Verify that tests would fail if the bug were reintroduced.
+
+**Problem Statement:**
+```python
+# Original test (failing)
+def test_calculate_tax():
+    assert calculate_tax(100, 0.1) == 10
+
+# Agent's "fix" - hollow, deletes functionality
+def test_calculate_tax():
+    pass  # Tests pass now! But we lost the test.
+
+# Or worse - function hollowed out
+def calculate_tax(amount, rate):
+    return 0  # Tests might pass if assertions were weak
+```
+
+**Solution:** Mutation testing verifies that reverting the fix causes tests to fail again.
+
+**Implementation:**
+
+```python
+# src/code_scalpel/autonomy/mutation_gate.py
+from dataclasses import dataclass
+from typing import List, Optional
+from enum import Enum
+import ast
+import copy
+
+class MutationType(Enum):
+    """Types of mutations to apply."""
+    REVERT_FIX = "revert_fix"          # Undo the agent's fix
+    NEGATE_CONDITION = "negate"         # Flip boolean conditions
+    BOUNDARY_VALUE = "boundary"         # Change +1 to -1, etc.
+    NULL_RETURN = "null_return"         # Return None/null/0
+    REMOVE_STATEMENT = "remove"         # Delete a statement
+
+@dataclass
+class MutationResult:
+    """Result of a mutation test."""
+    mutation_type: MutationType
+    original_code: str
+    mutated_code: str
+    tests_failed: bool              # True = good (mutation was caught)
+    tests_that_failed: List[str]
+    tests_that_passed: List[str]    # These tests are weak
+
+@dataclass
+class MutationGateResult:
+    """Overall result of mutation gate validation."""
+    passed: bool
+    mutations_tested: int
+    mutations_caught: int           # Tests failed (good)
+    mutations_survived: int         # Tests passed (bad - weak tests)
+    hollow_fix_detected: bool
+    weak_tests: List[str]
+    recommendations: List[str]
+
+class MutationTestGate:
+    """
+    Verify fixes are genuine by ensuring tests would fail if bug reintroduced.
+    
+    Addresses 3rd party review feedback on v3.0.0 Autonomy:
+    "What if agent *thinks* it succeeded but actually deleted functionality?"
+    
+    Solution: After agent claims fix, revert the fix and verify tests fail.
+    If tests still pass after reverting, the fix was hollow.
+    """
+    
+    def __init__(
+        self,
+        sandbox: "SandboxExecutor",
+        min_mutation_score: float = 0.8  # 80% of mutations must be caught
+    ):
+        self.sandbox = sandbox
+        self.min_mutation_score = min_mutation_score
+    
+    def validate_fix(
+        self,
+        original_code: str,
+        fixed_code: str,
+        test_files: List[str],
+        language: str = "python"
+    ) -> MutationGateResult:
+        """
+        Validate that a fix is genuine, not hollow.
+        
+        Args:
+            original_code: Code before the agent's fix (with bug)
+            fixed_code: Code after the agent's fix
+            test_files: List of test files to run
+            language: Programming language
+        
+        Returns:
+            MutationGateResult with validation status
+        
+        Process:
+            1. Verify fixed_code passes tests (sanity check)
+            2. Revert to original_code, verify tests fail
+            3. Apply additional mutations, verify tests catch them
+            4. Calculate mutation score, gate on threshold
+        """
+        results = []
+        
+        # Step 1: Sanity check - fixed code should pass
+        fixed_result = self.sandbox.run_tests(fixed_code, test_files)
+        if not fixed_result.all_passed:
+            return MutationGateResult(
+                passed=False,
+                mutations_tested=0,
+                mutations_caught=0,
+                mutations_survived=0,
+                hollow_fix_detected=False,
+                weak_tests=[],
+                recommendations=["Fix does not pass tests - not ready for mutation testing"]
+            )
+        
+        # Step 2: Critical - revert fix, tests MUST fail
+        revert_result = self._test_mutation(
+            mutated_code=original_code,  # Revert to buggy code
+            test_files=test_files,
+            mutation_type=MutationType.REVERT_FIX
+        )
+        results.append(revert_result)
+        
+        if not revert_result.tests_failed:
+            # HOLLOW FIX DETECTED
+            return MutationGateResult(
+                passed=False,
+                mutations_tested=1,
+                mutations_caught=0,
+                mutations_survived=1,
+                hollow_fix_detected=True,
+                weak_tests=revert_result.tests_that_passed,
+                recommendations=[
+                    "HOLLOW FIX DETECTED: Reverting the fix does not cause tests to fail.",
+                    "The agent may have deleted test assertions or hollowed out the function.",
+                    "Review the fix manually before accepting."
+                ]
+            )
+        
+        # Step 3: Additional mutations for thoroughness
+        additional_mutations = self._generate_mutations(fixed_code, language)
+        
+        for mutation in additional_mutations[:5]:  # Limit to 5 additional mutations
+            result = self._test_mutation(
+                mutated_code=mutation.code,
+                test_files=test_files,
+                mutation_type=mutation.type
+            )
+            results.append(result)
+        
+        # Step 4: Calculate mutation score
+        caught = sum(1 for r in results if r.tests_failed)
+        survived = sum(1 for r in results if not r.tests_failed)
+        score = caught / len(results) if results else 0
+        
+        weak_tests = set()
+        for r in results:
+            if not r.tests_failed:
+                weak_tests.update(r.tests_that_passed)
+        
+        recommendations = []
+        if survived > 0:
+            recommendations.append(
+                f"{survived} mutations survived. Consider strengthening these tests: {weak_tests}"
+            )
+        
+        return MutationGateResult(
+            passed=score >= self.min_mutation_score,
+            mutations_tested=len(results),
+            mutations_caught=caught,
+            mutations_survived=survived,
+            hollow_fix_detected=False,
+            weak_tests=list(weak_tests),
+            recommendations=recommendations
+        )
+    
+    def _test_mutation(
+        self,
+        mutated_code: str,
+        test_files: List[str],
+        mutation_type: MutationType
+    ) -> MutationResult:
+        """Run tests against mutated code."""
+        result = self.sandbox.run_tests(mutated_code, test_files)
+        
+        return MutationResult(
+            mutation_type=mutation_type,
+            original_code="",  # Not needed for result
+            mutated_code=mutated_code,
+            tests_failed=not result.all_passed,
+            tests_that_failed=[t.name for t in result.tests if not t.passed],
+            tests_that_passed=[t.name for t in result.tests if t.passed]
+        )
+    
+    def _generate_mutations(
+        self,
+        code: str,
+        language: str
+    ) -> List["Mutation"]:
+        """Generate additional mutations for the code."""
+        mutations = []
+        
+        if language == "python":
+            tree = ast.parse(code)
+            
+            # Mutation: Negate conditions
+            for node in ast.walk(tree):
+                if isinstance(node, ast.If):
+                    mutated_tree = copy.deepcopy(tree)
+                    # Find and negate the condition
+                    for m_node in ast.walk(mutated_tree):
+                        if isinstance(m_node, ast.If) and m_node.lineno == node.lineno:
+                            m_node.test = ast.UnaryOp(op=ast.Not(), operand=m_node.test)
+                    
+                    mutations.append(Mutation(
+                        type=MutationType.NEGATE_CONDITION,
+                        code=ast.unparse(mutated_tree),
+                        description=f"Negated condition at line {node.lineno}"
+                    ))
+            
+            # Mutation: Change return values
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Return) and node.value:
+                    mutated_tree = copy.deepcopy(tree)
+                    for m_node in ast.walk(mutated_tree):
+                        if isinstance(m_node, ast.Return) and m_node.lineno == node.lineno:
+                            m_node.value = ast.Constant(value=None)
+                    
+                    mutations.append(Mutation(
+                        type=MutationType.NULL_RETURN,
+                        code=ast.unparse(mutated_tree),
+                        description=f"Changed return to None at line {node.lineno}"
+                    ))
+        
+        return mutations
+
+@dataclass
+class Mutation:
+    """A code mutation for testing."""
+    type: MutationType
+    code: str
+    description: str
+```
+
+**Acceptance Criteria:**
+
+- [ ] Mutation Gate: Detects hollow fixes (tests pass after revert) (P0)
+- [ ] Mutation Gate: Generates additional mutations (P0)
+- [ ] Mutation Gate: Calculates mutation score (P0)
+- [ ] Mutation Gate: Gates on minimum score threshold (P0)
+- [ ] Mutation Gate: Identifies weak tests (P1)
+- [ ] Mutation Gate: Provides actionable recommendations (P1)
+- [ ] Mutation Gate: Integrates with Fix Loop (P0)
+
+#### 5. Ecosystem Integration
 
 **Purpose:** Provide native integrations with popular AI agent frameworks.
 
@@ -6324,17 +7216,136 @@ v3.0.0 "Autonomy" Release Criteria:
 
 ## Risk Register
 
-| ID  | Risk                                 | Probability | Impact   | Mitigation                    | Owner |
-| --- | ------------------------------------ | ----------- | -------- | ----------------------------- | ----- |
-| R1  | Cross-file taint too complex         | High        | High     | Start single-hop, iterate     | TBD   |
-| R2  | TypeScript AST differs significantly | Medium      | High     | Use tree-sitter, proven       | TBD   |
-| R3  | AI verification gives false confidence | High      | Critical | Conservative confidence scores | TBD   |
-| R4  | MCP protocol changes break compatibility | Low      | High     | Pin MCP version, abstract layer | TBD   |
-| R5  | Performance degrades at scale        | Medium      | High     | Benchmark at 100k LOC         | TBD   |
-| R6  | False positive rate too high         | Medium      | High     | Tune patterns, add sanitizers | TBD   |
-| R7  | Silent hallucination in graph        | High        | Critical | Confidence thresholds, human approval | TBD |
-| R8  | Policy bypass by syntax tricks       | Medium      | Critical | Semantic analysis, not regex  | TBD   |
-| R9  | Fix loop doesn't terminate           | Medium      | High     | Hard max_attempts limit       | TBD   |
+<!-- [20251216_DOCS] Updated per 3rd party review feedback with new risks and mitigations -->
+
+| ID  | Risk                                 | Probability | Impact   | Mitigation                    | Owner | Status |
+| --- | ------------------------------------ | ----------- | -------- | ----------------------------- | ----- | ------ |
+| R1  | Cross-file taint too complex         | High        | High     | Start single-hop, iterate     | TBD   | Mitigated |
+| R2  | TypeScript AST differs significantly | Medium      | High     | Use tree-sitter, proven       | TBD   | Mitigated |
+| R3  | AI verification gives false confidence | High      | Critical | Conservative confidence scores + **Confidence Decay (v2.5.0)** | TBD | Planned |
+| R4  | MCP protocol changes break compatibility | Low      | High     | Pin MCP version, abstract layer | TBD   | Mitigated |
+| R5  | Performance degrades at scale        | Medium      | High     | Benchmark at 100k LOC         | TBD   | Mitigated |
+| R6  | False positive rate too high         | Medium      | High     | Tune patterns, add sanitizers | TBD   | Mitigated |
+| R7  | Silent hallucination in graph        | High        | Critical | Confidence thresholds, human approval + **Graph Neighborhood View (v2.5.0)** | TBD | Planned |
+| R8  | Policy bypass by syntax tricks       | Medium      | Critical | Semantic analysis, not regex  | TBD   | Mitigated |
+| R9  | Fix loop doesn't terminate           | Medium      | High     | Hard max_attempts limit + **Mutation Test Gate (v3.0.0)** | TBD | Planned |
+| R10 | **Graph explosion (LLM context overflow)** | High | High | **Graph Neighborhood View with k-hop extraction (v2.5.0)** | TBD | Planned |
+| R11 | **Policy bypass via dynamic loading** | Medium | Critical | **Strict "Deny Dynamic" static rule + Research: Dynamic Analysis Sandbox** | TBD | Partial |
+| R12 | **Java version drift breaks parser** | Medium | High | **Nightly JDK EA Build Pipeline (CI/CD)** | TBD | Planned |
+| R13 | **Hollow fixes pass tests** | High | Critical | **Mutation Test Gate - verify tests fail on revert (v3.0.0)** | TBD | Planned |
+| R14 | **Tamper resistance bypass via chmod** | Medium | Critical | **Cryptographic Policy Verification with signed manifests (v2.5.0)** | TBD | Planned |
+
+### Risk Mitigation Details
+
+#### R10: Graph Explosion (NEW - 3rd Party Review)
+**Problem:** Full project graphs can have 50,000+ nodes, exceeding LLM context windows.
+**Mitigation:** Graph Neighborhood View extracts k-hop subgraphs (default: 100 nodes max) with confidence-based pruning.
+**Acceptance:** Agent receives only relevant nodes for current task.
+
+#### R11: Dynamic Loading Bypass (NEW - 3rd Party Review)
+**Problem:** Static AST analysis cannot catch `Class.forName()`, `__import__()`, or `eval()` patterns.
+**Mitigation (Partial):** 
+- **Implemented:** Strict "Deny Dynamic" static rule flags these patterns
+- **Research:** Dynamic Analysis Sandbox (P2, deferred) for runtime verification
+**Acceptance:** All dynamic loading patterns flagged with warnings.
+
+#### R12: Java Version Drift (NEW - 3rd Party Review)
+**Problem:** New JDK releases may introduce syntax that breaks the parser.
+**Mitigation:** Nightly CI job runs parser against JDK Early Access builds.
+**Acceptance:** Parser failures detected before JDK GA release.
+
+#### R13: Hollow Fixes (NEW - 3rd Party Review)
+**Problem:** Agent may delete functionality to make tests pass (e.g., `def test(): pass`).
+**Mitigation:** Mutation Test Gate verifies that reverting the fix causes tests to fail.
+**Acceptance:** Fixes rejected if revert doesn't break tests.
+
+#### R14: Tamper Resistance Bypass (NEW - 3rd Party Review)
+**Problem:** File permissions (0444) bypassable via `chmod +w`.
+**Mitigation:** SHA-256 signed policy manifests stored in git history.
+**Acceptance:** Policy modifications detected and operations denied.
+
+---
+
+## CI/CD Pipeline Enhancements
+
+<!-- [20251216_FEATURE] Added per 3rd party review feedback - R12 mitigation -->
+
+### Nightly JDK Early Access Build
+
+**Purpose:** Detect Java parser breakage before new JDK versions reach GA.
+
+```yaml
+# .github/workflows/jdk-ea-nightly.yml
+name: JDK Early Access Parser Test
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM daily
+  workflow_dispatch:
+
+jobs:
+  test-jdk-ea:
+    strategy:
+      matrix:
+        jdk-version: ['ea', '23-ea', '24-ea']
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK EA
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.jdk-version }}
+          distribution: 'oracle'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Code Scalpel
+        run: pip install -e ".[dev]"
+      
+      - name: Run Java Parser Tests
+        run: |
+          # Test against JDK EA sample code
+          python -c "
+          from code_scalpel.parsers.java_parser import JavaParser
+          
+          # Test new Java features if any
+          sample_code = '''
+          public class Test {
+              public static void main(String[] args) {
+                  // Test latest Java syntax
+                  var x = 10;
+                  System.out.println(x);
+              }
+          }
+          '''
+          
+          parser = JavaParser()
+          result = parser.parse(sample_code)
+          assert result is not None, 'Parser failed on JDK EA code'
+          print(f'✓ Parser works with JDK {\"${{ matrix.jdk-version }}\"}')
+          "
+      
+      - name: Run Full Java Test Suite
+        run: pytest tests/test_java_*.py -v --tb=short
+      
+      - name: Report Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ Java Parser Failure on JDK ${{ matrix.jdk-version }}`,
+              body: `The nightly JDK EA test failed. This may indicate parser incompatibility with upcoming Java features.\n\nJDK Version: ${{ matrix.jdk-version }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              labels: ['bug', 'java', 'parser']
+            })
+```
 
 ---
 
@@ -6453,6 +7464,8 @@ git push origin feature/v1.3.0-nosql-injection
 | ------- | ---------- | ------- | ------------------------------------------------- |
 | 1.0     | 2025-12-12 | Copilot | Initial roadmap based on external tester feedback |
 | 2.0     | 2025-12-15 | Copilot | Added v2.0.1 (Java Completion) and enhanced v2.1.0 (MCP Enhance) with detailed specs |
+| 3.0     | 2025-12-16 | Copilot | Revolution Edition - Integrated v2.2.0 Nexus, v2.5.0 Guardian, v3.0.0 Autonomy |
+| 3.1     | 2025-12-16 | Copilot | 3rd Party Review Integration: Added Confidence Decay, Graph Neighborhood View, Cryptographic Policy Verification, Mutation Test Gate, Nightly JDK EA Pipeline, expanded Risk Register |
 
 ---
 
