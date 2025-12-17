@@ -224,6 +224,8 @@ class ErrorToDiffEngine:
         lines[target_idx] = lines[target_idx].replace(old_part, new_part)
 
         return "".join(lines)
+
+
 class PythonErrorParser:
     """Parse Python error messages."""
 
