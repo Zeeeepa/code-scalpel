@@ -13,13 +13,16 @@ safety guarantees:
 3. Mutation Test Gate: Prevents "hollow fixes" where tests pass because
    functionality was deleted, not because the bug was fixed.
 
+4. Audit Trail: Cryptographically-hashed immutable audit log of all
+   autonomous operations for compliance and debugging.
+
 Features:
 - Multi-language error parsing (Python, TypeScript, Java)
 - Confidence-scored fix generation
 - Bounded fix attempts with timeout
 - Repeated error detection
 - Human escalation on failure
-- Full audit trail
+- Full audit trail with SHA-256 hashing
 - Hollow fix detection via mutation testing
 - Mutation score calculation
 
@@ -29,14 +32,8 @@ Usage:
         ErrorAnalysis,
         FixLoop,
         MutationTestGate,
+        AutonomyAuditTrail,
     )
-    
-    # Parse error and generate fix hints
-    engine = ErrorToDiffEngine(project_root="/path/to/project")
-    analysis = engine.analyze_error(error_output, "python", source_code)
-    
-    # Create fix loop for automated repair
-    fix_loop = FixLoop(max_attempts=5, max_duration_seconds=300)
 
 References:
 - DEVELOPMENT_ROADMAP.md: v3.0.0 Autonomy specifications
@@ -68,6 +65,12 @@ from code_scalpel.autonomy.mutation_gate import (
     MutationType,
 )
 
+# [20251217_FEATURE] Audit Trail
+from code_scalpel.autonomy.audit import (
+    AuditEntry,
+    AutonomyAuditTrail,
+)
+
 # [20251217_FEATURE] Stubs for external implementations (aliased to avoid conflicts)
 from code_scalpel.autonomy.stubs import (
     ErrorAnalysis as StubErrorAnalysis,
@@ -96,6 +99,9 @@ __all__ = [
     "MutationResult",
     "Mutation",
     "MutationType",
+    # Audit Trail
+    "AuditEntry",
+    "AutonomyAuditTrail",
     # Stubs (aliased for advanced usage)
     "StubErrorAnalysis",
     "StubFixHint",
