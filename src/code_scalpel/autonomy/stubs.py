@@ -13,7 +13,7 @@ from typing import Optional, List
 @dataclass
 class ErrorAnalysis:
     """Analysis of an error message."""
-    
+
     message: str
     error_type: str  # "syntax", "runtime", "type", etc.
     line_number: Optional[int] = None
@@ -24,7 +24,7 @@ class ErrorAnalysis:
 @dataclass
 class FixHint:
     """A suggested fix for an error."""
-    
+
     description: str
     confidence: float  # 0.0 to 1.0
     diff: str  # Unified diff format
@@ -34,7 +34,7 @@ class FixHint:
 @dataclass
 class FileChange:
     """A file change to apply."""
-    
+
     relative_path: str
     operation: str  # "modify", "create", "delete"
     new_content: Optional[str] = None
@@ -43,7 +43,7 @@ class FileChange:
 @dataclass
 class ExecutionTestResult:
     """Result of a single test execution."""
-    
+
     name: str
     passed: bool
     duration_ms: int
@@ -53,7 +53,7 @@ class ExecutionTestResult:
 @dataclass
 class SandboxResult:
     """Result of sandbox execution."""
-    
+
     success: bool
     all_passed: bool
     stdout: str
@@ -65,17 +65,17 @@ class SandboxResult:
 class SandboxExecutor:
     """
     Stub for sandbox execution environment.
-    
+
     In a real implementation, this would provide isolated execution
     of code changes with proper containerization.
     """
-    
+
     def execute_with_changes(
         self,
         project_path: str,
         changes: List[FileChange],
         test_command: str,
-        lint_command: Optional[str] = None
+        lint_command: Optional[str] = None,
     ) -> SandboxResult:
         """Execute tests with applied changes in isolated environment."""
         # Stub implementation - would actually run in container/sandbox
@@ -84,9 +84,9 @@ class SandboxExecutor:
             all_passed=False,
             stdout="",
             stderr="Not implemented",
-            execution_time_ms=0
+            execution_time_ms=0,
         )
-    
+
     def run_tests(self, code: str, test_files: List[str]) -> SandboxResult:
         """Run tests against code."""
         # Stub implementation
@@ -95,28 +95,21 @@ class SandboxExecutor:
             all_passed=False,
             stdout="",
             stderr="Not implemented",
-            execution_time_ms=0
+            execution_time_ms=0,
         )
 
 
 class ErrorToDiffEngine:
     """
     Stub for error-to-diff engine.
-    
+
     In a real implementation, this would analyze errors and generate
     fix suggestions using AI/ML techniques.
     """
-    
+
     def analyze_error(
-        self,
-        error_output: str,
-        language: str,
-        source_code: str
+        self, error_output: str, language: str, source_code: str
     ) -> ErrorAnalysis:
         """Analyze error and suggest fixes."""
         # Stub implementation
-        return ErrorAnalysis(
-            message=error_output,
-            error_type="unknown",
-            fixes=[]
-        )
+        return ErrorAnalysis(message=error_output, error_type="unknown", fixes=[])

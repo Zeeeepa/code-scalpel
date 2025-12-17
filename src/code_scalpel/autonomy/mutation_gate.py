@@ -31,57 +31,59 @@ Acceptance Criteria (P1):
 - Provides actionable recommendations
 """
 
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List
 from enum import Enum
 import ast
 import copy
 
-from code_scalpel.autonomy.stubs import SandboxExecutor, SandboxResult, ExecutionTestResult
+from code_scalpel.autonomy.stubs import (
+    SandboxExecutor,
+)
 
 
 class MutationType(Enum):
     """
     Types of mutations to apply.
-    
+
     [20251217_FEATURE] P0: Mutation types for testing.
     """
-    
-    REVERT_FIX = "revert_fix"          # Undo the agent's fix
-    NEGATE_CONDITION = "negate"         # Flip boolean conditions
-    BOUNDARY_VALUE = "boundary"         # Change +1 to -1, etc.
-    NULL_RETURN = "null_return"         # Return None/null/0
-    REMOVE_STATEMENT = "remove"         # Delete a statement
+
+    REVERT_FIX = "revert_fix"  # Undo the agent's fix
+    NEGATE_CONDITION = "negate"  # Flip boolean conditions
+    BOUNDARY_VALUE = "boundary"  # Change +1 to -1, etc.
+    NULL_RETURN = "null_return"  # Return None/null/0
+    REMOVE_STATEMENT = "remove"  # Delete a statement
 
 
 @dataclass
 class MutationResult:
     """
     Result of a mutation test.
-    
+
     [20251217_FEATURE] P0: Track whether mutation was caught.
     """
-    
+
     mutation_type: MutationType
     original_code: str
     mutated_code: str
-    tests_failed: bool              # True = good (mutation was caught)
+    tests_failed: bool  # True = good (mutation was caught)
     tests_that_failed: List[str]
-    tests_that_passed: List[str]    # These tests are weak
+    tests_that_passed: List[str]  # These tests are weak
 
 
 @dataclass
 class MutationGateResult:
     """
     Overall result of mutation gate validation.
-    
+
     [20251217_FEATURE] P0: Complete mutation testing results.
     """
-    
+
     passed: bool
     mutations_tested: int
-    mutations_caught: int           # Tests failed (good)
-    mutations_survived: int         # Tests passed (bad - weak tests)
+    mutations_caught: int  # Tests failed (good)
+    mutations_survived: int  # Tests passed (bad - weak tests)
     hollow_fix_detected: bool
     weak_tests: List[str]
     recommendations: List[str]
@@ -91,10 +93,10 @@ class MutationGateResult:
 class Mutation:
     """
     A code mutation for testing.
-    
+
     [20251217_FEATURE] P0: Mutation definition.
     """
-    
+
     type: MutationType
     code: str
     description: str
@@ -103,62 +105,62 @@ class Mutation:
 class MutationTestGate:
     """
     Verify fixes are genuine by ensuring tests would fail if bug reintroduced.
-    
+
     [20251217_FEATURE] v3.0.0 P0 requirement from 3rd party review.
-    
+
     Addresses 3rd party review feedback on v3.0.0 Autonomy:
     "What if agent *thinks* it succeeded but actually deleted functionality?"
-    
+
     Solution: After agent claims fix, revert the fix and verify tests fail.
     If tests still pass after reverting, the fix was hollow.
-    
+
     Acceptance Criteria (P0):
     - Detects hollow fixes (tests pass after revert)
     - Generates additional mutations
     - Calculates mutation score
     - Gates on minimum score threshold
-    
+
     Acceptance Criteria (P1):
     - Identifies weak tests
     - Provides actionable recommendations
     """
-    
+
     def __init__(
         self,
         sandbox: SandboxExecutor,
-        min_mutation_score: float = 0.8  # 80% of mutations must be caught
+        min_mutation_score: float = 0.8,  # 80% of mutations must be caught
     ):
         """
         Initialize mutation test gate.
-        
+
         Args:
             sandbox: Sandbox executor for running tests
             min_mutation_score: Minimum mutation score to pass (default: 0.8)
         """
         self.sandbox = sandbox
         self.min_mutation_score = min_mutation_score
-    
+
     def validate_fix(
         self,
         original_code: str,
         fixed_code: str,
         test_files: List[str],
-        language: str = "python"
+        language: str = "python",
     ) -> MutationGateResult:
         """
         Validate that a fix is genuine, not hollow.
-        
+
         [20251217_FEATURE] P0: Main validation logic.
-        
+
         Args:
             original_code: Code before the agent's fix (with bug)
             fixed_code: Code after the agent's fix
             test_files: List of test files to run
             language: Programming language
-        
+
         Returns:
             MutationGateResult with validation status
-        
+
         Process:
             1. Verify fixed_code passes tests (sanity check)
             2. Revert to original_code, verify tests fail
@@ -166,7 +168,7 @@ class MutationTestGate:
             4. Calculate mutation score, gate on threshold
         """
         results: List[MutationResult] = []
-        
+
         # [20251217_FEATURE] Step 1: Sanity check - fixed code should pass
         fixed_result = self.sandbox.run_tests(fixed_code, test_files)
         if not fixed_result.all_passed:
@@ -177,17 +179,19 @@ class MutationTestGate:
                 mutations_survived=0,
                 hollow_fix_detected=False,
                 weak_tests=[],
-                recommendations=["Fix does not pass tests - not ready for mutation testing"]
+                recommendations=[
+                    "Fix does not pass tests - not ready for mutation testing"
+                ],
             )
-        
+
         # [20251217_FEATURE] P0: Step 2: Critical - revert fix, tests MUST fail
         revert_result = self._test_mutation(
             mutated_code=original_code,  # Revert to buggy code
             test_files=test_files,
-            mutation_type=MutationType.REVERT_FIX
+            mutation_type=MutationType.REVERT_FIX,
         )
         results.append(revert_result)
-        
+
         # [20251217_FEATURE] P0: HOLLOW FIX DETECTION
         if not revert_result.tests_failed:
             # HOLLOW FIX DETECTED
@@ -201,39 +205,39 @@ class MutationTestGate:
                 recommendations=[
                     "HOLLOW FIX DETECTED: Reverting the fix does not cause tests to fail.",
                     "The agent may have deleted test assertions or hollowed out the function.",
-                    "Review the fix manually before accepting."
-                ]
+                    "Review the fix manually before accepting.",
+                ],
             )
-        
+
         # [20251217_FEATURE] P0: Step 3: Additional mutations for thoroughness
         additional_mutations = self._generate_mutations(fixed_code, language)
-        
+
         for mutation in additional_mutations[:5]:  # Limit to 5 additional mutations
             result = self._test_mutation(
                 mutated_code=mutation.code,
                 test_files=test_files,
-                mutation_type=mutation.type
+                mutation_type=mutation.type,
             )
             results.append(result)
-        
+
         # [20251217_FEATURE] P0: Step 4: Calculate mutation score
         caught = sum(1 for r in results if r.tests_failed)
         survived = sum(1 for r in results if not r.tests_failed)
         score = caught / len(results) if results else 0
-        
+
         # [20251217_FEATURE] P1: Identify weak tests
         weak_tests: set[str] = set()
         for r in results:
             if not r.tests_failed:
                 weak_tests.update(r.tests_that_passed)
-        
+
         # [20251217_FEATURE] P1: Provide actionable recommendations
         recommendations: List[str] = []
         if survived > 0:
             recommendations.append(
                 f"{survived} mutations survived. Consider strengthening these tests: {weak_tests}"
             )
-        
+
         return MutationGateResult(
             passed=score >= self.min_mutation_score,
             mutations_tested=len(results),
@@ -241,53 +245,46 @@ class MutationTestGate:
             mutations_survived=survived,
             hollow_fix_detected=False,
             weak_tests=list(weak_tests),
-            recommendations=recommendations
+            recommendations=recommendations,
         )
-    
+
     def _test_mutation(
-        self,
-        mutated_code: str,
-        test_files: List[str],
-        mutation_type: MutationType
+        self, mutated_code: str, test_files: List[str], mutation_type: MutationType
     ) -> MutationResult:
         """
         Run tests against mutated code.
-        
+
         [20251217_FEATURE] P0: Execute mutation test.
         """
         result = self.sandbox.run_tests(mutated_code, test_files)
-        
+
         return MutationResult(
             mutation_type=mutation_type,
             original_code="",  # Not needed for result
             mutated_code=mutated_code,
             tests_failed=not result.all_passed,
             tests_that_failed=[t.name for t in result.tests if not t.passed],
-            tests_that_passed=[t.name for t in result.tests if t.passed]
+            tests_that_passed=[t.name for t in result.tests if t.passed],
         )
-    
-    def _generate_mutations(
-        self,
-        code: str,
-        language: str
-    ) -> List[Mutation]:
+
+    def _generate_mutations(self, code: str, language: str) -> List[Mutation]:
         """
         Generate additional mutations for the code.
-        
+
         [20251217_FEATURE] P0: Mutation generation for Python.
-        
+
         Currently supports Python only. Future versions will support
         additional languages.
         """
         mutations: List[Mutation] = []
-        
+
         if language == "python":
             try:
                 tree = ast.parse(code)
             except SyntaxError:
                 # Cannot parse - return empty list
                 return mutations
-            
+
             # [20251217_FEATURE] P0: Mutation: Negate conditions
             for node in ast.walk(tree):
                 if isinstance(node, ast.If):
@@ -296,33 +293,40 @@ class MutationTestGate:
                     for m_node in ast.walk(mutated_tree):
                         if isinstance(m_node, ast.If) and m_node.lineno == node.lineno:
                             m_node.test = ast.UnaryOp(op=ast.Not(), operand=m_node.test)
-                    
+
                     try:
-                        mutations.append(Mutation(
-                            type=MutationType.NEGATE_CONDITION,
-                            code=ast.unparse(mutated_tree),
-                            description=f"Negated condition at line {node.lineno}"
-                        ))
+                        mutations.append(
+                            Mutation(
+                                type=MutationType.NEGATE_CONDITION,
+                                code=ast.unparse(mutated_tree),
+                                description=f"Negated condition at line {node.lineno}",
+                            )
+                        )
                     except Exception:
                         # Skip mutations that fail to unparse
                         pass
-            
+
             # [20251217_FEATURE] P0: Mutation: Change return values
             for node in ast.walk(tree):
                 if isinstance(node, ast.Return) and node.value:
                     mutated_tree = copy.deepcopy(tree)
                     for m_node in ast.walk(mutated_tree):
-                        if isinstance(m_node, ast.Return) and m_node.lineno == node.lineno:
+                        if (
+                            isinstance(m_node, ast.Return)
+                            and m_node.lineno == node.lineno
+                        ):
                             m_node.value = ast.Constant(value=None)
-                    
+
                     try:
-                        mutations.append(Mutation(
-                            type=MutationType.NULL_RETURN,
-                            code=ast.unparse(mutated_tree),
-                            description=f"Changed return to None at line {node.lineno}"
-                        ))
+                        mutations.append(
+                            Mutation(
+                                type=MutationType.NULL_RETURN,
+                                code=ast.unparse(mutated_tree),
+                                description=f"Changed return to None at line {node.lineno}",
+                            )
+                        )
                     except Exception:
                         # Skip mutations that fail to unparse
                         pass
-        
+
         return mutations
