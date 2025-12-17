@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "2.2.0"  # [20251216_DOCS] v2.2.0 Nexus - Unified Cross-Language Graph
+version = "2.5.0"  # [20251217_DOCS] v2.5.0 Guardian - Governance & Policy
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
