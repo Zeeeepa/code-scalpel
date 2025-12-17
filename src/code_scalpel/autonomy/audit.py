@@ -2,8 +2,8 @@
 Autonomy Audit Trail - Complete history of autonomous operations.
 
 # [20251217_FEATURE] v3.0.0 Autonomy - Full audit trail for debugging and compliance
-
-This module provides cryptographically-signed, immutable audit logging for all
+# [20251217_DOCS] Clarified that audit logging uses cryptographic hashing, not signatures
+This module provides cryptographically-hashed, immutable audit logging for all
 autonomous operations with parent-child tracking and multi-format export.
 """
 
@@ -261,9 +261,14 @@ class AutonomyAuditTrail:
         Returns:
             SHA256 hash as hex string
         """
-        # Convert to string representation
-        data_str = str(data)
-        return hashlib.sha256(data_str.encode()).hexdigest()
+        # [20251217_SECURITY] Use deterministic JSON serialization for hashing
+        try:
+            # Prefer canonical JSON with sorted keys for stable hashes
+            data_str = json.dumps(data, sort_keys=True, default=str, ensure_ascii=False)
+        except TypeError:
+            # Fallback: last-resort string conversion if JSON serialization fails
+            data_str = str(data)
+        return hashlib.sha256(data_str.encode("utf-8")).hexdigest()
 
     def _store_entry(self, entry: AuditEntry, input_data: Any, output_data: Any):
         """
@@ -373,7 +378,13 @@ class AutonomyAuditTrail:
         Returns:
             JSON string
         """
-        summary = self.get_session_summary()
+        # [20251217_BUGFIX] Make summary statistics consistent with filtered export entries
+        summary = {
+            "total_operations": len(entries),
+            "successful_operations": sum(1 for e in entries if e.success),
+            "failed_operations": sum(1 for e in entries if not e.success),
+            "total_duration_ms": sum(e.duration_ms for e in entries),
+        }
 
         operations = []
         for entry in entries:
@@ -454,7 +465,21 @@ class AutonomyAuditTrail:
         Returns:
             HTML string
         """
-        summary = self.get_session_summary()
+        # [20251217_BUGFIX] Ensure HTML summary matches filtered entries, not all session entries
+        total_ops = len(entries)
+        success_ops = sum(1 for entry in entries if entry.success)
+        failure_ops = total_ops - success_ops
+        total_duration_ms = sum(entry.duration_ms for entry in entries)
+        avg_duration_ms = int(total_duration_ms / total_ops) if total_ops else 0
+        success_rate = (success_ops / total_ops * 100.0) if total_ops else 0.0
+        summary = {
+            "total_operations": total_ops,
+            "success_count": success_ops,
+            "failure_count": failure_ops,
+            "success_rate": success_rate,
+            "total_duration_ms": total_duration_ms,
+            "avg_duration_ms": avg_duration_ms,
+        }
 
         html = f"""<!DOCTYPE html>
 <html>

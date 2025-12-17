@@ -484,9 +484,9 @@ class TestFiltering:
         assert len(operations) == 2
         assert all(op["success"] for op in operations)
 
+    # [20251217_BUGFIX] Removed unused datetime.now() call flagged by static analysis
     def test_filter_by_time_range(self, audit_trail):
         """Test filtering by time range."""
-        datetime.now()
 
         # Record operations at different times
         # We'll manipulate the timestamps manually for testing
