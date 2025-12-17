@@ -471,9 +471,18 @@ class SyntaxFixGenerator:
             new_line = old_line + ")" * (open_count - close_count)
             return f"{old_line} -> {new_line}"
         elif close_count > open_count:
-            # Remove extra closing parentheses
+            # [20251217_BUGFIX] Remove only the excess number of trailing closing parentheses
+            # rather than stripping all of them, to preserve balanced parens like foo()).
             old_line = target_line.rstrip()
-            new_line = old_line.rstrip(")")
+            excess = close_count - open_count
+            chars = list(old_line)
+            i = len(chars) - 1
+            to_remove = excess
+            while i >= 0 and to_remove > 0 and chars[i] == ")":
+                chars.pop(i)
+                to_remove -= 1
+                i -= 1
+            new_line = "".join(chars)
             return f"{old_line} -> {new_line}"
 
         return None
