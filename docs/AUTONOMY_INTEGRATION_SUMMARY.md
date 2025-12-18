@@ -135,23 +135,23 @@ langgraph  # [20251217_FEATURE] LangGraph integration for autonomous fixing
 ## Acceptance Criteria Verification
 
 ### LangGraph (P0)
-✅ Native StateGraph integration  
-✅ Fix loop as graph nodes  
-✅ Conditional routing based on fix success  
+[COMPLETE] Native StateGraph integration  
+[COMPLETE] Fix loop as graph nodes  
+[COMPLETE] Conditional routing based on fix success  
 
 ### CrewAI (P0)
-✅ Native Crew with Scalpel agents  
-✅ Agent roles (Analyzer, Generator, Validator)  
-✅ Task pipeline for fix workflow  
+[COMPLETE] Native Crew with Scalpel agents  
+[COMPLETE] Agent roles (Analyzer, Generator, Validator)  
+[COMPLETE] Task pipeline for fix workflow  
 
 ### AutoGen (P0)
-✅ AssistantAgent with Scalpel tools  
-✅ Function schemas for all operations  
-✅ Docker-based code execution  
+[COMPLETE] AssistantAgent with Scalpel tools  
+[COMPLETE] Function schemas for all operations  
+[COMPLETE] Docker-based code execution  
 
 ### General (P0)
-✅ 3+ frameworks with working examples  
-✅ Documentation with quickstart guides  
+[COMPLETE] 3+ frameworks with working examples  
+[COMPLETE] Documentation with quickstart guides  
 
 ## Code Quality
 

@@ -58,11 +58,11 @@ Prevents SQL injection via string construction across all supported languages.
 
 | Pattern | Languages | Status |
 |---------|-----------|--------|
-| String concatenation | Python, JS, TS, Java | ✅ Blocked |
-| f-strings | Python | ✅ Blocked |
-| format() strings | Python, Java | ✅ Blocked |
-| Template literals | JavaScript, TypeScript | ✅ Blocked |
-| StringBuilder | Java | ✅ Blocked |
+| String concatenation | Python, JS, TS, Java | [COMPLETE] Blocked |
+| f-strings | Python | [COMPLETE] Blocked |
+| format() strings | Python, Java | [COMPLETE] Blocked |
+| Template literals | JavaScript, TypeScript | [COMPLETE] Blocked |
+| StringBuilder | Java | [COMPLETE] Blocked |
 
 ### 3. Change Budgeting (P0)
 

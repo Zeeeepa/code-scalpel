@@ -13,7 +13,7 @@ This patch release resolves **all critical issues** discovered during external t
 
 ## Fixes in v1.2.2
 
-### 1. Float Type Inference ✅ (NEW in v1.2.2)
+### 1. Float Type Inference [COMPLETE] (NEW in v1.2.2)
 
 **Root Cause:** Type annotation parser only handled `int`, `bool`, `str` - missing `float`.
 
@@ -22,7 +22,7 @@ This patch release resolves **all critical issues** discovered during external t
 **Before:** `order_amount = ''` (empty string - TypeError)
 **After:** `order_amount = 100` (proper numeric value)
 
-### 2. Extra Parameter Bug ✅ (NEW in v1.2.2)
+### 2. Extra Parameter Bug [COMPLETE] (NEW in v1.2.2)
 
 **Root Cause:** Test generator copied ALL symbolic state variables, including intermediate variables like `discount` that are defined inside the function.
 
@@ -31,7 +31,7 @@ This patch release resolves **all critical issues** discovered during external t
 **Before:** `calculate_discount(customer_type=x, order_amount=y, has_coupon=z, discount=d)` ← Extra param!
 **After:** `calculate_discount(customer_type=x, order_amount=y, has_coupon=z)` ← Correct
 
-### 3. Flask XSS Sink Detection ✅ (NEW in v1.2.2)
+### 3. Flask XSS Sink Detection [COMPLETE] (NEW in v1.2.2)
 
 **Root Cause:** Two issues:
 1. Flask sinks `Response` and `make_response` were missing from `SINK_PATTERNS`

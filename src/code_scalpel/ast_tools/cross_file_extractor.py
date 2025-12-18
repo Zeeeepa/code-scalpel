@@ -76,7 +76,9 @@ DEFAULT_CONFIDENCE_DECAY_FACTOR = 0.9
 DEFAULT_LOW_CONFIDENCE_THRESHOLD = 0.5
 
 
-def calculate_confidence(depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR) -> float:
+def calculate_confidence(
+    depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR
+) -> float:
     """
     Calculate confidence score with exponential decay based on depth.
 
@@ -98,7 +100,7 @@ def calculate_confidence(depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DE
     safe_decay = min(decay_factor, 1.0)
 
     # Compute with clamp; guard against float domain issues
-    conf = 1.0 * (safe_decay ** depth)
+    conf = 1.0 * (safe_decay**depth)
     if conf != conf or conf == float("inf") or conf < 0:  # NaN or Inf or negative
         raise ValueError("invalid confidence result")
 
@@ -149,13 +151,15 @@ class ExtractionResult:
     def total_lines(self) -> int:
         """Total lines of code extracted."""
         return self.combined_code.count("\n") + 1 if self.combined_code else 0
-    
+
     @property
     def has_low_confidence_symbols(self) -> bool:
         """Check if any extracted symbols have low confidence."""
         return self.low_confidence_count > 0
-    
-    def get_low_confidence_symbols(self, threshold: float = DEFAULT_LOW_CONFIDENCE_THRESHOLD) -> List[ExtractedSymbol]:
+
+    def get_low_confidence_symbols(
+        self, threshold: float = DEFAULT_LOW_CONFIDENCE_THRESHOLD
+    ) -> List[ExtractedSymbol]:
         """Get all symbols below the confidence threshold."""
         low_conf = []
         if self.target and self.target.confidence < threshold:
@@ -310,7 +314,7 @@ class CrossFileExtractor:
         # [20251216_FEATURE] v2.5.0 - Target has depth 0 and confidence 1.0
         target_symbol.depth = 0
         target_symbol.confidence = 1.0
-        
+
         result.target = target_symbol
         result.files_touched.add(str(abs_path))
 
@@ -329,7 +333,7 @@ class CrossFileExtractor:
 
         # Generate combined code
         self._generate_combined_code(result)
-        
+
         # [20251216_FEATURE] v2.5.0 - Add warning if low confidence symbols found
         if result.has_low_confidence_symbols:
             low_conf_symbols = result.get_low_confidence_symbols()
@@ -746,7 +750,7 @@ class CrossFileExtractor:
                 # Track low confidence symbols
                 if extracted.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD:
                     result.low_confidence_count += 1
-                
+
                 result.dependencies.append(extracted)
                 result.files_touched.add(file_path)
 

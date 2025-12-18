@@ -83,9 +83,9 @@ Removed all emoji characters from documentation and shell scripts for profession
 - src/code_scalpel/ast_tools/import_resolver.py
 
 Replaced with standard ASCII text markers:
-- Checkmark (✅) → "DONE" or "PASSED"
-- Cross mark (❌) → "ERROR" or "FAILED"
-- Warning (⚠️) → "WARNING"
+- Checkmark ([COMPLETE]) → "DONE" or "PASSED"
+- Cross mark ([FAILED]) → "ERROR" or "FAILED"
+- Warning ([WARNING]) → "WARNING"
 - Other emojis → Removed or replaced with descriptive text
 
 ## Technical Details

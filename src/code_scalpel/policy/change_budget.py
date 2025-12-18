@@ -299,7 +299,11 @@ class ChangeBudget:
             # Treat empty or None original_code (new file) as zero complexity.
             if change.modified_code is not None:
                 try:
-                    before_complexity = self._measure_complexity(change.original_code) if change.original_code else 0
+                    before_complexity = (
+                        self._measure_complexity(change.original_code)
+                        if change.original_code
+                        else 0
+                    )
                     after_complexity = self._measure_complexity(change.modified_code)
                     total_delta += after_complexity - before_complexity
                 except SyntaxError:

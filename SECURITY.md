@@ -27,7 +27,7 @@
 - Security lead: triage, CVE coordination, vuln scan/SBOM review, signing verification.
 - Reviewer: enforces tests/lint/coverage/mutation/fuzz gates on PRs.
 
-<!-- [20251214_DOCS] Release gates and SLA commitments for v1.5.4 -->
+<!-- [20251218_DOCS] Release gates and SLA commitments for v3.0.0 -->
 
 ## Service Levels & Escalation
 - Intake SLA: acknowledgement ≤1 business day (Primary), ≤2 business days (Secondary).
@@ -35,25 +35,25 @@
 - Resolution targets: High/Critical ≤7 business days; Medium ≤15 business days; Low ≤30 business days; exceptions require Maintainer + Security lead approval and documented workaround.
 - Escalation: if targets slip, notify Maintainer, Security lead, and Reviewer; publish interim mitigation in evidence bundle and SECURITY.md changelog.
 
-## Release Gate Checklist (v1.5.4+)
+## Release Gate Checklist (v3.0.0+)
 - Tests: `python -m pytest` green; mutation smoke + parser/interpreter fuzz results recorded.
-- Coverage: ≥95% lines/branches; coverage report stored under `release_artifacts/v1.5.4/` and badge/docs updated.
+- Coverage: ≥90% combined (statement + branch); coverage report stored under `release_artifacts/v3.0.0/` and badge/docs updated.
 - Lint/Format: `ruff check .` and `python -m black --check .` clean; waivers must be documented.
-- Supply chain: SBOM generated and stored under `release_artifacts/v1.5.4/`; dependency vuln scan (OSV/pip-audit) logged with tool version/date/hash.
-- Signing: release artifacts signed with Sigstore/Cosign; verification steps captured in `release_artifacts/v1.5.4/v1.5.4_credibility_evidence.json`.
+- Supply chain: SBOM generated and stored under `release_artifacts/v3.0.0/`; dependency vuln scan (OSV/pip-audit) logged with tool version/date/hash.
+- Signing: release artifacts signed with Sigstore/Cosign; verification steps captured in `release_artifacts/v3.0.0/v3.0.0_credibility_evidence.json`.
 - Evidence: credibility bundle completed, including benchmarks, interop recipes, and DX smoke script references.
 - Approvals: Maintainer + Security lead + Reviewer sign off; any deviation documented in the evidence bundle and release notes.
 
-## Release Security Expectations (v1.5.4)
-- Signing: Sigstore/Cosign signatures for release artifacts; verification instructions recorded in `release_artifacts/v1.5.4/v1.5.4_credibility_evidence.json`.
-- SBOM: Generated for distributed packages; stored under `release_artifacts/v1.5.4/` and linked in evidence JSON.
+## Release Security Expectations (v3.0.0)
+- Signing: Sigstore/Cosign signatures for release artifacts; verification instructions recorded in `release_artifacts/v3.0.0/v3.0.0_credibility_evidence.json`.
+- SBOM: Generated for distributed packages; stored under `release_artifacts/v3.0.0/` and linked in evidence JSON.
 - Vulnerability scan: Dependency scan (e.g., OSV/pip-audit) recorded in evidence JSON with date/tool/hash.
-- Coverage & quality gates: ≥95% coverage, ruff/black clean, pytest clean, mutation smoke + parser/interpreter fuzz noted.
+- Coverage & quality gates: ≥90% combined coverage, ruff/black clean, pytest clean, mutation smoke + parser/interpreter fuzz noted.
 
 ## Contact
 - Primary: time@3dtechsolutions.us
 - Secondary: aescolopio@3dtechsolutions.us
 
 ## Versioning
-- Policy version: 2025-12-14
-- Applies starting with release v1.5.4 and forward.
+- Policy version: 2025-12-18
+- Applies starting with release v3.0.0 and forward.

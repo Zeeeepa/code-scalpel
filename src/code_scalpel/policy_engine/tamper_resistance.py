@@ -147,9 +147,9 @@ class TamperResistance:
 
         # Support both single file_path and affected_files list
         files_to_check = []
-        if hasattr(operation, 'affected_files') and operation.affected_files:
+        if hasattr(operation, "affected_files") and operation.affected_files:
             files_to_check = operation.affected_files
-        elif hasattr(operation, 'file_path') and operation.file_path:
+        elif hasattr(operation, "file_path") and operation.file_path:
             files_to_check = [operation.file_path]
 
         for file_path in files_to_check:

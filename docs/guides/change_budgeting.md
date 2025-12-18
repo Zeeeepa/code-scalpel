@@ -92,9 +92,9 @@ operation = Operation(
 decision = budget.validate_operation(operation)
 
 if decision.allowed:
-    print(f"✓ Operation allowed: {decision.reason}")
+    print(f"[COMPLETE] Operation allowed: {decision.reason}")
 else:
-    print(f"✗ Operation denied: {decision.reason}")
+    print(f"[FAILED] Operation denied: {decision.reason}")
     print(decision.get_error_message())
 ```
 
@@ -311,12 +311,12 @@ class BudgetedAgent:
         decision = self.budget.validate_operation(operation)
         
         if not decision.allowed:
-            print(f"❌ Operation blocked by budget: {decision.reason}")
+            print(f"[FAILED] Operation blocked by budget: {decision.reason}")
             print(decision.get_error_message())
             return False
         
         # Apply changes
-        print(f"✓ Operation allowed: {decision.reason}")
+        print(f"[COMPLETE] Operation allowed: {decision.reason}")
         # ... actual modification logic ...
         return True
 ```

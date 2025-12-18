@@ -8,7 +8,6 @@ This test file validates ALL acceptance criteria from the problem statement.
 
 import os
 import json
-import tempfile
 from pathlib import Path
 from datetime import datetime, timedelta
 import pytest
@@ -275,7 +274,7 @@ def test_AC8_overrides_logged_with_justification(acceptance_test_env, monkeypatc
         allowed=False, violated_policies=["security_check"], severity="HIGH"
     )
 
-    decision = tr.require_human_override(
+    tr.require_human_override(
         operation=operation, policy_decision=policy_decision, timeout_seconds=2
     )
 

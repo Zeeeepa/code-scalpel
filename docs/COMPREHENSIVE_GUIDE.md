@@ -1,6 +1,8 @@
-# Code Scalpel v2.2.0 - Comprehensive Documentation
+# Code Scalpel v3.0.0 "Autonomy" - Comprehensive Documentation
 
 **MCP Server Toolkit for AI Agents - Surgical Code Analysis**
+
+> **Version:** 3.0.0 | **Tests:** 4,033 | **Coverage:** 94.86% | **Coverage Gate:** ≥90%
 
 ---
 
@@ -42,8 +44,8 @@ Code Scalpel is a precision toolkit for AI-driven code analysis. Unlike general-
 | **Surgical Patcher** | Safe, atomic code modifications | Stable (96% coverage) |
 | **Symbolic Execution** | Explore execution paths with Z3 | Stable (100% coverage) |
 | **Security Analysis** | Taint-based vulnerability detection | Stable (100% coverage) |
-| **Graph Engine** | Unified cross-language dependency graph | Stable (v2.2.0) |
-| **MCP Server** | Model Context Protocol integration (17 tools) | Stable |
+| **Graph Engine** | Unified cross-language dependency graph | Stable (v3.0.0) |
+| **MCP Server** | Model Context Protocol integration (19 tools) | Stable |
 
 ### Supported Languages
 
@@ -389,11 +391,11 @@ else:
 
 | Type | Status | Notes |
 |------|--------|-------|
-| `Int` | ✅ Full | Arbitrary precision |
-| `Bool` | ✅ Full | |
-| `String` | ✅ Full | With length constraints |
-| `Float` | ❌ Planned | v1.3.0 |
-| `List` | ❌ Planned | v1.4.0 |
+| `Int` | [COMPLETE] Full | Arbitrary precision |
+| `Bool` | [COMPLETE] Full | |
+| `String` | [COMPLETE] Full | With length constraints |
+| `Float` | [FAILED] Planned | v1.3.0 |
+| `List` | [FAILED] Planned | v1.4.0 |
 
 #### Limitations
 
@@ -1185,7 +1187,7 @@ from code_scalpel.integrations import (
 - **Configurable Depth**: Control traversal depth for large codebases
 
 ### Enhanced MCP Tools
-- **17 MCP Tools**: Up from 13 in v1.5.0
+- **19 MCP Tools**: Up from 13 in v1.5.0, +6 in v2.5.0/v3.0.0
 - **`get_call_graph`**: Generate call graphs with entry point detection
 - **`get_cross_file_dependencies`**: Trace dependencies across module boundaries
 
@@ -1194,36 +1196,57 @@ from code_scalpel.integrations import (
 - **Caching**: LRU cache for repeated queries
 - **Memory Optimization**: Large graphs handled efficiently
 
+---
+
+## What's New in v3.0.0
+
+**December 18, 2025 - "Autonomy" Release**
+
+### Comprehensive Test Coverage
+- **4,033 tests passing** (up from 2,698 in v2.0.1)
+- **94.86% combined coverage** (statement + branch)
+- **Coverage gate updated to ≥90%** (pragmatic threshold)
+
+### Autonomy Foundation
+- **Error-to-Diff Engine**: Converts error messages to actionable patches
+- **Fix Loop Termination**: Bounded iteration prevents infinite loops
+- **Mutation Test Gate**: Validates fixes don't introduce regressions
+- **Audit Trail**: Complete logging of autonomous operations
+
 ### Stats
-- 3,006+ tests passing
-- 95%+ code coverage
+- 4,033+ tests passing
+- 94.86% combined coverage
 - 4 languages supported
-- 17 MCP tools
+- 19 MCP tools
 
 ---
 
-## Coming in v2.5.0
+## Coming in v3.1.0
 
-**Planned - "Guardian" Release**
+**Planned - "Autonomy+" Release**
 
-<!-- [20251216_DOCS] Added per 3rd party security review feedback -->
+### Enhanced Autonomy
+- Full autonomous refactoring with human-in-the-loop confirmation
+- Enhanced confidence scoring for cross-language boundaries
+- Integrated mutation testing in the fix loop
+- Enterprise demo kit with microservices examples
 
-### Policy Engine (P0 - Complete)
+### Policy Engine (Already Complete in v2.5.0)
 - **OPA/Rego Integration**: Declarative policy enforcement
 - **Semantic Blocking**: Blocks SQL injection patterns regardless of syntax variation
 - **Fail-Closed Security**: Invalid policies reject all operations
 
-### Confidence Decay (From 3rd Party Review)
+### Confidence Decay
 - **Formula**: `C_effective = C_base × 0.9^depth`
 - **Low-Confidence Flagging**: Results at depth 10+ marked with warning
 - **Configurable Decay Factor**: Default 0.9, adjustable per use case
 
-### Graph Neighborhood View (From 3rd Party Review)
+### Graph Neighborhood View
 - **k-hop Subgraph Extraction**: Prevent graph explosion on large codebases
 - **Max Node Limit**: Default 100 nodes with truncation warning
 - **Focused Analysis**: Extract only relevant neighborhood around target
 
-### Cryptographic Policy Verification (From 3rd Party Review)
+### Cryptographic Policy Verification
 - **SHA-256 Signed Manifests**: Policy files cryptographically signed
 - **chmod Bypass Prevention**: Integrity verified regardless of file permissions
 - **Fail-Closed on Invalid Signature**: Tampered policies rejected

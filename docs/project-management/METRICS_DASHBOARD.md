@@ -10,30 +10,31 @@ This document defines key metrics tracked for Code Scalpel development and relea
 
 ### Test Coverage
 
-| Metric | Target | Current (v2.2.0) | Trend |
+| Metric | Target | Current (v3.0.0) | Trend |
 |--------|--------|------------------|-------|
-| Line Coverage | ≥95% | 95% | → |
-| Branch Coverage | ≥90% | 92% | ↑ |
-| Function Coverage | ≥95% | 97% | ↑ |
+| Statement Coverage | ≥90% | 96.28% | ↑ |
+| Branch Coverage | ≥90% | 90.95% | ↑ |
+| Combined Coverage | ≥90% | 94.86% | ↑ |
 
 ```
 Coverage History:
 v1.5.0: 95.2%
 v1.5.1: 95.1%
 v1.5.2: 95.0%
-v2.0.0: 95.0%
+v2.0.0: 89.0%
 v2.0.1: 95.0%
 v2.2.0: 93.0%
+v3.0.0: 94.86%
 ```
 
 ### Test Suite Health
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Total Tests | - | 3,006 | - |
-| Pass Rate | 100% | 100% | ✅ |
-| XFail Tests | <5 | 1 | ✅ |
-| Flaky Tests | 0 | 0 | ✅ |
+| Total Tests | - | 4,033 | - |
+| Pass Rate | 100% | 100% | [COMPLETE] |
+| XFail Tests | <5 | 1 | [COMPLETE] |
+| Flaky Tests | 0 | 0 | [COMPLETE] |
 
 ---
 
@@ -43,10 +44,10 @@ v2.2.0: 93.0%
 
 | Operation | Target | Current | Status |
 |-----------|--------|---------|--------|
-| `analyze_code` (1K LOC) | <100ms | 45ms | ✅ |
-| `extract_code` | <50ms | 22ms | ✅ |
-| `security_scan` (1K LOC) | <500ms | 180ms | ✅ |
-| `crawl_project` (100 files) | <10s | 3.2s | ✅ |
+| `analyze_code` (1K LOC) | <100ms | 45ms | [COMPLETE] |
+| `extract_code` | <50ms | 22ms | [COMPLETE] |
+| `security_scan` (1K LOC) | <500ms | 180ms | [COMPLETE] |
+| `crawl_project` (100 files) | <10s | 3.2s | [COMPLETE] |
 
 ### Token Efficiency
 
@@ -132,9 +133,9 @@ v2.2.0: 93.0%
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Ruff Violations | 0 | 0* | ✅ |
-| Black Compliance | 100% | 100% | ✅ |
-| Type Coverage | ≥90% | 94% | ✅ |
+| Ruff Violations | 0 | 0* | [COMPLETE] |
+| Black Compliance | 100% | 100% | [COMPLETE] |
+| Type Coverage | ≥90% | 94% | [COMPLETE] |
 
 *Excluding synthetic test fixtures
 
@@ -142,9 +143,9 @@ v2.2.0: 93.0%
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| Max Cyclomatic Complexity | <15 | 12 | ✅ |
-| Avg Cyclomatic Complexity | <5 | 3.2 | ✅ |
-| Hotspot Files | <5 | 2 | ✅ |
+| Max Cyclomatic Complexity | <15 | 12 | [COMPLETE] |
+| Avg Cyclomatic Complexity | <5 | 3.2 | [COMPLETE] |
+| Hotspot Files | <5 | 2 | [COMPLETE] |
 
 ---
 
@@ -154,18 +155,18 @@ v2.2.0: 93.0%
 
 | Area | Target | Current | Status |
 |------|--------|---------|--------|
-| Public API | 100% | 100% | ✅ |
-| MCP Tools | 100% | 100% | ✅ |
-| Examples | 100% | 95% | ⚠️ |
-| Architecture | 100% | 100% | ✅ |
+| Public API | 100% | 100% | [COMPLETE] |
+| MCP Tools | 100% | 100% | [COMPLETE] |
+| Examples | 100% | 95% | [WARNING] |
+| Architecture | 100% | 100% | [COMPLETE] |
 
 ### Freshness
 
 | Document Type | Max Age | Status |
 |---------------|---------|--------|
-| API Reference | 1 release | ✅ |
-| Release Notes | Current | ✅ |
-| Guides | 2 releases | ✅ |
+| API Reference | 1 release | [COMPLETE] |
+| Release Notes | Current | [COMPLETE] |
+| Guides | 2 releases | [COMPLETE] |
 
 ---
 
@@ -175,10 +176,10 @@ v2.2.0: 93.0%
 
 | Priority | Target | Avg (Q4 2025) | Status |
 |----------|--------|---------------|--------|
-| Critical | <24h | 4h | ✅ |
-| High | <72h | 36h | ✅ |
-| Medium | <14d | 7d | ✅ |
-| Low | <30d | 21d | ✅ |
+| Critical | <24h | 4h | [COMPLETE] |
+| High | <72h | 36h | [COMPLETE] |
+| Medium | <14d | 7d | [COMPLETE] |
+| Low | <30d | 21d | [COMPLETE] |
 
 ### Bug Density
 

@@ -10,6 +10,7 @@ from code_scalpel.polyglot.tsx_analyzer import (
 
 # [20251216_TEST] Cover JSX detection and component classification paths
 
+
 def test_detect_server_directives() -> None:
     assert detect_server_directive("'use client'") == "use client"
     assert detect_server_directive('"use server"') == "use server"

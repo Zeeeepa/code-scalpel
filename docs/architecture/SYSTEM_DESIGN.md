@@ -1,6 +1,10 @@
-<!-- [20251215_DOCS] Architecture: System Design -->
+<!-- [20251218_DOCS] Architecture: System Design - Updated for v3.0.0 "Autonomy" -->
 
 # Code Scalpel System Design
+
+> **Version:** 3.0.0 "Autonomy"  
+> **Last Updated:** December 18, 2025  
+> **Coverage Gate:** ≥90% combined (statement + branch)
 
 This document provides a comprehensive overview of Code Scalpel's architecture and design decisions.
 
@@ -17,6 +21,7 @@ Code Scalpel is an MCP-native toolkit enabling AI agents to perform surgical cod
 3. **Multi-Language:** Support Python, JavaScript, TypeScript, Java
 4. **Security-First:** Detect vulnerabilities through taint analysis
 5. **Safe Modification:** Validate changes before applying
+6. **Autonomy Foundation:** Enable bounded autonomous agent operations (v3.0.0+)
 
 ---
 

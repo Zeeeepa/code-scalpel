@@ -17,10 +17,10 @@
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| AnalysisCache (memory+disk) | ✅ Complete | cache_effectiveness_evidence.json |
-| ParallelParser (batched) | ✅ Complete | parallel_execution_results.json |
-| IncrementalAnalyzer | ✅ Complete | incremental_analysis_results.json |
-| <10s target on 1000+ files | ✅ PASS (3.1s) | v1.5.5_performance_benchmarks.json |
+| AnalysisCache (memory+disk) | [COMPLETE] Complete | cache_effectiveness_evidence.json |
+| ParallelParser (batched) | [COMPLETE] Complete | parallel_execution_results.json |
+| IncrementalAnalyzer | [COMPLETE] Complete | incremental_analysis_results.json |
+| <10s target on 1000+ files | [COMPLETE] PASS (3.1s) | v1.5.5_performance_benchmarks.json |
 
 **Key Metrics:**
 - Cold run: **3.1s** for 1201 files with 4190 imports (target was <10s)
@@ -31,13 +31,13 @@
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| CacheStats counters | ✅ Complete | 4 new tests |
-| Memory-mapped file hashing | ✅ Complete | 2 new tests |
-| CI troubleshooting guide | ✅ Complete | docs/ci_cd/troubleshooting.md |
-| CI smoke gate | ✅ Complete | .github/workflows/ci.yml |
-| Pip caching in CI | ✅ Complete | All jobs use setup-python cache |
-| Windows spawn fix | ✅ Mitigated | test_parallel_parser_handles_unpicklable_callable |
-| CI reliability log | ✅ Complete | ci_cd_reliability_log.json |
+| CacheStats counters | [COMPLETE] Complete | 4 new tests |
+| Memory-mapped file hashing | [COMPLETE] Complete | 2 new tests |
+| CI troubleshooting guide | [COMPLETE] Complete | docs/ci_cd/troubleshooting.md |
+| CI smoke gate | [COMPLETE] Complete | .github/workflows/ci.yml |
+| Pip caching in CI | [COMPLETE] Complete | All jobs use setup-python cache |
+| Windows spawn fix | [COMPLETE] Mitigated | test_parallel_parser_handles_unpicklable_callable |
+| CI reliability log | [COMPLETE] Complete | ci_cd_reliability_log.json |
 
 ---
 
@@ -61,8 +61,8 @@ Large files (>1MB) are automatically hashed using `mmap` for better memory effic
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Total tests | 2545+ | ✅ Passing |
-| Cache module tests | 10 | ✅ Passing |
+| Total tests | 2545+ | [COMPLETE] Passing |
+| Cache module tests | 10 | [COMPLETE] Passing |
 | Test suite time | ~116s | Stable |
 
 ---

@@ -3,10 +3,10 @@
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-2668%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-89%25-brightgreen.svg)](release_artifacts/v2.0.0/)
+[![Tests](https://img.shields.io/badge/tests-4033%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Coverage](https://img.shields.io/badge/coverage-94.86%25-brightgreen.svg)](release_artifacts/v3.0.0/)
 
-**MCP Server Toolkit for AI Agents**
+**MCP Server Toolkit for AI Agents - v3.0.0 "Autonomy"**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
@@ -103,11 +103,11 @@ docker run -d \
   -p 8593:8593 \
   -p 8594:8594 \
   -v /path/to/project:/project \
-  ghcr.io/tescolopio/code-scalpel:2.0.0
+  ghcr.io/tescolopio/code-scalpel:3.0.0
 
 # Verify health
 curl http://localhost:8594/health
-# {"status":"healthy","version":"2.0.0","tools":18}
+# {"status":"healthy","version":"3.0.0","tools":19}
 
 # Connect via HTTP transport
 ```
@@ -116,7 +116,7 @@ curl http://localhost:8594/health
 ```yaml
 services:
   code-scalpel:
-    image: ghcr.io/tescolopio/code-scalpel:2.0.0
+    image: ghcr.io/tescolopio/code-scalpel:3.0.0
     ports:
       - "8593:8593"
       - "8594:8594"
@@ -146,8 +146,8 @@ Add to Cursor settings (`~/.cursor/mcp.json`):
 
 ---
 
-> **v2.0.0 "POLYGLOT" RELEASE** (December 15, 2025)  
-> Multi-Language Support + Advanced MCP Protocol Features
+> **v3.0.0 "AUTONOMY" RELEASE** (December 18, 2025)  
+> Comprehensive Coverage, Stability, and Autonomy Foundation
 >
 > | Component | Status | Notes |
 > |-----------|--------|-------|
@@ -156,10 +156,11 @@ Add to Cursor settings (`~/.cursor/mcp.json`):
 > | Cross-File Analysis | **STABLE** | Import resolution, taint tracking, extraction |
 > | MCP Protocol | **COMPLETE** | Health endpoint, Progress tokens, Roots capability |
 > | Token Efficiency | **99%** | Surgical extraction vs full file |
-> | Performance | **20,000+ LOC/sec** | Project-wide analysis |
-> | MCP Tools | **18 tools** | analyze, extract, security, test-gen, cross-file |
+> | Performance | **25,000+ LOC/sec** | Project-wide analysis |
+> | MCP Tools | **19 tools** | analyze, extract, security, test-gen, cross-file, policy |
+> | Test Suite | **4,033 tests** | 94.86% combined coverage |
 >
-> See [RELEASE_NOTES_v2.0.0.md](docs/release_notes/RELEASE_NOTES_v2.0.0.md) for full details.
+> See [RELEASE_NOTES_v3.0.0.md](docs/release_notes/RELEASE_NOTES_v3.0.0.md) for full details.
 
 ---
 
@@ -214,10 +215,10 @@ Code Scalpel transforms LLMs from "suggestion machines" into autonomous operator
 
 | Feature | Traditional Tools | Code Scalpel |
 |---------|------------------|--------------|
-| Pattern matching (regex) | ✓ | **Taint tracking** through variables |
-| Single file analysis | ✓ | **Cross-file** dependency graphs |
-| Manual test writing | ✓ | **Z3-powered** test generation |
-| Generic output | ✓ | **AI-optimized** structured responses |
+| Pattern matching (regex) | [COMPLETE] | **Taint tracking** through variables |
+| Single file analysis | [COMPLETE] | **Cross-file** dependency graphs |
+| Manual test writing | [COMPLETE] | **Z3-powered** test generation |
+| Generic output | [COMPLETE] | **AI-optimized** structured responses |
 | Context strategy | Stuff everything | **Surgical slicing** |
 
 ---
@@ -277,7 +278,7 @@ code-scalpel analyze demos/test_gen_scenario.py
 # - test_standard: income=50000, debt=20000, credit_score=700
 ```
 
-## MCP Tools Reference (18 Total)
+## MCP Tools Reference (19 Total)
 
 **Core Tools (v1.0.0)**
 | Tool | Description |
@@ -300,11 +301,19 @@ code-scalpel analyze demos/test_gen_scenario.py
 | `get_project_map` | Build complete project map and entry points |
 | `scan_dependencies` | Scan for vulnerable dependencies (OSV API) |
 
-**Cross-File Tools (v1.5.1) - NEW**
+**Cross-File Tools (v1.5.1)**
 | Tool | Description |
 |------|-------------|
 | `get_cross_file_dependencies` | Build import graphs and resolve symbols |
 | `cross_file_security_scan` | Detect vulnerabilities spanning modules |
+
+**v2.5.0+ Tools**
+| Tool | Description |
+|------|-------------|
+| `unified_sink_detect` | Unified polyglot sink detection with confidence |
+| `get_graph_neighborhood` | Extract k-hop subgraph around a node |
+| `validate_paths` | Validate path accessibility for Docker |
+| `verify_policy_integrity` | Cryptographic policy file verification |
 
 ## Features
 
@@ -362,6 +371,11 @@ docker run -p 8593:8593 -v $(pwd):/app/code code-scalpel
 
 ## Documentation
 
+**v3.0.0 Release Documentation:**
+- [docs/MIGRATION_v2.5_to_v3.0.md](docs/MIGRATION_v2.5_to_v3.0.md) - Upgrade guide from v2.5.0 (no breaking changes)
+- [docs/API_CHANGES_v3.0.0.md](docs/API_CHANGES_v3.0.0.md) - Complete API reference for v3.0.0
+- [docs/KNOWN_ISSUES_v3.0.0.md](docs/KNOWN_ISSUES_v3.0.0.md) - Known limitations and workarounds
+
 **Getting Started:**
 - [docs/getting_started.md](docs/getting_started.md) - Step-by-step developer guide
 - [docs/QUICK_REFERENCE_DOCS.md](docs/QUICK_REFERENCE_DOCS.md) - Quick lookup guide for finding documentation
@@ -399,26 +413,27 @@ See [Contributing Guide](docs/guides/CONTRIBUTING.md) for details.
 
 See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 
-> [20251216_DOCS] Release notes pointer updated for v2.5.0 "Guardian"
+> [20251218_DOCS] Release notes pointer updated for v3.0.0 "Autonomy"
 
-- Latest release notes: [docs/release_notes/RELEASE_NOTES_v2.5.0.md](docs/release_notes/RELEASE_NOTES_v2.5.0.md)
+- Latest release notes: [docs/release_notes/RELEASE_NOTES_v3.0.0.md](docs/release_notes/RELEASE_NOTES_v3.0.0.md)
 
 | Version | Status | Release Date | Highlights |
 |---------|--------|--------------|------------|
 | **v1.5.x** | Released | Dec 13, 2025 | Cross-file analysis, context tools, project intelligence |
-| **v2.0.0** | Current | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
-| **v2.1.0** | Planned | Q1 2026 | Enhanced JS/TS - spread operators, super calls |
-| **v2.2.0** | Planned | Q2 2026 | IDE Extensions - VS Code marketplace |
+| **v2.0.0** | Released | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
+| **v2.5.0** | Released | Dec 17, 2025 | **Guardian** - Policy engine, governance controls |
+| **v3.0.0** | Current | Dec 18, 2025 | **Autonomy** - Self-correction, 4033 tests, 94.86% coverage |
+| **v3.1.0** | Planned | Q1 2026 | Autonomy+ - Enhanced self-correction, enterprise demos |
 
 **Strategic Focus:** MCP server toolkit enabling AI agents to perform surgical code operations without hallucination.
 
 ## Stats
 
-- **2,668** tests passing (100% pass rate)
-- **89%** overall coverage (TypeScript parser stubs at 0% reduce total)
+- **4,033** tests passing (100% pass rate)
+- **94.86%** combined coverage (statement + branch)
 - **100%** coverage: PDG, AST, Symbolic Execution, Security Analysis, Cross-File Analysis
 - **4** languages supported (Python, TypeScript, JavaScript, Java)
-- **18** MCP tools for AI agents
+- **19** MCP tools for AI agents
 - **17+** vulnerability types detected (SQL, XSS, NoSQL, LDAP, DOM XSS, Prototype Pollution, secrets)
 - **30+** secret detection patterns (AWS, GitHub, Stripe, private keys)
 - **200x** cache speedup

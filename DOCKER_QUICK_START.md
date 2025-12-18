@@ -1,8 +1,8 @@
-# Code Scalpel v2.0.0 - Docker Deployment Quick Start
+# Code Scalpel v3.0.0 - Docker Deployment Quick Start
 
-**Release Date:** December 15, 2025  
-**Version:** 2.0.0  
-**Docker Image:** code-scalpel:2.0.0  
+**Release Date:** December 18, 2025  
+**Version:** 3.0.0  
+**Docker Image:** code-scalpel:3.0.0  
 **Status:** FULLY DEPLOYED AND TESTED
 
 ## One-Command Quick Start
@@ -13,7 +13,7 @@ docker run -d \
   --name code-scalpel-mcp \
   -p 8593:8593 \
   -v $(pwd):/workspace \
-  code-scalpel:2.0.0
+  code-scalpel:3.0.0
 
 # Verify it's running
 curl http://localhost:8593/sse
@@ -38,7 +38,7 @@ docker run -d \
   -v $(pwd)/certs:/certs:ro \
   -e SSL_CERT=/certs/cert.pem \
   -e SSL_KEY=/certs/key.pem \
-  code-scalpel:2.0.0
+  code-scalpel:3.0.0
 
 # Verify HTTPS is working
 curl -k https://localhost:8443/sse
@@ -46,11 +46,16 @@ curl -k https://localhost:8443/sse
 # Connect Claude API to: https://localhost:8443
 ```
 
-## What's New in v2.0.0
+## What's New in v3.0.0
 
 ### Key Features
 
-1. **HTTPS/SSL Support** - Production-ready secure connections:
+1. **19 MCP Tools** - Full tool suite with policy and governance:
+   - All tools from v2.0.0 plus new policy/governance tools
+   - `unified_sink_detect`, `get_graph_neighborhood`, `verify_policy_integrity`
+   - Complete test coverage (4,033 tests, 94.86% coverage)
+
+2. **HTTPS/SSL Support** - Production-ready secure connections:
    - Mount SSL certificates to enable HTTPS
    - Required for Claude API integration
    - Self-signed or CA-signed certificates supported
@@ -69,7 +74,7 @@ curl -k https://localhost:8443/sse
 4. **Docker-Aware Error Messages** - When files aren't found, get helpful suggestions:
    ```
    Suggestion: Mount your project root:
-     docker run -v /path/to/project:/workspace code-scalpel:2.0.0
+     docker run -v /path/to/project:/workspace code-scalpel:3.0.0
    ```
 
 5. **validate_paths MCP Tool** - Check path accessibility before analysis:
@@ -89,7 +94,7 @@ docker run -d \
   --name code-scalpel-mcp \
   -p 8593:8593 \
   -v $(pwd):/workspace \
-  code-scalpel:2.0.0
+  code-scalpel:3.0.0
 ```
 
 ### Option 2: HTTPS with Docker Run (Production / Claude API)
@@ -110,7 +115,7 @@ docker run -d \
   -v $(pwd)/certs:/certs:ro \
   -e SSL_CERT=/certs/cert.pem \
   -e SSL_KEY=/certs/key.pem \
-  code-scalpel:2.0.0
+  code-scalpel:3.0.0
 
 # Connect Claude to: https://your-domain.com:8443
 ```
@@ -155,7 +160,7 @@ docker run -d \
   -v /etc/letsencrypt/live/yourdomain.com:/certs:ro \
   -e SSL_CERT=/certs/fullchain.pem \
   -e SSL_KEY=/certs/privkey.pem \
-  code-scalpel:2.0.0
+  code-scalpel:3.0.0
 
 # Connect to: https://yourdomain.com
 ```

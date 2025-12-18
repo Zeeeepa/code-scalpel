@@ -29,14 +29,14 @@ Symbolic execution explores program paths by treating inputs as symbolic variabl
 
 | Feature | Status |
 |---------|--------|
-| Integer arithmetic | ✅ Full |
-| Boolean logic | ✅ Full |
-| String operations | ✅ Full |
-| Path exploration | ✅ Full |
-| Test generation | ✅ Full |
-| Security analysis | ✅ Full |
-| Float arithmetic | ❌ Planned |
-| Collections | ❌ Planned |
+| Integer arithmetic | [COMPLETE] Full |
+| Boolean logic | [COMPLETE] Full |
+| String operations | [COMPLETE] Full |
+| Path exploration | [COMPLETE] Full |
+| Test generation | [COMPLETE] Full |
+| Security analysis | [COMPLETE] Full |
+| Float arithmetic | [FAILED] Planned |
+| Collections | [FAILED] Planned |
 
 ### Quick Start
 

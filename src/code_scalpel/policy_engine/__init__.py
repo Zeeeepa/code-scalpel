@@ -20,7 +20,7 @@ Key Features:
 
 Example:
     from code_scalpel.policy_engine import PolicyEngine, Operation
-    
+
     engine = PolicyEngine(".scalpel/policy.yaml")
     operation = Operation(
         type="code_edit",
@@ -28,7 +28,7 @@ Example:
         language="python",
         file_path="app.py"
     )
-    
+
     decision = engine.evaluate(operation)
     if not decision.allowed:
         print(f"Policy violation: {decision.reason}")

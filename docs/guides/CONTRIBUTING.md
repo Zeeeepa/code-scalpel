@@ -6,7 +6,7 @@
 
 ## Project Scope
 
-> **⚠️ Important:** Code Scalpel is a **Python toolkit and MCP server** for AI agents—it is **NOT** a mobile application, web app, or GUI tool.
+> **[WARNING] Important:** Code Scalpel is a **Python toolkit and MCP server** for AI agents—it is **NOT** a mobile application, web app, or GUI tool.
 
 **What Code Scalpel is:**
 - A Python library installable via pip
@@ -28,7 +28,7 @@ Code Scalpel is transforming from a development prototype into a production-read
 
 ---
 
-## 📚 Documentation Files
+## [DOCUMENTATION] Documentation Files
 
 1. **[PRODUCT_BACKLOG.md](PRODUCT_BACKLOG.md)** - Comprehensive backlog with all epics, features, and tasks
 2. **[ROADMAP.md](ROADMAP.md)** - High-level roadmap and timeline
@@ -37,7 +37,7 @@ Code Scalpel is transforming from a development prototype into a production-read
 
 ---
 
-## 🚀 Quick Start for Contributors
+## [LAUNCH] Quick Start for Contributors
 
 ### 1. Clone and Setup (Current State - Won't Work Yet!)
 
@@ -87,7 +87,7 @@ Read in this order:
 
 ---
 
-## 🎯 Current Priorities (Week 1-2)
+## [TARGET] Current Priorities (Week 1-2)
 
 ### Critical Path Tasks
 
@@ -132,7 +132,7 @@ Read in this order:
 
 ---
 
-## 🛠️ Development Workflow
+## [TOOLS]️ Development Workflow
 
 ### Standard Contribution Flow
 
@@ -188,7 +188,7 @@ chore(epic6): set up GitHub Actions for CI
 
 ---
 
-## 📋 What is Model Context Protocol (MCP)?
+## [CHECKLIST] What is Model Context Protocol (MCP)?
 
 Since MCP is central to this project, here's a quick primer:
 
@@ -250,7 +250,7 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 📖 Key Technologies
+## [GUIDE] Key Technologies
 
 ### Core Technologies
 - **Python 3.8+** - Primary implementation language
@@ -277,7 +277,7 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 🤔 Common Questions
+## [QUESTION] Common Questions
 
 ### Q: Where should I start?
 **A:** Start with Epic 1 (Package Infrastructure) if you're comfortable with Python packaging, or Epic 4 (Documentation) if you prefer writing docs.
@@ -299,7 +299,7 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 🎓 Learning Resources
+## [LEARNING] Learning Resources
 
 ### Model Context Protocol (MCP)
 - [Anthropic MCP Documentation](https://modelcontextprotocol.io/)
@@ -320,7 +320,7 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 💡 Tips for Success
+## [IDEA] Tips for Success
 
 1. **Start Small** - Pick one task, complete it well
 2. **Ask Questions** - Use GitHub Discussions
@@ -332,7 +332,7 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 📞 Get Help
+## [CONTACT] Get Help
 
 - **GitHub Issues** - For bugs and feature requests
 - **GitHub Discussions** - For questions and ideas
@@ -340,11 +340,11 @@ Agent: Presents findings to user with explanations
 
 ---
 
-## 🙏 Thank You!
+## [THANKS] Thank You!
 
 Code Scalpel is becoming a community project. Every contribution, no matter how small, helps make code analysis better for AI agents worldwide.
 
-**Let's build something amazing together! 🚀**
+**Let's build something amazing together! [LAUNCH]**
 
 ---
 

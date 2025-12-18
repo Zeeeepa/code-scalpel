@@ -12,11 +12,8 @@ Test Categories:
 """
 
 import pytest
-import tempfile
-import os
 import subprocess
 import json
-from pathlib import Path
 from datetime import datetime, timedelta
 
 from code_scalpel.policy_engine import (
@@ -114,7 +111,7 @@ class TestPolicyLoading:
         """[20251216_TEST] Policy Engine loads valid YAML."""
         # Skip if OPA not available
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
             assert len(engine.policies) == 1
             assert engine.policies[0].name == "no-raw-sql"
             assert engine.policies[0].severity == "CRITICAL"
@@ -145,7 +142,7 @@ class TestPolicyLoading:
     def test_invalid_rego_syntax(self, invalid_rego_policy_file):
         """[20251216_TEST] Validates Rego syntax at startup."""
         try:
-            engine = PolicyEngine(invalid_rego_policy_file)
+            _ = PolicyEngine(invalid_rego_policy_file)
             pytest.fail("Should have raised PolicyError for invalid Rego")
         except PolicyError as e:
             # Either OPA not found (acceptable skip) or invalid Rego (pass)
@@ -181,7 +178,7 @@ class TestPolicyEvaluation:
     def test_evaluate_sql_injection(self, valid_policy_file):
         """[20251216_TEST] Detects SQL injection via concatenation."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -202,7 +199,7 @@ class TestPolicyEvaluation:
     def test_evaluate_safe_code(self, valid_policy_file):
         """[20251216_TEST] Allows safe code without violations."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -242,7 +239,7 @@ policies:
         policy_path.write_text(policy_content)
         
         try:
-            engine = PolicyEngine(str(policy_path))
+            _ = PolicyEngine(str(policy_path))
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -416,7 +413,7 @@ class TestFailClosed:
         # This test will only work if OPA is not installed
         # If OPA is installed, it will be skipped
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
             # If we get here, OPA is installed, skip test
             pytest.skip("OPA is installed, cannot test missing OPA case")
         except PolicyError as e:
@@ -452,7 +449,7 @@ class TestOverrideSystem:
     def test_valid_override_code(self, valid_policy_file):
         """[20251216_TEST] Accepts valid override code."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -480,7 +477,7 @@ class TestOverrideSystem:
     def test_invalid_override_code(self, valid_policy_file):
         """[20251216_TEST] Rejects invalid override code."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -503,7 +500,7 @@ class TestOverrideSystem:
     def test_override_single_use(self, valid_policy_file):
         """[20251216_TEST] Override code cannot be reused."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -535,7 +532,7 @@ class TestOverrideSystem:
     def test_override_expiration(self, valid_policy_file):
         """[20251216_TEST] Override expires after time limit."""
         try:
-            engine = PolicyEngine(valid_policy_file)
+            _ = PolicyEngine(valid_policy_file)
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")
@@ -592,7 +589,7 @@ policies:
         policy_path.write_text(policy_content)
         
         try:
-            engine = PolicyEngine(str(policy_path))
+            _ = PolicyEngine(str(policy_path))
         except PolicyError as e:
             if "OPA CLI not found" in str(e):
                 pytest.skip("OPA not installed")

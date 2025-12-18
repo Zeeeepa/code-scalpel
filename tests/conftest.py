@@ -202,14 +202,15 @@ def disable_health_server(monkeypatch):
     """
     # Patch threading.Thread.start to skip health server startup
     import threading
+
     original_start = threading.Thread.start
 
     def patched_start(self):
         # Skip starting threads named with "run_health_server" target
-        if hasattr(self, '_target') and self._target:
-            target_name = getattr(self._target, '__name__', '')
-            if 'health_server' in target_name.lower():
+        if hasattr(self, "_target") and self._target:
+            target_name = getattr(self._target, "__name__", "")
+            if "health_server" in target_name.lower():
                 return  # Skip health server threads
         original_start(self)
 
-    monkeypatch.setattr(threading.Thread, 'start', patched_start)
+    monkeypatch.setattr(threading.Thread, "start", patched_start)

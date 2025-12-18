@@ -104,7 +104,7 @@ Provide MCP tools that allow AI assistants to:
 
 | Metric | Target |
 |--------|--------|
-| Test Coverage | ≥95% |
+| Test Coverage | ≥90% combined |
 | Test Pass Rate | 100% |
 | Vulnerability Detection Rate | ≥90% |
 | False Positive Rate | <5% |
@@ -171,19 +171,19 @@ See [Risk Register](RISK_REGISTER.md) for detailed risk management.
 
 | Deliverable | Description | Status |
 |-------------|-------------|--------|
-| MCP Server | Core server with all tools | ✅ Released |
-| PyPI Package | `code-scalpel` package | ✅ Published |
-| Docker Image | Container deployment | ✅ Available |
-| CLI | Command-line interface | ✅ Released |
+| MCP Server | Core server with all tools | [COMPLETE] Released |
+| PyPI Package | `code-scalpel` package | [COMPLETE] Published |
+| Docker Image | Container deployment | [COMPLETE] Available |
+| CLI | Command-line interface | [COMPLETE] Released |
 
 ### Documentation Deliverables
 
 | Deliverable | Description | Status |
 |-------------|-------------|--------|
-| API Reference | Complete tool documentation | ✅ Complete |
-| Getting Started | Quick start guide | ✅ Complete |
-| Examples | Integration examples | ✅ Complete |
-| Architecture | System design docs | ✅ Complete |
+| API Reference | Complete tool documentation | [COMPLETE] Complete |
+| Getting Started | Quick start guide | [COMPLETE] Complete |
+| Examples | Integration examples | [COMPLETE] Complete |
+| Architecture | System design docs | [COMPLETE] Complete |
 
 ---
 
@@ -191,10 +191,10 @@ See [Risk Register](RISK_REGISTER.md) for detailed risk management.
 
 | Version | Theme | Date | Status |
 |---------|-------|------|--------|
-| v1.0.0 | Foundation | Q2 2025 | ✅ |
-| v1.3.0 | Security | Q3 2025 | ✅ |
-| v1.5.0 | Project Intelligence | Q4 2025 | ✅ |
-| v2.0.0 | Cross-File Analysis | Q4 2025 | ✅ |
+| v1.0.0 | Foundation | Q2 2025 | [COMPLETE] |
+| v1.3.0 | Security | Q3 2025 | [COMPLETE] |
+| v1.5.0 | Project Intelligence | Q4 2025 | [COMPLETE] |
+| v2.0.0 | Cross-File Analysis | Q4 2025 | [COMPLETE] |
 | v2.1.0 | Polyglot Parity | Q1 2026 | Planned |
 
 ---

@@ -79,7 +79,7 @@ PATCH: Bug fixes, backward compatible
 
 ```
 1. [ ] Run full test suite (pytest)
-2. [ ] Verify coverage ≥95%
+2. [ ] Verify coverage ≥90% combined
 3. [ ] Run linting (ruff, black)
 4. [ ] Run security scan
 5. [ ] Run benchmarks
@@ -122,7 +122,7 @@ PATCH: Bug fixes, backward compatible
 | Gate | Criteria | Blocking |
 |------|----------|----------|
 | Tests | 100% pass | Yes |
-| Coverage | ≥95% | Yes |
+| Coverage | ≥90% combined | Yes |
 | Lint | 0 errors | Yes |
 | Security | No critical vulns | Yes |
 

@@ -406,8 +406,8 @@ Code Scalpel v2.0.0 has been rigorously validated to counter common criticisms:
 ### Cross-File Analysis
 | Scenario | Files | Detected | Taint Traced |
 |----------|-------|----------|--------------|
-| SQL Injection via routes | 2 | ✓ | ✓ |
-| Command Injection via utils | 2 | ✓ | ✓ |
+| SQL Injection via routes | 2 | [COMPLETE] | [COMPLETE] |
+| Command Injection via utils | 2 | [COMPLETE] | [COMPLETE] |
 
 **Detection Rate: 100%** - Catches vulnerabilities spanning multiple files.
 
@@ -415,9 +415,9 @@ Code Scalpel v2.0.0 has been rigorously validated to counter common criticisms:
 | Metric | Result |
 |--------|--------|
 | Collateral Changes | 0 |
-| Imports Preserved | ✓ |
-| Other Functions Preserved | ✓ |
-| Syntax Preserved | ✓ |
+| Imports Preserved | [COMPLETE] |
+| Other Functions Preserved | [COMPLETE] |
+| Syntax Preserved | [COMPLETE] |
 
 **Zero Collateral Rate: 100%** - Edits only touch target code.
 

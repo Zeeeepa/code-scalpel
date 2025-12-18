@@ -1,12 +1,12 @@
 ---
-name: 📚 Documentation Issue
+name: [DOCUMENTATION] Documentation Issue
 about: Report unclear, missing, or incorrect documentation
 title: "[DOCS] "
 labels: documentation, needs-triage
 assignees: ''
 ---
 
-## 📍 Location
+## [MARKER] Location
 
 <!--
 Where is the documentation issue?
@@ -18,7 +18,7 @@ Where is the documentation issue?
 | **Section** | <!-- e.g., "Installation", "Quick Start" --> |
 | **URL** | <!-- If online, paste the link --> |
 
-## 🔍 Issue Type
+## [SEARCH] Issue Type
 
 <!--
 Check one:
@@ -30,7 +30,7 @@ Check one:
 - [ ] **Outdated** — This was true for an older version but not anymore
 - [ ] **Typo/Grammar** — Minor text issues
 
-## 📝 Description
+## [NOTE] Description
 
 <!--
 What's wrong and what should it say instead?
@@ -43,7 +43,7 @@ What's wrong and what should it say instead?
 **What it should say (or what's missing):**
 
 
-## 📎 Additional Context
+## [ATTACHMENT] Additional Context
 
 <!--
 Optional: Screenshots, links to related issues, etc.

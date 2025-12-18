@@ -12,11 +12,11 @@ Code Scalpel v2.2.0 "Nexus" introduces the **Unified Cross-Language Graph** - a 
 
 ### Key Highlights
 
-- 🔗 **Cross-Language HTTP Link Detection** - Trace frontend fetch calls to backend endpoints
-- 📊 **Confidence Scoring Engine** - All heuristic links scored 0.0-1.0, definite links = 1.0
-- 🛡️ **Contract Breach Detection** - Detect breaking changes between client/server
-- 📐 **Universal Node IDs** - `language::module::type::name` format for graph consistency
-- 🎯 **Zero Silent Hallucinations** - All uncertain connections flagged with evidence
+- [LINK] **Cross-Language HTTP Link Detection** - Trace frontend fetch calls to backend endpoints
+- [METRICS] **Confidence Scoring Engine** - All heuristic links scored 0.0-1.0, definite links = 1.0
+- [SECURITY]️ **Contract Breach Detection** - Detect breaking changes between client/server
+- [GEOMETRY] **Universal Node IDs** - `language::module::type::name` format for graph consistency
+- [TARGET] **Zero Silent Hallucinations** - All uncertain connections flagged with evidence
 
 ---
 
@@ -151,7 +151,7 @@ Comprehensive MCP operation logging with:
 
 ## Adversarial Validation
 
-### Regression Baseline ✅
+### Regression Baseline [COMPLETE]
 
 | Check | Status |
 |-------|--------|
@@ -160,7 +160,7 @@ Comprehensive MCP operation logging with:
 | Determinism (5 runs identical) | PASS |
 | Performance (< 10s for 100 files) | PASS |
 
-### Explicit Uncertainty ✅
+### Explicit Uncertainty [COMPLETE]
 
 | Check | Status |
 |-------|--------|
@@ -168,7 +168,7 @@ Comprehensive MCP operation logging with:
 | Threshold enforcement | PASS |
 | Evidence strings populated | PASS |
 
-### Cross-Boundary Linking ✅
+### Cross-Boundary Linking [COMPLETE]
 
 | Check | Status |
 |-------|--------|

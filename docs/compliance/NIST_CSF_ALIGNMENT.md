@@ -31,11 +31,11 @@ Code Scalpel operates primarily in the **Identify** and **Detect** functions, su
 
 | Subcategory | ID | Code Scalpel Capability | Coverage |
 |-------------|----|-----------------------|----------|
-| Asset Management | ID.AM-01 | Project crawling identifies all code assets | ✅ Full |
-| Asset Management | ID.AM-02 | Software inventory via dependency scanning | ✅ Full |
-| Risk Assessment | ID.RA-01 | Vulnerability detection in code | ✅ Full |
-| Risk Assessment | ID.RA-02 | Threat identification via taint analysis | ✅ Full |
-| Supply Chain | ID.SC-04 | Dependency vulnerability scanning (OSV) | ✅ Full |
+| Asset Management | ID.AM-01 | Project crawling identifies all code assets | [COMPLETE] Full |
+| Asset Management | ID.AM-02 | Software inventory via dependency scanning | [COMPLETE] Full |
+| Risk Assessment | ID.RA-01 | Vulnerability detection in code | [COMPLETE] Full |
+| Risk Assessment | ID.RA-02 | Threat identification via taint analysis | [COMPLETE] Full |
+| Supply Chain | ID.SC-04 | Dependency vulnerability scanning (OSV) | [COMPLETE] Full |
 
 #### Implementation Details
 
@@ -63,11 +63,11 @@ Output: Vulnerabilities with CWE mappings, severity, and remediation guidance
 
 | Subcategory | ID | Code Scalpel Capability | Coverage |
 |-------------|----|-----------------------|----------|
-| Identity Management | PR.AA-05 | Authentication flow analysis | ⚠️ Partial |
-| Data Security | PR.DS-01 | Sensitive data detection (secrets) | ✅ Full |
-| Data Security | PR.DS-02 | Data-in-transit patterns | ⚠️ Partial |
-| Secure Development | PR.PS-01 | Security vulnerability detection | ✅ Full |
-| Secure Development | PR.PS-02 | Secure coding pattern validation | ✅ Full |
+| Identity Management | PR.AA-05 | Authentication flow analysis | [WARNING] Partial |
+| Data Security | PR.DS-01 | Sensitive data detection (secrets) | [COMPLETE] Full |
+| Data Security | PR.DS-02 | Data-in-transit patterns | [WARNING] Partial |
+| Secure Development | PR.PS-01 | Security vulnerability detection | [COMPLETE] Full |
+| Secure Development | PR.PS-02 | Secure coding pattern validation | [COMPLETE] Full |
 
 #### Implementation Details
 
@@ -89,10 +89,10 @@ Validates: No new vulnerabilities introduced in code changes
 
 | Subcategory | ID | Code Scalpel Capability | Coverage |
 |-------------|----|-----------------------|----------|
-| Continuous Monitoring | DE.CM-01 | Static analysis in CI/CD | ✅ Full |
-| Continuous Monitoring | DE.CM-06 | External service monitoring (deps) | ✅ Full |
-| Adverse Event Analysis | DE.AE-02 | Vulnerability correlation | ✅ Full |
-| Adverse Event Analysis | DE.AE-03 | Impact analysis via call graph | ✅ Full |
+| Continuous Monitoring | DE.CM-01 | Static analysis in CI/CD | [COMPLETE] Full |
+| Continuous Monitoring | DE.CM-06 | External service monitoring (deps) | [COMPLETE] Full |
+| Adverse Event Analysis | DE.AE-02 | Vulnerability correlation | [COMPLETE] Full |
+| Adverse Event Analysis | DE.AE-03 | Impact analysis via call graph | [COMPLETE] Full |
 
 #### Implementation Details
 
@@ -120,9 +120,9 @@ Determines blast radius of vulnerable code
 
 | Subcategory | ID | Code Scalpel Capability | Coverage |
 |-------------|----|-----------------------|----------|
-| Incident Analysis | RS.AN-03 | Vulnerability forensics via taint paths | ✅ Full |
-| Incident Mitigation | RS.MI-01 | Safe code modification | ✅ Full |
-| Incident Mitigation | RS.MI-02 | Remediation guidance | ⚠️ Partial |
+| Incident Analysis | RS.AN-03 | Vulnerability forensics via taint paths | [COMPLETE] Full |
+| Incident Mitigation | RS.MI-01 | Safe code modification | [COMPLETE] Full |
+| Incident Mitigation | RS.MI-02 | Remediation guidance | [WARNING] Partial |
 
 #### Implementation Details
 

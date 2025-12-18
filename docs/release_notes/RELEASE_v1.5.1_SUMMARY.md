@@ -12,7 +12,7 @@ Code Scalpel v1.5.1 introduces **cross-file analysis capabilities**, enabling AI
 
 ---
 
-## Release Checklist: ✅ COMPLETE
+## Release Checklist: [COMPLETE] COMPLETE
 
 ### Code
 - [x] **ImportResolver** - Build import dependency graphs, resolve symbols across modules

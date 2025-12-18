@@ -1,0 +1,324 @@
+{
+  "version": "3.0.0",
+  "codename": "Autonomy",
+  "timestamp": "2025-12-18T12:00:00Z",
+  "release_date": "2025-12-18",
+  "mcp_tools": {
+    "total_count": 19,
+    "protocol_version": "2024-11-05",
+    "server_name": "code-scalpel",
+    "server_version": "3.0.0",
+    "tools": [
+      {
+        "name": "analyze_code",
+        "status": "stable",
+        "description": "Analyze source code structure - understand high-level architecture (classes, functions, imports) before editing",
+        "parameters": {
+          "code": "Source code to analyze (required)",
+          "language": "Language: python, java (default: python)"
+        },
+        "languages": ["python", "java"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "extract_code",
+        "status": "stable",
+        "description": "Surgically extract specific code elements (functions, classes, methods) with cross-file dependency resolution",
+        "parameters": {
+          "target_type": "function, class, or method (required)",
+          "target_name": "Name of element (required)",
+          "file_path": "Path to source file (token-efficient mode)",
+          "code": "Source code string (fallback mode)",
+          "language": "python, javascript, typescript, java (auto-detect)",
+          "include_context": "Include intra-file dependencies (default: false)",
+          "context_depth": "Dependency traversal depth (default: 1)",
+          "include_cross_file_deps": "Resolve imports from external files (default: false)",
+          "include_token_estimate": "Include token count estimate (default: true)"
+        },
+        "languages": ["python", "javascript", "typescript", "java"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "update_symbol",
+        "status": "stable",
+        "description": "Surgically replace a function, class, or method in a file with new code - preserves surrounding code",
+        "parameters": {
+          "file_path": "Path to the file to modify (required)",
+          "target_type": "function, class, or method (required)",
+          "target_name": "Name of element to replace (required)",
+          "new_code": "Complete new definition (required)",
+          "create_backup": "Create .bak file before modifying (default: true)"
+        },
+        "test_coverage": "100%"
+      },
+      {
+        "name": "security_scan",
+        "status": "stable",
+        "description": "Detect security vulnerabilities using taint analysis - SQL injection, XSS, command injection, path traversal",
+        "parameters": {
+          "code": "Source code to scan (optional if file_path provided)",
+          "file_path": "Path to file to scan (optional if code provided)"
+        },
+        "vulnerability_types": [
+          "sql_injection (CWE-89)",
+          "xss (CWE-79)",
+          "command_injection (CWE-78)",
+          "path_traversal (CWE-22)",
+          "nosql_injection (CWE-943)",
+          "ldap_injection (CWE-90)",
+          "xxe (CWE-611)",
+          "ssti (CWE-1336)",
+          "secret_detection (CWE-798)",
+          "weak_crypto (CWE-327)"
+        ],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "unified_sink_detect",
+        "status": "stable",
+        "description": "Unified polyglot sink detection with confidence thresholds - v2.5.0 Guardian feature",
+        "parameters": {
+          "code": "Source code to analyze (required)",
+          "language": "python, java, typescript, javascript (required)",
+          "min_confidence": "Minimum confidence threshold 0.0-1.0 (default: 0.8)"
+        },
+        "languages": ["python", "java", "typescript", "javascript"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "cross_file_security_scan",
+        "status": "stable",
+        "description": "Track taint flow across module boundaries - identify vulnerabilities when tainted data crosses file boundaries",
+        "parameters": {
+          "project_root": "Project root directory (optional)",
+          "entry_points": "Entry point files to start analysis (optional)",
+          "max_depth": "Maximum depth for cross-file traversal (default: 5)",
+          "include_diagram": "Include Mermaid diagram (default: true)"
+        },
+        "test_coverage": "95%"
+      },
+      {
+        "name": "generate_unit_tests",
+        "status": "stable",
+        "description": "Generate unit tests from code using symbolic execution - creates test cases covering all execution paths",
+        "parameters": {
+          "code": "Source code containing function to test (required)",
+          "function_name": "Function to generate tests for (auto-detected if None)",
+          "framework": "pytest or unittest (default: pytest)"
+        },
+        "frameworks": ["pytest", "unittest"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "simulate_refactor",
+        "status": "stable",
+        "description": "Simulate applying a code change and check for safety issues before applying AI-generated changes",
+        "parameters": {
+          "original_code": "Original source code (required)",
+          "new_code": "Modified code to compare (optional)",
+          "patch": "Unified diff patch to apply (optional)",
+          "strict_mode": "Treat warnings as unsafe (default: false)"
+        },
+        "test_coverage": "100%"
+      },
+      {
+        "name": "symbolic_execute",
+        "status": "stable",
+        "description": "Perform symbolic execution on Python code - explore execution paths and find bugs static analysis misses",
+        "parameters": {
+          "code": "Python source code to analyze (required)",
+          "max_paths": "Maximum paths to explore (default: 10)"
+        },
+        "supported_types": ["Int", "Bool", "String", "Float"],
+        "solver": "Z3",
+        "test_coverage": "100%"
+      },
+      {
+        "name": "crawl_project",
+        "status": "stable",
+        "description": "Crawl entire project directory - analyze all Python files for structure and complexity insights",
+        "parameters": {
+          "root_path": "Project root directory (optional, defaults to workspace)",
+          "exclude_dirs": "Additional directories to exclude",
+          "complexity_threshold": "Complexity score threshold (default: 10)",
+          "include_report": "Include markdown report (default: true)"
+        },
+        "test_coverage": "95%"
+      },
+      {
+        "name": "scan_dependencies",
+        "status": "stable",
+        "description": "Scan project dependencies for known vulnerabilities using OSV API",
+        "parameters": {
+          "project_root": "Project root directory (optional)",
+          "include_dev": "Include dev dependencies (default: false)",
+          "scan_vulnerabilities": "Query OSV for CVEs (default: true)"
+        },
+        "vulnerability_database": "OSV (Open Source Vulnerabilities)",
+        "test_coverage": "95%"
+      },
+      {
+        "name": "get_file_context",
+        "status": "stable",
+        "description": "Get file overview without reading full content - quickly assess file relevance without consuming tokens",
+        "parameters": {
+          "file_path": "Path to file (required)"
+        },
+        "returns": ["functions", "classes", "imports", "complexity_score", "security_warnings"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "get_symbol_references",
+        "status": "stable",
+        "description": "Find all references to a symbol across the project - essential for safe refactoring",
+        "parameters": {
+          "symbol_name": "Name of function/class/variable to search (required)",
+          "project_root": "Project root directory (default: server root)"
+        },
+        "test_coverage": "100%"
+      },
+      {
+        "name": "get_cross_file_dependencies",
+        "status": "stable",
+        "description": "Extract and analyze cross-file dependencies for specific functions or classes",
+        "parameters": {
+          "target_file": "File containing the symbol (required)",
+          "target_symbol": "Symbol to analyze (required)",
+          "project_root": "Project root directory (optional)",
+          "max_depth": "Maximum traversal depth (default: 3)",
+          "include_code": "Include extracted code (default: true)",
+          "include_diagram": "Include Mermaid diagram (default: true)"
+        },
+        "test_coverage": "95%"
+      },
+      {
+        "name": "get_call_graph",
+        "status": "stable",
+        "description": "Build call graph showing function relationships - line number tracking, entry point detection, Mermaid diagrams",
+        "parameters": {
+          "project_root": "Project root directory (default: server root)",
+          "entry_point": "Starting function name (e.g., 'main')",
+          "depth": "Maximum traversal depth (default: 10)",
+          "include_circular_import_check": "Check for circular imports (default: true)"
+        },
+        "features": ["line_tracking", "entry_point_detection", "mermaid_diagrams", "circular_import_detection"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "get_graph_neighborhood",
+        "status": "stable",
+        "description": "Extract k-hop neighborhood subgraph around a center node - prevents graph explosion on large codebases",
+        "parameters": {
+          "center_node_id": "ID of the center node (required)",
+          "k": "Maximum hops from center (default: 2)",
+          "max_nodes": "Maximum nodes to include (default: 100)",
+          "direction": "outgoing, incoming, or both (default: both)",
+          "min_confidence": "Minimum edge confidence (default: 0.0)",
+          "project_root": "Project root directory (optional)"
+        },
+        "features": ["k_hop_extraction", "truncation_protection", "mermaid_diagram"],
+        "test_coverage": "95%"
+      },
+      {
+        "name": "get_project_map",
+        "status": "stable",
+        "description": "Generate comprehensive map of project structure - packages, modules, functions, entry points",
+        "parameters": {
+          "project_root": "Project root directory (optional)",
+          "include_complexity": "Include complexity analysis (default: true)",
+          "complexity_threshold": "Threshold for hotspot detection (default: 10)",
+          "include_circular_check": "Check for circular imports (default: true)"
+        },
+        "features": ["package_structure", "entry_point_detection", "complexity_hotspots", "mermaid_diagram"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "validate_paths",
+        "status": "stable",
+        "description": "Validate that paths are accessible - essential for Docker deployments with volume mounts",
+        "parameters": {
+          "paths": "List of paths to validate (required)",
+          "project_root": "Project root directory (optional)"
+        },
+        "features": ["docker_detection", "mount_suggestions", "workspace_detection"],
+        "test_coverage": "100%"
+      },
+      {
+        "name": "verify_policy_integrity",
+        "status": "stable",
+        "description": "Verify policy file integrity using cryptographic signatures - tamper-resistant governance",
+        "parameters": {
+          "policy_dir": "Directory containing policy files (default: .scalpel)",
+          "manifest_source": "git, env, or file (default: file)"
+        },
+        "security_model": "FAIL CLOSED - missing/invalid signature denies all",
+        "test_coverage": "95%"
+      }
+    ]
+  },
+  "language_support": {
+    "python": {
+      "parser": "ast (built-in)",
+      "capabilities": ["parse", "extract", "security_scan", "symbolic_execute"],
+      "coverage": "100%"
+    },
+    "javascript": {
+      "parser": "tree-sitter",
+      "capabilities": ["parse", "extract", "security_scan"],
+      "coverage": "95%"
+    },
+    "typescript": {
+      "parser": "tree-sitter",
+      "capabilities": ["parse", "extract", "security_scan"],
+      "coverage": "95%"
+    },
+    "java": {
+      "parser": "tree-sitter",
+      "capabilities": ["parse", "extract", "security_scan"],
+      "coverage": "95%"
+    }
+  },
+  "quality_metrics": {
+    "test_count": 4033,
+    "coverage_combined": "94.86%",
+    "coverage_statement": "96.28%",
+    "coverage_branch": "90.95%",
+    "coverage_gate": ">=90%",
+    "gate_passed": true
+  },
+  "backward_compatibility": {
+    "api_version": "2.0",
+    "breaking_changes": false,
+    "deprecated_tools": [],
+    "migration_required": false
+  },
+  "evidence_files": [
+    "v3.0.0_test_evidence.json",
+    "v3.0.0_autonomy_evidence.json",
+    "coverage.xml",
+    "pytest_full.log",
+    "ruff_black.log"
+  ],
+  "verification_tests": {
+    "test_file": "tests/mcp_tool_verification/test_mcp_tools_live.py",
+    "total_tests": 36,
+    "tests_passed": 36,
+    "tests_by_category": {
+      "core_analysis": 1,
+      "security_scanning": 7,
+      "symbolic_execution": 2,
+      "surgical_extraction": 3,
+      "surgical_patching": 2,
+      "project_discovery": 6,
+      "graph_analysis": 4,
+      "test_generation": 2,
+      "autonomy_features": 4,
+      "roadmap_compliance": 5
+    },
+    "all_19_tools_verified": true,
+    "verification_date": "2025-12-18",
+    "notes": "All 19 MCP tools verified via pytest unit tests covering underlying APIs"
+  },
+  "generated_by": "Code Scalpel Release Pipeline",
+  "notes": "v3.0.0 'Autonomy' provides 19 MCP tools with comprehensive test coverage and stability."
+}

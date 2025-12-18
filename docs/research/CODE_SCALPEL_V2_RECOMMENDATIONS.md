@@ -43,18 +43,18 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 ### V2.0.0 Server Capabilities Verified
 
 Based on MCP tool analysis of the running server:
-- ✅ **stdio transport support** - Present in `run_server()` function
-- ✅ **streamable-http transport** - Present 
-- ✅ **sse transport** - Present (deprecated but supported)
-- ✅ **DNS rebinding protection** - Implemented via `TransportSecuritySettings`
-- ✅ **LAN access control** - Via `--allow-lan` flag
-- ❌ **Windows path resolution** - **VERIFIED BROKEN** (see Issue #2 below)
-- ⚠️ **Resources primitive** - **PARTIAL**: 1 resource defined (`scalpel://capabilities`) - needs expansion
-- ✅ **Prompts primitive** - 2 prompts defined via `@mcp.prompt()` decorator:
+- [COMPLETE] **stdio transport support** - Present in `run_server()` function
+- [COMPLETE] **streamable-http transport** - Present 
+- [COMPLETE] **sse transport** - Present (deprecated but supported)
+- [COMPLETE] **DNS rebinding protection** - Implemented via `TransportSecuritySettings`
+- [COMPLETE] **LAN access control** - Via `--allow-lan` flag
+- [FAILED] **Windows path resolution** - **VERIFIED BROKEN** (see Issue #2 below)
+- [WARNING] **Resources primitive** - **PARTIAL**: 1 resource defined (`scalpel://capabilities`) - needs expansion
+- [COMPLETE] **Prompts primitive** - 2 prompts defined via `@mcp.prompt()` decorator:
   - `code_review_prompt` - Comprehensive code review template
   - `security_audit_prompt` - Security-focused audit template
-- ❌ **Progress token support** - Not implemented
-- ❌ **Health endpoint** - Not implemented
+- [FAILED] **Progress token support** - Not implemented
+- [FAILED] **Health endpoint** - Not implemented
 
 ### Critical Issue #2: Windows Path Resolution Broken in V2.0.0
 
@@ -142,7 +142,7 @@ This document consolidates findings from:
 | **Cursor** | stdio | HTTP+SSE | Configuration-based |
 | **Windsurf** | stdio | PAT-based HTTP | Hybrid |
 | **Docker MCP Toolkit** | stdio (containerized) | Gateway proxy | Container orchestration |
-| **Code Scalpel** | ❌ None | SSE only | Always remote |
+| **Code Scalpel** | [FAILED] None | SSE only | Always remote |
 
 ### 1.2 The Two Standard Transports
 
@@ -642,25 +642,25 @@ services:
 
 | Feature | Code Scalpel v2.0 Current | Industry Standard | V2.0 Target |
 |---------|---------------------|-------------------|-------------|
-| **stdio transport** | ❌ | ✅ Required | ✅ |
-| **Streamable HTTP** | ❌ (SSE only) | ✅ | ✅ |
-| **Windows paths** | ❌ Broken | ✅ | ✅ |
-| **Native install** | ❌ Docker only | ✅ Both | ✅ |
-| **Session management** | ❌ | ✅ | ✅ |
-| **Origin validation** | ❌ | ✅ | ✅ |
-| **Tool descriptions** | ⚠️ Human-focused | Agent-focused | ✅ |
-| **Security scanning** | ✅ Excellent | ✅ | ✅ |
-| **Code extraction** | ✅ Excellent | ✅ | ✅ |
-| **Multi-language** | ⚠️ Python only | ✅ Multiple | ✅ |
-| **Resources primitive** | ❌ Not implemented | ✅ | ✅ |
-| **Prompts primitive** | ❌ Not implemented | ✅ | ✅ |
-| **Capability negotiation** | ⚠️ Unverified | ✅ | ✅ |
-| **Progress tokens** | ❌ | ✅ | ✅ |
-| **Roots support** | ❌ | ✅ | ✅ |
-| **Sampling capability** | ❌ | Optional | ✅ |
-| **OAuth 2.1 auth** | ❌ | ✅ (remote) | ✅ |
-| **stderr logging** | ⚠️ Unverified | ✅ Required | ✅ |
-| **Protocol versioning** | ⚠️ Unverified | ✅ | ✅ |
+| **stdio transport** | [FAILED] | [COMPLETE] Required | [COMPLETE] |
+| **Streamable HTTP** | [FAILED] (SSE only) | [COMPLETE] | [COMPLETE] |
+| **Windows paths** | [FAILED] Broken | [COMPLETE] | [COMPLETE] |
+| **Native install** | [FAILED] Docker only | [COMPLETE] Both | [COMPLETE] |
+| **Session management** | [FAILED] | [COMPLETE] | [COMPLETE] |
+| **Origin validation** | [FAILED] | [COMPLETE] | [COMPLETE] |
+| **Tool descriptions** | [WARNING] Human-focused | Agent-focused | [COMPLETE] |
+| **Security scanning** | [COMPLETE] Excellent | [COMPLETE] | [COMPLETE] |
+| **Code extraction** | [COMPLETE] Excellent | [COMPLETE] | [COMPLETE] |
+| **Multi-language** | [WARNING] Python only | [COMPLETE] Multiple | [COMPLETE] |
+| **Resources primitive** | [FAILED] Not implemented | [COMPLETE] | [COMPLETE] |
+| **Prompts primitive** | [FAILED] Not implemented | [COMPLETE] | [COMPLETE] |
+| **Capability negotiation** | [WARNING] Unverified | [COMPLETE] | [COMPLETE] |
+| **Progress tokens** | [FAILED] | [COMPLETE] | [COMPLETE] |
+| **Roots support** | [FAILED] | [COMPLETE] | [COMPLETE] |
+| **Sampling capability** | [FAILED] | Optional | [COMPLETE] |
+| **OAuth 2.1 auth** | [FAILED] | [COMPLETE] (remote) | [COMPLETE] |
+| **stderr logging** | [WARNING] Unverified | [COMPLETE] Required | [COMPLETE] |
+| **Protocol versioning** | [WARNING] Unverified | [COMPLETE] | [COMPLETE] |
 
 ### Unique Strengths to Preserve
 - **Security Scanning:** 15+ vulnerability types with CWE mapping
@@ -711,9 +711,9 @@ The research identifies **three core primitives** that a comprehensive MCP tools
 
 | Primitive | Role | Current Status | V2 Target |
 |-----------|------|----------------|-----------|
-| **Tools** | Action/Execution | ✅ Implemented | Maintain |
-| **Resources** | Passive Context | ❌ Not implemented | ✅ Add |
-| **Prompts** | Reusable Templates | ❌ Not implemented | ✅ Add |
+| **Tools** | Action/Execution | [COMPLETE] Implemented | Maintain |
+| **Resources** | Passive Context | [FAILED] Not implemented | [COMPLETE] Add |
+| **Prompts** | Reusable Templates | [FAILED] Not implemented | [COMPLETE] Add |
 
 #### P1: Implement Resources Primitive
 Resources provide **read-only context** to the AI—the "eyes" of the agent.

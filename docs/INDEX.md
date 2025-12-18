@@ -1,6 +1,9 @@
 # Code Scalpel Documentation
 
-**v2.2.0 "Nexus" - MCP Server Toolkit for AI Agents**
+**v3.0.0 "Autonomy" - MCP Server Toolkit for AI Agents**
+
+> **Coverage Gate:** ≥90% combined (statement + branch)  
+> **Current Coverage:** 94.86% | **Tests:** 4,033
 
 ---
 
@@ -10,9 +13,22 @@
 |----------|-------------|
 | [**COMPREHENSIVE_GUIDE.md**](COMPREHENSIVE_GUIDE.md) | Full documentation with examples |
 | [**README.md**](../README.md) | Project overview and quick start |
-| [**graph_engine_guide.md**](graph_engine_guide.md) | Unified Graph Engine documentation (v2.2.0) |
+| [**graph_engine_guide.md**](graph_engine_guide.md) | Unified Graph Engine documentation |
+| [**RELEASE_NOTES_v3.0.0.md**](release_notes/RELEASE_NOTES_v3.0.0.md) | Autonomy release - Comprehensive coverage, stability, autonomy foundation |  <!-- [20251218_DOCS] Added v3.0 notes link -->
+| [**RELEASE_NOTES_v2.5.0.md**](release_notes/RELEASE_NOTES_v2.5.0.md) | Guardian release - Policy, semantic blocking, tamper resistance |
 | [**RELEASE_NOTES_v2.2.0.md**](release_notes/RELEASE_NOTES_v2.2.0.md) | Nexus release - Unified Graph Engine |
-| [**RELEASE_NOTES_v2.5.0.md**](release_notes/RELEASE_NOTES_v2.5.0.md) | Guardian release - Policy, semantic blocking, tamper resistance |  <!-- [20251216_DOCS] Added v2.5 notes link -->
+
+---
+
+## v3.0.0 Release Documentation
+
+Critical upgrade and reference guides for v3.0.0:
+
+| Document | Description | Use Case |
+|----------|-------------|----------|
+| [**MIGRATION_v2.5_to_v3.0.md**](./MIGRATION_v2.5_to_v3.0.md) | Step-by-step upgrade guide | Upgrading from v2.5.0 |
+| [**API_CHANGES_v3.0.0.md**](./API_CHANGES_v3.0.0.md) | Detailed API changes and new features | Understanding API differences |
+| [**KNOWN_ISSUES_v3.0.0.md**](./KNOWN_ISSUES_v3.0.0.md) | Known limitations and workarounds | Troubleshooting issues |
 
 ---
 
@@ -47,7 +63,7 @@ code-scalpel/
 │   └── internal/           # Team documentation
 ├── demos/                  # Example code
 │   └── real_world/         # Real-world vulnerability demos
-└── tests/                  # Test suite (3,006 tests)
+└── tests/                  # Test suite (4,033 tests)
 ```
 
 ---

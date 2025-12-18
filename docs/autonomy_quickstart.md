@@ -230,10 +230,10 @@ coder, reviewer = create_scalpel_autogen_agents()
 | Feature | LangGraph | CrewAI | AutoGen |
 |---------|-----------|--------|---------|
 | **Execution Model** | StateGraph | Multi-agent crew | Function-calling |
-| **Conditional Routing** | ✓ | ✓ (via tasks) | ✓ (via LLM) |
-| **Multi-agent** | ✗ | ✓ | ✓ |
-| **Docker Sandbox** | ✗ | ✗ | ✓ |
-| **LLM Required** | ✗ | ✓ | ✓ |
+| **Conditional Routing** | [COMPLETE] | [COMPLETE] (via tasks) | [COMPLETE] (via LLM) |
+| **Multi-agent** | [FAILED] | [COMPLETE] | [COMPLETE] |
+| **Docker Sandbox** | [FAILED] | [FAILED] | [COMPLETE] |
+| **LLM Required** | [FAILED] | [COMPLETE] | [COMPLETE] |
 | **Best For** | Structured workflows | Collaborative fixing | Interactive debugging |
 
 ## Advanced Usage

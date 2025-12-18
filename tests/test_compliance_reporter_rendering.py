@@ -12,7 +12,9 @@ class _DummyAuditLog:
     def __init__(self, events: List[Dict[str, Any]]):
         self._events = events
 
-    def get_events(self, time_range: Tuple[datetime, datetime]) -> List[Dict[str, Any]]:  # noqa: ARG002
+    def get_events(
+        self, time_range: Tuple[datetime, datetime]
+    ) -> List[Dict[str, Any]]:  # noqa: ARG002
         return self._events
 
 
@@ -28,7 +30,11 @@ def _sample_events() -> List[Dict[str, Any]]:
         {"event_type": "OPERATION_ALLOWED", "details": {"policy_name": "ALLOW"}},
         {
             "event_type": "POLICY_VIOLATION",
-            "details": {"policy_name": "CRIT", "severity": "CRITICAL", "operation_type": "code_edit"},
+            "details": {
+                "policy_name": "CRIT",
+                "severity": "CRITICAL",
+                "operation_type": "code_edit",
+            },
         },
     ]
 
@@ -37,7 +43,11 @@ def _sample_events() -> List[Dict[str, Any]]:
         events.append(
             {
                 "event_type": "POLICY_VIOLATION",
-                "details": {"policy_name": "FREQUENT", "severity": "HIGH", "operation_type": "file_write"},
+                "details": {
+                    "policy_name": "FREQUENT",
+                    "severity": "HIGH",
+                    "operation_type": "file_write",
+                },
             }
         )
 
@@ -101,8 +111,22 @@ def _install_fake_reportlab(monkeypatch) -> None:
             "Normal": {},
         }
 
-    def _paragraph_style(name, parent=None, fontSize=None, textColor=None, spaceAfter=None, alignment=None):  # noqa: ARG001,E501
-        return {"name": name, "parent": parent, "fontSize": fontSize, "textColor": textColor, "spaceAfter": spaceAfter, "alignment": alignment}
+    def _paragraph_style(
+        name,
+        parent=None,
+        fontSize=None,
+        textColor=None,
+        spaceAfter=None,
+        alignment=None,
+    ):  # noqa: ARG001,E501
+        return {
+            "name": name,
+            "parent": parent,
+            "fontSize": fontSize,
+            "textColor": textColor,
+            "spaceAfter": spaceAfter,
+            "alignment": alignment,
+        }
 
     fake_reportlab.lib.styles = types.ModuleType("reportlab.lib.styles")
     fake_reportlab.lib.styles.getSampleStyleSheet = _get_stylesheet
@@ -150,7 +174,9 @@ def _install_fake_reportlab(monkeypatch) -> None:
 
     monkeypatch.setitem(sys.modules, "reportlab", fake_reportlab)
     monkeypatch.setitem(sys.modules, "reportlab.lib", fake_reportlab.lib)
-    monkeypatch.setitem(sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes)
+    monkeypatch.setitem(
+        sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes
+    )
     monkeypatch.setitem(sys.modules, "reportlab.lib.units", fake_reportlab.lib.units)
     monkeypatch.setitem(sys.modules, "reportlab.lib.styles", fake_reportlab.lib.styles)
     monkeypatch.setitem(sys.modules, "reportlab.lib.colors", fake_reportlab.lib.colors)
@@ -160,18 +186,20 @@ def _install_fake_reportlab(monkeypatch) -> None:
 
 # [20251216_TEST] Ensure JSON and HTML rendering paths execute without errors
 
+
 def test_generate_report_json_and_html() -> None:
     reporter = _build_reporter()
     time_range = (datetime.now() - timedelta(days=1), datetime.now())
 
     json_report = reporter.generate_report(time_range, format="json")
-    assert "\"violations\"" in json_report
+    assert '"violations"' in json_report
 
     html_report = reporter.generate_report(time_range, format="html")
     assert "<html" in html_report and "Compliance Report" in html_report
 
 
 # [20251216_TEST] Exercise PDF rendering through stubbed reportlab
+
 
 def test_generate_report_pdf_bytes(monkeypatch) -> None:
     _install_fake_reportlab(monkeypatch)

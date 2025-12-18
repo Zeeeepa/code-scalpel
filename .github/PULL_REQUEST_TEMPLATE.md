@@ -1,4 +1,4 @@
-## 📋 Description
+## [CHECKLIST] Description
 
 <!--
 What does this PR do? Link to any related issues.
@@ -6,21 +6,21 @@ What does this PR do? Link to any related issues.
 
 Fixes #<!-- issue number -->
 
-## 🔄 Type of Change
+## [CYCLE] Type of Change
 
 <!--
 Check all that apply:
 -->
 
-- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
+- [ ] [BUG] Bug fix (non-breaking change that fixes an issue)
 - [ ] ✨ New feature (non-breaking change that adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to change)
-- [ ] 📚 Documentation update
-- [ ] 🧪 Test update (no production code changes)
-- [ ] 🔧 Refactor (no functional changes)
+- [ ] [BREAKING] Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] [DOCUMENTATION] Documentation update
+- [ ] [TESTING] Test update (no production code changes)
+- [ ] [TOOL] Refactor (no functional changes)
 - [ ] ⚡ Performance improvement
 
-## 🧪 Testing
+## [TESTING] Testing
 
 <!--
 How did you test this? Provide steps to reproduce.
@@ -36,7 +36,7 @@ How did you test this? Provide steps to reproduce.
 pytest tests/test_specific.py -v
 ```
 
-## 📸 Screenshots (if applicable)
+## [SCREENSHOT] Screenshots (if applicable)
 
 <!--
 For UI changes, CLI output changes, or visualization updates.
@@ -50,7 +50,7 @@ For UI changes, CLI output changes, or visualization updates.
 - [ ] I have updated documentation if needed
 - [ ] I have added a changelog entry if this is user-facing
 
-## 📎 Additional Notes
+## [ATTACHMENT] Additional Notes
 
 <!--
 Anything else reviewers should know?

@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional
 
 from .confidence import ConfidenceEngine, EdgeType
 from .node_id import UniversalNodeID
@@ -44,10 +44,10 @@ from .node_id import UniversalNodeID
 class NeighborhoodResult:
     """
     Result of a k-hop neighborhood extraction.
-    
+
     This prevents graph explosion by limiting analysis to nodes
     within k hops of a center node.
-    
+
     Attributes:
         success: Whether extraction succeeded
         subgraph: The extracted neighborhood subgraph
@@ -61,6 +61,7 @@ class NeighborhoodResult:
         node_depths: Map of node_id to depth from center
         error: Error message if failed
     """
+
     success: bool = True
     subgraph: Optional["UniversalGraph"] = None
     center_node_id: str = ""
@@ -72,7 +73,7 @@ class NeighborhoodResult:
     truncation_warning: Optional[str] = None
     node_depths: Dict[str, int] = field(default_factory=dict)
     error: Optional[str] = None
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
@@ -269,24 +270,24 @@ class UniversalGraph:
     ) -> "NeighborhoodResult":
         """
         Extract k-hop neighborhood subgraph around a center node.
-        
+
         This prevents graph explosion by limiting the subgraph to nodes
         within k hops of the center node, with a maximum node count.
-        
+
         Formula: N(v, k) = {u ∈ V : d(v, u) ≤ k}
-        
+
         Args:
             center_node_id: ID of the center node
             k: Maximum hops from center (default: 2)
             max_nodes: Maximum nodes to include (default: 100)
             direction: "outgoing", "incoming", or "both" (default: "both")
             min_confidence: Minimum edge confidence to follow (default: 0.0)
-            
+
         Returns:
             NeighborhoodResult with subgraph, truncation info, and metadata
         """
         from collections import deque
-        
+
         # Validate center node exists
         center_node = self.get_node(center_node_id)
         if not center_node:
@@ -294,68 +295,71 @@ class UniversalGraph:
                 success=False,
                 error=f"Center node not found: {center_node_id}",
             )
-        
+
         # BFS to collect nodes within k hops
         visited_nodes: Dict[str, int] = {center_node_id: 0}  # node_id -> depth
         queue = deque([(center_node_id, 0)])
         collected_edges: List[GraphEdge] = []
         truncated = False
-        
+
         while queue and len(visited_nodes) < max_nodes:
             current_id, depth = queue.popleft()
-            
+
             if depth >= k:
                 continue
-            
+
             # Get edges based on direction
             edges_to_process = []
             if direction in ("outgoing", "both"):
                 edges_to_process.extend(self.get_edges_from(current_id))
             if direction in ("incoming", "both"):
                 edges_to_process.extend(self.get_edges_to(current_id))
-            
+
             for edge in edges_to_process:
                 # Skip low confidence edges
                 if edge.confidence < min_confidence:
                     continue
-                
+
                 # Determine neighbor node
                 neighbor_id = edge.to_id if edge.from_id == current_id else edge.from_id
-                
+
                 # Check if already visited at equal or shorter distance
-                if neighbor_id in visited_nodes and visited_nodes[neighbor_id] <= depth + 1:
+                if (
+                    neighbor_id in visited_nodes
+                    and visited_nodes[neighbor_id] <= depth + 1
+                ):
                     # Still add edge if both nodes are in our set
                     if edge not in collected_edges:
                         collected_edges.append(edge)
                     continue
-                
+
                 # Check max nodes limit
                 if len(visited_nodes) >= max_nodes:
                     truncated = True
                     continue
-                
+
                 visited_nodes[neighbor_id] = depth + 1
                 queue.append((neighbor_id, depth + 1))
-                
+
                 if edge not in collected_edges:
                     collected_edges.append(edge)
-        
+
         # Check if we hit the limit
         if len(visited_nodes) >= max_nodes and queue:
             truncated = True
-        
+
         # Build subgraph with collected nodes and edges
         subgraph = UniversalGraph()
         for node_id in visited_nodes:
             node = self.get_node(node_id)
             if node:
                 subgraph.add_node(node)
-        
+
         for edge in collected_edges:
             # Only include edges where both endpoints are in our subgraph
             if edge.from_id in visited_nodes and edge.to_id in visited_nodes:
                 subgraph.add_edge(edge)
-        
+
         return NeighborhoodResult(
             success=True,
             subgraph=subgraph,
@@ -368,7 +372,8 @@ class UniversalGraph:
             truncation_warning=(
                 f"⚠️ Graph truncated at {max_nodes} nodes. "
                 f"Increase max_nodes or reduce k for complete view."
-                if truncated else None
+                if truncated
+                else None
             ),
             node_depths=visited_nodes,
         )

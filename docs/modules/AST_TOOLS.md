@@ -65,14 +65,14 @@ Code Scalpel supports multiple programming languages through its **Unified IR (I
 
 | Feature | Python | Java | JavaScript |
 |---------|--------|------|------------|
-| Function extraction | ✅ | ✅ | ✅ |
-| Class extraction | ✅ | ✅ | ✅ |
-| Control flow analysis | ✅ | ✅ | ✅ |
-| Type inference | ✅ | ⚠️ | ⚠️ |
-| Symbolic execution | ✅ | ❌ | ❌ |
-| Security scanning | ✅ | ❌ | ❌ |
+| Function extraction | [COMPLETE] | [COMPLETE] | [COMPLETE] |
+| Class extraction | [COMPLETE] | [COMPLETE] | [COMPLETE] |
+| Control flow analysis | [COMPLETE] | [COMPLETE] | [COMPLETE] |
+| Type inference | [COMPLETE] | [WARNING] | [WARNING] |
+| Symbolic execution | [COMPLETE] | [FAILED] | [FAILED] |
+| Security scanning | [COMPLETE] | [FAILED] | [FAILED] |
 
-**Legend:** ✅ Full support | ⚠️ Partial support | ❌ Not yet available
+**Legend:** [COMPLETE] Full support | [WARNING] Partial support | [FAILED] Not yet available
 
 ---
 
@@ -840,7 +840,7 @@ print(f"Total complexity: {report['total_complexity']}")
 
 for func in report["functions"]:
     if func["complexity"] > 10:
-        print(f"⚠️  {func['name']} has high complexity: {func['complexity']}")
+        print(f"[WARNING]  {func['name']} has high complexity: {func['complexity']}")
 ```
 
 ### Example 2: Batch Rename

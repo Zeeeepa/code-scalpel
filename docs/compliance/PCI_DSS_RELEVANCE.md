@@ -33,14 +33,14 @@ PCI DSS 6.2.4 requires prevention of:
 
 | Vulnerability Type | Code Scalpel Detection | CWE |
 |-------------------|----------------------|-----|
-| Injection flaws | ✅ SQL, Command, Code injection | CWE-89, 78, 94 |
-| Buffer overflows | ⚠️ Limited (memory-safe languages) | CWE-120 |
-| Insecure cryptography | ⚠️ Weak algorithm detection | CWE-327 |
-| Insecure communications | ⚠️ Pattern matching | CWE-319 |
-| Improper error handling | ⚠️ Partial | CWE-209 |
-| XSS | ✅ Full taint analysis | CWE-79 |
-| Improper access control | ⚠️ Partial | CWE-284 |
-| CSRF | ❌ Not yet supported | CWE-352 |
+| Injection flaws | [COMPLETE] SQL, Command, Code injection | CWE-89, 78, 94 |
+| Buffer overflows | [WARNING] Limited (memory-safe languages) | CWE-120 |
+| Insecure cryptography | [WARNING] Weak algorithm detection | CWE-327 |
+| Insecure communications | [WARNING] Pattern matching | CWE-319 |
+| Improper error handling | [WARNING] Partial | CWE-209 |
+| XSS | [COMPLETE] Full taint analysis | CWE-79 |
+| Improper access control | [WARNING] Partial | CWE-284 |
+| CSRF | [FAILED] Not yet supported | CWE-352 |
 
 ---
 

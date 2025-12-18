@@ -140,12 +140,12 @@ def generate_reports(audit_log, policy_engine):
     print("\n4. Report summary:")
     report_obj = reporter.generate_report(time_range, format="object")
 
-    print(f"\n   Security Posture:")
+    print("\n   Security Posture:")
     print(f"   - Score: {report_obj.security_posture.score}/100")
     print(f"   - Grade: {report_obj.security_posture.grade}")
     print(f"   - Risk Level: {report_obj.security_posture.risk_level}")
 
-    print(f"\n   Executive Summary:")
+    print("\n   Executive Summary:")
     print(f"   - Total Operations: {report_obj.summary.total_operations}")
     print(f"   - Allowed: {report_obj.summary.allowed_operations}")
     print(f"   - Blocked: {report_obj.summary.blocked_operations}")
@@ -153,7 +153,7 @@ def generate_reports(audit_log, policy_engine):
     print(f"   - Overrides Approved: {report_obj.summary.overrides_approved}")
     print(f"   - Tamper Attempts: {report_obj.summary.tamper_attempts}")
 
-    print(f"\n   Policy Violations:")
+    print("\n   Policy Violations:")
     print(f"   - Total: {report_obj.policy_violations.total}")
     for severity, violations in report_obj.policy_violations.by_severity.items():
         print(f"   - {severity}: {len(violations)}")

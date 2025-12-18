@@ -6,7 +6,7 @@ labels: enhancement, needs-triage
 assignees: ''
 ---
 
-## 🎯 Problem Statement
+## [TARGET] Problem Statement
 
 <!--
 Describe the problem you're trying to solve.
@@ -22,7 +22,7 @@ Good: "When debugging analysis issues, I can't tell which step is slow because t
 **Why can't you do this today?**
 
 
-## 💡 Proposed Solution
+## [IDEA] Proposed Solution
 
 <!--
 Describe how you envision this working.
@@ -45,14 +45,14 @@ from code_scalpel import CodeAnalyzer
 code-scalpel analyze --your-new-flag
 ```
 
-## 🔄 Alternatives Considered
+## [CYCLE] Alternatives Considered
 
 <!--
 What other solutions have you considered?
 Why are they not sufficient?
 -->
 
-## 📊 Impact Assessment
+## [METRICS] Impact Assessment
 
 <!--
 Help us prioritize by answering these questions.
@@ -64,7 +64,7 @@ Help us prioritize by answering these questions.
 | **Is this blocking your work?** | <!-- Yes / No / Workaround exists --> |
 | **Would this benefit other users?** | <!-- Just me / Some users / Most users --> |
 
-## 📎 Additional Context
+## [ATTACHMENT] Additional Context
 
 <!--
 Optional: Any other context, mockups, or examples.

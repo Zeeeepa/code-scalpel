@@ -57,9 +57,9 @@ result = executor.execute_with_changes(
 
 # Check results
 if result.success:
-    print("✓ Safe to apply changes")
+    print("[COMPLETE] Safe to apply changes")
 else:
-    print("✗ Changes introduce failures")
+    print("[FAILED] Changes introduce failures")
 ```
 
 ## API Reference

@@ -382,7 +382,8 @@ Contains runnable example code for all integrations:
 
 ## Project Context
 
-Code Scalpel v1.5.0 is an MCP server toolkit for AI-driven surgical code operations.
+<!-- [20251218_DOCS] Updated for v3.0.0 "Autonomy" release -->
+Code Scalpel v3.0.0 is an MCP server toolkit for AI-driven surgical code operations.
 
 | Module | Status | Coverage |
 |--------|--------|----------|
@@ -392,30 +393,39 @@ Code Scalpel v1.5.0 is an MCP server toolkit for AI-driven surgical code operati
 | PDG Slicer | Stable | 100% |
 | Symbolic Engine | Stable | 100% |
 | Security Analysis | Stable | 100% |
-| MCP Server | Stable | 13 tools |
-| Surgical Tools | Stable | 95%+ |
+| MCP Server | Stable | 19 tools |
+| Polyglot Parsers | Stable | 90%+ |
+| Autonomy Engine | Stable | 90%+ |
 
-**Test Suite:** 2,045 tests passing (100% pass rate)
+**Test Suite:** 4,033 tests passing (100% pass rate)
+**Coverage Gate:** ≥90% combined (statement + branch)
+**Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v1.5.0):**
-- `analyze_code` - Parse and extract code structure
-- `extract_code` - Surgical extraction by symbol name
+**MCP Tools (Current - v3.0.0 - 19 tools):**
+- `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
+- `extract_code` - Surgical extraction by symbol name with cross-file deps
+- `update_symbol` - Safely replace functions/classes/methods in files
 - `security_scan` - Taint-based vulnerability detection
+- `unified_sink_detect` - Unified polyglot sink detection with confidence
+- `cross_file_security_scan` - Cross-module taint tracking
 - `generate_unit_tests` - Symbolic execution test generation
 - `simulate_refactor` - Verify refactor preserves behavior
+- `symbolic_execute` - Symbolic path exploration with Z3
 - `crawl_project` - Project-wide analysis
-- `update_symbol` - Safe symbol replacement
-- `get_project_map` - Analyze complete project structure and entry points
-- `get_call_graph` - Generate call graphs and trace execution flow
 - `scan_dependencies` - Scan for vulnerable dependencies (OSV API)
 - `get_file_context` - Get surrounding context for code locations
 - `get_symbol_references` - Find all uses of a symbol
 - `get_cross_file_dependencies` - Analyze cross-file dependency chains
+- `get_call_graph` - Generate call graphs and trace execution flow
+- `get_graph_neighborhood` - Extract k-hop neighborhood subgraph
+- `get_project_map` - Generate comprehensive project structure map
+- `validate_paths` - Validate path accessibility for Docker deployments
+- `verify_policy_integrity` - Cryptographic policy file verification
 
-**Latest Release:** v1.5.0 "Project Intelligence"
-- Release Date: December 13, 2025
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.5.0.md`
-- Evidence Files: `release_artifacts/v1.5.0/`
+**Latest Release:** v3.0.0 "Autonomy"
+- Release Date: December 18, 2025
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v3.0.0.md`
+- Evidence Files: `release_artifacts/v3.0.0/`
 
 ## Communication
 

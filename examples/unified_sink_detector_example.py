@@ -15,9 +15,9 @@ def example_python_detection():
     print("=" * 70)
     print("Example 1: Python SQL Injection Detection")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
-    
+
     code = """
 import sqlite3
 
@@ -31,9 +31,9 @@ def get_user(user_id):
     
     return cursor.fetchone()
 """
-    
+
     sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
-    
+
     print(f"\nFound {len(sinks)} security sink(s):\n")
     for sink in sinks:
         owasp = detector.get_owasp_category(sink.vulnerability_type)
@@ -51,9 +51,9 @@ def example_typescript_xss():
     print("=" * 70)
     print("Example 2: TypeScript XSS Detection")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
-    
+
     code = """
 function displayUserComment(comment: string) {
     const element = document.getElementById('comment-box');
@@ -65,9 +65,9 @@ function displayUserComment(comment: string) {
     return <div dangerouslySetInnerHTML={{__html: comment}} />;
 }
 """
-    
+
     sinks = detector.detect_sinks(code, "typescript", min_confidence=0.8)
-    
+
     print(f"\nFound {len(sinks)} security sink(s):\n")
     for sink in sinks:
         print(f"Pattern: {sink.pattern}")
@@ -82,9 +82,9 @@ def example_javascript_command_injection():
     print("=" * 70)
     print("Example 3: JavaScript Command Injection Detection")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
-    
+
     code = """
 const userInput = req.query.command;
 
@@ -96,9 +96,9 @@ exec('ls ' + userInput, (err, stdout) => {
     console.log(stdout);
 });
 """
-    
+
     sinks = detector.detect_sinks(code, "javascript", min_confidence=0.8)
-    
+
     print(f"\nFound {len(sinks)} security sink(s):\n")
     for sink in sinks:
         print(f"Pattern: {sink.pattern}")
@@ -113,9 +113,9 @@ def example_confidence_filtering():
     print("=" * 70)
     print("Example 4: Confidence Threshold Filtering")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
-    
+
     code = """
 import sqlite3
 
@@ -129,19 +129,19 @@ def process_data(filename, query):
     
     return data
 """
-    
+
     # High confidence only
     print("\nHigh confidence sinks (1.0):")
     high_sinks = detector.detect_sinks(code, "python", min_confidence=1.0)
     for sink in high_sinks:
         print(f"  - {sink.pattern} (confidence: {sink.confidence})")
-    
+
     # Medium confidence
     print("\nMedium+ confidence sinks (0.8):")
     medium_sinks = detector.detect_sinks(code, "python", min_confidence=0.8)
     for sink in medium_sinks:
         print(f"  - {sink.pattern} (confidence: {sink.confidence})")
-    
+
     # All sinks
     print("\nAll sinks (0.5+):")
     all_sinks = detector.detect_sinks(code, "python", min_confidence=0.5)
@@ -154,23 +154,23 @@ def example_coverage_report():
     print("=" * 70)
     print("Example 5: Coverage Report")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
     report = detector.get_coverage_report()
-    
+
     print(f"\nTotal security sink patterns: {report['total_patterns']}")
     print("\nPatterns by language:")
-    for lang, count in report['by_language'].items():
+    for lang, count in report["by_language"].items():
         print(f"  {lang}: {count}")
-    
+
     print("\nPatterns by vulnerability type:")
-    for vuln_type, langs in report['by_vulnerability'].items():
+    for vuln_type, langs in report["by_vulnerability"].items():
         total = sum(langs.values())
         print(f"  {vuln_type}: {total}")
-    
+
     print("\nOWASP Top 10 2021 Coverage:")
-    for category, stats in report['owasp_coverage'].items():
-        pct = stats['percentage']
+    for category, stats in report["owasp_coverage"].items():
+        pct = stats["percentage"]
         print(f"  {category}")
         print(f"    Coverage: {stats['covered']}/{stats['total']} ({pct:.1f}%)")
 
@@ -180,16 +180,16 @@ def example_multi_language():
     print("=" * 70)
     print("Example 6: Multi-Language Detection")
     print("=" * 70)
-    
+
     detector = UnifiedSinkDetector()
-    
+
     examples = {
         "python": 'cursor.execute("SELECT * FROM users")',
         "java": 'Statement.executeQuery("SELECT * FROM users");',
         "typescript": 'connection.query("SELECT * FROM users");',
-        "javascript": 'db.query("SELECT * FROM users");'
+        "javascript": 'db.query("SELECT * FROM users");',
     }
-    
+
     for language, code in examples.items():
         sinks = detector.detect_sinks(code, language, min_confidence=0.8)
         print(f"\n{language.upper()}:")
@@ -211,7 +211,7 @@ def main():
         example_coverage_report,
         example_multi_language,
     ]
-    
+
     for example in examples:
         try:
             example()

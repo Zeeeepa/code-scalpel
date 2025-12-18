@@ -314,8 +314,10 @@ class TestComplianceReporter:
         """Test PDF report export."""
         # [20251216_BUGFIX] Skip test if reportlab is not installed
         try:
-            import reportlab
-        except ImportError:
+            import importlib.util
+            if importlib.util.find_spec("reportlab") is None:
+                raise ImportError
+        except (ImportError, ModuleNotFoundError):
             pytest.skip("reportlab package not installed")
         
         time_range = (datetime.now() - timedelta(hours=1), datetime.now())

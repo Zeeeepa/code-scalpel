@@ -512,10 +512,10 @@ class DataCache:
 # Utility functions
 
 
-def hash_row(row: DataRow) -> str:
-    """Generate hash for a data row."""
-    content = json.dumps(row, sort_keys=True)
-    return hashlib.md5(content.encode()).hexdigest()
+def hash_row(row: dict) -> str:
+    """Hash a row for deduplication. [TEST]"""
+    import hashlib
+    return hashlib.md5(str(sorted(row.items())).encode()).hexdigest()
 
 
 def merge_rows(

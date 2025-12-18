@@ -18,7 +18,7 @@ Use these to populate the project board and track progress.
 
 ## EPIC Issues
 
-### Epic 1: Core Package Infrastructure 🏗️
+### Epic 1: Core Package Infrastructure [ARCHITECTURE]️
 
 ```markdown
 **Epic Goal:** Establish a robust, production-ready Python package infrastructure
@@ -42,7 +42,7 @@ Transform the package structure from development prototype to production-ready w
 **Dependencies:** None
 ```
 
-### Epic 2: MCP Server Implementation 🔌
+### Epic 2: MCP Server Implementation [INTEGRATION]
 
 ```markdown
 **Epic Goal:** Implement complete MCP server exposing Code Scalpel capabilities
@@ -71,7 +71,7 @@ Build a Model Context Protocol (MCP) server that allows AI agents to access Code
 **Dependencies:** Epic 1
 ```
 
-### Epic 3: Testing Infrastructure 🧪
+### Epic 3: Testing Infrastructure [TESTING]
 
 ```markdown
 **Epic Goal:** Achieve 80%+ test coverage with comprehensive testing

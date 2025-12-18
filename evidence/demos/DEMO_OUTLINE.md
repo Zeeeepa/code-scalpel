@@ -111,7 +111,7 @@ Path 3: customer_type="other", quantity=51, price=any → discount=0.10
 Path 4: customer_type="other", quantity=10, price=any → discount=0.0
 ...
 
-⚠️ Edge Case Detected:
+[WARNING] Edge Case Detected:
   - No validation for negative price
   - Constraint: price < 0 produces negative return value
 ```
@@ -192,16 +192,16 @@ extract_code(
 
 **Memory Stability:**
 ```
-✓ Analyzed 50 files sequentially
-✓ Peak memory: 32MB (100MB threshold)
-✓ No memory leaks detected
+[COMPLETE] Analyzed 50 files sequentially
+[COMPLETE] Peak memory: 32MB (100MB threshold)
+[COMPLETE] No memory leaks detected
 ```
 
 **Timeout Protection:**
 ```
-✓ Symbolic engine bounded to 10 iterations
-✓ Path explosion gracefully halted
-✓ MCP server rejects malformed requests
+[COMPLETE] Symbolic engine bounded to 10 iterations
+[COMPLETE] Path explosion gracefully halted
+[COMPLETE] MCP server rejects malformed requests
 ```
 
 **Coverage:**
@@ -305,13 +305,13 @@ code-scalpel scan your_project/
 
 | Feature | Code Scalpel | SonarQube | Snyk | Semgrep |
 |---------|-------------|-----------|------|---------|
-| Taint Tracking | ✓ Full path | Partial | Partial | Limited |
-| Symbolic Execution | ✓ Z3-powered | ✗ | ✗ | ✗ |
-| AI Agent Integration | ✓ MCP native | ✗ | ✗ | ✗ |
-| Token Optimization | ✓ Surgical | ✗ | ✗ | ✗ |
-| Self-hosted | ✓ Free | $$$ | $$$ | Partial |
-| Python Full Support | ✓ | ✓ | ✓ | ✓ |
-| TypeScript | Coming Q1 | ✓ | ✓ | ✓ |
+| Taint Tracking | [COMPLETE] Full path | Partial | Partial | Limited |
+| Symbolic Execution | [COMPLETE] Z3-powered | [FAILED] | [FAILED] | [FAILED] |
+| AI Agent Integration | [COMPLETE] MCP native | [FAILED] | [FAILED] | [FAILED] |
+| Token Optimization | [COMPLETE] Surgical | [FAILED] | [FAILED] | [FAILED] |
+| Self-hosted | [COMPLETE] Free | $$$ | $$$ | Partial |
+| Python Full Support | [COMPLETE] | [COMPLETE] | [COMPLETE] | [COMPLETE] |
+| TypeScript | Coming Q1 | [COMPLETE] | [COMPLETE] | [COMPLETE] |
 
 **Key Differentiator:** "Code Scalpel is the only tool built *for* AI agents, not just *with* AI."
 

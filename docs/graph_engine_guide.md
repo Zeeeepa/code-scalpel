@@ -1,7 +1,7 @@
 # Graph Engine Guide
 
-**Version:** 2.2.0  
-**Date:** December 16, 2025  
+**Version:** 3.0.0  
+**Date:** December 18, 2025  
 **Status:** Production Ready
 
 ## Overview
@@ -714,10 +714,10 @@ builder.add_edge(
 **Solution:** Check route formats and HTTP methods:
 ```python
 # Ensure routes match format
-detector.add_client_call("ts::fetch", "GET", "/api/users")  # ✓ Correct
-detector.add_endpoint("java::getUsers", "GET", "/api/users")  # ✓ Correct
+detector.add_client_call("ts::fetch", "GET", "/api/users")  # [COMPLETE] Correct
+detector.add_endpoint("java::getUsers", "GET", "/api/users")  # [COMPLETE] Correct
 
-# Not: detector.add_client_call("ts::fetch", "GET", "api/users")  # ✗ Missing /
+# Not: detector.add_client_call("ts::fetch", "GET", "api/users")  # [FAILED] Missing /
 ```
 
 ### Issue: Node IDs Not Parsing

@@ -47,7 +47,7 @@ The MCP server implements the [Model Context Protocol](https://modelcontextproto
 
 | Transport | Use Case | Default |
 |-----------|----------|---------|
-| **stdio** | Local AI assistants (Claude Desktop, Cursor) | ✅ |
+| **stdio** | Local AI assistants (Claude Desktop, Cursor) | [COMPLETE] |
 | **HTTP** | Network deployment, remote access | - |
 
 ---
@@ -109,7 +109,7 @@ run_server(transport="streamable-http", port=8593)
 
 ## Available Tools
 
-The MCP server exposes 17 tools for AI agents (v2.2.0):
+The MCP server exposes 19 tools for AI agents (v3.0.0):
 
 ### Core Analysis Tools
 
@@ -133,7 +133,7 @@ The MCP server exposes 17 tools for AI agents (v2.2.0):
 | `get_cross_file_dependencies` | Trace cross-file dependencies | Module relationships |
 | `scan_dependencies` | Scan for vulnerable dependencies (OSV) | Security compliance |
 
-### Graph Engine Tools (v2.2.0)
+### Graph Engine Tools (v3.0.0)
 
 | Tool | Description | Best For |
 |------|-------------|----------|
@@ -160,7 +160,7 @@ Parse code and extract structural information.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `code` | string | ✅ | Source code to analyze |
+| `code` | string | [COMPLETE] | Source code to analyze |
 | `language` | string | - | Language: "python" (default) or "java" |
 
 **Request:**
@@ -219,7 +219,7 @@ Detect security vulnerabilities using taint analysis.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `code` | string | ✅ | Source code to scan |
+| `code` | string | [COMPLETE] | Source code to scan |
 
 **Request:**
 
@@ -273,7 +273,7 @@ Explore execution paths using symbolic execution.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `code` | string | ✅ | Source code to analyze |
+| `code` | string | [COMPLETE] | Source code to analyze |
 | `function_name` | string | - | Specific function to analyze |
 | `max_paths` | integer | - | Maximum paths to explore (default: 50) |
 
@@ -335,8 +335,8 @@ Generate test cases from symbolic execution paths.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `code` | string | ✅ | Source code containing function |
-| `function_name` | string | ✅ | Function to generate tests for |
+| `code` | string | [COMPLETE] | Source code containing function |
+| `function_name` | string | [COMPLETE] | Function to generate tests for |
 | `format` | string | - | Output format: "pytest" (default) or "unittest" |
 
 **Request:**
@@ -391,8 +391,8 @@ Verify a code change is safe before applying.
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `original_code` | string | ✅ | Original source code |
-| `refactored_code` | string | ✅ | Proposed refactored code |
+| `original_code` | string | [COMPLETE] | Original source code |
+| `refactored_code` | string | [COMPLETE] | Proposed refactored code |
 
 **Request:**
 

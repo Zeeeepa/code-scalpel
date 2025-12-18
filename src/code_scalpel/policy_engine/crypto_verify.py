@@ -16,7 +16,7 @@ Solution: Hash verification against cryptographically signed manifest stored in:
 
 Security Model: FAIL CLOSED
 - Missing manifest → DENY ALL
-- Invalid signature → DENY ALL  
+- Invalid signature → DENY ALL
 - Hash mismatch → DENY ALL
 """
 
@@ -29,13 +29,12 @@ import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-from .exceptions import TamperDetectedError
+from typing import Dict, List, Optional
 
 
 class SecurityError(Exception):
     """Raised when cryptographic verification fails."""
+
     pass
 
 
@@ -43,9 +42,9 @@ class SecurityError(Exception):
 class PolicyManifest:
     """
     Signed manifest for policy files.
-    
+
     # [20250108_FEATURE] Contains hashes and signature for verification
-    
+
     Attributes:
         version: Manifest format version
         files: Mapping of filename to SHA-256 hash
@@ -53,9 +52,10 @@ class PolicyManifest:
         created_at: ISO timestamp when manifest was created
         signed_by: Identity of the signer (admin email/name)
     """
+
     version: str
     files: Dict[str, str]  # filename -> SHA-256 hash
-    signature: str         # HMAC signature of the manifest
+    signature: str  # HMAC signature of the manifest
     created_at: str
     signed_by: str
 
@@ -64,9 +64,9 @@ class PolicyManifest:
 class VerificationResult:
     """
     Result of cryptographic policy verification.
-    
+
     # [20250108_FEATURE] Detailed verification outcome
-    
+
     Attributes:
         success: Whether all verifications passed
         manifest_valid: Whether manifest signature is valid
@@ -74,6 +74,7 @@ class VerificationResult:
         files_failed: List of files that failed verification
         error: Error message if verification failed
     """
+
     success: bool
     manifest_valid: bool = False
     files_verified: int = 0
@@ -84,24 +85,24 @@ class VerificationResult:
 class CryptographicPolicyVerifier:
     """
     Verify policy files against cryptographically signed manifests.
-    
+
     # [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
-    
+
     This class addresses the 3rd party review feedback that file permissions
     can be bypassed by running `chmod +w` on policy files. By verifying
     SHA-256 hashes against a signed manifest, any modification is detected
     regardless of file permissions.
-    
+
     Security Model: FAIL CLOSED
     - If manifest cannot be loaded: DENY ALL
     - If signature verification fails: DENY ALL
     - If any file hash mismatches: DENY ALL
-    
+
     The signing secret should be stored in:
     - Environment variable (SCALPEL_MANIFEST_SECRET)
     - CI/CD secrets (not accessible to agent)
     - HashiCorp Vault or similar
-    
+
     Example:
         verifier = CryptographicPolicyVerifier(manifest_source="git")
         try:
@@ -111,7 +112,7 @@ class CryptographicPolicyVerifier:
             print(f"SECURITY: {e}")
             # Fail closed - deny all operations
     """
-    
+
     def __init__(
         self,
         manifest_source: str = "git",  # "git", "env", "file"
@@ -120,14 +121,14 @@ class CryptographicPolicyVerifier:
     ):
         """
         Initialize cryptographic policy verifier.
-        
+
         # [20250108_FEATURE] Configure verification source
-        
+
         Args:
             manifest_source: Where to load manifest from ("git", "env", "file")
             secret_key: HMAC signing secret (uses env var if not provided)
             policy_dir: Directory containing policy files
-            
+
         Raises:
             SecurityError: If secret key not available or manifest cannot be loaded
         """
@@ -135,7 +136,7 @@ class CryptographicPolicyVerifier:
         self.policy_dir = Path(policy_dir)
         self.secret_key = secret_key or self._get_secret_from_env()
         self.manifest: Optional[PolicyManifest] = None
-        
+
         # Load manifest (fail closed if unavailable)
         try:
             self.manifest = self._load_manifest()
@@ -144,16 +145,16 @@ class CryptographicPolicyVerifier:
                 f"Failed to load policy manifest: {e}. "
                 "All operations DENIED until manifest is available."
             )
-    
+
     def _get_secret_from_env(self) -> str:
         """
         Get signing secret from environment.
-        
+
         # [20250108_SECURITY] Secret must be set externally
-        
+
         Returns:
             Secret key string
-            
+
         Raises:
             SecurityError: If secret not found in environment
         """
@@ -164,16 +165,16 @@ class CryptographicPolicyVerifier:
                 "Policy verification requires a signing secret set by administrator."
             )
         return secret
-    
+
     def _load_manifest(self) -> PolicyManifest:
         """
         Load policy manifest from configured source.
-        
+
         # [20250108_FEATURE] Multi-source manifest loading
-        
+
         Returns:
             PolicyManifest object
-            
+
         Raises:
             SecurityError: If manifest cannot be loaded
         """
@@ -185,19 +186,19 @@ class CryptographicPolicyVerifier:
             return self._load_from_file()
         else:
             raise SecurityError(f"Unknown manifest source: {self.manifest_source}")
-    
+
     def _load_from_git(self) -> PolicyManifest:
         """
         Load manifest from git history.
-        
+
         # [20250108_FEATURE] Load from committed manifest
-        
+
         The manifest is stored in a committed file that the agent
         cannot modify without creating a visible git commit.
-        
+
         Returns:
             PolicyManifest loaded from git
-            
+
         Raises:
             SecurityError: If manifest not found in git
         """
@@ -209,16 +210,16 @@ class CryptographicPolicyVerifier:
                 text=True,
                 timeout=10,
             )
-            
+
             if result.returncode != 0:
                 raise SecurityError(
                     "Policy manifest not found in git history. "
                     "Run `scalpel policy sign` to create one and commit it."
                 )
-            
+
             data = json.loads(result.stdout)
             return PolicyManifest(**data)
-            
+
         except subprocess.TimeoutExpired:
             raise SecurityError(
                 "Git command timeout while loading manifest. Failing CLOSED."
@@ -227,18 +228,18 @@ class CryptographicPolicyVerifier:
             raise SecurityError(
                 f"Policy manifest is not valid JSON: {e}. Failing CLOSED."
             )
-    
+
     def _load_from_env(self) -> PolicyManifest:
         """
         Load manifest from environment variable.
-        
+
         # [20250108_FEATURE] Load from CI/CD injected env var
-        
+
         Useful for CI/CD pipelines that inject the manifest as a secret.
-        
+
         Returns:
             PolicyManifest loaded from environment
-            
+
         Raises:
             SecurityError: If manifest env var not set
         """
@@ -248,7 +249,7 @@ class CryptographicPolicyVerifier:
                 "SCALPEL_POLICY_MANIFEST environment variable not set. "
                 "Failing CLOSED."
             )
-        
+
         try:
             data = json.loads(manifest_json)
             return PolicyManifest(**data)
@@ -256,30 +257,30 @@ class CryptographicPolicyVerifier:
             raise SecurityError(
                 f"SCALPEL_POLICY_MANIFEST is not valid JSON: {e}. Failing CLOSED."
             )
-    
+
     def _load_from_file(self) -> PolicyManifest:
         """
         Load manifest from local file.
-        
+
         # [20250108_FEATURE] Load from local manifest file
-        
+
         Note: This is less secure than git or env sources since the file
         could potentially be modified. Use only for development/testing.
-        
+
         Returns:
             PolicyManifest loaded from file
-            
+
         Raises:
             SecurityError: If manifest file not found or invalid
         """
         manifest_path = self.policy_dir / "policy.manifest.json"
-        
+
         if not manifest_path.exists():
             raise SecurityError(
                 f"Policy manifest not found: {manifest_path}. "
                 "Run `scalpel policy sign` to create one."
             )
-        
+
         try:
             with open(manifest_path, "r") as f:
                 data = json.load(f)
@@ -288,25 +289,25 @@ class CryptographicPolicyVerifier:
             raise SecurityError(
                 f"Policy manifest is not valid JSON: {e}. Failing CLOSED."
             )
-    
+
     def verify_all_policies(self) -> VerificationResult:
         """
         Verify all policy files match their manifest hashes.
-        
+
         # [20250108_FEATURE] Full policy verification
-        
+
         Performs:
         1. Verify manifest HMAC signature
         2. Verify each policy file hash matches manifest
-        
+
         Returns:
             VerificationResult with detailed status
-            
+
         Raises:
             SecurityError: If any verification fails (FAIL CLOSED)
         """
         result = VerificationResult(success=False)
-        
+
         # First verify manifest signature
         if not self._verify_manifest_signature():
             result.error = (
@@ -315,50 +316,50 @@ class CryptographicPolicyVerifier:
                 "All operations DENIED."
             )
             raise SecurityError(result.error)
-        
+
         result.manifest_valid = True
-        
+
         # Verify each file
         files_failed = []
         files_verified = 0
-        
+
         for filename, expected_hash in self.manifest.files.items():
             try:
                 actual_hash = self._hash_file(filename)
-                
+
                 if actual_hash != expected_hash:
                     files_failed.append(filename)
                 else:
                     files_verified += 1
-                    
+
             except FileNotFoundError:
                 files_failed.append(filename)
-        
+
         result.files_verified = files_verified
         result.files_failed = files_failed
-        
+
         if files_failed:
             result.error = (
                 f"Policy files tampered or missing: {', '.join(files_failed)}. "
                 "All operations DENIED until policy integrity restored."
             )
             raise SecurityError(result.error)
-        
+
         result.success = True
         return result
-    
+
     def verify_single_file(self, filename: str) -> bool:
         """
         Verify a single policy file.
-        
+
         # [20250108_FEATURE] Single file verification
-        
+
         Args:
             filename: Name of policy file to verify
-            
+
         Returns:
             True if file matches manifest hash
-            
+
         Raises:
             SecurityError: If file doesn't match or is missing
         """
@@ -366,10 +367,10 @@ class CryptographicPolicyVerifier:
             raise SecurityError(
                 f"File '{filename}' not in policy manifest. Cannot verify."
             )
-        
+
         expected_hash = self.manifest.files[filename]
         actual_hash = self._hash_file(filename)
-        
+
         if actual_hash != expected_hash:
             raise SecurityError(
                 f"Policy file tampered: {filename}\n"
@@ -377,67 +378,65 @@ class CryptographicPolicyVerifier:
                 f"Actual:   {actual_hash}\n"
                 "All operations DENIED."
             )
-        
+
         return True
-    
+
     def _verify_manifest_signature(self) -> bool:
         """
         Verify HMAC signature of the manifest.
-        
+
         # [20250108_SECURITY] Signature verification
-        
+
         Returns:
             True if signature is valid, False otherwise
         """
         if not self.manifest:
             return False
-        
+
         # Reconstruct the signed data (same order as signing)
         signed_data = {
             "version": self.manifest.version,
             "files": self.manifest.files,
             "created_at": self.manifest.created_at,
-            "signed_by": self.manifest.signed_by
+            "signed_by": self.manifest.signed_by,
         }
-        
+
         message = json.dumps(signed_data, sort_keys=True)
         expected_signature = hmac.new(
-            self.secret_key.encode(),
-            message.encode(),
-            hashlib.sha256
+            self.secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()
-        
+
         # Use constant-time comparison to prevent timing attacks
         return hmac.compare_digest(expected_signature, self.manifest.signature)
-    
+
     def _hash_file(self, filename: str) -> str:
         """
         Calculate SHA-256 hash of a file.
-        
+
         # [20250108_FEATURE] File hashing
-        
+
         Args:
             filename: Name of file in policy directory
-            
+
         Returns:
             SHA-256 hash as hex string
-            
+
         Raises:
             FileNotFoundError: If file doesn't exist
         """
         path = self.policy_dir / filename
-        
+
         if not path.exists():
             raise FileNotFoundError(f"Policy file missing: {filename}")
-        
+
         hasher = hashlib.sha256()
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             # Read in chunks for memory efficiency
-            for chunk in iter(lambda: f.read(8192), b''):
+            for chunk in iter(lambda: f.read(8192), b""):
                 hasher.update(chunk)
-        
+
         return hasher.hexdigest()
-    
+
     @staticmethod
     def create_manifest(
         policy_files: List[str],
@@ -447,47 +446,45 @@ class CryptographicPolicyVerifier:
     ) -> PolicyManifest:
         """
         Create a new signed manifest for policy files.
-        
+
         # [20250108_FEATURE] Manifest creation for administrators
-        
+
         This should be run by a human administrator, NOT an agent.
         The manifest should be committed to git after creation.
-        
+
         Args:
             policy_files: List of policy filenames to include
             secret_key: HMAC signing secret
             signed_by: Identity of the signer (email/name)
             policy_dir: Directory containing policy files
-            
+
         Returns:
             Signed PolicyManifest
         """
         policy_path = Path(policy_dir)
         files = {}
-        
+
         for filename in policy_files:
             path = policy_path / filename
             if path.exists():
                 hasher = hashlib.sha256()
-                with open(path, 'rb') as f:
+                with open(path, "rb") as f:
                     hasher.update(f.read())
                 files[filename] = hasher.hexdigest()
-        
+
         manifest_data = {
             "version": "1.0",
             "files": files,
             "created_at": datetime.now().isoformat(),
-            "signed_by": signed_by
+            "signed_by": signed_by,
         }
-        
+
         # Create HMAC signature
         message = json.dumps(manifest_data, sort_keys=True)
         signature = hmac.new(
-            secret_key.encode(),
-            message.encode(),
-            hashlib.sha256
+            secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()
-        
+
         return PolicyManifest(
             version=manifest_data["version"],
             files=manifest_data["files"],
@@ -495,23 +492,23 @@ class CryptographicPolicyVerifier:
             signed_by=manifest_data["signed_by"],
             signature=signature,
         )
-    
+
     @staticmethod
     def save_manifest(manifest: PolicyManifest, policy_dir: str = ".scalpel") -> Path:
         """
         Save manifest to file.
-        
+
         # [20250108_FEATURE] Write manifest for git commit
-        
+
         Args:
             manifest: PolicyManifest to save
             policy_dir: Directory to save manifest in
-            
+
         Returns:
             Path to saved manifest file
         """
         manifest_path = Path(policy_dir) / "policy.manifest.json"
-        
+
         manifest_data = {
             "version": manifest.version,
             "files": manifest.files,
@@ -519,10 +516,10 @@ class CryptographicPolicyVerifier:
             "signed_by": manifest.signed_by,
             "signature": manifest.signature,
         }
-        
-        with open(manifest_path, 'w') as f:
+
+        with open(manifest_path, "w") as f:
             json.dump(manifest_data, f, indent=2)
-        
+
         return manifest_path
 
 
@@ -530,16 +527,16 @@ class CryptographicPolicyVerifier:
 def verify_policy_integrity_crypto(policy_dir: str = ".scalpel") -> bool:
     """
     Verify policy integrity using cryptographic verification.
-    
+
     This is a convenience function that integrates with the existing
     TamperResistance system.
-    
+
     Args:
         policy_dir: Directory containing policy files
-        
+
     Returns:
         True if verification passes
-        
+
     Raises:
         SecurityError: If verification fails (FAIL CLOSED)
     """
@@ -556,6 +553,5 @@ def verify_policy_integrity_crypto(policy_dir: str = ".scalpel") -> bool:
     except Exception as e:
         # Any unexpected error - FAIL CLOSED
         raise SecurityError(
-            f"Unexpected error during policy verification: {e}. "
-            "Failing CLOSED."
+            f"Unexpected error during policy verification: {e}. " "Failing CLOSED."
         )

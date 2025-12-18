@@ -527,12 +527,20 @@ class ContextualExtractionResult(BaseModel):
     line_end: int = Field(default=0, description="Ending line number of target")
     token_estimate: int = Field(default=0, description="Estimated token count")
     error: str | None = Field(default=None, description="Error if failed")
-    
+
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
-    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
-    is_server_action: bool = Field(default=False, description="Next.js Server Action ('use server')")
-    component_type: str | None = Field(default=None, description="React component type: 'functional', 'class', or None")
+    jsx_normalized: bool = Field(
+        default=False, description="Whether JSX syntax was normalized"
+    )
+    is_server_component: bool = Field(
+        default=False, description="Next.js Server Component (async)"
+    )
+    is_server_action: bool = Field(
+        default=False, description="Next.js Server Action ('use server')"
+    )
+    component_type: str | None = Field(
+        default=None, description="React component type: 'functional', 'class', or None"
+    )
 
 
 class PatchResultModel(BaseModel):
@@ -2809,12 +2817,14 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
         file_path = resolve_module_path(language, module, PROJECT_ROOT)
 
         if file_path is None:
-            return json.dumps({
-                "error": f"Module '{module}' not found for language '{language}'",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            })
+            return json.dumps(
+                {
+                    "error": f"Module '{module}' not found for language '{language}'",
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                }
+            )
 
         # Security check
         _validate_path_security(file_path)
@@ -2847,48 +2857,57 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
             last_error = result.error
 
         if result is None or not result.success:
-            return json.dumps({
-                "error": last_error or "Extraction failed",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            })
+            return json.dumps(
+                {
+                    "error": last_error or "Extraction failed",
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                }
+            )
 
         # Return full result with metadata
-        return json.dumps({
-            "uri": f"code:///{language}/{module}/{symbol}",
-            "mimeType": get_mime_type(language),
-            "code": result.full_code,
-            "metadata": {
-                "file_path": str(file_path),
+        return json.dumps(
+            {
+                "uri": f"code:///{language}/{module}/{symbol}",
+                "mimeType": get_mime_type(language),
+                "code": result.full_code,
+                "metadata": {
+                    "file_path": str(file_path),
+                    "language": language,
+                    "module": module,
+                    "symbol": symbol,
+                    "line_start": result.line_start,
+                    "line_end": result.line_end,
+                    "token_estimate": result.token_estimate,
+                    # JSX/TSX metadata
+                    "jsx_normalized": result.jsx_normalized,
+                    "is_server_component": result.is_server_component,
+                    "is_server_action": result.is_server_action,
+                    "component_type": result.component_type,
+                },
+            },
+            indent=2,
+        )
+
+    except PermissionError as e:
+        return json.dumps(
+            {
+                "error": str(e),
                 "language": language,
                 "module": module,
                 "symbol": symbol,
-                "line_start": result.line_start,
-                "line_end": result.line_end,
-                "token_estimate": result.token_estimate,
-                # JSX/TSX metadata
-                "jsx_normalized": result.jsx_normalized,
-                "is_server_component": result.is_server_component,
-                "is_server_action": result.is_server_action,
-                "component_type": result.component_type,
-            },
-        }, indent=2)
-
-    except PermissionError as e:
-        return json.dumps({
-            "error": str(e),
-            "language": language,
-            "module": module,
-            "symbol": symbol,
-        })
+            }
+        )
     except Exception as e:
-        return json.dumps({
-            "error": f"Resource access failed: {str(e)}",
-            "language": language,
-            "module": module,
-            "symbol": symbol,
-        })
+        return json.dumps(
+            {
+                "error": f"Resource access failed: {str(e)}",
+                "language": language,
+                "module": module,
+                "symbol": symbol,
+            }
+        )
 
 
 # ============================================================================
@@ -3345,13 +3364,13 @@ Please proceed with Step 1 to begin extracting the function."""
 def security_audit_workflow_prompt(project_path: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a comprehensive security audit.
-    
+
     This is a complete workflow prompt that guides through:
     1. Project structure analysis
     2. Vulnerability scanning
     3. Dependency checking
     4. Report generation
-    
+
     Args:
         project_path: Path to the project root
     """
@@ -3444,14 +3463,14 @@ Begin by running `crawl_project("{project_path}")` to start the audit.
 def safe_refactor_workflow_prompt(file_path: str, symbol_name: str) -> str:
     """
     [20251216_FEATURE] Guide an AI agent through a safe refactoring operation.
-    
+
     This workflow ensures refactoring is done safely with validation:
     1. Extract current implementation
     2. Find all usages
     3. Plan changes
     4. Simulate refactor
     5. Apply changes (only if safe)
-    
+
     Args:
         file_path: Path to the file containing the symbol
         symbol_name: Name of the function/class to refactor
@@ -4285,7 +4304,7 @@ async def get_call_graph(
 
 class NeighborhoodNodeModel(BaseModel):
     """A node in the neighborhood subgraph."""
-    
+
     id: str = Field(description="Node ID (language::module::type::name)")
     depth: int = Field(description="Distance from center node (0 = center)")
     metadata: dict = Field(default_factory=dict, description="Additional node metadata")
@@ -4293,7 +4312,7 @@ class NeighborhoodNodeModel(BaseModel):
 
 class NeighborhoodEdgeModel(BaseModel):
     """An edge in the neighborhood subgraph."""
-    
+
     from_id: str = Field(description="Source node ID")
     to_id: str = Field(description="Target node ID")
     edge_type: str = Field(description="Type of relationship")
@@ -4302,14 +4321,14 @@ class NeighborhoodEdgeModel(BaseModel):
 
 class GraphNeighborhoodResult(BaseModel):
     """Result of k-hop neighborhood extraction."""
-    
+
     success: bool = Field(description="Whether extraction succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    
+
     # Center node info
     center_node_id: str = Field(default="", description="ID of the center node")
     k: int = Field(default=0, description="Number of hops used")
-    
+
     # Subgraph
     nodes: list[NeighborhoodNodeModel] = Field(
         default_factory=list, description="Nodes in the neighborhood"
@@ -4319,17 +4338,19 @@ class GraphNeighborhoodResult(BaseModel):
     )
     total_nodes: int = Field(default=0, description="Number of nodes in subgraph")
     total_edges: int = Field(default=0, description="Number of edges in subgraph")
-    
+
     # Truncation info
-    max_depth_reached: int = Field(default=0, description="Maximum depth actually reached")
+    max_depth_reached: int = Field(
+        default=0, description="Maximum depth actually reached"
+    )
     truncated: bool = Field(default=False, description="Whether graph was truncated")
     truncation_warning: str | None = Field(
         default=None, description="Warning if truncated"
     )
-    
+
     # Mermaid diagram
     mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
-    
+
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -4340,13 +4361,13 @@ def _generate_neighborhood_mermaid(
 ) -> str:
     """Generate Mermaid diagram for neighborhood."""
     lines = ["graph TD"]
-    
+
     # Add nodes with depth-based styling
     for node in nodes:
         # Sanitize node ID for Mermaid
         safe_id = node.id.replace("::", "_").replace(".", "_").replace("-", "_")
         label = node.id.split("::")[-1] if "::" in node.id else node.id
-        
+
         if node.depth == 0:
             # Center node - special styling
             lines.append(f'    {safe_id}["{label}"]:::center')
@@ -4354,18 +4375,18 @@ def _generate_neighborhood_mermaid(
             lines.append(f'    {safe_id}["{label}"]:::depth1')
         else:
             lines.append(f'    {safe_id}["{label}"]:::depth2plus')
-    
+
     # Add edges
     for edge in edges:
         from_safe = edge.from_id.replace("::", "_").replace(".", "_").replace("-", "_")
         to_safe = edge.to_id.replace("::", "_").replace(".", "_").replace("-", "_")
-        lines.append(f'    {from_safe} --> {to_safe}')
-    
+        lines.append(f"    {from_safe} --> {to_safe}")
+
     # Add style definitions
-    lines.append('    classDef center fill:#f9f,stroke:#333,stroke-width:3px')
-    lines.append('    classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px')
-    lines.append('    classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px')
-    
+    lines.append("    classDef center fill:#f9f,stroke:#333,stroke-width:3px")
+    lines.append("    classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px")
+    lines.append("    classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px")
+
     return "\n".join(lines)
 
 
@@ -4380,20 +4401,20 @@ async def get_graph_neighborhood(
 ) -> GraphNeighborhoodResult:
     """
     Extract k-hop neighborhood subgraph around a center node.
-    
+
     [v2.5.0] Use this tool to prevent graph explosion when analyzing large
     codebases. Instead of loading the entire graph, extract only the nodes
     within k hops of a specific node.
-    
+
     **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
-    
+
     This extracts all nodes u where the shortest path from center v to u
     is at most k hops.
-    
+
     **Truncation Protection:**
     If the neighborhood exceeds max_nodes, the graph is truncated and
     a warning is returned. This prevents memory exhaustion on dense graphs.
-    
+
     Key capabilities:
     - Extract focused subgraph around any node
     - Control traversal depth with k parameter
@@ -4401,12 +4422,12 @@ async def get_graph_neighborhood(
     - Filter by edge direction (incoming, outgoing, both)
     - Filter by minimum confidence score
     - Generate Mermaid visualization
-    
+
     Why AI agents need this:
     - **Focused Analysis:** Analyze only relevant code, not entire codebase
     - **Memory Safety:** Prevent OOM on large graphs
     - **Honest Uncertainty:** Know when graph is incomplete
-    
+
     Example:
         # Get 2-hop neighborhood around a function
         result = get_graph_neighborhood(
@@ -4416,7 +4437,7 @@ async def get_graph_neighborhood(
         )
         if result.truncated:
             print(f"Warning: {result.truncation_warning}")
-    
+
     Args:
         center_node_id: ID of the center node (format: language::module::type::name)
         k: Maximum hops from center (default: 2)
@@ -4424,94 +4445,117 @@ async def get_graph_neighborhood(
         direction: "outgoing", "incoming", or "both" (default: "both")
         min_confidence: Minimum edge confidence to follow (default: 0.0)
         project_root: Project root directory (default: server's project root)
-    
+
     Returns:
         GraphNeighborhoodResult with subgraph, truncation info, and Mermaid diagram
     """
     from code_scalpel.graph_engine import UniversalGraph
-    
+
     root_path = Path(project_root) if project_root else PROJECT_ROOT
-    
+
     if not root_path.exists():
         return GraphNeighborhoodResult(
             success=False,
             error=f"Project root not found: {root_path}",
         )
-    
+
     # Validate parameters
     if k < 1:
         return GraphNeighborhoodResult(
             success=False,
             error="k must be at least 1",
         )
-    
+
     if max_nodes < 1:
         return GraphNeighborhoodResult(
             success=False,
             error="max_nodes must be at least 1",
         )
-    
+
     if direction not in ("outgoing", "incoming", "both"):
         return GraphNeighborhoodResult(
             success=False,
             error=f"direction must be 'outgoing', 'incoming', or 'both', got '{direction}'",
         )
-    
+
     try:
         # Try to load existing graph from project
         # For now, we'll build a simple graph from the call graph
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
-        
+
         builder = CallGraphBuilder(root_path)
         call_graph_result = builder.build_with_details(entry_point=None, depth=10)
-        
+
         # Convert call graph to UniversalGraph
         from code_scalpel.graph_engine import (
-            GraphNode, GraphEdge, UniversalNodeID, NodeType, EdgeType
+            GraphNode,
+            GraphEdge,
+            UniversalNodeID,
+            NodeType,
+            EdgeType,
         )
-        
+
         graph = UniversalGraph()
-        
+
         # Add nodes
         for node in call_graph_result.nodes:
             node_id = UniversalNodeID(
                 language="python",
-                module=node.file.replace("/", ".").replace(".py", "") if node.file != "<external>" else "external",
+                module=(
+                    node.file.replace("/", ".").replace(".py", "")
+                    if node.file != "<external>"
+                    else "external"
+                ),
                 node_type=NodeType.FUNCTION,
                 name=node.name,
                 line=node.line,
             )
-            graph.add_node(GraphNode(id=node_id, metadata={
-                "file": node.file,
-                "line": node.line,
-                "is_entry_point": node.is_entry_point,
-            }))
-        
+            graph.add_node(
+                GraphNode(
+                    id=node_id,
+                    metadata={
+                        "file": node.file,
+                        "line": node.line,
+                        "is_entry_point": node.is_entry_point,
+                    },
+                )
+            )
+
         # Add edges
         for edge in call_graph_result.edges:
             # Parse caller/callee into node IDs
             caller_parts = edge.caller.split(":")
             callee_parts = edge.callee.split(":")
-            
+
             caller_file = caller_parts[0] if len(caller_parts) > 1 else ""
             caller_name = caller_parts[-1]
             callee_file = callee_parts[0] if len(callee_parts) > 1 else ""
             callee_name = callee_parts[-1]
-            
-            caller_module = caller_file.replace("/", ".").replace(".py", "") if caller_file else "unknown"
-            callee_module = callee_file.replace("/", ".").replace(".py", "") if callee_file else "external"
-            
+
+            caller_module = (
+                caller_file.replace("/", ".").replace(".py", "")
+                if caller_file
+                else "unknown"
+            )
+            callee_module = (
+                callee_file.replace("/", ".").replace(".py", "")
+                if callee_file
+                else "external"
+            )
+
             caller_id = f"python::{caller_module}::function::{caller_name}"
             callee_id = f"python::{callee_module}::function::{callee_name}"
-            
-            graph.add_edge(GraphEdge(
-                from_id=caller_id,
-                to_id=callee_id,
-                edge_type=EdgeType.DIRECT_CALL,
-                confidence=0.9,
-                evidence="Direct function call",
-            ))
-        
+
+            graph.add_edge(
+                GraphEdge(
+                    from_id=caller_id,
+                    to_id=callee_id,
+                    edge_type=EdgeType.DIRECT_CALL,
+                    confidence=0.9,
+                    evidence="Direct function call",
+                )
+            )
+
         # Extract neighborhood
         result = graph.get_neighborhood(
             center_node_id=center_node_id,
@@ -4520,36 +4564,40 @@ async def get_graph_neighborhood(
             direction=direction,
             min_confidence=min_confidence,
         )
-        
+
         if not result.success:
             return GraphNeighborhoodResult(
                 success=False,
                 error=result.error,
             )
-        
+
         # Convert to response models
         nodes = []
         for node_id, depth in result.node_depths.items():
             node = result.subgraph.get_node(node_id) if result.subgraph else None
-            nodes.append(NeighborhoodNodeModel(
-                id=node_id,
-                depth=depth,
-                metadata=node.metadata if node else {},
-            ))
-        
+            nodes.append(
+                NeighborhoodNodeModel(
+                    id=node_id,
+                    depth=depth,
+                    metadata=node.metadata if node else {},
+                )
+            )
+
         edges = []
         if result.subgraph:
             for edge in result.subgraph.edges:
-                edges.append(NeighborhoodEdgeModel(
-                    from_id=edge.from_id,
-                    to_id=edge.to_id,
-                    edge_type=edge.edge_type.value,
-                    confidence=edge.confidence,
-                ))
-        
+                edges.append(
+                    NeighborhoodEdgeModel(
+                        from_id=edge.from_id,
+                        to_id=edge.to_id,
+                        edge_type=edge.edge_type.value,
+                        confidence=edge.confidence,
+                    )
+                )
+
         # Generate Mermaid diagram
         mermaid = _generate_neighborhood_mermaid(nodes, edges, center_node_id)
-        
+
         return GraphNeighborhoodResult(
             success=True,
             center_node_id=center_node_id,
@@ -4563,7 +4611,7 @@ async def get_graph_neighborhood(
             truncation_warning=result.truncation_warning,
             mermaid=mermaid,
         )
-        
+
     except Exception as e:
         return GraphNeighborhoodResult(
             success=False,
@@ -4976,11 +5024,10 @@ class ExtractedSymbolModel(BaseModel):
     depth: int = Field(default=0, description="Depth from original target (0 = target)")
     confidence: float = Field(
         default=1.0,
-        description="Confidence score with decay applied (0.0-1.0). Formula: C_base × 0.9^depth"
+        description="Confidence score with decay applied (0.0-1.0). Formula: C_base × 0.9^depth",
     )
     low_confidence: bool = Field(
-        default=False,
-        description="True if confidence is below threshold (0.5)"
+        default=False, description="True if confidence is below threshold (0.5)"
     )
 
 
@@ -5032,15 +5079,13 @@ class CrossFileDependenciesResult(BaseModel):
     # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
     confidence_decay_factor: float = Field(
         default=0.9,
-        description="Decay factor used: C_effective = C_base × decay_factor^depth"
+        description="Decay factor used: C_effective = C_base × decay_factor^depth",
     )
     low_confidence_count: int = Field(
-        default=0,
-        description="Number of symbols below confidence threshold (0.5)"
+        default=0, description="Number of symbols below confidence threshold (0.5)"
     )
     low_confidence_warning: str | None = Field(
-        default=None,
-        description="Warning message if low-confidence symbols detected"
+        default=None, description="Warning message if low-confidence symbols detected"
     )
 
     error: str | None = Field(default=None, description="Error message if failed")
@@ -5111,7 +5156,7 @@ def _get_cross_file_dependencies_sync(
         # Convert extracted symbols to models
         extracted_symbols = []
         combined_parts = []
-        
+
         # [20251216_FEATURE] v2.5.0 - Low confidence threshold
         LOW_CONFIDENCE_THRESHOLD = 0.5
 
@@ -5204,7 +5249,9 @@ def _get_cross_file_dependencies_sync(
         # [20251216_FEATURE] v2.5.0 - Build low confidence warning if needed
         low_confidence_warning = None
         if extraction_result.low_confidence_count > 0:
-            low_conf_names = [s.name for s in extraction_result.get_low_confidence_symbols()[:5]]
+            low_conf_names = [
+                s.name for s in extraction_result.get_low_confidence_symbols()[:5]
+            ]
             low_confidence_warning = (
                 f"⚠️ {extraction_result.low_confidence_count} symbol(s) have low confidence "
                 f"(below 0.5): {', '.join(low_conf_names)}"
@@ -5730,13 +5777,26 @@ async def validate_paths(
 # [20250108_FEATURE] v2.5.0 Guardian - Policy verification models
 class PolicyVerificationResult(BaseModel):
     """Result of cryptographic policy verification."""
+
     success: bool = Field(description="Whether all policy files verified successfully")
-    manifest_valid: bool = Field(default=False, description="Whether manifest signature is valid")
-    files_verified: int = Field(default=0, description="Number of files successfully verified")
-    files_failed: list[str] = Field(default_factory=list, description="List of files that failed verification")
-    error: str | None = Field(default=None, description="Error message if verification failed")
-    manifest_source: str | None = Field(default=None, description="Source of the policy manifest")
-    policy_dir: str | None = Field(default=None, description="Policy directory that was verified")
+    manifest_valid: bool = Field(
+        default=False, description="Whether manifest signature is valid"
+    )
+    files_verified: int = Field(
+        default=0, description="Number of files successfully verified"
+    )
+    files_failed: list[str] = Field(
+        default_factory=list, description="List of files that failed verification"
+    )
+    error: str | None = Field(
+        default=None, description="Error message if verification failed"
+    )
+    manifest_source: str | None = Field(
+        default=None, description="Source of the policy manifest"
+    )
+    policy_dir: str | None = Field(
+        default=None, description="Policy directory that was verified"
+    )
 
 
 def _verify_policy_integrity_sync(
@@ -5745,7 +5805,7 @@ def _verify_policy_integrity_sync(
 ) -> PolicyVerificationResult:
     """
     Synchronous implementation of policy integrity verification.
-    
+
     [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
     """
     try:
@@ -5753,16 +5813,16 @@ def _verify_policy_integrity_sync(
             CryptographicPolicyVerifier,
             SecurityError,
         )
-        
+
         dir_path = policy_dir or ".scalpel"
-        
+
         verifier = CryptographicPolicyVerifier(
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
-        
+
         result = verifier.verify_all_policies()
-        
+
         return PolicyVerificationResult(
             success=result.success,
             manifest_valid=result.manifest_valid,
@@ -5772,7 +5832,7 @@ def _verify_policy_integrity_sync(
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
-        
+
     except SecurityError as e:
         return PolicyVerificationResult(
             success=False,
@@ -5796,59 +5856,59 @@ async def verify_policy_integrity(
 ) -> PolicyVerificationResult:
     """
     Verify policy file integrity using cryptographic signatures.
-    
+
     [v2.5.0] Use this tool to verify that policy files have not been tampered
     with since they were signed. This is essential for tamper-resistant
     governance in enterprise deployments.
-    
+
     **Security Model: FAIL CLOSED**
     - Missing manifest → DENY ALL
     - Invalid signature → DENY ALL
     - Hash mismatch → DENY ALL
-    
+
     **How it works:**
     1. Load policy manifest from configured source (git, env, file)
     2. Verify HMAC-SHA256 signature using secret key
     3. Verify SHA-256 hash of each policy file matches manifest
     4. Any failure results in security error
-    
+
     **Bypass Prevention:**
     This addresses the 3rd party review feedback that file permissions
     (chmod 0444) can be bypassed. Even if an agent runs `chmod +w` and
     modifies a policy file, the hash verification will detect the change.
-    
+
     Key capabilities:
     - Verify manifest signature integrity
     - Detect tampered policy files
-    - Detect missing policy files  
+    - Detect missing policy files
     - Report detailed verification status
     - Fail closed on any error
-    
+
     Why AI agents need this:
     - **Trust Verification:** Confirm policies haven't been modified
     - **Audit Trail:** Verify policy integrity before operations
     - **Security Compliance:** Meet enterprise security requirements
-    
+
     Example:
         # Verify policy integrity before operations
         result = verify_policy_integrity(policy_dir=".scalpel")
-        
+
         if not result.success:
             print(f"SECURITY: {result.error}")
             # Fail closed - do not proceed
         else:
             print(f"Verified {result.files_verified} policy files")
-    
+
     Args:
         policy_dir: Directory containing policy files (default: .scalpel)
         manifest_source: Where to load manifest from - "git", "env", or "file"
             - "git": Load from committed version in git history (most secure)
             - "env": Load from SCALPEL_POLICY_MANIFEST environment variable
             - "file": Load from local policy.manifest.json file
-    
+
     Returns:
         PolicyVerificationResult with verification status and details
-    
+
     Note:
         Requires SCALPEL_MANIFEST_SECRET environment variable to be set.
         This secret should be managed by administrators, not agents.

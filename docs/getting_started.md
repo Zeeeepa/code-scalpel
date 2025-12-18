@@ -1,13 +1,13 @@
 # Getting Started with Code Scalpel
 
-Welcome to Code Scalpel v2.2.0 "Nexus"! This guide covers installation, configuration, and your first analysis.
+Welcome to Code Scalpel v3.0.0 "Autonomy"! This guide covers installation, configuration, and your first analysis.
 
 ## What is Code Scalpel?
 
 Code Scalpel is an **MCP server toolkit** for AI agents (Claude, GitHub Copilot, Cursor) to perform surgical code operations. Instead of stuffing entire files into context, Code Scalpel extracts *exactly* what's needed—saving 99% of tokens while improving accuracy.
 
 **Key Capabilities:**
-- **17 MCP Tools** for AI agents via Model Context Protocol
+- **19 MCP Tools** for AI agents via Model Context Protocol
 - **4 Languages** - Python, TypeScript, JavaScript, Java (all full support)
 - **Security Analysis** - 17+ vulnerability types including SQLi, NoSQL, DOM XSS
 - **Symbolic Execution** - Z3-powered path exploration and test generation
@@ -16,82 +16,11 @@ Code Scalpel is an **MCP server toolkit** for AI agents (Claude, GitHub Copilot,
 
 ---
 
-## Installation
+## Quick Start (Recommended)
 
-### Option 1: pip (Standard)
+The fastest way to use Code Scalpel is through your AI assistant with MCP. Choose your editor:
 
-```bash
-pip install code-scalpel
-```
-
-### Option 2: uv (Recommended for MCP)
-
-[uv](https://docs.astral.sh/uv/) is the fastest Python package manager and works seamlessly with MCP:
-
-```bash
-# Install uv (if not installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Run code-scalpel without installing
-uvx code-scalpel --help
-
-# Or install globally
-uv tool install code-scalpel
-```
-
-### Option 3: From Source (Development)
-
-```bash
-git clone https://github.com/tescolopio/code-scalpel.git
-cd code-scalpel
-pip install -e ".[dev]"
-```
-
-### Option 4: Docker
-
-```bash
-# Pull from GitHub Container Registry
-docker pull ghcr.io/tescolopio/code-scalpel:2.2.0
-
-# Or build locally
-docker build -t code-scalpel .
-```
-
-### Optional Dependencies
-
-```bash
-# For Autogen integration
-pip install code-scalpel[autogen]
-
-# For CrewAI integration  
-pip install code-scalpel[crewai]
-
-# For all AI integrations
-pip install code-scalpel[all]
-
-# For development (tests, linting)
-pip install code-scalpel[dev]
-```
-
----
-
-## Server Configuration by Transport Type
-
-Code Scalpel supports three transport methods:
-
-| Transport | Protocol | Best For |
-|-----------|----------|----------|
-| **stdio** | Standard I/O | Local AI assistants (Claude Desktop, VS Code, Cursor) |
-| **HTTP** | REST/SSE | Remote access, team servers, web integrations |
-| **Docker** | HTTP (containerized) | CI/CD, isolated environments, production |
-
----
-
-### stdio Transport (Local AI Assistants)
-
-The stdio transport communicates via standard input/output streams. This is the **default and recommended** method for local AI assistants.
-
-#### VS Code / GitHub Copilot
+### VS Code / GitHub Copilot (Recommended)
 
 1. Create `.vscode/mcp.json` in your project root:
 
@@ -107,24 +36,12 @@ The stdio transport communicates via standard input/output streams. This is the 
 }
 ```
 
-2. In VS Code: `Ctrl+Shift+P` → "MCP: List Servers"
-3. Click "Start" next to code-scalpel
-4. Use in Copilot Chat with agent mode (`@workspace`)
+2. In VS Code: `Ctrl+Shift+P` → "MCP: List Servers" → Click "Start"
+3. Use in Copilot Chat with agent mode (`@workspace`)
 
-**Alternative with pip install:**
-```json
-{
-  "servers": {
-    "code-scalpel": {
-      "type": "stdio", 
-      "command": "python",
-      "args": ["-m", "code_scalpel.mcp", "--root", "${workspaceFolder}"]
-    }
-  }
-}
-```
+**That's it!** Ask Copilot: *"Scan this file for security vulnerabilities"* and it will use Code Scalpel automatically.
 
-#### Claude Desktop
+### Claude Desktop
 
 1. Find your config file:
    - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
@@ -144,22 +61,9 @@ The stdio transport communicates via standard input/output streams. This is the 
 }
 ```
 
-**Windows paths:**
-```json
-{
-  "mcpServers": {
-    "code-scalpel": {
-      "command": "uvx",
-      "args": ["code-scalpel", "mcp", "--root", "C:\\Users\\you\\Projects\\myapp"]
-    }
-  }
-}
-```
+3. Restart Claude Desktop - look for the hammer icon indicating tools are available
 
-3. Restart Claude Desktop
-4. Look for the hammer icon indicating tools are available
-
-#### Cursor IDE
+### Cursor IDE
 
 Add to `~/.cursor/mcp.json`:
 
@@ -176,17 +80,63 @@ Add to `~/.cursor/mcp.json`:
 
 ---
 
-### HTTP Transport (Remote/Team Access)
+## Installation Options
 
-The HTTP transport runs a web server that accepts MCP requests. Use this for:
-- Team-shared analysis servers
-- Remote access from web applications
-- Integration with custom tools
+### Option 1: uv (Recommended - Zero Install)
 
-#### Start HTTP Server
+[uv](https://docs.astral.sh/uv/) runs Code Scalpel directly without installation:
 
 ```bash
-# Basic HTTP server (localhost only)
+# Install uv (if not installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Run code-scalpel without installing (used in MCP configs above)
+uvx code-scalpel --help
+```
+
+This is the **recommended** approach because:
+- No global installation needed
+- Always uses the latest version
+- Works seamlessly with MCP configs
+
+### Option 2: pip (Traditional)
+
+```bash
+pip install code-scalpel
+```
+
+Then use `python -m code_scalpel.mcp` in your MCP configs instead of `uvx code-scalpel mcp`.
+
+### Option 3: Docker (Production/CI)
+
+```bash
+# Pull from GitHub Container Registry
+docker pull ghcr.io/tescolopio/code-scalpel:3.0.0
+
+# Run HTTP server
+docker run -d -p 8593:8593 -p 8594:8594 \
+  -v /path/to/project:/project \
+  ghcr.io/tescolopio/code-scalpel:3.0.0
+```
+
+### Option 4: From Source (Development)
+
+```bash
+git clone https://github.com/tescolopio/code-scalpel.git
+cd code-scalpel
+pip install -e ".[dev]"
+```
+
+---
+
+## Additional Server Configuration
+
+### HTTP Transport (Remote/Team Access)
+
+For team-shared servers or remote access:
+
+```bash
+# Start HTTP server (localhost only)
 code-scalpel mcp --http --port 8593
 
 # Allow LAN access for team use
@@ -196,95 +146,33 @@ code-scalpel mcp --http --port 8593 --allow-lan
 code-scalpel mcp --http --port 8593 --root /path/to/project
 ```
 
-#### Health Check Endpoint
-
-Code Scalpel v2.0.0 includes a health endpoint on port 8594:
-
+**Health Check Endpoint** (port 8594):
 ```bash
 curl http://localhost:8594/health
+# {"status": "healthy", "version": "3.0.0", "tools": 18}
 ```
 
-Response:
-```json
-{
-  "status": "healthy",
-  "version": "2.0.0", 
-  "tools": 18,
-  "uptime_seconds": 3600
-}
-```
-
-#### Connect from VS Code (HTTP)
-
-```json
-{
-  "servers": {
-    "code-scalpel-remote": {
-      "type": "http",
-      "url": "http://your-server:8593/mcp"
-    }
-  }
-}
-```
-
-#### Connect from Claude Desktop (HTTP)
-
-Claude Desktop doesn't natively support HTTP transport. Use a proxy like [mcp-proxy](https://github.com/anthropics/mcp-proxy) or run locally with stdio.
-
----
-
-### Docker Deployment
-
-Docker provides isolation and reproducibility for CI/CD and production environments.
-
-#### Quick Start
-
-```bash
-# Run with project volume mounted
-docker run -d \
-  --name code-scalpel \
-  -p 8593:8593 \
-  -p 8594:8594 \
-  -v /path/to/project:/project \
-  ghcr.io/tescolopio/code-scalpel:2.0.0
-
-# Verify health
-curl http://localhost:8594/health
-
-# View logs
-docker logs code-scalpel
-```
-
-#### Docker Compose
-
-Create `docker-compose.yml`:
+### Docker Deployment (Production/CI)
 
 ```yaml
+# docker-compose.yml
 version: '3.8'
 services:
   code-scalpel:
-    image: ghcr.io/tescolopio/code-scalpel:2.0.0
+    image: ghcr.io/tescolopio/code-scalpel:3.0.0
     ports:
-      - "8593:8593"  # MCP server
-      - "8594:8594"  # Health endpoint
+      - "8593:8593"
+      - "8594:8594"
     volumes:
-      - ./:/project:ro  # Mount project read-only
-    environment:
-      - LOG_LEVEL=INFO
+      - ./:/project:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8594/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-    restart: unless-stopped
 ```
 
-Start with:
-```bash
-docker-compose up -d
-```
-
-#### CI/CD Integration (GitHub Actions)
+### CI/CD Integration (GitHub Actions)
 
 ```yaml
 name: Security Scan
@@ -295,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       code-scalpel:
-        image: ghcr.io/tescolopio/code-scalpel:2.0.0
+        image: ghcr.io/tescolopio/code-scalpel:3.0.0
         ports:
           - 8593:8593
     steps:
@@ -315,40 +203,48 @@ jobs:
 
 ---
 
-## CLI Reference
+## Using Code Scalpel
 
-Code Scalpel provides a command-line interface for standalone analysis:
+### Primary: Through Your AI Assistant (Recommended)
 
-```bash
-# Show help
-code-scalpel --help
+Once connected via MCP, simply ask your AI assistant:
 
-# Analyze code structure
-code-scalpel analyze app.py
-code-scalpel analyze src/ --json
+> "Analyze the security of my Flask app"
 
-# Security scan
-code-scalpel scan app.py
-code-scalpel scan --code "cursor.execute(user_input)"
+The AI will automatically use Code Scalpel's tools:
 
-# Start MCP server (stdio - default)
-code-scalpel mcp
-
-# Start MCP server (HTTP)
-code-scalpel mcp --http --port 8593
-
-# With project root
-code-scalpel mcp --root /path/to/project
-
-# Version info
-code-scalpel version
+```
+Security Analysis Results:
+- SQL Injection (CWE-89) at line 45
+  Taint path: request.args['id'] → user_id → query → cursor.execute()
+- Hardcoded Secret (AWS Key) at line 12
+  Pattern: AKIA... detected in config.py
 ```
 
----
+Other example prompts:
+- *"Extract the `calculate_tax` function from utils.py"*
+- *"Find all references to the UserService class"*
+- *"Generate unit tests for this function"*
+- *"Build a call graph starting from main()"*
 
-## Your First Analysis
+### Secondary: CLI (Standalone Analysis)
 
-### Using Python API
+For CI/CD or quick checks without an AI assistant:
+
+```bash
+# Security scan
+code-scalpel scan app.py
+
+# Analyze code structure
+code-scalpel analyze src/ --json
+
+# Start MCP server manually
+code-scalpel mcp --http --port 8593
+```
+
+### Advanced: Python API (Programmatic Use)
+
+For building custom tools on top of Code Scalpel:
 
 ```python
 from code_scalpel import CodeAnalyzer
@@ -395,22 +291,6 @@ code-scalpel analyze src/ --json > analysis.json
 
 # Security scan with taint tracking
 code-scalpel scan app.py
-```
-
-### Using MCP Tools (via AI Assistant)
-
-Once connected to Claude or Copilot, ask:
-
-> "Analyze the security of my Flask app"
-
-The AI will use the `security_scan` tool to detect vulnerabilities:
-
-```
-Security Analysis Results:
-- SQL Injection (CWE-89) at line 45
-  Taint path: request.args['id'] → user_id → query → cursor.execute()
-- Hardcoded Secret (AWS Key) at line 12
-  Pattern: AKIA... detected in config.py
 ```
 
 ---
@@ -490,7 +370,7 @@ curl -v http://localhost:8594/health
 
 - [API Reference](api_reference.md) - Complete API documentation
 - [Agent Integration Guide](agent_integration.md) - Deep dive into AI framework integrations
-- [MCP Tools Reference](mcp_tools.md) - All 18 tools explained
+- [MCP Tools Reference](mcp_tools.md) - All 19 tools explained
 - [Security Analysis Guide](security_analysis.md) - Vulnerability detection details
 - [Examples](examples.md) - Code samples and use cases
 
@@ -500,7 +380,7 @@ curl -v http://localhost:8594/health
 
 - **GitHub Issues:** [Report bugs](https://github.com/tescolopio/code-scalpel/issues)
 - **GitHub Discussions:** [Ask questions](https://github.com/tescolopio/code-scalpel/discussions)
-- **Release Notes:** [v2.0.0 Changes](release_notes/RELEASE_NOTES_v2.0.0.md)
+- **Release Notes:** [v3.0.0 Changes](release_notes/RELEASE_NOTES_v3.0.0.md)
 
 ---
 

@@ -39,10 +39,10 @@ The Policy Engine provides enterprise-grade, tamper-resistant policy enforcement
 
 ## Installation
 
-The policy engine is included in Code Scalpel v2.5.0+:
+The policy engine is included in Code Scalpel v2.5.0+ (current: v3.0.0):
 
 ```bash
-pip install code-scalpel>=2.5.0
+pip install code-scalpel>=3.0.0
 ```
 
 ## Quick Start
@@ -424,9 +424,9 @@ for op in operations:
 # Process results
 for op, allowed, error in results:
     if allowed:
-        print(f"✓ {op.type} on {op.affected_files} allowed")
+        print(f"[COMPLETE] {op.type} on {op.affected_files} allowed")
     else:
-        print(f"✗ {op.type} blocked: {error}")
+        print(f"[FAILED] {op.type} blocked: {error}")
 ```
 
 ## Integration Examples

@@ -164,57 +164,57 @@ curl http://localhost:8593/sse
 
 ```bash
 $ docker build -t code-scalpel:1.5.3 .
-✓ Build successful
-✓ Image created: sha256:d088a721448f52986709a59ea607a50d3154ce5f
-✓ Tags: code-scalpel:1.5.3, code-scalpel:latest
-✓ Size: 850MB
+[COMPLETE] Build successful
+[COMPLETE] Image created: sha256:d088a721448f52986709a59ea607a50d3154ce5f
+[COMPLETE] Tags: code-scalpel:1.5.3, code-scalpel:latest
+[COMPLETE] Size: 850MB
 ```
 
 ### Container Startup Verification
 
 ```bash
 $ docker run -d --name code-scalpel-mcp -p 8593:8593 code-scalpel:1.5.3
-✓ Container ID: a1c5a0e588f7...
-✓ Status: Up X seconds
-✓ Health: Starting
-✓ Port mapping: 0.0.0.0:8593->8593/tcp
+[COMPLETE] Container ID: a1c5a0e588f7...
+[COMPLETE] Status: Up X seconds
+[COMPLETE] Health: Starting
+[COMPLETE] Port mapping: 0.0.0.0:8593->8593/tcp
 ```
 
 ### SSE Endpoint Verification
 
 ```bash
 $ curl -v http://localhost:8593/sse
-✓ HTTP/1.1 200 OK
-✓ Content-Type: text/event-stream; charset=utf-8
-✓ Response: SSE stream with ping events
-✓ Server: uvicorn
+[COMPLETE] HTTP/1.1 200 OK
+[COMPLETE] Content-Type: text/event-stream; charset=utf-8
+[COMPLETE] Response: SSE stream with ping events
+[COMPLETE] Server: uvicorn
 ```
 
 ### PathResolver Verification
 
 ```bash
-✓ Docker Detected: True (using /.dockerenv + /proc/1/cgroup fallback)
-✓ Workspace Root: /workspace (auto-detected)
-✓ Cache Enabled: Yes (improves repeated resolutions 10x)
-✓ Error Messages: Include Docker volume mount suggestions
+[COMPLETE] Docker Detected: True (using /.dockerenv + /proc/1/cgroup fallback)
+[COMPLETE] Workspace Root: /workspace (auto-detected)
+[COMPLETE] Cache Enabled: Yes (improves repeated resolutions 10x)
+[COMPLETE] Error Messages: Include Docker volume mount suggestions
 ```
 
 ### Volume Mount Verification
 
 ```bash
-✓ Files mounted to /workspace are visible from container
-✓ File permissions preserved
-✓ Read access working
-✓ PathResolver correctly identifies mounted directory
+[COMPLETE] Files mounted to /workspace are visible from container
+[COMPLETE] File permissions preserved
+[COMPLETE] Read access working
+[COMPLETE] PathResolver correctly identifies mounted directory
 ```
 
 ### MCP Tool Verification
 
 ```bash
-✓ validate_paths tool available and functional
-✓ extract_code tool using PathResolver
-✓ get_file_context tool using PathResolver
-✓ All tools backward compatible
+[COMPLETE] validate_paths tool available and functional
+[COMPLETE] extract_code tool using PathResolver
+[COMPLETE] get_file_context tool using PathResolver
+[COMPLETE] All tools backward compatible
 ```
 
 ## Deployment Instructions
@@ -396,7 +396,7 @@ docker run -v $(pwd):/workspace code-scalpel:1.5.3
 ### Port Accessibility
 
 ```bash
-✓ curl http://localhost:8593/sse
+[COMPLETE] curl http://localhost:8593/sse
   Response: HTTP/1.1 200 OK
   Content-Type: text/event-stream
   Status: PASS
@@ -405,30 +405,30 @@ docker run -v $(pwd):/workspace code-scalpel:1.5.3
 ### Container Health
 
 ```bash
-✓ docker ps status: Up X seconds
-✓ Health check: Starting -> Healthy (after 30s)
-✓ Logs show: "Uvicorn running on http://0.0.0.0:8593"
-✓ No errors in logs
+[COMPLETE] docker ps status: Up X seconds
+[COMPLETE] Health check: Starting -> Healthy (after 30s)
+[COMPLETE] Logs show: "Uvicorn running on http://0.0.0.0:8593"
+[COMPLETE] No errors in logs
   Status: PASS
 ```
 
 ### PathResolver Functionality
 
 ```bash
-✓ Docker detection: True
-✓ Workspace root: /workspace
-✓ Path caching: Working
-✓ Error suggestions: Include Docker mount commands
+[COMPLETE] Docker detection: True
+[COMPLETE] Workspace root: /workspace
+[COMPLETE] Path caching: Working
+[COMPLETE] Error suggestions: Include Docker mount commands
   Status: PASS
 ```
 
 ### MCP Tools
 
 ```bash
-✓ validate_paths: Available and functional
-✓ extract_code: Using PathResolver
-✓ get_file_context: Using PathResolver
-✓ All tools backward compatible
+[COMPLETE] validate_paths: Available and functional
+[COMPLETE] extract_code: Using PathResolver
+[COMPLETE] get_file_context: Using PathResolver
+[COMPLETE] All tools backward compatible
   Status: PASS
 ```
 

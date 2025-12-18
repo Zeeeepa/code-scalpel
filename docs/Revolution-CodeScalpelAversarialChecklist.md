@@ -22,7 +22,7 @@ Principle: "An agent that works in Java but breaks the Frontend is useless. An a
 * If the API route is constructed dynamically ("/api/" \+ version \+ "/user"), does the graph claim a link or flag uncertainty?  
 * Can the agent be tricked into refactoring a "guessed" dependency?
 
-### **✅ Must‑Pass Checklist**
+### **[COMPLETE] Must‑Pass Checklist**
 
 **Explicit Uncertainty**
 
@@ -35,7 +35,7 @@ Principle: "An agent that works in Java but breaks the Frontend is useless. An a
 * \[ \] **HTTP Links:** Graph connects fetch (JS) to @RequestMapping (Java).  
 * \[ \] **Type Synching:** Changing a Java Class field flags the corresponding TypeScript Interface as "Stale".
 
-🚫 Fail Condition:  
+[DEPRECATED] Fail Condition:  
 If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination).
 
 ## **PHASE 5 — Governance & Policy (v2.5.0)**
@@ -50,7 +50,7 @@ If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination).
 * Does confidence decay for deep dependency chains? (10+ hops should trigger low-confidence warning)
 * Does graph explosion occur with large call graphs? (Must have neighborhood pruning)
 
-### **✅ Must‑Pass Checklist**
+### **[COMPLETE] Must‑Pass Checklist**
 
 **Enforcement**
 
@@ -72,7 +72,7 @@ If the tool presents a "Best Guess" as a "Fact" (Silent Hallucination).
 * \[ \] **Graph Neighborhood View:** k-hop subgraph extraction with max 100 nodes.
 * \[ \] **Truncation Warning:** When graph is pruned, return explicit warning to agent.
 
-🚫 Fail Condition:  
+[DEPRECATED] Fail Condition:  
 If an agent can execute a forbidden action by "tricking" the parser.
 
 ## **PHASE 6 — The Self-Correction Loop (v3.0.0)**
@@ -86,7 +86,7 @@ If an agent can execute a forbidden action by "tricking" the parser.
 * Can an agent submit a "hollow fix" (`def test(): pass`) and claim success?
 * Does reverting a fix cause tests to fail again? (Mutation Test Gate)
 
-### **✅ Must‑Pass Checklist**
+### **[COMPLETE] Must‑Pass Checklist**
 
 **Feedback Quality**
 
@@ -106,5 +106,5 @@ If an agent can execute a forbidden action by "tricking" the parser.
 * \[ \] **Mutation Score:** At least 80% of mutations caught by tests.
 * \[ \] **Weak Test Flagging:** Tests that pass with reversed logic flagged.
 
-🚫 Fail Condition:  
+[DEPRECATED] Fail Condition:  
 If the agent reports "Fixed" but the build fails in CI.

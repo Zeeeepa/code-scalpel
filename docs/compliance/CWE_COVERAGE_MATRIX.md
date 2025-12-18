@@ -23,7 +23,7 @@ This document maps Code Scalpel's security detection capabilities to Common Weak
 
 ### CWE-89: SQL Injection
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint analysis from user input to SQL execution sinks
 
@@ -52,7 +52,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-78: OS Command Injection
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to command execution functions
 
@@ -71,7 +71,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-79: Cross-Site Scripting (XSS)
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to HTML output sinks
 
@@ -90,7 +90,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-22: Path Traversal
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to file operations
 
@@ -108,7 +108,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-94: Code Injection
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to code execution
 
@@ -122,7 +122,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-611: XXE (XML External Entity)
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Pattern matching + taint analysis
 
@@ -138,7 +138,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-1336: SSTI (Server-Side Template Injection)
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to template constructors
 
@@ -151,7 +151,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-943: NoSQL Injection
 
-**Status:** ✅ Supported (v1.3.0+)
+**Status:** [COMPLETE] Supported (v1.3.0+)
 
 **Detection Method:** Taint flow to NoSQL query methods
 
@@ -166,7 +166,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-327: Use of Broken Crypto Algorithm
 
-**Status:** ⚠️ Partial Support
+**Status:** [WARNING] Partial Support
 
 **Detection Method:** Pattern matching for weak algorithms
 
@@ -179,7 +179,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-328: Reversible One-Way Hash
 
-**Status:** ⚠️ Partial Support
+**Status:** [WARNING] Partial Support
 
 **Detection Method:** Heuristic analysis
 
@@ -187,7 +187,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-798: Hardcoded Credentials
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Secret scanning with regex patterns
 
@@ -203,7 +203,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-200: Exposure of Sensitive Information
 
-**Status:** ⚠️ Partial Support
+**Status:** [WARNING] Partial Support
 
 **Detection Method:** Pattern matching for sensitive data logging
 
@@ -211,7 +211,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-532: Information in Log Files
 
-**Status:** ⚠️ Partial Support
+**Status:** [WARNING] Partial Support
 
 **Detection Method:** Taint flow to logging functions
 
@@ -219,7 +219,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-312: Cleartext Storage of Sensitive Info
 
-**Status:** ✅ Supported
+**Status:** [COMPLETE] Supported
 
 **Detection Method:** Pattern matching + context analysis
 
@@ -229,7 +229,7 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 ### CWE-502: Deserialization of Untrusted Data
 
-**Status:** ✅ Fully Supported
+**Status:** [COMPLETE] Fully Supported
 
 **Detection Method:** Taint flow to deserialization
 
@@ -247,34 +247,34 @@ cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
 
 | CWE | Status |
 |-----|--------|
-| CWE-89 (SQLi) | ✅ Full |
-| CWE-78 (Command) | ✅ Full |
-| CWE-79 (XSS) | ✅ Full |
-| CWE-22 (Path) | ✅ Full |
-| CWE-94 (Code) | ✅ Full |
-| CWE-611 (XXE) | ✅ Full |
-| CWE-1336 (SSTI) | ✅ Full |
-| CWE-502 (Deserial) | ✅ Full |
-| CWE-798 (Secrets) | ✅ Full |
+| CWE-89 (SQLi) | [COMPLETE] Full |
+| CWE-78 (Command) | [COMPLETE] Full |
+| CWE-79 (XSS) | [COMPLETE] Full |
+| CWE-22 (Path) | [COMPLETE] Full |
+| CWE-94 (Code) | [COMPLETE] Full |
+| CWE-611 (XXE) | [COMPLETE] Full |
+| CWE-1336 (SSTI) | [COMPLETE] Full |
+| CWE-502 (Deserial) | [COMPLETE] Full |
+| CWE-798 (Secrets) | [COMPLETE] Full |
 
 ### JavaScript/TypeScript
 
 | CWE | Status |
 |-----|--------|
-| CWE-79 (DOM XSS) | ✅ Full |
-| CWE-94 (eval) | ✅ Full |
-| CWE-78 (Command) | ✅ Full |
-| CWE-89 (SQLi) | ⚠️ Partial |
-| CWE-1321 (Prototype) | ⚠️ Partial |
+| CWE-79 (DOM XSS) | [COMPLETE] Full |
+| CWE-94 (eval) | [COMPLETE] Full |
+| CWE-78 (Command) | [COMPLETE] Full |
+| CWE-89 (SQLi) | [WARNING] Partial |
+| CWE-1321 (Prototype) | [WARNING] Partial |
 
 ### Java
 
 | CWE | Status |
 |-----|--------|
-| CWE-89 (SQLi) | ✅ Full |
-| CWE-78 (Command) | ✅ Full |
-| CWE-611 (XXE) | ✅ Full |
-| CWE-502 (Deserial) | ✅ Full |
+| CWE-89 (SQLi) | [COMPLETE] Full |
+| CWE-78 (Command) | [COMPLETE] Full |
+| CWE-611 (XXE) | [COMPLETE] Full |
+| CWE-502 (Deserial) | [COMPLETE] Full |
 
 ---
 

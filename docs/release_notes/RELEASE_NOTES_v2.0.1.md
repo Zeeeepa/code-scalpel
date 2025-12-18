@@ -59,11 +59,11 @@ The following paths are excluded from coverage requirements with justification:
 
 All Java regression baseline tests pass:
 
-- ✅ **Java Generics:** `Repository<User>` vs `Repository<Order>` correctly distinguished
-- ✅ **Spring Security:** `LdapTemplate` and `OAuth2TokenProvider` sinks detected
-- ✅ **JPA/ORM:** Entity relationships and query sinks tracked
-- ✅ **Determinism:** Identical node IDs on re-analysis
-- ✅ **Performance:** < 200ms parsing for standard files
+- [COMPLETE] **Java Generics:** `Repository<User>` vs `Repository<Order>` correctly distinguished
+- [COMPLETE] **Spring Security:** `LdapTemplate` and `OAuth2TokenProvider` sinks detected
+- [COMPLETE] **JPA/ORM:** Entity relationships and query sinks tracked
+- [COMPLETE] **Determinism:** Identical node IDs on re-analysis
+- [COMPLETE] **Performance:** < 200ms parsing for standard files
 
 ### 4. Revolution Roadmap Integration
 
@@ -109,10 +109,10 @@ This release officially documents the path to v3.0.0 "Autonomy":
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Analysis Throughput | 20,000+ LOC/sec | ✅ Maintained |
-| Token Efficiency | 99% reduction vs full-file | ✅ Maintained |
-| Security Detection F1 | 1.0 (100% precision/recall) | ✅ Maintained |
-| Java Parse Time | < 200ms (standard files) | ✅ Maintained |
+| Analysis Throughput | 20,000+ LOC/sec | [COMPLETE] Maintained |
+| Token Efficiency | 99% reduction vs full-file | [COMPLETE] Maintained |
+| Security Detection F1 | 1.0 (100% precision/recall) | [COMPLETE] Maintained |
+| Java Parse Time | < 200ms (standard files) | [COMPLETE] Maintained |
 
 ---
 

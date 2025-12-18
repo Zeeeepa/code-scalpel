@@ -1,10 +1,10 @@
-import os
 from pathlib import Path
 
 from code_scalpel.mcp.module_resolver import get_mime_type, resolve_module_path
 
 
 # [20251216_TEST] Cover module resolver branches across languages and fallbacks
+
 
 def test_python_resolution_variants(tmp_path: Path) -> None:
     (tmp_path / "utils.py").write_text("# util module")
@@ -15,8 +15,14 @@ def test_python_resolution_variants(tmp_path: Path) -> None:
     (tmp_path / "src" / "core" / "service.py").write_text("# service")
 
     assert resolve_module_path("python", "utils", tmp_path) == tmp_path / "utils.py"
-    assert resolve_module_path("python", "pkg", tmp_path) == tmp_path / "pkg" / "__init__.py"
-    assert resolve_module_path("python", "core.service", tmp_path) == tmp_path / "src" / "core" / "service.py"
+    assert (
+        resolve_module_path("python", "pkg", tmp_path)
+        == tmp_path / "pkg" / "__init__.py"
+    )
+    assert (
+        resolve_module_path("python", "core.service", tmp_path)
+        == tmp_path / "src" / "core" / "service.py"
+    )
 
 
 def test_javascript_and_typescript_resolution(tmp_path: Path) -> None:
@@ -32,9 +38,14 @@ def test_javascript_and_typescript_resolution(tmp_path: Path) -> None:
     lib_src.mkdir(parents=True)
     (lib_src / "index.ts").write_text("// ts index")
 
-    assert resolve_module_path("javascript", "components/Button", tmp_path) == components / "index.jsx"
+    assert (
+        resolve_module_path("javascript", "components/Button", tmp_path)
+        == components / "index.jsx"
+    )
     assert resolve_module_path("javascript", "shared", tmp_path) == shared / "index.js"
-    assert resolve_module_path("typescript", "lib/api", tmp_path) == lib_src / "index.ts"
+    assert (
+        resolve_module_path("typescript", "lib/api", tmp_path) == lib_src / "index.ts"
+    )
     assert resolve_module_path("ts", "lib/api", tmp_path) == lib_src / "index.ts"
 
 
@@ -43,7 +54,10 @@ def test_java_resolution_and_unknown_language(tmp_path: Path) -> None:
     java_main.mkdir(parents=True)
     (java_main / "Service.java").write_text("// service")
 
-    assert resolve_module_path("java", "com.example.Service", tmp_path) == java_main / "Service.java"
+    assert (
+        resolve_module_path("java", "com.example.Service", tmp_path)
+        == java_main / "Service.java"
+    )
     assert resolve_module_path("ruby", "foo", tmp_path) is None
     assert get_mime_type("unknown") == "text/plain"
     assert get_mime_type("tsx") == "text/x-tsx"
@@ -59,7 +73,9 @@ def test_direct_resolution_variants(tmp_path: Path) -> None:
     (pkg_index / "index.ts").write_text("// pkg index")
 
     assert resolve_module_path("typescript", "utils", tmp_path) == tmp_path / "utils.ts"
-    assert resolve_module_path("javascript", "Widget", tmp_path) == tmp_path / "Widget.jsx"
+    assert (
+        resolve_module_path("javascript", "Widget", tmp_path) == tmp_path / "Widget.jsx"
+    )
     assert resolve_module_path("java", "Service", tmp_path) == tmp_path / "Service.java"
     assert resolve_module_path("typescript", "pkg", tmp_path) == pkg_index / "index.ts"
 
@@ -100,8 +116,14 @@ def test_js_and_ts_resolution_nested_src_variants(tmp_path: Path) -> None:
     (jsx_index / "index.jsx").write_text("// jsx home")
 
     assert resolve_module_path("javascript", "ui/View", tmp_path) == src_ui / "View.jsx"
-    assert resolve_module_path("typescript", "widgets/Widget", tmp_path) == src_tsx / "Widget.tsx"
-    assert resolve_module_path("javascript", "pages/Home", tmp_path) == jsx_index / "index.jsx"
+    assert (
+        resolve_module_path("typescript", "widgets/Widget", tmp_path)
+        == src_tsx / "Widget.tsx"
+    )
+    assert (
+        resolve_module_path("javascript", "pages/Home", tmp_path)
+        == jsx_index / "index.jsx"
+    )
 
 
 def test_mime_type_aliases_and_defaults() -> None:
