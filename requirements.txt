@@ -19,6 +19,8 @@ esprima
 javalang
 tree-sitter
 tree-sitter-java
+tree-sitter-javascript  # [20251218_BUGFIX] Add missing JavaScript tree-sitter binding
+tree-sitter-typescript  # [20251218_BUGFIX] Add missing TypeScript tree-sitter binding
 mcp>=1.23.0
 urllib3>=2.6.0
 uvicorn
