@@ -22,4 +22,6 @@ tree-sitter-java
 mcp>=1.23.0
 urllib3>=2.6.0
 uvicorn
+flask>=2.0.0  # [20251218_BUGFIX] Add missing Flask dependency from pyproject.toml
 pytest-asyncio>=0.23  # [20251214_TEST] Enable async test execution
+structlog>=24.1.0  # [20251216_FEATURE] v2.2.0 Structured MCP logging
