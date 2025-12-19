@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.0.0"  # [20251219_RELEASE] v3.0.0 "Autonomy" - Self-correction loop with governance
+version = "3.0.1"  # [20251219_RELEASE] v3.0.1 "Autonomy" - Configuration management and security hardening
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

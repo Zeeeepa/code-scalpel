@@ -1,9 +1,13 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 3.5 (Post-Release Maintenance)  
-**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] Post-release test fixes -->
-**Current Release:** v3.0.0 "Autonomy" (Released Dec 18, 2025)  <!-- [20251218_DOCS] Self-correction loop complete -->
-**Previous Release:** v2.5.0 "Guardian" (Released Dec 17, 2025)
+**Document Version:** 3.6 (v3.0.1 Configuration Release)  
+**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v3.0.1 configuration enhancements -->
+**Current Release:** v3.0.1 "Autonomy" (Released Dec 19, 2025)  <!-- [20251219_RELEASE] Configuration management release -->
+**Previous Release:** v3.0.0 "Autonomy" (Released Dec 18, 2025)
+**v3.0.1 Features RELEASED:**
+- [COMPLETE] .code-scalpel Configuration Management - Governance config schema with blast radius controls
+- [COMPLETE] Security Hardening (13 Bandit issues) - Safe subprocess execution, XXE prevention, URL validation
+- [COMPLETE] defusedxml Integration - Safe XML parsing for pom.xml/dependency files
 **v3.0.0 Features RELEASED:**
 - [COMPLETE] Error-to-Diff Engine (27 tests) - Multi-language error parsing with confidence scoring
 - [COMPLETE] Fix Loop Termination (12 tests) - Supervised fix loop with max_attempts, timeout, escalation
@@ -321,21 +325,21 @@ v1.x Series (Python Excellence)
    Secrets     Patterns    Call Graph   Taint Flow   Isolation    Paths       __import__   Parallel
    Coverage    SSTI/XXE    Project Map  Multi-File   Mocking      Resolver    Lazy Load    10s/1000
 
-v2.x Series (Multi-Language + Revolution)
-<!-- [20251216_DOCS] Streamlined: v2.0.2, v2.0.3, v2.1.0 DEPRECATED and consolidated into v2.2.0 -->
-┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│   v2.0.0        │  │   v2.0.1         │  │   v2.2.0         │  │   v2.5.0         │  │   v3.0.0         │
-│   Polyglot      │─>│   Java Complete  │─>│   "Nexus"        │─>│   "Guardian"     │─>│   "Autonomy"     │
-│   RELEASED      │  │   RELEASED       │  │   Unified Graph  │  │   Governance     │  │   Self-Correct   │
-│  Dec 15, 2025   │  │  Dec 16, 2025    │  │   PLANNED Q1     │  │   PLANNED Q1-Q2  │  │   PLANNED Q2     │
-└─────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
-      │                    │                    │                    │                    │
-  TypeScript          Java                 **Consolidated:**    Policy Engine        Error-to-Diff
-  JavaScript          Generics             Unified Graph        Security Block       Speculative Exec
-  Java               Spring                Confidence Engine    Change Budget        Agent Templates
-  Progress Tokens     Security             JSX/TSX Support      Compliance           Full Audit
-  Roots              JPA/ORM               Resource Templates   Tamper-Resist        Ecosystem Lock
-  Health Endpoint     95% Coverage         Workflow Prompts     OWASP Block          Singularity Demo
+v2.x/v3.x Series (Multi-Language + Revolution)
+<!-- [20251219_DOCS] Updated timeline with v3.0.1 configuration release -->
+┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│   v2.0.0        │  │   v2.0.1         │  │   v2.2.0         │  │   v2.5.0         │  │   v3.0.0         │  │   v3.0.1         │
+│   Polyglot      │─>│   Java Complete  │─>│   "Nexus"        │─>│   "Guardian"     │─>│   "Autonomy"     │─>│   Config Mgmt    │
+│   RELEASED      │  │   RELEASED       │  │   RELEASED       │  │   RELEASED       │  │   RELEASED       │  │   RELEASED       │
+│  Dec 15, 2025   │  │  Dec 16, 2025    │  │  Dec 17, 2025    │  │  Dec 17, 2025    │  │  Dec 18, 2025    │  │  Dec 19, 2025    │
+└─────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
+      │                    │                    │                    │                    │                    │
+  TypeScript          Java                 Unified Graph        Policy Engine        Error-to-Diff        .code-scalpel
+  JavaScript          Generics             Confidence Engine    Security Block       Speculative Exec     Blast Radius
+  Java               Spring                JSX/TSX Support      Change Budget        Agent Templates      Governance Schema
+  Progress Tokens     Security             Resource Templates   Compliance           Full Audit           Security Hardening
+  Roots              JPA/ORM               Workflow Prompts     OWASP Block          Ecosystem Lock       defusedxml
+  Health Endpoint     95% Coverage         Cross-Lang Links     Tamper-Resist        Singularity Demo     XXE Prevention
 ```
 
 ## v1.3.0 - "Hardening"
@@ -7656,6 +7660,91 @@ v3.0.0 "Autonomy" Release Criteria: <!-- [20251218_DOCS] All criteria verified b
 [x] Release Notes: `docs/release_notes/RELEASE_NOTES_v3.0.0.md` (Singularity Demo) [COMPLETE]
 [x] Autonomy Evidence: `v3.0.0_autonomy_evidence.json` (fix hint accuracy, sandbox proofs) [COMPLETE]
 [x] Ecosystem Evidence: `v3.0.0_ecosystem_evidence.json` (framework integrations) [COMPLETE] <!-- In v3.0.0_autonomy_evidence.json -->
+
+---
+
+## v3.0.1 - Configuration Management & Security Hardening
+
+### Overview
+
+**Theme:** Enterprise Configuration  
+**Goal:** Provide immutable governance configuration with blast radius controls  
+**Effort:** ~3 developer-days  
+**Risk Level:** Low (non-breaking enhancements)  
+**Released:** December 19, 2025
+
+### Why This Release
+
+The v3.0.0 release introduced powerful autonomy features (self-correction, sandbox execution), but enterprises need fine-grained control over:
+- **Blast radius limits** - Prevent agents from modifying too many files
+- **Critical path protection** - Lock down security-sensitive code
+- **Configuration immutability** - Tamper-resistant settings with hash validation
+
+### Features Released
+
+| Priority | Feature | Status | Evidence |
+|----------|---------|--------|----------|
+| **P0** | `.code-scalpel` Configuration Directory | [COMPLETE] | `docs/configuration/governance_config_schema.md` |
+| **P0** | Governance Config Schema | [COMPLETE] | YAML/JSON schema with validation |
+| **P0** | Blast Radius Controls | [COMPLETE] | `max_files_per_operation`, `max_lines_changed` |
+| **P0** | Critical Path Protection | [COMPLETE] | `protected_paths` glob patterns |
+| **P0** | Configuration Hash Validation | [COMPLETE] | SHA-256 integrity verification |
+| **P0** | HMAC Signing Support | [COMPLETE] | Tamper detection for team configs |
+| **P1** | Security Hardening (13 Bandit issues) | [COMPLETE] | All HIGH/MEDIUM severity resolved |
+| **P1** | Safe XML Parsing (defusedxml) | [COMPLETE] | XXE attack prevention |
+| **P1** | URL Scheme Validation | [COMPLETE] | Prevent file:// exploitation |
+
+### Security Fixes (Bandit Scan)
+
+**HIGH Severity (3 issues - B602):**
+- `sandbox.py`: Replace `shell=True` with `shlex.split()` for safe command execution
+- Prevents command injection in build, lint, and test subprocess calls
+
+**MEDIUM Severity (10 issues):**
+- `dependency_parser.py` (B314): Use `defusedxml` instead of `xml.etree.ElementTree`
+- `osv_client.py` (B310): Add URL scheme validation for `urlopen`
+- Cache files (B301 - 4 instances): Add `nosec` comments for `pickle.load` (internal caches with hash validation)
+- `cli.py`, `server.py` (B104 - 4 instances): Add `nosec` for `0.0.0.0` binding (intentional server functionality)
+
+### Configuration Schema Example
+
+```yaml
+# .code-scalpel/config.yaml
+version: "1.0"
+governance:
+  blast_radius:
+    max_files_per_operation: 10
+    max_lines_changed: 500
+    max_functions_modified: 5
+  
+  protected_paths:
+    - "src/security/**"
+    - "src/auth/**"
+    - "*.key"
+    - "*.pem"
+  
+  allowed_operations:
+    - "analyze"
+    - "extract"
+    - "security_scan"
+  
+  denied_operations:
+    - "delete_file"
+    - "bulk_replace"
+
+integrity:
+  hash: "sha256:abc123..."  # Auto-generated
+  signed_by: "team-lead@company.com"
+```
+
+### Release Checklist
+
+[x] Version Updated: `__init__.py`, `pyproject.toml` [COMPLETE]
+[x] Documentation: `governance_config_schema.md` [COMPLETE]
+[x] Security Scan: All Bandit issues resolved [COMPLETE]
+[x] Dependencies: `defusedxml` added to `requirements.txt` [COMPLETE]
+[x] Tests Passing: All 4133 tests [COMPLETE]
+[x] PyPI Published: v3.0.1 [COMPLETE]
 
 ---
 
