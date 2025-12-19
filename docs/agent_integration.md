@@ -473,7 +473,7 @@ result = unified_sink_detect(
 
 ```python
 result = verify_policy_integrity(
-    policy_dir=".scalpel",
+    policy_dir=".code-scalpel",
     manifest_source="file"  # "git", "env", or "file"
 )
 

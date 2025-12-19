@@ -21,7 +21,7 @@ Key Features:
 Example:
     from code_scalpel.policy_engine import PolicyEngine, Operation
 
-    engine = PolicyEngine(".scalpel/policy.yaml")
+    engine = PolicyEngine(".code-scalpel/policy.yaml")
     operation = Operation(
         type="code_edit",
         code="cursor.execute('SELECT * FROM users WHERE id=' + user_id)",

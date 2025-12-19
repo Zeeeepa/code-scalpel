@@ -42,7 +42,7 @@ class TestCryptographicPolicyVerifier:
     @pytest.fixture
     def policy_dir(self, tmp_path):
         """Create a temporary policy directory with sample files."""
-        policy_path = tmp_path / ".scalpel"
+        policy_path = tmp_path / ".code-scalpel"
         policy_path.mkdir()
 
         # Create sample policy file
@@ -360,7 +360,7 @@ class TestHashConsistency:
 
     def test_hash_is_deterministic(self, tmp_path):
         """Test that same file always produces same hash."""
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
 
         policy_file = policy_dir / "policy.yaml"
@@ -386,7 +386,7 @@ class TestHashConsistency:
 
     def test_hash_changes_with_content(self, tmp_path):
         """Test that hash changes when file content changes."""
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
 
         policy_file = policy_dir / "policy.yaml"
@@ -419,7 +419,7 @@ class TestVerifyPolicyIntegrityCrypto:
 
     def test_verify_policy_integrity_crypto_success(self, tmp_path):
         """Test successful verification through convenience function."""
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
 
         policy_file = policy_dir / "policy.yaml"
@@ -462,7 +462,7 @@ class TestTimingAttackPrevention:
 
     def test_uses_constant_time_comparison(self, tmp_path):
         """Test that signature comparison uses constant time."""
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         (policy_dir / "policy.yaml").write_text("test")
 

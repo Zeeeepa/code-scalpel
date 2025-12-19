@@ -21,7 +21,7 @@ class TestErrorToDiffCoverage:
 def broken:
     pass
 """
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_analyze_name_error(self):
@@ -35,7 +35,7 @@ def broken:
 def test():
     print(undefined_var)
 """
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_fix_missing_colon(self):
@@ -46,7 +46,7 @@ def test():
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "SyntaxError: expected ':' (test.py, line 1)"
             source = "def foo()\n    pass"
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_fix_indentation(self):
@@ -57,7 +57,7 @@ def test():
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "IndentationError: expected an indented block (test.py, line 2)"
             source = "def foo():\npass"
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_fix_balance_parentheses_open(self):
@@ -68,7 +68,7 @@ def test():
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "SyntaxError: '(' was never closed (test.py, line 1)"
             source = "print(foo("
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_fix_balance_parentheses_close(self):
@@ -79,7 +79,7 @@ def test():
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "SyntaxError: unmatched ')' (test.py, line 1)"
             source = "print(foo))"
-            _ = e2d.analyze_error(error_msg, source, "python")
+            result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
     def test_non_python_language(self):
@@ -90,7 +90,7 @@ def test():
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "Error: some javascript error"
             source = "const x = 1"
-            _ = e2d.analyze_error(error_msg, source, "javascript")
+            result = e2d.analyze_error(error_msg, source, "javascript")
             assert result is not None
 
 
@@ -107,7 +107,7 @@ class TestASTBuilderCoverage:
             return code.replace("TAB", "    ")
 
         builder.add_preprocessing_hook(my_hook)
-        _ = builder.build_ast("def foo():\n    pass")
+        result = builder.build_ast("def foo():\n    pass")
         assert result is not None
 
     def test_build_invalid_syntax(self):
@@ -116,7 +116,7 @@ class TestASTBuilderCoverage:
 
         builder = ASTBuilder()
         try:
-            _ = builder.build_ast("def broken:")
+            result = builder.build_ast("def broken:")
         except SyntaxError:
             pass  # Expected
 
@@ -125,7 +125,7 @@ class TestASTBuilderCoverage:
         from code_scalpel.ast_tools.builder import ASTBuilder
 
         builder = ASTBuilder()
-        _ = builder.build_ast("")
+        result = builder.build_ast("")
         assert result is not None  # Empty module
 
 
@@ -194,8 +194,8 @@ class TestTypeInferenceDeepCoverage:
             TypeInferenceEngine,
         )
 
-        _ = TypeInferenceEngine()
-        _ = engine.infer("x = (1 + 2) * (3 - 4) / 5.0")
+        engine = TypeInferenceEngine()
+        result = engine.infer("x = (1 + 2) * (3 - 4) / 5.0")
         assert result is not None
 
     def test_infer_multiple_assignment(self):
@@ -204,8 +204,8 @@ class TestTypeInferenceDeepCoverage:
             TypeInferenceEngine,
         )
 
-        _ = TypeInferenceEngine()
-        _ = engine.infer("a = b = c = 1")
+        engine = TypeInferenceEngine()
+        result = engine.infer("a = b = c = 1")
         assert result is not None
 
     def test_infer_augmented_assignment(self):
@@ -214,8 +214,8 @@ class TestTypeInferenceDeepCoverage:
             TypeInferenceEngine,
         )
 
-        _ = TypeInferenceEngine()
-        _ = engine.infer("x = 1; x += 2")
+        engine = TypeInferenceEngine()
+        result = engine.infer("x = 1; x += 2")
         assert result is not None
 
 
@@ -226,19 +226,19 @@ class TestSymbolicEngineCoverage:
         """Cover simple function analysis."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        _ = """
+        code = """
 def double(x):
     return x * 2
 """
         analyzer = SymbolicAnalyzer()
-        _ = analyzer.analyze(code)
+        result = analyzer.analyze(code)
         assert result is not None
 
     def test_analyze_nested_if(self):
         """Cover nested if handling."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        _ = """
+        code = """
 def nested(x, y):
     if x > 0:
         if y > 0:
@@ -247,14 +247,14 @@ def nested(x, y):
     return 3
 """
         analyzer = SymbolicAnalyzer()
-        _ = analyzer.analyze(code)
+        result = analyzer.analyze(code)
         assert result is not None
 
     def test_analyze_while_loop(self):
         """Cover while loop handling."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        _ = """
+        code = """
 def countdown(n):
     _ = 0
     while n > 0:
@@ -263,7 +263,7 @@ def countdown(n):
     return result
 """
         analyzer = SymbolicAnalyzer()
-        _ = analyzer.analyze(code)
+        result = analyzer.analyze(code)
         assert result is not None
 
 
@@ -274,7 +274,7 @@ class TestPDGBuilderDeepCoverage:
         """Cover nested try blocks."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        _ = """
+        code = """
 def nested_try():
     try:
         try:
@@ -293,7 +293,7 @@ def nested_try():
         """Cover with statement handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        _ = """
+        code = """
 def with_context():
     with open("file.txt") as f:
         data = f.read()
@@ -307,7 +307,7 @@ def with_context():
         """Cover multiple return paths."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        _ = """
+        code = """
 def multi_return(x):
     if x < 0:
         return -1
@@ -328,7 +328,7 @@ class TestSurgicalExtractorDeepCoverage:
         """Cover property extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        _ = """
+        code = """
 class MyClass:
     @property
     def value(self):
@@ -339,35 +339,35 @@ class MyClass:
         self._value = v
 """
         extractor = SurgicalExtractor(code)
-        _ = extractor.get_method("MyClass", "value")
+        result = extractor.get_method("MyClass", "value")
         assert result is not None
 
     def test_extract_classmethod(self):
         """Cover classmethod extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        _ = """
+        code = """
 class MyClass:
     @classmethod
     def from_dict(cls, data):
         return cls()
 """
         extractor = SurgicalExtractor(code)
-        _ = extractor.get_method("MyClass", "from_dict")
+        result = extractor.get_method("MyClass", "from_dict")
         assert result is not None
 
     def test_extract_nested_class(self):
         """Cover nested class extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        _ = """
+        code = """
 class Outer:
     class Inner:
         def inner_method(self):
             pass
 """
         extractor = SurgicalExtractor(code)
-        _ = extractor.get_class("Outer")
+        result = extractor.get_class("Outer")
         assert result is not None
         # Check that Inner is in the code string
         assert "Inner" in result.code
@@ -381,13 +381,13 @@ class TestTestGeneratorDeepCoverage:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        _ = """
+        code = """
 class Data:
     @property
     def items(self):
         return self._items
 """
-        _ = gen.generate(code)
+        result = gen.generate(code)
         assert result is not None
 
     def test_generate_for_async_function(self):
@@ -395,9 +395,9 @@ class Data:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        _ = """
+        code = """
 async def fetch_data(url):
     return await http.get(url)
 """
-        _ = gen.generate(code)
+        result = gen.generate(code)
         assert result is not None

@@ -9,7 +9,7 @@ Policy Engine Example - v2.5.0 "Guardian"
 
 Prerequisites:
     - Install OPA CLI: https://www.openpolicyagent.org/docs/latest/#running-opa
-    - Create .scalpel/policy.yaml in your project
+    - Create .code-scalpel/policy.yaml in your project
 
 Usage:
     python examples/policy_engine_example.py
@@ -47,8 +47,8 @@ def example_1_basic_policy_evaluation():
 
     try:
         # Initialize policy engine
-        # Note: This requires .scalpel/policy.yaml and OPA CLI installed
-        engine = PolicyEngine(".scalpel/policy.yaml")
+        # Note: This requires .code-scalpel/policy.yaml and OPA CLI installed
+        engine = PolicyEngine(".code-scalpel/policy.yaml")
         print(f"✓ Loaded {len(engine.policies)} policies")
 
         # Example: Safe code (should pass)
@@ -84,7 +84,7 @@ def example_1_basic_policy_evaluation():
 
     except PolicyError as e:
         print(f"✗ Policy Engine Error: {e}")
-        print("\nTip: Ensure OPA CLI is installed and .scalpel/policy.yaml exists")
+        print("\nTip: Ensure OPA CLI is installed and .code-scalpel/policy.yaml exists")
         print("     See: https://www.openpolicyagent.org/docs/latest/#running-opa")
 
 
@@ -142,7 +142,7 @@ def example_3_human_override():
     print("=" * 70)
 
     try:
-        engine = PolicyEngine(".scalpel/policy.yaml")
+        engine = PolicyEngine(".code-scalpel/policy.yaml")
 
         # Create a dangerous operation
         operation = Operation(
@@ -222,7 +222,7 @@ def example_5_tamper_resistance():
     print("=" * 70)
 
     # Create a temporary policy file
-    policy_path = Path(".scalpel/policy.yaml")
+    policy_path = Path(".code-scalpel/policy.yaml")
     policy_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Only write if it doesn't exist or is empty
@@ -261,7 +261,7 @@ def example_6_audit_logging():
     print("=" * 70)
 
     # Create audit log
-    audit_log = AuditLog(log_path=".scalpel/audit.log")
+    audit_log = AuditLog(log_path=".code-scalpel/audit.log")
 
     # Record security events
     audit_log.record_event(
@@ -294,7 +294,7 @@ def example_7_tampering_detection():
     print("=" * 70)
 
     # Create policy file
-    policy_path = Path(".scalpel/policy_test.yaml")
+    policy_path = Path(".code-scalpel/policy_test.yaml")
     policy_path.parent.mkdir(parents=True, exist_ok=True)
     policy_path.write_text("# Original policy\nversion: 1.0\n")
 
@@ -327,7 +327,7 @@ def example_8_audit_filtering():
     print("=" * 70)
 
     # Create audit log
-    audit_log = AuditLog(log_path=".scalpel/audit_filter.log")
+    audit_log = AuditLog(log_path=".code-scalpel/audit_filter.log")
 
     # Record various events
     events_to_record = [
@@ -400,7 +400,7 @@ def main():
     print(
         "  1. Install OPA CLI: https://www.openpolicyagent.org/docs/latest/#running-opa"
     )
-    print("  2. Copy .scalpel/policy.yaml.example to .scalpel/policy.yaml")
+    print("  2. Copy .code-scalpel/policy.yaml.example to .code-scalpel/policy.yaml")
     print("  3. Customize policies for your organization")
     print("  4. Integrate with your AI agent workflows")
 

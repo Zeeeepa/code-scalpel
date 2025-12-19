@@ -5815,7 +5815,7 @@ def _verify_policy_integrity_sync(
             SecurityError,
         )
 
-        dir_path = policy_dir or ".scalpel"
+        dir_path = policy_dir or ".code-scalpel"
 
         verifier = CryptographicPolicyVerifier(
             manifest_source=manifest_source,
@@ -5892,7 +5892,7 @@ async def verify_policy_integrity(
 
     Example:
         # Verify policy integrity before operations
-        result = verify_policy_integrity(policy_dir=".scalpel")
+        result = verify_policy_integrity(policy_dir=".code-scalpel")
 
         if not result.success:
             print(f"SECURITY: {result.error}")
@@ -5901,7 +5901,7 @@ async def verify_policy_integrity(
             print(f"Verified {result.files_verified} policy files")
 
     Args:
-        policy_dir: Directory containing policy files (default: .scalpel)
+        policy_dir: Directory containing policy files (default: .code-scalpel)
         manifest_source: Where to load manifest from - "git", "env", or "file"
             - "git": Load from committed version in git history (most secure)
             - "env": Load from SCALPEL_POLICY_MANIFEST environment variable

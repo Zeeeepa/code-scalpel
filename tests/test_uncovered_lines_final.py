@@ -28,7 +28,7 @@ def safe():
     query = "SELECT * FROM users WHERE id=" + user_id
     cursor.execute(query)
 """
-        _ = sim.simulate(original, modified)
+        result = sim.simulate(original, modified)
         assert result is not None
 
 
@@ -40,8 +40,8 @@ class TestSemanticAnalyzerUncoveredLines:
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = 'cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))'
-        _ = analyzer.has_parameterization(code, "python")
+        code = 'cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))'
+        result = analyzer.has_parameterization(code, "python")
         assert result is True
 
     def test_has_parameterization_with_percent_s(self):
@@ -49,8 +49,8 @@ class TestSemanticAnalyzerUncoveredLines:
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = 'cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))'
-        _ = analyzer.has_parameterization(code, "python")
+        code = 'cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))'
+        result = analyzer.has_parameterization(code, "python")
         assert result is True
 
     def test_has_parameterization_java(self):
@@ -58,11 +58,11 @@ class TestSemanticAnalyzerUncoveredLines:
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = """
+        code = """
 PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE id=?");
 stmt.setString(1, userId);
 """
-        _ = analyzer.has_parameterization(code, "java")
+        result = analyzer.has_parameterization(code, "java")
         assert result is True
 
     def test_has_parameterization_java_setint(self):
@@ -70,8 +70,8 @@ stmt.setString(1, userId);
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = """stmt.setInt(1, userId);"""
-        _ = analyzer.has_parameterization(code, "java")
+        code = """stmt.setInt(1, userId);"""
+        result = analyzer.has_parameterization(code, "java")
         assert result is True
 
     def test_has_file_operation(self):
@@ -79,8 +79,8 @@ stmt.setString(1, userId);
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = 'open(user_filename, "w")'
-        _ = analyzer.has_file_operation(code)
+        code = 'open(user_filename, "w")'
+        result = analyzer.has_file_operation(code)
         assert result is True
 
     def test_tainted_path_input(self):
@@ -88,11 +88,11 @@ stmt.setString(1, userId);
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = """
+        code = """
 path = request.args.get('path')
 open(path)
 """
-        _ = analyzer.tainted_path_input(code)
+        result = analyzer.tainted_path_input(code)
         assert result is not None or isinstance(result, bool)
 
     def test_contains_sql_sink(self):
@@ -100,8 +100,8 @@ open(path)
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = 'cursor.execute("SELECT * FROM users WHERE id=" + user_id)'
-        _ = analyzer.contains_sql_sink(code, "python")
+        code = 'cursor.execute("SELECT * FROM users WHERE id=" + user_id)'
+        result = analyzer.contains_sql_sink(code, "python")
         assert result is True
 
     def test_has_annotation_python(self):
@@ -109,12 +109,12 @@ open(path)
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
-        _ = """
+        code = """
 @deprecated
 def old_function():
     pass
 """
-        _ = analyzer.has_annotation(code, "deprecated")
+        result = analyzer.has_annotation(code, "deprecated")
         assert result is not None or isinstance(result, bool)
 
 
@@ -125,18 +125,18 @@ class TestTamperResistanceUncoveredLines:
         """Cover policy integrity verification."""
         from code_scalpel.policy_engine.tamper_resistance import TamperResistance
 
-        _ = TamperResistance()
-        _ = tr.verify_policy_integrity()
+        tr = TamperResistance()
+        result = tr.verify_policy_integrity()
         assert result is not None or isinstance(result, bool)
 
     def test_is_override_valid(self):
         """Cover override validation - may fail with invalid token."""
         from code_scalpel.policy_engine.tamper_resistance import TamperResistance
 
-        _ = TamperResistance()
+        tr = TamperResistance()
         # This may raise or return False for invalid tokens
         try:
-            _ = tr.is_override_valid("test_token", "test_action")
+            result = tr.is_override_valid("test_token", "test_action")
             assert result is not None or isinstance(result, bool)
         except (TypeError, ValueError):
             pass  # Expected for invalid tokens
@@ -157,7 +157,7 @@ class TestAnalysisCacheUncoveredLines:
             f.write("x = 1")
             temp_path = f.name
         try:
-            _ = cache.get_cached(temp_path)
+            result = cache.get_cached(temp_path)
             assert result is None  # Not cached yet
         finally:
             os.unlink(temp_path)
@@ -210,7 +210,7 @@ class TestOSVClientUncoveredLines:
         with patch("requests.post") as mock_post:
             mock_post.return_value.status_code = 500
             mock_post.return_value.json.side_effect = Exception("Error")
-            _ = client.query_package("pkg", "1.0.0")
+            result = client.query_package("pkg", "1.0.0")
             assert result is not None or result == [] or result is None
 
     def test_query_with_timeout(self):
@@ -221,7 +221,7 @@ class TestOSVClientUncoveredLines:
         client = OSVClient()
         with patch("requests.post") as mock_post:
             mock_post.side_effect = requests.Timeout("Timeout")
-            _ = client.query_package("pkg", "1.0.0")
+            result = client.query_package("pkg", "1.0.0")
             # Should handle timeout gracefully
 
 
@@ -234,12 +234,12 @@ class TestAliasResolverUncoveredLines:
 
         with tempfile.TemporaryDirectory() as tmp:
             resolver = AliasResolver(Path(tmp))
-            _ = """
+            code = """
 from os import path as p
-_ = p.join("a", "b")
+result = p.join("a", "b")
 """
             tree = ast.parse(code)
-            _ = resolver.resolve(tree)
+            result = resolver.resolve(tree)
             assert result is not None
 
     def test_resolve_from_import(self):
@@ -248,12 +248,12 @@ _ = p.join("a", "b")
 
         with tempfile.TemporaryDirectory() as tmp:
             resolver = AliasResolver(Path(tmp))
-            _ = """
+            code = """
 from collections import defaultdict as dd
 d = dd(list)
 """
             tree = ast.parse(code)
-            _ = resolver.resolve(tree)
+            result = resolver.resolve(tree)
             assert result is not None
 
 

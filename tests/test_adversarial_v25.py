@@ -1150,7 +1150,7 @@ class TestADV255ChmodBypass:
     """
     ADV-2.5.5: chmod Bypass Test
     
-    Simulate an agent attack: chmod +w .scalpel/policy.yaml, edit the
+    Simulate an agent attack: chmod +w .code-scalpel/policy.yaml, edit the
     file to add "allow_all: true", then verify that Code Scalpel refuses
     to operate because SHA-256 hash no longer matches the signed manifest.
     """
@@ -1160,7 +1160,7 @@ class TestADV255ChmodBypass:
         """
         Create a policy directory with signed manifest.
         """
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         
         # Create original policy file
@@ -1281,7 +1281,7 @@ class TestADV256ManifestTamper:
     @pytest.fixture
     def signed_policy_dir(self, tmp_path):
         """Create a policy directory with valid signed manifest."""
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         
         # Create policy file
@@ -1546,7 +1546,7 @@ class TestADV256ManifestTamper:
         Attack: Create symlink from policy.yaml to /etc/passwd or malicious file.
         System must verify the ACTUAL file content, not follow symlinks blindly.
         """
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         
         # Create legitimate policy
@@ -1597,7 +1597,7 @@ class TestADV256ManifestTamper:
         import threading
         import time
         
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         
         policy_content = "policies: [safe]"
@@ -1640,7 +1640,7 @@ class TestADV256ManifestTamper:
         
         Attack: Use Unicode characters that LOOK like ASCII but have different bytes.
         """
-        policy_dir = tmp_path / ".scalpel"
+        policy_dir = tmp_path / ".code-scalpel"
         policy_dir.mkdir()
         
         # Create policy with ASCII filename

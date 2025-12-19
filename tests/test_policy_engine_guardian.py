@@ -62,7 +62,7 @@ def test_policy_engine_allows_with_warning(
             "PLACEHOLDER",
             "--format",
             "json",
-            "data.scalpel.security.deny",
+            "data.code-scalpel.security.deny",
         ): SimpleNamespace(returncode=0, stdout=eval_output, stderr=""),
     }
 
@@ -80,7 +80,7 @@ def test_policy_engine_allows_with_warning(
                     "PLACEHOLDER",
                     "--format",
                     "json",
-                    "data.scalpel.security.deny",
+                    "data.code-scalpel.security.deny",
                 )
             ]
         return side_effects.get(
@@ -120,7 +120,7 @@ def test_policy_engine_denies_on_eval_error(
             "PLACEHOLDER",
             "--format",
             "json",
-            "data.scalpel.security.deny",
+            "data.code-scalpel.security.deny",
         ): SimpleNamespace(returncode=1, stdout="{}", stderr=b"boom"),
     }
 
@@ -137,7 +137,7 @@ def test_policy_engine_denies_on_eval_error(
                     "PLACEHOLDER",
                     "--format",
                     "json",
-                    "data.scalpel.security.deny",
+                    "data.code-scalpel.security.deny",
                 )
             ]
         return side_effects.get(

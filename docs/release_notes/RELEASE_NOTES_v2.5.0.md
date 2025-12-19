@@ -46,7 +46,7 @@ Code Scalpel v2.5.0 "Guardian" introduces enterprise-grade governance and policy
 OPA/Rego-based governance for AI agent operations with fail-closed semantics.
 
 **Capabilities:**
-- Load and parse `.scalpel/policy.yaml` configuration
+- Load and parse `.code-scalpel/policy.yaml` configuration
 - Validate Rego syntax at startup via OPA CLI
 - Evaluate all operations against defined policies
 - **Fail CLOSED** on any policy parsing or evaluation error
@@ -122,7 +122,7 @@ All release evidence in `release_artifacts/v2.5.0/`:
 ## Migration Notes
 
 - **From v2.2.0**: No breaking changes. Fully backward compatible.
-- **Enabling Governance**: Create `.scalpel/policy.yaml` and optionally install OPA CLI
+- **Enabling Governance**: Create `.code-scalpel/policy.yaml` and optionally install OPA CLI
 - **PDF Reports**: `pip install reportlab` (optional)
 
 ---

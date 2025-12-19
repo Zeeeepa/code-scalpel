@@ -136,7 +136,7 @@
       "name": "chmod Bypass Test",
       "feature": "Cryptographic Policy Verification",
       "description": "chmod +w + file modification \u2192 hash mismatch detected",
-      "attack_vector": "chmod +w .scalpel/policy.yaml && echo allow_all",
+      "attack_vector": "chmod +w .code-scalpel/policy.yaml && echo allow_all",
       "defense": "SHA-256 hash verification against signed manifest",
       "status": "PASS",
       "security_impact": "File permission bypass cannot circumvent policy"

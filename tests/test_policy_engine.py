@@ -33,7 +33,7 @@ from code_scalpel.policy_engine import (
 @pytest.fixture
 def temp_policy_dir(tmp_path):
     """Create temporary directory for policy files."""
-    policy_dir = tmp_path / ".scalpel"
+    policy_dir = tmp_path / ".code-scalpel"
     policy_dir.mkdir(exist_ok=True)
     return policy_dir
 

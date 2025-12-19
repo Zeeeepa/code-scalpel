@@ -20,7 +20,7 @@ This document defines the configuration schema for governance controls including
       "command": "/path/to/code-scalpel",
       "args": ["mcp", "--root", "${workspaceFolder}"],
       "env": {
-        "SCALPEL_CONFIG": "${workspaceFolder}/.scalpel/config.json",
+        "SCALPEL_CONFIG": "${workspaceFolder}/.code-scalpel/config.json",
         "SCALPEL_CONFIG_HASH": "sha256:abc123..."
       }
     }
@@ -30,7 +30,7 @@ This document defines the configuration schema for governance controls including
 
 ### 2. Scalpel Configuration File (Immutable)
 
-**File:** `.scalpel/config.json`
+**File:** `.code-scalpel/config.json`
 
 ```json
 {
@@ -50,7 +50,15 @@ This document defines the configuration schema for governance controls including
       "max_affected_classes": 5,
       "max_call_graph_depth": 3,
       "warn_on_public_api_changes": true,
-      "block_on_critical_paths": true
+      "block_on_critical_paths": true,
+      "critical_paths": [
+        "src/core/",
+        "src/security/",
+        "src/symbolic_execution_tools/",
+        "src/mcp/server.py"
+      ],
+      "critical_path_max_lines": 50,
+      "critical_path_max_complexity_delta": 10
     },
     "autonomy_constraints": {
       "max_autonomous_iterations": 10,
@@ -82,10 +90,154 @@ export SCALPEL_BLAST_RADIUS_MAX_FUNCTIONS=20
 export SCALPEL_BLAST_RADIUS_MAX_CLASSES=5
 export SCALPEL_BLAST_RADIUS_MAX_DEPTH=3
 
+# Critical Paths (comma-separated)
+export SCALPEL_CRITICAL_PATHS="src/core/,src/security/,src/mcp/server.py"
+export SCALPEL_CRITICAL_PATH_MAX_LINES=50
+export SCALPEL_CRITICAL_PATH_MAX_COMPLEXITY_DELTA=10
+
 # Autonomy
 export SCALPEL_MAX_AUTONOMOUS_ITERATIONS=10
 export SCALPEL_REQUIRE_APPROVAL_BREAKING=true
 export SCALPEL_REQUIRE_APPROVAL_SECURITY=true
+```
+
+## Critical Paths
+
+<!-- [20251218_FEATURE] Critical paths for enhanced governance in sensitive code areas -->
+
+Critical paths allow you to designate specific directories or files that require stricter change controls. This is essential for:
+
+- **Core Infrastructure**: Security modules, authentication, authorization
+- **Data Processing**: Payment processing, PII handling, encryption
+- **Public APIs**: Interfaces with external systems or downstream consumers
+- **Safety-Critical Code**: Medical devices, autonomous systems, financial calculations
+
+### Defining Critical Paths
+
+Critical paths are glob-style patterns matching file or directory paths:
+
+```json
+{
+  "blast_radius": {
+    "critical_paths": [
+      "src/core/",                    // Entire core directory
+      "src/security/",                // Security module
+      "src/mcp/server.py",           // Specific critical file
+      "src/payments/**/*.py",         // All Python files in payments
+      "src/*/authentication.py"       // Authentication files anywhere
+    ]
+  }
+}
+```
+
+### Enhanced Controls for Critical Paths
+
+When a change affects files matching critical paths, stricter limits apply:
+
+| Setting | Regular Code | Critical Path Code |
+|---------|--------------|-------------------|
+| Max Lines Changed | 500 (default) | 50 (default) |
+| Max Complexity Increase | 50 (default) | 10 (default) |
+| Approval Required | Configurable | Always required |
+| Blast Radius Analysis | Standard | Enhanced depth |
+
+### Pattern Matching Rules
+
+Critical path patterns use glob syntax:
+- `src/core/` - Matches directory and all subdirectories
+- `src/security/*.py` - Matches Python files directly in security/
+- `src/**/auth*.py` - Matches auth files anywhere under src/
+- `src/mcp/server.py` - Matches specific file exactly
+
+**Important:** Paths are relative to project root. Use forward slashes (/) even on Windows.
+
+### Use Cases
+
+#### Example 1: Financial Services
+
+```json
+{
+  "blast_radius": {
+    "critical_paths": [
+      "src/trading/",
+      "src/compliance/",
+      "src/audit/",
+      "src/calculations/interest.py",
+      "src/calculations/risk.py"
+    ],
+    "critical_path_max_lines": 25,
+    "critical_path_max_complexity_delta": 5
+  }
+}
+```
+
+**Rationale:** Trading algorithms and compliance code require maximum scrutiny. Even small changes need careful review.
+
+#### Example 2: Healthcare Application
+
+```json
+{
+  "blast_radius": {
+    "critical_paths": [
+      "src/patient_data/",
+      "src/diagnosis/",
+      "src/prescription/",
+      "src/phi_handling/"
+    ],
+    "critical_path_max_lines": 50,
+    "critical_path_max_complexity_delta": 10,
+    "block_on_critical_paths": true
+  }
+}
+```
+
+**Rationale:** HIPAA compliance and patient safety require blocking autonomous changes to PHI and medical logic.
+
+#### Example 3: Open Source Security Infrastructure
+
+```json
+{
+  "blast_radius": {
+    "critical_paths": [
+      "src/symbolic_execution_tools/security_analyzer.py",
+      "src/mcp/server.py",
+      "src/ast_tools/security_scanner.py",
+      "src/policy_engine/"
+    ],
+    "critical_path_max_lines": 30,
+    "critical_path_max_complexity_delta": 8,
+    "warn_on_public_api_changes": true
+  }
+}
+```
+
+**Rationale:** Security analysis tools themselves require extra scrutiny to prevent introducing blind spots.
+
+### Checking if Path is Critical
+
+To check if a file is considered critical:
+
+```python
+from pathlib import Path
+from code_scalpel.config.governance_config import GovernanceConfigLoader
+
+loader = GovernanceConfigLoader()
+config = loader.load()
+
+def is_critical_path(file_path: str) -> bool:
+    """Check if file matches any critical path pattern."""
+    from fnmatch import fnmatch
+    path = Path(file_path).as_posix()
+    
+    for pattern in config.blast_radius.critical_paths:
+        if fnmatch(path, pattern) or path.startswith(pattern):
+            return True
+    return False
+
+# Example usage
+if is_critical_path("src/security/auth.py"):
+    print("WARNING: Modifying critical security code!")
+    print(f"Max lines allowed: {config.blast_radius.critical_path_max_lines}")
 ```
 
 ## Immutability Protection
@@ -99,7 +251,7 @@ To prevent tampering, configuration files use SHA-256 hash verification:
 import hashlib
 import json
 
-with open('.scalpel/config.json', 'rb') as f:
+with open('.code-scalpel/config.json', 'rb') as f:
     config_hash = hashlib.sha256(f.read()).hexdigest()
     print(f"SCALPEL_CONFIG_HASH=sha256:{config_hash}")
 ```
@@ -128,7 +280,7 @@ export SCALPEL_CONFIG_SECRET="your-secret-key"
 python -c "
 import hmac
 import hashlib
-with open('.scalpel/config.json', 'rb') as f:
+with open('.code-scalpel/config.json', 'rb') as f:
     sig = hmac.new(b'your-secret-key', f.read(), hashlib.sha256).hexdigest()
     print(f'SCALPEL_CONFIG_SIGNATURE={sig}')
 "
@@ -157,6 +309,9 @@ with open('.scalpel/config.json', 'rb') as f:
 | `max_call_graph_depth` | integer | `3` | Max depth for impact analysis |
 | `warn_on_public_api_changes` | boolean | `true` | Warn when public API modified |
 | `block_on_critical_paths` | boolean | `true` | Block changes to critical code paths |
+| `critical_paths` | array[string] | `[]` | Directories/files requiring extra scrutiny |
+| `critical_path_max_lines` | integer | `50` | Max lines changed in critical paths |
+| `critical_path_max_complexity_delta` | integer | `10` | Max complexity increase in critical paths |
 
 ### Autonomy Constraints
 
@@ -194,7 +349,14 @@ with open('.scalpel/config.json', 'rb') as f:
       "max_affected_functions": 5,
       "max_affected_classes": 2,
       "max_call_graph_depth": 2,
-      "block_on_critical_paths": true
+      "block_on_critical_paths": true,
+      "critical_paths": [
+        "src/core/",
+        "src/security/",
+        "src/symbolic_execution_tools/security_analyzer.py"
+      ],
+      "critical_path_max_lines": 25,
+      "critical_path_max_complexity_delta": 5
     },
     "autonomy_constraints": {
       "max_autonomous_iterations": 3,
@@ -224,7 +386,10 @@ with open('.scalpel/config.json', 'rb') as f:
       "max_affected_classes": 20,
       "max_call_graph_depth": 5,
       "warn_on_public_api_changes": false,
-      "block_on_critical_paths": false
+      "block_on_critical_paths": false,
+      "critical_paths": [],
+      "critical_path_max_lines": 200,
+      "critical_path_max_complexity_delta": 50
     },
     "autonomy_constraints": {
       "max_autonomous_iterations": 50,
@@ -292,6 +457,13 @@ class BlastRadiusConfig:
     max_call_graph_depth: int = 3
     warn_on_public_api_changes: bool = True
     block_on_critical_paths: bool = True
+    critical_paths: list[str] = None
+    critical_path_max_lines: int = 50
+    critical_path_max_complexity_delta: int = 10
+    
+    def __post_init__(self):
+        if self.critical_paths is None:
+            self.critical_paths = []
 
 @dataclass
 class AutonomyConstraintsConfig:
@@ -317,7 +489,7 @@ class GovernanceConfigLoader:
     """Load and validate governance configuration with integrity protection."""
     
     def __init__(self, config_path: Optional[Path] = None):
-        self.config_path = config_path or Path.cwd() / ".scalpel" / "config.json"
+        self.config_path = config_path or Path.cwd() / ".code-scalpel" / "config.json"
     
     def load(self) -> GovernanceConfig:
         """Load configuration with hash validation."""
@@ -384,7 +556,10 @@ class GovernanceConfigLoader:
                     "max_affected_classes": 5,
                     "max_call_graph_depth": 3,
                     "warn_on_public_api_changes": True,
-                    "block_on_critical_paths": True
+                    "block_on_critical_paths": True,
+                    "critical_paths": [],
+                    "critical_path_max_lines": 50,
+                    "critical_path_max_complexity_delta": 10
                 },
                 "autonomy_constraints": {
                     "max_autonomous_iterations": 10,
@@ -434,6 +609,19 @@ class GovernanceConfigLoader:
             br.get("max_call_graph_depth", 3)
         ))
         
+        # Critical Paths overrides
+        critical_paths_env = os.getenv("SCALPEL_CRITICAL_PATHS")
+        if critical_paths_env:
+            br["critical_paths"] = [p.strip() for p in critical_paths_env.split(",")]
+        br["critical_path_max_lines"] = int(os.getenv(
+            "SCALPEL_CRITICAL_PATH_MAX_LINES",
+            br.get("critical_path_max_lines", 50)
+        ))
+        br["critical_path_max_complexity_delta"] = int(os.getenv(
+            "SCALPEL_CRITICAL_PATH_MAX_COMPLEXITY_DELTA",
+            br.get("critical_path_max_complexity_delta", 10)
+        ))
+        
         # Autonomy overrides
         ac = gov.get("autonomy_constraints", {})
         ac["max_autonomous_iterations"] = int(os.getenv(
@@ -467,15 +655,15 @@ class GovernanceConfigLoader:
 
 1. **Hash Validation**: Always set `SCALPEL_CONFIG_HASH` to detect tampering
 2. **Signature Verification**: Use `SCALPEL_CONFIG_SECRET` for enterprise deployments
-3. **File Permissions**: Set `.scalpel/config.json` to read-only (`chmod 444`)
+3. **File Permissions**: Set `.code-scalpel/config.json` to read-only (`chmod 444`)
 4. **Audit Logging**: Enable audit logging to track all configuration changes
-5. **Version Control**: Commit `.scalpel/config.json` to git for team consistency
+5. **Version Control**: Commit `.code-scalpel/config.json` to git for team consistency
 
 ## Migration from Previous Versions
 
 For projects using older Code Scalpel versions without governance config:
 
-1. Run `code-scalpel init-governance` to create `.scalpel/config.json`
+1. Run `code-scalpel init-governance` to create `.code-scalpel/config.json`
 2. Review and adjust settings for your project's risk tolerance
 3. Generate and set `SCALPEL_CONFIG_HASH`
 4. Update `.vscode/mcp.json` with hash environment variable

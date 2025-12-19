@@ -1,0 +1,134 @@
+{
+  "version": "3.0.0",
+  "component": "code_scalpel_directory_inventory",
+  "timestamp": "2025-12-18T21:40:17.347858",
+  "directory": ".code-scalpel",
+  "purpose": "Unified configuration and policy directory",
+  "files": [
+    {
+      "name": "README.md",
+      "path": ".code-scalpel/README.md",
+      "size_bytes": 55227,
+      "sha256": "506fd922e04ea82777d67a80f9c4dacbc019fbba809c99fea5501442db419bf9",
+      "type": "documentation"
+    },
+    {
+      "name": "audit.log",
+      "path": ".code-scalpel/audit.log",
+      "size_bytes": 446109,
+      "sha256": "ce3cd5e8cfaa222dadaf3d540a2d3a82f89be2dfc4db9ead56e20c48a03cda36",
+      "type": "audit"
+    },
+    {
+      "name": "config.ci-cd.json",
+      "path": ".code-scalpel/config.ci-cd.json",
+      "size_bytes": 1197,
+      "sha256": "966203c370127259cd22c30e33d2ade84fbd36312792c79d3012f4344ce45783",
+      "type": "configuration"
+    },
+    {
+      "name": "config.development.json",
+      "path": ".code-scalpel/config.development.json",
+      "size_bytes": 1179,
+      "sha256": "4f98e236794777c5db795ba177af60fdb5f08c0933c11033596ac076227d0154",
+      "type": "configuration"
+    },
+    {
+      "name": "config.json",
+      "path": ".code-scalpel/config.json",
+      "size_bytes": 1244,
+      "sha256": "4a4c921fda740ce71d5518b6c8c672d50c553c8659eb39f1867c7d24a54b8049",
+      "type": "configuration"
+    },
+    {
+      "name": "config.permissive.json",
+      "path": ".code-scalpel/config.permissive.json",
+      "size_bytes": 1128,
+      "sha256": "3ac9d9b0cc0d486e0606cd825099c92d0f3c931dda973109e27f25ad4658d997",
+      "type": "configuration"
+    },
+    {
+      "name": "config.restrictive.json",
+      "path": ".code-scalpel/config.restrictive.json",
+      "size_bytes": 1341,
+      "sha256": "b09457a4ffa40db0436478a8f99be900c4a9449726cc739e44a989ec898c5e9d",
+      "type": "configuration"
+    },
+    {
+      "name": "config.testing.json",
+      "path": ".code-scalpel/config.testing.json",
+      "size_bytes": 1140,
+      "sha256": "34ff2461d0a096dedd487ce6720eca70e4272e8f6db3741982d340d280cd57fc",
+      "type": "configuration"
+    },
+    {
+      "name": "policy.yaml",
+      "path": ".code-scalpel/policy.yaml",
+      "size_bytes": 33,
+      "sha256": "f07706af4c7ad04b6129fd3598d0bda9e02084f96499b01722da9c070cd3d88d",
+      "type": "policy"
+    },
+    {
+      "name": "policy.yaml.example",
+      "path": ".code-scalpel/policy.yaml.example",
+      "size_bytes": 1957,
+      "sha256": "30dd7c42b06a2a3ba8e79f1bd8185b8aba82575adcb200b94fe902376ec0ac16",
+      "type": "policy"
+    },
+    {
+      "name": "policy_override.yaml",
+      "path": ".code-scalpel/policy_override.yaml",
+      "size_bytes": 27,
+      "sha256": "773a8117a5778a13f140c3e0c641d1bfe924ec0b9473014cd11dd76bfccdf626",
+      "type": "policy"
+    },
+    {
+      "name": "policy_test.yaml",
+      "path": ".code-scalpel/policy_test.yaml",
+      "size_bytes": 31,
+      "sha256": "f180b37200066e57c2d677b83c029e62fc58629ff62b0671107e10792acc8da5",
+      "type": "policy"
+    }
+  ],
+  "subdirectories": [
+    {
+      "name": "autonomy_audit",
+      "path": ".code-scalpel/autonomy_audit",
+      "file_count": 0,
+      "purpose": "Autonomy operation audit logs"
+    }
+  ],
+  "statistics": {
+    "total_files": 12,
+    "total_size_bytes": 510613,
+    "configuration_files": 6,
+    "policy_files": 4,
+    "audit_files": 1
+  },
+  "configuration_profiles": {
+    "default": {
+      "file": "config.json",
+      "description": "Balanced production settings"
+    },
+    "restrictive": {
+      "file": "config.restrictive.json",
+      "description": "Security-critical systems (100 lines, 3 files)"
+    },
+    "permissive": {
+      "file": "config.permissive.json",
+      "description": "Experimental projects (2000 lines, 50 files)"
+    },
+    "ci-cd": {
+      "file": "config.ci-cd.json",
+      "description": "CI/CD automation (1000 lines, 20 files)"
+    },
+    "development": {
+      "file": "config.development.json",
+      "description": "Local development (750 lines, 15 files)"
+    },
+    "testing": {
+      "file": "config.testing.json",
+      "description": "Unit test environments (50 lines, 2 files)"
+    }
+  }
+}

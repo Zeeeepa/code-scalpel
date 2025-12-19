@@ -248,7 +248,7 @@
         "status": "stable",
         "description": "Verify policy file integrity using cryptographic signatures - tamper-resistant governance",
         "parameters": {
-          "policy_dir": "Directory containing policy files (default: .scalpel)",
+          "policy_dir": "Directory containing policy files (default: .code-scalpel)",
           "manifest_source": "git, env, or file (default: file)"
         },
         "security_model": "FAIL CLOSED - missing/invalid signature denies all",

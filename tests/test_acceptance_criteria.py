@@ -25,7 +25,7 @@ from code_scalpel.policy_engine import (
 @pytest.fixture
 def acceptance_test_env(tmp_path):
     """Create acceptance test environment."""
-    policy_dir = tmp_path / ".scalpel"
+    policy_dir = tmp_path / ".code-scalpel"
     policy_dir.mkdir(parents=True, exist_ok=True)
 
     policy_file = policy_dir / "policy.yaml"
@@ -98,8 +98,8 @@ def test_AC3_agent_blocked_from_modifying_policy_files(acceptance_test_env):
 
     # Create operations that target protected files
     protected_operations = [
-        Operation(type="file_write", affected_files=[Path(".scalpel/policy.yaml")]),
-        Operation(type="file_write", affected_files=[Path(".scalpel/budget.yaml")]),
+        Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]),
+        Operation(type="file_write", affected_files=[Path(".code-scalpel/budget.yaml")]),
         Operation(type="file_delete", affected_files=[Path("scalpel.policy.yaml")]),
     ]
 
@@ -128,7 +128,7 @@ def test_AC4_policy_modification_attempts_logged(acceptance_test_env):
 
     # Attempt to modify policy file
     operation = Operation(
-        type="file_write", affected_files=[Path(".scalpel/policy.yaml")]
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
     )
 
     try:
@@ -142,7 +142,7 @@ def test_AC4_policy_modification_attempts_logged(acceptance_test_env):
 
     last_event = events[-1]
     assert last_event["severity"] == "CRITICAL"
-    assert ".scalpel/policy.yaml" in str(last_event["details"])
+    assert ".code-scalpel/policy.yaml" in str(last_event["details"])
 
     print("✅ AC4: Policy modification attempts logged")
 
@@ -427,7 +427,7 @@ def test_AC_INTEGRATION_full_workflow(acceptance_test_env):
 
     # 2. Block policy modification
     operation = Operation(
-        type="file_write", affected_files=[Path(".scalpel/policy.yaml")]
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
     )
     with pytest.raises(PolicyModificationError):
         tr.prevent_policy_modification(operation)

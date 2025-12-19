@@ -37,16 +37,16 @@ Successfully implemented complete P0 Policy Engine with declarative policy enfor
 ### Documentation (`docs/`)
 1. `policy_engine.md` - Complete user guide (465 lines)
 2. `v2.5.0_policy_engine_acceptance.md` - Acceptance validation (325 lines)
-3. `.scalpel/README.md` - Policy configuration guide (64 lines)
+3. `.code-scalpel/README.md` - Policy configuration guide (64 lines)
 
 ### Examples
-1. `.scalpel/policy.yaml.example` - Production-ready policy templates (85 lines)
+1. `.code-scalpel/policy.yaml.example` - Production-ready policy templates (85 lines)
 2. `examples/policy_engine_example.py` - Working demonstrations (258 lines)
 
 ## Acceptance Criteria - ALL MET [COMPLETE]
 
 ### Policy Engine Core (P0)
-- [COMPLETE] Loads and parses `.scalpel/policy.yaml`
+- [COMPLETE] Loads and parses `.code-scalpel/policy.yaml`
 - [COMPLETE] Validates Rego syntax at startup
 - [COMPLETE] Evaluates operations against all policies
 - [COMPLETE] Fails CLOSED on policy parsing error
@@ -126,7 +126,7 @@ PolicyEngine
 ```python
 from code_scalpel.policy_engine import PolicyEngine, Operation
 
-engine = PolicyEngine(".scalpel/policy.yaml")
+engine = PolicyEngine(".code-scalpel/policy.yaml")
 
 operation = Operation(
     type="code_edit",
@@ -234,7 +234,7 @@ Result: 19 passed, 10 skipped, 1 warning in 0.11s
 
 ### User Documentation
 - **docs/policy_engine.md** - Complete guide with examples
-- **.scalpel/README.md** - Quick start for policy setup
+- **.code-scalpel/README.md** - Quick start for policy setup
 - **examples/policy_engine_example.py** - Working code examples
 
 ### Technical Documentation

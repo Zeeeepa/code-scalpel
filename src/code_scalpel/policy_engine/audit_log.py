@@ -31,7 +31,7 @@ class AuditLog:
     - Tamper detection
     """
 
-    def __init__(self, log_path: str = ".scalpel/audit.log"):
+    def __init__(self, log_path: str = ".code-scalpel/audit.log"):
         """
         Initialize audit log.
 

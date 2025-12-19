@@ -209,13 +209,13 @@ class PolicyEngine:
     - Full audit trail
 
     Example:
-        engine = PolicyEngine(".scalpel/policy.yaml")
+        engine = PolicyEngine(".code-scalpel/policy.yaml")
         decision = engine.evaluate(operation)
         if not decision.allowed:
             print(f"Denied: {decision.reason}")
     """
 
-    def __init__(self, policy_path: str = ".scalpel/policy.yaml"):
+    def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """
         Initialize policy engine.
 
@@ -405,7 +405,7 @@ class PolicyEngine:
                         input_file_path,
                         "--format",
                         "json",
-                        "data.scalpel.security.deny",
+                        "data.code-scalpel.security.deny",
                     ],
                     capture_output=True,
                     text=True,

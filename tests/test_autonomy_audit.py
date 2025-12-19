@@ -29,7 +29,7 @@ from code_scalpel.autonomy import AutonomyAuditTrail
 @pytest.fixture
 def temp_audit_dir(tmp_path):
     """Create temporary directory for audit storage."""
-    audit_dir = tmp_path / ".scalpel" / "autonomy_audit"
+    audit_dir = tmp_path / ".code-scalpel" / "autonomy_audit"
     audit_dir.mkdir(parents=True, exist_ok=True)
     return audit_dir
 

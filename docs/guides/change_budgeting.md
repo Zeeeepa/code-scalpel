@@ -129,7 +129,7 @@ else:
 
 Budget configurations can be loaded from YAML files:
 
-### `.scalpel/budget.toml`
+### `.code-scalpel/budget.toml`
 
 ```toml
 [default]
@@ -406,7 +406,7 @@ FileChange(
 
 **Symptom:** Files in forbidden paths are not blocked
 
-**Solution:** In your `.scalpel/budget.toml` configuration file, ensure paths end with `/`:
+**Solution:** In your `.code-scalpel/budget.toml` configuration file, ensure paths end with `/`:
 
 ```toml
 # Wrong: Missing trailing slash
@@ -495,7 +495,7 @@ load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]
 Load budget configuration from YAML file.
 
 **Parameters:**
-- `config_path`: Path to budget.yaml file (default: `.scalpel/budget.yaml`)
+- `config_path`: Path to budget.yaml file (default: `.code-scalpel/budget.yaml`)
 
 **Returns:** Dictionary with budget configuration
 

@@ -56,7 +56,7 @@ class AutonomyAuditTrail:
     - Query by time range, event type, success/failure
     """
 
-    storage_path: Path = field(default_factory=lambda: Path(".scalpel/autonomy_audit"))
+    storage_path: Path = field(default_factory=lambda: Path(".code-scalpel/autonomy_audit"))
     current_session_id: str = field(default="")
 
     def __post_init__(self):

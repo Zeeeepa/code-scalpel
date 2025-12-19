@@ -59,7 +59,7 @@ from code_scalpel.policy_engine import (
 )
 
 # Initialize tamper resistance
-tr = TamperResistance(policy_path=".scalpel/policy.yaml")
+tr = TamperResistance(policy_path=".code-scalpel/policy.yaml")
 
 # Verify policy integrity
 tr.verify_policy_integrity()
@@ -67,14 +67,14 @@ tr.verify_policy_integrity()
 # Check if operation violates policy
 operation = Operation(
     type="file_write",
-    affected_files=[Path(".scalpel/policy.yaml")]
+    affected_files=[Path(".code-scalpel/policy.yaml")]
 )
 
 # This will raise PolicyModificationError
 tr.prevent_policy_modification(operation)
 
 # Create audit log
-audit_log = AuditLog(log_path=".scalpel/audit.log")
+audit_log = AuditLog(log_path=".code-scalpel/audit.log")
 
 # Record events
 audit_log.record_event(
@@ -104,7 +104,7 @@ The `TamperResistance` class provides policy enforcement and integrity verificat
 
 ```python
 class TamperResistance:
-    def __init__(self, policy_path: str = ".scalpel/policy.yaml"):
+    def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """Initialize tamper resistance with policy file path."""
         
     def verify_policy_integrity(self) -> bool:
@@ -166,7 +166,7 @@ The `AuditLog` class provides tamper-resistant event logging with cryptographic 
 
 ```python
 class AuditLog:
-    def __init__(self, log_path: str = ".scalpel/audit.log"):
+    def __init__(self, log_path: str = ".code-scalpel/audit.log"):
         """Initialize audit log with file path."""
         
     def record_event(
@@ -282,10 +282,10 @@ The policy engine defends against:
 
 The following paths are automatically protected:
 
-- `.scalpel/policy.yaml`
-- `.scalpel/budget.yaml`
-- `.scalpel/overrides.yaml`
-- Any file starting with `.scalpel/`
+- `.code-scalpel/policy.yaml`
+- `.code-scalpel/budget.yaml`
+- `.code-scalpel/overrides.yaml`
+- Any file starting with `.code-scalpel/`
 - `scalpel.policy.yaml`
 - `budget.yaml`
 - `overrides.yaml`
@@ -308,7 +308,7 @@ export SCALPEL_TOTP_SECRET=$(openssl rand -hex 32)
 ### Policy File Format
 
 ```yaml
-# .scalpel/policy.yaml
+# .code-scalpel/policy.yaml
 version: "1.0"
 
 # Policy enforcement settings
@@ -327,7 +327,7 @@ protected:
   files:
     - "*.config"
     - "*.env"
-    - ".scalpel/*"
+    - ".code-scalpel/*"
   
   operations:
     - "delete"
@@ -509,7 +509,7 @@ class PolicyEnforcedAgent:
 
 **Solution**: 
 - Ensure policy file exists before creating TamperResistance instance
-- Check file permissions: `stat -c "%a" .scalpel/policy.yaml`
+- Check file permissions: `stat -c "%a" .code-scalpel/policy.yaml`
 - Should show `444` (read-only)
 
 ### Issue: Tampering False Positive

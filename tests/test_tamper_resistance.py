@@ -34,7 +34,7 @@ from code_scalpel.policy_engine import (
 @pytest.fixture
 def temp_policy_dir(tmp_path):
     """Create temporary directory for policy files."""
-    policy_dir = tmp_path / ".scalpel"
+    policy_dir = tmp_path / ".code-scalpel"
     policy_dir.mkdir(parents=True, exist_ok=True)
 
     # Create a dummy policy file
@@ -133,8 +133,8 @@ def test_prevent_policy_modification_blocks_protected_files(tamper_resistance):
     # [20251216_TEST] P0 acceptance criteria
 
     protected_files = [
-        Path(".scalpel/policy.yaml"),
-        Path(".scalpel/budget.yaml"),
+        Path(".code-scalpel/policy.yaml"),
+        Path(".code-scalpel/budget.yaml"),
         Path("scalpel.policy.yaml"),
     ]
 
@@ -169,7 +169,7 @@ def test_policy_modification_attempt_logged(tamper_resistance):
     # [20251216_TEST] P0 acceptance criteria
 
     operation = Operation(
-        type="file_write", affected_files=[Path(".scalpel/policy.yaml")]
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
     )
 
     try:
@@ -183,7 +183,7 @@ def test_policy_modification_attempt_logged(tamper_resistance):
     )
     assert len(events) > 0
     assert events[-1]["severity"] == "CRITICAL"
-    assert ".scalpel/policy.yaml" in str(events[-1]["details"])
+    assert ".code-scalpel/policy.yaml" in str(events[-1]["details"])
 
 
 # =============================================================================
@@ -297,7 +297,7 @@ def test_override_logged_with_justification(tamper_resistance, tmp_path, monkeyp
         json.dump(response_data, f)
 
     # Update the tamper resistance to use the test path
-    tamper_resistance.audit_log.log_path = tmp_path / ".scalpel" / "audit.log"
+    tamper_resistance.audit_log.log_path = tmp_path / ".code-scalpel" / "audit.log"
 
     # Request override with short timeout
     decision = tamper_resistance.require_human_override(
@@ -558,7 +558,7 @@ def test_full_tamper_resistance_workflow(temp_policy_dir, tmp_path):
 
     # 2. Try to modify policy file (should be blocked)
     operation = Operation(
-        type="file_write", affected_files=[Path(".scalpel/policy.yaml")]
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
     )
 
     with pytest.raises(PolicyModificationError):

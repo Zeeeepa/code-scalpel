@@ -1,0 +1,178 @@
+{
+  "version": "3.0.0",
+  "component": "governance_config_integration",
+  "timestamp": "2025-12-18T21:47:24.058694",
+  "integration_status": "COMPLETE",
+  "autonomy_engine": {
+    "module_path": "src/code_scalpel/autonomy/engine.py",
+    "lines_of_code": 356,
+    "classes": [
+      "AutonomyEngine",
+      "BlastRadiusCalculator",
+      "ChangeValidationResult"
+    ],
+    "key_features": [
+      "Loads GovernanceConfig from .code-scalpel/config.json",
+      "Enforces change budgeting limits",
+      "Detects and protects critical paths",
+      "Supervised fix loop with bounded iterations",
+      "Full audit trail logging",
+      "Environment variable overrides",
+      "Config summary reporting"
+    ]
+  },
+  "integration_tests": {
+    "test_file": "tests/test_autonomy_engine_integration.py",
+    "total_tests": 17,
+    "passing_tests": 17,
+    "pass_rate": 100.0,
+    "test_categories": {
+      "engine_initialization": 2,
+      "change_validation": 6,
+      "critical_path_detection": 4,
+      "config_management": 2,
+      "blast_radius_calculator": 5
+    }
+  },
+  "integrated_components": {
+    "governance_config_loader": {
+      "loads_from": ".code-scalpel/config.json",
+      "env_var_overrides": 12,
+      "security": [
+        "SHA-256 hash validation",
+        "HMAC signature verification"
+      ]
+    },
+    "change_budget": {
+      "receives_from_config": [
+        "max_files",
+        "max_lines_per_file",
+        "max_total_lines",
+        "max_complexity_increase"
+      ]
+    },
+    "blast_radius_calculator": {
+      "uses_from_config": [
+        "critical_paths",
+        "critical_path_max_lines",
+        "block_on_critical_paths"
+      ],
+      "pattern_matching": [
+        "exact",
+        "prefix",
+        "glob"
+      ]
+    },
+    "fix_loop": {
+      "receives_from_config": [
+        "max_autonomous_iterations"
+      ],
+      "maps_to": "max_attempts parameter"
+    },
+    "audit_trail": {
+      "receives_from_config": [
+        "log_all_changes",
+        "retention_days"
+      ],
+      "storage_path": ".code-scalpel/autonomy_audit/"
+    }
+  },
+  "test_scenarios_verified": [
+    {
+      "scenario": "Default profile initialization",
+      "result": "PASS",
+      "description": "Engine loads config and initializes components correctly"
+    },
+    {
+      "scenario": "Restrictive profile enforcement",
+      "result": "PASS",
+      "description": "Stricter limits applied (100 lines, 3 files, 3 iterations)"
+    },
+    {
+      "scenario": "Standard change validation",
+      "result": "PASS",
+      "description": "Changes within limits are allowed"
+    },
+    {
+      "scenario": "Budget limit enforcement",
+      "result": "PASS",
+      "description": "Changes exceeding limits are blocked with clear messages"
+    },
+    {
+      "scenario": "Critical path detection",
+      "result": "PASS",
+      "description": "Files matching critical path patterns detected"
+    },
+    {
+      "scenario": "Critical path limit enforcement",
+      "result": "PASS",
+      "description": "Stricter limits applied to critical path changes"
+    },
+    {
+      "scenario": "Multiple file validation",
+      "result": "PASS",
+      "description": "Multi-file changes validated against file count limits"
+    },
+    {
+      "scenario": "File limit enforcement",
+      "result": "PASS",
+      "description": "Changes exceeding max_files blocked"
+    },
+    {
+      "scenario": "Pattern matching",
+      "result": "PASS",
+      "description": "Critical path patterns match correctly (prefix, exact, glob)"
+    },
+    {
+      "scenario": "Config summary",
+      "result": "PASS",
+      "description": "All config values accessible via get_config_summary()"
+    },
+    {
+      "scenario": "Environment overrides",
+      "result": "PASS",
+      "description": "Env vars override config file values"
+    },
+    {
+      "scenario": "Profile comparison",
+      "result": "PASS",
+      "description": "Restrictive profile blocks more aggressively than default"
+    }
+  ],
+  "acceptance_criteria_final": {
+    "config_loader_loads_file": "PASS",
+    "config_loader_validates_hash": "PASS",
+    "config_loader_validates_hmac": "PASS",
+    "config_loader_defaults": "PASS",
+    "config_loader_env_overrides": "PASS",
+    "critical_paths_detection": "PASS",
+    "critical_paths_stricter_limits": "PASS",
+    "critical_paths_complexity_limits": "PASS",
+    "critical_paths_blocking": "PASS",
+    "critical_paths_glob_patterns": "PASS",
+    "integration_autonomy_engine": "PASS",
+    "integration_change_budgeting": "PASS",
+    "integration_blast_radius": "PASS",
+    "integration_fix_loop": "PASS",
+    "unit_tests_complete": "PASS",
+    "integration_tests_complete": "PASS",
+    "critical_path_tests": "PASS",
+    "env_override_tests": "PASS",
+    "total_complete": "18/18",
+    "completion_percentage": 100.0
+  },
+  "total_tests": {
+    "governance_config_unit": 16,
+    "governance_config_profiles": 26,
+    "autonomy_engine_integration": 17,
+    "total": 59,
+    "all_passing": true
+  },
+  "documentation": {
+    "governance_config_schema": "docs/configuration/governance_config_schema.md",
+    "testing_configurations": "docs/configuration/TESTING_CONFIGURATIONS.md",
+    "development_roadmap": "DEVELOPMENT_ROADMAP.md (Section 6 complete)",
+    "implementation_module": "src/code_scalpel/autonomy/engine.py",
+    "integration_tests": "tests/test_autonomy_engine_integration.py"
+  }
+}

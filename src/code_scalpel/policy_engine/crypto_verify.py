@@ -117,7 +117,7 @@ class CryptographicPolicyVerifier:
         self,
         manifest_source: str = "git",  # "git", "env", "file"
         secret_key: Optional[str] = None,
-        policy_dir: str = ".scalpel",
+        policy_dir: str = ".code-scalpel",
     ):
         """
         Initialize cryptographic policy verifier.
@@ -442,7 +442,7 @@ class CryptographicPolicyVerifier:
         policy_files: List[str],
         secret_key: str,
         signed_by: str,
-        policy_dir: str = ".scalpel",
+        policy_dir: str = ".code-scalpel",
     ) -> PolicyManifest:
         """
         Create a new signed manifest for policy files.
@@ -494,7 +494,7 @@ class CryptographicPolicyVerifier:
         )
 
     @staticmethod
-    def save_manifest(manifest: PolicyManifest, policy_dir: str = ".scalpel") -> Path:
+    def save_manifest(manifest: PolicyManifest, policy_dir: str = ".code-scalpel") -> Path:
         """
         Save manifest to file.
 
@@ -524,7 +524,7 @@ class CryptographicPolicyVerifier:
 
 
 # [20250108_FEATURE] Integration with TamperResistance
-def verify_policy_integrity_crypto(policy_dir: str = ".scalpel") -> bool:
+def verify_policy_integrity_crypto(policy_dir: str = ".code-scalpel") -> bool:
     """
     Verify policy integrity using cryptographic verification.
 

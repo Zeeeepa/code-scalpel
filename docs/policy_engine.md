@@ -45,7 +45,7 @@ pip install code-scalpel
 
 ### 1. Create Policy File
 
-Create `.scalpel/policy.yaml` in your project root:
+Create `.code-scalpel/policy.yaml` in your project root:
 
 ```yaml
 version: "1.0"
@@ -72,7 +72,7 @@ policies:
 from code_scalpel.policy_engine import PolicyEngine, Operation
 
 # Initialize engine (loads and validates policies)
-engine = PolicyEngine(".scalpel/policy.yaml")
+engine = PolicyEngine(".code-scalpel/policy.yaml")
 
 # Create operation to evaluate
 operation = Operation(
@@ -325,7 +325,7 @@ pytest tests/test_policy_engine.py::TestFailClosed -v
 
 All P0 acceptance criteria from the problem statement are met:
 
-- [x] Policy Engine: Loads and parses `.scalpel/policy.yaml`
+- [x] Policy Engine: Loads and parses `.code-code-scalpel/policy.yaml`
 - [x] Policy Engine: Validates Rego syntax at startup
 - [x] Policy Engine: Evaluates operations against all policies
 - [x] Policy Engine: Fails CLOSED on policy parsing error
@@ -398,7 +398,7 @@ opa check policy.rego
 ### Policy File Not Found
 
 ```
-PolicyError: Policy file not found: .scalpel/policy.yaml
+PolicyError: Policy file not found: .code-scalpel/policy.yaml
 ```
 
 **Solution:** Create the policy file or specify the correct path.

@@ -399,7 +399,7 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     """
     Load budget configuration from YAML file.
 
-    [20251216_FEATURE] Configuration loader for .scalpel/budget.yaml.
+    [20251216_FEATURE] Configuration loader for .code-scalpel/budget.yaml.
 
     Args:
         config_path: Path to budget.yaml file (optional)
@@ -411,7 +411,7 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         Returns default configuration if file not found.
     """
     if config_path is None:
-        config_path = ".scalpel/budget.yaml"
+        config_path = ".code-scalpel/budget.yaml"
 
     config_file = Path(config_path)
     if not config_file.exists():

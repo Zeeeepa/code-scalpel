@@ -545,7 +545,7 @@ RUN pip install mypy black
 WORKDIR /workspace
 
 # Copy project-specific config
-COPY .scalpel.conf /etc/scalpel.conf
+COPY .code-scalpel.conf /etc/scalpel.conf
 
 # Environment variables
 ENV WORKSPACE_ROOT=/workspace

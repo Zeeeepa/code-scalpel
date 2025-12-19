@@ -39,7 +39,7 @@ class TamperResistance:
     - Comprehensive audit logging
     """
 
-    def __init__(self, policy_path: str = ".scalpel/policy.yaml"):
+    def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """
         Initialize tamper resistance system.
 
@@ -139,7 +139,7 @@ class TamperResistance:
             PolicyModificationError: If operation targets protected files
         """
         protected_paths = [
-            ".scalpel/",
+            ".code-scalpel/",
             "scalpel.policy.yaml",
             "budget.yaml",
             "overrides.yaml",
@@ -291,7 +291,7 @@ class TamperResistance:
         """
         # Check in multiple locations for flexibility
         response_paths = [
-            Path(".scalpel/override_response.json"),
+            Path(".code-scalpel/override_response.json"),
             self.policy_path.parent / "override_response.json",
         ]
 
