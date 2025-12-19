@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251218_RELEASE] Updated version for v3.0.0 "Autonomy" release
-__version__ = "3.0.1"  # [20251218_RELEASE] v3.0.1 Governance Integration - Complete autonomy governance system
+# [20251219_RELEASE] v3.0.0 "Autonomy" - Self-correction loop with governance
+__version__ = "3.0.0"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 
