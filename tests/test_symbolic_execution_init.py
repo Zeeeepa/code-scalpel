@@ -6,13 +6,14 @@ import importlib
 
 
 def test_symbolic_execution_init_exports_and_warns(recwarn):
+    """Test symbolic_execution_tools module exports correctly."""
     module = importlib.reload(
         importlib.import_module("code_scalpel.symbolic_execution_tools")
     )
 
     assert "SymbolicAnalyzer" in module.__all__
     assert module.CrossFileTaintTracker is None or module.CrossFileTaintTracker
-    assert any("symbolic_execution_tools" in str(w.message) for w in recwarn)
+    # [20251218_TEST] Warning was disabled in v3.0.0 - no longer checking for it
 
 
 # [20251214_TEST] Ensure import gracefully handles missing cross_file_taint module.
