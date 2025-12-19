@@ -355,17 +355,9 @@ class TestProcessExecution:
 
     def test_execute_in_process_simple_success(self, tmp_path):
         """Test _execute_in_process with successful commands."""
-        # Create a simple test project
-        (tmp_path / "test_file.py").write_text("def test_pass():\n    assert True\n")
-
+        (tmp_path / 'test_file.py').write_text('def test_pass():\n    assert True\n')
         executor = SandboxExecutor(max_cpu_seconds=10)
-        result = executor._execute_in_process(
-            tmp_path,
-            test_command="python -c 'exit(0)'",  # Simple success
-            lint_command="echo 'lint ok'",
-            build_command=None,
-        )
-
+        result = executor._execute_in_process(tmp_path, test_command="python -c 'exit(0)'", lint_command="echo 'lint ok'", build_command=None)
         assert result.success is True
         assert result.build_success is True
         assert result.execution_time_ms > 0
@@ -373,28 +365,15 @@ class TestProcessExecution:
     def test_execute_in_process_build_failure(self, tmp_path):
         """Test _execute_in_process handles build failure."""
         executor = SandboxExecutor(max_cpu_seconds=10)
-        result = executor._execute_in_process(
-            tmp_path,
-            test_command="echo test",
-            lint_command="echo lint",
-            build_command="exit 1",  # Failing build
-        )
-
+        result = executor._execute_in_process(tmp_path, test_command='echo test', lint_command='echo lint', build_command='bash -c "exit 1"')
         assert result.success is False
         assert result.build_success is False
-        # stderr may be empty for simple exit commands
         assert result.stderr is not None
 
     def test_execute_in_process_test_failure(self, tmp_path):
         """Test _execute_in_process handles test failure."""
         executor = SandboxExecutor(max_cpu_seconds=10)
-        result = executor._execute_in_process(
-            tmp_path,
-            test_command="python -c 'exit(1)'",  # Failing test
-            lint_command="echo lint",
-            build_command=None,
-        )
-
+        result = executor._execute_in_process(tmp_path, test_command="python -c 'exit(1)'", lint_command='echo lint', build_command=None)
         assert result.success is False
         assert len(result.test_results) > 0
         assert result.test_results[0].passed is False
@@ -402,15 +381,8 @@ class TestProcessExecution:
     def test_execute_in_process_respects_timeout(self, tmp_path):
         """Test _execute_in_process respects CPU time limit."""
         executor = SandboxExecutor(max_cpu_seconds=1)
-        result = executor._execute_in_process(
-            tmp_path,
-            test_command="python -c 'import time; time.sleep(10)'",  # Long running
-            lint_command="echo lint",
-            build_command=None,
-        )
-
-        # Should timeout
-        assert "timed out" in result.stderr.lower()
+        result = executor._execute_in_process(tmp_path, test_command="python -c 'import time; time.sleep(10)'", lint_command='echo lint', build_command=None)
+        assert 'timed out' in result.stderr.lower()
 
 
 class TestSideEffectDetection:

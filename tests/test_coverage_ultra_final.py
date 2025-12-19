@@ -13,32 +13,20 @@ class TestAutogenExceptionPaths:
 
     def test_analyze_error_analysis_exception(self):
         """Test when analysis itself throws exception."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_analyze_error_impl,
-        )
-
-        # Code that might trigger analysis exception
-        _ = scalpel_analyze_error_impl("x" * 10000, "error")
-        assert "success" in result
+        from code_scalpel.autonomy.integrations.autogen import scalpel_analyze_error_impl
+        result = scalpel_analyze_error_impl('x' * 10000, 'error')
+        assert 'success' in result
 
     def test_apply_fix_parse_exception(self):
         """Test apply_fix with code that triggers exception."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_apply_fix_impl,
-        )
-
-        # Syntax error in code
-        _ = scalpel_apply_fix_impl("def :", "fix")
-        assert result["success"] is False
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        result = scalpel_apply_fix_impl('def :', 'fix')
+        assert result['success'] is False
 
     def test_validate_general_exception(self):
         """Test validate with code that triggers general exception."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_validate_impl,
-        )
-
-        # Empty code
-        _ = scalpel_validate_impl("")
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        result = scalpel_validate_impl('')
         # May succeed with empty code or may fail
 
 
@@ -47,37 +35,16 @@ class TestLanggraphExceptionPaths:
 
     def test_generate_fix_with_exception(self):
         """Test generate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            generate_fix_node,
-        )
-
-        # State with malformed fix_attempts
-        state = {
-            "code": "x = 1",
-            "language": "python",
-            "error": "test",
-            "fix_attempts": [{"is_syntax_error": False}],
-            "success": False,
-        }
-
-        _ = generate_fix_node(state)
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        state = {'code': 'x = 1', 'language': 'python', 'error': 'test', 'fix_attempts': [{'is_syntax_error': False}], 'success': False}
+        result = generate_fix_node(state)
         assert result is not None
 
     def test_validate_fix_with_exception(self):
         """Test validate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            validate_fix_node,
-        )
-
-        state = {
-            "code": "def foo(:",  # Bad syntax
-            "language": "python",
-            "error": "test",
-            "fix_attempts": [{"has_fix": True}],
-            "success": False,
-        }
-
-        _ = validate_fix_node(state)
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        state = {'code': 'def foo(:', 'language': 'python', 'error': 'test', 'fix_attempts': [{'has_fix': True}], 'success': False}
+        result = validate_fix_node(state)
         assert result is not None
 
 
@@ -127,15 +94,11 @@ class TestErrorToDiffExceptionPaths:
     def test_analyze_with_multiple_errors(self):
         """Test analyze_error with code that has multiple issues."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = ErrorToDiffEngine(project_root=Path(tmp))
-
-            # Code with indentation error
-            _ = "def foo():\nreturn 1"
-            error = "IndentationError: expected an indented block"
-
-            _ = engine.analyze_error(error, "python", code)
+            engine = ErrorToDiffEngine(project_root=Path(tmp))
+            code = 'def foo():\nreturn 1'
+            error = 'IndentationError: expected an indented block'
+            result = engine.analyze_error(error, 'python', code)
             assert result is not None
 
 
@@ -231,13 +194,10 @@ class TestRefactorSimulatorExceptionPaths:
     def test_simulate_with_syntax_error(self):
         """Test simulate with syntax error in modified code."""
         from code_scalpel.generators.refactor_simulator import RefactorSimulator
-
         simulator = RefactorSimulator()
-
-        original = "def foo(): return 1"
-        modified = "def foo(: return 2"  # Syntax error
-
-        _ = simulator.simulate(original, modified)
+        original = 'def foo(): return 1'
+        modified = 'def foo(: return 2'
+        result = simulator.simulate(original, modified)
         assert result is not None
 
 
@@ -247,23 +207,16 @@ class TestTestGeneratorExceptionPaths:
     def test_generator_with_empty_code(self):
         """Test generator with empty code."""
         from code_scalpel.generators.test_generator import TestGenerator
-
         generator = TestGenerator()
-        _ = generator.generate("pytest", "")
+        result = generator.generate('pytest', '')
         assert result is not None
 
     def test_generator_with_class(self):
         """Test generator with class."""
         from code_scalpel.generators.test_generator import TestGenerator
-
         generator = TestGenerator()
-
-        _ = """
-class Calculator:
-    def add(self, a, b):
-        return a + b
-"""
-        _ = generator.generate("pytest", code)
+        code = '\nclass Calculator:\n    def add(self, a, b):\n        return a + b\n'
+        result = generator.generate('pytest', code)
         assert result is not None
 
 
@@ -304,19 +257,10 @@ class TestTypeInferenceExceptionPaths:
 
     def test_infer_with_generic_types(self):
         """Test type inference with generic types."""
-        from code_scalpel.symbolic_execution_tools.type_inference import (
-            TypeInferenceEngine,
-        )
-
-        _ = TypeInferenceEngine()
-
-        _ = """
-from typing import List, Dict
-
-def process(items: List[int]) -> Dict[str, int]:
-    return {"count": len(items)}
-"""
-        _ = engine.infer(code)
+        from code_scalpel.symbolic_execution_tools.type_inference import TypeInferenceEngine
+        engine = TypeInferenceEngine()
+        code = '\nfrom typing import List, Dict\n\ndef process(items: List[int]) -> Dict[str, int]:\n    return {"count": len(items)}\n'
+        result = engine.infer(code)
         assert result is not None
 
 

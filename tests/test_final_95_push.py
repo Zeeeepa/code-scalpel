@@ -296,6 +296,44 @@ MIIEpAIBAAKCAQEA...
             os.unlink(temp_path)
 
     def test_contract_breach_detector(self):
-        """Cover contract breach detection - skip if needs graph."""
-        # This test is skipped due to complex initialization requirement
-        pytest.skip("ContractBreachDetector requires graph initialization")
+        """[20251219_TEST] Cover contract breach detection with proper initialization."""
+        from code_scalpel.polyglot.contract_breach_detector import (
+            ContractBreachDetector,
+            UnifiedGraph,
+            Node,
+            Edge,
+        )
+
+        # Create a unified graph with some test data
+        graph = UnifiedGraph()
+
+        # [20251219_BUGFIX] Node uses node_id and node_type, not id and type
+        # Add a Java backend node
+        java_node = Node(
+            node_id="java::UserService::getUser",
+            node_type="method",
+            language="java",
+        )
+        graph.add_node(java_node)
+
+        # Add a TypeScript frontend node
+        ts_node = Node(
+            node_id="typescript::api::fetchUser",
+            node_type="function",
+            language="typescript",
+        )
+        graph.add_node(ts_node)
+
+        # Add an edge from frontend to backend
+        edge = Edge(
+            from_id="typescript::api::fetchUser",
+            to_id="java::UserService::getUser",
+            edge_type="api_call",
+            confidence=0.9,
+        )
+        graph.add_edge(edge)
+
+        # Create detector and detect breaches
+        detector = ContractBreachDetector(graph)
+        breaches = detector.detect_breaches("java::UserService::getUser")
+        assert isinstance(breaches, list)

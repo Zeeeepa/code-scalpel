@@ -372,15 +372,34 @@ class TestTSXAnalyzerUncovered:
     """Target uncovered lines in TSX analyzer."""
 
     def test_analyze_empty_tsx(self):
-        """Test TSX analyzer with minimal content."""
-        try:
-            from code_scalpel.polyglot.tsx_analyzer import TSXAnalyzer
+        """[20251219_TEST] Test TSX analyzer functions with minimal content."""
+        from code_scalpel.polyglot.tsx_analyzer import (
+            detect_server_directive,
+            has_jsx_syntax,
+            is_react_component,
+        )
+        from code_scalpel.ir.nodes import IRFunctionDef
 
-            analyzer = TSXAnalyzer()
-            _ = analyzer.analyze("")
-            assert result is not None
-        except ImportError:
-            pytest.skip("TSXAnalyzer not available")
+        # Test detect_server_directive
+        assert detect_server_directive("'use server'") == "use server"
+        assert detect_server_directive("'use client'") == "use client"
+        assert detect_server_directive("const x = 1") is None
+
+        # Test has_jsx_syntax
+        assert has_jsx_syntax("<div>hello</div>") is True
+        assert has_jsx_syntax("const x = 1") is False
+
+        # Test is_react_component - requires IR node and code
+        # [20251219_BUGFIX] Correct signature: is_react_component(node, code)
+        component_code = "function App() { return <div /> }"
+        func_node = IRFunctionDef(name="App", params=[], body=[])
+        result = is_react_component(func_node, component_code)
+        assert result is not None  # Returns ReactComponentInfo
+
+        non_component_code = "const x = 1"
+        func_node2 = IRFunctionDef(name="helper", params=[], body=[])
+        result2 = is_react_component(func_node2, non_component_code)
+        assert result2 is not None  # Still returns info, just not a component
 
 
 # =============================================================================
@@ -418,30 +437,64 @@ class TestPolicyEngineUncovered:
         """Test semantic analyzer methods."""
         try:
             from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
-
             analyzer = SemanticAnalyzer()
-
-            # Test contains_sql_sink method with language
-            result = analyzer.contains_sql_sink("execute(query)", "python")
+            result = analyzer.contains_sql_sink('execute(query)', 'python')
             assert isinstance(result, bool)
-
-            # Test has_parameterization method
-            assert analyzer.has_parameterization("%s", "?") or True
-
-            # Test has_file_operation
+            assert analyzer.has_parameterization('%s', '?') or True
             assert analyzer.has_file_operation("open('file')") or True
         except ImportError:
-            pytest.skip("SemanticAnalyzer not available")
+            pytest.skip('SemanticAnalyzer not available')
 
     def test_crypto_verify_initialization(self):
-        """Test CryptoVerify initialization."""
-        try:
-            from code_scalpel.policy_engine.crypto_verify import CryptoVerify
+        """[20251219_TEST] Test CryptographicPolicyVerifier initialization."""
+        import tempfile
+        import json
+        import hashlib
+        import hmac
+        from pathlib import Path
+        from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
-            _ = CryptoVerify()
+        # [20251219_BUGFIX] CryptographicPolicyVerifier requires secret_key and valid manifest
+        # Create a temp directory with valid policy structure
+        with tempfile.TemporaryDirectory() as td:
+            policy_dir = Path(td) / ".code-scalpel"
+            policy_dir.mkdir(parents=True)
+
+            # Create a simple policy file
+            policy_file = policy_dir / "test_policy.json"
+            policy_content = json.dumps({"version": "1.0", "rules": []})
+            policy_file.write_text(policy_content)
+
+            # Calculate hash
+            file_hash = hashlib.sha256(policy_content.encode()).hexdigest()
+
+            # Create manifest with correct PolicyManifest fields
+            # [20251219_BUGFIX] PolicyManifest uses created_at and signed_by, not timestamp
+            test_secret = "test_secret_key_for_testing"
+            manifest_data = {
+                "version": "1.0.0",
+                "created_at": "2025-12-19T00:00:00Z",
+                "signed_by": "test@example.com",
+                "files": {"test_policy.json": file_hash},
+            }
+            manifest_json = json.dumps(manifest_data, sort_keys=True)
+            signature = hmac.new(
+                test_secret.encode(), manifest_json.encode(), hashlib.sha256
+            ).hexdigest()
+            manifest_data["signature"] = signature
+
+            manifest_file = policy_dir / "policy.manifest.json"
+            manifest_file.write_text(json.dumps(manifest_data))
+
+            # Now create verifier with secret_key parameter and manifest_source="file"
+            # [20251219_BUGFIX] Default manifest_source is "git", must use "file" for test
+            verifier = CryptographicPolicyVerifier(
+                manifest_source="file",
+                secret_key=test_secret,
+                policy_dir=str(policy_dir),
+            )
             assert verifier is not None
-        except ImportError:
-            pytest.skip("CryptoVerify not available")
+            assert verifier.manifest is not None
 
 
 # =============================================================================

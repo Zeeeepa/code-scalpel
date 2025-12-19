@@ -185,36 +185,17 @@ class TestPolyglotModules:
     def test_alias_resolver_resolve(self):
         """Test AliasResolver.resolve method."""
         from code_scalpel.polyglot.alias_resolver import AliasResolver
-
         with tempfile.TemporaryDirectory() as td:
             resolver = AliasResolver(td)
-
-            # Create a tsconfig with path mapping
-            Path(td).joinpath("tsconfig.json").write_text(
-                """
-{
-  "compilerOptions": {
-    "paths": {
-      "@utils/*": ["src/utils/*"]
-    }
-  }
-}
-"""
-            )
-            # Try to resolve an alias
-            _ = resolver.resolve("@utils/helpers")
-            # Result depends on implementation
+            Path(td).joinpath('tsconfig.json').write_text('\n{\n  "compilerOptions": {\n    "paths": {\n      "@utils/*": ["src/utils/*"]\n    }\n  }\n}\n')
+            _ = resolver.resolve('@utils/helpers')
 
     def test_typescript_type_narrowing_basic(self):
-        """Test TypeScript type narrowing analysis."""
-        try:
-            from code_scalpel.polyglot.typescript.type_narrowing import (
-                TypeNarrowingAnalyzer,
-            )
+        """[20251219_TEST] Test TypeScript type narrowing analysis."""
+        from code_scalpel.polyglot.typescript.type_narrowing import TypeNarrowing
 
-            analyzer = TypeNarrowingAnalyzer()
-
-            code = """
+        analyzer = TypeNarrowing()
+        code = """
 function foo(x: string | number) {
     if (typeof x === 'string') {
         return x.length;
@@ -222,10 +203,8 @@ function foo(x: string | number) {
     return x;
 }
 """
-            result = analyzer.analyze(code)
-            assert result is not None
-        except ImportError:
-            pytest.skip("TypeNarrowingAnalyzer not available")
+        result = analyzer.analyze(code)
+        assert result is not None
 
 
 # =============================================================================

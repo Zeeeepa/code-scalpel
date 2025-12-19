@@ -1,7 +1,7 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 3.4 (Autonomy Release Edition)  
-**Last Updated:** December 18, 2025  <!-- [20251218_DOCS] v3.0.0 Autonomy released -->
+**Document Version:** 3.5 (Post-Release Maintenance)  
+**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] Post-release test fixes -->
 **Current Release:** v3.0.0 "Autonomy" (Released Dec 18, 2025)  <!-- [20251218_DOCS] Self-correction loop complete -->
 **Previous Release:** v2.5.0 "Guardian" (Released Dec 17, 2025)
 **v3.0.0 Features RELEASED:**
@@ -11,7 +11,7 @@
 - [COMPLETE] Audit Trail (28 tests) - Cryptographic SHA-256 hashing, immutable entries
 - [COMPLETE] Sandboxed Execution (42 tests) - Isolated speculative execution with resource limits
 - [COMPLETE] Framework Integrations (45 tests) - LangGraph, CrewAI, AutoGen
-**Test Summary:** 4033 tests passing, 94.86% combined coverage (≥90% gate PASSED), 71 adversarial tests pass
+**Test Summary:** 4133 tests passing, 94.86% combined coverage (≥90% gate PASSED), 71 adversarial tests pass
 **Coverage Gate:** ≥90% combined (statement + branch) - ACHIEVED: 94.86%
 **Maintainer:** 3D Tech Solutions LLC
 
@@ -179,7 +179,7 @@ pytest tests/test_error_to_diff.py tests/test_sandbox.py tests/test_autonomy_*.p
 - [x] Mutation Gate merged: 12 tests pass (hollow fix detection)
 - [x] Quality gates: ruff + black clean, 93% overall coverage
 - [x] Evidence bundle published: release_artifacts/v3.0.0-preview/
-- [x] All feature branches merged to main: 3504 total tests passing
+- [x] All feature branches merged to main: 4133 total tests passing
 
 ---
 
@@ -211,7 +211,7 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 |--------|-------|--------|
 | MCP Tools | 19 tools (analyze, extract, security, test gen, context, cross-file, policy) | Released v3.0.0 |
 | MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | Released v2.0.0 |
-| Test Suite | 4,033 tests passing (100% pass rate) | Stable |
+| Test Suite | 4,133 tests passing (100% pass rate) | Stable |
 | Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |
 | Code Coverage | 94.86% combined (96.28% stmt, 90.95% branch) | CI Gate Met (≥90%) |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns, cross-file taint | Stable |

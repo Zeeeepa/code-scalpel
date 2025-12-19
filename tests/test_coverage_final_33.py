@@ -101,55 +101,41 @@ class TestErrorToDiffBranches:
     def test_analyze_error_invalid_fix(self):
         """Test analyze_error with fix that produces invalid AST."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = ErrorToDiffEngine(project_root=Path(tmp))
-
-            # Code with syntax error
-            _ = "def foo(:\n    pass"
-            error = "SyntaxError: invalid syntax at line 1"
-
-            _ = engine.analyze_error(error, "python", code)
-            # Just verify we get an analysis result
+            engine = ErrorToDiffEngine(project_root=Path(tmp))
+            code = 'def foo(:\n    pass'
+            error = 'SyntaxError: invalid syntax at line 1'
+            result = engine.analyze_error(error, 'python', code)
             assert result is not None
 
     def test_analyze_error_type_error_diff(self):
         """Test analyze_error with fix that raises TypeError."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = ErrorToDiffEngine(project_root=Path(tmp))
-
-            _ = "x = undeclared_variable"
+            engine = ErrorToDiffEngine(project_root=Path(tmp))
+            code = 'x = undeclared_variable'
             error = "NameError: name 'undeclared_variable' is not defined at line 1"
-
-            _ = engine.analyze_error(error, "python", code)
+            result = engine.analyze_error(error, 'python', code)
             assert result is not None
 
     def test_apply_diff_no_match(self):
         """Test _apply_diff with no matching text."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = ErrorToDiffEngine(project_root=Path(tmp))
-
-            source = "x = 1\ny = 2"
-            diff = "not_found -> replaced"
-
-            _ = engine._apply_diff(source, diff)
-            assert result == source  # Should return unchanged
+            engine = ErrorToDiffEngine(project_root=Path(tmp))
+            source = 'x = 1\ny = 2'
+            diff = 'not_found -> replaced'
+            result = engine._apply_diff(source, diff)
+            assert result == source
 
     def test_apply_diff_multiple_matches(self):
         """Test _apply_diff with multiple matches."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = ErrorToDiffEngine(project_root=Path(tmp))
-
-            source = "x = 1\nx = 2"  # 'x' appears on multiple lines
-            diff = "x -> y"
-
-            _ = engine._apply_diff(source, diff)
+            engine = ErrorToDiffEngine(project_root=Path(tmp))
+            source = 'x = 1\nx = 2'
+            diff = 'x -> y'
+            result = engine._apply_diff(source, diff)
             # Multiple matches should not modify
 
 
@@ -158,74 +144,52 @@ class TestAutogenBranches:
 
     def test_scalpel_analyze_error_impl_syntax_error(self):
         """Test analyze error with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_analyze_error_impl,
-        )
-
-        _ = "def foo(:"  # Syntax error
-        error = "SyntaxError"
-
-        _ = scalpel_analyze_error_impl(code, error)
-        assert result["success"] is True
-        assert result["parsed"] is False
-        assert result["error_type"] == "syntax"
+        from code_scalpel.autonomy.integrations.autogen import scalpel_analyze_error_impl
+        code = 'def foo(:'
+        error = 'SyntaxError'
+        result = scalpel_analyze_error_impl(code, error)
+        assert result['success'] is True
+        assert result['parsed'] is False
+        assert result['error_type'] == 'syntax'
 
     def test_scalpel_analyze_error_impl_runtime(self):
         """Test analyze error with runtime error."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_analyze_error_impl,
-        )
-
-        _ = "x = 1 + 2"  # Valid code
-        error = "Runtime error"
-
-        _ = scalpel_analyze_error_impl(code, error)
-        assert result["success"] is True
-        assert result["parsed"] is True
+        from code_scalpel.autonomy.integrations.autogen import scalpel_analyze_error_impl
+        code = 'x = 1 + 2'
+        error = 'Runtime error'
+        result = scalpel_analyze_error_impl(code, error)
+        assert result['success'] is True
+        assert result['parsed'] is True
 
     def test_scalpel_apply_fix_impl_success(self):
         """Test apply fix with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_apply_fix_impl,
-        )
-
-        _ = "x = 1"
-        fix = "x = 2"
-
-        _ = scalpel_apply_fix_impl(code, fix)
-        assert result["success"] is True
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        code = 'x = 1'
+        fix = 'x = 2'
+        result = scalpel_apply_fix_impl(code, fix)
+        assert result['success'] is True
 
     def test_scalpel_apply_fix_impl_error(self):
         """Test apply fix with invalid code."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_apply_fix_impl,
-        )
-
-        _ = "def foo(:"  # Invalid
-        fix = "fix"
-
-        _ = scalpel_apply_fix_impl(code, fix)
-        assert result["success"] is False
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
+        code = 'def foo(:'
+        fix = 'fix'
+        result = scalpel_apply_fix_impl(code, fix)
+        assert result['success'] is False
 
     def test_scalpel_validate_impl_success(self):
         """Test validate with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_validate_impl,
-        )
-
-        _ = "x = 1"
-        _ = scalpel_validate_impl(code)
-        assert result["success"] is True
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        code = 'x = 1'
+        result = scalpel_validate_impl(code)
+        assert result['success'] is True
 
     def test_scalpel_validate_impl_syntax_error(self):
         """Test validate with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import (
-            scalpel_validate_impl,
-        )
-
-        _ = "def foo(:"  # Invalid
-        _ = scalpel_validate_impl(code)
-        assert result["success"] is False
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
+        code = 'def foo(:'
+        result = scalpel_validate_impl(code)
+        assert result['success'] is False
 
 
 class TestLanggraphBranches:
@@ -233,187 +197,76 @@ class TestLanggraphBranches:
 
     def test_analyze_error_node_syntax(self):
         """Test analyze_error_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            analyze_error_node,
-        )
-
-        state = {
-            "code": "def foo(:",
-            "language": "python",
-            "error": "SyntaxError",
-            "fix_attempts": [],
-            "success": False,
-        }
-
-        _ = analyze_error_node(state)
-        assert len(result["fix_attempts"]) > 0
+        from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
+        state = {'code': 'def foo(:', 'language': 'python', 'error': 'SyntaxError', 'fix_attempts': [], 'success': False}
+        result = analyze_error_node(state)
+        assert len(result['fix_attempts']) > 0
 
     def test_generate_fix_node_syntax(self):
         """Test generate_fix_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            generate_fix_node,
-        )
-
-        state = {
-            "code": "def foo(:",
-            "language": "python",
-            "error": "SyntaxError",
-            "fix_attempts": [{"step": "analyze_error", "is_syntax_error": True}],
-            "success": False,
-        }
-
-        _ = generate_fix_node(state)
-        assert len(result["fix_attempts"]) > 0
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        state = {'code': 'def foo(:', 'language': 'python', 'error': 'SyntaxError', 'fix_attempts': [{'step': 'analyze_error', 'is_syntax_error': True}], 'success': False}
+        result = generate_fix_node(state)
+        assert len(result['fix_attempts']) > 0
 
     def test_generate_fix_node_runtime(self):
         """Test generate_fix_node with runtime error."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            generate_fix_node,
-        )
-
-        state = {
-            "code": "x = undefined",
-            "language": "python",
-            "error": "NameError",
-            "fix_attempts": [{"step": "analyze_error", "is_syntax_error": False}],
-            "success": False,
-        }
-
-        _ = generate_fix_node(state)
-        assert len(result["fix_attempts"]) > 0
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
+        state = {'code': 'x = undefined', 'language': 'python', 'error': 'NameError', 'fix_attempts': [{'step': 'analyze_error', 'is_syntax_error': False}], 'success': False}
+        result = generate_fix_node(state)
+        assert len(result['fix_attempts']) > 0
 
     def test_validate_fix_node_no_fix(self):
         """Test validate_fix_node with no fix."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            validate_fix_node,
-        )
-
-        state = {
-            "code": "x = 1",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [],  # No fix attempts
-            "success": False,
-        }
-
-        _ = validate_fix_node(state)
-        assert result["success"] is False
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        state = {'code': 'x = 1', 'language': 'python', 'error': '', 'fix_attempts': [], 'success': False}
+        result = validate_fix_node(state)
+        assert result['success'] is False
 
     def test_validate_fix_node_with_fix(self):
         """Test validate_fix_node with fix."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            validate_fix_node,
-        )
-
-        state = {
-            "code": "x = 1",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [{"step": "generate_fix", "has_fix": True}],
-            "success": False,
-        }
-
-        _ = validate_fix_node(state)
-        # Should have validation result
-        assert len(result["fix_attempts"]) > 1
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
+        state = {'code': 'x = 1', 'language': 'python', 'error': '', 'fix_attempts': [{'step': 'generate_fix', 'has_fix': True}], 'success': False}
+        result = validate_fix_node(state)
+        assert len(result['fix_attempts']) > 1
 
     def test_apply_fix_node(self):
         """Test apply_fix_node."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            apply_fix_node,
-        )
-
-        state = {
-            "code": "x = 1",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [],
-            "success": False,
-        }
-
-        _ = apply_fix_node(state)
-        assert result["success"] is True
+        from code_scalpel.autonomy.integrations.langgraph import apply_fix_node
+        state = {'code': 'x = 1', 'language': 'python', 'error': '', 'fix_attempts': [], 'success': False}
+        result = apply_fix_node(state)
+        assert result['success'] is True
 
     def test_escalate_node(self):
         """Test escalate_node."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            escalate_node,
-        )
-
-        state = {
-            "code": "x = 1",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [],
-            "success": False,
-        }
-
-        _ = escalate_node(state)
-        assert result["success"] is False
-        assert result["fix_attempts"][-1]["requires_human"] is True
+        from code_scalpel.autonomy.integrations.langgraph import escalate_node
+        state = {'code': 'x = 1', 'language': 'python', 'error': '', 'fix_attempts': [], 'success': False}
+        result = escalate_node(state)
+        assert result['success'] is False
+        assert result['fix_attempts'][-1]['requires_human'] is True
 
     def test_has_valid_fixes_true(self):
         """Test has_valid_fixes when True."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            has_valid_fixes,
-        )
-
-        state = {
-            "code": "",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [{"has_fix": True}],
-            "success": False,
-        }
-
+        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
+        state = {'code': '', 'language': 'python', 'error': '', 'fix_attempts': [{'has_fix': True}], 'success': False}
         assert has_valid_fixes(state) is True
 
     def test_has_valid_fixes_false(self):
         """Test has_valid_fixes when False."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            has_valid_fixes,
-        )
-
-        state = {
-            "code": "",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [],
-            "success": False,
-        }
-
+        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
+        state = {'code': '', 'language': 'python', 'error': '', 'fix_attempts': [], 'success': False}
         assert has_valid_fixes(state) is False
 
     def test_fix_passed_true(self):
         """Test fix_passed when True."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            fix_passed,
-        )
-
-        state = {
-            "code": "",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [{"validation": "passed"}],
-            "success": False,
-        }
-
+        from code_scalpel.autonomy.integrations.langgraph import fix_passed
+        state = {'code': '', 'language': 'python', 'error': '', 'fix_attempts': [{'validation': 'passed'}], 'success': False}
         assert fix_passed(state) is True
 
     def test_fix_passed_false(self):
         """Test fix_passed when False."""
-        from code_scalpel.autonomy.integrations.langgraph import (
-            fix_passed,
-        )
-
-        state = {
-            "code": "",
-            "language": "python",
-            "error": "",
-            "fix_attempts": [{"validation": "failed"}],
-            "success": False,
-        }
-
+        from code_scalpel.autonomy.integrations.langgraph import fix_passed
+        state = {'code': '', 'language': 'python', 'error': '', 'fix_attempts': [{'validation': 'failed'}], 'success': False}
         assert fix_passed(state) is False
 
 
@@ -449,12 +302,9 @@ class TestMoreBranchCoverage:
     def test_call_graph_builder(self):
         """Test call graph builder."""
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
-
         with tempfile.TemporaryDirectory() as tmp:
-            # Create test file
-            test_file = Path(tmp) / "test.py"
-            test_file.write_text("def foo(): pass")
-
+            test_file = Path(tmp) / 'test.py'
+            test_file.write_text('def foo(): pass')
             builder = CallGraphBuilder(root_path=Path(tmp))
             graph = builder.build()
             assert graph is not None
@@ -462,15 +312,12 @@ class TestMoreBranchCoverage:
     def test_osv_client_branches(self):
         """Test OSV client branches."""
         from code_scalpel.ast_tools.osv_client import OSVClient
-
         client = OSVClient()
-        # Test initialization
         assert client is not None
 
     def test_audit_trail_branches(self):
         """Test audit trail branches."""
         from code_scalpel.autonomy.audit import AutonomyAuditTrail
-
         with tempfile.TemporaryDirectory() as tmp:
             trail = AutonomyAuditTrail(storage_path=Path(tmp))
             assert trail is not None
@@ -479,7 +326,6 @@ class TestMoreBranchCoverage:
         """Test mutation gate branches."""
         from code_scalpel.autonomy.mutation_gate import MutationTestGate
         from code_scalpel.autonomy.sandbox import SandboxExecutor
-
         sandbox = SandboxExecutor()
         gate = MutationTestGate(sandbox=sandbox)
         assert gate is not None
@@ -487,44 +333,32 @@ class TestMoreBranchCoverage:
     def test_sandbox_branches(self):
         """Test sandbox branches."""
         from code_scalpel.autonomy.sandbox import SandboxExecutor
-
-        sandbox = SandboxExecutor(
-            isolation_level="process",
-            max_cpu_seconds=5,
-        )
+        sandbox = SandboxExecutor(isolation_level='process', max_cpu_seconds=5)
         assert sandbox is not None
 
     def test_refactor_simulator_branches(self):
         """Test refactor simulator branches."""
         from code_scalpel.generators.refactor_simulator import RefactorSimulator
-
         simulator = RefactorSimulator()
-
-        original = "x = 1"
-        modified = "x = 2"
-
-        _ = simulator.simulate(original, modified)
+        original = 'x = 1'
+        modified = 'x = 2'
+        result = simulator.simulate(original, modified)
         assert result is not None
 
     def test_http_link_detector_branches(self):
         """Test HTTP link detector branches."""
         from code_scalpel.graph_engine.http_detector import HTTPLinkDetector
-
         detector = HTTPLinkDetector()
-
-        # Add some endpoint and client
-        detector.add_endpoint("/test", "GET", "test_module", "test_func")
-        detector.add_client_call("/test", "GET", "client_module", "client_func")
-
+        detector.add_endpoint('/test', 'GET', 'test_module', 'test_func')
+        detector.add_client_call('/test', 'GET', 'client_module', 'client_func')
         links = detector.detect_links()
         assert links is not None
 
     def test_resolve_module_path(self):
         """Test resolve_module_path."""
         from code_scalpel.mcp.module_resolver import resolve_module_path
-
         with tempfile.TemporaryDirectory() as tmp:
-            _ = resolve_module_path("python", "os", Path(tmp))
+            result = resolve_module_path('python', 'os', Path(tmp))
             # May or may not resolve depending on setup
 
 
@@ -574,24 +408,10 @@ class TestTypeInferenceBranches:
 
     def test_type_inference_complex_type(self):
         """Test type inference with complex type."""
-        from code_scalpel.symbolic_execution_tools.type_inference import (
-            TypeInferenceEngine,
-        )
-
-        _ = TypeInferenceEngine()
-
-        _ = """
-def process(data: list[dict[str, int]]) -> dict[str, list[int]]:
-    _ = {}
-    for item in data:
-        for k, v in item.items():
-            if k not in result:
-                result[k] = []
-            result[k].append(v)
-    return result
-"""
-
-        _ = engine.infer(code)
+        from code_scalpel.symbolic_execution_tools.type_inference import TypeInferenceEngine
+        engine = TypeInferenceEngine()
+        code = '\ndef process(data: list[dict[str, int]]) -> dict[str, list[int]]:\n    result = {}\n    for item in data:\n        for k, v in item.items():\n            if k not in result:\n                result[k] = []\n            result[k].append(v)\n    return result\n'
+        result = engine.infer(code)
         assert result is not None
 
 
@@ -600,34 +420,20 @@ class TestSecretScannerBranches:
 
     def test_secret_scanner_aws_key(self):
         """Test secret scanner with AWS key pattern."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import (
-            SecretScanner,
-        )
-
+        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
         scanner = SecretScanner()
-
-        _ = """
-AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE"
-"""
+        code = '\nAWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE"\n'
         tree = ast.parse(code)
-        _ = scanner.scan(tree)
+        result = scanner.scan(tree)
         assert result is not None
 
     def test_secret_scanner_private_key(self):
         """Test secret scanner with private key."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import (
-            SecretScanner,
-        )
-
+        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
         scanner = SecretScanner()
-
-        _ = '''
-key = """-----BEGIN RSA PRIVATE KEY-----
-MIIEowIBAAKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy
------END RSA PRIVATE KEY-----"""
-'''
+        code = '\nkey = """-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy\n-----END RSA PRIVATE KEY-----"""\n'
         tree = ast.parse(code)
-        _ = scanner.scan(tree)
+        result = scanner.scan(tree)
         assert result is not None
 
 
@@ -636,19 +442,8 @@ class TestUnifiedSinkBranches:
 
     def test_unified_sink_ldap(self):
         """Test unified sink with LDAP injection."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
-            UnifiedSinkDetector,
-        )
-
+        from code_scalpel.symbolic_execution_tools.unified_sink_detector import UnifiedSinkDetector
         detector = UnifiedSinkDetector()
-
-        _ = """
-import ldap
-
-def search_user(user_input):
-    conn = ldap.initialize("ldap://server")
-    conn.search_s("dc=example,dc=com", ldap.SCOPE_SUBTREE, f"(cn={user_input})")
-"""
-
-        _ = detector.detect_sinks(code, "python")
+        code = '\nimport ldap\n\ndef search_user(user_input):\n    conn = ldap.initialize("ldap://server")\n    conn.search_s("dc=example,dc=com", ldap.SCOPE_SUBTREE, f"(cn={user_input})")\n'
+        result = detector.detect_sinks(code, 'python')
         assert result is not None

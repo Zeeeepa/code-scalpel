@@ -28,6 +28,8 @@ from ..nodes import (
     IRPass,
     IRBreak,
     IRContinue,
+    IRTry,
+    IRRaise,
     IRBinaryOp,
     IRUnaryOp,
     IRCompare,
@@ -374,6 +376,78 @@ class PythonNormalizer(BaseNormalizer):
     def _normalize_Continue(self, node: ast.Continue) -> IRContinue:
         """Normalize continue statement."""
         return IRContinue(
+            loc=self._make_loc(node),
+            source_language=self.language,
+        )
+
+    # [20251218_FEATURE] Try/Except/Finally support
+    def _normalize_Try(self, node: ast.Try) -> IRTry:
+        """
+        Normalize try/except/else/finally statement.
+
+        [20251218_FEATURE] v3.0.1 - Full try/except support for Python IR.
+
+        Python try statement structure:
+            try:
+                body
+            except ExceptionType as name:
+                handler_body
+            else:
+                orelse_body
+            finally:
+                finalbody
+        """
+        # Normalize try body
+        body = self._normalize_body(node.body)
+
+        # Normalize exception handlers
+        handlers = []
+        for handler in node.handlers:
+            # handler.type is the exception type (can be None for bare except)
+            exc_type = None
+            if handler.type:
+                exc_type = self.normalize_node(handler.type)
+
+            # handler.name is the variable name (e.g., 'e' in 'except Exception as e')
+            exc_name = handler.name
+
+            # handler.body is the handler body
+            handler_body = self._normalize_body(handler.body)
+
+            handlers.append((exc_type, exc_name, handler_body))
+
+        # Normalize else block (Python-specific)
+        orelse = self._normalize_body(node.orelse) if node.orelse else []
+
+        # Normalize finally block
+        finalbody = self._normalize_body(node.finalbody) if node.finalbody else []
+
+        return IRTry(
+            body=body,
+            handlers=handlers,
+            orelse=orelse,
+            finalbody=finalbody,
+            loc=self._make_loc(node),
+            source_language=self.language,
+        )
+
+    def _normalize_Raise(self, node: ast.Raise) -> IRRaise:
+        """
+        Normalize raise statement.
+
+        [20251218_FEATURE] v3.0.1 - IRRaise support for Python.
+
+        Python raise statement forms:
+            raise                      # re-raise current exception
+            raise Exception            # raise exception
+            raise Exception from cause # raise with cause
+        """
+        exc = self.normalize_node(node.exc) if node.exc else None
+        cause = self.normalize_node(node.cause) if node.cause else None
+
+        return IRRaise(
+            exc=exc,
+            cause=cause,
             loc=self._make_loc(node),
             source_language=self.language,
         )
