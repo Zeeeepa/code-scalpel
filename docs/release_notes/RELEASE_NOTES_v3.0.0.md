@@ -16,7 +16,7 @@ Code Scalpel v3.0.0 "Autonomy" represents a major milestone in our journey towar
 
 | Metric | v2.0.1 | v3.0.0 | Improvement |
 |--------|--------|--------|-------------|
-| Test Count | 2,698 | 4,033 | +49.5% |
+| Test Count | 2,698 | 4,133 | +53.2% |
 | Statement Coverage | 89% | 96.28% | +7.28% |
 | Branch Coverage | 85% | 90.95% | +5.95% |
 | Combined Coverage | 87% | 94.86% | +7.86% |
@@ -60,6 +60,45 @@ The groundwork for autonomous agent capabilities includes:
 - **Edge Case Coverage:** Adversarial inputs handled gracefully
 - **Memory Safety:** No memory leaks in long-running operations
 - **Thread Safety:** Concurrent operations validated
+
+### 4. Configuration Management (`.code-scalpel/` Directory)
+
+v3.0.0 introduces a unified configuration directory standard for all policy and governance features:
+
+**Directory Structure:**
+```
+.code-scalpel/
+├── policy.yaml              # Main policy configuration
+├── policy.manifest.json     # Signed manifest for tamper detection
+├── budget.yaml              # Change budget limits
+├── override_response.json   # Policy override responses
+└── autonomy_audit/          # Audit trail logs (runtime)
+```
+
+**Key Features:**
+- **Centralized Configuration:** All policy engine settings in one location
+- **Cryptographic Verification:** `CryptographicPolicyVerifier` validates manifest signatures
+- **Tamper Resistance:** SHA-256 hashing detects unauthorized policy modifications
+- **Change Budgeting:** Configurable blast radius limits per session
+- **Audit Trail:** Immutable logging of all policy decisions
+
+**Usage:**
+```python
+from code_scalpel.policy_engine import PolicyEngine
+from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
+
+# Load policy from .code-scalpel directory
+engine = PolicyEngine(".code-scalpel/policy.yaml")
+
+# Verify policy integrity
+verifier = CryptographicPolicyVerifier(
+    manifest_source="file",
+    policy_dir=".code-scalpel"
+)
+```
+
+**MCP Tool Integration:**
+The `verify_policy_integrity` MCP tool uses `.code-scalpel/` by default for policy verification.
 
 ---
 
@@ -117,7 +156,7 @@ All MCP tools are production-ready with comprehensive test coverage:
 
 ### Test Suite Summary
 ```
-4033 passed, 24 skipped, 1 xfailed
+4133 passed, 20 skipped
 ```
 
 ### Coverage Breakdown
