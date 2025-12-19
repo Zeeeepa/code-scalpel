@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-4033%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Tests](https://img.shields.io/badge/tests-4133%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
 [![Coverage](https://img.shields.io/badge/coverage-94.86%25-brightgreen.svg)](release_artifacts/v3.0.0/)
 
 **MCP Server Toolkit for AI Agents - v3.0.0 "Autonomy"**
