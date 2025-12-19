@@ -17,6 +17,30 @@
 
 ---
 
+## Release Procedure - Version Update Checklist
+
+> **CRITICAL:** Before ANY release, update ALL version strings to avoid runtime version mismatches.
+
+**Pre-Release Version Updates (Required):**
+1. `src/code_scalpel/__init__.py` - Update `__version__ = "X.Y.Z"`
+2. `src/code_scalpel/mcp/server.py` - Verify imports `__version__` from package (NO hardcoded strings)
+3. `pyproject.toml` - Update `version = "X.Y.Z"`
+4. `README.md` - Update version badges and examples
+5. `RELEASE_vX.Y.Z_CHECKLIST.md` - Create release-specific checklist
+6. `docs/release_notes/RELEASE_NOTES_vX.Y.Z.md` - Write release notes
+
+**Verification Commands:**
+```bash
+# All should show same version
+python -c "from code_scalpel import __version__; print(__version__)"
+grep "^__version__" src/code_scalpel/__init__.py
+grep "version =" pyproject.toml
+```
+
+**Reference:** See full checklist at [docs/release_gate_checklist.md](docs/release_gate_checklist.md)
+
+---
+
 ## North Star Mission
 
 > **"An agent must never modify code unless Code Scalpel can prove the change is safe, minimal, and intentional."**

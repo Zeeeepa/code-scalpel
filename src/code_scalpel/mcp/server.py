@@ -44,7 +44,8 @@ from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
     UnifiedSinkDetector,
 )
 
-__version__ = "2.0.0"
+# [20251218_BUGFIX] Import version from package instead of hardcoding
+from code_scalpel import __version__
 
 
 # [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport corruption

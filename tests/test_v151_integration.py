@@ -105,7 +105,7 @@ database = Database()
         from code_scalpel.ast_tools.import_resolver import ImportResolver
 
         resolver = ImportResolver(flask_project)
-        _ = resolver.build()
+        result = resolver.build()
 
         assert result.success
         assert result.modules >= 4  # app, routes, db, services
@@ -124,7 +124,7 @@ database = Database()
         extractor = CrossFileExtractor(flask_project)
         extractor.build()
 
-        _ = extractor.extract(
+        result = extractor.extract(
             str(flask_project / "services" / "user_service.py"),
             "search_users",
             depth=2,
@@ -147,7 +147,7 @@ database = Database()
         )
 
         tracker = CrossFileTaintTracker(flask_project)
-        _ = tracker.analyze(max_depth=3)
+        result = tracker.analyze(max_depth=3)
 
         assert result.success
         assert result.modules_analyzed >= 3  # At least app, routes, db
@@ -197,13 +197,13 @@ class TestLargeProjectScalability:
             if i > 1:
                 imports.append(f"from module_{i-2} import func_{i-2}")
 
-            _ = (
+            code = (
                 "\n".join(imports)
                 + f"""
 
 def func_{i}(x):
     '''Function in module {i}.'''
-    _ = x * {i+1}
+    result = x * {i+1}
 """
             )
             # Add calls to imported functions
@@ -220,7 +220,7 @@ def func_{i}(x):
         from code_scalpel.ast_tools.import_resolver import ImportResolver
 
         resolver = ImportResolver(large_project)
-        _ = resolver.build()
+        result = resolver.build()
 
         assert result.success
         assert result.modules == 10
@@ -232,7 +232,7 @@ def func_{i}(x):
         extractor = CrossFileExtractor(large_project)
         extractor.build()
 
-        _ = extractor.extract(
+        result = extractor.extract(
             str(large_project / "module_9.py"),
             "func_9",
             depth=5,
@@ -280,7 +280,7 @@ def other_func():
         from code_scalpel.ast_tools.import_resolver import ImportResolver
 
         resolver = ImportResolver(circular_project)
-        _ = resolver.build()
+        result = resolver.build()
 
         assert result.success
         # Should have detected the circular import
@@ -295,7 +295,7 @@ def other_func():
         extractor.build()
 
         # Should complete without hanging
-        _ = extractor.extract(
+        result = extractor.extract(
             str(circular_project / "a.py"),
             "func_a",
             depth=3,
@@ -472,7 +472,7 @@ def func_5():
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
 
-        _ = extractor.extract(
+        result = extractor.extract(
             str(deep_dependency_project / "level_0.py"),
             "entry_point",
             depth=5,
@@ -500,7 +500,7 @@ def func_5():
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
 
-        _ = extractor.extract(
+        result = extractor.extract(
             str(deep_dependency_project / "level_0.py"),
             "entry_point",
             depth=5,
@@ -532,7 +532,7 @@ def func_5():
         extractor.build()
 
         # Use aggressive decay to trigger low confidence
-        _ = extractor.extract(
+        result = extractor.extract(
             str(deep_dependency_project / "level_0.py"),
             "entry_point",
             depth=10,
@@ -560,7 +560,7 @@ def func_5():
         extractor.build()
 
         # Use aggressive decay to trigger low confidence warning
-        _ = extractor.extract(
+        result = extractor.extract(
             str(deep_dependency_project / "level_0.py"),
             "entry_point",
             depth=10,
@@ -579,7 +579,7 @@ def func_5():
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         async def run_test():
-            _ = await get_cross_file_dependencies(
+            result = await get_cross_file_dependencies(
                 target_file="level_0.py",
                 target_symbol="entry_point",
                 project_root=str(deep_dependency_project),
@@ -587,7 +587,7 @@ def func_5():
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         assert result.success
         assert result.confidence_decay_factor == 0.9  # Default
@@ -604,7 +604,7 @@ def func_5():
         )
         if target_sym:
             assert target_sym.confidence == 1.0
-            assert target_sym.low_confidence 
+            assert not target_sym.low_confidence  # Target has confidence 1.0, should not be low
 
     def test_mcp_tool_custom_decay_factor(self, deep_dependency_project):
         """Test MCP tool with custom confidence decay factor."""
@@ -612,7 +612,7 @@ def func_5():
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         async def run_test():
-            _ = await get_cross_file_dependencies(
+            result = await get_cross_file_dependencies(
                 target_file="level_0.py",
                 target_symbol="entry_point",
                 project_root=str(deep_dependency_project),
@@ -621,7 +621,7 @@ def func_5():
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         assert result.success
         assert result.confidence_decay_factor == 0.7
@@ -638,7 +638,7 @@ def func_5():
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         async def run_test():
-            _ = await get_cross_file_dependencies(
+            result = await get_cross_file_dependencies(
                 target_file="level_0.py",
                 target_symbol="entry_point",
                 project_root=str(deep_dependency_project),
@@ -647,7 +647,7 @@ def func_5():
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         assert result.success
         # With 0.5 decay at depth 1: 0.5 = threshold, depth 2: 0.25 < threshold
@@ -758,7 +758,7 @@ class TestGraphNeighborhood:
         """Test basic k-hop neighborhood extraction."""
         center_id = "python::main::function::center"
 
-        _ = sample_graph.get_neighborhood(center_id, k=1)
+        result = sample_graph.get_neighborhood(center_id, k=1)
 
         assert result.success
         assert not result.truncated
@@ -779,7 +779,7 @@ class TestGraphNeighborhood:
         """Test k=2 neighborhood includes second-level nodes."""
         center_id = "python::main::function::center"
 
-        _ = sample_graph.get_neighborhood(center_id, k=2)
+        result = sample_graph.get_neighborhood(center_id, k=2)
 
         assert result.success
 
@@ -794,7 +794,7 @@ class TestGraphNeighborhood:
         """Test graph is truncated when exceeding max_nodes."""
         center_id = "python::main::function::center"
 
-        _ = sample_graph.get_neighborhood(center_id, k=3, max_nodes=3)
+        result = sample_graph.get_neighborhood(center_id, k=3, max_nodes=3)
 
         assert result.success
         assert result.truncated
@@ -808,7 +808,7 @@ class TestGraphNeighborhood:
         """Test outgoing-only neighborhood extraction."""
         center_id = "python::main::function::center"
 
-        _ = sample_graph.get_neighborhood(center_id, k=2, direction="outgoing")
+        result = sample_graph.get_neighborhood(center_id, k=2, direction="outgoing")
 
         assert result.success
 
@@ -820,7 +820,7 @@ class TestGraphNeighborhood:
         # Test from a leaf node - should find path back to center
         leaf_id = "python::module_a1::function::func_A1"
 
-        _ = sample_graph.get_neighborhood(leaf_id, k=2, direction="incoming")
+        result = sample_graph.get_neighborhood(leaf_id, k=2, direction="incoming")
 
         assert result.success
         # Incoming edges from a leaf may be limited
@@ -828,7 +828,7 @@ class TestGraphNeighborhood:
 
     def test_neighborhood_nonexistent_node(self, sample_graph):
         """Test error handling for nonexistent center node."""
-        _ = sample_graph.get_neighborhood(
+        result = sample_graph.get_neighborhood(
             "python::nonexistent::function::fake", k=1
         )
 
@@ -867,7 +867,7 @@ def util():
 
         async def run_test():
             # Use the actual project - it has a call graph
-            _ = await get_graph_neighborhood(
+            result = await get_graph_neighborhood(
                 center_node_id="python::tmp_cov::function::main",
                 k=2,
                 max_nodes=50,
@@ -875,7 +875,7 @@ def util():
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         # Tool should return a valid response
         assert hasattr(result, "success")
@@ -890,14 +890,14 @@ def util():
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         async def run_test():
-            _ = await get_graph_neighborhood(
+            result = await get_graph_neighborhood(
                 center_node_id="python::tmp_cov::function::load_coverage",
                 k=2,
                 max_nodes=20,
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         if result.success and result.nodes:
             assert result.mermaid is not None
@@ -912,13 +912,13 @@ def util():
 
         async def run_test():
             # Invalid k value
-            _ = await get_graph_neighborhood(
+            result = await get_graph_neighborhood(
                 center_node_id="python::test::function::test",
                 k=0,  # Invalid - must be >= 1
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         assert not result.success
         assert result.error is not None
@@ -930,13 +930,13 @@ def util():
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         async def run_test():
-            _ = await get_graph_neighborhood(
+            result = await get_graph_neighborhood(
                 center_node_id="python::test::function::test",
                 direction="invalid",  # Invalid direction
             )
             return result
 
-        _ = asyncio.run(run_test())
+        result = asyncio.run(run_test())
 
         assert not result.success
         assert "direction" in result.error.lower()

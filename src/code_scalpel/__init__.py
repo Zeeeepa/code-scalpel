@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251215_RELEASE] Updated version for v2.0.0 "Polyglot" release
-__version__ = "2.2.0"  # [20251216_DOCS] v2.2.0 Nexus - Unified Cross-Language Graph
+# [20251218_RELEASE] Updated version for v3.0.0 "Autonomy" release
+__version__ = "3.0.0"  # [20251218_DOCS] v3.0.0 Autonomy - Comprehensive Coverage and Stability
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

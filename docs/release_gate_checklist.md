@@ -10,6 +10,28 @@
 
 ---
 
+## VERSION UPDATE REQUIREMENTS (Pre-Release)
+
+> **CRITICAL:** Update ALL version strings before release to avoid mismatched versions.
+
+**Files to Update:**
+- [ ] `src/code_scalpel/__init__.py` - Update `__version__` constant
+- [ ] `src/code_scalpel/mcp/server.py` - Verify imports `__version__` from package (no hardcoded version)
+- [ ] `pyproject.toml` - Update version field
+- [ ] `README.md` - Update badge and quick start examples
+- [ ] `RELEASE_v{VERSION}_CHECKLIST.md` - Create new checklist for this release
+- [ ] `docs/release_notes/RELEASE_NOTES_v{VERSION}.md` - Create release notes
+
+**Verification:**
+```bash
+# Verify version consistency
+python -c "from code_scalpel import __version__; print(__version__)"
+python -m code_scalpel.mcp.server --help | grep version
+grep "version =" pyproject.toml
+```
+
+---
+
 ## REGRESSION BASELINE REQUIREMENTS (All Releases)
 
 > **STOP SHIP CRITERIA:** If ANY of these fail, the release is blocked.

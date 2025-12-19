@@ -24,7 +24,7 @@ class TestASTBuilderUncovered:
         from code_scalpel.ast_tools.builder import ASTBuilder
 
         builder = ASTBuilder()
-        _ = builder.build_ast_from_file("/nonexistent/path/to/file.py")
+        result = builder.build_ast_from_file("/nonexistent/path/to/file.py")
         assert result is None
 
     def test_build_ast_from_file_read_error(self):
@@ -38,7 +38,7 @@ class TestASTBuilderUncovered:
             temp_path = f.name
 
         with patch("tokenize.open", side_effect=PermissionError("Access denied")):
-            _ = builder.build_ast_from_file(temp_path)
+            result = builder.build_ast_from_file(temp_path)
             assert result is None
 
         Path(temp_path).unlink()
@@ -50,7 +50,7 @@ class TestASTBuilderUncovered:
         builder = ASTBuilder()
 
         with patch("ast.parse", side_effect=RuntimeError("Test error")):
-            _ = builder.build_ast("x = 1")
+            result = builder.build_ast("x = 1")
             assert result is None
 
     def test_handle_syntax_error_detailed(self):
@@ -60,8 +60,8 @@ class TestASTBuilderUncovered:
         builder = ASTBuilder()
 
         # Code with syntax error
-        _ = "def foo(\n    x = "  # Incomplete
-        _ = builder.build_ast(code)
+        code = "def foo(\n    x = "  # Incomplete
+        result = builder.build_ast(code)
         assert result is None
 
 
@@ -79,7 +79,7 @@ class TestASTCacheUncovered:
 
         with tempfile.TemporaryDirectory() as td:
             cache = IncrementalASTCache(cache_dir=td)
-            _ = cache._hash_file("/nonexistent/path.py")
+            result = cache._hash_file("/nonexistent/path.py")
             assert result == ""
 
     def test_load_metadata_json_decode_error(self):
@@ -156,7 +156,7 @@ class TestASTCacheUncovered:
             test_file.write_text("x = 1")
 
             custom_result = {"custom": "result"}
-            _ = cache.get_or_parse(
+            result = cache.get_or_parse(
                 str(test_file), "python", parse_fn=lambda p: custom_result
             )
             assert result == custom_result
@@ -171,7 +171,7 @@ class TestASTCacheUncovered:
             test_file = Path(td) / "test.js"
             test_file.write_text("const x = 1;")
 
-            _ = cache._parse_file(test_file, "javascript")
+            result = cache._parse_file(test_file, "javascript")
             assert result["type"] == "Module"
             assert result["language"] == "javascript"
 
@@ -250,14 +250,14 @@ class TestModuleResolverUncovered:
 
             # Create .jsx file
             (root / "Component.jsx").write_text("// jsx")
-            _ = resolve_module_path("javascript", "Component", root)
+            result = resolve_module_path("javascript", "Component", root)
             assert result is not None
             assert result.name == "Component.jsx"
 
             # Create index.js in folder
             (root / "utils").mkdir()
             (root / "utils" / "index.js").write_text("// index")
-            _ = resolve_module_path("javascript", "utils", root)
+            result = resolve_module_path("javascript", "utils", root)
             assert result is not None
 
     def test_resolve_typescript_module_variants(self):
@@ -269,14 +269,14 @@ class TestModuleResolverUncovered:
 
             # Create .tsx file
             (root / "Widget.tsx").write_text("// tsx")
-            _ = resolve_module_path("typescript", "Widget", root)
+            result = resolve_module_path("typescript", "Widget", root)
             assert result is not None
             assert result.name == "Widget.tsx"
 
             # Create index.ts in folder
             (root / "lib").mkdir()
             (root / "lib" / "index.ts").write_text("// index")
-            _ = resolve_module_path("typescript", "lib", root)
+            result = resolve_module_path("typescript", "lib", root)
             assert result is not None
 
     def test_resolve_java_module(self):
@@ -299,7 +299,7 @@ class TestModuleResolverUncovered:
         from code_scalpel.mcp.module_resolver import resolve_module_path
 
         with tempfile.TemporaryDirectory() as td:
-            _ = resolve_module_path("rust", "module", Path(td))
+            result = resolve_module_path("rust", "module", Path(td))
             assert result is None
 
 
@@ -422,7 +422,7 @@ class TestPolicyEngineUncovered:
             analyzer = SemanticAnalyzer()
 
             # Test contains_sql_sink method with language
-            _ = analyzer.contains_sql_sink("execute(query)", "python")
+            result = analyzer.contains_sql_sink("execute(query)", "python")
             assert isinstance(result, bool)
 
             # Test has_parameterization method
@@ -483,7 +483,7 @@ class TestAdditionalEdgeCases:
         extractor = SurgicalExtractor("")
 
         # Try to get non-existent function
-        _ = extractor.get_function("nonexistent")
+        result = extractor.get_function("nonexistent")
         # Result is an ExtractionResult with success=False
         assert result is not None
         assert not result.success
@@ -518,7 +518,7 @@ class TestAdditionalEdgeCases:
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine
 
         with tempfile.TemporaryDirectory() as td:
-            _ = ErrorToDiffEngine(td)
+            engine = ErrorToDiffEngine(td)
 
             # Multi-line error
             error = """
@@ -529,12 +529,12 @@ Traceback (most recent call last):
     return x / 0
 ZeroDivisionError: division by zero
 """
-            _ = """
+            code = """
 def foo():
     x = 10
     return x / 0
 
 _ = foo()
 """
-            _ = engine.analyze_error(error, "python", code)
+            result = engine.analyze_error(error, "python", code)
             assert result is not None

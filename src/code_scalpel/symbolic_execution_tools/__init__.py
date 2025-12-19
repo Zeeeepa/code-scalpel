@@ -138,13 +138,13 @@ except ImportError:
     TaintedParameter = None
     CrossFileSink = None
 
-# Emit info on import so users know about limitations
-warnings.warn(
-    "symbolic_execution_tools v1.2.0 (Stable). "
-    "Supports Int/Bool/String. See docs for type limitations.",
-    category=UserWarning,
-    stacklevel=2,
-)
+# [20251218_BUGFIX] Disabled import warning - info is in docs
+# warnings.warn(
+#     "symbolic_execution_tools v1.2.0 (Stable). "
+#     "Supports Int/Bool/String. See docs for type limitations.",
+#     category=UserWarning,
+#     stacklevel=2,
+# )
 
 __all__ = [
     # Core symbolic execution

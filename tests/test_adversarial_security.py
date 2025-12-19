@@ -200,7 +200,7 @@ def handler():
         """Sanitizer should clear taint."""
         file_a = temp_project / "sanitizers.py"
         file_a.write_text(
-            '''
+            r'''
 import re
 
 def sanitize_id(user_id: str) -> int:
