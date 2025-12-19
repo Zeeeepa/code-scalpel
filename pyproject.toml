@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.0.2"  # [20251219_RELEASE] v3.0.2 "Configuration Init" - code-scalpel init command
+version = "3.0.3"  # [20251219_RELEASE] v3.0.3 "Future Planning" - Complete roadmap with bridge releases
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

@@ -1,14 +1,35 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 4.0 (Strategic Vision through v5.0.0)  
-**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v4.0 roadmap expansion - Swarm & Re-Platforming -->
-**Current Release:** v3.0.1 "Autonomy" (Released Dec 19, 2025)
-**Next Release:** v3.0.2 "Configuration Init" (Ready for Release)
-**Future Releases:**
-- v3.1.0 "Gatekeeper" - CI/CD Enforcement (Q1 2026)
-- v4.0.0 "Swarm" - Multi-Agent Collaboration (H2 2026)
-- v5.0.0 "Re-Platforming" - Legacy Migration (2027+)
-**v3.0.2 Features READY FOR RELEASE:**
+**Document Version:** 8.0 (Complete Roadmap with All Bridge Releases)  
+**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v8.0 roadmap - Added v3.5→v4.0 and v4.0→v5.0 bridge releases -->
+**Current Release:** v3.0.2 "Configuration Init" (Released Dec 19, 2025)
+
+## The Surgical Suite Vision
+
+> **"Vibe coding with executive function."**
+
+Every AI coding interaction—whether Claude, Copilot, Cursor, or any future agent—operates through Code Scalpel's **Surgical Suite**. The developer experience feels like natural "vibe coding," but every action is:
+- **Auditable** - Immutable record of what changed, why, and who approved
+- **Governed** - Policy enforcement before any file modification
+- **Surgical** - Precise, minimal changes with blast radius controls
+- **Verified** - Proof that changes are safe before they ship
+
+**Next Releases (Foundation First):**
+- v3.1.0 "Polyglot+" - Go, Rust, C#, Kotlin Support (Q1 2026)
+- v3.2.0 "Framework IQ" - Semantic Framework Rules (Q2 2026)
+- v3.3.0 "Verified" - Test Execution Integration (Q2-Q3 2026)
+- v3.4.0 "Workspace" - Monorepo Support (Q3 2026)
+- v3.5.0 "Gatekeeper" - CI/CD Enforcement (Q4 2026)
+- v4.0.0 "Swarm" - Multi-Agent Collaboration (H1 2027)
+- v5.0.0 "Re-Platforming" - Legacy Migration (H2 2027)
+- v5.1.0 "Intercept" - MCP Proxy Layer (Q1 2028)
+- v5.2.0 "Intent" - Intent Analysis & Risk ML (Q2 2028)
+- v5.3.0 "Dashboard" - Audit UI & Policy Console (Q3 2028)
+- v5.4.0 "Enterprise" - SSO/RBAC/SIEM Integration (Q4 2028)
+- v5.5.0 "Extensions" - IDE Integrations (Q1 2029)
+- v6.0.0 "Surgical Suite" - Universal AI Operating Layer (H1 2029)
+
+**v3.0.2 Features RELEASED:**
 - [COMPLETE] `code-scalpel init` Command - Auto-initialize .code-scalpel with templates
 - [COMPLETE] Configuration Templates Module - config.json, policy.yaml, budget.yaml, README.md, .gitignore
 - [COMPLETE] CLI Integration - Subcommand with --dir and --force flags
@@ -7787,7 +7808,7 @@ This release adds a `code-scalpel init` command to solve the first-run experienc
 | **P0** | User-Friendly Output | [COMPLETE] | Step-by-step guidance after init |
 | **P1** | --force Flag Support | [COMPLETE] | Reinitialize existing directories |
 | **P1** | --dir Flag Support | [COMPLETE] | Initialize in custom directory |
-| **P1** | Documentation Update | [PENDING] | README.md quick start update |
+| **P1** | Documentation Update | [COMPLETE] | README.md quick start update |
 
 ### CLI Usage
 
@@ -7890,7 +7911,7 @@ Use --force to attempt reinitialization.
 
 ---
 
-## v3.1.0 - "Gatekeeper" (CI/CD Enforcement)
+## v3.5.0 - "Gatekeeper" (CI/CD Enforcement)
 
 ### Overview
 
@@ -7898,7 +7919,19 @@ Use --force to attempt reinitialization.
 **Goal:** Make Code Scalpel adoption mandatory via CI/CD pipeline enforcement  
 **Effort:** ~2 developer-weeks  
 **Risk Level:** Low (additive feature)  
-**Target Release:** Q1 2026
+**Target Release:** Q4 2026
+
+### Prerequisites (Why v3.5, Not Earlier)
+
+Gatekeeper was originally planned as v3.1. We moved it to v3.5 because **mandating a tool before it has full capability creates escape hatches.**
+
+**What Must Be Complete Before Gatekeeper:**
+- ✅ v3.1 Polyglot+ - Go, Rust, C#, Kotlin parsing (no "can't analyze" exceptions)
+- ✅ v3.2 Framework IQ - React, Spring, Django rules (no "valid but crashes" issues)
+- ✅ v3.3 Verified - Test execution (no "wrong test" false confidence)
+- ✅ v3.4 Workspace - Monorepo support (no "broke downstream" surprises)
+
+**The Lesson:** Enforce after capability, not before.
 
 ### Why This Release
 
@@ -8088,6 +8121,1133 @@ jobs:
 [ ] Human override flow documented
 [ ] Enterprise deployment guide written
 [ ] Example repositories demonstrating integration
+
+---
+
+## Gap Analysis: v3.1 to v4.0 (The "Mandatory Scalpel" Problem)
+
+### The Thought Experiment
+
+**Scenario:** v3.1 "Gatekeeper" is deployed. ALL code changes must go through Code Scalpel to merge. Where do agents currently hit walls?
+
+### Identified Walls
+
+| Wall | Description | Impact | Current Status |
+|------|-------------|--------|----------------|
+| **Language Coverage** | Go, Rust, C#, Kotlin not supported | Agents bypass Scalpel entirely | CRITICAL |
+| **Framework Semantics** | React hooks rules, Spring bean lifecycle not understood | "Valid" code that breaks at runtime | HIGH |
+| **Test Execution** | Can generate tests but can't verify correctness | Wrong tests ship wrong code | HIGH |
+| **Monorepo Support** | No cross-package dependency understanding | Changes break downstream consumers | HIGH |
+| **Build System** | Webpack, Vite, bundler implications unknown | Tree-shaking, code splitting breaks | MEDIUM |
+| **Database/ORM** | Model changes don't trigger migrations | Data corruption in production | MEDIUM |
+| **IaC Semantics** | Terraform, K8s changes not validated | Infrastructure misconfiguration | MEDIUM |
+| **Performance** | No Big-O analysis or benchmark integration | Correct but slow code ships | MEDIUM |
+| **Documentation** | Code changes without doc updates | Documentation becomes lies | LOW |
+| **Cross-Repo** | No multi-repository impact analysis | Breaking changes across services | LOW |
+
+### Strategic Solution: Foundation First
+
+**Key Insight:** Don't mandate usage until capability is complete.
+
+Reordered releases ensure agents never hit "sorry, can't parse that" walls:
+
+```
+v3.0.2 "Config Init" ───────────────────────────────────────────┐
+       Dec 2025                                                  │
+           │                                                     │
+           ▼                                                     │
+v3.1.0 "Polyglot+" ──> v3.2.0 "Framework IQ" ──> v3.3.0 "Verified"
+       Q1 2026              Q2 2026                   Q2-Q3 2026
+   Go, Rust, C#, Kotlin   React, Spring, Django    Test Execution
+           │                                             │
+           ▼                                             ▼
+v3.4.0 "Workspace" ─────────────────────────> v3.5.0 "Gatekeeper"
+       Q3 2026                                      Q4 2026
+   Monorepo Support                            NOW mandate usage
+                                               (when ready)
+           │
+           ▼
+v4.0.0 "Swarm" ──> v5.0.0 "Re-Platforming" ──> v6.0.0 "Surgical Suite"
+       H1 2027           2027                        2028
+   Multi-Agent         Legacy Migration        Universal AI Layer
+```
+
+**Why This Order:**
+1. **No escape hatches** - By Gatekeeper, there's no "can't parse Go" excuse
+2. **Trust is earned** - Teams use Scalpel because it's useful, then mandate because it's proven
+3. **Fewer bypass requests** - Capability precedes enforcement
+
+---
+
+## v3.1.0 - "Polyglot+" (Language Expansion)
+
+### Overview
+
+**Theme:** Universal Coverage  
+**Goal:** Expand language support to cover 90% of enterprise codebases  
+**Effort:** ~4-6 weeks per language  
+**Risk Level:** Medium (proven tree-sitter approach)  
+**Target Release:** Q1 2026
+
+### Why This Release
+
+With v3.1 "Gatekeeper" enforcing mandatory Scalpel usage, language gaps become **escape hatches**. If an agent needs to modify a Go file and we can't parse it, they bypass Scalpel entirely—defeating the CI gate's purpose.
+
+**Enterprise Language Distribution (2025 surveys):**
+| Language | Enterprise Usage | Current Support |
+|----------|------------------|-----------------|
+| Python | 72% | ✅ Full |
+| JavaScript | 68% | ✅ Full |
+| TypeScript | 61% | ✅ Full |
+| Java | 54% | ✅ Full |
+| **Go** | 38% | ❌ None |
+| **C#** | 35% | ❌ None |
+| **Kotlin** | 28% | ❌ None |
+| **Rust** | 19% | ❌ None |
+
+### Languages to Add
+
+| Language | Priority | Rationale | Parser |
+|----------|----------|-----------|--------|
+| **Go** | P0 | Kubernetes, cloud-native, Terraform providers | tree-sitter-go |
+| **Rust** | P0 | Security-critical systems, growing adoption | tree-sitter-rust |
+| **C#** | P1 | Enterprise .NET, Azure ecosystem | tree-sitter-c-sharp |
+| **Kotlin** | P1 | Android, Spring Boot, JVM ecosystem | tree-sitter-kotlin |
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Go Parser | Full AST extraction using tree-sitter-go | Planned |
+| **P0** | Go Security Sinks | Detect sql.Query, os.Exec, http.Get sinks | Planned |
+| **P0** | Rust Parser | Full AST extraction using tree-sitter-rust | Planned |
+| **P0** | Rust Security Sinks | Detect unsafe blocks, FFI calls, Command::new | Planned |
+| **P1** | C# Parser | Full AST extraction using tree-sitter-c-sharp | Planned |
+| **P1** | C# Security Sinks | Detect SqlCommand, Process.Start, WebClient | Planned |
+| **P1** | Kotlin Parser | Full AST extraction using tree-sitter-kotlin | Planned |
+| **P1** | Kotlin Security Sinks | Detect Runtime.exec, JDBC, OkHttp | Planned |
+| **P2** | Unified Type Graph | Cross-language type correlation | Research |
+
+### Implementation Approach
+
+**Architecture (per language):**
+```
+tree-sitter-{lang}  →  LangParser  →  IR (IRFunctionDef, IRClass)
+                            ↓
+                    LangSecurityAnalyzer  →  Taint tracking
+                            ↓
+                    UnifiedGraph  →  Cross-language linking
+```
+
+**Go-Specific Considerations:**
+- Multiple return values (error handling pattern)
+- Goroutines and channels (concurrency)
+- Interface satisfaction (duck typing)
+- Build tags and conditional compilation
+
+**Rust-Specific Considerations:**
+- Ownership and borrowing (lifetime tracking)
+- Traits and implementations
+- Macro expansion (procedural macros)
+- unsafe blocks (critical for security)
+
+**C#-Specific Considerations:**
+- LINQ expressions
+- async/await patterns
+- Nullable reference types
+- Properties vs fields
+
+**Kotlin-Specific Considerations:**
+- Null safety operators (?., !!)
+- Extension functions
+- Coroutines (suspend functions)
+- Data classes and sealed classes
+
+### Security Sink Detection
+
+**Go Security Sinks:**
+```go
+// SQL Injection
+db.Query(userInput)           // database/sql
+db.Exec(userInput)
+
+// Command Injection
+exec.Command(userInput)       // os/exec
+os.StartProcess(userInput)
+
+// Path Traversal
+os.Open(userInput)
+ioutil.ReadFile(userInput)
+
+// SSRF
+http.Get(userInput)           // net/http
+client.Do(req)                // with user-controlled URL
+```
+
+**Rust Security Sinks:**
+```rust
+// Command Injection
+Command::new(user_input)      // std::process
+    .arg(user_input)
+
+// SQL Injection (with sqlx/diesel)
+sqlx::query(user_input)
+diesel::sql_query(user_input)
+
+// Path Traversal
+fs::read(user_input)          // std::fs
+File::open(user_input)
+
+// Unsafe Code
+unsafe { ptr::read(user_input) }  // Any unsafe block with user data
+```
+
+### Release Checklist
+
+[ ] Go parser with full AST extraction
+[ ] Go security sink detection (10+ patterns)
+[ ] Rust parser with full AST extraction
+[ ] Rust security sink detection (10+ patterns)
+[ ] C# parser with full AST extraction
+[ ] C# security sink detection (10+ patterns)
+[ ] Kotlin parser with full AST extraction
+[ ] Kotlin security sink detection (10+ patterns)
+[ ] Cross-language type correlation (experimental)
+[ ] Documentation for each language
+[ ] Test suite: 500+ tests per language
+
+---
+
+## v3.2.0 - "Framework IQ" (Semantic Framework Rules)
+
+### Overview
+
+**Theme:** Deep Understanding  
+**Goal:** Add framework-specific semantic rules beyond AST parsing  
+**Effort:** ~2-3 weeks per framework  
+**Risk Level:** Medium (rule authoring is subjective)  
+**Target Release:** Q2 2026
+
+### Why This Release
+
+**The Problem:** AST parsing tells us WHAT code exists, not WHETHER it's correct.
+
+**Example - React Hooks:**
+```jsx
+// This parses fine but CRASHES at runtime
+function Component({ condition }) {
+  if (condition) {
+    const [state, setState] = useState(0);  // ILLEGAL: Hook in conditional
+  }
+  return <div />;
+}
+```
+
+Current Code Scalpel: ✅ Valid JavaScript, approved
+Reality: ❌ React crashes with "Hooks can only be called at the top level"
+
+### Framework Rules to Implement
+
+| Framework | Rules | Priority |
+|-----------|-------|----------|
+| **React** | Hooks rules, component patterns, server/client boundaries | P0 |
+| **Next.js** | App router conventions, server actions, 'use client' | P0 |
+| **Spring Boot** | Bean lifecycle, @Transactional, @Async | P1 |
+| **Django** | Model-migration sync, N+1 detection, signal handlers | P1 |
+| **Vue** | Composition API rules, reactivity gotchas | P2 |
+| **Angular** | DI tokens, module boundaries, zone.js implications | P2 |
+| **Express/NestJS** | Middleware order, guards, interceptors | P2 |
+| **FastAPI** | Dependency injection, Pydantic validation | P2 |
+
+### React Rules (Example)
+
+```yaml
+# .code-scalpel/framework-rules/react.yaml
+framework: react
+version: "18.x"
+
+rules:
+  - id: hooks-top-level
+    severity: error
+    message: "Hooks must be called at the top level of a function component"
+    pattern: |
+      if|while|for|switch {
+        useState|useEffect|useContext|useReducer|useCallback|useMemo|useRef
+      }
+    fix_hint: "Move hook call outside the conditional/loop"
+
+  - id: hooks-dependency-array
+    severity: warning
+    message: "useEffect dependency array may be missing variables"
+    pattern: |
+      useEffect(() => {
+        // references $VAR
+      }, [/* missing $VAR */])
+    fix_hint: "Add missing dependencies or use useCallback to memoize"
+
+  - id: server-component-hooks
+    severity: error
+    message: "Server Components cannot use useState, useEffect, or other client hooks"
+    condition: "file lacks 'use client' directive AND file is in app/ directory"
+    pattern: "useState|useEffect|useReducer|useContext"
+    fix_hint: "Add 'use client' directive or move state to a Client Component"
+
+  - id: use-client-directive-position
+    severity: error
+    message: "'use client' must be at the top of the file"
+    pattern: |
+      // any code before
+      'use client'
+    fix_hint: "Move 'use client' to the first line of the file"
+```
+
+### Spring Boot Rules (Example)
+
+```yaml
+# .code-scalpel/framework-rules/spring.yaml
+framework: spring-boot
+version: "3.x"
+
+rules:
+  - id: transactional-public
+    severity: error
+    message: "@Transactional only works on public methods (proxy limitation)"
+    pattern: |
+      @Transactional
+      (private|protected) * methodName()
+    fix_hint: "Change method visibility to public"
+
+  - id: circular-autowired
+    severity: warning
+    message: "Potential circular dependency detected"
+    pattern: |
+      class A { @Autowired B b; }
+      class B { @Autowired A a; }
+    fix_hint: "Use @Lazy or refactor to break the cycle"
+
+  - id: async-return-type
+    severity: error
+    message: "@Async methods should return void or Future"
+    pattern: |
+      @Async
+      (String|int|Object) methodName()  // non-void, non-Future
+    fix_hint: "Return CompletableFuture<T> or change to void"
+
+  - id: transactional-rollback
+    severity: warning
+    message: "@Transactional doesn't rollback on checked exceptions by default"
+    pattern: |
+      @Transactional
+      void method() throws CheckedException
+    fix_hint: "Add rollbackFor = Exception.class to @Transactional"
+```
+
+### Rule Engine Architecture
+
+```
+Source Code
+     │
+     ▼
+┌─────────────────┐
+│   AST Parser    │  (existing)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Framework       │  Detects React, Spring, Django, etc.
+│ Detector        │  from imports, file patterns, config
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Rule Loader     │  Loads framework-specific rules
+│                 │  from .code-scalpel/framework-rules/
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Semantic        │  Executes rules against AST
+│ Analyzer        │  with framework context
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Violation       │  Errors, warnings, fix hints
+│ Report          │
+└─────────────────┘
+```
+
+### Community Rule Contribution
+
+**Goal:** Enable community to contribute framework rules.
+
+**Rule Pack Structure:**
+```
+framework-rules/
+├── react/
+│   ├── hooks.yaml
+│   ├── server-components.yaml
+│   └── patterns.yaml
+├── spring/
+│   ├── transactions.yaml
+│   ├── security.yaml
+│   └── async.yaml
+├── django/
+│   ├── models.yaml
+│   ├── views.yaml
+│   └── queries.yaml
+└── community/
+    ├── rails.yaml        # Community contributed
+    ├── laravel.yaml
+    └── express.yaml
+```
+
+### Release Checklist
+
+[ ] Framework detection engine
+[ ] Rule DSL specification
+[ ] React rules (15+ patterns)
+[ ] Next.js rules (10+ patterns)
+[ ] Spring Boot rules (15+ patterns)
+[ ] Django rules (10+ patterns)
+[ ] Vue rules (10+ patterns)
+[ ] Rule contribution guidelines
+[ ] Community rule repository
+[ ] Test suite: 200+ rule tests
+
+---
+
+## v3.3.0 - "Verified" (Test Execution Integration)
+
+### Overview
+
+**Theme:** Proof of Correctness  
+**Goal:** Move from "tests generated" to "tests executed and verified"  
+**Effort:** ~6-8 weeks  
+**Risk Level:** Medium-High (sandboxed execution is complex)  
+**Target Release:** Q2-Q3 2026
+
+### Why This Release
+
+**The Current Gap:**
+
+```
+Current Flow:
+  Agent generates test → Mutation gate passes → SHIP
+
+Problem:
+  Agent introduces bug
+  Agent generates test that TESTS THE BUG (not the spec)
+  Test passes → Mutation gate passes (reverting breaks the buggy test)
+  BUG SHIPS TO PRODUCTION
+```
+
+**The Solution:** Actually EXECUTE tests and analyze results.
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Test Runner Integration | pytest, jest, junit, go test, cargo test | Planned |
+| **P0** | Sandboxed Execution | Docker-based isolated test runs | Planned |
+| **P0** | Coverage Delta Analysis | Did the change affect covered lines? | Planned |
+| **P1** | Test Result Parsing | Extract failures, map to code locations | Planned |
+| **P1** | Failure Diagnosis | Explain WHY a test failed | Planned |
+| **P1** | Property-Based Testing | Hypothesis/QuickCheck integration | Research |
+| **P2** | Flaky Test Detection | Identify non-deterministic tests | Planned |
+| **P2** | Test Impact Analysis | Which tests cover the changed code? | Planned |
+
+### Test Execution Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Verification Engine                       │
+│                                                              │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐ │
+│  │   Change     │     │   Test       │     │   Coverage   │ │
+│  │   Detector   │────▶│   Selector   │────▶│   Analyzer   │ │
+│  └──────────────┘     └──────────────┘     └──────────────┘ │
+│         │                                          │         │
+│         ▼                                          ▼         │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Sandboxed Test Runner                    │   │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  │   │
+│  │  │ pytest  │  │  jest   │  │  junit  │  │ go test │  │   │
+│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘  │   │
+│  │              Docker Isolation Layer                   │   │
+│  └──────────────────────────────────────────────────────┘   │
+│         │                                                    │
+│         ▼                                                    │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Result Analyzer                          │   │
+│  │  • Parse test output                                  │   │
+│  │  • Map failures to code locations                     │   │
+│  │  • Calculate coverage delta                           │   │
+│  │  • Generate verification report                       │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Coverage Delta Analysis
+
+**Concept:** Compare coverage before and after change.
+
+```python
+# Before change
+coverage_before = {
+    "src/utils.py": {10, 11, 12, 15, 16},  # Covered lines
+    "src/api.py": {20, 21, 25, 26, 27}
+}
+
+# After change (agent added lines 13-14, modified line 15)
+change_diff = {
+    "src/utils.py": {
+        "added": {13, 14},
+        "modified": {15}
+    }
+}
+
+# After running tests
+coverage_after = {
+    "src/utils.py": {10, 11, 12, 13, 15, 16},  # Line 14 NOT covered!
+    "src/api.py": {20, 21, 25, 26, 27}
+}
+
+# Analysis
+coverage_delta = analyze_delta(change_diff, coverage_after)
+# Result: WARNING - Line 14 added but not covered by tests
+```
+
+### Property-Based Testing Integration
+
+**Concept:** Generate edge cases automatically.
+
+```python
+# Agent's implementation
+def calculate_discount(price: float, percentage: float) -> float:
+    return price * (1 - percentage / 100)
+
+# Code Scalpel generates property-based tests
+from hypothesis import given, strategies as st
+
+@given(
+    price=st.floats(min_value=0, max_value=10000),
+    percentage=st.floats(min_value=0, max_value=100)
+)
+def test_discount_properties(price, percentage):
+    result = calculate_discount(price, percentage)
+    
+    # Property 1: Result should never exceed original price
+    assert result <= price
+    
+    # Property 2: Result should be non-negative
+    assert result >= 0
+    
+    # Property 3: 0% discount = original price
+    if percentage == 0:
+        assert result == price
+    
+    # Property 4: 100% discount = 0
+    if percentage == 100:
+        assert result == 0
+```
+
+### Verification Report
+
+```json
+{
+  "verification": {
+    "status": "PARTIAL",
+    "confidence": 0.72
+  },
+  "tests": {
+    "executed": 47,
+    "passed": 45,
+    "failed": 2,
+    "skipped": 0
+  },
+  "coverage": {
+    "before": 78.5,
+    "after": 81.2,
+    "delta": "+2.7%",
+    "new_lines_covered": 12,
+    "new_lines_uncovered": 3
+  },
+  "failures": [
+    {
+      "test": "test_edge_case_negative_input",
+      "file": "tests/test_utils.py",
+      "line": 45,
+      "message": "ValueError: percentage cannot be negative",
+      "related_change": "src/utils.py:13-14"
+    }
+  ],
+  "recommendations": [
+    "Add test for negative percentage input",
+    "Consider adding input validation in calculate_discount()"
+  ]
+}
+```
+
+### Release Checklist
+
+[ ] pytest integration with result parsing
+[ ] jest integration with result parsing
+[ ] junit integration with result parsing
+[ ] go test integration
+[ ] Docker-based sandboxed execution
+[ ] Coverage delta calculation
+[ ] Failure-to-code mapping
+[ ] Property-based test generation (Hypothesis)
+[ ] Verification report generation
+[ ] Test suite: 300+ tests
+
+---
+
+## v3.4.0 - "Workspace" (Monorepo Support)
+
+### Overview
+
+**Theme:** Scale  
+**Goal:** Support monorepos with 50+ packages and cross-package dependencies  
+**Effort:** ~6-8 weeks  
+**Risk Level:** Medium (complex dependency graphs)  
+**Target Release:** Q3 2026
+
+### Why This Release
+
+**The Reality:** Modern codebases aren't single projects.
+
+```
+typical-enterprise-monorepo/
+├── packages/
+│   ├── shared-utils/        # Used by 47 other packages
+│   ├── design-system/       # UI components
+│   ├── api-client/          # Generated from OpenAPI
+│   ├── web-app/             # Next.js frontend
+│   ├── mobile-app/          # React Native
+│   ├── backend-api/         # NestJS API
+│   ├── worker-service/      # Background jobs
+│   └── ... (40 more packages)
+├── services/
+│   ├── auth-service/
+│   ├── payment-service/
+│   └── notification-service/
+└── tools/
+    ├── eslint-config/
+    └── tsconfig-base/
+```
+
+**The Problem:**
+
+Agent modifies `shared-utils/string-helpers.ts`:
+- Code Scalpel: ✅ Valid TypeScript, no security issues
+- Reality: 47 packages import this → 15 break with the change
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Workspace Detection | Detect npm/pnpm/yarn workspaces, Cargo, Gradle | Planned |
+| **P0** | Cross-Package Graph | Track dependencies between packages | Planned |
+| **P0** | Impact Analysis | "This change affects packages X, Y, Z" | Planned |
+| **P1** | Affected Test Selection | Only run tests for affected packages | Planned |
+| **P1** | Breaking Change Detection | API changes that break consumers | Planned |
+| **P1** | Semver Validation | Detect breaking changes in minor/patch | Planned |
+| **P2** | Nx/Turborepo Integration | Use existing dep graph if available | Planned |
+| **P2** | Lockfile Analysis | Detect dependency version conflicts | Planned |
+
+### Workspace Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   Workspace Analyzer                         │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Workspace Detector                       │   │
+│  │  • package.json (npm/yarn/pnpm workspaces)           │   │
+│  │  • Cargo.toml ([workspace])                          │   │
+│  │  • settings.gradle (multi-project)                   │   │
+│  │  • nx.json / turbo.json                              │   │
+│  └────────────────────────┬─────────────────────────────┘   │
+│                           │                                  │
+│                           ▼                                  │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │           Cross-Package Dependency Graph              │   │
+│  │                                                       │   │
+│  │    shared-utils ─────────┬─────────────┐             │   │
+│  │         │                │             │             │   │
+│  │         ▼                ▼             ▼             │   │
+│  │    web-app         mobile-app    backend-api         │   │
+│  │         │                │             │             │   │
+│  │         └────────────────┼─────────────┘             │   │
+│  │                          ▼                           │   │
+│  │                    api-client                        │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                           │                                  │
+│                           ▼                                  │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Impact Analyzer                          │   │
+│  │  • Change in shared-utils                            │   │
+│  │  • Affected: web-app, mobile-app, backend-api        │   │
+│  │  • Run tests: 3 packages instead of 47               │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Impact Analysis Report
+
+```json
+{
+  "change": {
+    "package": "shared-utils",
+    "files": ["src/string-helpers.ts"],
+    "type": "modification"
+  },
+  "impact": {
+    "direct_dependents": [
+      "web-app",
+      "mobile-app",
+      "backend-api"
+    ],
+    "transitive_dependents": [
+      "api-client",
+      "design-system"
+    ],
+    "total_affected": 5
+  },
+  "breaking_changes": [
+    {
+      "symbol": "formatCurrency",
+      "change": "parameter added (required)",
+      "severity": "BREAKING",
+      "affected_usages": 127,
+      "locations": [
+        "web-app/src/components/Price.tsx:15",
+        "mobile-app/src/screens/Cart.tsx:42",
+        "..."
+      ]
+    }
+  ],
+  "recommended_actions": [
+    "Make new parameter optional with default value",
+    "OR update all 127 call sites",
+    "Bump shared-utils to next major version"
+  ],
+  "tests_to_run": [
+    "packages/shared-utils",
+    "packages/web-app",
+    "packages/mobile-app",
+    "packages/backend-api",
+    "packages/api-client"
+  ]
+}
+```
+
+### Semver Validation
+
+```
+Agent's Change:
+  - Removed function parameter (breaking)
+  - Changed return type (breaking)
+  
+Package.json says: "1.2.3" → "1.2.4" (patch)
+
+Code Scalpel:
+  ❌ BLOCKING: Breaking change requires major version bump
+  
+  Detected:
+  - formatCurrency(amount) → formatCurrency(amount, locale)
+    This is a BREAKING change (new required parameter)
+  
+  Options:
+  1. Make 'locale' optional: formatCurrency(amount, locale = 'en-US')
+  2. Bump to 2.0.0 and update all consumers
+  
+  Recommended: Option 1 for backward compatibility
+```
+
+### Release Checklist
+
+[ ] npm/yarn/pnpm workspace detection
+[ ] Cargo workspace detection
+[ ] Gradle multi-project detection
+[ ] Cross-package dependency graph
+[ ] Impact analysis for changes
+[ ] Breaking change detection
+[ ] Semver validation
+[ ] Affected test selection
+[ ] Nx/Turborepo integration
+[ ] Test suite: 250+ tests
+
+---
+
+## v3.5 → v4.0 Bridge: Pre-Swarm Infrastructure
+
+### Gap Analysis
+
+**v3.5 "Gatekeeper" delivers:** CI/CD enforcement, single-agent governance
+**v4.0 "Swarm" requires:** Multi-agent coordination, distributed systems
+
+**Missing Infrastructure:**
+| Gap | Problem | Solution Release |
+|-----|---------|------------------|
+| Agent Identity | No way to distinguish Agent A from Agent B | v3.6 "Identity" |
+| Message Protocol | No structured communication between agents | v3.7 "Protocol" |
+| Shared State | No real-time state synchronization | v3.8 "Sync" |
+| Conflict Detection | No way to detect conflicting edits | v3.9 "Arbitrate" |
+
+---
+
+## v3.6.0 - "Identity" (Agent Authentication & Tracking)
+
+### Overview
+
+**Theme:** Who's Who  
+**Goal:** Establish unique identity for each AI agent interacting with Code Scalpel  
+**Effort:** ~3-4 weeks  
+**Risk Level:** Low (foundation layer)  
+**Target Release:** Q1 2027
+
+### Why This Release
+
+Before multiple agents can collaborate, we need to know WHO is doing WHAT:
+- **Attribution:** Which agent made this change?
+- **Accountability:** Who introduced this bug?
+- **Authorization:** Can this agent perform this operation?
+- **Audit:** Complete trail of agent actions
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Agent Registration | Agents register with unique ID, capabilities, role | Planned |
+| **P0** | Session Tracking | Track agent sessions with start/end times | Planned |
+| **P0** | Action Attribution | Every tool call tagged with agent ID | Planned |
+| **P1** | Capability Declaration | Agents declare what they can do (read, write, delete) | Planned |
+| **P1** | Agent Fingerprinting | Detect agent type (Claude, Copilot, custom) from behavior | Planned |
+| **P2** | Agent Reputation | Track success/failure rates per agent | Research |
+
+### Agent Identity Schema
+
+```json
+{
+  "agent_id": "agent-claude-opus-7b2f3a",
+  "agent_type": "claude",
+  "model_version": "claude-3-opus-20240229",
+  "session_id": "sess-2027-01-15-abc123",
+  "role": "backend_developer",
+  "capabilities": ["read", "write", "execute_tests"],
+  "restrictions": ["no_delete", "no_auth_changes"],
+  "registered_at": "2027-01-15T10:00:00Z",
+  "trust_level": 0.85,
+  "parent_session": null
+}
+```
+
+### Release Checklist
+
+[ ] Agent registration API
+[ ] Session management (create, extend, terminate)
+[ ] Action attribution in audit log
+[ ] Capability declaration schema
+[ ] Agent fingerprinting heuristics
+[ ] Trust level calculation
+[ ] Integration with v3.5 Gatekeeper policies
+
+---
+
+## v3.7.0 - "Protocol" (Inter-Agent Communication)
+
+### Overview
+
+**Theme:** The Language  
+**Goal:** Define structured message protocol for agents to communicate intents and claims  
+**Effort:** ~4-5 weeks  
+**Risk Level:** Medium (protocol design)  
+**Target Release:** Q1 2027
+
+### Why This Release
+
+Agents need to communicate before v4.0 Swarm can coordinate them:
+- **Intent Declaration:** "I'm about to modify User.java"
+- **Resource Claims:** "I need exclusive access to auth/ directory"
+- **Status Updates:** "I've finished the frontend component"
+- **Dependency Requests:** "I need Backend Agent to expose this API first"
+
+### Message Types
+
+```yaml
+message_types:
+  # Intent messages
+  intent_declare:
+    description: "Agent announces planned action"
+    fields: [agent_id, action_type, target_files, estimated_duration]
+    
+  intent_withdraw:
+    description: "Agent cancels planned action"
+    fields: [agent_id, intent_id, reason]
+  
+  # Resource messages
+  resource_claim:
+    description: "Agent requests exclusive access"
+    fields: [agent_id, resource_path, claim_type, timeout]
+    claim_types: [exclusive, shared_read, shared_write]
+    
+  resource_release:
+    description: "Agent releases claimed resource"
+    fields: [agent_id, resource_path, changes_made]
+  
+  # Coordination messages
+  dependency_request:
+    description: "Agent needs something from another agent"
+    fields: [from_agent, to_agent, dependency_type, details]
+    
+  dependency_fulfilled:
+    description: "Agent confirms dependency is ready"
+    fields: [from_agent, to_agent, dependency_id, artifact]
+  
+  # Status messages
+  status_update:
+    description: "Agent reports progress"
+    fields: [agent_id, task_id, status, progress_pct, details]
+    statuses: [started, in_progress, blocked, completed, failed]
+```
+
+### Message Queue Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MESSAGE BROKER                            │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                   Topic: intents                      │   │
+│  │  Agent A: intent_declare(modify, User.java)          │   │
+│  │  Agent B: intent_declare(rename, User.java) ← CONFLICT│   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                   Topic: resources                    │   │
+│  │  Agent A: resource_claim(auth/, exclusive)           │   │
+│  │  Agent C: resource_claim(auth/, shared_read) ← OK    │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                   Topic: dependencies                 │   │
+│  │  Frontend: dependency_request(Backend, UserAPI)      │   │
+│  │  Backend: dependency_fulfilled(Frontend, UserAPI)    │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Release Checklist
+
+[ ] Message type definitions (JSON Schema)
+[ ] Message broker implementation (in-memory for single node)
+[ ] Topic-based routing
+[ ] Message validation and error handling
+[ ] Message persistence for audit trail
+[ ] Agent subscription management
+[ ] Conflict detection on intents
+[ ] Integration with v3.6 Identity
+
+---
+
+## v3.8.0 - "Sync" (Real-Time State Synchronization)
+
+### Overview
+
+**Theme:** The Shared Brain  
+**Goal:** Enable real-time synchronization of codebase state across multiple agents  
+**Effort:** ~5-6 weeks  
+**Risk Level:** Medium-High (distributed state)  
+**Target Release:** Q2 2027
+
+### Why This Release
+
+Multiple agents need consistent view of codebase state:
+- Agent A modifies `User.java` → Agent B must see the change immediately
+- Agent C queries call graph → Must include Agent A's recent changes
+- Agent D runs security scan → Must analyze latest code, not stale cache
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | State Events | Emit events on every codebase change | Planned |
+| **P0** | Event Subscription | Agents subscribe to relevant events | Planned |
+| **P0** | Graph Invalidation | Invalidate cached analysis on changes | Planned |
+| **P1** | Incremental Updates | Send diffs, not full state | Planned |
+| **P1** | Causal Ordering | Ensure events processed in correct order | Planned |
+| **P2** | Snapshot/Restore | Point-in-time state snapshots | Planned |
+
+### Event Types
+
+```yaml
+events:
+  file_created:
+    fields: [path, content_hash, created_by, timestamp]
+    
+  file_modified:
+    fields: [path, old_hash, new_hash, modified_by, diff, timestamp]
+    
+  file_deleted:
+    fields: [path, deleted_by, timestamp]
+    
+  symbol_added:
+    fields: [file, symbol_type, symbol_name, added_by, timestamp]
+    
+  symbol_modified:
+    fields: [file, symbol_type, symbol_name, old_signature, new_signature, modified_by]
+    
+  symbol_deleted:
+    fields: [file, symbol_type, symbol_name, deleted_by, timestamp]
+    
+  graph_edge_added:
+    fields: [from_node, to_node, edge_type, confidence, added_by]
+    
+  graph_edge_removed:
+    fields: [from_node, to_node, edge_type, removed_by]
+```
+
+### Consistency Model
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 CONSISTENCY GUARANTEES                       │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ STRONG CONSISTENCY (Default for writes)                │ │
+│  │ - All agents see writes in same order                  │ │
+│  │ - No stale reads after confirmed write                 │ │
+│  │ - Uses vector clocks for ordering                      │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ EVENTUAL CONSISTENCY (Optional for reads)              │ │
+│  │ - Faster reads from local cache                        │ │
+│  │ - May be slightly stale (configurable window)          │ │
+│  │ - Suitable for non-critical queries                    │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Release Checklist
+
+[ ] Event emission on all state changes
+[ ] Event subscription with filtering
+[ ] Vector clock implementation
+[ ] Incremental diff generation
+[ ] Graph cache invalidation
+[ ] Snapshot creation and restore
+[ ] Performance benchmarks (1000 events/sec)
+[ ] Integration with v3.7 Protocol
+
+---
+
+## v3.9.0 - "Arbitrate" (Conflict Detection & Resolution)
+
+### Overview
+
+**Theme:** The Referee  
+**Goal:** Detect and resolve conflicts when multiple agents modify the same code  
+**Effort:** ~5-6 weeks  
+**Risk Level:** High (correctness critical)  
+**Target Release:** Q2 2027
+
+### Why This Release
+
+With multiple agents writing to the same codebase, conflicts are inevitable:
+- Two agents modify same function simultaneously
+- One agent deletes code another is extending
+- API changes break dependent code
+
+v3.9 detects these conflicts BEFORE they corrupt the codebase.
+
+### Conflict Types & Resolution
+
+| Conflict Type | Detection | Resolution |
+|---------------|-----------|------------|
+| **Write-Write** | Same symbol modified by 2+ agents | Merge if compatible, escalate if not |
+| **Write-Delete** | Agent A modifies, Agent B deletes | Always escalate to human |
+| **Rename-Reference** | Agent A renames symbol, Agent B adds reference | Auto-update reference |
+| **Signature-Call** | Agent A changes signature, Agent B calls old | Block until B updates |
+| **Semantic** | Both changes valid, but combined breaks tests | Detect via test execution |
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Conflict Detection | Detect conflicts before they occur | Planned |
+| **P0** | Lock Management | Symbol-level and file-level locks | Planned |
+| **P0** | Escalation Queue | Queue conflicts for human resolution | Planned |
+| **P1** | Auto-Merge | Automatically merge compatible changes | Planned |
+| **P1** | Conflict Preview | Show what would conflict before execution | Planned |
+| **P2** | Conflict History | Track past conflicts for pattern analysis | Planned |
+
+### Lock Granularity
+
+```yaml
+lock_levels:
+  file:
+    description: "Entire file locked"
+    use_case: "Large refactors, file renames"
+    
+  symbol:
+    description: "Single function/class locked"
+    use_case: "Targeted modifications"
+    
+  region:
+    description: "Line range locked"
+    use_case: "Multi-symbol changes in one area"
+    
+  semantic:
+    description: "Logical unit locked (e.g., API contract)"
+    use_case: "Cross-file consistency"
+```
+
+### Conflict Resolution Flow
+
+```
+Agent A: modify(User.java, addField)
+Agent B: modify(User.java, renameClass)
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 CONFLICT DETECTOR                            │
+│                                                              │
+│  1. Check intent overlap → CONFLICT DETECTED                │
+│  2. Classify conflict type → WRITE-WRITE (same file)        │
+│  3. Check compatibility → INCOMPATIBLE (structural change)  │
+│  4. Resolution strategy → ESCALATE                          │
+└─────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 ESCALATION QUEUE                             │
+│                                                              │
+│  Conflict #42: User.java                                    │
+│  Agent A wants: Add 'email' field                           │
+│  Agent B wants: Rename class to 'Account'                   │
+│                                                              │
+│  Suggested resolution:                                       │
+│  1. Let Agent B rename first                                │
+│  2. Then Agent A adds field to renamed class                │
+│                                                              │
+│  [Accept Suggestion] [Let A Win] [Let B Win] [Manual]       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Release Checklist
+
+[ ] Conflict detection engine
+[ ] Lock management (acquire, release, timeout)
+[ ] Escalation queue with UI
+[ ] Auto-merge for compatible changes
+[ ] Conflict preview API
+[ ] Deadlock detection
+[ ] Integration tests with concurrent agents
+[ ] Integration with v3.8 Sync
 
 ---
 
@@ -8317,6 +9477,515 @@ Merged Result (automatic):
 
 ---
 
+## v4.0 → v5.0 Bridge: From Collaboration to Transformation
+
+### Gap Analysis
+
+**v4.0 "Swarm" delivers:** Multi-agent collaboration on a SINGLE codebase
+**v5.0 "Re-Platforming" requires:** Pattern recognition, transpilation, architectural transformation
+
+**Missing Capabilities:**
+| Gap | Problem | Solution Release |
+|-----|---------|------------------|
+| Pattern Learning | Swarm agents act, but don't learn patterns | v4.1 "Learn" |
+| Architecture Awareness | No understanding of architectural styles | v4.2 "Architect" |
+| Cross-Language Analysis | Can't compare Java and TypeScript semantics | v4.3 "Rosetta" |
+| Change Measurement | No metrics for transformation success | v4.4 "Metrics" |
+
+---
+
+## v4.1.0 - "Learn" (Pattern Recognition Foundation)
+
+### Overview
+
+**Theme:** The Student  
+**Goal:** Enable Code Scalpel to learn patterns from existing codebases  
+**Effort:** ~5-6 weeks  
+**Risk Level:** Medium (ML integration)  
+**Target Release:** Q3 2027
+
+### Why This Release
+
+Before we can do Pattern Mining (v5.0), we need basic pattern recognition:
+- What does a "Controller" look like in THIS codebase?
+- What's the naming convention for services?
+- How does error handling typically work here?
+
+v4.1 builds the foundation that v5.0's Pattern Mining will scale up.
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Code Fingerprinting | Generate fingerprints for code structures | Planned |
+| **P0** | Similarity Detection | Find similar code blocks across codebase | Planned |
+| **P0** | Pattern Extraction | Extract common patterns from similar code | Planned |
+| **P1** | Convention Learning | Learn naming, structure, style conventions | Planned |
+| **P1** | Anti-Pattern Detection | Identify code that deviates from patterns | Planned |
+| **P2** | Pattern Database | Store and query learned patterns | Planned |
+
+### Pattern Fingerprinting
+
+**Concept:** Transform code into a canonical fingerprint for comparison.
+
+```python
+# Input: Two similar functions
+def get_user(user_id):
+    user = db.query(User).filter_by(id=user_id).first()
+    if not user:
+        raise NotFoundError("User not found")
+    return user
+
+def get_product(product_id):
+    product = db.query(Product).filter_by(id=product_id).first()
+    if not product:
+        raise NotFoundError("Product not found")
+    return product
+
+# Fingerprint (abstracted structure)
+{
+    "structure": "function(param) -> query(Model).filter_by(id=param) -> null_check -> raise_or_return",
+    "pattern_type": "repository_get_by_id",
+    "variables": {
+        "entity_name": ["user", "product"],
+        "model_class": ["User", "Product"],
+        "id_param": ["user_id", "product_id"]
+    },
+    "similarity_score": 0.95
+}
+```
+
+### Convention Learning
+
+```yaml
+learned_conventions:
+  naming:
+    functions:
+      - pattern: "get_{entity}"
+        purpose: "Retrieve single entity by ID"
+        occurrences: 47
+      - pattern: "list_{entities}"
+        purpose: "Retrieve multiple entities"
+        occurrences: 32
+      - pattern: "create_{entity}"
+        purpose: "Create new entity"
+        occurrences: 28
+    classes:
+      - pattern: "{Entity}Service"
+        purpose: "Business logic for entity"
+        occurrences: 15
+      - pattern: "{Entity}Repository"
+        purpose: "Data access for entity"
+        occurrences: 15
+  structure:
+    error_handling:
+      pattern: "try-except with specific exceptions"
+      occurrences: 120
+    dependency_injection:
+      pattern: "constructor injection"
+      occurrences: 45
+```
+
+### Release Checklist
+
+[ ] Code fingerprinting engine
+[ ] Similarity detection (AST-based)
+[ ] Pattern extraction from similar code
+[ ] Convention learning (names, structure)
+[ ] Anti-pattern detection
+[ ] Pattern database with query API
+[ ] Visualization of learned patterns
+[ ] Integration with v4.0 Swarm agents
+
+---
+
+## v4.2.0 - "Architect" (Architectural Pattern Awareness)
+
+### Overview
+
+**Theme:** The Blueprint Reader  
+**Goal:** Understand architectural patterns (MVC, Hexagonal, Microservices, etc.)  
+**Effort:** ~5-6 weeks  
+**Risk Level:** Medium (domain knowledge)  
+**Target Release:** Q3 2027
+
+### Why This Release
+
+Before v5.0 can recommend target architectures, we need to UNDERSTAND architectures:
+- Is this codebase MVC or Hexagonal?
+- Are these microservices or a distributed monolith?
+- What layers exist and how do they communicate?
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Architecture Detection | Identify architectural style from code structure | Planned |
+| **P0** | Layer Analysis | Detect and map application layers | Planned |
+| **P0** | Dependency Direction | Verify dependencies point the right way | Planned |
+| **P1** | Architecture Conformance | Check if code follows stated architecture | Planned |
+| **P1** | Coupling Analysis | Measure coupling between components | Planned |
+| **P2** | Architecture Evolution | Track how architecture changed over time | Research |
+
+### Architecture Patterns Recognized
+
+```yaml
+patterns:
+  layered:
+    description: "Traditional N-tier architecture"
+    layers: [presentation, business, data]
+    detection_signals:
+      - "Controllers in /api or /web"
+      - "Services in /service or /business"
+      - "Repositories in /repository or /data"
+    
+  hexagonal:
+    description: "Ports and Adapters"
+    components: [domain, ports, adapters]
+    detection_signals:
+      - "Domain models with no external dependencies"
+      - "Port interfaces in domain"
+      - "Adapters implementing ports"
+    
+  microservices:
+    description: "Distributed service architecture"
+    detection_signals:
+      - "Multiple deployable units"
+      - "Inter-service communication (HTTP/gRPC)"
+      - "Service discovery configuration"
+    
+  monolith:
+    description: "Single deployable unit"
+    variants:
+      - "modular_monolith"
+      - "big_ball_of_mud"
+    detection_signals:
+      - "Single deployment artifact"
+      - "Shared database"
+```
+
+### Architecture Report
+
+```json
+{
+  "detected_architecture": "layered_monolith",
+  "confidence": 0.87,
+  "layers": {
+    "presentation": {
+      "path": "src/api/**",
+      "components": 24,
+      "dependencies_to": ["business"]
+    },
+    "business": {
+      "path": "src/services/**",
+      "components": 45,
+      "dependencies_to": ["data"]
+    },
+    "data": {
+      "path": "src/repositories/**",
+      "components": 18,
+      "dependencies_to": []
+    }
+  },
+  "violations": [
+    {
+      "type": "layer_skip",
+      "from": "presentation",
+      "to": "data",
+      "file": "src/api/UserController.java",
+      "line": 45,
+      "severity": "warning"
+    }
+  ],
+  "coupling_metrics": {
+    "afferent_coupling": 3.2,
+    "efferent_coupling": 2.8,
+    "instability": 0.47
+  }
+}
+```
+
+### Release Checklist
+
+[ ] Architecture pattern definitions
+[ ] Detection algorithms for each pattern
+[ ] Layer analysis and mapping
+[ ] Dependency direction validation
+[ ] Conformance checking
+[ ] Coupling metrics calculation
+[ ] Architecture visualization
+[ ] Integration with v4.1 patterns
+
+---
+
+## v4.3.0 - "Rosetta" (Cross-Language Semantic Understanding)
+
+### Overview
+
+**Theme:** The Translator's Dictionary  
+**Goal:** Build semantic mappings between programming languages  
+**Effort:** ~6-8 weeks  
+**Risk Level:** High (semantic complexity)  
+**Target Release:** Q4 2027
+
+### Why This Release
+
+v5.0's Language Transpilation needs to understand semantic equivalence:
+- Java `List<String>` ≈ TypeScript `string[]`
+- Java `Optional<T>` ≈ TypeScript `T | null`
+- Java `synchronized` ≈ TypeScript async patterns
+
+v4.3 builds the semantic mapping layer.
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Type Mapping | Map types between languages | Planned |
+| **P0** | Idiom Mapping | Map language idioms to equivalents | Planned |
+| **P0** | API Mapping | Map standard library APIs | Planned |
+| **P1** | Semantic Diff | Compare semantics across languages | Planned |
+| **P1** | Gap Analysis | Identify features with no equivalent | Planned |
+| **P2** | Runtime Behavior | Document runtime semantic differences | Research |
+
+### Type Mapping Database
+
+```yaml
+type_mappings:
+  java_to_typescript:
+    primitives:
+      int: "number"
+      long: "number"  # Warning: precision loss for large values
+      double: "number"
+      boolean: "boolean"
+      char: "string"
+      
+    collections:
+      "List<T>": "T[]"
+      "Set<T>": "Set<T>"
+      "Map<K,V>": "Map<K,V>"
+      "Optional<T>": "T | null | undefined"
+      
+    special:
+      String: "string"
+      Object: "unknown"
+      void: "void"
+      
+    annotations:
+      "@Nullable": "| null"
+      "@NonNull": "(no change, TypeScript strict mode)"
+      "@Deprecated": "/** @deprecated */"
+      
+  java_to_kotlin:
+    primitives:
+      int: "Int"
+      long: "Long"
+      boolean: "Boolean"
+      
+    nullability:
+      "T": "T"  # Non-null by default
+      "@Nullable T": "T?"
+```
+
+### Idiom Mapping
+
+```yaml
+idiom_mappings:
+  java_getter_setter:
+    java: |
+      private String name;
+      public String getName() { return name; }
+      public void setName(String name) { this.name = name; }
+    kotlin: |
+      var name: String = ""
+    typescript: |
+      private _name: string = "";
+      get name(): string { return this._name; }
+      set name(value: string) { this._name = value; }
+      
+  java_builder_pattern:
+    java: |
+      User.builder().name("John").age(30).build()
+    kotlin: |
+      User(name = "John", age = 30)
+    typescript: |
+      new User({ name: "John", age: 30 })
+      
+  java_stream:
+    java: |
+      list.stream().filter(x -> x > 0).map(x -> x * 2).collect(Collectors.toList())
+    kotlin: |
+      list.filter { it > 0 }.map { it * 2 }
+    typescript: |
+      list.filter(x => x > 0).map(x => x * 2)
+```
+
+### Semantic Gap Report
+
+```json
+{
+  "source_language": "java",
+  "target_language": "typescript",
+  "gaps": [
+    {
+      "feature": "checked_exceptions",
+      "java_semantics": "Compiler enforces exception handling",
+      "typescript_equivalent": "None - all exceptions are unchecked",
+      "migration_strategy": "Convert to Result<T, E> pattern or document throws"
+    },
+    {
+      "feature": "method_overloading",
+      "java_semantics": "Multiple methods with same name, different signatures",
+      "typescript_equivalent": "Single function with union parameter types",
+      "migration_strategy": "Generate overload signatures + implementation"
+    },
+    {
+      "feature": "synchronized_blocks",
+      "java_semantics": "Thread-safe execution via monitors",
+      "typescript_equivalent": "None - single-threaded (use async/await for concurrency)",
+      "migration_strategy": "Analyze for race conditions, convert to async patterns"
+    }
+  ]
+}
+```
+
+### Release Checklist
+
+[ ] Type mapping database (Java ↔ TypeScript ↔ Kotlin ↔ Python)
+[ ] Idiom mapping catalog
+[ ] Standard library API mapping
+[ ] Semantic diff tool
+[ ] Gap analysis reports
+[ ] Migration strategy suggestions
+[ ] Test cases for each mapping
+[ ] Integration with v4.2 architecture
+
+---
+
+## v4.4.0 - "Metrics" (Transformation Success Measurement)
+
+### Overview
+
+**Theme:** The Scorecard  
+**Goal:** Define and measure success metrics for code transformations  
+**Effort:** ~4-5 weeks  
+**Risk Level:** Low (measurement layer)  
+**Target Release:** Q4 2027
+
+### Why This Release
+
+How do we know if a migration succeeded? v4.4 provides the metrics:
+- Did we preserve behavior? (functional equivalence)
+- Did we maintain performance? (non-functional equivalence)
+- Did we reduce complexity? (improvement metrics)
+- What's the migration progress? (completion tracking)
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Functional Equivalence | Verify same inputs → same outputs | Planned |
+| **P0** | Coverage Metrics | Track what % of code has been migrated | Planned |
+| **P0** | Complexity Metrics | Measure complexity before/after | Planned |
+| **P1** | Performance Comparison | Benchmark original vs migrated | Planned |
+| **P1** | Defect Tracking | Track bugs introduced by migration | Planned |
+| **P2** | Business Metrics | Map technical metrics to business value | Research |
+
+### Metric Categories
+
+```yaml
+metrics:
+  functional_equivalence:
+    test_pass_rate:
+      description: "% of tests passing after migration"
+      target: ">= 100%"
+    behavior_diff:
+      description: "Detected behavior differences"
+      target: "0"
+    contract_compliance:
+      description: "API contracts preserved"
+      target: "100%"
+      
+  code_quality:
+    complexity_delta:
+      description: "Change in cyclomatic complexity"
+      target: "<= 0 (same or simpler)"
+    coupling_delta:
+      description: "Change in coupling metrics"
+      target: "<= 0"
+    duplication_delta:
+      description: "Change in code duplication"
+      target: "<= 0"
+      
+  migration_progress:
+    files_migrated:
+      description: "% of files converted"
+      current: "0%"
+      target: "100%"
+    lines_migrated:
+      description: "% of LOC converted"
+      current: "0%"
+      target: "100%"
+    features_migrated:
+      description: "% of features functional in new system"
+      current: "0%"
+      target: "100%"
+      
+  performance:
+    latency_delta:
+      description: "P99 latency change"
+      target: "<= 10% increase"
+    throughput_delta:
+      description: "Requests/sec change"
+      target: ">= 90% of original"
+    resource_delta:
+      description: "CPU/memory usage change"
+      target: "<= 20% increase"
+```
+
+### Migration Dashboard
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                 MIGRATION DASHBOARD: v5.0 Re-Platform          │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  PROGRESS                              QUALITY                  │
+│  ┌─────────────────────────┐          ┌─────────────────────┐  │
+│  │ Files:    ███████░░░ 72%│          │ Tests:        ✓ 100%│  │
+│  │ LOC:      █████░░░░░ 58%│          │ Contracts:    ✓ 100%│  │
+│  │ Features: ████████░░ 81%│          │ Behavior:     ✓ 0 Δ │  │
+│  └─────────────────────────┘          └─────────────────────┘  │
+│                                                                 │
+│  COMPLEXITY                            PERFORMANCE              │
+│  ┌─────────────────────────┐          ┌─────────────────────┐  │
+│  │ Before:    847          │          │ Latency:     -5% ✓  │  │
+│  │ After:     623  (-26%)  │          │ Throughput:  +12% ✓ │  │
+│  │ Target:    < 847  ✓     │          │ Memory:      -8% ✓  │  │
+│  └─────────────────────────┘          └─────────────────────┘  │
+│                                                                 │
+│  RECENT ISSUES                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ ⚠ UserService.findAll() - 3ms slower than original       │  │
+│  │ ⚠ OrderRepository - Missing index in new schema          │  │
+│  │ ✓ PaymentService - All tests passing (fixed 2h ago)      │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Release Checklist
+
+[ ] Functional equivalence testing framework
+[ ] Coverage tracking system
+[ ] Complexity metrics (before/after comparison)
+[ ] Performance benchmarking tools
+[ ] Defect tracking integration
+[ ] Migration dashboard UI
+[ ] Report generation (PDF, HTML)
+[ ] Integration with v4.3 Rosetta
+
+---
+
 ## v5.0.0 - "Re-Platforming" (Legacy Migration)
 
 ### Overview
@@ -8494,6 +10163,1219 @@ public class User {                   export class User {
 [ ] Database Schema Evolution tooling
 [ ] Performance benchmarks (1M+ LOC codebases)
 [ ] Case studies with enterprise partners
+
+---
+
+## v5.1.0 - "Intercept" (MCP Proxy Layer)
+
+### Overview
+
+**Theme:** The Router  
+**Goal:** Build the transparent interception layer that routes ALL AI tool calls through Code Scalpel  
+**Effort:** ~4-6 developer-months  
+**Risk Level:** Medium (protocol complexity)  
+**Target Release:** Q1 2028
+
+### Why This Release
+
+**The Gap:** Currently, AI agents can call file system tools directly, bypassing Code Scalpel entirely. The Surgical Suite requires ALL operations to flow through a central router.
+
+**The Solution:** An MCP proxy that sits between AI agents and the actual MCP servers, intercepting, analyzing, and governing every tool call.
+
+```
+BEFORE (Current):
+┌─────────┐     ┌─────────────────────┐
+│  Claude │────▶│  MCP Server (files) │
+└─────────┘     └─────────────────────┘
+     Direct access - no governance
+
+AFTER (v5.1 Intercept):
+┌─────────┐     ┌──────────────────┐     ┌─────────────────────┐
+│  Claude │────▶│  Surgical Router │────▶│  MCP Server (files) │
+└─────────┘     │  (MCP Proxy)     │     └─────────────────────┘
+                └──────────────────┘
+                     ▲
+                     │ Every call logged,
+                     │ analyzed, governed
+```
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | MCP Proxy Core | Transparent proxy that forwards MCP requests | Planned |
+| **P0** | Tool Interception | Capture all tool calls (read_file, write_file, etc.) | Planned |
+| **P0** | Request Logging | Log every request with timestamp, parameters, response | Planned |
+| **P0** | Pass-Through Mode | Initial mode: log only, don't block | Planned |
+| **P1** | Governance Mode | Block requests that violate policy | Planned |
+| **P1** | Multi-Server Routing | Route to different MCP servers based on tool type | Planned |
+| **P1** | Request Transformation | Modify requests before forwarding (e.g., add context) | Planned |
+| **P2** | Protocol Adapters | Support non-MCP protocols (LSP, DAP) | Research |
+| **P2** | WebSocket Support | Real-time bidirectional communication | Planned |
+
+### Architecture
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│                      SURGICAL ROUTER (v5.1)                        │
+│                                                                    │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │                    PROTOCOL LAYER                             │ │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐              │ │
+│  │  │ MCP/stdio  │  │ MCP/HTTP   │  │ MCP/WebSocket│             │ │
+│  │  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘              │ │
+│  └────────┼───────────────┼───────────────┼─────────────────────┘ │
+│           └───────────────┼───────────────┘                       │
+│                           ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │                    INTERCEPTION LAYER                         │ │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐              │ │
+│  │  │  Request   │  │  Request   │  │  Response  │              │ │
+│  │  │  Parser    │──▶│  Analyzer  │──▶│  Recorder  │              │ │
+│  │  └────────────┘  └────────────┘  └────────────┘              │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+│                           │                                        │
+│                           ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────┐ │
+│  │                    ROUTING LAYER                              │ │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐              │ │
+│  │  │ Code Scalpel│  │ File System│  │  External  │              │ │
+│  │  │ MCP Server │  │ MCP Server │  │ MCP Servers│              │ │
+│  │  └────────────┘  └────────────┘  └────────────┘              │ │
+│  └──────────────────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+### Tool Classification
+
+The router must understand tool semantics to govern appropriately:
+
+| Tool Category | Examples | Governance Level |
+|---------------|----------|------------------|
+| **Read-Only** | read_file, list_dir, grep_search | LOW - Log only |
+| **Write-File** | create_file, replace_string_in_file | HIGH - Analyze + Log |
+| **Execute** | run_in_terminal, run_notebook_cell | CRITICAL - Require approval |
+| **External** | fetch_webpage, github_api | MEDIUM - Rate limit + Log |
+
+### Configuration
+
+```yaml
+# .code-scalpel/router.yaml
+router:
+  mode: "governance"  # "passthrough" | "governance" | "strict"
+  
+  # Tool routing rules
+  routes:
+    - pattern: "code_scalpel_*"
+      target: "localhost:3000"
+      governance: "full"
+    
+    - pattern: "read_file|list_dir|grep_search"
+      target: "filesystem"
+      governance: "log_only"
+    
+    - pattern: "create_file|replace_string_in_file"
+      target: "filesystem"
+      governance: "analyze_and_log"
+    
+    - pattern: "run_in_terminal"
+      target: "terminal"
+      governance: "require_approval"
+  
+  # Logging configuration
+  logging:
+    level: "verbose"
+    destination: "audit_log"
+    include_request_body: true
+    include_response_body: true
+    redact_secrets: true
+```
+
+### Release Checklist
+
+[ ] MCP Proxy Core with stdio transport
+[ ] MCP Proxy with HTTP transport
+[ ] Tool interception and logging
+[ ] Request/response recording
+[ ] Pass-through mode (log only)
+[ ] Governance mode (analyze + block)
+[ ] Multi-server routing
+[ ] Configuration file support
+[ ] Health check and monitoring endpoints
+[ ] Performance benchmarks (<5ms overhead)
+[ ] Integration tests with Claude Desktop
+[ ] Integration tests with VS Code Copilot
+
+---
+
+## v5.2.0 - "Intent" (Intent Analysis & Risk ML)
+
+### Overview
+
+**Theme:** The Brain  
+**Goal:** Automatically understand WHAT the AI is trying to do and assess risk level  
+**Effort:** ~4-6 developer-months  
+**Risk Level:** Medium-High (ML model quality)  
+**Target Release:** Q2 2028
+
+### Why This Release
+
+**The Gap:** The router (v5.1) can intercept requests, but doesn't UNDERSTAND them. It sees "replace_string_in_file" but doesn't know if that's adding a log statement (LOW risk) or modifying authentication (CRITICAL risk).
+
+**The Solution:** Intent analysis that parses the AI's actions to understand the semantic meaning, followed by ML-based risk assessment.
+
+### Intent Classification
+
+```
+Raw Tool Call:
+  tool: "replace_string_in_file"
+  params:
+    filePath: "/src/auth/jwt.py"
+    oldString: "def verify_token(token):"
+    newString: "def verify_token(token, skip_validation=False):"
+
+Intent Analysis:
+  intent_type: "modify_function_signature"
+  semantic_domain: "authentication"
+  change_type: "add_parameter"
+  parameter_name: "skip_validation"
+  parameter_default: "False"
+  
+Risk Assessment:
+  level: "CRITICAL"
+  factors:
+    - "authentication_domain"
+    - "security_bypass_pattern" (skip_validation)
+    - "function_signature_change"
+  confidence: 0.94
+  recommendation: "REQUIRE_HUMAN_APPROVAL"
+```
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Intent Parser | Extract semantic intent from tool calls | Planned |
+| **P0** | Change Classifier | Classify changes (add, modify, delete, refactor) | Planned |
+| **P0** | Domain Detector | Identify semantic domain (auth, payments, logging) | Planned |
+| **P0** | Risk Scoring | Calculate risk score based on factors | Planned |
+| **P1** | Pattern Library | Known risky patterns (security bypass, etc.) | Planned |
+| **P1** | ML Risk Model | Trained model for risk assessment | Research |
+| **P1** | Confidence Scoring | How confident is the analysis? | Planned |
+| **P1** | Explanation Generator | Why is this HIGH risk? | Planned |
+| **P2** | Custom Risk Rules | User-defined risk patterns | Planned |
+| **P2** | Learning Mode | Learn from user approvals/rejections | Research |
+
+### Intent Taxonomy
+
+```yaml
+intent_types:
+  # File-level intents
+  - create_file:
+      subtypes: [new_feature, test_file, config_file, documentation]
+  - delete_file:
+      subtypes: [cleanup, refactor, deprecation]
+  - rename_file:
+      subtypes: [convention_fix, refactor, restructure]
+  
+  # Code-level intents
+  - add_function:
+      subtypes: [new_feature, helper, test, utility]
+  - modify_function:
+      subtypes: [bugfix, feature_addition, refactor, optimization]
+  - delete_function:
+      subtypes: [dead_code, refactor, deprecation]
+  - modify_signature:
+      subtypes: [add_parameter, remove_parameter, change_return_type]
+  
+  # Dependency intents
+  - add_dependency:
+      subtypes: [feature_requirement, dev_tool, security_fix]
+  - remove_dependency:
+      subtypes: [cleanup, security_vulnerability, replacement]
+  - upgrade_dependency:
+      subtypes: [security_patch, feature_update, major_upgrade]
+  
+  # Configuration intents
+  - modify_config:
+      subtypes: [feature_flag, environment, security_setting]
+  - add_secret:
+      subtypes: [api_key, password, token]
+```
+
+### Risk Factor Weights
+
+```yaml
+risk_factors:
+  # Domain factors (highest weight)
+  authentication_domain: 0.9
+  authorization_domain: 0.9
+  payment_domain: 0.85
+  cryptography_domain: 0.85
+  user_data_domain: 0.8
+  database_domain: 0.7
+  api_domain: 0.6
+  logging_domain: 0.2
+  test_domain: 0.1
+  
+  # Change type factors
+  delete_security_code: 0.95
+  modify_signature: 0.7
+  add_parameter_with_default: 0.5
+  add_new_code: 0.3
+  modify_whitespace: 0.05
+  
+  # Pattern factors (red flags)
+  security_bypass_pattern: 0.95  # skip_validation, disable_auth
+  hardcoded_secret_pattern: 0.9
+  sql_injection_pattern: 0.9
+  eval_exec_pattern: 0.85
+  file_system_access_pattern: 0.7
+  network_access_pattern: 0.6
+  
+  # Scope factors
+  blast_radius_high: 0.6  # >10 files affected
+  blast_radius_medium: 0.3  # 3-10 files
+  blast_radius_low: 0.1  # 1-2 files
+
+risk_thresholds:
+  LOW: 0.0 - 0.3
+  MEDIUM: 0.3 - 0.6
+  HIGH: 0.6 - 0.8
+  CRITICAL: 0.8 - 1.0
+```
+
+### ML Model Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    RISK ASSESSMENT MODEL                     │
+│                                                              │
+│  Input Features:                                             │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ • Tool name (one-hot encoded)                          │ │
+│  │ • File path components (embeddings)                    │ │
+│  │ • Code diff (CodeBERT embeddings)                      │ │
+│  │ • Change size (normalized)                             │ │
+│  │ • Time of day (cyclical encoding)                      │ │
+│  │ • User role (one-hot)                                  │ │
+│  │ • Historical approval rate for similar changes         │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                           │                                  │
+│                           ▼                                  │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │           Transformer Encoder (6 layers)               │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                           │                                  │
+│                           ▼                                  │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │           Classification Head                          │ │
+│  │  • Risk Level: [LOW, MEDIUM, HIGH, CRITICAL]          │ │
+│  │  • Confidence: 0.0 - 1.0                              │ │
+│  │  • Explanation Attention Weights                       │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  Training Data:                                              │
+│  • 100K+ labeled tool calls from enterprise deployments     │
+│  • Human approval/rejection labels                          │
+│  • Post-deployment incident correlation                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Release Checklist
+
+[ ] Intent parser for common tool calls
+[ ] Change type classifier
+[ ] Semantic domain detector
+[ ] Rule-based risk scoring engine
+[ ] Risk factor configuration
+[ ] Explanation generator
+[ ] ML model training pipeline
+[ ] CodeBERT integration for code understanding
+[ ] Confidence calibration
+[ ] A/B testing framework for model improvements
+[ ] Benchmark dataset creation
+[ ] Model accuracy: >90% on labeled test set
+[ ] False positive rate: <5%
+
+---
+
+## v5.3.0 - "Dashboard" (Audit UI & Policy Console)
+
+### Overview
+
+**Theme:** The Visibility  
+**Goal:** Web-based dashboards for viewing audit trails and configuring policies  
+**Effort:** ~3-4 developer-months  
+**Risk Level:** Low (UI development)  
+**Target Release:** Q3 2028
+
+### Why This Release
+
+**The Gap:** v5.1 and v5.2 create rich audit data and risk assessments, but there's no way to VIEW them without reading JSON logs. Enterprises need:
+- Real-time visibility into AI agent activity
+- Historical audit trail search and export
+- Policy configuration without editing YAML files
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Audit Log Viewer | Real-time feed of AI actions | Planned |
+| **P0** | Session Timeline | Visual timeline of a single session | Planned |
+| **P0** | Search & Filter | Query audit logs by user, risk, date, etc. | Planned |
+| **P0** | Policy Editor | Visual editor for policy.yaml | Planned |
+| **P1** | Risk Dashboard | Aggregated risk metrics and trends | Planned |
+| **P1** | User Activity Report | Per-user AI usage statistics | Planned |
+| **P1** | Approval Queue | Pending HIGH/CRITICAL approvals | Planned |
+| **P1** | Export (CSV/JSON) | Export audit logs for compliance | Planned |
+| **P2** | Real-time Alerts | WebSocket push for critical events | Planned |
+| **P2** | Diff Viewer | Side-by-side code changes | Planned |
+| **P2** | Replay Mode | Step through a session action-by-action | Planned |
+
+### Dashboard Wireframes
+
+**Audit Log Viewer:**
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  🔍 Search: [auth changes                    ] [Date: Last 7 days ▼]    │
+│  Filters: [Risk: All ▼] [User: All ▼] [Tool: All ▼]                     │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ 🔴 CRITICAL | 2028-03-15 14:32:18 | jane.doe                       │ │
+│  │ replace_string_in_file → src/auth/jwt.py                          │ │
+│  │ Intent: modify_function_signature (authentication_domain)          │ │
+│  │ Risk: CRITICAL (0.94) - security_bypass_pattern detected          │ │
+│  │ Status: ⏳ PENDING APPROVAL                      [View] [Approve]  │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ 🟡 HIGH | 2028-03-15 14:30:05 | jane.doe                          │ │
+│  │ create_file → src/api/endpoints/payments.py                       │ │
+│  │ Intent: create_file (payment_domain)                               │ │
+│  │ Risk: HIGH (0.72) - payment_domain                                │ │
+│  │ Status: ✅ AUTO-APPROVED (user has payment_write permission)      │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ 🟢 LOW | 2028-03-15 14:28:33 | jane.doe                           │ │
+│  │ read_file → src/utils/helpers.py                                  │ │
+│  │ Intent: read_only                                                  │ │
+│  │ Risk: LOW (0.05)                                                  │ │
+│  │ Status: ✅ LOGGED                                    [View]       │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  [Load More...]                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**Policy Editor:**
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  Policy Configuration                                    [Save] [Reset]  │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  📁 Protected Paths                                                      │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Path Pattern              │ Permission │ Approvers                 │ │
+│  ├───────────────────────────┼────────────┼───────────────────────────┤ │
+│  │ src/auth/**               │ DENY       │ security-team             │ │
+│  │ src/payments/**           │ APPROVE    │ payments-team, security   │ │
+│  │ **/*.env                  │ DENY       │ —                         │ │
+│  │ src/config/secrets.*      │ DENY       │ —                         │ │
+│  │ [+ Add Path]                                                       │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ⚡ Risk Thresholds                                                      │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Risk Level  │ Action           │ Threshold                         │ │
+│  ├─────────────┼──────────────────┼───────────────────────────────────┤ │
+│  │ LOW         │ Auto-approve     │ 0.0 - 0.3                         │ │
+│  │ MEDIUM      │ Log + Notify     │ 0.3 - 0.6                         │ │
+│  │ HIGH        │ Require Approval │ 0.6 - 0.8                         │ │
+│  │ CRITICAL    │ Block + Escalate │ 0.8 - 1.0                         │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  👥 Approval Roles                                                       │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ Role              │ Can Approve        │ Members                   │ │
+│  ├───────────────────┼────────────────────┼───────────────────────────┤ │
+│  │ security-team     │ HIGH, CRITICAL     │ alice, bob, charlie       │ │
+│  │ payments-team     │ HIGH (payments)    │ dave, eve                 │ │
+│  │ tech-lead         │ HIGH               │ frank, grace              │ │
+│  │ [+ Add Role]                                                       │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Technology Stack
+
+| Layer | Technology | Rationale |
+|-------|------------|-----------|
+| **Frontend** | React + TypeScript | Industry standard, rich ecosystem |
+| **State** | TanStack Query | Efficient data fetching and caching |
+| **UI** | Tailwind + shadcn/ui | Rapid development, consistent design |
+| **Backend** | FastAPI (Python) | Integrates with Code Scalpel core |
+| **Database** | PostgreSQL | JSONB for flexible audit log schema |
+| **Real-time** | WebSocket | Live updates for audit feed |
+| **Auth** | OAuth2 / OIDC | Enterprise SSO ready (v5.4) |
+
+### Release Checklist
+
+[ ] Audit log viewer with real-time updates
+[ ] Session timeline visualization
+[ ] Search and filter functionality
+[ ] Policy editor with validation
+[ ] Risk dashboard with charts
+[ ] Approval queue with one-click approve/reject
+[ ] Export functionality (CSV, JSON, PDF)
+[ ] User activity reports
+[ ] Diff viewer for code changes
+[ ] Mobile-responsive design
+[ ] Accessibility (WCAG 2.1 AA)
+[ ] Documentation and user guide
+
+---
+
+## v5.4.0 - "Enterprise" (SSO/RBAC/SIEM Integration)
+
+### Overview
+
+**Theme:** The Compliance  
+**Goal:** Enterprise-grade authentication, authorization, and security monitoring integration  
+**Effort:** ~4-5 developer-months  
+**Risk Level:** Medium (enterprise integration complexity)  
+**Target Release:** Q4 2028
+
+### Why This Release
+
+**The Gap:** The Dashboard (v5.3) has basic auth, but enterprises require:
+- Single Sign-On with their identity provider
+- Role-based access control matching their org structure
+- Audit log export to their SIEM for security monitoring
+- Compliance reports for auditors
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | SAML 2.0 SSO | Okta, Azure AD, OneLogin integration | Planned |
+| **P0** | OIDC SSO | Auth0, Keycloak, Google Workspace | Planned |
+| **P0** | RBAC Engine | Role-based permissions for approval/view | Planned |
+| **P0** | SIEM Export | Splunk, DataDog, Elastic integration | Planned |
+| **P1** | SCIM Provisioning | Auto-sync users/groups from IdP | Planned |
+| **P1** | Audit Log Retention | Configurable retention policies | Planned |
+| **P1** | Compliance Reports | SOC2, GDPR, HIPAA report templates | Planned |
+| **P1** | API Keys | Service account authentication | Planned |
+| **P2** | MFA Enforcement | Require MFA for approval actions | Planned |
+| **P2** | IP Allowlisting | Restrict dashboard access by IP | Planned |
+| **P2** | Data Residency | Region-specific data storage | Planned |
+
+### RBAC Model
+
+```yaml
+# Role definitions
+roles:
+  viewer:
+    description: "Can view audit logs and dashboards"
+    permissions:
+      - audit_log:read
+      - dashboard:view
+      - reports:view
+  
+  developer:
+    description: "Can view and receive AI assistance"
+    inherits: viewer
+    permissions:
+      - ai_session:create
+      - ai_session:own:read
+  
+  approver:
+    description: "Can approve HIGH risk changes"
+    inherits: developer
+    permissions:
+      - approval:high:grant
+      - approval:high:deny
+  
+  security_approver:
+    description: "Can approve CRITICAL risk changes"
+    inherits: approver
+    permissions:
+      - approval:critical:grant
+      - approval:critical:deny
+      - policy:view
+  
+  admin:
+    description: "Full system administration"
+    inherits: security_approver
+    permissions:
+      - policy:edit
+      - users:manage
+      - roles:manage
+      - settings:manage
+      - export:all
+
+# Permission scopes
+scopes:
+  - domain: [auth, payments, infrastructure, all]
+  - action: [read, write, approve, manage]
+  - resource: [audit_log, policy, users, settings, reports]
+```
+
+### SIEM Integration
+
+**Splunk Integration:**
+```python
+# Export to Splunk HEC (HTTP Event Collector)
+splunk_config = {
+    "endpoint": "https://splunk.company.com:8088",
+    "token": "${SPLUNK_HEC_TOKEN}",
+    "index": "code_scalpel_audit",
+    "source": "surgical_suite",
+    "sourcetype": "json",
+    "batch_size": 100,
+    "flush_interval_seconds": 10
+}
+
+# Event format
+{
+    "time": 1709481138,
+    "event": {
+        "action": "tool_call",
+        "tool": "replace_string_in_file",
+        "user": "jane.doe@company.com",
+        "risk_level": "HIGH",
+        "risk_score": 0.72,
+        "intent": "modify_function_signature",
+        "domain": "authentication",
+        "file_path": "/src/auth/jwt.py",
+        "approval_status": "pending",
+        "session_id": "ss-2028-03-15-abc123"
+    }
+}
+```
+
+**DataDog Integration:**
+```python
+# Export to DataDog
+datadog_config = {
+    "api_key": "${DATADOG_API_KEY}",
+    "site": "datadoghq.com",  # or datadoghq.eu
+    "service": "surgical-suite",
+    "env": "production",
+    "tags": ["team:platform", "app:code-scalpel"]
+}
+
+# Metrics exported
+- surgical_suite.tool_calls (count, tags: tool, risk_level, user)
+- surgical_suite.approvals (count, tags: risk_level, status)
+- surgical_suite.risk_score (histogram)
+- surgical_suite.session_duration (histogram)
+- surgical_suite.latency (histogram, tags: component)
+```
+
+### Compliance Reports
+
+**SOC2 Report Template:**
+```markdown
+# Code Scalpel Surgical Suite - SOC2 Audit Report
+Period: Q1 2028 (Jan 1 - Mar 31)
+
+## Executive Summary
+- Total AI-assisted code changes: 12,847
+- Changes requiring approval: 1,234 (9.6%)
+- Approval response time (median): 4.2 minutes
+- Policy violations blocked: 47
+
+## Control Objectives
+
+### CC6.1 - Logical Access Controls
+✅ All users authenticated via SSO (Okta)
+✅ Role-based access control enforced
+✅ MFA required for approval actions
+- Evidence: User access log, role assignments
+
+### CC7.2 - System Operations
+✅ All AI operations logged with timestamps
+✅ Audit logs retained for 2 years
+✅ Real-time alerting for CRITICAL events
+- Evidence: Audit log export, alert configuration
+
+### CC8.1 - Change Management
+✅ All code changes analyzed for risk
+✅ HIGH/CRITICAL changes require approval
+✅ Complete audit trail for each change
+- Evidence: Approval workflow logs, risk assessments
+
+## Appendix
+- [Full audit log export (JSON)]
+- [User access report]
+- [Policy configuration history]
+```
+
+### Release Checklist
+
+[ ] SAML 2.0 SSO integration
+[ ] OIDC SSO integration
+[ ] RBAC engine with permission inheritance
+[ ] Splunk HEC integration
+[ ] DataDog integration
+[ ] Elastic/OpenSearch integration
+[ ] SCIM user provisioning
+[ ] Audit log retention policies
+[ ] SOC2 report generator
+[ ] GDPR report generator (data subject access)
+[ ] API key management
+[ ] MFA enforcement for approvals
+[ ] IP allowlist configuration
+[ ] Enterprise deployment guide
+[ ] Security audit (penetration testing)
+
+---
+
+## v5.5.0 - "Extensions" (IDE Integrations)
+
+### Overview
+
+**Theme:** The Experience  
+**Goal:** Native IDE extensions that bring Surgical Suite governance into the developer workflow  
+**Effort:** ~5-6 developer-months  
+**Risk Level:** Medium (multi-platform development)  
+**Target Release:** Q1 2029
+
+### Why This Release
+
+**The Gap:** The Surgical Suite works, but developers interact with it through AI chat interfaces. Native IDE integration provides:
+- Visual risk indicators in the editor
+- One-click approvals without leaving the IDE
+- Real-time audit trail in a panel
+- Configuration management in settings
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | VS Code Extension | Full Surgical Suite integration | Planned |
+| **P0** | Risk Gutter Icons | Visual risk level in editor margin | Planned |
+| **P0** | Approval Panel | In-IDE approval workflow | Planned |
+| **P1** | Cursor Extension | Fork of VS Code extension for Cursor | Planned |
+| **P1** | Session Panel | View current AI session timeline | Planned |
+| **P1** | Policy Hover | Hover to see why change was flagged | Planned |
+| **P2** | JetBrains Plugin | IntelliJ, PyCharm, WebStorm | Planned |
+| **P2** | Neovim Plugin | For terminal-based developers | Planned |
+| **P2** | Settings UI | Configure Surgical Suite in IDE settings | Planned |
+
+### VS Code Extension Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    VS Code Extension Architecture                         │
+│                                                                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                         UI Layer                                     │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │ │
+│  │  │ Risk Gutter  │  │  Approval    │  │   Session    │               │ │
+│  │  │ Decorations  │  │   Panel      │  │   Timeline   │               │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │ │
+│  │  │ Status Bar   │  │  Hover       │  │  Quick Pick  │               │ │
+│  │  │   Item       │  │  Provider    │  │  Commands    │               │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│                                  │                                        │
+│                                  ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                      Service Layer                                   │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │ │
+│  │  │ Router       │  │  Dashboard   │  │  Config      │               │ │
+│  │  │ Client       │  │  Client      │  │  Manager     │               │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│                                  │                                        │
+│                                  ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                      External Services                               │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │ │
+│  │  │ Surgical     │  │  Dashboard   │  │  Auth        │               │ │
+│  │  │ Router       │  │  API         │  │  Service     │               │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Risk Gutter Icons
+
+Visual indicators in the editor gutter showing risk level of recent AI changes:
+
+```
+┌────┬──────────────────────────────────────────────────────────────────┐
+│ 1  │ import jwt                                                       │
+│ 2  │ from datetime import datetime, timedelta                         │
+│ 3  │                                                                  │
+│🔴4 │ def verify_token(token, skip_validation=False):  # AI MODIFIED   │
+│🔴5 │     """Verify JWT token."""                                      │
+│🔴6 │     if skip_validation:                                          │
+│🔴7 │         return {"valid": True}  # SECURITY RISK                  │
+│ 8  │     try:                                                         │
+│ 9  │         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS2 │
+│10  │         return payload                                           │
+│11  │     except jwt.ExpiredSignatureError:                            │
+│12  │         return {"error": "Token expired"}                        │
+└────┴──────────────────────────────────────────────────────────────────┘
+
+Gutter Legend:
+🔴 = CRITICAL risk (requires approval)
+🟠 = HIGH risk (requires approval)
+🟡 = MEDIUM risk (logged)
+🟢 = LOW risk (auto-approved)
+```
+
+### Approval Panel
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│  🔔 Pending Approvals (2)                                    [Refresh]   │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ 🔴 CRITICAL - src/auth/jwt.py                                      │ │
+│  │ Modified: verify_token() - added skip_validation parameter         │ │
+│  │ Risk: Security bypass pattern detected                             │ │
+│  │ Time: 2 minutes ago                                                │ │
+│  │                                                                    │ │
+│  │ [View Diff]  [Approve ✓]  [Reject ✗]  [Request Changes 💬]        │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ 🟠 HIGH - src/api/payments.py                                      │ │
+│  │ Created: new payment processing endpoint                           │ │
+│  │ Risk: Payment domain change                                        │ │
+│  │ Time: 5 minutes ago                                                │ │
+│  │                                                                    │ │
+│  │ [View Diff]  [Approve ✓]  [Reject ✗]  [Request Changes 💬]        │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+│                                                                          │
+│  ─────────────────────────────────────────────────────────────────────  │
+│  Recent Activity                                                         │
+│  • 🟢 LOW - utils/helpers.py - Auto-approved (3 min ago)                │
+│  • 🟡 MEDIUM - config/settings.py - Logged (7 min ago)                  │
+│  • 🟢 LOW - tests/test_api.py - Auto-approved (12 min ago)              │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Extension Commands
+
+```json
+{
+  "contributes": {
+    "commands": [
+      {
+        "command": "surgicalSuite.viewSession",
+        "title": "View Current AI Session",
+        "category": "Surgical Suite"
+      },
+      {
+        "command": "surgicalSuite.approveChange",
+        "title": "Approve Pending Change",
+        "category": "Surgical Suite"
+      },
+      {
+        "command": "surgicalSuite.rejectChange",
+        "title": "Reject Pending Change",
+        "category": "Surgical Suite"
+      },
+      {
+        "command": "surgicalSuite.viewAuditLog",
+        "title": "Open Audit Log",
+        "category": "Surgical Suite"
+      },
+      {
+        "command": "surgicalSuite.configurePolicy",
+        "title": "Configure Policy",
+        "category": "Surgical Suite"
+      },
+      {
+        "command": "surgicalSuite.exportSession",
+        "title": "Export Session Report",
+        "category": "Surgical Suite"
+      }
+    ]
+  }
+}
+```
+
+### Release Checklist
+
+[ ] VS Code extension with core features
+[ ] Risk gutter decorations
+[ ] Approval panel with approve/reject
+[ ] Session timeline panel
+[ ] Policy hover provider
+[ ] Status bar integration
+[ ] Settings UI
+[ ] Cursor extension (fork)
+[ ] JetBrains plugin (IntelliJ platform)
+[ ] Neovim plugin (Lua)
+[ ] Extension marketplace publishing
+[ ] Documentation and tutorials
+[ ] Integration tests
+[ ] Performance benchmarks (<50ms decoration time)
+
+---
+
+## v6.0.0 - "Surgical Suite" (Universal AI Operating Layer)
+
+### Overview
+
+**Theme:** The Operating System for AI Coding  
+**Goal:** Integrate v5.1-v5.5 components into a unified, production-ready platform  
+**Effort:** ~3-4 developer-months (integration + polish)  
+**Risk Level:** Medium (component integration)  
+**Target Release:** H1 2029
+
+### Prerequisites
+
+v6.0 is the **culmination** of the Surgical Suite initiative. It requires:
+
+| Version | Component | Status for v6.0 |
+|---------|-----------|-----------------|
+| v5.1 | MCP Proxy (Intercept) | Required |
+| v5.2 | Intent Analysis + Risk ML (Intent) | Required |
+| v5.3 | Audit Dashboard + Policy Console (Dashboard) | Required |
+| v5.4 | SSO/RBAC/SIEM (Enterprise) | Required |
+| v5.5 | IDE Extensions (Extensions) | Required |
+
+### What v6.0 Adds
+
+v6.0 is primarily an **integration release** that:
+1. Unifies all components under a single deployment
+2. Adds cross-component optimizations
+3. Provides one-click enterprise deployment
+4. Achieves production-grade reliability (99.9% uptime SLA)
+5. Completes the "Surgical Suite" brand and documentation
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Unified Installer | One-command deployment of full Suite | Planned |
+| **P0** | Component Health Dashboard | Monitor all v5.x components | Planned |
+| **P0** | Cross-Component Optimization | Reduce latency between services | Planned |
+| **P0** | Production Hardening | 99.9% uptime, disaster recovery | Planned |
+| **P1** | Kubernetes Helm Charts | Enterprise k8s deployment | Planned |
+| **P1** | Terraform Modules | Infrastructure-as-code deployment | Planned |
+| **P1** | Multi-Region Support | Global deployment for enterprises | Planned |
+| **P1** | Certification Program | "Surgical Suite Certified" for AI tools | Planned |
+| **P2** | White-Label Support | Custom branding for enterprises | Planned |
+| **P2** | On-Premises Installer | Air-gapped deployment option | Planned |
+
+### The Vision: Vibe Coding with Executive Function
+
+**The Problem with "Vibe Coding" Today:**
+
+```
+Developer: "Hey Claude, add authentication to my API"
+                    ↓
+Claude: [edits 15 files, adds dependencies, changes configs]
+                    ↓
+Result: ??? (No audit trail, no verification, no governance)
+```
+
+**The Surgical Suite Vision:**
+
+```
+Developer: "Hey Claude, add authentication to my API"
+                    ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    SURGICAL SUITE                            │
+│                                                              │
+│  Claude's Intent → Scalpel Intercept → Policy Check         │
+│         ↓                                                    │
+│  [Analysis: 15 files, HIGH_RISK, auth scope]                │
+│         ↓                                                    │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ "I plan to:                                          │    │
+│  │  - Add jwt-auth package (security scan: CLEAN)      │    │
+│  │  - Create auth/ module with 4 files                 │    │
+│  │  - Modify 3 existing endpoints                      │    │
+│  │                                                      │    │
+│  │  Risk: HIGH (authentication changes)                 │    │
+│  │  Blast Radius: 15 files, 3 API endpoints            │    │
+│  │  Tests: Will generate 12 auth tests                 │    │
+│  │                                                      │    │
+│  │  [Approve] [Modify Scope] [Reject]"                 │    │
+│  └─────────────────────────────────────────────────────┘    │
+│         ↓                                                    │
+│  Human: [Approve]                                           │
+│         ↓                                                    │
+│  Scalpel: Execute with audit trail                          │
+│         ↓                                                    │
+│  Verification: Tests pass, coverage ≥80%, security clean    │
+└─────────────────────────────────────────────────────────────┘
+                    ↓
+Result: Auditable, verified, governed code change
+```
+
+### Core Principles
+
+| Principle | Definition | Implementation |
+|-----------|------------|----------------|
+| **Transparent Interception** | All AI file operations route through Scalpel | MCP proxy layer, IDE hooks |
+| **Executive Function** | AI must plan before acting | Intent declaration, scope estimation |
+| **Human-in-the-Loop** | Critical decisions require approval | Risk-based approval gates |
+| **Immutable Audit Trail** | Every action cryptographically logged | SHA-256 signed entries |
+| **Seamless UX** | Feels like vibe coding, acts like governance | Invisible when safe, visible when risky |
+
+### The "Executive Function" Model
+
+**Inspired by human cognitive control:**
+
+```
+Human Executive Function          AI Surgical Executive Function
+─────────────────────────         ─────────────────────────────
+1. Inhibition (stop impulses)  →  1. Policy Gate (stop policy violations)
+2. Working Memory (context)    →  2. Context Awareness (what's in scope)
+3. Cognitive Flexibility       →  3. Alternative Paths (offer options)
+4. Planning                    →  4. Intent Declaration (state plan first)
+5. Monitoring                  →  5. Progress Tracking (audit trail)
+```
+
+**Before ANY code operation, AI must:**
+1. **Declare Intent:** "I will modify function X in file Y"
+2. **Assess Risk:** "This is HIGH_RISK because it affects authentication"
+3. **Estimate Scope:** "This will change 3 files with blast radius of 15"
+4. **Request Approval:** "Proceed? [Yes/No/Modify]"
+5. **Execute with Logging:** Every change recorded with timestamp + hash
+6. **Verify Result:** Tests pass, no regressions, security clean
+
+### Architecture
+
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          SURGICAL SUITE                                    │
+│                                                                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐  │
+│  │                      PRESENTATION LAYER                              │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │  │
+│  │  │   VS Code   │  │   Cursor    │  │   Claude    │  │  Web IDE   │  │  │
+│  │  │  Extension  │  │  Extension  │  │   Desktop   │  │  (Future)  │  │  │
+│  │  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └─────┬──────┘  │  │
+│  └─────────┴────────────────┴────────────────┴───────────────┴─────────┘  │
+│                                     │                                      │
+│                          ┌──────────▼──────────┐                          │
+│  ┌───────────────────────│   SURGICAL ROUTER   │───────────────────────┐  │
+│  │                       │   (MCP Proxy)       │                       │  │
+│  │                       └──────────┬──────────┘                       │  │
+│  │                                  │                                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐   │  │
+│  │  │                   EXECUTIVE FUNCTION LAYER                   │   │  │
+│  │  │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────┐  │   │  │
+│  │  │  │  Intent   │  │   Risk    │  │  Approval │  │  Budget  │  │   │  │
+│  │  │  │ Analyzer  │  │ Assessor  │  │   Gate    │  │ Monitor  │  │   │  │
+│  │  │  └───────────┘  └───────────┘  └───────────┘  └──────────┘  │   │  │
+│  │  └─────────────────────────────────────────────────────────────┘   │  │
+│  │                                  │                                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐   │  │
+│  │  │                    ENFORCEMENT LAYER                         │   │  │
+│  │  │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────┐  │   │  │
+│  │  │  │  Policy   │  │ Scalpel   │  │  Audit    │  │Verifica- │  │   │  │
+│  │  │  │  Engine   │  │  Core     │  │  Logger   │  │tion Gate │  │   │  │
+│  │  │  └───────────┘  └───────────┘  └───────────┘  └──────────┘  │   │  │
+│  │  └─────────────────────────────────────────────────────────────┘   │  │
+│  └────────────────────────────────────────────────────────────────────┘  │
+│                                     │                                      │
+│  ┌──────────────────────────────────▼─────────────────────────────────┐   │
+│  │                       PERSISTENCE LAYER                             │   │
+│  │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────────────┐ │   │
+│  │  │ Codebase  │  │  Audit    │  │  Policy   │  │   Metrics &      │ │   │
+│  │  │  Graph    │  │   Log     │  │  Store    │  │   Analytics      │ │   │
+│  │  └───────────┘  └───────────┘  └───────────┘  └──────────────────┘ │   │
+│  └────────────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Surgical Router | MCP proxy that intercepts all AI tool calls | Research |
+| **P0** | Intent Analyzer | Parse AI's stated intent, extract scope | Research |
+| **P0** | Risk Assessor | Automatically categorize risk level | Research |
+| **P0** | Approval Gate | Human-in-the-loop for HIGH/CRITICAL risk | Research |
+| **P1** | Budget Monitor | Track tokens, changes, time per session | Research |
+| **P1** | IDE Extensions | VS Code, Cursor, JetBrains integrations | Research |
+| **P1** | Audit Dashboard | Web UI showing all AI actions | Research |
+| **P1** | Policy Console | Web UI for governance configuration | Research |
+| **P2** | Multi-Agent Orchestration | Coordinate multiple AI agents in Suite | Research |
+| **P2** | Replay/Rollback | Undo any AI session to previous state | Research |
+| **P2** | Compliance Reports | Generate SOC2, GDPR audit reports | Research |
+
+### The "Vibe Coding" Preservation Principle
+
+**Goal:** Make governance invisible when possible, visible when necessary.
+
+**Risk-Based UX:**
+
+| Risk Level | UX Behavior |
+|------------|-------------|
+| **LOW** | Silent approval, minimal interruption |
+| **MEDIUM** | Brief notification: "Modified 3 files in utils/" |
+| **HIGH** | Explicit approval: "This changes authentication. Proceed?" |
+| **CRITICAL** | Mandatory review: "Security-critical change. Requires human review." |
+
+**Example Session - Seamless LOW Risk:**
+
+```
+Developer: "Add a helper function to format dates"
+AI: [Silently: Intent=add_function, Scope=1 file, Risk=LOW, Policy=ALLOW]
+AI: "Done! Added formatDate() to src/utils/dates.ts"
+[Audit log updated, no user interruption]
+```
+
+**Example Session - Explicit HIGH Risk:**
+
+```
+Developer: "Refactor the database connection pool"
+AI: [Analysis: Intent=modify_core, Scope=12 files, Risk=HIGH]
+
+┌──────────────────────────────────────────────────────┐
+│ 🔶 HIGH RISK CHANGE DETECTED                          │
+│                                                       │
+│ I'm planning to:                                      │
+│ • Modify DatabasePool class in db/pool.ts            │
+│ • Update 11 files that depend on the pool            │
+│ • Change connection lifecycle management              │
+│                                                       │
+│ This affects database reliability. Estimated impact: │
+│ • 47 API endpoints use this connection pool          │
+│ • 3 background workers depend on pool events         │
+│                                                       │
+│ [Proceed] [Show Detailed Plan] [Cancel]              │
+└──────────────────────────────────────────────────────┘
+```
+
+### Audit Trail Schema
+
+```json
+{
+  "session_id": "ss-2028-03-15-abc123",
+  "timestamp": "2028-03-15T14:32:18Z",
+  "agent": {
+    "type": "claude-4",
+    "model_version": "claude-4-opus-20280301",
+    "mcp_client": "vscode-copilot-1.2.0"
+  },
+  "user": {
+    "id": "dev-jane-doe",
+    "role": "developer",
+    "permissions": ["read", "write", "approve_medium"]
+  },
+  "intent": {
+    "raw_prompt": "Add authentication to my API",
+    "parsed_intent": "add_feature",
+    "scope_estimate": {
+      "files_affected": 15,
+      "functions_modified": 8,
+      "functions_created": 12,
+      "dependencies_added": ["jsonwebtoken", "bcrypt"]
+    }
+  },
+  "risk_assessment": {
+    "level": "HIGH",
+    "factors": [
+      "authentication_scope",
+      "new_dependencies",
+      "multiple_files"
+    ],
+    "confidence": 0.92
+  },
+  "approval": {
+    "required": true,
+    "granted_by": "dev-jane-doe",
+    "granted_at": "2028-03-15T14:32:45Z",
+    "method": "explicit_click"
+  },
+  "execution": {
+    "started_at": "2028-03-15T14:32:46Z",
+    "completed_at": "2028-03-15T14:33:12Z",
+    "operations": [
+      {
+        "type": "create_file",
+        "path": "src/auth/jwt.ts",
+        "hash_before": null,
+        "hash_after": "sha256:abc123...",
+        "tool_used": "extract_code"
+      },
+      {
+        "type": "modify_file",
+        "path": "src/api/routes.ts",
+        "hash_before": "sha256:def456...",
+        "hash_after": "sha256:ghi789...",
+        "tool_used": "update_symbol",
+        "symbols_changed": ["registerRoutes"]
+      }
+    ]
+  },
+  "verification": {
+    "tests_run": 47,
+    "tests_passed": 47,
+    "coverage_delta": "+3.2%",
+    "security_scan": "CLEAN",
+    "verified_at": "2028-03-15T14:33:30Z"
+  },
+  "signature": "ecdsa-sha256:xyz789..."
+}
+```
+
+### Enterprise Integration Points
+
+| Integration | Description | Priority |
+|-------------|-------------|----------|
+| **SSO/SAML** | Enterprise identity providers | P0 |
+| **SIEM** | Export audit logs to Splunk, DataDog, etc. | P0 |
+| **RBAC** | Role-based access control for approvals | P0 |
+| **Jira/Linear** | Link changes to tickets automatically | P1 |
+| **Slack/Teams** | Approval requests via chat | P1 |
+| **GitHub/GitLab** | PR annotations with audit summary | P1 |
+
+### Why This is the End Game
+
+**Current State (2025):**
+- AI agents are **tools** developers use
+- Governance is **opt-in** and often bypassed
+- Audit trails are **incomplete** or **non-existent**
+- Enterprise adoption is **slow** due to compliance concerns
+
+**Surgical Suite State (2028):**
+- AI agents are **governed** by default
+- Governance is **invisible** but **always present**
+- Audit trails are **complete** and **cryptographically signed**
+- Enterprise adoption is **accelerated** because compliance is built-in
+
+**The Ultimate Value Proposition:**
+
+> "Use any AI coding assistant you want. We don't care if it's Claude, Copilot, Cursor, or the next thing. As long as it goes through the Surgical Suite, every action is auditable, every change is verified, and your compliance team sleeps well at night."
+
+### Release Checklist
+
+[ ] Surgical Router (MCP proxy layer)
+[ ] Intent Analyzer with scope estimation
+[ ] Risk Assessor with ML-based categorization
+[ ] Approval Gate with configurable thresholds
+[ ] Budget Monitor with alerts
+[ ] VS Code Extension
+[ ] Cursor Extension
+[ ] Claude Desktop Integration
+[ ] Web-based Audit Dashboard
+[ ] Policy Console for governance configuration
+[ ] SSO/SAML integration
+[ ] SIEM export (Splunk, DataDog)
+[ ] Multi-agent coordination
+[ ] Replay/Rollback capability
+[ ] SOC2 compliance report generator
+[ ] Enterprise pilot program (3+ companies)
+[ ] Public documentation and certification
 
 ---
 
@@ -8768,15 +11650,16 @@ git push origin feature/v1.3.0-nosql-injection
 | MCP server for AI    | DONE                  | NO      | NO     | NO   | NO     |
 | Surgical extraction  | DONE                  | NO      | NO     | NO   | NO     |
 | AI-verified fixes    | DONE                  | NO      | NO     | NO   | NO     |
-| CI/CD Gate (v3.1)    | PLANNED               | NO      | YES    | YES  | NO     |
+| CI/CD Gate (v3.5)    | PLANNED               | NO      | YES    | YES  | NO     |
 | Multi-Agent (v4.0)   | PLANNED               | NO      | NO     | NO   | NO     |
 | Transpilation (v5.0) | RESEARCH              | NO      | NO     | NO   | NO     |
+| Surgical Suite (v6.0)| RESEARCH              | NO      | NO     | NO   | NO     |
 
 ### Strategic Positioning
 
-**v3.x "Autonomy":** Establish Code Scalpel as the **required dependency** for AI-assisted development.
-- Key differentiator: Cryptographic proof of safe changes
-- Adoption driver: CI/CD gate enforcement ("You must use this to merge")
+**v3.x "Foundation":** Build the capability stack (Polyglot, Framework IQ, Verified, Workspace, Gatekeeper).
+- Key differentiator: Comprehensive language and framework coverage
+- Adoption driver: Works with your entire codebase, not just Python/JS
 
 **v4.x "Swarm":** Position as the **coordination layer** for multi-agent teams.
 - Key differentiator: Only tool supporting simultaneous agent collaboration
@@ -8785,12 +11668,18 @@ git push origin feature/v1.3.0-nosql-injection
 **v5.x "Re-Platforming":** Become the **migration platform** for legacy modernization.
 - Key differentiator: AST-based semantic-preserving transformations
 - Adoption driver: $10M+ migration projects become $1M projects
+
+**v6.x "Surgical Suite":** Become the **operating system** for all AI coding.
+- Key differentiator: Universal governance layer for ANY AI agent
+- Adoption driver: "Use any AI you want—it all goes through the Suite"
+- End game: AI coding without governance becomes unthinkable
+
 | Symbolic execution   | DONE                  | NO      | NO     | NO   | NO     |
 | Test generation      | DONE                  | NO      | NO     | NO   | NO     |
 | Open source          | DONE                  | DONE    | NO     | NO   | DONE   |
 | IDE plugins          | Community             | DONE    | NO     | NO   | NO     |
 
-**Unique Differentiation:** The only tool purpose-built for AI agents to perform surgical code operations without hallucination. Combines precise extraction, symbolic execution, and behavior verification in an MCP-native architecture.
+**Unique Differentiation:** The only tool purpose-built for AI agents to perform surgical code operations without hallucination. Evolving from a tool to an operating system for AI-assisted development.
 
 ---
 
@@ -8816,6 +11705,11 @@ git push origin feature/v1.3.0-nosql-injection
 | 2.0     | 2025-12-15 | Copilot | Added v2.0.1 (Java Completion) and enhanced v2.1.0 (MCP Enhance) with detailed specs |
 | 3.0     | 2025-12-16 | Copilot | Revolution Edition - Integrated v2.2.0 Nexus, v2.5.0 Guardian, v3.0.0 Autonomy |
 | 3.1     | 2025-12-16 | Copilot | 3rd Party Review Integration: Added Confidence Decay, Graph Neighborhood View, Cryptographic Policy Verification, Mutation Test Gate, Nightly JDK EA Pipeline, expanded Risk Register |
+| 4.0     | 2025-12-19 | Copilot | Added v3.1-v5.0 strategic vision (Gatekeeper, Swarm, Re-Platforming) |
+| 5.0     | 2025-12-19 | Copilot | Gap Analysis: Added v3.2-v3.5 interim releases (Polyglot+, Framework IQ, Verified, Workspace) |
+| 6.0     | 2025-12-19 | Copilot | **Surgical Suite Vision**: Reordered releases (Gatekeeper→v3.5), added v6.0 "Surgical Suite" as end-game vision for universal AI governance layer |
+| 7.0     | 2025-12-19 | Copilot | **Complete Bridge**: Added v5.1-v5.5 releases (Intercept, Intent, Dashboard, Enterprise, Extensions) to bridge v5.0→v6.0 with full component specifications |
+| 8.0     | 2025-12-19 | Copilot | **Full Bridge Coverage**: Added v3.6-v3.9 (Identity, Protocol, Sync, Arbitrate) and v4.1-v4.4 (Learn, Architect, Rosetta, Metrics) bridge releases for complete version progression |
 
 ---
 
