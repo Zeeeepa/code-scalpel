@@ -9,6 +9,9 @@ from .governance_config import (
     GovernanceConfigLoader,
 )
 
+# [20251219_FEATURE] v3.0.2 - Configuration initialization
+from .init_config import init_config_dir
+
 __all__ = [
     "ChangeBudgetingConfig",
     "BlastRadiusConfig",
@@ -16,4 +19,5 @@ __all__ = [
     "AuditConfig",
     "GovernanceConfig",
     "GovernanceConfigLoader",
+    "init_config_dir",
 ]

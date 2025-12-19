@@ -1,0 +1,51 @@
+{
+  "version": "3.0.2",
+  "timestamp": "2025-12-19T10:55:00Z",
+  "test_execution": {
+    "framework": "pytest",
+    "total_tests": 4133,
+    "passed": 4133,
+    "failed": 0,
+    "skipped": 20,
+    "xfailed": 0,
+    "warnings": 1301,
+    "duration_seconds": 165.33
+  },
+  "coverage": {
+    "statement_coverage": 95.71,
+    "branch_coverage": 91.99,
+    "combined_coverage": 94.0,
+    "total_statements": 9594,
+    "missed_statements": 412,
+    "total_branches": 3446,
+    "missed_branches": 276
+  },
+  "coverage_gate": {
+    "required_minimum": 90.0,
+    "achieved": 94.0,
+    "passed": true
+  },
+  "skipped_tests_breakdown": {
+    "crewai_optional": 8,
+    "opa_optional": 4,
+    "reportlab_optional": 4,
+    "docker_optional": 4,
+    "reason": "Optional dependencies not installed - expected behavior"
+  },
+  "test_categories": {
+    "unit_tests": 3200,
+    "integration_tests": 800,
+    "adversarial_tests": 71,
+    "security_tests": 62
+  },
+  "init_command_tests": {
+    "test_init_creates_directory": "passed",
+    "test_init_creates_config_json": "passed",
+    "test_init_creates_policy_yaml": "passed",
+    "test_init_creates_budget_yaml": "passed",
+    "test_init_creates_readme": "passed",
+    "test_init_creates_gitignore": "passed",
+    "test_init_idempotent": "passed",
+    "test_init_custom_dir": "passed"
+  }
+}

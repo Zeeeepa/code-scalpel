@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-4133%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-94.86%25-brightgreen.svg)](release_artifacts/v3.0.0/)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.0.2/)
 
-**MCP Server Toolkit for AI Agents - v3.0.0 "Autonomy"**
+**MCP Server Toolkit for AI Agents - v3.0.2 "Configuration Init"**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
@@ -20,6 +20,21 @@ Or with [uv](https://docs.astral.sh/uv/) (recommended for MCP):
 ```bash
 uvx code-scalpel --help
 ```
+
+## First-Time Setup
+
+After installation, initialize the configuration directory:
+
+```bash
+cd /your/project
+code-scalpel init
+```
+
+This creates `.code-scalpel/` with governance configuration files:
+- `config.json` - Blast radius limits, protected paths, allowed operations
+- `policy.yaml` - Security rules (SQL injection, XSS blocking)
+- `budget.yaml` - Change limits per session
+- `README.md` - Configuration guide
 
 ---
 

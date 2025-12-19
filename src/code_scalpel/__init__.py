@@ -20,7 +20,7 @@ For AI agent integrations:
 """
 
 # [20251219_RELEASE] v3.0.1 "Autonomy" - Configuration management and security hardening
-__version__ = "3.0.1"
+__version__ = "3.0.2"  # [20251219_RELEASE] v3.0.2 "Configuration Init" - code-scalpel init command
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

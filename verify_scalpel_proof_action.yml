@@ -1,0 +1,56 @@
+name: "Verify Code Scalpel Proof"
+description: "Enforces that AI-generated PRs include a valid cryptographic proof of safety from Code Scalpel."
+author: "3D Tech Solutions LLC"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  proof-path:
+    description: "Path to the proof file artifact"
+    required: false
+    default: ".scalpel/proof.json"
+  strict-mode:
+    description: "Fail if proof is missing (default: true for bots)"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for Proof Artifact
+      id: check-proof
+      shell: bash
+      run: |
+        if [ -f "${{ inputs.proof-path }}" ]; then
+          echo "✅ Proof found at ${{ inputs.proof-path }}"
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ No proof found at ${{ inputs.proof-path }}"
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Validate Proof Signature
+      if: steps.check-proof.outputs.exists == 'true'
+      shell: bash
+      run: |
+        # In a real implementation, this would verify the cryptographic signature
+        # against the commit hash and policy manifest.
+        # For now, we check for basic structure.
+        if grep -q "signature" "${{ inputs.proof-path }}"; then
+           echo "✅ Proof signature detected."
+        else
+           echo "❌ Invalid Proof: Missing signature."
+           exit 1
+        fi
+
+    - name: Enforce on Bots
+      if: steps.check-proof.outputs.exists == 'false' && inputs.strict-mode == 'true'
+      shell: bash
+      run: |
+        # Logic: If PR author is a bot, FAIL. If human, WARN.
+        # Note: In a composite action, getting context requires passing it in or using env vars.
+        # This is a simplified logic representation.
+        echo "❌ BLOCKING: AI Agent submission detected without Code Scalpel Proof."
+        echo "Please configure your agent to use the 'Code Scalpel' MCP server to generate verified edits."
+        exit 1

@@ -1,9 +1,18 @@
 # Code Scalpel Development Roadmap
 
-**Document Version:** 3.6 (v3.0.1 Configuration Release)  
-**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v3.0.1 configuration enhancements -->
-**Current Release:** v3.0.1 "Autonomy" (Released Dec 19, 2025)  <!-- [20251219_RELEASE] Configuration management release -->
-**Previous Release:** v3.0.0 "Autonomy" (Released Dec 18, 2025)
+**Document Version:** 4.0 (Strategic Vision through v5.0.0)  
+**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v4.0 roadmap expansion - Swarm & Re-Platforming -->
+**Current Release:** v3.0.1 "Autonomy" (Released Dec 19, 2025)
+**Next Release:** v3.0.2 "Configuration Init" (Ready for Release)
+**Future Releases:**
+- v3.1.0 "Gatekeeper" - CI/CD Enforcement (Q1 2026)
+- v4.0.0 "Swarm" - Multi-Agent Collaboration (H2 2026)
+- v5.0.0 "Re-Platforming" - Legacy Migration (2027+)
+**v3.0.2 Features READY FOR RELEASE:**
+- [COMPLETE] `code-scalpel init` Command - Auto-initialize .code-scalpel with templates
+- [COMPLETE] Configuration Templates Module - config.json, policy.yaml, budget.yaml, README.md, .gitignore
+- [COMPLETE] CLI Integration - Subcommand with --dir and --force flags
+- [COMPLETE] Release Notes & Evidence Files
 **v3.0.1 Features RELEASED:**
 - [COMPLETE] .code-scalpel Configuration Management - Governance config schema with blast radius controls
 - [COMPLETE] Security Hardening (13 Bandit issues) - Safe subprocess execution, XXE prevention, URL validation
@@ -7748,6 +7757,746 @@ integrity:
 
 ---
 
+## v3.0.2 - Configuration Initialization & First-Run Experience
+
+### Overview
+
+**Theme:** User Experience Enhancement  
+**Goal:** Auto-initialize .code-scalpel configuration directory for first-time users  
+**Effort:** ~1 developer-day  
+**Risk Level:** Low (non-breaking enhancement)  
+**Status:** In Development  
+**Target Release:** December 19, 2025
+
+### Why This Release
+
+The v3.0.1 release introduced the `.code-scalpel` configuration directory for governance controls, but users installing via `pip install code-scalpel` had no easy way to:
+- Discover that configuration is required
+- Initialize the directory with sensible defaults
+- Understand what files need to be created
+
+This release adds a `code-scalpel init` command to solve the first-run experience problem.
+
+### Features Planned
+
+| Priority | Feature | Status | Evidence |
+|----------|---------|--------|----------|
+| **P0** | `code-scalpel init` CLI Command | [IN PROGRESS] | Created templates, CLI integration |
+| **P0** | Configuration Templates Module | [COMPLETE] | `src/code_scalpel/config/templates.py` |
+| **P0** | Initialization Logic | [COMPLETE] | `src/code_scalpel/config/init_config.py` |
+| **P0** | User-Friendly Output | [COMPLETE] | Step-by-step guidance after init |
+| **P1** | --force Flag Support | [COMPLETE] | Reinitialize existing directories |
+| **P1** | --dir Flag Support | [COMPLETE] | Initialize in custom directory |
+| **P1** | Documentation Update | [PENDING] | README.md quick start update |
+
+### CLI Usage
+
+```bash
+# Initialize in current directory
+code-scalpel init
+
+# Initialize in specific directory
+code-scalpel init --dir /path/to/project
+
+# Force reinitialize (requires manual deletion)
+code-scalpel init --force
+```
+
+### What Gets Created
+
+The `init` command creates the following structure:
+
+```
+.code-scalpel/
+├── config.json      # Main governance configuration (JSON format)
+├── policy.yaml      # Security rules and enforcement mode
+├── budget.yaml      # Change limits and blast radius controls
+├── README.md        # Configuration guide
+└── .gitignore       # Runtime files to exclude
+```
+
+### Template Contents
+
+**config.json:**
+- Main governance configuration in JSON format
+- Blast radius controls (max files, lines, functions, classes)
+- Protected paths with glob patterns
+- Allowed/denied operations
+- Enforcement mode and violation handling
+- Audit trail settings
+- Integrity verification settings
+
+**policy.yaml:**
+- Security rules (SQL injection, command injection, XSS, etc.)
+- Enforcement mode (warn/block/disabled)
+- Customizable rulesets
+
+**budget.yaml:**
+- Change budgeting controls
+- Max files per operation
+- Max lines changed
+- Max functions modified
+
+**README.md:**
+- Configuration overview
+- Usage examples
+- Link to full documentation
+
+**.gitignore:**
+- Excludes runtime files (audit.log, policy.manifest.json)
+- Preserves configuration files for version control
+
+### Release Checklist
+
+[x] Configuration Templates Created [COMPLETE]
+[x] Initialization Function Implemented [COMPLETE]
+[x] CLI Integration Added [COMPLETE]
+[x] Argument Parsing (--dir, --force) [COMPLETE]
+[x] User-Friendly Output [COMPLETE]
+[x] Error Handling (existing dir) [COMPLETE]
+[x] Tested in Clean Environment [COMPLETE]
+[x] Version Updated: `__init__.py`, `pyproject.toml` [COMPLETE]
+[x] Documentation: README.md quick start [COMPLETE]
+[x] Release Notes: `RELEASE_NOTES_v3.0.2.md` [COMPLETE]
+[x] Tests Passing: 4133 passed, 20 skipped, 94% coverage [COMPLETE]
+[x] Evidence Files: `release_artifacts/v3.0.2/` [COMPLETE]
+[ ] PyPI Published: v3.0.2 [PENDING]
+
+### Implementation Notes
+
+**Files Created:**
+- `src/code_scalpel/config/templates.py` - Template strings for all config files
+- `src/code_scalpel/config/init_config.py` - `init_config_dir()` function
+- `src/code_scalpel/cli.py` - Added `init` subcommand and handler
+
+**Design Decisions:**
+- Templates include comprehensive comments explaining each option
+- Init command is idempotent (won't overwrite existing directory)
+- Helpful next-steps guidance printed after initialization
+- Four template files balance completeness with simplicity
+
+**Testing Evidence:**
+```bash
+# Successful initialization
+$ code-scalpel init
+[SUCCESS] Configuration directory created: /tmp/test_init/.code-scalpel
+Created 5 files: policy.yaml, budget.yaml, README.md, .gitignore, config.json
+
+# Idempotent behavior
+$ code-scalpel init
+[OK] Configuration directory already exists.
+Use --force to attempt reinitialization.
+```
+
+---
+
+## v3.1.0 - "Gatekeeper" (CI/CD Enforcement)
+
+### Overview
+
+**Theme:** The Enforcer  
+**Goal:** Make Code Scalpel adoption mandatory via CI/CD pipeline enforcement  
+**Effort:** ~2 developer-weeks  
+**Risk Level:** Low (additive feature)  
+**Target Release:** Q1 2026
+
+### Why This Release
+
+The "Lazy Agent Problem": AI agents (and the developers configuring them) follow the path of least resistance. If agents can edit files directly without using Code Scalpel, they will—because it's easier. This results in:
+- Unverified code changes entering the codebase
+- No audit trail for AI-generated modifications
+- Security vulnerabilities introduced by hallucinating agents
+
+**The Solution: Structural Lock (CI Gate)**
+
+By positioning Code Scalpel as a requirement enforced *outside* the agent loop (in the CI pipeline), we remove the "agent choice" factor entirely. The agent *must* use the tool to pass the gate, making adoption mandatory rather than optional.
+
+This aligns with enterprise security models where compliance is enforced at the merge request level, not at the IDE level.
+
+**Adoption Curve Transformation:**
+- **Before:** "Please use my tool" (optional, low adoption)
+- **After:** "You must use my tool to merge" (mandatory, 100% adoption)
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | GitHub Action: `verify-scalpel-proof` | Reusable action that blocks PRs without cryptographic proof | [COMPLETE] |
+| **P0** | Proof Artifact Schema | JSON schema for `.scalpel/proof.json` with signature, commit hash, policy ID | Planned |
+| **P0** | CI Integration Guide | Step-by-step instructions for GitHub, GitLab, Azure DevOps | [COMPLETE] |
+| **P1** | Bot Detection Logic | Automatic detection of AI-generated PRs (Copilot, Cursor, Devin) | Planned |
+| **P1** | Human Override Flow | Documented process for humans to bypass gate with audit trail | Planned |
+| **P2** | GitLab CI Template | `.gitlab-ci.yml` template for GitLab users | Planned |
+| **P2** | Azure DevOps Task | Azure Pipelines task for enterprise customers | Planned |
+
+### GitHub Action Implementation
+
+**File:** `verify_scalpel_proof_action.yml`
+
+```yaml
+name: "Verify Code Scalpel Proof"
+description: "Enforces that AI-generated PRs include a valid cryptographic proof of safety from Code Scalpel."
+author: "3D Tech Solutions LLC"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  proof-path:
+    description: "Path to the proof file artifact"
+    required: false
+    default: ".scalpel/proof.json"
+  strict-mode:
+    description: "Fail if proof is missing (default: true for bots)"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for Proof Artifact
+      id: check-proof
+      shell: bash
+      run: |
+        if [ -f "${{ inputs.proof-path }}" ]; then
+          echo "✅ Proof found at ${{ inputs.proof-path }}"
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "⚠️ No proof found at ${{ inputs.proof-path }}"
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Validate Proof Signature
+      if: steps.check-proof.outputs.exists == 'true'
+      shell: bash
+      run: |
+        # Verify cryptographic signature against commit hash and policy manifest
+        if grep -q "signature" "${{ inputs.proof-path }}"; then
+           echo "✅ Proof signature detected."
+        else
+           echo "❌ Invalid Proof: Missing signature."
+           exit 1
+        fi
+
+    - name: Enforce on Bots
+      if: steps.check-proof.outputs.exists == 'false' && inputs.strict-mode == 'true'
+      shell: bash
+      run: |
+        echo "❌ BLOCKING: AI Agent submission detected without Code Scalpel Proof."
+        echo "Please configure your agent to use the 'Code Scalpel' MCP server to generate verified edits."
+        exit 1
+```
+
+### Usage in Repository Workflows
+
+```yaml
+# .github/workflows/pr-check.yml
+name: PR Safety Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  verify-ai-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify Code Scalpel Proof
+        uses: tescolopio/code-scalpel/.github/actions/verify-proof@v3
+        with:
+          proof-path: ".scalpel/proof.json"
+          strict-mode: "true"
+```
+
+### Proof Artifact Schema
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "commit", "signature", "policy_id", "changes"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Proof schema version",
+      "const": "1.0.0"
+    },
+    "commit": {
+      "type": "string",
+      "description": "Git commit hash this proof covers",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "signature": {
+      "type": "string",
+      "description": "HMAC-SHA256 signature of changes",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "policy_id": {
+      "type": "string",
+      "description": "Hash of policy.yaml used during analysis"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Agent identifier (e.g., 'claude-3.5', 'copilot-x')"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "operation", "verified"],
+        "properties": {
+          "file": { "type": "string" },
+          "operation": { "enum": ["create", "modify", "delete"] },
+          "verified": { "type": "boolean" },
+          "security_scan": { "enum": ["pass", "warn", "fail"] }
+        }
+      }
+    }
+  }
+}
+```
+
+### Enterprise Adoption Strategy
+
+**Phase 1: Soft Enforcement (Week 1-4)**
+- Deploy action in "warn" mode
+- Log all AI-generated PRs without blocking
+- Generate reports on unverified changes
+
+**Phase 2: Selective Enforcement (Week 5-8)**
+- Block unverified changes to security-critical paths
+- Allow unverified changes to documentation, tests
+- Train development teams on Scalpel workflow
+
+**Phase 3: Full Enforcement (Week 9+)**
+- Block ALL unverified AI changes
+- Require proof artifact for every AI-assisted PR
+- Audit trail for all AI modifications
+
+### Release Checklist
+
+[ ] GitHub Action published to marketplace
+[ ] Proof schema documented in JSON Schema
+[ ] CI Integration Guide complete for GitHub, GitLab, Azure
+[ ] Bot detection heuristics implemented
+[ ] Human override flow documented
+[ ] Enterprise deployment guide written
+[ ] Example repositories demonstrating integration
+
+---
+
+## v4.0.0 - "Swarm" (Multi-Agent Collaboration)
+
+### Overview
+
+**Theme:** The Digital Team  
+**Goal:** Coordinate multiple specialized agents (Architect, Security, Frontend, Backend) working on a shared codebase simultaneously  
+**Effort:** ~3-4 developer-months  
+**Risk Level:** High (complex distributed systems)  
+**Target Release:** H2 2026
+
+### Why This Release
+
+Modern AI-assisted development is evolving beyond single-agent interactions. Enterprise teams are deploying **specialized agents** for different roles:
+- **Architect Agent:** System design, API contracts, module boundaries
+- **Security Agent:** Vulnerability scanning, compliance checking
+- **Frontend Agent:** UI components, styling, accessibility
+- **Backend Agent:** Business logic, database interactions
+- **QA Agent:** Test generation, edge case discovery
+
+**The Problem:** Without coordination, these agents create chaos:
+- Agent A modifies `User.java` while Agent B is renaming it → Git conflict
+- Security Agent flags a vulnerability that Frontend Agent just introduced → Race condition
+- Architect Agent redesigns an API that Backend Agent is implementing → Wasted work
+
+**The Solution:** Shared Graph Memory with Optimistic Locking and Conflict Resolution.
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Shared Graph Memory | Multiple agents reading/writing to the same UnifiedGraph instance in real-time | Planned |
+| **P0** | Optimistic Locking | Prevent Agent A from editing `User.java` while Agent B is renaming it | Planned |
+| **P0** | Conflict Resolution Engine | Automatically merge conflicting AST changes from two agents without git conflicts | Planned |
+| **P1** | Role-Based Policy | "Architect" agents can delete files; "Junior" agents can only modify implementations | Planned |
+| **P1** | Agent Communication Protocol | Structured messages between agents (intents, claims, releases) | Planned |
+| **P1** | Deadlock Detection | Detect and resolve circular wait conditions in multi-agent scenarios | Planned |
+| **P2** | Agent Priority System | Higher-priority agents can preempt lower-priority ones | Planned |
+| **P2** | Consensus Algorithms | Multi-agent agreement on architectural decisions | Planned |
+| **P2** | Replay & Audit | Full history of multi-agent interactions for debugging | Planned |
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Swarm Coordinator                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          │
+│  │  Architect  │  │  Security   │  │  Frontend   │  ...     │
+│  │    Agent    │  │    Agent    │  │    Agent    │          │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘          │
+│         │                │                │                  │
+│         └────────────────┼────────────────┘                  │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Shared Graph Memory                     │    │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐              │    │
+│  │  │ Python  │  │   Java  │  │   TS    │  Unified     │    │
+│  │  │  Graph  │──│  Graph  │──│  Graph  │  Cross-Lang  │    │
+│  │  └─────────┘  └─────────┘  └─────────┘              │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                          │                                   │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │           Optimistic Locking Layer                   │    │
+│  │  • File-level locks (read/write/exclusive)          │    │
+│  │  • Symbol-level locks (function/class granularity)  │    │
+│  │  • Lease-based expiration (prevent stale locks)     │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                          │                                   │
+│                          ▼                                   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │          Conflict Resolution Engine                  │    │
+│  │  • AST-level 3-way merge                            │    │
+│  │  • Semantic conflict detection                      │    │
+│  │  • Automatic resolution strategies                  │    │
+│  │  • Human escalation for irresolvable conflicts      │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Shared Graph Memory
+
+**Concept:** A centralized, real-time synchronized UnifiedGraph that all agents read from and write to.
+
+```python
+# Agent A (Architect)
+async with swarm.acquire_lock("src/models/User.java", mode="write") as lock:
+    # Other agents blocked from writing User.java
+    user_class = await swarm.graph.get_class("User")
+    user_class.add_method("getFullName", return_type="String")
+    await swarm.graph.commit(lock)
+
+# Agent B (Security) - concurrent read allowed
+user_methods = await swarm.graph.get_methods("User")  # Sees getFullName after commit
+```
+
+### Optimistic Locking
+
+**Lock Modes:**
+| Mode | Read | Write | Delete | Use Case |
+|------|------|-------|--------|----------|
+| `read` | ✅ | ❌ | ❌ | Scanning, analysis |
+| `write` | ✅ | ✅ | ❌ | Modifying implementations |
+| `exclusive` | ✅ | ✅ | ✅ | Renaming, restructuring |
+
+**Lock Granularity:**
+- **File-level:** Lock entire file for major refactoring
+- **Symbol-level:** Lock specific function/class for surgical edits
+- **Line-level:** Lock specific line ranges (experimental)
+
+**Conflict Resolution:**
+```python
+# Agent A claims User.java for write
+# Agent B attempts to claim User.java for write
+
+try:
+    async with swarm.acquire_lock("User.java", mode="write", timeout=30):
+        # Work on file
+except LockConflictError as e:
+    # Option 1: Wait for Agent A to release
+    await swarm.wait_for_release("User.java", timeout=60)
+    
+    # Option 2: Request priority escalation
+    await swarm.request_preemption("User.java", reason="security-critical")
+    
+    # Option 3: Work on different file
+    alternative = await swarm.suggest_alternative("User.java")
+```
+
+### Role-Based Policy
+
+```yaml
+# .code-scalpel/swarm-policy.yaml
+roles:
+  architect:
+    permissions:
+      - "create_file"
+      - "delete_file"
+      - "modify_api"
+      - "rename_symbol"
+    priority: 100
+    can_preempt: ["backend", "frontend", "junior"]
+    
+  security:
+    permissions:
+      - "modify_security"
+      - "block_deployment"
+      - "flag_vulnerability"
+    priority: 90
+    protected_paths:
+      - "src/auth/**"
+      - "src/crypto/**"
+    
+  backend:
+    permissions:
+      - "modify_implementation"
+      - "add_tests"
+    priority: 50
+    restricted_paths:
+      - "src/frontend/**"  # Cannot modify frontend
+    
+  junior:
+    permissions:
+      - "modify_implementation"
+    priority: 10
+    requires_review: true
+    max_files_per_session: 3
+```
+
+### Conflict Resolution Engine
+
+**AST-Level 3-Way Merge:**
+```
+Base Version (commit abc123):
+    def process(data):
+        validate(data)
+        return transform(data)
+
+Agent A's Change:
+    def process(data):
+        validate(data)
+        log(data)           # Added logging
+        return transform(data)
+
+Agent B's Change:
+    def process(data):
+        validate(data)
+        data = sanitize(data)  # Added sanitization
+        return transform(data)
+
+Merged Result (automatic):
+    def process(data):
+        validate(data)
+        log(data)           # From Agent A
+        data = sanitize(data)  # From Agent B
+        return transform(data)
+```
+
+**Conflict Types:**
+| Type | Description | Resolution |
+|------|-------------|------------|
+| **Parallel Insert** | Both agents add code at same location | Order by priority, then timestamp |
+| **Modify-Delete** | Agent A modifies line, Agent B deletes it | Escalate to human |
+| **Semantic Conflict** | Changes compile but break behavior | Detect via test execution |
+| **API Contract** | Agent changes signature another depends on | Block until dependents update |
+
+### Research Areas
+
+- **Consensus Protocols:** Raft/Paxos for distributed agreement on architectural decisions
+- **Deadlock Prevention:** Banker's algorithm for resource allocation
+- **Fairness Guarantees:** Prevent agent starvation in high-contention scenarios
+- **Rollback Mechanisms:** Atomic multi-agent transactions with rollback on failure
+
+### Release Checklist
+
+[ ] Shared Graph Memory with real-time sync
+[ ] Optimistic Locking with file/symbol granularity
+[ ] Conflict Resolution Engine with AST merge
+[ ] Role-Based Policy with priority system
+[ ] Agent Communication Protocol
+[ ] Deadlock detection and resolution
+[ ] Integration with LangGraph, CrewAI, AutoGen
+[ ] Performance benchmarks (10+ concurrent agents)
+[ ] Security audit of multi-agent attack vectors
+
+---
+
+## v5.0.0 - "Re-Platforming" (Legacy Migration)
+
+### Overview
+
+**Theme:** The Phoenix  
+**Goal:** Automated architectural transformation at scale (e.g., Monolith to Microservices, Java to Kotlin)  
+**Effort:** ~6-12 developer-months  
+**Risk Level:** Very High (complex transformations)  
+**Target Release:** 2027+
+
+### Why This Release
+
+Enterprise codebases accumulate **technical debt** over decades:
+- **Monolithic architectures** that can't scale
+- **Legacy languages** (COBOL, VB6, Java 8) that can't attract talent
+- **Tightly coupled modules** that can't be deployed independently
+- **Inconsistent patterns** that make maintenance costly
+
+**Manual migration is expensive:** Consultants estimate 18-24 months and $10M+ for large migrations.
+
+**The Solution:** AI-driven pattern mining, automated transformation, and semantic-preserving transpilation.
+
+### Features Planned
+
+| Priority | Feature | Description | Status |
+|----------|---------|-------------|--------|
+| **P0** | Pattern Mining | AI scans 1M+ lines of code to learn "How this company writes Controllers" | Research |
+| **P0** | Strangler Fig Automation | Automatically extract a module into a microservice, generate API glue, update call sites | Research |
+| **P0** | Language Transpilation | AST-to-AST translation with semantic preservation (e.g., Java Class → TypeScript Interface) | Research |
+| **P1** | Architecture Recommender | Analyze codebase and recommend target architecture based on patterns | Planned |
+| **P1** | Migration Planner | Generate step-by-step migration plan with effort estimates | Planned |
+| **P1** | Regression Test Generator | Auto-generate tests to verify semantic preservation | Planned |
+| **P2** | COBOL-to-Java Translator | Specialized transpiler for mainframe modernization | Research |
+| **P2** | Database Schema Evolution | Migrate database schemas alongside code changes | Research |
+| **P2** | API Versioning Automation | Generate versioned APIs during migration | Planned |
+
+### Pattern Mining
+
+**Concept:** Learn the "house style" of a codebase by analyzing millions of lines.
+
+```python
+# Input: 500 Controller classes in a legacy monolith
+patterns = await scalpel.mine_patterns(
+    codebase="/legacy/src",
+    pattern_type="controller",
+    min_occurrences=10
+)
+
+# Output: Discovered patterns
+{
+    "controller_structure": {
+        "annotations": ["@RestController", "@RequestMapping"],
+        "common_methods": ["get*", "post*", "delete*"],
+        "injection_style": "constructor",  # vs field injection
+        "error_handling": "global_exception_handler",
+        "response_wrapper": "ResponseEntity<ApiResponse<T>>"
+    },
+    "naming_conventions": {
+        "controller_suffix": "Controller",
+        "service_suffix": "Service",
+        "method_prefix_get": "get|find|fetch",
+        "method_prefix_create": "create|add|save"
+    },
+    "code_organization": {
+        "package_by": "feature",  # vs layer
+        "test_location": "same_package",
+        "dto_location": "separate_module"
+    }
+}
+```
+
+**Use Cases:**
+- **Consistency Enforcement:** New code must follow discovered patterns
+- **Migration Templates:** Generate target architecture based on patterns
+- **Technical Debt Detection:** Flag code that deviates from patterns
+
+### Strangler Fig Automation
+
+**Concept:** Incrementally replace a monolith with microservices without big-bang rewrites.
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                     Legacy Monolith                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │  Users   │  │  Orders  │  │ Products │  │ Payments │   │
+│  │  Module  │  │  Module  │  │  Module  │  │  Module  │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ Strangler Fig Automation
+┌────────────────────────────────────────────────────────────┐
+│                     API Gateway                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Route: /users/*  → Users Microservice (NEW)         │  │
+│  │  Route: /orders/* → Monolith (legacy)                │  │
+│  │  Route: /products/* → Monolith (legacy)              │  │
+│  │  Route: /payments/* → Monolith (legacy)              │  │
+│  └──────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ After Automated Extraction
+┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
+│   Users    │  │   Orders   │  │  Products  │  │  Payments  │
+│ Microservice│  │ Microservice│  │ Microservice│  │ Microservice│
+│   (NEW)    │  │   (NEW)    │  │   (NEW)    │  │   (NEW)    │
+└────────────┘  └────────────┘  └────────────┘  └────────────┘
+```
+
+**Automated Steps:**
+1. **Dependency Analysis:** Map all calls into/out of Users Module
+2. **Interface Extraction:** Generate API contract from internal calls
+3. **Service Generation:** Create microservice skeleton with extracted code
+4. **Glue Code:** Generate adapter classes for monolith ↔ service communication
+5. **Call Site Update:** Replace direct calls with HTTP/gRPC calls
+6. **Test Migration:** Move relevant tests to new service
+7. **Data Migration:** Generate database split scripts
+
+### Language Transpilation
+
+**Concept:** AST-to-AST translation that preserves semantics, not just syntax.
+
+```
+Java Source:                          TypeScript Output:
+public class User {                   export class User {
+    private String name;                  private name: string;
+    private int age;                      private age: number;
+    
+    public User(String name, int age) {   constructor(name: string, age: number) {
+        this.name = name;                     this.name = name;
+        this.age = age;                       this.age = age;
+    }                                     }
+    
+    public String getName() {             getName(): string {
+        return this.name;                     return this.name;
+    }                                     }
+    
+    public boolean isAdult() {            isAdult(): boolean {
+        return this.age >= 18;                return this.age >= 18;
+    }                                     }
+}                                     }
+```
+
+**Semantic Preservation Guarantees:**
+- **Type Safety:** Java generics → TypeScript generics with runtime checks
+- **Null Safety:** Java `@Nullable` → TypeScript `| null` union types
+- **Exception Handling:** Java checked exceptions → TypeScript error types
+- **Concurrency:** Java `synchronized` → TypeScript async/await patterns
+
+**Supported Transformations:**
+| Source | Target | Complexity | Status |
+|--------|--------|------------|--------|
+| Java 8 → Java 17 | Upgrade | Low | Planned |
+| Java → Kotlin | Same ecosystem | Medium | Planned |
+| Java → TypeScript | Cross-platform | High | Research |
+| Python 2 → Python 3 | Upgrade | Medium | Planned |
+| JavaScript → TypeScript | Type safety | Low | Planned |
+| COBOL → Java | Legacy modernization | Very High | Research |
+
+### Research Areas
+
+- **Semantic Equivalence Proofs:** Formally verify that transpiled code has identical behavior
+- **Runtime Behavior Matching:** Execute original and transpiled code in parallel, compare outputs
+- **Incremental Migration:** Support partial migrations with mixed-language interop
+- **Performance Preservation:** Ensure transpiled code doesn't degrade performance
+
+### Release Checklist
+
+[ ] Pattern Mining engine with ML-based pattern recognition
+[ ] Strangler Fig automation with automated extraction
+[ ] Language Transpilation with semantic preservation
+[ ] Architecture Recommender with cost/benefit analysis
+[ ] Migration Planner with Gantt chart generation
+[ ] Regression Test Generator with coverage guarantees
+[ ] COBOL-to-Java prototype (enterprise partnerships)
+[ ] Database Schema Evolution tooling
+[ ] Performance benchmarks (1M+ LOC codebases)
+[ ] Case studies with enterprise partners
+
+---
+
 ## Risk Register
 
 <!-- [20251216_DOCS] Updated per 3rd party review feedback with new risks and mitigations -->
@@ -7797,6 +8546,54 @@ integrity:
 **Problem:** File permissions (0444) bypassable via `chmod +w`.
 **Mitigation:** SHA-256 signed policy manifests stored in git history.
 **Acceptance:** Policy modifications detected and operations denied.
+
+#### R15: Multi-Agent Deadlock (v4.0.0 - Swarm)
+**Problem:** Multiple agents waiting for each other's locks creates circular wait.
+**Mitigation:** 
+- Banker's algorithm for deadlock prevention
+- Lock timeout with automatic release
+- Deadlock detection daemon with forced preemption
+**Acceptance:** No deadlock persists longer than 30 seconds.
+
+#### R16: Conflicting Agent Changes (v4.0.0 - Swarm)
+**Problem:** Two agents modify same symbol, creating semantic conflicts that AST merge can't resolve.
+**Mitigation:**
+- Symbol-level locking with optimistic concurrency
+- Semantic conflict detection via test execution
+- Human escalation for irresolvable conflicts
+**Acceptance:** All conflicts either auto-resolved or escalated within 60 seconds.
+
+#### R17: Agent Priority Abuse (v4.0.0 - Swarm)
+**Problem:** Malicious agent claims highest priority to monopolize resources.
+**Mitigation:**
+- Priority assignment controlled by policy file (signed)
+- Rate limiting on preemption requests
+- Audit trail for all priority escalations
+**Acceptance:** No single agent can preempt more than 3 times per minute.
+
+#### R18: Semantic Preservation Failure (v5.0.0 - Re-Platforming)
+**Problem:** Transpiled code compiles but has different runtime behavior.
+**Mitigation:**
+- Dual execution: run original and transpiled code in parallel
+- Property-based testing with QuickCheck/Hypothesis
+- Formal verification proofs for critical transformations
+**Acceptance:** 100% behavior match on existing test suite + fuzz tests.
+
+#### R19: Migration Data Loss (v5.0.0 - Re-Platforming)
+**Problem:** Database schema migration loses data during transformation.
+**Mitigation:**
+- Dry-run mode with data integrity checksums
+- Reversible migrations with automatic rollback
+- Shadow database verification before cutover
+**Acceptance:** Zero data loss tolerance; rollback available for 30 days.
+
+#### R20: Pattern Mining Overfitting (v5.0.0 - Re-Platforming)
+**Problem:** Mined patterns are too specific to one codebase, don't generalize.
+**Mitigation:**
+- Cross-validation against multiple enterprise codebases
+- Confidence scoring for pattern applicability
+- Human review of top-10 patterns before application
+**Acceptance:** Patterns must match 3+ independent codebases with >80% precision.
 
 ---
 
@@ -7963,14 +8760,31 @@ git push origin feature/v1.3.0-nosql-injection
 
 ## Appendix A: Competitor Analysis
 
-| Feature              | Code Scalpel (v2.1.0) | Semgrep | CodeQL | Snyk | Bandit |
+| Feature              | Code Scalpel (v3.1+) | Semgrep | CodeQL | Snyk | Bandit |
 |----------------------|-----------------------|---------|--------|------|--------|
 | Python security      | DONE                  | DONE    | NO     | DONE | DONE   |
 | TypeScript security  | DONE                  | DONE    | DONE   | DONE | NO     |
 | Cross-file taint     | DONE                  | NO      | DONE   | NO   | NO     |
 | MCP server for AI    | DONE                  | NO      | NO     | NO   | NO     |
 | Surgical extraction  | DONE                  | NO      | NO     | NO   | NO     |
-| AI-verified fixes    | DONE                  | NO      | NO     | NO   | NO     | <!-- [20251218_DOCS] v3.0.0 Fix Loop Termination - 12 tests passing -->
+| AI-verified fixes    | DONE                  | NO      | NO     | NO   | NO     |
+| CI/CD Gate (v3.1)    | PLANNED               | NO      | YES    | YES  | NO     |
+| Multi-Agent (v4.0)   | PLANNED               | NO      | NO     | NO   | NO     |
+| Transpilation (v5.0) | RESEARCH              | NO      | NO     | NO   | NO     |
+
+### Strategic Positioning
+
+**v3.x "Autonomy":** Establish Code Scalpel as the **required dependency** for AI-assisted development.
+- Key differentiator: Cryptographic proof of safe changes
+- Adoption driver: CI/CD gate enforcement ("You must use this to merge")
+
+**v4.x "Swarm":** Position as the **coordination layer** for multi-agent teams.
+- Key differentiator: Only tool supporting simultaneous agent collaboration
+- Adoption driver: Enterprise teams deploying specialized agent swarms
+
+**v5.x "Re-Platforming":** Become the **migration platform** for legacy modernization.
+- Key differentiator: AST-based semantic-preserving transformations
+- Adoption driver: $10M+ migration projects become $1M projects
 | Symbolic execution   | DONE                  | NO      | NO     | NO   | NO     |
 | Test generation      | DONE                  | NO      | NO     | NO   | NO     |
 | Open source          | DONE                  | DONE    | NO     | NO   | DONE   |

@@ -1,0 +1,121 @@
+{
+  "version": "3.0.2",
+  "codename": "Configuration Init",
+  "release_date": "2025-12-19",
+  "timestamp": "2025-12-19T10:55:00Z",
+  "mcp_tools_inventory": [
+    {
+      "name": "analyze_code",
+      "status": "stable",
+      "description": "Parse and extract code structure (Python, JS, TS, Java)"
+    },
+    {
+      "name": "extract_code",
+      "status": "stable",
+      "description": "Surgical extraction by symbol name with cross-file deps"
+    },
+    {
+      "name": "update_symbol",
+      "status": "stable",
+      "description": "Safely replace functions/classes/methods in files"
+    },
+    {
+      "name": "security_scan",
+      "status": "stable",
+      "description": "Taint-based vulnerability detection"
+    },
+    {
+      "name": "unified_sink_detect",
+      "status": "stable",
+      "description": "Unified polyglot sink detection with confidence"
+    },
+    {
+      "name": "cross_file_security_scan",
+      "status": "stable",
+      "description": "Cross-module taint tracking"
+    },
+    {
+      "name": "generate_unit_tests",
+      "status": "stable",
+      "description": "Symbolic execution test generation"
+    },
+    {
+      "name": "simulate_refactor",
+      "status": "stable",
+      "description": "Verify refactor preserves behavior"
+    },
+    {
+      "name": "symbolic_execute",
+      "status": "stable",
+      "description": "Symbolic path exploration with Z3"
+    },
+    {
+      "name": "crawl_project",
+      "status": "stable",
+      "description": "Project-wide analysis"
+    },
+    {
+      "name": "scan_dependencies",
+      "status": "stable",
+      "description": "Scan for vulnerable dependencies (OSV API)"
+    },
+    {
+      "name": "get_file_context",
+      "status": "stable",
+      "description": "Get surrounding context for code locations"
+    },
+    {
+      "name": "get_symbol_references",
+      "status": "stable",
+      "description": "Find all uses of a symbol"
+    },
+    {
+      "name": "get_cross_file_dependencies",
+      "status": "stable",
+      "description": "Analyze cross-file dependency chains"
+    },
+    {
+      "name": "get_call_graph",
+      "status": "stable",
+      "description": "Generate call graphs and trace execution flow"
+    },
+    {
+      "name": "get_graph_neighborhood",
+      "status": "stable",
+      "description": "Extract k-hop neighborhood subgraph"
+    },
+    {
+      "name": "get_project_map",
+      "status": "stable",
+      "description": "Generate comprehensive project structure map"
+    },
+    {
+      "name": "validate_paths",
+      "status": "stable",
+      "description": "Validate path accessibility for Docker deployments"
+    },
+    {
+      "name": "verify_policy_integrity",
+      "status": "stable",
+      "description": "Cryptographic policy file verification"
+    }
+  ],
+  "total_mcp_tools": 19,
+  "new_features": {
+    "cli_init_command": {
+      "description": "code-scalpel init command for first-time configuration setup",
+      "files_created": [
+        "src/code_scalpel/config/templates.py",
+        "src/code_scalpel/config/init_config.py"
+      ],
+      "cli_arguments": ["--dir", "--force"],
+      "templates_generated": [
+        "config.json",
+        "policy.yaml",
+        "budget.yaml",
+        "README.md",
+        ".gitignore"
+      ]
+    }
+  }
+}
