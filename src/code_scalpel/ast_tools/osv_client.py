@@ -118,11 +118,15 @@ class OSVClient:
         payload = json.dumps(data).encode("utf-8")
         headers = {"Content-Type": "application/json"}
 
+        # [20251218_SECURITY] Validate URL scheme to prevent file:/ or custom scheme attacks (B310)
+        if not url.startswith(("https://", "http://")):
+            raise OSVError(f"Invalid URL scheme. Only http(s):// allowed, got: {url}")
+        
         last_error = None
         for attempt in range(MAX_RETRIES):
             try:
                 req = urllib.request.Request(url, data=payload, headers=headers)
-                with urllib.request.urlopen(req, timeout=self.timeout) as response:
+                with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
                 if e.code == 429:  # Rate limited

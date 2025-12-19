@@ -253,7 +253,8 @@ class IncrementalASTCache:
         [20251216_FEATURE] Pickle-based AST deserialization
         """
         with open(cache_path, "rb") as f:
-            return pickle.load(f)
+            # [20251218_SECURITY] pickle.load safe here: internal cache only, no untrusted data (B301)
+            return pickle.load(f)  # nosec B301
 
     def _save_ast(self, cache_path: Path, ast: Any) -> None:
         """

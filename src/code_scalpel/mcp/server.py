@@ -6000,7 +6000,8 @@ def run_server(
         else:
             protocol = "http"
 
-        if allow_lan or host == "0.0.0.0":
+        if allow_lan or host == "0.0.0.0":  # nosec B104
+            # [20251218_SECURITY] Intentional LAN binding for server functionality (B104)
             # Disable host validation for LAN access
             # WARNING: Only use on trusted networks!
             mcp.settings.transport_security = TransportSecuritySettings(

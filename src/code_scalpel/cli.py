@@ -345,8 +345,12 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
     return 0 if not result.has_vulnerabilities else 2
 
 
-def start_server(host: str = "0.0.0.0", port: int = 5000) -> int:
-    """Start the REST API server (legacy, for non-MCP clients)."""
+def start_server(host: str = "0.0.0.0", port: int = 5000) -> int:  # nosec B104
+    """Start the REST API server (legacy, for non-MCP clients).
+    
+    [20251218_SECURITY] Default 0.0.0.0 binding intentional for server functionality (B104).
+    Users can override with --host argument for localhost-only binding.
+    """
     from .integrations.rest_api_server import run_server
 
     print(f"Starting Code Scalpel REST API Server on {host}:{port}")
@@ -482,8 +486,8 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         "server", help="Start REST API server (legacy)"
     )
     server_parser.add_argument(
-        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
-    )
+        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"  # nosec B104
+    )  # [20251218_SECURITY] Server default binding - users control via --host flag
     server_parser.add_argument(
         "--port", "-p", type=int, default=5000, help="Port to bind to (default: 5000)"
     )
@@ -579,7 +583,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
 
         # [20251216_BUGFIX] Only override host if allow_lan and host is default
         if allow_lan and args.host == "127.0.0.1":
-            args.host = "0.0.0.0"
+            args.host = "0.0.0.0"  # nosec B104 - intentional LAN access when --allow-lan flag used
 
         # Build kwargs for server startup
         start_kwargs = {

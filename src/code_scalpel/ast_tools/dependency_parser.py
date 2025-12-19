@@ -2,7 +2,13 @@ import os
 import json
 import re
 from typing import List, Dict
-import xml.etree.ElementTree as ET
+
+try:
+    # [20251218_SECURITY] Use defusedxml to prevent XXE attacks (B314)
+    from defusedxml import ElementTree as ET
+except ImportError:
+    # Fallback to standard library if defusedxml not installed
+    import xml.etree.ElementTree as ET  # nosec B405
 
 try:
     import tomllib

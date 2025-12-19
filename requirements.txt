@@ -1,5 +1,6 @@
 # [20251214_SECURITY] Security bump for CVE-2025-66416 (MCP DNS rebinding) and urllib3 redirect/decompression issues
 astor
+defusedxml  # [20251218_SECURITY] Safe XML parsing to prevent XXE attacks (B314)
 graphviz
 networkx
 z3-solver

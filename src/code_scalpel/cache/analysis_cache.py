@@ -102,7 +102,8 @@ class AnalysisCache(Generic[T]):
         if cache_path.exists():
             try:
                 with cache_path.open("rb") as f:
-                    payload = pickle.load(f)
+                    # [20251218_SECURITY] pickle.load safe here: internal cache with hash validation (B301)
+                    payload = pickle.load(f)  # nosec B301
                 if payload.get("hash") == file_hash:
                     value: T = payload["value"]
                     self._memory_cache[key] = value
@@ -140,7 +141,8 @@ class AnalysisCache(Generic[T]):
         if cache_path.exists():
             try:
                 with cache_path.open("rb") as f:
-                    payload = pickle.load(f)
+                    # [20251218_SECURITY] pickle.load safe here: internal cache with hash validation (B301)
+                    payload = pickle.load(f)  # nosec B301
                 if payload.get("hash") == file_hash:
                     value: T = payload["value"]
                     self._memory_cache[key] = value

@@ -11,6 +11,7 @@ Security guarantees:
 """
 
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -341,9 +342,10 @@ class SandboxExecutor:
         # [20251217_FEATURE] Run build if specified
         if build_command:
             try:
+                # [20251218_SECURITY] Use shlex.split to safely parse command, avoid shell injection (B602)
                 build_result = subprocess.run(
-                    build_command,
-                    shell=True,
+                    shlex.split(build_command),
+                    shell=False,
                     cwd=sandbox_path,
                     capture_output=True,
                     timeout=self.max_cpu_seconds,
@@ -374,9 +376,10 @@ class SandboxExecutor:
         # [20251217_FEATURE] Run linter
         lint_result = None
         try:
+            # [20251218_SECURITY] Use shlex.split to safely parse command, avoid shell injection (B602)
             lint_result = subprocess.run(
-                lint_command,
-                shell=True,
+                shlex.split(lint_command),
+                shell=False,
                 cwd=sandbox_path,
                 capture_output=True,
                 timeout=self.max_cpu_seconds,
@@ -388,9 +391,10 @@ class SandboxExecutor:
         # [20251217_FEATURE] Run tests
         test_result = None
         try:
+            # [20251218_SECURITY] Use shlex.split to safely parse command, avoid shell injection (B602)
             test_result = subprocess.run(
-                f"{test_command} --tb=short -q",
-                shell=True,
+                shlex.split(f"{test_command} --tb=short -q"),
+                shell=False,
                 cwd=sandbox_path,
                 capture_output=True,
                 timeout=self.max_cpu_seconds,

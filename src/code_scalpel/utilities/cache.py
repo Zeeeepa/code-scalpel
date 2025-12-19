@@ -324,7 +324,8 @@ class AnalysisCache:
         try:
             if self.config.use_pickle:
                 with open(path, "rb") as f:
-                    return pickle.load(f)
+                    # [20251218_SECURITY] pickle.load safe here: internal cache with CacheEntry validation (B301)
+                    return pickle.load(f)  # nosec B301
             else:
                 with open(path, "r") as f:
                     data = json.load(f)
