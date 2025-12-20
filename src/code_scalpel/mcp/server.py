@@ -92,12 +92,76 @@ ALLOWED_ROOTS: list[Path] = []
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 
+# [20251220_PERF] v3.0.5 - AST Cache for parsed Python files
+# Stores parsed ASTs keyed by (file_path, mtime) to avoid re-parsing unchanged files
+# Format: {(file_path_str, mtime): ast.Module}
+_AST_CACHE: dict[tuple[str, float], "ast.Module"] = {}
+_AST_CACHE_MAX_SIZE = 500  # Limit memory usage - keep last 500 files
+
+
+def _get_cached_ast(file_path: Path) -> "ast.Module | None":
+    """Get cached AST for a file if it hasn't changed."""
+    try:
+        mtime = file_path.stat().st_mtime
+        key = (str(file_path.resolve()), mtime)
+        return _AST_CACHE.get(key)
+    except OSError:
+        return None
+
+
+def _cache_ast(file_path: Path, tree: "ast.Module") -> None:
+    """Cache a parsed AST for a file."""
+    try:
+        mtime = file_path.stat().st_mtime
+        key = (str(file_path.resolve()), mtime)
+        
+        # Evict old entries if cache is too large
+        if len(_AST_CACHE) >= _AST_CACHE_MAX_SIZE:
+            # Remove oldest 20% of entries
+            entries_to_remove = _AST_CACHE_MAX_SIZE // 5
+            keys_to_remove = list(_AST_CACHE.keys())[:entries_to_remove]
+            for k in keys_to_remove:
+                del _AST_CACHE[k]
+        
+        _AST_CACHE[key] = tree
+    except OSError:
+        pass
+
+
+def _parse_file_cached(file_path: Path) -> "ast.Module | None":
+    """Parse a Python file with caching."""
+    # Check cache first
+    cached = _get_cached_ast(file_path)
+    if cached is not None:
+        return cached
+    
+    try:
+        code = file_path.read_text(encoding="utf-8")
+        tree = ast.parse(code)
+        _cache_ast(file_path, tree)
+        return tree
+    except (OSError, SyntaxError):
+        return None
+
+
+# [20251220_PERF] v3.0.5 - Singleton UnifiedSinkDetector to avoid rebuilding patterns
+_SINK_DETECTOR: "UnifiedSinkDetector | None" = None
+
+
+def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
+    """Get or create singleton UnifiedSinkDetector."""
+    global _SINK_DETECTOR
+    if _SINK_DETECTOR is None:
+        from code_scalpel.symbolic_execution_tools.unified_sink_detector import UnifiedSinkDetector
+        _SINK_DETECTOR = UnifiedSinkDetector()
+    return _SINK_DETECTOR  # type: ignore[return-value]
+
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
 # Stores UniversalGraph objects keyed by project root path
 # Format: {project_root_str: (UniversalGraph, timestamp)}
-# Cache TTL: 60 seconds (graphs are expensive to build)
+# [20251220_PERF] v3.0.5 - Increased cache TTL from 60s to 300s for large codebases
 _GRAPH_CACHE: dict[str, tuple["UniversalGraph", float]] = {}  # type: ignore
-_GRAPH_CACHE_TTL = 60.0  # seconds
+_GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
 
 
 def _get_cached_graph(project_root: Path) -> "UniversalGraph | None":  # type: ignore
@@ -189,6 +253,8 @@ def _validate_path_security(path: Path) -> Path:
             f"Allowed roots: {roots_str}\n"
             f"Set roots via the roots/list capability or SCALPEL_ROOT environment variable."
         )
+    
+    return resolved
 
 
 async def _fetch_and_cache_roots(ctx: Context | None) -> list[Path]:
@@ -217,7 +283,11 @@ async def _fetch_and_cache_roots(ctx: Context | None) -> list[Path]:
 
     try:
         # Request roots from client via MCP protocol
-        roots = await ctx.list_roots()
+        # Note: list_roots may not be available on all Context implementations
+        list_roots_fn = getattr(ctx, 'list_roots', None)
+        if list_roots_fn is None:
+            return [PROJECT_ROOT]
+        roots = await list_roots_fn()
 
         if roots:
             # Convert file:// URIs to Path objects
@@ -788,7 +858,7 @@ def _analyze_java_code(code: str) -> AnalysisResult:
             class_count=0,
             complexity=0,
             lines_of_code=0,
-            error=f"Java analysis failed: {str(e)}",
+            error=f"Java analysis failed: {str(e)}.",
         )
 
 
@@ -939,7 +1009,7 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
             class_count=0,
             complexity=0,
             lines_of_code=0,
-            error=f"{lang_name} support not available. Please install tree-sitter packages: {e}",
+            error=f"{lang_name} support not available. Please install tree-sitter packages: {str(e)}.",
         )
     except Exception as e:
         lang_name = "TypeScript" if is_typescript else "JavaScript"
@@ -952,7 +1022,7 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
             class_count=0,
             complexity=0,
             lines_of_code=0,
-            error=f"{lang_name} analysis failed: {str(e)}",
+            error=f"{lang_name} analysis failed: {str(e)}.",
         )
 
 
@@ -1202,7 +1272,7 @@ def _security_scan_sync(
                     has_vulnerabilities=False,
                     vulnerability_count=0,
                     risk_level="unknown",
-                    error=f"File not found: {file_path}",
+                    error=f"File not found: {file_path}.",
                 )
             if not path.is_file():
                 return SecurityResult(
@@ -1210,7 +1280,7 @@ def _security_scan_sync(
                     has_vulnerabilities=False,
                     vulnerability_count=0,
                     risk_level="unknown",
-                    error=f"Path is not a file: {file_path}",
+                    error=f"Path is not a file: {file_path}.",
                 )
             code = path.read_text(encoding="utf-8")
             
@@ -1229,7 +1299,7 @@ def _security_scan_sync(
                 has_vulnerabilities=False,
                 vulnerability_count=0,
                 risk_level="unknown",
-                error=f"Failed to read file: {str(e)}",
+                error=f"Failed to read file: {str(e)}.",
             )
 
     if code is None:
@@ -1238,7 +1308,7 @@ def _security_scan_sync(
             has_vulnerabilities=False,
             vulnerability_count=0,
             risk_level="unknown",
-            error="Either 'code' or 'file_path' must be provided",
+            error="Either 'code' or 'file_path' must be provided.",
         )
 
     valid, error = _validate_code(code)
@@ -1272,8 +1342,8 @@ def _security_scan_sync(
         
         # [20251220_FEATURE] v3.0.4 - Use UnifiedSinkDetector for non-Python languages
         if detected_language != "python":
-            # Use unified sink detection for JS/TS/Java
-            detector = UnifiedSinkDetector()
+            # [20251220_PERF] v3.0.5 - Use singleton detector to avoid rebuilding patterns
+            detector = _get_sink_detector()
             detected_sinks = detector.detect_sinks(code, detected_language, min_confidence=0.7)
             
             for sink in detected_sinks:
@@ -1374,7 +1444,7 @@ def _security_scan_sync(
             has_vulnerabilities=False,
             vulnerability_count=0,
             risk_level="unknown",
-            error=f"Security scan failed: {str(e)}",
+            error=f"Security scan failed: {str(e)}.",
         )
 
 
@@ -1442,7 +1512,7 @@ def _unified_sink_detect_sync(
             success=False,
             language=lang,
             sink_count=0,
-            error="code is required",
+            error="Parameter 'code' is required.",
             coverage_summary={},
         )
 
@@ -1451,11 +1521,12 @@ def _unified_sink_detect_sync(
             success=False,
             language=lang,
             sink_count=0,
-            error="min_confidence must be between 0.0 and 1.0",
+            error="Parameter 'min_confidence' must be between 0.0 and 1.0.",
             coverage_summary={},
         )
 
-    detector = UnifiedSinkDetector()
+    # [20251220_PERF] v3.0.5 - Use singleton detector to avoid rebuilding patterns
+    detector = _get_sink_detector()
     try:
         detected = detector.detect_sinks(code, lang, min_confidence)
     except ValueError as e:
@@ -1635,12 +1706,12 @@ def _type_evaporation_scan_sync(
     except ImportError as e:
         return TypeEvaporationResultModel(
             success=False,
-            error=f"Type evaporation detector not available: {e}",
+            error=f"Type evaporation detector not available: {str(e)}.",
         )
     except Exception as e:
         return TypeEvaporationResultModel(
             success=False,
-            error=f"Analysis failed: {e}",
+            error=f"Analysis failed: {str(e)}.",
         )
 
 
@@ -1849,7 +1920,7 @@ async def scan_dependencies(
     result = await asyncio.to_thread(_scan_dependencies_sync, path, timeout)
     
     if ctx:
-        vuln_count = result.vulnerability_count if hasattr(result, 'vulnerability_count') else 0
+        vuln_count = result.vulnerabilities_found
         await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
     
     return result
@@ -2220,7 +2291,7 @@ def _generate_tests_sync(
                     success=False,
                     function_name=function_name or "unknown",
                     test_count=0,
-                    error=f"File not found: {file_path}",
+                    error=f"File not found: {file_path}.",
                 )
             code = resolved.read_text(encoding="utf-8")
         except Exception as e:
@@ -2228,7 +2299,7 @@ def _generate_tests_sync(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,
-                error=f"Failed to read file: {e}",
+                error=f"Failed to read file: {str(e)}.",
             )
     
     if not code:
@@ -2236,7 +2307,7 @@ def _generate_tests_sync(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
-            error="Either code or file_path must be provided",
+            error="Either 'code' or 'file_path' must be provided.",
         )
     
     valid, error = _validate_code(code)
@@ -2363,7 +2434,7 @@ def _simulate_refactor_sync(
             success=False,
             is_safe=False,
             status="error",
-            error=f"Invalid original code: {error}",
+            error=f"Invalid original code: {error}.",
         )
 
     if new_code is None and patch is None:
@@ -2371,7 +2442,7 @@ def _simulate_refactor_sync(
             success=False,
             is_safe=False,
             status="error",
-            error="Must provide either 'new_code' or 'patch'",
+            error="Must provide either 'new_code' or 'patch'.",
         )
 
     try:
@@ -2621,6 +2692,8 @@ async def _extract_polyglot(
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
             extractor = PolyglotExtractor.from_file(resolved_path, language)
         else:
+            # code is guaranteed to be str here (checked earlier in function)
+            assert code is not None
             extractor = PolyglotExtractor(code, language=language)
 
         # Perform extraction
@@ -2684,6 +2757,8 @@ def _create_extractor(
             return None, _extraction_error(target_name, str(e))
     else:
         try:
+            # code is guaranteed to be str here (we checked file_path is None and code is not None above)
+            assert code is not None
             return SurgicalExtractor(code), None
         except (SyntaxError, ValueError) as e:
             return None, _extraction_error(
@@ -2924,6 +2999,9 @@ async def extract_code(
     extractor, error = _create_extractor(file_path, code, target_name)
     if error:
         return error
+    
+    # extractor is guaranteed to be non-None when error is None
+    assert extractor is not None
 
     try:
         # Step 2: Perform extraction
@@ -3072,7 +3150,7 @@ async def update_symbol(
             file_path="",
             target_name=target_name,
             target_type=target_type,
-            error="file_path is required",
+            error="Parameter 'file_path' is required.",
         )
 
     if not new_code or not new_code.strip():
@@ -3081,7 +3159,7 @@ async def update_symbol(
             file_path=file_path,
             target_name=target_name,
             target_type=target_type,
-            error="new_code cannot be empty",
+            error="Parameter 'new_code' cannot be empty.",
         )
 
     if target_type not in ("function", "class", "method"):
@@ -3102,7 +3180,7 @@ async def update_symbol(
             file_path=file_path,
             target_name=target_name,
             target_type=target_type,
-            error=f"File not found: {file_path}",
+            error=f"File not found: {file_path}.",
         )
     except ValueError as e:
         return PatchResultModel(
@@ -3126,7 +3204,7 @@ async def update_symbol(
                     file_path=file_path,
                     target_name=target_name,
                     target_type=target_type,
-                    error="Method name must be 'ClassName.method_name' format",
+                    error="Method name must be 'ClassName.method_name' format.",
                 )
             class_name, method_name = target_name.rsplit(".", 1)
             result = patcher.update_method(class_name, method_name, new_code)
@@ -3137,7 +3215,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
-                error=f"Unknown target_type: {target_type}",
+                error=f"Unknown target_type: {target_type}.",
             )
 
         if not result.success:
@@ -3550,7 +3628,8 @@ def _extract_code_sync(
         class_name, method_name = target_name.split(".", 1)
         target = extractor.get_method(class_name, method_name)
         if include_context:
-            context = extractor.get_method_with_context(class_name, method_name)
+            # [20251220_FIX] get_method_with_context doesn't exist - use class context as fallback
+            context = extractor.get_class_with_context(class_name)
     else:
         target = extractor.get_function(target_name)
         if include_context:
@@ -4590,7 +4669,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 success=False,
                 file_path=str(path),
                 line_count=len(lines),
-                error=f"Syntax error at line {e.lineno}: {e.msg}",
+                error=f"Syntax error at line {e.lineno}: {e.msg}.",
             )
 
         functions = []
@@ -4746,6 +4825,7 @@ def _get_symbol_references_sync(
     Synchronous implementation of get_symbol_references.
     
     [20251220_FEATURE] v3.0.5 - Optimized single-pass AST walking with deduplication
+    [20251220_PERF] v3.0.5 - Uses AST cache to avoid re-parsing unchanged files
     """
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
@@ -4754,7 +4834,7 @@ def _get_symbol_references_sync(
             return SymbolReferencesResult(
                 success=False,
                 symbol_name=symbol_name,
-                error=f"Project root not found: {root}",
+                error=f"Project root not found: {root}.",
             )
 
         references: list[SymbolReference] = []
@@ -4775,9 +4855,13 @@ def _get_symbol_references_sync(
                 continue
 
             try:
+                # [20251220_PERF] v3.0.5 - Use cached AST parsing
+                tree = _parse_file_cached(py_file)
+                if tree is None:
+                    continue
+                    
                 code = py_file.read_text(encoding="utf-8")
                 lines = code.splitlines()
-                tree = ast.parse(code)
                 rel_path = str(py_file.relative_to(root))
 
                 # Single-pass AST walk with optimized checks
@@ -4991,7 +5075,7 @@ def _get_call_graph_sync(
     if not root_path.exists():
         return CallGraphResultModel(
             success=False,
-            error=f"Project root not found: {root_path}",
+            error=f"Project root not found: {root_path}.",
         )
 
     try:
@@ -5249,26 +5333,26 @@ async def get_graph_neighborhood(
     if not root_path.exists():
         return GraphNeighborhoodResult(
             success=False,
-            error=f"Project root not found: {root_path}",
+            error=f"Project root not found: {root_path}.",
         )
 
     # Validate parameters
     if k < 1:
         return GraphNeighborhoodResult(
             success=False,
-            error="k must be at least 1",
+            error="Parameter 'k' must be at least 1.",
         )
 
     if max_nodes < 1:
         return GraphNeighborhoodResult(
             success=False,
-            error="max_nodes must be at least 1",
+            error="Parameter 'max_nodes' must be at least 1.",
         )
 
     if direction not in ("outgoing", "incoming", "both"):
         return GraphNeighborhoodResult(
             success=False,
-            error=f"direction must be 'outgoing', 'incoming', or 'both', got '{direction}'",
+            error=f"Parameter 'direction' must be 'outgoing', 'incoming', or 'both', got '{direction}'.",
         )
 
     try:
@@ -5503,7 +5587,7 @@ def _get_project_map_sync(
         return ProjectMapResult(
             success=False,
             project_root=str(root_path),
-            error=f"Project root not found: {root_path}",
+            error=f"Project root not found: {root_path}.",
         )
 
     try:
@@ -5528,6 +5612,9 @@ def _get_project_map_sync(
 
         def is_entry_point(func_node: ast.AST) -> bool:
             """Check if function is an entry point."""
+            # Type guard: must be FunctionDef or AsyncFunctionDef
+            if not isinstance(func_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return False
             if func_node.name == "main":
                 return True
             for dec in getattr(func_node, "decorator_list", []):
@@ -5942,7 +6029,7 @@ def _get_cross_file_dependencies_sync(
     if not root_path.exists():
         return CrossFileDependenciesResult(
             success=False,
-            error=f"Project root not found: {root_path}",
+            error=f"Project root not found: {root_path}.",
         )
 
     # Resolve target file path
@@ -5953,7 +6040,7 @@ def _get_cross_file_dependencies_sync(
     if not target_path.exists():
         return CrossFileDependenciesResult(
             success=False,
-            error=f"Target file not found: {target_path}",
+            error=f"Target file not found: {target_path}.",
         )
 
     try:
@@ -5977,7 +6064,7 @@ def _get_cross_file_dependencies_sync(
         if not extraction_result.success:
             return CrossFileDependenciesResult(
                 success=False,
-                error=f"Extraction failed: {'; '.join(extraction_result.errors)}",
+                error=f"Extraction failed: {'; '.join(extraction_result.errors)}.",
             )
 
         # Build the list of all symbols (target + dependencies)
@@ -6290,7 +6377,7 @@ def _cross_file_security_scan_sync(
     if not root_path.exists():
         return CrossFileSecurityResult(
             success=False,
-            error=f"Project root not found: {root_path}",
+            error=f"Project root not found: {root_path}.",
         )
 
     try:
@@ -6504,7 +6591,7 @@ async def cross_file_security_scan(
 
     # Report completion with summary
     if ctx:
-        vuln_count = result.vulnerabilities_found if hasattr(result, 'vulnerabilities_found') else 0
+        vuln_count = result.vulnerability_count
         await ctx.report_progress(progress=100, total=100, message=f"Scan complete: {vuln_count} cross-file vulnerabilities found")
 
     return result
@@ -6708,7 +6795,7 @@ def _verify_policy_integrity_sync(
     except ImportError as e:
         return PolicyVerificationResult(
             success=False,
-            error=f"Policy engine not available: {e}",
+            error=f"Policy engine not available: {str(e)}.",
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
@@ -6716,7 +6803,7 @@ def _verify_policy_integrity_sync(
         # Handle SecurityError and other exceptions
         return PolicyVerificationResult(
             success=False,
-            error=f"Verification failed: {e}",
+            error=f"Verification failed: {str(e)}.",
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
@@ -6866,8 +6953,9 @@ def run_server(
 
         # [20251215_FEATURE] Configure SSL if certificates provided
         if use_https:
-            mcp.settings.ssl_certfile = ssl_certfile
-            mcp.settings.ssl_keyfile = ssl_keyfile
+            # Use setattr for optional SSL settings that may not be in all FastMCP versions
+            setattr(mcp.settings, 'ssl_certfile', ssl_certfile)
+            setattr(mcp.settings, 'ssl_keyfile', ssl_keyfile)
             protocol = "https"
         else:
             protocol = "http"
@@ -6950,6 +7038,8 @@ def _register_http_health_endpoint(
                 import ssl
 
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                # ssl_certfile and ssl_keyfile are guaranteed non-None when use_https is True
+                assert ssl_certfile is not None and ssl_keyfile is not None
                 ssl_context.load_cert_chain(ssl_certfile, ssl_keyfile)
                 server.socket = ssl_context.wrap_socket(server.socket, server_side=True)
                 protocol = "https"
