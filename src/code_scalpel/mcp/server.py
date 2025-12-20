@@ -88,6 +88,51 @@ ALLOWED_ROOTS: list[Path] = []
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 
+# [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
+# Stores UniversalGraph objects keyed by project root path
+# Format: {project_root_str: (UniversalGraph, timestamp)}
+# Cache TTL: 60 seconds (graphs are expensive to build)
+_GRAPH_CACHE: dict[str, tuple["UniversalGraph", float]] = {}  # type: ignore
+_GRAPH_CACHE_TTL = 60.0  # seconds
+
+
+def _get_cached_graph(project_root: Path) -> "UniversalGraph | None":  # type: ignore
+    """Get cached UniversalGraph for project if still valid."""
+    import time
+    
+    key = str(project_root.resolve())
+    if key in _GRAPH_CACHE:
+        graph, timestamp = _GRAPH_CACHE[key]
+        if time.time() - timestamp < _GRAPH_CACHE_TTL:
+            logger.debug(f"Using cached graph for {key}")
+            return graph
+        else:
+            # Cache expired
+            del _GRAPH_CACHE[key]
+            logger.debug(f"Graph cache expired for {key}")
+    return None
+
+
+def _cache_graph(project_root: Path, graph: "UniversalGraph") -> None:  # type: ignore
+    """Cache a UniversalGraph for a project."""
+    import time
+    
+    key = str(project_root.resolve())
+    _GRAPH_CACHE[key] = (graph, time.time())
+    logger.debug(f"Cached graph for {key}")
+
+
+def _invalidate_graph_cache(project_root: Path | None = None) -> None:
+    """Invalidate graph cache for a project or all projects."""
+    if project_root:
+        key = str(project_root.resolve())
+        if key in _GRAPH_CACHE:
+            del _GRAPH_CACHE[key]
+            logger.debug(f"Invalidated graph cache for {key}")
+    else:
+        _GRAPH_CACHE.clear()
+        logger.debug("Invalidated all graph caches")
+
 
 def _is_path_allowed(path: Path) -> bool:
     """
@@ -1301,7 +1346,9 @@ def _security_scan_sync(
 
 
 def _get_cwe_from_sink_type(sink_type) -> str:
-    """[20251220_FEATURE] v3.0.4 - Map sink types to CWE IDs."""
+    """[20251220_FEATURE] v3.0.4 - Map sink types to CWE IDs.
+    [20251220_FIX] v3.0.5 - Added more sink types, fallback to CWE-20 instead of Unknown.
+    """
     cwe_map = {
         "SQL_QUERY": "89",
         "HTML_OUTPUT": "79",
@@ -1316,9 +1363,16 @@ def _get_cwe_from_sink_type(sink_type) -> str:
         "WEAK_CRYPTO": "327",
         "PROTOTYPE_POLLUTION": "1321",
         "HARDCODED_SECRET": "798",
+        "LDAP_QUERY": "90",
+        "NOSQL_QUERY": "943",
+        "XPATH_QUERY": "643",
+        "LOG_INJECTION": "117",
+        "HTTP_REDIRECT": "601",
+        "REGEX_DOS": "1333",
     }
     sink_name = getattr(sink_type, "name", str(sink_type))
-    return cwe_map.get(sink_name, "Unknown")
+    # Fallback to CWE-20 (Improper Input Validation) instead of Unknown
+    return cwe_map.get(sink_name, "20")
 
 
 # ==========================================================================
@@ -1466,7 +1520,7 @@ def _type_evaporation_scan_sync(
             frontend_code, backend_code, frontend_file, backend_file
         )
         
-        all_vulns: List[VulnerabilityInfo] = []
+        all_vulns: list[VulnerabilityInfo] = []
         
         # Add frontend vulnerabilities
         for v in result.frontend_result.vulnerabilities:
@@ -1609,11 +1663,12 @@ class DependencyScanResultModel(BaseModel):
     summary: str = Field(default="", description="Human-readable summary")
 
 
-def _scan_dependencies_sync(path: str) -> DependencyScanResultModel:
+def _scan_dependencies_sync(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
     """
     Synchronous implementation of dependency vulnerability scanning.
     
     [20251219_FEATURE] v3.0.4 - A06 Vulnerable Components
+    [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
     """
     try:
         from code_scalpel.symbolic_execution_tools.vulnerability_scanner import (
@@ -1630,7 +1685,7 @@ def _scan_dependencies_sync(path: str) -> DependencyScanResultModel:
                 errors=[f"Path not found: {path}"],
             )
         
-        with VulnerabilityScanner() as scanner:
+        with VulnerabilityScanner(timeout=timeout) as scanner:
             if resolved_path.is_file():
                 result = scanner.scan_file(resolved_path)
             else:
@@ -1692,11 +1747,12 @@ def _scan_dependencies_sync(path: str) -> DependencyScanResultModel:
 
 
 @mcp.tool()
-async def scan_dependencies(path: str) -> DependencyScanResultModel:
+async def scan_dependencies(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
     """
     Scan project dependencies for known vulnerabilities (A06:2021 - Vulnerable Components).
     
     [20251219_FEATURE] v3.0.4 - A06 Vulnerable and Outdated Components
+    [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
     
     This tool scans dependency files and checks them against the Google OSV
     (Open Source Vulnerabilities) database for known CVEs and security advisories.
@@ -1715,11 +1771,12 @@ async def scan_dependencies(path: str) -> DependencyScanResultModel:
     
     Args:
         path: Path to a dependency file or project directory
+        timeout: Timeout in seconds for OSV API calls (default: 30.0)
         
     Returns:
         DependencyScanResultModel with vulnerability findings, severity counts, and remediation info.
     """
-    return await asyncio.to_thread(_scan_dependencies_sync, path)
+    return await asyncio.to_thread(_scan_dependencies_sync, path, timeout)
 
 
 @mcp.tool()
@@ -1907,14 +1964,22 @@ def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
 
         return symbolic_result
 
-    except ImportError:
-        # Fallback to basic path analysis
-        return _basic_symbolic_analysis(code)
+    except ImportError as e:
+        # Fallback to basic path analysis - SymbolicAnalyzer not available
+        logger.warning(f"Symbolic execution not available (ImportError: {e}), using basic analysis")
+        basic_result = _basic_symbolic_analysis(code)
+        # Indicate fallback in error field without marking as failure
+        basic_result.error = f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
+        return basic_result
     except Exception as e:
         # If symbolic execution fails (e.g., unsupported AST nodes like f-strings),
         # fall back to basic AST-based analysis instead of returning an error
+        # [20251220_FIX] v3.0.5 - Improved error reporting: include original error in result
         logger.warning(f"Symbolic execution failed, using basic analysis: {e}")
-        return _basic_symbolic_analysis(code)
+        basic_result = _basic_symbolic_analysis(code)
+        # Indicate fallback occurred without marking as failure
+        basic_result.error = f"[FALLBACK] Symbolic execution failed ({type(e).__name__}: {e}), using AST analysis"
+        return basic_result
 
 
 @mcp.tool()
@@ -1997,9 +2062,45 @@ def _basic_symbolic_analysis(code: str) -> SymbolicResult:
 
 
 def _generate_tests_sync(
-    code: str, function_name: str | None = None, framework: str = "pytest"
+    code: str | None = None, 
+    file_path: str | None = None,
+    function_name: str | None = None, 
+    framework: str = "pytest"
 ) -> TestGenerationResult:
-    """Synchronous implementation of generate_unit_tests."""
+    """Synchronous implementation of generate_unit_tests.
+    
+    [20251220_FIX] v3.0.5 - Added file_path parameter for consistency with other tools.
+    """
+    # Read from file if file_path provided
+    if file_path and not code:
+        try:
+            resolved = Path(file_path)
+            if not resolved.is_absolute():
+                resolved = PROJECT_ROOT / file_path
+            if not resolved.exists():
+                return TestGenerationResult(
+                    success=False,
+                    function_name=function_name or "unknown",
+                    test_count=0,
+                    error=f"File not found: {file_path}",
+                )
+            code = resolved.read_text(encoding="utf-8")
+        except Exception as e:
+            return TestGenerationResult(
+                success=False,
+                function_name=function_name or "unknown",
+                test_count=0,
+                error=f"Failed to read file: {e}",
+            )
+    
+    if not code:
+        return TestGenerationResult(
+            success=False,
+            function_name=function_name or "unknown",
+            test_count=0,
+            error="Either code or file_path must be provided",
+        )
+    
     valid, error = _validate_code(code)
     if not valid:
         return TestGenerationResult(
@@ -2046,7 +2147,10 @@ def _generate_tests_sync(
 
 @mcp.tool()
 async def generate_unit_tests(
-    code: str, function_name: str | None = None, framework: str = "pytest"
+    code: str | None = None,
+    file_path: str | None = None,
+    function_name: str | None = None, 
+    framework: str = "pytest"
 ) -> TestGenerationResult:
     """
     Generate unit tests from code using symbolic execution.
@@ -2054,16 +2158,19 @@ async def generate_unit_tests(
     Use this tool to automatically create test cases that cover all execution paths
     in a function. Each test case includes concrete input values that trigger a
     specific path through the code.
+    
+    [20251220_FIX] v3.0.5 - Added file_path parameter for consistency with other tools.
 
     Args:
-        code: Source code containing the function to test
+        code: Source code containing the function to test (provide code or file_path)
+        file_path: Path to file containing the function to test (provide code or file_path)
         function_name: Name of function to generate tests for (auto-detected if None)
         framework: Test framework ("pytest" or "unittest")
 
     Returns:
         Test generation result with generated test code and test cases
     """
-    return await asyncio.to_thread(_generate_tests_sync, code, function_name, framework)
+    return await asyncio.to_thread(_generate_tests_sync, code, file_path, function_name, framework)
 
 
 # ============================================================================
@@ -4532,6 +4639,8 @@ class CallEdgeModel(BaseModel):
 class CallGraphResultModel(BaseModel):
     """Result of call graph analysis."""
 
+    success: bool = Field(default=True, description="Whether analysis succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
     nodes: list[CallNodeModel] = Field(
         default_factory=list, description="Functions in the graph"
     )
@@ -4562,6 +4671,7 @@ def _get_call_graph_sync(
 
     if not root_path.exists():
         return CallGraphResultModel(
+            success=False,
             error=f"Project root not found: {root_path}",
         )
 
@@ -4599,6 +4709,7 @@ def _get_call_graph_sync(
 
     except Exception as e:
         return CallGraphResultModel(
+            success=False,
             error=f"Call graph analysis failed: {str(e)}",
         )
 
@@ -4828,82 +4939,90 @@ async def get_graph_neighborhood(
         )
 
     try:
-        # Try to load existing graph from project
-        # For now, we'll build a simple graph from the call graph
-        from code_scalpel.ast_tools.call_graph import CallGraphBuilder
+        # [v3.0.4] Try to use cached graph first
+        from code_scalpel.graph_engine import UniversalGraph
+        
+        graph = _get_cached_graph(root_path)
+        
+        if graph is None:
+            # Cache miss - build the graph
+            from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
-        builder = CallGraphBuilder(root_path)
-        call_graph_result = builder.build_with_details(entry_point=None, depth=10)
+            builder = CallGraphBuilder(root_path)
+            call_graph_result = builder.build_with_details(entry_point=None, depth=10)
 
-        # Convert call graph to UniversalGraph
-        from code_scalpel.graph_engine import (
-            GraphNode,
-            GraphEdge,
-            UniversalNodeID,
-            NodeType,
-            EdgeType,
-        )
+            # Convert call graph to UniversalGraph
+            from code_scalpel.graph_engine import (
+                GraphNode,
+                GraphEdge,
+                UniversalNodeID,
+                NodeType,
+                EdgeType,
+            )
 
-        graph = UniversalGraph()
+            graph = UniversalGraph()
 
-        # Add nodes
-        for node in call_graph_result.nodes:
-            node_id = UniversalNodeID(
-                language="python",
-                module=(
-                    node.file.replace("/", ".").replace(".py", "")
-                    if node.file != "<external>"
+            # Add nodes
+            for node in call_graph_result.nodes:
+                node_id = UniversalNodeID(
+                    language="python",
+                    module=(
+                        node.file.replace("/", ".").replace(".py", "")
+                        if node.file != "<external>"
+                        else "external"
+                    ),
+                    node_type=NodeType.FUNCTION,
+                    name=node.name,
+                    line=node.line,
+                )
+                graph.add_node(
+                    GraphNode(
+                        id=node_id,
+                        metadata={
+                            "file": node.file,
+                            "line": node.line,
+                            "is_entry_point": node.is_entry_point,
+                        },
+                    )
+                )
+
+            # Add edges
+            for edge in call_graph_result.edges:
+                # Parse caller/callee into node IDs
+                caller_parts = edge.caller.split(":")
+                callee_parts = edge.callee.split(":")
+
+                caller_file = caller_parts[0] if len(caller_parts) > 1 else ""
+                caller_name = caller_parts[-1]
+                callee_file = callee_parts[0] if len(callee_parts) > 1 else ""
+                callee_name = callee_parts[-1]
+
+                caller_module = (
+                    caller_file.replace("/", ".").replace(".py", "")
+                    if caller_file
+                    else "unknown"
+                )
+                callee_module = (
+                    callee_file.replace("/", ".").replace(".py", "")
+                    if callee_file
                     else "external"
-                ),
-                node_type=NodeType.FUNCTION,
-                name=node.name,
-                line=node.line,
-            )
-            graph.add_node(
-                GraphNode(
-                    id=node_id,
-                    metadata={
-                        "file": node.file,
-                        "line": node.line,
-                        "is_entry_point": node.is_entry_point,
-                    },
                 )
-            )
 
-        # Add edges
-        for edge in call_graph_result.edges:
-            # Parse caller/callee into node IDs
-            caller_parts = edge.caller.split(":")
-            callee_parts = edge.callee.split(":")
+                caller_id = f"python::{caller_module}::function::{caller_name}"
+                callee_id = f"python::{callee_module}::function::{callee_name}"
 
-            caller_file = caller_parts[0] if len(caller_parts) > 1 else ""
-            caller_name = caller_parts[-1]
-            callee_file = callee_parts[0] if len(callee_parts) > 1 else ""
-            callee_name = callee_parts[-1]
-
-            caller_module = (
-                caller_file.replace("/", ".").replace(".py", "")
-                if caller_file
-                else "unknown"
-            )
-            callee_module = (
-                callee_file.replace("/", ".").replace(".py", "")
-                if callee_file
-                else "external"
-            )
-
-            caller_id = f"python::{caller_module}::function::{caller_name}"
-            callee_id = f"python::{callee_module}::function::{callee_name}"
-
-            graph.add_edge(
-                GraphEdge(
-                    from_id=caller_id,
-                    to_id=callee_id,
-                    edge_type=EdgeType.DIRECT_CALL,
-                    confidence=0.9,
-                    evidence="Direct function call",
+                graph.add_edge(
+                    GraphEdge(
+                        from_id=caller_id,
+                        to_id=callee_id,
+                        edge_type=EdgeType.DIRECT_CALL,
+                        confidence=0.9,
+                        evidence="Direct function call",
+                    )
                 )
-            )
+
+            # Cache the built graph for subsequent calls
+            _cache_graph(root_path, graph)
 
         # Extract neighborhood
         result = graph.get_neighborhood(
@@ -5005,6 +5124,8 @@ class PackageInfo(BaseModel):
 class ProjectMapResult(BaseModel):
     """Result of project map analysis."""
 
+    success: bool = Field(default=True, description="Whether analysis succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
     project_root: str = Field(description="Absolute path to project root")
     total_files: int = Field(default=0, description="Total Python files")
     total_lines: int = Field(default=0, description="Total lines of code")
@@ -5044,6 +5165,7 @@ def _get_project_map_sync(
 
     if not root_path.exists():
         return ProjectMapResult(
+            success=False,
             project_root=str(root_path),
             error=f"Project root not found: {root_path}",
         )
@@ -5283,6 +5405,7 @@ def _get_project_map_sync(
 
     except Exception as e:
         return ProjectMapResult(
+            success=False,
             project_root=str(root_path),
             error=f"Project map analysis failed: {str(e)}",
         )
@@ -5545,7 +5668,7 @@ def _get_cross_file_dependencies_sync(
         )  # These are imports that couldn't be resolved
 
         # Build import graph dict (file -> list of imported files)
-        # Uses resolver.imports which is Dict[module_name, List[ImportInfo]]
+        # Uses resolver.imports which is dict[module_name, list[ImportInfo]]
         import_graph = {}
         for module_name, imports in resolver.imports.items():
             # Get file path for this module
