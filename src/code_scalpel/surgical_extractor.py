@@ -540,6 +540,155 @@ class SurgicalExtractor:
             context_items=context_items,
         )
 
+    def get_method_with_context(
+        self, class_name: str, method_name: str, max_depth: int = 2
+    ) -> ContextualExtraction:
+        """
+        Extract a method with its dependencies, including relevant class context.
+
+        [20251220_FEATURE] v3.0.5 - Token-efficient method extraction with context.
+
+        Unlike get_class_with_context which returns the entire class, this returns:
+        1. The target method code
+        2. Other methods in the same class that the target calls
+        3. Class-level attributes/properties the method accesses
+        4. External dependencies (functions, classes, globals)
+
+        This is more token-efficient when you only need one method.
+
+        Args:
+            class_name: Name of the class containing the method
+            method_name: Name of the method to extract
+            max_depth: How deep to follow dependencies (default: 2)
+
+        Returns:
+            ContextualExtraction with target method and minimal necessary context
+        """
+        target = self.get_method(class_name, method_name)
+        if not target.success:
+            return ContextualExtraction(
+                target=target,
+                context_code="",
+                total_lines=0,
+                context_items=[],
+            )
+
+        context_items: list[str] = []
+        context_code_parts: list[str] = []
+        visited = {f"{class_name}.{method_name}"}
+
+        # Get the class node to find sibling methods and class attributes
+        class_node = self._classes.get(class_name)
+        sibling_methods: dict[str, ast.AST] = {}
+        class_attributes: list[str] = []
+
+        if class_node:
+            for node in class_node.body:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if node.name != method_name:
+                        sibling_methods[node.name] = node
+                elif isinstance(node, ast.Assign):
+                    # Class-level attribute assignments
+                    for t in node.targets:
+                        if isinstance(t, ast.Name):
+                            class_attributes.append(t.id)
+                elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                    # Annotated class attributes
+                    class_attributes.append(node.target.id)
+
+        def find_self_calls(node: ast.AST) -> list[str]:
+            """Find all self.method() calls in a node."""
+            self_calls = []
+            for child in ast.walk(node):
+                # Look for Call nodes where func is Attribute on 'self'
+                if isinstance(child, ast.Call):
+                    if isinstance(child.func, ast.Attribute):
+                        if isinstance(child.func.value, ast.Name) and child.func.value.id == "self":
+                            self_calls.append(child.func.attr)
+                # Also look for self.attr accesses (class attributes)
+                elif isinstance(child, ast.Attribute):
+                    if isinstance(child.value, ast.Name) and child.value.id == "self":
+                        self_calls.append(child.attr)
+            return self_calls
+
+        def gather_deps(deps: list[str], depth: int, from_node: ast.AST | None = None) -> None:
+            if depth > max_depth:
+                return
+
+            # Also find self.method() calls if we have a node to inspect
+            if from_node:
+                self_deps = find_self_calls(from_node)
+                deps = list(set(deps + self_deps))
+
+            for dep in deps:
+                if dep in visited:
+                    continue
+                visited.add(dep)
+
+                # Check if it's a sibling method (self.method_name calls)
+                if dep in sibling_methods:
+                    method_node = sibling_methods[dep]
+                    method_code = self._node_to_code(method_node)
+                    context_items.append(f"{class_name}.{dep}")
+                    context_code_parts.append(f"# From class {class_name}:\n{method_code}")
+                    # Recursively gather deps from sibling method
+                    method_deps = self._find_dependencies(method_node)
+                    gather_deps(method_deps, depth + 1, method_node)
+
+                # Check if it's a class attribute
+                elif dep in class_attributes:
+                    # Include class header with attribute
+                    attr_context = f"# Class attribute from {class_name}:\n# {dep} = ..."
+                    if attr_context not in context_code_parts:
+                        context_items.append(f"{class_name}.{dep}")
+
+                # External function
+                elif dep in self._functions:
+                    dep_result = self.get_function(dep)
+                    if dep_result.success:
+                        context_items.append(dep)
+                        context_code_parts.append(dep_result.code)
+                        gather_deps(dep_result.dependencies, depth + 1)
+
+                # External class
+                elif dep in self._classes:
+                    dep_result = self.get_class(dep)
+                    if dep_result.success:
+                        context_items.append(dep)
+                        context_code_parts.append(dep_result.code)
+
+                # Global assignment
+                elif dep in self._global_assigns:
+                    node = self._global_assigns[dep]
+                    context_items.append(dep)
+                    context_code_parts.append(self._node_to_code(node))
+
+        # Find the method node to analyze self. calls
+        method_node: ast.AST | None = None
+        if class_node:
+            for node in class_node.body:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if node.name == method_name:
+                        method_node = node
+                        break
+
+        gather_deps(target.dependencies, 1, method_node)
+
+        # Add required imports
+        imports_code = self._get_imports_code(target.imports_needed)
+        if imports_code:
+            context_code_parts.insert(0, imports_code)
+
+        context_code = "\n\n".join(context_code_parts)
+        total_lines = len(context_code.splitlines()) + len(target.code.splitlines())
+
+        return ContextualExtraction(
+            target=target,
+            context_code=context_code,
+            total_lines=total_lines,
+            context_items=context_items,
+        )
+
     def resolve_cross_file_dependencies(
         self,
         target_name: str,

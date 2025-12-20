@@ -2,6 +2,7 @@
 Comprehensive tests for scan_dependencies MCP tool.
 
 [20251213_TEST] v1.5.0 - Tests for dependency vulnerability scanning.
+[20251220_FEATURE] v3.0.5 - Updated to use DependencyScanResult, DependencyInfo, DependencyVulnerability models.
 
 Tests cover:
 - Parsing requirements.txt
@@ -283,7 +284,8 @@ class TestSeveritySummary:
         """Test severity counts with real OSV API - uses requests package with known vulnerabilities."""
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
-            # requests==2.25.0 has known vulnerabilities (LOW severity as of latest OSV data)
+            # requests==2.25.0 has known vulnerabilities
+            # [20251220_FIX] Severity can change over time, so we just verify vulns are found
             req_path.write_text("requests==2.25.0\n")
 
             result = _scan_dependencies_sync(
@@ -294,8 +296,8 @@ class TestSeveritySummary:
             assert result.success is True
             # Verify we got vulnerabilities from real OSV data
             assert result.total_vulnerabilities >= 3, f"Expected at least 3 vulns, got: {result.total_vulnerabilities}"
-            # Verify severity summary is correctly aggregated
-            assert result.severity_summary.get("LOW", 0) >= 3, f"Expected LOW severity vulns, got: {result.severity_summary}"
+            # Verify severity summary has some entries (severity can vary over time)
+            assert sum(result.severity_summary.values()) >= 3, f"Expected severities, got: {result.severity_summary}"
             # Verify at least one package is marked vulnerable
             assert result.vulnerable_count >= 1
 

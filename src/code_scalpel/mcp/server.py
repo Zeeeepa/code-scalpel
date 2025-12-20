@@ -1761,7 +1761,56 @@ async def type_evaporation_scan(
 
 # =============================================================================
 # [20251219_FEATURE] v3.0.4 - A06 Vulnerable Components Detection (OSV API)
+# [20251220_FEATURE] v3.0.5 - Added DependencyInfo/DependencyVulnerability models for test compatibility
 # =============================================================================
+
+
+class DependencyVulnerability(BaseModel):
+    """A vulnerability associated with a specific dependency.
+    
+    [20251220_FEATURE] v3.0.5 - Model for per-dependency vulnerability tracking.
+    """
+    
+    id: str = Field(description="Vulnerability ID (OSV, CVE, or GHSA)")
+    summary: str = Field(default="", description="Brief description of the vulnerability")
+    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    package: str = Field(description="Name of the vulnerable package")
+    vulnerable_version: str = Field(description="Version that is vulnerable")
+    fixed_version: str | None = Field(default=None, description="First version that fixes this vulnerability")
+
+
+class DependencyInfo(BaseModel):
+    """Information about a scanned dependency.
+    
+    [20251220_FEATURE] v3.0.5 - Model for tracking individual dependencies and their vulnerabilities.
+    """
+    
+    name: str = Field(description="Package name")
+    version: str = Field(description="Package version (may be '*' for unspecified)")
+    ecosystem: str = Field(description="Package ecosystem: PyPI, npm, Maven, etc.")
+    vulnerabilities: list[DependencyVulnerability] = Field(
+        default_factory=list, description="Vulnerabilities affecting this dependency"
+    )
+
+
+class DependencyScanResult(BaseModel):
+    """Result of a dependency vulnerability scan with per-dependency details.
+    
+    [20251220_FEATURE] v3.0.5 - Comprehensive scan result with dependency-level tracking.
+    """
+    
+    success: bool = Field(description="Whether the scan completed successfully")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    error: str | None = Field(default=None, description="Error message if failed")
+    total_dependencies: int = Field(default=0, description="Number of dependencies found")
+    vulnerable_count: int = Field(default=0, description="Number of dependencies with vulnerabilities")
+    total_vulnerabilities: int = Field(default=0, description="Total number of vulnerabilities found")
+    severity_summary: dict[str, int] = Field(
+        default_factory=dict, description="Count of vulnerabilities by severity"
+    )
+    dependencies: list[DependencyInfo] = Field(
+        default_factory=list, description="All scanned dependencies with their vulnerabilities"
+    )
 
 
 class VulnerabilityFindingModel(BaseModel):
@@ -1795,7 +1844,223 @@ class DependencyScanResultModel(BaseModel):
     summary: str = Field(default="", description="Human-readable summary")
 
 
-def _scan_dependencies_sync(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
+def _scan_dependencies_sync(
+    project_root: str | None = None,
+    path: str | None = None,
+    scan_vulnerabilities: bool = True,
+    include_dev: bool = True,
+    timeout: float = 30.0,
+) -> DependencyScanResult:
+    """
+    Synchronous implementation of dependency vulnerability scanning.
+    
+    [20251219_FEATURE] v3.0.4 - A06 Vulnerable Components
+    [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
+    [20251220_FEATURE] v3.0.5 - Returns DependencyScanResult with per-dependency tracking
+    
+    Args:
+        project_root: Path to the project root directory (for backward compatibility)
+        path: Alternative parameter name for project_root  
+        scan_vulnerabilities: Whether to check OSV for vulnerabilities (default True)
+        include_dev: Whether to include dev dependencies (default True)
+        timeout: Timeout for OSV API calls in seconds
+        
+    Returns:
+        DependencyScanResult with dependency-level vulnerability tracking
+    """
+    # Handle parameter aliasing (support both 'path' and 'project_root')
+    resolved_path_str = project_root or path or str(PROJECT_ROOT)
+    
+    try:
+        from code_scalpel.symbolic_execution_tools.vulnerability_scanner import (
+            VulnerabilityScanner,
+            DependencyParser,
+            Ecosystem,
+        )
+        
+        resolved_path = Path(resolved_path_str)
+        if not resolved_path.is_absolute():
+            resolved_path = PROJECT_ROOT / resolved_path_str
+        
+        if not resolved_path.exists():
+            return DependencyScanResult(
+                success=False,
+                error=f"Path not found: {resolved_path_str}",
+            )
+        
+        # Parse dependencies from files
+        all_deps: list[Any] = []
+        errors: list[str] = []
+        
+        if resolved_path.is_file():
+            # Single file scan
+            try:
+                if resolved_path.name == "requirements.txt":
+                    all_deps = DependencyParser.parse_requirements_txt(resolved_path)
+                elif resolved_path.name == "pyproject.toml":
+                    all_deps = DependencyParser.parse_pyproject_toml(resolved_path)
+                elif resolved_path.name == "package.json":
+                    all_deps = DependencyParser.parse_package_json(resolved_path)
+                elif resolved_path.name == "pom.xml":
+                    all_deps = DependencyParser.parse_pom_xml(resolved_path)
+                elif resolved_path.name == "build.gradle":
+                    all_deps = DependencyParser.parse_build_gradle(resolved_path)
+            except Exception as e:
+                errors.append(f"Failed to parse {resolved_path}: {str(e)}")
+        else:
+            # Directory scan - find all dependency files
+            dep_files = [
+                ("requirements.txt", DependencyParser.parse_requirements_txt),
+                ("pyproject.toml", DependencyParser.parse_pyproject_toml),
+                ("package.json", DependencyParser.parse_package_json),
+                ("pom.xml", DependencyParser.parse_pom_xml),
+                ("build.gradle", DependencyParser.parse_build_gradle),
+            ]
+            
+            for filename, parser in dep_files:
+                file_path = resolved_path / filename
+                if file_path.exists():
+                    try:
+                        all_deps.extend(parser(file_path))
+                    except Exception as e:
+                        errors.append(f"Failed to parse {filename}: {str(e)}")
+        
+        # Filter dev dependencies if requested
+        if not include_dev:
+            all_deps = [d for d in all_deps if not getattr(d, 'is_dev', False)]
+        
+        # Build DependencyInfo list
+        dependency_infos: list[DependencyInfo] = []
+        severity_summary: dict[str, int] = {}
+        total_vulns = 0
+        vulnerable_count = 0
+        
+        # Query vulnerabilities if requested
+        vuln_map: dict[str, list[dict[str, Any]]] = {}
+        if scan_vulnerabilities and all_deps:
+            try:
+                with VulnerabilityScanner(timeout=timeout) as scanner:
+                    vuln_map = scanner.osv_client.query_batch(all_deps)
+            except Exception as e:
+                errors.append(f"OSV query failed: {str(e)}")
+        
+        for dep in all_deps:
+            dep_vulns: list[DependencyVulnerability] = []
+            dep_key = f"{dep.name}@{dep.version}"
+            
+            if dep_key in vuln_map:
+                for vuln in vuln_map[dep_key]:
+                    severity = _extract_severity(vuln)
+                    fixed = _extract_fixed_version(vuln, dep.name)
+                    
+                    dep_vulns.append(DependencyVulnerability(
+                        id=vuln.get("id", "UNKNOWN"),
+                        summary=vuln.get("summary", ""),
+                        severity=severity,
+                        package=dep.name,
+                        vulnerable_version=dep.version,
+                        fixed_version=fixed,
+                    ))
+                    
+                    severity_summary[severity] = severity_summary.get(severity, 0) + 1
+                    total_vulns += 1
+            
+            if dep_vulns:
+                vulnerable_count += 1
+            
+            dependency_infos.append(DependencyInfo(
+                name=dep.name,
+                version=dep.version,
+                ecosystem=dep.ecosystem.value if hasattr(dep.ecosystem, 'value') else str(dep.ecosystem),
+                vulnerabilities=dep_vulns,
+            ))
+        
+        return DependencyScanResult(
+            success=True,
+            total_dependencies=len(dependency_infos),
+            vulnerable_count=vulnerable_count,
+            total_vulnerabilities=total_vulns,
+            severity_summary=severity_summary,
+            dependencies=dependency_infos,
+        )
+        
+    except ImportError as e:
+        return DependencyScanResult(
+            success=False,
+            error=f"Vulnerability scanner not available: {str(e)}",
+        )
+    except Exception as e:
+        return DependencyScanResult(
+            success=False,
+            error=f"Scan failed: {str(e)}",
+        )
+
+
+def _extract_severity(vuln: dict[str, Any]) -> str:
+    """Extract severity from OSV vulnerability data.
+    
+    [20251220_FIX] v3.0.5 - Improved severity extraction from OSV responses.
+    """
+    # Try database_specific.severity first (most common for GitHub advisories)
+    if "database_specific" in vuln:
+        db_severity = vuln["database_specific"].get("severity", "")
+        if db_severity:
+            # Map GitHub severity names to standard names
+            severity_map = {
+                "CRITICAL": "CRITICAL",
+                "HIGH": "HIGH",
+                "MODERATE": "MEDIUM",
+                "MEDIUM": "MEDIUM",
+                "LOW": "LOW",
+            }
+            return severity_map.get(db_severity.upper(), "UNKNOWN")
+    
+    # Try CVSS severity array
+    if "severity" in vuln:
+        for sev in vuln.get("severity", []):
+            if sev.get("type") == "CVSS_V3":
+                score_str = sev.get("score", "")
+                # Parse CVSS score to severity
+                try:
+                    # CVSS format: "CVSS:3.1/AV:N/AC:L/..." 
+                    # or just the score like "7.5"
+                    if "/" in score_str:
+                        # Extract base score if full vector
+                        pass
+                    else:
+                        score = float(score_str)
+                        if score >= 9.0:
+                            return "CRITICAL"
+                        elif score >= 7.0:
+                            return "HIGH"
+                        elif score >= 4.0:
+                            return "MEDIUM"
+                        else:
+                            return "LOW"
+                except (ValueError, TypeError):
+                    pass
+    
+    # Try ecosystem_specific
+    if "ecosystem_specific" in vuln:
+        eco_severity = vuln["ecosystem_specific"].get("severity", "")
+        if eco_severity.upper() in ("CRITICAL", "HIGH", "MEDIUM", "MODERATE", "LOW"):
+            return "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
+    
+    return "UNKNOWN"
+
+
+def _extract_fixed_version(vuln: dict[str, Any], package_name: str) -> str | None:
+    """Extract fixed version from OSV vulnerability data."""
+    for affected in vuln.get("affected", []):
+        if affected.get("package", {}).get("name") == package_name:
+            for rng in affected.get("ranges", []):
+                for event in rng.get("events", []):
+                    if "fixed" in event:
+                        return event["fixed"]
+    return None
+
+
+def _scan_dependencies_sync_legacy(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
     """
     Synchronous implementation of dependency vulnerability scanning.
     
@@ -1880,16 +2145,20 @@ def _scan_dependencies_sync(path: str, timeout: float = 30.0) -> DependencyScanR
 
 @mcp.tool()
 async def scan_dependencies(
-    path: str, 
+    path: str | None = None,
+    project_root: str | None = None,
+    scan_vulnerabilities: bool = True,
+    include_dev: bool = True,
     timeout: float = 30.0,
     ctx: Context | None = None,
-) -> DependencyScanResultModel:
+) -> DependencyScanResult:
     """
     Scan project dependencies for known vulnerabilities (A06:2021 - Vulnerable Components).
     
     [20251219_FEATURE] v3.0.4 - A06 Vulnerable and Outdated Components
     [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
     [20251220_FEATURE] v3.0.5 - Progress reporting during vulnerability scan
+    [20251220_FEATURE] v3.0.5 - Returns DependencyScanResult with per-dependency tracking
     
     This tool scans dependency files and checks them against the Google OSV
     (Open Source Vulnerabilities) database for known CVEs and security advisories.
@@ -1900,27 +2169,40 @@ async def scan_dependencies(
     - Python: requirements.txt, pyproject.toml
     
     Example usage:
-    - Scan a single file: scan_dependencies("package.json")
-    - Scan a project directory: scan_dependencies("/path/to/project")
+    - Scan a single file: scan_dependencies(path="package.json")
+    - Scan a project directory: scan_dependencies(project_root="/path/to/project")
+    - Without vulnerability check: scan_dependencies(path="requirements.txt", scan_vulnerabilities=False)
     
     The scan will recursively find all dependency files in a directory,
     skipping node_modules and .venv directories.
     
     Args:
         path: Path to a dependency file or project directory
+        project_root: Alias for 'path' (for backward compatibility)
+        scan_vulnerabilities: Whether to check OSV for vulnerabilities (default True)
+        include_dev: Whether to include dev dependencies (default True)
         timeout: Timeout in seconds for OSV API calls (default: 30.0)
         
     Returns:
-        DependencyScanResultModel with vulnerability findings, severity counts, and remediation info.
+        DependencyScanResult with dependency-level vulnerability tracking.
     """
+    # Resolve path parameter (support both 'path' and 'project_root')
+    resolved_path = path or project_root or str(PROJECT_ROOT)
+    
     # [20251220_FEATURE] v3.0.5 - Progress reporting
     if ctx:
-        await ctx.report_progress(0, 100, f"Scanning dependencies in {path}...")
+        await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
     
-    result = await asyncio.to_thread(_scan_dependencies_sync, path, timeout)
+    result = await asyncio.to_thread(
+        _scan_dependencies_sync,
+        project_root=resolved_path,
+        scan_vulnerabilities=scan_vulnerabilities,
+        include_dev=include_dev,
+        timeout=timeout,
+    )
     
     if ctx:
-        vuln_count = result.vulnerabilities_found
+        vuln_count = result.total_vulnerabilities
         await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
     
     return result
@@ -3628,8 +3910,12 @@ def _extract_code_sync(
         class_name, method_name = target_name.split(".", 1)
         target = extractor.get_method(class_name, method_name)
         if include_context:
-            # [20251220_FIX] get_method_with_context doesn't exist - use class context as fallback
-            context = extractor.get_class_with_context(class_name)
+            # [20251220_FEATURE] Use get_method_with_context for token-efficient extraction
+            # Falls back to class context if method-level context unavailable
+            if hasattr(extractor, "get_method_with_context"):
+                context = extractor.get_method_with_context(class_name, method_name)
+            else:
+                context = extractor.get_class_with_context(class_name)
     else:
         target = extractor.get_function(target_name)
         if include_context:

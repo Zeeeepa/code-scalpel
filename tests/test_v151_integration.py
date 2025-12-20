@@ -922,7 +922,7 @@ def util():
 
         assert not result.success
         assert result.error is not None
-        assert "k must be at least 1" in result.error
+        assert "must be at least 1" in result.error  # Updated for standardized error format
 
     def test_mcp_tool_invalid_direction(self):
         """Test MCP tool validates direction parameter."""
