@@ -1758,12 +1758,17 @@ def _scan_dependencies_sync(path: str, timeout: float = 30.0) -> DependencyScanR
 
 
 @mcp.tool()
-async def scan_dependencies(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
+async def scan_dependencies(
+    path: str, 
+    timeout: float = 30.0,
+    ctx: Context | None = None,
+) -> DependencyScanResultModel:
     """
     Scan project dependencies for known vulnerabilities (A06:2021 - Vulnerable Components).
     
     [20251219_FEATURE] v3.0.4 - A06 Vulnerable and Outdated Components
     [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
+    [20251220_FEATURE] v3.0.5 - Progress reporting during vulnerability scan
     
     This tool scans dependency files and checks them against the Google OSV
     (Open Source Vulnerabilities) database for known CVEs and security advisories.
@@ -1787,7 +1792,17 @@ async def scan_dependencies(path: str, timeout: float = 30.0) -> DependencyScanR
     Returns:
         DependencyScanResultModel with vulnerability findings, severity counts, and remediation info.
     """
-    return await asyncio.to_thread(_scan_dependencies_sync, path, timeout)
+    # [20251220_FEATURE] v3.0.5 - Progress reporting
+    if ctx:
+        await ctx.report_progress(0, 100, f"Scanning dependencies in {path}...")
+    
+    result = await asyncio.to_thread(_scan_dependencies_sync, path, timeout)
+    
+    if ctx:
+        vuln_count = result.vulnerability_count if hasattr(result, 'vulnerability_count') else 0
+        await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
+    
+    return result
 
 
 @mcp.tool()
@@ -4623,12 +4638,15 @@ def _get_symbol_references_sync(
 async def get_symbol_references(
     symbol_name: str,
     project_root: str | None = None,
+    ctx: Context | None = None,
 ) -> SymbolReferencesResult:
     """
     Find all references to a symbol across the project.
 
     [v1.4.0] Use this tool before modifying a function, class, or variable to
     understand its usage across the codebase. Essential for safe refactoring.
+    
+    [v3.0.5] Now reports progress as files are scanned.
 
     Why AI agents need this:
     - Safe refactoring: know all call sites before changing signatures
@@ -4642,9 +4660,18 @@ async def get_symbol_references(
     Returns:
         SymbolReferencesResult with definition location and all references
     """
-    return await asyncio.to_thread(
+    # [20251220_FEATURE] v3.0.5 - Progress reporting for file scanning
+    if ctx:
+        await ctx.report_progress(0, 100, f"Searching for '{symbol_name}'...")
+    
+    result = await asyncio.to_thread(
         _get_symbol_references_sync, symbol_name, project_root
     )
+    
+    if ctx:
+        await ctx.report_progress(100, 100, f"Found {result.total_references} references")
+    
+    return result
 
 
 # ============================================================================
@@ -4755,6 +4782,7 @@ async def get_call_graph(
     entry_point: str | None = None,
     depth: int = 10,
     include_circular_import_check: bool = True,
+    ctx: Context | None = None,
 ) -> CallGraphResultModel:
     """
     Build a call graph showing function relationships in the project.
@@ -4766,6 +4794,8 @@ async def get_call_graph(
     - Depth-limited traversal from any starting function
     - Mermaid diagram generation for visualization
     - Circular import detection
+    
+    [v3.0.5] Now reports progress during graph construction.
 
     Why AI agents need this:
     - Navigation: Quickly understand how functions connect
@@ -4783,13 +4813,24 @@ async def get_call_graph(
     Returns:
         CallGraphResultModel with nodes, edges, Mermaid diagram, and any circular imports
     """
-    return await asyncio.to_thread(
+    # [20251220_FEATURE] v3.0.5 - Progress reporting
+    if ctx:
+        await ctx.report_progress(0, 100, "Building call graph...")
+    
+    result = await asyncio.to_thread(
         _get_call_graph_sync,
         project_root,
         entry_point,
         depth,
         include_circular_import_check,
     )
+    
+    if ctx:
+        node_count = len(result.nodes) if result.nodes else 0
+        edge_count = len(result.edges) if result.edges else 0
+        await ctx.report_progress(100, 100, f"Call graph complete: {node_count} functions, {edge_count} calls")
+    
+    return result
 
 
 # ============================================================================
@@ -5463,6 +5504,7 @@ async def get_project_map(
     include_complexity: bool = True,
     complexity_threshold: int = 10,
     include_circular_check: bool = True,
+    ctx: Context | None = None,
 ) -> ProjectMapResult:
     """
     Generate a comprehensive map of the project structure.
@@ -5475,6 +5517,8 @@ async def get_project_map(
     - Complexity hotspots (files that need attention)
     - Circular import detection
     - Mermaid diagram of project structure
+    
+    [v3.0.5] Now reports progress during analysis.
 
     Why AI agents need this:
     - Orientation: Understand project structure before making changes
@@ -5491,13 +5535,23 @@ async def get_project_map(
     Returns:
         ProjectMapResult with comprehensive project overview
     """
-    return await asyncio.to_thread(
+    # [20251220_FEATURE] v3.0.5 - Progress reporting
+    if ctx:
+        await ctx.report_progress(0, 100, "Scanning project structure...")
+    
+    result = await asyncio.to_thread(
         _get_project_map_sync,
         project_root,
         include_complexity,
         complexity_threshold,
         include_circular_check,
     )
+    
+    if ctx:
+        msg = f"Analyzed {result.total_files} files, {result.total_lines} lines"
+        await ctx.report_progress(100, 100, msg)
+    
+    return result
 
 
 # ============================================================================
@@ -6177,9 +6231,9 @@ async def cross_file_security_scan(
         CrossFileSecurityResult with vulnerabilities, taint flows, and risk assessment
     """
     # [20251215_FEATURE] v2.0.0 - Progress token support
-    # Report initial progress (discovery phase)
+    # [20251220_FEATURE] v3.0.5 - Enhanced progress messages
     if ctx:
-        await ctx.report_progress(progress=0, total=100)
+        await ctx.report_progress(progress=0, total=100, message="Starting cross-file security scan...")
 
     result = await asyncio.to_thread(
         _cross_file_security_scan_sync,
@@ -6191,9 +6245,10 @@ async def cross_file_security_scan(
         max_modules,
     )
 
-    # Report completion
+    # Report completion with summary
     if ctx:
-        await ctx.report_progress(progress=100, total=100)
+        vuln_count = result.vulnerabilities_found if hasattr(result, 'vulnerabilities_found') else 0
+        await ctx.report_progress(progress=100, total=100, message=f"Scan complete: {vuln_count} cross-file vulnerabilities found")
 
     return result
 
