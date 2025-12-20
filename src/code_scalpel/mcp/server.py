@@ -78,6 +78,10 @@ logger = logging.getLogger(__name__)
 # Maximum code size to prevent resource exhaustion
 MAX_CODE_SIZE = 100_000
 
+# [20251220_FEATURE] v3.0.5 - Consistent confidence thresholds across security tools
+# Default minimum confidence for sink detection across all tools
+DEFAULT_MIN_CONFIDENCE = 0.7  # Balanced: catches most issues without too many false positives
+
 # Project root for resources (default to current directory)
 PROJECT_ROOT = Path.cwd()
 
@@ -787,19 +791,19 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
     Analyze JavaScript/TypeScript code using tree-sitter.
     
     [20251220_FEATURE] v3.0.4 - Multi-language analyze_code support.
+    [20251220_BUGFIX] v3.0.5 - Consolidated tree-sitter imports.
     """
     try:
+        from tree_sitter import Language, Parser
+        
         if is_typescript:
             import tree_sitter_typescript as ts_ts
-            from tree_sitter import Language, Parser
-            TS_LANGUAGE = Language(ts_ts.language_typescript())
-            parser = Parser(TS_LANGUAGE)
+            lang = Language(ts_ts.language_typescript())
         else:
             import tree_sitter_javascript as ts_js
-            from tree_sitter import Language, Parser
-            JS_LANGUAGE = Language(ts_js.language())
-            parser = Parser(JS_LANGUAGE)
+            lang = Language(ts_js.language())
         
+        parser = Parser(lang)
         tree = parser.parse(bytes(code, 'utf-8'))
         
         functions = []
@@ -1461,17 +1465,18 @@ def _unified_sink_detect_sync(
 
 @mcp.tool()
 async def unified_sink_detect(
-    code: str, language: str, min_confidence: float = 0.8
+    code: str, language: str, min_confidence: float = DEFAULT_MIN_CONFIDENCE
 ) -> UnifiedSinkResult:
     """
     Unified polyglot sink detection with confidence thresholds.
 
     [20251216_FEATURE] v2.5.0 "Guardian" - Expose unified sink detector via MCP.
+    [20251220_BUGFIX] v3.0.5 - Use DEFAULT_MIN_CONFIDENCE for consistency.
 
     Args:
         code: Source code to analyze
         language: Programming language (python, java, typescript, javascript)
-        min_confidence: Minimum confidence threshold (0.0-1.0)
+        min_confidence: Minimum confidence threshold (0.0-1.0, default: 0.7)
 
     Returns:
         UnifiedSinkResult with detected sinks and coverage summary.
@@ -4296,8 +4301,19 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
     Synchronous implementation of get_file_context.
 
     [20251214_FEATURE] v1.5.3 - Integrated PathResolver for intelligent path resolution
+    [20251220_FEATURE] v3.0.5 - Multi-language support via file extension detection
     """
     from code_scalpel.mcp.path_resolver import resolve_path
+
+    # Language detection by file extension
+    LANG_EXTENSIONS = {
+        '.py': 'python',
+        '.js': 'javascript',
+        '.jsx': 'javascript',
+        '.ts': 'typescript',
+        '.tsx': 'typescript',
+        '.java': 'java',
+    }
 
     try:
         # [20251214_FEATURE] Use PathResolver for intelligent path resolution
@@ -4316,7 +4332,28 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
         code = path.read_text(encoding="utf-8")
         lines = code.splitlines()
 
-        # Parse the code
+        # [20251220_FEATURE] Detect language from file extension
+        detected_lang = LANG_EXTENSIONS.get(path.suffix.lower(), 'unknown')
+        
+        # For non-Python files, use analyze_code which handles multi-language
+        if detected_lang != 'python':
+            analysis = _analyze_code_sync(code, detected_lang)
+            return FileContextResult(
+                success=analysis.success,
+                file_path=str(path),
+                language=detected_lang,
+                line_count=len(lines),
+                functions=analysis.functions,
+                classes=analysis.classes,
+                imports=analysis.imports[:20],
+                exports=[],
+                complexity_score=analysis.complexity,
+                has_security_issues=False,  # Security check is Python-specific for now
+                summary=f"{detected_lang.title()} module with {analysis.function_count} function(s), {analysis.class_count} class(es)",
+                error=analysis.error,
+            )
+
+        # Python-specific parsing
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
@@ -4449,7 +4486,11 @@ async def get_file_context(file_path: str) -> FileContextResult:
 def _get_symbol_references_sync(
     symbol_name: str, project_root: str | None = None
 ) -> SymbolReferencesResult:
-    """Synchronous implementation of get_symbol_references."""
+    """
+    Synchronous implementation of get_symbol_references.
+    
+    [20251220_FEATURE] v3.0.5 - Optimized single-pass AST walking with deduplication
+    """
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
 
@@ -4463,6 +4504,8 @@ def _get_symbol_references_sync(
         references: list[SymbolReference] = []
         definition_file = None
         definition_line = None
+        # Track seen (file, line) pairs to avoid duplicates in single pass
+        seen: set[tuple[str, int]] = set()
 
         # Walk through all Python files
         for py_file in root.rglob("*.py"):
@@ -4479,101 +4522,69 @@ def _get_symbol_references_sync(
                 code = py_file.read_text(encoding="utf-8")
                 lines = code.splitlines()
                 tree = ast.parse(code)
+                rel_path = str(py_file.relative_to(root))
 
+                # Single-pass AST walk with optimized checks
                 for node in ast.walk(tree):
-                    # Check for function/class definitions
-                    if isinstance(
-                        node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
-                    ):
+                    node_line = getattr(node, "lineno", 0)
+                    node_col = getattr(node, "col_offset", 0)
+                    
+                    # Skip if already seen this location in this file
+                    loc_key = (rel_path, node_line)
+                    if loc_key in seen:
+                        continue
+                    
+                    is_def = False
+                    matched = False
+                    
+                    # Check definitions (FunctionDef, AsyncFunctionDef, ClassDef)
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         if node.name == symbol_name:
-                            rel_path = str(py_file.relative_to(root))
+                            matched = True
+                            is_def = True
                             if definition_file is None:
                                 definition_file = rel_path
-                                definition_line = node.lineno
-
-                            context = (
-                                lines[node.lineno - 1]
-                                if node.lineno <= len(lines)
-                                else ""
-                            )
-                            references.append(
-                                SymbolReference(
-                                    file=rel_path,
-                                    line=node.lineno,
-                                    column=node.col_offset,
-                                    context=context.strip(),
-                                    is_definition=True,
-                                )
-                            )
-
-                    # Check for function calls
+                                definition_line = node_line
+                    
+                    # Check function calls
                     elif isinstance(node, ast.Call):
                         func = node.func
-                        name = None
-                        if isinstance(func, ast.Name):
-                            name = func.id
-                        elif isinstance(func, ast.Attribute):
-                            name = func.attr
-
-                        if name == symbol_name:
-                            rel_path = str(py_file.relative_to(root))
-                            line_no = getattr(node, "lineno", 0)
-                            context = (
-                                lines[line_no - 1] if 0 < line_no <= len(lines) else ""
-                            )
-                            references.append(
-                                SymbolReference(
-                                    file=rel_path,
-                                    line=line_no,
-                                    column=getattr(node, "col_offset", 0),
-                                    context=context.strip(),
-                                    is_definition=False,
-                                )
-                            )
-
-                    # Check for name references
+                        if isinstance(func, ast.Name) and func.id == symbol_name:
+                            matched = True
+                        elif isinstance(func, ast.Attribute) and func.attr == symbol_name:
+                            matched = True
+                    
+                    # Check name references (but avoid duplicating Call nodes)
                     elif isinstance(node, ast.Name) and node.id == symbol_name:
-                        rel_path = str(py_file.relative_to(root))
-                        line_no = getattr(node, "lineno", 0)
-                        context = (
-                            lines[line_no - 1] if 0 < line_no <= len(lines) else ""
-                        )
-                        # Avoid duplicates from Call nodes
-                        if not any(
-                            r.file == rel_path and r.line == line_no for r in references
-                        ):
-                            references.append(
-                                SymbolReference(
-                                    file=rel_path,
-                                    line=line_no,
-                                    column=getattr(node, "col_offset", 0),
-                                    context=context.strip(),
-                                    is_definition=False,
-                                )
+                        matched = True
+                    
+                    if matched:
+                        seen.add(loc_key)
+                        context = lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        references.append(
+                            SymbolReference(
+                                file=rel_path,
+                                line=node_line,
+                                column=node_col,
+                                context=context.strip(),
+                                is_definition=is_def,
                             )
+                        )
 
             except (SyntaxError, UnicodeDecodeError):
                 # Skip files that can't be parsed
                 continue
 
-        # Remove duplicates and sort
-        seen = set()
-        unique_refs = []
-        for ref in references:
-            key = (ref.file, ref.line, ref.is_definition)
-            if key not in seen:
-                seen.add(key)
-                unique_refs.append(ref)
-
-        unique_refs.sort(key=lambda r: (not r.is_definition, r.file, r.line))
+        # Sort: definitions first, then by file and line
+        references.sort(key=lambda r: (not r.is_definition, r.file, r.line))
 
         return SymbolReferencesResult(
             success=True,
             symbol_name=symbol_name,
             definition_file=definition_file,
             definition_line=definition_line,
-            references=unique_refs[:100],  # Limit to prevent token overflow
-            total_references=len(unique_refs),
+            references=references[:100],  # Limit to prevent token overflow
+            total_references=len(references),
         )
 
     except Exception as e:
@@ -5564,15 +5575,19 @@ class CrossFileDependenciesResult(BaseModel):
 
 
 def _get_cross_file_dependencies_sync(
-    project_root: str | None,
     target_file: str,
     target_symbol: str,
+    project_root: str | None,
     max_depth: int,
     include_code: bool,
     include_diagram: bool,
     confidence_decay_factor: float = 0.9,
 ) -> CrossFileDependenciesResult:
-    """Synchronous implementation of get_cross_file_dependencies."""
+    """
+    Synchronous implementation of get_cross_file_dependencies.
+    
+    [20251220_BUGFIX] v3.0.5 - Parameter order matches async function for consistency.
+    """
     from code_scalpel.ast_tools.import_resolver import ImportResolver
     from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
@@ -5829,9 +5844,9 @@ async def get_cross_file_dependencies(
     """
     return await asyncio.to_thread(
         _get_cross_file_dependencies_sync,
-        project_root,
         target_file,
         target_symbol,
+        project_root,
         max_depth,
         include_code,
         include_diagram,
@@ -6298,17 +6313,15 @@ def _verify_policy_integrity_sync(
     Synchronous implementation of policy integrity verification.
 
     [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
+    [20251220_BUGFIX] v3.0.5 - Consolidated imports inside try block
     """
-    # Import SecurityError at module scope so it's available for exception handling
-    # even if other imports fail
-    from code_scalpel.policy_engine.crypto_verify import SecurityError
+    dir_path = policy_dir or ".code-scalpel"
     
     try:
         from code_scalpel.policy_engine import (
             CryptographicPolicyVerifier,
         )
-
-        dir_path = policy_dir or ".code-scalpel"
+        from code_scalpel.policy_engine.crypto_verify import SecurityError
 
         verifier = CryptographicPolicyVerifier(
             manifest_source=manifest_source,
@@ -6327,19 +6340,20 @@ def _verify_policy_integrity_sync(
             policy_dir=dir_path,
         )
 
-    except SecurityError as e:
+    except ImportError as e:
         return PolicyVerificationResult(
             success=False,
-            error=str(e),
+            error=f"Policy engine not available: {e}",
             manifest_source=manifest_source,
-            policy_dir=policy_dir,
+            policy_dir=dir_path,
         )
     except Exception as e:
+        # Handle SecurityError and other exceptions
         return PolicyVerificationResult(
             success=False,
             error=f"Verification failed: {e}",
             manifest_source=manifest_source,
-            policy_dir=policy_dir,
+            policy_dir=dir_path,
         )
 
 
