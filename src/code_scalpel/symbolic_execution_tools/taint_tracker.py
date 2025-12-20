@@ -101,6 +101,21 @@ class SecuritySink(Enum):
     PROTOTYPE_POLLUTION = auto()  # Object.assign, _.merge with user input
     # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
     REDIRECT = auto()  # Open Redirect (redirect to user-controlled URL)
+    # [20251229_FEATURE] v3.0.4 - Type System Evaporation detection
+    UNVALIDATED_OUTPUT = auto()  # Tainted data returned in HTTP response without validation (CWE-20)
+    # [20251219_FEATURE] v3.0.4 - Additional 12 vulnerability types for comprehensive coverage
+    LDAP_INJECTION = auto()  # LDAP filter injection (CWE-90)
+    XPATH_INJECTION = auto()  # XPath query injection (CWE-643)
+    NOSQL_INJECTION = auto()  # MongoDB/NoSQL injection (CWE-943)
+    EMAIL_INJECTION = auto()  # Email/SMTP header injection (CWE-93)
+    REGEX_DOS = auto()  # ReDoS via user-controlled regex (CWE-1333)
+    FORMAT_STRING = auto()  # Format string vulnerability (CWE-134)
+    UNSAFE_REFLECTION = auto()  # Reflection injection (CWE-470)
+    EL_INJECTION = auto()  # Expression Language injection - SpEL, OGNL, MVEL (CWE-917)
+    GRAPHQL_INJECTION = auto()  # GraphQL injection/batching attacks (CWE-89)
+    CORS_MISCONFIGURATION = auto()  # Dynamic CORS origin from user input (CWE-942)
+    JWT_WEAKNESS = auto()  # JWT algorithm confusion, weak secrets (CWE-347)
+    HTML_INJECTION = auto()  # HTML injection without script (CWE-80)
 
 
 class TaintLevel(Enum):
@@ -912,6 +927,8 @@ class Vulnerability:
             SecuritySink.PROTOTYPE_POLLUTION: "Prototype Pollution",
             # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
             SecuritySink.REDIRECT: "Open Redirect",
+            # [20251229_FEATURE] v3.0.4 - Type System Evaporation
+            SecuritySink.UNVALIDATED_OUTPUT: "Unvalidated Input in HTTP Response",
         }
         return mapping.get(self.sink_type, "Unknown Vulnerability")
 
@@ -938,6 +955,21 @@ class Vulnerability:
             SecuritySink.PROTOTYPE_POLLUTION: "CWE-1321",
             # [20251215_FEATURE] v2.0.0 P1 - Additional CWE mappings
             SecuritySink.REDIRECT: "CWE-601",
+            # [20251229_FEATURE] v3.0.4 - Type System Evaporation
+            SecuritySink.UNVALIDATED_OUTPUT: "CWE-20",
+            # [20251219_FEATURE] v3.0.4 - Additional 12 vulnerability types
+            SecuritySink.LDAP_INJECTION: "CWE-90",
+            SecuritySink.XPATH_INJECTION: "CWE-643",
+            SecuritySink.NOSQL_INJECTION: "CWE-943",
+            SecuritySink.EMAIL_INJECTION: "CWE-93",
+            SecuritySink.REGEX_DOS: "CWE-1333",
+            SecuritySink.FORMAT_STRING: "CWE-134",
+            SecuritySink.UNSAFE_REFLECTION: "CWE-470",
+            SecuritySink.EL_INJECTION: "CWE-917",
+            SecuritySink.GRAPHQL_INJECTION: "CWE-89",
+            SecuritySink.CORS_MISCONFIGURATION: "CWE-942",
+            SecuritySink.JWT_WEAKNESS: "CWE-347",
+            SecuritySink.HTML_INJECTION: "CWE-80",
         }
         return mapping.get(self.sink_type, "CWE-Unknown")
 
@@ -1025,6 +1057,21 @@ class Vulnerability:
             SecuritySink.PROTOTYPE_POLLUTION: "Use Object.create(null) for dictionaries, validate merge sources, use Map instead of Object",
             # [20251215_FEATURE] v2.0.0 P1 - Additional recommendations
             SecuritySink.REDIRECT: "Validate redirect URLs against allowlist, use relative paths, or verify same-origin",
+            # [20251229_FEATURE] v3.0.4 - Type System Evaporation recommendations
+            SecuritySink.UNVALIDATED_OUTPUT: "Validate enum/type values against allowed set before returning in HTTP response. Frontend types do NOT enforce runtime values",
+            # [20251219_FEATURE] v3.0.4 - Additional 12 vulnerability type recommendations
+            SecuritySink.LDAP_INJECTION: "Use parameterized LDAP queries, escape special characters with ldap.filter.escape_filter_chars()",
+            SecuritySink.XPATH_INJECTION: "Use parameterized XPath queries or pre-compiled expressions. Validate input against allowlist",
+            SecuritySink.NOSQL_INJECTION: "Use parameterized queries, avoid $where/$expr with user input. Sanitize with mongo-sanitize",
+            SecuritySink.EMAIL_INJECTION: "Validate email addresses with strict regex, strip newlines from headers. Use email library validation",
+            SecuritySink.REGEX_DOS: "Avoid user-controlled regex patterns. Use re2 library or set timeout. Validate regex complexity",
+            SecuritySink.FORMAT_STRING: "Never use user input directly in format strings. Use parameterized logging: logger.info('User: %s', user)",
+            SecuritySink.UNSAFE_REFLECTION: "Avoid getattr/setattr with user input. Use allowlist of permitted attributes/methods",
+            SecuritySink.EL_INJECTION: "Disable SpEL/OGNL evaluation with user input. Use SimpleEvaluationContext in Spring",
+            SecuritySink.GRAPHQL_INJECTION: "Disable introspection in production, implement query depth limiting, use persisted queries",
+            SecuritySink.CORS_MISCONFIGURATION: "Use strict CORS allowlist, never reflect Origin header directly. Validate against known domains",
+            SecuritySink.JWT_WEAKNESS: "Always verify algorithm (reject 'none'), use strong secrets (256+ bits), validate all claims",
+            SecuritySink.HTML_INJECTION: "Escape HTML output with html.escape() or use textContent. Even non-script HTML can be dangerous",
         }
         return recommendations.get(
             self.sink_type, "Review the code for potential security issues"
@@ -1044,6 +1091,12 @@ class Vulnerability:
             SecuritySink.SHELL_COMMAND,
             SecuritySink.EVAL,
             SecuritySink.DESERIALIZATION,
+            # [20251219_FEATURE] v3.0.4 - Critical severity vulnerability types
+            SecuritySink.EL_INJECTION,  # SpEL/OGNL can lead to RCE
+            SecuritySink.LDAP_INJECTION,
+            SecuritySink.NOSQL_INJECTION,
+            SecuritySink.JWT_WEAKNESS,
+            SecuritySink.UNSAFE_REFLECTION,
         }
         medium_risk_sinks = {
             SecuritySink.FILE_PATH,
@@ -1051,6 +1104,14 @@ class Vulnerability:
             SecuritySink.SSRF,
             SecuritySink.XXE,
             SecuritySink.SSTI,
+            # [20251219_FEATURE] v3.0.4 - Medium severity vulnerability types
+            SecuritySink.XPATH_INJECTION,
+            SecuritySink.EMAIL_INJECTION,
+            SecuritySink.REGEX_DOS,
+            SecuritySink.FORMAT_STRING,
+            SecuritySink.GRAPHQL_INJECTION,
+            SecuritySink.CORS_MISCONFIGURATION,
+            SecuritySink.HTML_INJECTION,
         }
 
         if self.sink_type in high_risk_sinks:
@@ -1086,6 +1147,8 @@ TAINT_SOURCE_PATTERNS: Dict[str, TaintSource] = {
     "request.args": TaintSource.USER_INPUT,
     "request.data": TaintSource.USER_INPUT,
     "request.json": TaintSource.USER_INPUT,
+    "request.get_json": TaintSource.USER_INPUT,  # [20251220_FEATURE] v3.0.4 - Flask method form
+    "request.get_data": TaintSource.USER_INPUT,  # [20251220_FEATURE] v3.0.4 - Flask method form
     "request.cookies.get": TaintSource.USER_INPUT,
     "request.headers.get": TaintSource.USER_INPUT,
     "request.GET.get": TaintSource.USER_INPUT,
@@ -1284,53 +1347,63 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "httpx.post": SecuritySink.SSRF,
     "httpx.AsyncClient.get": SecuritySink.SSRF,
     "aiohttp.ClientSession.get": SecuritySink.SSRF,
-    # NoSQL Injection - MongoDB (v1.3.0)
-    "collection.find": SecuritySink.SQL_QUERY,  # Reuse SQL_QUERY for NoSQL
-    "collection.find_one": SecuritySink.SQL_QUERY,
-    "collection.find_one_and_delete": SecuritySink.SQL_QUERY,
-    "collection.find_one_and_replace": SecuritySink.SQL_QUERY,
-    "collection.find_one_and_update": SecuritySink.SQL_QUERY,
-    "collection.aggregate": SecuritySink.SQL_QUERY,
-    "collection.count_documents": SecuritySink.SQL_QUERY,
-    "collection.distinct": SecuritySink.SQL_QUERY,
-    "collection.update_one": SecuritySink.SQL_QUERY,
-    "collection.update_many": SecuritySink.SQL_QUERY,
-    "collection.delete_one": SecuritySink.SQL_QUERY,
-    "collection.delete_many": SecuritySink.SQL_QUERY,
-    "collection.insert_one": SecuritySink.SQL_QUERY,
-    "collection.insert_many": SecuritySink.SQL_QUERY,
-    "collection.replace_one": SecuritySink.SQL_QUERY,
-    "db.command": SecuritySink.SQL_QUERY,
+    # NoSQL Injection - MongoDB (v1.3.0) [20251219_FEATURE] Updated to NOSQL_INJECTION
+    "collection.find": SecuritySink.NOSQL_INJECTION,
+    "collection.find_one": SecuritySink.NOSQL_INJECTION,
+    "collection.find_one_and_delete": SecuritySink.NOSQL_INJECTION,
+    "collection.find_one_and_replace": SecuritySink.NOSQL_INJECTION,
+    "collection.find_one_and_update": SecuritySink.NOSQL_INJECTION,
+    "collection.aggregate": SecuritySink.NOSQL_INJECTION,
+    "collection.count_documents": SecuritySink.NOSQL_INJECTION,
+    "collection.distinct": SecuritySink.NOSQL_INJECTION,
+    "collection.update_one": SecuritySink.NOSQL_INJECTION,
+    "collection.update_many": SecuritySink.NOSQL_INJECTION,
+    "collection.delete_one": SecuritySink.NOSQL_INJECTION,
+    "collection.delete_many": SecuritySink.NOSQL_INJECTION,
+    "collection.insert_one": SecuritySink.NOSQL_INJECTION,
+    "collection.insert_many": SecuritySink.NOSQL_INJECTION,
+    "collection.replace_one": SecuritySink.NOSQL_INJECTION,
+    "db.command": SecuritySink.NOSQL_INJECTION,
     # Motor (async MongoDB)
-    "motor_collection.find": SecuritySink.SQL_QUERY,
-    "motor_collection.find_one": SecuritySink.SQL_QUERY,
-    "motor_collection.aggregate": SecuritySink.SQL_QUERY,
+    "motor_collection.find": SecuritySink.NOSQL_INJECTION,
+    "motor_collection.find_one": SecuritySink.NOSQL_INJECTION,
+    "motor_collection.aggregate": SecuritySink.NOSQL_INJECTION,
     # MongoEngine ORM
-    "Document.objects": SecuritySink.SQL_QUERY,
-    "QuerySet.filter": SecuritySink.SQL_QUERY,
-    "QuerySet.get": SecuritySink.SQL_QUERY,
-    # LDAP Injection (v1.3.0)
-    "ldap.search": SecuritySink.SQL_QUERY,  # Reuse SQL_QUERY for LDAP
-    "ldap.search_s": SecuritySink.SQL_QUERY,
-    "ldap.search_st": SecuritySink.SQL_QUERY,
-    "ldap.search_ext": SecuritySink.SQL_QUERY,
-    "ldap.search_ext_s": SecuritySink.SQL_QUERY,
-    "ldap.bind": SecuritySink.SQL_QUERY,
-    "ldap.bind_s": SecuritySink.SQL_QUERY,
-    "ldap.simple_bind": SecuritySink.SQL_QUERY,
-    "ldap.simple_bind_s": SecuritySink.SQL_QUERY,
-    "ldap.modify": SecuritySink.SQL_QUERY,
-    "ldap.modify_s": SecuritySink.SQL_QUERY,
-    "ldap.add": SecuritySink.SQL_QUERY,
-    "ldap.add_s": SecuritySink.SQL_QUERY,
-    "ldap.delete": SecuritySink.SQL_QUERY,
-    "ldap.delete_s": SecuritySink.SQL_QUERY,
+    "Document.objects": SecuritySink.NOSQL_INJECTION,
+    "QuerySet.filter": SecuritySink.NOSQL_INJECTION,
+    "QuerySet.get": SecuritySink.NOSQL_INJECTION,
+    # [20251219_FEATURE] v3.0.4 - Additional NoSQL patterns
+    "$where": SecuritySink.NOSQL_INJECTION,  # MongoDB JS execution
+    "$expr": SecuritySink.NOSQL_INJECTION,  # MongoDB expression
+    "$function": SecuritySink.NOSQL_INJECTION,  # MongoDB JS function
+    "pymongo.collection.Collection.find": SecuritySink.NOSQL_INJECTION,
+    "pymongo.collection.Collection.aggregate": SecuritySink.NOSQL_INJECTION,
+    # LDAP Injection (v1.3.0) [20251219_FEATURE] Updated to LDAP_INJECTION
+    "ldap.search": SecuritySink.LDAP_INJECTION,
+    "ldap.search_s": SecuritySink.LDAP_INJECTION,
+    "ldap.search_st": SecuritySink.LDAP_INJECTION,
+    "ldap.search_ext": SecuritySink.LDAP_INJECTION,
+    "ldap.search_ext_s": SecuritySink.LDAP_INJECTION,
+    "ldap.bind": SecuritySink.LDAP_INJECTION,
+    "ldap.bind_s": SecuritySink.LDAP_INJECTION,
+    "ldap.simple_bind": SecuritySink.LDAP_INJECTION,
+    "ldap.simple_bind_s": SecuritySink.LDAP_INJECTION,
+    "ldap.modify": SecuritySink.LDAP_INJECTION,
+    "ldap.modify_s": SecuritySink.LDAP_INJECTION,
+    "ldap.add": SecuritySink.LDAP_INJECTION,
+    "ldap.add_s": SecuritySink.LDAP_INJECTION,
+    "ldap.delete": SecuritySink.LDAP_INJECTION,
+    "ldap.delete_s": SecuritySink.LDAP_INJECTION,
     # ldap3 library
-    "Connection.search": SecuritySink.SQL_QUERY,
-    "Connection.bind": SecuritySink.SQL_QUERY,
-    "Connection.modify": SecuritySink.SQL_QUERY,
-    "Connection.add": SecuritySink.SQL_QUERY,
-    "Connection.delete": SecuritySink.SQL_QUERY,
+    "Connection.search": SecuritySink.LDAP_INJECTION,
+    "Connection.bind": SecuritySink.LDAP_INJECTION,
+    "Connection.modify": SecuritySink.LDAP_INJECTION,
+    "Connection.add": SecuritySink.LDAP_INJECTION,
+    "Connection.delete": SecuritySink.LDAP_INJECTION,
+    # [20251219_FEATURE] v3.0.4 - Additional LDAP patterns
+    "ldap.filter_format": SecuritySink.LDAP_INJECTION,
+    "ldap3.Server": SecuritySink.LDAP_INJECTION,
+    "ldap3.Connection": SecuritySink.LDAP_INJECTION,
     # [20251212_FEATURE] v1.4.0 - XXE (XML External Entity) Injection (CWE-611)
     "xml.etree.ElementTree.parse": SecuritySink.XXE,
     "xml.etree.ElementTree.fromstring": SecuritySink.XXE,
@@ -1479,6 +1552,73 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "js-yaml.load": SecuritySink.DESERIALIZATION,
     "flatted.parse": SecuritySink.DESERIALIZATION,
     # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - JavaScript/TypeScript Weak Crypto (CWE-327)
+    # ==========================================================================
+    "crypto.createHash('md5')": SecuritySink.WEAK_CRYPTO,
+    "crypto.createHash('sha1')": SecuritySink.WEAK_CRYPTO,
+    "crypto.createCipheriv('des')": SecuritySink.WEAK_CRYPTO,
+    "crypto.createCipheriv('des-ede')": SecuritySink.WEAK_CRYPTO,
+    "crypto.createCipheriv('des-ede3')": SecuritySink.WEAK_CRYPTO,
+    "CryptoJS.MD5": SecuritySink.WEAK_CRYPTO,
+    "CryptoJS.SHA1": SecuritySink.WEAK_CRYPTO,
+    "CryptoJS.DES": SecuritySink.WEAK_CRYPTO,
+    "CryptoJS.TripleDES": SecuritySink.WEAK_CRYPTO,
+    "CryptoJS.RC4": SecuritySink.WEAK_CRYPTO,
+    "md5(": SecuritySink.WEAK_CRYPTO,
+    "sha1(": SecuritySink.WEAK_CRYPTO,
+    "blueimp-md5": SecuritySink.WEAK_CRYPTO,
+    "js-md5": SecuritySink.WEAK_CRYPTO,
+    "js-sha1": SecuritySink.WEAK_CRYPTO,
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - JavaScript/TypeScript XXE (CWE-611)
+    # ==========================================================================
+    "DOMParser": SecuritySink.XXE,
+    "new DOMParser": SecuritySink.XXE,
+    "DOMParser.parseFromString": SecuritySink.XXE,
+    "xml2js.parseString": SecuritySink.XXE,
+    "xml2js.Parser": SecuritySink.XXE,
+    "fast-xml-parser": SecuritySink.XXE,
+    "XMLParser": SecuritySink.XXE,
+    "xmldom": SecuritySink.XXE,
+    "xmldom.DOMParser": SecuritySink.XXE,
+    "libxmljs": SecuritySink.XXE,
+    "libxmljs.parseXml": SecuritySink.XXE,
+    "libxmljs.parseXmlString": SecuritySink.XXE,
+    "sax.parser": SecuritySink.XXE,
+    "saxes.SaxesParser": SecuritySink.XXE,
+    "expat": SecuritySink.XXE,
+    "node-expat": SecuritySink.XXE,
+    "cheerio.load": SecuritySink.XXE,  # Can parse XML
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - JavaScript/TypeScript Log Injection (CWE-117)
+    # ==========================================================================
+    "console.log": SecuritySink.LOG_OUTPUT,
+    "console.error": SecuritySink.LOG_OUTPUT,
+    "console.warn": SecuritySink.LOG_OUTPUT,
+    "console.info": SecuritySink.LOG_OUTPUT,
+    "console.debug": SecuritySink.LOG_OUTPUT,
+    "winston.log": SecuritySink.LOG_OUTPUT,
+    "winston.info": SecuritySink.LOG_OUTPUT,
+    "winston.error": SecuritySink.LOG_OUTPUT,
+    "winston.warn": SecuritySink.LOG_OUTPUT,
+    "winston.debug": SecuritySink.LOG_OUTPUT,
+    "pino": SecuritySink.LOG_OUTPUT,
+    "pino.info": SecuritySink.LOG_OUTPUT,
+    "pino.error": SecuritySink.LOG_OUTPUT,
+    "pino.warn": SecuritySink.LOG_OUTPUT,
+    "bunyan": SecuritySink.LOG_OUTPUT,
+    "bunyan.info": SecuritySink.LOG_OUTPUT,
+    "bunyan.error": SecuritySink.LOG_OUTPUT,
+    "log4js": SecuritySink.LOG_OUTPUT,
+    "log4js.getLogger": SecuritySink.LOG_OUTPUT,
+    "debug(": SecuritySink.LOG_OUTPUT,  # debug module
+    "loglevel": SecuritySink.LOG_OUTPUT,
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - ReDoS (CWE-1333)
+    # ==========================================================================
+    "new RegExp": SecuritySink.EVAL,  # Dynamic regex with user input = ReDoS risk
+    "RegExp(": SecuritySink.EVAL,
+    # ==========================================================================
     # [20251215_FEATURE] v2.0.0 - Java Security Sinks
     # ==========================================================================
     # Java SQL Injection (CWE-89)
@@ -1604,6 +1744,229 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "SqlSession.update": SecuritySink.SQL_QUERY,
     "SqlSession.delete": SecuritySink.SQL_QUERY,
     "SqlSession.insert": SecuritySink.SQL_QUERY,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - XPath Injection (CWE-643)
+    # ==========================================================================
+    # Python
+    "lxml.etree.XPath": SecuritySink.XPATH_INJECTION,
+    "etree.XPath": SecuritySink.XPATH_INJECTION,
+    "xml.etree.ElementTree.find": SecuritySink.XPATH_INJECTION,
+    "ElementTree.find": SecuritySink.XPATH_INJECTION,
+    "Element.find": SecuritySink.XPATH_INJECTION,
+    "Element.findall": SecuritySink.XPATH_INJECTION,
+    "Element.findtext": SecuritySink.XPATH_INJECTION,
+    "Element.iterfind": SecuritySink.XPATH_INJECTION,
+    ".xpath(": SecuritySink.XPATH_INJECTION,  # lxml pattern
+    # Java
+    "XPathFactory.newInstance": SecuritySink.XPATH_INJECTION,
+    "XPath.compile": SecuritySink.XPATH_INJECTION,
+    "XPath.evaluate": SecuritySink.XPATH_INJECTION,
+    "XPathExpression.evaluate": SecuritySink.XPATH_INJECTION,
+    # JavaScript
+    "document.evaluate": SecuritySink.XPATH_INJECTION,
+    "xpath.select": SecuritySink.XPATH_INJECTION,
+    "xpath.parse": SecuritySink.XPATH_INJECTION,
+    "xmldom.evaluate": SecuritySink.XPATH_INJECTION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - Email/SMTP Injection (CWE-93)
+    # ==========================================================================
+    # Python
+    "smtplib.SMTP.sendmail": SecuritySink.EMAIL_INJECTION,
+    "smtplib.SMTP_SSL.sendmail": SecuritySink.EMAIL_INJECTION,
+    "email.message.EmailMessage": SecuritySink.EMAIL_INJECTION,
+    "email.mime.text.MIMEText": SecuritySink.EMAIL_INJECTION,
+    "email.mime.multipart.MIMEMultipart": SecuritySink.EMAIL_INJECTION,
+    "flask_mail.Message": SecuritySink.EMAIL_INJECTION,
+    "django.core.mail.send_mail": SecuritySink.EMAIL_INJECTION,
+    "django.core.mail.EmailMessage": SecuritySink.EMAIL_INJECTION,
+    # Java
+    "MimeMessage.setSubject": SecuritySink.EMAIL_INJECTION,
+    "MimeMessage.setRecipients": SecuritySink.EMAIL_INJECTION,
+    "MimeMessage.addRecipients": SecuritySink.EMAIL_INJECTION,
+    "MimeMessage.setFrom": SecuritySink.EMAIL_INJECTION,
+    "Transport.send": SecuritySink.EMAIL_INJECTION,
+    "JavaMailSender.send": SecuritySink.EMAIL_INJECTION,
+    # JavaScript
+    "nodemailer.createTransport": SecuritySink.EMAIL_INJECTION,
+    "transporter.sendMail": SecuritySink.EMAIL_INJECTION,
+    "sendgrid.send": SecuritySink.EMAIL_INJECTION,
+    "mailgun.messages.send": SecuritySink.EMAIL_INJECTION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - ReDoS via User-Controlled Regex (CWE-1333)
+    # ==========================================================================
+    # Python
+    "re.compile": SecuritySink.REGEX_DOS,
+    "re.match": SecuritySink.REGEX_DOS,
+    "re.search": SecuritySink.REGEX_DOS,
+    "re.findall": SecuritySink.REGEX_DOS,
+    "re.sub": SecuritySink.REGEX_DOS,
+    "re.split": SecuritySink.REGEX_DOS,
+    "regex.compile": SecuritySink.REGEX_DOS,  # regex library
+    # Java
+    "Pattern.compile": SecuritySink.REGEX_DOS,
+    "Pattern.matches": SecuritySink.REGEX_DOS,
+    "String.matches": SecuritySink.REGEX_DOS,
+    "String.replaceAll": SecuritySink.REGEX_DOS,
+    "String.split": SecuritySink.REGEX_DOS,
+    # JavaScript (already have new RegExp)
+    ".match(": SecuritySink.REGEX_DOS,
+    ".replace(": SecuritySink.REGEX_DOS,
+    ".split(": SecuritySink.REGEX_DOS,
+    "String.prototype.match": SecuritySink.REGEX_DOS,
+    "String.prototype.replace": SecuritySink.REGEX_DOS,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - Format String Vulnerability (CWE-134)
+    # ==========================================================================
+    # Python
+    "str.format": SecuritySink.FORMAT_STRING,
+    ".format(": SecuritySink.FORMAT_STRING,
+    "f-string": SecuritySink.FORMAT_STRING,  # Detected via AST
+    "logging.info": SecuritySink.FORMAT_STRING,  # If format string from user
+    "logging.warning": SecuritySink.FORMAT_STRING,
+    "logging.error": SecuritySink.FORMAT_STRING,
+    "logging.debug": SecuritySink.FORMAT_STRING,
+    "logging.critical": SecuritySink.FORMAT_STRING,
+    "logger.info": SecuritySink.FORMAT_STRING,
+    "logger.warning": SecuritySink.FORMAT_STRING,
+    "logger.error": SecuritySink.FORMAT_STRING,
+    "logger.debug": SecuritySink.FORMAT_STRING,
+    # Java
+    "String.format": SecuritySink.FORMAT_STRING,
+    "PrintStream.printf": SecuritySink.FORMAT_STRING,
+    "PrintWriter.printf": SecuritySink.FORMAT_STRING,
+    "Formatter.format": SecuritySink.FORMAT_STRING,
+    # C/C++ (for completeness, if analyzing native code)
+    "printf": SecuritySink.FORMAT_STRING,
+    "sprintf": SecuritySink.FORMAT_STRING,
+    "fprintf": SecuritySink.FORMAT_STRING,
+    "snprintf": SecuritySink.FORMAT_STRING,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - Unsafe Reflection (CWE-470)
+    # ==========================================================================
+    # Python
+    "getattr": SecuritySink.UNSAFE_REFLECTION,
+    "setattr": SecuritySink.UNSAFE_REFLECTION,
+    "delattr": SecuritySink.UNSAFE_REFLECTION,
+    "__import__": SecuritySink.UNSAFE_REFLECTION,
+    "importlib.import_module": SecuritySink.UNSAFE_REFLECTION,
+    "globals()": SecuritySink.UNSAFE_REFLECTION,
+    "locals()": SecuritySink.UNSAFE_REFLECTION,
+    "vars()": SecuritySink.UNSAFE_REFLECTION,
+    # Java
+    "Class.forName": SecuritySink.UNSAFE_REFLECTION,
+    "Class.newInstance": SecuritySink.UNSAFE_REFLECTION,
+    "Constructor.newInstance": SecuritySink.UNSAFE_REFLECTION,
+    "Method.invoke": SecuritySink.UNSAFE_REFLECTION,
+    "Field.get": SecuritySink.UNSAFE_REFLECTION,
+    "Field.set": SecuritySink.UNSAFE_REFLECTION,
+    "ClassLoader.loadClass": SecuritySink.UNSAFE_REFLECTION,
+    # JavaScript
+    "Reflect.construct": SecuritySink.UNSAFE_REFLECTION,
+    "Reflect.get": SecuritySink.UNSAFE_REFLECTION,
+    "Reflect.set": SecuritySink.UNSAFE_REFLECTION,
+    "Object.getOwnPropertyDescriptor": SecuritySink.UNSAFE_REFLECTION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - Expression Language Injection (CWE-917)
+    # ==========================================================================
+    # Spring SpEL
+    "SpelExpressionParser.parseExpression": SecuritySink.EL_INJECTION,
+    "ExpressionParser.parseExpression": SecuritySink.EL_INJECTION,
+    "Expression.getValue": SecuritySink.EL_INJECTION,
+    "StandardEvaluationContext": SecuritySink.EL_INJECTION,
+    "@Value": SecuritySink.EL_INJECTION,  # Spring annotation with SpEL
+    "#{": SecuritySink.EL_INJECTION,  # SpEL expression prefix
+    # OGNL (Struts, etc.)
+    "Ognl.getValue": SecuritySink.EL_INJECTION,
+    "Ognl.setValue": SecuritySink.EL_INJECTION,
+    "OgnlRuntime.getMethodValue": SecuritySink.EL_INJECTION,
+    "ActionContext.getContext": SecuritySink.EL_INJECTION,
+    # MVEL
+    "MVEL.eval": SecuritySink.EL_INJECTION,
+    "MVEL.executeExpression": SecuritySink.EL_INJECTION,
+    "MVEL.compileExpression": SecuritySink.EL_INJECTION,
+    # JSP EL
+    "${": SecuritySink.EL_INJECTION,  # JSP EL prefix (when user-controlled)
+    "ExpressionFactory.createValueExpression": SecuritySink.EL_INJECTION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - GraphQL Injection (CWE-89 variant)
+    # ==========================================================================
+    # Python
+    "graphene.ObjectType": SecuritySink.GRAPHQL_INJECTION,
+    "graphql.graphql_sync": SecuritySink.GRAPHQL_INJECTION,
+    "graphql.execute": SecuritySink.GRAPHQL_INJECTION,
+    "ariadne.graphql_sync": SecuritySink.GRAPHQL_INJECTION,
+    "strawberry.Schema.execute": SecuritySink.GRAPHQL_INJECTION,
+    # JavaScript
+    "graphql.graphql": SecuritySink.GRAPHQL_INJECTION,
+    "apollo-server.ApolloServer": SecuritySink.GRAPHQL_INJECTION,
+    "express-graphql.graphqlHTTP": SecuritySink.GRAPHQL_INJECTION,
+    "makeExecutableSchema": SecuritySink.GRAPHQL_INJECTION,
+    # Java
+    "GraphQL.execute": SecuritySink.GRAPHQL_INJECTION,
+    "ExecutionInput.newExecutionInput": SecuritySink.GRAPHQL_INJECTION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - CORS Misconfiguration (CWE-942)
+    # ==========================================================================
+    # Python
+    "flask_cors.CORS": SecuritySink.CORS_MISCONFIGURATION,
+    "response.headers['Access-Control-Allow-Origin']": SecuritySink.CORS_MISCONFIGURATION,
+    "django-cors-headers": SecuritySink.CORS_MISCONFIGURATION,
+    "CORSMiddleware": SecuritySink.CORS_MISCONFIGURATION,
+    # JavaScript
+    "cors(": SecuritySink.CORS_MISCONFIGURATION,  # Express cors middleware
+    "res.setHeader('Access-Control-Allow-Origin'": SecuritySink.CORS_MISCONFIGURATION,
+    "Access-Control-Allow-Origin": SecuritySink.CORS_MISCONFIGURATION,
+    # Java
+    "@CrossOrigin": SecuritySink.CORS_MISCONFIGURATION,
+    "CorsConfiguration.setAllowedOrigins": SecuritySink.CORS_MISCONFIGURATION,
+    "CorsRegistry.addMapping": SecuritySink.CORS_MISCONFIGURATION,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - JWT Weakness (CWE-347)
+    # ==========================================================================
+    # Python
+    "jwt.decode": SecuritySink.JWT_WEAKNESS,
+    "jwt.encode": SecuritySink.JWT_WEAKNESS,
+    "PyJWT.decode": SecuritySink.JWT_WEAKNESS,
+    "jose.jwt.decode": SecuritySink.JWT_WEAKNESS,
+    "python-jose.jwt": SecuritySink.JWT_WEAKNESS,
+    # JavaScript
+    "jsonwebtoken.verify": SecuritySink.JWT_WEAKNESS,
+    "jsonwebtoken.sign": SecuritySink.JWT_WEAKNESS,
+    "jwt.verify": SecuritySink.JWT_WEAKNESS,
+    "jwt.sign": SecuritySink.JWT_WEAKNESS,
+    "jose.jwtVerify": SecuritySink.JWT_WEAKNESS,
+    "jose.SignJWT": SecuritySink.JWT_WEAKNESS,
+    # Java
+    "Jwts.parserBuilder": SecuritySink.JWT_WEAKNESS,
+    "JwtParser.parseClaimsJws": SecuritySink.JWT_WEAKNESS,
+    "JWT.decode": SecuritySink.JWT_WEAKNESS,  # auth0 java-jwt
+    "JWT.require": SecuritySink.JWT_WEAKNESS,
+    # ==========================================================================
+    # [20251219_FEATURE] v3.0.4 - HTML Injection (CWE-80)
+    # ==========================================================================
+    # Python
+    "markupsafe.Markup": SecuritySink.HTML_INJECTION,
+    "flask.Markup": SecuritySink.HTML_INJECTION,
+    "django.utils.safestring.mark_safe": SecuritySink.HTML_INJECTION,
+    "mark_safe": SecuritySink.HTML_INJECTION,
+    "format_html": SecuritySink.HTML_INJECTION,  # Django - can be misused
+    # JavaScript (already have innerHTML for DOM_XSS, this is for server-side)
+    "escape-html": SecuritySink.HTML_INJECTION,  # If bypassed
+    "html-entities": SecuritySink.HTML_INJECTION,
+    # Java
+    "HtmlUtils.htmlEscape": SecuritySink.HTML_INJECTION,  # If bypassed
+    "StringEscapeUtils.escapeHtml4": SecuritySink.HTML_INJECTION,
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - Unvalidated Input in HTTP Response (CWE-20)
+    # Type System Evaporation: tainted data returned without enum/type validation
+    "jsonify": SecuritySink.UNVALIDATED_OUTPUT,
+    "flask.jsonify": SecuritySink.UNVALIDATED_OUTPUT,
+    "json.dumps": SecuritySink.UNVALIDATED_OUTPUT,
+    "JSONResponse": SecuritySink.UNVALIDATED_OUTPUT,  # FastAPI
+    "fastapi.responses.JSONResponse": SecuritySink.UNVALIDATED_OUTPUT,
+    "starlette.responses.JSONResponse": SecuritySink.UNVALIDATED_OUTPUT,
+    "Response.json": SecuritySink.UNVALIDATED_OUTPUT,  # Django REST Framework
+    "rest_framework.response.Response": SecuritySink.UNVALIDATED_OUTPUT,
 }
 
 # =============================================================================

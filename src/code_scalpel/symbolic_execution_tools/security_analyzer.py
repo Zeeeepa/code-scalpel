@@ -637,6 +637,15 @@ class SecurityAnalyzer:
                     arg_vars = self._extract_variable_names(arg)
                     for var in arg_vars:
                         self._taint_tracker.check_sink(var, sink, location)
+                # [20251229_FEATURE] v3.0.4 - Type System Evaporation: Check dict values
+                elif isinstance(arg, ast.Dict):
+                    # Dictionary literal: jsonify({"key": tainted_value})
+                    # Check all values in the dictionary for taint
+                    for value in arg.values:
+                        if value is not None:  # None for **kwargs unpacking
+                            arg_vars = self._extract_variable_names(value)
+                            for var in arg_vars:
+                                self._taint_tracker.check_sink(var, sink, location)
 
         # Check if this is a sanitizer
         sanitizer = SANITIZER_PATTERNS.get(func_name)
@@ -680,6 +689,15 @@ class SecurityAnalyzer:
                         source_location=location,
                         propagation_path=[],
                     )
+
+        # [20251229_FEATURE] v3.0.4 - Type System Evaporation: Handle BoolOp (or/and)
+        # e.g., body = request.get_json() or {}
+        # The left operand may be a taint source
+        elif isinstance(node, ast.BoolOp):
+            for value in node.values:
+                result = self._check_taint_source(value, location)
+                if result is not None:
+                    return result
 
         return None
 

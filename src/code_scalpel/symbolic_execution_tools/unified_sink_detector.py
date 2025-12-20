@@ -481,17 +481,163 @@ UNIFIED_SINKS: Dict[str, Dict[str, List[SinkDefinition]]] = {
             ),
         ],
     },
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - A02:2021 – Cryptographic Failures (Weak Crypto)
+    # ==========================================================================
+    "weak_crypto": {
+        "python": [
+            SinkDefinition("hashlib.md5", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 hash - cryptographically broken"),
+            SinkDefinition("hashlib.sha1", 0.85, SecuritySink.WEAK_CRYPTO, "SHA1 hash - deprecated for security"),
+            SinkDefinition("Crypto.Cipher.DES", 1.0, SecuritySink.WEAK_CRYPTO, "DES cipher - broken"),
+            SinkDefinition("Crypto.Hash.MD5", 0.95, SecuritySink.WEAK_CRYPTO, "PyCryptodome MD5"),
+        ],
+        "java": [
+            SinkDefinition("MessageDigest.getInstance(\"MD5\")", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 digest"),
+            SinkDefinition("MessageDigest.getInstance(\"SHA-1\")", 0.85, SecuritySink.WEAK_CRYPTO, "SHA1 digest"),
+            SinkDefinition("Cipher.getInstance(\"DES\")", 1.0, SecuritySink.WEAK_CRYPTO, "DES cipher"),
+            SinkDefinition("Cipher.getInstance(\"DESede\")", 0.9, SecuritySink.WEAK_CRYPTO, "3DES cipher - weak"),
+        ],
+        "typescript": [
+            SinkDefinition("crypto.createHash('md5')", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 hash - broken"),
+            SinkDefinition("crypto.createHash('sha1')", 0.85, SecuritySink.WEAK_CRYPTO, "SHA1 hash - deprecated"),
+            SinkDefinition("crypto.createCipheriv('des')", 1.0, SecuritySink.WEAK_CRYPTO, "DES cipher - broken"),
+            SinkDefinition("crypto.createCipheriv('des-ede')", 0.9, SecuritySink.WEAK_CRYPTO, "3DES - weak"),
+            SinkDefinition("CryptoJS.MD5", 0.95, SecuritySink.WEAK_CRYPTO, "CryptoJS MD5"),
+            SinkDefinition("CryptoJS.SHA1", 0.85, SecuritySink.WEAK_CRYPTO, "CryptoJS SHA1"),
+            SinkDefinition("CryptoJS.DES", 1.0, SecuritySink.WEAK_CRYPTO, "CryptoJS DES"),
+            SinkDefinition("md5(", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 function call"),
+            SinkDefinition("sha1(", 0.85, SecuritySink.WEAK_CRYPTO, "SHA1 function call"),
+        ],
+        "javascript": [
+            SinkDefinition("crypto.createHash('md5')", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 hash - broken"),
+            SinkDefinition("crypto.createHash('sha1')", 0.85, SecuritySink.WEAK_CRYPTO, "SHA1 hash - deprecated"),
+            SinkDefinition("CryptoJS.MD5", 0.95, SecuritySink.WEAK_CRYPTO, "CryptoJS MD5"),
+            SinkDefinition("CryptoJS.SHA1", 0.85, SecuritySink.WEAK_CRYPTO, "CryptoJS SHA1"),
+            SinkDefinition("CryptoJS.DES", 1.0, SecuritySink.WEAK_CRYPTO, "CryptoJS DES"),
+            SinkDefinition("md5(", 0.95, SecuritySink.WEAK_CRYPTO, "MD5 function call"),
+        ],
+    },
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - A05:2021 – Security Misconfiguration (XXE)
+    # ==========================================================================
+    "xxe": {
+        "python": [
+            SinkDefinition("xml.etree.ElementTree.parse", 0.9, SecuritySink.XXE, "ElementTree parse"),
+            SinkDefinition("xml.etree.ElementTree.fromstring", 0.9, SecuritySink.XXE, "ElementTree fromstring"),
+            SinkDefinition("lxml.etree.parse", 0.95, SecuritySink.XXE, "lxml parse - XXE by default"),
+            SinkDefinition("xml.dom.minidom.parse", 0.9, SecuritySink.XXE, "minidom parse"),
+            SinkDefinition("xml.sax.parse", 0.9, SecuritySink.XXE, "SAX parse"),
+        ],
+        "java": [
+            SinkDefinition("DocumentBuilderFactory.newInstance", 0.95, SecuritySink.XXE, "DOM parser factory"),
+            SinkDefinition("SAXParserFactory.newInstance", 0.95, SecuritySink.XXE, "SAX parser factory"),
+            SinkDefinition("XMLInputFactory.newInstance", 0.95, SecuritySink.XXE, "StAX parser factory"),
+            SinkDefinition("Unmarshaller.unmarshal", 0.9, SecuritySink.XXE, "JAXB unmarshal"),
+        ],
+        "typescript": [
+            SinkDefinition("DOMParser", 0.85, SecuritySink.XXE, "Browser DOMParser"),
+            SinkDefinition("new DOMParser().parseFromString", 0.85, SecuritySink.XXE, "DOMParser parseFromString"),
+            SinkDefinition("xml2js.parseString", 0.9, SecuritySink.XXE, "xml2js parser"),
+            SinkDefinition("xml2js.Parser", 0.9, SecuritySink.XXE, "xml2js Parser class"),
+            SinkDefinition("fast-xml-parser", 0.85, SecuritySink.XXE, "fast-xml-parser"),
+            SinkDefinition("XMLParser", 0.85, SecuritySink.XXE, "XMLParser"),
+            SinkDefinition("xmldom", 0.9, SecuritySink.XXE, "xmldom library"),
+            SinkDefinition("libxmljs", 0.95, SecuritySink.XXE, "libxmljs - XXE vulnerable"),
+            SinkDefinition("sax.parser", 0.85, SecuritySink.XXE, "SAX parser"),
+        ],
+        "javascript": [
+            SinkDefinition("DOMParser", 0.85, SecuritySink.XXE, "Browser DOMParser"),
+            SinkDefinition("xml2js.parseString", 0.9, SecuritySink.XXE, "xml2js parser"),
+            SinkDefinition("fast-xml-parser", 0.85, SecuritySink.XXE, "fast-xml-parser"),
+            SinkDefinition("xmldom", 0.9, SecuritySink.XXE, "xmldom library"),
+            SinkDefinition("libxmljs", 0.95, SecuritySink.XXE, "libxmljs - XXE vulnerable"),
+        ],
+    },
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - A09:2021 – Security Logging and Monitoring Failures
+    # ==========================================================================
+    "log_injection": {
+        "python": [
+            SinkDefinition("logging.info", 0.7, SecuritySink.LOG_OUTPUT, "Logging info"),
+            SinkDefinition("logging.warning", 0.7, SecuritySink.LOG_OUTPUT, "Logging warning"),
+            SinkDefinition("logging.error", 0.7, SecuritySink.LOG_OUTPUT, "Logging error"),
+            SinkDefinition("logging.debug", 0.6, SecuritySink.LOG_OUTPUT, "Logging debug"),
+            SinkDefinition("logger.info", 0.7, SecuritySink.LOG_OUTPUT, "Logger info"),
+            SinkDefinition("logger.error", 0.7, SecuritySink.LOG_OUTPUT, "Logger error"),
+        ],
+        "java": [
+            SinkDefinition("Logger.info", 0.7, SecuritySink.LOG_OUTPUT, "Logger info"),
+            SinkDefinition("Logger.warn", 0.7, SecuritySink.LOG_OUTPUT, "Logger warn"),
+            SinkDefinition("Logger.error", 0.7, SecuritySink.LOG_OUTPUT, "Logger error"),
+            SinkDefinition("log.info", 0.7, SecuritySink.LOG_OUTPUT, "SLF4J log info"),
+            SinkDefinition("log.error", 0.7, SecuritySink.LOG_OUTPUT, "SLF4J log error"),
+            SinkDefinition("System.out.println", 0.6, SecuritySink.LOG_OUTPUT, "Console output"),
+        ],
+        "typescript": [
+            SinkDefinition("console.log", 0.65, SecuritySink.LOG_OUTPUT, "Console log - may leak data"),
+            SinkDefinition("console.error", 0.65, SecuritySink.LOG_OUTPUT, "Console error"),
+            SinkDefinition("console.warn", 0.65, SecuritySink.LOG_OUTPUT, "Console warn"),
+            SinkDefinition("console.info", 0.65, SecuritySink.LOG_OUTPUT, "Console info"),
+            SinkDefinition("winston.log", 0.75, SecuritySink.LOG_OUTPUT, "Winston logger"),
+            SinkDefinition("winston.info", 0.75, SecuritySink.LOG_OUTPUT, "Winston info"),
+            SinkDefinition("winston.error", 0.75, SecuritySink.LOG_OUTPUT, "Winston error"),
+            SinkDefinition("pino.info", 0.75, SecuritySink.LOG_OUTPUT, "Pino logger info"),
+            SinkDefinition("pino.error", 0.75, SecuritySink.LOG_OUTPUT, "Pino logger error"),
+            SinkDefinition("bunyan.info", 0.75, SecuritySink.LOG_OUTPUT, "Bunyan logger info"),
+            SinkDefinition("bunyan.error", 0.75, SecuritySink.LOG_OUTPUT, "Bunyan logger error"),
+            SinkDefinition("log4js.getLogger", 0.75, SecuritySink.LOG_OUTPUT, "Log4js logger"),
+        ],
+        "javascript": [
+            SinkDefinition("console.log", 0.65, SecuritySink.LOG_OUTPUT, "Console log"),
+            SinkDefinition("console.error", 0.65, SecuritySink.LOG_OUTPUT, "Console error"),
+            SinkDefinition("winston.log", 0.75, SecuritySink.LOG_OUTPUT, "Winston logger"),
+            SinkDefinition("pino.info", 0.75, SecuritySink.LOG_OUTPUT, "Pino logger"),
+            SinkDefinition("bunyan.info", 0.75, SecuritySink.LOG_OUTPUT, "Bunyan logger"),
+        ],
+    },
+    # ==========================================================================
+    # [20251229_FEATURE] v3.0.4 - ReDoS (Regular Expression Denial of Service)
+    # ==========================================================================
+    "redos": {
+        "python": [
+            SinkDefinition("re.match", 0.6, SecuritySink.EVAL, "Regex match - check for catastrophic backtracking"),
+            SinkDefinition("re.search", 0.6, SecuritySink.EVAL, "Regex search"),
+            SinkDefinition("re.compile", 0.6, SecuritySink.EVAL, "Regex compile"),
+            SinkDefinition("re.findall", 0.6, SecuritySink.EVAL, "Regex findall"),
+        ],
+        "java": [
+            SinkDefinition("Pattern.compile", 0.6, SecuritySink.EVAL, "Regex compile"),
+            SinkDefinition("Pattern.matches", 0.6, SecuritySink.EVAL, "Regex matches"),
+            SinkDefinition("String.matches", 0.6, SecuritySink.EVAL, "String regex match"),
+            SinkDefinition("String.replaceAll", 0.6, SecuritySink.EVAL, "Regex replace"),
+        ],
+        "typescript": [
+            SinkDefinition("new RegExp", 0.75, SecuritySink.EVAL, "Dynamic regex - ReDoS risk if user input"),
+            SinkDefinition("RegExp(", 0.75, SecuritySink.EVAL, "RegExp constructor with user input"),
+            SinkDefinition(".match(", 0.6, SecuritySink.EVAL, "String match with regex"),
+            SinkDefinition(".replace(", 0.6, SecuritySink.EVAL, "String replace with regex"),
+            SinkDefinition(".search(", 0.6, SecuritySink.EVAL, "String search with regex"),
+            SinkDefinition(".split(", 0.5, SecuritySink.EVAL, "String split with regex"),
+        ],
+        "javascript": [
+            SinkDefinition("new RegExp", 0.75, SecuritySink.EVAL, "Dynamic regex - ReDoS risk"),
+            SinkDefinition("RegExp(", 0.75, SecuritySink.EVAL, "RegExp constructor"),
+            SinkDefinition(".match(", 0.6, SecuritySink.EVAL, "String match"),
+            SinkDefinition(".replace(", 0.6, SecuritySink.EVAL, "String replace"),
+        ],
+    },
 }
 
 
 # [20251216_FEATURE] OWASP Top 10 2021 complete mapping
+# [20251229_UPDATE] v3.0.4 - Added weak_crypto, xxe, log_injection, redos patterns
 OWASP_COVERAGE: Dict[str, List[str]] = {
     "A01:2021 – Broken Access Control": [
         "path_traversal",
         "unauthorized_file_access",
     ],
     "A02:2021 – Cryptographic Failures": [
-        "weak_crypto",
+        "weak_crypto",  # MD5, SHA1, DES, etc.
         "hardcoded_secrets",
         "insecure_random",
     ],
@@ -504,15 +650,18 @@ OWASP_COVERAGE: Dict[str, List[str]] = {
         "xss",
         "ssti",
         "xxe",
+        "redos",  # ReDoS via regex injection
     ],
     "A04:2021 – Insecure Design": [
         "missing_rate_limiting",
         "insecure_defaults",
+        "type_evaporation",  # v3.0.4 - TypeScript type system evaporation
     ],
     "A05:2021 – Security Misconfiguration": [
         "debug_mode_enabled",
         "verbose_errors",
         "default_credentials",
+        "xxe",  # XXE is also a misconfiguration issue
     ],
     "A06:2021 – Vulnerable and Outdated Components": [
         "outdated_dependencies",  # Via scan_dependencies MCP tool
@@ -527,6 +676,7 @@ OWASP_COVERAGE: Dict[str, List[str]] = {
         "deserialization",
     ],
     "A09:2021 – Security Logging and Monitoring Failures": [
+        "log_injection",  # v3.0.4 - Log injection patterns
         "missing_audit_log",
         "insufficient_logging",
     ],

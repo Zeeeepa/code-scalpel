@@ -111,6 +111,80 @@ from .unified_sink_detector import (
     OWASP_COVERAGE,
 )
 
+# [20251219_FEATURE] v3.0.4: Schema Drift Detection
+from .schema_drift_detector import (
+    SchemaDriftDetector,
+    SchemaDriftResult,
+    SchemaChange,
+    ChangeType,
+    ChangeSeverity,
+    ProtobufParser,
+    compare_protobuf_files,
+    compare_json_schema_files,
+)
+
+# [20251219_FEATURE] v3.0.4: gRPC Contract Analysis
+from .grpc_contract_analyzer import (
+    GrpcContractAnalyzer,
+    GrpcContract,
+    GrpcService,
+    RpcMethod,
+    StreamingType,
+    ContractIssue,
+    IssueSeverity,
+    analyze_grpc_contract,
+    validate_grpc_contract,
+    analyze_grpc_file,
+)
+
+# [20251219_FEATURE] v3.0.4: GraphQL Schema Tracking
+from .graphql_schema_tracker import (
+    GraphQLSchemaTracker,
+    GraphQLSchema,
+    GraphQLType,
+    GraphQLTypeKind,
+    GraphQLField,
+    GraphQLArgument,
+    GraphQLSchemaDrift,
+    GraphQLSchemaChange,
+    GraphQLChangeType,
+    GraphQLChangeSeverity,
+    track_graphql_schema,
+    compare_graphql_schemas,
+    compare_graphql_files,
+)
+
+# [20251220_FEATURE] v3.0.4: Kafka Taint Tracking
+from .kafka_taint_tracker import (
+    KafkaTaintTracker,
+    KafkaProducer,
+    KafkaConsumer,
+    KafkaTaintBridge,
+    KafkaTopicInfo,
+    KafkaAnalysisResult,
+    KafkaLibrary,
+    KafkaPatternType,
+    KafkaRiskLevel,
+    analyze_kafka_file,
+    analyze_kafka_codebase,
+    get_kafka_taint_bridges,
+)
+
+# [20251220_FEATURE] v3.0.4: Frontend Input Tracker (TypeScript/JS DOM Detection)
+from .frontend_input_tracker import (
+    FrontendInputTracker,
+    FrontendAnalysisResult,
+    FrontendFramework,
+    InputSource,
+    InputSourceType,
+    DangerousSink,
+    DangerousSinkType,
+    DataFlow,
+    analyze_frontend_file,
+    analyze_frontend_codebase,
+    get_xss_risks,
+)
+
 import warnings
 
 # [20251215_REFACTOR] Move warning configuration after imports to satisfy import-order lint rules.
@@ -182,6 +256,65 @@ __all__ = [
     "Language",
     "UNIFIED_SINKS",
     "OWASP_COVERAGE",
+    # [20251219_FEATURE] v3.0.4: Schema Drift Detection
+    "SchemaDriftDetector",
+    "SchemaDriftResult",
+    "SchemaChange",
+    "ChangeType",
+    "ChangeSeverity",
+    "ProtobufParser",
+    "compare_protobuf_files",
+    "compare_json_schema_files",
+    # [20251219_FEATURE] v3.0.4: gRPC Contract Analysis
+    "GrpcContractAnalyzer",
+    "GrpcContract",
+    "GrpcService",
+    "RpcMethod",
+    "StreamingType",
+    "ContractIssue",
+    "IssueSeverity",
+    "analyze_grpc_contract",
+    "validate_grpc_contract",
+    "analyze_grpc_file",
+    # [20251219_FEATURE] v3.0.4: GraphQL Schema Tracking
+    "GraphQLSchemaTracker",
+    "GraphQLSchema",
+    "GraphQLType",
+    "GraphQLTypeKind",
+    "GraphQLField",
+    "GraphQLArgument",
+    "GraphQLSchemaDrift",
+    "GraphQLSchemaChange",
+    "GraphQLChangeType",
+    "GraphQLChangeSeverity",
+    "track_graphql_schema",
+    "compare_graphql_schemas",
+    "compare_graphql_files",
+    # [20251220_FEATURE] v3.0.4: Kafka Taint Tracking
+    "KafkaTaintTracker",
+    "KafkaProducer",
+    "KafkaConsumer",
+    "KafkaTaintBridge",
+    "KafkaTopicInfo",
+    "KafkaAnalysisResult",
+    "KafkaLibrary",
+    "KafkaPatternType",
+    "KafkaRiskLevel",
+    "analyze_kafka_file",
+    "analyze_kafka_codebase",
+    "get_kafka_taint_bridges",
+    # [20251220_FEATURE] v3.0.4: Frontend Input Tracker
+    "FrontendInputTracker",
+    "FrontendAnalysisResult",
+    "FrontendFramework",
+    "InputSource",
+    "InputSourceType",
+    "DangerousSink",
+    "DangerousSinkType",
+    "DataFlow",
+    "analyze_frontend_file",
+    "analyze_frontend_codebase",
+    "get_xss_risks",
     # v1.5.1: Cross-File Taint Analysis
     "CrossFileTaintTracker",
     "CrossFileTaintResult",

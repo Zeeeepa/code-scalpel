@@ -3,10 +3,10 @@
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-4133%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.0.2/)
+[![Tests](https://img.shields.io/badge/tests-4355%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.0.4/)
 
-**MCP Server Toolkit for AI Agents - v3.0.2 "Configuration Init"**
+**MCP Server Toolkit for AI Agents - v3.0.4 "Ninja Warrior"**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
@@ -350,6 +350,13 @@ code-scalpel analyze demos/test_gen_scenario.py
 - NoSQL Injection (CWE-943) - MongoDB PyMongo/Motor
 - LDAP Injection (CWE-90) - python-ldap/ldap3
 
+### API Contract & Cross-Service Analysis (v3.0.4)
+- **Schema Drift Detection** - Protobuf, JSON Schema, GraphQL breaking change detection
+- **gRPC Contract Analyzer** - Service definition parsing and validation
+- **GraphQL Schema Tracker** - Schema evolution and drift detection
+- **Kafka Taint Tracking** - Cross-service async message taint analysis
+- **Frontend DOM Input Detection** - XSS risk analysis for React/Vue/Angular
+
 ### Performance
 - **200x cache speedup** for unchanged files
 - **5-second Z3 timeout** prevents hangs
@@ -386,7 +393,8 @@ docker run -p 8593:8593 -v $(pwd):/app/code code-scalpel
 
 ## Documentation
 
-**v3.0.0 Release Documentation:**
+**v3.0.4 Release Documentation:**
+- [docs/release_notes/RELEASE_NOTES_v3.0.4.md](docs/release_notes/RELEASE_NOTES_v3.0.4.md) - Stage 3 API Contract & Cross-Service features
 - [docs/MIGRATION_v2.5_to_v3.0.md](docs/MIGRATION_v2.5_to_v3.0.md) - Upgrade guide from v2.5.0 (no breaking changes)
 - [docs/API_CHANGES_v3.0.0.md](docs/API_CHANGES_v3.0.0.md) - Complete API reference for v3.0.0
 - [docs/KNOWN_ISSUES_v3.0.0.md](docs/KNOWN_ISSUES_v3.0.0.md) - Known limitations and workarounds

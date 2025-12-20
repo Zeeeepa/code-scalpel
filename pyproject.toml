@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.0.3"  # [20251219_RELEASE] v3.0.3 "Future Planning" - Complete roadmap with bridge releases
+version = "3.0.4"  # [20251219_RELEASE] v3.0.4 "Ninja Warrior" - Language detection and BOM handling fixes
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

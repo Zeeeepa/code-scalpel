@@ -737,8 +737,188 @@ def _analyze_java_code(code: str) -> AnalysisResult:
         )
 
 
-def _analyze_code_sync(code: str, language: str = "python") -> AnalysisResult:
-    """Synchronous implementation of analyze_code."""
+def _analyze_javascript_code(code: str, is_typescript: bool = False) -> AnalysisResult:
+    """
+    Analyze JavaScript/TypeScript code using tree-sitter.
+    
+    [20251220_FEATURE] v3.0.4 - Multi-language analyze_code support.
+    """
+    try:
+        if is_typescript:
+            import tree_sitter_typescript as ts_ts
+            from tree_sitter import Language, Parser
+            TS_LANGUAGE = Language(ts_ts.language_typescript())
+            parser = Parser(TS_LANGUAGE)
+        else:
+            import tree_sitter_javascript as ts_js
+            from tree_sitter import Language, Parser
+            JS_LANGUAGE = Language(ts_js.language())
+            parser = Parser(JS_LANGUAGE)
+        
+        tree = parser.parse(bytes(code, 'utf-8'))
+        
+        functions = []
+        function_details = []
+        classes = []
+        class_details = []
+        imports = []
+        
+        def walk_tree(node, depth=0):
+            """Walk tree-sitter tree to extract structure."""
+            node_type = node.type
+            
+            # Functions (function declarations, arrow functions, methods)
+            if node_type in ('function_declaration', 'function', 'generator_function_declaration'):
+                name_node = node.child_by_field_name('name')
+                name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+                functions.append(name)
+                function_details.append(
+                    FunctionInfo(
+                        name=name,
+                        lineno=node.start_point[0] + 1,
+                        end_lineno=node.end_point[0] + 1,
+                        is_async=any(c.type == 'async' for c in node.children),
+                    )
+                )
+            
+            # Arrow functions with variable declaration
+            elif node_type == 'lexical_declaration' or node_type == 'variable_declaration':
+                for child in node.children:
+                    if child.type == 'variable_declarator':
+                        name_node = child.child_by_field_name('name')
+                        value_node = child.child_by_field_name('value')
+                        if value_node and value_node.type == 'arrow_function':
+                            name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+                            functions.append(name)
+                            function_details.append(
+                                FunctionInfo(
+                                    name=name,
+                                    lineno=child.start_point[0] + 1,
+                                    end_lineno=child.end_point[0] + 1,
+                                    is_async=any(c.type == 'async' for c in value_node.children),
+                                )
+                            )
+            
+            # Classes
+            elif node_type == 'class_declaration':
+                name_node = node.child_by_field_name('name')
+                name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+                
+                # Extract methods
+                methods = []
+                body_node = node.child_by_field_name('body')
+                if body_node:
+                    for member in body_node.children:
+                        if member.type == 'method_definition':
+                            method_name_node = member.child_by_field_name('name')
+                            if method_name_node:
+                                methods.append(method_name_node.text.decode('utf-8'))
+                
+                classes.append(name)
+                class_details.append(
+                    ClassInfo(
+                        name=name,
+                        lineno=node.start_point[0] + 1,
+                        end_lineno=node.end_point[0] + 1,
+                        methods=methods,
+                    )
+                )
+            
+            # Imports (ES6 import statements)
+            elif node_type == 'import_statement':
+                source_node = node.child_by_field_name('source')
+                if source_node:
+                    module = source_node.text.decode('utf-8').strip('\'"')
+                    imports.append(module)
+            
+            # CommonJS require
+            elif node_type == 'call_expression':
+                func_node = node.child_by_field_name('function')
+                if func_node and func_node.text == b'require':
+                    args_node = node.child_by_field_name('arguments')
+                    if args_node and args_node.children:
+                        for arg in args_node.children:
+                            if arg.type == 'string':
+                                imports.append(arg.text.decode('utf-8').strip('\'"'))
+            
+            # Recurse into children
+            for child in node.children:
+                walk_tree(child, depth + 1)
+        
+        walk_tree(tree.root_node)
+        
+        # Estimate complexity (branches)
+        complexity = 1
+        for node in _walk_ts_tree(tree.root_node):
+            if node.type in ('if_statement', 'while_statement', 'for_statement', 
+                            'for_in_statement', 'catch_clause', 'ternary_expression',
+                            'switch_case'):
+                complexity += 1
+            elif node.type == 'binary_expression':
+                op_node = node.child_by_field_name('operator')
+                if op_node and op_node.text in (b'&&', b'||'):
+                    complexity += 1
+        
+        lang_name = "TypeScript" if is_typescript else "JavaScript"
+        return AnalysisResult(
+            success=True,
+            functions=functions,
+            classes=classes,
+            imports=imports,
+            function_count=len(functions),
+            class_count=len(classes),
+            complexity=complexity,
+            lines_of_code=len(code.splitlines()),
+            issues=[],
+            function_details=function_details,
+            class_details=class_details,
+        )
+    except ImportError as e:
+        lang_name = "TypeScript" if is_typescript else "JavaScript"
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            function_count=0,
+            class_count=0,
+            complexity=0,
+            lines_of_code=0,
+            error=f"{lang_name} support not available. Please install tree-sitter packages: {e}",
+        )
+    except Exception as e:
+        lang_name = "TypeScript" if is_typescript else "JavaScript"
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            function_count=0,
+            class_count=0,
+            complexity=0,
+            lines_of_code=0,
+            error=f"{lang_name} analysis failed: {str(e)}",
+        )
+
+
+def _walk_ts_tree(node):
+    """Generator to walk all nodes in a tree-sitter tree."""
+    yield node
+    for child in node.children:
+        yield from _walk_ts_tree(child)
+
+
+def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
+    """Synchronous implementation of analyze_code.
+    
+    [20251219_BUGFIX] v3.0.4 - Auto-detect language from content if not specified.
+    [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present.
+    [20251220_FEATURE] v3.0.4 - Multi-language support for JavaScript/TypeScript.
+    """
+    # [20251219_BUGFIX] Strip UTF-8 BOM if present
+    if code.startswith('\ufeff'):
+        code = code[1:]
+    
     valid, error = _validate_code(code)
     if not valid:
         return AnalysisResult(
@@ -752,6 +932,18 @@ def _analyze_code_sync(code: str, language: str = "python") -> AnalysisResult:
             lines_of_code=0,
             error=error,
         )
+
+    # [20251219_BUGFIX] v3.0.4 - Auto-detect language from content
+    if language == "auto" or language is None:
+        from code_scalpel.polyglot import detect_language, Language
+        detected = detect_language(None, code)
+        lang_map = {
+            Language.PYTHON: "python",
+            Language.JAVASCRIPT: "javascript",
+            Language.TYPESCRIPT: "typescript", 
+            Language.JAVA: "java",
+        }
+        language = lang_map.get(detected, "python")
 
     # Check cache first
     cache = _get_cache()
@@ -771,6 +963,20 @@ def _analyze_code_sync(code: str, language: str = "python") -> AnalysisResult:
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
 
+    # [20251220_FEATURE] v3.0.4 - Route JavaScript/TypeScript to tree-sitter analyzer
+    if language.lower() == "javascript":
+        result = _analyze_javascript_code(code, is_typescript=False)
+        if cache and result.success:
+            cache.set(code, "analysis", result.model_dump(), cache_config)
+        return result
+    
+    if language.lower() == "typescript":
+        result = _analyze_javascript_code(code, is_typescript=True)
+        if cache and result.success:
+            cache.set(code, "analysis", result.model_dump(), cache_config)
+        return result
+
+    # Python analysis using ast module
     try:
         tree = ast.parse(code)
 
@@ -876,7 +1082,7 @@ def _analyze_code_sync(code: str, language: str = "python") -> AnalysisResult:
 
 
 @mcp.tool()
-async def analyze_code(code: str, language: str = "python") -> AnalysisResult:
+async def analyze_code(code: str, language: str = "auto") -> AnalysisResult:
     """
     Analyze source code structure.
 
@@ -884,9 +1090,12 @@ async def analyze_code(code: str, language: str = "python") -> AnalysisResult:
     of a file before attempting to edit it. This helps prevent hallucinating non-existent
     methods or classes.
 
+    [20251219_BUGFIX] v3.0.4 - Now auto-detects language from code content.
+    
     Args:
         code: Source code to analyze
-        language: Language of the code ("python", "java")
+        language: Language of the code ("auto", "python", "javascript", "typescript", "java")
+                  Default "auto" detects from code content.
 
     Returns:
         Structured analysis result with code metrics and structure
@@ -901,7 +1110,10 @@ def _security_scan_sync(
     Synchronous implementation of security_scan.
 
     [20251214_FEATURE] v2.0.0 - Added file_path parameter support.
+    [20251220_FEATURE] v3.0.4 - Multi-language support via UnifiedSinkDetector
     """
+    detected_language = "python"  # Default to Python
+    
     # Handle file_path parameter
     if file_path is not None:
         try:
@@ -923,6 +1135,16 @@ def _security_scan_sync(
                     error=f"Path is not a file: {file_path}",
                 )
             code = path.read_text(encoding="utf-8")
+            
+            # [20251220_FEATURE] v3.0.4 - Detect language from file extension
+            ext = path.suffix.lower()
+            extension_map = {
+                ".py": "python", ".pyi": "python", ".pyw": "python",
+                ".js": "javascript", ".mjs": "javascript", ".cjs": "javascript", ".jsx": "javascript",
+                ".ts": "typescript", ".tsx": "typescript", ".mts": "typescript", ".cts": "typescript",
+                ".java": "java",
+            }
+            detected_language = extension_map.get(ext, "python")
         except Exception as e:
             return SecurityResult(
                 success=False,
@@ -967,38 +1189,78 @@ def _security_scan_sync(
             return cached
 
     try:
-        # Import here to avoid circular imports
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
-
-        analyzer = SecurityAnalyzer()
-        result = analyzer.analyze(code).to_dict()
-
         vulnerabilities = []
         taint_sources = []
-
-        for vuln in result.get("vulnerabilities", []):
-            # Extract line number from sink_location tuple (line, col)
-            sink_loc = vuln.get("sink_location")
-            line_number = (
-                sink_loc[0]
-                if sink_loc and isinstance(sink_loc, (list, tuple))
-                else None
-            )
-
-            vulnerabilities.append(
-                VulnerabilityInfo(
-                    type=vuln.get("type", "Unknown"),
-                    cwe=vuln.get("cwe", "Unknown"),
-                    severity=vuln.get("severity", "medium"),
-                    line=line_number,
-                    description=vuln.get("description", ""),
+        
+        # [20251220_FEATURE] v3.0.4 - Use UnifiedSinkDetector for non-Python languages
+        if detected_language != "python":
+            # Use unified sink detection for JS/TS/Java
+            detector = UnifiedSinkDetector()
+            detected_sinks = detector.detect_sinks(code, detected_language, min_confidence=0.7)
+            
+            for sink in detected_sinks:
+                vulnerabilities.append(
+                    VulnerabilityInfo(
+                        type=getattr(sink, "vulnerability_type", "") or sink.pattern,
+                        cwe=f"CWE-{_get_cwe_from_sink_type(sink.sink_type)}",
+                        severity="high" if sink.confidence >= 0.9 else "medium",
+                        line=sink.line,
+                        description=f"Detected {sink.pattern} with {sink.confidence:.0%} confidence",
+                    )
                 )
+            
+            # [20251229_FEATURE] v3.0.4 - Type System Evaporation detection for TypeScript
+            if detected_language == "typescript":
+                try:
+                    from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+                        TypeEvaporationDetector,
+                    )
+                    
+                    te_detector = TypeEvaporationDetector()
+                    te_result = te_detector.analyze(code, file_path or "<string>")
+                    
+                    for vuln in te_result.vulnerabilities:
+                        vulnerabilities.append(
+                            VulnerabilityInfo(
+                                type=f"Type Evaporation: {vuln.risk_type.name}",
+                                cwe=vuln.cwe_id,
+                                severity=vuln.severity.lower(),
+                                line=vuln.location[0],
+                                description=vuln.description,
+                            )
+                        )
+                except ImportError:
+                    pass  # Type evaporation detector not available
+        else:
+            # Use full SecurityAnalyzer for Python (supports taint tracking)
+            from code_scalpel.symbolic_execution_tools.security_analyzer import (
+                SecurityAnalyzer,
             )
 
-        for source in result.get("taint_sources", []):
-            taint_sources.append(str(source))
+            analyzer = SecurityAnalyzer()
+            result = analyzer.analyze(code).to_dict()
+
+            for vuln in result.get("vulnerabilities", []):
+                # Extract line number from sink_location tuple (line, col)
+                sink_loc = vuln.get("sink_location")
+                line_number = (
+                    sink_loc[0]
+                    if sink_loc and isinstance(sink_loc, (list, tuple))
+                    else None
+                )
+
+                vulnerabilities.append(
+                    VulnerabilityInfo(
+                        type=vuln.get("type", "Unknown"),
+                        cwe=vuln.get("cwe", "Unknown"),
+                        severity=vuln.get("severity", "medium"),
+                        line=line_number,
+                        description=vuln.get("description", ""),
+                    )
+                )
+
+            for source in result.get("taint_sources", []):
+                taint_sources.append(str(source))
 
         vuln_count = len(vulnerabilities)
         if vuln_count == 0:
@@ -1036,6 +1298,27 @@ def _security_scan_sync(
             risk_level="unknown",
             error=f"Security scan failed: {str(e)}",
         )
+
+
+def _get_cwe_from_sink_type(sink_type) -> str:
+    """[20251220_FEATURE] v3.0.4 - Map sink types to CWE IDs."""
+    cwe_map = {
+        "SQL_QUERY": "89",
+        "HTML_OUTPUT": "79",
+        "DOM_XSS": "79",
+        "FILE_PATH": "22",
+        "SHELL_COMMAND": "78",
+        "EVAL": "94",
+        "DESERIALIZATION": "502",
+        "XXE": "611",
+        "SSRF": "918",
+        "SSTI": "1336",
+        "WEAK_CRYPTO": "327",
+        "PROTOTYPE_POLLUTION": "1321",
+        "HARDCODED_SECRET": "798",
+    }
+    sink_name = getattr(sink_type, "name", str(sink_type))
+    return cwe_map.get(sink_name, "Unknown")
 
 
 # ==========================================================================
@@ -1143,6 +1426,300 @@ async def unified_sink_detect(
     return await asyncio.to_thread(
         _unified_sink_detect_sync, code, language, min_confidence
     )
+
+
+# =============================================================================
+# [20251229_FEATURE] v3.0.4 - Cross-File Type Evaporation Detection
+# =============================================================================
+
+
+class TypeEvaporationResultModel(BaseModel):
+    """Result of type evaporation analysis."""
+
+    success: bool = Field(description="Whether analysis succeeded")
+    frontend_vulnerabilities: int = Field(default=0, description="Number of frontend vulnerabilities")
+    backend_vulnerabilities: int = Field(default=0, description="Number of backend vulnerabilities")
+    cross_file_issues: int = Field(default=0, description="Number of cross-file issues")
+    matched_endpoints: list[str] = Field(default_factory=list, description="Correlated API endpoints")
+    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="All vulnerabilities")
+    summary: str = Field(default="", description="Analysis summary")
+    error: str | None = Field(default=None, description="Error message if failed")
+
+
+def _type_evaporation_scan_sync(
+    frontend_code: str,
+    backend_code: str,
+    frontend_file: str = "frontend.ts",
+    backend_file: str = "backend.py",
+) -> TypeEvaporationResultModel:
+    """
+    Synchronous implementation of cross-file type evaporation analysis.
+    
+    [20251229_FEATURE] v3.0.4 - Ninja Warrior Stage 3.1 Type System Evaporation
+    """
+    try:
+        from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+            analyze_type_evaporation_cross_file,
+        )
+        
+        result = analyze_type_evaporation_cross_file(
+            frontend_code, backend_code, frontend_file, backend_file
+        )
+        
+        all_vulns: List[VulnerabilityInfo] = []
+        
+        # Add frontend vulnerabilities
+        for v in result.frontend_result.vulnerabilities:
+            all_vulns.append(
+                VulnerabilityInfo(
+                    type=f"[Frontend] {v.risk_type.name}",
+                    cwe=v.cwe_id,
+                    severity=v.severity.lower(),
+                    line=v.location[0],
+                    description=v.description,
+                )
+            )
+        
+        # Add backend vulnerabilities
+        for v in result.backend_vulnerabilities:
+            all_vulns.append(
+                VulnerabilityInfo(
+                    type=f"[Backend] {v.vulnerability_type}",
+                    cwe=v.cwe_id,
+                    severity=getattr(v, "severity", "high"),
+                    line=v.sink_location[0] if v.sink_location else None,
+                    description=getattr(v, "description", ""),
+                )
+            )
+        
+        # Add cross-file issues
+        for v in result.cross_file_issues:
+            all_vulns.append(
+                VulnerabilityInfo(
+                    type=f"[Cross-File] {v.risk_type.name}",
+                    cwe=v.cwe_id,
+                    severity=v.severity.lower(),
+                    line=v.location[0],
+                    description=v.description,
+                )
+            )
+        
+        matched = [
+            f"{endpoint}: TS line {ts_line} → Python line {py_line}"
+            for endpoint, ts_line, py_line in result.matched_endpoints
+        ]
+        
+        return TypeEvaporationResultModel(
+            success=True,
+            frontend_vulnerabilities=len(result.frontend_result.vulnerabilities),
+            backend_vulnerabilities=len(result.backend_vulnerabilities),
+            cross_file_issues=len(result.cross_file_issues),
+            matched_endpoints=matched,
+            vulnerabilities=all_vulns,
+            summary=result.summary(),
+        )
+        
+    except ImportError as e:
+        return TypeEvaporationResultModel(
+            success=False,
+            error=f"Type evaporation detector not available: {e}",
+        )
+    except Exception as e:
+        return TypeEvaporationResultModel(
+            success=False,
+            error=f"Analysis failed: {e}",
+        )
+
+
+@mcp.tool()
+async def type_evaporation_scan(
+    frontend_code: str,
+    backend_code: str,
+    frontend_file: str = "frontend.ts",
+    backend_file: str = "backend.py",
+) -> TypeEvaporationResultModel:
+    """
+    Detect Type System Evaporation vulnerabilities across TypeScript frontend and Python backend.
+    
+    [20251229_FEATURE] v3.0.4 - Ninja Warrior Stage 3.1
+    
+    Type System Evaporation occurs when TypeScript compile-time types (like union types)
+    are trusted but evaporate at serialization boundaries (JSON.stringify).
+    
+    This tool analyzes:
+    - TypeScript frontend: unsafe type assertions, DOM input, fetch boundaries
+    - Python backend: unvalidated external input in HTTP responses  
+    - Cross-file: correlates TS fetch() endpoints with Python @app.route() decorators
+    
+    Example vulnerability:
+        Frontend: type Role = 'admin' | 'user'; const role = input.value as Role;
+        Backend: role = request.get_json()['role']  # No validation!
+        
+    The TypeScript type provides NO runtime enforcement - attacker can send any value.
+    
+    Args:
+        frontend_code: TypeScript/JavaScript frontend code
+        backend_code: Python backend code
+        frontend_file: Frontend filename for error messages
+        backend_file: Backend filename for error messages
+        
+    Returns:
+        TypeEvaporationResultModel with frontend, backend, and cross-file vulnerabilities.
+    """
+    return await asyncio.to_thread(
+        _type_evaporation_scan_sync,
+        frontend_code,
+        backend_code,
+        frontend_file,
+        backend_file,
+    )
+
+
+# =============================================================================
+# [20251219_FEATURE] v3.0.4 - A06 Vulnerable Components Detection (OSV API)
+# =============================================================================
+
+
+class VulnerabilityFindingModel(BaseModel):
+    """A vulnerability found in a dependency."""
+    
+    id: str = Field(description="OSV vulnerability ID (e.g., GHSA-xxxx-xxxx-xxxx)")
+    cve_id: str | None = Field(default=None, description="CVE ID if available")
+    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    package_name: str = Field(description="Name of the vulnerable package")
+    package_version: str = Field(description="Version of the vulnerable package")
+    ecosystem: str = Field(description="Package ecosystem (npm, Maven, PyPI)")
+    summary: str = Field(default="", description="Brief description of the vulnerability")
+    fixed_versions: list[str] = Field(default_factory=list, description="Versions that fix this vulnerability")
+    source_file: str = Field(default="", description="Dependency file where package was found")
+
+
+class DependencyScanResultModel(BaseModel):
+    """Result of a dependency vulnerability scan."""
+    
+    success: bool = Field(description="Whether the scan completed successfully")
+    dependencies_scanned: int = Field(default=0, description="Number of dependencies checked")
+    vulnerabilities_found: int = Field(default=0, description="Number of vulnerabilities found")
+    critical_count: int = Field(default=0, description="Number of CRITICAL severity")
+    high_count: int = Field(default=0, description="Number of HIGH severity")
+    medium_count: int = Field(default=0, description="Number of MEDIUM severity")
+    low_count: int = Field(default=0, description="Number of LOW severity")
+    findings: list[VulnerabilityFindingModel] = Field(default_factory=list, description="Detailed findings")
+    errors: list[str] = Field(default_factory=list, description="Errors encountered during scan")
+    summary: str = Field(default="", description="Human-readable summary")
+
+
+def _scan_dependencies_sync(path: str) -> DependencyScanResultModel:
+    """
+    Synchronous implementation of dependency vulnerability scanning.
+    
+    [20251219_FEATURE] v3.0.4 - A06 Vulnerable Components
+    """
+    try:
+        from code_scalpel.symbolic_execution_tools.vulnerability_scanner import (
+            VulnerabilityScanner,
+        )
+        
+        resolved_path = Path(path)
+        if not resolved_path.is_absolute():
+            resolved_path = PROJECT_ROOT / path
+        
+        if not resolved_path.exists():
+            return DependencyScanResultModel(
+                success=False,
+                errors=[f"Path not found: {path}"],
+            )
+        
+        with VulnerabilityScanner() as scanner:
+            if resolved_path.is_file():
+                result = scanner.scan_file(resolved_path)
+            else:
+                result = scanner.scan_directory(resolved_path)
+        
+        # Convert to Pydantic models and count severities
+        findings = []
+        severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
+        
+        for f in result.findings:
+            findings.append(VulnerabilityFindingModel(
+                id=f.id,
+                cve_id=f.cve_id,
+                severity=f.severity,
+                package_name=f.package_name,
+                package_version=f.package_version,
+                ecosystem=f.ecosystem,
+                summary=f.summary,
+                fixed_versions=f.fixed_versions,
+                source_file=f.source_file,
+            ))
+            if f.severity in severity_counts:
+                severity_counts[f.severity] += 1
+        
+        # Generate summary
+        if result.vulnerabilities_found == 0:
+            summary = f"✅ No vulnerabilities found in {result.dependencies_scanned} dependencies."
+        else:
+            summary = (
+                f"⚠️ Found {result.vulnerabilities_found} vulnerabilities in "
+                f"{result.dependencies_scanned} dependencies: "
+                f"{severity_counts['CRITICAL']} critical, {severity_counts['HIGH']} high, "
+                f"{severity_counts['MEDIUM']} medium, {severity_counts['LOW']} low."
+            )
+        
+        return DependencyScanResultModel(
+            success=True,
+            dependencies_scanned=result.dependencies_scanned,
+            vulnerabilities_found=result.vulnerabilities_found,
+            critical_count=severity_counts["CRITICAL"],
+            high_count=severity_counts["HIGH"],
+            medium_count=severity_counts["MEDIUM"],
+            low_count=severity_counts["LOW"],
+            findings=findings,
+            errors=result.errors,
+            summary=summary,
+        )
+        
+    except ImportError as e:
+        return DependencyScanResultModel(
+            success=False,
+            errors=[f"Vulnerability scanner not available: {e}"],
+        )
+    except Exception as e:
+        return DependencyScanResultModel(
+            success=False,
+            errors=[f"Scan failed: {e}"],
+        )
+
+
+@mcp.tool()
+async def scan_dependencies(path: str) -> DependencyScanResultModel:
+    """
+    Scan project dependencies for known vulnerabilities (A06:2021 - Vulnerable Components).
+    
+    [20251219_FEATURE] v3.0.4 - A06 Vulnerable and Outdated Components
+    
+    This tool scans dependency files and checks them against the Google OSV
+    (Open Source Vulnerabilities) database for known CVEs and security advisories.
+    
+    Supported dependency files:
+    - npm: package.json
+    - Maven: pom.xml, build.gradle  
+    - Python: requirements.txt, pyproject.toml
+    
+    Example usage:
+    - Scan a single file: scan_dependencies("package.json")
+    - Scan a project directory: scan_dependencies("/path/to/project")
+    
+    The scan will recursively find all dependency files in a directory,
+    skipping node_modules and .venv directories.
+    
+    Args:
+        path: Path to a dependency file or project directory
+        
+    Returns:
+        DependencyScanResultModel with vulnerability findings, severity counts, and remediation info.
+    """
+    return await asyncio.to_thread(_scan_dependencies_sync, path)
 
 
 @mcp.tool()
@@ -5445,6 +6022,8 @@ def _cross_file_security_scan_sync(
     entry_points: list[str] | None,
     max_depth: int,
     include_diagram: bool,
+    timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
+    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
     from code_scalpel.symbolic_execution_tools.cross_file_taint import (
@@ -5461,7 +6040,13 @@ def _cross_file_security_scan_sync(
 
     try:
         tracker = CrossFileTaintTracker(root_path)
-        result = tracker.analyze(entry_points=entry_points, max_depth=max_depth)
+        # [20251220_PERF] Pass timeout and module limit to prevent hanging
+        result = tracker.analyze(
+            entry_points=entry_points, 
+            max_depth=max_depth,
+            timeout_seconds=timeout_seconds,
+            max_modules=max_modules,
+        )
 
         # Helper to get file path from module name
         def get_file_for_module(module: str) -> str:
@@ -5597,6 +6182,8 @@ async def cross_file_security_scan(
     entry_points: list[str] | None = None,
     max_depth: int = 5,
     include_diagram: bool = True,
+    timeout_seconds: float | None = 120.0,
+    max_modules: int | None = 500,
     ctx: Context | None = None,
 ) -> CrossFileSecurityResult:
     """
@@ -5608,6 +6195,9 @@ async def cross_file_security_scan(
 
     [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
     Reports progress during file discovery and taint analysis phases.
+    
+    [20251220_PERF] v3.0.4 - Added timeout and module limits to prevent hanging
+    on large codebases with circular imports.
 
     Key capabilities:
     - Track taint flow through function calls across files
@@ -5634,6 +6224,10 @@ async def cross_file_security_scan(
                      If None, analyzes all detected entry points
         max_depth: Maximum call depth to trace (default: 5)
         include_diagram: Include Mermaid diagram of taint flows (default: True)
+        timeout_seconds: Maximum time in seconds for analysis (default: 120)
+                        Set to None for no timeout (not recommended for large projects)
+        max_modules: Maximum number of modules to analyze (default: 500)
+                    Set to None for no limit (not recommended for large projects)
 
     Returns:
         CrossFileSecurityResult with vulnerabilities, taint flows, and risk assessment
@@ -5649,6 +6243,8 @@ async def cross_file_security_scan(
         entry_points,
         max_depth,
         include_diagram,
+        timeout_seconds,
+        max_modules,
     )
 
     # Report completion
@@ -5809,10 +6405,13 @@ def _verify_policy_integrity_sync(
 
     [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
     """
+    # Import SecurityError at module scope so it's available for exception handling
+    # even if other imports fail
+    from code_scalpel.policy_engine.crypto_verify import SecurityError
+    
     try:
         from code_scalpel.policy_engine import (
             CryptographicPolicyVerifier,
-            SecurityError,
         )
 
         dir_path = policy_dir or ".code-scalpel"

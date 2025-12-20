@@ -190,6 +190,8 @@ TAINT_SOURCES = {
     "request.form.get": CrossFileTaintSource.RETURN_VALUE,
     "request.data": CrossFileTaintSource.RETURN_VALUE,
     "request.json": CrossFileTaintSource.RETURN_VALUE,
+    "request.get_json": CrossFileTaintSource.RETURN_VALUE,  # [20251220_FEATURE] v3.0.4 - Flask method form
+    "request.get_data": CrossFileTaintSource.RETURN_VALUE,  # [20251220_FEATURE] v3.0.4 - Flask method form
     "request.cookies.get": CrossFileTaintSource.RETURN_VALUE,
     "request.headers.get": CrossFileTaintSource.RETURN_VALUE,
     "request.GET.get": CrossFileTaintSource.RETURN_VALUE,  # Django
@@ -355,6 +357,8 @@ class CrossFileTaintTracker:
         self,
         entry_points: Optional[List[str]] = None,
         max_depth: int = 5,
+        timeout_seconds: Optional[float] = None,
+        max_modules: Optional[int] = None,
     ) -> CrossFileTaintResult:
         """
         Perform cross-file taint analysis.
@@ -362,10 +366,20 @@ class CrossFileTaintTracker:
         Args:
             entry_points: Optional list of entry point files/functions
             max_depth: Maximum depth to follow taint flows
+            timeout_seconds: Optional timeout in seconds (default: None = no timeout)
+            max_modules: Optional limit on modules to analyze (for large projects)
 
         Returns:
             CrossFileTaintResult with detected vulnerabilities
         """
+        import time
+        start_time = time.time()
+        
+        def check_timeout():
+            """Check if timeout exceeded and raise if so."""
+            if timeout_seconds and (time.time() - start_time) > timeout_seconds:
+                raise TimeoutError(f"Analysis timeout after {timeout_seconds}s")
+        
         if not self._built:
             if not self.build():
                 return CrossFileTaintResult(
@@ -375,17 +389,36 @@ class CrossFileTaintTracker:
         result = CrossFileTaintResult()
 
         try:
+            # Get modules to analyze (optionally limited)
+            modules_to_analyze = list(self.resolver.module_to_file.items())
+            if max_modules and len(modules_to_analyze) > max_modules:
+                result.warnings.append(
+                    f"Limiting analysis to {max_modules} of {len(modules_to_analyze)} modules"
+                )
+                modules_to_analyze = modules_to_analyze[:max_modules]
+            
             # Phase 1: Analyze each module for local taint sources and sinks
-            for module, file_path in self.resolver.module_to_file.items():
+            for module, file_path in modules_to_analyze:
+                check_timeout()
                 self._analyze_module_taint(module, file_path, result)
 
             # [20251215_BUGFIX] v2.0.1 - Phase 1.5: Propagate returns_tainted through import chains
             # This handles multi-hop taint tracking (A->B->C) by iteratively re-analyzing
-            self._propagate_taint_through_imports(result, max_iterations=max_depth)
+            # [20251220_PERF] Limit iterations and add timeout check
+            effective_iterations = min(max_depth, 3)  # Cap at 3 iterations for performance
+            self._propagate_taint_through_imports(
+                result, 
+                max_iterations=effective_iterations,
+                timeout_check=check_timeout
+            )
 
+            check_timeout()
+            
             # Phase 2: Build call graph and track cross-module calls
             self._build_cross_module_calls(result)
 
+            check_timeout()
+            
             # Phase 3: Trace taint flows across modules
             self._trace_cross_file_flows(result, max_depth)
 
@@ -396,9 +429,15 @@ class CrossFileTaintTracker:
             # Phase 4: Identify vulnerabilities from taint flows
             self._identify_vulnerabilities(result)
 
-            result.modules_analyzed = len(self.resolver.module_to_file)
+            result.modules_analyzed = len(modules_to_analyze)
             result.success = True
 
+        except TimeoutError as e:
+            result.errors.append(str(e))
+            result.success = False
+            # Still report partial results
+            self._identify_vulnerabilities(result)
+            result.warnings.append("Analysis incomplete due to timeout - partial results returned")
         except Exception as e:
             result.errors.append(f"Analysis failed: {e}")
             result.success = False
@@ -454,10 +493,14 @@ class CrossFileTaintTracker:
         return (module, func_name, 0)
 
     def _propagate_taint_through_imports(
-        self, result: CrossFileTaintResult, max_iterations: int = 5
+        self, 
+        result: CrossFileTaintResult, 
+        max_iterations: int = 5,
+        timeout_check: Optional[callable] = None,
     ) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Multi-pass propagation of returns_tainted through import chains.
+        [20251220_PERF] v3.0.4 - Optimized to cache function nodes and only re-analyze changed modules.
 
         This handles cases like:
             source.py: get_user_input() -> returns request.args.get() [tainted]
@@ -466,32 +509,41 @@ class CrossFileTaintTracker:
 
         We iterate until no new taints are discovered (fixpoint).
         """
+        # [20251220_PERF] Pre-cache function nodes to avoid repeated ast.walk()
+        module_func_nodes: Dict[str, List[ast.AST]] = {}
+        for module, file_path in self.resolver.module_to_file.items():
+            tree = self._get_file_ast(file_path)
+            if tree:
+                func_nodes = [
+                    node for node in ast.walk(tree)
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                ]
+                module_func_nodes[module] = func_nodes
+        
         for iteration in range(max_iterations):
+            if timeout_check:
+                timeout_check()
+                
             changed = False
 
             # For each module, re-analyze functions that call imported tainted functions
-            for module, file_path in self.resolver.module_to_file.items():
-                tree = self._get_file_ast(file_path)
-                if not tree:
-                    continue
+            for module, func_nodes in module_func_nodes.items():
+                for node in func_nodes:
+                    func_info = self.function_taint_info.get(module, {}).get(
+                        node.name
+                    )
+                    if func_info and not func_info.returns_tainted:
+                        # Re-analyze with updated taint info
+                        old_tainted_vars = len(func_info.tainted_variables)
+                        visitor = FunctionTaintVisitor(func_info, self)
+                        visitor.visit(node)
 
-                for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        func_info = self.function_taint_info.get(module, {}).get(
-                            node.name
-                        )
-                        if func_info and not func_info.returns_tainted:
-                            # Re-analyze with updated taint info
-                            old_tainted_vars = len(func_info.tainted_variables)
-                            visitor = FunctionTaintVisitor(func_info, self)
-                            visitor.visit(node)
-
-                            # Check if taint status changed
-                            if (
-                                func_info.returns_tainted
-                                or len(func_info.tainted_variables) > old_tainted_vars
-                            ):
-                                changed = True
+                        # Check if taint status changed
+                        if (
+                            func_info.returns_tainted
+                            or len(func_info.tainted_variables) > old_tainted_vars
+                        ):
+                            changed = True
 
             # Fixpoint reached - no new taints discovered
             if not changed:

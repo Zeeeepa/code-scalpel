@@ -26,13 +26,24 @@ def analyze_file(
         print(f"Error: File not found: {filepath}", file=sys.stderr)
         return 1
 
+    # [20251219_BUGFIX] v3.0.4 - Extended language detection for TS/JSX/TSX
     if language is None:
-        if path.suffix == ".py":
-            language = "python"
-        elif path.suffix == ".js":
-            language = "javascript"
-        elif path.suffix == ".java":
-            language = "java"
+        ext = path.suffix.lower()
+        extension_map = {
+            ".py": "python",
+            ".pyw": "python",
+            ".js": "javascript",
+            ".mjs": "javascript",
+            ".cjs": "javascript",
+            ".jsx": "javascript",
+            ".ts": "typescript",
+            ".tsx": "typescript",
+            ".mts": "typescript",
+            ".cts": "typescript",
+            ".java": "java",
+        }
+        if ext in extension_map:
+            language = extension_map[ext]
         else:
             print(
                 f"Warning: Unknown extension {path.suffix}, defaulting to Python",
@@ -42,6 +53,9 @@ def analyze_file(
 
     try:
         code = path.read_text(encoding="utf-8")
+        # [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present
+        if code.startswith('\ufeff'):
+            code = code[1:]
     except Exception as e:
         print(f"Error reading file: {e}", file=sys.stderr)
         return 1

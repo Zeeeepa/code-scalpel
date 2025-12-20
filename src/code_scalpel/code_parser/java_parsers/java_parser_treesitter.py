@@ -5,8 +5,8 @@ from tree_sitter import Language, Parser
 class JavaParser:
     def __init__(self):
         self.JAVA_LANGUAGE = Language(tree_sitter_java.language())
-        self.parser = Parser()
-        self.parser.set_language(self.JAVA_LANGUAGE)
+        # [20251220_BUGFIX] v3.0.4 - Use new tree-sitter API (Parser(language))
+        self.parser = Parser(self.JAVA_LANGUAGE)
 
     def parse(self, code: str) -> dict:
         tree = self.parser.parse(bytes(code, "utf8"))
