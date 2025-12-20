@@ -1146,14 +1146,37 @@ async def analyze_code(code: str, language: str = "auto") -> AnalysisResult:
     methods or classes.
 
     [20251219_BUGFIX] v3.0.4 - Now auto-detects language from code content.
-    
+
+    Example::
+
+        result = await analyze_code('''
+        import math
+        
+        class Calculator:
+            def add(self, a: int, b: int) -> int:
+                return a + b
+        
+        def helper(x):
+            if x > 10:
+                return x * 2
+            return x
+        ''')
+        
+        # Returns AnalysisResult:
+        # - functions: ["helper"]
+        # - classes: ["Calculator"]
+        # - imports: ["math"]
+        # - complexity_score: 2 (one branch in helper)
+        # - has_main: False
+        # - lines_of_code: 10
+
     Args:
         code: Source code to analyze
         language: Language of the code ("auto", "python", "javascript", "typescript", "java")
                   Default "auto" detects from code content.
 
     Returns:
-        Structured analysis result with code metrics and structure
+        AnalysisResult with functions, classes, imports, complexity_score, and metrics
     """
     return await asyncio.to_thread(_analyze_code_sync, code, language)
 
@@ -1476,8 +1499,32 @@ async def unified_sink_detect(
     """
     Unified polyglot sink detection with confidence thresholds.
 
+    Sinks are dangerous functions where untrusted data should never reach directly
+    (e.g., eval(), execute(), os.system()). This tool detects sinks across multiple
+    languages and maps them to CWE identifiers.
+
     [20251216_FEATURE] v2.5.0 "Guardian" - Expose unified sink detector via MCP.
     [20251220_BUGFIX] v3.0.5 - Use DEFAULT_MIN_CONFIDENCE for consistency.
+
+    Example::
+
+        result = await unified_sink_detect(
+            code="eval(user_input)",
+            language="python"
+        )
+        
+        # Returns UnifiedSinkResult:
+        # - sinks: [SinkInfo(name="eval", line=1, cwe="CWE-94", confidence=0.95)]
+        # - sink_count: 1
+        # - coverage: {"code_injection": True, "sql_injection": False, ...}
+        # - language: "python"
+
+        # Multi-language support:
+        js_result = await unified_sink_detect(
+            code="document.innerHTML = userInput;",
+            language="javascript"
+        )
+        # Detects XSS sink with CWE-79
 
     Args:
         code: Source code to analyze
@@ -1485,7 +1532,7 @@ async def unified_sink_detect(
         min_confidence: Minimum confidence threshold (0.0-1.0, default: 0.7)
 
     Returns:
-        UnifiedSinkResult with detected sinks and coverage summary.
+        UnifiedSinkResult with detected sinks, CWE mappings, and coverage summary
     """
 
     return await asyncio.to_thread(
@@ -1502,6 +1549,7 @@ class TypeEvaporationResultModel(BaseModel):
     """Result of type evaporation analysis."""
 
     success: bool = Field(description="Whether analysis succeeded")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
     frontend_vulnerabilities: int = Field(default=0, description="Number of frontend vulnerabilities")
     backend_vulnerabilities: int = Field(default=0, description="Number of backend vulnerabilities")
     cross_file_issues: int = Field(default=0, description="Number of cross-file issues")
@@ -1663,6 +1711,8 @@ class DependencyScanResultModel(BaseModel):
     """Result of a dependency vulnerability scan."""
     
     success: bool = Field(description="Whether the scan completed successfully")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    error: str | None = Field(default=None, description="Error message if failed")
     dependencies_scanned: int = Field(default=0, description="Number of dependencies checked")
     vulnerabilities_found: int = Field(default=0, description="Number of vulnerabilities found")
     critical_count: int = Field(default=0, description="Number of CRITICAL severity")
@@ -1830,12 +1880,38 @@ async def security_scan(
     - Weak Cryptography (CWE-327) - MD5, SHA-1 [v2.0.0]
     - Dangerous Patterns - shell=True, eval(), pickle [v2.0.0]
 
+    Example::
+
+        # Scan code directly
+        result = await security_scan(code='''
+        def get_user(user_id):
+            query = f"SELECT * FROM users WHERE id = {user_id}"
+            cursor.execute(query)  # SQL Injection!
+        ''')
+        
+        # Returns SecurityResult:
+        # - has_vulnerabilities: True
+        # - vulnerability_count: 1
+        # - risk_level: "high"
+        # - vulnerabilities: [
+        #     VulnerabilityInfo(
+        #         type="SQL Injection",
+        #         cwe="CWE-89",
+        #         line=3,
+        #         description="Tainted data flows to SQL execution"
+        #     )
+        # ]
+        # - taint_flows: [{source: "user_id", sink: "execute", path: [...]}]
+        
+        # Or scan a file
+        result = await security_scan(file_path="/app/handlers/user.py")
+
     Args:
         code: Python source code to scan (provide either code or file_path)
         file_path: Path to Python file to scan (provide either code or file_path)
 
     Returns:
-        Security analysis result with vulnerabilities and risk assessment
+        SecurityResult with vulnerabilities, risk_level, taint_flows, and remediation hints
     """
     return await asyncio.to_thread(_security_scan_sync, code, file_path)
 
@@ -2017,12 +2093,48 @@ async def symbolic_execute(code: str, max_paths: int = 10) -> SymbolicResult:
     It treats variables as symbolic values and uses a Z3 solver to find inputs that
     trigger specific paths.
 
+    Example::
+
+        result = await symbolic_execute('''
+        def check_bounds(x, y):
+            if x > 100:
+                if y < 0:
+                    return "danger"  # Path we want to find
+                return "warning"
+            return "safe"
+        ''')
+        
+        # Returns SymbolicResult:
+        # - paths_explored: 3
+        # - paths: [
+        #     ExecutionPath(
+        #         path_id=0,
+        #         conditions=["x > 100", "y < 0"],
+        #         reproduction_input={"x": 101, "y": -1},  # Triggers "danger" path
+        #         is_reachable=True
+        #     ),
+        #     ExecutionPath(
+        #         path_id=1,
+        #         conditions=["x > 100", "y >= 0"],
+        #         reproduction_input={"x": 101, "y": 0},  # Triggers "warning" path
+        #         is_reachable=True
+        #     ),
+        #     ExecutionPath(
+        #         path_id=2,
+        #         conditions=["x <= 100"],
+        #         reproduction_input={"x": 50},  # Triggers "safe" path
+        #         is_reachable=True
+        #     )
+        # ]
+        # - symbolic_variables: ["x", "y"]
+        # - constraints: ["x > 100", "y < 0", "y >= 0", "x <= 100"]
+
     Args:
         code: Python source code to analyze
         max_paths: Maximum number of paths to explore (default: 10)
 
     Returns:
-        Symbolic execution result with discovered paths, constraints, and reproduction inputs
+        SymbolicResult with paths, reproduction_input for each path, and symbolic constraints
     """
     return await asyncio.to_thread(_symbolic_execute_sync, code, max_paths)
 
@@ -2187,6 +2299,40 @@ async def generate_unit_tests(
     
     [20251220_FIX] v3.0.5 - Added file_path parameter for consistency with other tools.
 
+    Example::
+
+        result = await generate_unit_tests(
+            code='''
+            def calculate_discount(price, is_member):
+                if price > 100:
+                    if is_member:
+                        return price * 0.8  # 20% off for members
+                    return price * 0.9  # 10% off
+                return price  # No discount
+            ''',
+            framework="pytest"
+        )
+        
+        # Returns TestGenerationResult:
+        # - pytest_code: '''
+        #     import pytest
+        #     
+        #     def test_calculate_discount_member_high_price():
+        #         assert calculate_discount(150, True) == 120.0
+        #     
+        #     def test_calculate_discount_non_member_high_price():
+        #         assert calculate_discount(150, False) == 135.0
+        #     
+        #     def test_calculate_discount_low_price():
+        #         assert calculate_discount(50, True) == 50
+        #   '''
+        # - test_cases: [
+        #     GeneratedTestCase(inputs={"price": 150, "is_member": True}, ...),
+        #     GeneratedTestCase(inputs={"price": 150, "is_member": False}, ...),
+        #     GeneratedTestCase(inputs={"price": 50, "is_member": True}, ...)
+        # ]
+        # - coverage_paths: 3
+
     Args:
         code: Source code containing the function to test (provide code or file_path)
         file_path: Path to file containing the function to test (provide code or file_path)
@@ -2194,7 +2340,7 @@ async def generate_unit_tests(
         framework: Test framework ("pytest" or "unittest")
 
     Returns:
-        Test generation result with generated test code and test cases
+        TestGenerationResult with pytest_code/unittest_code and generated test_cases
     """
     return await asyncio.to_thread(_generate_tests_sync, code, file_path, function_name, framework)
 
@@ -2283,6 +2429,38 @@ async def simulate_refactor(
 
     Provide either the new_code directly OR a unified diff patch.
 
+    Example::
+
+        # Check if a refactor introduces vulnerabilities
+        result = await simulate_refactor(
+            original_code='''
+            def process_data(data):
+                return sanitize(data)
+            ''',
+            new_code='''
+            def process_data(data):
+                return eval(data)  # Dangerous change!
+            '''
+        )
+        
+        # Returns RefactorSimulationResult:
+        # - is_safe: False
+        # - status: "unsafe"
+        # - security_issues: [
+        #     {"type": "Code Injection", "cwe": "CWE-94", 
+        #      "description": "eval() introduced in refactor"}
+        # ]
+        # - structural_changes: [
+        #     {"type": "function_body_changed", "name": "process_data"}
+        # ]
+        
+        # Safe refactor example
+        safe_result = await simulate_refactor(
+            original_code="def add(a, b): return a + b",
+            new_code="def add(a: int, b: int) -> int: return a + b"
+        )
+        # is_safe: True, status: "safe"
+
     Args:
         original_code: The original source code
         new_code: The modified code to compare against (optional)
@@ -2290,7 +2468,7 @@ async def simulate_refactor(
         strict_mode: If True, treat warnings as unsafe
 
     Returns:
-        Simulation result with safety verdict and any issues found
+        RefactorSimulationResult with is_safe verdict, security_issues, and structural_changes
     """
     return await asyncio.to_thread(
         _simulate_refactor_sync, original_code, new_code, patch, strict_mode
@@ -3012,6 +3190,33 @@ async def crawl_project(
     [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
     Reports progress as files are discovered and analyzed.
 
+    Example::
+
+        result = await crawl_project(
+            root_path="/home/user/myproject",
+            complexity_threshold=8,
+            include_report=True
+        )
+        
+        # Returns ProjectCrawlResult:
+        # - summary: ProjectSummary(
+        #     total_files=42,
+        #     total_lines=5680,
+        #     total_functions=187,
+        #     total_classes=23,
+        #     average_complexity=4.2
+        # )
+        # - files: [CrawlFileResult(path="src/main.py", ...), ...]
+        # - complexity_hotspots: [
+        #     CrawlFunctionInfo(name="parse_config", complexity=15, lineno=42),
+        #     CrawlFunctionInfo(name="process_batch", complexity=12, lineno=156)
+        # ]
+        # - markdown_report: "# Project Analysis Report\n\n## Summary\n..."
+        
+        # Find files exceeding complexity threshold
+        for hotspot in result.complexity_hotspots:
+            print(f"{hotspot.name}: complexity {hotspot.complexity}")
+
     Args:
         root_path: Path to project root (defaults to current working directory)
         exclude_dirs: Additional directories to exclude (common ones already excluded)
@@ -3019,7 +3224,7 @@ async def crawl_project(
         include_report: Include a markdown report in the response (default: True)
 
     Returns:
-        Project crawl result with file analysis, summary statistics, and optional report
+        ProjectCrawlResult with files, summary stats, complexity_hotspots, and markdown_report
     """
     if root_path is None:
         root_path = str(PROJECT_ROOT)
@@ -4504,11 +4709,32 @@ async def get_file_context(file_path: str) -> FileContextResult:
     - Understand file structure without token overhead
     - Make informed decisions about which functions to modify
 
+    Example::
+
+        result = await get_file_context("src/services/payment.py")
+        
+        # Returns FileContextResult:
+        # - file_path: "src/services/payment.py"
+        # - functions: ["process_payment", "validate_card", "refund_transaction"]
+        # - classes: ["PaymentProcessor", "PaymentError"]
+        # - imports: ["stripe", "decimal.Decimal", "datetime"]
+        # - complexity_score: 8
+        # - line_count: 245
+        # - has_security_issues: True
+        # - security_warnings: ["Potential SQL injection at line 87"]
+        # - docstring: "Payment processing service for Stripe integration."
+        
+        # Use to decide if file is relevant
+        if "payment" in result.functions or result.has_security_issues:
+            # Now extract specific functions
+            code = await extract_code(file_path, symbol_name="process_payment")
+
     Args:
-        file_path: Path to the Python file (absolute or relative to project root)
+        file_path: Path to the file (absolute or relative to project root)
+                   Supports: .py, .js, .ts, .java, .go, .rs, .rb, .php
 
     Returns:
-        FileContextResult with file overview and metadata
+        FileContextResult with functions, classes, imports, complexity, and security warnings
     """
     return await asyncio.to_thread(_get_file_context_sync, file_path)
 
@@ -4653,12 +4879,43 @@ async def get_symbol_references(
     - Impact analysis: understand blast radius of changes
     - No hallucination: real references, not guessed ones
 
+    Example::
+
+        result = await get_symbol_references("process_order")
+        
+        # Returns SymbolReferencesResult:
+        # - symbol_name: "process_order"
+        # - definition_file: "services/order.py"
+        # - definition_line: 42
+        # - total_references: 7
+        # - references: [
+        #     SymbolReference(
+        #         file="handlers/api.py",
+        #         line=156,
+        #         column=8,
+        #         context="        result = process_order(order_data)",
+        #         is_definition=False
+        #     ),
+        #     SymbolReference(
+        #         file="tests/test_order.py",
+        #         line=23,
+        #         column=4,
+        #         context="    process_order(mock_order)",
+        #         is_definition=False
+        #     ),
+        #     ...
+        # ]
+        
+        # Before changing function signature, check all call sites
+        if result.total_references > 0:
+            print(f"Warning: {result.total_references} call sites to update")
+
     Args:
         symbol_name: Name of the function, class, or variable to search for
         project_root: Project root directory (default: server's project root)
 
     Returns:
-        SymbolReferencesResult with definition location and all references
+        SymbolReferencesResult with definition_file, definition_line, and all references
     """
     # [20251220_FEATURE] v3.0.5 - Progress reporting for file scanning
     if ctx:
@@ -6262,6 +6519,8 @@ class PathValidationResult(BaseModel):
     """Result of path validation."""
 
     success: bool = Field(description="Whether all paths were accessible")
+    server_version: str = Field(default=__version__, description="Code Scalpel version")
+    error: str | None = Field(default=None, description="Error message if failed")
     accessible: list[str] = Field(
         default_factory=list, description="Paths that were successfully resolved"
     )
@@ -6344,23 +6603,39 @@ async def validate_paths(
     - Before crawl_project: Check project root is mounted
     - Troubleshooting: Help users configure Docker volumes
 
-    Example:
-        # Check if files are accessible
-        result = validate_paths([
+    Example::
+
+        result = await validate_paths([
             "/home/user/project/main.py",
+            "/nonexistent/file.py",
             "utils/helpers.py"
         ])
-
-        if not result.success:
-            print("Inaccessible:", result.inaccessible)
-            print("Suggestions:", result.suggestions)
+        
+        # Returns PathValidationResult:
+        # - success: False (not all paths accessible)
+        # - accessible: ["/home/user/project/main.py", "utils/helpers.py"]
+        # - inaccessible: ["/nonexistent/file.py"]
+        # - suggestions: [
+        #     "File not found: /nonexistent/file.py",
+        #     "Check if the path exists and is spelled correctly"
+        # ]
+        # - workspace_roots: ["/home/user/project"]
+        # - is_docker: False
+        
+        # In Docker environment:
+        docker_result = await validate_paths(["/app/src/main.py"])
+        # - is_docker: True
+        # - suggestions: [
+        #     "Running in Docker: Mount your project with -v /path/to/project:/app",
+        #     "Example: docker run -v $(pwd):/app code-scalpel:latest"
+        # ]
 
     Args:
         paths: List of file paths to validate
         project_root: Optional explicit project root directory
 
     Returns:
-        PathValidationResult with accessible/inaccessible paths and suggestions
+        PathValidationResult with accessible, inaccessible, suggestions, workspace_roots, is_docker
     """
     return await asyncio.to_thread(_validate_paths_sync, paths, project_root)
 
