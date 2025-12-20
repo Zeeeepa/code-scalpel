@@ -160,11 +160,11 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
 # Stores UniversalGraph objects keyed by project root path
 # Format: {project_root_str: (UniversalGraph, timestamp)}
 # [20251220_PERF] v3.0.5 - Increased cache TTL from 60s to 300s for large codebases
-_GRAPH_CACHE: dict[str, tuple["UniversalGraph", float]] = {}  # type: ignore
+_GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
 
 
-def _get_cached_graph(project_root: Path) -> "UniversalGraph | None":  # type: ignore
+def _get_cached_graph(project_root: Path) -> UniversalGraph | None:  # type: ignore[name-defined]
     """Get cached UniversalGraph for project if still valid."""
     import time
 
@@ -181,7 +181,7 @@ def _get_cached_graph(project_root: Path) -> "UniversalGraph | None":  # type: i
     return None
 
 
-def _cache_graph(project_root: Path, graph: "UniversalGraph") -> None:  # type: ignore
+def _cache_graph(project_root: Path, graph: UniversalGraph) -> None:  # type: ignore[name-defined]
     """Cache a UniversalGraph for a project."""
     import time
 

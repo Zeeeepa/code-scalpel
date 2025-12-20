@@ -25,7 +25,7 @@ Command-line:
     python -m code_scalpel.error_scanner --path src/ --format json
 """
 
-
+from __future__ import annotations
 
 import json
 import logging
@@ -33,7 +33,7 @@ import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -290,8 +290,6 @@ class ErrorScanner:
 
         # Try flake8 for linting
         try:
-            import subprocess
-
             for file_path in files:
                 errors = self._parse_flake8_errors(str(file_path))
                 if errors:
@@ -302,8 +300,6 @@ class ErrorScanner:
 
         # Try ruff for fast linting
         try:
-            import subprocess
-
             for file_path in files:
                 errors = self._parse_ruff_errors(str(file_path))
                 if errors:
@@ -318,8 +314,6 @@ class ErrorScanner:
         # Try pylint for comprehensive analysis
         if self.use_pylint:
             try:
-                import subprocess
-
                 for file_path in files:
                     errors = self._parse_pylint_errors(str(file_path))
                     if errors:
