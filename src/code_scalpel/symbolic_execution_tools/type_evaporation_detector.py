@@ -524,12 +524,12 @@ class CrossFileTypeEvaporationResult:
         lines.append(f"Backend vulnerabilities: {len(self.backend_vulnerabilities)}")
         lines.append(f"Matched endpoints: {len(self.matched_endpoints)}")
         lines.append(f"Cross-file issues: {len(self.cross_file_issues)}")
-        
+
         if self.matched_endpoints:
             lines.append("\nEndpoint Correlations:")
             for endpoint, ts_line, py_line in self.matched_endpoints:
                 lines.append(f"  - {endpoint}: TS line {ts_line} → Python line {py_line}")
-        
+
         return "\n".join(lines)
 
 

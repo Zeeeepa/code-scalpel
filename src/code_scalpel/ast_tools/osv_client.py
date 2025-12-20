@@ -121,7 +121,7 @@ class OSVClient:
         # [20251218_SECURITY] Validate URL scheme to prevent file:/ or custom scheme attacks (B310)
         if not url.startswith(("https://", "http://")):
             raise OSVError(f"Invalid URL scheme. Only http(s):// allowed, got: {url}")
-        
+
         last_error = None
         for attempt in range(MAX_RETRIES):
             try:

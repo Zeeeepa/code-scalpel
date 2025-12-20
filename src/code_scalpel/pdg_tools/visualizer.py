@@ -485,10 +485,10 @@ class PDGVisualizer:
             const details = document.getElementById("details");
             const content = document.getElementById("node-content");
             details.style.display = "block";
-            
+
             let html = `<strong>ID:</strong> ${d.id}<br>`;
             html += `<strong>Type:</strong> ${d.type}<br>`;
-            
+
             for (const [key, value] of Object.entries(d.data)) {
                 if (key !== "type") {
                     html += `<strong>${key}:</strong> ${value}<br>`;

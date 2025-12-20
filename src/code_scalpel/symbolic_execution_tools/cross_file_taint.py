@@ -374,12 +374,12 @@ class CrossFileTaintTracker:
         """
         import time
         start_time = time.time()
-        
+
         def check_timeout():
             """Check if timeout exceeded and raise if so."""
             if timeout_seconds and (time.time() - start_time) > timeout_seconds:
                 raise TimeoutError(f"Analysis timeout after {timeout_seconds}s")
-        
+
         if not self._built:
             if not self.build():
                 return CrossFileTaintResult(
@@ -396,7 +396,7 @@ class CrossFileTaintTracker:
                     f"Limiting analysis to {max_modules} of {len(modules_to_analyze)} modules"
                 )
                 modules_to_analyze = modules_to_analyze[:max_modules]
-            
+
             # Phase 1: Analyze each module for local taint sources and sinks
             for module, file_path in modules_to_analyze:
                 check_timeout()
@@ -407,18 +407,18 @@ class CrossFileTaintTracker:
             # [20251220_PERF] Limit iterations and add timeout check
             effective_iterations = min(max_depth, 3)  # Cap at 3 iterations for performance
             self._propagate_taint_through_imports(
-                result, 
+                result,
                 max_iterations=effective_iterations,
                 timeout_check=check_timeout
             )
 
             check_timeout()
-            
+
             # Phase 2: Build call graph and track cross-module calls
             self._build_cross_module_calls(result)
 
             check_timeout()
-            
+
             # Phase 3: Trace taint flows across modules
             self._trace_cross_file_flows(result, max_depth)
 
@@ -493,8 +493,8 @@ class CrossFileTaintTracker:
         return (module, func_name, 0)
 
     def _propagate_taint_through_imports(
-        self, 
-        result: CrossFileTaintResult, 
+        self,
+        result: CrossFileTaintResult,
         max_iterations: int = 5,
         timeout_check: Optional[callable] = None,
     ) -> None:
@@ -519,11 +519,11 @@ class CrossFileTaintTracker:
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                 ]
                 module_func_nodes[module] = func_nodes
-        
+
         for iteration in range(max_iterations):
             if timeout_check:
                 timeout_check()
-                
+
             changed = False
 
             # For each module, re-analyze functions that call imported tainted functions

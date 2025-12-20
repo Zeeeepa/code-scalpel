@@ -663,7 +663,7 @@ class ComplianceReporter:
 <body>
     <div class="container">
         <h1>Compliance Report</h1>
-        
+
         <div class="meta-info">
             <strong>Generated:</strong> {report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}<br>
             <strong>Period:</strong> {report.time_range[0].strftime('%Y-%m-%d')} to {report.time_range[1].strftime('%Y-%m-%d')}
@@ -706,7 +706,7 @@ class ComplianceReporter:
 
         <h2>Policy Violations</h2>
         <p><strong>Total Violations:</strong> {report.policy_violations.total}</p>
-        
+
         <h3>By Severity</h3>
         <table>
             <tr>
@@ -763,7 +763,7 @@ class ComplianceReporter:
         </div>
 
         <h2>Security Assessment</h2>
-        
+
         <h3>Strengths</h3>
         <ul>
 """

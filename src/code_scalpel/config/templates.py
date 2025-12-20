@@ -17,13 +17,13 @@ enforcement: "warn"  # Options: "warn", "block", "disabled"
 security:
   # Block SQL injection attempts
   sql_injection: true
-  
+
   # Block command injection attempts
   command_injection: true
-  
+
   # Block path traversal attempts
   path_traversal: true
-  
+
   # Block XSS attempts
   xss: true
 
@@ -52,20 +52,20 @@ budgets:
   max_files_modified: 10
   max_files_created: 5
   max_files_deleted: 2
-  
+
   # Line-level limits (per file)
   max_lines_added: 500
   max_lines_deleted: 300
   max_lines_modified: 400
-  
+
   # Total session limits
   max_total_line_changes: 1000
-  
+
 # Reset behavior
 reset:
   # Options: "session", "daily", "manual"
   mode: "session"
-  
+
 # Exemptions (files that don't count against budget)
 exemptions:
   - "tests/**/*.py"

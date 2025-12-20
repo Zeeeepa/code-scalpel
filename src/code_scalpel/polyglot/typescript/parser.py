@@ -411,11 +411,11 @@ import { UserService } from './services/user';
 
 export class UserController {
     private userService: UserService;
-    
+
     constructor(userService: UserService) {
         this.userService = userService;
     }
-    
+
     async getUser(req: Request, res: Response): Promise<void> {
         const userId = req.params.id;
         const user = await this.userService.findById(userId);

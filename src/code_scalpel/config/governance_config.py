@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class ChangeBudgetingConfig:
     """
     Configuration for change budgeting limits.
-    
+
     Controls how much code can be modified in a single autonomous operation.
     """
     enabled: bool = True
@@ -50,7 +50,7 @@ class ChangeBudgetingConfig:
 class BlastRadiusConfig:
     """
     Configuration for blast radius control.
-    
+
     Limits the scope of changes by tracking affected functions, classes,
     and call graph depth. Provides special handling for critical paths.
     """
@@ -63,31 +63,31 @@ class BlastRadiusConfig:
     critical_paths: List[str] = field(default_factory=list)
     critical_path_max_lines: int = 50
     critical_path_max_complexity_delta: int = 10
-    
+
     def is_critical_path(self, file_path: str) -> bool:
         """
         Check if file matches any critical path pattern.
-        
+
         Supports:
         - Exact paths: "src/security/auth.py"
         - Directory prefixes: "src/security/"
         - Glob patterns: "src/*/security/*.py"
-        
+
         Args:
             file_path: Path to check
-            
+
         Returns:
             True if path matches any critical path pattern
         """
         from fnmatch import fnmatch
-        
+
         path_str = Path(file_path).as_posix()
-        
+
         for pattern in self.critical_paths:
             # Direct match or prefix match
             if fnmatch(path_str, pattern) or path_str.startswith(pattern):
                 return True
-        
+
         return False
 
 
@@ -95,7 +95,7 @@ class BlastRadiusConfig:
 class AutonomyConstraintsConfig:
     """
     Configuration for autonomy constraints.
-    
+
     Controls iteration limits and approval requirements for autonomous operations.
     """
     max_autonomous_iterations: int = 10
@@ -108,7 +108,7 @@ class AutonomyConstraintsConfig:
 class AuditConfig:
     """
     Configuration for audit trail.
-    
+
     Controls logging and retention of autonomous operations.
     """
     log_all_changes: bool = True
@@ -120,7 +120,7 @@ class AuditConfig:
 class GovernanceConfig:
     """
     Complete governance configuration.
-    
+
     Aggregates all governance subsystems into a single config object.
     """
     change_budgeting: ChangeBudgetingConfig
@@ -132,23 +132,23 @@ class GovernanceConfig:
 class GovernanceConfigLoader:
     """
     Load and validate governance configuration.
-    
+
     Configuration precedence:
     1. Environment variables (SCALPEL_*)
     2. .code-scalpel/config.json (with hash validation)
     3. Default values
-    
+
     Security features:
     - SHA-256 hash validation via SCALPEL_CONFIG_HASH
     - HMAC signature verification via SCALPEL_CONFIG_SECRET
     - Tamper detection with fail-closed behavior
-    
+
     Example:
         >>> loader = GovernanceConfigLoader()
         >>> config = loader.load()
         >>> if config.blast_radius.is_critical_path("src/security/auth.py"):
         ...     print("Critical path - stricter limits apply")
-    
+
     Environment variables:
         SCALPEL_CONFIG - Path to config.json override
         SCALPEL_CONFIG_HASH - Expected SHA-256 hash (format: sha256:...)
@@ -160,24 +160,24 @@ class GovernanceConfigLoader:
         SCALPEL_CRITICAL_PATH_MAX_LINES - Override critical path line limit
         SCALPEL_MAX_AUTONOMOUS_ITERATIONS - Override iteration limit
     """
-    
+
     def __init__(self, config_path: Optional[Path] = None):
         """
         Initialize config loader.
-        
+
         Args:
             config_path: Optional explicit path to config.json
                         Defaults to .code-scalpel/config.json in current directory
         """
         self.config_path = config_path or Path.cwd() / ".code-scalpel" / "config.json"
-    
+
     def load(self) -> GovernanceConfig:
         """
         Load configuration with integrity validation.
-        
+
         Returns:
             GovernanceConfig object with all settings
-            
+
         Raises:
             ValueError: If hash/signature validation fails
             FileNotFoundError: Only if config_path explicitly set and doesn't exist
@@ -186,7 +186,7 @@ class GovernanceConfigLoader:
         config_path_env = os.getenv("SCALPEL_CONFIG")
         if config_path_env:
             self.config_path = Path(config_path_env)
-        
+
         # Load configuration or use defaults
         if self.config_path.exists():
             logger.info(f"Loading governance config from {self.config_path}")
@@ -197,26 +197,26 @@ class GovernanceConfigLoader:
                 "using defaults"
             )
             config_data = self._get_defaults()
-        
+
         # Apply environment variable overrides
         config_data = self._apply_env_overrides(config_data)
-        
+
         # Parse into typed dataclasses
         return self._parse_config(config_data)
-    
+
     def _load_and_validate(self) -> dict:
         """
         Load and validate configuration file integrity.
-        
+
         Returns:
             Parsed configuration dict
-            
+
         Raises:
             ValueError: If hash or signature validation fails
         """
         with open(self.config_path, 'rb') as f:
             content = f.read()
-        
+
         # SHA-256 hash validation
         expected_hash = os.getenv("SCALPEL_CONFIG_HASH")
         if expected_hash:
@@ -229,7 +229,7 @@ class GovernanceConfigLoader:
                     f"Regenerate hash: sha256sum {self.config_path}"
                 )
             logger.debug("Configuration hash validation passed")
-        
+
         # HMAC signature validation (enterprise feature)
         secret = os.getenv("SCALPEL_CONFIG_SECRET")
         expected_sig = os.getenv("SCALPEL_CONFIG_SIGNATURE")
@@ -244,13 +244,13 @@ class GovernanceConfigLoader:
                     "Regenerate signature with correct secret key."
                 )
             logger.debug("Configuration HMAC signature validation passed")
-        
+
         return json.loads(content)
-    
+
     def _get_defaults(self) -> dict:
         """
         Return default configuration.
-        
+
         Returns:
             Default configuration dict
         """
@@ -289,21 +289,21 @@ class GovernanceConfigLoader:
                 }
             }
         }
-    
+
     def _apply_env_overrides(self, config: dict) -> dict:
         """
         Apply environment variable overrides.
-        
+
         Environment variables take precedence over file configuration.
-        
+
         Args:
             config: Configuration dict to modify
-            
+
         Returns:
             Modified configuration dict
         """
         gov = config.get("governance", {})
-        
+
         # Change Budgeting overrides
         cb = gov.get("change_budgeting", {})
         if os.getenv("SCALPEL_CHANGE_BUDGET_MAX_LINES"):
@@ -312,7 +312,7 @@ class GovernanceConfigLoader:
             cb["max_files_per_change"] = int(os.getenv("SCALPEL_CHANGE_BUDGET_MAX_FILES"))
         if os.getenv("SCALPEL_CHANGE_BUDGET_MAX_COMPLEXITY"):
             cb["max_complexity_delta"] = int(os.getenv("SCALPEL_CHANGE_BUDGET_MAX_COMPLEXITY"))
-        
+
         # Blast Radius & Critical Paths overrides
         br = gov.get("blast_radius", {})
         critical_paths_env = os.getenv("SCALPEL_CRITICAL_PATHS")
@@ -322,34 +322,34 @@ class GovernanceConfigLoader:
             br["critical_path_max_lines"] = int(os.getenv("SCALPEL_CRITICAL_PATH_MAX_LINES"))
         if os.getenv("SCALPEL_MAX_CALL_GRAPH_DEPTH"):
             br["max_call_graph_depth"] = int(os.getenv("SCALPEL_MAX_CALL_GRAPH_DEPTH"))
-        
+
         # Autonomy Constraints overrides
         ac = gov.get("autonomy_constraints", {})
         if os.getenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS"):
             ac["max_autonomous_iterations"] = int(os.getenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS"))
-        
+
         # Audit overrides
         audit = gov.get("audit", {})
         if os.getenv("SCALPEL_AUDIT_RETENTION_DAYS"):
             audit["retention_days"] = int(os.getenv("SCALPEL_AUDIT_RETENTION_DAYS"))
-        
+
         return config
-    
+
     def _parse_config(self, config_data: dict) -> GovernanceConfig:
         """
         Parse configuration dict into typed dataclasses.
-        
+
         Args:
             config_data: Configuration dict
-            
+
         Returns:
             GovernanceConfig object
-            
+
         Raises:
             TypeError: If configuration values have wrong types
         """
         gov = config_data.get("governance", {})
-        
+
         return GovernanceConfig(
             change_budgeting=ChangeBudgetingConfig(**gov.get("change_budgeting", {})),
             blast_radius=BlastRadiusConfig(**gov.get("blast_radius", {})),

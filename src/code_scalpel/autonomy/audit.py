@@ -501,7 +501,7 @@ class AutonomyAuditTrail:
 <body>
     <h1>Autonomy Audit Report</h1>
     <p>Session ID: {self.current_session_id}</p>
-    
+
     <div class="summary">
         <h2>Summary</h2>
         <div class="summary-item"><strong>Total Operations:</strong> {summary['total_operations']}</div>
@@ -509,7 +509,7 @@ class AutonomyAuditTrail:
         <div class="summary-item"><strong>Failed:</strong> <span class="failure">{summary['failed']}</span></div>
         <div class="summary-item"><strong>Total Duration:</strong> {summary['total_duration_ms']} ms</div>
     </div>
-    
+
     <h2>Operations</h2>
     <table>
         <tr>

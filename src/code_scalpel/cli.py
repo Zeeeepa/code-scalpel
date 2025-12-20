@@ -361,18 +361,18 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
 
 def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     """Initialize .code-scalpel configuration directory.
-    
+
     [20251219_FEATURE] v3.0.2 - Auto-initialize configuration for first-time users.
     Creates .code-scalpel/ with config.json, policy.yaml, budget.yaml, README.md, .gitignore.
     """
     from .config import init_config_dir
     from pathlib import Path
-    
+
     print("Code Scalpel Configuration Initialization")
     print("=" * 60)
-    
+
     result = init_config_dir(target_dir)
-    
+
     if not result["success"]:
         if "already exists" in result["message"]:
             if force:
@@ -388,25 +388,25 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
         else:
             print(f"\n[ERROR] {result['message']}")
             return 1
-    
+
     print(f"\n[SUCCESS] Configuration directory created:")
     print(f"   Path: {result['path']}")
     print(f"\nCreated {len(result['files_created'])} files:")
     for filename in result["files_created"]:
         print(f"   - {filename}")
-    
+
     print("\nNext steps:")
     print("   1. Review policy.yaml to configure security rules")
     print("   2. Review budget.yaml to set change limits")
     print("   3. Read README.md for configuration guidance")
     print("   4. Add .code-scalpel/ to version control (optional)")
-    
+
     return 0
 
 
 def start_server(host: str = "0.0.0.0", port: int = 5000) -> int:  # nosec B104
     """Start the REST API server (legacy, for non-MCP clients).
-    
+
     [20251218_SECURITY] Default 0.0.0.0 binding intentional for server functionality (B104).
     Users can override with --host argument for localhost-only binding.
     """
