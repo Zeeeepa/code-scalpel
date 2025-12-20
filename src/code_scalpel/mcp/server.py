@@ -621,7 +621,7 @@ class FileContextResult(BaseModel):
     line_count: int = Field(description="Total lines in file")
     functions: list[str] = Field(default_factory=list, description="Function names")
     classes: list[str] = Field(default_factory=list, description="Class names")
-    imports: list[str] = Field(default_factory=list, description="Import statements")
+    imports: list[str] = Field(default_factory=list, description="Import statements (max 20)")
     exports: list[str] = Field(
         default_factory=list, description="Exported symbols (__all__)"
     )
@@ -632,6 +632,9 @@ class FileContextResult(BaseModel):
         default=False, description="Whether file has security issues"
     )
     summary: str = Field(default="", description="Brief description of file purpose")
+    # [20251220_FEATURE] v3.0.5 - Truncation communication
+    imports_truncated: bool = Field(default=False, description="Whether imports list was truncated")
+    total_imports: int = Field(default=0, description="Total imports before truncation")
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -660,9 +663,12 @@ class SymbolReferencesResult(BaseModel):
         default=None, description="Line where symbol is defined"
     )
     references: list[SymbolReference] = Field(
-        default_factory=list, description="All references found"
+        default_factory=list, description="References found (max 100)"
     )
-    total_references: int = Field(default=0, description="Total reference count")
+    total_references: int = Field(default=0, description="Total reference count before truncation")
+    # [20251220_FEATURE] v3.0.5 - Truncation communication
+    references_truncated: bool = Field(default=False, description="Whether references list was truncated")
+    truncation_warning: str | None = Field(default=None, description="Warning if results truncated")
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -4338,6 +4344,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
         # For non-Python files, use analyze_code which handles multi-language
         if detected_lang != 'python':
             analysis = _analyze_code_sync(code, detected_lang)
+            total_imports = len(analysis.imports)
             return FileContextResult(
                 success=analysis.success,
                 file_path=str(path),
@@ -4350,6 +4357,8 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 complexity_score=analysis.complexity,
                 has_security_issues=False,  # Security check is Python-specific for now
                 summary=f"{detected_lang.title()} module with {analysis.function_count} function(s), {analysis.class_count} class(es)",
+                imports_truncated=total_imports > 20,
+                total_imports=total_imports,
                 error=analysis.error,
             )
 
@@ -4426,6 +4435,10 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
 
         summary = ", ".join(summary_parts) if summary_parts else "Python module"
 
+        # [20251220_FEATURE] v3.0.5 - Communicate truncation
+        total_imports = len(imports)
+        imports_truncated = total_imports > 20
+
         return FileContextResult(
             success=True,
             file_path=str(path),
@@ -4433,11 +4446,13 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
             line_count=len(lines),
             functions=functions,
             classes=classes,
-            imports=imports[:20],  # Limit to avoid token bloat
+            imports=imports[:20],
             exports=exports,
             complexity_score=complexity,
             has_security_issues=has_security_issues,
             summary=summary,
+            imports_truncated=imports_truncated,
+            total_imports=total_imports,
         )
 
     except Exception as e:
@@ -4578,13 +4593,22 @@ def _get_symbol_references_sync(
         # Sort: definitions first, then by file and line
         references.sort(key=lambda r: (not r.is_definition, r.file, r.line))
 
+        # [20251220_FEATURE] v3.0.5 - Communicate truncation
+        total_refs = len(references)
+        refs_truncated = total_refs > 100
+        truncation_msg = None
+        if refs_truncated:
+            truncation_msg = f"Results truncated: showing 100 of {total_refs} references. Use more specific symbol name or filter by file."
+
         return SymbolReferencesResult(
             success=True,
             symbol_name=symbol_name,
             definition_file=definition_file,
             definition_line=definition_line,
-            references=references[:100],  # Limit to prevent token overflow
-            total_references=len(references),
+            references=references[:100],
+            total_references=total_refs,
+            references_truncated=refs_truncated,
+            truncation_warning=truncation_msg,
         )
 
     except Exception as e:
@@ -5147,7 +5171,7 @@ class ProjectMapResult(BaseModel):
         default_factory=list, description="Detected packages"
     )
     modules: list[ModuleInfo] = Field(
-        default_factory=list, description="All modules analyzed"
+        default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)"
     )
     entry_points: list[str] = Field(
         default_factory=list, description="All detected entry points"
@@ -5159,6 +5183,9 @@ class ProjectMapResult(BaseModel):
         default_factory=list, description="Files with high complexity"
     )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
+    # [20251220_FEATURE] v3.0.5 - Truncation communication
+    modules_in_diagram: int = Field(default=0, description="Number of modules shown in Mermaid diagram")
+    diagram_truncated: bool = Field(default=False, description="Whether Mermaid diagram was truncated")
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -5390,6 +5417,7 @@ def _get_project_map_sync(
         # Generate Mermaid package diagram
         mermaid_lines = ["graph TD"]
         mermaid_lines.append("    subgraph Project")
+        modules_in_diagram = min(len(modules), 50)
         for i, mod in enumerate(modules[:50]):  # Limit to 50 modules
             mod_id = f"M{i}"
             label = mod.path.replace("/", "_").replace(".", "_")
@@ -5400,6 +5428,11 @@ def _get_project_map_sync(
             else:
                 mermaid_lines.append(f'        {mod_id}["{label}"]')
         mermaid_lines.append("    end")
+        
+        # [20251220_FEATURE] v3.0.5 - Communicate truncation
+        diagram_truncated = len(modules) > 50
+        if diagram_truncated:
+            mermaid_lines.append(f"    Note[... and {len(modules) - 50} more modules]")
 
         return ProjectMapResult(
             project_root=str(root_path),
@@ -5412,6 +5445,8 @@ def _get_project_map_sync(
             circular_imports=circular_imports,
             complexity_hotspots=complexity_hotspots,
             mermaid="\n".join(mermaid_lines),
+            modules_in_diagram=modules_in_diagram,
+            diagram_truncated=diagram_truncated,
         )
 
     except Exception as e:
