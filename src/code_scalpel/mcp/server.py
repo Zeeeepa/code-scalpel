@@ -6532,11 +6532,18 @@ def _get_cross_file_dependencies_sync(
 
     try:
         import signal
+        import platform
         from contextlib import contextmanager
 
         @contextmanager
         def timeout_context(seconds):
-            """Context manager for operation timeout."""
+            """Context manager for operation timeout (Unix only)."""
+            # signal.SIGALRM only available on Unix/Linux
+            if platform.system() == "Windows":
+                # On Windows, no timeout protection (SIGALRM not available)
+                yield
+                return
+            
             def timeout_handler(signum, frame):
                 raise TimeoutError(f"Operation timed out after {seconds} seconds")
             
