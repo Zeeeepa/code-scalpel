@@ -5,6 +5,39 @@ All notable changes to Code Scalpel will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2025-12-22
+
+### Fixed
+
+#### Init Command Templates - CRITICAL
+- **HOTFIX**: `code-scalpel init` now creates complete v3.1.0 governance structure (was only creating 7 minimal files)
+- Added **9 new template constants** to `templates.py`:
+  - `DEV_GOVERNANCE_YAML_TEMPLATE` - Development meta-policies for AI agents
+  - `PROJECT_STRUCTURE_YAML_TEMPLATE` - File organization rules
+  - `POLICIES_README_TEMPLATE` - Main policies documentation
+  - `ARCHITECTURE_README_TEMPLATE` - Architecture policy docs
+  - `DEVOPS_README_TEMPLATE` - DevOps policy docs
+  - `DEVSECOPS_README_TEMPLATE` - DevSecOps policy docs
+  - `PROJECT_README_TEMPLATE` - Project structure policy docs
+  - `LAYERED_ARCHITECTURE_REGO_TEMPLATE` - Layered architecture enforcement
+  - `DOCKER_SECURITY_REGO_TEMPLATE` - Docker security best practices
+  - `SECRET_DETECTION_REGO_TEMPLATE` - Hardcoded secret detection
+  - `PROJECT_STRUCTURE_REGO_TEMPLATE` - Project structure enforcement
+- Updated `init_config.py` to create **23 files** (up from 7):
+  - **Root config**: policy.yaml, budget.yaml, config.json, README.md, .gitignore, audit.log, .env.example
+  - **Governance**: dev-governance.yaml, project-structure.yaml
+  - **Policy templates**: policies/README.md + 4 subdirectories:
+    - `architecture/` - README.md + layered_architecture.rego
+    - `devops/` - README.md + docker_security.rego
+    - `devsecops/` - README.md + secret_detection.rego
+    - `project/` - README.md + structure.rego
+- **Impact**: New users now get production-ready governance configuration matching v3.1.0 project structure
+- **Priority**: HIGH - Fixes major usability issue where users got outdated minimal config
+
+### Changed
+- `init_config_dir()` now returns 23 files in `files_created` list (was 7)
+- Module header updated to reflect v3.1.1 governance structure feature
+
 ## [3.1.0] - 2025-12-22
 
 ### Added
