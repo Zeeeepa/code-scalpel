@@ -6531,21 +6531,60 @@ def _get_cross_file_dependencies_sync(
         )
 
     try:
-        # Build import graph
-        resolver = ImportResolver(root_path)
-        resolver.build()
+        import signal
+        from contextlib import contextmanager
 
-        # Extract cross-file dependencies
-        extractor = CrossFileExtractor(root_path)
-        extractor.build()
+        @contextmanager
+        def timeout_context(seconds):
+            """Context manager for operation timeout."""
+            def timeout_handler(signum, frame):
+                raise TimeoutError(f"Operation timed out after {seconds} seconds")
+            
+            # Set up signal handler (Unix only)
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(seconds)
+            try:
+                yield
+            finally:
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
+
+        # Build import graph with timeout protection (30 seconds)
+        try:
+            with timeout_context(30):
+                resolver = ImportResolver(root_path)
+                resolver.build()
+        except TimeoutError as e:
+            return CrossFileDependenciesResult(
+                success=False,
+                error=f"ImportResolver.build() timed out after 30s. Project may be too large. Error: {e}",
+            )
+
+        # Extract cross-file dependencies with timeout protection (60 seconds)
+        try:
+            with timeout_context(60):
+                extractor = CrossFileExtractor(root_path)
+                extractor.build()
+        except TimeoutError as e:
+            return CrossFileDependenciesResult(
+                success=False,
+                error=f"CrossFileExtractor.build() timed out after 60s. Project may be too large. Error: {e}",
+            )
 
         # [20251216_FEATURE] v2.5.0 - Pass confidence_decay_factor to extractor
-        extraction_result = extractor.extract(
-            str(target_path),
-            target_symbol,
-            depth=max_depth,
-            confidence_decay_factor=confidence_decay_factor,
-        )
+        try:
+            with timeout_context(30):
+                extraction_result = extractor.extract(
+                    str(target_path),
+                    target_symbol,
+                    depth=max_depth,
+                    confidence_decay_factor=confidence_decay_factor,
+                )
+        except TimeoutError as e:
+            return CrossFileDependenciesResult(
+                success=False,
+                error=f"extractor.extract() timed out after 30s for {target_symbol}. Error: {e}",
+            )
 
         # Check for extraction errors
         if not extraction_result.success:
