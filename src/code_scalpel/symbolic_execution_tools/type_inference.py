@@ -15,9 +15,9 @@ This is a flow-insensitive analysis: we track the LAST assignment to each variab
 
 import ast
 from enum import Enum, auto
-from typing import Dict
+from typing import Any, Dict
 
-from z3 import IntSort, BoolSort, StringSort, RealSort, Sort
+from z3 import IntSort, BoolSort, StringSort, RealSort
 
 
 class InferredType(Enum):
@@ -36,7 +36,7 @@ class InferredType(Enum):
     FLOAT = auto()  # v1.3.0
     UNKNOWN = auto()
 
-    def to_z3_sort(self) -> Sort:
+    def to_z3_sort(self) -> Any:
         """Convert to Z3 sort. Raises if UNKNOWN."""
         if self == InferredType.INT:
             return IntSort()

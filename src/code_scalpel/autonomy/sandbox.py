@@ -21,10 +21,11 @@ from pathlib import Path
 from typing import Optional
 
 try:
-    import docker
+    import docker  # type: ignore[import-untyped]
 
     DOCKER_AVAILABLE = True
 except ImportError:
+    docker = None  # type: ignore[assignment]
     DOCKER_AVAILABLE = False
 
 
@@ -112,6 +113,20 @@ class SandboxExecutor:
         self.max_cpu_seconds = max_cpu_seconds
         self.max_disk_mb = max_disk_mb
 
+        # [20251221_TODO] Phase 1 Enhancements:
+        # - [ ] Add configuration validation
+        # - [ ] Support custom environment variables
+        # - [ ] Add pre-execution hooks
+        # - [ ] Implement result caching layer
+        # - [ ] Add timeout handling for hanging processes
+        #
+        # [20251221_TODO] Phase 2 Features:
+        # - [ ] Parallel execution coordination
+        # - [ ] Result streaming support
+        # - [ ] Performance profiling integration
+        # - [ ] Network isolation verification
+        # - [ ] Filesystem access logging
+
         # [20251217_FEATURE] Initialize Docker client if container isolation requested
         if isolation_level == "container":
             if not DOCKER_AVAILABLE:
@@ -119,6 +134,8 @@ class SandboxExecutor:
                     "Docker support requires 'docker' package. "
                     "Install with: pip install docker"
                 )
+            import docker  # Re-import to satisfy type checker
+
             self.docker_client = docker.from_env()
 
     def execute_with_changes(

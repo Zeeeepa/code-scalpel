@@ -13,7 +13,18 @@ But the BEHAVIOR of ADD differs:
     JS: "5" + 3 -> "53"
 
 This difference is handled in semantics.py, not here.
-"""
+[20251220_TODO] Add missing operators:
+    - Nullish coalescing: ?? (JavaScript)
+    - Optional chaining: ?. (JavaScript/TypeScript)
+    - Template literal: ` (backtick) for dynamic strings
+    - Logical XOR operator (for completeness)
+    - Pipe operator | for functional composition (future)
+
+[20251220_TODO] Add operator metadata:
+    - Precedence level for each operator
+    - Associativity (left/right/none)
+    - Is_commutative flag for optimization
+    - Language-specific availability"""
 
 from enum import Enum
 

@@ -24,7 +24,7 @@ Key Features:
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 from dataclasses import dataclass
 import logging
 
@@ -249,8 +249,9 @@ class PathResolver:
 
         if result.success:
             # Cache successful resolution
-            self.path_cache[cache_key] = result.resolved_path
-            return result.resolved_path
+            # [20251220_BUGFIX] Type narrowing: if result.success is True, resolved_path is guaranteed to be str
+            self.path_cache[cache_key] = cast(str, result.resolved_path)
+            return cast(str, result.resolved_path)
         else:
             # Raise with helpful error message
             raise FileNotFoundError(self._format_error_message(path, result))

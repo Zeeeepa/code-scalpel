@@ -13,8 +13,6 @@ Tests cover:
 
 import os
 import json
-import tempfile
-import time
 from pathlib import Path
 from datetime import datetime, timedelta
 import pytest
@@ -27,7 +25,6 @@ from code_scalpel.policy_engine import (
     Operation,
     PolicyDecision,
     OverrideDecision,
-    HumanResponse,
 )
 
 
@@ -97,7 +94,7 @@ def test_policy_file_locking_read_only(temp_policy_dir):
     budget_file.write_text("budget: 100\n")
 
     # Create tamper resistance instance (locks files)
-    tr = TamperResistance(policy_path=str(policy_file))
+    TamperResistance(policy_path=str(policy_file))
 
     # Verify policy file is read-only
     stat = policy_file.stat()

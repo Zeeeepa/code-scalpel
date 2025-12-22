@@ -29,6 +29,10 @@ OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
 DEFAULT_TIMEOUT = 10  # seconds
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # seconds
+# [20251221_FEATURE] TODO: Add local vulnerability database caching
+# [20251221_FEATURE] TODO: Support ecosystem-specific vulnerability scoring
+# [20251221_ENHANCEMENT] TODO: Add advisory enrichment with CVSS and exploit data
+# [20251221_ENHANCEMENT] TODO: Support batch vulnerability checks with deduplication
 
 
 @dataclass
@@ -126,7 +130,9 @@ class OSVClient:
         for attempt in range(MAX_RETRIES):
             try:
                 req = urllib.request.Request(url, data=payload, headers=headers)
-                with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
+                with urllib.request.urlopen(
+                    req, timeout=self.timeout
+                ) as response:  # nosec B310
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
                 if e.code == 429:  # Rate limited

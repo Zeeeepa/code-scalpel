@@ -7,6 +7,62 @@ This module provides a unified interface for:
 - Symbolic execution for path analysis
 - Dead code detection
 - Refactoring via PDG-guided transformations
+
+TODO: CodeAnalyzer Enhancement Roadmap
+======================================
+
+Phase 1 - code_parsers Integration:
+- TODO: Use code_parsers.ParserFactory instead of direct ast.parse()
+- TODO: Support code_parsers.ParseResult for unified error handling
+- TODO: Integrate code_parsers language detection for multi-language files
+- TODO: Use code_parsers.PythonASTParser for enhanced Python parsing
+- TODO: Leverage code_parsers.RuffParser for fast linting integration
+- TODO: Add parser_backend parameter to __init__ for parser selection
+
+Phase 2 - Multi-Language Analysis:
+- TODO: Extend analyze() to support JavaScript/TypeScript via code_parsers
+- TODO: Add Java analysis using code_parsers.java_parsers
+- TODO: Implement language-agnostic AnalysisResult with unified metrics
+- TODO: Create language-specific analyzers that inherit from CodeAnalyzer
+- TODO: Support mixed-language projects (JS + Python)
+
+Phase 3 - Enhanced Dead Code Detection:
+- TODO: Add cross-file dead code detection (unused exports)
+- TODO: Implement test coverage integration for dead code validation
+- TODO: Add dead code detection for TypeScript (unused types/interfaces)
+- TODO: Support conditional dead code (platform-specific, debug-only)
+- TODO: Add confidence scores based on multiple analysis passes
+- TODO: Integrate with PDG for data-flow based dead code detection
+
+Phase 4 - Advanced Metrics:
+- TODO: Add Halstead complexity metrics
+- TODO: Implement maintainability index calculation
+- TODO: Add code churn metrics (requires git integration)
+- TODO: Calculate test-to-code ratio
+- TODO: Add dependency depth metrics
+- TODO: Implement cognitive complexity (beyond cyclomatic)
+
+Phase 5 - Refactoring Engine:
+- TODO: Implement extract_function() refactoring
+- TODO: Implement extract_variable() refactoring
+- TODO: Implement inline_variable() refactoring
+- TODO: Add rename_symbol() with scope awareness
+- TODO: Implement move_to_module() refactoring
+- TODO: Add automatic import management during refactoring
+
+Phase 6 - Analysis Caching & Performance:
+- TODO: Implement persistent analysis cache (SQLite or file-based)
+- TODO: Add incremental analysis (only re-analyze changed functions)
+- TODO: Implement parallel analysis for multi-file projects
+- TODO: Add analysis result serialization for external tools
+- TODO: Implement analysis result diffing for change detection
+
+Phase 7 - Security Analysis Integration:
+- TODO: Integrate taint analysis from symbolic_execution_tools
+- TODO: Add SAST rule engine for custom security patterns
+- TODO: Implement dependency vulnerability scanning
+- TODO: Add secrets detection (API keys, passwords)
+- TODO: Generate SARIF output for security findings
 """
 
 import ast
@@ -14,10 +70,29 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Callable, Optional, Union
 
 import astor
 import networkx as nx
+
+# Import code_parsers for multi-language support
+CODE_PARSERS_AVAILABLE = False
+ParserFactory: Any = None
+ParserLanguage: Any = None
+_detect_language_func: Optional[Callable[..., Any]] = None
+
+try:
+    from .code_parsers.factory import ParserFactory as _PF  # type: ignore[import-not-found]
+    from .code_parsers.interface import Language as _PL  # type: ignore[import-not-found]
+    from .code_parsers.language_detection import detect_language as _dl  # type: ignore[import-not-found]
+
+    ParserFactory = _PF
+    ParserLanguage = _PL
+    _detect_language_func = _dl
+    CODE_PARSERS_AVAILABLE = True
+except ImportError:
+    pass
 
 # Configure module logger
 logger = logging.getLogger(__name__)
@@ -29,6 +104,16 @@ class AnalysisLevel(Enum):
     BASIC = "basic"  # AST only
     STANDARD = "standard"  # AST + PDG
     FULL = "full"  # AST + PDG + Symbolic Execution
+
+
+class AnalysisLanguage(Enum):
+    """Supported analysis languages."""
+
+    PYTHON = "python"
+    JAVASCRIPT = "javascript"
+    TYPESCRIPT = "typescript"
+    JAVA = "java"
+    AUTO = "auto"  # Auto-detect from file extension or content
 
 
 @dataclass
@@ -53,6 +138,13 @@ class AnalysisMetrics:
     num_variables: int = 0
     cyclomatic_complexity: int = 0
     analysis_time_seconds: float = 0.0
+    language: str = "python"
+    parser_backend: str = "ast"  # Which parser was used
+    # Additional metrics from code_parsers
+    halstead_volume: float = 0.0
+    halstead_difficulty: float = 0.0
+    cognitive_complexity: int = 0
+    maintainability_index: float = 0.0
 
 
 @dataclass
@@ -80,6 +172,11 @@ class AnalysisResult:
     refactor_suggestions: list[RefactorSuggestion] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     symbolic_paths: list[dict[str, Any]] = field(default_factory=list)
+    # Multi-language support
+    language: str = "python"
+    parser_result: Optional[Any] = None  # Raw ParseResult from code_parsers
+    functions: list[str] = field(default_factory=list)  # Extracted function names
+    classes: list[str] = field(default_factory=list)  # Extracted class names
 
 
 class CodeAnalyzer:
@@ -101,23 +198,32 @@ class CodeAnalyzer:
     def __init__(
         self,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
+        language: AnalysisLanguage = AnalysisLanguage.AUTO,
+        parser_backend: Optional[str] = None,
         cache_enabled: bool = True,
         max_symbolic_depth: int = 50,
         max_loop_iterations: int = 10,
+        use_code_parsers: bool = True,
     ):
         """
         Initialize the CodeAnalyzer.
 
         Args:
             level: Analysis level (BASIC, STANDARD, or FULL)
+            language: Target language (AUTO for detection, or specific language)
+            parser_backend: Parser backend to use (e.g., "tree-sitter", "ast", "esprima")
             cache_enabled: Whether to cache analysis results
             max_symbolic_depth: Maximum depth for symbolic execution
             max_loop_iterations: Maximum loop iterations for symbolic execution
+            use_code_parsers: Whether to use code_parsers module when available
         """
         self.level = level
+        self.language = language
+        self.parser_backend = parser_backend
         self.cache_enabled = cache_enabled
         self.max_symbolic_depth = max_symbolic_depth
         self.max_loop_iterations = max_loop_iterations
+        self.use_code_parsers = use_code_parsers and CODE_PARSERS_AVAILABLE
 
         # Caches
         self._ast_cache: dict[str, ast.AST] = {}
@@ -136,58 +242,81 @@ class CodeAnalyzer:
         self.logger = logging.getLogger("CodeAnalyzer")
 
     def analyze(
-        self, code: str, level: Optional[AnalysisLevel] = None
+        self,
+        code: str,
+        level: Optional[AnalysisLevel] = None,
+        language: Optional[AnalysisLanguage] = None,
+        filepath: Optional[str] = None,
     ) -> AnalysisResult:
         """
         Perform comprehensive code analysis.
 
         Args:
-            code: Python source code to analyze
+            code: Source code to analyze (Python, JavaScript, TypeScript, or Java)
             level: Override the default analysis level
+            language: Override the default language (None = use instance default)
+            filepath: Optional file path for language detection and context
 
         Returns:
             AnalysisResult containing all analysis data
         """
         start_time = time.time()
         analysis_level = level or self.level
+        analysis_language = language or self.language
+
+        # Detect language if AUTO
+        detected_lang = self._detect_language(code, filepath, analysis_language)
 
         # Check cache
-        cache_key = f"{hash(code)}_{analysis_level.value}"
+        cache_key = f"{hash(code)}_{analysis_level.value}_{detected_lang}"
         if self.cache_enabled and cache_key in self._analysis_cache:
             return self._analysis_cache[cache_key]
 
-        result = AnalysisResult(code=code)
+        result = AnalysisResult(code=code, language=detected_lang)
 
         try:
-            # Step 1: Parse to AST
-            result.ast_tree = self._parse_to_ast(code)
-            if result.ast_tree is None:
+            # Step 1: Parse to AST (using code_parsers if available and appropriate)
+            parse_result = self._parse_code(code, detected_lang, filepath)
+            result.ast_tree = parse_result.get("ast")
+            result.parser_result = parse_result.get("parser_result")
+            result.functions = parse_result.get("functions", [])
+            result.classes = parse_result.get("classes", [])
+
+            if result.ast_tree is None and not result.parser_result:
                 result.errors.append("Failed to parse code to AST")
+                if parse_result.get("errors"):
+                    result.errors.extend(parse_result["errors"])
                 return result
 
             # Compute basic metrics
-            result.metrics = self._compute_metrics(result.ast_tree, code)
+            result.metrics = self._compute_metrics(
+                result.ast_tree, code, detected_lang, parse_result
+            )
 
-            # Step 2: Build PDG (if STANDARD or FULL level)
-            if analysis_level in (AnalysisLevel.STANDARD, AnalysisLevel.FULL):
+            # Step 2: Build PDG (if STANDARD or FULL level) - Python only for now
+            if (
+                analysis_level in (AnalysisLevel.STANDARD, AnalysisLevel.FULL)
+                and detected_lang == "python"
+            ):
                 result.pdg, result.call_graph = self._build_pdg(code)
 
-            # Step 3: Symbolic Execution (if FULL level)
-            if analysis_level == AnalysisLevel.FULL:
+            # Step 3: Symbolic Execution (if FULL level) - Python only for now
+            if analysis_level == AnalysisLevel.FULL and detected_lang == "python":
                 result.symbolic_paths = self._run_symbolic_execution(code)
 
-            # Step 4: Dead code detection
-            result.dead_code = self._detect_dead_code(
-                result.ast_tree, result.pdg, result.call_graph
-            )
+            # Step 4: Dead code detection (requires Python AST)
+            if result.ast_tree is not None:
+                result.dead_code = self._detect_dead_code(
+                    result.ast_tree, result.pdg, result.call_graph
+                )
 
-            # Step 5: Security analysis
-            result.security_issues = self._analyze_security(result.ast_tree)
+                # Step 5: Security analysis (requires Python AST)
+                result.security_issues = self._analyze_security(result.ast_tree)
 
-            # Step 6: Generate refactoring suggestions
-            result.refactor_suggestions = self._generate_refactor_suggestions(
-                result.ast_tree, result.pdg, result.dead_code
-            )
+                # Step 6: Generate refactoring suggestions
+                result.refactor_suggestions = self._generate_refactor_suggestions(
+                    result.ast_tree, result.pdg, result.dead_code
+                )
 
         except SyntaxError as e:
             result.errors.append(f"Syntax error: {str(e)}")
@@ -218,6 +347,200 @@ class CodeAnalyzer:
             self.logger.error(f"Parse error at line {e.lineno}: {e.msg}")
             return None
 
+    def _detect_language(
+        self,
+        code: str,
+        filepath: Optional[str],
+        language: AnalysisLanguage,
+    ) -> str:
+        """
+        Detect the programming language of the code.
+
+        [20251221_FEATURE] Uses code_parsers language detection when available.
+        """
+        if language != AnalysisLanguage.AUTO:
+            return language.value
+
+        # Use code_parsers detection if available
+        if self.use_code_parsers and CODE_PARSERS_AVAILABLE and _detect_language_func:
+            try:
+                detected = _detect_language_func(filepath, code)
+                return detected.value
+            except Exception:
+                pass
+
+        # Fallback: simple extension-based detection
+        if filepath:
+            ext = Path(filepath).suffix.lower()
+            ext_map = {
+                ".py": "python",
+                ".pyi": "python",
+                ".js": "javascript",
+                ".mjs": "javascript",
+                ".jsx": "javascript",
+                ".ts": "typescript",
+                ".tsx": "typescript",
+                ".java": "java",
+            }
+            if ext in ext_map:
+                return ext_map[ext]
+
+        # Content-based heuristics (basic)
+        # Check for Python patterns
+        if any(
+            pattern in code
+            for pattern in [
+                "def ",
+                "import ",
+                "class ",
+                "from ",
+                "print(",
+                "if __name__",
+            ]
+        ):
+            return "python"
+        # Check for JavaScript/TypeScript patterns
+        if any(
+            pattern in code
+            for pattern in [
+                "function ",
+                "const ",
+                "let ",
+                "var ",
+                "=>",
+                "module.exports",
+            ]
+        ):
+            return "javascript"
+        # Check for Java patterns
+        if any(
+            pattern in code
+            for pattern in [
+                "public class ",
+                "import java.",
+                "private ",
+                "public static void main",
+            ]
+        ):
+            return "java"
+
+        # Default to Python for simple expressions like "x = 1"
+        return "python"
+
+    def _parse_code(
+        self,
+        code: str,
+        language: str,
+        filepath: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """
+        Parse code using the appropriate parser for the language.
+
+        [20251221_FEATURE] Uses code_parsers.ParserFactory for multi-language support.
+
+        Returns:
+            Dict with keys: ast, parser_result, functions, classes, errors
+        """
+        result: dict[str, Any] = {
+            "ast": None,
+            "parser_result": None,
+            "functions": [],
+            "classes": [],
+            "errors": [],
+            "parser_backend": "ast",
+        }
+
+        # For Python, always try standard ast first
+        if language == "python":
+            result["ast"] = self._parse_to_ast(code)
+            result["parser_backend"] = "ast"
+
+            # Extract functions and classes from Python AST
+            if result["ast"]:
+                for node in ast.walk(result["ast"]):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        result["functions"].append(node.name)
+                    elif isinstance(node, ast.ClassDef):
+                        result["classes"].append(node.name)
+            return result
+
+        # For other languages, use code_parsers
+        if (
+            self.use_code_parsers
+            and CODE_PARSERS_AVAILABLE
+            and ParserFactory
+            and ParserLanguage
+        ):
+            try:
+                # Map language string to ParserLanguage enum
+                lang_map: dict[str, Any] = {
+                    "javascript": getattr(ParserLanguage, "JAVASCRIPT", None),
+                    "typescript": getattr(ParserLanguage, "TYPESCRIPT", None),
+                    "java": getattr(ParserLanguage, "JAVA", None),
+                }
+
+                parser_lang = lang_map.get(language)
+                if parser_lang and ParserFactory.is_registered(parser_lang):
+                    parser = ParserFactory.get_parser(parser_lang, self.parser_backend)
+                    parse_result = parser.parse(code)
+
+                    result["parser_result"] = parse_result
+                    result["ast"] = parse_result.ast
+                    result["functions"] = parser.get_functions(parse_result.ast)
+                    result["classes"] = parser.get_classes(parse_result.ast)
+                    result["parser_backend"] = language
+
+                    # Collect errors from parse result
+                    if parse_result.errors:
+                        for err in parse_result.errors:
+                            if isinstance(err, dict):
+                                result["errors"].append(err.get("message", str(err)))
+                            else:
+                                result["errors"].append(str(err))
+
+                    return result
+            except Exception as e:
+                result["errors"].append(f"Parser error: {str(e)}")
+                self.logger.warning(f"code_parsers failed for {language}: {e}")
+
+        # Fallback: return empty result with error
+        if not result["ast"] and not result["parser_result"]:
+            result["errors"].append(f"No parser available for language: {language}")
+
+        return result
+
+    def analyze_file(
+        self,
+        filepath: Union[str, Path],
+        level: Optional[AnalysisLevel] = None,
+    ) -> AnalysisResult:
+        """
+        Analyze a source file with automatic language detection.
+
+        [20251221_FEATURE] Convenience method for file-based analysis.
+
+        Args:
+            filepath: Path to the source file
+            level: Analysis level override
+
+        Returns:
+            AnalysisResult for the file
+        """
+        filepath = Path(filepath)
+
+        if not filepath.exists():
+            result = AnalysisResult(code="")
+            result.errors.append(f"File not found: {filepath}")
+            return result
+
+        code = filepath.read_text(encoding="utf-8")
+        return self.analyze(
+            code,
+            level=level,
+            language=AnalysisLanguage.AUTO,
+            filepath=str(filepath),
+        )
+
     def _build_pdg(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
         """Build Program Dependence Graph and Call Graph."""
         if self.cache_enabled and code in self._pdg_cache:
@@ -236,29 +559,98 @@ class CodeAnalyzer:
 
         return result
 
-    def _compute_metrics(self, tree: ast.AST, code: str) -> AnalysisMetrics:
-        """Compute code metrics from AST."""
+    def _compute_metrics(
+        self,
+        tree: Optional[ast.AST],
+        code: str,
+        language: str = "python",
+        parse_result: Optional[dict[str, Any]] = None,
+    ) -> AnalysisMetrics:
+        """
+        Compute code metrics from AST.
+
+        [20251221_FEATURE] Extended to support multi-language metrics from code_parsers.
+        """
         metrics = AnalysisMetrics()
+        metrics.language = language
+        metrics.parser_backend = (
+            parse_result.get("parser_backend", "ast") if parse_result else "ast"
+        )
 
         # Count lines of code (non-empty, non-comment)
+        comment_chars = {
+            "python": "#",
+            "javascript": "//",
+            "typescript": "//",
+            "java": "//",
+        }
+        comment_char = comment_chars.get(language, "#")
         lines = [
             line
             for line in code.split("\n")
-            if line.strip() and not line.strip().startswith("#")
+            if line.strip() and not line.strip().startswith(comment_char)
         ]
         metrics.lines_of_code = len(lines)
 
-        # Walk AST to count elements
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                metrics.num_functions += 1
-            elif isinstance(node, ast.ClassDef):
-                metrics.num_classes += 1
-            elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
-                metrics.num_variables += 1
+        # Extract metrics from parse_result if available
+        if parse_result:
+            metrics.num_functions = len(parse_result.get("functions", []))
+            metrics.num_classes = len(parse_result.get("classes", []))
 
-        # Calculate cyclomatic complexity
-        metrics.cyclomatic_complexity = self._calculate_complexity(tree)
+            # Get extended metrics from parser_result
+            parser_result = parse_result.get("parser_result")
+            if parser_result and hasattr(parser_result, "metrics"):
+                pr_metrics = parser_result.metrics
+                if isinstance(pr_metrics, dict):
+                    metrics.halstead_volume = pr_metrics.get("halstead_volume", 0.0)
+                    metrics.halstead_difficulty = pr_metrics.get(
+                        "halstead_difficulty", 0.0
+                    )
+                    metrics.cognitive_complexity = pr_metrics.get(
+                        "cognitive_complexity", 0
+                    )
+
+        # For Python AST, compute metrics directly
+        if tree and language == "python":
+            # Walk AST to count elements
+            func_count = 0
+            class_count = 0
+            var_count = 0
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    func_count += 1
+                elif isinstance(node, ast.ClassDef):
+                    class_count += 1
+                elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+                    var_count += 1
+
+            # Only override if not already set from parse_result
+            if metrics.num_functions == 0:
+                metrics.num_functions = func_count
+            if metrics.num_classes == 0:
+                metrics.num_classes = class_count
+            metrics.num_variables = var_count
+
+            # Calculate cyclomatic complexity
+            metrics.cyclomatic_complexity = self._calculate_complexity(tree)
+
+            # Calculate maintainability index (simplified)
+            # MI = 171 - 5.2*ln(V) - 0.23*CC - 16.2*ln(LOC)
+            # Simplified: higher is better, 0-100 scale
+            if metrics.lines_of_code > 0:
+                import math
+
+                loc = max(metrics.lines_of_code, 1)
+                cc = max(metrics.cyclomatic_complexity, 1)
+                # Simplified maintainability calculation
+                mi = max(
+                    0,
+                    171
+                    - 5.2 * math.log(loc * 10 + 1)
+                    - 0.23 * cc
+                    - 16.2 * math.log(loc + 1),
+                )
+                metrics.maintainability_index = min(100, mi)
 
         return metrics
 

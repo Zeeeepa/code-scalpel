@@ -54,9 +54,26 @@ class AutonomyAuditTrail:
     - Parent-child relationships for nested operations
     - Export to multiple formats (JSON, CSV, HTML)
     - Query by time range, event type, success/failure
+
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Implement advanced querying (filters, aggregations)
+    - [ ] Add audit trail compression
+    - [ ] Support database backend
+    - [ ] Implement audit trail rotation
+    - [ ] Add performance metrics collection
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] Anomaly detection in audit trail
+    - [ ] Integration with SIEM systems
+    - [ ] Compliance report generation
+    - [ ] Audit trail analytics
+    - [ ] Integration with external audit systems
+    - [ ] Real-time alerting
     """
 
-    storage_path: Path = field(default_factory=lambda: Path(".code-scalpel/autonomy_audit"))
+    storage_path: Path = field(
+        default_factory=lambda: Path(".code-scalpel/autonomy_audit")
+    )
     current_session_id: str = field(default="")
 
     def __post_init__(self):

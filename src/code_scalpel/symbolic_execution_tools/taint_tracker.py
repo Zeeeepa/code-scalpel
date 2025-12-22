@@ -41,6 +41,32 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from z3 import ExprRef, String
 
 
+# TODO: Enhanced taint source tracking
+#   - Add WebSocket message sources
+#   - Support Server-Sent Events (SSE) as sources
+#   - Track Redis/Memcached cache as sources
+#   - Add message queue sources (RabbitMQ, SQS)
+#   - Support GraphQL subscription sources
+
+# TODO: Context-aware taint propagation
+#   - Implement taint decay (authentication reduces taint level)
+#   - Add context-sensitive sanitizer effectiveness
+#   - Support domain-specific taint policies
+#   - Implement taint elevation on privilege escalation
+
+# TODO: Sanitizer improvements
+#   - Machine learning-based sanitizer detection
+#   - Context-aware sanitizer validation
+#   - Incomplete sanitizer detection (e.g., only escaping quotes)
+#   - Custom sanitizer effectiveness scoring
+
+# TODO: Advanced flow analysis
+#   - Object-sensitive taint tracking (track fields separately)
+#   - Path-sensitive analysis (different paths, different taints)
+#   - Context-sensitive interprocedural analysis
+#   - Support async/await taint propagation
+
+
 class TaintSource(Enum):
     """
     Categories of taint sources.
@@ -102,7 +128,9 @@ class SecuritySink(Enum):
     # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
     REDIRECT = auto()  # Open Redirect (redirect to user-controlled URL)
     # [20251229_FEATURE] v3.0.4 - Type System Evaporation detection
-    UNVALIDATED_OUTPUT = auto()  # Tainted data returned in HTTP response without validation (CWE-20)
+    UNVALIDATED_OUTPUT = (
+        auto()
+    )  # Tainted data returned in HTTP response without validation (CWE-20)
     # [20251219_FEATURE] v3.0.4 - Additional 12 vulnerability types for comprehensive coverage
     LDAP_INJECTION = auto()  # LDAP filter injection (CWE-90)
     XPATH_INJECTION = auto()  # XPath query injection (CWE-643)
@@ -635,7 +663,11 @@ class TaintedValue:
 
     def __repr__(self) -> str:
         if self.is_tainted:
-            return f"TaintedValue({self.expr}, taint={self.taint.source.name})"
+            return (
+                f"TaintedValue({self.expr}, taint={self.taint.source.name})"
+                if self.taint
+                else "TaintedValue(undefined)"
+            )
         return f"TaintedValue({self.expr}, clean)"
 
 
@@ -1297,8 +1329,8 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "make_response": SecuritySink.HTML_OUTPUT,
     "flask.make_response": SecuritySink.HTML_OUTPUT,
     "Markup": SecuritySink.HTML_OUTPUT,
-    "flask.Markup": SecuritySink.HTML_OUTPUT,
-    "markupsafe.Markup": SecuritySink.HTML_OUTPUT,
+    # "flask.Markup": SecuritySink.HTML_OUTPUT,  # Duplicate - defined in HTML_INJECTION section
+    # "markupsafe.Markup": SecuritySink.HTML_OUTPUT,  # Duplicate - defined in HTML_INJECTION section
     # File paths
     "open": SecuritySink.FILE_PATH,
     "os.path.join": SecuritySink.FILE_PATH,
@@ -1694,10 +1726,10 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
     "LdapTemplate.authenticate": SecuritySink.SQL_QUERY,  # [20251215_FEATURE] LDAP auth
     "BindAuthenticator.authenticate": SecuritySink.SQL_QUERY,
     # Java Expression Language Injection (similar to SSTI)
-    "ExpressionParser.parseExpression": SecuritySink.SSTI,  # Spring SpEL
+    # Removed duplicate: "ExpressionParser.parseExpression" - defined in EL_INJECTION section
     "SpelExpressionParser": SecuritySink.SSTI,
     "OGNL.getValue": SecuritySink.SSTI,  # Struts
-    "MVEL.eval": SecuritySink.SSTI,
+    # Removed duplicate: "MVEL.eval" - defined in EL_INJECTION section
     # ==========================================================================
     # [20251215_FEATURE] v2.0.0 P1 - Additional Spring Security Patterns
     # ==========================================================================

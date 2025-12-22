@@ -236,9 +236,12 @@ class UniversalGraph:
 
     def get_dependencies(
         self, node_id: str, min_confidence: float = 0.8
-    ) -> Dict[str, List[GraphEdge]]:
+    ) -> Dict[str, Any]:
         """
         Get dependencies with confidence filtering.
+
+        [20251220_BUGFIX] Fixed return type to match actual return value
+        which includes boolean flag alongside edge lists.
 
         Args:
             node_id: Node to analyze
@@ -400,9 +403,11 @@ class UniversalGraph:
         edges = [GraphEdge.from_dict(e) for e in graph_data.get("edges", [])]
         metadata = data.get("metadata", {})
 
-        graph = UniversalGraph(metadata=metadata)
+        # [20251221_BUGFIX] Fixed dataclass construction with proper field assignment
+        graph = UniversalGraph()
         graph.nodes = nodes
         graph.edges = edges
+        graph.metadata = metadata
         return graph
 
     @staticmethod

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from code_scalpel.cache.analysis_cache import AnalysisCache
+from code_scalpel.cache.unified_cache import AnalysisCache
 from code_scalpel.cache.incremental_analyzer import IncrementalAnalyzer
 
 
@@ -27,7 +27,9 @@ def test_incremental_analyzer_invalidation_and_dependents(tmp_path: Path) -> Non
 
     # Dependent should be listed and invalidated
     assert str(user.resolve()) in affected
-    assert cache.get_cached(user) is None
+    # After invalidation, cache for user should be None
+    cached_user = cache.get_cached(user)
+    assert cached_user is None
 
     # Updated file should now be cached with new content
     assert cache.get_or_parse(dep, parse_fn=parse_text) == "two"

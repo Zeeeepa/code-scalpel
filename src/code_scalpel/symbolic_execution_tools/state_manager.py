@@ -26,7 +26,7 @@ need to be copied.
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from z3 import (
     ExprRef,
@@ -249,12 +249,12 @@ class SymbolicState:
             A single Z3 And expression, or True if no constraints
         """
         if not self._constraints:
-            return Bool("__true__") == Bool("__true__")  # Trivially true
+            return cast(BoolRef, Bool("__true__") == Bool("__true__"))  # Trivially true
 
         if len(self._constraints) == 1:
             return self._constraints[0]
 
-        return And(*self._constraints)
+        return cast(BoolRef, And(*self._constraints))
 
     def is_feasible(self) -> bool:
         """

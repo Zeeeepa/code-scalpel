@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import logging
 from collections import defaultdict
@@ -15,7 +17,7 @@ class FunctionMetrics:
 
     name: str
     args: list[str]
-    kwargs: list[tuple[str, Optional[str]]]  # (arg_name, default_value)
+    kwargs: list[tuple[str, str]]  # (arg_name, default_value)
     return_type: Optional[str]
     complexity: int
     line_count: int
@@ -44,6 +46,10 @@ class ASTAnalyzer:
         self.ast_cache: dict[str, ast.AST] = {}
         self.cache_enabled = cache_enabled
         self.current_context: list[str] = []  # Track current function/class context
+        # [20251221_FEATURE] TODO: Add type hint inference from code analysis
+        # [20251221_FEATURE] TODO: Support async function metrics and analysis
+        # [20251221_ENHANCEMENT] TODO: Add data flow analysis for variable usage tracking
+        # [20251221_ENHANCEMENT] TODO: Support class inheritance metrics and depth calculation
 
     def parse_to_ast(self, code: str) -> ast.AST:
         """Parse Python code into an AST with caching."""
@@ -214,7 +220,11 @@ class ASTAnalyzer:
 
     def _count_node_lines(self, node: ast.AST) -> int:
         """Count the number of lines in a node."""
-        return node.end_lineno - node.lineno + 1 if hasattr(node, "end_lineno") else 1
+        lineno = getattr(node, "lineno", None)
+        end_lineno = getattr(node, "end_lineno", None)
+        if lineno and end_lineno:
+            return end_lineno - lineno + 1
+        return 1
 
     def _extract_function_calls(self, node: ast.AST) -> list[str]:
         """Extract all function calls within a node."""

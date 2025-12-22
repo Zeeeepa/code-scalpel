@@ -20,6 +20,62 @@ Usage:
 
     # Generate markdown report
     report = crawler.generate_report()
+
+TODO: Module Enhancement Roadmap
+================================
+
+Phase 1 - Extended Language Support:
+- TODO: Add support for analyzing JavaScript/TypeScript files
+- TODO: Add support for analyzing Java files with similar metrics
+- TODO: Add support for analyzing Go files
+- TODO: Add support for analyzing Rust files
+- TODO: Create language-agnostic base visitor for multi-language support
+
+Phase 2 - Advanced Metrics:
+- TODO: Implement Halstead complexity metrics (volume, difficulty, effort)
+- TODO: Implement maintainability index calculation
+- TODO: Add cognitive complexity scoring (more accurate than cyclomatic)
+- TODO: Track code churn metrics when git history is available
+- TODO: Calculate test coverage correlation per module
+- TODO: Add SLOC vs logical LOC distinction
+- TODO: Implement comment density analysis
+
+Phase 3 - Dependency Analysis:
+- TODO: Build import dependency graph for the entire project
+- TODO: Detect circular import dependencies
+- TODO: Identify unused imports across the codebase
+- TODO: Generate dependency visualization (DOT/Mermaid format)
+- TODO: Calculate coupling metrics between modules
+- TODO: Track external vs internal dependency ratio
+
+Phase 4 - Code Quality Indicators:
+- TODO: Detect code duplication (clone detection)
+- TODO: Identify dead code (unreachable functions/classes)
+- TODO: Flag functions exceeding parameter count thresholds
+- TODO: Detect deeply nested code blocks
+- TODO: Identify god classes and long methods
+- TODO: Track technical debt indicators
+
+Phase 5 - Performance & Scalability:
+- TODO: Implement parallel file analysis using multiprocessing
+- TODO: Add incremental analysis (only changed files)
+- TODO: Implement caching of analysis results
+- TODO: Add memory-efficient streaming for large codebases
+- TODO: Support analysis of monorepos with multiple roots
+
+Phase 6 - Integration & Reporting:
+- TODO: Add HTML report generation with interactive charts
+- TODO: Export metrics to Prometheus/Grafana format
+- TODO: Generate SARIF output for IDE integration
+- TODO: Add CI/CD integration helpers (GitHub Actions, GitLab CI)
+- TODO: Create VS Code extension integration
+- TODO: Add threshold-based exit codes for CI gates
+
+Phase 7 - AI/ML Features:
+- TODO: Train model to predict bug-prone files based on metrics
+- TODO: Implement semantic code similarity detection
+- TODO: Add natural language summaries of complex functions
+- TODO: Generate refactoring suggestions based on patterns
 """
 
 from __future__ import annotations
@@ -63,13 +119,37 @@ DEFAULT_COMPLEXITY_THRESHOLD: int = 10
 
 @dataclass
 class FunctionInfo:
-    """Information about a function or method."""
+    """
+    Information about a function or method.
+
+    TODO: Add the following fields for richer analysis:
+    - TODO: end_lineno: int - Track function end line for size calculation
+    - TODO: docstring: str | None - Extract and store docstring
+    - TODO: has_docstring: bool - Quick check for documentation coverage
+    - TODO: parameters: list[str] - Track parameter names and count
+    - TODO: return_type: str | None - Extract return type annotation
+    - TODO: decorators: list[str] - Track applied decorators
+    - TODO: is_async: bool - Flag async functions separately
+    - TODO: is_generator: bool - Flag generator functions
+    - TODO: is_property: bool - Flag property methods
+    - TODO: is_staticmethod: bool - Flag static methods
+    - TODO: is_classmethod: bool - Flag class methods
+    - TODO: cognitive_complexity: int - More accurate complexity metric
+    - TODO: nested_depth: int - Maximum nesting level in function
+    - TODO: local_variables: int - Count of local variable declarations
+    - TODO: calls_made: list[str] - Functions/methods called within
+    """
 
     name: str
     lineno: int
     complexity: int
     is_method: bool = False
     class_name: str | None = None
+
+    # TODO: Add computed properties:
+    # - is_complex: bool - Returns True if complexity > threshold
+    # - size_lines: int - Number of lines (requires end_lineno)
+    # - documentation_ratio: float - Docstring lines vs code lines
 
     @property
     def qualified_name(self) -> str:
@@ -81,17 +161,61 @@ class FunctionInfo:
 
 @dataclass
 class ClassInfo:
-    """Information about a class."""
+    """
+    Information about a class.
+
+    TODO: Add the following fields for richer class analysis:
+    - TODO: end_lineno: int - Track class end line
+    - TODO: docstring: str | None - Extract class docstring
+    - TODO: decorators: list[str] - Track class decorators (@dataclass, etc.)
+    - TODO: instance_attributes: list[str] - Attributes set in __init__
+    - TODO: class_attributes: list[str] - Class-level attribute definitions
+    - TODO: properties: list[str] - @property decorated methods
+    - TODO: abstract_methods: list[str] - @abstractmethod decorated methods
+    - TODO: is_dataclass: bool - Flag dataclass decorated classes
+    - TODO: is_abstract: bool - Flag ABC subclasses
+    - TODO: is_protocol: bool - Flag Protocol subclasses
+    - TODO: metaclass: str | None - Track metaclass if specified
+    - TODO: inner_classes: list[ClassInfo] - Nested class definitions
+    - TODO: method_count_by_visibility: dict - public/private/protected counts
+    """
 
     name: str
     lineno: int
     methods: list[FunctionInfo] = field(default_factory=list)
     bases: list[str] = field(default_factory=list)
 
+    # TODO: Add computed properties:
+    # - total_complexity: int - Sum of all method complexities
+    # - average_method_complexity: float - Mean complexity per method
+    # - is_god_class: bool - Too many methods/attributes indicator
+    # - inheritance_depth: int - Depth in inheritance hierarchy
+
 
 @dataclass
 class FileAnalysisResult:
-    """Result of analyzing a single file."""
+    """
+    Result of analyzing a single file.
+
+    TODO: Add the following fields for comprehensive file analysis:
+    - TODO: file_hash: str - SHA256 hash for change detection
+    - TODO: last_modified: datetime - File modification timestamp
+    - TODO: encoding: str - Detected file encoding
+    - TODO: blank_lines: int - Count of blank lines
+    - TODO: comment_lines: int - Count of comment-only lines
+    - TODO: docstring_lines: int - Lines within docstrings
+    - TODO: logical_lines: int - Actual code statements
+    - TODO: global_variables: list[str] - Module-level variable definitions
+    - TODO: constants: list[str] - UPPER_CASE module-level names
+    - TODO: type_aliases: list[str] - Type alias definitions
+    - TODO: __all__: list[str] | None - Exported names if defined
+    - TODO: shebang: str | None - Shebang line if present
+    - TODO: future_imports: list[str] - __future__ imports used
+    - TODO: conditional_imports: list[str] - Imports inside if/try blocks
+    - TODO: star_imports: list[str] - from x import * occurrences
+    - TODO: relative_imports: list[str] - Relative import statements
+    - TODO: syntax_version: str - Minimum Python version required
+    """
 
     path: str
     status: str  # "success" or "error"
@@ -102,6 +226,15 @@ class FileAnalysisResult:
     complexity_warnings: list[FunctionInfo] = field(default_factory=list)
     error: str | None = None
 
+    # TODO: Add computed properties:
+    # - code_to_comment_ratio: float - Code lines / comment lines
+    # - documentation_coverage: float - % of functions with docstrings
+    # - average_function_length: float - Mean lines per function
+    # - max_nesting_depth: int - Deepest nesting in file
+    # - import_count_external: int - Third-party imports
+    # - import_count_stdlib: int - Standard library imports
+    # - import_count_local: int - Project-internal imports
+
     @property
     def total_functions(self) -> int:
         """Total number of functions including class methods."""
@@ -110,12 +243,34 @@ class FileAnalysisResult:
 
 @dataclass
 class CrawlResult:
-    """Result of crawling an entire project."""
+    """
+    Result of crawling an entire project.
+
+    TODO: Add the following fields for comprehensive project analysis:
+    - TODO: duration_seconds: float - Time taken to complete crawl
+    - TODO: python_version: str - Python version used for parsing
+    - TODO: exclude_patterns: list[str] - Patterns that were excluded
+    - TODO: file_count_by_extension: dict[str, int] - All files found by type
+    - TODO: largest_files: list[tuple[str, int]] - Top N files by LOC
+    - TODO: most_complex_files: list[tuple[str, int]] - Top N by complexity
+    - TODO: dependency_graph: dict[str, list[str]] - Import relationships
+    - TODO: circular_dependencies: list[list[str]] - Detected cycles
+    - TODO: packages_found: list[str] - Directories with __init__.py
+    - TODO: test_files: list[str] - Files matching test patterns
+    - TODO: config_files: list[str] - setup.py, pyproject.toml, etc.
+    """
 
     root_path: str
     timestamp: str
     files_analyzed: list[FileAnalysisResult] = field(default_factory=list)
     files_with_errors: list[FileAnalysisResult] = field(default_factory=list)
+
+    # TODO: Add methods:
+    # - get_files_by_complexity(min_score: int) -> list[FileAnalysisResult]
+    # - get_files_by_size(min_loc: int) -> list[FileAnalysisResult]
+    # - get_hotspots(top_n: int) -> list[tuple[str, FunctionInfo]]
+    # - compare(other: CrawlResult) -> CrawlDiff - Compare two crawl results
+    # - filter_by_path(pattern: str) -> CrawlResult - Filter results by path
 
     @property
     def total_files(self) -> int:
@@ -163,7 +318,24 @@ class CrawlResult:
 
 
 class CodeAnalyzerVisitor(ast.NodeVisitor):
-    """AST visitor that extracts code metrics."""
+    """
+    AST visitor that extracts code metrics.
+
+    TODO: Visitor Enhancement Roadmap:
+    - TODO: Track current nesting depth for nested function detection
+    - TODO: Collect decorator information from function/class nodes
+    - TODO: Extract docstrings using ast.get_docstring()
+    - TODO: Detect type annotations on parameters and return values
+    - TODO: Track global/nonlocal statements for scope analysis
+    - TODO: Identify comprehension patterns (list, dict, set, generator)
+    - TODO: Count exception handling patterns (try/except/finally)
+    - TODO: Detect context managers (with statements)
+    - TODO: Track assertion statements for test-like code detection
+    - TODO: Identify magic methods (__init__, __str__, etc.)
+    - TODO: Detect protocol/ABC usage patterns
+    - TODO: Track lambda expressions and their complexity
+    - TODO: Identify f-string usage vs .format() vs % formatting
+    """
 
     def __init__(self, complexity_threshold: int = DEFAULT_COMPLEXITY_THRESHOLD):
         self.complexity_threshold = complexity_threshold
@@ -172,6 +344,13 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
         self.imports: list[str] = []
         self.complexity_warnings: list[FunctionInfo] = []
         self._current_class: ClassInfo | None = None
+        # TODO: Add tracking for:
+        # self._nesting_depth: int = 0
+        # self._max_nesting_depth: int = 0
+        # self.global_variables: list[str] = []
+        # self.constants: list[str] = []
+        # self.decorators_used: set[str] = set()
+        # self.type_annotations_count: int = 0
 
     def visit_Import(self, node: ast.Import) -> None:
         """Handle import statements."""
@@ -187,10 +366,10 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Handle class definitions."""
-        bases = [
-            self._get_base_name(base)
+        bases: list[str] = [
+            base_name
             for base in node.bases
-            if self._get_base_name(base)
+            if (base_name := self._get_base_name(base)) is not None
         ]
         class_info = ClassInfo(
             name=node.name,
@@ -240,6 +419,18 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
         Calculate cyclomatic complexity.
 
         Complexity = 1 + number of decision points (if, for, while, try, etc.)
+
+        TODO: Complexity Calculation Improvements:
+        - TODO: Implement cognitive complexity (Sonar-style) as alternative metric
+        - TODO: Add weighted complexity based on nesting depth
+        - TODO: Handle match/case statements (Python 3.10+)
+        - TODO: Consider ternary expressions (a if b else c)
+        - TODO: Weight recursive calls higher
+        - TODO: Track complexity per branch for detailed analysis
+        - TODO: Add support for async for/async with statements
+        - TODO: Consider walrus operator (:=) in conditions
+        - TODO: Implement essential complexity (after structured simplification)
+        - TODO: Add McCabe strict mode vs relaxed mode option
         """
         score = 1
         for child in ast.walk(node):
@@ -255,6 +446,13 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
             elif isinstance(child, ast.comprehension):
                 # List/dict/set comprehensions with if clauses
                 score += len(child.ifs)
+            # TODO: Add these cases:
+            # elif isinstance(child, ast.Match):  # Python 3.10+
+            #     score += len(child.cases)
+            # elif isinstance(child, ast.IfExp):  # Ternary expressions
+            #     score += 1
+            # elif isinstance(child, ast.Assert):
+            #     score += 1  # Optional: count assertions
         return score
 
     @staticmethod
@@ -276,6 +474,39 @@ class ProjectCrawler:
         result = crawler.crawl()
         print(f"Analyzed {result.total_files} files")
         print(f"Total LOC: {result.total_lines_of_code}")
+
+    TODO: ProjectCrawler Enhancement Roadmap:
+    =========================================
+
+    Configuration & Flexibility:
+    - TODO: Add .crawlerignore file support (like .gitignore)
+    - TODO: Support glob patterns for include/exclude (not just dir names)
+    - TODO: Add file size limits to skip extremely large files
+    - TODO: Support configuration via pyproject.toml [tool.code-scalpel.crawler]
+    - TODO: Add preset configurations (strict, relaxed, ci-mode)
+
+    Performance & Scalability:
+    - TODO: Implement multiprocessing.Pool for parallel file analysis
+    - TODO: Add async/await support with aiofiles for I/O bound operations
+    - TODO: Implement incremental crawling with file hash caching
+    - TODO: Add progress callback for UI integration
+    - TODO: Support streaming results for memory efficiency
+    - TODO: Add timeout per-file to handle pathological cases
+
+    Analysis Features:
+    - TODO: Integrate with git to get file history/blame info
+    - TODO: Add support for analyzing Jupyter notebooks (.ipynb)
+    - TODO: Detect and parse type stub files (.pyi)
+    - TODO: Support analyzing Cython files (.pyx)
+    - TODO: Add configurable complexity algorithms (cyclomatic, cognitive, etc.)
+
+    Output & Integration:
+    - TODO: Add JSON Schema for output validation
+    - TODO: Generate SonarQube compatible metrics
+    - TODO: Output CodeClimate compatible format
+    - TODO: Add SQLite export for querying large results
+    - TODO: Generate treemap visualization data
+    - TODO: Add diff mode to compare two crawl results
     """
 
     def __init__(
@@ -382,6 +613,21 @@ class ProjectCrawler:
 
         Returns:
             Markdown report string
+
+        TODO: Report Generation Enhancements:
+        - TODO: Add HTML report with interactive charts (Chart.js/D3.js)
+        - TODO: Generate PDF report using weasyprint or reportlab
+        - TODO: Add treemap visualization of code structure
+        - TODO: Include mini sparkline graphs for trends (if historical data)
+        - TODO: Add collapsible sections for large reports
+        - TODO: Generate per-package/module breakdown sections
+        - TODO: Add code snippets for complexity hotspots
+        - TODO: Include actionable recommendations section
+        - TODO: Add comparison table if baseline provided
+        - TODO: Generate badges (shields.io compatible) for README
+        - TODO: Support custom Jinja2 templates for report formatting
+        - TODO: Add executive summary with key findings
+        - TODO: Include trend indicators (↑↓→) when comparing
         """
         if result is None:
             result = self.crawl()

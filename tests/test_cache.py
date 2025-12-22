@@ -15,7 +15,7 @@ class TestAnalysisCache:
 
     def test_cache_set_and_get(self):
         """Test basic set and get operations."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -31,7 +31,7 @@ class TestAnalysisCache:
 
     def test_cache_miss(self):
         """Test cache miss returns None."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -44,7 +44,7 @@ class TestAnalysisCache:
 
     def test_different_code_different_cache(self):
         """Test that different code gets different cache entries."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -63,7 +63,7 @@ class TestAnalysisCache:
 
     def test_different_result_types(self):
         """Test caching different result types for same code."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -81,7 +81,7 @@ class TestAnalysisCache:
 
     def test_config_affects_cache_key(self):
         """Test that different configs create different cache entries."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -99,7 +99,7 @@ class TestAnalysisCache:
 
     def test_cache_disabled(self):
         """Test that disabled cache returns None."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         config = CacheConfig(enabled=False)
         cache = AnalysisCache(config)
@@ -112,7 +112,7 @@ class TestAnalysisCache:
 
     def test_cache_invalidate(self):
         """Test cache invalidation."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -129,7 +129,7 @@ class TestAnalysisCache:
 
     def test_cache_clear(self):
         """Test clearing entire cache."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -145,7 +145,7 @@ class TestAnalysisCache:
 
     def test_cache_stats(self):
         """Test cache statistics."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -167,7 +167,7 @@ class TestAnalysisCache:
 
     def test_cache_hit_rate(self):
         """Test cache hit rate calculation."""
-        from code_scalpel.utilities.cache import CacheStats
+        from code_scalpel.cache.unified_cache import CacheStats
 
         stats = CacheStats(hits=3, misses=1)
         assert stats.hit_rate == 0.75
@@ -177,7 +177,7 @@ class TestAnalysisCache:
 
     def test_cache_persistence(self):
         """Test that cache persists across instances."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create first instance and set value
@@ -193,7 +193,7 @@ class TestAnalysisCache:
 
     def test_ttl_expiration(self):
         """Test that expired entries are not returned."""
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Very short TTL
@@ -218,8 +218,8 @@ class TestAnalysisCache:
         This ensures that upgrading code-scalpel automatically invalidates
         old cache entries, preventing stale results from older analysis.
         """
-        from code_scalpel.utilities import cache as cache_module
-        from code_scalpel.utilities.cache import AnalysisCache, CacheConfig
+        from code_scalpel.cache import unified_cache as cache_module
+        from code_scalpel.cache.unified_cache import AnalysisCache, CacheConfig
 
         with tempfile.TemporaryDirectory() as tmpdir:
             config = CacheConfig(cache_dir=Path(tmpdir))
@@ -256,7 +256,7 @@ class TestCacheConfig:
 
     def test_default_config(self):
         """Test default configuration values."""
-        from code_scalpel.utilities.cache import CacheConfig
+        from code_scalpel.cache.unified_cache import CacheConfig
 
         config = CacheConfig()
 
@@ -267,7 +267,7 @@ class TestCacheConfig:
 
     def test_custom_config(self):
         """Test custom configuration."""
-        from code_scalpel.utilities.cache import CacheConfig
+        from code_scalpel.cache.unified_cache import CacheConfig
 
         config = CacheConfig(
             max_entries=100,
@@ -285,7 +285,7 @@ class TestGlobalCache:
 
     def test_get_cache_singleton(self):
         """Test that get_cache returns same instance."""
-        from code_scalpel.utilities.cache import get_cache, reset_cache
+        from code_scalpel.cache.unified_cache import get_cache, reset_cache
 
         reset_cache()  # Clear any existing
 
@@ -296,7 +296,7 @@ class TestGlobalCache:
 
     def test_reset_cache(self):
         """Test cache reset."""
-        from code_scalpel.utilities.cache import get_cache, reset_cache
+        from code_scalpel.cache.unified_cache import get_cache, reset_cache
 
         cache1 = get_cache()
         reset_cache()
@@ -354,7 +354,11 @@ class TestSymbolicCaching:
         import tempfile
         import time
         from pathlib import Path
-        from code_scalpel.utilities.cache import CacheConfig, AnalysisCache, reset_cache
+        from code_scalpel.cache.unified_cache import (
+            CacheConfig,
+            AnalysisCache,
+            reset_cache,
+        )
 
         # Reset global cache to ensure clean state
         reset_cache()
@@ -365,7 +369,7 @@ class TestSymbolicCaching:
             cache = AnalysisCache(config)
 
             # Patch get_cache to return our test cache
-            import code_scalpel.utilities.cache as cache_module
+            import code_scalpel.cache.unified_cache as cache_module
 
             original_get_cache = cache_module.get_cache
             cache_module.get_cache = lambda *args, **kwargs: cache
@@ -428,7 +432,11 @@ else:
         """Test that different configs produce different cache entries."""
         import tempfile
         from pathlib import Path
-        from code_scalpel.utilities.cache import CacheConfig, AnalysisCache, reset_cache
+        from code_scalpel.cache.unified_cache import (
+            CacheConfig,
+            AnalysisCache,
+            reset_cache,
+        )
 
         reset_cache()
 
@@ -436,7 +444,7 @@ else:
             config = CacheConfig(cache_dir=Path(tmpdir))
             cache = AnalysisCache(config)
 
-            import code_scalpel.utilities.cache as cache_module
+            import code_scalpel.cache.unified_cache as cache_module
 
             original_get_cache = cache_module.get_cache
             cache_module.get_cache = lambda *args, **kwargs: cache

@@ -352,7 +352,7 @@ def example_8_audit_filtering():
     print(f"✓ CRITICAL severity events: {len(critical_events)}")
 
     # Get all events with limit
-    recent_events = audit_log.get_events(limit=3)
+    _ = audit_log.get_events(limit=3)
     print("✓ Most recent 3 events retrieved")
 
 

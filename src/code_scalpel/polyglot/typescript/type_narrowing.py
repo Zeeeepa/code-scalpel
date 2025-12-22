@@ -30,7 +30,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from tree_sitter import Node as TSNode
 
 try:
     import tree_sitter
@@ -169,14 +172,16 @@ class TypeNarrowing:
 
     def __init__(self) -> None:
         """Initialize the type narrowing analyzer."""
-        self._parser = None
+        self._parser: Any = None
         if TREE_SITTER_AVAILABLE:
             try:
                 import tree_sitter_typescript
 
-                self._parser = tree_sitter.Parser(
+                # Create Language object from the PyCapsule
+                typescript_lang = tree_sitter.Language(
                     tree_sitter_typescript.language_typescript()
                 )
+                self._parser = tree_sitter.Parser(typescript_lang)
             except Exception:
                 pass
 
@@ -196,7 +201,13 @@ class TypeNarrowing:
         taint_reduced: dict[str, bool] = {}
 
         if self._parser:
-            tree = self._parser.parse(code.encode())
+            try:
+                tree = self._parser.parse(code.encode())
+                if not tree or not tree.root_node:
+                    raise ValueError("Parsing failed: tree or root_node is None")
+            except Exception as e:
+                raise ValueError(f"Parsing failed: {str(e)}")
+
             self._analyze_tree(
                 tree.root_node,
                 code,
@@ -226,7 +237,7 @@ class TypeNarrowing:
 
     def _analyze_tree(
         self,
-        node: TSNode,
+        node: Any,
         code: str,
         type_guards: list[TypeGuard],
         branch_states: dict[int, BranchState],
@@ -264,7 +275,7 @@ class TypeNarrowing:
 
     def _analyze_if_statement(
         self,
-        node: TSNode,
+        node: Any,
         code: str,
         type_guards: list[TypeGuard],
         branch_states: dict[int, BranchState],
@@ -314,7 +325,7 @@ class TypeNarrowing:
         condition_text: str,
         line: int,
         code: str,
-        node: TSNode | None = None,
+        node: Any | None = None,
     ) -> list[TypeGuard]:
         """Detect type guards in a condition expression."""
         guards = []

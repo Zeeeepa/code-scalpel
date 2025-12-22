@@ -1,5 +1,4 @@
-"""
-[20251216_FEATURE] v2.2.0 - Structured MCP Logging and Analytics.
+"""[20251216_FEATURE] v2.2.0 - Structured MCP Logging and Analytics.
 
 This module provides structured logging for MCP tool invocations with detailed
 metrics tracking and analytics capabilities.
@@ -11,18 +10,45 @@ Features:
 - Token savings tracking
 - Error traces for debugging
 - Analytics queries for usage patterns
+
+[20251220_TODO] Add log rotation and persistence:
+    - Rotate logs by size/time
+    - Persist analytics to database
+    - Historical trend analysis
+    - Long-term metrics aggregation
+
+[20251220_TODO] Add alerting and thresholds:
+    - Alert on high error rates
+    - Alert on performance degradation
+    - Track SLA compliance
+    - Anomaly detection
+
+[20251220_TODO] Add distributed tracing support:
+    - Implement OpenTelemetry instrumentation
+    - Support W3C Trace Context propagation
+    - Correlate logs across multiple tool invocations
+    - Export traces to Jaeger/Zipkin
+
+[20251220_TODO] Add cardinality limits and sanitization:
+    - Limit unique tool combinations to prevent cardinality explosion
+    - Sanitize error messages to remove sensitive data
+    - Implement PII detection and masking
+    - Add configurable sanitization rules
+
+[20251220_TODO] Add custom metrics and dimensions:
+    - Support custom metric registration
+    - Allow clients to inject custom dimensions
+    - Implement metric forwarding to monitoring systems
+    - Add Prometheus metrics exporter
 """
 
 from __future__ import annotations
 
-# [20251216_BUGFIX] Avoid self-import: explicitly import stdlib logging
-import importlib
-import traceback  # noqa: E402
-from dataclasses import dataclass, field  # noqa: E402
-from datetime import datetime  # noqa: E402
-from typing import Any, Dict, List, Optional  # noqa: E402
-
-logging = importlib.import_module("logging")
+import logging
+import traceback
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 try:
     import structlog
@@ -30,33 +56,41 @@ try:
     STRUCTLOG_AVAILABLE = True
 except ImportError:
     STRUCTLOG_AVAILABLE = False
-    structlog = None
+    structlog = None  # type: ignore
 
 
 # Configure structured logging if available
-if STRUCTLOG_AVAILABLE:
-    # Configure structlog with JSON rendering for production
-    structlog.configure(
-        processors=[
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.processors.UnicodeDecoder(),
-            structlog.processors.JSONRenderer(),
-        ],
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
-    mcp_logger = structlog.get_logger("code_scalpel.mcp")
+if STRUCTLOG_AVAILABLE and structlog is not None:
+    try:
+        # Configure structlog with JSON rendering for production
+        structlog.configure(
+            processors=[
+                structlog.stdlib.filter_by_level,
+                structlog.stdlib.add_logger_name,
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.PositionalArgumentsFormatter(),
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.processors.StackInfoRenderer(),
+                structlog.processors.format_exc_info,
+                structlog.processors.UnicodeDecoder(),
+                structlog.processors.JSONRenderer(),
+            ],
+            context_class=dict,
+            logger_factory=structlog.stdlib.LoggerFactory(),
+            cache_logger_on_first_use=True,
+        )
+        _structlog_logger: Any = structlog.get_logger("code_scalpel.mcp")
+        mcp_logger: Any = _structlog_logger  # type: ignore
+    except Exception as e:
+        # Fallback if structlog configuration fails
+        _stdlib_logger = logging.getLogger("code_scalpel.mcp")
+        _stdlib_logger.warning(f"Failed to configure structlog: {e}")
+        mcp_logger = _stdlib_logger  # type: ignore
 else:
     # Fallback to standard logging if structlog not available
-    mcp_logger = logging.getLogger("code_scalpel.mcp")
-    mcp_logger.setLevel(logging.INFO)
+    _stdlib_logger = logging.getLogger("code_scalpel.mcp")
+    _stdlib_logger.setLevel(logging.INFO)
+    mcp_logger = _stdlib_logger  # type: ignore
 
 
 @dataclass
@@ -271,10 +305,10 @@ def log_tool_invocation(
     # Sanitize params (remove sensitive data)
     safe_params = _sanitize_params(params or {})
 
-    if STRUCTLOG_AVAILABLE:
-        mcp_logger.info("tool_invoked", tool=tool_name, params=safe_params, **kwargs)
+    if STRUCTLOG_AVAILABLE and hasattr(mcp_logger, "bind"):
+        mcp_logger.bind(tool=tool_name, params=safe_params, **kwargs).info("tool_invoked")  # type: ignore
     else:
-        mcp_logger.info(
+        mcp_logger.info(  # type: ignore
             f"Tool invoked: {tool_name}",
             extra={"tool": tool_name, "params": safe_params, **kwargs},
         )
@@ -307,12 +341,10 @@ def log_tool_success(
     )
     _analytics.record_invocation(invocation)
 
-    if STRUCTLOG_AVAILABLE:
-        mcp_logger.info(
-            "tool_success", tool=tool_name, duration_ms=duration_ms, **metrics, **kwargs
-        )
+    if STRUCTLOG_AVAILABLE and hasattr(mcp_logger, "bind"):
+        mcp_logger.bind(tool=tool_name, duration_ms=duration_ms, **metrics, **kwargs).info("tool_success")  # type: ignore
     else:
-        mcp_logger.info(
+        mcp_logger.info(  # type: ignore
             f"Tool success: {tool_name} ({duration_ms:.2f}ms)",
             extra={"tool": tool_name, "duration_ms": duration_ms, **metrics, **kwargs},
         )
@@ -351,18 +383,19 @@ def log_tool_error(
     )
     _analytics.record_invocation(invocation)
 
-    if STRUCTLOG_AVAILABLE:
-        mcp_logger.error(
-            "tool_error",
+    if STRUCTLOG_AVAILABLE and hasattr(mcp_logger, "bind"):
+        mcp_logger.bind(
             tool=tool_name,
             error=error_message,
             error_type=error_type,
-            traceback=error_trace,
+            error_trace=error_trace,
             duration_ms=duration_ms,
             **kwargs,
-        )
+        ).error(
+            "tool_error"
+        )  # type: ignore
     else:
-        mcp_logger.error(
+        mcp_logger.error(  # type: ignore
             f"Tool error: {tool_name} - {error_type}: {error_message}",
             extra={
                 "tool": tool_name,

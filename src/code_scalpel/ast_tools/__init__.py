@@ -19,12 +19,9 @@ except ImportError:
     ASTValidator = None
 
 try:
-    from .utils import (
-        get_all_names,
-        get_node_type,
-        is_constant,
-    )
+    from .utils import ASTUtils, is_constant, get_node_type, get_all_names
 except ImportError:
+    ASTUtils = None
     is_constant = None
     get_node_type = None
     get_all_names = None
@@ -89,6 +86,32 @@ try:
 except ImportError:
     osv_client = None
 
+# [20251221_FEATURE] v3.0.0+ - Advanced analysis modules
+# [20251221_TODO] Complete type_inference module implementation - currently stub
+# from .type_inference import TypeInference, TypeInfo, FunctionTypeInfo
+TypeInference = None  # [20251221_TODO] Implement stub
+TypeInfo = None  # [20251221_TODO] Implement stub
+FunctionTypeInfo = None  # [20251221_TODO] Implement stub
+
+# [20251221_TODO] Complete control_flow module implementation - currently stub
+# from .control_flow import ControlFlowBuilder, ControlFlowGraph, BasicBlock
+ControlFlowBuilder = None  # [20251221_TODO] Implement stub
+ControlFlowGraph = None  # [20251221_TODO] Implement stub
+BasicBlock = None  # [20251221_TODO] Implement stub
+
+# [20251221_TODO] Complete data_flow module implementation - currently stub
+# from .data_flow import DataFlowAnalyzer, DataFlow, Definition, Usage
+DataFlowAnalyzer = None  # [20251221_TODO] Implement stub
+DataFlow = None  # [20251221_TODO] Implement stub
+Definition = None  # [20251221_TODO] Implement stub
+Usage = None  # [20251221_TODO] Implement stub
+
+# [20251221_FEATURE] Refactoring pattern detection and code smell analysis
+# [20251221_TODO] Debug and resolve circular import in ast_refactoring module
+RefactoringAnalyzer = None  # Lazy load when needed
+RefactoringOpportunity = None  # Lazy load when needed
+CodeSmell = None  # Lazy load when needed
+
 
 __all__ = [
     "ASTAnalyzer",
@@ -98,6 +121,7 @@ __all__ = [
     "ASTTransformer",
     "ASTVisualizer",
     "ASTValidator",
+    "ASTUtils",
     "is_constant",
     "get_node_type",
     "get_all_names",
@@ -117,4 +141,18 @@ __all__ = [
     "ExtractionResult",
     # v1.5.3 - OSV Client
     "osv_client",
+    # v3.0.0+ - Advanced analysis
+    "TypeInference",
+    "TypeInfo",
+    "FunctionTypeInfo",
+    "ControlFlowBuilder",
+    "ControlFlowGraph",
+    "BasicBlock",
+    "DataFlowAnalyzer",
+    "DataFlow",
+    "Definition",
+    "Usage",
+    "RefactoringAnalyzer",
+    "RefactoringOpportunity",
+    "CodeSmell",
 ]

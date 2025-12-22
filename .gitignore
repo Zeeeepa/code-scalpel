@@ -39,9 +39,16 @@ pdg_visualizations/
 analysis_results/
 .scalpel_cache/
 .code_scalpel_cache/
+.scalpel_ast_cache/
 compliance_reports/
 .code-scalpel/autonomy_audit/  # Autonomy audit trail runtime files
 .code-scalpel/audit.log  # Policy engine audit log
+
+# Internal development archives
+.archive/
+
+# Development summaries (internal archives - not for version control)
+docs/summaries/
 
 # Benchmark fixtures (generated/cloned data)
 tests/fixtures/data/
@@ -68,6 +75,10 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+coverage.json
+
+# Release evidence and artifacts
+evidence/
 
 # Jupyter Notebook
 .ipynb_checkpoints

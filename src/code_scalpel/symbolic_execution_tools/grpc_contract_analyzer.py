@@ -38,30 +38,57 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 from .schema_drift_detector import (
     ProtobufParser,
-    ProtobufSchema,
     ProtobufMessage,
-    ProtobufField,
     ProtobufEnum,
     SchemaDriftDetector,
     SchemaDriftResult,
 )
 
 
+# TODO: Advanced gRPC security analysis
+#   - Detect missing authentication interceptors
+#   - Identify unencrypted metadata (credentials leak)
+#   - Validate TLS configuration
+#   - Detect rate limiting gaps
+#   - Check for request size limits
+
+# TODO: gRPC best practices validation
+#   - Enforce timeout configuration
+#   - Validate retry policies
+#   - Check keepalive settings
+#   - Detect blocking calls in async contexts
+#   - Verify health check implementation
+
+# TODO: Contract evolution safety
+#   - Detect field number reuse (Protobuf)
+#   - Validate oneof field changes
+#   - Check for reserved field violations
+#   - Enforce deprecation before removal
+#   - Validate service method additions
+
+# TODO: Performance analysis
+#   - Detect large message sizes
+#   - Identify missing pagination
+#   - Check for N+1 query patterns
+#   - Validate streaming vs unary usage
+#   - Analyze compression settings
+
+
 class StreamingType(Enum):
     """gRPC streaming patterns."""
 
-    UNARY = "unary"                      # Single request, single response
-    SERVER_STREAMING = "server_stream"    # Single request, stream response
-    CLIENT_STREAMING = "client_stream"    # Stream request, single response
-    BIDIRECTIONAL = "bidi_stream"         # Stream request, stream response
+    UNARY = "unary"  # Single request, single response
+    SERVER_STREAMING = "server_stream"  # Single request, stream response
+    CLIENT_STREAMING = "client_stream"  # Stream request, single response
+    BIDIRECTIONAL = "bidi_stream"  # Stream request, stream response
 
 
 class IssueSeverity(Enum):
     """Severity of contract issues."""
 
-    ERROR = "ERROR"       # Must fix - will break clients
-    WARNING = "WARNING"   # Should fix - potential problems
-    INFO = "INFO"         # Best practice suggestion
+    ERROR = "ERROR"  # Must fix - will break clients
+    WARNING = "WARNING"  # Should fix - potential problems
+    INFO = "INFO"  # Best practice suggestion
 
 
 @dataclass
@@ -91,8 +118,16 @@ class RpcMethod:
     @property
     def full_signature(self) -> str:
         """Get the full RPC signature."""
-        req = f"stream {self.request_type}" if self.client_streaming else self.request_type
-        resp = f"stream {self.response_type}" if self.server_streaming else self.response_type
+        req = (
+            f"stream {self.request_type}"
+            if self.client_streaming
+            else self.request_type
+        )
+        resp = (
+            f"stream {self.response_type}"
+            if self.server_streaming
+            else self.response_type
+        )
         return f"rpc {self.name}({req}) returns ({resp})"
 
 
@@ -113,12 +148,16 @@ class GrpcService:
     @property
     def streaming_methods(self) -> List[RpcMethod]:
         """Get all streaming methods."""
-        return [m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY]
+        return [
+            m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY
+        ]
 
     @property
     def unary_methods(self) -> List[RpcMethod]:
         """Get all unary methods."""
-        return [m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY]
+        return [
+            m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY
+        ]
 
 
 @dataclass
@@ -194,8 +233,14 @@ class GrpcContract:
             for service in self.services:
                 lines.append(f"  {service.name}:")
                 for method in service.methods.values():
-                    streaming = f" [{method.streaming_type.value}]" if method.streaming_type != StreamingType.UNARY else ""
-                    lines.append(f"    - {method.name}({method.request_type}) → {method.response_type}{streaming}")
+                    streaming = (
+                        f" [{method.streaming_type.value}]"
+                        if method.streaming_type != StreamingType.UNARY
+                        else ""
+                    )
+                    lines.append(
+                        f"    - {method.name}({method.request_type}) → {method.response_type}{streaming}"
+                    )
 
         return "\n".join(lines)
 
@@ -247,18 +292,20 @@ class GrpcContractAnalyzer:
     # Extended regex patterns for gRPC-specific parsing
     IMPORT_PATTERN = re.compile(r'import\s+["\']([^"\']+)["\']')
     OPTION_PATTERN = re.compile(r'option\s+(\w+)\s*=\s*["\']?([^"\';\s]+)["\']?\s*;')
-    SERVICE_PATTERN = re.compile(r'service\s+(\w+)\s*\{')
+    SERVICE_PATTERN = re.compile(r"service\s+(\w+)\s*\{")
     RPC_PATTERN = re.compile(
-        r'rpc\s+(\w+)\s*\(\s*(stream\s+)?([\w.]+)\s*\)\s*returns\s*\(\s*(stream\s+)?([\w.]+)\s*\)'
+        r"rpc\s+(\w+)\s*\(\s*(stream\s+)?([\w.]+)\s*\)\s*returns\s*\(\s*(stream\s+)?([\w.]+)\s*\)"
     )
-    DEPRECATED_PATTERN = re.compile(r'\[deprecated\s*=\s*true\]', re.IGNORECASE)
+    DEPRECATED_PATTERN = re.compile(r"\[deprecated\s*=\s*true\]", re.IGNORECASE)
 
     def __init__(self) -> None:
         """Initialize the analyzer."""
         self._proto_parser = ProtobufParser()
         self._drift_detector = SchemaDriftDetector()
 
-    def analyze(self, proto_content: str, source_file: Optional[str] = None) -> GrpcContract:
+    def analyze(
+        self, proto_content: str, source_file: Optional[str] = None
+    ) -> GrpcContract:
         """
         Analyze a .proto file and extract the gRPC contract.
 
@@ -323,21 +370,25 @@ class GrpcContractAnalyzer:
 
         # Check for missing package
         if not contract.package:
-            issues.append(ContractIssue(
-                severity=IssueSeverity.WARNING,
-                code="GRPC001",
-                message="No package defined - may cause naming conflicts",
-                suggestion="Add 'package your.service.name;' to the .proto file",
-            ))
+            issues.append(
+                ContractIssue(
+                    severity=IssueSeverity.WARNING,
+                    code="GRPC001",
+                    message="No package defined - may cause naming conflicts",
+                    suggestion="Add 'package your.service.name;' to the .proto file",
+                )
+            )
 
         # Check for proto3 syntax
         if contract.syntax != "proto3":
-            issues.append(ContractIssue(
-                severity=IssueSeverity.INFO,
-                code="GRPC002",
-                message=f"Using {contract.syntax} syntax - proto3 is recommended",
-                suggestion="Consider migrating to proto3 for better defaults",
-            ))
+            issues.append(
+                ContractIssue(
+                    severity=IssueSeverity.INFO,
+                    code="GRPC002",
+                    message=f"Using {contract.syntax} syntax - proto3 is recommended",
+                    suggestion="Consider migrating to proto3 for better defaults",
+                )
+            )
 
         # Check each service
         for service in contract.services:
@@ -352,34 +403,40 @@ class GrpcContractAnalyzer:
 
         # Add messages referenced in other messages
         for msg in contract.messages.values():
-            for field in msg.fields.values():
-                if field.type in contract.messages:
-                    used_messages.add(field.type)
+            for msg_field in msg.fields.values():
+                if msg_field.type in contract.messages:
+                    used_messages.add(msg_field.type)
 
         unused = set(contract.messages.keys()) - used_messages
         for msg_name in unused:
-            issues.append(ContractIssue(
-                severity=IssueSeverity.INFO,
-                code="GRPC010",
-                message=f"Message '{msg_name}' is not used by any RPC method",
-                location=msg_name,
-                suggestion="Consider removing unused messages or marking as reserved",
-            ))
+            issues.append(
+                ContractIssue(
+                    severity=IssueSeverity.INFO,
+                    code="GRPC010",
+                    message=f"Message '{msg_name}' is not used by any RPC method",
+                    location=msg_name,
+                    suggestion="Consider removing unused messages or marking as reserved",
+                )
+            )
 
         return issues
 
-    def _validate_service(self, service: GrpcService, contract: GrpcContract) -> List[ContractIssue]:
+    def _validate_service(
+        self, service: GrpcService, contract: GrpcContract
+    ) -> List[ContractIssue]:
         """Validate a single service."""
         issues: List[ContractIssue] = []
 
         # Check for empty service
         if not service.methods:
-            issues.append(ContractIssue(
-                severity=IssueSeverity.WARNING,
-                code="GRPC003",
-                message=f"Service '{service.name}' has no RPC methods",
-                location=service.name,
-            ))
+            issues.append(
+                ContractIssue(
+                    severity=IssueSeverity.WARNING,
+                    code="GRPC003",
+                    message=f"Service '{service.name}' has no RPC methods",
+                    location=service.name,
+                )
+            )
 
         # Check each RPC method
         for method in service.methods.values():
@@ -389,60 +446,72 @@ class GrpcContractAnalyzer:
             if method.request_type not in contract.messages:
                 # Check if it's a well-known type
                 if not self._is_well_known_type(method.request_type):
-                    issues.append(ContractIssue(
-                        severity=IssueSeverity.ERROR,
-                        code="GRPC004",
-                        message=f"Request type '{method.request_type}' not found in contract",
-                        location=location,
-                        suggestion=f"Define message {method.request_type} or check for typos",
-                    ))
+                    issues.append(
+                        ContractIssue(
+                            severity=IssueSeverity.ERROR,
+                            code="GRPC004",
+                            message=f"Request type '{method.request_type}' not found in contract",
+                            location=location,
+                            suggestion=f"Define message {method.request_type} or check for typos",
+                        )
+                    )
 
             if method.response_type not in contract.messages:
                 if not self._is_well_known_type(method.response_type):
-                    issues.append(ContractIssue(
-                        severity=IssueSeverity.ERROR,
-                        code="GRPC005",
-                        message=f"Response type '{method.response_type}' not found in contract",
-                        location=location,
-                        suggestion=f"Define message {method.response_type} or check for typos",
-                    ))
+                    issues.append(
+                        ContractIssue(
+                            severity=IssueSeverity.ERROR,
+                            code="GRPC005",
+                            message=f"Response type '{method.response_type}' not found in contract",
+                            location=location,
+                            suggestion=f"Define message {method.response_type} or check for typos",
+                        )
+                    )
 
             # Check for generic request/response names
             if method.request_type.lower() in ("request", "req"):
-                issues.append(ContractIssue(
-                    severity=IssueSeverity.WARNING,
-                    code="GRPC006",
-                    message="Generic request type name - use descriptive names",
-                    location=location,
-                    suggestion=f"Rename to {method.name}Request",
-                ))
+                issues.append(
+                    ContractIssue(
+                        severity=IssueSeverity.WARNING,
+                        code="GRPC006",
+                        message="Generic request type name - use descriptive names",
+                        location=location,
+                        suggestion=f"Rename to {method.name}Request",
+                    )
+                )
 
             if method.response_type.lower() in ("response", "resp"):
-                issues.append(ContractIssue(
-                    severity=IssueSeverity.WARNING,
-                    code="GRPC007",
-                    message="Generic response type name - use descriptive names",
-                    location=location,
-                    suggestion=f"Rename to {method.name}Response",
-                ))
+                issues.append(
+                    ContractIssue(
+                        severity=IssueSeverity.WARNING,
+                        code="GRPC007",
+                        message="Generic response type name - use descriptive names",
+                        location=location,
+                        suggestion=f"Rename to {method.name}Response",
+                    )
+                )
 
             # Check naming conventions
             if not method.name[0].isupper():
-                issues.append(ContractIssue(
-                    severity=IssueSeverity.INFO,
-                    code="GRPC008",
-                    message="RPC method names should start with uppercase (PascalCase)",
-                    location=location,
-                ))
+                issues.append(
+                    ContractIssue(
+                        severity=IssueSeverity.INFO,
+                        code="GRPC008",
+                        message="RPC method names should start with uppercase (PascalCase)",
+                        location=location,
+                    )
+                )
 
             # Warn about deprecated methods
             if method.deprecated:
-                issues.append(ContractIssue(
-                    severity=IssueSeverity.INFO,
-                    code="GRPC009",
-                    message=f"RPC method '{method.name}' is deprecated",
-                    location=location,
-                ))
+                issues.append(
+                    ContractIssue(
+                        severity=IssueSeverity.INFO,
+                        code="GRPC009",
+                        message=f"RPC method '{method.name}' is deprecated",
+                        location=location,
+                    )
+                )
 
         return issues
 
@@ -518,8 +587,10 @@ class GrpcContractAnalyzer:
         # Messages
         for msg in contract.messages.values():
             lines.append(f"message {msg.name} {{")
-            for field in msg.fields.values():
-                lines.append(f"  {field.type} {field.name} = {field.number};")
+            for msg_field in msg.fields.values():
+                lines.append(
+                    f"  {msg_field.type} {msg_field.name} = {msg_field.number};"
+                )
             lines.append("}")
             lines.append("")
 
@@ -527,8 +598,16 @@ class GrpcContractAnalyzer:
         for service in contract.services:
             lines.append(f"service {service.name} {{")
             for method in service.methods.values():
-                req = f"stream {method.request_type}" if method.client_streaming else method.request_type
-                resp = f"stream {method.response_type}" if method.server_streaming else method.response_type
+                req = (
+                    f"stream {method.request_type}"
+                    if method.client_streaming
+                    else method.request_type
+                )
+                resp = (
+                    f"stream {method.response_type}"
+                    if method.server_streaming
+                    else method.response_type
+                )
                 lines.append(f"  rpc {method.name}({req}) returns ({resp});")
             lines.append("}")
 
@@ -536,8 +615,8 @@ class GrpcContractAnalyzer:
 
     def _remove_comments(self, content: str) -> str:
         """Remove single-line and multi-line comments."""
-        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
-        content = re.sub(r'//.*$', '', content, flags=re.MULTILINE)
+        content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
+        content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
         return content
 
     def _parse_imports(self, content: str) -> List[str]:
@@ -565,13 +644,13 @@ class GrpcContractAnalyzer:
             brace_count = 1
             end = start
             while brace_count > 0 and end < len(content):
-                if content[end] == '{':
+                if content[end] == "{":
                     brace_count += 1
-                elif content[end] == '}':
+                elif content[end] == "}":
                     brace_count -= 1
                 end += 1
 
-            service_body = content[start:end-1]
+            service_body = content[start : end - 1]
             service = self._parse_service_body(service_name, service_body)
             services.append(service)
 
@@ -596,7 +675,7 @@ class GrpcContractAnalyzer:
             # Check if this specific method is deprecated
             # Look for deprecated option near this RPC
             method_start = match.start()
-            method_section = body[max(0, method_start-50):match.end()+50]
+            method_section = body[max(0, method_start - 50) : match.end() + 50]
             deprecated = bool(self.DEPRECATED_PATTERN.search(method_section))
 
             method = RpcMethod(
@@ -665,10 +744,10 @@ class GrpcContractAnalyzer:
             return
 
         msg = contract.messages[msg_name]
-        for field in msg.fields.values():
-            if field.type in contract.messages and field.type not in deps:
-                deps.add(field.type)
-                self._collect_message_deps(field.type, contract, deps)
+        for msg_field in msg.fields.values():
+            if msg_field.type in contract.messages and msg_field.type not in deps:
+                deps.add(msg_field.type)
+                self._collect_message_deps(msg_field.type, contract, deps)
 
 
 def analyze_grpc_contract(proto_content: str) -> GrpcContract:

@@ -135,5 +135,5 @@ __all__ = [
     "StubErrorToDiffEngine",
 ]
 
-# [20251217_FEATURE] Version indicator for autonomy module
-__version__ = "3.0.0"
+# [20251221_RELEASE] v3.1.0 "Enhanced Extraction" - Version indicator for autonomy module
+__version__ = "3.1.0"

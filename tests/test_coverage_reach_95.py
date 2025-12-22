@@ -185,7 +185,7 @@ class TestParallelParserFull:
     def test_parallel_parser_operations(self):
         """[20251217_TEST] Cover parallel parser operations."""
         from code_scalpel.cache.parallel_parser import ParallelParser
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
         import ast
 
         with tempfile.TemporaryDirectory() as tmp_dir:

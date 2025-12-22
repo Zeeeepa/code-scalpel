@@ -40,6 +40,10 @@ class ASTValidator:
             **(config or {}),
         }
         self.issues: list[ValidationIssue] = []
+        # [20251221_FEATURE] TODO: Add custom rule registration and validation plugins
+        # [20251221_FEATURE] TODO: Support style guide enforcement (Black, Ruff configs)
+        # [20251221_ENHANCEMENT] TODO: Add auto-fix suggestions for common violations
+        # [20251221_ENHANCEMENT] TODO: Support language-specific validation rules
 
     def validate(self, tree: ast.AST, code: str) -> list[ValidationIssue]:
         """Perform all validations on the AST."""

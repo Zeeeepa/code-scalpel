@@ -239,3 +239,20 @@ def get_mime_type(language: str) -> str:
     }
 
     return mime_types.get(language.lower(), "text/plain")
+
+
+# [20251220_TODO] Add package manager aware module resolution:
+#     - Detect package.json, pyproject.toml, pom.xml to understand project structure
+#     - Support workspace/monorepo module resolution (npm workspaces, poetry groups)
+#     - Resolve node_modules/@scoped/package structure
+#     - Handle virtual imports (barrel exports, path aliases in tsconfig.json)
+
+# [20251220_TODO] Add cache for resolved module paths:
+#     - Cache resolution results to avoid repeated filesystem lookups
+#     - Invalidate cache on file system changes
+#     - Use mtime/hash to detect stale entries
+
+# [20251220_TODO] Add symlink resolution:
+#     - Follow symlinks when resolving paths
+#     - Detect symlink cycles to prevent infinite loops
+#     - Handle npm link and similar symlink patterns

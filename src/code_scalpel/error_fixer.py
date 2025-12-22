@@ -12,6 +12,60 @@ Key Features:
 Usage (command-line):
     python error_fixer.py --path src/ --dry-run
     python error_fixer.py --path src/ --fix
+
+TODO: ErrorFixer Enhancement Roadmap
+====================================
+
+Phase 1 - code_parsers Integration:
+- TODO: Use code_parsers.ParserFactory for language-aware fixing
+- TODO: Integrate code_parsers.RuffParser for auto-fix suggestions
+- TODO: Support code_parsers error codes in fix mapping
+- TODO: Use code_parsers language detection for multi-language projects
+- TODO: Leverage code_parsers.ParseResult for structured error info
+
+Phase 2 - Extended Fix Types:
+- TODO: Add import sorting fixes (isort-style)
+- TODO: Add unused import removal
+- TODO: Add missing type hint insertion (from mypy suggestions)
+- TODO: Add docstring formatting fixes
+- TODO: Add line length fixes (auto-wrap)
+- TODO: Add indentation normalization (tabs vs spaces)
+
+Phase 3 - Multi-Language Fixes:
+- TODO: Add JavaScript/TypeScript fixes (prettier integration)
+- TODO: Add Java fixes (google-java-format integration)
+- TODO: Add Go fixes (gofmt integration)
+- TODO: Add generic brace style normalization
+- TODO: Add semicolon insertion/removal for JS
+
+Phase 4 - AST-Aware Fixes:
+- TODO: Add safe variable renaming (scope-aware)
+- TODO: Add string quote normalization (single vs double)
+- TODO: Add f-string conversion for Python 3.6+
+- TODO: Add walrus operator suggestions for Python 3.8+
+- TODO: Add type annotation modernization (list vs List)
+
+Phase 5 - Safety & Validation:
+- TODO: Add syntax validation after each fix
+- TODO: Implement fix rollback on validation failure
+- TODO: Add semantic preservation checks
+- TODO: Support fix preview with diff output
+- TODO: Add --safe mode that skips risky fixes
+- TODO: Implement fix conflict detection
+
+Phase 6 - Batch Processing:
+- TODO: Add parallel file processing
+- TODO: Implement fix priority ordering
+- TODO: Add --max-fixes limit per file
+- TODO: Support fix profiles (minimal, standard, aggressive)
+- TODO: Add progress reporting for large projects
+
+Phase 7 - Integration:
+- TODO: Add git pre-commit hook integration
+- TODO: Add CI/CD pipeline integration (GitHub Actions)
+- TODO: Add IDE extension support (VS Code quick fixes)
+- TODO: Generate fix suggestions for code review
+- TODO: Add MCP tool for AI-assisted fixing
 """
 
 from __future__ import annotations

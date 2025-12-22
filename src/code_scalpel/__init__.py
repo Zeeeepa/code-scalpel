@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251219_RELEASE] v3.0.4 "Ninja Warrior" - Language detection and BOM handling fixes
-__version__ = "3.0.4"
+# [20251221_RELEASE] v3.1.0 "Parser Unification" - Unified extractor for all languages
+__version__ = "3.1.0"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 
@@ -77,6 +77,17 @@ from .surgical_extractor import (
     extract_class,
     extract_method,
     extract_with_context,
+)
+
+# Unified Extractor (Multi-language extraction) - v3.1.0
+# [20251221_FEATURE] v3.1.0 - Unified interface for all languages
+from .unified_extractor import (
+    UnifiedExtractor,
+    UnifiedExtractionResult,
+    Language,
+    detect_language,
+    extract_from_file,
+    extract_from_code,
 )
 
 # Surgical Patcher (Safe code modification)
@@ -137,6 +148,13 @@ __all__ = [
     "extract_class",
     "extract_method",
     "extract_with_context",
+    # Unified Extractor (v3.1.0)
+    "UnifiedExtractor",
+    "UnifiedExtractionResult",
+    "Language",
+    "detect_language",
+    "extract_from_file",
+    "extract_from_code",
     # Surgical Patcher
     "SurgicalPatcher",
     "PatchResult",

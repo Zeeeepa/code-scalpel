@@ -375,3 +375,342 @@ class SemanticAnalyzer:
         has_file_op = self.has_file_operation(code)
 
         return has_user_input and has_file_op
+
+    # [20251221_FEATURE] Enhanced security detection methods
+
+    def contains_xss_sink(self, code: str, language: str) -> bool:
+        """
+        Detect XSS (Cross-Site Scripting) vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe DOM manipulation and output encoding issues
+
+        Detects:
+        - innerHTML/outerHTML assignments (JavaScript/TypeScript)
+        - dangerouslySetInnerHTML (React)
+        - document.write() with user input
+        - Response.write() in Java/C# servlets
+        - No sanitization checks
+
+        Args:
+            code: Source code to analyze
+            language: Programming language
+
+        Returns:
+            True if XSS vulnerability pattern detected
+        """
+        language_lower = language.lower()
+
+        # JavaScript/TypeScript DOM manipulation
+        if language_lower in ["javascript", "js", "typescript", "ts"]:
+            xss_sinks = [
+                "innerHTML",
+                "outerHTML",
+                "dangerouslySetInnerHTML",
+                "document.write",
+                "insertAdjacentHTML",
+            ]
+
+            has_xss_sink = any(sink in code for sink in xss_sinks)
+
+            if has_xss_sink:
+                # Check if user input is anywhere in the code (not just right after sink)
+                user_input_patterns = [
+                    "userInput",
+                    "user_input",
+                    "event.",
+                    "props.",
+                    "req.",
+                    "request.",
+                    "query.",
+                    "body.",
+                    "args.",
+                    "input(",
+                ]
+                has_user_input = any(pattern in code for pattern in user_input_patterns)
+                return has_user_input
+
+        # Java servlet response writing
+        elif language_lower == "java":
+            if "response.getWriter()" in code or "PrintWriter" in code:
+                if any(
+                    req_access in code
+                    for req_access in ["request.getParameter", "getQueryString"]
+                ):
+                    return True
+
+        return False
+
+    def contains_command_injection(self, code: str, language: str) -> bool:
+        """
+        Detect Command Injection vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe shell command execution
+
+        Detects:
+        - os.system() / subprocess.call() with user input
+        - Runtime.exec() with command concatenation
+        - child_process.exec() with user input
+        - shell=True in subprocess calls
+        - eval/exec with untrusted code
+
+        Args:
+            code: Source code to analyze
+            language: Programming language
+
+        Returns:
+            True if command injection vulnerability pattern detected
+        """
+        language_lower = language.lower()
+
+        # Python command execution
+        if language_lower == "python":
+            dangerous_funcs = [
+                "os.system",
+                "subprocess.call",
+                "subprocess.popen",
+                "eval",
+                "exec",
+            ]
+
+            has_dangerous = any(func in code for func in dangerous_funcs)
+
+            if has_dangerous:
+                # Check for shell=True or user input
+                if "shell=True" in code:
+                    return True
+                # Check for user input patterns
+                user_input_patterns = [
+                    "request.",
+                    "input(",
+                    "argv",
+                    "sys.argv",
+                    "environ",
+                    "user_",
+                    "query",
+                    "body",
+                    "args",
+                ]
+                has_user_input = any(pattern in code for pattern in user_input_patterns)
+                if has_user_input:
+                    return True
+
+        # Java command execution
+        elif language_lower == "java":
+            if "Runtime.getRuntime().exec" in code or "ProcessBuilder" in code:
+                # Check if command uses user input
+                if any(
+                    user_input in code
+                    for user_input in [
+                        "request.getParameter",
+                        "getQueryString",
+                        "args[",
+                    ]
+                ):
+                    return True
+
+        # JavaScript/TypeScript command execution
+        elif language_lower in ["javascript", "js", "typescript", "ts"]:
+            dangerous_funcs = ["child_process.exec", "child_process.spawn", "eval"]
+
+            has_dangerous = any(func in code for func in dangerous_funcs)
+
+            if has_dangerous:
+                # Check for user input
+                user_input_patterns = ["req.", "body", "query", "params", "input"]
+                has_user_input = any(pattern in code for pattern in user_input_patterns)
+                if has_user_input:
+                    return True
+
+        return False
+
+    def contains_path_traversal(self, code: str, language: str) -> bool:
+        """
+        Detect Path Traversal vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe file path operations
+
+        Detects:
+        - File operations with user-controlled paths
+        - Lack of path normalization
+        - Using ../ or absolute paths
+        - No path validation checks
+
+        Args:
+            code: Source code to analyze
+            language: Programming language
+
+        Returns:
+            True if path traversal vulnerability pattern detected
+        """
+        if not self.has_file_operation(code):
+            return False
+
+        # Check for user-controlled paths without validation
+        user_input_patterns = [
+            "request.getParameter",
+            "request.",
+            "query.",
+            "params.",
+            "argv",
+            "process.argv",
+            "process.env",
+            "req.",
+            "body.",
+            "input(",
+        ]
+
+        has_user_input = any(pattern in code for pattern in user_input_patterns)
+
+        if not has_user_input:
+            return False
+
+        # Check if there's any path normalization/validation
+        validation_patterns = [
+            "normalizePath",
+            "realpath",
+            "abspath",
+            "resolve",
+            "startswith",
+            "allowed_dir",
+            "basename",
+            "dirname",
+        ]
+
+        has_validation = any(pattern in code.lower() for pattern in validation_patterns)
+
+        # If file operation + user input + no validation = vulnerable
+        return not has_validation
+
+    def contains_noql_injection(self, code: str) -> bool:
+        """
+        Detect NoSQL Injection vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe NoSQL query construction
+
+        Detects MongoDB patterns like:
+        - db.collection.find() with user input
+        - Query objects built from request parameters
+        - No input validation/sanitization
+
+        Args:
+            code: Source code
+
+        Returns:
+            True if NoSQL injection pattern detected
+        """
+        nosql_patterns = [
+            "db.",
+            "collection",
+            ".find",
+            ".findOne",
+            ".updateOne",
+            ".deleteOne",
+            ".aggregate",
+            "mongodb",
+            "mongoose",
+        ]
+
+        has_nosql = any(pattern in code for pattern in nosql_patterns)
+
+        if not has_nosql:
+            return False
+
+        # Check for user input near NoSQL operations
+        user_input_patterns = [
+            "request.",
+            "req.",
+            "query.",
+            "body.",
+            "params.",
+            "input(",
+            "user_",
+            "args.",
+        ]
+
+        has_user_input = any(pattern in code for pattern in user_input_patterns)
+
+        return has_user_input
+
+    def contains_ldap_injection(self, code: str) -> bool:
+        """
+        Detect LDAP Injection vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe LDAP query construction
+
+        Args:
+            code: Source code
+
+        Returns:
+            True if LDAP injection pattern detected
+        """
+        ldap_patterns = [
+            "ldap://",
+            "InitialDirContext",
+            "DirContext",
+            "new LdapConnection",
+            "ldap_bind",
+            "ldap_search",
+        ]
+
+        has_ldap = any(pattern in code for pattern in ldap_patterns)
+
+        if not has_ldap:
+            return False
+
+        # Check for user input in LDAP queries
+        user_input_patterns = [
+            "request.",
+            "query.",
+            "input(",
+            "username",
+            "user_id",
+        ]
+
+        has_user_input = any(pattern in code for pattern in user_input_patterns)
+
+        return has_user_input
+
+    def contains_xxe_injection(self, code: str, language: str) -> bool:
+        """
+        Detect XXE (XML External Entity) vulnerabilities.
+
+        [20251221_FEATURE] Detect unsafe XML parsing
+
+        Args:
+            code: Source code
+            language: Programming language
+
+        Returns:
+            True if XXE injection pattern detected
+        """
+        # Python XXE
+        if language.lower() == "python":
+            xml_parsers = ["xml.etree", "ElementTree", "lxml", "minidom", "pulldom"]
+            has_xml = any(parser in code for parser in xml_parsers)
+
+            if has_xml:
+                # Check for defusedxml usage (safe)
+                if "defusedxml" in code:
+                    return False  # Safe
+
+                # Unsafe if using standard XML parsers
+                return True
+
+        # Java XXE
+        elif language.lower() == "java":
+            if (
+                "DocumentBuilder" in code
+                or "SAXParser" in code
+                or "XMLInputFactory" in code
+            ):
+                # Check for XXE prevention patterns
+                safe_patterns = [
+                    "XMLConstants.ACCESS_EXTERNAL",
+                    "setFeature",
+                    "XXE",
+                ]
+
+                has_safe_config = any(pattern in code for pattern in safe_patterns)
+                return not has_safe_config
+
+        return False

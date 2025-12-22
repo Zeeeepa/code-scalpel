@@ -31,6 +31,11 @@ class SecurityAgent(BaseCodeAnalysisAgent):
             "hardcoded_secrets": ["HARDCODED_SECRET"],
         }
         self.risk_levels = {"critical": 9, "high": 7, "medium": 5, "low": 3, "info": 1}
+        # [20251221_FEATURE] TODO: Support CVSS scoring and severity calculation
+        # [20251221_FEATURE] TODO: Add exploit availability and attack complexity assessment
+        # [20251221_ENHANCEMENT] TODO: Integrate with vulnerability databases (NVD, GHSA)
+        # [20251221_ENHANCEMENT] TODO: Add threat modeling and attack tree generation
+        # [20251221_ENHANCEMENT] TODO: Generate security test cases from identified vulnerabilities
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """Observe the target for security vulnerabilities."""

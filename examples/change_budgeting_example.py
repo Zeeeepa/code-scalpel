@@ -11,7 +11,7 @@ This example shows:
 4. Configuring different budget policies
 """
 
-from code_scalpel.policy import (
+from code_scalpel.governance.change_budget import (
     Operation,
     FileChange,
     ChangeBudget,

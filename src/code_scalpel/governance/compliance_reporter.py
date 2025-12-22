@@ -13,8 +13,9 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from typing import Dict, List, Any, Tuple
 
-from code_scalpel.governance.audit_log import AuditLog
-from code_scalpel.governance.policy_engine import PolicyEngine
+# [20251221_REFACTOR] v3.1.0 - Use policy_engine's full audit_log implementation
+from code_scalpel.policy_engine.audit_log import AuditLog
+from code_scalpel.policy_engine import PolicyEngine
 
 
 @dataclass
@@ -99,8 +100,27 @@ class ComplianceReporter:
             audit_log: Audit log containing event history
             policy_engine: Policy engine for validation
         """
+        # [20251222_BUGFIX] Keep compatibility with older tests/code paths that
+        # expect private attributes, while retaining the public ones.
         self.audit_log = audit_log
         self.policy_engine = policy_engine
+        self._audit_log = audit_log
+        self._policy_engine = policy_engine
+
+    def _coerce_event_timestamp(self, value: Any) -> datetime:
+        """Normalize event timestamps to datetime.
+
+        [20251222_BUGFIX] AuditLog persists timestamps as ISO strings; report
+        filtering needs datetimes.
+        """
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            try:
+                return datetime.fromisoformat(value)
+            except ValueError:
+                return datetime.min
+        return datetime.min
 
     def generate_report(
         self,
@@ -150,7 +170,19 @@ class ComplianceReporter:
         Returns:
             List of event dictionaries
         """
-        return self.audit_log.get_events(time_range)
+        events = self.audit_log.get_events()
+
+        # Filter events within the time range
+        start, end = time_range
+        filtered: List[Dict[str, Any]] = []
+        for event in events:
+            ts = self._coerce_event_timestamp(event.get("timestamp"))
+            if start <= ts <= end:
+                # Preserve normalized timestamp for downstream consumers.
+                event = dict(event)
+                event["timestamp"] = ts
+                filtered.append(event)
+        return filtered
 
     def _generate_summary(self, events: List[Dict[str, Any]]) -> ReportSummary:
         """
@@ -220,7 +252,10 @@ class ComplianceReporter:
         by_operation_type: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         for violation in violations:
-            severity = violation["details"].get("severity", "UNKNOWN")
+            # [20251222_BUGFIX] Some call sites store severity inside details,
+            # while AuditLog persists severity at the event level.
+            details = violation.get("details", {})
+            severity = details.get("severity") or violation.get("severity") or "UNKNOWN"
             policy = violation["details"].get("policy_name", "unknown")
             operation = violation["details"].get("operation_type", "unknown")
 
@@ -816,11 +851,11 @@ class ComplianceReporter:
         """
         # [20251216_FEATURE] PDF report rendering with charts and tables
         try:
-            from reportlab.lib.pagesizes import letter
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.lib import colors
-            from reportlab.platypus import (
+            from reportlab.lib.pagesizes import letter  # type: ignore[import-not-found]
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # type: ignore[import-not-found]
+            from reportlab.lib.units import inch  # type: ignore[import-not-found]
+            from reportlab.lib import colors  # type: ignore[import-not-found]
+            from reportlab.platypus import (  # type: ignore[import-not-found]
                 SimpleDocTemplate,
                 Paragraph,
                 Spacer,
@@ -828,7 +863,7 @@ class ComplianceReporter:
                 TableStyle,
                 PageBreak,
             )
-            from reportlab.lib.enums import TA_CENTER
+            from reportlab.lib.enums import TA_CENTER  # type: ignore[import-not-found]
             from io import BytesIO
         except ImportError:
             # Fallback if reportlab is not installed

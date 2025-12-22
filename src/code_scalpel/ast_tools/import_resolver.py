@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 # [20251214_FEATURE] Top-level parse fn for parallel workers (picklable on Windows spawn)
-def _parse_for_imports(file_path: Path) -> Tuple[str, ast.AST]:
+def _parse_for_imports(file_path: Path) -> Tuple[str, ast.Module]:
     with file_path.open("r", encoding="utf-8") as f:
         source = f.read()
     tree = ast.parse(source)
@@ -96,6 +96,11 @@ class ImportInfo:
 
 class DynamicImportVisitor(ast.NodeVisitor):
     """Visitor to extract dynamic imports and track local string variables."""
+
+    # [20251221_FEATURE] TODO: Support lazy import detection and resolution
+    # [20251221_FEATURE] TODO: Add framework-specific import resolution (Django, FastAPI)
+    # [20251221_ENHANCEMENT] TODO: Support type stub analysis for unresolved imports
+    # [20251221_ENHANCEMENT] TODO: Add import cycle detection with detailed paths
 
     def __init__(self, resolver, module_name: str, file_path: str):
         self.resolver = resolver
@@ -299,11 +304,11 @@ class ImportResolver:
         self.project_root = Path(project_root).resolve()
 
         # [20251214_FEATURE] Reusable parse cache + parallel parser and incremental graph
-        self._parse_cache: AnalysisCache[Tuple[str, ast.AST]] = AnalysisCache()
-        self._parallel_parser: ParallelParser[Tuple[str, ast.AST]] = ParallelParser(
+        self._parse_cache: AnalysisCache[Tuple[str, ast.Module]] = AnalysisCache()
+        self._parallel_parser: ParallelParser[Tuple[str, ast.Module]] = ParallelParser(
             cache=self._parse_cache
         )
-        self._incremental: IncrementalAnalyzer[Tuple[str, ast.AST]] = (
+        self._incremental: IncrementalAnalyzer[Tuple[str, ast.Module]] = (
             IncrementalAnalyzer(self._parse_cache)
         )
 
@@ -486,7 +491,7 @@ class ImportResolver:
         return None
 
     def _analyze_file(
-        self, file_path: Path, parsed: Optional[Tuple[str, ast.AST]] = None
+        self, file_path: Path, parsed: Optional[Tuple[str, ast.Module]] = None
     ) -> None:
         """
         Analyze a single Python file for imports and definitions.
@@ -534,7 +539,9 @@ class ImportResolver:
                 if target_path:
                     self._incremental.record_dependency(source_path, target_path)
 
-    def _extract_imports(self, tree: ast.AST, module_name: str, file_path: str) -> None:
+    def _extract_imports(
+        self, tree: ast.Module, module_name: str, file_path: str
+    ) -> None:
         """
         Extract all imports from an AST.
 
@@ -610,7 +617,7 @@ class ImportResolver:
                         self.reverse_edges[resolved_module].add(module_name)
 
     def _extract_dynamic_imports(
-        self, tree: ast.AST, module_name: str, file_path: str
+        self, tree: ast.Module, module_name: str, file_path: str
     ) -> None:
         """Extract dynamic imports (importlib, __import__) from an AST."""
         visitor = DynamicImportVisitor(self, module_name, file_path)
@@ -618,7 +625,7 @@ class ImportResolver:
 
     # [20251214_FEATURE] Django/Flask framework import extraction
     def _extract_framework_imports(
-        self, tree: ast.AST, module_name: str, file_path: str
+        self, tree: ast.Module, module_name: str, file_path: str
     ) -> None:
         """Extract framework-derived imports such as Django INSTALLED_APPS and Flask blueprints."""
         blueprint_vars: Set[str] = set()
@@ -652,15 +659,6 @@ class ImportResolver:
                         module_name, target, getattr(node, "lineno", 0), file_path
                     )
 
-    def _extract_string_iterable(self, node: ast.AST) -> List[str]:
-        """Extract string values from a list/tuple literal."""
-        strings: List[str] = []
-        if isinstance(node, (ast.List, ast.Tuple)):
-            for elt in node.elts:
-                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
-                    strings.append(elt.value)
-        return strings
-
     def _is_import_module_call(self, node: ast.Call) -> bool:
         """Check if this is importlib.import_module()."""
         if isinstance(node.func, ast.Attribute):
@@ -676,7 +674,7 @@ class ImportResolver:
         return isinstance(node.func, ast.Name) and node.func.id == "__import__"
 
     # [20251214_FEATURE] Flask Blueprint constructor detection
-    def _is_blueprint_ctor(self, node: ast.AST) -> bool:
+    def _is_blueprint_ctor(self, node: ast.Assign) -> bool:
         """Check if assignment value is a Flask Blueprint(...) call."""
         if not isinstance(node, ast.Assign):
             return False
@@ -697,6 +695,15 @@ class ImportResolver:
         if isinstance(node.func, ast.Attribute):
             return node.func.attr == "register_blueprint"
         return False
+
+    def _extract_string_iterable(self, node: ast.AST) -> List[str]:
+        """Extract string values from a list/tuple literal."""
+        strings: List[str] = []
+        if isinstance(node, (ast.List, ast.Tuple)):
+            for elt in node.elts:
+                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                    strings.append(elt.value)
+        return strings
 
     def _add_dynamic_import(
         self,
@@ -793,7 +800,7 @@ class ImportResolver:
         return False
 
     def _extract_definitions(
-        self, tree: ast.AST, module_name: str, file_path: str
+        self, tree: ast.Module, module_name: str, file_path: str
     ) -> None:
         """
         Extract symbol definitions (functions, classes) from an AST.

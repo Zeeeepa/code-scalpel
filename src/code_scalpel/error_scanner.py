@@ -23,6 +23,64 @@ Usage:
 
 Command-line:
     python -m code_scalpel.error_scanner --path src/ --format json
+
+TODO: ErrorScanner Enhancement Roadmap
+======================================
+
+Phase 1 - code_parsers Integration:
+- TODO: Use code_parsers.ParserFactory for unified multi-language scanning
+- TODO: Replace individual tool calls with code_parsers unified interface
+- TODO: Use code_parsers.Language enum for file type detection
+- TODO: Integrate code_parsers.PythonASTParser for syntax checking
+- TODO: Use code_parsers.RuffParser as primary fast linter
+- TODO: Support code_parsers tool configuration (enable/disable specific tools)
+
+Phase 2 - Multi-Language Scanning:
+- TODO: Add JavaScript/TypeScript scanning via code_parsers.javascript_parsers
+- TODO: Add Java scanning via code_parsers.java_parsers
+- TODO: Add Go scanning via code_parsers.go_parsers
+- TODO: Add C/C++ scanning via code_parsers.cpp_parsers
+- TODO: Support mixed-language projects with unified results
+- TODO: Add language-specific severity mappings
+
+Phase 3 - Enhanced Error Detection:
+- TODO: Add security vulnerability scanning (bandit integration)
+- TODO: Add type error detection (mypy/pyright integration)
+- TODO: Add code smell detection (cognitive complexity, etc.)
+- TODO: Add dependency vulnerability scanning (safety, pip-audit)
+- TODO: Add license compliance checking
+- TODO: Add documentation coverage checking
+
+Phase 4 - Incremental Scanning:
+- TODO: Implement git-aware scanning (only scan changed files)
+- TODO: Add file hash-based caching to skip unchanged files
+- TODO: Support incremental scan results merging
+- TODO: Add --since flag for date-based scanning
+- TODO: Implement scan result persistence for CI/CD
+
+Phase 5 - Output & Reporting:
+- TODO: Add SARIF output format for GitHub code scanning
+- TODO: Add JUnit XML output for CI integration
+- TODO: Add CodeClimate output format
+- TODO: Generate trend reports (errors over time)
+- TODO: Add error hotspot visualization (most error-prone files)
+- TODO: Support custom report templates
+
+Phase 6 - Configuration & Filtering:
+- TODO: Add .code-scalpel/scanner.yaml configuration file
+- TODO: Support per-directory configuration overrides
+- TODO: Add error suppression via inline comments
+- TODO: Support baseline files (ignore pre-existing errors)
+- TODO: Add error grouping by category/rule
+- TODO: Support custom error severity mappings
+
+Phase 7 - Performance & Scalability:
+- TODO: Implement parallel file scanning with worker pool
+- TODO: Add streaming results for large projects
+- TODO: Implement memory-efficient scanning for huge codebases
+- TODO: Add progress callbacks for UI integration
+- TODO: Support distributed scanning across machines
+- TODO: Add scan timeout per file to prevent hangs
 """
 
 from __future__ import annotations
@@ -30,10 +88,11 @@ from __future__ import annotations
 import json
 import logging
 import sys
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from subprocess import TimeoutExpired
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +150,9 @@ class ScanResults:
             self.total_errors += 1
 
             # Track by type
-            self.error_types[error.error_type] = self.error_types.get(error.error_type, 0) + 1
+            self.error_types[error.error_type] = (
+                self.error_types.get(error.error_type, 0) + 1
+            )
 
             # Track by severity
             self.severity_counts[error.severity] = (
@@ -117,7 +178,10 @@ class ScanResults:
             ErrorSeverity.WARNING: 1,
             ErrorSeverity.INFO: 2,
         }
-        return sorted(self.errors, key=lambda e: (severity_order[e.severity], e.file_path, e.line_number))
+        return sorted(
+            self.errors,
+            key=lambda e: (severity_order[e.severity], e.file_path, e.line_number),
+        )
 
     def sort_by_file(self) -> list[CodeError]:
         """Get errors sorted by file path."""
@@ -132,7 +196,9 @@ class ErrorScanner:
     addressing the limitations of directory-level error scanning.
     """
 
-    def __init__(self, batch_size: int = 30, verbose: bool = False, use_pylint: bool = False):
+    def __init__(
+        self, batch_size: int = 30, verbose: bool = False, use_pylint: bool = False
+    ):
         """
         Initialize the ErrorScanner.
 
@@ -159,7 +225,6 @@ class ErrorScanner:
         Returns:
             ScanResults containing all errors found
         """
-        import time
 
         root = Path(root_path)
         if not root.exists():
@@ -187,7 +252,9 @@ class ErrorScanner:
             batch_num = (i // self.batch_size) + 1
             total_batches = (len(python_files) + self.batch_size - 1) // self.batch_size
 
-            logger.info(f"Processing batch {batch_num}/{total_batches} ({len(batch)} files)")
+            logger.info(
+                f"Processing batch {batch_num}/{total_batches} ({len(batch)} files)"
+            )
 
             # Check this batch
             batch_errors = self._check_files_batch(batch)
@@ -556,7 +623,13 @@ class ErrorScanner:
             import json
 
             result = subprocess.run(
-                ["pylint", file_path, "--output-format=json", "--disable=all", "--enable=E,W,C0101,C0103,W0611,W0612"],
+                [
+                    "pylint",
+                    file_path,
+                    "--output-format=json",
+                    "--disable=all",
+                    "--enable=E,W,C0101,C0103,W0611,W0612",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -572,7 +645,10 @@ class ErrorScanner:
                         message = msg.get("message", "")
 
                         # Map pylint codes to severity
-                        if error_code.startswith("E") or error_code in ["unused-import", "undefined-variable"]:
+                        if error_code.startswith("E") or error_code in [
+                            "unused-import",
+                            "undefined-variable",
+                        ]:
                             severity = ErrorSeverity.ERROR
                         elif error_code.startswith("W"):
                             severity = ErrorSeverity.WARNING
@@ -594,7 +670,7 @@ class ErrorScanner:
 
         except (ImportError, FileNotFoundError):
             logger.debug("pylint command not available")
-        except subprocess.TimeoutExpired:
+        except TimeoutExpired:
             logger.debug("pylint check timed out")
         except Exception as e:
             logger.debug(f"Error parsing pylint output: {e}")
@@ -708,7 +784,11 @@ class ErrorScanner:
         if results.severity_counts:
             lines.append("ERRORS BY SEVERITY")
             lines.append("-" * 40)
-            for severity in [ErrorSeverity.ERROR, ErrorSeverity.WARNING, ErrorSeverity.INFO]:
+            for severity in [
+                ErrorSeverity.ERROR,
+                ErrorSeverity.WARNING,
+                ErrorSeverity.INFO,
+            ]:
                 count = results.severity_counts.get(severity, 0)
                 if count > 0:
                     lines.append(f"  {severity.value.upper():30} {count:5d}")
@@ -797,7 +877,7 @@ class ErrorScanner:
             "</head>",
             "<body>",
             "  <h1>Code Error Scan Report</h1>",
-            f"  <div class='summary'>",
+            "  <div class='summary'>",
             f"    <p><strong>Root Path:</strong> {results.root_path}</p>",
             f"    <p><strong>Files Scanned:</strong> {results.files_checked}</p>",
             f"    <p><strong>Files with Errors:</strong> {results.files_with_errors}</p>",
@@ -831,7 +911,9 @@ class ErrorScanner:
             for error in results.sort_by_file():
                 if error.file_path != current_file:
                     current_file = error.file_path
-                    html_lines.append(f"  <div class='file-name'>📄 {error.file_path}</div>")
+                    html_lines.append(
+                        f"  <div class='file-name'>📄 {error.file_path}</div>"
+                    )
 
                 severity_class = error.severity.value
                 html_lines.append(f"  <div class='error {severity_class}'>")
@@ -853,7 +935,6 @@ class ErrorScanner:
 def main():
     """Command-line interface for error scanning."""
     import argparse
-    import time
 
     parser = argparse.ArgumentParser(
         description="Comprehensive project error scanner for code-scalpel"
@@ -888,14 +969,14 @@ def main():
         action="store_true",
         help="Enable slower pylint analysis (slower but more thorough)",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose logging"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()
 
     # Create scanner and run
-    scanner = ErrorScanner(batch_size=args.batch_size, verbose=args.verbose, use_pylint=args.pylint)
+    scanner = ErrorScanner(
+        batch_size=args.batch_size, verbose=args.verbose, use_pylint=args.pylint
+    )
 
     print(f"Scanning {args.path}...", file=sys.stderr)
     start = time.time()
@@ -909,7 +990,7 @@ def main():
     if args.output:
         with open(args.output, "w") as f:
             f.write(report)
-        print(f"Report written to {args.output}", file=sys.stderr)
+        print(f"Report written to {args.output} (took {elapsed:.2f}s)", file=sys.stderr)
     else:
         print(report)
 

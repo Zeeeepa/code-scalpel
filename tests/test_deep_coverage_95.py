@@ -116,7 +116,7 @@ class TestASTBuilderCoverage:
 
         builder = ASTBuilder()
         try:
-            result = builder.build_ast("def broken:")
+            builder.build_ast("def broken:")
         except SyntaxError:
             pass  # Expected
 
@@ -140,7 +140,7 @@ class TestSandboxCoverage:
         assert sandbox.max_cpu_seconds is not None
         assert sandbox.max_memory_mb is not None
         assert sandbox.max_disk_mb is not None
-        assert sandbox.network_enabled is not None or not sandbox.network_enabled 
+        assert sandbox.network_enabled is not None or not sandbox.network_enabled
         assert sandbox.isolation_level is not None
 
 

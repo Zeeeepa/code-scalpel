@@ -11,6 +11,7 @@ from .templates import (
     README_TEMPLATE,
     GITIGNORE_TEMPLATE,
     CONFIG_JSON_TEMPLATE,
+    ENV_EXAMPLE_TEMPLATE,
 )
 
 
@@ -66,9 +67,19 @@ def init_config_dir(target_dir: str = ".") -> dict:
     config_file.write_text(CONFIG_JSON_TEMPLATE)
     files_created.append("config.json")
 
+    # Create .env.example with environment variable documentation
+    env_example_file = target_path / ".env.example"
+    env_example_file.write_text(ENV_EXAMPLE_TEMPLATE)
+    files_created.append(".env.example")
+
+    # Initialize empty audit.log
+    audit_log_file = config_dir / "audit.log"
+    audit_log_file.touch()
+    files_created.append("audit.log")
+
     return {
         "success": True,
-        "message": f"Configuration directory created successfully",
+        "message": "Configuration directory created successfully",
         "path": str(config_dir),
         "files_created": files_created,
     }

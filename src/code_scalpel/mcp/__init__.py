@@ -12,7 +12,20 @@ Supports:
 - Tool invocation tracking with timing
 - Success/failure metrics
 - Analytics queries for usage patterns
-"""
+[20251220_TODO] Add MCP prompt templates export:
+    - Export prompt templates as resources (code_review_prompt, security_audit_prompt, etc.)
+    - Implement prompt registry with versioning
+    - Support custom prompt injection from client
+
+[20251220_TODO] Add sampling/rate limiting:
+    - Implement request rate limiting by client ID
+    - Add quota tracking (requests per hour/day)
+    - Support tiered rate limits (free/pro/enterprise)
+
+[20251220_TODO] Add request/response validation schemas:
+    - Validate all MCP request payloads against JSON Schema
+    - Implement strict type checking for response models
+    - Add schema versioning for backwards compatibility"""
 
 from .server import mcp, run_server
 

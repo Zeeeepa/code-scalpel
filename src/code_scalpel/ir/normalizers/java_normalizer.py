@@ -13,7 +13,7 @@ Key Mappings:
 - for_statement -> IRFor
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from ..nodes import (
     IRAssign,
@@ -47,7 +47,9 @@ from tree_sitter import Language, Parser
 class JavaVisitor(TreeSitterVisitor):
     """Visitor that converts Java CST nodes to IR nodes."""
 
-    language = "java"
+    @property
+    def language(self) -> str:  # [20251220_BUGFIX] language should be a property
+        return "java"
 
     def __init__(self, source: str = ""):
         super().__init__()
@@ -81,6 +83,25 @@ class JavaVisitor(TreeSitterVisitor):
 
     def _get_children_by_field(self, node: Any, field_name: str) -> List[Any]:
         return node.children_by_field_name(field_name)
+
+    # [20251220_BUGFIX] Helper methods for proper type casting and normalization
+    def _norm_expr(self, node: Optional[Any]) -> Optional[Any]:
+        """Normalize node to expression with type casting."""
+        if node is None:
+            return None
+        result = self.visit(node)
+        return cast(Any, result) if not isinstance(result, list) else None
+
+    def _norm_expr_list(self, nodes: Optional[List[Any]]) -> List[Any]:
+        """Normalize list of nodes to flat list of expressions."""
+        if nodes is None:
+            return []
+        results = []
+        for node in nodes:
+            result = self.visit(node)
+            if not isinstance(result, list) and result is not None:
+                results.append(result)
+        return results
 
     def visit_program(self, node: Any) -> IRModule:
         """Root node of a Java file."""
@@ -220,7 +241,7 @@ class JavaVisitor(TreeSitterVisitor):
             name=name,
             bases=bases,
             body=body,
-            decorators=decorators,
+            decorators=cast(List[Any], decorators),  # [20251220_BUGFIX] Cast decorators
             source_language=self.language,
             loc=self._get_location(node),
         )
@@ -278,7 +299,9 @@ class JavaVisitor(TreeSitterVisitor):
 
         return IRClassDef(
             name=name,
-            bases=["Record"],  # Mark as a record type
+            bases=[
+                IRName(id="Record")
+            ],  # [20251220_BUGFIX] Use IRName instead of string
             body=body,
             source_language=self.language,
             loc=self._get_location(node),
@@ -368,7 +391,7 @@ class JavaVisitor(TreeSitterVisitor):
             return_type=class_name,  # Constructor "returns" instance of class
             source_language=self.language,
             loc=self._get_location(node),
-            decorators=decorators,
+            decorators=cast(List[Any], decorators),  # [20251220_BUGFIX] Cast decorators
         )
 
         if type_params:
@@ -387,11 +410,11 @@ class JavaVisitor(TreeSitterVisitor):
 
         for child in node.children:
             if child.type == "variable_declarator":
-                assign = self.visit(child)
-                if assign:
+                assign = self._norm_expr(child)
+                if isinstance(assign, IRAssign):  # [20251220_BUGFIX] Type check
                     assignments.append(assign)
 
-        return assignments if assignments else None
+        return assignments  # [20251220_BUGFIX] Always return list, never None
 
     def visit_method_declaration(self, node: Any) -> IRFunctionDef:
         """
@@ -433,7 +456,10 @@ class JavaVisitor(TreeSitterVisitor):
         body_stmts = []
         if body_node:
             # visit_block returns List[IRNode]
-            body_stmts = self.visit(body_node)
+            result = self.visit(body_node)
+            body_stmts = (
+                result if isinstance(result, list) else []
+            )  # [20251220_BUGFIX] Handle list
 
         func = IRFunctionDef(
             name=name,
@@ -444,7 +470,7 @@ class JavaVisitor(TreeSitterVisitor):
             loc=self._get_location(
                 node
             ),  # [20251214_FEATURE] Add location for extraction
-            decorators=decorators,
+            decorators=cast(List[Any], decorators),  # [20251220_BUGFIX] Cast decorators
         )
 
         if type_params:
@@ -489,9 +515,11 @@ class JavaVisitor(TreeSitterVisitor):
         value_node = node.child_by_field_name("value")
 
         target = IRName(id=self.get_text(name_node))
-        value = self.visit(value_node) if value_node else IRConstant(value=None)
+        value = (
+            self._norm_expr(value_node) if value_node else IRConstant(value=None)
+        )  # [20251220_BUGFIX] Normalize value
 
-        return IRAssign(targets=[target], value=value)
+        return IRAssign(targets=[target], value=cast(Any, value))
 
     def visit_expression_statement(self, node: Any) -> Any:
         """x = 5; or func();"""
@@ -506,7 +534,10 @@ class JavaVisitor(TreeSitterVisitor):
         left = node.child_by_field_name("left")
         right = node.child_by_field_name("right")
 
-        return IRAssign(targets=[self.visit(left)], value=self.visit(right))
+        return IRAssign(
+            targets=[cast(Any, self._norm_expr(left))],
+            value=cast(Any, self._norm_expr(right)),
+        )  # [20251220_BUGFIX] Normalize expressions
 
     def visit_method_invocation(self, node: Any) -> IRCall:
         """obj.method(arg)"""
@@ -536,7 +567,9 @@ class JavaVisitor(TreeSitterVisitor):
         consequence_node = node.child_by_field_name("consequence")
         alternative_node = node.child_by_field_name("alternative")
 
-        condition = self.visit(condition_node) if condition_node else None
+        condition = (
+            self._norm_expr(condition_node) if condition_node else None
+        )  # [20251220_BUGFIX] Normalize condition
         consequence = self.visit(consequence_node) if consequence_node else []
         alternative = self.visit(alternative_node) if alternative_node else []
 
@@ -547,12 +580,16 @@ class JavaVisitor(TreeSitterVisitor):
             return [n] if n else []
 
         return IRIf(
-            test=condition, body=to_list(consequence), orelse=to_list(alternative)
+            test=cast(Any, condition),
+            body=to_list(consequence),
+            orelse=to_list(alternative),  # [20251220_BUGFIX] Cast condition
         )
 
     def visit_while_statement(self, node: Any) -> IRWhile:
         """while (cond) { ... }"""
-        condition = self.visit(node.child_by_field_name("condition"))
+        condition = self._norm_expr(
+            node.child_by_field_name("condition")
+        )  # [20251220_BUGFIX] Normalize condition
         body = self.visit(node.child_by_field_name("body"))
 
         def to_list(n):
@@ -560,7 +597,9 @@ class JavaVisitor(TreeSitterVisitor):
                 return n
             return [n] if n else []
 
-        return IRWhile(test=condition, body=to_list(body))
+        return IRWhile(
+            test=cast(Any, condition), body=to_list(body)
+        )  # [20251220_BUGFIX] Cast condition
 
     def visit_return_statement(self, node: Any) -> IRReturn:
         """return x;"""
@@ -568,15 +607,19 @@ class JavaVisitor(TreeSitterVisitor):
         expr = None
         for child in node.children:
             if child.is_named:
-                expr = self.visit(child)
+                expr = self._norm_expr(child)  # [20251220_BUGFIX] Normalize expression
                 break
 
-        return IRReturn(value=expr)
+        return IRReturn(value=cast(Any, expr))  # [20251220_BUGFIX] Cast expression
 
     def visit_binary_expression(self, node: Any) -> IRBinaryOp:
         """a + b"""
-        left = self.visit(node.child_by_field_name("left"))
-        right = self.visit(node.child_by_field_name("right"))
+        left = self._norm_expr(
+            node.child_by_field_name("left")
+        )  # [20251220_BUGFIX] Normalize left
+        right = self._norm_expr(
+            node.child_by_field_name("right")
+        )  # [20251220_BUGFIX] Normalize right
         operator_text = self.get_text(node.child_by_field_name("operator"))
 
         # Map operator text to BinaryOperator enum if possible, or just use text for now if allowed
@@ -595,7 +638,9 @@ class JavaVisitor(TreeSitterVisitor):
             operator_text, BinaryOperator.ADD
         )  # Default to ADD if unknown for now
 
-        return IRBinaryOp(left=left, op=op, right=right)
+        return IRBinaryOp(
+            left=cast(Any, left), op=op, right=cast(Any, right)
+        )  # [20251220_BUGFIX] Cast operands
 
     def visit_identifier(self, node: Any) -> IRName:
         return IRName(id=self.get_text(node))
@@ -688,11 +733,11 @@ class JavaVisitor(TreeSitterVisitor):
         exc = None
         for child in node.children:
             if child.is_named and child.type != ";":
-                exc = self.visit(child)
+                exc = self._norm_expr(child)  # [20251220_BUGFIX] Normalize exception
                 break
 
         return IRRaise(
-            exc=exc,
+            exc=cast(Any, exc),  # [20251220_BUGFIX] Cast exception
             cause=None,
             loc=self._get_location(node),
         )
@@ -723,7 +768,9 @@ class JavaVisitor(TreeSitterVisitor):
                 # The switch subject: switch (x)
                 for inner in child.children:
                     if inner.is_named:
-                        discriminant = self.visit(inner)
+                        discriminant = self._norm_expr(
+                            inner
+                        )  # [20251220_BUGFIX] Normalize discriminant
                         break
             elif child.type == "switch_block":
                 # Process cases
@@ -762,7 +809,7 @@ class JavaVisitor(TreeSitterVisitor):
                                 cases.append((cv, case_body))
 
         return IRSwitch(
-            discriminant=discriminant,
+            discriminant=cast(Any, discriminant),  # [20251220_BUGFIX] Cast discriminant
             cases=cases,
             loc=self._get_location(node),
         )
@@ -787,7 +834,9 @@ class JavaVisitor(TreeSitterVisitor):
             elif child.type == "assignment_expression" and init is None:
                 init = self.visit(child)
             elif child.type == "binary_expression" and condition is None:
-                condition = self.visit(child)
+                condition = self._norm_expr(
+                    child
+                )  # [20251220_BUGFIX] Normalize condition
             elif child.type == "update_expression":
                 self.visit(child)
             elif child.type in ("block", "expression_statement"):
@@ -795,7 +844,7 @@ class JavaVisitor(TreeSitterVisitor):
 
         return IRFor(
             target=init.targets[0] if isinstance(init, IRAssign) else IRName(id="_"),
-            iter=condition,  # Condition acts as iteration bound
+            iter=cast(Any, condition),  # [20251220_BUGFIX] Cast condition
             body=body if isinstance(body, list) else [body] if body else [],
             orelse=[],
             loc=self._get_location(node),
@@ -820,23 +869,38 @@ class JavaVisitor(TreeSitterVisitor):
                 "identifier",
             ):
                 if iterable is None:
-                    iterable = self.visit(child)
+                    iterable = self._norm_expr(
+                        child
+                    )  # [20251220_BUGFIX] Normalize iterable
             elif child.type == "block":
                 body = self.visit(child)
 
         return IRFor(
             target=target or IRName(id="_"),
-            iter=iterable,
+            iter=cast(Any, iterable),  # [20251220_BUGFIX] Cast iterable
             body=body if isinstance(body, list) else [body] if body else [],
             orelse=[],
             loc=self._get_location(node),
         )
 
-    def visit_update_expression(self, node: Any) -> IRAssign:
+    def visit_update_expression(
+        self, node: Any
+    ) -> Optional[IRAssign]:  # [20251220_BUGFIX] Allow None return
         """
         i++ or ++i
 
         [20251215_FEATURE] Update expressions become augmented assignments.
+
+        [20251220_TODO] Add Java 8+ lambda expression support:
+            - Lambda expressions: (x, y) -> x + y
+            - Method references: String::valueOf, System.out::println
+            - Constructor references: ArrayList::new
+            - Stream API patterns: stream().map().filter().collect()
+
+        [20251220_TODO] Preserve access modifiers in metadata:
+            - public/private/protected markers
+            - static, final, abstract flags
+            - Package-private default visibility
         """
         operand = None
         operator = None
@@ -922,7 +986,10 @@ class JavaVisitor(TreeSitterVisitor):
 class JavaNormalizer(BaseNormalizer):
     """Normalizes Java source code to Unified IR."""
 
-    language = "java"
+    @property
+    def language(self) -> str:  # [20251220_BUGFIX] language should be a property
+        return "java"
+
     _MAX_CACHE = 16  # [20251215_PERF] Bound cached parse trees for Java throughput
     _tree_cache: Dict[int, Any] = {}
 
@@ -935,7 +1002,8 @@ class JavaNormalizer(BaseNormalizer):
     def normalize(self, source: str, filename: str = "<string>") -> IRModule:
         tree = self._parse_cached(source)
         self._visitor = JavaVisitor(source)
-        return self._visitor.visit(tree.root_node)
+        result = self._visitor.visit(tree.root_node)
+        return cast(IRModule, result)  # [20251220_BUGFIX] Cast result to IRModule
 
     def _parse_cached(self, source: str):
         """Parse with a small eviction cache to improve repeated Java runs."""

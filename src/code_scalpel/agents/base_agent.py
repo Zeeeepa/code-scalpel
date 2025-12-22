@@ -37,6 +37,9 @@ class AgentContext:
         self.current_file: Optional[str] = None
         self.recent_operations: List[Dict[str, Any]] = []
         self.knowledge_base: Dict[str, Any] = {}
+        # [20251221_FEATURE] TODO: Add context persistence to file/database
+        # [20251221_FEATURE] TODO: Add context versioning and rollback support
+        # [20251221_FEATURE] TODO: Add knowledge_base serialization for learning across sessions
 
     def add_operation(self, operation: str, result: Any, success: bool = True):
         """Record an operation and its result."""
@@ -194,6 +197,11 @@ class BaseCodeAnalysisAgent(ABC):
         Returns:
             Dict containing the results of each phase and overall success
         """
+        # [20251221_FEATURE] TODO: Add loop timeout and graceful cancellation
+        # [20251221_FEATURE] TODO: Add telemetry/metrics collection for agent performance
+        # [20251221_FEATURE] TODO: Add circuit breaker pattern for external tool failures
+        # [20251221_ENHANCEMENT] TODO: Support async phase execution with parallel processing
+        # [20251221_ENHANCEMENT] TODO: Add human-in-the-loop approval gates before Act phase
         try:
             self.logger.info(f"Starting OODA loop for target: {target}")
 

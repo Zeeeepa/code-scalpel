@@ -1,4 +1,4 @@
-from code_scalpel.code_parser.python_parser import PythonParser
+from code_scalpel.code_parsers.python_parser import PythonParser
 
 
 # [20251214_TEST] Cover PythonParser error handling and complexity helpers.

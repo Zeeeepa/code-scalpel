@@ -13,7 +13,7 @@ class _DummyAuditLog:
         self._events = events
 
     def get_events(
-        self, time_range: Tuple[datetime, datetime]
+        self, time_range: Tuple[datetime, datetime] | None = None
     ) -> List[Dict[str, Any]]:  # noqa: ARG002
         return self._events
 

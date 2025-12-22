@@ -193,21 +193,44 @@ class TestSandboxAdditionalGaps:
     def test_sandbox_build_command_failure(self):
         """[20251217_TEST] Cover build command failure path."""
         from code_scalpel.autonomy.sandbox import SandboxExecutor, FileChange
-        executor = SandboxExecutor(isolation_level='process')
-        changes = [FileChange(relative_path='test.py', operation='create', new_content="print('test')")]
+
+        executor = SandboxExecutor(isolation_level="process")
+        changes = [
+            FileChange(
+                relative_path="test.py", operation="create", new_content="print('test')"
+            )
+        ]
         with tempfile.TemporaryDirectory() as tmp_dir:
-            result = executor.execute_with_changes(project_path=tmp_dir, changes=changes, test_command='echo test', lint_command='true', build_command='bash -c "exit 1"')
+            result = executor.execute_with_changes(
+                project_path=tmp_dir,
+                changes=changes,
+                test_command="echo test",
+                lint_command="true",
+                build_command='bash -c "exit 1"',
+            )
         assert result.build_success is False
 
     def test_sandbox_timeout_handling(self):
         """[20251217_TEST] Cover timeout handling in sandbox execution."""
         from code_scalpel.autonomy.sandbox import SandboxExecutor, FileChange
-        executor = SandboxExecutor(isolation_level='process', max_cpu_seconds=1)
-        changes = [FileChange(relative_path='slow.py', operation='create', new_content='import time; time.sleep(10)')]
+
+        executor = SandboxExecutor(isolation_level="process", max_cpu_seconds=1)
+        changes = [
+            FileChange(
+                relative_path="slow.py",
+                operation="create",
+                new_content="import time; time.sleep(10)",
+            )
+        ]
         with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch('subprocess.run') as mock_run:
-                mock_run.side_effect = subprocess.TimeoutExpired(cmd='test', timeout=1)
-                result = executor.execute_with_changes(project_path=tmp_dir, changes=changes, test_command='python slow.py', lint_command='true')
+            with patch("subprocess.run") as mock_run:
+                mock_run.side_effect = subprocess.TimeoutExpired(cmd="test", timeout=1)
+                result = executor.execute_with_changes(
+                    project_path=tmp_dir,
+                    changes=changes,
+                    test_command="python slow.py",
+                    lint_command="true",
+                )
         assert result.success is False
 
 

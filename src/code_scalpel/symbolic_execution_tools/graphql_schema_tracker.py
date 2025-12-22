@@ -39,13 +39,39 @@ Usage:
         print(f"BREAKING: {drift.breaking_changes}")
 """
 
+# TODO: GraphQL security analysis
+#   - Detect query depth attacks (nested queries)
+#   - Identify missing query complexity limits
+#   - Check for rate limiting configuration
+#   - Detect introspection enabled in production
+#   - Validate authentication directives (@auth, @requiresAuth)
+
+# TODO: GraphQL N+1 query detection
+#   - Analyze field resolvers for database calls
+#   - Detect missing DataLoader usage
+#   - Identify batch loading opportunities
+#   - Check for eager loading patterns
+
+# TODO: Schema evolution best practices
+#   - Enforce deprecation-first policy
+#   - Validate nullable field changes
+#   - Check for interface evolution safety
+#   - Detect union type compatibility
+#   - Enforce schema stitching boundaries
+
+# TODO: Federation support
+#   - Analyze @key directive usage
+#   - Validate entity resolution
+#   - Detect gateway configuration issues
+#   - Check for circular dependencies
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class GraphQLChangeType(Enum):
@@ -200,7 +226,9 @@ class GraphQLSchema:
     @property
     def input_types(self) -> List[GraphQLType]:
         """Get all input types."""
-        return [t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT]
+        return [
+            t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT
+        ]
 
     @property
     def enum_types(self) -> List[GraphQLType]:
@@ -295,7 +323,9 @@ class GraphQLSchemaDrift:
     @property
     def dangerous_changes(self) -> List[GraphQLSchemaChange]:
         """Get dangerous changes."""
-        return [c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS]
+        return [
+            c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS
+        ]
 
     @property
     def info_changes(self) -> List[GraphQLSchemaChange]:
@@ -340,75 +370,68 @@ class GraphQLSchemaParser:
     # Regex patterns for parsing SDL
     TYPE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'  # Optional description
-        r'type\s+(\w+)\s*'
-        r'(?:implements\s+([\w\s&,]+))?\s*'  # Optional interfaces
+        r"type\s+(\w+)\s*"
+        r"(?:implements\s+([\w\s&,]+))?\s*"  # Optional interfaces
         r'(?:@[\w\s()=",]+)?\s*'  # Optional directives
-        r'\{([\s\S]*?)\}',
-        re.MULTILINE
+        r"\{([\s\S]*?)\}",
+        re.MULTILINE,
     )
 
     INTERFACE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
-        r'interface\s+(\w+)\s*'
+        r"interface\s+(\w+)\s*"
         r'(?:@[\w\s()=",]+)?\s*'
-        r'\{([\s\S]*?)\}',
-        re.MULTILINE
+        r"\{([\s\S]*?)\}",
+        re.MULTILINE,
     )
 
     INPUT_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
-        r'input\s+(\w+)\s*'
+        r"input\s+(\w+)\s*"
         r'(?:@[\w\s()=",]+)?\s*'
-        r'\{([\s\S]*?)\}',
-        re.MULTILINE
+        r"\{([\s\S]*?)\}",
+        re.MULTILINE,
     )
 
     ENUM_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
-        r'enum\s+(\w+)\s*'
+        r"enum\s+(\w+)\s*"
         r'(?:@[\w\s()=",]+)?\s*'
-        r'\{([\s\S]*?)\}',
-        re.MULTILINE
+        r"\{([\s\S]*?)\}",
+        re.MULTILINE,
     )
 
     UNION_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
-        r'union\s+(\w+)\s*=\s*([\w\s|]+?)(?=\n\s*(?:type|interface|union|enum|input|scalar|directive|schema|$))',
-        re.MULTILINE
+        r"union\s+(\w+)\s*=\s*([\w\s|]+?)(?=\n\s*(?:type|interface|union|enum|input|scalar|directive|schema|$))",
+        re.MULTILINE,
     )
 
     SCALAR_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r'scalar\s+(\w+)',
-        re.MULTILINE
+        r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE
     )
 
     DIRECTIVE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
-        r'directive\s+@(\w+)\s*'
-        r'(?:\(([^)]*)\))?\s*'
-        r'(?:repeatable\s+)?'
-        r'on\s+([\w\s|]+)',
-        re.MULTILINE
+        r"directive\s+@(\w+)\s*"
+        r"(?:\(([^)]*)\))?\s*"
+        r"(?:repeatable\s+)?"
+        r"on\s+([\w\s|]+)",
+        re.MULTILINE,
     )
 
-    SCHEMA_PATTERN = re.compile(
-        r'schema\s*\{([^}]*)\}',
-        re.MULTILINE
-    )
+    SCHEMA_PATTERN = re.compile(r"schema\s*\{([^}]*)\}", re.MULTILINE)
 
     FIELD_PATTERN = re.compile(
         r'(?:"""[^"]*"""\s*|"[^"]*"\s*)?'  # Optional description
-        r'(\w+)\s*'  # Field name
-        r'(?:\(([^)]*)\))?\s*'  # Optional arguments
-        r':\s*'
-        r'([\w\[\]!]+)\s*'  # Type
-        r'(@\w+(?:\([^)]*\))?)?'  # Optional directive
+        r"(\w+)\s*"  # Field name
+        r"(?:\(([^)]*)\))?\s*"  # Optional arguments
+        r":\s*"
+        r"([\w\[\]!]+)\s*"  # Type
+        r"(@\w+(?:\([^)]*\))?)?"  # Optional directive
     )
 
-    ARG_PATTERN = re.compile(
-        r'(\w+)\s*:\s*([\w\[\]!]+)(?:\s*=\s*([^\s,)]+))?'
-    )
+    ARG_PATTERN = re.compile(r"(\w+)\s*:\s*([\w\[\]!]+)(?:\s*=\s*([^\s,)]+))?")
 
     DESCRIPTION_PATTERN = re.compile(r'"""([\s\S]*?)"""')
 
@@ -447,22 +470,22 @@ class GraphQLSchemaParser:
         """Remove single-line comments but preserve triple-quote descriptions."""
         # Remove single-line comments
         lines = []
-        for line in content.split('\n'):
+        for line in content.split("\n"):
             # Check if line has a comment
-            if '#' in line:
+            if "#" in line:
                 # Don't remove if inside a string
                 in_string = False
                 comment_pos = -1
                 for i, char in enumerate(line):
-                    if char == '"' and (i == 0 or line[i - 1] != '\\'):
+                    if char == '"' and (i == 0 or line[i - 1] != "\\"):
                         in_string = not in_string
-                    elif char == '#' and not in_string:
+                    elif char == "#" and not in_string:
                         comment_pos = i
                         break
                 if comment_pos >= 0:
                     line = line[:comment_pos]
             lines.append(line)
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     def _parse_schema_definition(self, content: str, schema: GraphQLSchema) -> None:
         """Parse the schema definition block."""
@@ -471,18 +494,18 @@ class GraphQLSchemaParser:
             body = match.group(1)
 
             # Parse query/mutation/subscription types
-            for line in body.split('\n'):
+            for line in body.split("\n"):
                 line = line.strip()
-                if line.startswith('query'):
-                    parts = line.split(':')
+                if line.startswith("query"):
+                    parts = line.split(":")
                     if len(parts) == 2:
                         schema.query_type = parts[1].strip()
-                elif line.startswith('mutation'):
-                    parts = line.split(':')
+                elif line.startswith("mutation"):
+                    parts = line.split(":")
                     if len(parts) == 2:
                         schema.mutation_type = parts[1].strip()
-                elif line.startswith('subscription'):
-                    parts = line.split(':')
+                elif line.startswith("subscription"):
+                    parts = line.split(":")
                     if len(parts) == 2:
                         schema.subscription_type = parts[1].strip()
 
@@ -494,7 +517,7 @@ class GraphQLSchemaParser:
             body = match.group(3)
 
             # Get description before the type
-            desc_match = self.DESCRIPTION_PATTERN.search(content[:match.start()])
+            desc_match = self.DESCRIPTION_PATTERN.search(content[: match.start()])
             description = desc_match.group(1).strip() if desc_match else None
 
             gql_type = GraphQLType(
@@ -505,7 +528,7 @@ class GraphQLSchemaParser:
 
             # Parse interfaces
             if interfaces_str:
-                interfaces = [i.strip() for i in re.split(r'[&,]', interfaces_str)]
+                interfaces = [i.strip() for i in re.split(r"[&,]", interfaces_str)]
                 gql_type.interfaces = [i for i in interfaces if i]
 
             # Parse fields
@@ -553,12 +576,12 @@ class GraphQLSchemaParser:
             )
 
             # Parse enum values
-            for line in body.split('\n'):
+            for line in body.split("\n"):
                 line = line.strip()
-                if line and not line.startswith('#') and not line.startswith('"'):
+                if line and not line.startswith("#") and not line.startswith('"'):
                     # Handle deprecation
-                    deprecated = '@deprecated' in line.lower()
-                    value_name = re.match(r'(\w+)', line)
+                    deprecated = "@deprecated" in line.lower()
+                    value_name = re.match(r"(\w+)", line)
                     if value_name:
                         gql_type.enum_values[value_name.group(1)] = GraphQLEnumValue(
                             name=value_name.group(1),
@@ -579,7 +602,7 @@ class GraphQLSchemaParser:
             )
 
             # Parse union members
-            members = [m.strip() for m in members_str.split('|')]
+            members = [m.strip() for m in members_str.split("|")]
             gql_type.union_types = [m for m in members if m]
 
             schema.types[name] = gql_type
@@ -605,8 +628,10 @@ class GraphQLSchemaParser:
 
             directive = GraphQLDirective(
                 name=name,
-                locations=[loc.strip() for loc in locations_str.split('|') if loc.strip()],
-                repeatable='repeatable' in content[match.start():match.end()].lower(),
+                locations=[
+                    loc.strip() for loc in locations_str.split("|") if loc.strip()
+                ],
+                repeatable="repeatable" in content[match.start() : match.end()].lower(),
             )
 
             # Parse arguments
@@ -631,7 +656,7 @@ class GraphQLSchemaParser:
             )
 
             # Check for deprecation
-            if directive and '@deprecated' in directive.lower():
+            if directive and "@deprecated" in directive.lower():
                 gql_field.deprecated = True
                 # Try to extract reason
                 reason_match = re.search(r'reason:\s*"([^"]*)"', directive)
@@ -787,22 +812,26 @@ class GraphQLSchemaTracker:
         # Removed types (BREAKING)
         for name in old_types - new_types:
             old_type = old_schema.types[name]
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.TYPE_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=name,
-                message=f"Type '{name}' ({old_type.kind.value}) was removed",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.TYPE_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=name,
+                    message=f"Type '{name}' ({old_type.kind.value}) was removed",
+                )
+            )
 
         # Added types (INFO)
         for name in new_types - old_types:
             new_type = new_schema.types[name]
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.TYPE_ADDED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=name,
-                message=f"Type '{name}' ({new_type.kind.value}) was added",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.TYPE_ADDED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=name,
+                    message=f"Type '{name}' ({new_type.kind.value}) was added",
+                )
+            )
 
         # Compare common types
         for name in old_types & new_types:
@@ -811,14 +840,16 @@ class GraphQLSchemaTracker:
 
             # Check if type kind changed (BREAKING)
             if old_type.kind != new_type.kind:
-                drift.changes.append(GraphQLSchemaChange(
-                    change_type=GraphQLChangeType.TYPE_REMOVED,
-                    severity=GraphQLChangeSeverity.BREAKING,
-                    path=name,
-                    message=f"Type '{name}' kind changed from {old_type.kind.value} to {new_type.kind.value}",
-                    old_value=old_type.kind.value,
-                    new_value=new_type.kind.value,
-                ))
+                drift.changes.append(
+                    GraphQLSchemaChange(
+                        change_type=GraphQLChangeType.TYPE_REMOVED,
+                        severity=GraphQLChangeSeverity.BREAKING,
+                        path=name,
+                        message=f"Type '{name}' kind changed from {old_type.kind.value} to {new_type.kind.value}",
+                        old_value=old_type.kind.value,
+                        new_value=new_type.kind.value,
+                    )
+                )
                 continue
 
             # Compare based on type kind
@@ -845,21 +876,25 @@ class GraphQLSchemaTracker:
 
         # Removed fields (BREAKING)
         for name in old_fields - new_fields:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.FIELD_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{old_type.name}.{name}",
-                message=f"Field '{name}' was removed from type '{old_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.FIELD_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{old_type.name}.{name}",
+                    message=f"Field '{name}' was removed from type '{old_type.name}'",
+                )
+            )
 
         # Added fields (INFO)
         for name in new_fields - old_fields:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.FIELD_ADDED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=f"{new_type.name}.{name}",
-                message=f"Field '{name}' was added to type '{new_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.FIELD_ADDED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=f"{new_type.name}.{name}",
+                    message=f"Field '{name}' was added to type '{new_type.name}'",
+                )
+            )
 
         # Compare common fields
         for name in old_fields & new_fields:
@@ -872,20 +907,24 @@ class GraphQLSchemaTracker:
         new_interfaces = set(new_type.interfaces)
 
         for iface in old_interfaces - new_interfaces:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.INTERFACE_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{old_type.name}",
-                message=f"Type '{old_type.name}' no longer implements interface '{iface}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.INTERFACE_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{old_type.name}",
+                    message=f"Type '{old_type.name}' no longer implements interface '{iface}'",
+                )
+            )
 
         for iface in new_interfaces - old_interfaces:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.INTERFACE_ADDED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=f"{new_type.name}",
-                message=f"Type '{new_type.name}' now implements interface '{iface}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.INTERFACE_ADDED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=f"{new_type.name}",
+                    message=f"Type '{new_type.name}' now implements interface '{iface}'",
+                )
+            )
 
     def _compare_fields(
         self,
@@ -901,26 +940,34 @@ class GraphQLSchemaTracker:
         if old_field.type != new_field.type:
             # Check if it's a breaking change
             is_breaking = self._is_type_change_breaking(old_field.type, new_field.type)
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
-                severity=GraphQLChangeSeverity.BREAKING if is_breaking else GraphQLChangeSeverity.DANGEROUS,
-                path=path,
-                message=f"Field '{old_field.name}' type changed from '{old_field.type}' to '{new_field.type}'",
-                old_value=old_field.type,
-                new_value=new_field.type,
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
+                    severity=(
+                        GraphQLChangeSeverity.BREAKING
+                        if is_breaking
+                        else GraphQLChangeSeverity.DANGEROUS
+                    ),
+                    path=path,
+                    message=f"Field '{old_field.name}' type changed from '{old_field.type}' to '{new_field.type}'",
+                    old_value=old_field.type,
+                    new_value=new_field.type,
+                )
+            )
 
         # Compare arguments
         self._compare_arguments(path, old_field.arguments, new_field.arguments, drift)
 
         # Deprecation added
         if not old_field.deprecated and new_field.deprecated:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.FIELD_DEPRECATED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=path,
-                message=f"Field '{old_field.name}' was deprecated",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.FIELD_DEPRECATED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=path,
+                    message=f"Field '{old_field.name}' was deprecated",
+                )
+            )
 
     def _compare_arguments(
         self,
@@ -935,23 +982,35 @@ class GraphQLSchemaTracker:
 
         # Removed arguments (BREAKING)
         for name in old_arg_names - new_arg_names:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.ARG_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{path}({name})",
-                message=f"Argument '{name}' was removed from '{path}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.ARG_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{path}({name})",
+                    message=f"Argument '{name}' was removed from '{path}'",
+                )
+            )
 
         # Added arguments
         for name in new_arg_names - old_arg_names:
             new_arg = new_args[name]
             is_required = new_arg.is_required
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.OPTIONAL_ARG_ADDED,
-                severity=GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO,
-                path=f"{path}({name})",
-                message=f"{'Required' if is_required else 'Optional'} argument '{name}' was added to '{path}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=(
+                        GraphQLChangeType.REQUIRED_ARG_ADDED
+                        if is_required
+                        else GraphQLChangeType.OPTIONAL_ARG_ADDED
+                    ),
+                    severity=(
+                        GraphQLChangeSeverity.BREAKING
+                        if is_required
+                        else GraphQLChangeSeverity.INFO
+                    ),
+                    path=f"{path}({name})",
+                    message=f"{'Required' if is_required else 'Optional'} argument '{name}' was added to '{path}'",
+                )
+            )
 
         # Compare common arguments
         for name in old_arg_names & new_arg_names:
@@ -959,14 +1018,16 @@ class GraphQLSchemaTracker:
             new_arg = new_args[name]
 
             if old_arg.type != new_arg.type:
-                drift.changes.append(GraphQLSchemaChange(
-                    change_type=GraphQLChangeType.ARG_TYPE_CHANGED,
-                    severity=GraphQLChangeSeverity.BREAKING,
-                    path=f"{path}({name})",
-                    message=f"Argument '{name}' type changed from '{old_arg.type}' to '{new_arg.type}'",
-                    old_value=old_arg.type,
-                    new_value=new_arg.type,
-                ))
+                drift.changes.append(
+                    GraphQLSchemaChange(
+                        change_type=GraphQLChangeType.ARG_TYPE_CHANGED,
+                        severity=GraphQLChangeSeverity.BREAKING,
+                        path=f"{path}({name})",
+                        message=f"Argument '{name}' type changed from '{old_arg.type}' to '{new_arg.type}'",
+                        old_value=old_arg.type,
+                        new_value=new_arg.type,
+                    )
+                )
 
     def _compare_input_types(
         self,
@@ -980,23 +1041,35 @@ class GraphQLSchemaTracker:
 
         # Removed fields (BREAKING)
         for name in old_fields - new_fields:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.FIELD_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{old_type.name}.{name}",
-                message=f"Input field '{name}' was removed from '{old_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.FIELD_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{old_type.name}.{name}",
+                    message=f"Input field '{name}' was removed from '{old_type.name}'",
+                )
+            )
 
         # Added fields
         for name in new_fields - old_fields:
             new_field = new_type.input_fields[name]
             is_required = new_field.type.endswith("!")
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.FIELD_ADDED,
-                severity=GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO,
-                path=f"{new_type.name}.{name}",
-                message=f"{'Required' if is_required else 'Optional'} input field '{name}' was added to '{new_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=(
+                        GraphQLChangeType.REQUIRED_ARG_ADDED
+                        if is_required
+                        else GraphQLChangeType.FIELD_ADDED
+                    ),
+                    severity=(
+                        GraphQLChangeSeverity.BREAKING
+                        if is_required
+                        else GraphQLChangeSeverity.INFO
+                    ),
+                    path=f"{new_type.name}.{name}",
+                    message=f"{'Required' if is_required else 'Optional'} input field '{name}' was added to '{new_type.name}'",
+                )
+            )
 
         # Compare common fields
         for name in old_fields & new_fields:
@@ -1004,14 +1077,16 @@ class GraphQLSchemaTracker:
             new_field = new_type.input_fields[name]
 
             if old_field.type != new_field.type:
-                drift.changes.append(GraphQLSchemaChange(
-                    change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
-                    severity=GraphQLChangeSeverity.BREAKING,
-                    path=f"{old_type.name}.{name}",
-                    message=f"Input field '{name}' type changed from '{old_field.type}' to '{new_field.type}'",
-                    old_value=old_field.type,
-                    new_value=new_field.type,
-                ))
+                drift.changes.append(
+                    GraphQLSchemaChange(
+                        change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
+                        severity=GraphQLChangeSeverity.BREAKING,
+                        path=f"{old_type.name}.{name}",
+                        message=f"Input field '{name}' type changed from '{old_field.type}' to '{new_field.type}'",
+                        old_value=old_field.type,
+                        new_value=new_field.type,
+                    )
+                )
 
     def _compare_enum_types(
         self,
@@ -1025,21 +1100,25 @@ class GraphQLSchemaTracker:
 
         # Removed values (BREAKING)
         for name in old_values - new_values:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.ENUM_VALUE_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{old_type.name}.{name}",
-                message=f"Enum value '{name}' was removed from '{old_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.ENUM_VALUE_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{old_type.name}.{name}",
+                    message=f"Enum value '{name}' was removed from '{old_type.name}'",
+                )
+            )
 
         # Added values (INFO)
         for name in new_values - old_values:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.ENUM_VALUE_ADDED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=f"{new_type.name}.{name}",
-                message=f"Enum value '{name}' was added to '{new_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.ENUM_VALUE_ADDED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=f"{new_type.name}.{name}",
+                    message=f"Enum value '{name}' was added to '{new_type.name}'",
+                )
+            )
 
     def _compare_union_types(
         self,
@@ -1053,21 +1132,25 @@ class GraphQLSchemaTracker:
 
         # Removed members (BREAKING)
         for name in old_members - new_members:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.UNION_MEMBER_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"{old_type.name}",
-                message=f"Union member '{name}' was removed from '{old_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.UNION_MEMBER_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"{old_type.name}",
+                    message=f"Union member '{name}' was removed from '{old_type.name}'",
+                )
+            )
 
         # Added members (DANGEROUS - may affect fragment spreads)
         for name in new_members - old_members:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.UNION_MEMBER_ADDED,
-                severity=GraphQLChangeSeverity.DANGEROUS,
-                path=f"{new_type.name}",
-                message=f"Union member '{name}' was added to '{new_type.name}'",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.UNION_MEMBER_ADDED,
+                    severity=GraphQLChangeSeverity.DANGEROUS,
+                    path=f"{new_type.name}",
+                    message=f"Union member '{name}' was added to '{new_type.name}'",
+                )
+            )
 
     def _compare_directives(
         self,
@@ -1081,21 +1164,25 @@ class GraphQLSchemaTracker:
 
         # Removed directives (BREAKING)
         for name in old_directives - new_directives:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.DIRECTIVE_REMOVED,
-                severity=GraphQLChangeSeverity.BREAKING,
-                path=f"@{name}",
-                message=f"Directive '@{name}' was removed",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.DIRECTIVE_REMOVED,
+                    severity=GraphQLChangeSeverity.BREAKING,
+                    path=f"@{name}",
+                    message=f"Directive '@{name}' was removed",
+                )
+            )
 
         # Added directives (INFO)
         for name in new_directives - old_directives:
-            drift.changes.append(GraphQLSchemaChange(
-                change_type=GraphQLChangeType.DIRECTIVE_ADDED,
-                severity=GraphQLChangeSeverity.INFO,
-                path=f"@{name}",
-                message=f"Directive '@{name}' was added",
-            ))
+            drift.changes.append(
+                GraphQLSchemaChange(
+                    change_type=GraphQLChangeType.DIRECTIVE_ADDED,
+                    severity=GraphQLChangeSeverity.INFO,
+                    path=f"@{name}",
+                    message=f"Directive '@{name}' was added",
+                )
+            )
 
     def _is_type_change_breaking(self, old_type: str, new_type: str) -> bool:
         """

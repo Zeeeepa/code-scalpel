@@ -277,7 +277,7 @@ MIIEpAIBAAKCAQEA...
 
     def test_analysis_cache_get_or_parse(self):
         """Cover get_or_parse method."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
         import os
 
         cache = AnalysisCache()

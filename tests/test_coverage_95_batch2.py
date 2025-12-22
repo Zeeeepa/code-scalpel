@@ -155,7 +155,7 @@ class TestAnalysisCacheMore:
 
     def test_analysis_cache_basic_operations(self):
         """Test basic cache operations."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
 
         with tempfile.TemporaryDirectory() as td:
             cache = AnalysisCache(cache_dir=td)
@@ -185,10 +185,13 @@ class TestPolyglotModules:
     def test_alias_resolver_resolve(self):
         """Test AliasResolver.resolve method."""
         from code_scalpel.polyglot.alias_resolver import AliasResolver
+
         with tempfile.TemporaryDirectory() as td:
             resolver = AliasResolver(td)
-            Path(td).joinpath('tsconfig.json').write_text('\n{\n  "compilerOptions": {\n    "paths": {\n      "@utils/*": ["src/utils/*"]\n    }\n  }\n}\n')
-            _ = resolver.resolve('@utils/helpers')
+            Path(td).joinpath("tsconfig.json").write_text(
+                '\n{\n  "compilerOptions": {\n    "paths": {\n      "@utils/*": ["src/utils/*"]\n    }\n  }\n}\n'
+            )
+            _ = resolver.resolve("@utils/helpers")
 
     def test_typescript_type_narrowing_basic(self):
         """[20251219_TEST] Test TypeScript type narrowing analysis."""
@@ -329,14 +332,14 @@ class TestPolicyEngineMore:
 
     def test_policy_engine_initialization(self):
         """Test PolicyEngine initialization."""
-        from code_scalpel.governance.policy_engine import PolicyEngine
+        from code_scalpel.policy_engine import PolicyEngine
 
         engine = PolicyEngine()
         assert engine is not None
 
     def test_audit_log_initialization(self):
         """Test AuditLog initialization."""
-        from code_scalpel.governance.audit_log import AuditLog
+        from code_scalpel.policy_engine.audit_log import AuditLog
 
         log = AuditLog()
         assert log is not None

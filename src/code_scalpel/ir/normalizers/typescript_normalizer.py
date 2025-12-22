@@ -100,6 +100,19 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                 type_parameters? (optional generics)
                 extends_type_clause? (optional)
                 object_type: body
+
+        [20251220_TODO] Enhanced type metadata extraction:
+            - Generic type parameters and constraints <T extends Base>
+            - Union types (string | number) as metadata
+            - Intersection types (&) preservation
+            - Readonly modifier detection
+            - Type guard function patterns (is Type)
+
+        [20251220_TODO] Add advanced TypeScript features:
+            - Mapped types: { [K in keyof T]: ... }
+            - Conditional types: T extends U ? X : Y
+            - Index signatures and computed types
+            - Template literal types
         """
         name_node = self._child_by_field(node, "name")
         body_node = self._child_by_field(node, "body")
@@ -124,13 +137,19 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
                     if method:
                         body.append(method)
 
-        return self._set_language(
-            IRClassDef(
-                name=name,
-                bases=[],  # TODO: Handle extends clause
-                body=body,
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRClassDef
+        from typing import cast
+
+        return cast(
+            IRClassDef,
+            self._set_language(
+                IRClassDef(
+                    name=name,
+                    bases=[],  # TODO: Handle extends clause
+                    body=body,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_property_signature(self, node) -> IRExprStmt | None:
@@ -149,11 +168,17 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         name = self._get_text(name_node)
 
         # Create a simple name expression for the property
-        return self._set_language(
-            IRExprStmt(
-                value=IRName(id=name, loc=self._make_loc(name_node)),
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRExprStmt
+        from typing import cast
+
+        return cast(
+            IRExprStmt,
+            self._set_language(
+                IRExprStmt(
+                    value=IRName(id=name, loc=self._make_loc(name_node)),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_method_signature(self, node) -> IRFunctionDef | None:
@@ -175,13 +200,19 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
         name = self._get_text(name_node)
         params = self._normalize_parameters(params_node) if params_node else []
 
-        return self._set_language(
-            IRFunctionDef(
-                name=name,
-                params=params,
-                body=[],  # Interface methods have no body
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRFunctionDef
+        from typing import cast
+
+        return cast(
+            IRFunctionDef,
+            self._set_language(
+                IRFunctionDef(
+                    name=name,
+                    params=params,
+                    body=[],  # Interface methods have no body
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_type_alias_declaration(self, node) -> IRClassDef:
@@ -203,13 +234,19 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
 
         # Type aliases are represented as empty classes
         # The actual type is captured in metadata if needed
-        return self._set_language(
-            IRClassDef(
-                name=name,
-                bases=[],
-                body=[],
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRClassDef
+        from typing import cast
+
+        return cast(
+            IRClassDef,
+            self._set_language(
+                IRClassDef(
+                    name=name,
+                    bases=[],
+                    body=[],
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
 
@@ -286,12 +323,18 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
                     children.append(child_ir)
 
         # Represent as createElement(tag, props, ...children)
-        return self._set_language(
-            IRCall(
-                func=IRName(id=f"JSX:{tag_name}"),
-                args=children,
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRCall
+        from typing import cast
+
+        return cast(
+            IRCall,
+            self._set_language(
+                IRCall(
+                    func=IRName(id=f"JSX:{tag_name}"),
+                    args=children,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_self_closing_element(self, node) -> IRCall:
@@ -303,12 +346,18 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
         name_node = self._child_by_field(node, "name")
         tag_name = self._get_text(name_node) if name_node else "unknown"
 
-        return self._set_language(
-            IRCall(
-                func=IRName(id=f"JSX:{tag_name}"),
-                args=[],
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRCall
+        from typing import cast
+
+        return cast(
+            IRCall,
+            self._set_language(
+                IRCall(
+                    func=IRName(id=f"JSX:{tag_name}"),
+                    args=[],
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_fragment(self, node) -> IRCall:
@@ -324,12 +373,18 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
                 if child_ir:
                     children.append(child_ir)
 
-        return self._set_language(
-            IRCall(
-                func=IRName(id="JSX:Fragment"),
-                args=children,
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] _set_language returns IRNode, cast to IRCall
+        from typing import cast
+
+        return cast(
+            IRCall,
+            self._set_language(
+                IRCall(
+                    func=IRName(id="JSX:Fragment"),
+                    args=children,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_expression(self, node) -> IRExpr:
@@ -339,9 +394,15 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
         [20251215_FEATURE] JSX expressions are embedded JavaScript.
         """
         # JSX expression is { expr }, extract the inner expression
+        # [20251220_BUGFIX] Handle union return from normalize_node, cast to IRExpr
+        from typing import cast
+
         for child in self._get_named_children(node):
-            return self.normalize_node(child)
-        return None
+            result = self.normalize_node(child)
+            if isinstance(result, IRExpr):
+                return cast(IRExpr, result)
+        # Default: return a placeholder expression
+        return cast(IRExpr, IRConstant(value=None, loc=self._make_loc(node)))
 
     def _normalize_jsx_text(self, node) -> IRConstant:
         """
@@ -349,12 +410,18 @@ class TypeScriptTSXNormalizer(TypeScriptNormalizer):
 
         [20251215_FEATURE] Text nodes become string constants.
         """
+        # [20251220_BUGFIX] Extract text, handle None case, cast _set_language return
+        from typing import cast
+
         text = self._get_text(node).strip()
         if not text:
-            return None
-        return self._set_language(
-            IRConstant(
-                value=text,
-                loc=self._make_loc(node),
-            )
+            return cast(IRConstant, IRConstant(value="", loc=self._make_loc(node)))
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=text,
+                    loc=self._make_loc(node),
+                )
+            ),
         )

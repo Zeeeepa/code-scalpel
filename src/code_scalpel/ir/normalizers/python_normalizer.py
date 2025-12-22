@@ -11,7 +11,7 @@ cleanly to our IR without needing to filter "noise" nodes.
 from __future__ import annotations
 
 import ast
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 from .base import BaseNormalizer
 from ..nodes import (
@@ -43,6 +43,7 @@ from ..nodes import (
     IRDict,
     IRParameter,
     IRNode,
+    IRExpr,
     SourceLocation,
 )
 from ..operators import (
@@ -108,16 +109,43 @@ class PythonNormalizer(BaseNormalizer):
 
     def _make_loc(self, node: ast.AST) -> Optional[SourceLocation]:
         """Extract source location from ast node."""
+        # [20251220_BUGFIX] hasattr check handles AST nodes safely regardless of attributes
         if not hasattr(node, "lineno"):
             return None
 
+        # Safe access - we verified lineno exists
+        lineno = getattr(node, "lineno", 0)
         return SourceLocation(
-            line=node.lineno,
+            line=lineno,
             column=getattr(node, "col_offset", 0),
             end_line=getattr(node, "end_lineno", None),
             end_column=getattr(node, "end_col_offset", None),
             filename=self._filename,
         )
+
+    def _norm_expr(self, node: Optional[ast.AST]) -> Optional[IRExpr]:
+        """
+        [20251220_BUGFIX] Normalize node to IRExpr with type casting.
+
+        Converts Union[IRNode, List[IRNode], None] to IRExpr | None
+        for expression contexts.
+        """
+        if node is None:
+            return None
+        result = self.normalize_node(node)
+        # Cast to IRExpr - caller ensures node is expression-like
+        return cast(IRExpr, result) if not isinstance(result, list) else None
+
+    def _norm_expr_list(self, nodes: List[ast.expr]) -> List[IRExpr]:
+        """
+        [20251220_BUGFIX] Normalize list of expression nodes to List[IRExpr] with type casting.
+        """
+        results = []
+        for node in nodes:
+            result = self.normalize_node(node)
+            if not isinstance(result, list) and result is not None:
+                results.append(cast(IRExpr, result))
+        return results
 
     def _normalize_body(self, body: List[ast.stmt]) -> List[IRNode]:
         """Normalize a list of statements."""
@@ -171,6 +199,9 @@ class PythonNormalizer(BaseNormalizer):
         ):
             docstring = body[0].value.value
 
+        # [20251220_BUGFIX] Cast decorator list and normalize to IRExpr
+        decorators = self._norm_expr_list(node.decorator_list)
+
         return IRFunctionDef(
             name=node.name,
             params=self._normalize_arguments(node.args),
@@ -180,7 +211,7 @@ class PythonNormalizer(BaseNormalizer):
             is_generator=any(
                 isinstance(n, (ast.Yield, ast.YieldFrom)) for n in ast.walk(node)
             ),
-            decorators=[self.normalize_node(d) for d in node.decorator_list],
+            decorators=decorators,
             docstring=docstring,
             loc=self._make_loc(node),
             source_language=self.language,
@@ -203,7 +234,8 @@ class PythonNormalizer(BaseNormalizer):
             default_idx = i - defaults_offset
             default = None
             if default_idx >= 0:
-                default = self.normalize_node(args.defaults[default_idx])
+                # [20251220_BUGFIX] Cast default value to IRExpr
+                default = self._norm_expr(args.defaults[default_idx])
 
             params.append(
                 IRParameter(
@@ -242,7 +274,8 @@ class PythonNormalizer(BaseNormalizer):
         for i, arg in enumerate(args.kwonlyargs):
             default = None
             if i in kw_defaults_map:
-                default = self.normalize_node(kw_defaults_map[i])
+                # [20251220_BUGFIX] Cast default value to IRExpr
+                default = self._norm_expr(kw_defaults_map[i])
 
             params.append(
                 IRParameter(
@@ -271,11 +304,15 @@ class PythonNormalizer(BaseNormalizer):
         ):
             docstring = node.body[0].value.value
 
+        # [20251220_BUGFIX] Cast base classes and decorators to IRExpr
+        bases = self._norm_expr_list(node.bases)
+        decorators = self._norm_expr_list(node.decorator_list)
+
         return IRClassDef(
             name=node.name,
-            bases=[self.normalize_node(b) for b in node.bases],
+            bases=bases,
             body=self._normalize_body(node.body),
-            decorators=[self.normalize_node(d) for d in node.decorator_list],
+            decorators=decorators,
             docstring=docstring,
             loc=self._make_loc(node),
             source_language=self.language,
@@ -283,8 +320,9 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_If(self, node: ast.If) -> IRIf:
         """Normalize if statement."""
+        # [20251220_BUGFIX] Cast test to IRExpr
         return IRIf(
-            test=self.normalize_node(node.test),
+            test=self._norm_expr(node.test),
             body=self._normalize_body(node.body),
             orelse=self._normalize_body(node.orelse),
             loc=self._make_loc(node),
@@ -293,9 +331,10 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_For(self, node: ast.For) -> IRFor:
         """Normalize for loop."""
+        # [20251220_BUGFIX] Cast target and iter to IRExpr
         return IRFor(
-            target=self.normalize_node(node.target),
-            iter=self.normalize_node(node.iter),
+            target=self._norm_expr(node.target),
+            iter=self._norm_expr(node.iter),
             body=self._normalize_body(node.body),
             orelse=self._normalize_body(node.orelse),
             is_for_in=False,
@@ -305,8 +344,9 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_While(self, node: ast.While) -> IRWhile:
         """Normalize while loop."""
+        # [20251220_BUGFIX] Cast test to IRExpr
         return IRWhile(
-            test=self.normalize_node(node.test),
+            test=self._norm_expr(node.test),
             body=self._normalize_body(node.body),
             orelse=self._normalize_body(node.orelse),
             loc=self._make_loc(node),
@@ -315,17 +355,19 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_Return(self, node: ast.Return) -> IRReturn:
         """Normalize return statement."""
+        # [20251220_BUGFIX] Cast value to IRExpr | None
         return IRReturn(
-            value=self.normalize_node(node.value) if node.value else None,
+            value=self._norm_expr(node.value) if node.value else None,
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Assign(self, node: ast.Assign) -> IRAssign:
         """Normalize assignment statement."""
+        # [20251220_BUGFIX] Cast targets and value to IRExpr
         return IRAssign(
-            targets=[self.normalize_node(t) for t in node.targets],
-            value=self.normalize_node(node.value),
+            targets=self._norm_expr_list(node.targets),
+            value=self._norm_expr(node.value),
             declaration_kind=None,  # Python doesn't have let/const/var
             loc=self._make_loc(node),
             source_language=self.language,
@@ -333,9 +375,12 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_AnnAssign(self, node: ast.AnnAssign) -> IRAssign:
         """Normalize annotated assignment (x: int = 5)."""
+        # [20251220_BUGFIX] Cast target and value to IRExpr; ensure targets is List[IRExpr]
+        target = self._norm_expr(node.target)
+        targets = [target] if target is not None else []
         return IRAssign(
-            targets=[self.normalize_node(node.target)],
-            value=self.normalize_node(node.value) if node.value else None,
+            targets=targets,
+            value=self._norm_expr(node.value) if node.value else None,
             declaration_kind=None,
             loc=self._make_loc(node),
             source_language=self.language,
@@ -343,18 +388,20 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_AugAssign(self, node: ast.AugAssign) -> IRAugAssign:
         """Normalize augmented assignment (+=, -=, etc.)."""
+        # [20251220_BUGFIX] Cast target and value to IRExpr
         return IRAugAssign(
-            target=self.normalize_node(node.target),
+            target=self._norm_expr(node.target),
             op=self._map_aug_assign_op(node.op),
-            value=self.normalize_node(node.value),
+            value=self._norm_expr(node.value),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Expr(self, node: ast.Expr) -> IRExprStmt:
         """Normalize expression statement."""
+        # [20251220_BUGFIX] Cast value to IRExpr
         return IRExprStmt(
-            value=self.normalize_node(node.value),
+            value=self._norm_expr(node.value),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -442,8 +489,9 @@ class PythonNormalizer(BaseNormalizer):
             raise Exception            # raise exception
             raise Exception from cause # raise with cause
         """
-        exc = self.normalize_node(node.exc) if node.exc else None
-        cause = self.normalize_node(node.cause) if node.cause else None
+        # [20251220_BUGFIX] Cast exc and cause to IRExpr
+        exc = self._norm_expr(node.exc) if node.exc else None
+        cause = self._norm_expr(node.cause) if node.cause else None
 
         return IRRaise(
             exc=exc,
@@ -489,62 +537,70 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_BinOp(self, node: ast.BinOp) -> IRBinaryOp:
         """Normalize binary operation."""
+        # [20251220_BUGFIX] Cast operands to IRExpr
         return IRBinaryOp(
-            left=self.normalize_node(node.left),
+            left=self._norm_expr(node.left),
             op=self._map_binary_op(node.op),
-            right=self.normalize_node(node.right),
+            right=self._norm_expr(node.right),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Await(self, node: ast.Await) -> IRCall:
         """Normalize await expression as a special call."""
+        # [20251220_BUGFIX] Cast value to IRExpr; ensure args is List[IRExpr]
+        value = self._norm_expr(node.value)
+        args = [value] if value is not None else []
         return IRCall(
             func=IRName(id="__await__", source_language=self.language),
-            args=[self.normalize_node(node.value)],
+            args=args,
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_UnaryOp(self, node: ast.UnaryOp) -> IRUnaryOp:
         """Normalize unary operation."""
+        # [20251220_BUGFIX] Cast operand to IRExpr
         return IRUnaryOp(
             op=self._map_unary_op(node.op),
-            operand=self.normalize_node(node.operand),
+            operand=self._norm_expr(node.operand),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Compare(self, node: ast.Compare) -> IRCompare:
         """Normalize comparison operation."""
+        # [20251220_BUGFIX] Cast left and comparators to IRExpr
         return IRCompare(
-            left=self.normalize_node(node.left),
+            left=self._norm_expr(node.left),
             ops=[self._map_cmp_op(op) for op in node.ops],
-            comparators=[self.normalize_node(c) for c in node.comparators],
+            comparators=self._norm_expr_list(node.comparators),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_BoolOp(self, node: ast.BoolOp) -> IRBoolOp:
         """Normalize boolean operation (and/or)."""
+        # [20251220_BUGFIX] Cast values to IRExpr
         return IRBoolOp(
             op=self._map_bool_op(node.op),
-            values=[self.normalize_node(v) for v in node.values],
+            values=self._norm_expr_list(node.values),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Call(self, node: ast.Call) -> IRCall:
         """Normalize function call."""
+        # [20251220_BUGFIX] Cast func and args to IRExpr
         kwargs = {}
         for kw in node.keywords:
             if kw.arg:  # Named keyword
-                kwargs[kw.arg] = self.normalize_node(kw.value)
+                kwargs[kw.arg] = self._norm_expr(kw.value)
             # **kwargs is complex, skip for now
 
         return IRCall(
-            func=self.normalize_node(node.func),
-            args=[self.normalize_node(arg) for arg in node.args],
+            func=self._norm_expr(node.func),
+            args=self._norm_expr_list(node.args),
             kwargs=kwargs,
             loc=self._make_loc(node),
             source_language=self.language,
@@ -552,8 +608,9 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_Attribute(self, node: ast.Attribute) -> IRAttribute:
         """Normalize attribute access."""
+        # [20251220_BUGFIX] Cast value to IRExpr
         return IRAttribute(
-            value=self.normalize_node(node.value),
+            value=self._norm_expr(node.value),
             attr=node.attr,
             loc=self._make_loc(node),
             source_language=self.language,
@@ -561,9 +618,10 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_Subscript(self, node: ast.Subscript) -> IRSubscript:
         """Normalize subscript access."""
+        # [20251220_BUGFIX] Cast value and slice to IRExpr
         return IRSubscript(
-            value=self.normalize_node(node.value),
-            slice=self.normalize_node(node.slice),
+            value=self._norm_expr(node.value),
+            slice=self._norm_expr(node.slice),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -587,16 +645,18 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_List(self, node: ast.List) -> IRList:
         """Normalize list literal."""
+        # [20251220_BUGFIX] Cast elements to IRExpr
         return IRList(
-            elements=[self.normalize_node(elt) for elt in node.elts],
+            elements=self._norm_expr_list(node.elts),
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Tuple(self, node: ast.Tuple) -> IRList:
         """Normalize tuple literal (treated as list in IR)."""
+        # [20251220_BUGFIX] Cast elements to IRExpr
         result = IRList(
-            elements=[self.normalize_node(elt) for elt in node.elts],
+            elements=self._norm_expr_list(node.elts),
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -605,9 +665,12 @@ class PythonNormalizer(BaseNormalizer):
 
     def _normalize_Dict(self, node: ast.Dict) -> IRDict:
         """Normalize dict literal."""
+        # [20251220_BUGFIX] Cast keys and values to IRExpr | None
+        keys = [self._norm_expr(k) if k else None for k in node.keys]
+        values = self._norm_expr_list(node.values)
         return IRDict(
-            keys=[self.normalize_node(k) if k else None for k in node.keys],
-            values=[self.normalize_node(v) for v in node.values],
+            keys=keys,
+            values=values,
             loc=self._make_loc(node),
             source_language=self.language,
         )
@@ -618,25 +681,32 @@ class PythonNormalizer(BaseNormalizer):
 
         Represented as a special call for now.
         """
+        # [20251220_BUGFIX] Cast test, body, orelse to IRExpr; ensure args are non-None
+        test = self._norm_expr(node.test) or IRConstant(
+            value=False, source_language=self.language
+        )
+        body = self._norm_expr(node.body) or IRConstant(
+            value=None, source_language=self.language
+        )
+        orelse = self._norm_expr(node.orelse) or IRConstant(
+            value=None, source_language=self.language
+        )
         return IRCall(
             func=IRName(id="__ternary__", source_language=self.language),
-            args=[
-                self.normalize_node(node.test),
-                self.normalize_node(node.body),
-                self.normalize_node(node.orelse),
-            ],
+            args=[test, body, orelse],
             loc=self._make_loc(node),
             source_language=self.language,
         )
 
     def _normalize_Lambda(self, node: ast.Lambda) -> IRFunctionDef:
         """Normalize lambda expression."""
+        # [20251220_BUGFIX] Cast body to IRExpr and wrap in IRReturn
         return IRFunctionDef(
             name="",  # Anonymous
             params=self._normalize_arguments(node.args),
             body=[
                 IRReturn(
-                    value=self.normalize_node(node.body),
+                    value=self._norm_expr(node.body),
                     source_language=self.language,
                 )
             ],
@@ -662,14 +732,35 @@ class PythonNormalizer(BaseNormalizer):
         - Test generation (can analyze the element expression and conditions)
         - Type inference (can determine output type from element type)
         - Data flow analysis (can track which variables are used)
+
+        [20251220_TODO] Enhanced Python syntax support:
+            - f-string expression parsing: f"value={expr}" as nested calls
+            - JoinedStr normalization strategy for template strings
+            - Walrus operator (named expressions): if (x := func()) > 0
+            - Match/case statements (Python 3.10+)
+            - Type aliases and type parameter syntax (3.12+)
+
+        [20251220_TODO] Async comprehensions and generators:
+            - Async list/dict/set comprehensions
+            - Async generator expressions
+            - Async for loops in comprehensions
+
+        [20251220_TODO] Decorator metadata preservation:
+            - Decorator argument normalization
+            - Stacked decorator tracking
+            - Class and method decorator analysis
         """
         # Get the first generator (most common case)
         # For nested comprehensions, we'd need to handle multiple generators
         if not node.generators:
             # Shouldn't happen in valid Python, but handle gracefully
+            # [20251220_BUGFIX] Cast elt to IRExpr
+            elt = self._norm_expr(node.elt) or IRConstant(
+                value=None, source_language=self.language
+            )
             return IRCall(
                 func=IRName(id="__listcomp__", source_language=self.language),
-                args=[self.normalize_node(node.elt)],
+                args=[elt],
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
@@ -677,12 +768,23 @@ class PythonNormalizer(BaseNormalizer):
         gen = node.generators[0]
 
         # Normalize the comprehension components
-        element_expr = self.normalize_node(node.elt)
-        target_expr = self.normalize_node(gen.target)
-        iter_expr = self.normalize_node(gen.iter)
+        # [20251220_BUGFIX] Cast all expressions to IRExpr
+        element_expr = self._norm_expr(node.elt) or IRConstant(
+            value=None, source_language=self.language
+        )
+        target_expr = self._norm_expr(gen.target) or IRName(
+            id="_", source_language=self.language
+        )
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(
+            value=None, source_language=self.language
+        )
 
         # Normalize filter conditions (if any)
-        conditions = [self.normalize_node(cond) for cond in gen.ifs]
+        # [20251220_BUGFIX] Cast conditions to IRExpr list
+        conditions = [
+            c or IRConstant(value=True, source_language=self.language)
+            for c in [self._norm_expr(cond) for cond in gen.ifs]
+        ]
 
         # For nested generators, we can chain them
         # But for v2.0.0, focus on single-level comprehensions
@@ -715,18 +817,32 @@ class PythonNormalizer(BaseNormalizer):
         {x for x in items} -> __setcomp__(element, target, iter)
         """
         if not node.generators:
+            # [20251220_BUGFIX] Cast elt to IRExpr
+            elt = self._norm_expr(node.elt) or IRConstant(
+                value=None, source_language=self.language
+            )
             return IRCall(
                 func=IRName(id="__setcomp__", source_language=self.language),
-                args=[self.normalize_node(node.elt)],
+                args=[elt],
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
 
         gen = node.generators[0]
-        element_expr = self.normalize_node(node.elt)
-        target_expr = self.normalize_node(gen.target)
-        iter_expr = self.normalize_node(gen.iter)
-        conditions = [self.normalize_node(cond) for cond in gen.ifs]
+        # [20251220_BUGFIX] Cast expressions to IRExpr
+        element_expr = self._norm_expr(node.elt) or IRConstant(
+            value=None, source_language=self.language
+        )
+        target_expr = self._norm_expr(gen.target) or IRName(
+            id="_", source_language=self.language
+        )
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(
+            value=None, source_language=self.language
+        )
+        conditions = [
+            c or IRConstant(value=True, source_language=self.language)
+            for c in [self._norm_expr(cond) for cond in gen.ifs]
+        ]
 
         return IRCall(
             func=IRName(id="__setcomp__", source_language=self.language),
@@ -751,19 +867,38 @@ class PythonNormalizer(BaseNormalizer):
         {k: v for k, v in items} -> __dictcomp__(key, value, target, iter)
         """
         if not node.generators:
+            # [20251220_BUGFIX] Cast key and value to IRExpr
+            key = self._norm_expr(node.key) or IRConstant(
+                value=None, source_language=self.language
+            )
+            value = self._norm_expr(node.value) or IRConstant(
+                value=None, source_language=self.language
+            )
             return IRCall(
                 func=IRName(id="__dictcomp__", source_language=self.language),
-                args=[self.normalize_node(node.key), self.normalize_node(node.value)],
+                args=[key, value],
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
 
         gen = node.generators[0]
-        key_expr = self.normalize_node(node.key)
-        value_expr = self.normalize_node(node.value)
-        target_expr = self.normalize_node(gen.target)
-        iter_expr = self.normalize_node(gen.iter)
-        conditions = [self.normalize_node(cond) for cond in gen.ifs]
+        # [20251220_BUGFIX] Cast all expressions to IRExpr
+        key_expr = self._norm_expr(node.key) or IRConstant(
+            value=None, source_language=self.language
+        )
+        value_expr = self._norm_expr(node.value) or IRConstant(
+            value=None, source_language=self.language
+        )
+        target_expr = self._norm_expr(gen.target) or IRName(
+            id="_", source_language=self.language
+        )
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(
+            value=None, source_language=self.language
+        )
+        conditions = [
+            c or IRConstant(value=True, source_language=self.language)
+            for c in [self._norm_expr(cond) for cond in gen.ifs]
+        ]
 
         return IRCall(
             func=IRName(id="__dictcomp__", source_language=self.language),
@@ -788,18 +923,32 @@ class PythonNormalizer(BaseNormalizer):
         (x for x in items) -> __genexp__(element, target, iter)
         """
         if not node.generators:
+            # [20251220_BUGFIX] Cast elt to IRExpr
+            elt = self._norm_expr(node.elt) or IRConstant(
+                value=None, source_language=self.language
+            )
             return IRCall(
                 func=IRName(id="__genexp__", source_language=self.language),
-                args=[self.normalize_node(node.elt)],
+                args=[elt],
                 loc=self._make_loc(node),
                 source_language=self.language,
             )
 
         gen = node.generators[0]
-        element_expr = self.normalize_node(node.elt)
-        target_expr = self.normalize_node(gen.target)
-        iter_expr = self.normalize_node(gen.iter)
-        conditions = [self.normalize_node(cond) for cond in gen.ifs]
+        # [20251220_BUGFIX] Cast expressions to IRExpr
+        element_expr = self._norm_expr(node.elt) or IRConstant(
+            value=None, source_language=self.language
+        )
+        target_expr = self._norm_expr(gen.target) or IRName(
+            id="_", source_language=self.language
+        )
+        iter_expr = self._norm_expr(gen.iter) or IRConstant(
+            value=None, source_language=self.language
+        )
+        conditions = [
+            c or IRConstant(value=True, source_language=self.language)
+            for c in [self._norm_expr(cond) for cond in gen.ifs]
+        ]
 
         return IRCall(
             func=IRName(id="__genexp__", source_language=self.language),
@@ -820,25 +969,19 @@ class PythonNormalizer(BaseNormalizer):
     # Slice is used in subscripts
     def _normalize_Slice(self, node: ast.Slice) -> IRCall:
         """Normalize slice (a:b:c)."""
+        # [20251220_BUGFIX] Cast slice bounds to IRExpr with defaults
+        lower = self._norm_expr(node.lower) or IRConstant(
+            value=None, source_language=self.language
+        )
+        upper = self._norm_expr(node.upper) or IRConstant(
+            value=None, source_language=self.language
+        )
+        step = self._norm_expr(node.step) or IRConstant(
+            value=None, source_language=self.language
+        )
         return IRCall(
             func=IRName(id="slice", source_language=self.language),
-            args=[
-                (
-                    self.normalize_node(node.lower)
-                    if node.lower
-                    else IRConstant(value=None, source_language=self.language)
-                ),
-                (
-                    self.normalize_node(node.upper)
-                    if node.upper
-                    else IRConstant(value=None, source_language=self.language)
-                ),
-                (
-                    self.normalize_node(node.step)
-                    if node.step
-                    else IRConstant(value=None, source_language=self.language)
-                ),
-            ],
+            args=[lower, upper, step],
             loc=self._make_loc(node),
             source_language=self.language,
         )

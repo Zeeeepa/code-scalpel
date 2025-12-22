@@ -27,7 +27,7 @@ Usage:
 from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from .taint_tracker import (
     TaintTracker,
@@ -296,7 +296,7 @@ class SecurityAnalyzer:
         result.vulnerabilities = taint_vulns + secret_vulns + ssr_vulns
 
         result.taint_flows = {
-            name: self._taint_tracker.get_taint(name)
+            name: cast(TaintInfo, self._taint_tracker.get_taint(name))
             for name in self._current_taint_map.keys()
             if self._taint_tracker.get_taint(name) is not None
         }
@@ -327,8 +327,9 @@ class SecurityAnalyzer:
                     source_location=(node.lineno, node.col_offset),
                     propagation_path=[],
                 )
-                self._taint_tracker.mark_tainted(param_name, taint_info)
-                self._current_taint_map[param_name] = taint_info
+                if self._taint_tracker:
+                    self._taint_tracker.mark_tainted(param_name, taint_info)
+                    self._current_taint_map[param_name] = taint_info
 
             for child in node.body:
                 self._analyze_node(child, result)
@@ -366,7 +367,7 @@ class SecurityAnalyzer:
                     source_vars = self._extract_variable_names(item.context_expr)
                     # Propagate taint from source variables to the target
                     # signature: propagate_assignment(target, source_names: List[str])
-                    if source_vars:
+                    if source_vars and self._taint_tracker:
                         self._taint_tracker.propagate_assignment(
                             target_var, source_vars
                         )
@@ -438,7 +439,7 @@ class SecurityAnalyzer:
                         tainted_vars.append(var)
 
         # If we have HTML and tainted variables, flag as XSS
-        if has_html and tainted_vars:
+        if has_html and tainted_vars and self._taint_tracker:
             for var in tainted_vars:
                 taint_info = self._current_taint_map[var]
                 vuln = Vulnerability(
@@ -477,7 +478,7 @@ class SecurityAnalyzer:
                 if part.id in self._current_taint_map:
                     tainted_vars.append(part.id)
 
-        if has_html and tainted_vars:
+        if has_html and tainted_vars and self._taint_tracker:
             for var in tainted_vars:
                 taint_info = self._current_taint_map[var]
                 vuln = Vulnerability(
@@ -510,7 +511,7 @@ class SecurityAnalyzer:
                     if isinstance(elt, ast.Name):
                         targets.append(elt.id)
 
-        if not targets:
+        if not targets or not self._taint_tracker:
             return
 
         # Check if RHS is a call that might be a sink (even if also an assignment)
@@ -556,7 +557,7 @@ class SecurityAnalyzer:
         Returns:
             Tuple of (sanitizer_name, source_taint) if sanitizer found, None otherwise
         """
-        if not isinstance(node, ast.Call):
+        if not isinstance(node, ast.Call) or not self._taint_tracker:
             return None
 
         func_name = self._get_call_name(node)
@@ -588,6 +589,9 @@ class SecurityAnalyzer:
 
     def _analyze_call(self, node: ast.Call, location: Tuple[int, int]) -> None:
         """Analyze a function call for sink detection."""
+        if not self._taint_tracker:
+            return
+
         # Recursively analyze chained calls like hashlib.md5(...).hexdigest()
         # The inner call (hashlib.md5) is in node.func.value when node.func is Attribute
         if isinstance(node.func, ast.Attribute) and isinstance(
@@ -843,6 +847,9 @@ class SecurityAnalyzer:
             description: Human-readable description of the issue
             location: (line, column) tuple
         """
+        if not self._taint_tracker:
+            return
+
         # Check for duplicates
         for v in self._taint_tracker.get_vulnerabilities():
             if v.sink_location == location and v.sink_type == sink_type:

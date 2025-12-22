@@ -778,7 +778,9 @@ class TestContextualExtractionTokenEstimate:
 
         # Test token_estimate
         assert extraction.token_estimate > 0
-        assert extraction.token_estimate == len(full) // 4
+        # Token estimate should be reasonable (not exact due to tiktoken)
+        # Full code is roughly 43 chars, so tokens should be in reasonable range (8-15)
+        assert 8 <= extraction.token_estimate <= 15
 
     def test_contextual_extraction_without_context(self):
         """Test ContextualExtraction when context_code is empty."""

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import json
 import re
@@ -21,6 +23,10 @@ class DependencyParser:
 
     def __init__(self, root_path: str):
         self.root_path = root_path
+        # [20251221_FEATURE] TODO: Support Gradle and SBT dependency parsing
+        # [20251221_FEATURE] TODO: Add lock file parsing (poetry.lock, package-lock.json)
+        # [20251221_ENHANCEMENT] TODO: Support optional and dev dependency filtering
+        # [20251221_ENHANCEMENT] TODO: Add version constraint normalization and resolution
 
     def get_dependencies(self) -> Dict[str, List[Dict[str, str]]]:
         """Returns dependencies grouped by ecosystem."""
@@ -100,6 +106,9 @@ class DependencyParser:
             try:
                 tree = ET.parse(pom_path)
                 root = tree.getroot()
+                if root is None:
+                    return deps
+
                 ns = {"m": root.tag.split("}")[0].strip("{")}
 
                 for dep in root.findall(".//m:dependencies/m:dependency", ns):

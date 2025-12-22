@@ -4,9 +4,10 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Callable, Dict, Generic, List, Optional, Tuple, TypeVar
+from typing import Callable, Dict, Generic, List, Optional, Sequence, Tuple, TypeVar
 
-from .analysis_cache import AnalysisCache
+# [20251223_CONSOLIDATION] Import from unified_cache
+from .unified_cache import AnalysisCache
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,14 @@ def _batch_parse_worker(
 
 
 class ParallelParser(Generic[T]):
-    """[20251214_FEATURE] Parallel file parsing with cache reuse."""
+    """[20251214_FEATURE] Parallel file parsing with cache reuse.
+
+    [20251221_TODO] Phase 2: Implement adaptive batch sizing based on file sizes
+    [20251221_TODO] Phase 2: Add progress callbacks for long-running operations
+    [20251221_TODO] Phase 2: Implement per-worker timeout to handle hung workers
+    [20251221_TODO] Phase 2: Add priority-based scheduling (prioritize hot files)
+    [20251221_TODO] Phase 2: Implement memory-aware batching to prevent OOM
+    """
 
     # [20251214_PERF] Default batch size to amortize pickle overhead
     DEFAULT_BATCH_SIZE = 100
@@ -46,8 +54,15 @@ class ParallelParser(Generic[T]):
         self.batch_size = batch_size or self.DEFAULT_BATCH_SIZE
 
     def parse_files(
-        self, files: List[Path | str], parse_fn: Callable[[Path], T]
+        self, files: Sequence[Path | str], parse_fn: Callable[[Path], T]
     ) -> Tuple[Dict[str, T], List[str]]:
+        """Parse multiple files in parallel with caching.
+
+        [20251221_TODO] Phase 2: Add progress callback parameter for UI feedback
+        [20251221_TODO] Phase 2: Implement timeout per worker thread
+        [20251221_TODO] Phase 2: Add support for cancellation tokens
+        [20251221_TODO] Phase 2: Return detailed metrics (parse time per file)
+        """
         results: Dict[str, T] = {}
         errors: List[str] = []
         to_parse: List[str] = []

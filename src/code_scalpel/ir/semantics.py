@@ -21,6 +21,45 @@ Example:
     >>> semantics = PythonSemantics()
     >>> semantics.binary_add("5", 3)
     TypeError: can only concatenate str (not "int") to str
+
+[20251220_TODO] Add bitwise operation semantics:
+    - bitwise_and, bitwise_or, bitwise_xor
+    - bitwise_not, left_shift, right_shift
+    - JavaScript: All numbers are 32-bit integers in bitwise ops
+    - Python: Arbitrary precision integers
+
+[20251220_TODO] Add object/array operation semantics:
+    - property_access(obj, key) -> value or undefined
+    - property_set(obj, key, value) -> new_obj
+    - array_index_access(arr, idx) -> element
+    - array_length(arr) -> int
+    - object_keys(obj) -> List[str]
+
+[20251220_TODO] Add null/undefined/None handling:
+    - is_nullish(value) - JS: null, undefined; Python: None
+    - nullish_coalesce(left, right) - ?? operator
+    - optional_chain(obj, path) - obj?.prop?.method?.()
+    - Error propagation in optional chaining
+
+[20251220_TODO] Add Promise/async semantics (JavaScript):
+    - promise_resolve(value) -> Promise
+    - promise_reject(error) -> Promise
+    - async_await(promise) -> awaited_value or throw
+    - Promise.then() chaining behavior
+    - Promise.catch() error handling
+
+[20251220_TODO] Add string operation semantics:
+    - string_concat(left, right) -> string
+    - string_slice(str, start, end) -> string
+    - string_index(str, idx) -> char or undefined
+    - string_length(str) -> int
+    - regex_match(str, pattern) -> match_result
+
+[20251220_TODO] Add type-specific equality semantics:
+    - is_nan(value) - special IEEE 754 handling
+    - deep_equal(left, right) - recursive structure comparison
+    - loose_equal handling (== vs ===) with type coercion rules
+    - Object identity vs equality
 """
 
 from abc import ABC, abstractmethod
@@ -47,6 +86,18 @@ class LanguageSemantics(ABC):
 
     All methods accept Z3 symbolic values and return Z3 symbolic values.
     This allows symbolic execution across languages.
+
+    [20251220_TODO] Add semantic operation categories:
+        - Bitwise operations (and, or, xor, not, shift)
+        - Object/array operations (access, set, keys, length)
+        - String operations (concat, slice, index, match)
+        - Type checking and guards
+        - Error handling and exception semantics
+
+    [20251220_TODO] Add constraint tracking:\n        - Track value ranges and type constraints
+        - Propagate type information through operations
+        - Enable type narrowing in conditionals
+        - Support optional chaining constraints
     """
 
     # [20250105_REFACTOR] Abstract stubs are excluded from coverage; implementations live in concrete semantics classes.
@@ -371,7 +422,9 @@ class PythonSemantics(LanguageSemantics):
         if isinstance(left, BoolRef) and isinstance(right, BoolRef):
             return And(left, right)
         # Concrete: return first falsy or last truthy
-        if not left:
+        # [20251220_BUGFIX] Cannot check BoolRef with if statement - separate symbolic/concrete paths
+        left_is_falsy = not left if not isinstance(left, (BoolRef, ExprRef)) else False
+        if left_is_falsy:
             return left
         return right
 
@@ -380,7 +433,9 @@ class PythonSemantics(LanguageSemantics):
         if isinstance(left, BoolRef) and isinstance(right, BoolRef):
             return Or(left, right)
         # Concrete: return first truthy or last falsy
-        if left:
+        # [20251220_BUGFIX] Cannot check BoolRef with if statement - separate symbolic/concrete paths
+        left_is_truthy = left if not isinstance(left, (BoolRef, ExprRef)) else None
+        if left_is_truthy:
             return left
         return right
 
@@ -506,8 +561,15 @@ class JavaScriptSemantics(LanguageSemantics):
         try:
             left_num = float(left) if isinstance(left, str) else left
             right_num = float(right) if isinstance(right, str) else right
-            if right_num == 0:
-                return float("inf") if left_num >= 0 else float("-inf")
+            # [20251220_BUGFIX] Cannot use ArithRef in if conditional - check for concrete types
+            right_is_zero = (
+                right_num == 0 if isinstance(right_num, (int, float)) else False
+            )
+            if right_is_zero:
+                left_is_positive = (
+                    left_num >= 0 if isinstance(left_num, (int, float)) else True
+                )
+                return float("inf") if left_is_positive else float("-inf")
             return left_num / right_num
         except (ValueError, TypeError):
             return float("nan")
@@ -535,7 +597,13 @@ class JavaScriptSemantics(LanguageSemantics):
             # JS: a % b = a - (b * trunc(a/b))
             import math
 
-            return left_num - right_num * math.trunc(left_num / right_num)
+            # [20251220_BUGFIX] math.trunc() needs concrete float, not ArithRef
+            if isinstance(left_num, (int, float)) and isinstance(
+                right_num, (int, float)
+            ):
+                return left_num - right_num * math.trunc(left_num / right_num)
+            # For symbolic values, fall back to modulo operator
+            return left_num % right_num
         except (ValueError, TypeError, ZeroDivisionError):
             return float("nan")
 

@@ -1,9 +1,16 @@
+<!-- [20251221_DOCS] Kept root roadmap entrypoint for public repo compatibility -->
+
+# Development Roadmap
+
+The canonical roadmap lives in [docs/DEVELOPMENT_ROADMAP.md](docs/DEVELOPMENT_ROADMAP.md).
+
+This root file exists to preserve compatibility with older links and external references.
 # Code Scalpel Development Roadmap
 
-**Document Version:** 9.1 (v3.0.5 Pro Features Planning)  
-**Last Updated:** December 19, 2025  <!-- [20251219_DOCS] v9.1 roadmap - v3.0.5 Pro Features rate limiting -->
-**Current Release:** v3.0.4 "Ninja Warrior" (Released Dec 20, 2025)
-**Next Release:** v3.0.5 "Pro Features" (Rate Limiting & Licensing)
+**Document Version:** 10.0 (v3.1.0 "Parser Unification" Complete)  
+**Last Updated:** December 21, 2025  <!-- [20251221_DOCS] v10.0 roadmap - v3.1.0 Parser Unification complete, polyglot write roadmap -->
+**Current Release:** v3.1.0 "Parser Unification" (Released Dec 21, 2025)
+**Next Release:** v3.2.0 "Polyglot Pro" (Multi-Language Write Operations & Security)
 
 ## The Surgical Suite Vision
 
@@ -15,29 +22,42 @@ Every AI coding interaction—whether Claude, Copilot, Cursor, or any future age
 - **Surgical** - Precise, minimal changes with blast radius controls
 - **Verified** - Proof that changes are safe before they ship
 
-**Next Releases (Foundation First):**
-- v3.0.5 "Pro Features" - Rate Limiting & Licensing (Q1 2025)
-- v3.0.6 "Vuln Sync" - Priority Vulnerability Database Updates (Q1 2025)
-- v3.1.0 "Polyglot+" - Go, Rust, C#, Kotlin Support (Q1 2026)
-- v3.2.0 "Framework IQ" - Semantic Framework Rules (Q2 2026)
-- v3.3.0 "Verified" - Test Execution Integration (Q2-Q3 2026)
-- v3.4.0 "Workspace" - Monorepo Support (Q3 2026)
-- v3.5.0 "Gatekeeper" - CI/CD Enforcement (Q4 2026)
-- v4.0.0 "Swarm" - Multi-Agent Collaboration (H1 2027)
-- v5.0.0 "Re-Platforming" - Legacy Migration (H2 2027)
-- v5.1.0 "Intercept" - MCP Proxy Layer (Q1 2028)
-- v5.2.0 "Intent" - Intent Analysis & Risk ML (Q2 2028)
-- v5.3.0 "Dashboard" - Audit UI & Policy Console (Q3 2028)
-- v5.4.0 "Enterprise" - SSO/RBAC/SIEM Integration (Q4 2028)
-- v5.5.0 "Extensions" - IDE Integrations (Q1 2029)
-- v6.0.0 "Surgical Suite" - Universal AI Operating Layer (H1 2029)
+**Strategic Release Timeline:**
 
-**v3.0.5 Features PLANNED:**
-- [ ] Rate Limiting Middleware - 100 calls/day community, unlimited Pro/Enterprise
-- [ ] LicenseInfo & RateLimitResult dataclasses
-- [ ] Machine ID generation (platform + MAC hash)
-- [ ] Rate limit headers in all MCP responses
-- [ ] License key validation infrastructure
+| Version | Codename | Focus | Timeline | Status |
+|---------|----------|-------|----------|--------|
+| **v3.1.0** | **Parser Unification** | **Multi-language read/analyze support** | **RELEASED Dec 21** | ✅ **COMPLETE** |
+| v3.2.0 | Polyglot Pro | Multi-language write + security | Q1 2026 | In Planning |
+| v3.3.0 | Extended Languages | Go, Rust, C#, Kotlin support | Q2 2026 | Backlog |
+| v3.4.0 | Framework IQ | Semantic framework rules | Q2 2026 | Backlog |
+| v3.5.0 | Verified | Test execution integration | Q3 2026 | Backlog |
+| v4.0.0 | Workspace | Monorepo support | Q3 2026 | Backlog |
+| v4.1.0 | Gatekeeper | CI/CD enforcement | Q4 2026 | Backlog |
+| v5.0.0 | Swarm | Multi-agent collaboration | H1 2027 | Backlog |
+
+**v3.2.0 Features (NEXT):**
+- [ ] Polyglot Write Operations - `update_symbol` for Java/TypeScript/JavaScript
+- [ ] Cross-File Security Scanning - Taint tracking across Java, TypeScript, JavaScript
+- [ ] TypeScript Arrow Function Fix - Enhanced IR normalizer for TS arrow functions
+- [ ] Polyglot Mutation Testing - Mutation-based verification for all languages
+- [ ] Polyglot Test Generation - Generate tests for Java, TypeScript, JavaScript
+
+**v3.1.0 Features RELEASED:**
+- [COMPLETE] Parser Unification - Unified UnifiedExtractor for all languages
+- [COMPLETE] SurgicalExtractor Enhancements - Token counting, metadata extraction, LLM prompts
+- [COMPLETE] Multi-Language Extraction - Python/Java/JavaScript/TypeScript extraction parity
+- [COMPLETE] Polyglot Analysis - `analyze_code` works across all four languages
+- [COMPLETE] Unified Sink Detection - `unified_sink_detect` for polyglot security scanning
+- [COMPLETE] Enhanced Metadata - Docstrings, signatures, decorators, async/generator detection
+- [COMPLETE] Token Budget Management - `trim_to_budget()` for LLM context windows
+- [COMPLETE] LRU Caching - 2.8x performance speedup on cached extractions
+- [COMPLETE] Data Flow Verification - Complete extraction pipeline end-to-end tested
+- [COMPLETE] Multi-Language Documentation - Clear status matrix for all languages
+- [COMPLETE] Release Checklist - v3.1.0 release gate all criteria met
+
+**v3.0.5 Features (SKIPPED - Merged into v3.1.0)**
+- [MERGED] Rate Limiting Middleware - Deferred to v3.2.0
+- [MERGED] License Key Validation - Deferred to v3.2.0
 
 **v3.0.4 Features RELEASED:**
 - [COMPLETE] MCP Language Auto-Detection Fix - JS/TS files no longer default to Python parser
@@ -49,7 +69,8 @@ Every AI coding interaction—whether Claude, Copilot, Cursor, or any future age
 - [COMPLETE] JavaScript/TypeScript analyze_code - Full tree-sitter AST analysis for JS/TS
 - [COMPLETE] Java tree-sitter API Fix - Updated to new Parser(language) format
 - [COMPLETE] Ninja Warrior Gap Analysis - Honest documentation of Stage 3 cross-service limitations
-- [COMPLETE] Ninja Warrior Torture Tests - 35/36 passing (97%), 4133 unit tests passing
+- [COMPLETE] Ninja Warrior Torture Tests - 35/36 passing (97%), 4,133 unit tests passing
+- [COMPLETE] Graph Dataclass Fix - UniversalGraph construction bug resolved
 **v3.0.2 Features RELEASED:**
 - [COMPLETE] `code-scalpel init` Command - Auto-initialize .code-scalpel with templates
 - [COMPLETE] Configuration Templates Module - config.json, policy.yaml, budget.yaml, README.md, .gitignore
@@ -66,8 +87,9 @@ Every AI coding interaction—whether Claude, Copilot, Cursor, or any future age
 - [COMPLETE] Audit Trail (28 tests) - Cryptographic SHA-256 hashing, immutable entries
 - [COMPLETE] Sandboxed Execution (42 tests) - Isolated speculative execution with resource limits
 - [COMPLETE] Framework Integrations (45 tests) - LangGraph, CrewAI, AutoGen
-**Test Summary:** 4133 tests passing, 94.86% combined coverage (≥90% gate PASSED), 71 adversarial tests pass
-**Coverage Gate:** ≥90% combined (statement + branch) - ACHIEVED: 94.86%
+**Test Summary:** 4,133+ tests passing (100% pass rate), 94.86% combined coverage (≥90% gate PASSED), 138+ adversarial tests pass
+**Coverage Gate:** ≥90% combined (statement + branch) - ACHIEVED: 94.86% (96.28% stmt, 90.95% branch)
+**Multi-Language Status:** Parser Unification complete - Python/Java/JavaScript/TypeScript extraction parity
 **Maintainer:** 3D Tech Solutions LLC
 
 ---
@@ -258,31 +280,36 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 - **Verify before applying** - Simulate refactors to detect behavior changes
 - **Analyze with certainty** - Real AST parsing, not regex pattern matching
 
-### Current State (v3.0.0)
+### Current State (v3.1.0)
 
-<!-- [20251218_DOCS] Updated for v3.0.0 Autonomy release -->
+<!-- [20251221_DOCS] Updated for v3.1.0 "Parser Unification" release -->
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| MCP Tools | 19 tools (analyze, extract, security, test gen, context, cross-file, policy) | Released v3.0.0 |
+| MCP Tools | 20 tools (analyze, extract, security, test gen, context, cross-file, policy, graph) | Released v3.1.0 |
 | MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | Released v2.0.0 |
-| Test Suite | 4,133 tests passing (100% pass rate) | Stable |
+| Test Suite | 4,133+ tests passing (100% pass rate) | Stable |
 | Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |
 | Code Coverage | 94.86% combined (96.28% stmt, 90.95% branch) | CI Gate Met (≥90%) |
 | Security Detection | 17+ vulnerability types, 30+ secret patterns, cross-file taint | Stable |
-| Languages | Python (full), TypeScript, JavaScript, Java | Released v2.0.0 |
-| AI Agent Integrations | Claude Desktop, VS Code Copilot, Cursor, Docker | Verified v3.0.0 |
+| Languages | Python (full read/write), TypeScript, JavaScript, Java (read) | Released v3.1.0 |
+| AI Agent Integrations | Claude Desktop, VS Code Copilot, Cursor, Docker | Verified v3.1.0 |
 | Cross-File Operations | Import resolution, taint tracking, dependency extraction | Stable v2.0.0 |
 | Autonomy Engine | Error-to-diff, fix loop, mutation gate, audit trail | Released v3.0.0 |
+| Parser Unification | UnifiedExtractor for all languages, polyglot extraction | Released v3.1.0 |
+| Polyglot Metadata | Token counting, docstrings, signatures, decorators | Released v3.1.0 |
+| Token Budget Management | Trim code to fit LLM context windows | Released v3.1.0 |
+| LRU Caching | 2.8x performance speedup on cached extractions | Released v3.1.0 |
 
-### Target State
+### Target State (Post-v3.1.0 Roadmap)
 
-<!-- [20251216_DOCS] Consolidated interim versions (v2.0.2, v2.0.3, v2.1.0) into v2.2.0 "Nexus" -->
+<!-- [20251221_DOCS] v3.2.0 roadmap for polyglot write operations -->
 
 | Metric | Target | Milestone |
 |--------|--------|-----------|
-| MCP Tools | 19 tools | [COMPLETE] DONE v3.0.0 |
-| Languages | Python, TypeScript, JavaScript, Java (complete) | [COMPLETE] DONE v2.0.1 |
+| MCP Tools | 20 tools | [COMPLETE] DONE v3.1.0 |
+| Languages Read | Python, TypeScript, JavaScript, Java (complete) | [COMPLETE] DONE v3.1.0 |
+| Languages Write | Python + Java/TS/JS (phase 2) | [IN PROGRESS] v3.2.0 |
 | Cross-File Operations | Full project context | [COMPLETE] DONE v2.0.0 |
 | MCP Protocol Features | Progress Tokens, Roots, Health | [COMPLETE] DONE v2.0.0 |
 | **Unified Graph** | Cross-language service graph with confidence | [COMPLETE] DONE v2.2.0 "Nexus" |
@@ -294,6 +321,10 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 | **Security Blocking** | OWASP Top 10 agent prevention | [COMPLETE] DONE v2.5.0 "Guardian" |
 | **Self-Correction** | Error-to-diff engine with fix hints | [COMPLETE] DONE v3.0.0 "Autonomy" |
 | **Speculative Execution** | Sandboxed test verification | [COMPLETE] DONE v3.0.0 "Autonomy" |
+| **Parser Unification** | Multi-language extraction and analysis | [COMPLETE] DONE v3.1.0 "Parser Unification" |
+| **Polyglot Metadata** | Token counting, LLM prompts across languages | [COMPLETE] DONE v3.1.0 "Parser Unification" |
+| **Polyglot Write** | Modify Java/TypeScript/JavaScript code | [IN PROGRESS] v3.2.0 "Polyglot Pro" |
+| **Cross-Language Security** | Taint tracking across all languages | [IN PROGRESS] v3.2.0 "Polyglot Pro" |
 
 ---
 
@@ -392,6 +423,219 @@ v2.x/v3.x Series (Multi-Language + Revolution)
   Roots              JPA/ORM               Workflow Prompts     OWASP Block          Ecosystem Lock       defusedxml
   Health Endpoint     95% Coverage         Cross-Lang Links     Tamper-Resist        Singularity Demo     XXE Prevention
 ```
+
+---
+
+## v3.1.0 "Parser Unification" - RELEASED (December 21, 2025)
+
+### Release Overview
+
+**Codename:** "Parser Unification"  
+**Theme:** Unified multi-language extraction and analysis  
+**Status:** ✅ COMPLETE and RELEASED  
+**Test Results:** 4,133+ tests passing (100% pass rate), 94.86% coverage  
+**Release Date:** December 21, 2025
+
+### Major Accomplishments
+
+#### 1. Unified Extraction Pipeline (Core Architecture)
+
+Created `UnifiedExtractor` providing single API for all supported languages:
+
+- **Language auto-detection** from file extension or code content
+- **Unified API** for extract, list_symbols, get_imports operations
+- **Dispatch logic** to appropriate backend (SurgicalExtractor for Python, PolyglotExtractor for Java/JS/TS)
+- **End-to-end tested** with integration tests covering all languages
+- **Token-efficient file reading** using MCP Roots capability
+
+#### 2. SurgicalExtractor v3.1.0 Enhancements
+
+Enhanced Python extraction with production-grade LLM features:
+
+- **Token Counting:** Accurate `count_tokens()` for GPT-4, GPT-3.5, Claude models
+- **Metadata Extraction:** Docstrings, signatures, decorators, async/generator detection, source file tracking
+- **LLM Integration:** `to_prompt()` formatting, `summarize()` for code description
+- **Token Budget Management:** `trim_to_budget()` for fitting code to context windows
+- **LRU Caching:** 2.8x performance speedup on cached extractions
+- **Decorator Inspection:** `get_decorator()` and `list_decorators()` for decorator analysis
+- **Caller Discovery:** `find_callers()` to find all callers of a function
+
+#### 3. Multi-Language Extraction Parity
+
+**Verified extraction across all four languages:**
+
+| Feature | Python | Java | JavaScript | TypeScript |
+|---------|--------|------|------------|------------|
+| Function extraction | ✅ | ✅ | ✅ | ✅ |
+| Class extraction | ✅ | ✅ | ✅ | ✅ |
+| Method extraction | ✅ | ✅ | ✅ | ✅ |
+| Import tracking | ✅ | ✅ | ✅ | ✅ |
+| Async detection | ✅ | ✅ | ✅ | ✅ |
+| Known limitations | None | Generic types | Dynamic imports | Arrow functions |
+
+#### 4. Polyglot Analysis (`analyze_code`)
+
+Extended `analyze_code` MCP tool to support all four languages:
+- Function/class extraction with signatures
+- Import enumeration
+- Cyclomatic complexity calculation
+- Language-aware type information
+
+#### 5. Unified Sink Detection
+
+Created `unified_sink_detect` for polyglot security scanning:
+- Detects 17+ vulnerability types across Python/Java/JavaScript/TypeScript
+- Confidence scoring (0.0-1.0) for each detected sink
+- CWE mapping for all sinks
+- Multi-language code injection prevention
+
+#### 6. Comprehensive Documentation
+
+Created `MULTI_LANGUAGE_STATUS.md` with:
+- Data flow architecture diagrams
+- Language support matrix for all 20 MCP tools
+- Known limitations and workarounds
+- v3.2.0 roadmap for polyglot write operations
+
+#### 7. All Code Quality Gates Passed
+
+- ✅ 0 type errors (mypy clean)
+- ✅ 0 linter errors (ruff + pylint clean)
+- ✅ 4,133+ tests passing (100% pass rate)
+- ✅ 94.86% coverage (exceeds 90% gate)
+- ✅ All integration files error-free
+
+### Release Checklist - v3.1.0 ✅ COMPLETE
+
+**Regression Baseline:** All v3.0.x tests pass, no API breakage  
+**Pre-Flight Quality:** ruff + black clean, 100% test pass rate, 94.86% coverage  
+**Features Complete:** Parser unification, SurgicalExtractor enhancements, multi-language parity  
+**Criteria Met:** ✅ READY TO SHIP
+
+---
+
+## v3.2.0 "Polyglot Pro" - PLANNED (Q1 2026)
+
+### Release Overview
+
+**Codename:** "Polyglot Pro"  
+**Theme:** Multi-language write operations and security scanning  
+**Target Date:** Q1 2026  
+**Planned Effort:** ~20 developer-days  
+**Risk Level:** Medium
+
+### Phase 1: Polyglot Write Operations (5-7 days)
+
+**Goal:** Extend `update_symbol` to Java, JavaScript, and TypeScript.
+
+**Implementation:**
+- Abstract write operation interface for language-agnostic contract
+- Java writer: AST-based via tree-sitter with formatting preservation
+- JavaScript/TypeScript writer: tree-sitter-based with JSX/TSX support
+- Comprehensive test coverage (90%+) with adversarial tests
+
+**Acceptance Criteria:**
+- `update_symbol` works for Java classes/methods
+- `update_symbol` works for JavaScript/TypeScript functions
+- All changes preserve formatting and comments
+- No type safety regressions
+
+### Phase 2: Cross-File Security (3-5 days)
+
+**Goal:** Extend taint tracking across Java, JavaScript, TypeScript.
+
+**Implementation:**
+- Polyglot TaintTracker for multi-language data flow
+- HTTP/IPC boundary detection (REST endpoints, subprocess calls)
+- Contract breach detection (interface/type changes breaking clients)
+- Cross-language validation
+
+**Acceptance Criteria:**
+- Taint tracking works across all languages
+- HTTP endpoint mapping accurate
+- Contract breaches detected
+- Cross-language links discovered
+
+### Phase 3: TypeScript Arrow Functions (1-2 days)
+
+**Goal:** Fix known limitation with TS arrow functions.
+
+**Issue:** Tree-sitter parses arrow functions as variable declarations.  
+**Solution:** Enhance IR normalizer to recognize arrow function patterns.
+
+**Acceptance Criteria:**
+- Arrow functions extracted as functions, not variables
+- Async arrow functions detected correctly
+- Arrow functions in object literals extracted
+- v3.1.0 regression tests all pass
+
+### Phase 4: Polyglot Mutation Testing (3-4 days)
+
+**Goal:** Extend mutation-based testing to Java, JavaScript, TypeScript.
+
+**Implementation:**
+- Language-specific mutators for each language
+- Mutation application with formatting preservation
+- Test validation and mutation score calculation
+- Integration with `simulate_refactor` for fix quality verification
+
+**Acceptance Criteria:**
+- Mutations applied successfully across all languages
+- Test suites detect mutations
+- Mutation score calculated correctly
+- Integration with fix loop working
+
+### Phase 5: Polyglot Test Generation (2-3 days)
+
+**Goal:** Extend test generation to Java, JavaScript, TypeScript.
+
+**Implementation:**
+- Symbolic execution for Java (existing: Python only)
+- JavaScript/TypeScript execution simulation
+- Framework-specific test output (JUnit, Jest, Mocha, Vitest)
+- Integration with `generate_unit_tests`
+
+**Acceptance Criteria:**
+- Tests generated for Java classes
+- Tests generated for JavaScript/TypeScript functions
+- Generated tests are valid and run
+- Edge case coverage equivalent to Python
+
+### v3.2.0 Marketing Message
+
+> **v3.2.0 "Polyglot Pro"** brings full read/write multi-language support to Code Scalpel. AI agents can now modify Java, JavaScript, and TypeScript code with the same surgical precision as Python. Enhanced cross-file security scanning with taint tracking across all languages enables comprehensive application security analysis.
+
+---
+
+## v3.3.0 "Extended Languages" - PLANNED (Q2 2026)
+
+### Focus Areas
+
+- Add Go, Rust, C#, Kotlin support to extraction and analysis
+- Framework-specific rules for each new language
+- Extended security sink coverage for new languages
+
+---
+
+## v3.4.0 "Framework IQ" - PLANNED (Q2 2026)
+
+### Focus Areas
+
+- Semantic rules for Spring Boot, Express, NestJS, Django, FastAPI
+- ORM-specific vulnerability detection (Hibernate, SQLAlchemy, Sequelize)
+- Framework-specific safe patterns and anti-patterns
+
+---
+
+## v3.5.0 "Verified" - PLANNED (Q3 2026)
+
+### Focus Areas
+
+- Test execution integration (actual test run verification)
+- Performance profiling in speculative execution
+- Build artifact generation and validation
+
+---
 
 ## v1.3.0 - "Hardening"
 
@@ -12676,12 +12920,15 @@ git push origin feature/v1.3.0-nosql-injection
 | 1.0     | 2025-12-12 | Copilot | Initial roadmap based on external tester feedback |
 | 2.0     | 2025-12-15 | Copilot | Added v2.0.1 (Java Completion) and enhanced v2.1.0 (MCP Enhance) with detailed specs |
 | 3.0     | 2025-12-16 | Copilot | Revolution Edition - Integrated v2.2.0 Nexus, v2.5.0 Guardian, v3.0.0 Autonomy |
-| 3.1     | 2025-12-16 | Copilot | 3rd Party Review Integration: Added Confidence Decay, Graph Neighborhood View, Cryptographic Policy Verification, Mutation Test Gate, Nightly JDK EA Pipeline, expanded Risk Register |
+| 3.1     | 2025-12-16 | Copilot | 3rd Party Review Integration: Added Confidence Decay, Graph Neighborhood View, Cryptographic Policy Verification, Mutation Test Gate |
 | 4.0     | 2025-12-19 | Copilot | Added v3.1-v5.0 strategic vision (Gatekeeper, Swarm, Re-Platforming) |
 | 5.0     | 2025-12-19 | Copilot | Gap Analysis: Added v3.2-v3.5 interim releases (Polyglot+, Framework IQ, Verified, Workspace) |
-| 6.0     | 2025-12-19 | Copilot | **Surgical Suite Vision**: Reordered releases (Gatekeeper→v3.5), added v6.0 "Surgical Suite" as end-game vision for universal AI governance layer |
-| 7.0     | 2025-12-19 | Copilot | **Complete Bridge**: Added v5.1-v5.5 releases (Intercept, Intent, Dashboard, Enterprise, Extensions) to bridge v5.0→v6.0 with full component specifications |
-| 8.0     | 2025-12-19 | Copilot | **Full Bridge Coverage**: Added v3.6-v3.9 (Identity, Protocol, Sync, Arbitrate) and v4.1-v4.4 (Learn, Architect, Rosetta, Metrics) bridge releases for complete version progression |
+| 6.0     | 2025-12-19 | Copilot | **Surgical Suite Vision**: Reordered releases (Gatekeeper→v3.5), added v6.0 "Surgical Suite" as end-game vision |
+| 7.0     | 2025-12-19 | Copilot | **Complete Bridge**: Added v5.1-v5.5 releases (Intercept, Intent, Dashboard, Enterprise, Extensions) |
+| 8.0     | 2025-12-19 | Copilot | **Full Bridge Coverage**: Added v3.6-v3.9 and v4.1-v4.4 bridge releases for complete version progression |
+| 9.0     | 2025-12-19 | Copilot | **v3.0.5 Pro Features Planning**: Rate limiting, licensing infrastructure, machine ID generation |
+| 9.1     | 2025-12-19 | Copilot | Updated timeline with v3.0.1 configuration release and v3.0.4 "Ninja Warrior" completion |
+| 10.0    | 2025-12-21 | Copilot | **v3.1.0 "Parser Unification" RELEASED**: Multi-language extraction/analysis complete, v3.2.0 "Polyglot Pro" roadmap with write operations and cross-language security |
 
 ---
 

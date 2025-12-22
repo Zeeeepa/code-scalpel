@@ -3,9 +3,22 @@ import copy
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 import networkx as nx
+
+
+# [20251221_TODO] Add correctness-preserving transformation verification:
+#     - Implement semantic equivalence checking
+#     - Use symbolic execution to verify transformations preserve behavior
+#     - Generate test cases for transformation validation
+#     - Support regression testing for transformed code
+
+# [20251221_TODO] Add transformation conflict detection:
+#     - Detect conflicts when multiple transformations affect same nodes
+#     - Support transformation composition and ordering
+#     - Generate safe transformation sequences
+#     - Implement conflict resolution strategies
 
 
 class TransformationType(Enum):
@@ -40,6 +53,24 @@ class PDGTransformer:
         self.history: list[tuple[TransformationType, TransformationResult]] = []
         self.node_counter = defaultdict(int)
 
+        # [20251221_TODO] Add transformation recommendation engine:
+        #     - Suggest transformations based on code patterns
+        #     - Rank transformations by impact and safety
+        #     - Support interactive transformation selection
+        #     - Learn from developer acceptance/rejection patterns
+
+        # [20251221_TODO] Add parallel safe transformation:
+        #     - Detect independently applicable transformations
+        #     - Support parallel transformation application
+        #     - Ensure no race conditions in transformation order
+        #     - Aggregate results from parallel transformations
+
+        # [20251221_TODO] Add rollback/undo capabilities:
+        #     - Support full undo of transformation sequences
+        #     - Implement selective transformation rollback
+        #     - Track transformation dependencies for partial undo
+        #     - Generate reverse transformations automatically
+
     def transform(
         self, transformation_type: TransformationType, **kwargs
     ) -> TransformationResult:
@@ -53,14 +84,29 @@ class PDGTransformer:
         Returns:
             TransformationResult object
         """
-        result = None
-
         if transformation_type == TransformationType.OPTIMIZE:
             result = self.optimize_pdg(**kwargs)
         elif transformation_type == TransformationType.REFACTOR:
             result = self.refactor_pdg(**kwargs)
+        elif transformation_type == TransformationType.REMOVE:
+            result = self.remove_node(**kwargs)
+        elif transformation_type == TransformationType.INSERT:
+            result = self.insert_node(**kwargs)
+        elif transformation_type == TransformationType.REPLACE:
+            result = self.replace_node(**kwargs)
+        elif transformation_type == TransformationType.MERGE:
+            result = self.merge_nodes(**kwargs)
+        elif transformation_type == TransformationType.SPLIT:
+            result = self.split_node(**kwargs)
         else:
-            result = self._apply_basic_transformation(transformation_type, **kwargs)
+            return TransformationResult(
+                success=False,
+                modified_nodes=set(),
+                added_nodes=set(),
+                removed_nodes=set(),
+                description=f"Unknown transformation type: {transformation_type}",
+                metrics={},
+            )
 
         if result.success:
             self.history.append((transformation_type, result))
@@ -215,7 +261,7 @@ class PDGTransformer:
             self.pdg.add_edge(new_nodes[-1], succ, **data)
 
     def insert_node(
-        self, node: str, data: dict, dependencies: list = None
+        self, node: str, data: dict, dependencies: Optional[list] = None
     ) -> TransformationResult:
         """Insert a new node into the PDG."""
         if node in self.pdg:
@@ -381,7 +427,7 @@ class PDGTransformer:
         )
 
     def _extract_method(
-        self, nodes: list[str], method_name: str, parameters: list[str] = None
+        self, nodes: list[str], method_name: str, parameters: Optional[list[str]] = None
     ) -> TransformationResult:
         """Extract a set of nodes into a new method."""
         if not all(node in self.pdg for node in nodes):
@@ -582,7 +628,7 @@ class PDGTransformer:
         return loop_body
 
     def _create_method_node(
-        self, method_name: str, nodes: list[str], parameters: list[str] = None
+        self, method_name: str, nodes: list[str], parameters: Optional[list[str]] = None
     ) -> str:
         """Create a new method node representing extracted code."""
         method_node = f"method_{method_name}"

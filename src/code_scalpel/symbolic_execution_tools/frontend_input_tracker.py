@@ -52,14 +52,48 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 
+# TODO: Add support for additional frameworks
+#   - Solid.js (reactive framework)
+#   - Qwik (resumable framework)
+#   - Lit (web components)
+#   - Alpine.js (lightweight reactive)
+#   - Preact (React alternative)
+#   - Ember.js (MVC framework)
+
+# TODO: Enhanced DOM XSS detection
+#   - Track innerHTML/outerHTML with tainted data
+#   - Detect dangerouslySetInnerHTML in React
+#   - Identify v-html in Vue (unsafe)
+#   - Track document.write with user input
+#   - Detect eval() with DOM data
+
+# TODO: Client-side routing vulnerabilities
+#   - Open redirect via router.push(userInput)
+#   - History manipulation attacks
+#   - Route parameter injection
+#   - Hash fragment injection
+
+# TODO: Storage security
+#   - XSS via localStorage.setItem + getItem
+#   - Session fixation via sessionStorage
+#   - Cookie injection and theft
+#   - IndexedDB taint tracking
+
+# TODO: Web API security
+#   - PostMessage origin validation
+#   - WebSocket message taint
+#   - Service Worker message handling
+#   - Broadcast Channel API taint
+
+
 class FrontendFramework(Enum):
     """Supported frontend frameworks."""
 
-    VANILLA = "vanilla"      # Plain JS/TS
-    REACT = "react"          # React (hooks or class)
-    VUE = "vue"              # Vue 2/3
-    ANGULAR = "angular"      # Angular
-    SVELTE = "svelte"        # Svelte
+    VANILLA = "vanilla"  # Plain JS/TS
+    REACT = "react"  # React (hooks or class)
+    VUE = "vue"  # Vue 2/3
+    ANGULAR = "angular"  # Angular
+    SVELTE = "svelte"  # Svelte
     UNKNOWN = "unknown"
 
 
@@ -67,44 +101,44 @@ class InputSourceType(Enum):
     """Types of frontend input sources."""
 
     # DOM element access
-    DOM_ELEMENT = auto()        # document.getElementById, querySelector
-    ELEMENT_VALUE = auto()      # .value property
-    EVENT_TARGET = auto()       # event.target.value, e.target.value
+    DOM_ELEMENT = auto()  # document.getElementById, querySelector
+    ELEMENT_VALUE = auto()  # .value property
+    EVENT_TARGET = auto()  # event.target.value, e.target.value
 
     # URL/Location
-    URL_PARAM = auto()          # URLSearchParams, location.search
-    URL_HASH = auto()           # location.hash
-    URL_PATH = auto()           # location.pathname
+    URL_PARAM = auto()  # URLSearchParams, location.search
+    URL_HASH = auto()  # location.hash
+    URL_PATH = auto()  # location.pathname
 
     # Storage
-    LOCAL_STORAGE = auto()      # localStorage.getItem
-    SESSION_STORAGE = auto()    # sessionStorage.getItem
+    LOCAL_STORAGE = auto()  # localStorage.getItem
+    SESSION_STORAGE = auto()  # sessionStorage.getItem
 
     # React specific
-    REACT_STATE = auto()        # useState setter
-    REACT_REF = auto()          # useRef
-    REACT_FORM = auto()         # form event handlers
+    REACT_STATE = auto()  # useState setter
+    REACT_REF = auto()  # useRef
+    REACT_FORM = auto()  # form event handlers
 
     # Vue specific
-    VUE_V_MODEL = auto()        # v-model binding
-    VUE_REF = auto()            # ref(), reactive()
-    VUE_COMPUTED = auto()       # computed with input
+    VUE_V_MODEL = auto()  # v-model binding
+    VUE_REF = auto()  # ref(), reactive()
+    VUE_COMPUTED = auto()  # computed with input
 
     # Angular specific
-    ANGULAR_NG_MODEL = auto()   # ngModel
-    ANGULAR_FORM = auto()       # FormControl, FormGroup
-    ANGULAR_INPUT = auto()      # @Input() decorator
+    ANGULAR_NG_MODEL = auto()  # ngModel
+    ANGULAR_FORM = auto()  # FormControl, FormGroup
+    ANGULAR_INPUT = auto()  # @Input() decorator
 
     # Other
-    POST_MESSAGE = auto()       # window.postMessage
-    FILE_INPUT = auto()         # File input
+    POST_MESSAGE = auto()  # window.postMessage
+    FILE_INPUT = auto()  # File input
     UNKNOWN = auto()
 
 
 class DangerousSinkType(Enum):
     """Types of dangerous sinks for frontend code."""
 
-    INNER_HTML = auto()         # innerHTML, outerHTML
+    INNER_HTML = auto()  # innerHTML, outerHTML
     DOCUMENT_WRITE = auto()  # document.write, writeln
     DANGEROUSLY_SET = auto()  # React dangerouslySetInnerHTML
     V_HTML = auto()  # Vue v-html directive
@@ -113,9 +147,9 @@ class DangerousSinkType(Enum):
     SCRIPT_SRC = auto()  # script.src assignment
     HREF = auto()  # a.href with javascript:
     LOCATION = auto()  # location.href, location.assign
-    OPEN = auto()               # window.open
-    FETCH_URL = auto()          # fetch/axios with user URL
-    DOM_MANIPULATION = auto()   # insertAdjacentHTML, outerHTML
+    OPEN = auto()  # window.open
+    FETCH_URL = auto()  # fetch/axios with user URL
+    DOM_MANIPULATION = auto()  # insertAdjacentHTML, outerHTML
 
 
 @dataclass
@@ -123,7 +157,7 @@ class InputSource:
     """Detected frontend input source."""
 
     source_type: InputSourceType
-    pattern: str              # The matched pattern
+    pattern: str  # The matched pattern
     variable_name: Optional[str] = None  # Variable storing the input
     line: int = 0
     column: int = 0
@@ -191,9 +225,7 @@ class DataFlow:
     def description(self) -> str:
         """Human-readable flow description."""
         flow_str = " → ".join(
-            [self.source.pattern] +
-            self.intermediate_variables +
-            [self.sink.pattern]
+            [self.source.pattern] + self.intermediate_variables + [self.sink.pattern]
         )
         return f"[{self.risk_level}] {flow_str}"
 
@@ -253,40 +285,49 @@ class FrontendAnalysisResult:
 # Vanilla JS/TS input patterns
 VANILLA_INPUT_PATTERNS = [
     # DOM element access
-    (r'document\.getElementById\s*\(\s*["\']([^"\']+)["\']\s*\)', InputSourceType.DOM_ELEMENT),
-    (r'document\.querySelector\s*\(\s*["\']([^"\']+)["\']\s*\)', InputSourceType.DOM_ELEMENT),
-    (r'document\.querySelectorAll\s*\(\s*["\']([^"\']+)["\']\s*\)', InputSourceType.DOM_ELEMENT),
-    (r'document\.getElementsByClassName\s*\(\s*["\']([^"\']+)["\']\s*\)', InputSourceType.DOM_ELEMENT),
-    (r'document\.getElementsByName\s*\(\s*["\']([^"\']+)["\']\s*\)', InputSourceType.DOM_ELEMENT),
-
+    (
+        r'document\.getElementById\s*\(\s*["\']([^"\']+)["\']\s*\)',
+        InputSourceType.DOM_ELEMENT,
+    ),
+    (
+        r'document\.querySelector\s*\(\s*["\']([^"\']+)["\']\s*\)',
+        InputSourceType.DOM_ELEMENT,
+    ),
+    (
+        r'document\.querySelectorAll\s*\(\s*["\']([^"\']+)["\']\s*\)',
+        InputSourceType.DOM_ELEMENT,
+    ),
+    (
+        r'document\.getElementsByClassName\s*\(\s*["\']([^"\']+)["\']\s*\)',
+        InputSourceType.DOM_ELEMENT,
+    ),
+    (
+        r'document\.getElementsByName\s*\(\s*["\']([^"\']+)["\']\s*\)',
+        InputSourceType.DOM_ELEMENT,
+    ),
     # Element value access
-    (r'(\w+)\.value\b', InputSourceType.ELEMENT_VALUE),
-    (r'(\w+)\.textContent\b', InputSourceType.ELEMENT_VALUE),
-    (r'(\w+)\.innerText\b', InputSourceType.ELEMENT_VALUE),
-
+    (r"(\w+)\.value\b", InputSourceType.ELEMENT_VALUE),
+    (r"(\w+)\.textContent\b", InputSourceType.ELEMENT_VALUE),
+    (r"(\w+)\.innerText\b", InputSourceType.ELEMENT_VALUE),
     # Event target
-    (r'(?:e|event|evt)\.target\.value', InputSourceType.EVENT_TARGET),
-    (r'(?:e|event|evt)\.currentTarget\.value', InputSourceType.EVENT_TARGET),
-
+    (r"(?:e|event|evt)\.target\.value", InputSourceType.EVENT_TARGET),
+    (r"(?:e|event|evt)\.currentTarget\.value", InputSourceType.EVENT_TARGET),
     # URL/Location
-    (r'location\.search\b', InputSourceType.URL_PARAM),
-    (r'location\.hash\b', InputSourceType.URL_HASH),
-    (r'location\.pathname\b', InputSourceType.URL_PATH),
-    (r'window\.location\.search\b', InputSourceType.URL_PARAM),
-    (r'new\s+URLSearchParams\s*\(', InputSourceType.URL_PARAM),
-    (r'URLSearchParams\.get\s*\(', InputSourceType.URL_PARAM),
-
+    (r"location\.search\b", InputSourceType.URL_PARAM),
+    (r"location\.hash\b", InputSourceType.URL_HASH),
+    (r"location\.pathname\b", InputSourceType.URL_PATH),
+    (r"window\.location\.search\b", InputSourceType.URL_PARAM),
+    (r"new\s+URLSearchParams\s*\(", InputSourceType.URL_PARAM),
+    (r"URLSearchParams\.get\s*\(", InputSourceType.URL_PARAM),
     # Storage
-    (r'localStorage\.getItem\s*\(', InputSourceType.LOCAL_STORAGE),
-    (r'sessionStorage\.getItem\s*\(', InputSourceType.SESSION_STORAGE),
-
+    (r"localStorage\.getItem\s*\(", InputSourceType.LOCAL_STORAGE),
+    (r"sessionStorage\.getItem\s*\(", InputSourceType.SESSION_STORAGE),
     # postMessage
-    (r'(?:e|event)\.data\b', InputSourceType.POST_MESSAGE),
+    (r"(?:e|event)\.data\b", InputSourceType.POST_MESSAGE),
     (r'addEventListener\s*\(\s*["\']message["\']\s*,', InputSourceType.POST_MESSAGE),
-
     # File input
-    (r'(\w+)\.files\b', InputSourceType.FILE_INPUT),
-    (r'FileReader\.(?:result|readAsText|readAsDataURL)', InputSourceType.FILE_INPUT),
+    (r"(\w+)\.files\b", InputSourceType.FILE_INPUT),
+    (r"FileReader\.(?:result|readAsText|readAsDataURL)", InputSourceType.FILE_INPUT),
 ]
 
 # React-specific patterns
@@ -294,36 +335,33 @@ REACT_INPUT_PATTERNS = [
     # useState with event handler
     (r'useState\s*<[^>]*>\s*\(\s*["\']', InputSourceType.REACT_STATE),
     (r'useState\s*\(\s*["\']', InputSourceType.REACT_STATE),
-    (r'set(\w+)\s*\(\s*(?:e|event|evt)\.target\.value', InputSourceType.REACT_STATE),
-    (r'set(\w+)\s*\(\s*(?:e|event|evt)\.currentTarget\.value', InputSourceType.REACT_STATE),
-
+    (r"set(\w+)\s*\(\s*(?:e|event|evt)\.target\.value", InputSourceType.REACT_STATE),
+    (
+        r"set(\w+)\s*\(\s*(?:e|event|evt)\.currentTarget\.value",
+        InputSourceType.REACT_STATE,
+    ),
     # useRef for DOM access
-    (r'useRef\s*<[^>]*>\s*\(', InputSourceType.REACT_REF),
-    (r'(\w+)Ref\.current\.value', InputSourceType.REACT_REF),
-
+    (r"useRef\s*<[^>]*>\s*\(", InputSourceType.REACT_REF),
+    (r"(\w+)Ref\.current\.value", InputSourceType.REACT_REF),
     # Form handlers
-    (r'onChange\s*=\s*\{?\s*\(?(?:e|event|evt)\)?', InputSourceType.REACT_FORM),
-    (r'onInput\s*=\s*\{?\s*\(?(?:e|event|evt)\)?', InputSourceType.REACT_FORM),
-    (r'onSubmit\s*=', InputSourceType.REACT_FORM),
-
+    (r"onChange\s*=\s*\{?\s*\(?(?:e|event|evt)\)?", InputSourceType.REACT_FORM),
+    (r"onInput\s*=\s*\{?\s*\(?(?:e|event|evt)\)?", InputSourceType.REACT_FORM),
+    (r"onSubmit\s*=", InputSourceType.REACT_FORM),
     # Controlled input pattern
-    (r'value\s*=\s*\{\s*(\w+)\s*\}', InputSourceType.REACT_STATE),
+    (r"value\s*=\s*\{\s*(\w+)\s*\}", InputSourceType.REACT_STATE),
 ]
 
 # Vue-specific patterns
 VUE_INPUT_PATTERNS = [
     # v-model
     (r'v-model\s*=\s*["\']([^"\']+)["\']', InputSourceType.VUE_V_MODEL),
-    (r'v-model:(\w+)\s*=', InputSourceType.VUE_V_MODEL),
-
+    (r"v-model:(\w+)\s*=", InputSourceType.VUE_V_MODEL),
     # Composition API
-    (r'ref\s*<[^>]*>\s*\(', InputSourceType.VUE_REF),
+    (r"ref\s*<[^>]*>\s*\(", InputSourceType.VUE_REF),
     (r'ref\s*\(\s*["\']', InputSourceType.VUE_REF),
-    (r'reactive\s*\(\s*\{', InputSourceType.VUE_REF),
-
+    (r"reactive\s*\(\s*\{", InputSourceType.VUE_REF),
     # computed with user input
-    (r'computed\s*\(\s*\(\s*\)\s*=>', InputSourceType.VUE_COMPUTED),
-
+    (r"computed\s*\(\s*\(\s*\)\s*=>", InputSourceType.VUE_COMPUTED),
     # Event handlers
     (r'@input\s*=\s*["\']([^"\']+)["\']', InputSourceType.VUE_V_MODEL),
     (r'@change\s*=\s*["\']([^"\']+)["\']', InputSourceType.VUE_V_MODEL),
@@ -334,16 +372,13 @@ ANGULAR_INPUT_PATTERNS = [
     # ngModel
     (r'\[\(ngModel\)\]\s*=\s*["\']([^"\']+)["\']', InputSourceType.ANGULAR_NG_MODEL),
     (r'\[ngModel\]\s*=\s*["\']([^"\']+)["\']', InputSourceType.ANGULAR_NG_MODEL),
-
     # Reactive Forms
-    (r'new\s+FormControl\s*\(', InputSourceType.ANGULAR_FORM),
-    (r'new\s+FormGroup\s*\(', InputSourceType.ANGULAR_FORM),
-    (r'FormBuilder\.control\s*\(', InputSourceType.ANGULAR_FORM),
-    (r'\.valueChanges\b', InputSourceType.ANGULAR_FORM),
-
+    (r"new\s+FormControl\s*\(", InputSourceType.ANGULAR_FORM),
+    (r"new\s+FormGroup\s*\(", InputSourceType.ANGULAR_FORM),
+    (r"FormBuilder\.control\s*\(", InputSourceType.ANGULAR_FORM),
+    (r"\.valueChanges\b", InputSourceType.ANGULAR_FORM),
     # @Input decorator
-    (r'@Input\s*\(\s*\)', InputSourceType.ANGULAR_INPUT),
-
+    (r"@Input\s*\(\s*\)", InputSourceType.ANGULAR_INPUT),
     # Event binding
     (r'\(input\)\s*=\s*["\']([^"\']+)["\']', InputSourceType.ANGULAR_FORM),
     (r'\(change\)\s*=\s*["\']([^"\']+)["\']', InputSourceType.ANGULAR_FORM),
@@ -352,53 +387,46 @@ ANGULAR_INPUT_PATTERNS = [
 # Dangerous sink patterns (all frameworks)
 DANGEROUS_SINK_PATTERNS = [
     # innerHTML
-    (r'\.innerHTML\s*=', DangerousSinkType.INNER_HTML, "CWE-79"),
-    (r'\.outerHTML\s*=', DangerousSinkType.INNER_HTML, "CWE-79"),
-    (r'insertAdjacentHTML\s*\(', DangerousSinkType.DOM_MANIPULATION, "CWE-79"),
-
+    (r"\.innerHTML\s*=", DangerousSinkType.INNER_HTML, "CWE-79"),
+    (r"\.outerHTML\s*=", DangerousSinkType.INNER_HTML, "CWE-79"),
+    (r"insertAdjacentHTML\s*\(", DangerousSinkType.DOM_MANIPULATION, "CWE-79"),
     # document.write
-    (r'document\.write\s*\(', DangerousSinkType.DOCUMENT_WRITE, "CWE-79"),
-    (r'document\.writeln\s*\(', DangerousSinkType.DOCUMENT_WRITE, "CWE-79"),
-
+    (r"document\.write\s*\(", DangerousSinkType.DOCUMENT_WRITE, "CWE-79"),
+    (r"document\.writeln\s*\(", DangerousSinkType.DOCUMENT_WRITE, "CWE-79"),
     # React dangerouslySetInnerHTML
-    (r'dangerouslySetInnerHTML\s*=', DangerousSinkType.DANGEROUSLY_SET, "CWE-79"),
-    (r'dangerouslySetInnerHTML:\s*\{', DangerousSinkType.DANGEROUSLY_SET, "CWE-79"),
-
+    (r"dangerouslySetInnerHTML\s*=", DangerousSinkType.DANGEROUSLY_SET, "CWE-79"),
+    (r"dangerouslySetInnerHTML:\s*\{", DangerousSinkType.DANGEROUSLY_SET, "CWE-79"),
     # Vue v-html
-    (r'v-html\s*=', DangerousSinkType.V_HTML, "CWE-79"),
-
+    (r"v-html\s*=", DangerousSinkType.V_HTML, "CWE-79"),
     # Angular innerHTML binding
-    (r'\[innerHTML\]\s*=', DangerousSinkType.INNER_HTML_BINDING, "CWE-79"),
-
+    (r"\[innerHTML\]\s*=", DangerousSinkType.INNER_HTML_BINDING, "CWE-79"),
     # eval and Function
-    (r'\beval\s*\(', DangerousSinkType.EVAL, "CWE-94"),
-    (r'new\s+Function\s*\(', DangerousSinkType.EVAL, "CWE-94"),
+    (r"\beval\s*\(", DangerousSinkType.EVAL, "CWE-94"),
+    (r"new\s+Function\s*\(", DangerousSinkType.EVAL, "CWE-94"),
     (r'setTimeout\s*\(\s*["\']', DangerousSinkType.EVAL, "CWE-94"),
     (r'setInterval\s*\(\s*["\']', DangerousSinkType.EVAL, "CWE-94"),
-
     # Location/Redirect
-    (r'location\.href\s*=', DangerousSinkType.LOCATION, "CWE-601"),
-    (r'location\.assign\s*\(', DangerousSinkType.LOCATION, "CWE-601"),
-    (r'location\.replace\s*\(', DangerousSinkType.LOCATION, "CWE-601"),
-    (r'window\.open\s*\(', DangerousSinkType.OPEN, "CWE-601"),
-
+    (r"location\.href\s*=", DangerousSinkType.LOCATION, "CWE-601"),
+    (r"location\.assign\s*\(", DangerousSinkType.LOCATION, "CWE-601"),
+    (r"location\.replace\s*\(", DangerousSinkType.LOCATION, "CWE-601"),
+    (r"window\.open\s*\(", DangerousSinkType.OPEN, "CWE-601"),
     # Script src
-    (r'\.src\s*=', DangerousSinkType.SCRIPT_SRC, "CWE-79"),
+    (r"\.src\s*=", DangerousSinkType.SCRIPT_SRC, "CWE-79"),
 ]
 
 # Known sanitizer patterns
 SANITIZER_PATTERNS = [
-    r'DOMPurify\.sanitize\s*\(',
-    r'sanitize\s*\(',
-    r'escapeHtml\s*\(',
-    r'escape\s*\(',
-    r'encodeURIComponent\s*\(',
-    r'textContent\s*=',  # Safe alternative to innerHTML
-    r'innerText\s*=',    # Safe alternative to innerHTML
-    r'createTextNode\s*\(',
-    r'sanitize-html',
-    r'xss-filters',
-    r'validator\.escape',
+    r"DOMPurify\.sanitize\s*\(",
+    r"sanitize\s*\(",
+    r"escapeHtml\s*\(",
+    r"escape\s*\(",
+    r"encodeURIComponent\s*\(",
+    r"textContent\s*=",  # Safe alternative to innerHTML
+    r"innerText\s*=",  # Safe alternative to innerHTML
+    r"createTextNode\s*\(",
+    r"sanitize-html",
+    r"xss-filters",
+    r"validator\.escape",
 ]
 
 
@@ -472,34 +500,69 @@ class FrontendInputTracker:
     def _detect_framework(self, source_code: str) -> FrontendFramework:
         """Auto-detect frontend framework from code patterns."""
         # React indicators
-        if any(pattern in source_code for pattern in [
-            "import React", "from 'react'", 'from "react"',
-            "useState", "useEffect", "useRef",
-            "React.Component", "ReactDOM",
-        ]):
+        if any(
+            pattern in source_code
+            for pattern in [
+                "import React",
+                "from 'react'",
+                'from "react"',
+                "useState",
+                "useEffect",
+                "useRef",
+                "React.Component",
+                "ReactDOM",
+            ]
+        ):
             return FrontendFramework.REACT
 
         # Vue indicators
-        if any(pattern in source_code for pattern in [
-            "import Vue", "from 'vue'", 'from "vue"',
-            "defineComponent", "v-model", "v-html", "v-bind",
-            "@vue/composition-api", "createApp",
-        ]):
+        if any(
+            pattern in source_code
+            for pattern in [
+                "import Vue",
+                "from 'vue'",
+                'from "vue"',
+                "defineComponent",
+                "v-model",
+                "v-html",
+                "v-bind",
+                "@vue/composition-api",
+                "createApp",
+            ]
+        ):
             return FrontendFramework.VUE
 
         # Angular indicators
-        if any(pattern in source_code for pattern in [
-            "@angular/core", "@Component", "@Injectable",
-            "ngModel", "FormControl", "FormGroup",
-            "NgModule", "@Input()", "@Output()",
-        ]):
+        if any(
+            pattern in source_code
+            for pattern in [
+                "@angular/core",
+                "@Component",
+                "@Injectable",
+                "ngModel",
+                "FormControl",
+                "FormGroup",
+                "NgModule",
+                "@Input()",
+                "@Output()",
+            ]
+        ):
             return FrontendFramework.ANGULAR
 
         # Svelte indicators
-        if any(pattern in source_code for pattern in [
-            "svelte", "<script>", "bind:",
-            "export let", "on:click",
-        ]) and ".svelte" in source_code:
+        if (
+            any(
+                pattern in source_code
+                for pattern in [
+                    "svelte",
+                    "<script>",
+                    "bind:",
+                    "export let",
+                    "on:click",
+                ]
+            )
+            and ".svelte" in source_code
+        ):
             return FrontendFramework.SVELTE
 
         return FrontendFramework.VANILLA
@@ -510,29 +573,37 @@ class FrontendInputTracker:
         result: FrontendAnalysisResult,
     ) -> None:
         """Detect all input sources in the code."""
-        lines = source_code.split('\n')
+        lines = source_code.split("\n")
 
         # Always check vanilla patterns
         self._apply_patterns(
-            source_code, lines, VANILLA_INPUT_PATTERNS,
-            result, FrontendFramework.VANILLA
+            source_code,
+            lines,
+            VANILLA_INPUT_PATTERNS,
+            result,
+            FrontendFramework.VANILLA,
         )
 
         # Framework-specific patterns
         if result.framework == FrontendFramework.REACT:
             self._apply_patterns(
-                source_code, lines, REACT_INPUT_PATTERNS,
-                result, FrontendFramework.REACT
+                source_code,
+                lines,
+                REACT_INPUT_PATTERNS,
+                result,
+                FrontendFramework.REACT,
             )
         elif result.framework == FrontendFramework.VUE:
             self._apply_patterns(
-                source_code, lines, VUE_INPUT_PATTERNS,
-                result, FrontendFramework.VUE
+                source_code, lines, VUE_INPUT_PATTERNS, result, FrontendFramework.VUE
             )
         elif result.framework == FrontendFramework.ANGULAR:
             self._apply_patterns(
-                source_code, lines, ANGULAR_INPUT_PATTERNS,
-                result, FrontendFramework.ANGULAR
+                source_code,
+                lines,
+                ANGULAR_INPUT_PATTERNS,
+                result,
+                FrontendFramework.ANGULAR,
             )
 
     def _apply_patterns(
@@ -549,7 +620,7 @@ class FrontendInputTracker:
 
             for match in re.finditer(pattern, source_code, re.MULTILINE):
                 # Calculate line number
-                line_num = source_code[:match.start()].count('\n') + 1
+                line_num = source_code[: match.start()].count("\n") + 1
 
                 # Extract variable name if captured
                 var_name = match.group(1) if match.groups() else None
@@ -559,7 +630,7 @@ class FrontendInputTracker:
                     pattern=match.group(0),
                     variable_name=var_name,
                     line=line_num,
-                    column=match.start() - source_code.rfind('\n', 0, match.start()),
+                    column=match.start() - source_code.rfind("\n", 0, match.start()),
                     file_path=result.file_path,
                     framework=framework,
                 )
@@ -589,13 +660,13 @@ class FrontendInputTracker:
         """Detect dangerous sinks in the code."""
         for pattern, sink_type, cwe in DANGEROUS_SINK_PATTERNS:
             for match in re.finditer(pattern, source_code, re.MULTILINE):
-                line_num = source_code[:match.start()].count('\n') + 1
+                line_num = source_code[: match.start()].count("\n") + 1
 
                 sink = DangerousSink(
                     sink_type=sink_type,
                     pattern=match.group(0).strip(),
                     line=line_num,
-                    column=match.start() - source_code.rfind('\n', 0, match.start()),
+                    column=match.start() - source_code.rfind("\n", 0, match.start()),
                     file_path=result.file_path,
                     cwe=cwe,
                 )
@@ -610,8 +681,7 @@ class FrontendInputTracker:
         # React useState pattern: const [value, setValue] = useState(...)
         # Look for setValue(e.target.value) pattern
         state_pattern = re.compile(
-            r'const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState',
-            re.MULTILINE
+            r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE
         )
 
         for match in state_pattern.finditer(source_code):
@@ -619,9 +689,9 @@ class FrontendInputTracker:
             setter_name = f"set{match.group(2)}"
 
             # Check if setter is called with event target value
-            setter_pattern = rf'{setter_name}\s*\(\s*(?:e|event|evt)\.(?:target|currentTarget)\.value'
+            setter_pattern = rf"{setter_name}\s*\(\s*(?:e|event|evt)\.(?:target|currentTarget)\.value"
             if re.search(setter_pattern, source_code):
-                line_num = source_code[:match.start()].count('\n') + 1
+                line_num = source_code[: match.start()].count("\n") + 1
                 source = InputSource(
                     source_type=InputSourceType.REACT_STATE,
                     pattern=f"{var_name} (via {setter_name})",
@@ -639,7 +709,7 @@ class FrontendInputTracker:
         result: FrontendAnalysisResult,
     ) -> None:
         """Analyze data flow from inputs to sinks."""
-        lines = source_code.split('\n')
+        lines = source_code.split("\n")
 
         # For each dangerous sink, check if any tainted variable flows to it
         for sink in result.dangerous_sinks:
@@ -649,7 +719,7 @@ class FrontendInputTracker:
 
                 # Check context around sink (10 lines before)
                 start_line = max(0, sink.line - 10)
-                context = '\n'.join(lines[start_line:sink.line])
+                context = "\n".join(lines[start_line : sink.line])
 
                 # Check if any input source or tainted var flows to this sink
                 for source in result.input_sources:
@@ -664,7 +734,10 @@ class FrontendInputTracker:
 
                     # Indirect flow via variable
                     elif source.variable_name:
-                        if source.variable_name in sink_line or source.variable_name in context:
+                        if (
+                            source.variable_name in sink_line
+                            or source.variable_name in context
+                        ):
                             flow = DataFlow(
                                 source=source,
                                 sink=sink,
@@ -704,33 +777,37 @@ class FrontendInputTracker:
         findings = []
 
         for flow in result.dangerous_flows:
-            findings.append({
-                "type": "FRONTEND_XSS_RISK",
-                "severity": flow.risk_level,
-                "cwe": flow.sink.cwe,
-                "message": f"User input flows to dangerous sink: {flow.sink.pattern}",
-                "file": result.file_path,
-                "line": flow.sink.line,
-                "source_line": flow.source.line,
-                "source_pattern": flow.source.pattern,
-                "sink_pattern": flow.sink.pattern,
-                "framework": result.framework.value,
-                "recommendation": self._get_recommendation(flow),
-            })
+            findings.append(
+                {
+                    "type": "FRONTEND_XSS_RISK",
+                    "severity": flow.risk_level,
+                    "cwe": flow.sink.cwe,
+                    "message": f"User input flows to dangerous sink: {flow.sink.pattern}",
+                    "file": result.file_path,
+                    "line": flow.sink.line,
+                    "source_line": flow.source.line,
+                    "source_pattern": flow.source.pattern,
+                    "sink_pattern": flow.sink.pattern,
+                    "framework": result.framework.value,
+                    "recommendation": self._get_recommendation(flow),
+                }
+            )
 
         # Informational: unvalidated inputs
         for source in result.input_sources:
             if not source.is_validated:
-                findings.append({
-                    "type": "FRONTEND_INPUT_SOURCE",
-                    "severity": "INFO",
-                    "cwe": "CWE-20",
-                    "message": f"User input source detected: {source.pattern}",
-                    "file": result.file_path,
-                    "line": source.line,
-                    "framework": result.framework.value,
-                    "recommendation": "Validate and sanitize user input before use.",
-                })
+                findings.append(
+                    {
+                        "type": "FRONTEND_INPUT_SOURCE",
+                        "severity": "INFO",
+                        "cwe": "CWE-20",
+                        "message": f"User input source detected: {source.pattern}",
+                        "file": result.file_path,
+                        "line": source.line,
+                        "framework": result.framework.value,
+                        "recommendation": "Validate and sanitize user input before use.",
+                    }
+                )
 
         return findings
 
@@ -764,13 +841,14 @@ class FrontendInputTracker:
         }
         return recommendations.get(
             flow.sink.sink_type,
-            "Validate and sanitize user input before passing to this operation"
+            "Validate and sanitize user input before passing to this operation",
         )
 
 
 # =============================================================================
 # Convenience Functions
 # =============================================================================
+
 
 def analyze_frontend_file(
     file_path: str,
@@ -822,9 +900,10 @@ def analyze_frontend_codebase(
     for ext in extensions:
         for file_path in root.rglob(f"*{ext}"):
             # Skip node_modules and build directories
-            if any(part in file_path.parts for part in [
-                "node_modules", "dist", "build", ".next", ".nuxt"
-            ]):
+            if any(
+                part in file_path.parts
+                for part in ["node_modules", "dist", "build", ".next", ".nuxt"]
+            ):
                 continue
 
             try:

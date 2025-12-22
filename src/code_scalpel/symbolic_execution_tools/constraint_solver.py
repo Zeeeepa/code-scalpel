@@ -83,6 +83,30 @@ class SolverResult:
             return f"SolverResult({self.status.name})"
 
 
+# TODO: Add alternative SMT solver backends
+#   - Support CVC5 as alternative to Z3
+#   - Add MathSAT5 support
+#   - Implement Yices2 backend
+#   - Add solver selection strategy (fastest for problem type)
+
+# TODO: Constraint optimization
+#   - Implement constraint minimization
+#   - Add MaxSMT for finding best solutions
+#   - Support optimization objectives (minimize/maximize)
+#   - Implement UNSAT core extraction for debugging
+
+# TODO: Enhanced solver features
+#   - Add timeout configuration per constraint
+#   - Implement incremental solving with push/pop
+#   - Support quantifiers (forall/exists)
+#   - Add theory-specific simplifications
+
+# TODO: Result caching and reuse
+#   - Cache solved constraints with hashing
+#   - Implement constraint subsumption checking
+#   - Add incremental model building
+
+
 class ConstraintSolver:
     """
     Z3-based constraint solver with Python-native output.

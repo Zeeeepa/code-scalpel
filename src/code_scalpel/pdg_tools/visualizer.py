@@ -8,6 +8,19 @@ import networkx as nx
 from graphviz import Digraph
 
 
+# [20251221_TODO] Add interactive visualization framework:
+#     - Build web UI for PDG exploration (React/Vue)
+#     - Implement zoom, pan, and search capabilities
+#     - Add real-time updates for dynamic PDGs
+#     - Support code preview and jump-to-source
+
+# [20251221_TODO] Add visualization analytics:
+#     - Track user interaction patterns on visualizations
+#     - Identify frequently accessed graph regions
+#     - Suggest interesting subgraphs based on history
+#     - Generate heatmaps of high-risk code areas
+
+
 class VisualizationFormat(Enum):
     """Supported visualization output formats."""
 
@@ -21,16 +34,16 @@ class VisualizationFormat(Enum):
 class VisualizationConfig:
     """Configuration for PDG visualization."""
 
-    node_colors: dict[str, str] = None
-    edge_colors: dict[str, str] = None
-    node_shapes: dict[str, str] = None
-    edge_styles: dict[str, str] = None
-    font_sizes: dict[str, int] = None
+    node_colors: Optional[dict[str, str]] = None
+    edge_colors: Optional[dict[str, str]] = None
+    node_shapes: Optional[dict[str, str]] = None
+    edge_styles: Optional[dict[str, str]] = None
+    font_sizes: Optional[dict[str, int]] = None
     layout: str = "dot"
     dpi: int = 300
-    highlight_nodes: set[str] = None
-    highlight_edges: set[tuple[str, str]] = None
-    cluster_groups: dict[str, list[str]] = None
+    highlight_nodes: Optional[set[str]] = None
+    highlight_edges: Optional[set[tuple[str, str]]] = None
+    cluster_groups: Optional[dict[str, list[str]]] = None
     show_attributes: bool = True
     label_wrapping: int = 30
 
@@ -41,6 +54,24 @@ class PDGVisualizer:
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()
         self._init_default_styles()
+
+        # [20251221_TODO] Add adaptive visualization:
+        #     - Detect graph complexity and auto-adjust layout
+        #     - Hide/collapse low-importance subgraphs
+        #     - Focus visualization on user-specified regions
+        #     - Support progressive rendering for large graphs
+
+        # [20251221_TODO] Add annotation capabilities:
+        #     - Allow user annotations on PDG nodes/edges
+        #     - Support collaborative annotations
+        #     - Track annotation history and changes
+        #     - Export annotations with PDG snapshots
+
+        # [20251221_TODO] Add comparison visualization:
+        #     - Side-by-side visualization of multiple PDGs
+        #     - Highlight differences between PDGs
+        #     - Support diff mode for before/after transformations
+        #     - Generate visual summaries of PDG changes
 
     def _init_default_styles(self):
         """Initialize default visualization styles."""
@@ -175,18 +206,23 @@ class PDGVisualizer:
 
     def _add_clusters(self, dot: Digraph, pdg: nx.DiGraph) -> None:
         """Add clustered nodes to the visualization."""
-        for cluster_name, nodes in self.config.cluster_groups.items():
-            with dot.subgraph(name=f"cluster_{cluster_name}") as c:
-                c.attr(label=cluster_name)
-                c.attr(style="rounded")
-                c.attr(color="gray")
+        if not self.config.cluster_groups:
+            return
 
-                for node in nodes:
-                    if node in pdg.nodes:
-                        attrs = pdg.nodes[node]
-                        label = self._create_node_label(node, attrs)
-                        style = self._get_node_style(node, attrs)
-                        c.node(str(node), label, **style)
+        for cluster_name, nodes in self.config.cluster_groups.items():
+            c = Digraph(name=f"cluster_{cluster_name}")
+            c.attr(label=cluster_name)
+            c.attr(style="rounded")
+            c.attr(color="gray")
+
+            for node in nodes:
+                if node in pdg.nodes:
+                    attrs = pdg.nodes[node]
+                    label = self._create_node_label(node, attrs)
+                    style = self._get_node_style(node, attrs)
+                    c.node(str(node), label, **style)
+
+            dot.subgraph(c)
 
     def _add_edges(self, dot: Digraph, pdg: nx.DiGraph) -> None:
         """Add edges to the visualization."""
@@ -247,11 +283,14 @@ class PDGVisualizer:
         edge_type = edge_attrs.get("type", "default")
 
         # Get base style
-        style = self._default_edge_styles.get(edge_type, {}).copy()
+        base_style = self._default_edge_styles.get(edge_type, {})
+        style: dict[str, str] = {k: str(v) for k, v in base_style.items()}
 
         # Apply custom styling if configured
         if self.config.edge_styles and edge_type in self.config.edge_styles:
-            style.update(self.config.edge_styles[edge_type])
+            custom_style = self.config.edge_styles[edge_type]
+            if isinstance(custom_style, dict):
+                style.update({k: str(v) for k, v in custom_style.items()})
 
         return style
 

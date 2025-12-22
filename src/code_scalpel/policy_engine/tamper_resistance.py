@@ -48,7 +48,8 @@ class TamperResistance:
         """
         self.policy_path = Path(policy_path)
         self.policy_hash = self._hash_policy_file()
-        self.audit_log = AuditLog()
+        # [20251222_BUGFIX] Use a persistent audit log colocated with policy files.
+        self.audit_log = AuditLog(str(self.policy_path.parent / "audit.log"))
         self._lock_policy_files()
 
         # Override tracking

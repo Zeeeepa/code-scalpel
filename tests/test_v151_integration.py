@@ -604,7 +604,9 @@ def func_5():
         )
         if target_sym:
             assert target_sym.confidence == 1.0
-            assert not target_sym.low_confidence  # Target has confidence 1.0, should not be low
+            assert (
+                not target_sym.low_confidence
+            )  # Target has confidence 1.0, should not be low
 
     def test_mcp_tool_custom_decay_factor(self, deep_dependency_project):
         """Test MCP tool with custom confidence decay factor."""
@@ -922,7 +924,9 @@ def util():
 
         assert not result.success
         assert result.error is not None
-        assert "must be at least 1" in result.error  # Updated for standardized error format
+        assert (
+            "must be at least 1" in result.error
+        )  # Updated for standardized error format
 
     def test_mcp_tool_invalid_direction(self):
         """Test MCP tool validates direction parameter."""

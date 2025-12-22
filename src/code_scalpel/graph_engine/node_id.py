@@ -84,9 +84,15 @@ class UniversalNodeID:
             return f"{self.language}::{self.name}:{self.method}"
         return f"{self.language}::{self.name}"
 
-    def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization."""
-        result = {
+    def to_dict(self) -> dict[str, str | int]:
+        """
+        Convert to dictionary for JSON serialization.
+
+        [20251220_BUGFIX] Fixed return type annotation to accept both str and int values.
+        The dict contains string fields (id, language, module, type, name, method, file)
+        and optional integer field (line).
+        """
+        result: dict[str, str | int] = {
             "id": str(self),
             "language": self.language,
             "module": self.module,

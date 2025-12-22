@@ -14,7 +14,41 @@ Node Categories:
     - Statements: IRModule, IRFunctionDef, IRIf, IRFor, IRWhile, IRAssign, etc.
     - Expressions: IRBinaryOp, IRUnaryOp, IRCall, IRName, IRConstant, etc.
     - Special: IRParameter, SourceLocation
-"""
+
+[20251220_TODO] Add destructuring/pattern matching support:
+    - IRDestructurePattern for array/object destructuring
+    - ObjectPattern for { x, y } = obj
+    - ArrayPattern for [a, b] = arr
+    - RestElement for ...rest patterns
+    - AssignmentPattern for default values in destructuring
+
+[20251220_TODO] Extend location tracking:
+    - Add byte_offset and end_byte_offset for precise error messages
+    - Add source_text field to preserve exact source at node location
+    - Add column number in characters (not bytes) for terminal output
+
+[20251220_TODO] Add JSX/TSX-specific node metadata:
+    - Mark JSX elements with component_type (function, class, intrinsic)
+    - Track JSX spread attributes and prop spreading
+    - Preserve JSX expression containers
+    - Add JSX fragment detection
+
+[20251220_TODO] Add generator and async iteration support:
+    - IRYield expression node for yield expressions
+    - IRYieldFrom for Python's yield from
+    - Add async_iter flag to IRFor for async for-of loops
+    - Add is_async_generator to IRFunctionDef
+
+[20251220_TODO] Add node visitor pattern support:
+    - Generic visitor interface for IR traversal
+    - Pre/post-order traversal helpers
+    - Node path tracking during traversal
+    - Visitor shortcuts for common patterns
+
+[20251220_TODO] Add type narrowing and guard nodes:
+    - IRTypeGuard for type guard expressions (TypeScript is X)
+    - Track control flow narrowing in conditionals
+    - Add assertion support (TypeScript asserts X is Y)"""
 
 from __future__ import annotations
 
@@ -80,6 +114,19 @@ class IRNode:
         - JavaScript "5" + 3 -> "53"
 
     Analysis engines use source_language to select the right LanguageSemantics.
+
+    [20251220_TODO] Add node utility methods:
+        - parent_node tracking for traversal
+        - children() method for generic iteration
+        - clone_with_updates() for immutable-style updates
+        - hash() and equality for caching/deduplication
+        - accept(visitor) for visitor pattern
+
+    [20251220_TODO] Add constraint/type information:
+        - value_constraints for range/type constraints
+        - possible_types for union types
+        - is_null_coalescing for nullish tracking
+        - error_handling_context for try/catch tracking
     """
 
     loc: Optional[SourceLocation] = None
@@ -179,7 +226,8 @@ class IRIf(IRNode):
         orelse: Statements in else branch (may be another IRIf for elif)
     """
 
-    test: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field types - test can be None in some contexts
+    test: Optional["IRExpr"] = None
     body: List[IRNode] = field(default_factory=list)
     orelse: List[IRNode] = field(default_factory=list)
 
@@ -201,8 +249,9 @@ class IRFor(IRNode):
         is_for_in: True for JS for-in (iterate keys), False for for-of (iterate values)
     """
 
-    target: "IRExpr" = None
-    iter: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field types - target and iter can be None in some contexts
+    target: Optional["IRExpr"] = None
+    iter: Optional["IRExpr"] = None
     body: List[IRNode] = field(default_factory=list)
     orelse: List[IRNode] = field(default_factory=list)
     is_for_in: bool = False  # JS for-in vs for-of
@@ -219,7 +268,8 @@ class IRWhile(IRNode):
         orelse: Python's while-else clause (empty for JS)
     """
 
-    test: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field type - test can be None in some contexts
+    test: Optional["IRExpr"] = None
     body: List[IRNode] = field(default_factory=list)
     orelse: List[IRNode] = field(default_factory=list)
 
@@ -233,6 +283,7 @@ class IRReturn(IRNode):
         value: Return value expression (None for bare return)
     """
 
+    # [20251220_BUGFIX] Fixed optional field type - value can be None for bare return
     value: Optional["IRExpr"] = None
 
 
@@ -252,7 +303,8 @@ class IRAssign(IRNode):
     """
 
     targets: List["IRExpr"] = field(default_factory=list)
-    value: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
+    value: Optional["IRExpr"] = None
     declaration_kind: Optional[str] = None  # "let", "const", "var" for JS
 
 
@@ -267,9 +319,10 @@ class IRAugAssign(IRNode):
         value: Value to combine with target
     """
 
-    target: "IRExpr" = None
-    op: AugAssignOperator = None
-    value: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field types - target, op, and value can be None in some contexts
+    target: Optional["IRExpr"] = None
+    op: Optional[AugAssignOperator] = None
+    value: Optional["IRExpr"] = None
 
 
 @dataclass
@@ -283,7 +336,8 @@ class IRExprStmt(IRNode):
         value: The expression
     """
 
-    value: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
+    value: Optional["IRExpr"] = None
 
 
 @dataclass
@@ -371,7 +425,8 @@ class IRSwitch(IRNode):
         cases: List of (test, body) tuples. test=None for default case.
     """
 
-    discriminant: "IRExpr" = None
+    # [20251220_BUGFIX] Fixed optional field type - discriminant can be None in some contexts
+    discriminant: Optional["IRExpr"] = None
     cases: List[tuple] = field(default_factory=list)  # [(test, [body]), ...]
 
 
@@ -436,11 +491,22 @@ class IRBinaryOp(IRExpr):
         left: Left operand
         op: Binary operator
         right: Right operand
+
+    [20251220_TODO] Add operator precedence and associativity metadata:
+        - Store precedence level for pretty-printing
+        - Store associativity (left/right) for nested operations
+        - Enable parenthesis elision in code generation
+
+    [20251220_TODO] Add semantic information for overflow/underflow:
+        - Flag operations that may overflow in target language
+        - Track integer division vs float division
+        - Mark potential NaN or Infinity results (JS)
     """
 
-    left: IRExpr = None
-    op: BinaryOperator = None
-    right: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field types - left, op, and right can be None in some contexts
+    left: Optional[IRExpr] = None
+    op: Optional[BinaryOperator] = None
+    right: Optional[IRExpr] = None
 
 
 @dataclass
@@ -453,8 +519,9 @@ class IRUnaryOp(IRExpr):
         operand: The operand expression
     """
 
-    op: UnaryOperator = None
-    operand: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field types - op and operand can be None in some contexts
+    op: Optional[UnaryOperator] = None
+    operand: Optional[IRExpr] = None
 
 
 @dataclass
@@ -475,7 +542,8 @@ class IRCompare(IRExpr):
         Means: a < b AND b < c
     """
 
-    left: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field type - left can be None in some contexts
+    left: Optional[IRExpr] = None
     ops: List[CompareOperator] = field(default_factory=list)
     comparators: List[IRExpr] = field(default_factory=list)
 
@@ -492,7 +560,8 @@ class IRBoolOp(IRExpr):
         values: List of operands (at least 2)
     """
 
-    op: BoolOperator = None
+    # [20251220_BUGFIX] Fixed optional field type - op can be None in some contexts
+    op: Optional[BoolOperator] = None
     values: List[IRExpr] = field(default_factory=list)
 
 
@@ -511,13 +580,26 @@ class IRTernary(IRExpr):
         orelse: Value if false
     """
 
-    test: IRExpr = None
-    body: IRExpr = None
-    orelse: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field types - test, body, and orelse can be None in some contexts
+    test: Optional[IRExpr] = None
+    body: Optional[IRExpr] = None
+    orelse: Optional[IRExpr] = None
 
 
 @dataclass
 class IRCall(IRExpr):
+    """
+    Function/method call.
+
+    [20251220_TODO] Complete IRCall implementation:
+        - func: The function being called
+        - args: Positional arguments
+        - keywords: Keyword arguments (name, value) tuples
+        - Add spread_args flag for ...args in JS
+        - Add await_result flag for awaited calls
+        - Add is_super flag for super() calls
+    """
+
     """
     Function/method call.
 
@@ -527,7 +609,8 @@ class IRCall(IRExpr):
         kwargs: Keyword arguments (name -> value)
     """
 
-    func: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field type - func can be None in some contexts
+    func: Optional[IRExpr] = None
     args: List[IRExpr] = field(default_factory=list)
     kwargs: Dict[str, IRExpr] = field(default_factory=dict)
 
@@ -542,7 +625,8 @@ class IRAttribute(IRExpr):
         attr: The attribute name
     """
 
-    value: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
+    value: Optional[IRExpr] = None
     attr: str = ""
 
 
@@ -556,8 +640,9 @@ class IRSubscript(IRExpr):
         slice: The index/key expression
     """
 
-    value: IRExpr = None
-    slice: IRExpr = None
+    # [20251220_BUGFIX] Fixed optional field types - value and slice can be None in some contexts
+    value: Optional[IRExpr] = None
+    slice: Optional[IRExpr] = None
 
 
 @dataclass

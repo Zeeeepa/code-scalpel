@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef
@@ -22,7 +22,7 @@ class ReactComponentInfo:
     """Metadata about a React component."""
 
     name: str
-    component_type: str  # "functional", "class", None
+    component_type: Optional[str] = None  # "functional", "class", or None
     is_server_component: bool = False  # async function component
     is_server_action: bool = False  # 'use server' directive
     has_jsx: bool = False  # Contains JSX syntax

@@ -75,6 +75,21 @@ class ErrorToDiffEngine:
     - Java compile errors → missing imports, type mismatches
     - Test failures → assertion fixes, mock corrections
     - Lint warnings → style fixes, best practices
+
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Add Go error parsing
+    - [ ] Add Rust error parsing
+    - [ ] Implement AST-based fix generation
+    - [ ] Add fix validation before returning
+    - [ ] Support multiple fix suggestions per error
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] ML-based fix ranking
+    - [ ] Context-aware import suggestions
+    - [ ] Type inference integration
+    - [ ] Cross-file fix support
+    - [ ] Learning from applied fixes
+    - [ ] Framework-specific error handling
     """
 
     def __init__(self, project_root: str):

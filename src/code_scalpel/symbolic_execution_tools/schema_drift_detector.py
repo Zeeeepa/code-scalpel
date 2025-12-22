@@ -44,7 +44,33 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
+
+
+# TODO: Add support for additional schema formats
+#   - Avro schema evolution rules
+#   - Thrift IDL change detection
+#   - AsyncAPI specification (message schemas)
+#   - CloudEvents schema validation
+#   - JSON-LD context changes
+
+# TODO: Automated migration generation
+#   - Generate database migration scripts from schema drift
+#   - Create API client update patches
+#   - Auto-generate deprecation warnings
+#   - Build backward-compatible adapters
+
+# TODO: Impact analysis
+#   - Estimate number of affected clients
+#   - Calculate deployment risk score
+#   - Identify dependent services
+#   - Suggest rollout strategy (canary, blue-green)
+
+# TODO: Compatibility testing
+#   - Generate test cases for breaking changes
+#   - Validate old clients against new schema
+#   - Check schema registry compatibility levels
+#   - Simulate version negotiation
 
 
 class ChangeType(Enum):
@@ -183,7 +209,9 @@ class ProtobufSchema:
     package: str = ""
     messages: Dict[str, ProtobufMessage] = field(default_factory=dict)
     enums: Dict[str, ProtobufEnum] = field(default_factory=dict)
-    services: Dict[str, Dict[str, Tuple[str, str]]] = field(default_factory=dict)  # service -> {rpc_name: (request, response)}
+    services: Dict[str, Dict[str, Tuple[str, str]]] = field(
+        default_factory=dict
+    )  # service -> {rpc_name: (request, response)}
 
 
 class ProtobufParser:
@@ -198,19 +226,21 @@ class ProtobufParser:
 
     # Regex patterns for parsing
     SYNTAX_PATTERN = re.compile(r'syntax\s*=\s*["\'](\w+)["\']')
-    PACKAGE_PATTERN = re.compile(r'package\s+([\w.]+)\s*;')
-    MESSAGE_PATTERN = re.compile(r'message\s+(\w+)\s*\{')
-    ENUM_PATTERN = re.compile(r'enum\s+(\w+)\s*\{')
+    PACKAGE_PATTERN = re.compile(r"package\s+([\w.]+)\s*;")
+    MESSAGE_PATTERN = re.compile(r"message\s+(\w+)\s*\{")
+    ENUM_PATTERN = re.compile(r"enum\s+(\w+)\s*\{")
     FIELD_PATTERN = re.compile(
-        r'(optional|required|repeated)?\s*'
-        r'(\w+)\s+'
-        r'(\w+)\s*=\s*'
-        r'(\d+)\s*'
-        r'(?:\[(.*?)\])?\s*;'
+        r"(optional|required|repeated)?\s*"
+        r"(\w+)\s+"
+        r"(\w+)\s*=\s*"
+        r"(\d+)\s*"
+        r"(?:\[(.*?)\])?\s*;"
     )
-    ENUM_VALUE_PATTERN = re.compile(r'(\w+)\s*=\s*(-?\d+)\s*;')
-    SERVICE_PATTERN = re.compile(r'service\s+(\w+)\s*\{')
-    RPC_PATTERN = re.compile(r'rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)')
+    ENUM_VALUE_PATTERN = re.compile(r"(\w+)\s*=\s*(-?\d+)\s*;")
+    SERVICE_PATTERN = re.compile(r"service\s+(\w+)\s*\{")
+    RPC_PATTERN = re.compile(
+        r"rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)"
+    )
 
     def parse(self, proto_content: str) -> ProtobufSchema:
         """
@@ -251,9 +281,9 @@ class ProtobufParser:
     def _remove_comments(self, content: str) -> str:
         """Remove single-line and multi-line comments."""
         # Remove multi-line comments
-        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+        content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
         # Remove single-line comments
-        content = re.sub(r'//.*$', '', content, flags=re.MULTILINE)
+        content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
         return content
 
     def _parse_messages(self, content: str) -> Dict[str, ProtobufMessage]:
@@ -269,13 +299,13 @@ class ProtobufParser:
             brace_count = 1
             end = start
             while brace_count > 0 and end < len(content):
-                if content[end] == '{':
+                if content[end] == "{":
                     brace_count += 1
-                elif content[end] == '}':
+                elif content[end] == "}":
                     brace_count -= 1
                 end += 1
 
-            message_body = content[start:end-1]
+            message_body = content[start : end - 1]
             message = self._parse_message_body(name, message_body)
             messages[name] = message
 
@@ -305,7 +335,7 @@ class ProtobufParser:
                 if "deprecated" in options_str.lower():
                     field.deprecated = True
                 if "default" in options_str:
-                    default_match = re.search(r'default\s*=\s*(\S+)', options_str)
+                    default_match = re.search(r"default\s*=\s*(\S+)", options_str)
                     if default_match:
                         field.default = default_match.group(1)
 
@@ -320,13 +350,13 @@ class ProtobufParser:
             brace_count = 1
             enum_end = enum_start
             while brace_count > 0 and enum_end < len(body):
-                if body[enum_end] == '{':
+                if body[enum_end] == "{":
                     brace_count += 1
-                elif body[enum_end] == '}':
+                elif body[enum_end] == "}":
                     brace_count -= 1
                 enum_end += 1
 
-            enum_body = body[enum_start:enum_end-1]
+            enum_body = body[enum_start : enum_end - 1]
             enum = self._parse_enum_body(enum_name, enum_body)
             message.nested_enums[enum_name] = enum
 
@@ -355,13 +385,13 @@ class ProtobufParser:
             brace_count = 1
             end = start
             while brace_count > 0 and end < len(content):
-                if content[end] == '{':
+                if content[end] == "{":
                     brace_count += 1
-                elif content[end] == '}':
+                elif content[end] == "}":
                     brace_count -= 1
                 end += 1
 
-            enum_body = content[start:end-1]
+            enum_body = content[start : end - 1]
             enum = self._parse_enum_body(name, enum_body)
             enums[name] = enum
 
@@ -378,13 +408,13 @@ class ProtobufParser:
             brace_count = 1
             end = start
             while brace_count > 0 and end < len(content):
-                if content[end] == '{':
+                if content[end] == "{":
                     brace_count += 1
-                elif content[end] == '}':
+                elif content[end] == "}":
                     brace_count -= 1
                 end += 1
 
-            service_body = content[start:end-1]
+            service_body = content[start : end - 1]
             rpcs: Dict[str, Tuple[str, str]] = {}
 
             for rpc_match in self.RPC_PATTERN.finditer(service_body):
@@ -453,9 +483,7 @@ class SchemaDriftDetector:
         self._compare_protobuf_messages(old_schema, new_schema, result)
 
         # Compare top-level enums
-        self._compare_protobuf_enums(
-            old_schema.enums, new_schema.enums, "", result
-        )
+        self._compare_protobuf_enums(old_schema.enums, new_schema.enums, "", result)
 
         # Compare services
         self._compare_protobuf_services(old_schema, new_schema, result)
@@ -474,23 +502,27 @@ class SchemaDriftDetector:
 
         # Removed messages
         for name in old_messages - new_messages:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_REMOVED,
-                severity=ChangeSeverity.BREAKING,
-                path=name,
-                field_name=name,
-                message=f"Message '{name}' was removed",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_REMOVED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=name,
+                    field_name=name,
+                    message=f"Message '{name}' was removed",
+                )
+            )
 
         # Added messages (non-breaking)
         for name in new_messages - old_messages:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.OPTIONAL_FIELD_ADDED,
-                severity=ChangeSeverity.INFO,
-                path=name,
-                field_name=name,
-                message=f"Message '{name}' was added",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.OPTIONAL_FIELD_ADDED,
+                    severity=ChangeSeverity.INFO,
+                    path=name,
+                    field_name=name,
+                    message=f"Message '{name}' was added",
+                )
+            )
 
         # Compare common messages
         for name in old_messages & new_messages:
@@ -515,14 +547,16 @@ class SchemaDriftDetector:
         # Removed fields (BREAKING)
         for name in old_fields - new_fields:
             old_field = old_msg.fields[name]
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_REMOVED,
-                severity=ChangeSeverity.BREAKING,
-                path=f"{path}.{name}",
-                field_name=name,
-                message=f"Field '{name}' (number {old_field.number}) was removed from '{path}'",
-                old_value=f"{old_field.type} {name} = {old_field.number}",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_REMOVED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=f"{path}.{name}",
+                    field_name=name,
+                    message=f"Field '{name}' (number {old_field.number}) was removed from '{path}'",
+                    old_value=f"{old_field.type} {name} = {old_field.number}",
+                )
+            )
 
         # Added fields
         for name in new_fields - old_fields:
@@ -535,14 +569,16 @@ class SchemaDriftDetector:
                 severity = ChangeSeverity.BREAKING
                 change_type = ChangeType.REQUIRED_FIELD_ADDED
 
-            result.changes.append(SchemaChange(
-                change_type=change_type,
-                severity=severity,
-                path=f"{path}.{name}",
-                field_name=name,
-                message=f"{'Required' if new_field.label == 'required' else 'Optional'} field '{name}' was added to '{path}'",
-                new_value=f"{new_field.type} {name} = {new_field.number}",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=change_type,
+                    severity=severity,
+                    path=f"{path}.{name}",
+                    field_name=name,
+                    message=f"{'Required' if new_field.label == 'required' else 'Optional'} field '{name}' was added to '{path}'",
+                    new_value=f"{new_field.type} {name} = {new_field.number}",
+                )
+            )
 
         # Compare common fields
         for name in old_fields & new_fields:
@@ -551,60 +587,70 @@ class SchemaDriftDetector:
 
             # Type changed (BREAKING)
             if old_field.type != new_field.type:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.FIELD_TYPE_CHANGED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"{path}.{name}",
-                    field_name=name,
-                    message=f"Field '{name}' type changed from '{old_field.type}' to '{new_field.type}'",
-                    old_value=old_field.type,
-                    new_value=new_field.type,
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.FIELD_TYPE_CHANGED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"{path}.{name}",
+                        field_name=name,
+                        message=f"Field '{name}' type changed from '{old_field.type}' to '{new_field.type}'",
+                        old_value=old_field.type,
+                        new_value=new_field.type,
+                    )
+                )
 
             # Field number changed (BREAKING - wire format incompatibility)
             if old_field.number != new_field.number:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.FIELD_NUMBER_CHANGED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"{path}.{name}",
-                    field_name=name,
-                    message=f"Field '{name}' number changed from {old_field.number} to {new_field.number}",
-                    old_value=old_field.number,
-                    new_value=new_field.number,
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.FIELD_NUMBER_CHANGED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"{path}.{name}",
+                        field_name=name,
+                        message=f"Field '{name}' number changed from {old_field.number} to {new_field.number}",
+                        old_value=old_field.number,
+                        new_value=new_field.number,
+                    )
+                )
 
             # Label changed (optional -> required is BREAKING)
             if old_field.label != new_field.label:
                 if old_field.label == "optional" and new_field.label == "required":
-                    result.changes.append(SchemaChange(
-                        change_type=ChangeType.FIELD_MADE_REQUIRED,
-                        severity=ChangeSeverity.BREAKING,
-                        path=f"{path}.{name}",
-                        field_name=name,
-                        message=f"Field '{name}' changed from optional to required",
-                        old_value=old_field.label,
-                        new_value=new_field.label,
-                    ))
+                    result.changes.append(
+                        SchemaChange(
+                            change_type=ChangeType.FIELD_MADE_REQUIRED,
+                            severity=ChangeSeverity.BREAKING,
+                            path=f"{path}.{name}",
+                            field_name=name,
+                            message=f"Field '{name}' changed from optional to required",
+                            old_value=old_field.label,
+                            new_value=new_field.label,
+                        )
+                    )
                 else:
-                    result.changes.append(SchemaChange(
-                        change_type=ChangeType.FIELD_MADE_OPTIONAL,
-                        severity=ChangeSeverity.INFO,
-                        path=f"{path}.{name}",
-                        field_name=name,
-                        message=f"Field '{name}' label changed from '{old_field.label}' to '{new_field.label}'",
-                        old_value=old_field.label,
-                        new_value=new_field.label,
-                    ))
+                    result.changes.append(
+                        SchemaChange(
+                            change_type=ChangeType.FIELD_MADE_OPTIONAL,
+                            severity=ChangeSeverity.INFO,
+                            path=f"{path}.{name}",
+                            field_name=name,
+                            message=f"Field '{name}' label changed from '{old_field.label}' to '{new_field.label}'",
+                            old_value=old_field.label,
+                            new_value=new_field.label,
+                        )
+                    )
 
             # Deprecated changed
             if not old_field.deprecated and new_field.deprecated:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.FIELD_DEPRECATED,
-                    severity=ChangeSeverity.WARNING,
-                    path=f"{path}.{name}",
-                    field_name=name,
-                    message=f"Field '{name}' was marked as deprecated",
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.FIELD_DEPRECATED,
+                        severity=ChangeSeverity.WARNING,
+                        path=f"{path}.{name}",
+                        field_name=name,
+                        message=f"Field '{name}' was marked as deprecated",
+                    )
+                )
 
     def _compare_protobuf_enums(
         self,
@@ -621,23 +667,27 @@ class SchemaDriftDetector:
 
         # Removed enums (BREAKING)
         for name in old_names - new_names:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_REMOVED,
-                severity=ChangeSeverity.BREAKING,
-                path=f"{prefix}{name}",
-                field_name=name,
-                message=f"Enum '{name}' was removed",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_REMOVED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=f"{prefix}{name}",
+                    field_name=name,
+                    message=f"Enum '{name}' was removed",
+                )
+            )
 
         # Added enums (non-breaking)
         for name in new_names - old_names:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.OPTIONAL_FIELD_ADDED,
-                severity=ChangeSeverity.INFO,
-                path=f"{prefix}{name}",
-                field_name=name,
-                message=f"Enum '{name}' was added",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.OPTIONAL_FIELD_ADDED,
+                    severity=ChangeSeverity.INFO,
+                    path=f"{prefix}{name}",
+                    field_name=name,
+                    message=f"Enum '{name}' was added",
+                )
+            )
 
         # Compare common enums
         for name in old_names & new_names:
@@ -649,25 +699,29 @@ class SchemaDriftDetector:
 
             # Removed enum values (BREAKING)
             for value in old_values - new_values:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.ENUM_VALUE_REMOVED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"{prefix}{name}.{value}",
-                    field_name=value,
-                    message=f"Enum value '{value}' was removed from '{name}'",
-                    old_value=old_enum.values[value],
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.ENUM_VALUE_REMOVED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"{prefix}{name}.{value}",
+                        field_name=value,
+                        message=f"Enum value '{value}' was removed from '{name}'",
+                        old_value=old_enum.values[value],
+                    )
+                )
 
             # Added enum values (non-breaking)
             for value in new_values - old_values:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.ENUM_VALUE_ADDED,
-                    severity=ChangeSeverity.INFO,
-                    path=f"{prefix}{name}.{value}",
-                    field_name=value,
-                    message=f"Enum value '{value}' was added to '{name}'",
-                    new_value=new_enum.values[value],
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.ENUM_VALUE_ADDED,
+                        severity=ChangeSeverity.INFO,
+                        path=f"{prefix}{name}.{value}",
+                        field_name=value,
+                        message=f"Enum value '{value}' was added to '{name}'",
+                        new_value=new_enum.values[value],
+                    )
+                )
 
     def _compare_protobuf_services(
         self,
@@ -681,23 +735,27 @@ class SchemaDriftDetector:
 
         # Removed services (BREAKING)
         for name in old_services - new_services:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_REMOVED,
-                severity=ChangeSeverity.BREAKING,
-                path=f"service.{name}",
-                field_name=name,
-                message=f"Service '{name}' was removed",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_REMOVED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=f"service.{name}",
+                    field_name=name,
+                    message=f"Service '{name}' was removed",
+                )
+            )
 
         # Added services (non-breaking)
         for name in new_services - old_services:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.OPTIONAL_FIELD_ADDED,
-                severity=ChangeSeverity.INFO,
-                path=f"service.{name}",
-                field_name=name,
-                message=f"Service '{name}' was added",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.OPTIONAL_FIELD_ADDED,
+                    severity=ChangeSeverity.INFO,
+                    path=f"service.{name}",
+                    field_name=name,
+                    message=f"Service '{name}' was added",
+                )
+            )
 
         # Compare RPCs in common services
         for name in old_services & new_services:
@@ -709,13 +767,15 @@ class SchemaDriftDetector:
 
             # Removed RPCs (BREAKING)
             for rpc in old_rpc_names - new_rpc_names:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.FIELD_REMOVED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"service.{name}.{rpc}",
-                    field_name=rpc,
-                    message=f"RPC '{rpc}' was removed from service '{name}'",
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.FIELD_REMOVED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"service.{name}.{rpc}",
+                        field_name=rpc,
+                        message=f"RPC '{rpc}' was removed from service '{name}'",
+                    )
+                )
 
             # Compare common RPCs
             for rpc in old_rpc_names & new_rpc_names:
@@ -723,26 +783,30 @@ class SchemaDriftDetector:
                 new_req, new_resp = new_rpcs[rpc]
 
                 if old_req != new_req:
-                    result.changes.append(SchemaChange(
-                        change_type=ChangeType.FIELD_TYPE_CHANGED,
-                        severity=ChangeSeverity.BREAKING,
-                        path=f"service.{name}.{rpc}.request",
-                        field_name=rpc,
-                        message=f"RPC '{rpc}' request type changed from '{old_req}' to '{new_req}'",
-                        old_value=old_req,
-                        new_value=new_req,
-                    ))
+                    result.changes.append(
+                        SchemaChange(
+                            change_type=ChangeType.FIELD_TYPE_CHANGED,
+                            severity=ChangeSeverity.BREAKING,
+                            path=f"service.{name}.{rpc}.request",
+                            field_name=rpc,
+                            message=f"RPC '{rpc}' request type changed from '{old_req}' to '{new_req}'",
+                            old_value=old_req,
+                            new_value=new_req,
+                        )
+                    )
 
                 if old_resp != new_resp:
-                    result.changes.append(SchemaChange(
-                        change_type=ChangeType.FIELD_TYPE_CHANGED,
-                        severity=ChangeSeverity.BREAKING,
-                        path=f"service.{name}.{rpc}.response",
-                        field_name=rpc,
-                        message=f"RPC '{rpc}' response type changed from '{old_resp}' to '{new_resp}'",
-                        old_value=old_resp,
-                        new_value=new_resp,
-                    ))
+                    result.changes.append(
+                        SchemaChange(
+                            change_type=ChangeType.FIELD_TYPE_CHANGED,
+                            severity=ChangeSeverity.BREAKING,
+                            path=f"service.{name}.{rpc}.response",
+                            field_name=rpc,
+                            message=f"RPC '{rpc}' response type changed from '{old_resp}' to '{new_resp}'",
+                            old_value=old_resp,
+                            new_value=new_resp,
+                        )
+                    )
 
     def compare_json_schema(
         self,
@@ -798,15 +862,17 @@ class SchemaDriftDetector:
         new_type = new.get("type")
 
         if old_type != new_type and old_type is not None and new_type is not None:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_TYPE_CHANGED,
-                severity=ChangeSeverity.BREAKING,
-                path=path,
-                field_name=path.split("/")[-1],
-                message=f"Type changed from '{old_type}' to '{new_type}' at {path}",
-                old_value=old_type,
-                new_value=new_type,
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_TYPE_CHANGED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=path,
+                    field_name=path.split("/")[-1],
+                    message=f"Type changed from '{old_type}' to '{new_type}' at {path}",
+                    old_value=old_type,
+                    new_value=new_type,
+                )
+            )
 
         # Compare properties (for objects)
         old_props = old.get("properties", {})
@@ -819,27 +885,35 @@ class SchemaDriftDetector:
 
         # Removed properties (BREAKING)
         for prop in old_prop_names - new_prop_names:
-            result.changes.append(SchemaChange(
-                change_type=ChangeType.FIELD_REMOVED,
-                severity=ChangeSeverity.BREAKING,
-                path=f"{path}/properties/{prop}",
-                field_name=prop,
-                message=f"Property '{prop}' was removed",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=ChangeType.FIELD_REMOVED,
+                    severity=ChangeSeverity.BREAKING,
+                    path=f"{path}/properties/{prop}",
+                    field_name=prop,
+                    message=f"Property '{prop}' was removed",
+                )
+            )
 
         # Added properties
         for prop in new_prop_names - old_prop_names:
             is_required = prop in new_required
             severity = ChangeSeverity.BREAKING if is_required else ChangeSeverity.INFO
-            change_type = ChangeType.REQUIRED_FIELD_ADDED if is_required else ChangeType.OPTIONAL_FIELD_ADDED
+            change_type = (
+                ChangeType.REQUIRED_FIELD_ADDED
+                if is_required
+                else ChangeType.OPTIONAL_FIELD_ADDED
+            )
 
-            result.changes.append(SchemaChange(
-                change_type=change_type,
-                severity=severity,
-                path=f"{path}/properties/{prop}",
-                field_name=prop,
-                message=f"{'Required' if is_required else 'Optional'} property '{prop}' was added",
-            ))
+            result.changes.append(
+                SchemaChange(
+                    change_type=change_type,
+                    severity=severity,
+                    path=f"{path}/properties/{prop}",
+                    field_name=prop,
+                    message=f"{'Required' if is_required else 'Optional'} property '{prop}' was added",
+                )
+            )
 
         # Compare common properties
         for prop in old_prop_names & new_prop_names:
@@ -854,13 +928,15 @@ class SchemaDriftDetector:
         newly_required = new_required - old_required
         for prop in newly_required:
             if prop in old_prop_names:  # Existing field made required
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.FIELD_MADE_REQUIRED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"{path}/properties/{prop}",
-                    field_name=prop,
-                    message=f"Property '{prop}' was made required",
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.FIELD_MADE_REQUIRED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"{path}/properties/{prop}",
+                        field_name=prop,
+                        message=f"Property '{prop}' was made required",
+                    )
+                )
 
         # Check for enum changes
         old_enum = old.get("enum", [])
@@ -872,25 +948,29 @@ class SchemaDriftDetector:
 
             # Removed enum values (BREAKING)
             for value in old_enum_set - new_enum_set:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.ENUM_VALUE_REMOVED,
-                    severity=ChangeSeverity.BREAKING,
-                    path=f"{path}/enum",
-                    field_name="enum",
-                    message=f"Enum value '{value}' was removed",
-                    old_value=value,
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.ENUM_VALUE_REMOVED,
+                        severity=ChangeSeverity.BREAKING,
+                        path=f"{path}/enum",
+                        field_name="enum",
+                        message=f"Enum value '{value}' was removed",
+                        old_value=value,
+                    )
+                )
 
             # Added enum values (non-breaking)
             for value in new_enum_set - old_enum_set:
-                result.changes.append(SchemaChange(
-                    change_type=ChangeType.ENUM_VALUE_ADDED,
-                    severity=ChangeSeverity.INFO,
-                    path=f"{path}/enum",
-                    field_name="enum",
-                    message=f"Enum value '{value}' was added",
-                    new_value=value,
-                ))
+                result.changes.append(
+                    SchemaChange(
+                        change_type=ChangeType.ENUM_VALUE_ADDED,
+                        severity=ChangeSeverity.INFO,
+                        path=f"{path}/enum",
+                        field_name="enum",
+                        message=f"Enum value '{value}' was added",
+                        new_value=value,
+                    )
+                )
 
         # Compare items (for arrays)
         if "items" in old and "items" in new:

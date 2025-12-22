@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, cast
 
 from z3 import (
     ArithRef,
@@ -346,7 +346,7 @@ class PythonSemantics(LanguageSemantics):
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
-            return left * right
+            return cast(ExprRef, left * right)
         return None
 
     def binary_div(
@@ -367,12 +367,12 @@ class PythonSemantics(LanguageSemantics):
     def compare_eq(
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[BoolRef]:
-        return left == right
+        return cast(BoolRef, left == right)
 
     def compare_ne(
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[BoolRef]:
-        return left != right
+        return cast(BoolRef, left != right)
 
     def compare_lt(
         self, left: ExprRef, right: ExprRef, state: SymbolicState
@@ -410,7 +410,7 @@ class PythonSemantics(LanguageSemantics):
     def unary_not(self, operand: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
         bool_val = self.to_bool(operand, state)
         if bool_val is not None:
-            return Not(bool_val)
+            return cast(BoolRef, Not(bool_val))
         return None
 
     def to_bool(self, value: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
@@ -418,7 +418,7 @@ class PythonSemantics(LanguageSemantics):
         if isinstance(value, BoolRef):
             return value
         if isinstance(value, ArithRef):
-            return value != IntVal(0)
+            return cast(BoolRef, value != IntVal(0))
         return None
 
 
@@ -459,7 +459,7 @@ class JavaScriptSemantics(LanguageSemantics):
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
-            return left * right
+            return cast(ExprRef, left * right)
         return None
 
     def binary_div(
@@ -480,12 +480,12 @@ class JavaScriptSemantics(LanguageSemantics):
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[BoolRef]:
         # JavaScript == has coercion, but we use strict equality for simplicity
-        return left == right
+        return cast(BoolRef, left == right)
 
     def compare_ne(
         self, left: ExprRef, right: ExprRef, state: SymbolicState
     ) -> Optional[BoolRef]:
-        return left != right
+        return cast(BoolRef, left != right)
 
     def compare_lt(
         self, left: ExprRef, right: ExprRef, state: SymbolicState
@@ -523,7 +523,7 @@ class JavaScriptSemantics(LanguageSemantics):
     def unary_not(self, operand: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
         bool_val = self.to_bool(operand, state)
         if bool_val is not None:
-            return Not(bool_val)
+            return cast(BoolRef, Not(bool_val))
         return None
 
     def to_bool(self, value: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
@@ -531,7 +531,7 @@ class JavaScriptSemantics(LanguageSemantics):
         if isinstance(value, BoolRef):
             return value
         if isinstance(value, ArithRef):
-            return value != IntVal(0)
+            return cast(BoolRef, value != IntVal(0))
         return None
 
 
@@ -782,7 +782,7 @@ class IRSymbolicInterpreter(IRNodeVisitor):
                     state.set_variable(name, value_expr)
                 elif not state.has_variable(name):  # pragma: no branch
                     # Unknown type - create placeholder
-                    state.create_variable(name, IntSort())
+                    state.create_variable(name, cast(Sort, IntSort()))
 
         return [state]
 
@@ -808,7 +808,7 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         current = state.get_variable(name)
 
         if current is None:
-            current = state.create_variable(name, IntSort())
+            current = state.create_variable(name, cast(Sort, IntSort()))
 
         right = self._eval_expr(stmt.value, state)
 
@@ -871,8 +871,8 @@ class IRSymbolicInterpreter(IRNodeVisitor):
                 condition = bool_cond
 
         # SMART FORKING: Check feasibility before forking
-        true_feasible = self._is_feasible(state, condition)
-        false_feasible = self._is_feasible(state, Not(condition))
+        true_feasible = self._is_feasible(state, cast(BoolRef, condition))
+        false_feasible = self._is_feasible(state, cast(BoolRef, Not(condition)))
 
         terminal_states = []
 
@@ -881,12 +881,12 @@ class IRSymbolicInterpreter(IRNodeVisitor):
             result.path_count += 2
 
             true_state = state.fork()
-            true_state.add_constraint(condition)
+            true_state.add_constraint(cast(BoolRef, condition))
             true_states = self._execute_block(stmt.body, true_state, result)
             terminal_states.extend(true_states)
 
             false_state = state.fork()
-            false_state.add_constraint(Not(condition))
+            false_state.add_constraint(cast(BoolRef, Not(condition)))
             if stmt.orelse:
                 false_states = self._execute_block(stmt.orelse, false_state, result)
             else:
@@ -897,14 +897,14 @@ class IRSymbolicInterpreter(IRNodeVisitor):
             # Only true branch feasible
             result.path_count += 1
             result.pruned_count += 1
-            state.add_constraint(condition)
+            state.add_constraint(cast(BoolRef, condition))
             terminal_states = self._execute_block(stmt.body, state, result)
 
         elif false_feasible:
             # Only false branch feasible
             result.path_count += 1
             result.pruned_count += 1
-            state.add_constraint(Not(condition))
+            state.add_constraint(cast(BoolRef, Not(condition)))
             if stmt.orelse:
                 terminal_states = self._execute_block(stmt.orelse, state, result)
             else:
@@ -952,20 +952,20 @@ class IRSymbolicInterpreter(IRNodeVisitor):
                     if bool_cond is not None:  # pragma: no branch
                         condition = bool_cond
 
-                true_feasible = self._is_feasible(s, condition)
-                false_feasible = self._is_feasible(s, Not(condition))
+                true_feasible = self._is_feasible(s, cast(BoolRef, condition))
+                false_feasible = self._is_feasible(s, cast(BoolRef, Not(condition)))
 
                 if true_feasible:
                     # Continue loop
                     loop_state = s.fork()
-                    loop_state.add_constraint(condition)
+                    loop_state.add_constraint(cast(BoolRef, condition))
                     body_states = self._execute_block(stmt.body, loop_state, result)
                     next_states.extend(body_states)
 
                 if false_feasible:
                     # Exit loop
                     exit_state = s.fork()
-                    exit_state.add_constraint(Not(condition))
+                    exit_state.add_constraint(cast(BoolRef, Not(condition)))
                     # Execute else clause if present
                     if stmt.orelse:
                         else_states = self._execute_block(
@@ -1092,7 +1092,7 @@ class IRSymbolicInterpreter(IRNodeVisitor):
             return var
 
         # Variable doesn't exist - create it as unknown int
-        return state.create_variable(name, IntSort())
+        return state.create_variable(name, cast(Sort, IntSort()))
 
     def _eval_binary_op(
         self, expr: IRBinaryOp, state: SymbolicState
@@ -1173,7 +1173,7 @@ class IRSymbolicInterpreter(IRNodeVisitor):
             else:
                 from z3 import And
 
-                result = And(result, cmp_result)
+                result = cast(BoolRef, And(result, cmp_result))
 
             left = right
 
@@ -1197,9 +1197,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         from z3 import And
 
         if expr.op == BoolOperator.AND:
-            return And(*results)
+            return cast(BoolRef, And(*results))
         elif expr.op == BoolOperator.OR:
-            return Or(*results)
+            return cast(BoolRef, Or(*results))
         else:
             return None  # pragma: no cover - unknown BoolOperator
 
@@ -1243,9 +1243,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         if isinstance(type_arg, IRName):  # pragma: no branch
             type_name = type_arg.id
             if type_name == "int":
-                return state.create_variable(name, IntSort())
+                return state.create_variable(name, cast(Sort, IntSort()))
             elif type_name == "bool":
-                return state.create_variable(name, BoolSort())
+                return state.create_variable(name, cast(Sort, BoolSort()))
 
         return None
 

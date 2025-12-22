@@ -1,7 +1,7 @@
 import pytest
-from code_scalpel.code_parser.factory import ParserFactory
-from code_scalpel.code_parser.interface import Language, IParser
-from code_scalpel.code_parser.python_parser import PythonParser
+from code_scalpel.code_parsers.factory import ParserFactory
+from code_scalpel.code_parsers.interface import Language, IParser
+from code_scalpel.code_parsers.python_parser import PythonParser
 
 
 class TestParserFactory:
@@ -18,7 +18,7 @@ class TestParserFactory:
 
     def test_get_unsupported_parser(self):
         with pytest.raises(ValueError, match="No parser registered"):
-            ParserFactory.get_parser(Language.JAVASCRIPT)  # Not implemented yet
+            ParserFactory.get_parser(Language.CPP)  # CPP not implemented
 
 
 class TestPythonParser:

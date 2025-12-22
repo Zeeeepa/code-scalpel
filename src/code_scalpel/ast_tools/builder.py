@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import logging
 import tokenize
@@ -17,6 +19,10 @@ class ASTBuilder:
         self.preprocessing_hooks: list[Callable[[str], str]] = []
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
+        # [20251221_FEATURE] TODO: Add incremental parsing for large codebases
+        # [20251221_FEATURE] TODO: Support caching with TTL and cache invalidation
+        # [20251221_ENHANCEMENT] TODO: Add preprocessing for type stubs and annotations
+        # [20251221_ENHANCEMENT] TODO: Support parallel AST building for multiple files
 
     def build_ast(
         self, code: str, preprocess: bool = True, validate: bool = True
@@ -145,8 +151,10 @@ class ASTBuilder:
     def _handle_syntax_error(self, error: SyntaxError) -> None:
         """Handle syntax errors with detailed information."""
         logger.error(f"Syntax Error at line {error.lineno}, column {error.offset}:")
-        logger.error(f"  {error.text.strip()}")
-        logger.error("  " + " " * (error.offset - 1) + "^")
+        if error.text:
+            logger.error(f"  {error.text.strip()}")
+            if error.offset:
+                logger.error("  " + " " * (error.offset - 1) + "^")
         logger.error(f"Error message: {str(error)}")
 
     def clear_cache(self) -> None:

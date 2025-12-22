@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import os
 from pathlib import Path
@@ -56,6 +58,10 @@ class CallGraphBuilder:
         self.imports: Dict[str, Dict[str, str]] = (
             {}
         )  # file_path -> { alias -> full_name }
+        # [20251221_FEATURE] TODO: Support dynamic call detection (reflection, __getattr__)
+        # [20251221_FEATURE] TODO: Add call frequency and confidence scoring
+        # [20251221_ENHANCEMENT] TODO: Support async/await call graph analysis
+        # [20251221_ENHANCEMENT] TODO: Add framework-specific call patterns (decorators, middleware)
 
     def build(self) -> Dict[str, List[str]]:
         """
@@ -145,7 +151,9 @@ class CallGraphBuilder:
                 self.current_scope = None
                 self.calls = []
 
-            def visit_FunctionDef(self, node):
+            def visit_FunctionDef(
+                self, node: ast.FunctionDef | ast.AsyncFunctionDef
+            ) -> None:
                 old_scope = self.current_scope
                 self.current_scope = node.name
                 self.calls = []
@@ -298,7 +306,9 @@ class CallGraphBuilder:
             mermaid=mermaid,
         )
 
-    def _is_entry_point(self, func_node: ast.AST, tree: ast.AST) -> bool:
+    def _is_entry_point(
+        self, func_node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.AST
+    ) -> bool:
         """
         Detect if a function is likely an entry point.
 

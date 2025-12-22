@@ -455,8 +455,9 @@ Contains runnable example code for all integrations:
 
 ## Project Context
 
-<!-- [20251218_DOCS] Updated for v3.0.0 "Autonomy" release -->
-Code Scalpel v3.0.0 is an MCP server toolkit for AI-driven surgical code operations.
+# [20251223_DOCS] Updated for v3.0.5 "Ninja Consolidation" release -->
+# [20251221_DOCS] Updated for v3.1.0 "Parser Unification" release -->
+Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operations.
 
 | Module | Status | Coverage |
 |--------|--------|----------|
@@ -466,15 +467,16 @@ Code Scalpel v3.0.0 is an MCP server toolkit for AI-driven surgical code operati
 | PDG Slicer | Stable | 100% |
 | Symbolic Engine | Stable | 100% |
 | Security Analysis | Stable | 100% |
-| MCP Server | Stable | 19 tools |
+| MCP Server | Stable | 20 tools |
 | Polyglot Parsers | Stable | 90%+ |
 | Autonomy Engine | Stable | 90%+ |
+| Unified Cache | Stable | 95%+ |
 
 **Test Suite:** 4,033 tests passing (100% pass rate)
 **Coverage Gate:** ≥90% combined (statement + branch)
 **Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v3.0.0 - 19 tools):**
+**MCP Tools (Current - v3.0.5 - 20 tools):**
 - `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
 - `extract_code` - Surgical extraction by symbol name with cross-file deps
 - `update_symbol` - Safely replace functions/classes/methods in files
@@ -493,12 +495,18 @@ Code Scalpel v3.0.0 is an MCP server toolkit for AI-driven surgical code operati
 - `get_graph_neighborhood` - Extract k-hop neighborhood subgraph
 - `get_project_map` - Generate comprehensive project structure map
 - `validate_paths` - Validate path accessibility for Docker deployments
-- `verify_policy_integrity` - Cryptographic policy file verification
+- `verify_policy_integrity` - Cryptographic policy file verification (v3.0.0)
+- `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities (v3.0.4)
 
-**Latest Release:** v3.0.0 "Autonomy"
-- Release Date: December 18, 2025
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v3.0.0.md`
-- Evidence Files: `release_artifacts/v3.0.0/`
+**Latest Release:** v3.0.5 "Ninja Consolidation"
+- Release Date: December 23, 2025
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v3.0.5.md`
+- Evidence Files: `release_artifacts/v3.0.5/`
+- **Key Changes:**
+  - Cache consolidation: merged `cache/analysis_cache.py` + `utilities/cache.py` → `cache/unified_cache.py` (677 LOC → 714 LOC unified)
+  - Eliminated 277 lines of redundancy while preserving all features
+  - Updated 20 MCP tools documentation (was incorrectly listed as 19)
+  - All imports updated to use unified cache API
 
 ## Communication
 

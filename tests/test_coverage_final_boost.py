@@ -21,10 +21,11 @@ class TestASTToolsInitCoverage:
     def test_visualize_ast_not_available(self):
         """[20251217_TEST] Cover visualize_ast when ASTVisualizer is None."""
         from code_scalpel import ast_tools
+
         original = ast_tools.ASTVisualizer
         try:
             ast_tools.ASTVisualizer = None
-            with pytest.raises(ImportError, match='ASTVisualizer not available'):
+            with pytest.raises(ImportError, match="ASTVisualizer not available"):
                 ast_tools.visualize_ast(None)
         finally:
             ast_tools.ASTVisualizer = original
@@ -32,7 +33,8 @@ class TestASTToolsInitCoverage:
     def test_build_ast_functions(self):
         """[20251217_TEST] Cover convenience build_ast functions."""
         from code_scalpel.ast_tools import build_ast
-        code = 'x = 1'
+
+        code = "x = 1"
         result = build_ast(code)
         assert result is not None
 
@@ -43,15 +45,16 @@ class TestMCPServerCoverage:
     def test_path_security_validation(self):
         """[20251217_TEST] Cover path security validation."""
         from code_scalpel.mcp import server
+
         with tempfile.TemporaryDirectory() as tmp_dir:
-            path = Path(tmp_dir) / 'test.py'
+            path = Path(tmp_dir) / "test.py"
             path.touch()
             original_roots = server.ALLOWED_ROOTS
             server.ALLOWED_ROOTS = [Path(tmp_dir)]
             try:
                 result = server._is_path_allowed(path)
                 assert result is True
-                result = server._is_path_allowed(Path('/some/other/path'))
+                result = server._is_path_allowed(Path("/some/other/path"))
                 assert result is False
             finally:
                 server.ALLOWED_ROOTS = original_roots
@@ -99,19 +102,21 @@ class TestErrorToDiffFinalGaps:
     def test_typescript_property_missing_error(self):
         """[20251217_TEST] Cover TypeScript Property missing error type."""
         from code_scalpel.autonomy import ErrorToDiffEngine, ErrorType
-        engine = ErrorToDiffEngine(project_root='/tmp')
+
+        engine = ErrorToDiffEngine(project_root="/tmp")
         error_output = "user.ts(5,1): error TS2741: Property 'email' is missing in type '{ name: string }'"
         source_code = "const user: User = { name: 'John' };"
-        analysis = engine.analyze_error(error_output, 'typescript', source_code)
+        analysis = engine.analyze_error(error_output, "typescript", source_code)
         assert analysis.error_type == ErrorType.TYPE_ERROR
 
     def test_test_fix_generator(self):
         """[20251217_TEST] Cover TestFixGenerator paths."""
         from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine, ErrorType
-        engine = ErrorToDiffEngine(project_root='/tmp')
-        error_output = 'AssertionError: assert 10 == 5'
-        source_code = 'assert result == 5'
-        analysis = engine.analyze_error(error_output, 'python', source_code)
+
+        engine = ErrorToDiffEngine(project_root="/tmp")
+        error_output = "AssertionError: assert 10 == 5"
+        source_code = "assert result == 5"
+        analysis = engine.analyze_error(error_output, "python", source_code)
         assert analysis.error_type == ErrorType.TEST_FAILURE
 
 
@@ -132,9 +137,10 @@ class TestPolicyEngineCoverage:
     def test_semantic_analyzer(self):
         """[20251217_TEST] Cover semantic analyzer."""
         from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
+
         analyzer = SemanticAnalyzer()
         code = "cursor.execute('SELECT * FROM users WHERE id=' + user_id)"
-        result = analyzer.contains_sql_sink(code, 'python')
+        result = analyzer.contains_sql_sink(code, "python")
         assert result is True
         file_code = "open('file.txt', 'w').write(data)"
         result = analyzer.has_file_operation(file_code)
@@ -165,14 +171,15 @@ class TestCacheCoverage:
 
     def test_analysis_cache_operations(self):
         """[20251217_TEST] Cover cache operations."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
+
         with tempfile.TemporaryDirectory() as tmp_dir:
             cache = AnalysisCache(cache_dir=tmp_dir)
-            test_file = Path(tmp_dir) / 'test.py'
-            test_file.write_text('x = 1')
-            cache.store(test_file, {'parsed': True})
+            test_file = Path(tmp_dir) / "test.py"
+            test_file.write_text("x = 1")
+            cache.store(test_file, {"parsed": True})
             result = cache.get_cached(test_file)
-            assert result == {'parsed': True}
+            assert result == {"parsed": True}
 
 
 class TestGraphEngineCoverage:

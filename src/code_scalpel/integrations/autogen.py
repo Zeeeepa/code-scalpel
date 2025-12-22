@@ -56,7 +56,7 @@ class AutogenScalpel:
             from ..ast_tools.analyzer import ASTAnalyzer
         except (ImportError, ValueError):
             try:
-                from ast_tools.analyzer import ASTAnalyzer
+                from code_scalpel.ast_tools.analyzer import ASTAnalyzer
             except ImportError:
                 # Direct import as fallback
                 import os
@@ -65,7 +65,7 @@ class AutogenScalpel:
                 src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 if src_path not in sys.path:
                     sys.path.insert(0, src_path)
-                from ast_tools.analyzer import ASTAnalyzer
+                from code_scalpel.ast_tools.analyzer import ASTAnalyzer
         self.analyzer = ASTAnalyzer(cache_enabled=cache_enabled)
         self._cache_enabled = cache_enabled
 
@@ -209,7 +209,7 @@ class AutogenScalpel:
 
         return suggestions
 
-    def get_tool_description(self) -> dict[str, str]:
+    def get_tool_description(self) -> dict[str, str | dict[str, str]]:
         """
         Get description for use as an Autogen tool.
 

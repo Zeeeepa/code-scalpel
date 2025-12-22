@@ -8,6 +8,19 @@ from typing import Any, Optional
 import networkx as nx
 
 
+# [20251221_TODO] Add PDG serialization formats:
+#     - Implement efficient binary PDG format
+#     - Support compressed PDG storage for distribution
+#     - Add incremental serialization for updates
+#     - Support multiple versions for backwards compatibility
+
+# [20251221_TODO] Add PDG comparison and diffing:
+#     - Compute structural differences between PDGs
+#     - Support semantic diff (behavior changes, not just syntax)
+#     - Generate human-readable PDG diffs
+#     - Support merging PDG changes from different branches
+
+
 @dataclass
 class NodeInfo:
     """Information about a PDG node."""
@@ -33,6 +46,24 @@ class DependencyType(Enum):
 
 class PDGUtils:
     """Utility functions for working with Program Dependence Graphs."""
+
+    # [20251221_TODO] Add performance optimization utilities:
+    #     - Implement PDG pruning for irrelevant nodes
+    #     - Add graph summarization for large PDGs
+    #     - Support memoization of expensive analyses
+    #     - Implement caching strategies for multi-use analyses
+
+    # [20251221_TODO] Add PDG validation and sanity checks:
+    #     - Verify PDG structural properties
+    #     - Detect cycles that shouldn't exist
+    #     - Check node/edge consistency
+    #     - Validate dependency type classifications
+
+    # [20251221_TODO] Add PDG statistics and profiling:
+    #     - Compute detailed PDG metrics (density, diameter, etc.)
+    #     - Profile analysis performance per node type
+    #     - Track cache hit rates and memory usage
+    #     - Generate performance reports
 
     @staticmethod
     def analyze_node(pdg: nx.DiGraph, node: str) -> NodeInfo:
@@ -160,7 +191,8 @@ class PDGUtils:
                 for path in paths:
                     nodes_in_paths.update(path)
 
-        return pdg.subgraph(nodes_in_paths).copy()
+        subgraph = pdg.subgraph(nodes_in_paths)
+        return nx.DiGraph(subgraph)
 
     @staticmethod
     def compute_node_hash(node_data: dict[str, Any]) -> str:

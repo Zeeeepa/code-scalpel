@@ -13,14 +13,14 @@ v3.0.0 "Autonomy" Release - Config-driven governance integration.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Dict, Optional, Callable
+from typing import List, Dict, Optional, Callable, Any
 import logging
 
 from code_scalpel.config.governance_config import (
     GovernanceConfigLoader,
     GovernanceConfig,
 )
-from code_scalpel.policy.change_budget import (
+from code_scalpel.governance.change_budget import (
     ChangeBudget,
     Operation,
     FileChange,
@@ -37,6 +37,7 @@ class ChangeValidationResult:
 
     [20251218_FEATURE] Combines budget and critical path checks.
     """
+
     allowed: bool
     reason: str
     budget_decision: Optional[BudgetDecision] = None
@@ -64,9 +65,7 @@ class BlastRadiusCalculator:
         self.logger = logging.getLogger("scalpel.blast_radius")
 
     def check_critical_path_impact(
-        self,
-        files: List[str],
-        lines_changed: Dict[str, int]
+        self, files: List[str], lines_changed: Dict[str, int]
     ) -> tuple[bool, str, int]:
         """
         Check if change impacts critical paths and apply limits.
@@ -80,8 +79,7 @@ class BlastRadiusCalculator:
         """
         # Check if any file is in critical path
         critical_files = [
-            f for f in files
-            if self.config.blast_radius.is_critical_path(f)
+            f for f in files if self.config.blast_radius.is_critical_path(f)
         ]
 
         if not critical_files:
@@ -89,7 +87,7 @@ class BlastRadiusCalculator:
             return (
                 False,
                 "No critical paths affected",
-                self.config.change_budgeting.max_lines_per_change
+                self.config.change_budgeting.max_lines_per_change,
             )
 
         # Critical path detected - apply stricter limits
@@ -104,14 +102,14 @@ class BlastRadiusCalculator:
                     f"Files: {critical_files}. "
                     f"Attempted {total_lines} lines, maximum {max_lines} allowed."
                 ),
-                max_lines
+                max_lines,
             )
 
         # Within critical path limits
         return (
             True,
             f"Critical path changes within limits ({total_lines}/{max_lines} lines)",
-            max_lines
+            max_lines,
         )
 
 
@@ -121,6 +119,21 @@ class AutonomyEngine:
 
     [20251218_FEATURE] Orchestrates autonomous operations with
     config-driven limits and critical path protection.
+
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Add agent composition and coordination
+    - [ ] Implement result caching across operations
+    - [ ] Add operation sequencing logic
+    - [ ] Support conditional branching
+    - [ ] Implement rollback mechanisms
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] ML-based decision making
+    - [ ] Intelligent resource allocation
+    - [ ] Cross-agent communication
+    - [ ] Advanced policy evaluation
+    - [ ] Integration with external frameworks (AutoGen, CrewAI)
+    - [ ] Continuous monitoring and adjustment
 
     Key Features:
     - Loads governance configuration from .code-scalpel/config.json
@@ -147,7 +160,7 @@ class AutonomyEngine:
         self,
         project_root: Path,
         config_path: Optional[Path] = None,
-        on_escalate: Optional[Callable] = None
+        on_escalate: Optional[Callable] = None,
     ):
         """
         Initialize autonomy engine.
@@ -176,12 +189,15 @@ class AutonomyEngine:
         )
 
         # [20251218_FEATURE] Initialize components with config values
-        self.change_budget = ChangeBudget({
-            "max_files": self.config.change_budgeting.max_files_per_change,
-            "max_lines_per_file": self.config.change_budgeting.max_lines_per_change,
-            "max_total_lines": self.config.change_budgeting.max_lines_per_change * self.config.change_budgeting.max_files_per_change,
-            "max_complexity_increase": self.config.change_budgeting.max_complexity_delta,
-        })
+        self.change_budget = ChangeBudget(
+            {
+                "max_files": self.config.change_budgeting.max_files_per_change,
+                "max_lines_per_file": self.config.change_budgeting.max_lines_per_change,
+                "max_total_lines": self.config.change_budgeting.max_lines_per_change
+                * self.config.change_budgeting.max_files_per_change,
+                "max_complexity_increase": self.config.change_budgeting.max_complexity_delta,
+            }
+        )
 
         self.blast_radius = BlastRadiusCalculator(self.config)
 
@@ -189,23 +205,19 @@ class AutonomyEngine:
             max_attempts=self.config.autonomy_constraints.max_autonomous_iterations,
             max_duration_seconds=300,  # 5 minutes
             min_confidence_threshold=0.5,
-            on_escalate=on_escalate
+            on_escalate=on_escalate,
         )
 
         # Initialize audit trail if enabled
         if self.config.audit.log_all_changes:
             audit_log_path = project_root / ".code-scalpel" / "autonomy_audit"
             audit_log_path.mkdir(parents=True, exist_ok=True)
-            self.audit_trail = AutonomyAuditTrail(
-                storage_path=audit_log_path
-            )
+            self.audit_trail = AutonomyAuditTrail(storage_path=audit_log_path)
         else:
             self.audit_trail = None
 
     def check_change_allowed(
-        self,
-        files: List[str],
-        lines_changed: Dict[str, int]
+        self, files: List[str], lines_changed: Dict[str, int]
     ) -> ChangeValidationResult:
         """
         Check if proposed change meets governance constraints.
@@ -220,8 +232,8 @@ class AutonomyEngine:
             ChangeValidationResult with detailed decision
         """
         # [20251218_FEATURE] Check critical path impact first
-        is_critical, crit_reason, max_lines = self.blast_radius.check_critical_path_impact(
-            files, lines_changed
+        is_critical, crit_reason, max_lines = (
+            self.blast_radius.check_critical_path_impact(files, lines_changed)
         )
 
         if is_critical and "exceed" in crit_reason:
@@ -230,7 +242,7 @@ class AutonomyEngine:
                 allowed=False,
                 reason=crit_reason,
                 critical_path_violation=True,
-                max_lines_allowed=max_lines
+                max_lines_allowed=max_lines,
             )
 
         # [20251218_FEATURE] Check change budgeting
@@ -239,7 +251,7 @@ class AutonomyEngine:
                 FileChange(
                     file_path=f,
                     added_lines=[""] * lines_changed.get(f, 0),  # Placeholder
-                    removed_lines=[]
+                    removed_lines=[],
                 )
                 for f in files
             ]
@@ -253,7 +265,7 @@ class AutonomyEngine:
                 reason=budget_decision.get_error_message(),
                 budget_decision=budget_decision,
                 max_lines_allowed=max_lines,
-                max_files_allowed=self.config.change_budgeting.max_files_per_change
+                max_files_allowed=self.config.change_budgeting.max_files_per_change,
             )
 
         # [20251218_FEATURE] Check approval requirements
@@ -266,7 +278,7 @@ class AutonomyEngine:
                         f"Files: {files}"
                     ),
                     critical_path_violation=True,
-                    max_lines_allowed=max_lines
+                    max_lines_allowed=max_lines,
                 )
 
         # Change allowed
@@ -276,7 +288,7 @@ class AutonomyEngine:
             budget_decision=budget_decision,
             critical_path_violation=False,
             max_lines_allowed=max_lines,
-            max_files_allowed=self.config.change_budgeting.max_files_per_change
+            max_files_allowed=self.config.change_budgeting.max_files_per_change,
         )
 
     def run_fix_loop(
@@ -286,7 +298,7 @@ class AutonomyEngine:
         language: str,
         sandbox,
         error_engine,
-        project_path: str
+        project_path: str,
     ) -> FixLoopResult:
         """
         Run supervised fix loop with config-driven iteration limits.
@@ -310,32 +322,31 @@ class AutonomyEngine:
             language=language,
             sandbox=sandbox,
             error_engine=error_engine,
-            project_path=project_path
+            project_path=project_path,
         )
 
         # Log to audit if enabled
         if self.audit_trail and self.config.audit.log_all_changes:
-            from code_scalpel.autonomy.audit import AuditEntry
-            entry = AuditEntry(
-                operation_id=f"fix_loop_{len(result.attempts)}",
-                operation_type="fix_loop",
-                input_hash=hash(initial_error),
-                output_hash=hash(result.termination_reason),
+
+            self.audit_trail.record(
+                event_type="fix_loop",
+                operation="autonomous_fix_loop",
+                input_data=initial_error,
+                output_data=result.termination_reason,
                 success=result.success,
-                parent_operation_id=None,
+                duration_ms=result.total_duration_ms,
                 metadata={
                     "language": language,
                     "termination_reason": result.termination_reason,
                     "escalated": result.escalated_to_human,
-                    "duration_ms": result.total_duration_ms,
-                    "attempts": len(result.attempts)
-                }
+                    "attempts": len(result.attempts),
+                },
+                parent_id=None,
             )
-            self.audit_trail.log_entry(entry)
 
         return result
 
-    def get_config_summary(self) -> Dict[str, any]:
+    def get_config_summary(self) -> Dict[str, Any]:
         """
         Get summary of active configuration.
 
@@ -363,5 +374,5 @@ class AutonomyEngine:
             "audit": {
                 "log_all_changes": self.config.audit.log_all_changes,
                 "retention_days": self.config.audit.retention_days,
-            }
+            },
         }

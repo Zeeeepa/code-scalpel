@@ -135,7 +135,7 @@ class RefactorSimulator:
         # Apply patch to get new code
         if new_code is None:
             try:
-                new_code = self._apply_patch(original_code, patch)
+                new_code = self._apply_patch(original_code, patch)  # type: ignore[arg-type]
             except Exception as e:
                 return RefactorResult(
                     status=RefactorStatus.ERROR,
@@ -224,7 +224,6 @@ class RefactorSimulator:
             match = hunk_pattern.match(line)
             if match:
                 old_start = int(match.group(1)) - 1  # 0-indexed
-                int(match.group(3)) - 1
                 i += 1
 
                 # Process hunk
@@ -278,7 +277,7 @@ class RefactorSimulator:
 
         # Try using the SecurityAnalyzer
         try:
-            from code_scalpel.security import SecurityAnalyzer
+            from code_scalpel.security.security_analyzer import SecurityAnalyzer  # type: ignore[import-not-found]
 
             analyzer = SecurityAnalyzer()
 

@@ -7,6 +7,13 @@ from typing import Optional
 import networkx as nx
 
 
+# [20251221_TODO] Add support for non-local scope analysis:
+#     - Properly handle nonlocal and global declarations
+#     - Track variable scope chains across nested functions
+#     - Detect scope-related bugs (shadowing, unintended globals)
+#     - Support closure variable capture tracking
+
+
 class NodeType(Enum):
     """Types of nodes in the PDG."""
 
@@ -31,7 +38,7 @@ class Scope:
     name: str
     node_id: str
     parent: Optional["Scope"] = None
-    variables: dict[str, str] = None  # var_name -> defining_node_id
+    variables: Optional[dict[str, str]] = None  # var_name -> defining_node_id
 
     def __post_init__(self):
         if self.variables is None:
@@ -52,6 +59,24 @@ class PDGBuilder(ast.NodeVisitor):
         self.interprocedural = interprocedural
         self.current_function: Optional[str] = None
         self.node_counter = defaultdict(int)
+
+        # [20251221_TODO] Add interprocedural parameter tracking:
+        #     - Track parameter passing and type flow through call sites
+        #     - Compute parameter-to-argument mappings
+        #     - Support return value tracking across calls
+        #     - Enable context-sensitive analysis for indirect calls
+
+        # [20251221_TODO] Add exception path tracking:
+        #     - Model exception flow through try/except/finally blocks
+        #     - Track exception propagation to callers
+        #     - Detect uncaught exception paths
+        #     - Support custom exception hierarchies
+
+        # [20251221_TODO] Add memory/reference semantics:
+        #     - Track aliasing relationships between variables
+        #     - Model object identity vs. value equality
+        #     - Support pointer analysis for reference types
+        #     - Detect use-after-free and memory leak patterns
 
     def build(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
         """Build PDG and call graph from code."""
@@ -119,7 +144,8 @@ class PDGBuilder(ast.NodeVisitor):
                 arg_id, type="parameter", name=arg.arg, lineno=arg.lineno
             )
             self.graph.add_edge(node_id, arg_id, type="parameter_dependency")
-            scope.variables[arg.arg] = arg_id
+            if scope and scope.variables:
+                scope.variables[arg.arg] = arg_id
 
         # Process function body
         for stmt in node.body:
@@ -461,13 +487,15 @@ class PDGBuilder(ast.NodeVisitor):
     def _find_definition(self, var_name: str) -> Optional[str]:
         """Find the most recent definition of a variable in the current scope chain."""
         for scope in reversed(self.scopes):
-            if var_name in scope.variables:
+            if scope.variables and var_name in scope.variables:
                 return scope.variables[var_name]
         return None
 
     def _add_variable_definition(self, var_name: str, node_id: str):
         """Add a variable definition to the current scope."""
         if scope := self.get_current_scope():
+            if scope.variables is None:
+                scope.variables = {}
             scope.variables[var_name] = node_id
 
     def _get_node_id(self, prefix: str) -> str:

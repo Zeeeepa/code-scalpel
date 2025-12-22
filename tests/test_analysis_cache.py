@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.cache.analysis_cache import AnalysisCache
+# [20251221_BUGFIX] v3.1.0 - Use unified_cache after v3.0.5 consolidation
+from code_scalpel.cache.unified_cache import AnalysisCache
 
 
 class DummyParseError(Exception):
@@ -175,7 +176,7 @@ def test_cache_stats_stores_and_invalidations(
 # [20251214_TEST] Memory-mapped file hashing tests
 def test_hash_file_mmap_for_large_files(tmp_path: Path) -> None:
     """Test that large files use memory-mapped hashing."""
-    from code_scalpel.cache.analysis_cache import MMAP_THRESHOLD_BYTES
+    from code_scalpel.cache.unified_cache import MMAP_THRESHOLD_BYTES
 
     cache = AnalysisCache(cache_dir=tmp_path / "cache")
 
@@ -195,7 +196,7 @@ def test_hash_file_mmap_for_large_files(tmp_path: Path) -> None:
 
 def test_hash_file_small_uses_read_bytes(tmp_path: Path) -> None:
     """Test that small files use regular read_bytes."""
-    from code_scalpel.cache.analysis_cache import MMAP_THRESHOLD_BYTES
+    from code_scalpel.cache.unified_cache import MMAP_THRESHOLD_BYTES
 
     cache = AnalysisCache(cache_dir=tmp_path / "cache")
 

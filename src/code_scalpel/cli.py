@@ -8,6 +8,58 @@ Usage:
     code-scalpel mcp                      Start MCP server (for AI clients)
     code-scalpel server [--port PORT]     Start REST API server (legacy)
     code-scalpel version                  Show version
+
+TODO: CLI Enhancement Roadmap
+=============================
+
+Phase 1 - Multi-Language Analysis via code_parsers:
+- TODO: Integrate code_parsers.ParserFactory for unified language handling
+- TODO: Replace manual extension_map with ParserFactory.detect_language()
+- TODO: Add --parser flag to select specific parser backend (ast, ruff, mypy)
+- TODO: Support all languages in code_parsers (Go, C#, Ruby, Swift, PHP, Kotlin)
+- TODO: Add analyze subcommand for TypeScript with full type checking
+- TODO: Use code_parsers.ParseResult for consistent error/warning format
+
+Phase 2 - New CLI Commands:
+- TODO: Add 'extract' command for surgical extraction (code-scalpel extract func main.py::calculate)
+- TODO: Add 'patch' command for surgical patching (code-scalpel patch func main.py::calculate new_code.py)
+- TODO: Add 'diff' command to show symbol-level diffs between versions
+- TODO: Add 'refactor' command for automated refactoring operations
+- TODO: Add 'crawl' command to analyze entire project structure
+- TODO: Add 'symbols' command to list all extractable symbols in a file
+
+Phase 3 - Output Formats & Reporting:
+- TODO: Add --format markdown for documentation generation
+- TODO: Add --format sarif for GitHub code scanning integration
+- TODO: Add --format csv for spreadsheet analysis
+- TODO: Add --quiet mode for CI/CD pipelines (exit codes only)
+- TODO: Add --verbose mode with detailed progress output
+- TODO: Support streaming JSON output for large projects
+
+Phase 4 - Configuration & Profiles:
+- TODO: Add --profile flag to load predefined configurations (strict, lenient, security)
+- TODO: Support .code-scalpel/cli.yaml for persistent CLI defaults
+- TODO: Add --ignore flag to skip specific files/patterns
+- TODO: Add --include flag for explicit file selection
+- TODO: Support reading file lists from stdin (find . -name '*.py' | code-scalpel analyze -)
+
+Phase 5 - Watch Mode & Incremental Analysis:
+- TODO: Add --watch flag for continuous file monitoring
+- TODO: Implement incremental analysis (only re-analyze changed files)
+- TODO: Add --cache flag to persist analysis results between runs
+- TODO: Support LSP-style diagnostics output for editor integration
+
+Phase 6 - Batch & Parallel Processing:
+- TODO: Add --parallel flag for multi-core analysis
+- TODO: Add --batch flag to process multiple files from a manifest
+- TODO: Implement progress bars for long-running operations
+- TODO: Add --timeout flag to limit analysis time per file
+
+Phase 7 - Integration Commands:
+- TODO: Add 'mcp tools' command to list available MCP tools
+- TODO: Add 'mcp test' command to verify MCP server functionality
+- TODO: Add 'config show' command to display current configuration
+- TODO: Add 'config validate' command to check configuration files
 """
 
 import argparse
@@ -17,7 +69,7 @@ from pathlib import Path
 
 
 def analyze_file(
-    filepath: str, output_format: str = "text", language: str = None
+    filepath: str, output_format: str = "text", language: str | None = None
 ) -> int:
     """Analyze a file and print results."""
 
@@ -54,7 +106,7 @@ def analyze_file(
     try:
         code = path.read_text(encoding="utf-8")
         # [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present
-        if code.startswith('\ufeff'):
+        if code.startswith("\ufeff"):
             code = code[1:]
     except Exception as e:
         print(f"Error reading file: {e}", file=sys.stderr)
@@ -366,7 +418,6 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     Creates .code-scalpel/ with config.json, policy.yaml, budget.yaml, README.md, .gitignore.
     """
     from .config import init_config_dir
-    from pathlib import Path
 
     print("Code Scalpel Configuration Initialization")
     print("=" * 60)
@@ -376,12 +427,12 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     if not result["success"]:
         if "already exists" in result["message"]:
             if force:
-                print(f"\n[WARNING] Directory exists, but --force specified.")
+                print("\n[WARNING] Directory exists, but --force specified.")
                 print(f"   Path: {result['path']}")
                 print("\n[SKIP] Use manual deletion if you need to reinitialize.")
                 return 1
             else:
-                print(f"\n[OK] Configuration directory already exists.")
+                print("\n[OK] Configuration directory already exists.")
                 print(f"   Path: {result['path']}")
                 print("\nUse --force to attempt reinitialization.")
                 return 0
@@ -389,7 +440,7 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
             print(f"\n[ERROR] {result['message']}")
             return 1
 
-    print(f"\n[SUCCESS] Configuration directory created:")
+    print("\n[SUCCESS] Configuration directory created:")
     print(f"   Path: {result['path']}")
     print(f"\nCreated {len(result['files_created'])} files:")
     for filename in result["files_created"]:
@@ -562,7 +613,9 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         "server", help="Start REST API server (legacy)"
     )
     server_parser.add_argument(
-        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"  # nosec B104
+        "--host",
+        default="0.0.0.0",
+        help="Host to bind to (default: 0.0.0.0)",  # nosec B104
     )  # [20251218_SECURITY] Server default binding - users control via --host flag
     server_parser.add_argument(
         "--port", "-p", type=int, default=5000, help="Port to bind to (default: 5000)"

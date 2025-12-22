@@ -64,8 +64,9 @@ class VisitorContext:
 
     filename: str = "<string>"
     source: str = ""
-    parent_chain: List[Any] = None
-    scope_stack: List[str] = None
+    # [20251220_BUGFIX] Wrap None-defaulting fields with Optional
+    parent_chain: Optional[List[Any]] = None
+    scope_stack: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.parent_chain is None:
@@ -94,6 +95,16 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
     Node types with hyphens are converted to underscores:
         - "arrow_function" -> visit_arrow_function
         - "if_statement" -> visit_if_statement
+
+    [20251220_TODO] Add error recovery strategies:
+        - Graceful handling of unsupported constructs (skip vs. fail)
+        - Better error messages with node context and suggestions
+        - Diagnostic mode to report all unsupported patterns
+
+    [20251220_TODO] Enhance diagnostics:
+        - Track parent node chain for error context
+        - Report column numbers and visual error markers
+        - Aggregate warnings and errors for batch reporting
     """
 
     def __init__(self):
@@ -190,7 +201,9 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         node_type = self._get_node_type(node)
 
         # Push to parent chain for debugging
-        self.ctx.parent_chain.append(node)
+        # [20251220_BUGFIX] Check if parent_chain is not None before appending
+        if self.ctx.parent_chain is not None:
+            self.ctx.parent_chain.append(node)
 
         try:
             # Look up handler
@@ -203,7 +216,9 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
 
         finally:
             # Pop from parent chain
-            self.ctx.parent_chain.pop()
+            # [20251220_BUGFIX] Check if parent_chain is not None before popping
+            if self.ctx.parent_chain is not None:
+                self.ctx.parent_chain.pop()
 
     def generic_visit(self, node: TSNode) -> Union[IRNode, List[IRNode], None]:
         """

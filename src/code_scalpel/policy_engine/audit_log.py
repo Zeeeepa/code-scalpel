@@ -11,9 +11,10 @@ import json
 import hmac
 import hashlib
 import os
+import tempfile
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from .exceptions import TamperDetectedError
 
@@ -31,18 +32,32 @@ class AuditLog:
     - Tamper detection
     """
 
-    def __init__(self, log_path: str = ".code-scalpel/audit.log"):
+    def __init__(self, log_path: Optional[str] = None):
         """
         Initialize audit log.
 
+        # [20251222_BUGFIX] Default to an isolated temp log to prevent accidental
+        # cross-test/run contamination when AuditLog() is constructed without an
+        # explicit path.
+        #
+        # For persistent logging, pass an explicit path (e.g. ".code-scalpel/audit.log").
+
         Args:
-            log_path: Path to audit log file
+            log_path: Path to audit log file (optional)
         """
-        self.log_path = Path(log_path)
+        if log_path is None:
+            temp_dir = Path(tempfile.mkdtemp(prefix="code-scalpel-audit-"))
+            self.log_path = temp_dir / "audit.log"
+        else:
+            self.log_path = Path(log_path)
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
     def record_event(
-        self, event_type: str, severity: str, details: Dict[str, Any]
+        self,
+        event_type: str,
+        severity: str,
+        details: Dict[str, Any],
+        timestamp: Optional[datetime] = None,
     ) -> None:
         """
         Record security event to tamper-resistant log.
@@ -56,8 +71,11 @@ class AuditLog:
             severity: Event severity (LOW, MEDIUM, HIGH, CRITICAL)
             details: Event details dictionary
         """
+        # [20251222_BUGFIX] Respect provided timestamp for time-range filtering in reports/tests.
+        event_timestamp = timestamp or datetime.now()
+
         event = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": event_timestamp.isoformat(),
             "event_type": event_type,
             "severity": severity,
             "details": details,
@@ -70,6 +88,26 @@ class AuditLog:
         # Append to log (append-only)
         with open(self.log_path, "a") as f:
             f.write(json.dumps(event) + "\n")
+
+    def log_event(
+        self,
+        event_type: str,
+        details: Dict[str, Any],
+        timestamp: Optional[datetime] = None,
+        severity: str = "MEDIUM",
+    ) -> None:
+        """Backward compatibility wrapper for log_event.
+
+        # [20251223_FEATURE] v3.1.0 - Backward compatibility
+        # [20251222_BUGFIX] Honor provided timestamp to keep report filtering correct.
+
+        Args:
+            event_type: Type of security event
+            details: Event details dictionary
+            timestamp: Event timestamp
+            severity: Event severity (default: MEDIUM)
+        """
+        self.record_event(event_type, severity, details, timestamp=timestamp)
 
     def _sign_event(self, event: Dict[str, Any]) -> str:
         """
@@ -133,7 +171,10 @@ class AuditLog:
         return True
 
     def get_events(
-        self, event_type: str = None, severity: str = None, limit: int = None
+        self,
+        event_type: Optional[str] = None,
+        severity: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> list:
         """
         Retrieve events from audit log.
@@ -170,3 +211,13 @@ class AuditLog:
                     continue
 
         return events
+
+    def clear(self) -> None:
+        """Clear all events from audit log.
+
+        # [20251221_FEATURE] v3.1.0 - Backward compatibility for tests
+
+        Note: This removes the log file entirely.
+        """
+        if self.log_path.exists():
+            self.log_path.unlink()

@@ -38,6 +38,7 @@ class ChangeBudgetingConfig:
 
     Controls how much code can be modified in a single autonomous operation.
     """
+
     enabled: bool = True
     max_lines_per_change: int = 500
     max_files_per_change: int = 10
@@ -54,6 +55,7 @@ class BlastRadiusConfig:
     Limits the scope of changes by tracking affected functions, classes,
     and call graph depth. Provides special handling for critical paths.
     """
+
     enabled: bool = True
     max_affected_functions: int = 20
     max_affected_classes: int = 5
@@ -98,6 +100,7 @@ class AutonomyConstraintsConfig:
 
     Controls iteration limits and approval requirements for autonomous operations.
     """
+
     max_autonomous_iterations: int = 10
     require_approval_for_breaking_changes: bool = True
     require_approval_for_security_changes: bool = True
@@ -111,6 +114,7 @@ class AuditConfig:
 
     Controls logging and retention of autonomous operations.
     """
+
     log_all_changes: bool = True
     log_rejected_changes: bool = True
     retention_days: int = 90
@@ -123,6 +127,7 @@ class GovernanceConfig:
 
     Aggregates all governance subsystems into a single config object.
     """
+
     change_budgeting: ChangeBudgetingConfig
     blast_radius: BlastRadiusConfig
     autonomy_constraints: AutonomyConstraintsConfig
@@ -214,7 +219,7 @@ class GovernanceConfigLoader:
         Raises:
             ValueError: If hash or signature validation fails
         """
-        with open(self.config_path, 'rb') as f:
+        with open(self.config_path, "rb") as f:
             content = f.read()
 
         # SHA-256 hash validation
@@ -234,9 +239,7 @@ class GovernanceConfigLoader:
         secret = os.getenv("SCALPEL_CONFIG_SECRET")
         expected_sig = os.getenv("SCALPEL_CONFIG_SIGNATURE")
         if secret and expected_sig:
-            actual_sig = hmac.new(
-                secret.encode(), content, hashlib.sha256
-            ).hexdigest()
+            actual_sig = hmac.new(secret.encode(), content, hashlib.sha256).hexdigest()
             if actual_sig != expected_sig:
                 raise ValueError(
                     "Configuration signature invalid. "
@@ -263,7 +266,7 @@ class GovernanceConfigLoader:
                     "max_files_per_change": 10,
                     "max_complexity_delta": 50,
                     "require_justification": True,
-                    "budget_refresh_interval_hours": 24
+                    "budget_refresh_interval_hours": 24,
                 },
                 "blast_radius": {
                     "enabled": True,
@@ -274,20 +277,20 @@ class GovernanceConfigLoader:
                     "block_on_critical_paths": True,
                     "critical_paths": [],
                     "critical_path_max_lines": 50,
-                    "critical_path_max_complexity_delta": 10
+                    "critical_path_max_complexity_delta": 10,
                 },
                 "autonomy_constraints": {
                     "max_autonomous_iterations": 10,
                     "require_approval_for_breaking_changes": True,
                     "require_approval_for_security_changes": True,
-                    "sandbox_execution_required": True
+                    "sandbox_execution_required": True,
                 },
                 "audit": {
                     "log_all_changes": True,
                     "log_rejected_changes": True,
-                    "retention_days": 90
-                }
-            }
+                    "retention_days": 90,
+                },
+            },
         }
 
     def _apply_env_overrides(self, config: dict) -> dict:
@@ -306,32 +309,39 @@ class GovernanceConfigLoader:
 
         # Change Budgeting overrides
         cb = gov.get("change_budgeting", {})
-        if os.getenv("SCALPEL_CHANGE_BUDGET_MAX_LINES"):
-            cb["max_lines_per_change"] = int(os.getenv("SCALPEL_CHANGE_BUDGET_MAX_LINES"))
-        if os.getenv("SCALPEL_CHANGE_BUDGET_MAX_FILES"):
-            cb["max_files_per_change"] = int(os.getenv("SCALPEL_CHANGE_BUDGET_MAX_FILES"))
-        if os.getenv("SCALPEL_CHANGE_BUDGET_MAX_COMPLEXITY"):
-            cb["max_complexity_delta"] = int(os.getenv("SCALPEL_CHANGE_BUDGET_MAX_COMPLEXITY"))
+        max_lines_env = os.getenv("SCALPEL_CHANGE_BUDGET_MAX_LINES")
+        if max_lines_env:
+            cb["max_lines_per_change"] = int(max_lines_env)
+        max_files_env = os.getenv("SCALPEL_CHANGE_BUDGET_MAX_FILES")
+        if max_files_env:
+            cb["max_files_per_change"] = int(max_files_env)
+        max_complexity_env = os.getenv("SCALPEL_CHANGE_BUDGET_MAX_COMPLEXITY")
+        if max_complexity_env:
+            cb["max_complexity_delta"] = int(max_complexity_env)
 
         # Blast Radius & Critical Paths overrides
         br = gov.get("blast_radius", {})
         critical_paths_env = os.getenv("SCALPEL_CRITICAL_PATHS")
         if critical_paths_env:
             br["critical_paths"] = [p.strip() for p in critical_paths_env.split(",")]
-        if os.getenv("SCALPEL_CRITICAL_PATH_MAX_LINES"):
-            br["critical_path_max_lines"] = int(os.getenv("SCALPEL_CRITICAL_PATH_MAX_LINES"))
-        if os.getenv("SCALPEL_MAX_CALL_GRAPH_DEPTH"):
-            br["max_call_graph_depth"] = int(os.getenv("SCALPEL_MAX_CALL_GRAPH_DEPTH"))
+        critical_path_max_lines_env = os.getenv("SCALPEL_CRITICAL_PATH_MAX_LINES")
+        if critical_path_max_lines_env:
+            br["critical_path_max_lines"] = int(critical_path_max_lines_env)
+        max_call_graph_depth_env = os.getenv("SCALPEL_MAX_CALL_GRAPH_DEPTH")
+        if max_call_graph_depth_env:
+            br["max_call_graph_depth"] = int(max_call_graph_depth_env)
 
         # Autonomy Constraints overrides
         ac = gov.get("autonomy_constraints", {})
-        if os.getenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS"):
-            ac["max_autonomous_iterations"] = int(os.getenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS"))
+        max_iterations_env = os.getenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS")
+        if max_iterations_env:
+            ac["max_autonomous_iterations"] = int(max_iterations_env)
 
         # Audit overrides
         audit = gov.get("audit", {})
-        if os.getenv("SCALPEL_AUDIT_RETENTION_DAYS"):
-            audit["retention_days"] = int(os.getenv("SCALPEL_AUDIT_RETENTION_DAYS"))
+        retention_days_env = os.getenv("SCALPEL_AUDIT_RETENTION_DAYS")
+        if retention_days_env:
+            audit["retention_days"] = int(retention_days_env)
 
         return config
 
@@ -353,6 +363,8 @@ class GovernanceConfigLoader:
         return GovernanceConfig(
             change_budgeting=ChangeBudgetingConfig(**gov.get("change_budgeting", {})),
             blast_radius=BlastRadiusConfig(**gov.get("blast_radius", {})),
-            autonomy_constraints=AutonomyConstraintsConfig(**gov.get("autonomy_constraints", {})),
-            audit=AuditConfig(**gov.get("audit", {}))
+            autonomy_constraints=AutonomyConstraintsConfig(
+                **gov.get("autonomy_constraints", {})
+            ),
+            audit=AuditConfig(**gov.get("audit", {})),
         )

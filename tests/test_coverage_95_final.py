@@ -415,7 +415,7 @@ class TestComplianceReporterUncovered:
         try:
             from code_scalpel.governance.compliance_reporter import ComplianceReporter
             from code_scalpel.governance.audit_log import AuditLog
-            from code_scalpel.governance.policy_engine import PolicyEngine
+            from code_scalpel.policy_engine import PolicyEngine
 
             audit_log = AuditLog()
             policy_engine = PolicyEngine()
@@ -437,13 +437,14 @@ class TestPolicyEngineUncovered:
         """Test semantic analyzer methods."""
         try:
             from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
+
             analyzer = SemanticAnalyzer()
-            result = analyzer.contains_sql_sink('execute(query)', 'python')
+            result = analyzer.contains_sql_sink("execute(query)", "python")
             assert isinstance(result, bool)
-            assert analyzer.has_parameterization('%s', '?') or True
+            assert analyzer.has_parameterization("%s", "?") or True
             assert analyzer.has_file_operation("open('file')") or True
         except ImportError:
-            pytest.skip('SemanticAnalyzer not available')
+            pytest.skip("SemanticAnalyzer not available")
 
     def test_crypto_verify_initialization(self):
         """[20251219_TEST] Test CryptographicPolicyVerifier initialization."""

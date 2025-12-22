@@ -18,7 +18,7 @@ Endpoints:
 
 import time
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 from flask import Flask, Response, jsonify, request
 
@@ -55,10 +55,16 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
     app.config["MAX_CONTENT_LENGTH"] = config.max_code_size
 
     # Lazy import to avoid circular dependencies
+    # [20251220_BUGFIX] Fixed import path for CrewAIScalpel
     try:
-        from .crewai import CrewAIScalpel
+        from code_scalpel.integrations.crewai import CrewAIScalpel
     except ImportError:
-        from integrations.crewai import CrewAIScalpel
+        try:
+            from .crewai import CrewAIScalpel
+        except ImportError as e:
+            raise ImportError(
+                "Could not import CrewAIScalpel. Ensure code_scalpel is properly installed."
+            ) from e
     scalpel = CrewAIScalpel(cache_enabled=config.cache_enabled)
 
     @app.route("/health", methods=["GET"])
@@ -69,7 +75,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
         )
 
     @app.route("/analyze", methods=["POST"])
-    def analyze_code() -> Response:
+    def analyze_code() -> Union[Response, tuple[Response, int]]:
         """
         Analyze Python code and return analysis results.
 
@@ -175,7 +181,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/refactor", methods=["POST"])
-    def refactor_code() -> Response:
+    def refactor_code() -> Union[Response, tuple[Response, int]]:
         """
         Refactor Python code based on analysis.
 
@@ -268,7 +274,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/security", methods=["POST"])
-    def security_scan() -> Response:
+    def security_scan() -> Union[Response, tuple[Response, int]]:
         """
         Perform security-focused analysis on Python code.
 
@@ -345,7 +351,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/symbolic", methods=["POST"])
-    def symbolic_analysis() -> Response:
+    def symbolic_analysis() -> Union[Response, tuple[Response, int]]:
         """
         Perform symbolic execution analysis on Python code.
 

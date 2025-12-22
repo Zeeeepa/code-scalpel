@@ -70,6 +70,20 @@ class SandboxExecutor:
 
     In a real implementation, this would provide isolated execution
     of code changes with proper containerization.
+
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Implement Docker container execution
+    - [ ] Add resource limit enforcement (CPU, memory, disk)
+    - [ ] Implement side effect detection
+    - [ ] Add test result parsing and categorization
+    - [ ] Support multiple test frameworks (pytest, unittest, jest, etc.)
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] Result caching for repeated executions
+    - [ ] Incremental test execution (only changed tests)
+    - [ ] Parallel test execution
+    - [ ] Integration with error-to-diff system
+    - [ ] Performance profiling hooks
     """
 
     def execute_with_changes(
@@ -107,6 +121,20 @@ class ErrorToDiffEngine:
 
     In a real implementation, this would analyze errors and generate
     fix suggestions using AI/ML techniques.
+
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Multi-language error parsing (Python, JS, TS, Java)
+    - [ ] Pattern-based fix generation
+    - [ ] Confidence scoring for fixes
+    - [ ] Alternative fix suggestions
+    - [ ] Diff format generation (unified diff)
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] ML-based fix ranking
+    - [ ] Context-aware suggestions
+    - [ ] Learning from applied fixes
+    - [ ] Framework-specific error handling
+    - [ ] Semantic code analysis for better suggestions
     """
 
     def analyze_error(

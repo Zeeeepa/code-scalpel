@@ -514,7 +514,6 @@ class DataCache:
 
 def hash_row(row: dict) -> str:
     """Hash a row for deduplication. [TEST]"""
-    import hashlib
     return hashlib.md5(str(sorted(row.items())).encode()).hexdigest()
 
 

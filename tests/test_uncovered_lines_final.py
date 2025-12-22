@@ -147,7 +147,7 @@ class TestAnalysisCacheUncoveredLines:
 
     def test_cache_get_cached_miss(self):
         """Cover cache miss with existing file."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
         import tempfile
         import os
 
@@ -164,7 +164,7 @@ class TestAnalysisCacheUncoveredLines:
 
     def test_cache_store_and_get(self):
         """Cover cache store and get."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
         import tempfile
         import os
 
@@ -184,7 +184,7 @@ class TestAnalysisCacheUncoveredLines:
 
     def test_cache_invalidate(self):
         """Cover cache invalidate."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
 
         cache = AnalysisCache()
         cache.invalidate("some_file.py")
@@ -192,7 +192,7 @@ class TestAnalysisCacheUncoveredLines:
 
     def test_cache_stats(self):
         """Cover cache stats property."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
 
         cache = AnalysisCache()
         stats = cache.stats  # It's a property, not a method
@@ -221,7 +221,7 @@ class TestOSVClientUncoveredLines:
         client = OSVClient()
         with patch("requests.post") as mock_post:
             mock_post.side_effect = requests.Timeout("Timeout")
-            result = client.query_package("pkg", "1.0.0")
+            client.query_package("pkg", "1.0.0")
             # Should handle timeout gracefully
 
 
@@ -265,6 +265,7 @@ class TestCrewAIIntegrationUncoveredLines:
         # Just test import doesn't crash
         try:
             import importlib.util
+
             if importlib.util.find_spec("crewai") is None:
                 raise ImportError
         except (ImportError, ModuleNotFoundError):

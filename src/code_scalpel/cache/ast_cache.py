@@ -50,6 +50,12 @@ class IncrementalASTCache:
         >>> cache = IncrementalASTCache()
         >>> ast = cache.get_or_parse("file.py", "python")
         >>> cache.invalidate("file.py")  # Returns affected files
+
+    [20251221_TODO] Phase 2: Support polymorphic AST types (TypeScript, Java, etc)
+    [20251221_TODO] Phase 2: Implement incremental parsing (re-parse only changed functions)
+    [20251221_TODO] Phase 2: Add AST diff tracking (track what changed between versions)
+    [20251221_TODO] Phase 2: Implement memory pooling for AST nodes (reduce GC pressure)
+    [20251221_TODO] Phase 2: Add generational collection (keep hot files in memory)
     """
 
     def __init__(self, cache_dir: str | Path = ".scalpel_ast_cache"):
@@ -60,6 +66,7 @@ class IncrementalASTCache:
             cache_dir: Directory to store cache files
 
         [20251216_FEATURE] Cache initialization with dependency tracking
+        [20251221_TODO] Phase 2: Add max_ast_memory_mb parameter for generational GC
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True, parents=True)
@@ -68,6 +75,8 @@ class IncrementalASTCache:
         self.file_hashes: dict[str, str] = {}  # file -> hash
         self.ast_cache: dict[str, Any] = {}  # file -> AST
         self.dependency_graph: dict[str, Set[str]] = {}  # file -> dependencies
+        # [20251221_TODO] Phase 2: Add reverse dependency graph for faster lookups
+        # [20251221_TODO] Phase 2: Add LRU tracking for memory management
 
         # Load metadata from disk
         self._load_metadata()
@@ -179,6 +188,9 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Cache-first AST retrieval
+        [20251221_TODO] Phase 2: Add parse_fn timeout to prevent hanging
+        [20251221_TODO] Phase 2: Support incremental parsing (re-parse only changed functions)
+        [20251221_TODO] Phase 2: Add progress callback for large file parsing
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -229,6 +241,9 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Default parsing logic
+        [20251221_TODO] Phase 2: Add parser for TypeScript/JavaScript
+        [20251221_TODO] Phase 2: Add parser for Java
+        [20251221_TODO] Phase 2: Add parser for Go
         """
         if language == "python":
             import ast
@@ -284,6 +299,9 @@ class IncrementalASTCache:
             Set of file paths affected by the change
 
         [20251216_FEATURE] Cascading invalidation with dependency tracking
+        [20251221_TODO] Phase 2: Add depth limit to prevent cascading invalidation explosions
+        [20251221_TODO] Phase 2: Return invalidation chain for debugging
+        [20251221_TODO] Phase 2: Add metrics for invalidation size/depth
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -343,6 +361,9 @@ class IncrementalASTCache:
             depends_on: Dependency file path
 
         [20251216_FEATURE] Track dependency graph for cascading invalidation
+        [20251221_TODO] Phase 2: Add cycle detection (prevent circular dependencies)
+        [20251221_TODO] Phase 2: Add dependency weight tracking (prioritize high-impact changes)
+        [20251221_TODO] Phase 2: Support reverse dependency queries (what depends on me?)
         """
         source_path = str(Path(source).resolve())
         dep_path = str(Path(depends_on).resolve())
@@ -361,6 +382,9 @@ class IncrementalASTCache:
             Dictionary with cache stats
 
         [20251216_FEATURE] Cache observability
+        [20251221_TODO] Phase 2: Add hit/miss ratios
+        [20251221_TODO] Phase 2: Add memory usage estimates
+        [20251221_TODO] Phase 2: Add cache age statistics
         """
         total_files = len(self.file_hashes)
         memory_cached = len(self.ast_cache)
@@ -383,6 +407,9 @@ class IncrementalASTCache:
         Clear all cache data.
 
         [20251216_FEATURE] Cache reset capability
+        [20251221_TODO] Phase 2: Add selective clearing (by language, by age)
+        [20251221_TODO] Phase 2: Add backup before clearing for recovery
+        [20251221_TODO] Phase 2: Add metrics collection on clear
         """
         self.file_hashes.clear()
         self.ast_cache.clear()

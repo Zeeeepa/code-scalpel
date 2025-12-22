@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 class VisualizationConfig:
     """Configuration for AST visualization."""
 
-    node_colors: dict[str, str] = None
-    edge_colors: dict[str, str] = None
-    node_shapes: dict[str, str] = None
-    highlight_nodes: set[int] = None
+    node_colors: Optional[dict[str, str]] = None
+    edge_colors: Optional[dict[str, str]] = None
+    node_shapes: Optional[dict[str, str]] = None
+    highlight_nodes: Optional[set[int]] = None
     show_attributes: bool = True
     show_line_numbers: bool = True
     show_source_code: bool = True
@@ -46,6 +46,10 @@ class ASTVisualizer:
             "ast.Name": "oval",
             "ast.Constant": "diamond",
         }
+        # [20251221_FEATURE] TODO: Support interactive visualization with hover details
+        # [20251221_FEATURE] TODO: Add SVG and HTML export formats
+        # [20251221_ENHANCEMENT] TODO: Support custom node rendering and styling
+        # [20251221_ENHANCEMENT] TODO: Add semantic highlighting for control flow
 
     def visualize(
         self,
@@ -182,8 +186,10 @@ class ASTVisualizer:
         """Create a detailed node label."""
         label_parts = [node.__class__.__name__]
 
-        if self.config.show_line_numbers and hasattr(node, "lineno"):
-            label_parts.append(f"Line: {node.lineno}")
+        if self.config.show_line_numbers:
+            lineno = getattr(node, "lineno", None)
+            if lineno is not None:
+                label_parts.append(f"Line: {lineno}")
 
         # Add node-specific information
         if isinstance(node, ast.FunctionDef):
@@ -249,7 +255,11 @@ class ASTVisualizer:
                 changes["added"].add(id(node2))
             elif node1 is not None and node2 is None:
                 changes["removed"].add(id(node1))
-            elif not self._nodes_equal(node1, node2):
+            elif (
+                node1 is not None
+                and node2 is not None
+                and not self._nodes_equal(node1, node2)
+            ):
                 changes["modified"].add(id(node1))
                 changes["modified"].add(id(node2))
 
@@ -306,6 +316,23 @@ class ASTVisualizer:
                         str(sorted_children[i + 1]),
                         style="invis",
                     )
+
+    def _build_diff_visualization(
+        self, tree1: ast.AST, tree2: ast.AST, changes: dict[str, set[int]], dot: Digraph
+    ) -> None:
+        """Build visualization highlighting differences between two ASTs."""
+        # Store original highlight_nodes
+        original_highlights = self.config.highlight_nodes
+
+        # Combine all changed nodes for highlighting
+        all_changes = changes["added"] | changes["removed"] | changes["modified"]
+        self.config.highlight_nodes = all_changes
+
+        # Build the visualization with highlighted changes
+        self._build_visualization(tree1, dot)
+
+        # Restore original highlight_nodes
+        self.config.highlight_nodes = original_highlights
 
     def _nodes_equal(self, node1: ast.AST, node2: ast.AST) -> bool:
         """Check if two AST nodes are equal."""

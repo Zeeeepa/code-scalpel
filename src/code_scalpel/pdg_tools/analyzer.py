@@ -7,6 +7,19 @@ from typing import Any, Optional
 import networkx as nx
 
 
+# [20251221_TODO] Add taint analysis improvements:
+#     - Support custom taint sources (config files, environment variables)
+#     - Implement context-sensitive taint tracking
+#     - Add taint sanitization pattern recognition
+#     - Support data structure field-sensitive taints
+
+# [20251221_TODO] Add advanced alias analysis:
+#     - Implement flow-sensitive alias tracking
+#     - Support pointer analysis for complex reference patterns
+#     - Detect must-alias and may-alias relationships
+#     - Track alias propagation through function parameters
+
+
 class DependencyType(Enum):
     """Types of dependencies in the PDG."""
 
@@ -46,6 +59,24 @@ class PDGAnalyzer:
     def __init__(self, pdg: nx.DiGraph):
         self.pdg = pdg
         self.cached_results = {}
+
+        # [20251221_TODO] Add incremental analysis capabilities:
+        #     - Support differential analysis for PDG changes
+        #     - Cache intermediate analysis results
+        #     - Reuse previous analysis on code updates
+        #     - Track analysis invalidation triggers
+
+        # [20251221_TODO] Add result aggregation and summarization:
+        #     - Aggregate findings across modules/packages
+        #     - Generate executive summaries of issues
+        #     - Support result filtering and prioritization
+        #     - Implement result suppression/baselines for known issues
+
+        # [20251221_TODO] Add blame/attribution tracking:
+        #     - Link findings to specific developers/commits
+        #     - Track when issues were introduced/fixed
+        #     - Generate responsibility reports
+        #     - Support team-based issue assignment
 
     def analyze_data_flow(self) -> dict[str, Any]:
         """Perform comprehensive data flow analysis."""
@@ -182,13 +213,21 @@ class PDGAnalyzer:
 
         for source in sources:
             for sink in sinks:
-                paths = list(nx.all_simple_paths(self.pdg, source, sink))
+                try:
+                    paths = list(nx.all_simple_paths(self.pdg, source, sink))
+                except nx.NetworkXNoPath:
+                    paths = []
+
                 if paths:
                     # Check if taint is sanitized along the path
                     for path in paths:
                         if not self._is_path_sanitized(path):
-                            source_type = self.pdg.nodes[source].get("taint_type")
-                            sink_type = self.pdg.nodes[sink].get("sink_type")
+                            source_type = (
+                                self.pdg.nodes[source].get("taint_type") or "unknown"
+                            )
+                            sink_type = (
+                                self.pdg.nodes[sink].get("sink_type") or "unknown"
+                            )
                             vulnerabilities.append(
                                 SecurityVulnerability(
                                     type=f"{source_type}_to_{sink_type}",

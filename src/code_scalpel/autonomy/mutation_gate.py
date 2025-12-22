@@ -108,6 +108,21 @@ class MutationTestGate:
 
     [20251217_FEATURE] v3.0.0 P0 requirement from 3rd party review.
 
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Implement additional mutation types (logic inversions, boundary mutations)
+    - [ ] Add mutation impact visualization
+    - [ ] Support custom mutation rules
+    - [ ] Implement mutation caching
+    - [ ] Add mutation filtering (skip trivial mutations)
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] ML-based mutation relevance scoring
+    - [ ] Adaptive mutation generation
+    - [ ] Integration with test coverage analysis
+    - [ ] Generate weak test detection report
+    - [ ] Suggest test improvements
+    - [ ] Support mutation score trending
+
     Addresses 3rd party review feedback on v3.0.0 Autonomy:
     "What if agent *thinks* it succeeded but actually deleted functionality?"
 

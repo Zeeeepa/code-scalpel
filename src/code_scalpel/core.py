@@ -1,3 +1,66 @@
+"""
+CodeAnalysisToolkit - Core AST and PDG analysis utilities.
+
+This module provides foundational code analysis capabilities:
+- AST parsing and code generation
+- Program Dependence Graph (PDG) construction
+- Graph visualization
+
+TODO: Core Module Enhancement Roadmap
+=====================================
+
+Phase 1 - code_parsers Integration:
+- TODO: Replace direct ast.parse() with code_parsers.ParserFactory
+- TODO: Use code_parsers.Language enum for language detection
+- TODO: Support multi-language PDG construction via code_parsers
+- TODO: Integrate code_parsers.ParseResult for error propagation
+- TODO: Add fallback to code_parsers when astor unavailable
+
+Phase 2 - PDG Enhancements:
+- TODO: Add inter-procedural data flow edges
+- TODO: Implement context-sensitive call graph construction
+- TODO: Add exception flow edges (try/except/finally)
+- TODO: Support async/await control flow
+- TODO: Add generator/yield control flow edges
+- TODO: Implement PDG slicing (forward and backward)
+
+Phase 3 - Multi-Language PDG:
+- TODO: Create JavaScript PDG builder using tree-sitter
+- TODO: Create TypeScript PDG builder with type information
+- TODO: Create Java PDG builder for method-level analysis
+- TODO: Implement unified PDG interface across languages
+- TODO: Support cross-language call graphs (e.g., Python calling C extension)
+
+Phase 4 - Visualization Improvements:
+- TODO: Add interactive HTML visualization (D3.js or Cytoscape.js)
+- TODO: Support hierarchical PDG layout for large graphs
+- TODO: Add node filtering by type (data deps only, control deps only)
+- TODO: Implement graph diff visualization
+- TODO: Add animation for data flow paths
+- TODO: Support exporting to DOT, JSON, GraphML formats
+
+Phase 5 - Analysis Queries:
+- TODO: Add def-use chain queries
+- TODO: Implement reaching definitions analysis
+- TODO: Add live variable analysis
+- TODO: Implement available expressions analysis
+- TODO: Add dominance frontier computation
+- TODO: Support custom graph queries via DSL
+
+Phase 6 - Caching & Performance:
+- TODO: Implement incremental PDG updates (avoid full rebuild)
+- TODO: Add persistent PDG cache
+- TODO: Support lazy PDG construction (build on-demand)
+- TODO: Implement parallel PDG construction for multi-file projects
+- TODO: Add PDG compression for large codebases
+
+Phase 7 - Integration:
+- TODO: Add MCP tool for PDG queries
+- TODO: Export PDG to Neo4j for advanced graph queries
+- TODO: Integrate with IDE extensions for visual debugging
+- TODO: Add REST API endpoint for PDG construction
+"""
+
 import ast
 
 import astor

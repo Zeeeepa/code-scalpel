@@ -5,7 +5,7 @@ Tests for Change Budgeting (Blast Radius Control).
 Tests all constraint validations and policy enforcement.
 """
 
-from code_scalpel.policy import (
+from code_scalpel.governance.change_budget import (
     Operation,
     FileChange,
     ChangeBudget,

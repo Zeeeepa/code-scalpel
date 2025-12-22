@@ -54,7 +54,7 @@ def test_AC1_policy_files_read_only(acceptance_test_env):
     budget_file.write_text("budget: 100\n")
 
     # Initialize tamper resistance (should lock files)
-    tr = TamperResistance(policy_path=str(policy_file))
+    TamperResistance(policy_path=str(policy_file))
 
     # Verify policy file is read-only (0o444)
     stat = policy_file.stat()
@@ -98,8 +98,12 @@ def test_AC3_agent_blocked_from_modifying_policy_files(acceptance_test_env):
 
     # Create operations that target protected files
     protected_operations = [
-        Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]),
-        Operation(type="file_write", affected_files=[Path(".code-scalpel/budget.yaml")]),
+        Operation(
+            type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
+        ),
+        Operation(
+            type="file_write", affected_files=[Path(".code-scalpel/budget.yaml")]
+        ),
         Operation(type="file_delete", affected_files=[Path("scalpel.policy.yaml")]),
     ]
 

@@ -59,7 +59,7 @@ class CrewAIScalpel:
             from ..ast_tools.analyzer import ASTAnalyzer
         except (ImportError, ValueError):
             try:
-                from ast_tools.analyzer import ASTAnalyzer
+                from code_scalpel.ast_tools.analyzer import ASTAnalyzer
             except ImportError:
                 # Direct import as fallback
                 import os
@@ -68,7 +68,7 @@ class CrewAIScalpel:
                 src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 if src_path not in sys.path:
                     sys.path.insert(0, src_path)
-                from ast_tools.analyzer import ASTAnalyzer
+                from code_scalpel.ast_tools.analyzer import ASTAnalyzer
         self.analyzer = ASTAnalyzer(cache_enabled=cache_enabled)
         self._cache_enabled = cache_enabled
 
@@ -262,21 +262,19 @@ class CrewAIScalpel:
             for i, path in enumerate(result.paths[:10]):  # Limit to 10 paths
                 path_data = {
                     "path_id": i,
-                    "feasible": (
-                        path.is_feasible if hasattr(path, "is_feasible") else True
-                    ),
+                    "feasible": getattr(path, "is_feasible", True),
                 }
                 # Try to get variables from path
                 if hasattr(path, "variables"):
                     path_data["variables"] = {
                         k: str(v) for k, v in path.variables.items()
                     }
-                elif hasattr(path, "state") and hasattr(
-                    path.state, "get_all_variables"
-                ):
-                    path_data["variables"] = {
-                        k: str(v) for k, v in path.state.get_all_variables().items()
-                    }
+                else:
+                    state = getattr(path, "state", None)
+                    if state and hasattr(state, "get_all_variables"):
+                        path_data["variables"] = {
+                            k: str(v) for k, v in state.get_all_variables().items()
+                        }
                 paths_info.append(path_data)
 
             return {

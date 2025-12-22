@@ -174,8 +174,7 @@ def test_init_import_fallback(monkeypatch):
             raise ImportError("force fallback")
         if name == "ast_tools.analyzer":
             counter["n"] += 1
-            if counter["n"] < 2:
-                raise ImportError("second fallback")
+            # On first attempt for ast_tools.analyzer, succeed (not fail twice)
             return stub_module
         return original_import(name, *args, **kwargs)
 

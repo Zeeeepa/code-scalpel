@@ -2,11 +2,11 @@
 
 [![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-4355%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.0.4/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-4388%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.1.0/)
 
-**MCP Server Toolkit for AI Agents - v3.0.4 "Ninja Warrior"**
+**MCP Server Toolkit for AI Agents - v3.1.0 "Parser Unification + Surgical Enhancements"**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
@@ -31,10 +31,50 @@ code-scalpel init
 ```
 
 This creates `.code-scalpel/` with governance configuration files:
-- `config.json` - Blast radius limits, protected paths, allowed operations
-- `policy.yaml` - Security rules (SQL injection, XSS blocking)
-- `budget.yaml` - Change limits per session
-- `README.md` - Configuration guide
+- `config.yaml` - Unified governance configuration
+- `policy.yaml` - OPA/Rego security policies (SQL injection, XSS blocking)
+- `budgets.yaml` - Change budget limits (max files, lines, complexity)
+- `dev-governance.yaml` - Development governance (AI agent behavior rules)
+- `README.md` - Complete configuration guide
+
+**Learn more:** [Governance Configuration](.code-scalpel/README.md) | [Policy Engine](src/code_scalpel/policy_engine/README.md)
+
+---
+
+## What's New in v3.1.0 🎉
+
+### Surgical Extractor Enhancements
+Token-efficient code extraction now even more powerful:
+- ✅ **Accurate Token Counting** - tiktoken integration for GPT-4/3.5/Claude
+- ✅ **Rich Metadata** - Extract docstrings, signatures, decorators, async/generator detection
+- ✅ **LLM-Ready Prompts** - `to_prompt()` formats extractions for AI consumption
+- ✅ **Token Budget Management** - `trim_to_budget()` intelligently fits token limits
+- ✅ **Decorator Extraction** - Extract and analyze decorator definitions
+- ✅ **Impact Analysis** - `find_callers()` discovers all code calling a function
+- ✅ **Performance Caching** - 2.8x faster with LRU cache
+
+**Example:**
+```python
+from code_scalpel.surgical_extractor import SurgicalExtractor
+
+extractor = SurgicalExtractor.from_file("app.py")
+result = extractor.get_function("process_payment")
+print(f"Tokens: {result.token_estimate}")
+print(f"Async: {result.is_async}, Generator: {result.is_generator}")
+print(f"Decorators: {result.decorators}")
+
+# Find who calls this function (impact analysis)
+callers = extractor.find_callers("process_payment")
+for name, typ, line in callers:
+    print(f"{typ} {name} calls it at line {line}")
+
+# Format for LLM with budget constraint
+extraction = extractor.get_function_with_context("process_payment")
+prompt = extraction.to_prompt("Add error handling")
+trimmed = extraction.trim_to_budget(max_tokens=2000)
+```
+
+See [examples/surgical_extractor_enhanced_example.py](examples/surgical_extractor_enhanced_example.py) for full demos.
 
 ---
 
@@ -350,6 +390,18 @@ code-scalpel analyze demos/test_gen_scenario.py
 - NoSQL Injection (CWE-943) - MongoDB PyMongo/Motor
 - LDAP Injection (CWE-90) - python-ldap/ldap3
 
+### Governance & Policy System (v2.5.0+)
+- **OPA/Rego Policies** - Declarative security rules for SQL injection, XSS, dangerous functions
+- **Change Budgets** - Quantitative limits (max files, lines, complexity per operation)
+- **Semantic Analysis** - Pattern-based vulnerability detection (Python, Java, JavaScript)
+- **Unified Governance** - Single evaluation: policy + budget + semantic checks
+- **Compliance Reporting** - Enterprise audit trails, security posture scoring
+- **Tamper Resistance** - Cryptographic verification, HMAC-signed audit logs
+- **Human Override** - TOTP-based approval system with justification
+- **Development Governance** - Meta-policies for AI agent behavior (README requirements, architecture boundaries)
+
+See [Policy Engine Documentation](src/code_scalpel/policy_engine/README.md) for details.
+
 ### API Contract & Cross-Service Analysis (v3.0.4)
 - **Schema Drift Detection** - Protobuf, JSON Schema, GraphQL breaking change detection
 - **gRPC Contract Analyzer** - Service definition parsing and validation
@@ -393,44 +445,37 @@ docker run -p 8593:8593 -v $(pwd):/app/code code-scalpel
 
 ## Documentation
 
-**v3.0.4 Release Documentation:**
-- [docs/release_notes/RELEASE_NOTES_v3.0.4.md](docs/release_notes/RELEASE_NOTES_v3.0.4.md) - Stage 3 API Contract & Cross-Service features
-- [docs/MIGRATION_v2.5_to_v3.0.md](docs/MIGRATION_v2.5_to_v3.0.md) - Upgrade guide from v2.5.0 (no breaking changes)
-- [docs/API_CHANGES_v3.0.0.md](docs/API_CHANGES_v3.0.0.md) - Complete API reference for v3.0.0
-- [docs/KNOWN_ISSUES_v3.0.0.md](docs/KNOWN_ISSUES_v3.0.0.md) - Known limitations and workarounds
+### Quick Start
+- **[Getting Started](docs/getting_started.md)** - Step-by-step setup and first steps
+- **[Documentation Index](docs/INDEX.md)** - Master table of contents for all docs
+- **[Examples](examples/)** - Runnable integration examples
 
-**Getting Started:**
-- [docs/getting_started.md](docs/getting_started.md) - Step-by-step developer guide
-- [docs/QUICK_REFERENCE_DOCS.md](docs/QUICK_REFERENCE_DOCS.md) - Quick lookup guide for finding documentation
+### For Contributors
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup, workflow, and guidelines
+- **[Development Roadmap](DEVELOPMENT_ROADMAP.md)** - Project roadmap and future plans
 
-**Organization & Guidelines:**
-- [docs/DOCUMENT_ORGANIZATION.md](docs/DOCUMENT_ORGANIZATION.md) - Complete documentation organization reference
-- [docs/BEFORE_AFTER_ORGANIZATION.md](docs/BEFORE_AFTER_ORGANIZATION.md) - Visual before/after of documentation structure
-- [docs/INDEX.md](docs/INDEX.md) - Master table of contents for all documentation
+### Current Release (v3.0.4)
+- [Release Notes v3.0.4](docs/release_notes/RELEASE_NOTES_v3.0.4.md) - Stage 3 API Contract & Cross-Service features
+- [Release Notes v3.0.0](docs/release_notes/RELEASE_NOTES_v3.0.0.md) - Autonomy release
+- [Migration Guide v2.5→v3.0](docs/MIGRATION_v2.5_to_v3.0.md) - Upgrade from v2.5.0
+- [API Changes v3.0.0](docs/API_CHANGES_v3.0.0.md) - Complete API reference
+- [Known Issues v3.0.0](docs/KNOWN_ISSUES_v3.0.0.md) - Limitations and workarounds
 
-**Integration & Examples:**
-- [docs/agent_integration.md](docs/agent_integration.md) - AI agent integration guide
-- [docs/examples.md](docs/examples.md) - Code examples and use cases
-- [examples/](examples/) - Runnable integration examples
+### Core Features
+- **[Policy Engine](src/code_scalpel/policy_engine/README.md)** - Enterprise governance with OPA/Rego
+- **[Governance System](src/code_scalpel/governance/README.md)** - Unified governance orchestration
+- **[Change Budgets](src/code_scalpel/policy/README.md)** - Blast radius control
+- **[Graph Engine](docs/graph_engine_guide.md)** - Unified graph analysis
+- **[Polyglot Parsers](docs/parsers/DOCUMENTATION_INDEX.md)** - Multi-language support
 
-**Deployment:**
-- [DOCKER_QUICK_START.md](DOCKER_QUICK_START.md) - Quick Docker deployment
-- [docs/deployment/](docs/deployment/) - Comprehensive deployment procedures and troubleshooting
+### Integration & Deployment
+- **[AI Agent Integration](docs/agent_integration.md)** - Autogen, CrewAI, LangChain
+- **[Docker Quick Start](DOCKER_QUICK_START.md)** - Docker deployment
+- **[Deployment Guides](docs/deployment/)** - Production deployment procedures
 
-**Security & Compliance:**
-- [SECURITY.md](SECURITY.md) - Security policies and reporting
-- [docs/compliance/](docs/compliance/) - Regulatory and audit documentation
-
-## Contributing
-
-```bash
-git clone https://github.com/tescolopio/code-scalpel.git
-cd code-scalpel
-pip install -e ".[dev]"
-pytest tests/
-```
-
-See [Contributing Guide](docs/guides/CONTRIBUTING.md) for details.
+### Security & Compliance
+- **[SECURITY.md](SECURITY.md)** - Security policies and vulnerability reporting
+- **[Compliance Documentation](docs/compliance/)** - OWASP, CWE, NIST, PCI DSS, SOC2
 
 ## Roadmap
 

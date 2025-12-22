@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from code_scalpel.cache.analysis_cache import AnalysisCache
+from code_scalpel.cache.unified_cache import AnalysisCache
 from code_scalpel.cache.parallel_parser import ParallelParser
 
 

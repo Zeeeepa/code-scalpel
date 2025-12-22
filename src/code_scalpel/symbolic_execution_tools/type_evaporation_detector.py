@@ -36,7 +36,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 # Type stubs for tree-sitter when not available
 if TYPE_CHECKING:
@@ -45,6 +45,31 @@ else:
     TSLanguage = Any
     TSNode = Any
     TSParser = Any
+
+# TODO: Enhanced type boundary analysis
+#   - Detect Zod/Yup validation at boundaries
+#   - Check for io-ts runtime type validation
+#   - Validate JSON Schema at API endpoints
+#   - Detect class-validator decorators (NestJS)
+#   - Check for Ajv schema validation
+
+# TODO: Cross-framework type safety
+#   - tRPC type safety verification
+#   - GraphQL Code Generator validation
+#   - OpenAPI type generation checks
+#   - Prisma type safety analysis
+
+# TODO: Serialization safety
+#   - Detect JSON.parse without validation
+#   - Check for unsafe Object.assign on types
+#   - Validate structuredClone type preservation
+#   - Detect prototype pollution via types
+
+# TODO: Type narrowing detection
+#   - Validate type guards are used (is, typeof, instanceof)
+#   - Detect discriminated union exhaustiveness
+#   - Check for null/undefined guards
+#   - Validate branded types at boundaries
 
 # Try to import tree-sitter for TypeScript parsing
 try:
@@ -101,9 +126,7 @@ class TypeEvaporationResult:
     type_definitions: Dict[str, Tuple[int, str]] = field(
         default_factory=dict
     )  # name -> (line, definition)
-    fetch_endpoints: List[Tuple[str, int]] = field(
-        default_factory=list
-    )  # (url, line)
+    fetch_endpoints: List[Tuple[str, int]] = field(default_factory=list)  # (url, line)
     dom_accesses: List[Tuple[str, int]] = field(
         default_factory=list
     )  # (element_id, line)
@@ -455,9 +478,10 @@ class TypeEvaporationDetector:
                 result.type_assertions.append((type_name, i, line.strip()))
 
                 # Check if DOM input
-                if any(
-                    pattern in line for pattern in self.DOM_INPUT_PATTERNS
-                ) or ".value" in line:
+                if (
+                    any(pattern in line for pattern in self.DOM_INPUT_PATTERNS)
+                    or ".value" in line
+                ):
                     result.vulnerabilities.append(
                         TypeEvaporationVulnerability(
                             risk_type=TypeEvaporationRisk.UNSAFE_TYPE_ASSERTION,
@@ -513,14 +537,14 @@ class CrossFileTypeEvaporationResult:
 
     frontend_result: TypeEvaporationResult
     backend_vulnerabilities: List[Any]  # From SecurityAnalyzer
-    matched_endpoints: List[
-        Tuple[str, int, int]
-    ]  # (endpoint, ts_line, py_line)
+    matched_endpoints: List[Tuple[str, int, int]]  # (endpoint, ts_line, py_line)
     cross_file_issues: List[TypeEvaporationVulnerability] = field(default_factory=list)
 
     def summary(self) -> str:
         lines = ["=== Cross-File Type Evaporation Analysis ==="]
-        lines.append(f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}")
+        lines.append(
+            f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}"
+        )
         lines.append(f"Backend vulnerabilities: {len(self.backend_vulnerabilities)}")
         lines.append(f"Matched endpoints: {len(self.matched_endpoints)}")
         lines.append(f"Cross-file issues: {len(self.cross_file_issues)}")
@@ -528,7 +552,9 @@ class CrossFileTypeEvaporationResult:
         if self.matched_endpoints:
             lines.append("\nEndpoint Correlations:")
             for endpoint, ts_line, py_line in self.matched_endpoints:
-                lines.append(f"  - {endpoint}: TS line {ts_line} → Python line {py_line}")
+                lines.append(
+                    f"  - {endpoint}: TS line {ts_line} → Python line {py_line}"
+                )
 
         return "\n".join(lines)
 
@@ -584,7 +610,11 @@ def analyze_type_evaporation_cross_file(
         path = ts_endpoint
         if "://" in ts_endpoint:
             # http://localhost:8080/api/x -> /api/x
-            path = "/" + ts_endpoint.split("/", 3)[-1] if ts_endpoint.count("/") >= 3 else ts_endpoint
+            path = (
+                "/" + ts_endpoint.split("/", 3)[-1]
+                if ts_endpoint.count("/") >= 3
+                else ts_endpoint
+            )
 
         # Try to match with Python routes
         for py_route, py_line in py_routes.items():

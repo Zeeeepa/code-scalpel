@@ -23,7 +23,7 @@ Example:
 
 import ast
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Union, Tuple
+from typing import Dict, List, Set, Optional, Union, Tuple, Callable, cast
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 from enum import Enum, auto
@@ -39,6 +39,34 @@ class CrossFileTaintSource(Enum):
     GLOBAL_VARIABLE = auto()  # Imported global/constant
     CLASS_ATTRIBUTE = auto()  # Attribute from imported class
     MODULE_LEVEL = auto()  # Top-level code in imported module
+
+
+# TODO: Enhanced cross-file analysis
+#   - Support circular imports and complex module graphs
+#   - Track taint through decorators and metaclasses
+#   - Analyze taint in class hierarchies (inheritance)
+#   - Support dynamic imports (importlib)
+#   - Handle namespace packages
+
+# TODO: Cross-language taint tracking
+#   - Track taint from Python to JavaScript (Pyodide, Transcrypt)
+#   - Support Python ↔ C/C++ via ctypes/cffi
+#   - Analyze Python ↔ Java via Jython
+#   - Track Python ↔ Rust via PyO3
+#   - Support polyglot microservices (REST/gRPC boundaries)
+
+# TODO: Framework-aware cross-file tracking
+#   - Django request → view → template chains
+#   - Flask route → blueprint → helper chains
+#   - FastAPI dependency injection taint
+#   - Celery task parameter taint
+#   - SQLAlchemy model field taint
+
+# TODO: Performance optimizations
+#   - Implement demand-driven analysis (only analyze reachable paths)
+#   - Add call graph pruning (remove impossible paths)
+#   - Cache cross-file analysis results
+#   - Parallelize multi-file analysis
 
 
 class CrossFileSink(Enum):
@@ -373,6 +401,7 @@ class CrossFileTaintTracker:
             CrossFileTaintResult with detected vulnerabilities
         """
         import time
+
         start_time = time.time()
 
         def check_timeout():
@@ -405,11 +434,11 @@ class CrossFileTaintTracker:
             # [20251215_BUGFIX] v2.0.1 - Phase 1.5: Propagate returns_tainted through import chains
             # This handles multi-hop taint tracking (A->B->C) by iteratively re-analyzing
             # [20251220_PERF] Limit iterations and add timeout check
-            effective_iterations = min(max_depth, 3)  # Cap at 3 iterations for performance
+            effective_iterations = min(
+                max_depth, 3
+            )  # Cap at 3 iterations for performance
             self._propagate_taint_through_imports(
-                result,
-                max_iterations=effective_iterations,
-                timeout_check=check_timeout
+                result, max_iterations=effective_iterations, timeout_check=check_timeout
             )
 
             check_timeout()
@@ -437,7 +466,9 @@ class CrossFileTaintTracker:
             result.success = False
             # Still report partial results
             self._identify_vulnerabilities(result)
-            result.warnings.append("Analysis incomplete due to timeout - partial results returned")
+            result.warnings.append(
+                "Analysis incomplete due to timeout - partial results returned"
+            )
         except Exception as e:
             result.errors.append(f"Analysis failed: {e}")
             result.success = False
@@ -496,7 +527,7 @@ class CrossFileTaintTracker:
         self,
         result: CrossFileTaintResult,
         max_iterations: int = 5,
-        timeout_check: Optional[callable] = None,
+        timeout_check: Optional[Callable[[], None]] = None,
     ) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Multi-pass propagation of returns_tainted through import chains.
@@ -510,12 +541,15 @@ class CrossFileTaintTracker:
         We iterate until no new taints are discovered (fixpoint).
         """
         # [20251220_PERF] Pre-cache function nodes to avoid repeated ast.walk()
-        module_func_nodes: Dict[str, List[ast.AST]] = {}
+        module_func_nodes: Dict[
+            str, List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]
+        ] = {}
         for module, file_path in self.resolver.module_to_file.items():
             tree = self._get_file_ast(file_path)
             if tree:
                 func_nodes = [
-                    node for node in ast.walk(tree)
+                    cast(Union[ast.FunctionDef, ast.AsyncFunctionDef], node)
+                    for node in ast.walk(tree)
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                 ]
                 module_func_nodes[module] = func_nodes
@@ -529,9 +563,7 @@ class CrossFileTaintTracker:
             # For each module, re-analyze functions that call imported tainted functions
             for module, func_nodes in module_func_nodes.items():
                 for node in func_nodes:
-                    func_info = self.function_taint_info.get(module, {}).get(
-                        node.name
-                    )
+                    func_info = self.function_taint_info.get(module, {}).get(node.name)
                     if func_info and not func_info.returns_tainted:
                         # Re-analyze with updated taint info
                         old_tainted_vars = len(func_info.tainted_variables)
@@ -676,7 +708,7 @@ class CrossFileTaintTracker:
                     caller_line=node.lineno,
                     target_module=target_module,
                     target_function=target_function,
-                    arguments=self._extract_argument_names(node),
+                    arguments=tuple(self._extract_argument_names(node)),
                 )
 
         return None

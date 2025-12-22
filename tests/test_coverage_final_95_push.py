@@ -217,7 +217,7 @@ class TestAnalysisCacheBranches2:
 
     def test_analysis_cache_stats_property(self):
         """Test AnalysisCache stats property."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
 
         with tempfile.TemporaryDirectory() as tmp:
             cache = AnalysisCache(cache_dir=tmp)
@@ -256,7 +256,7 @@ class TestBaseParserBranches2:
 
     def test_base_parser_import(self):
         """Test base parser can be imported."""
-        from code_scalpel.code_parser.base_parser import BaseParser
+        from code_scalpel.code_parsers.base_parser import BaseParser
 
         assert BaseParser is not None
 
@@ -266,7 +266,7 @@ class TestPythonParserBranches2:
 
     def test_python_parser_parse(self):
         """Test PythonParser parse."""
-        from code_scalpel.code_parser.python_parser import PythonParser
+        from code_scalpel.code_parsers.python_parser import PythonParser
 
         parser = PythonParser()
         result = parser.parse("x = 1")

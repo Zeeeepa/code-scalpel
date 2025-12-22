@@ -35,6 +35,39 @@ warnings.filterwarnings(
 )
 
 
+# TODO: Enhanced secret detection
+#   - Detect base64-encoded secrets
+#   - Identify hex-encoded credentials
+#   - Check for encrypted secrets without key management
+#   - Detect secrets in configuration files (YAML, JSON, TOML)
+#   - Identify environment variable defaults with secrets
+
+# TODO: Cloud provider secrets
+#   - Azure connection strings and SAS tokens
+#   - GCP service account keys (JSON)
+#   - DigitalOcean API tokens
+#   - Heroku API keys
+#   - Cloudflare API tokens
+
+# TODO: Secret entropy analysis
+#   - Calculate Shannon entropy for high-randomness strings
+#   - Detect password patterns (lowercase+numbers, etc.)
+#   - Identify UUIDs used as secrets
+#   - Check for weak secrets ("password123")
+
+# TODO: Secret lifecycle management
+#   - Detect secrets in version control history
+#   - Check for secrets in environment files committed
+#   - Identify secrets in Docker images/layers
+#   - Validate secret rotation age
+
+# TODO: Integration with secret managers
+#   - Suggest AWS Secrets Manager migration
+#   - Recommend HashiCorp Vault usage
+#   - Propose Azure Key Vault integration
+#   - Auto-generate secret manager code
+
+
 class SecretScanner(ast.NodeVisitor):
     """
     Scans AST for hardcoded secrets using comprehensive pattern matching.
@@ -229,7 +262,10 @@ class SecretScanner(ast.NodeVisitor):
             matched_value: The actual matched string (masked in output)
             node: AST node where the secret was found
         """
-        loc = (node.lineno, node.col_offset) if hasattr(node, "lineno") else (0, 0)
+        # AST nodes have lineno and col_offset attributes at runtime
+        lineno = getattr(node, "lineno", 0)
+        col_offset = getattr(node, "col_offset", 0)
+        loc = (lineno, col_offset)
 
         # Check for duplicates
         for v in self.vulnerabilities:
@@ -269,7 +305,10 @@ class SecretScanner(ast.NodeVisitor):
             secret_type: Type of secret detected
             node: AST node for location info
         """
-        loc = (node.lineno, node.col_offset) if hasattr(node, "lineno") else (0, 0)
+        # AST nodes have lineno and col_offset attributes at runtime
+        lineno = getattr(node, "lineno", 0)
+        col_offset = getattr(node, "col_offset", 0)
+        loc = (lineno, col_offset)
 
         # Check for duplicates
         for v in self.vulnerabilities:

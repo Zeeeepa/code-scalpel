@@ -25,6 +25,22 @@ class BaseNormalizer(ABC):
         >>> ir = normalizer.normalize("x = 1 + 2")
         >>> ir.source_language
         'python'
+
+    [20251220_TODO] Add metadata schema for preserving language-specific info:
+        - Type annotations and generics
+        - Access modifiers (public/private/protected)
+        - Documentation/docstrings
+        - Decorator metadata across all languages
+
+    [20251220_TODO] Implement IR validation framework:
+        - Type schema validation for created IR nodes
+        - Consistency checks across polyglot projects
+        - Warning on type mismatches in cross-language code
+
+    [20251220_TODO] Add caching interface:
+        - Memoize normalized subtrees
+        - Cache common patterns (arithmetic, calls, assignments)
+        - Reuse normalized nodes for duplicate code
     """
 
     @property

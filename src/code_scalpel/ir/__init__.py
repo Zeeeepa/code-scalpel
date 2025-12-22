@@ -24,6 +24,37 @@ Modules:
     operators: Operator enums (BinaryOperator, CompareOperator, etc.)
     normalizers: Language-specific normalizers (PythonNormalizer, etc.)
     semantics: Language-specific behavior (PythonSemantics, JavaScriptSemantics)
+
+[20251220_TODO] Add export for additional IR nodes:
+    - IRImport, IRExport, IRSwitch, IRTry, IRRaise (polyglot support)
+    - IRYield, IRYieldFrom (generator support)
+    - IRTernary (conditional expressions)
+    - IRDestructure (destructuring patterns) when implemented
+
+[20251220_TODO] Export additional normalizers:
+    - JavaNormalizer, TypeScriptNormalizer
+    - TypeScriptTSXNormalizer for JSX/TSX support
+    - Add conditional imports for optional dependencies
+
+[20251220_TODO] Add IR utility functions:
+    - ir_visitor(node, visitor) - Generic visitor pattern
+    - ir_clone(node) - Deep copy IR subtree
+    - ir_hash(node) - Compute IR node hash for caching
+    - ir_compare(node1, node2) - Structural equality
+    - ir_find(node, predicate) - Search IR tree
+
+[20251220_TODO] Add IR transformation utilities:
+    - ir_replace(node, old, new) - Replace subtrees
+    - ir_map(node, transform) - Functional map over IR
+    - ir_fold(node, combiner, initial) - Fold over IR
+    - ir_collect(node, collector) - Gather matching nodes
+
+[20251220_TODO] Add IR validation and analysis helpers:
+    - validate_ir(ir_module) - Type and structure validation
+    - find_all_calls(ir_module) -> List[IRCall]
+    - find_all_assignments(ir_module) -> List[IRAssign]
+    - find_all_definitions(ir_module) -> List[IRFunctionDef | IRClassDef]
+    - get_variable_scope(ir_node) - Scope analysis helper
 """
 
 from .nodes import (

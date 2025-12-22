@@ -34,6 +34,7 @@ from typing import Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from code_scalpel import SurgicalExtractor
+    from code_scalpel.graph_engine.graph import UniversalGraph
 
 from pydantic import BaseModel, Field
 
@@ -80,7 +81,33 @@ MAX_CODE_SIZE = 100_000
 
 # [20251220_FEATURE] v3.0.5 - Consistent confidence thresholds across security tools
 # Default minimum confidence for sink detection across all tools
-DEFAULT_MIN_CONFIDENCE = 0.7  # Balanced: catches most issues without too many false positives
+DEFAULT_MIN_CONFIDENCE = (
+    0.7  # Balanced: catches most issues without too many false positives
+)
+
+# [20251220_TODO] Add configurable confidence thresholds:
+#     - Support per-tool threshold configuration
+#     - Allow environment variable overrides (SCALPEL_MIN_CONFIDENCE_*)
+#     - Implement adaptive thresholds based on false positive rates
+#     - Add user feedback loop to tune thresholds per project
+
+# [20251220_TODO] Add streaming/incremental response support:
+#     - Implement Tool Use with streaming for large result sets
+#     - Add pagination for crawl_project and cross_file_security_scan
+#     - Support partial results with continuation tokens
+#     - Allow clients to limit result size
+
+# [20251220_TODO] Add request timeout and cancellation:
+#     - Implement per-tool timeout configuration
+#     - Support client-initiated cancellation via MCP protocol
+#     - Add graceful shutdown for long-running operations
+#     - Track timeout-prone tools for monitoring
+
+# [20251220_TODO] Add result deduplication:
+#     - Deduplicate vulnerabilities across multiple scan runs
+#     - Track vulnerability lineage (new/fixed/regressed)
+#     - Implement baseline comparisons for security scans
+#     - Support incremental scan mode
 
 # Project root for resources (default to current directory)
 PROJECT_ROOT = Path.cwd()
@@ -97,6 +124,18 @@ CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 # Format: {(file_path_str, mtime): ast.Module}
 _AST_CACHE: dict[tuple[str, float], "ast.Module"] = {}
 _AST_CACHE_MAX_SIZE = 500  # Limit memory usage - keep last 500 files
+
+# [20251220_TODO] Add persistent AST caching:
+#     - Serialize parsed ASTs to disk for session persistence
+#     - Use SQLite or pickle-based cache backend
+#     - Implement cache invalidation on Python version change
+#     - Add cache statistics endpoint for monitoring
+
+# [20251220_TODO] Add cache eviction strategies:
+#     - Implement LRU eviction instead of FIFO
+#     - Track cache hit/miss rates for monitoring
+#     - Add adaptive cache sizing based on memory pressure
+#     - Support cache preloading for frequently accessed files
 
 
 def _get_cached_ast(file_path: Path) -> "ast.Module | None":
@@ -152,9 +191,25 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
     """Get or create singleton UnifiedSinkDetector."""
     global _SINK_DETECTOR
     if _SINK_DETECTOR is None:
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import UnifiedSinkDetector
+        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
+
         _SINK_DETECTOR = UnifiedSinkDetector()
     return _SINK_DETECTOR  # type: ignore[return-value]
+
+
+# [20251220_TODO] Add detector warm-up and preloading:
+#     - Precompile patterns on server startup
+#     - Detect regex performance issues
+#     - Support custom pattern injection from config
+#     - Add pattern versioning and updates
+
+# [20251220_TODO] Add detector metrics and monitoring:
+#     - Track pattern match times
+#     - Monitor false positive rates per pattern
+#     - Detect performance regressions
+#     - Support pattern profiling and optimization hints
 
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
 # Stores UniversalGraph objects keyed by project root path
@@ -162,6 +217,18 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
 # [20251220_PERF] v3.0.5 - Increased cache TTL from 60s to 300s for large codebases
 _GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
+
+# [20251220_TODO] Add graph cache invalidation on file changes:
+#     - Watch for file system changes (using watchdog or similar)
+#     - Invalidate only affected portions of graph on incremental changes
+#     - Support manual cache invalidation via MCP
+#     - Track invalidation frequency for debugging
+
+# [20251220_TODO] Add graph cache compression:
+#     - Serialize graphs to compressed format for memory efficiency
+#     - Implement graph delta encoding for incremental updates
+#     - Support distributed cache (Redis) for multi-process deployments
+#     - Add cache statistics and memory usage monitoring
 
 
 def _get_cached_graph(project_root: Path) -> UniversalGraph | None:  # type: ignore[name-defined]
@@ -213,6 +280,12 @@ def _is_path_allowed(path: Path) -> bool:
 
     Returns:
         True if path is within allowed roots, False otherwise
+
+    [20251220_TODO] Add path traversal detection:
+        - Detect symlink escape attempts
+        - Validate path components don't contain suspicious patterns
+        - Support denied path patterns (blacklist certain directories)
+        - Log security-relevant path access attempts
     """
     resolved = path.resolve()
 
@@ -243,6 +316,12 @@ def _validate_path_security(path: Path) -> Path:
 
     Raises:
         PermissionError: If path is outside allowed roots
+
+    [20251220_TODO] Add audit logging for path access:
+        - Log all path validations with caller identity
+        - Track denied access attempts
+        - Generate security alerts for suspicious patterns
+        - Support per-client access control lists
     """
     resolved = path.resolve()
 
@@ -284,7 +363,7 @@ async def _fetch_and_cache_roots(ctx: Context | None) -> list[Path]:
     try:
         # Request roots from client via MCP protocol
         # Note: list_roots may not be available on all Context implementations
-        list_roots_fn = getattr(ctx, 'list_roots', None)
+        list_roots_fn = getattr(ctx, "list_roots", None)
         if list_roots_fn is None:
             return [PROJECT_ROOT]
         roots = await list_roots_fn()
@@ -328,7 +407,8 @@ def _get_cache():
     if not CACHE_ENABLED:
         return None
     try:
-        from code_scalpel.utilities.cache import get_cache
+        # [20251223_CONSOLIDATION] Import from unified cache
+        from code_scalpel.cache import get_cache
 
         return get_cache()
     except ImportError:
@@ -691,7 +771,9 @@ class FileContextResult(BaseModel):
     line_count: int = Field(description="Total lines in file")
     functions: list[str] = Field(default_factory=list, description="Function names")
     classes: list[str] = Field(default_factory=list, description="Class names")
-    imports: list[str] = Field(default_factory=list, description="Import statements (max 20)")
+    imports: list[str] = Field(
+        default_factory=list, description="Import statements (max 20)"
+    )
     exports: list[str] = Field(
         default_factory=list, description="Exported symbols (__all__)"
     )
@@ -703,7 +785,9 @@ class FileContextResult(BaseModel):
     )
     summary: str = Field(default="", description="Brief description of file purpose")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    imports_truncated: bool = Field(default=False, description="Whether imports list was truncated")
+    imports_truncated: bool = Field(
+        default=False, description="Whether imports list was truncated"
+    )
     total_imports: int = Field(default=0, description="Total imports before truncation")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -735,10 +819,16 @@ class SymbolReferencesResult(BaseModel):
     references: list[SymbolReference] = Field(
         default_factory=list, description="References found (max 100)"
     )
-    total_references: int = Field(default=0, description="Total reference count before truncation")
+    total_references: int = Field(
+        default=0, description="Total reference count before truncation"
+    )
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    references_truncated: bool = Field(default=False, description="Whether references list was truncated")
-    truncation_warning: str | None = Field(default=None, description="Warning if results truncated")
+    references_truncated: bool = Field(
+        default=False, description="Whether references list was truncated"
+    )
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if results truncated"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -819,7 +909,7 @@ def _count_complexity(tree: ast.AST) -> int:
 def _analyze_java_code(code: str) -> AnalysisResult:
     """Analyze Java code using tree-sitter."""
     try:
-        from code_scalpel.code_parser.java_parsers.java_parser_treesitter import (
+        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import (
             JavaParser,
         )
 
@@ -874,13 +964,15 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
 
         if is_typescript:
             import tree_sitter_typescript as ts_ts
+
             lang = Language(ts_ts.language_typescript())
         else:
             import tree_sitter_javascript as ts_js
+
             lang = Language(ts_js.language())
 
         parser = Parser(lang)
-        tree = parser.parse(bytes(code, 'utf-8'))
+        tree = parser.parse(bytes(code, "utf-8"))
 
         functions = []
         function_details = []
@@ -893,51 +985,64 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
             node_type = node.type
 
             # Functions (function declarations, arrow functions, methods)
-            if node_type in ('function_declaration', 'function', 'generator_function_declaration'):
-                name_node = node.child_by_field_name('name')
-                name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+            if node_type in (
+                "function_declaration",
+                "function",
+                "generator_function_declaration",
+            ):
+                name_node = node.child_by_field_name("name")
+                name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
                 functions.append(name)
                 function_details.append(
                     FunctionInfo(
                         name=name,
                         lineno=node.start_point[0] + 1,
                         end_lineno=node.end_point[0] + 1,
-                        is_async=any(c.type == 'async' for c in node.children),
+                        is_async=any(c.type == "async" for c in node.children),
                     )
                 )
 
             # Arrow functions with variable declaration
-            elif node_type == 'lexical_declaration' or node_type == 'variable_declaration':
+            elif (
+                node_type == "lexical_declaration"
+                or node_type == "variable_declaration"
+            ):
                 for child in node.children:
-                    if child.type == 'variable_declarator':
-                        name_node = child.child_by_field_name('name')
-                        value_node = child.child_by_field_name('value')
-                        if value_node and value_node.type == 'arrow_function':
-                            name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+                    if child.type == "variable_declarator":
+                        name_node = child.child_by_field_name("name")
+                        value_node = child.child_by_field_name("value")
+                        if value_node and value_node.type == "arrow_function":
+                            name = (
+                                name_node.text.decode("utf-8")
+                                if name_node
+                                else "<anonymous>"
+                            )
                             functions.append(name)
                             function_details.append(
                                 FunctionInfo(
                                     name=name,
                                     lineno=child.start_point[0] + 1,
                                     end_lineno=child.end_point[0] + 1,
-                                    is_async=any(c.type == 'async' for c in value_node.children),
+                                    is_async=any(
+                                        c.type == "async" for c in value_node.children
+                                    ),
                                 )
                             )
 
             # Classes
-            elif node_type == 'class_declaration':
-                name_node = node.child_by_field_name('name')
-                name = name_node.text.decode('utf-8') if name_node else '<anonymous>'
+            elif node_type == "class_declaration":
+                name_node = node.child_by_field_name("name")
+                name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
 
                 # Extract methods
                 methods = []
-                body_node = node.child_by_field_name('body')
+                body_node = node.child_by_field_name("body")
                 if body_node:
                     for member in body_node.children:
-                        if member.type == 'method_definition':
-                            method_name_node = member.child_by_field_name('name')
+                        if member.type == "method_definition":
+                            method_name_node = member.child_by_field_name("name")
                             if method_name_node:
-                                methods.append(method_name_node.text.decode('utf-8'))
+                                methods.append(method_name_node.text.decode("utf-8"))
 
                 classes.append(name)
                 class_details.append(
@@ -950,21 +1055,21 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
                 )
 
             # Imports (ES6 import statements)
-            elif node_type == 'import_statement':
-                source_node = node.child_by_field_name('source')
+            elif node_type == "import_statement":
+                source_node = node.child_by_field_name("source")
                 if source_node:
-                    module = source_node.text.decode('utf-8').strip('\'"')
+                    module = source_node.text.decode("utf-8").strip("'\"")
                     imports.append(module)
 
             # CommonJS require
-            elif node_type == 'call_expression':
-                func_node = node.child_by_field_name('function')
-                if func_node and func_node.text == b'require':
-                    args_node = node.child_by_field_name('arguments')
+            elif node_type == "call_expression":
+                func_node = node.child_by_field_name("function")
+                if func_node and func_node.text == b"require":
+                    args_node = node.child_by_field_name("arguments")
                     if args_node and args_node.children:
                         for arg in args_node.children:
-                            if arg.type == 'string':
-                                imports.append(arg.text.decode('utf-8').strip('\'"'))
+                            if arg.type == "string":
+                                imports.append(arg.text.decode("utf-8").strip("'\""))
 
             # Recurse into children
             for child in node.children:
@@ -975,13 +1080,19 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
         # Estimate complexity (branches)
         complexity = 1
         for node in _walk_ts_tree(tree.root_node):
-            if node.type in ('if_statement', 'while_statement', 'for_statement',
-                            'for_in_statement', 'catch_clause', 'ternary_expression',
-                            'switch_case'):
+            if node.type in (
+                "if_statement",
+                "while_statement",
+                "for_statement",
+                "for_in_statement",
+                "catch_clause",
+                "ternary_expression",
+                "switch_case",
+            ):
                 complexity += 1
-            elif node.type == 'binary_expression':
-                op_node = node.child_by_field_name('operator')
-                if op_node and op_node.text in (b'&&', b'||'):
+            elif node.type == "binary_expression":
+                op_node = node.child_by_field_name("operator")
+                if op_node and op_node.text in (b"&&", b"||"):
                     complexity += 1
 
         lang_name = "TypeScript" if is_typescript else "JavaScript"
@@ -1039,9 +1150,10 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
     [20251219_BUGFIX] v3.0.4 - Auto-detect language from content if not specified.
     [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present.
     [20251220_FEATURE] v3.0.4 - Multi-language support for JavaScript/TypeScript.
+    [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection.
     """
     # [20251219_BUGFIX] Strip UTF-8 BOM if present
-    if code.startswith('\ufeff'):
+    if code.startswith("\ufeff"):
         code = code[1:]
 
     valid, error = _validate_code(code)
@@ -1058,9 +1170,10 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             error=error,
         )
 
-    # [20251219_BUGFIX] v3.0.4 - Auto-detect language from content
+    # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
     if language == "auto" or language is None:
-        from code_scalpel.polyglot import detect_language, Language
+        from code_scalpel.unified_extractor import detect_language, Language
+
         detected = detect_language(None, code)
         lang_map = {
             Language.PYTHON: "python",
@@ -1287,9 +1400,17 @@ def _security_scan_sync(
             # [20251220_FEATURE] v3.0.4 - Detect language from file extension
             ext = path.suffix.lower()
             extension_map = {
-                ".py": "python", ".pyi": "python", ".pyw": "python",
-                ".js": "javascript", ".mjs": "javascript", ".cjs": "javascript", ".jsx": "javascript",
-                ".ts": "typescript", ".tsx": "typescript", ".mts": "typescript", ".cts": "typescript",
+                ".py": "python",
+                ".pyi": "python",
+                ".pyw": "python",
+                ".js": "javascript",
+                ".mjs": "javascript",
+                ".cjs": "javascript",
+                ".jsx": "javascript",
+                ".ts": "typescript",
+                ".tsx": "typescript",
+                ".mts": "typescript",
+                ".cts": "typescript",
                 ".java": "java",
             }
             detected_language = extension_map.get(ext, "python")
@@ -1344,7 +1465,9 @@ def _security_scan_sync(
         if detected_language != "python":
             # [20251220_PERF] v3.0.5 - Use singleton detector to avoid rebuilding patterns
             detector = _get_sink_detector()
-            detected_sinks = detector.detect_sinks(code, detected_language, min_confidence=0.7)
+            detected_sinks = detector.detect_sinks(
+                code, detected_language, min_confidence=0.7
+            )
 
             for sink in detected_sinks:
                 vulnerabilities.append(
@@ -1621,11 +1744,19 @@ class TypeEvaporationResultModel(BaseModel):
 
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    frontend_vulnerabilities: int = Field(default=0, description="Number of frontend vulnerabilities")
-    backend_vulnerabilities: int = Field(default=0, description="Number of backend vulnerabilities")
+    frontend_vulnerabilities: int = Field(
+        default=0, description="Number of frontend vulnerabilities"
+    )
+    backend_vulnerabilities: int = Field(
+        default=0, description="Number of backend vulnerabilities"
+    )
     cross_file_issues: int = Field(default=0, description="Number of cross-file issues")
-    matched_endpoints: list[str] = Field(default_factory=list, description="Correlated API endpoints")
-    vulnerabilities: list[VulnerabilityInfo] = Field(default_factory=list, description="All vulnerabilities")
+    matched_endpoints: list[str] = Field(
+        default_factory=list, description="Correlated API endpoints"
+    )
+    vulnerabilities: list[VulnerabilityInfo] = Field(
+        default_factory=list, description="All vulnerabilities"
+    )
     summary: str = Field(default="", description="Analysis summary")
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -1772,11 +1903,17 @@ class DependencyVulnerability(BaseModel):
     """
 
     id: str = Field(description="Vulnerability ID (OSV, CVE, or GHSA)")
-    summary: str = Field(default="", description="Brief description of the vulnerability")
-    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    summary: str = Field(
+        default="", description="Brief description of the vulnerability"
+    )
+    severity: str = Field(
+        default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package: str = Field(description="Name of the vulnerable package")
     vulnerable_version: str = Field(description="Version that is vulnerable")
-    fixed_version: str | None = Field(default=None, description="First version that fixes this vulnerability")
+    fixed_version: str | None = Field(
+        default=None, description="First version that fixes this vulnerability"
+    )
 
 
 class DependencyInfo(BaseModel):
@@ -1802,14 +1939,21 @@ class DependencyScanResult(BaseModel):
     success: bool = Field(description="Whether the scan completed successfully")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     error: str | None = Field(default=None, description="Error message if failed")
-    total_dependencies: int = Field(default=0, description="Number of dependencies found")
-    vulnerable_count: int = Field(default=0, description="Number of dependencies with vulnerabilities")
-    total_vulnerabilities: int = Field(default=0, description="Total number of vulnerabilities found")
+    total_dependencies: int = Field(
+        default=0, description="Number of dependencies found"
+    )
+    vulnerable_count: int = Field(
+        default=0, description="Number of dependencies with vulnerabilities"
+    )
+    total_vulnerabilities: int = Field(
+        default=0, description="Total number of vulnerabilities found"
+    )
     severity_summary: dict[str, int] = Field(
         default_factory=dict, description="Count of vulnerabilities by severity"
     )
     dependencies: list[DependencyInfo] = Field(
-        default_factory=list, description="All scanned dependencies with their vulnerabilities"
+        default_factory=list,
+        description="All scanned dependencies with their vulnerabilities",
     )
 
 
@@ -1818,13 +1962,21 @@ class VulnerabilityFindingModel(BaseModel):
 
     id: str = Field(description="OSV vulnerability ID (e.g., GHSA-xxxx-xxxx-xxxx)")
     cve_id: str | None = Field(default=None, description="CVE ID if available")
-    severity: str = Field(default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN")
+    severity: str = Field(
+        default="UNKNOWN", description="Severity: CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN"
+    )
     package_name: str = Field(description="Name of the vulnerable package")
     package_version: str = Field(description="Version of the vulnerable package")
     ecosystem: str = Field(description="Package ecosystem (npm, Maven, PyPI)")
-    summary: str = Field(default="", description="Brief description of the vulnerability")
-    fixed_versions: list[str] = Field(default_factory=list, description="Versions that fix this vulnerability")
-    source_file: str = Field(default="", description="Dependency file where package was found")
+    summary: str = Field(
+        default="", description="Brief description of the vulnerability"
+    )
+    fixed_versions: list[str] = Field(
+        default_factory=list, description="Versions that fix this vulnerability"
+    )
+    source_file: str = Field(
+        default="", description="Dependency file where package was found"
+    )
 
 
 class DependencyScanResultModel(BaseModel):
@@ -1833,14 +1985,22 @@ class DependencyScanResultModel(BaseModel):
     success: bool = Field(description="Whether the scan completed successfully")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     error: str | None = Field(default=None, description="Error message if failed")
-    dependencies_scanned: int = Field(default=0, description="Number of dependencies checked")
-    vulnerabilities_found: int = Field(default=0, description="Number of vulnerabilities found")
+    dependencies_scanned: int = Field(
+        default=0, description="Number of dependencies checked"
+    )
+    vulnerabilities_found: int = Field(
+        default=0, description="Number of vulnerabilities found"
+    )
     critical_count: int = Field(default=0, description="Number of CRITICAL severity")
     high_count: int = Field(default=0, description="Number of HIGH severity")
     medium_count: int = Field(default=0, description="Number of MEDIUM severity")
     low_count: int = Field(default=0, description="Number of LOW severity")
-    findings: list[VulnerabilityFindingModel] = Field(default_factory=list, description="Detailed findings")
-    errors: list[str] = Field(default_factory=list, description="Errors encountered during scan")
+    findings: list[VulnerabilityFindingModel] = Field(
+        default_factory=list, description="Detailed findings"
+    )
+    errors: list[str] = Field(
+        default_factory=list, description="Errors encountered during scan"
+    )
     summary: str = Field(default="", description="Human-readable summary")
 
 
@@ -1926,7 +2086,7 @@ def _scan_dependencies_sync(
 
         # Filter dev dependencies if requested
         if not include_dev:
-            all_deps = [d for d in all_deps if not getattr(d, 'is_dev', False)]
+            all_deps = [d for d in all_deps if not getattr(d, "is_dev", False)]
 
         # Build DependencyInfo list
         dependency_infos: list[DependencyInfo] = []
@@ -1952,14 +2112,16 @@ def _scan_dependencies_sync(
                     severity = _extract_severity(vuln)
                     fixed = _extract_fixed_version(vuln, dep.name)
 
-                    dep_vulns.append(DependencyVulnerability(
-                        id=vuln.get("id", "UNKNOWN"),
-                        summary=vuln.get("summary", ""),
-                        severity=severity,
-                        package=dep.name,
-                        vulnerable_version=dep.version,
-                        fixed_version=fixed,
-                    ))
+                    dep_vulns.append(
+                        DependencyVulnerability(
+                            id=vuln.get("id", "UNKNOWN"),
+                            summary=vuln.get("summary", ""),
+                            severity=severity,
+                            package=dep.name,
+                            vulnerable_version=dep.version,
+                            fixed_version=fixed,
+                        )
+                    )
 
                     severity_summary[severity] = severity_summary.get(severity, 0) + 1
                     total_vulns += 1
@@ -1967,12 +2129,18 @@ def _scan_dependencies_sync(
             if dep_vulns:
                 vulnerable_count += 1
 
-            dependency_infos.append(DependencyInfo(
-                name=dep.name,
-                version=dep.version,
-                ecosystem=dep.ecosystem.value if hasattr(dep.ecosystem, 'value') else str(dep.ecosystem),
-                vulnerabilities=dep_vulns,
-            ))
+            dependency_infos.append(
+                DependencyInfo(
+                    name=dep.name,
+                    version=dep.version,
+                    ecosystem=(
+                        dep.ecosystem.value
+                        if hasattr(dep.ecosystem, "value")
+                        else str(dep.ecosystem)
+                    ),
+                    vulnerabilities=dep_vulns,
+                )
+            )
 
         return DependencyScanResult(
             success=True,
@@ -2043,7 +2211,9 @@ def _extract_severity(vuln: dict[str, Any]) -> str:
     if "ecosystem_specific" in vuln:
         eco_severity = vuln["ecosystem_specific"].get("severity", "")
         if eco_severity.upper() in ("CRITICAL", "HIGH", "MEDIUM", "MODERATE", "LOW"):
-            return "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
+            return (
+                "MEDIUM" if eco_severity.upper() == "MODERATE" else eco_severity.upper()
+            )
 
     return "UNKNOWN"
 
@@ -2059,7 +2229,9 @@ def _extract_fixed_version(vuln: dict[str, Any], package_name: str) -> str | Non
     return None
 
 
-def _scan_dependencies_sync_legacy(path: str, timeout: float = 30.0) -> DependencyScanResultModel:
+def _scan_dependencies_sync_legacy(
+    path: str, timeout: float = 30.0
+) -> DependencyScanResultModel:
     """
     Synchronous implementation of dependency vulnerability scanning.
 
@@ -2092,17 +2264,19 @@ def _scan_dependencies_sync_legacy(path: str, timeout: float = 30.0) -> Dependen
         severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
 
         for f in result.findings:
-            findings.append(VulnerabilityFindingModel(
-                id=f.id,
-                cve_id=f.cve_id,
-                severity=f.severity,
-                package_name=f.package_name,
-                package_version=f.package_version,
-                ecosystem=f.ecosystem,
-                summary=f.summary,
-                fixed_versions=f.fixed_versions,
-                source_file=f.source_file,
-            ))
+            findings.append(
+                VulnerabilityFindingModel(
+                    id=f.id,
+                    cve_id=f.cve_id,
+                    severity=f.severity,
+                    package_name=f.package_name,
+                    package_version=f.package_version,
+                    ecosystem=f.ecosystem,
+                    summary=f.summary,
+                    fixed_versions=f.fixed_versions,
+                    source_file=f.source_file,
+                )
+            )
             if f.severity in severity_counts:
                 severity_counts[f.severity] += 1
 
@@ -2190,7 +2364,9 @@ async def scan_dependencies(
 
     # [20251220_FEATURE] v3.0.5 - Progress reporting
     if ctx:
-        await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
+        await ctx.report_progress(
+            0, 100, f"Scanning dependencies in {resolved_path}..."
+        )
 
     result = await asyncio.to_thread(
         _scan_dependencies_sync,
@@ -2202,7 +2378,9 @@ async def scan_dependencies(
 
     if ctx:
         vuln_count = result.total_vulnerabilities
-        await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
+        await ctx.report_progress(
+            100, 100, f"Scan complete: {vuln_count} vulnerabilities found"
+        )
 
     return result
 
@@ -2420,10 +2598,14 @@ def _symbolic_execute_sync(code: str, max_paths: int = 10) -> SymbolicResult:
 
     except ImportError as e:
         # Fallback to basic path analysis - SymbolicAnalyzer not available
-        logger.warning(f"Symbolic execution not available (ImportError: {e}), using basic analysis")
+        logger.warning(
+            f"Symbolic execution not available (ImportError: {e}), using basic analysis"
+        )
         basic_result = _basic_symbolic_analysis(code)
         # Indicate fallback in error field without marking as failure
-        basic_result.error = f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
+        basic_result.error = (
+            f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
+        )
         return basic_result
     except Exception as e:
         # If symbolic execution fails (e.g., unsupported AST nodes like f-strings),
@@ -2555,7 +2737,7 @@ def _generate_tests_sync(
     code: str | None = None,
     file_path: str | None = None,
     function_name: str | None = None,
-    framework: str = "pytest"
+    framework: str = "pytest",
 ) -> TestGenerationResult:
     """Synchronous implementation of generate_unit_tests.
 
@@ -2640,7 +2822,7 @@ async def generate_unit_tests(
     code: str | None = None,
     file_path: str | None = None,
     function_name: str | None = None,
-    framework: str = "pytest"
+    framework: str = "pytest",
 ) -> TestGenerationResult:
     """
     Generate unit tests from code using symbolic execution.
@@ -2694,7 +2876,9 @@ async def generate_unit_tests(
     Returns:
         TestGenerationResult with pytest_code/unittest_code and generated test_cases
     """
-    return await asyncio.to_thread(_generate_tests_sync, code, file_path, function_name, framework)
+    return await asyncio.to_thread(
+        _generate_tests_sync, code, file_path, function_name, framework
+    )
 
 
 # ============================================================================
@@ -2959,7 +3143,8 @@ async def _extract_polyglot(
     Returns:
         ContextualExtractionResult with extracted code
     """
-    from code_scalpel.polyglot import PolyglotExtractor
+    # [20251221_FEATURE] v3.1.0 - Use UnifiedExtractor instead of PolyglotExtractor
+    from code_scalpel.unified_extractor import UnifiedExtractor
     from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
@@ -2971,11 +3156,11 @@ async def _extract_polyglot(
         # Create extractor from file or code
         if file_path is not None:
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
-            extractor = PolyglotExtractor.from_file(resolved_path, language)
+            extractor = UnifiedExtractor.from_file(resolved_path, language)
         else:
             # code is guaranteed to be str here (checked earlier in function)
             assert code is not None
-            extractor = PolyglotExtractor(code, language=language)
+            extractor = UnifiedExtractor(code, language=language)
 
         # Perform extraction
         result = extractor.extract(target_type, target_name)
@@ -3005,7 +3190,7 @@ async def _extract_polyglot(
     except FileNotFoundError as e:
         return _extraction_error(target_name, str(e))
     except Exception as e:
-        return _extraction_error(target_name, f"Polyglot extraction failed: {str(e)}")
+        return _extraction_error(target_name, f"Extraction failed: {str(e)}")
 
 
 def _create_extractor(
@@ -3243,9 +3428,12 @@ async def extract_code(
         await _fetch_and_cache_roots(ctx)
 
     from code_scalpel.surgical_extractor import ContextualExtraction, ExtractionResult
-    from code_scalpel.polyglot import Language, detect_language
+    from code_scalpel.unified_extractor import (
+        Language,
+        detect_language,
+    )
 
-    # [20251214_FEATURE] v2.0.0 - Multi-language support
+    # [20251221_FEATURE] v3.1.0 - Unified extractor for all languages
     # Determine language from parameter, file extension, or code content
     detected_lang = Language.AUTO
     if language:
@@ -4897,12 +5085,12 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
 
     # Language detection by file extension
     LANG_EXTENSIONS = {
-        '.py': 'python',
-        '.js': 'javascript',
-        '.jsx': 'javascript',
-        '.ts': 'typescript',
-        '.tsx': 'typescript',
-        '.java': 'java',
+        ".py": "python",
+        ".js": "javascript",
+        ".jsx": "javascript",
+        ".ts": "typescript",
+        ".tsx": "typescript",
+        ".java": "java",
     }
 
     try:
@@ -4923,10 +5111,10 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
         lines = code.splitlines()
 
         # [20251220_FEATURE] Detect language from file extension
-        detected_lang = LANG_EXTENSIONS.get(path.suffix.lower(), 'unknown')
+        detected_lang = LANG_EXTENSIONS.get(path.suffix.lower(), "unknown")
 
         # For non-Python files, use analyze_code which handles multi-language
-        if detected_lang != 'python':
+        if detected_lang != "python":
             analysis = _analyze_code_sync(code, detected_lang)
             total_imports = len(analysis.imports)
             return FileContextResult(
@@ -5163,7 +5351,9 @@ def _get_symbol_references_sync(
                     matched = False
 
                     # Check definitions (FunctionDef, AsyncFunctionDef, ClassDef)
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    if isinstance(
+                        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                    ):
                         if node.name == symbol_name:
                             matched = True
                             is_def = True
@@ -5176,7 +5366,9 @@ def _get_symbol_references_sync(
                         func = node.func
                         if isinstance(func, ast.Name) and func.id == symbol_name:
                             matched = True
-                        elif isinstance(func, ast.Attribute) and func.attr == symbol_name:
+                        elif (
+                            isinstance(func, ast.Attribute) and func.attr == symbol_name
+                        ):
                             matched = True
 
                     # Check name references (but avoid duplicating Call nodes)
@@ -5185,7 +5377,9 @@ def _get_symbol_references_sync(
 
                     if matched:
                         seen.add(loc_key)
-                        context = lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        context = (
+                            lines[node_line - 1] if 0 < node_line <= len(lines) else ""
+                        )
                         references.append(
                             SymbolReference(
                                 file=rel_path,
@@ -5295,7 +5489,9 @@ async def get_symbol_references(
     )
 
     if ctx:
-        await ctx.report_progress(100, 100, f"Found {result.total_references} references")
+        await ctx.report_progress(
+            100, 100, f"Found {result.total_references} references"
+        )
 
     return result
 
@@ -5454,7 +5650,9 @@ async def get_call_graph(
     if ctx:
         node_count = len(result.nodes) if result.nodes else 0
         edge_count = len(result.edges) if result.edges else 0
-        await ctx.report_progress(100, 100, f"Call graph complete: {node_count} functions, {edge_count} calls")
+        await ctx.report_progress(
+            100, 100, f"Call graph complete: {node_count} functions, {edge_count} calls"
+        )
 
     return result
 
@@ -5851,8 +6049,12 @@ class ProjectMapResult(BaseModel):
     )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    modules_in_diagram: int = Field(default=0, description="Number of modules shown in Mermaid diagram")
-    diagram_truncated: bool = Field(default=False, description="Whether Mermaid diagram was truncated")
+    modules_in_diagram: int = Field(
+        default=0, description="Number of modules shown in Mermaid diagram"
+    )
+    diagram_truncated: bool = Field(
+        default=False, description="Whether Mermaid diagram was truncated"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -6650,7 +6852,9 @@ def _cross_file_security_scan_sync(
     max_depth: int,
     include_diagram: bool,
     timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
-    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
+    max_modules: (
+        int | None
+    ) = 500,  # [20251220_PERF] Default module limit for large projects
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
     from code_scalpel.symbolic_execution_tools.cross_file_taint import (
@@ -6862,7 +7066,9 @@ async def cross_file_security_scan(
     # [20251215_FEATURE] v2.0.0 - Progress token support
     # [20251220_FEATURE] v3.0.5 - Enhanced progress messages
     if ctx:
-        await ctx.report_progress(progress=0, total=100, message="Starting cross-file security scan...")
+        await ctx.report_progress(
+            progress=0, total=100, message="Starting cross-file security scan..."
+        )
 
     result = await asyncio.to_thread(
         _cross_file_security_scan_sync,
@@ -6877,7 +7083,11 @@ async def cross_file_security_scan(
     # Report completion with summary
     if ctx:
         vuln_count = result.vulnerability_count
-        await ctx.report_progress(progress=100, total=100, message=f"Scan complete: {vuln_count} cross-file vulnerabilities found")
+        await ctx.report_progress(
+            progress=100,
+            total=100,
+            message=f"Scan complete: {vuln_count} cross-file vulnerabilities found",
+        )
 
     return result
 
@@ -7238,8 +7448,8 @@ def run_server(
         # [20251215_FEATURE] Configure SSL if certificates provided
         if use_https:
             # Use setattr for optional SSL settings that may not be in all FastMCP versions
-            setattr(mcp.settings, 'ssl_certfile', ssl_certfile)
-            setattr(mcp.settings, 'ssl_keyfile', ssl_keyfile)
+            setattr(mcp.settings, "ssl_certfile", ssl_certfile)
+            setattr(mcp.settings, "ssl_keyfile", ssl_keyfile)
             protocol = "https"
         else:
             protocol = "http"

@@ -308,6 +308,10 @@ class CryptographicPolicyVerifier:
         """
         result = VerificationResult(success=False)
 
+        if not self.manifest:
+            result.error = "Policy manifest not loaded. All operations DENIED."
+            raise SecurityError(result.error)
+
         # First verify manifest signature
         if not self._verify_manifest_signature():
             result.error = (
@@ -363,6 +367,9 @@ class CryptographicPolicyVerifier:
         Raises:
             SecurityError: If file doesn't match or is missing
         """
+        if not self.manifest:
+            raise SecurityError("Policy manifest not loaded. Cannot verify file.")
+
         if filename not in self.manifest.files:
             raise SecurityError(
                 f"File '{filename}' not in policy manifest. Cannot verify."
@@ -494,7 +501,9 @@ class CryptographicPolicyVerifier:
         )
 
     @staticmethod
-    def save_manifest(manifest: PolicyManifest, policy_dir: str = ".code-scalpel") -> Path:
+    def save_manifest(
+        manifest: PolicyManifest, policy_dir: str = ".code-scalpel"
+    ) -> Path:
         """
         Save manifest to file.
 

@@ -6,6 +6,13 @@ from typing import Optional, Union
 import networkx as nx
 
 
+# [20251221_TODO] Add multi-dimensional slicing:
+#     - Support simultaneous slicing by multiple criteria
+#     - Implement context-specific slices (class/function scope)
+#     - Add value-dependent slices (track specific constant values)
+#     - Support nondeterministic slicing for concurrent code
+
+
 class SliceType(Enum):
     """Types of program slices."""
 
@@ -25,7 +32,7 @@ class SlicingCriteria:
     nodes: set[str]
     variables: set[str]
     line_range: Optional[tuple[int, int]] = None
-    dependency_types: set[str] = None
+    dependency_types: Optional[set[str]] = None
     include_control: bool = True
     include_data: bool = True
 
@@ -49,6 +56,24 @@ class ProgramSlicer:
         self.pdg = pdg
         self.cache = {}
         self._initialize_indices()
+
+        # [20251221_TODO] Add amnestic slicing:
+        #     - Implement memory-bounded slicing for large graphs
+        #     - Support incremental slice computation with snapshots
+        #     - Add slice compression/summarization
+        #     - Implement lightweight slices for streaming analysis
+
+        # [20251221_TODO] Add assertion-guided slicing:
+        #     - Slice based on specific program assertions
+        #     - Support property-based slicing for formal verification
+        #     - Track assertion satisfaction along slice paths
+        #     - Generate minimal failing slices for bug reproduction
+
+        # [20251221_TODO] Add interactive slice refinement:
+        #     - Support user feedback on slice results
+        #     - Enable iterative slice refinement
+        #     - Track slice quality metrics and feedback
+        #     - Learn preferences for future slicing operations
 
     def _initialize_indices(self):
         """Initialize indices for faster slicing."""
@@ -107,7 +132,8 @@ class ProgramSlicer:
         elif slice_type in (SliceType.UNION, SliceType.INTERSECTION):
             sliced_pdg = self._compute_composite_slice(criteria, slice_type)
         else:
-            sliced_pdg = self._compute_specialized_slice(criteria, slice_type)
+            # Default to backward slice for unknown types
+            sliced_pdg = self._compute_backward_slice(criteria)
 
         self.cache[cache_key] = sliced_pdg
         return sliced_pdg.copy()
@@ -170,6 +196,40 @@ class ProgramSlicer:
             "core": self._extract_core_component(full_slice),
             "auxiliary": self._extract_auxiliary_component(full_slice),
         }
+
+    def _extract_data_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
+        """Extract data dependency component from a slice."""
+        edges_to_keep = [
+            (u, v)
+            for u, v, d in sliced_pdg.edges(data=True)
+            if d.get("type") == "data_dependency"
+        ]
+        subgraph = sliced_pdg.edge_subgraph(edges_to_keep)
+        return nx.DiGraph(subgraph)
+
+    def _extract_control_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
+        """Extract control dependency component from a slice."""
+        edges_to_keep = [
+            (u, v)
+            for u, v, d in sliced_pdg.edges(data=True)
+            if d.get("type") == "control_dependency"
+        ]
+        subgraph = sliced_pdg.edge_subgraph(edges_to_keep)
+        return nx.DiGraph(subgraph)
+
+    def _extract_core_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
+        """Extract core component (nodes with multiple dependencies)."""
+        core_nodes = {
+            node for node in sliced_pdg.nodes() if sliced_pdg.in_degree(node) > 1
+        }
+        return self._induce_subgraph(core_nodes)
+
+    def _extract_auxiliary_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
+        """Extract auxiliary component (leaf nodes)."""
+        auxiliary_nodes = {
+            node for node in sliced_pdg.nodes() if sliced_pdg.out_degree(node) == 0
+        }
+        return self._induce_subgraph(auxiliary_nodes)
 
     def _compute_backward_slice(self, criteria: SlicingCriteria) -> nx.DiGraph:
         """Compute a backward slice."""
@@ -317,7 +377,8 @@ class ProgramSlicer:
 
     def _induce_subgraph(self, nodes: set[str]) -> nx.DiGraph:
         """Create a subgraph from the given nodes, preserving edge attributes."""
-        return self.pdg.subgraph(nodes).copy()
+        subgraph = self.pdg.subgraph(nodes)
+        return nx.DiGraph(subgraph)
 
     def _make_cache_key(
         self, criteria: SlicingCriteria, slice_type: SliceType

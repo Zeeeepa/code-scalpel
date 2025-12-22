@@ -24,7 +24,8 @@ CST Node Reference (tree-sitter-javascript):
 
 from __future__ import annotations
 
-from typing import Any, List, Union
+from typing import Any, List, Union, cast, Optional
+import warnings
 
 from ..nodes import (
     IRModule,
@@ -161,9 +162,38 @@ class JavaScriptNormalizer(BaseNormalizer):
     def __init__(self):
         self._filename: str = "<string>"
         self._source: str = ""
-        self._parser = None
-        self._language = None
+        self._parser: Optional[Any] = None
+        self._language: Optional[Any] = None
         self._ensure_parser()
+
+    # [20251220_BUGFIX] Helper methods for proper type casting
+    def _norm_expr(self, node: Any) -> Optional[IRExpr]:
+        """Normalize node to IRExpr with type casting."""
+        if node is None:
+            return None
+        result = self.normalize_node(node)
+        return cast(IRExpr, result) if not isinstance(result, list) else None
+
+    def _norm_expr_list(self, nodes: List[Any]) -> List[IRExpr]:
+        """Normalize list of expression nodes to List[IRExpr]."""
+        results = []
+        for node in nodes:
+            result = self.normalize_node(node)
+            if not isinstance(result, list) and result is not None:
+                results.append(cast(IRExpr, result))
+        return results
+
+    def _norm_body(self, nodes: List[Any]) -> List[IRNode]:
+        """Normalize list of statement nodes."""
+        results = []
+        for node in nodes:
+            result = self.normalize_node(node)
+            if result is not None:
+                if isinstance(result, list):
+                    results.extend(result)
+                else:
+                    results.append(result)
+        return results
 
     def _ensure_parser(self) -> None:
         """Lazily initialize tree-sitter parser."""
@@ -189,6 +219,7 @@ class JavaScriptNormalizer(BaseNormalizer):
     def normalize(self, source: str, filename: str = "<string>") -> IRModule:
         """Parse JavaScript source and normalize to IR."""
         self._ensure_parser()
+        assert self._parser is not None  # [20251220_BUGFIX] Guard parser None access
         self._filename = filename
         self._source = source
 
@@ -224,7 +255,6 @@ class JavaScriptNormalizer(BaseNormalizer):
             return None
 
         # Warn and skip unknown nodes
-        import warnings
 
         warnings.warn(
             f"JavaScript CST node type '{node_type}' not yet supported. "
@@ -298,34 +328,41 @@ class JavaScriptNormalizer(BaseNormalizer):
 
     def _normalize_program(self, node) -> IRModule:
         """Normalize the root program node."""
-        body = self._normalize_body(self._get_named_children(node))
+        body = self._norm_body(self._get_named_children(node))
 
-        return self._set_language(
-            IRModule(
-                body=body,
-                loc=self._make_loc(node),
-            )
+        # [20251220_BUGFIX] Cast _set_language return to IRModule
+        return cast(
+            IRModule,
+            self._set_language(
+                IRModule(
+                    body=body,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
     # Statements
     # =========================================================================
 
-    def _normalize_expression_statement(self, node) -> IRExprStmt:
+    def _normalize_expression_statement(self, node) -> Optional[IRExprStmt]:
         """Normalize expression statement (expr;)."""
         expr_node = self._get_named_children(node)[0] if node.children else None
         if expr_node is None:
             return None
 
-        expr = self.normalize_node(expr_node)
+        expr = self._norm_expr(expr_node)
         if expr is None:
             return None
 
-        return self._set_language(
-            IRExprStmt(
-                value=expr,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRExprStmt,
+            self._set_language(
+                IRExprStmt(
+                    value=expr,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_return_statement(self, node) -> IRReturn:
@@ -333,22 +370,27 @@ class JavaScriptNormalizer(BaseNormalizer):
         # return; or return expr;
         # The return value is a named child, not a field
         named_children = self._get_named_children(node)
-        value = self.normalize_node(named_children[0]) if named_children else None
+        value = self._norm_expr(named_children[0]) if named_children else None
 
-        return self._set_language(
-            IRReturn(
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRReturn,
+            self._set_language(
+                IRReturn(
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_break_statement(self, node) -> IRBreak:
         """Normalize break statement."""
-        return self._set_language(IRBreak(loc=self._make_loc(node)))
+        return cast(IRBreak, self._set_language(IRBreak(loc=self._make_loc(node))))
 
     def _normalize_continue_statement(self, node) -> IRContinue:
         """Normalize continue statement."""
-        return self._set_language(IRContinue(loc=self._make_loc(node)))
+        return cast(
+            IRContinue, self._set_language(IRContinue(loc=self._make_loc(node)))
+        )
 
     def _normalize_empty_statement(self, node) -> None:
         """Empty statement (;) - skip."""
@@ -382,17 +424,18 @@ class JavaScriptNormalizer(BaseNormalizer):
         name_node = self._child_by_field(node, "name")
         value_node = self._child_by_field(node, "value")
 
-        target = self.normalize_node(name_node) if name_node else None
-        value = (
-            self.normalize_node(value_node) if value_node else IRConstant(value=None)
-        )
+        target = self._norm_expr(name_node) if name_node else None
+        value = self._norm_expr(value_node) if value_node else IRConstant(value=None)
 
-        return self._set_language(
-            IRAssign(
-                targets=[target],
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRAssign,
+            self._set_language(
+                IRAssign(
+                    targets=[cast(IRExpr, target)] if target else [],
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_lexical_declaration(self, node) -> Union[IRAssign, List[IRAssign]]:
@@ -430,14 +473,17 @@ class JavaScriptNormalizer(BaseNormalizer):
             if not c.is_named
         )
 
-        return self._set_language(
-            IRFunctionDef(
-                name=name,
-                params=params,
-                body=body,
-                is_async=is_async,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRFunctionDef,
+            self._set_language(
+                IRFunctionDef(
+                    name=name,
+                    params=params,
+                    body=body,
+                    is_async=is_async,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_arrow_function(self, node) -> IRFunctionDef:
@@ -469,7 +515,7 @@ class JavaScriptNormalizer(BaseNormalizer):
                 body = self._normalize_block(body_node)
             else:
                 # Expression body: implicit return
-                expr = self.normalize_node(body_node)
+                expr = self._norm_expr(body_node)
                 body = [IRReturn(value=expr)] if expr else []
         else:
             body = []
@@ -480,14 +526,17 @@ class JavaScriptNormalizer(BaseNormalizer):
             if not c.is_named
         )
 
-        return self._set_language(
-            IRFunctionDef(
-                name="",  # Arrow functions are anonymous
-                params=params,
-                body=body,
-                is_async=is_async,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRFunctionDef,
+            self._set_language(
+                IRFunctionDef(
+                    name="",  # Arrow functions are anonymous
+                    params=params,
+                    body=cast(List[IRNode], body),
+                    is_async=is_async,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_function_expression(self, node) -> IRFunctionDef:
@@ -514,7 +563,7 @@ class JavaScriptNormalizer(BaseNormalizer):
                     IRParameter(
                         name=self._get_text(name_node) if name_node else "",
                         default=(
-                            self.normalize_node(default_node) if default_node else None
+                            self._norm_expr(default_node) if default_node else None
                         ),
                     )
                 )
@@ -524,7 +573,7 @@ class JavaScriptNormalizer(BaseNormalizer):
                 params.append(
                     IRParameter(
                         name=self._get_text(name_node) if name_node else "",
-                        is_variadic=True,
+                        is_rest=True,  # [20251220_BUGFIX] Correct parameter name
                     )
                 )
         return params
@@ -582,13 +631,16 @@ class JavaScriptNormalizer(BaseNormalizer):
                 alt = self.normalize_node(alt_node)
                 alternative = [alt] if alt else []
 
-        return self._set_language(
-            IRIf(
-                test=condition,
-                body=consequence,
-                orelse=alternative,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRIf,
+            self._set_language(
+                IRIf(
+                    test=condition,
+                    body=cast(List[IRNode], consequence),
+                    orelse=cast(List[IRNode], alternative),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_while_statement(self, node) -> IRWhile:
@@ -607,12 +659,15 @@ class JavaScriptNormalizer(BaseNormalizer):
         else:
             body = []
 
-        return self._set_language(
-            IRWhile(
-                test=condition,
-                body=body,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRWhile,
+            self._set_language(
+                IRWhile(
+                    test=condition,
+                    body=cast(List[IRNode], body),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_for_statement(self, node) -> IRFor:
@@ -650,18 +705,26 @@ class JavaScriptNormalizer(BaseNormalizer):
 
         # For now, return as IRWhile with init prepended
         while_node = IRWhile(
-            test=condition if condition else IRConstant(value=True),
-            body=body + ([IRExprStmt(value=update)] if update else []),
+            test=cast(
+                Optional[IRExpr], condition if condition else IRConstant(value=True)
+            ),
+            body=cast(
+                List[IRNode],
+                body
+                + (
+                    [IRExprStmt(value=cast(Optional[IRExpr], update))] if update else []
+                ),
+            ),
             loc=self._make_loc(node),
         )
 
         if init:
             # Return list: init statement + while loop
             if isinstance(init, list):
-                return init + [self._set_language(while_node)]
-            return [init, self._set_language(while_node)]
+                return cast(IRFor, init + [self._set_language(while_node)])
+            return cast(IRFor, [init, self._set_language(while_node)])
 
-        return self._set_language(while_node)
+        return cast(IRFor, self._set_language(while_node))
 
     def _normalize_for_in_statement(self, node) -> IRFor:
         """Normalize for-in statement (for (x in obj))."""
@@ -679,11 +742,11 @@ class JavaScriptNormalizer(BaseNormalizer):
                 # [20251214_BUGFIX] IRName constructor uses 'id' rather than 'name'.
                 target = IRName(id=self._get_text(name_node)) if name_node else None
             else:
-                target = self.normalize_node(left_node)
+                target = self._norm_expr(left_node)
         else:
             target = None
 
-        iter_expr = self.normalize_node(right_node) if right_node else None
+        iter_expr = self._norm_expr(right_node) if right_node else None
 
         if body_node:
             if body_node.type == "statement_block":
@@ -694,13 +757,16 @@ class JavaScriptNormalizer(BaseNormalizer):
         else:
             body = []
 
-        return self._set_language(
-            IRFor(
-                target=target,
-                iter=iter_expr,
-                body=body,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRFor,
+            self._set_language(
+                IRFor(
+                    target=target,
+                    iter=iter_expr,
+                    body=cast(List[IRNode], body),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_for_of_statement(self, node) -> IRFor:
@@ -712,19 +778,22 @@ class JavaScriptNormalizer(BaseNormalizer):
     # Expressions
     # =========================================================================
 
-    def _unwrap_expression(self, node) -> IRExpr:
+    def _unwrap_expression(self, node) -> Optional[IRExpr]:
         """Unwrap parenthesized expression if needed."""
         if node.type == "parenthesized_expression":
             inner = self._get_named_children(node)
             if inner:
-                return self.normalize_node(inner[0])
-        return self.normalize_node(node)
+                result = self.normalize_node(inner[0])
+                return cast(IRExpr, result) if not isinstance(result, list) else None
+        result = self.normalize_node(node)
+        return cast(IRExpr, result) if not isinstance(result, list) else None
 
-    def _normalize_parenthesized_expression(self, node) -> IRExpr:
+    def _normalize_parenthesized_expression(self, node) -> Optional[IRExpr]:
         """Normalize parenthesized expression."""
         inner = self._get_named_children(node)
         if inner:
-            return self.normalize_node(inner[0])
+            result = self.normalize_node(inner[0])
+            return cast(IRExpr, result) if not isinstance(result, list) else None
         return None
 
     def _normalize_binary_expression(
@@ -738,6 +807,24 @@ class JavaScriptNormalizer(BaseNormalizer):
                 left: expression
                 operator (anonymous)
                 right: expression
+
+        [20251220_TODO] Advanced JavaScript expression features:
+            - Optional chaining edge cases: obj?.prop?.method?.()
+            - Nullish coalescing combinations: a ?? b ?? c
+            - Spread operator normalization: ...arr, ...obj
+            - Rest parameters in function calls
+            - Exponentiation operator: ** (already supported)
+
+        [20251220_TODO] Async/await normalization improvements:
+            - Promise chain tracking across statements
+            - Async IIFE detection and handling
+            - Top-level await in modules
+            - Error boundary patterns with try/catch
+
+        [20251220_TODO] Dynamic import expression handling:
+            - import() expressions as special function calls
+            - Metadata preservation for lazy loading patterns
+            - Conditional imports detection
         """
         left_node = self._child_by_field(node, "left")
         right_node = self._child_by_field(node, "right")
@@ -751,49 +838,61 @@ class JavaScriptNormalizer(BaseNormalizer):
                     op_text = text
                     break
 
-        left = self.normalize_node(left_node) if left_node else None
-        right = self.normalize_node(right_node) if right_node else None
+        left = self._norm_expr(left_node) if left_node else None
+        right = self._norm_expr(right_node) if right_node else None
         loc = self._make_loc(node)
 
         # Determine operator type
         if op_text in BINARY_OP_MAP:
-            return self._set_language(
-                IRBinaryOp(
-                    op=BINARY_OP_MAP[op_text],
-                    left=left,
-                    right=right,
-                    loc=loc,
-                )
+            return cast(
+                IRBinaryOp,
+                self._set_language(
+                    IRBinaryOp(
+                        op=BINARY_OP_MAP[op_text],
+                        left=left,
+                        right=right,
+                        loc=loc,
+                    )
+                ),
             )
         elif op_text in COMPARE_OP_MAP:
-            return self._set_language(
-                IRCompare(
-                    ops=[COMPARE_OP_MAP[op_text]],
-                    left=left,
-                    comparators=[right],
-                    loc=loc,
-                )
+            return cast(
+                IRBinaryOp,
+                self._set_language(
+                    IRCompare(
+                        ops=[COMPARE_OP_MAP[op_text]],
+                        left=left,
+                        comparators=[cast(IRExpr, right)] if right else [],
+                        loc=loc,
+                    )
+                ),
             )
         elif op_text in BOOL_OP_MAP:
-            return self._set_language(
-                IRBoolOp(
-                    op=BOOL_OP_MAP[op_text],
-                    values=[left, right],
-                    loc=loc,
-                )
+            return cast(
+                IRBinaryOp,
+                self._set_language(
+                    IRBoolOp(
+                        op=BOOL_OP_MAP[op_text],
+                        values=[cast(IRExpr, v) for v in [left, right] if v],
+                        loc=loc,
+                    )
+                ),
             )
         else:
             import warnings
 
             warnings.warn(f"Unknown binary operator '{op_text}' at {loc}")
             # Return as binary op with ADD as placeholder
-            return self._set_language(
-                IRBinaryOp(
-                    op=BinaryOperator.ADD,
-                    left=left,
-                    right=right,
-                    loc=loc,
-                )
+            return cast(
+                IRBinaryOp,
+                self._set_language(
+                    IRBinaryOp(
+                        op=BinaryOperator.ADD,
+                        left=left,
+                        right=right,
+                        loc=loc,
+                    )
+                ),
             )
 
     def _normalize_unary_expression(self, node) -> IRUnaryOp:
@@ -809,15 +908,20 @@ class JavaScriptNormalizer(BaseNormalizer):
                     op_text = text
                     break
 
-        operand = self.normalize_node(arg_node) if arg_node else None
-        op = UNARY_OP_MAP.get(op_text, UnaryOperator.NEG)
+        operand = self._norm_expr(arg_node) if arg_node else None
+        op = UNARY_OP_MAP.get(
+            op_text or "", UnaryOperator.NEG
+        )  # [20251220_BUGFIX] Guard None op_text
 
-        return self._set_language(
-            IRUnaryOp(
-                op=op,
-                operand=operand,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRUnaryOp,
+            self._set_language(
+                IRUnaryOp(
+                    op=op,
+                    operand=operand,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_update_expression(self, node) -> IRAugAssign:
@@ -833,16 +937,19 @@ class JavaScriptNormalizer(BaseNormalizer):
                     op_text = text
                     break
 
-        target = self.normalize_node(arg_node) if arg_node else None
+        target = self._norm_expr(arg_node) if arg_node else None
         op = AugAssignOperator.ADD if op_text == "++" else AugAssignOperator.SUB
 
-        return self._set_language(
-            IRAugAssign(
-                target=target,
-                op=op,
-                value=IRConstant(value=1),
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRAugAssign,
+            self._set_language(
+                IRAugAssign(
+                    target=target,
+                    op=op,
+                    value=IRConstant(value=1),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_assignment_expression(self, node) -> IRAssign:
@@ -850,15 +957,18 @@ class JavaScriptNormalizer(BaseNormalizer):
         left_node = self._child_by_field(node, "left")
         right_node = self._child_by_field(node, "right")
 
-        target = self.normalize_node(left_node) if left_node else None
-        value = self.normalize_node(right_node) if right_node else None
+        target = self._norm_expr(left_node) if left_node else None
+        value = self._norm_expr(right_node) if right_node else None
 
-        return self._set_language(
-            IRAssign(
-                targets=[target],
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRAssign,
+            self._set_language(
+                IRAssign(
+                    targets=[cast(IRExpr, target)] if target else [],
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_augmented_assignment_expression(self, node) -> IRAugAssign:
@@ -875,17 +985,20 @@ class JavaScriptNormalizer(BaseNormalizer):
                     op_text = text
                     break
 
-        target = self.normalize_node(left_node) if left_node else None
-        value = self.normalize_node(right_node) if right_node else None
-        op = AUG_ASSIGN_OP_MAP.get(op_text, AugAssignOperator.ADD)
+        target = self._norm_expr(left_node) if left_node else None
+        value = self._norm_expr(right_node) if right_node else None
+        op = AUG_ASSIGN_OP_MAP.get(op_text or "", AugAssignOperator.ADD)
 
-        return self._set_language(
-            IRAugAssign(
-                target=target,
-                op=op,
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRAugAssign,
+            self._set_language(
+                IRAugAssign(
+                    target=target,
+                    op=op,
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_call_expression(self, node) -> IRCall:
@@ -893,21 +1006,24 @@ class JavaScriptNormalizer(BaseNormalizer):
         func_node = self._child_by_field(node, "function")
         args_node = self._child_by_field(node, "arguments")
 
-        func = self.normalize_node(func_node) if func_node else None
+        func = self._norm_expr(func_node) if func_node else None
 
         args = []
         if args_node:
             for arg in self._get_named_children(args_node):
-                arg_ir = self.normalize_node(arg)
+                arg_ir = self._norm_expr(arg)
                 if arg_ir:
                     args.append(arg_ir)
 
-        return self._set_language(
-            IRCall(
-                func=func,
-                args=args,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRCall,
+            self._set_language(
+                IRCall(
+                    func=func,
+                    args=args,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_new_expression(self, node) -> IRCall:
@@ -915,12 +1031,12 @@ class JavaScriptNormalizer(BaseNormalizer):
         ctor_node = self._child_by_field(node, "constructor") or None
         args_node = self._child_by_field(node, "arguments")
 
-        ctor = self.normalize_node(ctor_node) if ctor_node else IRName(id="")
+        ctor = self._norm_expr(ctor_node) if ctor_node else IRName(id="")
 
         args: List[IRExpr] = []
         if args_node:
             for arg in self._get_named_children(args_node):
-                normalized = self.normalize_node(arg)
+                normalized = self._norm_expr(arg)
                 if normalized is not None:
                     args.append(normalized)
 
@@ -930,12 +1046,12 @@ class JavaScriptNormalizer(BaseNormalizer):
             loc=self._make_loc(node),
         )
         call._metadata["is_new"] = True
-        return self._set_language(call)
+        return cast(IRCall, self._set_language(call))
 
     def _normalize_await_expression(self, node) -> IRCall:
         """[20251215_FEATURE] Represent `await expr` as a call-like IR node for downstream handling."""
         arg_node = self._child_by_field(node, "argument") or None
-        arg_ir = self.normalize_node(arg_node) if arg_node else None
+        arg_ir = self._norm_expr(arg_node) if arg_node else None
 
         call = IRCall(
             func=IRName(id="await"),
@@ -943,30 +1059,30 @@ class JavaScriptNormalizer(BaseNormalizer):
             loc=self._make_loc(node),
         )
         call._metadata["is_await"] = True
-        return self._set_language(call)
+        return cast(IRCall, self._set_language(call))
 
-    def _normalize_as_expression(self, node) -> IRExpr:
+    def _normalize_as_expression(self, node) -> Optional[IRExpr]:
         """[20251215_FEATURE] TypeScript `as` assertions return the underlying expression."""
         expr_node = self._child_by_field(node, "expression")
         if expr_node is None:
             named = self._get_named_children(node)
             expr_node = named[0] if named else None
-        return self.normalize_node(expr_node) if expr_node else None
+        return self._norm_expr(expr_node) if expr_node else None
 
-    def _normalize_satisfies_expression(self, node) -> IRExpr:
+    def _normalize_satisfies_expression(self, node) -> Optional[IRExpr]:
         """[20251215_FEATURE] TypeScript `satisfies` assertions are erased to the expression value."""
         expr_node = self._child_by_field(node, "left")
         if expr_node is None:
             named = self._get_named_children(node)
             expr_node = named[0] if named else None
-        return self.normalize_node(expr_node) if expr_node else None
+        return self._norm_expr(expr_node) if expr_node else None
 
     def _normalize_member_expression(self, node) -> Union[IRAttribute, IRSubscript]:
         """Normalize member access (obj.prop or obj[key])."""
         obj_node = self._child_by_field(node, "object")
         prop_node = self._child_by_field(node, "property")
 
-        obj = self.normalize_node(obj_node) if obj_node else None
+        obj = self._norm_expr(obj_node) if obj_node else None
 
         # Check if bracket notation (computed)
         is_computed = any(
@@ -975,23 +1091,29 @@ class JavaScriptNormalizer(BaseNormalizer):
 
         if is_computed and prop_node:
             # obj[key] -> IRSubscript
-            key = self.normalize_node(prop_node)
-            return self._set_language(
-                IRSubscript(
-                    value=obj,
-                    slice=key,
-                    loc=self._make_loc(node),
-                )
+            key = self._norm_expr(prop_node)
+            return cast(
+                IRSubscript,
+                self._set_language(
+                    IRSubscript(
+                        value=obj,
+                        slice=key,
+                        loc=self._make_loc(node),
+                    )
+                ),
             )
         else:
             # obj.prop -> IRAttribute
             attr = self._get_text(prop_node) if prop_node else ""
-            return self._set_language(
-                IRAttribute(
-                    value=obj,
-                    attr=attr,
-                    loc=self._make_loc(node),
-                )
+            return cast(
+                IRAttribute,
+                self._set_language(
+                    IRAttribute(
+                        value=obj,
+                        attr=attr,
+                        loc=self._make_loc(node),
+                    )
+                ),
             )
 
     def _normalize_subscript_expression(self, node) -> IRSubscript:
@@ -999,15 +1121,19 @@ class JavaScriptNormalizer(BaseNormalizer):
         obj_node = self._child_by_field(node, "object")
         index_node = self._child_by_field(node, "index")
 
-        obj = self.normalize_node(obj_node) if obj_node else None
-        index = self.normalize_node(index_node) if index_node else None
+        # Normalize nodes directly to get IRExpr objects
+        obj = self._norm_expr(obj_node) if obj_node else None
+        index = self._norm_expr(index_node) if index_node else None
 
-        return self._set_language(
-            IRSubscript(
-                value=obj,
-                slice=index,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRSubscript,
+            self._set_language(
+                IRSubscript(
+                    value=obj,
+                    slice=index,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
@@ -1016,20 +1142,26 @@ class JavaScriptNormalizer(BaseNormalizer):
 
     def _normalize_identifier(self, node) -> IRName:
         """Normalize identifier."""
-        return self._set_language(
-            IRName(
-                id=self._get_text(node),
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRName,
+            self._set_language(
+                IRName(
+                    id=self._get_text(node),
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_this(self, node) -> IRName:
         """[20251215_FEATURE] Normalize `this` reference as an identifier."""
-        return self._set_language(
-            IRName(
-                id="this",
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRName,
+            self._set_language(
+                IRName(
+                    id="this",
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_property_identifier(self, node) -> IRName:
@@ -1047,11 +1179,14 @@ class JavaScriptNormalizer(BaseNormalizer):
         except ValueError:
             value = float(text)
 
-        return self._set_language(
-            IRConstant(
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_string(self, node) -> IRConstant:
@@ -1065,11 +1200,14 @@ class JavaScriptNormalizer(BaseNormalizer):
         else:
             value = text
 
-        return self._set_language(
-            IRConstant(
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_template_string(self, node) -> IRConstant:
@@ -1078,61 +1216,85 @@ class JavaScriptNormalizer(BaseNormalizer):
         # For now, treat as plain string
         value = text[1:-1] if text.startswith("`") else text
 
-        return self._set_language(
-            IRConstant(
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_element(self, node) -> IRConstant:
         """[20251215_FEATURE] Represent JSX elements as opaque constants to avoid warnings."""
         raw = self._get_text(node)
-        return self._set_language(
-            IRConstant(
-                value=raw,
-                raw=raw,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=raw,
+                    raw=raw,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_self_closing_element(self, node) -> IRConstant:
         """[20251215_FEATURE] Represent self-closing JSX elements as opaque constants."""
         raw = self._get_text(node)
-        return self._set_language(
-            IRConstant(
-                value=raw,
-                raw=raw,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=raw,
+                    raw=raw,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_jsx_fragment(self, node) -> IRConstant:
         """[20251215_FEATURE] Represent JSX fragments as opaque constants."""
         raw = self._get_text(node)
-        return self._set_language(
-            IRConstant(
-                value=raw,
-                raw=raw,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRConstant,
+            self._set_language(
+                IRConstant(
+                    value=raw,
+                    raw=raw,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_true(self, node) -> IRConstant:
         """Normalize true literal."""
-        return self._set_language(IRConstant(value=True, loc=self._make_loc(node)))
+        return cast(
+            IRConstant,
+            self._set_language(IRConstant(value=True, loc=self._make_loc(node))),
+        )
 
     def _normalize_false(self, node) -> IRConstant:
         """Normalize false literal."""
-        return self._set_language(IRConstant(value=False, loc=self._make_loc(node)))
+        return cast(
+            IRConstant,
+            self._set_language(IRConstant(value=False, loc=self._make_loc(node))),
+        )
 
     def _normalize_null(self, node) -> IRConstant:
         """Normalize null literal."""
-        return self._set_language(IRConstant(value=None, loc=self._make_loc(node)))
+        return cast(
+            IRConstant,
+            self._set_language(IRConstant(value=None, loc=self._make_loc(node))),
+        )
 
     def _normalize_undefined(self, node) -> IRConstant:
         """Normalize undefined literal."""
-        return self._set_language(IRConstant(value=None, loc=self._make_loc(node)))
+        return cast(
+            IRConstant,
+            self._set_language(IRConstant(value=None, loc=self._make_loc(node))),
+        )
 
     def _normalize_array(self, node) -> IRList:
         """Normalize array literal."""
@@ -1143,11 +1305,14 @@ class JavaScriptNormalizer(BaseNormalizer):
                 elements.append(elem)
 
         # [20251214_BUGFIX] IRList expects 'elements', not legacy 'elts' keyword.
-        return self._set_language(
-            IRList(
-                elements=elements,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRList,
+            self._set_language(
+                IRList(
+                    elements=elements,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_array_pattern(self, node) -> IRList:
@@ -1158,11 +1323,14 @@ class JavaScriptNormalizer(BaseNormalizer):
             if normalized is not None:
                 elements.append(normalized)
 
-        return self._set_language(
-            IRList(
-                elements=elements,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRList,
+            self._set_language(
+                IRList(
+                    elements=elements,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_object(self, node) -> IRDict:
@@ -1191,12 +1359,15 @@ class JavaScriptNormalizer(BaseNormalizer):
                 # [20251214_BUGFIX] Align IRName construction with dataclass field 'id'.
                 values.append(IRName(id=name))
 
-        return self._set_language(
-            IRDict(
-                keys=keys,
-                values=values,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRDict,
+            self._set_language(
+                IRDict(
+                    keys=keys,
+                    values=values,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
@@ -1230,13 +1401,16 @@ class JavaScriptNormalizer(BaseNormalizer):
                     else:
                         body.append(normalized)
 
-        return self._set_language(
-            IRClassDef(
-                name=name,
-                bases=bases,
-                body=body,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRClassDef,
+            self._set_language(
+                IRClassDef(
+                    name=name,
+                    bases=bases,
+                    body=body,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_class(self, node) -> IRClassDef:
@@ -1253,18 +1427,26 @@ class JavaScriptNormalizer(BaseNormalizer):
         value_node = self._child_by_field(node, "value")
         field_name = self._get_text(name_node) if name_node else ""
         target = IRAttribute(value=IRName(id="this"), attr=field_name)
-        value = (
+        value_result = (
             self.normalize_node(value_node)
             if value_node is not None
             else IRConstant(value=None, raw="undefined")
         )
+        value = (
+            cast(IRExpr, value_result)
+            if not isinstance(value_result, list)
+            else IRConstant(value=None, raw="undefined")
+        )
 
-        return self._set_language(
-            IRAssign(
-                targets=[target],
-                value=value,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRAssign,
+            self._set_language(
+                IRAssign(
+                    targets=[cast(IRExpr, target)] if target else [],
+                    value=value,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_class_body(self, node) -> List[IRNode]:
@@ -1286,14 +1468,17 @@ class JavaScriptNormalizer(BaseNormalizer):
             self._get_text(c) == "async" for c in node.children if not c.is_named
         )
 
-        return self._set_language(
-            IRFunctionDef(
-                name=name,
-                params=params,
-                body=body,
-                is_async=is_async,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRFunctionDef,
+            self._set_language(
+                IRFunctionDef(
+                    name=name,
+                    params=params,
+                    body=body,
+                    is_async=is_async,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
@@ -1340,14 +1525,17 @@ class JavaScriptNormalizer(BaseNormalizer):
                 self._normalize_block(finally_body_node) if finally_body_node else []
             )
 
-        return self._set_language(
-            IRTry(
-                body=body,
-                handlers=handlers,
-                orelse=[],  # JS doesn't have try-else
-                finalbody=finalbody,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRTry,
+            self._set_language(
+                IRTry(
+                    body=body,
+                    handlers=handlers,
+                    orelse=[],  # JS doesn't have try-else
+                    finalbody=finalbody,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_throw_statement(self, node) -> IRRaise:
@@ -1361,14 +1549,22 @@ class JavaScriptNormalizer(BaseNormalizer):
                 expression
         """
         named_children = self._get_named_children(node)
-        exc = self.normalize_node(named_children[0]) if named_children else None
+        exc_node = self.normalize_node(named_children[0]) if named_children else None
+        exc = (
+            cast(IRExpr, exc_node)
+            if exc_node and not isinstance(exc_node, list)
+            else None
+        )
 
-        return self._set_language(
-            IRRaise(
-                exc=exc,
-                cause=None,  # JS doesn't have 'from' clause
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRRaise,
+            self._set_language(
+                IRRaise(
+                    exc=exc,
+                    cause=None,  # JS doesn't have 'from' clause
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
@@ -1421,15 +1617,18 @@ class JavaScriptNormalizer(BaseNormalizer):
                                     if alias_node:
                                         alias = self._get_text(alias_node)
 
-        return self._set_language(
-            IRImport(
-                module=module,
-                names=names,
-                alias=alias,
-                is_default=is_default,
-                is_star=is_star,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRImport,
+            self._set_language(
+                IRImport(
+                    module=module,
+                    names=names,
+                    alias=alias,
+                    is_default=is_default,
+                    is_star=is_star,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_export_statement(self, node) -> IRExport:
@@ -1469,16 +1668,20 @@ class JavaScriptNormalizer(BaseNormalizer):
                 "variable_declaration",
             ):
                 # export const x = 1, export function foo() {}
-                declaration = self.normalize_node(child)
+                decl_node = self.normalize_node(child)
+                declaration = decl_node if not isinstance(decl_node, list) else None
 
-        return self._set_language(
-            IRExport(
-                names=names,
-                declaration=declaration,
-                is_default=is_default,
-                source=source,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRExport,
+            self._set_language(
+                IRExport(
+                    names=names,
+                    declaration=declaration,
+                    is_default=is_default,
+                    source=source,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # =========================================================================
@@ -1513,12 +1716,15 @@ class JavaScriptNormalizer(BaseNormalizer):
                     body = self._normalize_case_body(child)
                     cases.append((None, body))
 
-        return self._set_language(
-            IRSwitch(
-                discriminant=discriminant,
-                cases=cases,
-                loc=self._make_loc(node),
-            )
+        return cast(
+            IRSwitch,
+            self._set_language(
+                IRSwitch(
+                    discriminant=discriminant,
+                    cases=cases,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     def _normalize_case_body(self, node) -> List[IRNode]:
@@ -1553,17 +1759,36 @@ class JavaScriptNormalizer(BaseNormalizer):
         cons_node = self._child_by_field(node, "consequence")
         alt_node = self._child_by_field(node, "alternative")
 
-        test = self.normalize_node(cond_node) if cond_node else None
-        body = self.normalize_node(cons_node) if cons_node else None
-        orelse = self.normalize_node(alt_node) if alt_node else None
+        test_node = self.normalize_node(cond_node) if cond_node else None
+        body_node = self.normalize_node(cons_node) if cons_node else None
+        orelse_node = self.normalize_node(alt_node) if alt_node else None
 
-        return self._set_language(
-            IRTernary(
-                test=test,
-                body=body,
-                orelse=orelse,
-                loc=self._make_loc(node),
-            )
+        test = (
+            cast(IRExpr, test_node)
+            if test_node and not isinstance(test_node, list)
+            else None
+        )
+        body = (
+            cast(IRExpr, body_node)
+            if body_node and not isinstance(body_node, list)
+            else None
+        )
+        orelse = (
+            cast(IRExpr, orelse_node)
+            if orelse_node and not isinstance(orelse_node, list)
+            else None
+        )
+
+        return cast(
+            IRTernary,
+            self._set_language(
+                IRTernary(
+                    test=test,
+                    body=body,
+                    orelse=orelse,
+                    loc=self._make_loc(node),
+                )
+            ),
         )
 
     # Alias for common tree-sitter name

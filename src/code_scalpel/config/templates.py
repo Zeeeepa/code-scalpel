@@ -81,15 +81,26 @@ This directory contains configuration files for Code Scalpel policy engine and g
 
 - `policy.yaml` - Main policy configuration (security rules, enforcement mode)
 - `budget.yaml` - Change budget limits (blast radius control)
+- `config.json` - Governance and enforcement settings
 - `policy.manifest.json` - Signed manifest for tamper detection (optional)
 - `audit.log` - Audit trail of policy decisions (auto-generated)
 - `autonomy_audit/` - Autonomy engine audit logs (auto-generated)
+
+## Environment Variables
+
+Check `../.env.example` in the project root for required environment variables:
+
+- **SCALPEL_MANIFEST_SECRET** - Required for cryptographic policy verification
+- **SCALPEL_TOTP_SECRET** - Optional, for TOTP-based human verification
+
+Copy `.env.example` to `.env` and update with your actual secrets.
 
 ## Getting Started
 
 1. **Review `policy.yaml`** - Configure security rules and enforcement mode
 2. **Review `budget.yaml`** - Set change budget limits (optional)
-3. **Enable audit logging** - Track all policy decisions
+3. **Set environment variables** - Copy `.env.example` to `.env` and configure secrets
+4. **Enable audit logging** - Track all policy decisions
 
 ## Documentation
 
@@ -169,4 +180,35 @@ override_response.json
 
 # Signed manifest (optional - commit if using tamper resistance)
 # policy.manifest.json
+"""
+
+# .env.example template for environment variables documentation
+ENV_EXAMPLE_TEMPLATE = """# Code Scalpel Environment Variables
+# =====================================
+# Copy this file to .env and update with your actual secrets
+# DO NOT commit .env file to version control
+
+# ----------------------------------------------------------------------------
+# Policy Engine Secrets
+# ----------------------------------------------------------------------------
+
+# SCALPEL_MANIFEST_SECRET (REQUIRED for production with cryptographic verification)
+# Used to sign and verify policy manifests to prevent tampering
+# Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+SCALPEL_MANIFEST_SECRET=your-64-char-hex-secret-key-here
+
+# SCALPEL_TOTP_SECRET (Optional - for human override verification)
+# Used for TOTP-based human verification when overriding policy decisions
+# Generate with: python -c "import secrets; print(secrets.token_hex(16))"
+# SCALPEL_TOTP_SECRET=your-32-char-hex-totp-secret-here
+
+# ----------------------------------------------------------------------------
+# Additional Configuration (Optional)
+# ----------------------------------------------------------------------------
+
+# Enable debug logging for policy engine
+# DEBUG_POLICY_ENGINE=false
+
+# Custom policy file location
+# SCALPEL_POLICY_PATH=.code-scalpel/policy.yaml
 """

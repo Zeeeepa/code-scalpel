@@ -13,7 +13,7 @@ PHASE 1 SCOPE (RFC-001): Integers and Booleans only.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import z3
 
@@ -32,6 +32,30 @@ logger = logging.getLogger(__name__)
 # Note: The symbolic engine has type limitations
 # It handles Int/Bool/String but not Float/List/Dict
 # Loop unrolling is bounded to prevent explosion
+
+# TODO: Add support for complex data types
+#   - List/Array symbolic execution with index tracking
+#   - Dictionary/Map symbolic execution with key constraints
+#   - Tuple unpacking and multiple assignment
+#   - Set operations with symbolic membership
+
+# TODO: Improve path exploration strategies
+#   - Implement concolic execution (concrete + symbolic)
+#   - Add heuristic-based path prioritization
+#   - Implement depth-first vs breadth-first strategies
+#   - Add coverage-guided exploration
+
+# TODO: Performance optimizations
+#   - Implement path memoization to avoid re-exploring
+#   - Add incremental constraint solving
+#   - Implement constraint caching and simplification
+#   - Parallelize path exploration with worker pools
+
+# TODO: Enhanced loop handling
+#   - Implement widening for unbounded loops
+#   - Add loop invariant detection
+#   - Support dynamic unrolling based on complexity
+#   - Detect and warn on infinite loops
 
 
 class PathStatus(Enum):
@@ -180,7 +204,8 @@ class SymbolicAnalyzer:
         self._cache = None
         if enable_cache:
             try:
-                from ..utilities.cache import get_cache
+                # [20251223_CONSOLIDATION] Import from unified cache
+                from code_scalpel.cache import get_cache
 
                 self._cache = get_cache()
             except ImportError:
@@ -308,7 +333,11 @@ class SymbolicAnalyzer:
                     sort_name = "String (untyped)"
 
                 logger.debug(f"Creating symbolic parameter: {param_name} ({sort_name})")
-                self._interpreter.declare_symbolic(param_name, param_sort)
+                # declare_symbolic expects z3.Sort objects (IntSort(), BoolSort(), etc.)
+                # param_sort is already the result of z3.IntSort(), so it's a Sort object
+                self._interpreter.declare_symbolic(
+                    param_name, cast(z3.Sort, param_sort)
+                )
 
             # Execute the function body instead of module body
             modified_ir = IRModule(
@@ -354,7 +383,9 @@ class SymbolicAnalyzer:
         variables_list = list(state_vars.values())
         variable_names = list(state_vars.keys())
 
-        # Check satisfiability
+        # Check satisfiability (solver is initialized in _analyze_uncached)
+        if self._solver is None:
+            raise RuntimeError("Solver not initialized - call _analyze_uncached first")
         solver_result = self._solver.solve(constraints, variables_list, variable_names)
 
         if solver_result.status == SolverStatus.SAT:

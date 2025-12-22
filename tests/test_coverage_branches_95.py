@@ -253,7 +253,7 @@ class TestCacheAnalysisCache:
 
     def test_analysis_cache_basic(self):
         """[20251217_TEST] Cover basic cache operations."""
-        from code_scalpel.cache.analysis_cache import AnalysisCache
+        from code_scalpel.cache.unified_cache import AnalysisCache
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             cache = AnalysisCache(cache_dir=tmp_dir)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import tokenize
 from collections import defaultdict
@@ -7,6 +9,11 @@ from typing import Any, Callable, Union
 
 class ASTUtils:
     """Utility functions for working with ASTs."""
+
+    # [20251221_FEATURE] TODO: Add constant folding and evaluation
+    # [20251221_FEATURE] TODO: Support dead code detection and removal
+    # [20251221_ENHANCEMENT] TODO: Add data flow analysis utilities
+    # [20251221_ENHANCEMENT] TODO: Support control flow graph generation
 
     @staticmethod
     def get_all_names(tree: ast.AST) -> set[str]:
@@ -42,8 +49,10 @@ class ASTUtils:
     @staticmethod
     def get_node_source(node: ast.AST, source_lines: list[str]) -> str:
         """Get the source code for a node."""
-        if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
-            return "\n".join(source_lines[node.lineno - 1 : node.end_lineno])
+        lineno = getattr(node, "lineno", None)
+        end_lineno = getattr(node, "end_lineno", None)
+        if lineno is not None and end_lineno is not None:
+            return "\n".join(source_lines[lineno - 1 : end_lineno])
         return ast.unparse(node)
 
     @staticmethod
@@ -185,3 +194,21 @@ class ASTUtils:
             f"{a}={d}" for a, d in zip(args[len(args) - len(defaults) :], defaults)
         ]
         return f"def {node.name}({', '.join(args_with_defaults)})"
+
+
+# Standalone utility functions for convenience
+def is_constant(node: ast.AST) -> bool:
+    """Check if a node represents a constant value."""
+    return isinstance(
+        node, (ast.Constant, ast.Num, ast.Str, ast.Bytes, ast.NameConstant)
+    )
+
+
+def get_node_type(node: ast.AST) -> str:
+    """Get the type name of an AST node."""
+    return type(node).__name__
+
+
+def get_all_names(tree: ast.AST) -> set[str]:
+    """Get all names used in the AST."""
+    return ASTUtils.get_all_names(tree)

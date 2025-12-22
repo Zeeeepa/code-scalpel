@@ -1,0 +1,198 @@
+"""
+Control Flow Graph Builder for Advanced Code Analysis.
+
+[20251221_FEATURE] v3.0.0+ - Control flow analysis and visualization
+
+This module provides control flow graph (CFG) building and analysis capabilities,
+enabling advanced program analysis, slicing, and optimization.
+
+Key features:
+- Build control flow graphs from AST
+- Identify basic blocks and control flow paths
+- Support conditional branching (if/elif/else)
+- Handle loops (for, while, with)
+- Exception handling (try/except)
+- Generate reachability analysis
+
+Example:
+    >>> from code_scalpel.ast_tools.control_flow import ControlFlowBuilder
+    >>> builder = ControlFlowBuilder()
+    >>> cfg = builder.build("src/module.py", "process_data")
+    >>> paths = cfg.get_all_paths()
+    >>> for path in paths:
+    ...     print(f"Path: {path}")
+"""
+
+import ast
+from typing import Dict, List, Set, Optional, Tuple
+from dataclasses import dataclass, field
+from enum import Enum
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class BlockType(Enum):
+    """Types of basic blocks in control flow."""
+
+    ENTRY = "entry"  # Entry point
+    EXIT = "exit"  # Exit point
+    NORMAL = "normal"  # Sequential execution
+    BRANCH = "branch"  # Conditional branch
+    LOOP = "loop"  # Loop header
+    EXCEPTION = "exception"  # Exception handler
+    MERGE = "merge"  # Merge point (e.g., after if/else)
+
+
+@dataclass
+class BasicBlock:
+    """A basic block in control flow."""
+
+    id: str
+    type: BlockType
+    statements: List[ast.stmt] = field(default_factory=list)
+    successors: List[str] = field(default_factory=list)
+    predecessors: List[str] = field(default_factory=list)
+    branch_condition: Optional[ast.expr] = None
+    exception_handlers: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ControlFlowGraph:
+    """Represents a control flow graph."""
+
+    blocks: Dict[str, BasicBlock] = field(default_factory=dict)
+    entry_block: Optional[str] = None
+    exit_block: Optional[str] = None
+    loops: List[Tuple[str, str]] = field(default_factory=list)  # (header, tail) pairs
+
+
+class ControlFlowBuilder:
+    """
+    Builds and analyzes control flow graphs.
+
+    [20251221_FEATURE] TODO: Build CFG from function/method body
+    [20251221_FEATURE] TODO: Identify basic blocks and edges
+    [20251221_ENHANCEMENT] TODO: Detect and mark loop structures
+    [20251221_ENHANCEMENT] TODO: Handle exception flow
+    """
+
+    def __init__(self):
+        self.cfg: Optional[ControlFlowGraph] = None
+        self.block_counter = 0
+
+    def build(self, file_path: str, function_name: str) -> Optional[ControlFlowGraph]:
+        """
+        Build control flow graph for a function.
+
+        Args:
+            file_path: Path to Python file
+            function_name: Name of function to analyze
+
+        Returns:
+            ControlFlowGraph or None if function not found
+
+        [20251221_FEATURE] TODO: Parse file and extract function
+        [20251221_FEATURE] TODO: Build CFG from function statements
+        """
+        return ControlFlowGraph()
+
+    def build_from_node(self, node: ast.FunctionDef) -> ControlFlowGraph:
+        """
+        Build CFG from a FunctionDef AST node.
+
+        [20251221_FEATURE] TODO: Create entry and exit blocks
+        [20251221_FEATURE] TODO: Process function body statements
+        [20251221_FEATURE] TODO: Connect blocks with edges
+        """
+        cfg = ControlFlowGraph()
+        return cfg
+
+    def get_all_paths(self, cfg: ControlFlowGraph) -> List[List[str]]:
+        """
+        Get all execution paths from entry to exit.
+
+        [20251221_FEATURE] TODO: Enumerate all paths (with depth limit)
+        [20251221_FEATURE] TODO: Detect infeasible paths
+        [20251221_ENHANCEMENT] TODO: Prioritize paths by coverage impact
+        """
+        return []
+
+    def find_loops(self, cfg: ControlFlowGraph) -> List[Tuple[str, Set[str]]]:
+        """
+        Find all loops in the CFG.
+
+        Returns:
+            List of (loop_header, body_blocks) tuples
+
+        [20251221_FEATURE] TODO: Identify strongly connected components
+        [20251221_FEATURE] TODO: Detect loop headers and back edges
+        [20251221_ENHANCEMENT] TODO: Classify loop types (for, while, do-while simulation)
+        """
+        return []
+
+    def find_dominators(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+        """
+        Find dominator relationships in CFG.
+
+        Returns:
+            Dict mapping block ID to set of dominating block IDs
+
+        [20251221_FEATURE] TODO: Implement dominator tree algorithm
+        [20251221_ENHANCEMENT] TODO: Compute immediate dominators
+        """
+        return {}
+
+    def compute_reachability(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+        """
+        Compute which blocks are reachable from entry.
+
+        Returns:
+            Dict mapping each block to set of blocks it reaches
+
+        [20251221_FEATURE] TODO: Fixed-point iteration for reachability
+        [20251221_FEATURE] TODO: Identify unreachable code
+        """
+        return {}
+
+    def analyze_loop_invariants(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+        """
+        Identify loop invariant statements.
+
+        [20251221_FEATURE] TODO: Detect statements that don't change loop state
+        [20251221_FEATURE] TODO: Flag for code motion optimization
+        """
+        return {}
+
+    def visualize(self, cfg: ControlFlowGraph, output_file: str = "cfg"):
+        """
+        Generate visualization of control flow graph.
+
+        [20251221_FEATURE] TODO: Generate Graphviz DOT format
+        [20251221_FEATURE] TODO: Color-code different block types
+        [20251221_ENHANCEMENT] TODO: Support interactive visualization
+        """
+        pass
+
+    def _create_block(self, block_type: BlockType) -> str:
+        """Create a new basic block with unique ID."""
+        block_id = f"B{self.block_counter}"
+        self.block_counter += 1
+        return block_id
+
+    def _process_if_statement(
+        self, node: ast.If, current_block: str
+    ) -> Tuple[str, str]:
+        """Process if/elif/else statement and return merge block."""
+        # Implementation placeholder
+        return current_block, ""
+
+    def _process_loop(self, node: ast.stmt, current_block: str) -> str:
+        """Process while/for loop and return block after loop."""
+        # Implementation placeholder
+        return current_block
+
+    def _process_try_except(self, node: ast.Try, current_block: str) -> str:
+        """Process try/except/finally and return block after exception handling."""
+        # Implementation placeholder
+        return current_block

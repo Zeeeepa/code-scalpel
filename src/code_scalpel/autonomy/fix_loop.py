@@ -109,6 +109,21 @@ class FixLoop:
 
     [20251217_FEATURE] v3.0.0 P0 requirement - Loop termination.
 
+    [20251221_TODO] Phase 1 Enhancements:
+    - [ ] Implement error pattern learning
+    - [ ] Add similar error detection (avoid redundant fixes)
+    - [ ] Support custom escalation strategies
+    - [ ] Add fix quality metrics
+    - [ ] Implement result caching
+
+    [20251221_TODO] Phase 2 Features:
+    - [ ] ML-based fix quality prediction
+    - [ ] Intelligent retry strategies
+    - [ ] Parallel fix attempt exploration
+    - [ ] Integration with mutation gate
+    - [ ] Feedback loop for learning
+    - [ ] Support for user-guided fixes
+
     Safety features:
     - Hard limit on retry attempts
     - Timeout for total loop duration

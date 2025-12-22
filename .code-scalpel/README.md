@@ -1,20 +1,135 @@
 # Code Scalpel Governance Configuration
 
-<!-- [20251218_FEATURE] Comprehensive governance configuration documentation -->
-
-This directory contains governance configuration files for Code Scalpel v3.0.0+ autonomy features. These configurations control how autonomous agents interact with your codebase, defining strict limits on change scope, complexity, and iteration behavior.
+This directory contains all governance policies and configurations for Code Scalpel v3.0+, including runtime code policies, change budgets, and **development governance** (meta-policies for AI agent behavior).
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
+- [Policy Types](#policy-types)
+- [Directory Structure](#directory-structure)
 - [Available Configuration Profiles](#available-configuration-profiles)
+- [Development Governance (NEW)](#development-governance)
 - [Policy Engine (OPA/Rego)](#policy-engine-oparego)
 - [Complete Configuration Schema Reference](#complete-configuration-schema-reference)
 - [Usage Examples](#usage-examples)
-- [Field Reference](#field-reference)
-- [Security and Integrity](#security-and-integrity)
-- [Testing Configurations](#testing-configurations)
-- [Troubleshooting](#troubleshooting)
 - [Best Practices](#best-practices)
+
+## Quick Start
+
+```bash
+# Initialize governance for a new project
+code-scalpel init --governance
+
+# Check if an operation is allowed
+code-scalpel check --operation operation.json
+
+# Check development governance (AI agent behavior)
+code-scalpel dev-check --task "add new feature"
+
+# Generate compliance report
+code-scalpel compliance-report --period weekly
+```
+
+## Policy Types
+
+Code Scalpel uses **three complementary policy systems**:
+
+### 1. Code Modification Policies (`policy.yaml`)
+**What:** Govern what code changes are allowed  
+**Examples:** SQL injection prevention, XSS prevention, dangerous functions  
+**Enforced by:** `PolicyEngine` class (OPA/Rego)  
+**When:** Before every AI agent code modification
+
+### 2. Change Budget Policies (`budgets.yaml`)
+**What:** Govern how much code can be changed  
+**Examples:** Max files (10), max lines (500), forbidden paths  
+**Enforced by:** `ChangeBudget` class  
+**When:** Before every AI agent operation
+
+### 3. Development Governance Policies (`dev-governance.yaml`) ⭐ **NEW**
+**What:** Govern how AI agents approach development  
+**Examples:** 
+- Always create README in new module directories
+- Update backlog when completing tasks
+- Respect architectural boundaries
+- Require tests for new features
+- Document design decisions
+
+**Enforced by:** `UnifiedGovernance` with development mode  
+**When:** During AI agent task planning and execution
+
+## Directory Structure
+
+```
+.code-scalpel/
+├── README.md                  # This file
+├── policy.yaml                # Code modification policies (OPA/Rego)
+├── budgets.yaml               # Change budget constraints
+├── config.yaml                # Unified governance configuration
+├── dev-governance.yaml        # Development governance (AI behavior) ⭐ NEW
+├── audit.log                  # Policy decision audit trail
+├── manifest.json              # Cryptographic manifest
+└── .secrets/
+    └── hmac.key               # HMAC signing key (DO NOT COMMIT)
+```
+
+## Development Governance
+
+### Overview
+
+Development governance policies ensure AI agents follow software engineering best practices:
+
+| Category | Examples |
+|----------|----------|
+| **Documentation** | Always create README in new modules, update docs on major changes |
+| **Architecture** | Respect layer boundaries (MCP → Autonomy → Governance → Tools → Parsers) |
+| **Project Management** | Update TODO.md/BACKLOG.md when completing tasks |
+| **Code Quality** | Require tests for new features, run linting before commit |
+| **Security** | No secrets in code, require security review for auth changes |
+
+### Example: Creating a New Module
+
+**Without Dev Governance:**
+```bash
+mkdir src/code_scalpel/new_feature
+touch src/code_scalpel/new_feature/__init__.py
+# ✅ Allowed, but no documentation
+```
+
+**With Dev Governance:**
+```bash
+mkdir src/code_scalpel/new_feature
+touch src/code_scalpel/new_feature/__init__.py
+# ❌ DENIED: Missing README.md (policy: mandatory-readme-for-new-modules)
+
+# Must include:
+cat > src/code_scalpel/new_feature/README.md << EOF
+# New Feature Module
+## Overview
+...
+EOF
+# ✅ ALLOWED
+```
+
+### AI Agent Instructions
+
+Development governance includes explicit instructions for AI agents:
+
+**Always:**
+- Create READMEs in module directories (not separate docs/)
+- Update TODO.md or BACKLOG.md when completing tasks
+- Run tests after making changes
+- Follow FAIL CLOSED principle for security
+- Document design decisions
+
+**Never:**
+- Commit secrets or credentials
+- Bypass security checks
+- Modify core security code without review
+- Create circular dependencies
+- Hardcode environment-specific values
+
+**Configuration:** See [dev-governance.yaml](dev-governance.yaml) for complete policy definitions.
 
 ## Available Configuration Profiles
 

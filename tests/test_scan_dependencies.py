@@ -16,7 +16,7 @@ Tests cover:
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pytest
 
 from code_scalpel.mcp.server import (
@@ -295,9 +295,13 @@ class TestSeveritySummary:
 
             assert result.success is True
             # Verify we got vulnerabilities from real OSV data
-            assert result.total_vulnerabilities >= 3, f"Expected at least 3 vulns, got: {result.total_vulnerabilities}"
+            assert (
+                result.total_vulnerabilities >= 3
+            ), f"Expected at least 3 vulns, got: {result.total_vulnerabilities}"
             # Verify severity summary has some entries (severity can vary over time)
-            assert sum(result.severity_summary.values()) >= 3, f"Expected severities, got: {result.severity_summary}"
+            assert (
+                sum(result.severity_summary.values()) >= 3
+            ), f"Expected severities, got: {result.severity_summary}"
             # Verify at least one package is marked vulnerable
             assert result.vulnerable_count >= 1
 
@@ -318,10 +322,12 @@ class TestVersionCleaning:
             ("^1.2.3", "1.2.3"),
             ("1.0.0", "1.0.0"),  # No prefix
         ]
-        
+
         for version_with_prefix, expected_clean in test_cases:
-            clean_version = version_with_prefix.lstrip('>=<~^')
-            assert clean_version == expected_clean, f"Failed for {version_with_prefix}: got {clean_version}, expected {expected_clean}"
+            clean_version = version_with_prefix.lstrip(">=<~^")
+            assert (
+                clean_version == expected_clean
+            ), f"Failed for {version_with_prefix}: got {clean_version}, expected {expected_clean}"
 
 
 class TestEcosystemMapping:
