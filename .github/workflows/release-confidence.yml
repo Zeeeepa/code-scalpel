@@ -1,0 +1,222 @@
+name: Release Confidence
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (Black & Ruff)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install black ruff
+    - name: Black
+      run: |
+        black --check --diff src/ tests/
+    - name: Ruff
+      run: |
+        ruff check src/ tests/
+
+  typecheck:
+    name: Type Check (Pyright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies + Pyright
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyright
+    - name: Pyright
+      run: |
+        pyright -p pyrightconfig.json
+
+  security:
+    name: Security Scan (Bandit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install Bandit
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit
+    - name: Run Bandit
+      run: |
+        bandit -r src/ -ll -ii -x '**/test_*.py' --format json --output bandit-report.json || true
+        bandit -r src/ -ll -ii -x '**/test_*.py'
+    - name: Upload Bandit report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+
+  dependency-audit:
+    name: Dependency Audit (pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install pip-audit
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-audit
+    - name: Run pip-audit
+      run: |
+        pip-audit -r requirements.txt --format json --output pip-audit-report.json
+        pip-audit -r requirements.txt
+    - name: Upload pip-audit report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pip-audit-report
+        path: pip-audit-report.json
+
+  test:
+    name: Test (pytest)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, security, dependency-audit]
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    - name: Run tests
+      run: |
+        pytest tests/ -v --tb=short
+
+  mcp-contract:
+    name: MCP Contract (All Tools)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        transport: ['stdio', 'streamable-http', 'sse']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest anyio httpx
+    - name: Run contract test
+      env:
+        MCP_CONTRACT_TRANSPORT: ${{ matrix.transport }}
+        MCP_CONTRACT_ARTIFACT_DIR: ${{ runner.temp }}/mcp-contract/${{ matrix.transport }}
+      run: |
+        pytest -q tests/test_mcp_all_tools_contract.py
+    - name: Upload MCP contract evidence
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mcp-contract-${{ matrix.transport }}
+        path: ${{ runner.temp }}/mcp-contract/${{ matrix.transport }}
+
+  release-baseline:
+    name: Release Baseline Validation (v1.3.0 → v2.0.0)
+    runs-on: ubuntu-latest
+    needs: [typecheck]
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run baseline release validation
+      run: |
+        python scripts/validate_all_releases.py
+    - name: Run regression smoke (v1.5.x)
+      run: |
+        python scripts/regression_test.py
+    - name: Upload baseline validation evidence
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-validation-results
+        path: release_artifacts/release_validation_results.json
+
+  build:
+    name: Build + Twine Check
+    runs-on: ubuntu-latest
+    needs: [test]
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    - name: Build
+      run: |
+        python -m build
+    - name: Twine check
+      run: |
+        python -m twine check dist/*
+    - name: Upload dist
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/

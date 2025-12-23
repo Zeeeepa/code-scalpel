@@ -109,7 +109,7 @@ run_server(transport="streamable-http", port=8593)
 
 ## Available Tools
 
-The MCP server exposes 19 tools for AI agents (v3.0.0):
+The MCP server exposes 20 tools for AI agents:
 
 ### Core Analysis Tools
 
@@ -117,36 +117,33 @@ The MCP server exposes 19 tools for AI agents (v3.0.0):
 |------|-------------|----------|
 | `analyze_code` | Parse code structure | Understanding code organization |
 | `extract_code` | Surgical extraction by symbol name | Token-efficient code retrieval |
+| `get_file_context` | Fast file overview (no full content) | Quick relevance checks |
+| `get_symbol_references` | Find symbol usages across project | Safer refactoring |
+| `update_symbol` | Safe symbol replacement with backup | Applying precise edits |
 | `security_scan` | Detect vulnerabilities via taint analysis | Security audits |
+| `unified_sink_detect` | Polyglot sink detection with confidence | Sink inventory and triage |
+| `type_evaporation_scan` | Cross-file TS ↔ Python type evaporation analysis | Full-stack boundary issues |
 | `symbolic_execute` | Explore execution paths with Z3 | Edge case discovery |
 | `generate_unit_tests` | Create test cases from symbolic execution | Automated testing |
 | `simulate_refactor` | Verify safe refactoring | Code changes |
+| `validate_paths` | Validate filesystem paths are accessible | Docker / workspace troubleshooting |
 
 ### Project Intelligence Tools
 
 | Tool | Description | Best For |
 |------|-------------|----------|
 | `crawl_project` | Analyze entire project structure | Project overview |
-| `get_file_context` | Get file overview without full content | Quick file assessment |
-| `get_symbol_references` | Find all usages of a symbol | Safe refactoring |
 | `get_call_graph` | Build function relationship graph | Impact analysis |
+| `get_graph_neighborhood` | K-hop subgraph around a node | Graph explosion control |
 | `get_cross_file_dependencies` | Trace cross-file dependencies | Module relationships |
+| `get_project_map` | Comprehensive project structure map | Navigation |
+| `cross_file_security_scan` | Track taint across module boundaries | Cross-file vulnerability detection |
 | `scan_dependencies` | Scan for vulnerable dependencies (OSV) | Security compliance |
+| `verify_policy_integrity` | Cryptographically verify policy files | Governance tamper resistance |
 
-### Graph Engine Tools (v3.0.0)
+### Note on tool listings
 
-| Tool | Description | Best For |
-|------|-------------|----------|
-| `build_unified_graph` | Create cross-language dependency graph | Monorepo analysis |
-| `detect_http_links` | Link frontend calls to backend endpoints | Full-stack tracing |
-| `detect_contract_breaches` | Find breaking API changes | Client/server sync |
-
-### Symbol Modification Tools
-
-| Tool | Description | Best For |
-|------|-------------|----------|
-| `update_symbol` | Safe symbol replacement with backup | Code modifications |
-| `get_project_map` | Complete project structure analysis | Navigation |
+Some older documentation versions referenced additional “Graph Engine Tools”. Those are not currently exposed as MCP tools by the server; the graph engine functionality that *is* exposed today is available via `get_call_graph` / `get_graph_neighborhood`.
 
 ---
 

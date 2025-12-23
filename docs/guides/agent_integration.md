@@ -9,9 +9,9 @@ Code Scalpel is designed for AI-driven code analysis. It provides:
 - **MCP Server**: Model Context Protocol for Claude, Copilot, Cursor
 - **Surgical Tools**: Token-efficient extraction and modification
 - **Structured Output**: Pydantic models optimized for LLM consumption
-- **19 MCP Tools**: Complete toolkit for code analysis, security, and modification
+- **20 MCP Tools**: Complete toolkit for code analysis, security, and modification
 
-## Quick Reference: All 19 MCP Tools
+## Quick Reference: All 20 MCP Tools
 
 | Tool | Category | Purpose |
 |------|----------|---------|
@@ -27,6 +27,7 @@ Code Scalpel is designed for AI-driven code analysis. It provides:
 | `crawl_project` | Discovery | Analyze all files in project |
 | `security_scan` | Security | Taint-based vulnerability detection |
 | `unified_sink_detect` | Security | Polyglot sink detection with confidence |
+| `type_evaporation_scan` | Security | Detect cross-file type evaporation vulnerabilities (TS ↔ Python) |
 | `cross_file_security_scan` | Security | Track taint across module boundaries |
 | `scan_dependencies` | Security | Check dependencies against OSV database |
 | `verify_policy_integrity` | Security | Cryptographic policy verification |
@@ -74,7 +75,7 @@ Create `.vscode/mcp.json` in your workspace:
 > `activate_project_structure_and_security_analysis_tools`). If a tool returns "disabled by user" error,
 > try calling the relevant activation tool first. This is Copilot's internal tool management behavior 
 > to optimize context size, not a Code Scalpel limitation. Other MCP clients (Claude Desktop, Cursor, 
-> Cline) expose all 19 tools directly without activation.
+> Cline) expose all 20 tools directly without activation.
 
 ### Docker / Network Deployment
 

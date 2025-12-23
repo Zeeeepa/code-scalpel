@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-4388%20passed-brightgreen.svg)](https://github.com/tescolopio/code-scalpel)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/v3.1.0/)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen.svg)](release_artifacts/README.md)
 
-**MCP Server Toolkit for AI Agents - v3.1.0 "Parser Unification + Surgical Enhancements"**
+**MCP Server Toolkit for AI Agents - v3.2.0 "Release Solidification"**
 
 Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to perform surgical code operations without hallucination. Extract exactly what's needed, modify without collateral damage, verify before applying.
 
@@ -41,7 +41,7 @@ This creates `.code-scalpel/` with governance configuration files:
 
 ---
 
-## What's New in v3.1.0 🎉
+## What's New in v3.2.0 🎉
 
 ### Surgical Extractor Enhancements
 Token-efficient code extraction now even more powerful:
@@ -333,7 +333,9 @@ code-scalpel analyze demos/test_gen_scenario.py
 # - test_standard: income=50000, debt=20000, credit_score=700
 ```
 
-## MCP Tools Reference (19 Total)
+## MCP Tools Reference (20 Total)
+
+> Note: the authoritative tool inventory is provided by MCP `list_tools` at runtime; this section is a quick overview.
 
 **Core Tools (v1.0.0)**
 | Tool | Description |
@@ -477,6 +479,61 @@ docker run -p 8593:8593 -v $(pwd):/app/code code-scalpel
 - **[SECURITY.md](SECURITY.md)** - Security policies and vulnerability reporting
 - **[Compliance Documentation](docs/compliance/)** - OWASP, CWE, NIST, PCI DSS, SOC2
 
+## Ninja Warrior Acceptance Harness (Opt-in)
+
+Code Scalpel includes an opt-in acceptance harness that validates MCP behavior across transports against the `Code-Scalpel-Ninja-Warrior` monorepo.
+
+```bash
+cd code-scalpel
+. .venv/bin/activate
+
+# Fast acceptance (stdio + HTTP + SSE)
+RUN_NINJA_WARRIOR=1 \
+NINJA_WARRIOR_ROOT=/absolute/path/to/Code-Scalpel-Ninja-Warrior \
+python -m pytest -q -m ninja_warrior tests/test_ninja_warrior_acceptance_harness.py
+
+# Heavy mode (adds crawl/map/call-graph)
+RUN_NINJA_WARRIOR=1 RUN_NINJA_WARRIOR_HEAVY=1 \
+NINJA_WARRIOR_ROOT=/absolute/path/to/Code-Scalpel-Ninja-Warrior \
+python -m pytest -q -m ninja_warrior tests/test_ninja_warrior_acceptance_harness.py -k heavy
+```
+
+Evidence output:
+- Default: `evidence/ninja-warrior/` (gitignored)
+- Override: set `NINJA_WARRIOR_EVIDENCE_DIR=/path/to/output`
+- Each run emits a JSON evidence report plus (for HTTP/SSE) server logs, including both repo git SHAs (best-effort) for traceability.
+
+## MCP Contract Tests (All Tools, All Transports)
+
+Code Scalpel includes a deterministic contract test that calls **all 20 MCP tools** over:
+- `stdio`
+- streamable HTTP (`/mcp`)
+- SSE (`/sse`)
+
+```bash
+cd code-scalpel
+. .venv/bin/activate
+python -m pytest -q tests/test_mcp_all_tools_contract.py
+```
+
+Evidence output:
+- Default: `evidence/mcp-contract/` (gitignored)
+- Override: set `MCP_CONTRACT_ARTIFACT_DIR=/path/to/output`
+
+Run a single transport (useful for CI or debugging):
+
+```bash
+MCP_CONTRACT_TRANSPORT=stdio python -m pytest -q tests/test_mcp_all_tools_contract.py
+MCP_CONTRACT_TRANSPORT=streamable-http python -m pytest -q tests/test_mcp_all_tools_contract.py
+MCP_CONTRACT_TRANSPORT=sse python -m pytest -q tests/test_mcp_all_tools_contract.py
+```
+
+CI also runs Pyright type checking:
+
+```bash
+pyright -p pyrightconfig.json
+```
+
 ## Roadmap
 
 See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
@@ -491,7 +548,8 @@ See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 | **v2.0.0** | Released | Dec 15, 2025 | **Polyglot** - TypeScript, JavaScript, Java support |
 | **v2.5.0** | Released | Dec 17, 2025 | **Guardian** - Policy engine, governance controls |
 | **v3.0.0** | Current | Dec 18, 2025 | **Autonomy** - Self-correction, 4033 tests, 94.86% coverage |
-| **v3.1.0** | Planned | Q1 2026 | Autonomy+ - Enhanced self-correction, enterprise demos |
+| **v3.1.1** | Released | Dec 22, 2025 | **Parser Unification** - Unified extractor, richer docs, init hotfix |
+| **v3.2.0** | Planned | TBD | **Release Solidification** - MCP contract tests + blocking CI confidence gates |
 
 **Strategic Focus:** MCP server toolkit enabling AI agents to perform surgical code operations without hallucination.
 
@@ -501,7 +559,7 @@ See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 - **94.86%** combined coverage (statement + branch)
 - **100%** coverage: PDG, AST, Symbolic Execution, Security Analysis, Cross-File Analysis
 - **4** languages supported (Python, TypeScript, JavaScript, Java)
-- **19** MCP tools for AI agents
+- **20** MCP tools for AI agents
 - **17+** vulnerability types detected (SQL, XSS, NoSQL, LDAP, DOM XSS, Prototype Pollution, secrets)
 - **30+** secret detection patterns (AWS, GitHub, Stripe, private keys)
 - **200x** cache speedup

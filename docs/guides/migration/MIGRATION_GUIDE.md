@@ -19,7 +19,7 @@ Code Scalpel v3.0.0 "Autonomy" is **fully backward compatible** with v2.5.0. Thi
 | **Coverage** | +49.5% more tests (4,033 tests, 94.86% coverage) |
 | **Stability** | Edge case handling, memory safety, thread safety |
 | **Autonomy** | Fix loops, error-to-diff, mutation gates, audit trails |
-| **Tools** | All 19 MCP tools stable and fully tested |
+| **Tools** | MCP tools stable and fully tested (current registry: 20 tools) |
 | **Performance** | Caching improvements, faster parsing |
 
 ---

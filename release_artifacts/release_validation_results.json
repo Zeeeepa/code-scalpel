@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-15T08:14:26.004554",
+  "timestamp": "2025-12-22T15:03:09.130411",
   "releases": {
     "v1.3.0": {
       "passed": [
@@ -30,15 +30,15 @@
       "passed": [
         {
           "feature": "P0: get_file_context returns functions/classes",
-          "details": "52 functions, 40 classes"
+          "details": "92 functions, 49 classes"
         },
         {
           "feature": "P0: get_file_context reports complexity",
-          "details": "Complexity: 357"
+          "details": "Complexity: 625"
         },
         {
           "feature": "P0: get_symbol_references finds usages",
-          "details": "54 references found"
+          "details": "128 references found"
         },
         {
           "feature": "P0: XXE detection",
@@ -55,15 +55,15 @@
       "passed": [
         {
           "feature": "P0: crawl_project returns project structure",
-          "details": "1470 files analyzed"
+          "details": "1708 files analyzed"
         },
         {
           "feature": "P0: get_project_map returns structure",
-          "details": "1470 files, 52 entry points"
+          "details": "3671 files, 106 entry points"
         },
         {
           "feature": "P1: JWT vulnerability detection",
-          "details": "Scan completed with 0 findings"
+          "details": "Scan completed with 1 findings"
         },
         {
           "feature": "P1: Mass assignment detection",
@@ -106,7 +106,7 @@
         },
         {
           "feature": "P1: Docker volume mount suggestions",
-          "details": "3 suggestions"
+          "details": "4 suggestions"
         }
       ],
       "failed": []
@@ -128,11 +128,11 @@
       "passed": [
         {
           "feature": "P0: Caching layer (crawl performance)",
-          "details": "First: 1.30s, Second: 1.23s"
+          "details": "First: 7.76s, Second: 7.32s"
         },
         {
           "feature": "P0: Parallel file parsing",
-          "details": "1470 files parsed"
+          "details": "1708 files parsed"
         }
       ],
       "failed": []
@@ -165,19 +165,19 @@
         },
         {
           "feature": "P0: JavaScript code extraction verified",
-          "details": "Function and class extraction passed above"
+          "details": "Function and class extraction validated; JS/TS analysis via Python analyzer"
         },
         {
           "feature": "P0: TypeScript code extraction verified",
-          "details": "Function and class extraction passed above"
+          "details": "Function and class extraction validated; JS/TS analysis via Python analyzer"
         },
         {
           "feature": "P0: Java code analysis",
-          "details": "Known tree-sitter API issue (extraction works): Java analysis failed: 'tree_sitter.Parser' object has no attribute 'set_language'"
+          "details": "1 classes, 1 methods"
         },
         {
           "feature": "P1: Spring @Query pattern detection",
-          "details": "Known tree-sitter API issue (extraction works)"
+          "details": "Java analysis: 1 classes"
         },
         {
           "feature": "P1: JSX component extraction",

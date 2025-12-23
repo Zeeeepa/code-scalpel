@@ -50,7 +50,7 @@ curl -k https://localhost:8443/sse
 
 ### Key Features
 
-1. **19 MCP Tools** - Full tool suite with policy and governance:
+1. **20 MCP Tools** - Full tool suite with policy and governance:
    - All tools from v2.0.0 plus new policy/governance tools
    - `unified_sink_detect`, `get_graph_neighborhood`, `verify_policy_integrity`
    - Complete test coverage (4,033 tests, 94.86% coverage)
