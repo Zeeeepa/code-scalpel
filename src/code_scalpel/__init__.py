@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251222_BUGFIX] v3.2.1 - Ninja Warrior tool fixes
-__version__ = "3.2.1"
+# [20251223_BUGFIX] v3.2.2 - CI/lint + publishing fixes
+__version__ = "3.2.2"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

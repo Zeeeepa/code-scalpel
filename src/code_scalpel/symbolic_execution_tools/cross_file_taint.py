@@ -1183,7 +1183,8 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         # Treat assignments as tainted if the RHS is a known taint source OR
         # the RHS references tainted variables / function parameters.
         rhs_depends_on_taint = (not rhs_is_sanitizer) and any(
-            name in self.func_info.parameters or name in self.func_info.tainted_variables
+            name in self.func_info.parameters
+            or name in self.func_info.tainted_variables
             for name in referenced_names
         )
 
@@ -1296,10 +1297,12 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         # sink reachability back to those parameters.
                         for param in self.func_info.parameters:
                             if self._var_depends_on(param, arg_name):
-                                self.func_info.parameters_reaching_sinks[param] = SinkInfo(
-                                    sink_type=sink_type,
-                                    line=node.lineno,
-                                    function_call=callee or sink_lookup,
+                                self.func_info.parameters_reaching_sinks[param] = (
+                                    SinkInfo(
+                                        sink_type=sink_type,
+                                        line=node.lineno,
+                                        function_call=callee or sink_lookup,
+                                    )
                                 )
 
         # Propagate sink reachability through imported function calls.
@@ -1309,15 +1312,17 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             imported = self._resolve_imported_function(callee)
             if imported is not None and self.tracker is not None:
                 target_module, target_func = imported
-                target_info = self.tracker.function_taint_info.get(target_module, {}).get(
-                    target_func
-                )
+                target_info = self.tracker.function_taint_info.get(
+                    target_module, {}
+                ).get(target_func)
 
                 # Determine a representative sink type from the callee (if known).
                 sink_info = None
                 if target_info:
                     if target_info.parameters_reaching_sinks:
-                        sink_info = next(iter(target_info.parameters_reaching_sinks.values()))
+                        sink_info = next(
+                            iter(target_info.parameters_reaching_sinks.values())
+                        )
                     elif target_info.local_sinks:
                         sink_info = next(iter(target_info.local_sinks.values()))
 
@@ -1329,10 +1334,12 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         arg_names = self._extract_tainted_vars_from_arg(arg)
                         for arg_name in arg_names:
                             if arg_name in self.func_info.parameters:
-                                self.func_info.parameters_reaching_sinks[arg_name] = SinkInfo(
-                                    sink_type=sink_info.sink_type,
-                                    line=node.lineno,
-                                    function_call=f"{callee} -> {sink_info.function_call}",
+                                self.func_info.parameters_reaching_sinks[arg_name] = (
+                                    SinkInfo(
+                                        sink_type=sink_info.sink_type,
+                                        line=node.lineno,
+                                        function_call=f"{callee} -> {sink_info.function_call}",
+                                    )
                                 )
                             if arg_name in self.func_info.tainted_variables:
                                 self.func_info.local_sinks[arg_name] = SinkInfo(
@@ -1343,7 +1350,9 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                                 # Attribute back to caller params if applicable.
                                 for param in self.func_info.parameters:
                                     if self._var_depends_on(param, arg_name):
-                                        self.func_info.parameters_reaching_sinks[param] = SinkInfo(
+                                        self.func_info.parameters_reaching_sinks[
+                                            param
+                                        ] = SinkInfo(
                                             sink_type=sink_info.sink_type,
                                             line=node.lineno,
                                             function_call=f"{callee} -> {sink_info.function_call}",
@@ -1388,7 +1397,9 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         imports = self.tracker.resolver.imports.get(module, [])
 
         for imp in imports:
-            if imp.effective_name == callee or callee.startswith(f"{imp.effective_name}."):
+            if imp.effective_name == callee or callee.startswith(
+                f"{imp.effective_name}."
+            ):
                 target_module = imp.module
                 target_function = imp.name if imp.name != "*" else callee
                 return (target_module, target_function)
