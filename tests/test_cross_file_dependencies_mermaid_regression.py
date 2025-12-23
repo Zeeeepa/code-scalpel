@@ -12,9 +12,7 @@ def test_cross_file_dependencies_include_diagram_does_not_crash(tmp_path: Path) 
         encoding="utf-8",
     )
     (tmp_path / "a.py").write_text(
-        "from b import bar\n\n\n"
-        "def foo():\n"
-        "    return bar()\n",
+        "from b import bar\n\n\n" "def foo():\n" "    return bar()\n",
         encoding="utf-8",
     )
 

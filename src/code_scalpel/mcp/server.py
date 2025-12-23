@@ -6576,23 +6576,26 @@ def _get_cross_file_dependencies_sync(
         )
 
     try:
-        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+        from concurrent.futures import (
+            ThreadPoolExecutor,
+            TimeoutError as FuturesTimeoutError,
+        )
 
         def run_with_timeout(func, timeout_seconds, *args, **kwargs):
             """
             Cross-platform timeout wrapper using ThreadPoolExecutor.
-            
+
             Works on both Unix/Linux and Windows by running the function
             in a thread pool with a timeout.
-            
+
             Args:
                 func: Function to execute
                 timeout_seconds: Maximum execution time in seconds
                 *args, **kwargs: Arguments to pass to func
-                
+
             Returns:
                 Result from func
-                
+
             Raises:
                 TimeoutError: If execution exceeds timeout_seconds
             """
@@ -6617,7 +6620,7 @@ def _get_cross_file_dependencies_sync(
             resolver = ImportResolver(root_path)
             resolver.build()
             return resolver
-        
+
         try:
             resolver = run_with_timeout(build_resolver, 30)
         except TimeoutError as e:
@@ -6631,7 +6634,7 @@ def _get_cross_file_dependencies_sync(
             extractor = CrossFileExtractor(root_path)
             extractor.build()
             return extractor
-        
+
         try:
             extractor = run_with_timeout(build_extractor, 60)
         except TimeoutError as e:
@@ -6648,7 +6651,7 @@ def _get_cross_file_dependencies_sync(
                 depth=max_depth,
                 confidence_decay_factor=confidence_decay_factor,
             )
-        
+
         try:
             extraction_result = run_with_timeout(extract_dependencies, 30)
         except TimeoutError as e:
@@ -6771,14 +6774,18 @@ def _get_cross_file_dependencies_sync(
             seen_nodes: set[str] = set()
             edges_out: list[tuple[str, str]] = []
 
-            while queue and len(seen_nodes) < max_mermaid_nodes and len(edges_out) < max_mermaid_edges:
+            while (
+                queue
+                and len(seen_nodes) < max_mermaid_nodes
+                and len(edges_out) < max_mermaid_edges
+            ):
                 cur, depth = queue.popleft()
                 if cur in seen_nodes:
                     continue
                 seen_nodes.add(cur)
                 if depth >= max_depth:
                     continue
-                for dep in import_graph.get(cur, [])[: max_mermaid_edges]:
+                for dep in import_graph.get(cur, [])[:max_mermaid_edges]:
                     if len(edges_out) >= max_mermaid_edges:
                         break
                     edges_out.append((cur, dep))
@@ -6800,7 +6807,10 @@ def _get_cross_file_dependencies_sync(
                     lines.append(f"    {node_ids[a]} --> {node_ids[b]}")
 
             # Truncation hint
-            if len(seen_nodes) >= max_mermaid_nodes or len(edges_out) >= max_mermaid_edges:
+            if (
+                len(seen_nodes) >= max_mermaid_nodes
+                or len(edges_out) >= max_mermaid_edges
+            ):
                 lines.append(
                     f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})"
                 )

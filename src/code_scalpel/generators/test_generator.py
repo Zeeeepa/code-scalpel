@@ -528,7 +528,9 @@ class TestGenerator:
             # control flow using the concrete inputs (without executing user code).
             # This fixes cases where symbolic execution falls back to a shallow
             # path analysis and condition->return matching becomes ambiguous.
-            interpreted = self._safe_interpret_return(code, function_name, inputs, language)
+            interpreted = self._safe_interpret_return(
+                code, function_name, inputs, language
+            )
             if interpreted is not None:
                 expected_result = interpreted
 
@@ -592,7 +594,10 @@ class TestGenerator:
 
         func_node: ast.FunctionDef | ast.AsyncFunctionDef | None = None
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name:
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == function_name
+            ):
                 func_node = node
                 break
         if func_node is None:
