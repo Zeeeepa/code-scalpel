@@ -133,6 +133,7 @@ class RefactorSimulator:
             raise ValueError("Must provide either 'patch' or 'new_code'")
 
         # Apply patch to get new code
+        patch_text = patch
         if new_code is None:
             try:
                 new_code = self._apply_patch(original_code, patch)  # type: ignore[arg-type]
@@ -144,6 +145,12 @@ class RefactorSimulator:
                     reason=f"Failed to apply patch: {str(e)}",
                 )
 
+        patch_security_issues: list[SecurityIssue] = []
+        if patch_text:
+            patch_security_issues = self._scan_patch_added_lines_for_security(
+                patch_text, original_code
+            )
+
         # Validate syntax
         syntax_error = self._check_syntax(new_code, language)
         if syntax_error:
@@ -152,10 +159,13 @@ class RefactorSimulator:
                 is_safe=False,
                 patched_code=new_code,
                 reason=f"Syntax error in patched code: {syntax_error}",
+                security_issues=patch_security_issues,
             )
 
         # Run security scan
         security_issues = self._scan_security(new_code, original_code, language)
+        if patch_security_issues:
+            security_issues.extend(patch_security_issues)
 
         # Check structural changes
         structural_changes = self._analyze_structural_changes(
@@ -179,6 +189,80 @@ class RefactorSimulator:
             structural_changes=structural_changes,
             warnings=warnings,
         )
+
+    def _scan_patch_added_lines_for_security(
+        self, patch: str, original_code: str
+    ) -> list[SecurityIssue]:
+        """Scan patch-added lines for obviously dangerous introductions.
+
+        This is intentionally conservative: it only considers lines starting with '+'
+        (excluding file headers like '+++') and only flags patterns not already
+        present in the original code.
+        """
+        added_lines: list[str] = []
+        for raw in patch.splitlines():
+            stripped = raw.lstrip(" \t")
+            if stripped.startswith("+++") or stripped.startswith("@@"):
+                continue
+            if stripped.startswith("+") and not stripped.startswith("+++"):
+                added_lines.append(stripped[1:])
+
+        added_text = "\n".join(added_lines)
+        if not added_text.strip():
+            return []
+
+        issues: list[SecurityIssue] = []
+        dangerous_patterns = [
+            (
+                "eval(",
+                "Code Injection",
+                "CWE-94",
+                "high",
+                "Introduced eval() via patch",
+            ),
+            (
+                "exec(",
+                "Code Injection",
+                "CWE-94",
+                "high",
+                "Introduced exec() via patch",
+            ),
+            (
+                "os.system(",
+                "Command Injection",
+                "CWE-78",
+                "high",
+                "Introduced os.system() via patch",
+            ),
+            (
+                "subprocess.Popen(",
+                "Command Injection",
+                "CWE-78",
+                "medium",
+                "Introduced subprocess.Popen() via patch",
+            ),
+            (
+                "pickle.loads(",
+                "Deserialization",
+                "CWE-502",
+                "high",
+                "Introduced pickle.loads() via patch",
+            ),
+        ]
+
+        for pattern, vuln_type, cwe, severity, desc in dangerous_patterns:
+            if pattern in added_text and pattern not in original_code:
+                issues.append(
+                    SecurityIssue(
+                        type=vuln_type,
+                        severity=severity,
+                        line=None,
+                        description=desc,
+                        cwe=cwe,
+                    )
+                )
+
+        return issues
 
     def simulate_inline(
         self,

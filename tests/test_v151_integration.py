@@ -756,6 +756,37 @@ class TestGraphNeighborhood:
 
         return graph
 
+
+def test_get_graph_neighborhood_fast_fail_avoids_graph_build(monkeypatch, tmp_path):
+    import asyncio
+    from pathlib import Path
+
+    # Create an empty project root (no modules)
+    project_root = tmp_path / "proj"
+    project_root.mkdir()
+
+    # If the slow path is taken, we'd build a call graph. Make that explode.
+    from code_scalpel.ast_tools import call_graph as call_graph_mod
+
+    def _boom(*args, **kwargs):
+        raise AssertionError("CallGraphBuilder.build_with_details should not run")
+
+    monkeypatch.setattr(call_graph_mod.CallGraphBuilder, "build_with_details", _boom)
+
+    from code_scalpel.mcp.server import get_graph_neighborhood
+
+    async def run():
+        return await get_graph_neighborhood(
+            center_node_id="python::does.not.exist::function::nope",
+            k=2,
+            max_nodes=10,
+            project_root=str(Path(project_root)),
+        )
+
+    result = asyncio.run(run())
+    assert result.success is False
+    assert result.error
+
     def test_basic_neighborhood_extraction(self, sample_graph):
         """Test basic k-hop neighborhood extraction."""
         center_id = "python::main::function::center"

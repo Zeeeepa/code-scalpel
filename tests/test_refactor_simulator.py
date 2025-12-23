@@ -286,6 +286,27 @@ class TestRefactorSimulatorPatch:
 
         assert "return 2" in result.patched_code
 
+    def test_patch_introducing_eval_is_unsafe(self):
+        """Patch-mode should detect eval() introduction."""
+        from code_scalpel.generators import RefactorSimulator
+
+        original = """def foo(data):
+    return data
+"""
+
+        patch = """@@ -1,2 +1,3 @@
+ def foo(data):
+-    return data
++    # dangerous
++    return eval(data)
+"""
+
+        simulator = RefactorSimulator()
+        result = simulator.simulate(original, patch=patch)
+
+        assert result.is_safe is False
+        assert any("Code Injection" in issue.type for issue in result.security_issues)
+
     def test_invalid_patch_error(self):
         """Test that invalid patches are handled gracefully."""
         from code_scalpel.generators import RefactorSimulator

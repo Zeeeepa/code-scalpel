@@ -59,6 +59,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional, Callable, List
 import logging
+import time
 
 from code_scalpel.autonomy.stubs import (
     ErrorAnalysis,
@@ -161,6 +162,7 @@ class FixLoop:
         """
         self.max_attempts = max_attempts
         self.max_duration = timedelta(seconds=max_duration_seconds)
+        self.max_duration_seconds = float(max_duration_seconds)
         self.min_confidence = min_confidence_threshold
         self.on_escalate = on_escalate
         self.logger = logging.getLogger("scalpel.fix_loop")
@@ -191,14 +193,14 @@ class FixLoop:
             FixLoopResult with success/failure and full history
         """
         attempts: List[FixAttempt] = []
-        start_time = datetime.now()
+        start_monotonic = time.monotonic()
         current_code = source_code
         current_error = initial_error
         seen_errors: set[int] = set()  # Track unique errors to detect loops
 
         for attempt_num in range(1, self.max_attempts + 1):
             # [20251217_FEATURE] P0: Check timeout
-            if datetime.now() - start_time > self.max_duration:
+            if (time.monotonic() - start_monotonic) > self.max_duration_seconds:
                 self.logger.warning(
                     f"Fix loop timeout after {attempt_num - 1} attempts"
                 )
@@ -250,6 +252,18 @@ class FixLoop:
             # [20251217_FEATURE] Apply fix and test in sandbox
             patched_code = self._apply_fix(current_code, best_fix)
 
+            # Timeout guard before launching potentially expensive sandbox execution
+            if (time.monotonic() - start_monotonic) > self.max_duration_seconds:
+                self.logger.warning(
+                    f"Fix loop timeout before sandbox execution (attempt {attempt_num})"
+                )
+                return self._create_result(
+                    attempts=attempts,
+                    success=False,
+                    reason="timeout",
+                    escalated=self._escalate("Timeout exceeded", attempts),
+                )
+
             sandbox_result = sandbox.execute_with_changes(
                 project_path=project_path,
                 changes=[
@@ -263,6 +277,9 @@ class FixLoop:
                 lint_command="ruff check",
             )
 
+            # Enforce timeout even if the sandbox call ran long.
+            timed_out = (time.monotonic() - start_monotonic) > self.max_duration_seconds
+
             # [20251217_FEATURE] P0: Record attempt (full audit trail)
             attempt = FixAttempt(
                 attempt_number=attempt_num,
@@ -274,6 +291,17 @@ class FixLoop:
                 duration_ms=sandbox_result.execution_time_ms,
             )
             attempts.append(attempt)
+
+            if timed_out:
+                self.logger.warning(
+                    f"Fix loop timeout during sandbox execution (attempt {attempt_num})"
+                )
+                return self._create_result(
+                    attempts=attempts,
+                    success=False,
+                    reason="timeout",
+                    escalated=self._escalate("Timeout exceeded", attempts),
+                )
 
             # [20251217_FEATURE] P0: Check success (validates in sandbox)
             if sandbox_result.success:

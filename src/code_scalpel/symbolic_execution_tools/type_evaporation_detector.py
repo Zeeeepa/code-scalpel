@@ -191,15 +191,66 @@ class TypeEvaporationDetector:
         "postMessage",
     }
 
-    # Fetch/HTTP patterns
+    # Fetch/HTTP patterns.
+    # Note: tree-sitter function text for member calls includes the member, e.g. "axios.post".
     FETCH_PATTERNS = {
         "fetch",
         "axios",
+        "axios.get",
+        "axios.post",
+        "axios.put",
+        "axios.delete",
+        "axios.patch",
         "XMLHttpRequest",
         "$.ajax",
         "$.post",
         "$.get",
     }
+
+    def _is_fetch_like(self, func_text: str) -> bool:
+        ft = (func_text or "").strip()
+        if ft in self.FETCH_PATTERNS:
+            return True
+        # Handle axios.<method> variations
+        if ft.startswith("axios."):
+            return True
+        return False
+
+    def _normalize_endpoint_candidate(self, raw: str) -> str:
+        """Normalize an extracted endpoint candidate.
+
+        - Removes ${...} from template strings
+        - Strips scheme/host if present
+        - Drops query/fragments
+        - Ensures leading '/'
+        """
+        s = (raw or "").strip().strip("\"'`")
+        if not s:
+            return s
+
+        # Remove template interpolations
+        s = re.sub(r"\$\{[^}]+\}", "", s)
+        s = s.strip()
+
+        # Drop query/fragment
+        s = s.split("#", 1)[0]
+        s = s.split("?", 1)[0]
+
+        # Strip scheme/host
+        if "://" in s:
+            parts = s.split("/", 3)
+            if len(parts) >= 4:
+                s = "/" + parts[3]
+
+        s = s.strip()
+        if s and not s.startswith("/"):
+            # If it's clearly a path segment, normalize to a path.
+            if "/" in s:
+                s = "/" + s.lstrip("/")
+        # Normalize trailing slash (except root)
+        if len(s) > 1:
+            s = s.rstrip("/")
+        return s
 
     def __init__(self) -> None:
         """Initialize the detector with tree-sitter if available."""
@@ -295,15 +346,9 @@ class TypeEvaporationDetector:
         if node.type == "as_expression":
             self._check_type_assertion(node, code, lines, result)
 
-        # Check for DOM access
+        # Check for DOM access / serialization / fetch calls
         elif node.type == "call_expression":
             self._check_call_expression(node, code, lines, result)
-
-        # Check for fetch calls
-        elif node.type == "call_expression":
-            func_text = self._get_function_name(node, code)
-            if func_text in self.FETCH_PATTERNS:
-                self._check_fetch_call(node, code, lines, result)
 
         # Recurse
         for child in node.children:
@@ -415,7 +460,7 @@ class TypeEvaporationDetector:
             )
 
         # Check for fetch calls
-        if func_name in self.FETCH_PATTERNS:
+        if self._is_fetch_like(func_name):
             self._check_fetch_call(node, code, lines, result)
 
     def _check_fetch_call(
@@ -443,7 +488,9 @@ class TypeEvaporationDetector:
                     break
 
         if endpoint:
-            result.fetch_endpoints.append((endpoint, line_num))
+            endpoint = self._normalize_endpoint_candidate(endpoint)
+            if endpoint:
+                result.fetch_endpoints.append((endpoint, line_num))
 
             # Check if body contains JSON.stringify
             if "JSON.stringify" in snippet:
@@ -501,11 +548,29 @@ class TypeEvaporationDetector:
                     element_id = id_match.group(1) if id_match else "unknown"
                     result.dom_accesses.append((element_id, i))
 
-            # Fetch calls
+            # Fetch calls (fetch + axios)
             if "fetch(" in line:
-                url_match = re.search(r"fetch\s*\(\s*['\"`]([^'\"`]+)['\"`]", line)
+                url_match = re.search(r"fetch\s*\(\s*(['\"`])([^'\"`]+)\1", line)
                 if url_match:
-                    result.fetch_endpoints.append((url_match.group(1), i))
+                    result.fetch_endpoints.append(
+                        (self._normalize_endpoint_candidate(url_match.group(2)), i)
+                    )
+                else:
+                    # Template strings / concatenations: try to salvage a path suffix
+                    tmpl = re.search(r"fetch\s*\(\s*(`)([^`]+)`", line)
+                    if tmpl:
+                        result.fetch_endpoints.append(
+                            (self._normalize_endpoint_candidate(tmpl.group(2)), i)
+                        )
+
+            axios_match = re.search(
+                r"\baxios\.(get|post|put|delete|patch)\s*\(\s*(['\"`])([^'\"`]+)\2",
+                line,
+            )
+            if axios_match:
+                result.fetch_endpoints.append(
+                    (self._normalize_endpoint_candidate(axios_match.group(3)), i)
+                )
 
             # JSON.stringify boundary
             if "JSON.stringify" in line:
@@ -594,8 +659,9 @@ def analyze_type_evaporation_cross_file(
 
     # Extract Python routes
     py_routes: Dict[str, int] = {}
+    # Support Flask/FastAPI blueprints/routers (e.g., @bp.route, @router.get, @app.post)
     route_pattern = re.compile(
-        r'@app\.(route|get|post|put|delete|patch)\s*\(\s*["\']([^"\']+)["\']'
+        r'@\w+\.(route|get|post|put|delete|patch)\s*\(\s*["\']([^"\']+)["\']'
     )
     for i, line in enumerate(python_code.splitlines(), 1):
         match = route_pattern.search(line)
@@ -605,20 +671,41 @@ def analyze_type_evaporation_cross_file(
 
     # Match endpoints
     matched_endpoints: List[Tuple[str, int, int]] = []
+
+    def _norm_path(s: str) -> str:
+        s = (s or "").strip()
+        s = re.sub(r"\$\{[^}]+\}", "", s)
+        s = s.split("#", 1)[0]
+        s = s.split("?", 1)[0]
+        if "://" in s:
+            parts = s.split("/", 3)
+            if len(parts) >= 4:
+                s = "/" + parts[3]
+        if s and not s.startswith("/") and "/" in s:
+            s = "/" + s.lstrip("/")
+        if len(s) > 1:
+            s = s.rstrip("/")
+        return s
+
     for ts_endpoint, ts_line in frontend_result.fetch_endpoints:
-        # Extract path from full URL
-        path = ts_endpoint
-        if "://" in ts_endpoint:
-            # http://localhost:8080/api/x -> /api/x
-            path = (
-                "/" + ts_endpoint.split("/", 3)[-1]
-                if ts_endpoint.count("/") >= 3
-                else ts_endpoint
-            )
+        path = _norm_path(ts_endpoint)
+        if not path:
+            continue
 
         # Try to match with Python routes
         for py_route, py_line in py_routes.items():
-            if path.endswith(py_route) or py_route.endswith(path.split("/")[-1]):
+            py_norm = _norm_path(py_route)
+            if not py_norm:
+                continue
+
+            # Prefer exact match, then suffix match.
+            if path == py_norm or path.endswith(py_norm):
+                matched_endpoints.append((py_route, ts_line, py_line))
+                continue
+
+            # Fallback: match by final segment (useful for simple test fixtures)
+            last_seg = path.split("/")[-1]
+            if last_seg and py_norm.split("/")[-1] == last_seg:
                 matched_endpoints.append((py_route, ts_line, py_line))
 
     # Create cross-file issues for matched endpoints

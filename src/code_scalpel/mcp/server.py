@@ -5793,6 +5793,63 @@ def _normalize_graph_center_node_id(center_node_id: str) -> str:
     return raw
 
 
+def _fast_validate_python_function_node_exists(
+    root_path: Path, center_node_id: str
+) -> tuple[bool, str | None]:
+    """Best-effort fast validation for python::<module>::function::<name>.
+
+    This avoids building the full call graph when the node ID points to a module
+    file that doesn't exist or a function name that doesn't exist in that file.
+
+    Returns:
+        (ok, error_message)
+    """
+    import re
+
+    m = re.match(
+        r"^(?P<lang>[^:]+)::(?P<module>[^:]+)::(?P<kind>[^:]+)::(?P<name>.+)$",
+        center_node_id.strip(),
+    )
+    if not m:
+        return (
+            False,
+            "Invalid center_node_id format; expected language::module::type::name",
+        )
+
+    lang = m.group("lang")
+    module = m.group("module")
+    kind = m.group("kind")
+    name = m.group("name")
+
+    if lang != "python" or kind != "function":
+        return True, None
+
+    if module in ("external", "unknown"):
+        return False, f"Center node module '{module}' is not a local module"
+
+    # Map module -> file path
+    candidate = root_path / (module.replace(".", "/") + ".py")
+    if not candidate.exists():
+        return False, f"Center node file not found for module '{module}': {candidate}"
+
+    # Quick AST scan for a matching function name in that single file.
+    try:
+        import ast
+
+        code = candidate.read_text(encoding="utf-8")
+        tree = ast.parse(code)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and node.name == name
+            ):
+                return True, None
+        return False, f"Center node function '{name}' not found in {candidate}"
+    except Exception:
+        # If parsing fails, fall back to the slow path (graph build)
+        return True, None
+
+
 @mcp.tool()
 async def get_graph_neighborhood(
     center_node_id: str,
@@ -5883,6 +5940,15 @@ async def get_graph_neighborhood(
 
     try:
         center_node_id = _normalize_graph_center_node_id(center_node_id)
+
+        ok, fast_err = _fast_validate_python_function_node_exists(
+            root_path, center_node_id
+        )
+        if not ok:
+            return GraphNeighborhoodResult(
+                success=False,
+                error=fast_err or "Center node not found",
+            )
 
         # [v3.0.4] Try to use cached graph first
         from code_scalpel.graph_engine import UniversalGraph
@@ -6553,7 +6619,6 @@ def _get_cross_file_dependencies_sync(
 
     [20251220_BUGFIX] v3.0.5 - Parameter order matches async function for consistency.
     """
-    from code_scalpel.ast_tools.import_resolver import ImportResolver
     from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
     root_path = Path(project_root) if project_root else PROJECT_ROOT
@@ -6615,21 +6680,7 @@ def _get_cross_file_dependencies_sync(
                 # Do not wait for a potentially hung worker thread.
                 executor.shutdown(wait=False, cancel_futures=True)
 
-        # Build import graph with timeout protection (30 seconds)
-        def build_resolver():
-            resolver = ImportResolver(root_path)
-            resolver.build()
-            return resolver
-
-        try:
-            resolver = run_with_timeout(build_resolver, 30)
-        except TimeoutError as e:
-            return CrossFileDependenciesResult(
-                success=False,
-                error=f"ImportResolver.build() timed out after 30s. Project may be too large. Error: {e}",
-            )
-
-        # Extract cross-file dependencies with timeout protection (60 seconds)
+        # Build CrossFileExtractor (includes ImportResolver.build()) with timeout protection.
         def build_extractor():
             extractor = CrossFileExtractor(root_path)
             extractor.build()
@@ -6716,32 +6767,44 @@ def _get_cross_file_dependencies_sync(
         )  # These are imports that couldn't be resolved
 
         # Build import graph dict (file -> list of imported files)
-        # Uses resolver.imports which is dict[module_name, list[ImportInfo]]
-        import_graph = {}
-        for module_name, imports in resolver.imports.items():
-            # Get file path for this module
-            if module_name in resolver.module_to_file:
-                file_path = resolver.module_to_file[module_name]
-                rel_path = (
-                    str(Path(file_path).relative_to(root_path))
-                    if Path(file_path).is_absolute()
-                    else file_path
-                )
-            else:
-                rel_path = module_name.replace(".", "/") + ".py"  # Best guess
+        # Use the extractor's resolver (avoid double-building) and keep this focused.
+        resolver = extractor.resolver
+        import_graph: dict[str, list[str]] = {}
 
-            imported_files = []
-            for imp in imports:
-                # Try to resolve module to file using module_to_file mapping
-                if imp.module in resolver.module_to_file:
-                    resolved_file = resolver.module_to_file[imp.module]
-                    resolved_rel = (
-                        str(Path(resolved_file).relative_to(root_path))
-                        if Path(resolved_file).is_absolute()
-                        else resolved_file
-                    )
-                    if resolved_rel not in imported_files:
-                        imported_files.append(resolved_rel)
+        # Limit graph construction to files actually involved in the extraction.
+        files_of_interest: set[str] = set()
+        for sym in all_symbols:
+            try:
+                p = Path(sym.file)
+                if not p.is_absolute():
+                    p = root_path / p
+                p = p.resolve()
+                files_of_interest.add(str(p))
+            except Exception:
+                continue
+        files_of_interest.add(str(target_path.resolve()))
+
+        for abs_file in files_of_interest:
+            module_name = resolver.file_to_module.get(abs_file)
+            if not module_name:
+                continue
+
+            rel_path = str(Path(abs_file).relative_to(root_path))
+            imported_files: list[str] = []
+            for imp in resolver.imports.get(module_name, []):
+                resolved_file = resolver.module_to_file.get(imp.module)
+                if not resolved_file:
+                    continue
+                try:
+                    resolved_abs = str(Path(resolved_file).resolve())
+                    if resolved_abs not in files_of_interest:
+                        continue
+                    resolved_rel = str(Path(resolved_abs).relative_to(root_path))
+                except Exception:
+                    continue
+                if resolved_rel not in imported_files:
+                    imported_files.append(resolved_rel)
+
             if imported_files:
                 import_graph[rel_path] = imported_files
 
