@@ -1,0 +1,341 @@
+import os
+import socket
+import subprocess
+import sys
+import time
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from datetime import timedelta
+from pathlib import Path
+
+import anyio
+from anyio.streams.text import TextReceiveStream
+import httpx
+import pytest
+
+from mcp.client.session import ClientSession
+from mcp.client.sse import sse_client
+from mcp.client.streamable_http import streamable_http_client
+from mcp import StdioServerParameters
+from mcp.shared.message import SessionMessage
+import mcp.types as mcp_types
+
+
+pytestmark = pytest.mark.asyncio
+
+
+@dataclass(frozen=True)
+class _Ports:
+    mcp_port: int
+    health_port: int
+
+
+def _can_bind(host: str, port: int) -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind((host, port))
+        return True
+    except OSError:
+        return False
+
+
+def _get_free_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
+
+
+def _get_free_port_pair(host: str = "127.0.0.1", attempts: int = 200) -> _Ports:
+    for _ in range(attempts):
+        base = _get_free_port()
+        if base <= 0:
+            continue
+        if _can_bind(host, base) and _can_bind(host, base + 1):
+            return _Ports(mcp_port=base, health_port=base + 1)
+    raise RuntimeError("Could not find a free (port, port+1) pair")
+
+
+def _wait_for_tcp(host: str, port: int, timeout_s: float = 15.0) -> None:
+    deadline = time.time() + timeout_s
+    last_exc: Exception | None = None
+
+    while time.time() < deadline:
+        try:
+            with socket.create_connection((host, port), timeout=0.5):
+                return
+        except Exception as e:
+            last_exc = e
+            time.sleep(0.1)
+
+    raise RuntimeError(f"Port not ready: {host}:{port} ({last_exc})")
+
+
+def _pythonpath_env(repo_root: Path) -> dict[str, str]:
+    src_root = repo_root / "src"
+    assert (src_root / "code_scalpel").exists()
+
+    env = os.environ.copy()
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(src_root) + (":" + existing if existing else "")
+    return env
+
+
+def _make_tiny_project(tmp_path: Path) -> tuple[Path, str]:
+    root = tmp_path / "proj"
+    (root / "pkg").mkdir(parents=True, exist_ok=True)
+
+    (root / "pkg" / "__init__.py").write_text("", encoding="utf-8")
+    (root / "pkg" / "b.py").write_text(
+        """\
+class Helper:
+    def ping(self) -> str:
+        return 'pong'
+""",
+        encoding="utf-8",
+    )
+    (root / "pkg" / "a.py").write_text(
+        """\
+from pkg.b import Helper
+
+class PolicyEngine:
+    def __init__(self) -> None:
+        self.h = Helper()
+
+    def run(self) -> str:
+        return self.h.ping()
+""",
+        encoding="utf-8",
+    )
+
+    # target_file must be relative to project_root for get_cross_file_dependencies
+    target_file = str((root / "pkg" / "a.py").relative_to(root))
+    return root, target_file
+
+
+@asynccontextmanager
+async def _strict_stdio_client(server: StdioServerParameters):
+    """A stdio client that treats stdout as protocol-only.
+
+    This intentionally fails fast if the server writes any non-JSON-RPC lines to
+    stdout (e.g., accidental print statements), which can otherwise corrupt the
+    MCP framing and manifest as hangs/timeouts.
+    """
+
+    read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
+    write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
+
+    process = await anyio.open_process(
+        [server.command, *server.args],
+        env=server.env,
+        cwd=str(server.cwd) if server.cwd is not None else None,
+        stderr=sys.stderr,
+        start_new_session=True,
+    )
+
+    async def _stdout_reader():
+        assert process.stdout is not None
+
+        buffer = ""
+        async with read_stream_writer:
+            async for chunk in TextReceiveStream(
+                process.stdout,
+                encoding=server.encoding,
+                errors=server.encoding_error_handler,
+            ):
+                lines = (buffer + chunk).split("\n")
+                buffer = lines.pop()
+
+                for line in lines:
+                    if not line.strip():
+                        continue
+                    try:
+                        message = mcp_types.JSONRPCMessage.model_validate_json(line)
+                    except Exception as exc:
+                        raise AssertionError(
+                            "Server wrote non-JSON-RPC data to stdout; "
+                            f"first invalid line: {line[:200]!r}"
+                        ) from exc
+
+                    await read_stream_writer.send(SessionMessage(message))
+
+    async def _stdin_writer():
+        assert process.stdin is not None
+
+        async with write_stream_reader:
+            async for session_message in write_stream_reader:
+                payload = session_message.message.model_dump_json(
+                    by_alias=True, exclude_none=True
+                )
+                await process.stdin.send(
+                    (payload + "\n").encode(
+                        encoding=server.encoding,
+                        errors=server.encoding_error_handler,
+                    )
+                )
+
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(_stdout_reader)
+        tg.start_soon(_stdin_writer)
+        try:
+            yield read_stream, write_stream
+        finally:
+            try:
+                if process.stdin is not None:
+                    await process.stdin.aclose()
+            except Exception:
+                pass
+
+            with anyio.move_on_after(2.0):
+                await process.wait()
+
+            if process.returncode is None:
+                process.terminate()
+                with anyio.move_on_after(2.0):
+                    await process.wait()
+
+            if process.returncode is None:
+                process.kill()
+                with anyio.move_on_after(2.0):
+                    await process.wait()
+
+            await read_stream.aclose()
+            await write_stream.aclose()
+            await read_stream_writer.aclose()
+            await write_stream_reader.aclose()
+
+
+async def _assert_core_mcp_contract(
+    session: ClientSession, project_root: Path, target_file: str
+) -> None:
+    tools = await session.list_tools()
+    tool_names = {t.name for t in tools.tools}
+
+    # Tool availability: ensure current registry count and a few key tools.
+    assert len(tool_names) == 20
+    assert "analyze_code" in tool_names
+    assert "get_cross_file_dependencies" in tool_names
+    assert "verify_policy_integrity" in tool_names
+
+    # Tool call: analyze_code
+    analyze = await session.call_tool(
+        "analyze_code",
+        arguments={"code": "def foo():\n    return 1\n", "language": "python"},
+        read_timeout_seconds=timedelta(seconds=30),
+    )
+    assert analyze.isError is False
+
+    # Tool call: cross-file dependencies (small project)
+    deps = await session.call_tool(
+        "get_cross_file_dependencies",
+        arguments={
+            "target_file": target_file,
+            "target_symbol": "PolicyEngine",
+            "project_root": str(project_root),
+            "max_depth": 2,
+            "include_code": False,
+            "include_diagram": False,
+        },
+        read_timeout_seconds=timedelta(seconds=60),
+    )
+    assert deps.isError is False
+
+
+async def test_mcp_stdio_transport_end_to_end(tmp_path: Path):
+    with anyio.fail_after(120):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = _pythonpath_env(repo_root)
+
+        project_root, target_file = _make_tiny_project(tmp_path)
+
+        params = StdioServerParameters(
+            command=sys.executable,
+            args=["-m", "code_scalpel.mcp.server", "--root", str(project_root)],
+            env=env,
+        )
+
+        async with _strict_stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                await _assert_core_mcp_contract(session, project_root, target_file)
+
+
+@pytest.mark.parametrize(
+    "transport,endpoint_path",
+    [
+        ("streamable-http", "/mcp"),
+        ("sse", "/sse"),
+    ],
+)
+async def test_mcp_http_transports_end_to_end(
+    tmp_path: Path, transport: str, endpoint_path: str
+):
+    with anyio.fail_after(180):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = _pythonpath_env(repo_root)
+
+        project_root, target_file = _make_tiny_project(tmp_path)
+        ports = _get_free_port_pair(host="127.0.0.1")
+
+        log_path = tmp_path / f"server_{transport}.log"
+        with log_path.open("w", encoding="utf-8") as log_file:
+            proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-m",
+                    "code_scalpel.mcp.server",
+                    "--transport",
+                    transport,
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    str(ports.mcp_port),
+                    "--root",
+                    str(project_root),
+                ],
+                cwd=str(repo_root),
+                env=env,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+
+        try:
+            if proc.poll() is not None:
+                raise RuntimeError(f"Server exited early (code={proc.returncode})")
+            _wait_for_tcp("127.0.0.1", ports.mcp_port, timeout_s=20.0)
+
+            health_url = f"http://127.0.0.1:{ports.health_port}/health"
+            r = httpx.get(health_url, timeout=2.0)
+            r.raise_for_status()
+            data = r.json()
+            assert data.get("status") == "healthy"
+
+            base_url = f"http://127.0.0.1:{ports.mcp_port}{endpoint_path}"
+
+            if transport == "streamable-http":
+                async with streamable_http_client(base_url) as (
+                    read_stream,
+                    write_stream,
+                    _get_session_id,
+                ):
+                    async with ClientSession(read_stream, write_stream) as session:
+                        await session.initialize()
+                        await _assert_core_mcp_contract(
+                            session, project_root, target_file
+                        )
+            else:
+                async with sse_client(base_url) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        await _assert_core_mcp_contract(
+                            session, project_root, target_file
+                        )
+
+        finally:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:  # pragma: no cover
+                proc.kill()
+                proc.wait(timeout=5)
