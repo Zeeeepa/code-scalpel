@@ -596,7 +596,7 @@ def detect_language(
 
     # Default to Python for backward compatibility
     return Language.PYTHON
-    return Language.PYTHON
+
 
 
 class UnifiedExtractor:

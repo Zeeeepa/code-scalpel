@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import threading
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable, Dict, Generic, List, Optional, Sequence, Tuple, TypeVar
 
@@ -81,7 +82,18 @@ class ParallelParser(Generic[T]):
                 to_parse[i : i + self.batch_size]
                 for i in range(0, len(to_parse), self.batch_size)
             ]
-            with ProcessPoolExecutor(max_workers=self.max_workers) as executor:
+
+            # Spawning/forking processes from a non-main thread can hang on some
+            # platforms/configs. Since this parser may be invoked from MCP tool
+            # handlers running in worker threads (e.g., stdio/async transports),
+            # fall back to threads when not on the main thread.
+            executor_cls = (
+                ProcessPoolExecutor
+                if threading.current_thread() is threading.main_thread()
+                else ThreadPoolExecutor
+            )
+
+            with executor_cls(max_workers=self.max_workers) as executor:
                 futures = {
                     executor.submit(_batch_parse_worker, batch, parse_fn): batch
                     for batch in batches

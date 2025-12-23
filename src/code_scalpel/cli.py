@@ -506,7 +506,8 @@ def start_mcp_server(
         print(
             f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}"
         )
-        print(f"   MCP endpoint: {protocol}://{host}:{port}/sse")
+        endpoint_path = "/mcp" if transport == "streamable-http" else "/sse"
+        print(f"   MCP endpoint: {protocol}://{host}:{port}{endpoint_path}")
         if use_https:
             print("   SSL/TLS: ENABLED")
         if allow_lan:

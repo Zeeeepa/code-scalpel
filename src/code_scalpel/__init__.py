@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251221_RELEASE] v3.1.0 "Parser Unification" - Unified extractor for all languages
-__version__ = "3.1.0"
+# [20251222_PREP] v3.2.0 - Release solidification (MCP contract tests + CI confidence gates)
+__version__ = "3.2.0"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

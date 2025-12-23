@@ -6531,36 +6531,50 @@ def _get_cross_file_dependencies_sync(
         )
 
     try:
-        import signal
-        import platform
-        from contextlib import contextmanager
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-        @contextmanager
-        def timeout_context(seconds):
-            """Context manager for operation timeout (Unix only)."""
-            # signal.SIGALRM only available on Unix/Linux
-            if platform.system() == "Windows":
-                # On Windows, no timeout protection (SIGALRM not available)
-                yield
-                return
+        def run_with_timeout(func, timeout_seconds, *args, **kwargs):
+            """
+            Cross-platform timeout wrapper using ThreadPoolExecutor.
             
-            def timeout_handler(signum, frame):
-                raise TimeoutError(f"Operation timed out after {seconds} seconds")
+            Works on both Unix/Linux and Windows by running the function
+            in a thread pool with a timeout.
             
-            # Set up signal handler (Unix only)
-            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(seconds)
+            Args:
+                func: Function to execute
+                timeout_seconds: Maximum execution time in seconds
+                *args, **kwargs: Arguments to pass to func
+                
+            Returns:
+                Result from func
+                
+            Raises:
+                TimeoutError: If execution exceeds timeout_seconds
+            """
+            # NOTE: Avoid `with ThreadPoolExecutor(...)` here.
+            # If `future.result(timeout=...)` times out, the context manager's
+            # shutdown(wait=True) can block forever waiting for a hung worker.
+            executor = ThreadPoolExecutor(max_workers=1)
+            future = executor.submit(func, *args, **kwargs)
             try:
-                yield
+                return future.result(timeout=timeout_seconds)
+            except FuturesTimeoutError:
+                future.cancel()
+                raise TimeoutError(
+                    f"Operation timed out after {timeout_seconds} seconds"
+                )
             finally:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, old_handler)
+                # Do not wait for a potentially hung worker thread.
+                executor.shutdown(wait=False, cancel_futures=True)
 
         # Build import graph with timeout protection (30 seconds)
+        def build_resolver():
+            resolver = ImportResolver(root_path)
+            resolver.build()
+            return resolver
+        
         try:
-            with timeout_context(30):
-                resolver = ImportResolver(root_path)
-                resolver.build()
+            resolver = run_with_timeout(build_resolver, 30)
         except TimeoutError as e:
             return CrossFileDependenciesResult(
                 success=False,
@@ -6568,10 +6582,13 @@ def _get_cross_file_dependencies_sync(
             )
 
         # Extract cross-file dependencies with timeout protection (60 seconds)
+        def build_extractor():
+            extractor = CrossFileExtractor(root_path)
+            extractor.build()
+            return extractor
+        
         try:
-            with timeout_context(60):
-                extractor = CrossFileExtractor(root_path)
-                extractor.build()
+            extractor = run_with_timeout(build_extractor, 60)
         except TimeoutError as e:
             return CrossFileDependenciesResult(
                 success=False,
@@ -6579,14 +6596,16 @@ def _get_cross_file_dependencies_sync(
             )
 
         # [20251216_FEATURE] v2.5.0 - Pass confidence_decay_factor to extractor
+        def extract_dependencies():
+            return extractor.extract(
+                str(target_path),
+                target_symbol,
+                depth=max_depth,
+                confidence_decay_factor=confidence_decay_factor,
+            )
+        
         try:
-            with timeout_context(30):
-                extraction_result = extractor.extract(
-                    str(target_path),
-                    target_symbol,
-                    depth=max_depth,
-                    confidence_decay_factor=confidence_decay_factor,
-                )
+            extraction_result = run_with_timeout(extract_dependencies, 30)
         except TimeoutError as e:
             return CrossFileDependenciesResult(
                 success=False,
@@ -7512,7 +7531,10 @@ def run_server(
             print("WARNING: LAN access enabled. Host validation disabled.", file=output)
             print("Only use on trusted networks!", file=output)
 
-        print(f"MCP endpoint: {protocol}://{host}:{port}/sse", file=output)
+        # FastMCP defaults: streamable-http mounts at /mcp and SSE mounts at /sse
+        # (see mcp.server.fastmcp.server.FastMCP settings)
+        endpoint_path = "/mcp" if transport == "streamable-http" else "/sse"
+        print(f"MCP endpoint: {protocol}://{host}:{port}{endpoint_path}", file=output)
 
         # [20251215_FEATURE] Register HTTP health endpoint for Docker health checks
         _register_http_health_endpoint(mcp, host, port, ssl_certfile, ssl_keyfile)

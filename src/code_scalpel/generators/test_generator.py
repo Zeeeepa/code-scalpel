@@ -311,8 +311,10 @@ class TestGenerator:
             analyzer = SymbolicAnalyzer(enable_cache=False)
             result = analyzer.analyze(code, language=language)
             return result.to_dict()
-        except (ImportError, ValueError, SyntaxError):
-            # Fallback to basic path analysis on import or syntax errors
+        except (ImportError, ValueError, SyntaxError, Exception):
+            # Fallback to basic path analysis when symbolic execution fails.
+            # This keeps generate_unit_tests reliable even if Z3 cannot solve
+            # or the analyzer hits an unsupported construct.
             return self._basic_path_analysis(code, language)
 
     def _basic_path_analysis(self, code: str, language: str) -> dict[str, Any]:

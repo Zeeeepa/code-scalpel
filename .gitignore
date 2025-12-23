@@ -31,6 +31,7 @@ env.bak/
 venv.bak/
 .env
 .venv
+.venv-mcp-smoke/
 pip-log.txt
 pip-delete-this-directory.txt
 

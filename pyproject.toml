@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.1.1"  # [20251222_HOTFIX] v3.1.1 - Complete init templates with full governance structure
+version = "3.2.0"  # [20251222_PREP] v3.2.0 - MCP contract testing + CI release confidence gates
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
