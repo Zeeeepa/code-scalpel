@@ -125,6 +125,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov
+        pip install -e .
     - name: Run tests
       run: |
         pytest tests/ -v --tb=short
@@ -150,6 +151,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest anyio httpx
+        pip install -e .
     - name: Run contract test
       env:
         MCP_CONTRACT_TRANSPORT: ${{ matrix.transport }}
@@ -179,6 +181,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install -e .
     - name: Run baseline release validation
       run: |
         python scripts/validate_all_releases.py

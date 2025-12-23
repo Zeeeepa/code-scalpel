@@ -136,6 +136,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov
+        pip install -e .
     
     - name: Run tests with coverage
       run: |
@@ -302,6 +303,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest anyio httpx
+        pip install -e .
 
     - name: Run contract test
       env:
