@@ -1,12 +1,36 @@
 #!/usr/bin/env python
-"""
-v1.5.x Python Regression Tests
+"""v1.5.x Python Regression Tests
 
 [20251215_TEST] v2.0.0 - Verify no breaking changes from previous version.
+
+Note:
+This script is executed directly in CI. It must be able to import `code_scalpel`
+even if the package hasn't been installed (e.g., missing `pip install -e .`).
 """
 
 import asyncio
-from code_scalpel.mcp.server import extract_code, security_scan, analyze_code
+
+
+def _ensure_repo_src_on_path() -> None:
+    try:
+        import code_scalpel  # noqa: F401
+
+        return
+    except Exception:
+        pass
+
+    import sys
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[1]
+    src_root = repo_root / "src"
+    if str(src_root) not in sys.path:
+        sys.path.insert(0, str(src_root))
+
+
+_ensure_repo_src_on_path()
+
+from code_scalpel.mcp.server import analyze_code, extract_code, security_scan  # noqa: E402
 
 
 def test_python_extraction():

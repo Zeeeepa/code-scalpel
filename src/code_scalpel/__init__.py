@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251223_BUGFIX] v3.2.3 - CI gates (pyright/pip-audit) fixes
-__version__ = "3.2.3"
+# [20251223_BUGFIX] v3.2.4 - CI contract + regression runner reliability
+__version__ = "3.2.4"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 
