@@ -116,7 +116,9 @@ def init_config_dir(target_dir: str = ".") -> dict:
     arch_dir = policies_dir / "architecture"
     arch_dir.mkdir(exist_ok=True)
     (arch_dir / "README.md").write_text(ARCHITECTURE_README_TEMPLATE)
-    (arch_dir / "layered_architecture.rego").write_text(LAYERED_ARCHITECTURE_REGO_TEMPLATE)
+    (arch_dir / "layered_architecture.rego").write_text(
+        LAYERED_ARCHITECTURE_REGO_TEMPLATE
+    )
     files_created.append("policies/architecture/README.md")
     files_created.append("policies/architecture/layered_architecture.rego")
 

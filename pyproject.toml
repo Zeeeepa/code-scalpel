@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.2.0"  # [20251222_PREP] v3.2.0 - MCP contract testing + CI release confidence gates
+version = "3.2.1"  # [20251222_BUGFIX] v3.2.1 - Ninja Warrior tool fixes
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}
@@ -32,6 +32,8 @@ classifiers = [
 ]
 dependencies = [
     "astor>=0.8.1",
+    "defusedxml>=0.7.1",
+    "PyYAML>=6.0",
     "networkx>=2.6.3",
     "z3-solver>=4.8.12",
     "graphviz>=0.16",

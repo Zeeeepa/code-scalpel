@@ -828,4 +828,3 @@ has_readme(dir) if {
     file.path == concat("/", [dir, "README.md"])
 }
 """
-

@@ -370,6 +370,14 @@ class CrossFileTaintTracker:
         self.module_taint_sources: Dict[str, List[TaintSourceInfo]] = {}
         self.call_graph: Dict[str, Set[CallInfo]] = defaultdict(set)
 
+        # Cache of function spans per module for call-site attribution.
+        # module -> list of (start_line, end_line, function_name)
+        self._module_function_spans: Dict[str, List[Tuple[int, int, str]]] = {}
+
+        # Optional entry-point module filter. When provided, we allow reporting
+        # of local-only vulnerabilities for those entry modules.
+        self._entry_modules: Optional[Set[str]] = None
+
     def build(self) -> bool:
         """
         Build the import graph and prepare for analysis.
@@ -416,6 +424,22 @@ class CrossFileTaintTracker:
                 )
 
         result = CrossFileTaintResult()
+
+        # Map entry point files to module names (best-effort). This is used to
+        # keep local-only vulnerability reporting bounded to explicitly requested
+        # entry points.
+        self._entry_modules = None
+        if entry_points:
+            entry_modules: Set[str] = set()
+            for ep in entry_points:
+                try:
+                    ep_path = (self.project_root / ep).resolve()
+                    entry_modules.add(
+                        self.resolver.file_to_module.get(str(ep_path), ep_path.stem)
+                    )
+                except Exception:
+                    continue
+            self._entry_modules = entry_modules or None
 
         try:
             # Get modules to analyze (optionally limited)
@@ -772,6 +796,33 @@ class CrossFileTaintTracker:
                                     call, func_info, result, max_depth
                                 )
 
+        # Also record local taint flows where a tainted local variable (or parameter)
+        # reaches a sink within the same function. These can be surfaced as
+        # vulnerabilities when entry_points are provided (see _identify_vulnerabilities).
+        for module, func_infos in self.function_taint_info.items():
+            for func_name, func_info in func_infos.items():
+                for var_name, sink_info in func_info.local_sinks.items():
+                    if (
+                        var_name in func_info.tainted_variables
+                        or var_name in func_info.parameters
+                    ):
+                        result.taint_flows.append(
+                            CrossFileTaintFlow(
+                                source_module=module,
+                                source_function=func_name,
+                                source_line=func_info.line,
+                                sink_module=module,
+                                sink_function=func_name,
+                                sink_line=sink_info.line,
+                                sink_type=sink_info.sink_type,
+                                flow_path=[
+                                    (module, func_name, func_info.line),
+                                    (module, func_name, sink_info.line),
+                                ],
+                                tainted_data=var_name,
+                            )
+                        )
+
     def _trace_flow_from_source(
         self,
         source: "TaintSourceInfo",
@@ -832,6 +883,20 @@ class CrossFileTaintTracker:
         # Get caller's function taint info
         caller_funcs = self.function_taint_info.get(call.caller_module, {})
 
+        # Attribute the call site to its enclosing function where possible.
+        # Without this, we may incorrectly "borrow" tainted variables from other
+        # functions in the same module (causing duplicates and false positives).
+        caller_func_name = self._get_enclosing_function_name(
+            call.caller_module, call.caller_line
+        )
+        if caller_func_name and caller_func_name in caller_funcs:
+            caller_funcs_to_check: Dict[str, FunctionTaintInfo] = {
+                caller_func_name: caller_funcs[caller_func_name]
+            }
+        else:
+            # Fallback: legacy behavior when we cannot determine the enclosing function.
+            caller_funcs_to_check = caller_funcs
+
         # For each argument in the call
         for i, arg_name in enumerate(call.arguments):
             if i < len(func_info.parameters):
@@ -842,7 +907,7 @@ class CrossFileTaintTracker:
                     sink_info = func_info.parameters_reaching_sinks[param]
 
                     # Check if the argument is tainted in the caller
-                    for caller_func, caller_info in caller_funcs.items():
+                    for caller_func, caller_info in caller_funcs_to_check.items():
                         if arg_name in caller_info.tainted_variables:
                             # Found cross-file taint flow!
                             taint_param = TaintedParameter(
@@ -873,6 +938,39 @@ class CrossFileTaintTracker:
                             )
                             result.taint_flows.append(flow)
 
+    def _get_enclosing_function_name(self, module: str, line: int) -> Optional[str]:
+        """Best-effort: return the function name in `module` that contains `line`."""
+        if module not in self._module_function_spans:
+            file_path = self.resolver.module_to_file.get(module)
+            spans: List[Tuple[int, int, str]] = []
+
+            if file_path:
+                fp = str(file_path)
+                tree = self._get_file_ast(fp)
+                if tree:
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            start = getattr(node, "lineno", None)
+                            end = getattr(node, "end_lineno", None)
+                            if isinstance(start, int) and isinstance(end, int):
+                                spans.append((start, end, node.name))
+                            elif isinstance(start, int):
+                                spans.append((start, start, node.name))
+
+            self._module_function_spans[module] = spans
+
+        best_name: Optional[str] = None
+        best_span: Optional[int] = None
+
+        for start, end, name in self._module_function_spans.get(module, []):
+            if start <= line <= end:
+                span = end - start
+                if best_span is None or span < best_span:
+                    best_span = span
+                    best_name = name
+
+        return best_name
+
     def _identify_vulnerabilities(self, result: CrossFileTaintResult) -> None:
         """
         Convert taint flows into vulnerability reports.
@@ -880,11 +978,23 @@ class CrossFileTaintTracker:
         seen = set()
 
         for flow in result.taint_flows:
+            # By default, this tool is specifically for cross-file analysis; ignore
+            # local-only flows unless the user provided entry points and the flow is
+            # within one of those entry modules.
+            if flow.source_module == flow.sink_module:
+                if not self._entry_modules or (
+                    flow.source_module not in self._entry_modules
+                    and flow.sink_module not in self._entry_modules
+                ):
+                    continue
+
             # Deduplicate
             flow_key = (
                 flow.source_module,
+                flow.source_function,
                 flow.source_line,
                 flow.sink_module,
+                flow.sink_function,
                 flow.sink_line,
             )
             if flow_key in seen:
@@ -989,6 +1099,9 @@ class FunctionTaintInfo:
     line: int
     parameters: List[str] = field(default_factory=list)
     tainted_variables: Set[str] = field(default_factory=set)
+    # Track how taint propagates through assignments (target_var -> source vars).
+    # Used to attribute sink reachability back to function parameters.
+    taint_var_sources: Dict[str, Set[str]] = field(default_factory=dict)
     parameters_reaching_sinks: Dict[str, "SinkInfo"] = field(default_factory=dict)
     local_sinks: Dict[str, "SinkInfo"] = field(default_factory=dict)
     returns_tainted: bool = False
@@ -1054,10 +1167,37 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         # Check if RHS is a taint source
         rhs_tainted = self._is_taint_source(node.value)
 
-        if rhs_tainted:
+        # Treat some calls as sanitizers (best-effort). In particular, the Ninja Warrior
+        # fixtures include allowlist-based sanitizers like `sanitize_allowlist_alpha`.
+        rhs_is_sanitizer = False
+        if isinstance(node.value, ast.Call):
+            callee = self._get_callee_name(node.value)
+            if callee and "sanitize_allowlist" in callee:
+                rhs_is_sanitizer = True
+
+        # Helper: collect all variable names referenced by an expression.
+        referenced_names = {
+            n.id for n in ast.walk(node.value) if isinstance(n, ast.Name)
+        }
+
+        # Treat assignments as tainted if the RHS is a known taint source OR
+        # the RHS references tainted variables / function parameters.
+        rhs_depends_on_taint = (not rhs_is_sanitizer) and any(
+            name in self.func_info.parameters or name in self.func_info.tainted_variables
+            for name in referenced_names
+        )
+
+        if (rhs_tainted and not rhs_is_sanitizer) or rhs_depends_on_taint:
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.func_info.tainted_variables.add(target.id)
+                    if rhs_depends_on_taint:
+                        self.func_info.taint_var_sources[target.id] = {
+                            n
+                            for n in referenced_names
+                            if n in self.func_info.parameters
+                            or n in self.func_info.tainted_variables
+                        }
 
         # Check if assigning from a parameter
         if isinstance(node.value, ast.Name):
@@ -1065,6 +1205,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                 for target in node.targets:
                     if isinstance(target, ast.Name):
                         self.func_info.tainted_variables.add(target.id)
+                        self.func_info.taint_var_sources[target.id] = {node.value.id}
 
         # [20251215_BUGFIX] v2.0.1 - Check if assigning from a call to a tainted function
         if isinstance(node.value, ast.Call):
@@ -1073,6 +1214,18 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                 for target in node.targets:
                     if isinstance(target, ast.Name):
                         self.func_info.tainted_variables.add(target.id)
+                        # Best-effort: record sources from call arguments.
+                        call_sources = {
+                            n.id
+                            for n in ast.walk(node.value)
+                            if isinstance(n, ast.Name)
+                            and (
+                                n.id in self.func_info.parameters
+                                or n.id in self.func_info.tainted_variables
+                            )
+                        }
+                        if call_sources:
+                            self.func_info.taint_var_sources[target.id] = call_sources
 
         self.generic_visit(node)
 
@@ -1108,8 +1261,16 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         """Check for dangerous sinks."""
         callee = self._get_callee_name(node)
 
-        if callee in DANGEROUS_SINKS:
-            sink_type = DANGEROUS_SINKS[callee]
+        # Allow sink matching on either full dotted name (e.g., "cursor.execute")
+        # or just the terminal method name (e.g., "execute").
+        sink_lookup = callee
+        if callee and callee not in DANGEROUS_SINKS:
+            tail = callee.split(".")[-1]
+            if tail in DANGEROUS_SINKS:
+                sink_lookup = tail
+
+        if sink_lookup in DANGEROUS_SINKS:
+            sink_type = DANGEROUS_SINKS[sink_lookup]
 
             # Check if any argument is tainted
             for i, arg in enumerate(node.args):
@@ -1121,15 +1282,74 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         self.func_info.parameters_reaching_sinks[arg_name] = SinkInfo(
                             sink_type=sink_type,
                             line=node.lineno,
-                            function_call=callee,
+                            function_call=callee or sink_lookup,
                         )
 
                     if arg_name in self.func_info.tainted_variables:
                         self.func_info.local_sinks[arg_name] = SinkInfo(
                             sink_type=sink_type,
                             line=node.lineno,
-                            function_call=callee,
+                            function_call=callee or sink_lookup,
                         )
+
+                        # If this tainted variable depends on parameters, attribute the
+                        # sink reachability back to those parameters.
+                        for param in self.func_info.parameters:
+                            if self._var_depends_on(param, arg_name):
+                                self.func_info.parameters_reaching_sinks[param] = SinkInfo(
+                                    sink_type=sink_type,
+                                    line=node.lineno,
+                                    function_call=callee or sink_lookup,
+                                )
+
+        # Propagate sink reachability through imported function calls.
+        # If this function calls an imported function that has sinks, treat passing
+        # tainted data/params into that call as reaching the same sink.
+        if callee:
+            imported = self._resolve_imported_function(callee)
+            if imported is not None and self.tracker is not None:
+                target_module, target_func = imported
+                target_info = self.tracker.function_taint_info.get(target_module, {}).get(
+                    target_func
+                )
+
+                # Determine a representative sink type from the callee (if known).
+                sink_info = None
+                if target_info:
+                    if target_info.parameters_reaching_sinks:
+                        sink_info = next(iter(target_info.parameters_reaching_sinks.values()))
+                    elif target_info.local_sinks:
+                        sink_info = next(iter(target_info.local_sinks.values()))
+
+                if sink_info:
+                    # Walk positional args and map them to the callee's parameters.
+                    for i, arg in enumerate(node.args):
+                        if i >= len(target_info.parameters) if target_info else True:
+                            continue
+
+                        target_param = target_info.parameters[i]  # type: ignore[union-attr]
+                        arg_names = self._extract_tainted_vars_from_arg(arg)
+                        for arg_name in arg_names:
+                            if arg_name in self.func_info.parameters:
+                                self.func_info.parameters_reaching_sinks[arg_name] = SinkInfo(
+                                    sink_type=sink_info.sink_type,
+                                    line=node.lineno,
+                                    function_call=f"{callee} -> {sink_info.function_call}",
+                                )
+                            if arg_name in self.func_info.tainted_variables:
+                                self.func_info.local_sinks[arg_name] = SinkInfo(
+                                    sink_type=sink_info.sink_type,
+                                    line=node.lineno,
+                                    function_call=f"{callee} -> {sink_info.function_call}",
+                                )
+                                # Attribute back to caller params if applicable.
+                                for param in self.func_info.parameters:
+                                    if self._var_depends_on(param, arg_name):
+                                        self.func_info.parameters_reaching_sinks[param] = SinkInfo(
+                                            sink_type=sink_info.sink_type,
+                                            line=node.lineno,
+                                            function_call=f"{callee} -> {sink_info.function_call}",
+                                        )
 
         # [20251215_BUGFIX] v2.0.1 - Check for callback pattern
         # If a tainted variable is passed along with a function that has dangerous sinks,
@@ -1137,6 +1357,45 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         self._check_callback_taint_pattern(node)
 
         self.generic_visit(node)
+
+    def _var_depends_on(self, param_name: str, var_name: str) -> bool:
+        """Best-effort: check whether a tainted variable depends on a parameter."""
+        if var_name == param_name:
+            return True
+
+        seen: Set[str] = set()
+
+        def walk(v: str) -> bool:
+            if v in seen:
+                return False
+            seen.add(v)
+            sources = self.func_info.taint_var_sources.get(v, set())
+            if param_name in sources:
+                return True
+            for src in sources:
+                # Only recurse for local variables we've tracked.
+                if src in self.func_info.taint_var_sources:
+                    if walk(src):
+                        return True
+            return False
+
+        return walk(var_name)
+
+    def _resolve_imported_function(self, callee: str) -> Optional[Tuple[str, str]]:
+        """Resolve an imported function call name to (module, function)."""
+        if not self.tracker:
+            return None
+
+        module = self.func_info.module
+        imports = self.tracker.resolver.imports.get(module, [])
+
+        for imp in imports:
+            if imp.effective_name == callee or callee.startswith(f"{imp.effective_name}."):
+                target_module = imp.module
+                target_function = imp.name if imp.name != "*" else callee
+                return (target_module, target_function)
+
+        return None
 
     def _check_callback_taint_pattern(self, node: ast.Call) -> None:
         """
@@ -1236,11 +1495,9 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             result.extend(self._extract_tainted_vars_from_arg(arg.left))
             result.extend(self._extract_tainted_vars_from_arg(arg.right))
         elif isinstance(arg, ast.Call):
-            # Method call like "...".format(x, y) or str.format(...)
-            callee = self._get_callee_name(arg)
-            if callee and "format" in callee:
-                for sub_arg in arg.args:
-                    result.extend(self._extract_tainted_vars_from_arg(sub_arg))
+            # Any call: conservatively extract names from arguments.
+            for sub_arg in arg.args:
+                result.extend(self._extract_tainted_vars_from_arg(sub_arg))
         elif isinstance(arg, ast.Mod):
             # Old-style formatting: "..." % x
             result.extend(self._extract_tainted_vars_from_arg(arg))

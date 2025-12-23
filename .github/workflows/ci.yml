@@ -34,6 +34,10 @@ jobs:
         pip install black ruff pytest
         pip install -e . || pip install -r requirements.txt
 
+    - name: Smoke import (policy engine)
+      run: |
+        python -c "import code_scalpel.policy_engine.policy_engine; print('policy-engine-import-ok')"
+
     - name: Check formatting (Black)
       run: black --check --diff src/ tests/
 
@@ -261,8 +265,8 @@ jobs:
 
     - name: Run pip-audit
       run: |
-        pip-audit -r requirements.txt --format json --output pip-audit-report.json
-        pip-audit -r requirements.txt
+        pip-audit -r requirements-secure.txt --format json --output pip-audit-report.json
+        pip-audit -r requirements-secure.txt
 
     - name: Upload pip-audit report
       if: always()

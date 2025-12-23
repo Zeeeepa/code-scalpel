@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from urllib.request import urlopen, Request
 from urllib.error import URLError
+from urllib.parse import urlparse
 import base64
 
 
@@ -99,6 +100,13 @@ class SonarQubeParser:
         Returns:
             JSON response or None
         """
+        parsed_base = urlparse(self.server_url)
+        if parsed_base.scheme not in {"http", "https"} or not parsed_base.netloc:
+            print(
+                "SonarQube API error: server_url must be http(s) with a host (e.g., https://sonar.local:9000)"
+            )
+            return None
+
         url = f"{self.server_url}/api/{endpoint}"
         try:
             request = Request(url)
@@ -107,7 +115,7 @@ class SonarQubeParser:
                 credentials = base64.b64encode(f"{self.token}:".encode()).decode()
                 request.add_header("Authorization", f"Basic {credentials}")
 
-            with urlopen(request, timeout=30) as response:
+            with urlopen(request, timeout=30) as response:  # nosec B310
                 return json.loads(response.read().decode())
         except (URLError, json.JSONDecodeError) as e:
             print(f"SonarQube API error: {e}")

@@ -1004,7 +1004,7 @@ class JavaParser:
 
     def _compute_hash(self, code: str) -> str:
         """Compute a hash of the source code for incremental parsing."""
-        return hashlib.md5(code.encode()).hexdigest()
+        return hashlib.sha256(code.encode()).hexdigest()
 
     def parse_incremental(
         self, code: str, previous_result: Optional[JavaParseResult] = None

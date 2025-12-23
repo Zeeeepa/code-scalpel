@@ -238,7 +238,7 @@ class PolicyEngine:
             self.policy_path.parent / "used_override_codes.json"
         )
         self._used_override_codes: set[str] = self._load_used_override_codes()
-        
+
         # [20251222_BUGFIX] Check OPA availability but don't require it at init time.
         # We support a safe fallback evaluator when OPA is unavailable.
         self._opa_available: bool = self._detect_opa_available()
@@ -378,7 +378,9 @@ class PolicyEngine:
     @staticmethod
     def _basic_validate_rego(rule: str, policy_name: str) -> None:
         if not rule or not isinstance(rule, str):
-            raise PolicyError(f"Invalid Rego in policy '{policy_name}': empty rule. Failing CLOSED.")
+            raise PolicyError(
+                f"Invalid Rego in policy '{policy_name}': empty rule. Failing CLOSED."
+            )
 
         # Strip comments and string literals, then perform simple balance checks.
         in_string: str | None = None
@@ -668,13 +670,18 @@ class PolicyEngine:
 
         for policy in self.policies:
             try:
-                if self._policy_matches_operation(policy.rule, input_operation) is False:
+                if (
+                    self._policy_matches_operation(policy.rule, input_operation)
+                    is False
+                ):
                     continue
 
                 matched, message = self._policy_matches_code(policy.rule, input_code)
 
                 # If the policy appears SQL-related, add semantic safety check.
-                sql_related = "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
+                sql_related = (
+                    "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
+                )
                 if matched and sql_related:
                     if self._semantic_analyzer.has_parameterization(
                         input_code, input_language

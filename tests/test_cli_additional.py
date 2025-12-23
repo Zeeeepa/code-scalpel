@@ -365,7 +365,7 @@ def test_main_server_dispatch(monkeypatch):
     result = cli.main()
 
     assert result == 0
-    assert called["host"] == "0.0.0.0"
+    assert called["host"] == "127.0.0.1"
     assert called["port"] == 5050
 
 

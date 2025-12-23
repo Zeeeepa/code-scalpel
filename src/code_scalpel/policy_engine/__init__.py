@@ -34,30 +34,39 @@ Example:
         print(f"Policy violation: {decision.reason}")
 """
 
-# Policy Engine core
-from .policy_engine import (
-    PolicyEngine,
-    Policy,
-    PolicyDecision,
-    PolicyViolation,
-    Operation,
-    OverrideDecision,
-    PolicyError,
-)
+from __future__ import annotations
 
-from .semantic_analyzer import SemanticAnalyzer
+from typing import TYPE_CHECKING
 
-# Tamper Resistance (v2.5.0 Guardian P0)
-from .tamper_resistance import TamperResistance
-from .audit_log import AuditLog
-from .exceptions import (
-    PolicyEngineError,
-    TamperDetectedError,
-    PolicyModificationError,
-    OverrideTimeoutError,
-    InvalidOverrideCodeError,
-)
-from .models import HumanResponse
+# NOTE: This package contains both:
+# - YAML/OPA policy engine components (require optional deps like PyYAML)
+# - Cryptographic integrity verification (pure stdlib)
+#
+# Importing the cryptographic verifier must NOT require PyYAML, because the MCP
+# server can be run in a minimal environment where only the integrity tool is
+# needed.
+
+if TYPE_CHECKING:
+    from .audit_log import AuditLog
+    from .exceptions import (
+        InvalidOverrideCodeError,
+        OverrideTimeoutError,
+        PolicyEngineError,
+        PolicyModificationError,
+        TamperDetectedError,
+    )
+    from .models import HumanResponse
+    from .policy_engine import (
+        Operation,
+        OverrideDecision,
+        Policy,
+        PolicyDecision,
+        PolicyEngine,
+        PolicyError,
+        PolicyViolation,
+    )
+    from .semantic_analyzer import SemanticAnalyzer
+    from .tamper_resistance import TamperResistance
 
 # [20250108_FEATURE] Cryptographic Policy Verification (v2.5.0 Guardian)
 from .crypto_verify import (
@@ -67,6 +76,67 @@ from .crypto_verify import (
     SecurityError,
     verify_policy_integrity_crypto,
 )
+
+
+def __getattr__(name: str):
+    """Lazy-load YAML/OPA-dependent policy engine symbols.
+
+    This keeps cryptographic verification usable even when optional policy
+    engine dependencies (like PyYAML) are not installed.
+    """
+
+    if name in {
+        "PolicyEngine",
+        "Policy",
+        "PolicyDecision",
+        "PolicyViolation",
+        "Operation",
+        "OverrideDecision",
+        "PolicyError",
+    }:
+        from . import policy_engine as _policy_engine
+
+        return getattr(_policy_engine, name)
+
+    if name == "SemanticAnalyzer":
+        from .semantic_analyzer import SemanticAnalyzer
+
+        return SemanticAnalyzer
+
+    if name in {
+        "TamperResistance",
+        "AuditLog",
+        "PolicyEngineError",
+        "TamperDetectedError",
+        "PolicyModificationError",
+        "OverrideTimeoutError",
+        "InvalidOverrideCodeError",
+        "HumanResponse",
+    }:
+        from .audit_log import AuditLog
+        from .exceptions import (
+            InvalidOverrideCodeError,
+            OverrideTimeoutError,
+            PolicyEngineError,
+            PolicyModificationError,
+            TamperDetectedError,
+        )
+        from .models import HumanResponse
+        from .tamper_resistance import TamperResistance
+
+        mapping = {
+            "TamperResistance": TamperResistance,
+            "AuditLog": AuditLog,
+            "PolicyEngineError": PolicyEngineError,
+            "TamperDetectedError": TamperDetectedError,
+            "PolicyModificationError": PolicyModificationError,
+            "OverrideTimeoutError": OverrideTimeoutError,
+            "InvalidOverrideCodeError": InvalidOverrideCodeError,
+            "HumanResponse": HumanResponse,
+        }
+        return mapping[name]
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     # Policy Engine core

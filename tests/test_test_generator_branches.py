@@ -72,3 +72,24 @@ def target(x):
     assert "test_target_path_1" in pytest_code
     # [20260507_TEST] Generator emits equality check rather than identity for booleans.
     assert re.search(r"assert result == True", pytest_code)
+
+
+def test_generate_unit_tests_infers_distinct_expected_returns_for_branches():
+    gen = TestGenerator(framework="pytest")
+    code = """
+
+def classify(x: int) -> str:
+    if x > 0:
+        if x > 10:
+            return "danger"
+        return "warn"
+    return "safe"
+"""
+
+    suite = gen.generate(code, function_name="classify", language="python")
+    pytest_code = suite.pytest_code
+
+    # Ensure we don't regress to asserting the same return for all paths.
+    assert "assert result == 'danger'" in pytest_code
+    assert "assert result == 'warn'" in pytest_code
+    assert "assert result == 'safe'" in pytest_code

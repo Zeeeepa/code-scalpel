@@ -948,7 +948,7 @@ class CodeQualityAnalyzer:
         for i, line in enumerate(lines):
             normalized = self._normalize_line(line)
             if normalized:  # Skip empty/whitespace lines
-                line_hash = hashlib.md5(normalized.encode()).hexdigest()[:8]
+                line_hash = hashlib.sha256(normalized.encode()).hexdigest()[:8]
                 line_hashes.append((i, line_hash))
 
         # Find duplicate sequences
@@ -963,7 +963,7 @@ class CodeQualityAnalyzer:
                 h[1]
                 for h in line_hashes[start_idx : start_idx + self.min_duplicate_lines]
             )
-            seq_hash = hashlib.md5("".join(sequence).encode()).hexdigest()
+            seq_hash = hashlib.sha256("".join(sequence).encode()).hexdigest()
 
             actual_line = line_hashes[start_idx][0] + 1  # 1-indexed
 

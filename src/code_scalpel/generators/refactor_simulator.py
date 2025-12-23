@@ -275,39 +275,56 @@ class RefactorSimulator:
         """Scan for security vulnerabilities in the new code."""
         issues = []
 
-        # Try using the SecurityAnalyzer
+        # Prefer the built-in security analyzer (AST + taint + dangerous patterns).
+        # This exists in the core package and should be available in normal installs.
         try:
-            from code_scalpel.security.security_analyzer import SecurityAnalyzer  # type: ignore[import-not-found]
+            from code_scalpel.symbolic_execution_tools.security_analyzer import (
+                SecurityAnalyzer,
+            )
+            from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
 
             analyzer = SecurityAnalyzer()
 
-            # Scan new code
             new_result = analyzer.analyze(new_code)
             old_result = analyzer.analyze(original_code)
 
-            # Find NEW vulnerabilities (not in original)
             old_vulns = {
-                (v.get("type"), v.get("line"))
-                for v in old_result.get("vulnerabilities", [])
+                (v.sink_type, v.sink_location)
+                for v in getattr(old_result, "vulnerabilities", [])
             }
 
-            for vuln in new_result.get("vulnerabilities", []):
-                vuln_key = (vuln.get("type"), vuln.get("line"))
-                if vuln_key not in old_vulns:
-                    issues.append(
-                        SecurityIssue(
-                            type=vuln.get("type", "Unknown"),
-                            severity=vuln.get("severity", "medium"),
-                            line=vuln.get("line"),
-                            description=vuln.get(
-                                "description", "Security vulnerability"
-                            ),
-                            cwe=vuln.get("cwe"),
-                        )
-                    )
+            severity_by_sink = {
+                SecuritySink.SHELL_COMMAND: "high",
+                SecuritySink.SQL_QUERY: "high",
+                SecuritySink.EVAL: "high",
+                SecuritySink.DESERIALIZATION: "high",
+                SecuritySink.SSRF: "high",
+                SecuritySink.WEAK_CRYPTO: "medium",
+                SecuritySink.HARDCODED_SECRET: "medium",
+                SecuritySink.HTML_OUTPUT: "medium",
+                SecuritySink.DOM_XSS: "medium",
+                SecuritySink.SSTI: "high",
+                SecuritySink.XXE: "high",
+            }
 
-        except ImportError:
-            # Fallback to pattern-based detection
+            for vuln in getattr(new_result, "vulnerabilities", []):
+                vuln_key = (vuln.sink_type, vuln.sink_location)
+                if vuln_key in old_vulns:
+                    continue
+
+                line = vuln.sink_location[0] if vuln.sink_location else None
+                issues.append(
+                    SecurityIssue(
+                        type=vuln.vulnerability_type,
+                        severity=severity_by_sink.get(vuln.sink_type, "medium"),
+                        line=line,
+                        description=vuln.vulnerability_type,
+                        cwe=vuln.cwe_id,
+                    )
+                )
+
+        except Exception:
+            # Fallback to pattern-based detection (best-effort).
             issues.extend(self._pattern_security_scan(new_code, original_code))
 
         return issues

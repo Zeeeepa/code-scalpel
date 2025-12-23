@@ -5750,6 +5750,49 @@ def _generate_neighborhood_mermaid(
     return "\n".join(lines)
 
 
+def _normalize_graph_center_node_id(center_node_id: str) -> str:
+    """Normalize common legacy node-id formats into canonical IDs.
+
+    Canonical format: python::<module>::function::<name>
+
+    Accepted legacy inputs:
+    - routes.py:search_route
+    - path/to/routes.py:search_route
+    - routes:search_route
+    """
+    raw = (center_node_id or "").strip()
+    if not raw:
+        return raw
+
+    if raw.startswith("python::") and "::function::" in raw:
+        return raw
+
+    # Common legacy format: <file>:<symbol>
+    if ":" in raw and "::" not in raw:
+        left, right = raw.rsplit(":", 1)
+        file_part = left.strip()
+        name = right.strip()
+        if not name:
+            return raw
+
+        # If this looks like a path, convert to module.
+        if file_part.endswith(".py"):
+            module = file_part.replace("/", ".").replace("\\", ".")
+            if module.endswith(".py"):
+                module = module[: -len(".py")]
+            # Drop leading dots that can happen with absolute-ish inputs.
+            module = module.strip(".")
+            if module:
+                return f"python::{module}::function::{name}"
+
+        # If this looks like a bare module name.
+        module = file_part.replace("/", ".").replace("\\", ".").strip(".")
+        if module:
+            return f"python::{module}::function::{name}"
+
+    return raw
+
+
 @mcp.tool()
 async def get_graph_neighborhood(
     center_node_id: str,
@@ -5839,6 +5882,8 @@ async def get_graph_neighborhood(
         )
 
     try:
+        center_node_id = _normalize_graph_center_node_id(center_node_id)
+
         # [v3.0.4] Try to use cached graph first
         from code_scalpel.graph_engine import UniversalGraph
 
@@ -6703,20 +6748,67 @@ def _get_cross_file_dependencies_sync(
             ci.cycle for ci in circular_import_objs
         ]  # CircularImport uses 'cycle'
 
-        # Generate Mermaid diagram
-        mermaid = ""
-        if include_diagram:
-            mermaid = resolver.generate_mermaid()
-
-        # Calculate token estimate (rough: 4 chars per token)
-        token_estimate = len(combined_code) // 4 if combined_code else 0
-
-        # Make target file relative
+        # Make target file relative (used by diagram + returned fields)
         target_rel = (
             str(target_path.relative_to(root_path))
             if target_path.is_absolute()
             else target_file
         )
+
+        # Generate Mermaid diagram
+        mermaid = ""
+        if include_diagram:
+            from collections import deque
+
+            # Generate a focused diagram to avoid project-wide graph explosion.
+            # We bound the subgraph by max_depth and cap nodes/edges.
+            max_mermaid_nodes = 60
+            max_mermaid_edges = 200
+
+            start_file = target_rel
+            # BFS from target file using the computed import_graph (file -> imported files)
+            queue = deque([(start_file, 0)])
+            seen_nodes: set[str] = set()
+            edges_out: list[tuple[str, str]] = []
+
+            while queue and len(seen_nodes) < max_mermaid_nodes and len(edges_out) < max_mermaid_edges:
+                cur, depth = queue.popleft()
+                if cur in seen_nodes:
+                    continue
+                seen_nodes.add(cur)
+                if depth >= max_depth:
+                    continue
+                for dep in import_graph.get(cur, [])[: max_mermaid_edges]:
+                    if len(edges_out) >= max_mermaid_edges:
+                        break
+                    edges_out.append((cur, dep))
+                    if dep not in seen_nodes:
+                        queue.append((dep, depth + 1))
+
+            # Mermaid with stable short node ids
+            lines = ["graph TD"]
+            node_ids: dict[str, str] = {}
+            # Always include the start node (even if it has no outgoing edges)
+            seen_nodes.add(start_file)
+            for i, n in enumerate(sorted(seen_nodes)):
+                node_ids[n] = f"N{i}"
+                safe_label = n.replace("/", "_").replace(".", "_")
+                lines.append(f"    {node_ids[n]}[{safe_label}]")
+
+            for a, b in edges_out:
+                if a in node_ids and b in node_ids:
+                    lines.append(f"    {node_ids[a]} --> {node_ids[b]}")
+
+            # Truncation hint
+            if len(seen_nodes) >= max_mermaid_nodes or len(edges_out) >= max_mermaid_edges:
+                lines.append(
+                    f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})"
+                )
+
+            mermaid = "\n".join(lines)
+
+        # Calculate token estimate (rough: 4 chars per token)
+        token_estimate = len(combined_code) // 4 if combined_code else 0
 
         # [20251216_FEATURE] v2.5.0 - Build low confidence warning if needed
         low_confidence_warning = None
@@ -7330,9 +7422,9 @@ def _verify_policy_integrity_sync(
     dir_path = policy_dir or ".code-scalpel"
 
     try:
-        from code_scalpel.policy_engine import (
-            CryptographicPolicyVerifier,
-        )
+        # Import directly from the crypto verifier module to avoid importing
+        # YAML/OPA policy engine components (which may require optional deps).
+        from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
         verifier = CryptographicPolicyVerifier(
             manifest_source=manifest_source,

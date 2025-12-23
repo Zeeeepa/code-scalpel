@@ -998,7 +998,7 @@ class BanditFileMetrics:
 
     filename: str
     loc: int = 0  # Lines of code
-    nosec_count: int = 0  # Number of # nosec comments
+    nosec_count: int = 0  # Number of nosec suppression markers
     high_severity: int = 0
     medium_severity: int = 0
     low_severity: int = 0

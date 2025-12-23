@@ -16,7 +16,7 @@ Phase 2 Enhancement TODOs:
 [20251221_TODO] Add false positive filtering logic
 """
 
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional

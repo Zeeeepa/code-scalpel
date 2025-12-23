@@ -523,6 +523,15 @@ class TestGenerator:
             expected_result = self._infer_expected_result(
                 conditions, return_value_map, inputs
             )
+
+            # If possible, compute the expected return value from the actual
+            # control flow using the concrete inputs (without executing user code).
+            # This fixes cases where symbolic execution falls back to a shallow
+            # path analysis and condition->return matching becomes ambiguous.
+            interpreted = self._safe_interpret_return(code, function_name, inputs, language)
+            if interpreted is not None:
+                expected_result = interpreted
+
             expected_behavior = "Executes without error"
             if expected_result is True:
                 expected_behavior = "returns True"
@@ -555,6 +564,119 @@ class TestGenerator:
             )
 
         return test_cases
+
+    def _safe_interpret_return(
+        self,
+        code: str,
+        function_name: str,
+        inputs: dict[str, Any],
+        language: str,
+    ) -> Any:
+        """Best-effort, safe evaluation of which return value is produced.
+
+        This does NOT execute arbitrary code. It only interprets:
+        - if/elif/else control flow
+        - simple boolean/comparison expressions for conditions
+        - return of constants / True / False / None
+
+        Returns:
+            A concrete expected return value, or None if unsupported.
+        """
+        if language != "python":
+            return None
+
+        try:
+            tree = ast.parse(code)
+        except Exception:
+            return None
+
+        func_node: ast.FunctionDef | ast.AsyncFunctionDef | None = None
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name:
+                func_node = node
+                break
+        if func_node is None:
+            return None
+
+        def eval_expr(expr: ast.AST) -> Any:
+            if isinstance(expr, ast.Constant):
+                return expr.value
+
+            if isinstance(expr, ast.Name):
+                if expr.id in {"True", "False", "None"}:
+                    return {"True": True, "False": False, "None": None}[expr.id]
+                return inputs.get(expr.id)
+
+            if isinstance(expr, ast.UnaryOp) and isinstance(expr.op, ast.Not):
+                v = eval_expr(expr.operand)
+                if isinstance(v, bool):
+                    return not v
+                return None
+
+            if isinstance(expr, ast.BoolOp) and isinstance(expr.op, (ast.And, ast.Or)):
+                vals = [eval_expr(v) for v in expr.values]
+                if any(v is None for v in vals):
+                    return None
+                if isinstance(expr.op, ast.And):
+                    return all(bool(v) for v in vals)
+                return any(bool(v) for v in vals)
+
+            if isinstance(expr, ast.Compare):
+                left = eval_expr(expr.left)
+                if left is None:
+                    return None
+                # Support chained comparisons
+                current = left
+                for op, comparator in zip(expr.ops, expr.comparators):
+                    right = eval_expr(comparator)
+                    if right is None:
+                        return None
+                    ok: bool | None = None
+                    try:
+                        if isinstance(op, ast.Gt):
+                            ok = current > right
+                        elif isinstance(op, ast.GtE):
+                            ok = current >= right
+                        elif isinstance(op, ast.Lt):
+                            ok = current < right
+                        elif isinstance(op, ast.LtE):
+                            ok = current <= right
+                        elif isinstance(op, ast.Eq):
+                            ok = current == right
+                        elif isinstance(op, ast.NotEq):
+                            ok = current != right
+                        else:
+                            return None
+                    except (TypeError, ValueError):
+                        # Unsupported comparison due to type mismatch.
+                        return None
+                    if not ok:
+                        return False
+                    current = right
+                return True
+
+            return None
+
+        def walk_statements(stmts: list[ast.stmt]) -> Any:
+            for st in stmts:
+                if isinstance(st, ast.Return):
+                    if st.value is None:
+                        return None
+                    return eval_expr(st.value)
+
+                if isinstance(st, ast.If):
+                    cond_val = eval_expr(st.test)
+                    if cond_val is None:
+                        return None
+                    branch = st.body if bool(cond_val) else st.orelse
+                    rv = walk_statements(branch)
+                    if rv is not None or any(isinstance(x, ast.Return) for x in branch):
+                        return rv
+                    # Continue after if if branch had no return
+
+            return None
+
+        return walk_statements(func_node.body)
 
     def _extract_parameter_types(
         self, code: str, function_name: str, language: str

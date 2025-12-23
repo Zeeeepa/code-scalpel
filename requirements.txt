@@ -6,6 +6,7 @@ networkx
 z3-solver
 requests
 tqdm
+pyyaml
 crewai
 langchain
 langgraph  # [20251217_FEATURE] LangGraph integration for autonomous fixing

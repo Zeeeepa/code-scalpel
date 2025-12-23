@@ -88,6 +88,34 @@ def run_command(cmd):
         assert result.is_safe is False
         assert "Command" in result.security_issues[0].type
 
+    def test_unsafe_subprocess_shell_true(self):
+        """Test that introducing subprocess.run(..., shell=True) is unsafe."""
+        from code_scalpel.generators import RefactorSimulator
+
+        original = """
+def run_command(cmd):
+    return cmd
+"""
+
+        new_code = """
+import subprocess
+
+def run_command(cmd):
+    subprocess.run(cmd, shell=True)
+    return cmd
+"""
+
+        simulator = RefactorSimulator()
+        result = simulator.simulate(original, new_code=new_code)
+
+        assert result.is_safe is False
+        assert any(
+            (issue.cwe == "CWE-78")
+            or ("command" in (issue.type or "").lower())
+            or ("shell" in (issue.description or "").lower())
+            for issue in result.security_issues
+        )
+
     def test_structural_changes_tracked(self):
         """Test that structural changes are tracked."""
         from code_scalpel.generators import RefactorSimulator

@@ -598,7 +598,6 @@ def detect_language(
     return Language.PYTHON
 
 
-
 class UnifiedExtractor:
     """
     Universal code extractor for all supported languages.

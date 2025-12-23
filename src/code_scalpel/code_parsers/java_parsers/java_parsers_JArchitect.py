@@ -16,7 +16,7 @@ Phase 2 Enhancement TODOs:
 [20251221_TODO] Add anti-pattern detection
 """
 
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
