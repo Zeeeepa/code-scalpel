@@ -144,7 +144,9 @@ async def main() -> int:
         ),
         (
             "get_file_context",
-            lambda: mcp_server.get_file_context(file_path=str(tiny_root / "pkg" / "a.py")),
+            lambda: mcp_server.get_file_context(
+                file_path=str(tiny_root / "pkg" / "a.py")
+            ),
         ),
         (
             "get_symbol_references",
@@ -223,7 +225,16 @@ async def main() -> int:
         except Exception as e:
             failures.append(f"{name}: {type(e).__name__}: {e}")
 
-    print(json.dumps({"project_root": str(tiny_root), "failures": failures, "results_keys": sorted(results.keys())}, indent=2))
+    print(
+        json.dumps(
+            {
+                "project_root": str(tiny_root),
+                "failures": failures,
+                "results_keys": sorted(results.keys()),
+            },
+            indent=2,
+        )
+    )
 
     return 1 if failures else 0
 

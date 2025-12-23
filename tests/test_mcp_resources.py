@@ -3,7 +3,7 @@ Comprehensive tests for MCP Resource endpoints.
 
 Tests cover all 5 resource URIs:
 - scalpel://project/call-graph
-- scalpel://project/dependencies  
+- scalpel://project/dependencies
 - scalpel://project/structure
 - scalpel://version
 - scalpel://capabilities
