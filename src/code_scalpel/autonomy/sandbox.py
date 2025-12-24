@@ -134,7 +134,11 @@ class SandboxExecutor:
                     "Docker support requires 'docker' package. "
                     "Install with: pip install docker"
                 )
-            import docker  # Re-import to satisfy type checker
+            if docker is None:
+                raise ImportError(
+                    "Docker support requires 'docker' package. "
+                    "Install with: pip install docker"
+                )
 
             self.docker_client = docker.from_env()
 

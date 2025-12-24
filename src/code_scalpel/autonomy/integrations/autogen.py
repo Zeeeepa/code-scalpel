@@ -271,16 +271,37 @@ If validation fails, try a different fix approach.""",
         llm_config=llm_config,
     )
 
-    # Reviewer agent with code execution
-    reviewer = UserProxyAgent(
-        name="CodeReviewer",
-        human_input_mode="NEVER",
-        max_consecutive_auto_reply=10,
-        code_execution_config={
+    # Reviewer agent with code execution.
+    # Prefer Docker isolation when available, but fall back gracefully when Docker
+    # isn't running (common in constrained CI/local environments).
+    code_execution_config = {
+        "work_dir": ".scalpel_sandbox",
+        "use_docker": True,
+    }
+
+    try:
+        reviewer = UserProxyAgent(
+            name="CodeReviewer",
+            human_input_mode="NEVER",
+            max_consecutive_auto_reply=10,
+            code_execution_config=code_execution_config,
+        )
+    except RuntimeError as e:
+        # AutoGen raises a RuntimeError when docker execution is enabled but docker
+        # isn't reachable. Fall back to non-docker execution instead of failing.
+        if "docker" not in str(e).lower():
+            raise
+
+        code_execution_config = {
             "work_dir": ".scalpel_sandbox",
-            "use_docker": True,
-        },
-    )
+            "use_docker": False,
+        }
+        reviewer = UserProxyAgent(
+            name="CodeReviewer",
+            human_input_mode="NEVER",
+            max_consecutive_auto_reply=10,
+            code_execution_config=code_execution_config,
+        )
 
     # Register function implementations
     reviewer.register_function(

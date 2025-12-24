@@ -32,6 +32,13 @@ except ImportError:
     pytest = None
 
 
+def _docker_socket_available() -> bool:
+    # Fast, platform-appropriate signal for docker availability.
+    # AutoGen's docker execution relies on a reachable daemon; the unix socket
+    # is the common case in Linux CI/dev environments.
+    return os.path.exists("/var/run/docker.sock")
+
+
 @unittest.skipIf(not AUTOGEN_AVAILABLE, "AutoGen not available")
 class TestAutoGenIntegration(unittest.TestCase):
     """Tests for AutoGen integration."""
@@ -155,7 +162,11 @@ def run(cmd):
         self.assertEqual(reviewer.name, "CodeReviewer")
         self.assertEqual(reviewer.human_input_mode, "NEVER")
         self.assertIn("work_dir", reviewer._code_execution_config)
-        self.assertTrue(reviewer._code_execution_config.get("use_docker"))
+        use_docker = reviewer._code_execution_config.get("use_docker")
+        if _docker_socket_available():
+            self.assertTrue(use_docker)
+        else:
+            self.assertFalse(use_docker)
 
     def test_create_scalpel_autogen_agents_custom_config(self):
         """Test create_scalpel_autogen_agents with custom config."""
@@ -219,7 +230,10 @@ def run(cmd):
         coder, reviewer = create_scalpel_autogen_agents(llm_config=config)
 
         use_docker = reviewer._code_execution_config.get("use_docker")
-        self.assertTrue(use_docker)
+        if _docker_socket_available():
+            self.assertTrue(use_docker)
+        else:
+            self.assertFalse(use_docker)
 
     def test_function_schemas_are_valid_openai_format(self):
         """Test function schemas match OpenAI format."""

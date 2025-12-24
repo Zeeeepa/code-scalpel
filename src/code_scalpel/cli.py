@@ -487,6 +487,7 @@ def start_mcp_server(
     port: int = 8080,
     allow_lan: bool = False,
     root_path: str | None = None,
+    tier: str | None = None,
     ssl_certfile: str | None = None,
     ssl_keyfile: str | None = None,
 ) -> int:
@@ -522,6 +523,7 @@ def start_mcp_server(
         "port": port,
         "allow_lan": allow_lan,
         "root_path": root_path,
+        "tier": tier,
     }
     if use_https:
         server_kwargs.update(
@@ -659,6 +661,12 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         default=None,
         help="Project root directory for context resources (default: current directory)",
     )
+    mcp_parser.add_argument(
+        "--tier",
+        choices=["community", "pro", "enterprise"],
+        default=None,
+        help="Tool tier (default: enterprise or CODE_SCALPEL_TIER/SCALPEL_TIER)",
+    )
     # [20251215_FEATURE] SSL/TLS support for HTTPS - required for Claude API and production
     mcp_parser.add_argument(
         "--ssl-cert",
@@ -711,6 +719,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
 
         allow_lan = getattr(args, "allow_lan", False)
         root_path = getattr(args, "root", None)
+        tier = getattr(args, "tier", None)
         ssl_certfile = getattr(args, "ssl_cert", None)
         ssl_keyfile = getattr(args, "ssl_key", None)
 
@@ -726,6 +735,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
             "port": args.port,
             "allow_lan": allow_lan,
             "root_path": root_path,
+            "tier": tier,
         }
         if ssl_certfile and ssl_keyfile:
             start_kwargs.update(

@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.2.5"  # [20251223_FEATURE] v3.2.5 - MCP response envelope + correlation ids + path safety
+version = "3.2.6"  # [20251223_FEATURE] v3.2.6 - Tiered tool registry + docs + cross-transport tier contract tests
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

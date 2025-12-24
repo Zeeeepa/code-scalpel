@@ -27,7 +27,31 @@ Supports:
     - Implement strict type checking for response models
     - Add schema versioning for backwards compatibility"""
 
-from .server import mcp, run_server
+def _load_server():
+    # Import lazily to avoid runpy warnings when executing the module as a script
+    # (python -m code_scalpel.mcp.server).
+    from . import server as _server  # noqa: WPS433
+
+    return _server
+
+
+def get_mcp():
+    """Return the FastMCP server instance (lazy import)."""
+
+    return _load_server().mcp
+
+
+def run_server(*args, **kwargs):
+    """Run the MCP server (lazy import)."""
+
+    return _load_server().run_server(*args, **kwargs)
+
+
+def __getattr__(name: str):
+    # Backwards compatibility: older code imported `mcp` from this package.
+    if name == "mcp":
+        return get_mcp()
+    raise AttributeError(name)
 
 # [20251216_FEATURE] v2.2.0 - Structured logging
 from .logging import (
@@ -41,6 +65,7 @@ from .logging import (
 )
 
 __all__ = [
+    "get_mcp",
     "mcp",
     "run_server",
     # [20251216_FEATURE] v2.2.0 - Logging exports

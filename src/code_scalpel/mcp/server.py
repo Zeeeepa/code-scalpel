@@ -7613,6 +7613,7 @@ def run_server(
     port: int = 8080,
     allow_lan: bool = False,
     root_path: str | None = None,
+    tier: str | None = None,
     ssl_certfile: str | None = None,
     ssl_keyfile: str | None = None,
 ):
@@ -7625,6 +7626,7 @@ def run_server(
         port: Port to bind to (HTTP only)
         allow_lan: Allow connections from LAN (disables host validation)
         root_path: Project root directory (default: current directory)
+        tier: Tool tier (community, pro, enterprise). Defaults to env vars or enterprise.
         ssl_certfile: Path to SSL certificate file for HTTPS (optional)
         ssl_keyfile: Path to SSL private key file for HTTPS (optional)
 
@@ -7642,6 +7644,25 @@ def run_server(
     # [20251215_BUGFIX] Configure logging to stderr before anything else
     _configure_logging(transport)
 
+    # Tier selection: default is the full toolset to preserve current behavior.
+    # Override via CODE_SCALPEL_TIER/SCALPEL_TIER.
+    if tier is None:
+        tier = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    tier = (tier or "enterprise").strip().lower()
+    if tier == "free":
+        tier = "community"
+    if tier == "all":
+        tier = "enterprise"
+    if tier not in {"community", "pro", "enterprise"}:
+        raise ValueError(
+            "Invalid tier. Expected one of: community, pro, enterprise "
+            "(or set CODE_SCALPEL_TIER/SCALPEL_TIER)"
+        )
+
+    # Tool surface is tier-scoped by removing disallowed tools.
+    # NOTE: this is process-global; the server is intended to run once per process.
+    _apply_tier_tool_filter(tier)
+
     global PROJECT_ROOT
     if root_path:
         PROJECT_ROOT = Path(root_path).resolve()
@@ -7657,6 +7678,7 @@ def run_server(
     output = sys.stderr if transport == "stdio" else sys.stdout
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
     print(f"Project Root: {PROJECT_ROOT}", file=output)
+    print(f"Tier: {tier}", file=output)
 
     # [20251215_FEATURE] SSL/HTTPS support for production deployments
     use_https = ssl_certfile and ssl_keyfile
@@ -7707,6 +7729,72 @@ def run_server(
         mcp.run(transport=transport)
     else:
         mcp.run()
+
+
+def _apply_tier_tool_filter(tier: str) -> None:
+    """Filter the registered MCP tools by tier.
+
+    Default tier is "enterprise" (no filtering).
+    """
+
+    # Canonical tool IDs currently registered by this repo.
+    all_tools = {
+        "analyze_code",
+        "crawl_project",
+        "cross_file_security_scan",
+        "extract_code",
+        "generate_unit_tests",
+        "get_call_graph",
+        "get_cross_file_dependencies",
+        "get_file_context",
+        "get_graph_neighborhood",
+        "get_project_map",
+        "get_symbol_references",
+        "scan_dependencies",
+        "security_scan",
+        "simulate_refactor",
+        "symbolic_execute",
+        "type_evaporation_scan",
+        "unified_sink_detect",
+        "update_symbol",
+        "validate_paths",
+        "verify_policy_integrity",
+    }
+
+    # Draft contract from docs/guides/production_release_v1.0.md.
+    community_tools = {
+        "analyze_code",
+        "extract_code",
+        "update_symbol",
+        "get_project_map",
+        "get_file_context",
+        "get_symbol_references",
+        "security_scan",
+        "unified_sink_detect",
+        "scan_dependencies",
+        "validate_paths",
+    }
+
+    # Option B split (implemented): Enterprise-only governance/cross-file tools.
+    enterprise_only_tools = {
+        "verify_policy_integrity",
+        "cross_file_security_scan",
+        "get_cross_file_dependencies",
+    }
+
+    if tier == "enterprise":
+        return
+    if tier == "pro":
+        allowed = all_tools - enterprise_only_tools
+    else:
+        allowed = community_tools
+
+    for tool_name in (all_tools - allowed):
+        try:
+            mcp.remove_tool(tool_name)
+        except Exception:
+            # If a tool isn't present for some reason, ignore and continue.
+            pass
 
 
 def _register_http_health_endpoint(
@@ -7815,6 +7903,12 @@ if __name__ == "__main__":
         "--root",
         help="Project root directory for resources (default: current directory)",
     )
+    parser.add_argument(
+        "--tier",
+        choices=["community", "pro", "enterprise"],
+        default=None,
+        help="Tool tier (default: enterprise or CODE_SCALPEL_TIER/SCALPEL_TIER)",
+    )
     # [20251215_FEATURE] SSL/TLS support for HTTPS
     parser.add_argument(
         "--ssl-cert",
@@ -7832,6 +7926,7 @@ if __name__ == "__main__":
         port=args.port,
         allow_lan=args.allow_lan,
         root_path=args.root,
+        tier=args.tier,
         ssl_certfile=args.ssl_cert,
         ssl_keyfile=args.ssl_key,
     )

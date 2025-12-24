@@ -1060,7 +1060,12 @@ class TestCLIDirectImport:
         calls = {}
 
         def fake_run_server(
-            transport: str, host: str, port: int, allow_lan: bool, root_path
+            transport: str,
+            host: str,
+            port: int,
+            allow_lan: bool,
+            root_path,
+            tier=None,
         ):
             calls.update(
                 {
@@ -1069,6 +1074,7 @@ class TestCLIDirectImport:
                     "port": port,
                     "allow_lan": allow_lan,
                     "root_path": root_path,
+                    "tier": tier,
                 }
             )
 

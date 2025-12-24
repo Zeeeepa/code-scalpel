@@ -260,6 +260,86 @@ async def test_mcp_stdio_transport_end_to_end(tmp_path: Path):
                 await _assert_core_mcp_contract(session, project_root, target_file)
 
 
+async def test_mcp_stdio_transport_community_tier_filters_tools(tmp_path: Path):
+    with anyio.fail_after(120):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = _pythonpath_env(repo_root)
+        env["CODE_SCALPEL_TIER"] = "community"
+
+        project_root, _target_file = _make_tiny_project(tmp_path)
+
+        params = StdioServerParameters(
+            command=sys.executable,
+            args=["-m", "code_scalpel.mcp.server", "--root", str(project_root)],
+            env=env,
+        )
+
+        async with _strict_stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                tools = await session.list_tools()
+                tool_names = {t.name for t in tools.tools}
+
+                expected = {
+                    "analyze_code",
+                    "extract_code",
+                    "update_symbol",
+                    "get_project_map",
+                    "get_file_context",
+                    "get_symbol_references",
+                    "security_scan",
+                    "unified_sink_detect",
+                    "scan_dependencies",
+                    "validate_paths",
+                }
+
+                assert tool_names == expected
+
+
+async def test_mcp_stdio_transport_pro_tier_excludes_enterprise_only_tools(tmp_path: Path):
+    with anyio.fail_after(120):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = _pythonpath_env(repo_root)
+        env["CODE_SCALPEL_TIER"] = "pro"
+
+        project_root, _target_file = _make_tiny_project(tmp_path)
+
+        params = StdioServerParameters(
+            command=sys.executable,
+            args=["-m", "code_scalpel.mcp.server", "--root", str(project_root)],
+            env=env,
+        )
+
+        async with _strict_stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                tools = await session.list_tools()
+                tool_names = {t.name for t in tools.tools}
+
+                # Pro = all current tools minus Enterprise-only tools (Option B).
+                expected = {
+                    "analyze_code",
+                    "crawl_project",
+                    "extract_code",
+                    "generate_unit_tests",
+                    "get_call_graph",
+                    "get_file_context",
+                    "get_graph_neighborhood",
+                    "get_project_map",
+                    "get_symbol_references",
+                    "scan_dependencies",
+                    "security_scan",
+                    "simulate_refactor",
+                    "symbolic_execute",
+                    "type_evaporation_scan",
+                    "unified_sink_detect",
+                    "update_symbol",
+                    "validate_paths",
+                }
+
+                assert tool_names == expected
+
+
 @pytest.mark.parametrize(
     "transport,endpoint_path",
     [
@@ -331,6 +411,171 @@ async def test_mcp_http_transports_end_to_end(
                         await _assert_core_mcp_contract(
                             session, project_root, target_file
                         )
+
+        finally:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:  # pragma: no cover
+                proc.kill()
+
+
+@pytest.mark.parametrize(
+    "transport,endpoint_path,tier,expected_tools",
+    [
+        (
+            "streamable-http",
+            "/mcp",
+            "community",
+            {
+                "analyze_code",
+                "extract_code",
+                "update_symbol",
+                "get_project_map",
+                "get_file_context",
+                "get_symbol_references",
+                "security_scan",
+                "unified_sink_detect",
+                "scan_dependencies",
+                "validate_paths",
+            },
+        ),
+        (
+            "sse",
+            "/sse",
+            "community",
+            {
+                "analyze_code",
+                "extract_code",
+                "update_symbol",
+                "get_project_map",
+                "get_file_context",
+                "get_symbol_references",
+                "security_scan",
+                "unified_sink_detect",
+                "scan_dependencies",
+                "validate_paths",
+            },
+        ),
+        (
+            "streamable-http",
+            "/mcp",
+            "pro",
+            {
+                "analyze_code",
+                "crawl_project",
+                "extract_code",
+                "generate_unit_tests",
+                "get_call_graph",
+                "get_file_context",
+                "get_graph_neighborhood",
+                "get_project_map",
+                "get_symbol_references",
+                "scan_dependencies",
+                "security_scan",
+                "simulate_refactor",
+                "symbolic_execute",
+                "type_evaporation_scan",
+                "unified_sink_detect",
+                "update_symbol",
+                "validate_paths",
+            },
+        ),
+        (
+            "sse",
+            "/sse",
+            "pro",
+            {
+                "analyze_code",
+                "crawl_project",
+                "extract_code",
+                "generate_unit_tests",
+                "get_call_graph",
+                "get_file_context",
+                "get_graph_neighborhood",
+                "get_project_map",
+                "get_symbol_references",
+                "scan_dependencies",
+                "security_scan",
+                "simulate_refactor",
+                "symbolic_execute",
+                "type_evaporation_scan",
+                "unified_sink_detect",
+                "update_symbol",
+                "validate_paths",
+            },
+        ),
+    ],
+)
+async def test_mcp_http_transports_tier_tool_contract(
+    tmp_path: Path,
+    transport: str,
+    endpoint_path: str,
+    tier: str,
+    expected_tools: set[str],
+):
+    with anyio.fail_after(180):
+        repo_root = Path(__file__).resolve().parents[1]
+        env = _pythonpath_env(repo_root)
+        env["CODE_SCALPEL_TIER"] = tier
+
+        project_root, _target_file = _make_tiny_project(tmp_path)
+        ports = _get_free_port_pair(host="127.0.0.1")
+
+        log_path = tmp_path / f"server_{transport}_{tier}.log"
+        with log_path.open("w", encoding="utf-8") as log_file:
+            proc = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-m",
+                    "code_scalpel.mcp.server",
+                    "--transport",
+                    transport,
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    str(ports.mcp_port),
+                    "--root",
+                    str(project_root),
+                ],
+                cwd=str(repo_root),
+                env=env,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+
+        try:
+            if proc.poll() is not None:
+                raise RuntimeError(f"Server exited early (code={proc.returncode})")
+            _wait_for_tcp("127.0.0.1", ports.mcp_port, timeout_s=20.0)
+
+            health_url = f"http://127.0.0.1:{ports.health_port}/health"
+            r = httpx.get(health_url, timeout=2.0)
+            r.raise_for_status()
+            data = r.json()
+            assert data.get("status") == "healthy"
+
+            base_url = f"http://127.0.0.1:{ports.mcp_port}{endpoint_path}"
+
+            if transport == "streamable-http":
+                async with streamable_http_client(base_url) as (
+                    read_stream,
+                    write_stream,
+                    _get_session_id,
+                ):
+                    async with ClientSession(read_stream, write_stream) as session:
+                        await session.initialize()
+                        tools = await session.list_tools()
+                        tool_names = {t.name for t in tools.tools}
+                        assert tool_names == expected_tools
+            else:
+                async with sse_client(base_url) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        tools = await session.list_tools()
+                        tool_names = {t.name for t in tools.tools}
+                        assert tool_names == expected_tools
 
         finally:
             proc.terminate()

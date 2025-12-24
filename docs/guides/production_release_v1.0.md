@@ -61,6 +61,10 @@ Steps:
 This is a **starting point** that matches the MCP tools currently registered by the server in this repo.
 Treat it as the draft contract to confirm/edit before you freeze Phase 0.
 
+Implementation note (current repo): the MCP server supports tier selection via `--tier` and via
+`CODE_SCALPEL_TIER` / `SCALPEL_TIER` env vars. The generated, source-of-truth tier matrix is:
+- `docs/reference/mcp_tools_by_tier.md`
+
 | MCP Tool ID | Community | Pro | Enterprise | Notes |
 |---|---:|---:|---:|---|
 | `analyze_code` | ✅ | ✅ | ✅ | Structure + metrics; multi-language “auto” mode |
@@ -71,8 +75,8 @@ Treat it as the draft contract to confirm/edit before you freeze Phase 0.
 | `get_symbol_references` | ✅ | ✅ | ✅ | Reference search; can be capped in Community |
 | `get_call_graph` | ◻️ | ✅ | ✅ | Recommend Pro (can be compute-heavy) |
 | `get_graph_neighborhood` | ❌ | ✅ | ✅ | Pro differentiator: k-hop neighborhood |
-| `get_cross_file_dependencies` | ❌ | ✅ | ✅ | Pro differentiator: cross-file dependency extraction |
-| `cross_file_security_scan` | ❌ | ✅ | ✅ | Pro differentiator: cross-file security coverage |
+| `get_cross_file_dependencies` | ❌ | ❌ | ✅ | Enterprise-only: cross-file dependency extraction |
+| `cross_file_security_scan` | ❌ | ❌ | ✅ | Enterprise-only: cross-file security coverage |
 | `security_scan` | ✅ | ✅ | ✅ | Single-file security scan |
 | `unified_sink_detect` | ✅ | ✅ | ✅ | Polyglot sink detection; low-friction, high value |
 | `scan_dependencies` | ✅ | ✅ | ✅ | Vulnerable components (OSV) scanning |
@@ -82,7 +86,7 @@ Treat it as the draft contract to confirm/edit before you freeze Phase 0.
 | `type_evaporation_scan` | ❌ | ✅ | ✅ | Pro differentiator: TS→Python boundary analysis |
 | `crawl_project` | ◻️ | ✅ | ✅ | Recommend Pro (resource-intensive); Community could cap scope |
 | `validate_paths` | ✅ | ✅ | ✅ | Safety: root/path validation; keep in Community |
-| `verify_policy_integrity` | ❌ | ✅ | ✅ | Governance/policy integrity verification |
+| `verify_policy_integrity` | ❌ | ❌ | ✅ | Enterprise-only: governance/policy integrity verification |
 
 Legend:
 - ✅ Included in tier
@@ -484,12 +488,12 @@ Acceptance criteria (Phase 4 complete):
 
 | Release Blocker | Current State (this workspace) | Suggested Evidence/Link |
 |---|---|---|
-| PyPI package installable via `pip install code-scalpel` | Needs Verification (publish not confirmed here) | `python -m build` + `twine check` output; PyPI release record |
-| MCP server starts and responds to protocol messages | In Progress (multiple MCP tests exist) | [tests/test_mcp.py](../../tests/test_mcp.py), [tests/test_mcp_http.py](../../tests/test_mcp_http.py), [tests/test_mcp_transports_end_to_end.py](../../tests/test_mcp_transports_end_to_end.py) |
-| Community tool list frozen and verified by contract tests | Not Started (tier freeze pending) | Tier-aware suite (recommended): `tests/production_contract/` |
+| PyPI package installable via `pip install code-scalpel` | In Progress (build + metadata checks pass locally; publish requires running tag-based workflow) | `.github/workflows/publish-pypi.yml`, `python -m build` + `python -m twine check dist/*` output |
+| MCP server starts and responds to protocol messages | Done (MCP all-tools contract test exercises startup + tool calls) | [tests/test_mcp_all_tools_contract.py](../../tests/test_mcp_all_tools_contract.py), [tests/test_mcp_transports_end_to_end.py](../../tests/test_mcp_transports_end_to_end.py) |
+| Community tool list frozen and verified by contract tests | In Progress (all-tools list is validated; per-tier tool lists not implemented yet) | [tests/test_mcp_all_tools_contract.py](../../tests/test_mcp_all_tools_contract.py); Tier-aware suite (recommended): `tests/production_contract/` |
 | Getting Started guide complete | In Progress | [README.md](../../README.md) (needs V1.0 alignment) |
 | MIT license file present | Done | [LICENSE](../../LICENSE) |
-| Basic error handling with clear messages | In Progress (policy/contract defined; enforce in tools) | Contract tests asserting structured `error` + `error_code` |
+| Basic error handling with clear messages | Not Started (no standardized MCP response envelope/error registry enforced across all tools) | Contract tests asserting structured `error` + `error_code` (to add) |
 
 ---
 
@@ -622,8 +626,8 @@ These are “make production/forking painless” checklists. They are intentiona
 |---|---|---|
 | Canonical tool list per tier is finalized (tool IDs) | Not Started | Tier-specific `tools/list` snapshots |
 | Input/output schemas frozen per tool | Not Started | Generated schema docs checked in |
-| Response envelope implemented everywhere | In Progress | Contract tests asserting envelope fields |
-| Error code registry defined and used everywhere | In Progress | `error_code` assertions across tool failures |
+| Response envelope implemented everywhere | Not Started | Contract tests asserting envelope fields (to add) |
+| Error code registry defined and used everywhere | Not Started | `error_code` assertions across tool failures (to add) |
 | Deprecation policy for tool IDs and fields | In Progress | “Versioning, Compatibility, and Deprecation Policy” section |
 
 #### Tier Split Implementation Checklist
@@ -640,7 +644,7 @@ These are “make production/forking painless” checklists. They are intentiona
 
 | Item | Status | Evidence |
 |---|---|---|
-| Build artifacts (sdist/wheel) + metadata validation | In Progress | [release_artifacts/](../../release_artifacts/) (prior releases) |
+| Build artifacts (sdist/wheel) + metadata validation | In Progress (prior bundles exist; local build + twine check passes) | [release_artifacts/](../../release_artifacts/) (prior releases), `.github/workflows/publish-pypi.yml` |
 | Full pytest log + summary | In Progress | [release_artifacts/](../../release_artifacts/) |
 | Coverage report (`coverage.xml`) | In Progress | [release_artifacts/](../../release_artifacts/) |
 | Dependency audit (e.g., `pip-audit`) | In Progress | [release_artifacts/](../../release_artifacts/) |
@@ -661,10 +665,10 @@ These are “make production/forking painless” checklists. They are intentiona
 
 | Item | Status | Evidence |
 |---|---|---|
-| `request_id` correlation supported end-to-end | In Progress | Contract tests validating field presence |
+| `request_id` correlation supported end-to-end | Not Started | Contract tests validating field presence (to add) |
 | Audit event schema versioned and stable | Not Started | `audit_event_schema.md` + schema tests |
 | Audit logs are content-safe (no code bodies) | In Progress | Tests asserting redaction |
-| Export format defined (JSON/CSV) + retention policy | Not Started | Export tests + docs |
+| Export format defined (JSON/CSV/HTML) + retention policy | In Progress (export implemented; retention policy/documentation pending) | [tests/test_coverage_additional_gaps.py](../../tests/test_coverage_additional_gaps.py), [src/code_scalpel/autonomy/audit.py](../../src/code_scalpel/autonomy/audit.py) |
 
 ---
 
@@ -678,6 +682,16 @@ This repo already includes substantial “production-style” evidence and testi
 - MCP contract-style tests already exist in [tests/](../../tests/) (see [tests/test_mcp_all_tools_contract.py](../../tests/test_mcp_all_tools_contract.py)).
 - Ninja Warrior torture-test harness exists in the workspace under [Code-Scalpel-Ninja-Warrior/](../../../Code-Scalpel-Ninja-Warrior/) (including MCP contract tests).
 - The V1.0 production planning and architecture docs are already present under [docs/guides/](./).
+
+**Important reality check (today):** the current `code-scalpel` package ships *all* tools together (Community/Pro/Enterprise separation is not enforced yet). The V1.0 “Production” work remains primarily: (1) freeze the tier contract, then (2) split distributions.
+
+#### Next Development (Recommended Order)
+
+1. **Generate a definitive MCP tool inventory artifact** (name + args schema + response model) and check it in (e.g., `docs/reference/mcp_tools_current.md`).
+2. **Introduce tier-aware tool registration** (`register_core_tools`, `register_pro_tools`, `register_enterprise_tools`) and a config switch selecting a tier.
+3. **Add tier-aware contract tests** that assert `tools/list` equals the frozen matrix per tier (and that higher-tier tools are absent when not installed).
+4. **Implement a standardized MCP response envelope + error code registry** across tools (and update contract tests to enforce it).
+5. **Split distribution** into `code-scalpel` (MIT Community) + separate Pro/Enterprise packages/images and update CI/release workflows accordingly.
 
 #### **Critical Path (All Tiers)**
 

@@ -235,7 +235,7 @@ def test_main_mcp_allows_lan(monkeypatch):
 
     captured = {}
 
-    def fake_start_mcp_server(transport, host, port, allow_lan, root_path):
+    def fake_start_mcp_server(transport, host, port, allow_lan, root_path, tier=None):
         captured.update(
             {
                 "transport": transport,
@@ -243,6 +243,7 @@ def test_main_mcp_allows_lan(monkeypatch):
                 "port": port,
                 "allow_lan": allow_lan,
                 "root_path": root_path,
+                "tier": tier,
             }
         )
         return 0
@@ -316,7 +317,7 @@ def test_main_version(monkeypatch, capsys):
 def test_main_mcp_http_allow_lan(monkeypatch):
     called = {}
 
-    def _stub(transport, host, port, allow_lan, root_path):  # noqa: ANN001
+    def _stub(transport, host, port, allow_lan, root_path, tier=None):  # noqa: ANN001
         called.update(
             {
                 "transport": transport,
@@ -324,6 +325,7 @@ def test_main_mcp_http_allow_lan(monkeypatch):
                 "port": port,
                 "allow_lan": allow_lan,
                 "root_path": root_path,
+                "tier": tier,
             }
         )
         return 0
