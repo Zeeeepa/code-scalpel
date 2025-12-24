@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: release-confidence
+        name: Release Confidence (local)
+        entry: ./scripts/verify.sh
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+      - id: commit-message-version
+        name: Require version in commit message
+        entry: python scripts/hooks/ensure_commit_version.py
+        language: system
+        stages: [commit-msg]

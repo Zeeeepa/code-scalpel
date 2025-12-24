@@ -50,7 +50,52 @@ $PYTHON_BIN -m ruff check src tests examples 2>&1 || {
 echo "Linting check passed"
 echo ""
 
-echo "🧪 Step 3/4: Running Tests with Coverage..."
+echo "🔎 Step 3/8: Type Check (Pyright)..."
+echo "----------------------------------------------"
+$PYTHON_BIN -m pip show pyright >/dev/null 2>&1 || {
+    echo ""
+    echo "ERROR: pyright is not installed. Install dev deps: pip install -e '.[dev]' && pip install pyright"
+    exit 1
+}
+pyright -p pyrightconfig.json 2>&1 || {
+    echo ""
+    echo "ERROR: Pyright type check failed"
+    exit 1
+}
+echo "Type checking passed"
+echo ""
+
+echo "🛡️  Step 4/8: Security Scan (Bandit)..."
+echo "----------------------------------------------"
+$PYTHON_BIN -m pip show bandit >/dev/null 2>&1 || {
+    echo ""
+    echo "ERROR: bandit is not installed. Install dev deps: pip install -e '.[dev]' && pip install bandit"
+    exit 1
+}
+bandit -r src/ -ll -ii -x '**/test_*.py' 2>&1 || {
+    echo ""
+    echo "ERROR: Bandit reported issues"
+    exit 1
+}
+echo "Bandit scan passed"
+echo ""
+
+echo "🧾 Step 5/8: Dependency Audit (pip-audit)..."
+echo "----------------------------------------------"
+$PYTHON_BIN -m pip show pip-audit >/dev/null 2>&1 || {
+    echo ""
+    echo "ERROR: pip-audit is not installed. Install dev deps: pip install -e '.[dev]' && pip install pip-audit"
+    exit 1
+}
+pip-audit -r requirements-secure.txt 2>&1 || {
+    echo ""
+    echo "ERROR: pip-audit found vulnerabilities"
+    exit 1
+}
+echo "Dependency audit passed"
+echo ""
+
+echo "🧪 Step 6/8: Running Tests with Coverage..."
 echo "----------------------------------------------"
 $PYTHON_BIN -m pytest --cov=code_scalpel --cov-report=term-missing --cov-fail-under=24 tests/ 2>&1 || {
     echo ""
@@ -60,7 +105,20 @@ $PYTHON_BIN -m pytest --cov=code_scalpel --cov-report=term-missing --cov-fail-un
 echo "Tests passed with required coverage"
 echo ""
 
-echo "📦 Step 4/4: Verifying Package Build..."
+echo "🧩 Step 7/8: MCP Contract (All Tools)..."
+echo "----------------------------------------------"
+for transport in stdio streamable-http sse; do
+    echo "Running MCP contract for transport: $transport"
+    MCP_CONTRACT_TRANSPORT="$transport" $PYTHON_BIN -m pytest -q tests/test_mcp_all_tools_contract.py 2>&1 || {
+        echo ""
+        echo "ERROR: MCP contract test failed for transport: $transport"
+        exit 1
+    }
+done
+echo "MCP contract passed"
+echo ""
+
+echo "📦 Step 8/8: Verifying Package Build..."
 echo "----------------------------------------------"
 $PYTHON_BIN -m build --sdist --wheel --outdir /tmp/code-scalpel-test-build 2>&1 || {
     echo ""

@@ -42,6 +42,19 @@ pip install -e ".[dev]"
 code-scalpel init
 ```
 
+### Install Commit Hooks (Required)
+
+This repo enforces a **pre-release confidence** gate before every commit via `pre-commit`.
+
+```bash
+pre-commit install
+pre-commit install --hook-type commit-msg
+```
+
+What this does:
+- Runs the full local verification suite (`./scripts/verify.sh`) before each commit.
+- Ensures every commit message includes the current version (e.g. `v3.2.7`).
+
 ### 2. Run Tests
 
 ```bash
@@ -65,7 +78,10 @@ ruff check src/
 ruff format src/
 
 # Type checking
-mypy src/code_scalpel/
+pyright -p pyrightconfig.json
+
+# Full pre-release confidence suite (matches CI gates)
+./scripts/verify.sh
 ```
 
 ---
@@ -103,13 +119,8 @@ git checkout -b docs/documentation-update
 ### 4. Run Quality Checks
 
 ```bash
-# Run all checks
-./scripts/check_quality.sh
-
-# Or manually:
-pytest tests/
-ruff check src/
-mypy src/code_scalpel/
+# Full pre-release confidence suite (required before every commit)
+./scripts/verify.sh
 ```
 
 ### 5. Commit Changes
