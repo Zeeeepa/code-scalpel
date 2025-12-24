@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.2.7"  # [20251223_HOTFIX] v3.2.7 - Fix Release Confidence lint gates
+version = "3.2.8"  # [20251223_RELEASE] v3.2.8 - V1.0 production requirements
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

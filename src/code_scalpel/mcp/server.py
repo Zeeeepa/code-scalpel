@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import ast
 import asyncio
-import inspect
 import logging
 import os
 import sys
@@ -50,7 +49,7 @@ from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
 # [20251218_BUGFIX] Import version from package instead of hardcoding
 from code_scalpel import __version__
 
-from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
+from code_scalpel.mcp.contract import ToolResponseEnvelope
 
 
 # Current tier for response envelope metadata.
@@ -61,12 +60,12 @@ CURRENT_TIER = "community"
 
 def _get_current_tier() -> str:
     """Get the current tier from environment or global.
-    
+
     Checks in order:
     1. CODE_SCALPEL_TIER environment variable
     2. SCALPEL_TIER environment variable (legacy)
     3. CURRENT_TIER global (set by main() or defaults to 'community')
-    
+
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
     """
@@ -921,38 +920,40 @@ Code is PARSED only, never executed.""",
 _original_add_tool = mcp._tool_manager.add_tool
 
 
-def _add_tool_with_envelope_output(fn: Callable[..., Any], **add_tool_kwargs: Any) -> Any:
+def _add_tool_with_envelope_output(
+    fn: Callable[..., Any], **add_tool_kwargs: Any
+) -> Any:
     """Register a tool normally, then wrap its run() method to return ToolResponseEnvelope."""
     # Force structured_output=False so FastMCP doesn't validate output against schema
     # We'll return ToolResponseEnvelope as unstructured JSON
     add_tool_kwargs["structured_output"] = False
-    
+
     # Register the tool - let FastMCP build input schema from the original function
     tool = _original_add_tool(fn, **add_tool_kwargs)
-    
+
     # Save the original run method
     original_run = tool.run
-    
+
     async def _enveloped_run(
-        arguments: dict[str, Any],
-        context: Any = None,
-        convert_result: bool = False
+        arguments: dict[str, Any], context: Any = None, convert_result: bool = False
     ) -> dict[str, Any]:
         """Wrapped run() that returns ToolResponseEnvelope as a dict."""
         import time as time_module
         import uuid as uuid_module
-        
+
         started = time_module.perf_counter()
         request_id = uuid_module.uuid4().hex
         tier = _get_current_tier()
-        
+
         try:
             # Call the original run method with convert_result=False to get raw tool output
             # We'll wrap it in an envelope, so FastMCP's conversion happens at envelope level
-            result = await original_run(arguments, context=context, convert_result=False)
-            
+            result = await original_run(
+                arguments, context=context, convert_result=False
+            )
+
             duration_ms = int((time_module.perf_counter() - started) * 1000)
-            
+
             # Check for failure indicators in the result
             success = None
             err_msg = None
@@ -962,13 +963,17 @@ def _add_tool_with_envelope_output(fn: Callable[..., Any], **add_tool_kwargs: An
             elif isinstance(result, dict):
                 success = result.get("success")
                 err_msg = result.get("error")
-            
+
             error_obj = None
             if success is False and err_msg:
-                from code_scalpel.mcp.contract import ToolError, _classify_failure_message
+                from code_scalpel.mcp.contract import (
+                    ToolError,
+                    _classify_failure_message,
+                )
+
                 code = _classify_failure_message(err_msg) or "internal_error"
                 error_obj = ToolError(error=err_msg, error_code=code)
-            
+
             return ToolResponseEnvelope(
                 tier=tier,
                 tool_version=__version__,
@@ -980,10 +985,11 @@ def _add_tool_with_envelope_output(fn: Callable[..., Any], **add_tool_kwargs: An
                 upgrade_hints=[],
                 data=result,
             ).model_dump(mode="json")
-            
+
         except BaseException as exc:
             duration_ms = int((time_module.perf_counter() - started) * 1000)
             from code_scalpel.mcp.contract import ToolError, _classify_exception
+
             code = _classify_exception(exc)
             return ToolResponseEnvelope(
                 tier=tier,
@@ -996,16 +1002,14 @@ def _add_tool_with_envelope_output(fn: Callable[..., Any], **add_tool_kwargs: An
                 upgrade_hints=[],
                 data=None,
             ).model_dump(mode="json")
-    
+
     # Replace the tool's run method (Tool is a Pydantic model, use object.__setattr__)
     object.__setattr__(tool, "run", _enveloped_run)
-    
+
     return tool
 
 
-
 mcp._tool_manager.add_tool = _add_tool_with_envelope_output  # type: ignore[method-assign]
-
 
 
 def _validate_code(code: str) -> tuple[bool, str | None]:
@@ -3141,7 +3145,7 @@ def _crawl_project_discovery(
 ) -> ProjectCrawlResult:
     """
     Discovery-only crawl for Community tier.
-    
+
     Provides file inventory and structure without deep analysis:
     - Lists Python files and their paths
     - Identifies entrypoint patterns (main blocks, CLI commands)
@@ -3149,75 +3153,89 @@ def _crawl_project_discovery(
     - NO complexity analysis
     - NO function/class details
     - NO file contents
-    
+
     [20251223_FEATURE] v3.2.8 - Community tier discovery crawl.
     """
     import os
     from pathlib import Path
     from datetime import datetime
-    
+
     try:
         root = Path(root_path)
         if not root.exists():
             raise FileNotFoundError(f"Project root not found: {root_path}")
-        
+
         # Default excludes
         default_excludes = {
-            "__pycache__", ".git", ".venv", "venv", "node_modules",
-            ".pytest_cache", ".mypy_cache", "dist", "build", ".tox",
-            "htmlcov", ".eggs", "*.egg-info"
+            "__pycache__",
+            ".git",
+            ".venv",
+            "venv",
+            "node_modules",
+            ".pytest_cache",
+            ".mypy_cache",
+            "dist",
+            "build",
+            ".tox",
+            "htmlcov",
+            ".eggs",
+            "*.egg-info",
         }
         if exclude_dirs:
             default_excludes.update(exclude_dirs)
-        
+
         python_files = []
         entrypoints = []
         total_files = 0
-        
+
         # Walk the directory tree
         for dirpath, dirnames, filenames in os.walk(root):
             # Filter out excluded directories
             dirnames[:] = [d for d in dirnames if d not in default_excludes]
-            
+
             for filename in filenames:
-                if filename.endswith('.py'):
+                if filename.endswith(".py"):
                     total_files += 1
                     file_path = Path(dirpath) / filename
                     rel_path = str(file_path.relative_to(root))
-                    
+
                     # Check for entrypoint patterns without parsing
                     try:
-                        content = file_path.read_text(encoding='utf-8', errors='ignore')
+                        content = file_path.read_text(encoding="utf-8", errors="ignore")
                         is_entrypoint = (
-                            'if __name__ == "__main__"' in content or
-                            'if __name__ == \'__main__\'' in content or
-                            '@click.command' in content or
-                            '@app.route' in content or
-                            'def main(' in content
+                            'if __name__ == "__main__"' in content
+                            or "if __name__ == '__main__'" in content
+                            or "@click.command" in content
+                            or "@app.route" in content
+                            or "def main(" in content
                         )
-                        
+
                         if is_entrypoint:
                             entrypoints.append(rel_path)
-                        
+
                         # Create minimal file result (discovery mode)
-                        python_files.append(CrawlFileResult(
-                            path=rel_path,
-                            status="discovered",
-                            lines_of_code=len(content.splitlines()),
-                            functions=[],
-                            classes=[],
-                            imports=[],
-                            complexity_warnings=[],
-                            error=None,
-                        ))
+                        python_files.append(
+                            CrawlFileResult(
+                                path=rel_path,
+                                status="discovered",
+                                lines_of_code=len(content.splitlines()),
+                                functions=[],
+                                classes=[],
+                                imports=[],
+                                complexity_warnings=[],
+                                error=None,
+                            )
+                        )
                     except Exception as e:
-                        python_files.append(CrawlFileResult(
-                            path=rel_path,
-                            status="error",
-                            lines_of_code=0,
-                            error=f"Could not read file: {str(e)}",
-                        ))
-        
+                        python_files.append(
+                            CrawlFileResult(
+                                path=rel_path,
+                                status="error",
+                                lines_of_code=0,
+                                error=f"Could not read file: {str(e)}",
+                            )
+                        )
+
         # Build discovery report
         report = f"""# Project Discovery Report (Community)
 
@@ -3243,7 +3261,7 @@ upgrade to Pro or Enterprise tier.
 - Cross-file dependency resolution
 - Detailed code metrics
 """
-        
+
         summary = CrawlSummary(
             total_files=total_files,
             successful_files=len([f for f in python_files if f.status == "discovered"]),
@@ -3253,7 +3271,7 @@ upgrade to Pro or Enterprise tier.
             total_classes=0,  # Not analyzed in discovery mode
             complexity_warnings=0,  # Not analyzed in discovery mode
         )
-        
+
         return ProjectCrawlResult(
             success=True,
             root_path=str(root),
@@ -3263,7 +3281,7 @@ upgrade to Pro or Enterprise tier.
             errors=[],
             markdown_report=report,
         )
-        
+
     except Exception as e:
         return ProjectCrawlResult(
             success=False,
@@ -4011,7 +4029,7 @@ async def crawl_project(
 
     [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
     Reports progress as files are discovered and analyzed.
-    
+
     [20251223_FEATURE] v3.2.8 - Tier-based behavior splitting.
     Community tier provides discovery-only crawl for inventory and entrypoints.
 
@@ -4083,7 +4101,6 @@ async def crawl_project(
         await ctx.report_progress(progress=100, total=100)
 
     return result
-
 
 
 # ============================================================================
@@ -5781,7 +5798,7 @@ async def get_symbol_references(
 
     # [20251223_FEATURE] v3.2.8 - Tier-based limiting
     tier = _get_current_tier()
-    
+
     result = await asyncio.to_thread(
         _get_symbol_references_sync, symbol_name, project_root
     )
@@ -5797,7 +5814,7 @@ async def get_symbol_references(
             definition_line=result.definition_line,
             total_references=result.total_references,
             references=limited_refs,
-            error=f"Community tier: Showing 10 of {result.total_references} references. Upgrade to Pro/Enterprise for full project-wide search.",
+            error=None,  # Tier limitation communicated via envelope's upgrade_hints
         )
 
     if ctx:
@@ -5960,7 +5977,7 @@ async def get_call_graph(
     tier = _get_current_tier()
     actual_depth = depth
     depth_limited = False
-    
+
     if tier == "community" and depth > 3:
         actual_depth = 3
         depth_limited = True
@@ -5973,11 +5990,8 @@ async def get_call_graph(
         include_circular_import_check,
     )
 
-    # Add upgrade hint if depth was limited
-    if depth_limited and result.success:
-        original_error = result.error or ""
-        upgrade_msg = f"Community tier: Graph limited to {actual_depth} hops (requested {depth}). Upgrade to Pro/Enterprise for deeper analysis."
-        result.error = f"{original_error}\n{upgrade_msg}" if original_error else upgrade_msg
+    # Note: Tier limitation is communicated via envelope's upgrade_hints, not tool's error field
+    # The envelope wrapper will add upgrade hints when tier != "enterprise"
 
     if ctx:
         node_count = len(result.nodes) if result.nodes else 0
@@ -6201,7 +6215,7 @@ async def get_graph_neighborhood(
     [v2.5.0] Use this tool to prevent graph explosion when analyzing large
     codebases. Instead of loading the entire graph, extract only the nodes
     within k hops of a specific node.
-    
+
     [v3.2.8] Tier-based hop limiting for Community tier.
 
     **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
@@ -6261,7 +6275,7 @@ async def get_graph_neighborhood(
     tier = _get_current_tier()
     actual_k = k
     k_limited = False
-    
+
     if tier == "community" and k > 1:
         actual_k = 1
         k_limited = True
@@ -6425,11 +6439,8 @@ async def get_graph_neighborhood(
         # Generate Mermaid diagram
         mermaid = _generate_neighborhood_mermaid(nodes, edges, center_node_id)
 
-        # [20251223_FEATURE] v3.2.8 - Add upgrade hint if k was limited
-        truncation_msg = result.truncation_warning
-        if k_limited:
-            upgrade_msg = f"Community tier: Limited to {actual_k} hop (requested {k}). Upgrade to Pro/Enterprise for multi-hop traversal."
-            truncation_msg = f"{truncation_msg}\n{upgrade_msg}" if truncation_msg else upgrade_msg
+        # Note: Tier limitation is communicated via envelope's upgrade_hints
+        # Don't pollute the tool's truncation_warning with tier messages
 
         return GraphNeighborhoodResult(
             success=True,
@@ -6441,7 +6452,7 @@ async def get_graph_neighborhood(
             total_edges=result.total_edges,
             max_depth_reached=result.max_depth_reached,
             truncated=result.truncated or k_limited,
-            truncation_warning=truncation_msg,
+            truncation_warning=result.truncation_warning,
             mermaid=mermaid,
         )
 

@@ -19,8 +19,8 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-# [20251223_BUGFIX] v3.2.4 - CI contract + regression runner reliability
-__version__ = "3.2.7"
+# [20251223_RELEASE] v3.2.8 - V1.0 production requirements (response envelope, tier behavior, distribution separation)
+__version__ = "3.2.8"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

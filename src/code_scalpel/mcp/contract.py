@@ -54,12 +54,16 @@ class ToolResponseEnvelope(BaseModel):
     tier: str = Field(description="One of: community, pro, enterprise")
     tool_version: str = Field(description="Semantic version of tool implementation")
     tool_id: str = Field(description="Canonical MCP tool ID")
-    request_id: str = Field(description="Correlation ID (caller-provided or server-generated)")
+    request_id: str = Field(
+        description="Correlation ID (caller-provided or server-generated)"
+    )
     capabilities: list[str] = Field(description="Capabilities for this invocation")
     duration_ms: int | None = Field(
         default=None, description="End-to-end runtime in milliseconds"
     )
-    error: ToolError | None = Field(default=None, description="Standardized error model")
+    error: ToolError | None = Field(
+        default=None, description="Standardized error model"
+    )
     upgrade_hints: list[UpgradeHint] = Field(
         default_factory=list,
         description="Upgrade hints when a feature is unavailable at this tier",
@@ -206,7 +210,7 @@ def envelop_tool_function(
     _wrapped.__doc__ = getattr(fn, "__doc__", None)
     _wrapped.__module__ = getattr(fn, "__module__", __name__)
     _wrapped.__annotations__ = getattr(fn, "__annotations__", {})
-    
+
     # Copy __globals__ so Pydantic can resolve type annotations
     if hasattr(fn, "__globals__"):
         _wrapped.__globals__.update(fn.__globals__)  # type: ignore[attr-defined]

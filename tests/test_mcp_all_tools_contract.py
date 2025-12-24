@@ -316,9 +316,9 @@ def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
         assert key in payload, f"Missing envelope field: {key}"
 
     assert payload["tool_id"] == tool_name
-    assert isinstance(payload["tool_version"], str) and payload["tool_version"], (
-        "tool_version must be a non-empty string"
-    )
+    assert (
+        isinstance(payload["tool_version"], str) and payload["tool_version"]
+    ), "tool_version must be a non-empty string"
     assert isinstance(payload["tier"], str) and payload["tier"]
     assert isinstance(payload["request_id"], str) and payload["request_id"]
     assert isinstance(payload["capabilities"], list)
@@ -690,9 +690,7 @@ def set_role():
                     read_timeout=timedelta(seconds=30),
                     evidence=evidence,
                 )
-                tev_data = _assert_envelope(
-                    tev_json, tool_name="type_evaporation_scan"
-                )
+                tev_data = _assert_envelope(tev_json, tool_name="type_evaporation_scan")
                 assert tev_data.get("success") is True
                 assert "vulnerabilities" in tev_data
 
@@ -706,9 +704,7 @@ def set_role():
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                deps_data = _assert_envelope(
-                    deps_json, tool_name="scan_dependencies"
-                )
+                deps_data = _assert_envelope(deps_json, tool_name="scan_dependencies")
                 assert deps_data.get("success") is True
 
                 sec_json = await _call_tool_json(
@@ -755,9 +751,7 @@ def add(a, b):
                     read_timeout=timedelta(seconds=120),
                     evidence=evidence,
                 )
-                gen_data = _assert_envelope(
-                    gen_json, tool_name="generate_unit_tests"
-                )
+                gen_data = _assert_envelope(gen_json, tool_name="generate_unit_tests")
                 assert gen_data.get("success") is True
 
                 sim_json = await _call_tool_json(
