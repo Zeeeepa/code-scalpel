@@ -10,9 +10,12 @@
 
 ## 0) Scope Lock (Do First)
 
-- [ ] Confirm the exact scope for v3.2.8 (features/bugfixes/docs only).
-- [ ] Confirm whether v3.2.8 is allowed to include workflow/process changes (CI, release pipelines).
-- [ ] Confirm whether v3.2.8 starts any tier **behavior** splits (not just tool exposure).
+- [x] Confirm the exact scope for v3.2.8 (features/bugfixes/docs only).
+  - **Confirmed**: V1.0 production requirements (response envelope, tier behavior, distribution separation)
+- [x] Confirm whether v3.2.8 is allowed to include workflow/process changes (CI, release pipelines).
+  - **Confirmed**: GitHub Release workflow improved to use release notes from tag
+- [x] Confirm whether v3.2.8 starts any tier **behavior** splits (not just tool exposure).
+  - **Confirmed**: Yes, 4 major tools have tier-based behavioral differences
 
 ---
 
@@ -86,16 +89,20 @@
 
 ### B) Release Notes / GitHub Release Attachment (Required)
 
-- [ ] Add release notes file: `docs/release_notes/RELEASE_NOTES_v3.2.8.md`.
-- [ ] Backfill (repo-only): ensure `docs/release_notes/RELEASE_NOTES_v3.2.7.md` exists on the default branch for historical completeness (cannot retrofit old tags).
-- [ ] Ensure GitHub Release workflow uses `docs/release_notes/RELEASE_NOTES_v{VERSION}.md` as the release body.
-- [ ] Ensure release notes are present **in the tag** (GitHub Release body must match tagged source).
-- [ ] Verify behavior for legacy tags (warn+fallback vs fail hard) and keep it consistent.
+- [x] Add release notes file: `docs/release_notes/RELEASE_NOTES_v3.2.8.md`.
+- [x] Backfill (repo-only): ensure `docs/release_notes/RELEASE_NOTES_v3.2.7.md` exists on the default branch for historical completeness (cannot retrofit old tags).
+- [x] Ensure GitHub Release workflow uses `docs/release_notes/RELEASE_NOTES_v{VERSION}.md` as the release body.
+- [x] Ensure release notes are present **in the tag** (GitHub Release body must match tagged source).
+  - **Implemented**: Workflow prefers notes from tag with `git show refs/tags/$TAG:$NOTES_PATH`
+- [x] Verify behavior for legacy tags (warn+fallback vs fail hard) and keep it consistent.
+  - **Implemented**: Fallback to current branch with warning for legacy tags
 
 ### C) Tier Work (Current State vs Next)
 
-- [ ] Confirm tier tool lists are still correct (Community / Pro / Enterprise).
-- [ ] Confirm tier behavior split implementation matches V1.0 requirements (see section 1A).
+- [x] Confirm tier tool lists are still correct (Community / Pro / Enterprise).
+  - **Confirmed**: All basic tools available to Community; 4 project-wide tools have restrictions
+- [x] Confirm tier behavior split implementation matches V1.0 requirements (see section 1A).
+  - **Confirmed**: Discovery vs deep crawl, file/depth/hop limits implemented and tested
 
 ### D) Docs-as-Contract (Required if tool surface changes)
 
@@ -213,5 +220,14 @@
 
 ## Notes / Decisions Log
 
-- Decision: GitHub Release workflow behavior when notes are missing in-tag: (fill)
-- Decision: First tier behavior split in v3.2.8? (fill)
+- **Decision**: GitHub Release workflow behavior when notes are missing in-tag: Fallback to current branch file with warning (supports legacy tags)
+- **Decision**: First tier behavior split in v3.2.8? YES - Runtime tier enforcement with 4 major tools having Community limits
+- **Decision**: Distribution separation approach: Runtime tier enforcement (single package) over separate packages
+  - Rationale: Simplicity, transparency, maintainability, trust
+- **Decision**: Default tier: Community (was incorrectly defaulting to Enterprise; fixed in commit 9ebc393)
+- **Commits**:
+  - aa9c911: Universal response envelope, tier behavior, distribution separation
+  - 9322652: Distribution verification script
+  - 8f2bda7: Implementation review document
+  - 9ebc393: Tier configuration fix and comprehensive documentation
+  - 07b713e: Final release summary
