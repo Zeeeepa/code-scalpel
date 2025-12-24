@@ -20,7 +20,7 @@ For AI agent integrations:
 """
 
 # [20251223_BUGFIX] v3.2.4 - CI contract + regression runner reliability
-__version__ = "3.2.6"
+__version__ = "3.2.7"
 __author__ = "Tim Escolopio"
 __email__ = "3dtsus@gmail.com"
 

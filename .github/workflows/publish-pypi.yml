@@ -9,7 +9,7 @@ on:
       tag:
         description: 'Tag name to publish (e.g., v3.2.5)'
         required: true
-        default: 'v3.2.6'
+        default: 'v3.2.7'
 
 permissions:
   contents: read

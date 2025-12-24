@@ -6,7 +6,7 @@ on:
       tag:
         description: 'Tag/version to validate (e.g., v3.2.5)'
         required: true
-        default: 'v3.2.6'
+        default: 'v3.2.7'
   push:
     tags:
       - 'v*'
