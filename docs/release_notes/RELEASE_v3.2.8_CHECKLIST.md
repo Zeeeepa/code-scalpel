@@ -56,7 +56,7 @@
 - [x] Publish/refresh reference docs:
   - [x] `docs/reference/mcp_response_envelope.md`
   - [x] `docs/reference/error_codes.md`
-  - [ ] (Enterprise) `docs/reference/audit_event_schema.md`
+  - [x] `docs/reference/audit_event_schema.md`
 
 #### 3) Distribution separation (open-core correctness)
 
@@ -77,15 +77,13 @@
   - [x] Created `scripts/verify_distribution_separation.py` (validates tier checks)
   - [x] Verified 5 tier check calls, 4 restricted features have checks
   - [x] Documented in `docs/architecture/distribution_separation.md`
-- [ ] Container/image split (if you ship images):
-  - [ ] Build Community image from Community distribution only.
-  - [ ] Build Pro/Enterprise images from their respective distributions.
+- [x] Container/image split (if you ship images): **N/A** — Not shipping container images in this release
 - [x] Acceptance:
   - [x] All code ships in single MIT-licensed package (transparency)
   - [x] Tier restrictions enforced at runtime via tier checks
   - [x] Verification script validates tier checks (`scripts/verify_distribution_separation.py`)
   - [x] Documentation explains runtime tier model and upgrade path
-  - [ ] CI includes distribution verification check (script exists, needs integration)
+  - [x] CI includes distribution verification check (integrated into CI pipeline)
 
 ### B) Release Notes / GitHub Release Attachment (Required)
 
@@ -106,21 +104,21 @@
 
 ### D) Docs-as-Contract (Required if tool surface changes)
 
-- [ ] If any MCP tool signature/metadata changes, regenerate tool reference docs:
-  - [ ] `docs/reference/mcp_tools_current.md`
-  - [ ] `docs/reference/mcp_tools_by_tier.md`
+- [x] If any MCP tool signature/metadata changes, regenerate tool reference docs:
+  - [x] `docs/reference/mcp_tools_current.md`
+  - [x] `docs/reference/mcp_tools_by_tier.md` (generated automatically)
 
 ---
 
 ## 2) Versioning (Required)
 
-- [ ] Bump `pyproject.toml` project version to `3.2.8`.
-- [ ] Update `__version__` in:
-  - [ ] `src/code_scalpel/__init__.py`
-  - [ ] `src/code_scalpel/autonomy/__init__.py`
-- [ ] If any workflow defaults reference a tag, update defaults to `v3.2.8`:
-  - [ ] `.github/workflows/release-confidence.yml`
-  - [ ] `.github/workflows/publish-pypi.yml`
+- [x] Bump `pyproject.toml` project version to `3.2.8`.
+- [x] Update `__version__` in:
+  - [x] `src/code_scalpel/__init__.py`
+  - [x] `src/code_scalpel/autonomy/__init__.py`
+- [x] If any workflow defaults reference a tag, update defaults to `v3.2.8`:
+  - [x] `.github/workflows/release-confidence.yml`
+  - [x] `.github/workflows/publish-pypi.yml`
 
 ---
 
@@ -130,48 +128,48 @@
 
 ### A) Formatting & Lint
 
-- [ ] `black --check --diff src/ tests/`
-- [ ] `ruff check src/ tests/`
+- [x] `black --check --diff src/ tests/`
+- [x] `ruff check src/ tests/`
 
 ### B) Type Checking
 
-- [ ] `pyright -p pyrightconfig.json`
+- [x] `pyright -p pyrightconfig.json`
 
 ### C) Security
 
-- [ ] `bandit -r src/ -ll -ii -x '**/test_*.py' --format json --output bandit-report.json || true`
-- [ ] `bandit -r src/ -ll -ii -x '**/test_*.py'`
-- [ ] `pip-audit -r requirements-secure.txt --format json --output pip-audit-report.json`
-- [ ] `pip-audit -r requirements-secure.txt`
+- [x] `bandit -r src/ -ll -ii -x '**/test_*.py' --format json --output bandit-report.json || true`
+- [x] `bandit -r src/ -ll -ii -x '**/test_*.py'`
+- [x] `pip-audit -r requirements-secure.txt --format json --output pip-audit-report.json`
+- [x] `pip-audit -r requirements-secure.txt`
 
 ### D) Tests
 
-- [ ] `pytest tests/ -q`
+- [x] `pytest tests/ -q`
 
 ### E) MCP Contract Tests (All Transports)
 
-- [ ] `MCP_CONTRACT_TRANSPORT=stdio pytest -q tests/test_mcp_all_tools_contract.py`
-- [ ] `MCP_CONTRACT_TRANSPORT=sse pytest -q tests/test_mcp_all_tools_contract.py`
-- [ ] `MCP_CONTRACT_TRANSPORT=streamable-http pytest -q tests/test_mcp_all_tools_contract.py`
+- [x] `MCP_CONTRACT_TRANSPORT=stdio pytest -q tests/test_mcp_all_tools_contract.py`
+- [x] `MCP_CONTRACT_TRANSPORT=sse pytest -q tests/test_mcp_all_tools_contract.py`
+- [x] `MCP_CONTRACT_TRANSPORT=streamable-http pytest -q tests/test_mcp_all_tools_contract.py`
 
 ### F) Packaging
 
-- [ ] `python -m build`
-- [ ] `python -m twine check dist/*`
+- [x] `python -m build`
+- [x] `python -m twine check dist/*`
 
 ### G) Release Baseline Validation
 
-- [ ] `python scripts/validate_all_releases.py`
-- [ ] `python scripts/regression_test.py`
+- [x] `python scripts/validate_all_releases.py`
+- [x] `python scripts/regression_test.py`
 
 ---
 
 ## 4) Repo Hygiene (Must Pass Before Commit)
 
-- [ ] `git status` is clean aside from intended changes.
-- [ ] No accidental file mode flips (e.g., executable bit on docs/yaml) in `git diff --summary`.
-- [ ] Generated docs are committed (if required by CI).
-- [ ] No secrets or tokens committed (spot-check diff for credentials).
+- [x] `git status` is clean aside from intended changes.
+- [x] No accidental file mode flips (e.g., executable bit on docs/yaml) in `git diff --summary`.
+- [x] Generated docs are committed (if required by CI).
+- [x] No secrets or tokens committed (spot-check diff for credentials).
 
 ---
 
@@ -179,17 +177,18 @@
 
 > Create exactly one release commit after local gates pass.
 
-- [ ] Commit includes:
-  - [ ] Version bump (3.2.8)
-  - [ ] Release notes file (3.2.8)
-  - [ ] Any required workflow changes
-  - [ ] Any regenerated docs/contracts
+- [x] Commit includes:
+  - [x] Version bump (3.2.8)
+  - [x] Release notes file (3.2.8)
+  - [x] Any required workflow changes
+  - [x] Any regenerated docs/contracts
+  - **Commit**: 0e67bef
 
 ---
 
 ## 6) Tag + CI Release Confidence
 
-- [ ] Create annotated tag: `v3.2.8`.
+- [x] Create annotated tag: `v3.2.8`.
 - [ ] Push branch + tag.
 - [ ] Confirm GitHub Actions “Release Confidence” passes for `v3.2.8`.
 
@@ -231,3 +230,6 @@
   - 8f2bda7: Implementation review document
   - 9ebc393: Tier configuration fix and comprehensive documentation
   - 07b713e: Final release summary
+  - 76de71f: Regenerated MCP tool reference docs with tier behavior
+  - 6e27cfe: Audit event schema documentation
+  - 8315a9c: CI distribution separation verification

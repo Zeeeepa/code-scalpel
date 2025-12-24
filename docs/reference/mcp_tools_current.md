@@ -96,11 +96,18 @@ Analyze source code structure.
 
 Crawl an entire project directory and analyze all Python files.
 
+    **Tier Behavior:**
+    - Community: Discovery crawl (file inventory, structure, entrypoints)
+    - Pro/Enterprise: Deep crawl (full analysis with complexity, dependencies, cross-file)
+
     Use this tool to get a comprehensive overview of a project's structure,
     complexity hotspots, and code metrics before diving into specific files.
 
     [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
     Reports progress as files are discovered and analyzed.
+
+    [20251223_FEATURE] v3.2.8 - Tier-based behavior splitting.
+    Community tier provides discovery-only crawl for inventory and entrypoints.
 
     Example::
 
@@ -560,6 +567,10 @@ Generate unit tests from code using symbolic execution.
 
 Build a call graph showing function relationships in the project.
 
+    **Tier Behavior:**
+    - Community: Maximum depth of 3 hops from entry point
+    - Pro/Enterprise: Full depth traversal (configurable up to 50)
+
     [v1.5.0] Use this tool to understand code flow and function dependencies.
     Analyzes Python source files to build a static call graph with:
     - Line number tracking for each function
@@ -569,6 +580,7 @@ Build a call graph showing function relationships in the project.
     - Circular import detection
 
     [v3.0.5] Now reports progress during graph construction.
+    [v3.2.8] Tier-based depth limiting for Community tier.
 
     Why AI agents need this:
     - Navigation: Quickly understand how functions connect
@@ -811,9 +823,15 @@ Get a file overview without reading full content.
 
 Extract k-hop neighborhood subgraph around a center node.
 
+    **Tier Behavior:**
+    - Community: Maximum 1 hop from center node
+    - Pro/Enterprise: Configurable k-hop traversal
+
     [v2.5.0] Use this tool to prevent graph explosion when analyzing large
     codebases. Instead of loading the entire graph, extract only the nodes
     within k hops of a specific node.
+
+    [v3.2.8] Tier-based hop limiting for Community tier.
 
     **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
 
@@ -980,10 +998,15 @@ Generate a comprehensive map of the project structure.
 
 Find all references to a symbol across the project.
 
+    **Tier Behavior:**
+    - Community: Limited to 10 files (sample of references with upgrade hint)
+    - Pro/Enterprise: Full project-wide search across all files
+
     [v1.4.0] Use this tool before modifying a function, class, or variable to
     understand its usage across the codebase. Essential for safe refactoring.
 
     [v3.0.5] Now reports progress as files are scanned.
+    [v3.2.8] Tier-based result limiting for Community tier.
 
     Why AI agents need this:
     - Safe refactoring: know all call sites before changing signatures

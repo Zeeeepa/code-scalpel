@@ -169,11 +169,22 @@ def _tool_json(result) -> dict:
     assert hasattr(first, "text"), f"Unexpected content type: {type(first)!r}"
     text = first.text
     try:
-        return json.loads(text)
+        envelope = json.loads(text)
     except json.JSONDecodeError as exc:
         raise AssertionError(
             "Tool content is not valid JSON; first 200 chars: " + repr(text[:200])
         ) from exc
+    
+    # [v3.2.8] Validate universal response envelope
+    assert "tier" in envelope, "Response missing 'tier' field"
+    assert "tool_version" in envelope, "Response missing 'tool_version' field"
+    assert "tool_id" in envelope, "Response missing 'tool_id' field"
+    assert "request_id" in envelope, "Response missing 'request_id' field"
+    assert "capabilities" in envelope, "Response missing 'capabilities' field"
+    assert "data" in envelope, "Response missing 'data' field"
+    
+    # Return the data payload (unwrapped)
+    return envelope["data"]
 
 
 @asynccontextmanager

@@ -5976,11 +5976,9 @@ async def get_call_graph(
     # [20251223_FEATURE] v3.2.8 - Tier-based depth limiting
     tier = _get_current_tier()
     actual_depth = depth
-    depth_limited = False
 
     if tier == "community" and depth > 3:
         actual_depth = 3
-        depth_limited = True
 
     result = await asyncio.to_thread(
         _get_call_graph_sync,
