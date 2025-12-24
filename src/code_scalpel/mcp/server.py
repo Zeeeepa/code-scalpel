@@ -7789,7 +7789,7 @@ def _apply_tier_tool_filter(tier: str) -> None:
     else:
         allowed = community_tools
 
-    for tool_name in (all_tools - allowed):
+    for tool_name in all_tools - allowed:
         try:
             mcp.remove_tool(tool_name)
         except Exception:

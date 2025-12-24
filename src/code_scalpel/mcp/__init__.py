@@ -27,10 +27,32 @@ Supports:
     - Implement strict type checking for response models
     - Add schema versioning for backwards compatibility"""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+# [20251216_FEATURE] v2.2.0 - Structured logging
+from .logging import (  # noqa: E402
+    MCPAnalytics,
+    ToolInvocation,
+    get_analytics,
+    log_tool_error,
+    log_tool_invocation,
+    log_tool_success,
+    mcp_logger,
+)
+
+if TYPE_CHECKING:
+    # Make `mcp` visible to type checkers without eagerly importing at runtime.
+    from .server import mcp as mcp
+else:
+    mcp: Any
+
+
 def _load_server():
     # Import lazily to avoid runpy warnings when executing the module as a script
     # (python -m code_scalpel.mcp.server).
-    from . import server as _server  # noqa: WPS433
+    from . import server as _server
 
     return _server
 
@@ -53,16 +75,6 @@ def __getattr__(name: str):
         return get_mcp()
     raise AttributeError(name)
 
-# [20251216_FEATURE] v2.2.0 - Structured logging
-from .logging import (
-    MCPAnalytics,
-    ToolInvocation,
-    log_tool_invocation,
-    log_tool_success,
-    log_tool_error,
-    get_analytics,
-    mcp_logger,
-)
 
 __all__ = [
     "get_mcp",

@@ -296,7 +296,9 @@ async def test_mcp_stdio_transport_community_tier_filters_tools(tmp_path: Path):
                 assert tool_names == expected
 
 
-async def test_mcp_stdio_transport_pro_tier_excludes_enterprise_only_tools(tmp_path: Path):
+async def test_mcp_stdio_transport_pro_tier_excludes_enterprise_only_tools(
+    tmp_path: Path,
+):
     with anyio.fail_after(120):
         repo_root = Path(__file__).resolve().parents[1]
         env = _pythonpath_env(repo_root)
