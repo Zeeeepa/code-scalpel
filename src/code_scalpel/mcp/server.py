@@ -54,8 +54,32 @@ from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_functio
 
 
 # Current tier for response envelope metadata.
-# Initialized to the default behavior (enterprise/full surface).
-CURRENT_TIER = "enterprise"
+# Initialized to "community" (free tier) by default.
+# Can be overridden via CODE_SCALPEL_TIER environment variable.
+CURRENT_TIER = "community"
+
+
+def _get_current_tier() -> str:
+    """Get the current tier from environment or global.
+    
+    Checks in order:
+    1. CODE_SCALPEL_TIER environment variable
+    2. SCALPEL_TIER environment variable (legacy)
+    3. CURRENT_TIER global (set by main() or defaults to 'community')
+    
+    Returns:
+        str: One of 'community', 'pro', or 'enterprise'
+    """
+    tier = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    if tier:
+        tier = tier.strip().lower()
+        # Normalize aliases
+        if tier == "free":
+            tier = "community"
+        elif tier == "all":
+            tier = "enterprise"
+        return tier
+    return CURRENT_TIER
 
 
 # [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport corruption
@@ -891,10 +915,6 @@ Access code via URIs without knowing file paths:
 
 Code is PARSED only, never executed.""",
 )
-
-
-def _get_current_tier() -> str:
-    return CURRENT_TIER
 
 
 # Wrap tool registration to make ALL tools return ToolResponseEnvelope in their signature.

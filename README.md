@@ -21,6 +21,32 @@ Or with [uv](https://docs.astral.sh/uv/) (recommended for MCP):
 uvx code-scalpel --help
 ```
 
+## Tier Configuration
+
+Code Scalpel offers three tiers: **Community** (free), **Pro**, and **Enterprise**.
+
+- **Community** (default): Free, full access to basic tools, limited project-wide analysis
+- **Pro**: Unlimited project-wide analysis, deep crawling, no file/depth limits
+- **Enterprise**: All Pro features plus governance and audit capabilities
+
+**Configure your tier**:
+```bash
+# Community (default - no configuration needed)
+code-scalpel mcp
+
+# Pro (requires license)
+export CODE_SCALPEL_TIER=pro
+code-scalpel mcp
+
+# Enterprise (requires license)
+export CODE_SCALPEL_TIER=enterprise
+code-scalpel mcp
+```
+
+**📖 Complete tier documentation**: [Tier Configuration Guide](docs/TIER_CONFIGURATION.md)
+
+---
+
 ## First-Time Setup
 
 After installation, initialize the configuration directory:
