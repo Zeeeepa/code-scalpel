@@ -22,6 +22,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Resolve tag + release notes path
         id: resolve
@@ -43,14 +46,23 @@ jobs:
           VERSION="${TAG_NAME#v}"
           NOTES_PATH="docs/release_notes/RELEASE_NOTES_v${VERSION}.md"
 
-          if [[ ! -f "$NOTES_PATH" ]]; then
+          # Prefer the release notes as they exist in the tag itself.
+          # This ensures the release body matches the tagged source.
+          if git cat-file -e "refs/tags/$TAG_NAME:$NOTES_PATH" 2>/dev/null; then
+            git show "refs/tags/$TAG_NAME:$NOTES_PATH" > release_notes.md
+            echo "Using release notes from tag: $TAG_NAME ($NOTES_PATH)"
+          elif [[ -f "$NOTES_PATH" ]]; then
+            # Fallback for legacy tags created before notes existed.
+            echo "::warning::Release notes not present in tag $TAG_NAME; using current branch file: $NOTES_PATH"
+            cp "$NOTES_PATH" release_notes.md
+          else
             echo "::error::Release notes file not found: $NOTES_PATH"
             echo "Expected release notes at docs/release_notes/RELEASE_NOTES_v${VERSION}.md"
             exit 1
           fi
 
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-          echo "notes_path=$NOTES_PATH" >> "$GITHUB_OUTPUT"
+          echo "notes_path=release_notes.md" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

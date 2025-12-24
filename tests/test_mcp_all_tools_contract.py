@@ -299,6 +299,44 @@ def _tool_json(result) -> dict:
         ) from exc
 
 
+def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
+    assert isinstance(payload, dict)
+
+    for key in (
+        "tier",
+        "tool_version",
+        "tool_id",
+        "request_id",
+        "capabilities",
+        "duration_ms",
+        "error",
+        "upgrade_hints",
+        "data",
+    ):
+        assert key in payload, f"Missing envelope field: {key}"
+
+    assert payload["tool_id"] == tool_name
+    assert isinstance(payload["tool_version"], str) and payload["tool_version"], (
+        "tool_version must be a non-empty string"
+    )
+    assert isinstance(payload["tier"], str) and payload["tier"]
+    assert isinstance(payload["request_id"], str) and payload["request_id"]
+    assert isinstance(payload["capabilities"], list)
+    assert isinstance(payload["upgrade_hints"], list)
+    assert isinstance(payload["duration_ms"], int) and payload["duration_ms"] >= 0
+
+    err = payload.get("error")
+    if err is not None:
+        assert isinstance(err, dict)
+        assert isinstance(err.get("error"), str) and err.get("error")
+        assert isinstance(err.get("error_code"), str) and err.get("error_code")
+        # error_details may be None or dict
+        if err.get("error_details") is not None:
+            assert isinstance(err.get("error_details"), dict)
+
+    return payload["data"]  # type: ignore[return-value]
+
+
 def _write_fixture_project(project_root: Path) -> dict[str, Path]:
     project_root.mkdir(parents=True, exist_ok=True)
     (project_root / "pkg").mkdir(parents=True, exist_ok=True)
@@ -605,8 +643,9 @@ async def test_mcp_all_tools_independent_contracts(
                     read_timeout=timedelta(seconds=20),
                     evidence=evidence,
                 )
-                assert analyze_json.get("success") is True
-                assert "functions" in analyze_json
+                analyze_data = _assert_envelope(analyze_json, tool_name="analyze_code")
+                assert analyze_data.get("success") is True
+                assert "functions" in analyze_data
 
                 sinks_json = await _call_tool_json(
                     session,
@@ -619,8 +658,11 @@ async def test_mcp_all_tools_independent_contracts(
                     read_timeout=timedelta(seconds=20),
                     evidence=evidence,
                 )
-                assert sinks_json.get("success") is True
-                assert "sink_count" in sinks_json
+                sinks_data = _assert_envelope(
+                    sinks_json, tool_name="unified_sink_detect"
+                )
+                assert sinks_data.get("success") is True
+                assert "sink_count" in sinks_data
 
                 tev_json = await _call_tool_json(
                     session,
@@ -648,8 +690,11 @@ def set_role():
                     read_timeout=timedelta(seconds=30),
                     evidence=evidence,
                 )
-                assert tev_json.get("success") is True
-                assert "vulnerabilities" in tev_json
+                tev_data = _assert_envelope(
+                    tev_json, tool_name="type_evaporation_scan"
+                )
+                assert tev_data.get("success") is True
+                assert "vulnerabilities" in tev_data
 
                 deps_json = await _call_tool_json(
                     session,
@@ -661,7 +706,10 @@ def set_role():
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert deps_json.get("success") is True
+                deps_data = _assert_envelope(
+                    deps_json, tool_name="scan_dependencies"
+                )
+                assert deps_data.get("success") is True
 
                 sec_json = await _call_tool_json(
                     session,
@@ -670,8 +718,9 @@ def set_role():
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert sec_json.get("success") is True
-                assert "risk_level" in sec_json
+                sec_data = _assert_envelope(sec_json, tool_name="security_scan")
+                assert sec_data.get("success") is True
+                assert "risk_level" in sec_data
 
                 sym_json = await _call_tool_json(
                     session,
@@ -688,7 +737,8 @@ def abs_value(x):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert sym_json.get("success") is True
+                sym_data = _assert_envelope(sym_json, tool_name="symbolic_execute")
+                assert sym_data.get("success") is True
 
                 gen_json = await _call_tool_json(
                     session,
@@ -705,7 +755,10 @@ def add(a, b):
                     read_timeout=timedelta(seconds=120),
                     evidence=evidence,
                 )
-                assert gen_json.get("success") is True
+                gen_data = _assert_envelope(
+                    gen_json, tool_name="generate_unit_tests"
+                )
+                assert gen_data.get("success") is True
 
                 sim_json = await _call_tool_json(
                     session,
@@ -718,7 +771,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert sim_json.get("success") is True
+                sim_data = _assert_envelope(sim_json, tool_name="simulate_refactor")
+                assert sim_data.get("success") is True
 
                 extract_json = await _call_tool_json(
                     session,
@@ -733,7 +787,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=20),
                     evidence=evidence,
                 )
-                assert extract_json.get("success") is True
+                extract_data = _assert_envelope(extract_json, tool_name="extract_code")
+                assert extract_data.get("success") is True
 
                 update_json = await _call_tool_json(
                     session,
@@ -748,7 +803,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert update_json.get("success") is True
+                update_data = _assert_envelope(update_json, tool_name="update_symbol")
+                assert update_data.get("success") is True
 
                 crawl_json = await _call_tool_json(
                     session,
@@ -761,7 +817,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert crawl_json.get("success") is True
+                crawl_data = _assert_envelope(crawl_json, tool_name="crawl_project")
+                assert crawl_data.get("success") is True
 
                 ctx_json = await _call_tool_json(
                     session,
@@ -772,7 +829,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=30),
                     evidence=evidence,
                 )
-                assert ctx_json.get("success") is True
+                ctx_data = _assert_envelope(ctx_json, tool_name="get_file_context")
+                assert ctx_data.get("success") is True
 
                 refs_json = await _call_tool_json(
                     session,
@@ -784,7 +842,10 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert refs_json.get("success") is True
+                refs_data = _assert_envelope(
+                    refs_json, tool_name="get_symbol_references"
+                )
+                assert refs_data.get("success") is True
 
                 call_graph_json = await _call_tool_json(
                     session,
@@ -797,7 +858,10 @@ def add(a, b):
                     read_timeout=timedelta(seconds=90),
                     evidence=evidence,
                 )
-                assert call_graph_json.get("success") is True
+                call_graph_data = _assert_envelope(
+                    call_graph_json, tool_name="get_call_graph"
+                )
+                assert call_graph_data.get("success") is True
 
                 neigh_json = await _call_tool_json(
                     session,
@@ -813,7 +877,11 @@ def add(a, b):
                     read_timeout=timedelta(seconds=90),
                     evidence=evidence,
                 )
-                assert neigh_json.get("success") in (True, False)
+                neigh_data = _assert_envelope(
+                    neigh_json, tool_name="get_graph_neighborhood"
+                )
+                # This tool may legitimately return success False for missing nodes.
+                assert neigh_data.get("success") in (True, False)
 
                 map_json = await _call_tool_json(
                     session,
@@ -826,7 +894,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=90),
                     evidence=evidence,
                 )
-                assert map_json.get("success") is True
+                map_data = _assert_envelope(map_json, tool_name="get_project_map")
+                assert map_data.get("success") is True
 
                 dep_json = await _call_tool_json(
                     session,
@@ -844,7 +913,10 @@ def add(a, b):
                     read_timeout=timedelta(seconds=120),
                     evidence=evidence,
                 )
-                assert dep_json.get("success") is True
+                dep_data = _assert_envelope(
+                    dep_json, tool_name="get_cross_file_dependencies"
+                )
+                assert dep_data.get("success") is True
 
                 cross_sec_json = await _call_tool_json(
                     session,
@@ -859,7 +931,10 @@ def add(a, b):
                     read_timeout=timedelta(seconds=180),
                     evidence=evidence,
                 )
-                assert cross_sec_json.get("success") is True
+                cross_sec_data = _assert_envelope(
+                    cross_sec_json, tool_name="cross_file_security_scan"
+                )
+                assert cross_sec_data.get("success") is True
 
                 paths_json = await _call_tool_json(
                     session,
@@ -874,7 +949,8 @@ def add(a, b):
                     read_timeout=timedelta(seconds=30),
                     evidence=evidence,
                 )
-                assert "accessible" in paths_json and "inaccessible" in paths_json
+                paths_data = _assert_envelope(paths_json, tool_name="validate_paths")
+                assert "accessible" in paths_data and "inaccessible" in paths_data
 
                 policy_json = await _call_tool_json(
                     session,
@@ -886,8 +962,11 @@ def add(a, b):
                     read_timeout=timedelta(seconds=60),
                     evidence=evidence,
                 )
-                assert policy_json.get("success") is True
-                assert "summary" in tev_json
+                policy_data = _assert_envelope(
+                    policy_json, tool_name="verify_policy_integrity"
+                )
+                assert policy_data.get("success") is True
+                assert "summary" in tev_data
         except BaseException as exc:  # noqa: BLE001
             evidence.record_failure(exc)
             raise

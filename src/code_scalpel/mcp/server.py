@@ -26,9 +26,11 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import inspect
 import logging
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Optional, TYPE_CHECKING
 
@@ -47,6 +49,13 @@ from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
 
 # [20251218_BUGFIX] Import version from package instead of hardcoding
 from code_scalpel import __version__
+
+from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
+
+
+# Current tier for response envelope metadata.
+# Initialized to the default behavior (enterprise/full surface).
+CURRENT_TIER = "enterprise"
 
 
 # [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport corruption
@@ -882,6 +891,101 @@ Access code via URIs without knowing file paths:
 
 Code is PARSED only, never executed.""",
 )
+
+
+def _get_current_tier() -> str:
+    return CURRENT_TIER
+
+
+# Wrap tool registration to make ALL tools return ToolResponseEnvelope in their signature.
+_original_add_tool = mcp._tool_manager.add_tool
+
+
+def _add_tool_with_envelope_output(fn: Callable[..., Any], **add_tool_kwargs: Any) -> Any:
+    """Register a tool normally, then wrap its run() method to return ToolResponseEnvelope."""
+    # Force structured_output=False so FastMCP doesn't validate output against schema
+    # We'll return ToolResponseEnvelope as unstructured JSON
+    add_tool_kwargs["structured_output"] = False
+    
+    # Register the tool - let FastMCP build input schema from the original function
+    tool = _original_add_tool(fn, **add_tool_kwargs)
+    
+    # Save the original run method
+    original_run = tool.run
+    
+    async def _enveloped_run(
+        arguments: dict[str, Any],
+        context: Any = None,
+        convert_result: bool = False
+    ) -> dict[str, Any]:
+        """Wrapped run() that returns ToolResponseEnvelope as a dict."""
+        import time as time_module
+        import uuid as uuid_module
+        
+        started = time_module.perf_counter()
+        request_id = uuid_module.uuid4().hex
+        tier = _get_current_tier()
+        
+        try:
+            # Call the original run method with convert_result=False to get raw tool output
+            # We'll wrap it in an envelope, so FastMCP's conversion happens at envelope level
+            result = await original_run(arguments, context=context, convert_result=False)
+            
+            duration_ms = int((time_module.perf_counter() - started) * 1000)
+            
+            # Check for failure indicators in the result
+            success = None
+            err_msg = None
+            if isinstance(result, BaseModel):
+                success = getattr(result, "success", None)
+                err_msg = getattr(result, "error", None)
+            elif isinstance(result, dict):
+                success = result.get("success")
+                err_msg = result.get("error")
+            
+            error_obj = None
+            if success is False and err_msg:
+                from code_scalpel.mcp.contract import ToolError, _classify_failure_message
+                code = _classify_failure_message(err_msg) or "internal_error"
+                error_obj = ToolError(error=err_msg, error_code=code)
+            
+            return ToolResponseEnvelope(
+                tier=tier,
+                tool_version=__version__,
+                tool_id=tool.name,
+                request_id=request_id,
+                capabilities=["envelope-v1"],
+                duration_ms=duration_ms,
+                error=error_obj,
+                upgrade_hints=[],
+                data=result,
+            ).model_dump(mode="json")
+            
+        except BaseException as exc:
+            duration_ms = int((time_module.perf_counter() - started) * 1000)
+            from code_scalpel.mcp.contract import ToolError, _classify_exception
+            code = _classify_exception(exc)
+            return ToolResponseEnvelope(
+                tier=tier,
+                tool_version=__version__,
+                tool_id=tool.name,
+                request_id=request_id,
+                capabilities=["envelope-v1"],
+                duration_ms=duration_ms,
+                error=ToolError(error=str(exc) or "Tool error", error_code=code),
+                upgrade_hints=[],
+                data=None,
+            ).model_dump(mode="json")
+    
+    # Replace the tool's run method (Tool is a Pydantic model, use object.__setattr__)
+    object.__setattr__(tool, "run", _enveloped_run)
+    
+    return tool
+
+
+
+mcp._tool_manager.add_tool = _add_tool_with_envelope_output  # type: ignore[method-assign]
+
 
 
 def _validate_code(code: str) -> tuple[bool, str | None]:
@@ -3011,6 +3115,153 @@ async def simulate_refactor(
     )
 
 
+def _crawl_project_discovery(
+    root_path: str,
+    exclude_dirs: list[str] | None = None,
+) -> ProjectCrawlResult:
+    """
+    Discovery-only crawl for Community tier.
+    
+    Provides file inventory and structure without deep analysis:
+    - Lists Python files and their paths
+    - Identifies entrypoint patterns (main blocks, CLI commands)
+    - Basic statistics (file count, directory structure)
+    - NO complexity analysis
+    - NO function/class details
+    - NO file contents
+    
+    [20251223_FEATURE] v3.2.8 - Community tier discovery crawl.
+    """
+    import os
+    from pathlib import Path
+    from datetime import datetime
+    
+    try:
+        root = Path(root_path)
+        if not root.exists():
+            raise FileNotFoundError(f"Project root not found: {root_path}")
+        
+        # Default excludes
+        default_excludes = {
+            "__pycache__", ".git", ".venv", "venv", "node_modules",
+            ".pytest_cache", ".mypy_cache", "dist", "build", ".tox",
+            "htmlcov", ".eggs", "*.egg-info"
+        }
+        if exclude_dirs:
+            default_excludes.update(exclude_dirs)
+        
+        python_files = []
+        entrypoints = []
+        total_files = 0
+        
+        # Walk the directory tree
+        for dirpath, dirnames, filenames in os.walk(root):
+            # Filter out excluded directories
+            dirnames[:] = [d for d in dirnames if d not in default_excludes]
+            
+            for filename in filenames:
+                if filename.endswith('.py'):
+                    total_files += 1
+                    file_path = Path(dirpath) / filename
+                    rel_path = str(file_path.relative_to(root))
+                    
+                    # Check for entrypoint patterns without parsing
+                    try:
+                        content = file_path.read_text(encoding='utf-8', errors='ignore')
+                        is_entrypoint = (
+                            'if __name__ == "__main__"' in content or
+                            'if __name__ == \'__main__\'' in content or
+                            '@click.command' in content or
+                            '@app.route' in content or
+                            'def main(' in content
+                        )
+                        
+                        if is_entrypoint:
+                            entrypoints.append(rel_path)
+                        
+                        # Create minimal file result (discovery mode)
+                        python_files.append(CrawlFileResult(
+                            path=rel_path,
+                            status="discovered",
+                            lines_of_code=len(content.splitlines()),
+                            functions=[],
+                            classes=[],
+                            imports=[],
+                            complexity_warnings=[],
+                            error=None,
+                        ))
+                    except Exception as e:
+                        python_files.append(CrawlFileResult(
+                            path=rel_path,
+                            status="error",
+                            lines_of_code=0,
+                            error=f"Could not read file: {str(e)}",
+                        ))
+        
+        # Build discovery report
+        report = f"""# Project Discovery Report (Community)
+
+## Summary
+- Total Python files: {total_files}
+- Entrypoints detected: {len(entrypoints)}
+
+## Structure
+This is a discovery-only crawl providing file inventory and structure.
+For detailed analysis including complexity, dependencies, and code metrics,
+upgrade to Pro or Enterprise tier.
+
+## Entrypoints
+{chr(10).join(f'- {ep}' for ep in entrypoints) if entrypoints else '(none detected)'}
+
+## Files
+{chr(10).join(f'- {f.path}' for f in python_files[:50])}
+{'...' if len(python_files) > 50 else ''}
+
+**Note:** Upgrade to Pro/Enterprise for:
+- Complexity analysis
+- Function and class inventories
+- Cross-file dependency resolution
+- Detailed code metrics
+"""
+        
+        summary = CrawlSummary(
+            total_files=total_files,
+            successful_files=len([f for f in python_files if f.status == "discovered"]),
+            failed_files=len([f for f in python_files if f.status == "error"]),
+            total_lines_of_code=sum(f.lines_of_code for f in python_files),
+            total_functions=0,  # Not analyzed in discovery mode
+            total_classes=0,  # Not analyzed in discovery mode
+            complexity_warnings=0,  # Not analyzed in discovery mode
+        )
+        
+        return ProjectCrawlResult(
+            success=True,
+            root_path=str(root),
+            timestamp=datetime.now().isoformat(),
+            summary=summary,
+            files=python_files,
+            errors=[],
+            markdown_report=report,
+        )
+        
+    except Exception as e:
+        return ProjectCrawlResult(
+            success=False,
+            root_path=root_path,
+            timestamp=datetime.now().isoformat(),
+            summary=CrawlSummary(
+                total_files=0,
+                successful_files=0,
+                failed_files=0,
+                total_lines_of_code=0,
+                total_functions=0,
+                total_classes=0,
+                complexity_warnings=0,
+            ),
+            error=f"Discovery crawl failed: {str(e)}",
+        )
+
+
 def _crawl_project_sync(
     root_path: str,
     exclude_dirs: list[str] | None = None,
@@ -3731,11 +3982,18 @@ async def crawl_project(
     """
     Crawl an entire project directory and analyze all Python files.
 
+    **Tier Behavior:**
+    - Community: Discovery crawl (file inventory, structure, entrypoints)
+    - Pro/Enterprise: Deep crawl (full analysis with complexity, dependencies, cross-file)
+
     Use this tool to get a comprehensive overview of a project's structure,
     complexity hotspots, and code metrics before diving into specific files.
 
     [20251215_FEATURE] v2.0.0 - Progress reporting for long-running operations.
     Reports progress as files are discovered and analyzed.
+    
+    [20251223_FEATURE] v3.2.8 - Tier-based behavior splitting.
+    Community tier provides discovery-only crawl for inventory and entrypoints.
 
     Example::
 
@@ -3781,19 +4039,31 @@ async def crawl_project(
     if ctx:
         await ctx.report_progress(progress=0, total=100)
 
-    result = await asyncio.to_thread(
-        _crawl_project_sync,
-        root_path,
-        exclude_dirs,
-        complexity_threshold,
-        include_report,
-    )
+    # [20251223_FEATURE] v3.2.8 - Tier-based behavior splitting
+    tier = _get_current_tier()
+    if tier == "community":
+        # Community: Discovery crawl only (inventory + structure)
+        result = await asyncio.to_thread(
+            _crawl_project_discovery,
+            root_path,
+            exclude_dirs,
+        )
+    else:
+        # Pro/Enterprise: Deep crawl with full analysis
+        result = await asyncio.to_thread(
+            _crawl_project_sync,
+            root_path,
+            exclude_dirs,
+            complexity_threshold,
+            include_report,
+        )
 
     # Report completion
     if ctx:
         await ctx.report_progress(progress=100, total=100)
 
     return result
+
 
 
 # ============================================================================
@@ -5432,10 +5702,15 @@ async def get_symbol_references(
     """
     Find all references to a symbol across the project.
 
+    **Tier Behavior:**
+    - Community: Limited to 10 files (sample of references with upgrade hint)
+    - Pro/Enterprise: Full project-wide search across all files
+
     [v1.4.0] Use this tool before modifying a function, class, or variable to
     understand its usage across the codebase. Essential for safe refactoring.
 
     [v3.0.5] Now reports progress as files are scanned.
+    [v3.2.8] Tier-based result limiting for Community tier.
 
     Why AI agents need this:
     - Safe refactoring: know all call sites before changing signatures
@@ -5484,9 +5759,26 @@ async def get_symbol_references(
     if ctx:
         await ctx.report_progress(0, 100, f"Searching for '{symbol_name}'...")
 
+    # [20251223_FEATURE] v3.2.8 - Tier-based limiting
+    tier = _get_current_tier()
+    
     result = await asyncio.to_thread(
         _get_symbol_references_sync, symbol_name, project_root
     )
+
+    # Community tier: limit to first 10 files
+    if tier == "community" and result.success and len(result.references) > 10:
+        limited_refs = result.references[:10]
+        result = SymbolReferencesResult(
+            success=True,
+            server_version=result.server_version,
+            symbol_name=result.symbol_name,
+            definition_file=result.definition_file,
+            definition_line=result.definition_line,
+            total_references=result.total_references,
+            references=limited_refs,
+            error=f"Community tier: Showing 10 of {result.total_references} references. Upgrade to Pro/Enterprise for full project-wide search.",
+        )
 
     if ctx:
         await ctx.report_progress(
@@ -5609,6 +5901,10 @@ async def get_call_graph(
     """
     Build a call graph showing function relationships in the project.
 
+    **Tier Behavior:**
+    - Community: Maximum depth of 3 hops from entry point
+    - Pro/Enterprise: Full depth traversal (configurable up to 50)
+
     [v1.5.0] Use this tool to understand code flow and function dependencies.
     Analyzes Python source files to build a static call graph with:
     - Line number tracking for each function
@@ -5618,6 +5914,7 @@ async def get_call_graph(
     - Circular import detection
 
     [v3.0.5] Now reports progress during graph construction.
+    [v3.2.8] Tier-based depth limiting for Community tier.
 
     Why AI agents need this:
     - Navigation: Quickly understand how functions connect
@@ -5639,13 +5936,28 @@ async def get_call_graph(
     if ctx:
         await ctx.report_progress(0, 100, "Building call graph...")
 
+    # [20251223_FEATURE] v3.2.8 - Tier-based depth limiting
+    tier = _get_current_tier()
+    actual_depth = depth
+    depth_limited = False
+    
+    if tier == "community" and depth > 3:
+        actual_depth = 3
+        depth_limited = True
+
     result = await asyncio.to_thread(
         _get_call_graph_sync,
         project_root,
         entry_point,
-        depth,
+        actual_depth,
         include_circular_import_check,
     )
+
+    # Add upgrade hint if depth was limited
+    if depth_limited and result.success:
+        original_error = result.error or ""
+        upgrade_msg = f"Community tier: Graph limited to {actual_depth} hops (requested {depth}). Upgrade to Pro/Enterprise for deeper analysis."
+        result.error = f"{original_error}\n{upgrade_msg}" if original_error else upgrade_msg
 
     if ctx:
         node_count = len(result.nodes) if result.nodes else 0
@@ -5862,9 +6174,15 @@ async def get_graph_neighborhood(
     """
     Extract k-hop neighborhood subgraph around a center node.
 
+    **Tier Behavior:**
+    - Community: Maximum 1 hop from center node
+    - Pro/Enterprise: Configurable k-hop traversal
+
     [v2.5.0] Use this tool to prevent graph explosion when analyzing large
     codebases. Instead of loading the entire graph, extract only the nodes
     within k hops of a specific node.
+    
+    [v3.2.8] Tier-based hop limiting for Community tier.
 
     **Graph Pruning Formula:** N(v, k) = {u ∈ V : d(v, u) ≤ k}
 
@@ -5918,6 +6236,16 @@ async def get_graph_neighborhood(
             success=False,
             error=f"Project root not found: {root_path}.",
         )
+
+    # [20251223_FEATURE] v3.2.8 - Tier-based hop limiting
+    tier = _get_current_tier()
+    actual_k = k
+    k_limited = False
+    
+    if tier == "community" and k > 1:
+        actual_k = 1
+        k_limited = True
+        k = 1  # Update k for downstream processing
 
     # Validate parameters
     if k < 1:
@@ -6077,17 +6405,23 @@ async def get_graph_neighborhood(
         # Generate Mermaid diagram
         mermaid = _generate_neighborhood_mermaid(nodes, edges, center_node_id)
 
+        # [20251223_FEATURE] v3.2.8 - Add upgrade hint if k was limited
+        truncation_msg = result.truncation_warning
+        if k_limited:
+            upgrade_msg = f"Community tier: Limited to {actual_k} hop (requested {k}). Upgrade to Pro/Enterprise for multi-hop traversal."
+            truncation_msg = f"{truncation_msg}\n{upgrade_msg}" if truncation_msg else upgrade_msg
+
         return GraphNeighborhoodResult(
             success=True,
             center_node_id=center_node_id,
-            k=k,
+            k=actual_k,
             nodes=nodes,
             edges=edges,
             total_nodes=result.total_nodes,
             total_edges=result.total_edges,
             max_depth_reached=result.max_depth_reached,
-            truncated=result.truncated,
-            truncation_warning=result.truncation_warning,
+            truncated=result.truncated or k_limited,
+            truncation_warning=truncation_msg,
             mermaid=mermaid,
         )
 
@@ -7658,6 +7992,10 @@ def run_server(
             "Invalid tier. Expected one of: community, pro, enterprise "
             "(or set CODE_SCALPEL_TIER/SCALPEL_TIER)"
         )
+
+    # Expose tier to the response envelope wrapper.
+    global CURRENT_TIER
+    CURRENT_TIER = tier
 
     # Tool surface is tier-scoped by removing disallowed tools.
     # NOTE: this is process-global; the server is intended to run once per process.
