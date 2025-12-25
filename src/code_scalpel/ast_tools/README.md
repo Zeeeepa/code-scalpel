@@ -291,20 +291,123 @@ User / Claude / Copilot
 
 ---
 
-## Development Roadmap
+## Feature Roadmap by Tier
 
-### Phase 1: Core Analysis (Complete ✅)
-- [x] AST parsing and metrics (analyzer.py)
-- [x] Call graph building (call_graph.py)
-- [x] Import resolution (import_resolver.py)
-- [x] Cross-file extraction (cross_file_extractor.py)
-- [x] Code validation (validator.py)
+### TIER 1: COMMUNITY FEATURES (Free, High Priority)
 
-### Phase 2: Advanced Analysis (In Progress 🆕)
+**Foundation capabilities** for code analysis and transformation:
 
-#### Type Inference (16 TODOs)
-- [ ] Literal type inference from assignments
-- [ ] Union type handling
+#### Core Analysis
+- Basic AST parsing and metrics (analyzer.py)
+- Function/class information extraction (utils.py)
+- Simple code validation (validator.py)
+- Basic visualization (visualizer.py)
+
+#### Import & Call Analysis
+- Single-file import resolution (import_resolver.py)
+- Call graph building (call_graph.py)
+- Basic cross-file extraction (cross_file_extractor.py)
+
+#### Transformation
+- Variable and function renaming (transformer.py)
+- Basic AST traversal and visiting
+- Type hint extraction (type_inference.py)
+
+#### Dependency Scanning
+- Single package vulnerability queries (osv_client.py)
+- Batch vulnerability checking (100+ packages)
+- CVSS severity classification
+
+**Test Coverage Target:** 400+ tests across TIER 1 features
+**Implementation Status:** 80% complete (ready for community release)
+
+---
+
+### TIER 2: PRO FEATURES (Commercial, Medium Priority)
+
+**Advanced capabilities** for enterprise code analysis:
+
+#### Advanced Analysis
+- Complex code metrics and complexity scoring (analyzer.py)
+- Data flow analysis with reaching definitions (data_flow.py)
+- Control flow graph building (control_flow.py)
+- Comprehensive validation rules (validator.py)
+
+#### Cross-File Analysis
+- Import cycle detection (import_resolver.py, call_graph.py)
+- Framework-specific pattern recognition (all modules)
+- Confidence-based symbol extraction (cross_file_extractor.py)
+- Dynamic call detection (call_graph.py)
+
+#### Type System
+- Type inference from assignments and operations (type_inference.py)
+- Function return type inference
+- Class attribute typing
+- Type hint generation with formatting
+
+#### Transformation & Refactoring
+- Method extraction from code blocks (transformer.py)
+- Variable inlining and simplification
+- Pattern matching with wildcards
+- Transformation composition
+
+#### Visualization & Reporting
+- Interactive HTML visualization (visualizer.py)
+- Diff visualization between ASTs
+- Side-by-side source and AST view
+- Multiple export formats (SVG, PDF)
+
+#### Dependency Scanning
+- Vulnerability caching with TTL (osv_client.py)
+- Ecosystem-specific scoring (PyPI, npm, Maven)
+- Advisory enrichment with CVSS and CWE
+- Batch deduplication and aggregation
+- Local vulnerability database fallback
+
+**Test Coverage Target:** 650+ tests across TIER 2 features
+**Implementation Status:** 50% complete (in development)
+
+---
+
+### TIER 3: ENTERPRISE FEATURES (Commercial, Lower Priority)
+
+**State-of-the-art capabilities** for advanced users:
+
+#### ML-Based Analysis
+- ML-based type prediction (type_inference.py)
+- Vulnerability exploitability prediction (osv_client.py)
+- Code anomaly detection (validator.py)
+- Refactoring opportunity suggestions (transformer.py)
+
+#### Advanced Transformation
+- Semantic-preserving optimizations (transformer.py)
+- Type-aware transformations with validation
+- Transformation rollback and undo support
+
+#### Advanced Graph Analysis
+- Symbolic execution for path exploration
+- Dominance analysis and reachability (control_flow.py)
+- Interprocedural data flow analysis (data_flow.py)
+- Protocol and structural typing (type_inference.py)
+
+#### Visualization & IDE Integration
+- 3D visualization with interactive exploration (visualizer.py)
+- LSP integration for real-time analysis
+- Performance profiling visualization
+- Subgraph clustering by module
+
+#### Dependency Analysis
+- Vulnerability remediation recommendations (osv_client.py)
+- Vulnerability trend analysis and prediction
+- Integration with dependency lock files
+- Automated security reports
+
+**Test Coverage Target:** 500+ tests across TIER 3 features
+**Implementation Status:** 20% complete (research phase)
+
+**Total Test Coverage Across All Tiers:** 1,550+ tests
+
+---
 - [ ] Generic type parameter inference
 - [ ] Protocol/interface inference
 - [ ] Overload resolution

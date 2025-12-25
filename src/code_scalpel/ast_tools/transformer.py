@@ -17,7 +17,93 @@ class TransformationRule:
 
 
 class ASTTransformer(ast.NodeTransformer):
-    """Advanced AST transformer with pattern matching and complex transformations."""
+    """
+    Advanced AST transformer with pattern matching and complex transformations.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Variable rename transformation
+      - Register variable rename mappings
+      - Apply renames with scope awareness
+      - Preserve variable references
+      - Handle shadowing correctly
+      - Add 15+ tests for variable renaming
+
+    [20251224_TIER1_TODO] FEATURE: Function rename transformation
+      - Register function rename mappings
+      - Update call sites
+      - Handle method references
+      - Preserve function signatures
+      - Add 12+ tests for function renaming
+
+    [20251224_TIER1_TODO] FEATURE: Basic AST visitor pattern
+      - Context tracking during traversal
+      - Node visiting with scope management
+      - Handle nested structures
+      - Add 10+ tests for traversal
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: AST pattern matching with wildcards
+      - Match AST patterns with variable wildcards
+      - Support structural pattern matching
+      - Extract matched components
+      - Add 15+ tests for pattern matching
+
+    [20251224_TIER2_TODO] FEATURE: Transformation composition and chaining
+      - Compose multiple transformations
+      - Execute in sequence
+      - Track intermediate results
+      - Add 15+ tests for composition
+
+    [20251224_TIER2_TODO] FEATURE: Code extraction into methods
+      - Identify code blocks to extract
+      - Analyze variable usage (used/defined)
+      - Generate new function with parameters
+      - Replace code with function call
+      - Add 15+ tests for extraction
+
+    [20251224_TIER2_TODO] FEATURE: Variable inlining
+      - Find variable definitions
+      - Inline constant values
+      - Eliminate dead assignments
+      - Add 12+ tests for inlining
+
+    [20251224_TIER2_TODO] FEATURE: Decorator manipulation
+      - Add decorators to functions
+      - Remove decorators selectively
+      - Transform decorator arguments
+      - Add 12+ tests for decorators
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Type-aware transformations
+      - Use type hints for safe transforms
+      - Verify compatibility before applying
+      - Suggest type updates
+      - Add 15+ tests for type awareness
+
+    [20251224_TIER3_TODO] FEATURE: Transformation rollback and undo support
+      - Store transformation history
+      - Revert to previous state
+      - Diff before/after transformations
+      - Add 12+ tests for rollback
+
+    [20251224_TIER3_TODO] FEATURE: Semantic-preserving optimizations
+      - Constant folding
+      - Dead code elimination
+      - Loop unrolling (small loops)
+      - Add 15+ tests for optimizations
+
+    [20251224_TIER3_TODO] FEATURE: ML-based transformation suggestion
+      - Analyze code for refactoring opportunities
+      - Suggest safe transformations
+      - Predict transformation impact
+      - Add 12+ tests for suggestions
+    """
 
     def __init__(self):
         super().__init__()
@@ -26,10 +112,6 @@ class ASTTransformer(ast.NodeTransformer):
         self.transformation_rules: list[TransformationRule] = []
         self.context: list[ast.AST] = []
         self.modified = False
-        # [20251221_FEATURE] TODO: Support AST pattern matching with wildcards
-        # [20251221_FEATURE] TODO: Add transformation composition and chaining
-        # [20251221_ENHANCEMENT] TODO: Support type-aware transformations
-        # [20251221_ENHANCEMENT] TODO: Add transformation rollback and undo support
 
     def add_transformation_rule(self, rule: TransformationRule) -> None:
         """Add a new transformation rule."""

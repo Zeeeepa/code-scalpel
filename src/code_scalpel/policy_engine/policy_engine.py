@@ -10,6 +10,44 @@ Security Model: FAIL CLOSED
 - Policy parsing errors → DENY ALL
 - Policy evaluation errors → DENY ALL
 - Missing OPA CLI → DENY ALL
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core Functionality):
+1. TODO: Implement YAML policy file loading and parsing
+2. TODO: Add OPA CLI integration and Rego evaluation
+3. TODO: Create Operation and PolicyDecision data structures
+4. TODO: Implement policy validation on load
+5. TODO: Add fail-closed error handling
+6. TODO: Implement policy caching for performance
+7. TODO: Create policy context and variable binding
+8. TODO: Add comprehensive logging for policy evaluations
+9. TODO: Implement policy result interpretation
+10. TODO: Document policy language and examples
+
+PRO TIER (Enhanced Features):
+11. TODO: Add JSONSchema-based alternative policy format
+12. TODO: Implement hot-reload without restart capability
+13. TODO: Create policy versioning and evolution tracking
+14. TODO: Add policy inheritance system (parent/child)
+15. TODO: Implement custom severity levels per organization
+16. TODO: Create policy tagging and categorization
+17. TODO: Add policy conflict detection and resolution
+18. TODO: Implement dynamic policy modification hooks
+19. TODO: Create policy testing framework for validation
+20. TODO: Add policy performance profiling tools
+
+ENTERPRISE TIER (Advanced Capabilities):
+21. TODO: Build ML-based semantic code understanding
+22. TODO: Implement distributed policy evaluation
+23. TODO: Add WebAssembly compilation for policy DSL
+24. TODO: Create federated policy governance
+25. TODO: Implement quantum-safe policy signing
+26. TODO: Build blockchain-based policy records
+27. TODO: Add zero-knowledge proof policy verification
+28. TODO: Implement advanced threat modeling integration
+29. TODO: Create AI-powered policy generation
+30. TODO: Build cross-organization policy federation
 """
 
 from __future__ import annotations
@@ -40,6 +78,13 @@ class PolicyError(Exception):
     pass
 
 
+# TODO [COMMUNITY]: Support YAML policies with OPA/Rego (current)
+# TODO [PRO]: Add JSONSchema-based policy definitions as alternative to YAML
+# TODO [ENTERPRISE]: Support for policy DSL compilation to WebAssembly for performance
+# TODO [PRO/ENTERPRISE]: Dynamic policy reloading without restart
+# TODO [ENTERPRISE]: Hot-pluggable policy backend (OPA, YAML, JSON, custom)
+
+
 class PolicySeverity(Enum):
     """Severity levels for policy violations."""
 
@@ -50,12 +95,24 @@ class PolicySeverity(Enum):
     INFO = "INFO"
 
 
+# TODO [PRO]: Add custom severity levels for organizations
+# TODO [ENTERPRISE]: Severity scoring based on context (time, user role, resource criticality)
+# TODO [ENTERPRISE]: Dynamic severity calculation based on policy history and patterns
+
+
 class PolicyAction(Enum):
     """Actions to take when policy is violated."""
 
     DENY = "DENY"  # Block the operation
     WARN = "WARN"  # Allow but log warning
     AUDIT = "AUDIT"  # Allow and log for review
+
+
+# TODO [PRO]: Add QUARANTINE action (isolate code for manual review)
+# TODO [PRO]: Add RATE_LIMIT action (throttle similar operations)
+# TODO [ENTERPRISE]: Add ESCALATE action (notify security team automatically)
+# TODO [ENTERPRISE]: Add SNAPSHOT action (preserve state before violation)
+# TODO [ENTERPRISE]: Custom webhook actions for policy enforcement integration
 
 
 @dataclass
@@ -72,6 +129,12 @@ class Policy:
         severity: Impact level (CRITICAL, HIGH, MEDIUM, LOW)
         action: What to do on violation (DENY, WARN, AUDIT)
     """
+
+    # TODO [PRO]: Add tags field for policy categorization and filtering
+    # TODO [PRO]: Add version field for policy evolution tracking
+    # TODO [ENTERPRISE]: Add effective_date/expiration_date for time-bound policies
+    # TODO [ENTERPRISE]: Add scope field (global, per-project, per-user, per-role)
+    # TODO [ENTERPRISE]: Add metadata field for custom policy context
 
     name: str
     description: str

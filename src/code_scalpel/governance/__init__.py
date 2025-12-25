@@ -42,6 +42,16 @@ from code_scalpel.governance.unified_governance import (
     ViolationSource,
 )
 
+# [20251225_FEATURE] Governance configuration (moved from config/)
+from code_scalpel.governance.governance_config import (
+    GovernanceConfig,
+    GovernanceConfigLoader,
+    ChangeBudgetingConfig,
+    BlastRadiusConfig,
+    AutonomyConstraintsConfig,
+    AuditConfig,
+)
+
 __all__ = [
     # Compliance reporting (v2.5.0)
     "ComplianceReporter",
@@ -65,4 +75,11 @@ __all__ = [
     "GovernanceViolation",
     "GovernanceContext",
     "ViolationSource",
+    # Governance configuration (moved from config/)
+    "GovernanceConfig",
+    "GovernanceConfigLoader",
+    "ChangeBudgetingConfig",
+    "BlastRadiusConfig",
+    "AutonomyConstraintsConfig",
+    "AuditConfig",
 ]

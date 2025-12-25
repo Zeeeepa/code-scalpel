@@ -10,12 +10,95 @@ structured parsing of Vulture output.
 Implementation Status: NOT IMPLEMENTED
 Priority: P2 - HIGH
 
-TODO Features:
-    - [ ] P2-VULTURE-001: Parse Vulture JSON output
-    - [ ] P2-VULTURE-002: Configuration parsing
-    - [ ] P2-VULTURE-003: False positive filtering
-    - [ ] P2-VULTURE-004: Dead code categorization
-    - [ ] P2-VULTURE-005: Unused import detection
+============================================================================
+TODO ITEMS: python_parsers_vulture.py
+============================================================================
+COMMUNITY TIER - Dead Code Detection (P0-P2) [NOT IMPLEMENTED]
+============================================================================
+
+[P0_CRITICAL] Basic Dead Code Detection:
+    - Parse Vulture JSON output format
+    - Identify unused variables
+    - Identify unused functions
+    - Identify unused classes
+    - Identify unused imports
+    - Confidence level extraction
+    - Test count: 40 tests
+
+[P1_HIGH] Advanced Detection:
+    - Unused method detection
+    - Unused attribute detection
+    - Dead code branch identification
+    - Unreachable code detection
+    - Test count: 35 tests
+
+[P2_MEDIUM] False Positive Filtering:
+    - __all__ definition handling
+    - Plugin/hook detection
+    - Dynamic usage patterns (getattr)
+    - Whitelist management
+    - Test count: 30 tests
+
+[P2_MEDIUM] Configuration:
+    - pyproject.toml configuration
+    - Min-confidence filtering
+    - Exclude patterns
+    - Custom ignore rules
+    - Test count: 25 tests
+
+============================================================================
+PRO TIER - Advanced Dead Code Analysis (P1-P3)
+============================================================================
+
+[P1_HIGH] Code Reachability Analysis:
+    - Control flow reachability
+    - Exception path analysis
+    - Conditional import handling
+    - Test count: 45 tests
+
+[P2_MEDIUM] Dependency-Based Detection:
+    - Cross-module unused code
+    - API usage tracking
+    - Export/import relationship analysis
+    - Test count: 40 tests
+
+[P2_MEDIUM] Code Cleanup Automation:
+    - Auto-remove safe unused code
+    - Generate cleanup diffs
+    - Safe refactoring suggestions
+    - Test count: 35 tests
+
+[P3_LOW] Code Quality Metrics:
+    - Dead code ratio calculation
+    - Code bloat metrics
+    - Cleanup impact estimation
+    - Test count: 30 tests
+
+============================================================================
+ENTERPRISE TIER - Enterprise Dead Code Management (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Multi-Project Analysis:
+    - Workspace-wide dead code detection
+    - Shared library unused code
+    - Monorepo dead code tracking
+    - Test count: 45 tests
+
+[P3_LOW] Historical Analysis:
+    - Dead code accumulation tracking
+    - Code lifecycle analysis
+    - Refactoring opportunity identification
+    - Test count: 35 tests
+
+[P3_LOW] Compliance and Reporting:
+    - Code cleanup audit trails
+    - Dead code removal tracking
+    - Technical debt metrics
+    - Test count: 30 tests
+
+============================================================================
+TOTAL TEST ESTIMATE: 390 tests (130 COMMUNITY + 150 PRO + 110 ENTERPRISE)
+============================================================================
 
 ==============================================================================
 PLANNED [P2-VULTURE-001]: VultureParser for dead code detection

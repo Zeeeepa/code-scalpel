@@ -32,6 +32,44 @@ Example:
     decision = engine.evaluate(operation)
     if not decision.allowed:
         print(f"Policy violation: {decision.reason}")
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core Functionality):
+1. TODO: Implement basic YAML policy file loading and parsing
+2. TODO: Create OPA/Rego policy evaluation engine
+3. TODO: Implement Operation and PolicyDecision data models
+4. TODO: Add policy validation on load (syntax, required fields)
+5. TODO: Implement fail-closed security model for policy errors
+6. TODO: Create basic audit logging framework
+7. TODO: Add semantic analysis for SQL injection detection
+8. TODO: Implement TOTP-based override verification
+9. TODO: Create comprehensive error handling and exceptions
+10. TODO: Document policy syntax and examples with tutorials
+
+PRO TIER (Enhanced Features):
+11. TODO: Add policy hot-reload without restart capability
+12. TODO: Implement JSONSchema-based alternative policy format
+13. TODO: Add policy versioning and evolution tracking
+14. TODO: Create policy inheritance system (parent/child policies)
+15. TODO: Implement custom severity levels for organizations
+16. TODO: Add policy tagging and categorization system
+17. TODO: Create policy conflict detection and resolution
+18. TODO: Implement rate limiting for policy violations
+19. TODO: Add audit log rotation with retention policies
+20. TODO: Create policy testing framework for validation
+
+ENTERPRISE TIER (Advanced Capabilities):
+21. TODO: Build ML-based semantic code understanding using AST embeddings
+22. TODO: Implement distributed policy evaluation across regions
+23. TODO: Add X.509 certificate chain support for policy signing
+24. TODO: Create blockchain-style audit log linking (hash chains)
+25. TODO: Implement policy encryption at rest with key rotation
+26. TODO: Build federated policy governance across organizations
+27. TODO: Add quantum-safe cryptographic signatures
+28. TODO: Implement zero-knowledge proof policy verification
+29. TODO: Create AI-powered policy generation from compliance specs
+30. TODO: Build advanced threat modeling integration with policies
 """
 
 from __future__ import annotations
@@ -76,6 +114,12 @@ from .crypto_verify import (
     SecurityError,
     verify_policy_integrity_crypto,
 )
+
+# TODO [COMMUNITY]: Export minimal API for Community tier (policy verification only)
+# TODO [PRO]: Add support for policy versioning and rollback
+# TODO [ENTERPRISE]: Multi-tenant policy namespacing and inheritance hierarchies
+# TODO [PRO/ENTERPRISE]: Add policy schema validation and auto-documentation
+# TODO [ENTERPRISE]: Support for policy audit trails with blockchain-style linking
 
 
 def __getattr__(name: str):

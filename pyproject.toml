@@ -1,6 +1,6 @@
 [project]
 name = "code-scalpel"
-version = "3.2.8"  # [20251223_RELEASE] v3.2.8 - V1.0 production requirements
+version = "3.3.0"  # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
 description = "MCP server toolkit for AI agents - surgical code analysis and modification"
 readme = "README.md"
 license = {text = "MIT"}

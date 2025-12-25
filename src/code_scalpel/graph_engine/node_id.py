@@ -19,6 +19,92 @@ The universal ID enables the graph engine to:
 - Build cross-language dependency graphs
 - Track taint flow across module boundaries
 - Detect HTTP links between frontend and backend
+
+TODO ITEMS: graph_engine/node_id.py
+======================================================================
+COMMUNITY TIER - Core Node ID System
+======================================================================
+1. Add UniversalNodeID dataclass for ID representation
+2. Add NodeIDParser class for parsing ID strings
+3. Add parse_node_id(id_string) main parser
+4. Add validate_node_id(id_string) format validation
+5. Add create_node_id(language, module, type, name, method=None)
+6. Add Language enum (PYTHON, JAVA, JAVASCRIPT, TYPESCRIPT)
+7. Add NodeType enum (class, function, method, variable, endpoint)
+8. Add get_language() from node ID
+9. Add get_module() from node ID
+10. Add get_type() from node ID
+11. Add get_name() from node ID
+12. Add get_method() from node ID
+13. Add is_function(node_id) predicate
+14. Add is_class(node_id) predicate
+15. Add is_method(node_id) predicate
+16. Add is_endpoint(node_id) predicate
+17. Add is_variable(node_id) predicate
+18. Add node_id_to_string(node_id) serialization
+19. Add node_id_equality(id1, id2) comparison
+20. Add node_id_contains(parent_id, child_id) relationship
+21. Add get_parent_node_id(node_id) hierarchy
+22. Add get_siblings_node_ids(node_id) locality
+23. Add node_id_depth(node_id) nesting level
+24. Add normalize_module_path() path consistency
+25. Add node_id_documentation() format guide
+
+PRO TIER - Advanced Node ID Features
+======================================================================
+26. Add fuzzy_match_node_id(id1, id2, threshold)
+27. Add node_id_similarity(id1, id2) similarity scoring
+28. Add find_node_by_name(graph, name) search
+29. Add find_nodes_by_module(graph, module) filtering
+30. Add find_nodes_by_type(graph, node_type) filtering
+31. Add find_similar_node_ids(node_id, threshold)
+32. Add node_id_aliasing() support for aliases
+33. Add create_alias(canonical_id, alias_id)
+34. Add resolve_alias(alias_id) to canonical
+35. Add node_id_versioning() for tracking changes
+36. Add node_id_history() audit trail
+37. Add node_id_renaming() refactoring support
+38. Add node_id_path_compression() for efficiency
+39. Add node_id_context() surrounding information
+40. Add node_id_metadata(node_id) properties
+41. Add node_id_provenance() source tracking
+42. Add node_id_confidence() reliability
+43. Add node_id_alternative_names() equivalences
+44. Add node_id_language_conversion() cross-language
+45. Add node_id_regex_pattern() for pattern matching
+46. Add node_id_glob_pattern() for wildcards
+47. Add node_id_ranking() importance ordering
+48. Add node_id_statistics() usage analytics
+49. Add node_id_deduplication() normalization
+50. Add node_id_collision_detection() uniqueness
+
+ENTERPRISE TIER - Distributed Node ID System
+======================================================================
+51. Add distributed_node_id_generation() across services
+52. Add federated_node_id_resolution() across orgs
+53. Add multi_region_node_id_consistency()
+54. Add node_id_global_registry() centralized tracking
+55. Add node_id_synchronization() distributed sync
+56. Add node_id_replication() for redundancy
+57. Add node_id_backup_recovery() disaster recovery
+58. Add node_id_encryption() security
+59. Add node_id_audit_logging() compliance
+60. Add node_id_access_control() permissions
+61. Add node_id_versioning_system() history tracking
+62. Add node_id_rollback() revert changes
+63. Add node_id_sharding() horizontal scaling
+64. Add node_id_caching() performance
+65. Add node_id_invalidation() cache management
+66. Add node_id_async_resolution() non-blocking
+67. Add node_id_streaming_updates() real-time
+68. Add node_id_monitoring() metrics
+69. Add node_id_alerting() anomaly detection
+70. Add node_id_ml_enrichment() ML features
+71. Add node_id_semantic_similarity() meaning
+72. Add node_id_graph_embedding() vector representation
+73. Add node_id_performance_profiling()
+74. Add node_id_cost_tracking() billing
+75. Add node_id_commercial_licensing()
 """
 
 from __future__ import annotations

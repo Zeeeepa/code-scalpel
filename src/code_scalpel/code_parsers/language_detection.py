@@ -9,6 +9,129 @@ Unified Language Detection - Central language detection for code-scalpel.
 
 This module should be the single source of truth for language detection
 across all code-scalpel modules.
+
+============================================================================
+TODO ITEMS: code_parsers/language_detection.py
+============================================================================
+COMMUNITY TIER - Core Detection Features (P0-P2)
+============================================================================
+
+[P0_CRITICAL] Enhance extension detection:
+    - Add compound extension support (.d.ts, .test.js, .spec.ts)
+    - Support case-insensitive matching
+    - Add language version detection from extensions (.py3, .jsx)
+    - Handle edge cases (no extension, multiple dots)
+    - Test count: 20 tests (extension detection, edge cases)
+
+[P1_HIGH] Improve shebang detection:
+    - Support env shebangs (#!/usr/bin/env python3)
+    - Detect language versions from shebangs
+    - Handle malformed shebangs gracefully
+    - Add shebang normalization
+    - Test count: 15 tests (shebang parsing, normalization)
+
+[P1_HIGH] Enhance content heuristics:
+    - Add more language-specific patterns
+    - Improve scoring algorithm for ambiguous cases
+    - Support framework detection (React, Vue, Django)
+    - Add confidence scoring with thresholds
+    - Test count: 30 tests (heuristics accuracy, scoring)
+
+[P2_MEDIUM] Add language metadata:
+    - Store language features (static/dynamic, compiled/interpreted)
+    - Add language family information (C-like, ML-like)
+    - Include typical file naming conventions
+    - Support language ecosystem detection
+    - Test count: 15 tests (metadata accuracy)
+
+[P2_MEDIUM] Improve confidence scoring:
+    - Implement probabilistic language detection
+    - Add confidence threshold configuration
+    - Support multi-language detection (polyglot files)
+    - Provide confidence breakdown by signal type
+    - Test count: 25 tests (confidence calculation, thresholds)
+
+============================================================================
+PRO TIER - Advanced Detection Features (P1-P3)
+============================================================================
+
+[P1_HIGH] Add magic comment detection:
+    - Python: # -*- coding: utf-8 -*-
+    - JavaScript: // @ts-check, /* @flow */
+    - PHP: <?php
+    - Support custom magic comments
+    - Test count: 20 tests (magic comments, custom patterns)
+
+[P1_HIGH] Implement .editorconfig integration:
+    - Parse .editorconfig files
+    - Apply per-project language rules
+    - Support configuration inheritance
+    - Handle language overrides
+    - Test count: 25 tests (editorconfig parsing, integration)
+
+[P2_MEDIUM] Add framework and library detection:
+    - Detect React/Vue/Angular from imports
+    - Identify Django/Flask/FastAPI from patterns
+    - Recognize Spring/Hibernate in Java
+    - Support framework-specific analysis
+    - Test count: 30 tests (framework detection, patterns)
+
+[P2_MEDIUM] Implement caching for detection:
+    - Cache detection results by file hash
+    - Support invalidation strategies
+    - Add LRU cache for frequently accessed files
+    - Persist cache across sessions
+    - Test count: 20 tests (caching, invalidation)
+
+[P3_LOW] Add language dialect detection:
+    - JavaScript vs TypeScript vs Flow
+    - Python 2 vs Python 3
+    - C vs C++
+    - Java versions (8, 11, 17, 21)
+    - Test count: 25 tests (dialect detection, versions)
+
+============================================================================
+ENTERPRISE TIER - Enterprise Detection Features (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Implement multi-file detection:
+    - Analyze project structure for language hints
+    - Detect build system files (package.json, pom.xml)
+    - Identify configuration files
+    - Support monorepo language detection
+    - Test count: 30 tests (project analysis, monorepos)
+
+[P2_MEDIUM] Add telemetry and analytics:
+    - Track detection accuracy metrics
+    - Log detection failures for improvement
+    - Collect language usage statistics
+    - Generate detection quality reports
+    - Test count: 20 tests (telemetry, analytics)
+
+[P3_LOW] Implement policy-based detection:
+    - Support organization-specific detection rules
+    - Add allowlist/blocklist for languages
+    - Enforce language usage policies
+    - Generate compliance reports
+    - Test count: 25 tests (policies, compliance)
+
+[P3_LOW] Add distributed detection:
+    - Support distributed language detection
+    - Aggregate detection results from workers
+    - Coordinate detection across large codebases
+    - Add progress tracking
+    - Test count: 25 tests (distribution, coordination)
+
+[P4_LOW] Implement ML-based detection:
+    - Train ML model on code patterns
+    - Use deep learning for ambiguous cases
+    - Adaptive detection based on project history
+    - Anomaly detection for unusual languages
+    - Test count: 35 tests (ML integration, model accuracy)
+
+============================================================================
+TOTAL TEST ESTIMATE: 385 tests (125 COMMUNITY + 120 PRO + 140 ENTERPRISE)
+============================================================================
 """
 
 import re

@@ -48,6 +48,47 @@ class ExtractedSymbol:
         dependencies: Names of symbols this depends on
         depth: Depth from original target (0 = target itself)
         confidence: Confidence score with decay applied (0.0-1.0)
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Add semantic similarity scoring
+      Purpose: Find related symbols for context
+      Steps:
+        1. Compute code similarity metrics
+        2. Compare function/class signatures
+        3. Score semantic relationships
+        4. Rank by similarity
+        5. Add 15+ tests for similarity
+
+    [20251224_TIER2_TODO] FEATURE: Support stub detection and filtering
+      Purpose: Handle type stubs (.pyi) appropriately
+      Steps:
+        1. Detect stub files
+        2. Extract type information
+        3. Mark as stub in metadata
+        4. Filter stubs in results
+        5. Add 10+ tests for stub handling
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] ENHANCEMENT: Add extraction caching with invalidation
+      Purpose: Improve performance for repeated extractions
+      Steps:
+        1. Cache extraction results
+        2. Track file modification times
+        3. Invalidate on changes
+        4. Support manual invalidation
+        5. Add 15+ tests for caching
+
+    [20251224_TIER3_TODO] ENHANCEMENT: Support protocol definitions
+      Purpose: Extract typing.Protocol as interfaces
+      Steps:
+        1. Detect Protocol definitions
+        2. Extract method signatures
+        3. Track implementation relationships
+        4. Add 12+ tests for protocols
     """
 
     name: str
@@ -214,6 +255,65 @@ class CrossFileExtractor:
     - depth=3+: Continue following the chain
 
     The default depth=2 is usually sufficient for most refactoring tasks.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Basic cross-file extraction
+      - Extract single symbol with dependencies
+      - Handle basic import resolution
+      - Add 15+ tests for basic extraction
+
+    [20251224_TIER1_TODO] TEST: Adversarial tests
+      - Circular dependencies, deep nesting
+      - Complex import patterns
+      - Large extraction results
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Extract multiple symbols
+      Purpose: Batch extraction for efficiency
+      Steps:
+        1. Support list of targets
+        2. Dedup shared dependencies
+        3. Merge results
+        4. Add 20+ tests for batch extraction
+
+    [20251224_TIER2_TODO] FEATURE: Confidence-based extraction
+      Purpose: Track reliability of extracted symbols
+      Steps:
+        1. Calculate confidence per symbol
+        2. Apply exponential decay by depth
+        3. Report low-confidence symbols
+        4. Add 20+ tests for confidence
+
+    [20251224_TIER2_TODO] FEATURE: Optimize extraction size
+      Purpose: Keep extraction manageable
+      Steps:
+        1. Calculate extraction size
+        2. Suggest depth reductions
+        3. Trim unnecessary dependencies
+        4. Add 15+ tests for optimization
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Smart dependency selection
+      Purpose: Extract only necessary symbols
+      Steps:
+        1. Analyze symbol usage patterns
+        2. Filter unused dependencies
+        3. Suggest minimal extraction
+        4. Add 20+ tests for selection
+
+    [20251224_TIER3_TODO] FEATURE: Extraction caching
+      Purpose: Speed up repeated extractions
+      Steps:
+        1. Cache extraction results
+        2. Track file changes
+        3. Invalidate on edits
+        4. Add 15+ tests for caching
     """
 
     # Default maximum depth to prevent infinite loops

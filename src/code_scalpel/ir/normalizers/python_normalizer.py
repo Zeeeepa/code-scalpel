@@ -70,6 +70,44 @@ class PythonNormalizer(BaseNormalizer):
         ... ''')
         >>> ir.body[0].name
         'add'
+
+    TODO ITEMS:
+
+    COMMUNITY TIER (Core Python AST Normalization):
+    1. TODO: Complete ast.FunctionDef → IRFunctionDef mapping
+    2. TODO: Support ast.ClassDef → IRClassDef with inheritance
+    3. TODO: Handle all binary operators (+, -, *, /, //, %, **)
+    4. TODO: Normalize comparison operators (==, !=, <, >, <=, >=, in, is)
+    5. TODO: Support boolean operators (and, or, not)
+    6. TODO: Implement loop normalization (for, while)
+    7. TODO: Handle exception handling (try/except/finally)
+    8. TODO: Support import statements (import, from...import)
+    9. TODO: Normalize decorators and their arguments
+    10. TODO: Handle context managers (with statement)
+
+    PRO TIER (Advanced Python Features):
+    11. TODO: Support list/dict/set comprehensions with scoping
+    12. TODO: Handle lambda expressions properly
+    13. TODO: Support type annotations in function signatures
+    14. TODO: Preserve type hints in variable declarations
+    15. TODO: Handle f-string expressions and formatting
+    16. TODO: Support async functions and await expressions
+    17. TODO: Normalize generator expressions (yield)
+    18. TODO: Handle walrus operator (:=) assignments
+    19. TODO: Support match statements (Python 3.10+)
+    20. TODO: Preserve docstring metadata
+
+    ENTERPRISE TIER (Advanced Analysis & Optimization):
+    21. TODO: Implement dataclass detection and normalization
+    22. TODO: Support protocol and structural typing
+    23. TODO: Detect and normalize Python metaclasses
+    24. TODO: Handle property decorators specially
+    25. TODO: Implement typing module analysis (TypeVar, Generic, Union)
+    26. TODO: Add ML-based Python idiom recognition
+    27. TODO: Support distributed AST analysis
+    28. TODO: Implement caching for repeated patterns
+    29. TODO: Add performance profiling for large files
+    30. TODO: Create AI-driven Python optimization suggestions
     """
 
     def __init__(self):

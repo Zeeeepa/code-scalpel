@@ -130,7 +130,7 @@ def _tool_json(result) -> dict:
         raise AssertionError(
             "Tool content is not valid JSON; first 200 chars: " + repr(text[:200])
         ) from exc
-    
+
     # [v3.2.8] Validate universal response envelope
     assert "tier" in envelope, "Response missing 'tier' field"
     assert "tool_version" in envelope, "Response missing 'tool_version' field"
@@ -138,7 +138,7 @@ def _tool_json(result) -> dict:
     assert "request_id" in envelope, "Response missing 'request_id' field"
     assert "capabilities" in envelope, "Response missing 'capabilities' field"
     assert "data" in envelope, "Response missing 'data' field"
-    
+
     # Return the data payload (unwrapped)
     return envelope["data"]
 

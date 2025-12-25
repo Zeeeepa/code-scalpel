@@ -76,7 +76,10 @@ policies:
 
         assert manifest.version == "1.0"
         assert "policy.yaml" in manifest.files
-        assert len(manifest.files["policy.yaml"]) == 64  # SHA-256 hex length
+        assert (
+            len(manifest.files["policy.yaml"]) == 71
+        )  # [20241224_BUGFIX] v3.2.9 - SHA-256 hex with "sha256:" prefix
+        assert manifest.files["policy.yaml"].startswith("sha256:")
         assert manifest.signature  # Should have a signature
         assert manifest.signed_by == "admin@test.com"
 

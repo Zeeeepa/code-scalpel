@@ -7,6 +7,44 @@ This module implements the V1.0 production contract requirements from
 
 The intent is to enforce the contract at the MCP tool boundary so individual
 tool implementations can remain focused on their domain logic.
+
+TODO ITEMS:
+
+COMMUNITY TIER (Basic Contract Enforcement):
+1. TODO: Implement ToolResponseEnvelope with all required fields
+2. TODO: Define error codes enum (invalid_argument, not_found, etc.)
+3. TODO: Create error contract with machine-parseable codes
+4. TODO: Implement envelope wrapping for all tool responses
+5. TODO: Add tier metadata to responses
+6. TODO: Validate response schema on serialization
+7. TODO: Implement request correlation IDs
+8. TODO: Add tool version tracking in envelope
+9. TODO: Create contract validation tests
+10. TODO: Document contract specification
+
+PRO TIER (Advanced Contract Features):
+11. TODO: Implement conditional response fields based on tier
+12. TODO: Add upgrade hint generation for tier-restricted features
+13. TODO: Implement response streaming with envelope markers
+14. TODO: Add structured error details (non-sensitive)
+15. TODO: Support custom error codes per tool
+16. TODO: Implement contract versioning and migration
+17. TODO: Add response compression hints
+18. TODO: Create envelope validation middleware
+19. TODO: Implement response filtering based on capabilities
+20. TODO: Add trace context propagation
+
+ENTERPRISE TIER (Contract Extension & Compliance):
+21. TODO: Implement multi-version contract support
+22. TODO: Add compliance metadata (GDPR, HIPAA, SOC2)
+23. TODO: Implement digital signatures for responses
+24. TODO: Add encryption support for sensitive data
+25. TODO: Implement audit trail in contract
+26. TODO: Support blockchain-based response hashing
+27. TODO: Add federated contract validation
+28. TODO: Implement zero-knowledge proofs for contract compliance
+29. TODO: Add quantum-safe signature schemes
+30. TODO: Create AI-powered contract optimization
 """
 
 from __future__ import annotations

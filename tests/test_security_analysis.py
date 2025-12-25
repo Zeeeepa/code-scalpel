@@ -1169,7 +1169,7 @@ class TestTaintTrackerCoverage:
     def test_find_config_file_not_found(self, tmp_path):
         """Test _find_config_file when no config exists."""
         import os
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             _find_config_file,
         )
 
@@ -1316,7 +1316,7 @@ class TestTaintTrackerCoverage:
 
     def test_load_toml_no_parser_available(self):
         """Test _load_toml when no parser is available."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import _load_toml
+        from code_scalpel.security.analyzers.taint_tracker import _load_toml
         import tempfile
         import os
 
@@ -1649,7 +1649,7 @@ class TestTaintTrackerConfigEdgeCases:
     def test_load_sanitizers_from_config_none_config(self):
         """Test load_sanitizers_from_config returns 0 when config is None (line 383)."""
         from unittest.mock import patch
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             load_sanitizers_from_config,
         )
 
@@ -1657,7 +1657,7 @@ class TestTaintTrackerConfigEdgeCases:
         with (
             patch("os.path.exists", return_value=True),
             patch(
-                "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
+                "code_scalpel.security.analyzers.taint_tracker._load_toml",
                 return_value=None,
             ),
         ):
@@ -1668,7 +1668,7 @@ class TestTaintTrackerConfigEdgeCases:
     def test_load_sanitizers_invalid_format(self):
         """Test load_sanitizers_from_config skips invalid format (line 390)."""
         from unittest.mock import patch
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             load_sanitizers_from_config,
         )
 
@@ -1686,7 +1686,7 @@ class TestTaintTrackerConfigEdgeCases:
         with (
             patch("os.path.exists", return_value=True),
             patch(
-                "code_scalpel.symbolic_execution_tools.taint_tracker._load_toml",
+                "code_scalpel.security.analyzers.taint_tracker._load_toml",
                 return_value=fake_config,
             ),
         ):
@@ -1698,7 +1698,7 @@ class TestTaintTrackerConfigEdgeCases:
     def test_load_toml_no_parser_available(self):
         """Test _load_toml returns None when no parser is available (line 452)."""
         from unittest.mock import patch
-        from code_scalpel.symbolic_execution_tools.taint_tracker import _load_toml
+        from code_scalpel.security.analyzers.taint_tracker import _load_toml
 
         # Mock both tomllib and tomli to raise ImportError
         def mock_import(name, *args, **kwargs):

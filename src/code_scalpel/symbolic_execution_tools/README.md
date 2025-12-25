@@ -506,6 +506,37 @@ Used by:
 
 ---
 
+## Module Enhancement Roadmap by Tier
+
+### COMMUNITY (Current & Planned)
+- Core security analysis improvements
+- Documentation enhancements
+- Example scripts and tutorials
+- Troubleshooting guides
+- Performance benchmarking
+
+### PRO (Enhanced Features)
+- Advanced vulnerability detection
+- Framework-specific analysis
+- Incremental analysis support
+- Polyglot taint tracking
+- Custom patterns and rules
+- Real-time analysis mode
+- IDE integrations
+
+### ENTERPRISE (Advanced Capabilities)
+- Distributed analysis across clusters
+- Machine learning-based detection
+- Custom vulnerability databases
+- Multi-tenant support
+- Compliance auditing
+- SIEM integration
+- Real-time monitoring
+- Advanced visualization
+- Automated remediation
+
+---
+
 ## 🤝 Contributing
 
 To contribute to these enhancements:
@@ -520,5 +551,5 @@ See [CONTRIBUTING.md](../../../../CONTRIBUTING.md) for development guidelines.
 
 ---
 
-**Last Updated**: December 21, 2025  
+**Last Updated**: December 24, 2025 (Tier-organized TODOs added)  
 **Version**: v3.0.5 (current) → v3.5.0 (planned)

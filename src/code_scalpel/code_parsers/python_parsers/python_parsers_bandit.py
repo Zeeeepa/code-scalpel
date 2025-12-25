@@ -17,6 +17,86 @@ Bandit Features:
     - SARIF output for IDE integration
     - Baseline support for legacy code
 
+============================================================================
+TODO ITEMS: python_parsers_bandit.py
+============================================================================
+COMMUNITY TIER - Core Security Analysis (P0-P2) [COMPLETED]
+============================================================================
+
+[P0_CRITICAL] Basic Security Scanning (COMPLETED ✓):
+    - ✓ JSON output parsing
+    - ✓ CWE mapping
+    - ✓ Severity/confidence extraction
+    - ✓ OWASP Top 10 mapping
+    - Test count: 80 tests (COMPLETED)
+
+[P1_HIGH] Security Reporting:
+    - Security trend analysis
+    - Vulnerability age tracking
+    - False positive management
+    - Security baseline integration
+    - Test count: 35 tests
+
+[P2_MEDIUM] Custom Security Rules:
+    - Custom Bandit plugin development
+    - Organization-specific security patterns
+    - Domain-specific vulnerability detection
+    - Test count: 40 tests
+
+============================================================================
+PRO TIER - Advanced Security Features (P1-P3)
+============================================================================
+
+[P1_HIGH] Taint Analysis Integration:
+    - Data flow taint tracking
+    - Source-to-sink path analysis
+    - Sanitizer detection
+    - Test count: 60 tests
+
+[P1_HIGH] Framework-Specific Security:
+    - Django security patterns
+    - Flask security analysis
+    - FastAPI security checks
+    - Test count: 50 tests
+
+[P2_MEDIUM] Advanced Vulnerability Detection:
+    - Race condition detection
+    - Time-of-check-time-of-use (TOCTOU)
+    - Authentication/authorization flaws
+    - Test count: 55 tests
+
+[P3_LOW] Security Metrics:
+    - Security debt calculation
+    - Vulnerability density metrics
+    - Security fix priority scoring
+    - Test count: 30 tests
+
+============================================================================
+ENTERPRISE TIER - Enterprise Security (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Compliance Integration:
+    - PCI-DSS compliance checking
+    - HIPAA security requirements
+    - SOC 2 security controls
+    - Test count: 50 tests
+
+[P2_MEDIUM] Security Audit Trail:
+    - Security scan history
+    - Vulnerability remediation tracking
+    - Security policy enforcement
+    - Test count: 40 tests
+
+[P3_LOW] Advanced Security Reporting:
+    - Executive security dashboards
+    - Risk scoring algorithms
+    - Security SLA tracking
+    - Test count: 35 tests
+
+============================================================================
+TOTAL TEST ESTIMATE: 475 tests (155 COMMUNITY + 195 PRO + 125 ENTERPRISE)
+============================================================================
+
 ==============================================================================
 COMPLETED [P2-BANDIT-001]: BanditParser for security analysis
 ==============================================================================

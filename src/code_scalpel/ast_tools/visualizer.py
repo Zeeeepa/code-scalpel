@@ -28,7 +28,99 @@ class VisualizationConfig:
 
 
 class ASTVisualizer:
-    """Advanced AST visualization with customizable styling and multiple output formats."""
+    """
+    Advanced AST visualization with customizable styling and multiple output formats.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Generate Graphviz visualizations
+      - Create directed graph from AST
+      - Build node and edge structure
+      - Apply basic styling
+      - Add 15+ tests for visualization
+
+    [20251224_TIER1_TODO] FEATURE: Export to PNG/PDF formats
+      - Render Graphviz output
+      - Save to PNG/PDF files
+      - Handle rendering errors
+      - Add 12+ tests for export
+
+    [20251224_TIER1_TODO] FEATURE: Customize node appearance
+      - Apply colors by node type
+      - Set node shapes
+      - Add labels with information
+      - Add 12+ tests for styling
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Diff visualization between ASTs
+      - Compare two ASTs
+      - Highlight added nodes
+      - Highlight removed nodes
+      - Highlight modified nodes
+      - Add 15+ tests for diff
+
+    [20251224_TIER2_TODO] FEATURE: Interactive HTML visualization
+      - Generate interactive HTML with D3.js
+      - Add hover information
+      - Support zooming and panning
+      - Add 15+ tests for interactivity
+
+    [20251224_TIER2_TODO] FEATURE: SVG export format
+      - Generate scalable SVG output
+      - Preserve vector formatting
+      - Support SVG styling
+      - Add 12+ tests for SVG
+
+    [20251224_TIER2_TODO] FEATURE: Side-by-side source and AST view
+      - Display source code and AST together
+      - Link AST nodes to source lines
+      - Sync highlighting between views
+      - Add 12+ tests for views
+
+    [20251224_TIER2_TODO] FEATURE: Enhanced node labeling
+      - Show line numbers
+      - Include source code snippets
+      - Display type information
+      - Add 12+ tests for labels
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Advanced diagram customization
+      - Parameter node sizing by metrics
+      - Color gradients by metrics
+      - Subgraph clustering by module
+      - Interactive filtering
+      - Add 15+ tests for customization
+
+    [20251224_TIER3_TODO] FEATURE: Multiple export formats
+      - Export to GraphML
+      - Export to JSON
+      - Export to DOT
+      - Support custom formats
+      - Add 15+ tests for formats
+
+    [20251224_TIER3_TODO] FEATURE: Semantic visualization
+      - Highlight control flow paths
+      - Show data dependencies
+      - Indicate cyclomatic complexity
+      - Add 15+ tests for semantics
+
+    [20251224_TIER3_TODO] FEATURE: 3D visualization and exploration
+      - Generate 3D graph layouts
+      - Interactive 3D navigation
+      - Advanced filtering and search
+      - Add 12+ tests for 3D
+
+    [20251224_TIER3_TODO] FEATURE: Performance optimization visualization
+      - Identify hotspots
+      - Show call frequency
+      - Highlight bottlenecks
+      - Add 12+ tests for performance
+    """
 
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()
@@ -46,10 +138,6 @@ class ASTVisualizer:
             "ast.Name": "oval",
             "ast.Constant": "diamond",
         }
-        # [20251221_FEATURE] TODO: Support interactive visualization with hover details
-        # [20251221_FEATURE] TODO: Add SVG and HTML export formats
-        # [20251221_ENHANCEMENT] TODO: Support custom node rendering and styling
-        # [20251221_ENHANCEMENT] TODO: Add semantic highlighting for control flow
 
     def visualize(
         self,

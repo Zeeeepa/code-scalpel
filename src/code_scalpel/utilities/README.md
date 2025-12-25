@@ -2,14 +2,25 @@
 
 **Purpose:** Shared utilities for path resolution and caching
 
+<!-- TODO [COMMUNITY]: Basic path resolution and caching utilities (current)
+     TODO [PRO]: Add configuration management and logging utilities
+     TODO [ENTERPRISE]: Add metrics collection and observability hooks -->
+
 ## Overview
 
 This module provides utility functions used across Code Scalpel. After v3.0.5 consolidation, cache functionality is now re-exported from the main cache module.
 
 ## Key Components
 
+<!-- TODO [COMMUNITY]: Path resolution and cache re-exports (current)
+     TODO [PRO]: Add environment variable expansion and config files support
+     TODO [ENTERPRISE]: Add secrets vault integration (HashiCorp Vault, AWS Secrets Manager) -->
+
 ### path_resolution.py (5,367 LOC)
 **File path resolution and normalization**
+
+<!-- TODO [PRO]: Add LRU cache for frequently resolved paths
+     TODO [ENTERPRISE]: Add distributed path caching for network filesystems -->
 
 ```python
 def resolve_file_path(path: str | Path, project_root: Path | None = None) -> Path:
@@ -35,6 +46,9 @@ def get_relative_path(path: Path, base: Path) -> Path:
 - Symlink resolution
 - Relative path conversion
 
+<!-- TODO [PRO]: Add support for custom workspace markers
+     TODO [ENTERPRISE]: Add monorepo detection and workspace hierarchy -->
+
 **Example:**
 ```python
 from code_scalpel.utilities import resolve_file_path, get_workspace_root
@@ -48,6 +62,10 @@ root = get_workspace_root()
 # Get relative path
 rel_path = get_relative_path(abs_path, root)
 ```
+
+<!-- TODO [COMMUNITY]: Basic cache with in-memory and file-based backends (current)
+     TODO [PRO]: Add Redis cache backend for distributed scenarios
+     TODO [ENTERPRISE]: Add cache invalidation policies and versioning -->
 
 ### Cache (Re-exported)
 **Unified cache implementation**
@@ -64,6 +82,9 @@ cache = get_cache()
 config = CacheConfig(max_size_mb=1000, ttl_seconds=3600)
 cache = AnalysisCache(config=config)
 ```
+
+<!-- TODO [PRO]: Add configuration-driven utilities (env vars, config files)
+     TODO [ENTERPRISE]: Add dependency injection for customizable behavior -->
 
 **See:** `cache/README.md` for full cache documentation
 
@@ -83,6 +104,9 @@ project_root = get_workspace_root()
 file_path = resolve_file_path("src/main.py", project_root)
 normalized = normalize_path(file_path)
 
+<!-- TODO [PRO]: Add integration with more modules (AST tools, parsers)
+     TODO [ENTERPRISE]: Add telemetry and observability hooks for all utilities -->
+
 # Cache utilities (re-exported)
 cache = get_cache()
 result = cache.get(code, "analysis")
@@ -92,6 +116,10 @@ result = cache.get(code, "analysis")
 
 Used by:
 - `mcp/server.py` - Path resolution for MCP tools
+<!-- TODO [COMMUNITY]: Maintain backward compatibility for utilities
+     TODO [PRO]: Add deprecation warnings for old imports
+     TODO [ENTERPRISE]: Add migration utilities for v3.0 to v3.1 upgrades -->
+
 - `surgical_extractor.py` - File path normalization
 - `project_crawler.py` - Workspace root detection
 - All modules - Caching (via re-exports)

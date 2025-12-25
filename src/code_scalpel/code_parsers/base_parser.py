@@ -1,4 +1,132 @@
 # src/code_parser/base_parser.py
+"""Base Parser - Abstract base class and shared utilities for all parsers.
+
+============================================================================
+TODO ITEMS: code_parsers/base_parser.py
+============================================================================
+COMMUNITY TIER - Core Base Parser Features (P0-P2)
+============================================================================
+
+[P0_CRITICAL] Extend Language enum:
+    - Add TypeScript, Go, Rust, Ruby, PHP, Swift, Kotlin
+    - Add language aliases (js→javascript, ts→typescript)
+    - Add language metadata (extensions, shebangs, features)
+    - Support language detection from content
+    - Test count: 15 tests (language detection, aliases)
+
+[P1_HIGH] Enhance ParseResult dataclass:
+    - Add source_map: Optional[SourceMap] for position tracking
+    - Add file_path: Optional[str] for context
+    - Add parse_time_ms: float for performance tracking
+    - Add metadata: Dict[str, Any] for parser-specific data
+    - Make it serializable (JSON, pickle)
+    - Test count: 20 tests (serialization, deserialization)
+
+[P1_HIGH] Improve preprocessing capabilities:
+    - Add macro expansion for C/C++
+    - Add JSX/TSX transformation for JavaScript
+    - Add template preprocessing for template languages
+    - Support multiple preprocessor passes
+    - Add preprocessor plugin system
+    - Test count: 25 tests (preprocessing, transformations)
+
+[P2_MEDIUM] Enhance comment removal:
+    - Support multi-language comment syntax
+    - Preserve docstrings/JSDoc/JavaDoc
+    - Handle edge cases (comments in strings, regex)
+    - Support comment extraction for documentation
+    - Test count: 20 tests (comment handling, edge cases)
+
+[P2_MEDIUM] Add token stream support:
+    - Generate detailed token streams
+    - Include token positions and types
+    - Support token-based analysis
+    - Add token filtering utilities
+    - Test count: 20 tests (tokenization, filtering)
+
+============================================================================
+PRO TIER - Advanced Base Parser Features (P1-P3)
+============================================================================
+
+[P1_HIGH] Implement incremental parsing support:
+    - Add parse_incremental(code, changes) method
+    - Support efficient re-parsing of modified sections
+    - Implement AST caching with invalidation
+    - Add change impact analysis
+    - Test count: 30 tests (incremental parsing, caching)
+
+[P1_HIGH] Add enhanced metrics calculation:
+    - Calculate Halstead complexity
+    - Add cognitive complexity
+    - Calculate maintainability index
+    - Add code smell detection
+    - Generate comprehensive quality reports
+    - Test count: 30 tests (metrics accuracy, quality reports)
+
+[P2_MEDIUM] Implement advanced error handling:
+    - Add error recovery strategies
+    - Support partial parsing on errors
+    - Provide fix suggestions for common errors
+    - Add error context extraction
+    - Test count: 25 tests (error handling, recovery)
+
+[P2_MEDIUM] Add parser configuration system:
+    - Support per-language configuration
+    - Add configuration validation
+    - Implement configuration inheritance
+    - Support environment-specific configs
+    - Test count: 20 tests (configuration, validation)
+
+[P3_LOW] Implement source mapping:
+    - Generate source maps for transformations
+    - Support source map chains
+    - Add source position utilities
+    - Enable debugging transformed code
+    - Test count: 25 tests (source maps, position tracking)
+
+============================================================================
+ENTERPRISE TIER - Enterprise Base Parser Features (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Add distributed parsing support:
+    - Support parsing work distribution
+    - Implement result aggregation
+    - Add progress tracking for large codebases
+    - Support parallel parsing coordination
+    - Test count: 30 tests (distribution, aggregation)
+
+[P2_MEDIUM] Implement parser telemetry:
+    - Add comprehensive metrics collection
+    - Support OpenTelemetry integration
+    - Add performance profiling hooks
+    - Generate parsing analytics
+    - Test count: 25 tests (telemetry, profiling)
+
+[P3_LOW] Add enterprise compliance features:
+    - Implement parsing audit logging
+    - Add compliance policy enforcement
+    - Support regulatory requirements (HIPAA, SOC2)
+    - Generate compliance reports
+    - Test count: 25 tests (compliance, audit, reporting)
+
+[P3_LOW] Implement resource management:
+    - Add memory usage tracking
+    - Implement parsing timeouts
+    - Support resource quotas per tenant
+    - Add graceful degradation on resource limits
+    - Test count: 20 tests (resource management, quotas)
+
+[P4_LOW] Add ML-driven optimization:
+    - Predict optimal preprocessing strategies
+    - Adapt parsing strategies based on patterns
+    - Detect anomalous code structures
+    - Optimize parsing performance via ML
+    - Test count: 30 tests (ML integration, optimization)
+
+============================================================================
+TOTAL TEST ESTIMATE: 395 tests (120 COMMUNITY + 130 PRO + 145 ENTERPRISE)
+============================================================================
+"""
 
 import ast  # Import the ast module
 from abc import ABC, abstractmethod

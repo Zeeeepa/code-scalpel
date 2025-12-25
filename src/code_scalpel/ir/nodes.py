@@ -64,6 +64,93 @@ from .operators import (
 )
 
 
+# TODO ITEMS: nodes.py
+# ======================================================================
+# COMMUNITY TIER - Core Node Definitions
+# ======================================================================
+# 1. Add IRTupleNode for tuple literals (Python, JavaScript)
+# 2. Add IRSetNode for set literals (Python)
+# 3. Add IRWithNode for context managers (Python with statement)
+# 4. Add IRYieldNode for yield expressions (generators)
+# 5. Add IRAssertNode for assert statements
+# 6. Add IRLambdaNode for lambda/arrow function expressions
+# 7. Add IRSliceNode for slice expressions (Python)
+# 8. Extend IRCall to support **kwargs and *args spread
+# 9. Add parent_node tracking for bottom-up traversal
+# 10. Document node creation best practices
+# 11. Add IRDictComprehensionNode for dict comprehensions
+# 12. Add IRListComprehensionNode for list comprehensions
+# 13. Add IRSetComprehensionNode for set comprehensions
+# 14. Add IRGeneratorExpression for generator expressions
+# 15. Add IRFormatString node for f-strings (Python)
+# 16. Add IRRegexPattern node for regex literals
+# 17. Add IRAnnotatedType node for type hints
+# 18. Add IRDecoratorNode for decorator tracking
+# 19. Add IRTypeVarNode for generic type variables
+# 20. Add IRConstraintNode for type constraints
+# 21. Add IRErrorNode for malformed/unparseable code
+# 22. Add IRComprehensionIter for comprehension iteration tracking
+# 23. Add IRConditionalExpr for ternary/conditional expressions
+# 24. Add IRMatrixMultiply for @ operator (Python)
+# 25. Add IRWalrusAssign for := assignment expression
+
+# PRO TIER - Advanced Node Features
+# ======================================================================
+# 26. Add type_annotation field to all expression nodes
+# 27. Add control_flow_context for tracking exception handlers
+# 28. Add dataflow_constraints for symbolic execution
+# 29. Add IRDestructureNode for destructuring patterns (JS/TS)
+# 30. Add IRSpreadElement for spread operator (...) patterns
+# 31. Add IRTemplateNode for template literals (JS/TS)
+# 32. Add alias_tracking for variable aliases and references
+# 33. Add scope_level to distinguish local/global/closure scopes
+# 34. Add IROptionalChainNode for optional chaining (?.) support
+# 35. Add IRNullCoalescingNode for ?? operator support
+# 36. Add IRAsyncNode for async/await expressions
+# 37. Add IRAwaitNode for await expressions
+# 38. Add IRAsyncIterNode for async iteration
+# 39. Add IRPromiseNode for Promise-like structures
+# 40. Add IRTypeGuardNode for TypeScript type guards
+# 41. Add IRAssertionNode for assertion expressions
+# 42. Add IRGenericNode for generic type parameters
+# 43. Add IRMappedTypeNode for mapped types (TypeScript)
+# 44. Add IRConditionalTypeNode for conditional types (TypeScript)
+# 45. Add IRInferNode for infer keyword (TypeScript)
+# 46. Add IRModuleNode for module metadata
+# 47. Add IRNamespaceNode for namespace support
+# 48. Add IREnumNode for enum definitions
+# 49. Add IRInterfaceNode for interface definitions
+# 50. Add IRMixinNode for mixin/trait support
+
+# ENTERPRISE TIER - Advanced Analysis Features
+# ======================================================================
+# 51. Add distributed IR serialization support (protobuf)
+# 52. Add distributed IR serialization support (FlatBuffers)
+# 53. Add distributed IR serialization support (Avro)
+# 54. Add IR versioning for compatibility checking
+# 55. Add cross-language node equivalence detection
+# 56. Add ML-based node classification hints
+# 57. Add hardware-accelerated node comparison (GPU)
+# 58. Add async/await context tracking for all nodes
+# 59. Add React/JSX component metadata tracking
+# 60. Add Vue.js/Angular component support
+# 61. Add dependency injection container support in IR
+# 62. Add distributed analysis checkpoint storage
+# 63. Add anomaly detection on node patterns
+# 64. Add node mutation tracking for immutability analysis
+# 65. Add side_effect_tracking for pure function detection
+# 66. Add performance_hints on computationally expensive patterns
+# 67. Add security_vulnerability_hints for code inspection
+# 68. Add accessibility_hints for web components
+# 69. Add i18n_tracking for internationalization patterns
+# 70. Add performance_regression_detection() for optimization analysis
+# 71. Add ml_feature_extraction_from_nodes() for ML pipelines
+# 72. Add graph_representation_generation() for visualization
+# 73. Add node_similarity_clustering() for code deduplication
+# 74. Add polyglot_equivalence_detection() for cross-language analysis
+# 75. Add distributed_node_caching() for federated analysis
+
+
 # =============================================================================
 # Source Location
 # =============================================================================

@@ -984,6 +984,47 @@ class JavaVisitor(TreeSitterVisitor):
 
 
 class JavaNormalizer(BaseNormalizer):
+    """[20251224_FEATURE] Java CST normalization with comprehensive features.
+
+    TODO ITEMS:
+
+    COMMUNITY TIER (Core Java AST Normalization):
+    1. TODO: Complete method_declaration → IRFunctionDef mapping
+    2. TODO: Support class_declaration → IRClassDef with visibility
+    3. TODO: Handle interface_declaration → IRClassDef (interface marker)
+    4. TODO: Implement field_declaration → IRAssign normalization
+    5. TODO: Support constructor_declaration as special IRFunctionDef
+    6. TODO: Normalize all binary operators (arithmetic, bitwise, logical)
+    7. TODO: Handle comparison operators with Java semantics
+    8. TODO: Support control flow (if/else, for, while, do-while)
+    9. TODO: Implement try/catch/finally with Java exception types
+    10. TODO: Handle method invocations with proper call stacks
+
+    PRO TIER (Advanced Java Features):
+    11. TODO: Support generics with type parameters and bounds
+    12. TODO: Preserve access modifiers (public/private/protected)
+    13. TODO: Handle annotations (@Override, @Deprecated, custom)
+    14. TODO: Support static members and initializers
+    15. TODO: Normalize inner classes and anonymous classes
+    16. TODO: Handle enums with constants and methods
+    17. TODO: Support Java 8+ lambdas and functional interfaces
+    18. TODO: Implement record_declaration normalization (Java 16+)
+    19. TODO: Handle sealed classes and pattern matching
+    20. TODO: Preserve javadoc comments and documentation
+
+    ENTERPRISE TIER (Advanced Analysis & Optimization):
+    21. TODO: Implement Java type resolution with classpath
+    22. TODO: Support cross-file type inference
+    23. TODO: Detect design patterns (Visitor, Strategy, etc.)
+    24. TODO: Handle complex generic type relationships
+    25. TODO: Implement ML-based Java code pattern recognition
+    26. TODO: Support distributed Java project analysis
+    27. TODO: Add caching for repeated patterns
+    28. TODO: Implement performance profiling for large codebases
+    29. TODO: Add AI-driven refactoring suggestions
+    30. TODO: Create optimization analysis for Java code
+    """
+
     """Normalizes Java source code to Unified IR."""
 
     @property

@@ -25,7 +25,96 @@ class ValidationIssue:
 
 
 class ASTValidator:
-    """Advanced AST validator with configurable rules and detailed reporting."""
+    """
+    Advanced AST validator with configurable rules and detailed reporting.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Validate nesting depth limits
+      - Track nesting depth during traversal
+      - Check against max_nesting_depth config
+      - Report violations with line numbers
+      - Add 15+ tests for nesting validation
+
+    [20251224_TIER1_TODO] FEATURE: Validate code style basics
+      - Check naming conventions
+      - Validate line lengths
+      - Check indentation consistency
+      - Add 15+ tests for style validation
+
+    [20251224_TIER1_TODO] FEATURE: Validate docstring presence
+      - Check function docstrings
+      - Check class docstrings
+      - Verify docstring format
+      - Add 12+ tests for docstring validation
+
+    [20251224_TIER1_TODO] FEATURE: Validate function size limits
+      - Count statements in functions
+      - Check against max_function_length
+      - Report oversized functions
+      - Add 12+ tests for size validation
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Validate cognitive complexity
+      - Calculate complexity score
+      - Check against thresholds
+      - Identify complex paths
+      - Add 15+ tests for complexity
+
+    [20251224_TIER2_TODO] FEATURE: Validate function parameters
+      - Check parameter count against limits
+      - Detect unused parameters
+      - Validate parameter types
+      - Add 12+ tests for parameters
+
+    [20251224_TIER2_TODO] FEATURE: Validate class sizes
+      - Count attributes and methods
+      - Check against max_class_length
+      - Identify God Classes
+      - Add 12+ tests for class validation
+
+    [20251224_TIER2_TODO] FEATURE: Custom rule registration
+      - Register validation plugins
+      - Apply custom rules
+      - Support rule configuration
+      - Add 15+ tests for custom rules
+
+    [20251224_TIER2_TODO] FEATURE: Auto-fix suggestions
+      - Suggest code formatting fixes
+      - Recommend variable renames
+      - Propose simplifications
+      - Add 15+ tests for suggestions
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Style guide enforcement
+      - Load Black/Ruff configurations
+      - Apply style checks
+      - Enforce naming patterns
+      - Add 15+ tests for style guides
+
+    [20251224_TIER3_TODO] FEATURE: Language-specific validation
+      - Python-specific rules
+      - JavaScript/TypeScript rules
+      - Java-specific rules
+      - Add 15+ tests for languages
+
+    [20251224_TIER3_TODO] FEATURE: Security validation
+      - Detect security patterns
+      - Check for injection risks
+      - Validate credential handling
+      - Add 15+ tests for security
+
+    [20251224_TIER3_TODO] FEATURE: ML-based anomaly detection
+      - Learn code patterns
+      - Detect deviations
+      - Suggest corrections
+      - Add 12+ tests for anomalies
+    """
 
     def __init__(self, config: Optional[dict] = None):
         self.config = {
@@ -40,10 +129,6 @@ class ASTValidator:
             **(config or {}),
         }
         self.issues: list[ValidationIssue] = []
-        # [20251221_FEATURE] TODO: Add custom rule registration and validation plugins
-        # [20251221_FEATURE] TODO: Support style guide enforcement (Black, Ruff configs)
-        # [20251221_ENHANCEMENT] TODO: Add auto-fix suggestions for common violations
-        # [20251221_ENHANCEMENT] TODO: Support language-specific validation rules
 
     def validate(self, tree: ast.AST, code: str) -> list[ValidationIssue]:
         """Perform all validations on the AST."""

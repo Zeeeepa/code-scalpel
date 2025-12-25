@@ -95,7 +95,38 @@ class ImportInfo:
 
 
 class DynamicImportVisitor(ast.NodeVisitor):
-    """Visitor to extract dynamic imports and track local string variables."""
+    """Visitor to extract dynamic imports and track local string variables.
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Support lazy import detection and resolution
+      - Detect importlib.import_module() patterns
+      - Track lazy import declarations
+      - Support deferred resolution
+      - Add 20+ tests for lazy imports
+
+    [20251224_TIER2_TODO] FEATURE: Add framework-specific import resolution
+      - Django INSTALLED_APPS module resolution
+      - FastAPI app inclusion patterns
+      - Flask Blueprint registration
+      - Add 25+ tests for framework patterns
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] ENHANCEMENT: Support type stub analysis
+      - Parse .pyi files for unresolved imports
+      - Extract type information from stubs
+      - Support typing_extensions
+      - Add 15+ tests for stub handling
+
+    [20251224_TIER3_TODO] ENHANCEMENT: Add import cycle detection with paths
+      - Report full cycle paths to user
+      - Suggest cycle breaking strategies
+      - Calculate impact of breaking each edge
+      - Add 15+ tests for cycle reporting
+    """
 
     # [20251221_FEATURE] TODO: Support lazy import detection and resolution
     # [20251221_FEATURE] TODO: Add framework-specific import resolution (Django, FastAPI)

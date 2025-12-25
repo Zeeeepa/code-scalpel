@@ -56,11 +56,93 @@ class TypeInference:
     """
     Advanced type inference engine for Python code.
 
-    [20251221_FEATURE] TODO: Infer types from variable assignments
-    [20251221_FEATURE] TODO: Generate function parameter type hints
-    [20251221_FEATURE] TODO: Track return type inference from return statements
-    [20251221_ENHANCEMENT] TODO: Support type narrowing in conditional blocks
-    [20251221_ENHANCEMENT] TODO: Integrate with type stub files (pyi)
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Extract existing type hints
+      - Parse type annotations from source
+      - Build type map for functions
+      - Build type map for variables
+      - Store confidence scores
+      - Add 15+ tests for hint extraction
+
+    [20251224_TIER1_TODO] FEATURE: Infer types from literal assignments
+      - Track literal values (str, int, bool, list, dict)
+      - Infer type from assignment
+      - Handle reassignments
+      - Add 12+ tests for literal inference
+
+    [20251224_TIER1_TODO] FEATURE: Track type through function calls
+      - Map return types to variables
+      - Follow simple call chains
+      - Handle built-in functions
+      - Add 12+ tests for call tracking
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Infer function parameter types
+      - Analyze parameter usage
+      - Infer types from operations
+      - Handle defaults with type inference
+      - Add 15+ tests for parameter inference
+
+    [20251224_TIER2_TODO] FEATURE: Infer return types from return statements
+      - Analyze all return paths
+      - Detect union types (multiple return types)
+      - Handle implicit None returns
+      - Add 15+ tests for return type inference
+
+    [20251224_TIER2_TODO] FEATURE: Support type narrowing in conditional blocks
+      - Track type narrowing in if statements
+      - Handle isinstance checks
+      - Support type guards
+      - Add 15+ tests for type narrowing
+
+    [20251224_TIER2_TODO] FEATURE: Class attribute type inference
+      - Extract types from __init__
+      - Infer from class variables
+      - Track inherited attributes
+      - Add 12+ tests for class types
+
+    [20251224_TIER2_TODO] FEATURE: Generate type hint annotations
+      - Create modified source with hints
+      - Format according to PEP 257
+      - Support Black/Ruff formatting
+      - Add 15+ tests for generation
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Integrate with type stub files (pyi)
+      - Parse and load .pyi files
+      - Merge stub types with inferred
+      - Validate against stubs
+      - Add 15+ tests for stub integration
+
+    [20251224_TIER3_TODO] FEATURE: Generic type parameter tracking
+      - Track TypeVar usage
+      - Resolve generic parameters
+      - Handle nested generics
+      - Add 15+ tests for generics
+
+    [20251224_TIER3_TODO] FEATURE: Advanced forward reference resolution
+      - Handle string-based type references
+      - Support PEP 563 (postponed annotations)
+      - Resolve circular types
+      - Add 12+ tests for forward refs
+
+    [20251224_TIER3_TODO] FEATURE: ML-based type prediction
+      - Learn from type patterns
+      - Predict types for unannotated code
+      - Confidence-based suggestions
+      - Add 15+ tests for prediction
+
+    [20251224_TIER3_TODO] FEATURE: Protocol and structural typing
+      - Infer protocols from duck typing
+      - Validate structural compatibility
+      - Generate Protocol definitions
+      - Add 12+ tests for protocols
     """
 
     def __init__(self, project_root: Optional[str] = None):

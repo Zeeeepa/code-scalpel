@@ -25,7 +25,45 @@ Supports:
 [20251220_TODO] Add request/response validation schemas:
     - Validate all MCP request payloads against JSON Schema
     - Implement strict type checking for response models
-    - Add schema versioning for backwards compatibility"""
+    - Add schema versioning for backwards compatibility
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core MCP Integration):
+1. TODO: Implement basic MCP server with stdio transport
+2. TODO: Expose core analysis tools (analyze_code, extract_code) as MCP tools
+3. TODO: Create MCP request/response envelope with tier metadata
+4. TODO: Implement error handling with machine-parseable error codes
+5. TODO: Add tool discovery and capability advertisement
+6. TODO: Create comprehensive MCP logging framework
+7. TODO: Implement request tracing and correlation IDs
+8. TODO: Add basic rate limiting for community tier
+9. TODO: Create MCP server unit tests and integration tests
+10. TODO: Document MCP protocol compliance and tool specifications
+
+PRO TIER (Enhanced MCP Features):
+11. TODO: Add HTTP transport with TLS support
+12. TODO: Implement per-client quota tracking (requests/hour)
+13. TODO: Add tier-based feature gating at MCP boundary
+14. TODO: Implement custom MCP prompt templates export
+15. TODO: Add analytics queries for usage patterns
+16. TODO: Support batch tool invocations
+17. TODO: Implement response streaming for large outputs
+18. TODO: Add performance monitoring and SLA tracking
+19. TODO: Create advanced logging with structured analytics
+20. TODO: Implement request filtering and query optimization
+
+ENTERPRISE TIER (Distributed & Scale):
+21. TODO: Implement distributed MCP with load balancing
+22. TODO: Add multi-protocol support (gRPC, WebSocket)
+23. TODO: Implement federated MCP across multiple servers
+24. TODO: Add OpenTelemetry distributed tracing
+25. TODO: Support custom authentication/authorization plugins
+26. TODO: Implement MCP caching layer with invalidation
+27. TODO: Add audit logging for compliance (SOC2, HIPAA)
+28. TODO: Implement health checks and failover
+29. TODO: Add blockchain-based request signature verification
+30. TODO: Create AI-powered MCP request optimization engine"""
 
 from __future__ import annotations
 

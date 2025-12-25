@@ -13,6 +13,46 @@ import networkx as nx
 #     - Detect scope-related bugs (shadowing, unintended globals)
 #     - Support closure variable capture tracking
 
+"""
+TODO ITEMS:
+
+COMMUNITY TIER (Core PDG Building):
+1. TODO: Implement AST node visitation for all Python statements
+2. TODO: Build control flow graph from if/while/for statements
+3. TODO: Track variable definitions and uses
+4. TODO: Create data dependency edges (def-use chains)
+5. TODO: Implement basic call graph construction
+6. TODO: Add return statement tracking
+7. TODO: Create scope hierarchy for nested functions/classes
+8. TODO: Track import statements and module dependencies
+9. TODO: Implement exception handling node tracking
+10. TODO: Add comprehensive error handling for malformed input
+
+PRO TIER (Advanced Dependency Analysis):
+11. TODO: Support interprocedural control flow (function calls)
+12. TODO: Implement parameter passing and return value tracking
+13. TODO: Add closure variable capture in nested functions
+14. TODO: Track nonlocal/global variable declarations
+15. TODO: Support exception flow through call chains
+16. TODO: Implement context-sensitive scope tracking
+17. TODO: Add alias detection for variable references
+18. TODO: Support class attribute and method tracking
+19. TODO: Implement decorator handling and analysis
+20. TODO: Add generator/yield statement tracking
+
+ENTERPRISE TIER (Distributed & Polyglot):
+21. TODO: Extend builder to support JavaScript/TypeScript
+22. TODO: Add Java language support via tree-sitter
+23. TODO: Implement C/C++ PDG building for systems analysis
+24. TODO: Support distributed PDG building (sharded by module)
+25. TODO: Add incremental PDG updates for code changes
+26. TODO: Implement inter-module dependency tracking
+27. TODO: Support async/await dependency tracking
+28. TODO: Add WebAssembly code analysis support
+29. TODO: Implement quantum-safe dependency hashing
+30. TODO: Create federated PDG for cross-repository analysis
+"""
+
 
 class NodeType(Enum):
     """Types of nodes in the PDG."""

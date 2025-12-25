@@ -5,6 +5,94 @@ Incremental AST Cache.
 
 This module extends the base AnalysisCache to provide AST-specific caching
 with dependency tracking and cascading invalidation.
+
+TODO ITEMS: cache/ast_cache.py
+======================================================================
+COMMUNITY TIER - Core AST Caching
+======================================================================
+1. Add IncrementalASTCache.get_or_parse() method
+2. Add IncrementalASTCache.invalidate() dependency invalidation
+3. Add IncrementalASTCache.get_cached() cache lookup
+4. Add IncrementalASTCache.clear() full cache clear
+5. Add CacheMetadata validation and serialization
+6. Add file_hash computation (SHA256)
+7. Add dependency graph tracking and updates
+8. Add cascading invalidation for affected files
+9. Add cache persistence (save/load metadata)
+10. Add language-specific AST handling (Python first)
+11. Add AST serialization with pickle
+12. Add deserialization with corruption recovery
+13. Add cache statistics (hit/miss, size)
+14. Add cache directory initialization
+15. Add cache disk storage management
+16. Add memory cache layer (in-process)
+17. Add duplicate AST detection
+18. Add cache entry expiry tracking
+19. Add cache metadata export
+20. Add cache diagnostic reporting
+21. Add cache integrity checking
+22. Add cache consistency verification
+23. Add incremental file hash computation
+24. Add dependency graph visualization
+25. Add cache performance metrics
+
+======================================================================
+PRO TIER - Advanced AST Caching
+======================================================================
+26. Add support for polymorphic AST types (TypeScript, Java, Go, etc)
+27. Add incremental parsing (re-parse only changed functions)
+28. Add AST diff tracking (track what changed between versions)
+29. Add memory pooling for AST nodes (reduce GC pressure)
+30. Add generational collection (keep hot files in memory)
+31. Add adaptive AST caching based on file size
+32. Add AST compression for storage optimization
+33. Add AST validation with schema checking
+34. Add AST normalization across languages
+35. Add AST delta compression (store diffs not full ASTs)
+36. Add AST versioning and migrations
+37. Add AST preload for hot files
+38. Add AST memory usage profiling
+39. Add AST serialization format optimization
+40. Add concurrent AST cache access
+41. Add AST cache partitioning by language
+42. Add AST cache statistics export
+43. Add AST performance benchmarking
+44. Add AST cache warming on startup
+45. Add AST-specific invalidation strategies
+46. Add AST cache coherence detection
+47. Add AST cache replication support
+48. Add AST cache debugging tools
+49. Add AST cache visualization dashboard
+50. Add AST parse progress tracking
+
+======================================================================
+ENTERPRISE TIER - Distributed & Federated AST Caching
+======================================================================
+51. Add distributed AST cache across agents
+52. Add federated AST management across organizations
+53. Add multi-region AST replication with failover
+54. Add AST cache consensus and voting
+55. Add distributed AST locking (Zookeeper, etcd)
+56. Add AST change event streaming
+57. Add AST cache change notifications
+58. Add AST cache cost tracking per org
+59. Add AST cache quota enforcement
+60. Add AST cache SLA monitoring
+61. Add AST cache audit trail logging
+62. Add AST cache encryption for sensitive code
+63. Add AST cache access control (RBAC)
+64. Add AST cache multi-tenancy isolation
+65. Add AST cache disaster recovery
+66. Add AST cache cross-region failover
+67. Add AST cache data retention policies
+68. Add AST cache billing integration
+69. Add AST cache executive reporting
+70. Add AST cache anomaly detection
+71. Add AST cache circuit breaker
+72. Add AST cache health monitoring
+73. Add AST cache performance optimization ML model
+74. Add AST cache capacity planning
+75. Add AST cache AI-powered invalidation prediction
 """
 
 from __future__ import annotations

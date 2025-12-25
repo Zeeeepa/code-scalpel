@@ -19,10 +19,88 @@ class ASTBuilder:
         self.preprocessing_hooks: list[Callable[[str], str]] = []
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
-        # [20251221_FEATURE] TODO: Add incremental parsing for large codebases
-        # [20251221_FEATURE] TODO: Support caching with TTL and cache invalidation
-        # [20251221_ENHANCEMENT] TODO: Add preprocessing for type stubs and annotations
-        # [20251221_ENHANCEMENT] TODO: Support parallel AST building for multiple files
+        # ====================================================================
+        # TIER 1: COMMUNITY (Free - High Priority)
+        # ====================================================================
+        # [20251224_TIER1_TODO] FEATURE: Comment preservation in preprocessing
+        #   Purpose: Maintain code documentation during AST parsing
+        #   Steps:
+        #     1. Enhance _remove_comments to preserve docstrings
+        #     2. Track comment locations with line numbers
+        #     3. Reattach comments to AST nodes
+        #     4. Add 20+ tests for comment preservation
+
+        # [20251224_TIER1_TODO] FEATURE: Better syntax error recovery
+        #   Purpose: Provide actionable error messages
+        #   Steps:
+        #     1. Suggest fixes for common syntax errors
+        #     2. Recover and continue parsing
+        #     3. Collect all errors in one pass
+        #     4. Add 25+ tests for error recovery
+
+        # [20251224_TIER1_TODO] TEST: Edge cases
+        #   - Incomplete code, mixed line endings
+        #   - Very large files, deeply nested structures
+
+        # ====================================================================
+        # TIER 2: PRO (Commercial - Medium Priority)
+        # ====================================================================
+        # [20251224_TIER2_TODO] FEATURE: Add incremental parsing for large codebases
+        #   Purpose: Improve performance for multi-file projects
+        #   Steps:
+        #     1. Parse only modified files
+        #     2. Reuse AST from unchanged files
+        #     3. Track file modification times
+        #     4. Implement dependency-aware incremental parsing
+        #     5. Add 30+ tests for incremental parsing
+
+        # [20251224_TIER2_TODO] FEATURE: Support caching with TTL and invalidation
+        #   Purpose: Enable efficient cache management
+        #   Steps:
+        #     1. Implement TTL (time-to-live) for cache entries
+        #     2. Support cache invalidation by dependency
+        #     3. Track cache key dependencies
+        #     4. Add cache warming strategies
+        #     5. Add 25+ tests for cache expiration
+
+        # [20251224_TIER2_TODO] ENHANCEMENT: Add preprocessing for type stubs
+        #   Purpose: Support .pyi stub files for type checking
+        #   Steps:
+        #     1. Handle .pyi file parsing
+        #     2. Extract type signatures from stubs
+        #     3. Merge type information with source
+        #     4. Support typing_extensions compatibility
+        #     5. Add 20+ tests for stub handling
+
+        # ====================================================================
+        # TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        # ====================================================================
+        # [20251224_TIER3_TODO] ENHANCEMENT: Support parallel AST building
+        #   Purpose: Leverage multi-core processors
+        #   Steps:
+        #     1. Implement thread-pool based parsing
+        #     2. Handle thread-safe cache access
+        #     3. Support process-based parsing for isolation
+        #     4. Add performance benchmarks
+        #     5. Add 30+ tests for parallel parsing
+
+        # [20251224_TIER3_TODO] FEATURE: Custom preprocessing pipeline
+        #   Purpose: Allow extensible code transformations
+        #   Steps:
+        #     1. Support pipeline configuration
+        #     2. Enable preprocessing hook ordering
+        #     3. Add conditional preprocessing
+        #     4. Support reversible preprocessing
+        #     5. Add 25+ tests for preprocessing pipeline
+
+        # [20251224_TIER3_TODO] FEATURE: AST validation with custom rules
+        #   Purpose: Enforce code standards
+        #   Steps:
+        #     1. Support custom validation rule registration
+        #     2. Generate detailed validation reports
+        #     3. Suggest fixes for validation failures
+        #     4. Support configurable rule sets
+        #     5. Add 35+ tests for validation rules
 
     def build_ast(
         self, code: str, preprocess: bool = True, validate: bool = True

@@ -5,6 +5,62 @@ All notable changes to Code Scalpel will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2025-12-25
+
+### Added
+
+#### Project Reorganization (Phases 1-4)
+- **quality_assurance/** - New module for error scanning and fixing
+  - `error_scanner.py` - Code error detection
+  - `error_fixer.py` - Automated error correction
+- **surgery/** - New module for surgical code modification
+  - `surgical_extractor.py` - Precise code extraction
+  - `surgical_patcher.py` - Safe code patching
+  - `unified_extractor.py` - Universal polyglot extraction
+- **analysis/** - New module for code analysis
+  - `code_analyzer.py` - AST-based analysis
+  - `project_crawler.py` - Project-wide scanning
+  - `core.py` - Analysis toolkit core
+- **licensing/** - New module for license tier management
+  - `tier_detector.py`, `license_manager.py`, `validator.py`, `cache.py`
+- **tiers/** - New module for tier enforcement
+  - `decorators.py` - @requires_tier decorator
+  - `feature_registry.py` - Feature tier mapping
+  - `tool_registry.py` - MCP tool tier mapping
+- **security/** - Reorganized security module with 6 subdirectories
+  - `analyzers/` - security_analyzer.py, taint_tracker.py, unified_sink_detector.py, cross_file_taint.py
+  - `type_safety/` - type_evaporation_detector.py
+  - `dependencies/` - vulnerability_scanner.py, osv_client.py
+  - `sanitization/` - sanitizer_analyzer.py
+  - `secrets/` - secret_scanner.py
+  - `ml/` - ml_vulnerability_predictor.py
+- **integrations/protocol_analyzers/** - New protocol analysis module
+  - `graphql/schema_tracker.py` - GraphQL schema tracking
+  - `grpc/contract_analyzer.py` - gRPC contract analysis
+  - `kafka/taint_tracker.py` - Kafka message taint tracking
+  - `schema/drift_detector.py` - Protocol buffer drift detection
+  - `frontend/input_tracker.py` - Frontend input tracking (React/Vue/Angular)
+
+#### Backward Compatibility System
+- All reorganized modules include deprecation warning stubs
+- Old import paths continue to work with warnings
+- Migration guide included in release notes
+
+### Fixed
+- **langchain.py** - Fixed incomplete module stub (missing closing docstring)
+- **decorators.py** - Fixed Pyright type error for tier enum handling
+- **Test imports** - Updated test imports for private functions to canonical locations
+
+### Changed
+- `governance_config.py` moved from `config/` to `governance/`
+- `osv_client.py` moved from `ast_tools/` to `security/dependencies/`
+- 27 files reorganized with backward compatibility stubs
+
+### Statistics
+- **Tests**: 4,431 passed, 17 skipped (100% pass rate)
+- **Lines Scanned**: 102,972 (Bandit security scan)
+- **Quality Gates**: All passed (Black, Ruff, Pyright, Bandit, pip-audit)
+
 ## [3.1.1] - 2025-12-22
 
 ### Fixed

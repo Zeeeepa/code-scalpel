@@ -78,10 +78,87 @@ class DataFlowAnalyzer:
     """
     Advanced data flow analyzer.
 
-    [20251221_FEATURE] TODO: Build use-definition chains
-    [20251221_FEATURE] TODO: Compute reaching definitions
-    [20251221_ENHANCEMENT] TODO: Support live variable analysis
-    [20251221_ENHANCEMENT] TODO: Implement available expressions analysis
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Basic data flow infrastructure
+      - Initialize analyzer with caching
+      - Support file and function-level analysis
+      - Add 15+ tests for basic functionality
+
+    [20251224_TIER1_TODO] TEST: Adversarial tests for edge cases
+      - Nested scopes, global variables
+      - Complex assignments, mutations
+      - Exception handlers
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Build use-definition chains
+      Purpose: Track variable dependencies
+      Steps:
+        1. Extract all variable definitions
+        2. Extract all variable usages
+        3. Match definitions to uses
+        4. Create def-use pairs
+        5. Add 30+ tests for chain building
+
+    [20251224_TIER2_TODO] FEATURE: Compute reaching definitions
+      Purpose: Find which definitions affect a use
+      Steps:
+        1. Fixed-point iteration
+        2. Forward data flow analysis
+        3. Mark reaching defs at each program point
+        4. Handle control flow merges
+        5. Add 30+ tests for reaching defs
+
+    [20251224_TIER2_TODO] ENHANCEMENT: Support live variable analysis
+      Purpose: Identify variables that may be used later
+      Steps:
+        1. Backward data flow from exits
+        2. Mark live variables at each point
+        3. Identify dead assignments
+        4. Suggest variable removal
+        5. Add 25+ tests for liveness
+
+    [20251224_TIER2_TODO] FEATURE: Detect uninitialized variables
+      Purpose: Find uses before definitions
+      Steps:
+        1. Track definition sites
+        2. Check uses for reaching defs
+        3. Detect uninitialized paths
+        4. Report with line numbers
+        5. Add 25+ tests for detection
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Available expressions analysis
+      Purpose: Identify redundant computations
+      Steps:
+        1. Track expression definitions
+        2. Find where expressions are available
+        3. Detect redundant calculations
+        4. Suggest common subexpression elimination
+        5. Add 20+ tests
+
+    [20251224_TIER3_TODO] ENHANCEMENT: Implement taint analysis
+      Purpose: Track sensitive data flow
+      Steps:
+        1. Mark sources of untrusted data
+        2. Track taint propagation
+        3. Detect taint at sinks
+        4. Identify sanitization points
+        5. Add 30+ tests for taint
+
+    [20251224_TIER3_TODO] ENHANCEMENT: Support interprocedural analysis
+      Purpose: Track data flow across functions
+      Steps:
+        1. Build call graph
+        2. Propagate data flow through calls
+        3. Handle parameter passing
+        4. Analyze return value flow
+        5. Add 25+ tests for interprocedural
     """
 
     def __init__(self):
@@ -97,8 +174,22 @@ class DataFlowAnalyzer:
         Returns:
             DataFlow object with analysis results
 
-        [20251221_FEATURE] TODO: Parse file and extract definitions/usages
-        [20251221_FEATURE] TODO: Build def-use and use-def chains
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Parse file and extract definitions/usages
+          - Load and parse Python file
+          - Walk AST for all definitions
+          - Walk AST for all usages
+          - Track line numbers and context
+          - Add 15+ tests for extraction
+
+        [20251224_TIER2_TODO] FEATURE: Build def-use and use-def chains
+          - Create Definition objects for all defs
+          - Create Usage objects for all uses
+          - Link definitions to their uses
+          - Link uses to their definitions
+          - Add 20+ tests for chain building
         """
         return DataFlow()
 
@@ -106,8 +197,20 @@ class DataFlowAnalyzer:
         """
         Perform data flow analysis on a function.
 
-        [20251221_FEATURE] TODO: Extract parameters as definitions
-        [20251221_FEATURE] TODO: Analyze function body
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Extract parameters as definitions
+          - Create Definition objects for each parameter
+          - Mark as parameter type
+          - Add default values if present
+          - Add 10+ tests for parameter extraction
+
+        [20251224_TIER2_TODO] FEATURE: Analyze function body
+          - Extract all statements
+          - Find definitions and uses
+          - Build chains
+          - Add 15+ tests for function analysis
         """
         data_flow = DataFlow()
         return data_flow
@@ -116,8 +219,21 @@ class DataFlowAnalyzer:
         """
         Get definitions that reach a specific line.
 
-        [20251221_FEATURE] TODO: Compute reaching definitions fact
-        [20251221_FEATURE] TODO: Handle multiple definition sources
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Compute reaching definitions fact
+          - Fixed-point iteration for data flow
+          - Mark gen/kill sets for each block
+          - Compute IN/OUT for each block
+          - Collect defs at target line
+          - Add 15+ tests for reaching defs
+
+        [20251224_TIER2_TODO] FEATURE: Handle multiple definition sources
+          - Support multiple definitions of same variable
+          - Handle conditional definitions
+          - Track definition merging
+          - Add 12+ tests for multi-def
         """
         return set()
 
@@ -127,8 +243,21 @@ class DataFlowAnalyzer:
 
         Variables are live if they are used on some path after this line.
 
-        [20251221_FEATURE] TODO: Backward data flow analysis
-        [20251221_FEATURE] TODO: Identify dead variables
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Backward data flow analysis
+          - Build reverse CFG
+          - Backward analysis from exits
+          - Compute liveness facts
+          - Mark live variables
+          - Add 15+ tests for backward analysis
+
+        [20251224_TIER3_TODO] FEATURE: Identify dead variables
+          - Find variables with no uses after definition
+          - Suggest variable removal
+          - Calculate removal safety
+          - Add 12+ tests for dead var detection
         """
         return set()
 
@@ -159,8 +288,20 @@ class DataFlowAnalyzer:
         Returns:
             Set of (start_line, end_line) tuples for dead code blocks
 
-        [20251221_FEATURE] TODO: Identify unreachable code
-        [20251221_FEATURE] TODO: Detect unused assignments
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Identify unreachable code
+          - Use CFG for reachability analysis
+          - Find blocks with no path from entry
+          - Report unreachable statements
+          - Add 15+ tests for unreachable
+
+        [20251224_TIER2_TODO] FEATURE: Detect unused assignments
+          - Find definitions with no reaching uses
+          - Track assignment locations
+          - Suggest removal
+          - Add 12+ tests for unused assignments
         """
         return set()
 
@@ -180,7 +321,14 @@ class DataFlowAnalyzer:
         Returns:
             Set of (variable, line) tuples for uninitialized usage
 
-        [20251221_FEATURE] TODO: Detect uses without reaching definitions
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Detect uses without reaching definitions
+          - Find uses not covered by any definition
+          - Analyze control flow paths
+          - Identify conditional usage
+          - Add 15+ tests for uninitialized detection
         """
         return set()
 
@@ -191,9 +339,27 @@ class DataFlowAnalyzer:
         Returns:
             List of def chains from source to sink
 
-        [20251221_FEATURE] TODO: Build taint flow from sources to sinks
-        [20251221_FEATURE] TODO: Detect taint sanitization
-        [20251221_ENHANCEMENT] TODO: Support taint sensitivity analysis
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Build taint flow from sources to sinks
+          - Mark taint sources
+          - Follow taint propagation
+          - Find taint at sinks
+          - Collect taint chains
+          - Add 20+ tests for taint flow
+
+        [20251224_TIER3_TODO] FEATURE: Detect taint sanitization
+          - Identify sanitizer functions
+          - Mark taint neutralization
+          - Detect unsafe casts
+          - Add 15+ tests for sanitization
+
+        [20251224_TIER3_TODO] ENHANCEMENT: Support taint sensitivity
+          - Track taint levels (low/medium/high)
+          - Propagate sensitivity
+          - Adjust reports by sensitivity
+          - Add 12+ tests for sensitivity
         """
         return []
 
@@ -207,8 +373,20 @@ class DataFlowAnalyzer:
         Returns:
             Dict mapping line number to set of facts
 
-        [20251221_FEATURE] TODO: Implement fixed-point computation
-        [20251221_FEATURE] TODO: Support multiple fact types
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Implement fixed-point computation
+          - Iterate until fixpoint
+          - Manage gen/kill sets
+          - Compute IN/OUT for each block
+          - Add 15+ tests for fixpoint
+
+        [20251224_TIER3_TODO] FEATURE: Support multiple fact types
+          - Dispatch to appropriate analysis
+          - Cache computed facts
+          - Support on-demand computation
+          - Add 12+ tests for fact types
         """
         return {}
 

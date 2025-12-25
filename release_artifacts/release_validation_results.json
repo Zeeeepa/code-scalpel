@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-22T15:03:09.130411",
+  "timestamp": "2025-12-24T08:54:34.218619",
   "releases": {
     "v1.3.0": {
       "passed": [
@@ -30,11 +30,11 @@
       "passed": [
         {
           "feature": "P0: get_file_context returns functions/classes",
-          "details": "92 functions, 49 classes"
+          "details": "98 functions, 49 classes"
         },
         {
           "feature": "P0: get_file_context reports complexity",
-          "details": "Complexity: 625"
+          "details": "Complexity: 713"
         },
         {
           "feature": "P0: get_symbol_references finds usages",
@@ -55,11 +55,11 @@
       "passed": [
         {
           "feature": "P0: crawl_project returns project structure",
-          "details": "1708 files analyzed"
+          "details": "3682 files analyzed"
         },
         {
           "feature": "P0: get_project_map returns structure",
-          "details": "3671 files, 106 entry points"
+          "details": "3682 files, 110 entry points"
         },
         {
           "feature": "P1: JWT vulnerability detection",
@@ -128,11 +128,11 @@
       "passed": [
         {
           "feature": "P0: Caching layer (crawl performance)",
-          "details": "First: 7.76s, Second: 7.32s"
+          "details": "First: 12.80s, Second: 11.73s"
         },
         {
           "feature": "P0: Parallel file parsing",
-          "details": "1708 files parsed"
+          "details": "3682 files parsed"
         }
       ],
       "failed": []

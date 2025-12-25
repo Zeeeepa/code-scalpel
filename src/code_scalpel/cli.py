@@ -12,54 +12,48 @@ Usage:
 TODO: CLI Enhancement Roadmap
 =============================
 
-Phase 1 - Multi-Language Analysis via code_parsers:
-- TODO: Integrate code_parsers.ParserFactory for unified language handling
-- TODO: Replace manual extension_map with ParserFactory.detect_language()
-- TODO: Add --parser flag to select specific parser backend (ast, ruff, mypy)
-- TODO: Support all languages in code_parsers (Go, C#, Ruby, Swift, PHP, Kotlin)
-- TODO: Add analyze subcommand for TypeScript with full type checking
-- TODO: Use code_parsers.ParseResult for consistent error/warning format
+COMMUNITY (Current & Planned):
+- TODO [COMMUNITY]: Add --verbose mode with detailed progress output (current)
+- TODO [COMMUNITY]: Add 'extract' command for surgical extraction (code-scalpel extract func main.py::calculate)
+- TODO [COMMUNITY]: Add 'patch' command for surgical patching (code-scalpel patch func main.py::calculate new_code.py)
+- TODO [COMMUNITY]: Add 'crawl' command to analyze entire project structure
+- TODO [COMMUNITY]: Add 'symbols' command to list all extractable symbols in a file
+- TODO [COMMUNITY]: Add --format markdown for documentation generation
+- TODO [COMMUNITY]: Add --quiet mode for CI/CD pipelines (exit codes only)
+- TODO [COMMUNITY]: Support .code-scalpel/cli.yaml for persistent CLI defaults
+- TODO [COMMUNITY]: Add --ignore flag to skip specific files/patterns
+- TODO [COMMUNITY]: Add --include flag for explicit file selection
 
-Phase 2 - New CLI Commands:
-- TODO: Add 'extract' command for surgical extraction (code-scalpel extract func main.py::calculate)
-- TODO: Add 'patch' command for surgical patching (code-scalpel patch func main.py::calculate new_code.py)
-- TODO: Add 'diff' command to show symbol-level diffs between versions
-- TODO: Add 'refactor' command for automated refactoring operations
-- TODO: Add 'crawl' command to analyze entire project structure
-- TODO: Add 'symbols' command to list all extractable symbols in a file
+PRO (Enhanced Features):
+- TODO [PRO]: Integrate code_parsers.ParserFactory for unified language handling
+- TODO [PRO]: Replace manual extension_map with ParserFactory.detect_language()
+- TODO [PRO]: Use code_parsers.ParseResult for consistent error/warning format
+- TODO [PRO]: Add 'diff' command to show symbol-level diffs between versions
+- TODO [PRO]: Add 'refactor' command for automated refactoring operations
+- TODO [PRO]: Add --format sarif for GitHub code scanning integration
+- TODO [PRO]: Add --format csv for spreadsheet analysis
+- TODO [PRO]: Add --profile flag to load predefined configurations (strict, lenient, security)
+- TODO [PRO]: Support reading file lists from stdin (find . -name '*.py' | code-scalpel analyze -)
+- TODO [PRO]: Add --watch flag for continuous file monitoring
+- TODO [PRO]: Implement incremental analysis (only re-analyze changed files)
+- TODO [PRO]: Support LSP-style diagnostics output for editor integration
+- TODO [PRO]: Add --parallel flag for multi-core analysis
+- TODO [PRO]: Implement progress bars for long-running operations
+- TODO [PRO]: Add 'mcp tools' command to list available MCP tools
+- TODO [PRO]: Add 'config show' command to display current configuration
 
-Phase 3 - Output Formats & Reporting:
-- TODO: Add --format markdown for documentation generation
-- TODO: Add --format sarif for GitHub code scanning integration
-- TODO: Add --format csv for spreadsheet analysis
-- TODO: Add --quiet mode for CI/CD pipelines (exit codes only)
-- TODO: Add --verbose mode with detailed progress output
-- TODO: Support streaming JSON output for large projects
-
-Phase 4 - Configuration & Profiles:
-- TODO: Add --profile flag to load predefined configurations (strict, lenient, security)
-- TODO: Support .code-scalpel/cli.yaml for persistent CLI defaults
-- TODO: Add --ignore flag to skip specific files/patterns
-- TODO: Add --include flag for explicit file selection
-- TODO: Support reading file lists from stdin (find . -name '*.py' | code-scalpel analyze -)
-
-Phase 5 - Watch Mode & Incremental Analysis:
-- TODO: Add --watch flag for continuous file monitoring
-- TODO: Implement incremental analysis (only re-analyze changed files)
-- TODO: Add --cache flag to persist analysis results between runs
-- TODO: Support LSP-style diagnostics output for editor integration
-
-Phase 6 - Batch & Parallel Processing:
-- TODO: Add --parallel flag for multi-core analysis
-- TODO: Add --batch flag to process multiple files from a manifest
-- TODO: Implement progress bars for long-running operations
-- TODO: Add --timeout flag to limit analysis time per file
-
-Phase 7 - Integration Commands:
-- TODO: Add 'mcp tools' command to list available MCP tools
-- TODO: Add 'mcp test' command to verify MCP server functionality
-- TODO: Add 'config show' command to display current configuration
-- TODO: Add 'config validate' command to check configuration files
+ENTERPRISE (Advanced Capabilities):
+- TODO [ENTERPRISE]: Add --parser flag to select specific parser backend (ast, ruff, mypy)
+- TODO [ENTERPRISE]: Support all languages in code_parsers (Go, C#, Ruby, Swift, PHP, Kotlin)
+- TODO [ENTERPRISE]: Add analyze subcommand for TypeScript with full type checking
+- TODO [ENTERPRISE]: Support streaming JSON output for large projects
+- TODO [ENTERPRISE]: Add --cache flag to persist analysis results between runs
+- TODO [ENTERPRISE]: Add --batch flag to process multiple files from a manifest
+- TODO [ENTERPRISE]: Add --timeout flag to limit analysis time per file
+- TODO [ENTERPRISE]: Add 'mcp test' command to verify MCP server functionality
+- TODO [ENTERPRISE]: Add 'config validate' command to check configuration files
+- TODO [ENTERPRISE]: Multi-language CLI support with per-language options
+- TODO [ENTERPRISE]: Custom rule definitions and linting profiles
 """
 
 import argparse

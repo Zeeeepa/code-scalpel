@@ -8,6 +8,10 @@
 
 This directory contains Code Scalpel's **security analysis engine**. It provides:
 
+<!-- TODO [COMMUNITY]: Taint analysis and vulnerability detection for Python/Java/JavaScript/TypeScript
+     TODO [PRO]: Real-time scanning with incremental analysis and change tracking
+     TODO [ENTERPRISE]: AI-powered vulnerability discovery and advanced persistent threat detection -->
+
 - **Taint Analysis** - Track untrusted data flow from sources to sinks
 - **Vulnerability Detection** - SQL injection, XSS, command injection, path traversal, etc.
 - **Security Pattern Recognition** - Hardcoded secrets, weak crypto, dangerous patterns
@@ -20,6 +24,11 @@ This directory contains Code Scalpel's **security analysis engine**. It provides
 ## Data Flow
 
 ### Taint Analysis Pipeline
+
+<!-- TODO [COMMUNITY]: Intra-file taint tracking (current)
+     TODO [PRO]: Support for implicit flows (control flow analysis)
+     TODO [ENTERPRISE]: Timing-sensitive taint (transient flows) and probabilistic analysis -->
+
 ```
 Source Code
     ↓
@@ -44,6 +53,11 @@ SecurityAnalyzer.analyze()
        ├─ File operations (open(), unlink())
        ├─ XML parsing (parse(), fromstring())
        └─ LDAP queries (search(), bind())
+
+<!-- TODO [COMMUNITY]: Basic cross-file taint tracking (current)
+     TODO [PRO]: Module-level vulnerability aggregation and dependency analysis
+     TODO [ENTERPRISE]: Distributed vulnerability analysis with shared cache -->
+
     ↓
 Vulnerabilities Detected (with flow path)
 ```
@@ -68,6 +82,11 @@ CrossFileScan.analyze()
        ├─ Source file:line
        ├─ Flow through intermediate files
        └─ Sink file:line
+
+<!-- TODO [COMMUNITY]: OSV database vulnerability checking (current)
+     TODO [PRO]: Supply chain security: SBOM generation and licensing analysis
+     TODO [ENTERPRISE]: Transitive dependency tracking and supply chain attestation -->
+
     ↓
 Cross-File Vulnerabilities (with complete call path)
 ```
@@ -100,24 +119,45 @@ Vulnerability Report
 
 ## Core Modules (4)
 
+<!-- TODO [COMMUNITY]: Basic analyzer, scanner, patterns, sink_detector modules
+     TODO [PRO]: Add behavior analysis module for context-aware detection
+     TODO [ENTERPRISE]: Add ML-based anomaly detector and graph neural network modules -->
+
 | Module | Purpose | Key Classes | Status |
-|--------|---------|------------|--------|
-| **analyzer.py** | Taint tracking & vulnerability detection | `TaintTracker`, `SecurityAnalyzer` | ✅ Stable |
 | **scanner.py** | Vulnerability scanning orchestration | `VulnerabilityScanner`, `ScanResult` | ✅ Stable |
 | **patterns.py** | Security vulnerability patterns | Pattern definitions, CWE mappings | ✅ Stable |
 | **sink_detector.py** | Dangerous sink detection (polyglot) | `SinkDetector`, sink registry | ✅ Stable |
+
+
+<!-- TODO [PRO]: Add PII detection and sensitive data classification
+     TODO [ENTERPRISE]: Add data lineage tracking for compliance (GDPR/CCPA) -->
 
 ---
 
 ## Vulnerability Coverage
 
+<!-- TODO [COMMUNITY]: SQL, NoSQL, LDAP, Command, XXE, SSTI injection detection
+     TODO [PRO]: Add prototype pollution, DOM clobbering, prototype chain pollution
+     TODO [ENTERPRISE]: Add polymorphic injection patterns (polyglot attacks) -->
+
 ### Injection Attacks
 - **SQL Injection (CWE-89)** - Tainted SQL queries
+
+<!-- TODO [PRO]: Add elliptic curve vulnerability detection
+     TODO [ENTERPRISE]: Add cryptographic protocol analysis and hybrid security assessment -->
+
+
+<!-- TODO [ENTERPRISE]: Add code gadget chain detection and deserialization exploit analysis -->
+
 - **NoSQL Injection (CWE-943)** - MongoDB/unstructured injection
 - **LDAP Injection (CWE-90)** - LDAP filter injection
 - **Command Injection (CWE-78)** - OS command execution
 - **XXE (CWE-611)** - XML external entity attacks
 - **SSTI (CWE-1336)** - Server-side template injection
+
+<!-- TODO [PRO]: Add CORS misconfiguration detection
+     TODO [ENTERPRISE]: Add OAuth/OIDC vulnerability analysis and SPA security assessment -->
+
 
 ### Data Exposure
 - **Path Traversal (CWE-22)** - File path traversal

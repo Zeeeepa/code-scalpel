@@ -5,6 +5,10 @@ Handles conversion of relative/absolute paths, workspace detection,
 and common project structure patterns.
 """
 
+# TODO [COMMUNITY]: Basic path resolution for file discovery (current)
+# TODO [PRO]: Add symlink graph tracking and cycle detection
+# TODO [ENTERPRISE]: Add virtual filesystem abstraction for remote path handling
+
 from __future__ import annotations
 
 import os
@@ -18,6 +22,9 @@ class PathResolutionError(Exception):
     """Raised when a file path cannot be resolved."""
 
     pass
+
+    # TODO [PRO]: Add context information to exceptions (project structure, attempted paths)
+    # TODO [ENTERPRISE]: Add recovery suggestions for common path resolution failures
 
 
 def resolve_file_path(
@@ -56,6 +63,10 @@ def resolve_file_path(
         >>> resolve_file_path("src/utils.py")
         "/current/dir/src/utils.py"
     """
+    # TODO [PRO]: Add caching to avoid repeated filesystem lookups
+    # TODO [ENTERPRISE]: Add symbolic link following limits (prevent infinite loops)
+    # TODO [ENTERPRISE]: Add Windows UNC path support (network paths)
+
     path = Path(file_path)
 
     # Case 1: Already absolute
@@ -130,6 +141,10 @@ def get_workspace_root(start_path: Optional[str] = None) -> Optional[str]:
         >>> get_workspace_root("/project/src/utils")
         "/project"  # if /project/.git exists
     """
+    # TODO [PRO]: Add custom marker support (allow user-defined workspace markers)
+    # TODO [ENTERPRISE]: Add multi-root workspace detection (monorepos)
+    # TODO [ENTERPRISE]: Add workspace hierarchy and dependency graph
+
     if start_path is None:
         start_path = os.getcwd()
 
@@ -147,20 +162,23 @@ def get_workspace_root(start_path: Optional[str] = None) -> Optional[str]:
 
 def normalize_path(path: str) -> str:
     """
-    Normalize a path to use forward slashes on all platforms.
+        Normalize a path to use forward slashes on all platforms.
 
-    Args:
-        path: Path to normalize
+        Args:
+            path: Path to normalize
 
-    Returns:
-        Normalized path with forward slashes
+        Returns:
+            Normalized path with forward slashes
 
-    Examples:
-        >>> normalize_path("C:\\\\Users\\\\file.py")
-        "C:/Users/file.py"
+        Examples:
+            >>> normalize_path("C:\\\\Users\\\\file.py")
+            "C:/Users/file.py"
+    # TODO [PRO]: Add support for URL-like paths (file://, http://)
+        # TODO [ENTERPRISE]: Add path canonicalization (resolve .., symlinks, case normalization)
 
-        >>> normalize_path("/home/user/file.py")
-        "/home/user/file.py"
+
+            >>> normalize_path("/home/user/file.py")
+            "/home/user/file.py"
     """
     return str(Path(path)).replace("\\", "/")
 
@@ -177,6 +195,9 @@ def get_relative_path(file_path: str, base_path: str) -> str:
         Relative path from base to target
 
     Examples:
+    # TODO [PRO]: Add path prefix matching for non-relative paths
+    # TODO [ENTERPRISE]: Add cross-filesystem path handling (different drives/mounts)
+
         >>> get_relative_path("/project/src/utils.py", "/project")
         "src/utils.py"
     """

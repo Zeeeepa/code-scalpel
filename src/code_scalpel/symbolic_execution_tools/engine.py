@@ -57,6 +57,115 @@ logger = logging.getLogger(__name__)
 #   - Support dynamic unrolling based on complexity
 #   - Detect and warn on infinite loops
 
+# TODO: Engine Enhancement Roadmap
+# =================================
+#
+# COMMUNITY (Current & Planned):
+# Documentation & Learning:
+# - TODO [COMMUNITY]: Add better error messages for path exploration (current)
+# - TODO [COMMUNITY]: Document symbolic state management
+# - TODO [COMMUNITY]: Add visualization of explored paths
+# - TODO [COMMUNITY]: Create debugging helpers for analysis
+# - TODO [COMMUNITY]: Add path explosion detection and reporting
+# - TODO [COMMUNITY]: Implement graceful degradation on solver timeout
+# - TODO [COMMUNITY]: Create symbolic execution tutorial
+# - TODO [COMMUNITY]: Document PathStatus and AnalysisResult
+# - TODO [COMMUNITY]: Add troubleshooting guide for path explosion
+# - TODO [COMMUNITY]: Create performance tuning guide
+# - TODO [COMMUNITY]: Document cache configuration options
+# - TODO [COMMUNITY]: Add examples for different code patterns
+#
+# Testing & Validation:
+# - TODO [COMMUNITY]: Add integration tests for path exploration
+# - TODO [COMMUNITY]: Create test suite for different Python versions
+# - TODO [COMMUNITY]: Add regression tests for engine behavior
+# - TODO [COMMUNITY]: Document test execution procedure
+# - TODO [COMMUNITY]: Add test coverage reporting
+#
+# User Experience:
+# - TODO [COMMUNITY]: Improve error messages with suggestions
+# - TODO [COMMUNITY]: Add progress reporting for long-running analysis
+# - TODO [COMMUNITY]: Implement analysis cancellation support
+# - TODO [COMMUNITY]: Add memory usage warnings
+#
+# PRO (Enhanced Features):
+# Core Engine Capabilities:
+# - TODO [PRO]: Implement concurrent path exploration
+# - TODO [PRO]: Add memory-efficient state tracking
+# - TODO [PRO]: Support partial path exploration
+# - TODO [PRO]: Implement symbolic array indexing
+# - TODO [PRO]: Add state merging heuristics
+# - TODO [PRO]: Support function summaries for better performance
+# - TODO [PRO]: Implement path ranking by feasibility
+# - TODO [PRO]: Add integration with external solvers (CVC4, Yices)
+# - TODO [PRO]: Implement loop widening algorithms
+# - TODO [PRO]: Support recursive function analysis
+#
+# Analysis Enhancements:
+# - TODO [PRO]: Add interprocedural analysis
+# - TODO [PRO]: Implement context-sensitive analysis
+# - TODO [PRO]: Support module-level analysis
+# - TODO [PRO]: Add call graph construction
+# - TODO [PRO]: Implement data flow analysis
+# - TODO [PRO]: Support def-use chain analysis
+# - TODO [PRO]: Add control flow graph construction
+#
+# Data Type Support:
+# - TODO [PRO]: Add symbolic List/Array support
+# - TODO [PRO]: Implement symbolic Dict/Map support
+# - TODO [PRO]: Support symbolic Set operations
+# - TODO [PRO]: Implement symbolic Tuple analysis
+# - TODO [PRO]: Add string length tracking
+# - TODO [PRO]: Support symbolic slice operations
+#
+# Performance & Optimization:
+# - TODO [PRO]: Implement constraint caching
+# - TODO [PRO]: Add path memoization
+# - TODO [PRO]: Support incremental re-analysis
+# - TODO [PRO]: Implement dead code elimination
+# - TODO [PRO]: Add solver result caching
+# - TODO [PRO]: Support parallel path exploration
+#
+# Debugging & Analysis Tools:
+# - TODO [PRO]: Add path visualization tools
+# - TODO [PRO]: Implement constraint visualization
+# - TODO [PRO]: Add execution trace generation
+# - TODO [PRO]: Support breakpoint-style debugging
+# - TODO [PRO]: Implement variable watch functionality
+#
+# ENTERPRISE (Advanced Capabilities):
+# Distributed & Scalability:
+# - TODO [ENTERPRISE]: Implement distributed engine via MCP server
+# - TODO [ENTERPRISE]: Add persistent cache for analysis results
+# - TODO [ENTERPRISE]: Support multi-language symbolic execution
+# - TODO [ENTERPRISE]: Implement custom path exploration strategies
+# - TODO [ENTERPRISE]: Add dataflow-aware state management
+# - TODO [ENTERPRISE]: Support incremental re-analysis
+# - TODO [ENTERPRISE]: Implement parallel constraint solving
+# - TODO [ENTERPRISE]: Add human-in-the-loop annotation support
+# - TODO [ENTERPRISE]: Support cluster-based distributed analysis
+# - TODO [ENTERPRISE]: Implement load balancing for path exploration
+#
+# Advanced Analysis Capabilities:
+# - TODO [ENTERPRISE]: Implement vulnerability prediction
+# - TODO [ENTERPRISE]: Add exploit chain detection
+# - TODO [ENTERPRISE]: Support zero-day vulnerability detection
+# - TODO [ENTERPRISE]: Implement behavior-based anomaly detection
+# - TODO [ENTERPRISE]: Add ML-based false positive filtering
+# - TODO [ENTERPRISE]: Support supply chain attack detection
+# - TODO [ENTERPRISE]: Implement semantic code similarity
+# - TODO [ENTERPRISE]: Add automatic remediation suggestions
+#
+# Integration & Intelligence:
+# - TODO [ENTERPRISE]: Add SIEM integration
+# - TODO [ENTERPRISE]: Support compliance reporting
+# - TODO [ENTERPRISE]: Implement audit trail logging
+# - TODO [ENTERPRISE]: Add multi-tenant architecture
+# - TODO [ENTERPRISE]: Support policy enforcement
+# - TODO [ENTERPRISE]: Implement continuous monitoring
+# - TODO [ENTERPRISE]: Add automated triage workflows
+# - TODO [ENTERPRISE]: Support vulnerability management integration
+
 
 class PathStatus(Enum):
     """Status of an explored execution path."""

@@ -7,6 +7,44 @@ This module detects contract breaches across language boundaries, such as:
 - Java POJO field renames breaking TypeScript interfaces
 - REST endpoint path changes breaking frontend calls
 - Response format changes breaking client expectations
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core Functionality):
+1. TODO: Implement basic field type mismatch detection across languages
+2. TODO: Add REST endpoint change detection (path, method, status codes)
+3. TODO: Create interface contract matching algorithm
+4. TODO: Implement version comparison for API contracts
+5. TODO: Add breach severity calculation with heuristics
+6. TODO: Create comprehensive logging for contract analysis
+7. TODO: Document contract breach categories with examples
+8. TODO: Implement POJO to TypeScript interface mapping
+9. TODO: Add JSON schema validation against contracts
+10. TODO: Create CLI integration for contract breach reporting
+
+PRO TIER (Enhanced Features):
+11. TODO: Add GraphQL schema contract detection
+12. TODO: Implement OpenAPI/Swagger contract analysis
+13. TODO: Add gRPC proto contract validation
+14. TODO: Create custom breach type plugin system
+15. TODO: Implement real-time contract monitoring
+16. TODO: Add contract evolution tracking over time
+17. TODO: Create intelligent breach fix suggestions
+18. TODO: Implement field aliasing detection (@JsonProperty, etc.)
+19. TODO: Add response transformation breach detection
+20. TODO: Create contract diff visualization tools
+21. TODO: Implement preview mode for potential breaches
+
+ENTERPRISE TIER (Advanced Capabilities):
+22. TODO: Build ML-based breach prediction system
+23. TODO: Implement distributed contract analysis for large projects
+24. TODO: Create cross-organization contract federation system
+25. TODO: Add blockchain-based contract audit trails
+26. TODO: Implement AI-powered fix generation for breaches
+27. TODO: Build enterprise contract governance system
+28. TODO: Add compliance checking against contract standards
+29. TODO: Implement quantum-safe contract hashing
+30. TODO: Create federated contract registry across orgs
 """
 
 from __future__ import annotations

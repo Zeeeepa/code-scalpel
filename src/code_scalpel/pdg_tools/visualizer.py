@@ -20,6 +20,46 @@ from graphviz import Digraph
 #     - Suggest interesting subgraphs based on history
 #     - Generate heatmaps of high-risk code areas
 
+"""
+TODO ITEMS:
+
+COMMUNITY TIER (Basic Visualization):
+1. TODO: Implement Graphviz DOT file generation
+2. TODO: Add PNG/SVG export for visualization
+3. TODO: Create basic node coloring by type
+4. TODO: Implement edge styling by dependency type
+5. TODO: Add legend and node/edge labels
+6. TODO: Create layout customization (hierarchical, circular)
+7. TODO: Implement PDF export for reports
+8. TODO: Add graph clustering visualization
+9. TODO: Create basic filtering UI
+10. TODO: Document visualization formats and options
+
+PRO TIER (Advanced Visualization):
+11. TODO: Build interactive web UI (React/Vue/D3.js)
+12. TODO: Implement zoom and pan capabilities
+13. TODO: Add search and highlight features
+14. TODO: Create code preview on node hover
+15. TODO: Implement jump-to-source functionality
+16. TODO: Add real-time visualization updates
+17. TODO: Create custom node styling and coloring
+18. TODO: Implement focus+context navigation
+19. TODO: Add graph layout algorithms (force-directed, hierarchical)
+20. TODO: Support multiple PDG visualization formats
+
+ENTERPRISE TIER (Scalability & Intelligence):
+21. TODO: Implement distributed graph visualization
+22. TODO: Add streaming visualization for large PDGs
+23. TODO: Create progressive rendering for real-time updates
+24. TODO: Implement collaborative visualization for teams
+25. TODO: Add visualization analytics and heatmaps
+26. TODO: Support augmented reality PDG visualization
+27. TODO: Create AI-powered graph layout optimization
+28. TODO: Implement 3D visualization for complex dependencies
+29. TODO: Add quantum circuit visualization
+30. TODO: Create blockchain-based visualization provenance
+"""
+
 
 class VisualizationFormat(Enum):
     """Supported visualization output formats."""

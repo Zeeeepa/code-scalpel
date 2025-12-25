@@ -71,7 +71,7 @@ class TestTaintTrackerPerfectCoverage:
         The code has: `for _ in range(10):` - we need to exhaust all 10 iterations
         without finding a config file OR hitting the root directory.
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             _find_config_file,
         )
 

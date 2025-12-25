@@ -26,21 +26,43 @@ class BaseNormalizer(ABC):
         >>> ir.source_language
         'python'
 
-    [20251220_TODO] Add metadata schema for preserving language-specific info:
-        - Type annotations and generics
-        - Access modifiers (public/private/protected)
-        - Documentation/docstrings
-        - Decorator metadata across all languages
+    TODO ITEMS:
 
-    [20251220_TODO] Implement IR validation framework:
-        - Type schema validation for created IR nodes
-        - Consistency checks across polyglot projects
-        - Warning on type mismatches in cross-language code
+    COMMUNITY TIER (Basic AST/CST Normalization):
+    1. TODO: Implement basic statement normalization (assignments, calls, returns)
+    2. TODO: Support function and class definition parsing
+    3. TODO: Handle control flow statements (if/else, loops, try/catch)
+    4. TODO: Normalize binary/unary operations and comparisons
+    5. TODO: Support variable declarations and parameter lists
+    6. TODO: Create SourceLocation tracking for all nodes
+    7. TODO: Implement error reporting with line/column information
+    8. TODO: Add basic expression parsing (literals, names, subscripts)
+    9. TODO: Support list/dict/set literals
+    10. TODO: Create comprehensive test suite for basic normalization
 
-    [20251220_TODO] Add caching interface:
-        - Memoize normalized subtrees
-        - Cache common patterns (arithmetic, calls, assignments)
-        - Reuse normalized nodes for duplicate code
+    PRO TIER (Advanced Language Features):
+    11. TODO: Add metadata schema for type annotations and generics
+    12. TODO: Preserve access modifiers (public/private/protected)
+    13. TODO: Extract and normalize documentation/docstrings
+    14. TODO: Support decorator metadata across all languages
+    15. TODO: Implement IR validation framework with schema checking
+    16. TODO: Add consistency checks across polyglot projects
+    17. TODO: Support generic type parameters and constraints
+    18. TODO: Normalize async/await and generator functions
+    19. TODO: Add language-specific semantic metadata
+    20. TODO: Create advanced error recovery with suggestions
+
+    ENTERPRISE TIER (Polyglot & Advanced Analysis):
+    21. TODO: Implement IR validation with warning on type mismatches
+    22. TODO: Add caching interface for normalized subtrees
+    23. TODO: Implement memoization of common patterns
+    24. TODO: Support cross-language type resolution
+    25. TODO: Add distributed normalization for large projects
+    26. TODO: Implement ML-based pattern recognition for optimization
+    27. TODO: Support encrypted metadata preservation
+    28. TODO: Add AI-driven semantic enrichment
+    29. TODO: Implement quantum-safe hash signatures for IR
+    30. TODO: Create multi-language consistency analyzer
     """
 
     @property

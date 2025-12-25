@@ -3,11 +3,23 @@
 **Version:** 3.0.5 "Ninja Consolidation"  
 **Release Date:** December 23, 2025
 
+<!-- TODO [COMMUNITY]: Maintain documentation alignment with latest release (current)
+     TODO [PRO]: Add architecture diagrams for each module
+     TODO [ENTERPRISE]: Add automated API documentation generation -->
+
 ## Overview
 
 This is the main source directory for Code Scalpel, an MCP server toolkit for AI-driven surgical code analysis and modification.
 
+<!-- TODO [COMMUNITY]: Core module status and dependencies (current)
+     TODO [PRO]: Performance benchmarks for each module
+     TODO [ENTERPRISE]: Distributed deployment topology diagrams -->
+
 ## Module Organization
+
+<!-- TODO [COMMUNITY]: Organization by capability tier (current)
+     TODO [PRO]: Cross-module dependency analysis and import tracking
+     TODO [ENTERPRISE]: Microservices decomposition for independent deployment -->
 
 ### Core Analysis
 - **ast_tools/** - AST parsing and analysis
@@ -70,6 +82,10 @@ from code_scalpel import run_server
 run_server(port=8080)
 ```
 
+<!-- TODO [COMMUNITY]: Basic usage examples (current)
+     TODO [PRO]: Advanced configuration and profiles
+     TODO [ENTERPRISE]: Custom integration patterns and deployment scenarios -->
+
 ## Module Statistics (v3.0.5)
 
 | Module | LOC | Status | Coverage |
@@ -81,6 +97,10 @@ run_server(port=8080)
 | pdg_tools | 120K+ | Stable | 100% |
 | mcp | 4K+ | Stable | 100% |
 | **Total** | **~1.2M LOC** | | **94.86%** |
+
+<!-- TODO [COMMUNITY]: Baseline metrics and status tracking (current)
+     TODO [PRO]: Performance regression detection across releases
+     TODO [ENTERPRISE]: Automated metric collection and trending -->
 
 ## Key Features (v3.0.5)
 
@@ -115,6 +135,10 @@ pytest tests/test_symbolic_execution/
 pytest --cov=src/code_scalpel --cov-report=html
 ```
 
+<!-- TODO [COMMUNITY]: Standard test execution (current)
+     TODO [PRO]: Performance testing and benchmarks
+     TODO [ENTERPRISE]: Distributed testing across agents -->
+
 ## Development
 
 ```bash
@@ -129,6 +153,10 @@ ruff check src/code_scalpel --fix
 mypy src/code_scalpel
 ```
 
+<!-- TODO [COMMUNITY]: Standard development workflow (current)
+     TODO [PRO]: IDE integration setup and debugging
+     TODO [ENTERPRISE]: Custom development environment provisioning -->
+
 ## Module READMEs
 
 Every subdirectory contains a README.md with detailed module documentation:
@@ -137,6 +165,10 @@ Every subdirectory contains a README.md with detailed module documentation:
 - Usage examples
 - Integration points
 - Version status
+
+<!-- TODO [COMMUNITY]: Documentation completeness checklist (current)
+     TODO [PRO]: Auto-generated API docs from docstrings
+     TODO [ENTERPRISE]: Multi-language documentation support -->
 
 ## v3.0.5 Changes
 
@@ -150,6 +182,10 @@ Every subdirectory contains a README.md with detailed module documentation:
 - Fixed MCP tool count (19 → 20)
 - Created READMEs for all 33 directories
 - Archived old cache implementations with explanation
+
+<!-- TODO [COMMUNITY]: Release notes and change tracking (current)
+     TODO [PRO]: Migration guides and breaking changes documentation
+     TODO [ENTERPRISE]: Upgrade automation and compatibility matrices -->
 
 ## Contact
 

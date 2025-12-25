@@ -5,6 +5,44 @@ Tamper-Resistant Policy Enforcement.
 
 This module provides tamper-resistant policy enforcement to prevent agents
 from circumventing policy controls.
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core Functionality):
+1. TODO: Implement policy file integrity verification (SHA-256)
+2. TODO: Add read-only file permissions enforcement
+3. TODO: Implement policy modification prevention
+4. TODO: Create TOTP-based human override system
+5. TODO: Add comprehensive audit logging integration
+6. TODO: Implement override code generation
+7. TODO: Create override timeout enforcement
+8. TODO: Add override justification tracking
+9. TODO: Implement file permission monitoring
+10. TODO: Document tamper resistance architecture
+
+PRO TIER (Enhanced Features):
+11. TODO: Add SELinux/AppArmor policy file protection
+12. TODO: Implement file system watcher for unauthorized modifications
+13. TODO: Create email notification for override requests
+14. TODO: Add multi-factor authentication for overrides
+15. TODO: Implement override approval workflows
+16. TODO: Create role-based override permissions
+17. TODO: Add geographic location verification for overrides
+18. TODO: Implement device fingerprinting for overrides
+19. TODO: Create policy change notifications
+20. TODO: Add encrypted storage for override secrets
+
+ENTERPRISE TIER (Advanced Capabilities):
+21. TODO: Build seccomp sandbox for agent process isolation
+22. TODO: Implement containerized policy engine with immutable images
+23. TODO: Add TPM-backed attestation for policy integrity
+24. TODO: Create hardware security module (HSM) integration
+25. TODO: Implement quantum-safe cryptographic protection
+26. TODO: Build federated tamper resistance across orgs
+27. TODO: Add blockchain-based tamper proof audit trail
+28. TODO: Implement zero-knowledge proof integrity verification
+29. TODO: Create AI-powered anomaly detection for tampering
+30. TODO: Build distributed consensus for policy verification
 """
 
 import hashlib
@@ -39,6 +77,13 @@ class TamperResistance:
     - Comprehensive audit logging
     """
 
+    # TODO [COMMUNITY]: Basic file locking and hash verification
+    # TODO [PRO]: Add SELinux/AppArmor policy file protection
+    # TODO [PRO]: Add file system watcher for unauthorized modification attempts
+    # TODO [ENTERPRISE]: Add seccomp sandbox for agent process isolation
+    # TODO [ENTERPRISE]: Add containerized policy engine with immutable images
+    # TODO [ENTERPRISE]: Add TPM-backed attestation for policy integrity
+
     def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """
         Initialize tamper resistance system.
@@ -61,6 +106,10 @@ class TamperResistance:
 
         # [20251216_FEATURE] v2.5.0 Guardian P0 - File locking
         """
+        # TODO [PRO]: Add file encryption with read-only key
+        # TODO [ENTERPRISE]: Add immutable file flag (chattr +i on Linux)
+        # TODO [ENTERPRISE]: Add kernel module for file access control
+
         # Use policy_path parent as base directory for relative paths
         policy_dir = self.policy_path.parent
 
@@ -77,15 +126,19 @@ class TamperResistance:
 
     def verify_policy_integrity(self) -> bool:
         """
-        Verify policy file has not been tampered with.
+                Verify policy file has not been tampered with.
 
-        # [20251216_FEATURE] v2.5.0 Guardian P0 - Integrity check
+                # [20251216_FEATURE] v2.5.0 Guardian P0 - Integrity check
 
-        Returns:
-            True if policy is intact, raises error if tampered
+                Returns:
+                    True if policy is intact, raises error if tampered
+        # TODO [PRO]: Add rollback capability to last known-good version
+                # TODO [ENTERPRISE]: Add incremental hash verification (Merkle tree)
+                # TODO [ENTERPRISE]: Add cryptographic chain of custody verification
 
-        Raises:
-            TamperDetectedError: If policy integrity check fails
+
+                Raises:
+                    TamperDetectedError: If policy integrity check fails
         """
         current_hash = self._hash_policy_file()
 

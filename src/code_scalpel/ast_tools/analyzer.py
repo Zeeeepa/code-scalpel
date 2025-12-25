@@ -46,10 +46,89 @@ class ASTAnalyzer:
         self.ast_cache: dict[str, ast.AST] = {}
         self.cache_enabled = cache_enabled
         self.current_context: list[str] = []  # Track current function/class context
-        # [20251221_FEATURE] TODO: Add type hint inference from code analysis
-        # [20251221_FEATURE] TODO: Support async function metrics and analysis
-        # [20251221_ENHANCEMENT] TODO: Add data flow analysis for variable usage tracking
-        # [20251221_ENHANCEMENT] TODO: Support class inheritance metrics and depth calculation
+        # ====================================================================
+        # TIER 1: COMMUNITY (Free - High Priority)
+        # ====================================================================
+        # [20251224_TIER1_TODO] FEATURE: Enhanced caching with LRU eviction
+        #   Purpose: Improve performance for large codebases
+        #   Steps:
+        #     1. Implement bounded cache size with LRU eviction
+        #     2. Add cache hit/miss statistics
+        #     3. Support cache invalidation by file path
+        #     4. Add 15+ tests for cache behavior
+
+        # [20251224_TIER1_TODO] FEATURE: Improve function metrics accuracy
+        #   Purpose: Provide better code quality insights
+        #   Steps:
+        #     1. Track decorator information (staticmethod, classmethod, property)
+        #     2. Detect generator functions and coroutines
+        #     3. Support type hints in complexity calculation
+        #     4. Add 20+ tests for decorator and generator detection
+
+        # [20251224_TIER1_TODO] TEST: Adversarial tests for code analysis
+        #   - Empty functions, deeply nested code
+        #   - Unicode identifiers, edge case naming
+        #   - Large classes with minimal functions
+
+        # ====================================================================
+        # TIER 2: PRO (Commercial - Medium Priority)
+        # ====================================================================
+        # [20251224_TIER2_TODO] FEATURE: Type hint inference from code analysis
+        #   Purpose: Enable type checking without explicit annotations
+        #   Steps:
+        #     1. Infer return types from return statements
+        #     2. Infer parameter types from usage patterns
+        #     3. Support PEP 484 annotations
+        #     4. Generate type hints for untyped code
+        #     5. Add 30+ tests for type inference accuracy
+
+        # [20251224_TIER2_TODO] FEATURE: Support async function metrics and analysis
+        #   Purpose: Analyze modern async/await patterns
+        #   Steps:
+        #     1. Detect async/await patterns
+        #     2. Track coroutine awaits and yields
+        #     3. Analyze async context managers
+        #     4. Calculate async complexity metrics
+        #     5. Add 25+ tests for async detection
+
+        # [20251224_TIER2_TODO] ENHANCEMENT: Data flow analysis for variable usage
+        #   Purpose: Track variable lifecycle and detect issues
+        #   Steps:
+        #     1. Build def-use chains for all variables
+        #     2. Detect uninitialized variable uses
+        #     3. Identify dead assignments
+        #     4. Track variable scope and visibility
+        #     5. Add 35+ tests for def-use analysis
+
+        # ====================================================================
+        # TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        # ====================================================================
+        # [20251224_TIER3_TODO] FEATURE: Class inheritance analysis
+        #   Purpose: Analyze object-oriented design patterns
+        #   Steps:
+        #     1. Calculate inheritance depth
+        #     2. Detect diamond inheritance patterns
+        #     3. Analyze method override patterns
+        #     4. Calculate class cohesion metrics
+        #     5. Add 25+ tests for inheritance analysis
+
+        # [20251224_TIER3_TODO] FEATURE: Performance optimization analysis
+        #   Purpose: Identify inefficient code patterns
+        #   Steps:
+        #     1. Detect inefficient patterns (list comprehensions vs loops)
+        #     2. Identify expensive operations in loops
+        #     3. Suggest optimization opportunities
+        #     4. Calculate complexity vs performance impact
+        #     5. Add 30+ tests for pattern detection
+
+        # [20251224_TIER3_TODO] ENHANCEMENT: Security-focused analysis
+        #   Purpose: Extend vulnerability detection
+        #   Steps:
+        #     1. Add more vulnerability types beyond SQL injection
+        #     2. Implement taint tracking for sensitive operations
+        #     3. Detect hardcoded secrets and credentials
+        #     4. Cross-file vulnerability tracking
+        #     5. Add 40+ tests for security patterns
 
     def parse_to_ast(self, code: str) -> ast.AST:
         """Parse Python code into an AST with caching."""

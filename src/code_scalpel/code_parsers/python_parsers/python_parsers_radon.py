@@ -10,12 +10,100 @@ This module provides structured parsing of Radon output and metrics.
 Implementation Status: NOT IMPLEMENTED
 Priority: P2 - HIGH
 
-TODO Features:
-    - [ ] P2-RADON-001: Parse Radon CC (Cyclomatic Complexity) output
-    - [ ] P2-RADON-002: Parse Radon MI (Maintainability Index) output
-    - [ ] P2-RADON-003: Cognitive complexity analysis
-    - [ ] P2-RADON-004: Function and class metrics
-    - [ ] P2-RADON-005: Complexity grading system
+============================================================================
+TODO ITEMS: python_parsers_radon.py
+============================================================================
+COMMUNITY TIER - Core Complexity Metrics (P0-P2) [NOT IMPLEMENTED]
+============================================================================
+
+[P0_CRITICAL] Basic Complexity Analysis:
+    - Parse Radon CC (Cyclomatic Complexity) output
+    - Parse Radon MI (Maintainability Index) output
+    - Function-level complexity metrics
+    - Class-level complexity aggregation
+    - Complexity grade classification (A-F)
+    - Test count: 45 tests
+
+[P1_HIGH] Advanced Metrics:
+    - Cognitive complexity calculation
+    - Halstead metrics integration
+    - Nesting depth tracking
+    - Parameter complexity
+    - Test count: 40 tests
+
+[P2_MEDIUM] Complexity Reporting:
+    - Per-file complexity summary
+    - High-complexity item identification
+    - Complexity trend visualization
+    - Risk level categorization
+    - Test count: 35 tests
+
+[P2_MEDIUM] Configuration and Thresholds:
+    - Configurable complexity thresholds
+    - Per-project grade standards
+    - Custom metric calculations
+    - Test count: 25 tests
+
+============================================================================
+PRO TIER - Advanced Complexity Analysis (P1-P3)
+============================================================================
+
+[P1_HIGH] Detailed Metrics:
+    - Lines of Code (LOC) breakdown
+    - Logical LOC calculation
+    - Comment density analysis
+    - Blank line ratio
+    - Test count: 40 tests
+
+[P1_HIGH] Code Quality Indicators:
+    - Maintainability Index components
+    - Code smell correlation
+    - Refactoring priority scoring
+    - Test count: 45 tests
+
+[P2_MEDIUM] Comparative Analysis:
+    - Complexity trends over time
+    - Peer comparison (similar projects)
+    - Industry benchmark comparison
+    - Test count: 35 tests
+
+[P3_LOW] Advanced Reporting:
+    - Complexity heat maps
+    - Interactive complexity dashboards
+    - Complexity distribution charts
+    - Test count: 30 tests
+
+============================================================================
+ENTERPRISE TIER - Enterprise Complexity Management (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Project-Wide Analysis:
+    - Multi-module complexity aggregation
+    - Package-level complexity metrics
+    - Dependency complexity impact
+    - Test count: 50 tests
+
+[P2_MEDIUM] Quality Gates:
+    - Complexity-based CI/CD gates
+    - Automated complexity enforcement
+    - Complexity SLA tracking
+    - Test count: 40 tests
+
+[P3_LOW] Strategic Metrics:
+    - Technical debt quantification
+    - Refactoring ROI estimation
+    - Complexity reduction planning
+    - Test count: 35 tests
+
+[P4_LOW] ML-Driven Insights:
+    - Complexity prediction models
+    - Automated refactoring suggestions
+    - Risk assessment algorithms
+    - Test count: 30 tests
+
+============================================================================
+TOTAL TEST ESTIMATE: 450 tests (145 COMMUNITY + 150 PRO + 155 ENTERPRISE)
+============================================================================
 
 ==============================================================================
 PLANNED [P2-RADON-001]: RadonParser for complexity metrics

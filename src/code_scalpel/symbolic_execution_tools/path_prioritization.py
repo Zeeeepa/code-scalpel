@@ -40,6 +40,98 @@ TODO: Integration features
     - [ ] Configuration via YAML/JSON
     - [ ] Real-time strategy visualization
     - [ ] Export exploration traces for analysis
+
+# TODO: PathPrioritizer Enhancement Roadmap
+# ==========================================
+#
+# COMMUNITY (Current & Planned):
+# - TODO [COMMUNITY]: Add documentation and examples (current)
+# - TODO [COMMUNITY]: Create strategy comparison guide
+# - TODO [COMMUNITY]: Document heuristic functions
+# - TODO [COMMUNITY]: Add performance benchmarks
+# - TODO [COMMUNITY]: Create configuration guide
+# - TODO [COMMUNITY]: Document path scoring algorithm
+# - TODO [COMMUNITY]: Add troubleshooting guide
+# - TODO [COMMUNITY]: Create best practices guide
+# - TODO [COMMUNITY]: Add API reference documentation
+#
+# COMMUNITY Examples & Tutorials:
+# - TODO [COMMUNITY]: Add basic prioritization example
+# - TODO [COMMUNITY]: Create coverage-guided example
+# - TODO [COMMUNITY]: Add security-focused example
+# - TODO [COMMUNITY]: Document complexity-based example
+# - TODO [COMMUNITY]: Create custom strategy example
+# - TODO [COMMUNITY]: Add multi-strategy example
+# - TODO [COMMUNITY]: Create visualization example
+#
+# COMMUNITY Testing & Validation:
+# - TODO [COMMUNITY]: Add path scoring tests
+# - TODO [COMMUNITY]: Create strategy selection tests
+# - TODO [COMMUNITY]: Add adaptive switching tests
+# - TODO [COMMUNITY]: Test edge cases in prioritization
+# - TODO [COMMUNITY]: Create regression test suite
+# - TODO [COMMUNITY]: Add integration tests
+#
+# PRO (Enhanced Features):
+# - TODO [PRO]: Implement coverage-guided exploration
+# - TODO [PRO]: Add security-focused prioritization
+# - TODO [PRO]: Support complexity-based strategies
+# - TODO [PRO]: Implement heuristic functions
+# - TODO [PRO]: Add adaptive strategy switching
+# - TODO [PRO]: Support custom strategies
+# - TODO [PRO]: Implement multi-armed bandit
+# - TODO [PRO]: Add exploration visualization
+# - TODO [PRO]: Support performance profiling
+# - TODO [PRO]: Implement incremental analysis
+# - TODO [PRO]: Add strategy composition support
+# - TODO [PRO]: Support weighted strategy combinations
+# - TODO [PRO]: Implement coverage metrics tracking
+# - TODO [PRO]: Add sink distance heuristics
+# - TODO [PRO]: Support taint flow likelihood estimation
+# - TODO [PRO]: Implement constraint complexity scoring
+# - TODO [PRO]: Add path explosion detection
+# - TODO [PRO]: Support exploration timeout management
+# - TODO [PRO]: Implement memoization for path scores
+# - TODO [PRO]: Add statistics collection
+# - TODO [PRO]: Support real-time progress reporting
+# - TODO [PRO]: Add path graph visualization
+# - TODO [PRO]: Implement strategy comparison charts
+# - TODO [PRO]: Support heatmap generation
+# - TODO [PRO]: Create exploration timeline views
+# - TODO [PRO]: Add performance metric dashboards
+# - TODO [PRO]: Support trace export functionality
+# - TODO [PRO]: Implement interactive exploration tools
+#
+# ENTERPRISE (Advanced Capabilities):
+# - TODO [ENTERPRISE]: Implement ML-based prioritization
+# - TODO [ENTERPRISE]: Add distributed exploration
+# - TODO [ENTERPRISE]: Support polyglot path exploration
+# - TODO [ENTERPRISE]: Implement advanced heuristics
+# - TODO [ENTERPRISE]: Add continuous learning mode
+# - TODO [ENTERPRISE]: Support predictive path selection
+# - TODO [ENTERPRISE]: Implement automated strategy tuning
+# - TODO [ENTERPRISE]: Add exploitation path detection
+# - TODO [ENTERPRISE]: Support vulnerability pattern learning
+# - TODO [ENTERPRISE]: Implement visualization dashboards
+# - TODO [ENTERPRISE]: Add reinforcement learning for strategies
+# - TODO [ENTERPRISE]: Support adaptive timeout tuning
+# - TODO [ENTERPRISE]: Implement multi-armed bandit optimization
+# - TODO [ENTERPRISE]: Add Thompson sampling for strategies
+# - TODO [ENTERPRISE]: Support contextual bandits
+# - TODO [ENTERPRISE]: Implement cumulative regret analysis
+# - TODO [ENTERPRISE]: Add strategy performance prediction
+# - TODO [ENTERPRISE]: Support learning curve estimation
+# - TODO [ENTERPRISE]: Implement ensemble strategy selection
+# - TODO [ENTERPRISE]: Real-time prioritization during execution
+# - TODO [ENTERPRISE]: Support multi-model strategy selection
+# - TODO [ENTERPRISE]: Implement GPU-accelerated prioritization
+# - TODO [ENTERPRISE]: Add distributed path exploration
+# - TODO [ENTERPRISE]: Support cross-project learning
+# - TODO [ENTERPRISE]: Implement federated strategy learning
+# - TODO [ENTERPRISE]: Add continuous model updates
+# - TODO [ENTERPRISE]: Support telemetry and monitoring
+# - TODO [ENTERPRISE]: Implement SLA-based time allocation
+# - TODO [ENTERPRISE]: Add compliance-aware path prioritization
 """
 
 from dataclasses import dataclass

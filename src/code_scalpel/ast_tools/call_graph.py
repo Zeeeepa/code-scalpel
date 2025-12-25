@@ -45,6 +45,159 @@ class CallGraphResult:
 class CallGraphBuilder:
     """
     Builds a static call graph for a Python project.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Basic call graph building
+      - Parse Python files and extract function definitions
+      - Track function calls within each function
+      - Build adjacency list representation
+      - Handle basic import resolution
+      - Add 25+ tests for core functionality
+
+    [20251224_TIER1_TODO] FEATURE: Entry point detection
+      - Detect main() functions
+      - Detect CLI decorators (click.command, etc.)
+      - Identify __name__ == "__main__" blocks
+      - Mark entry points in graph
+      - Add 15+ tests for entry point detection
+
+    [20251224_TIER1_TODO] FEATURE: Basic visualization
+      - Generate simple text representation
+      - Output to stdout
+      - Show call relationships
+      - Add 10+ tests for visualization
+
+    [20251224_TIER1_TODO] FEATURE: Circular import detection
+      - Find import cycles in project
+      - Report cycle paths
+      - Handle complex import graphs
+      - Add 20+ tests for cycle detection
+
+    [20251224_TIER1_TODO] TEST: Adversarial tests
+      - Empty files, single function projects
+      - Deeply nested calls, recursive functions
+      - Large projects, complex imports
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Dynamic call detection
+      Purpose: Track reflection and dynamic imports
+      Steps:
+        1. Detect getattr() calls
+        2. Track __getattribute__ overrides
+        3. Detect importlib.import_module() patterns
+        4. Detect __import__() usage
+        5. Mark as potential calls with confidence
+        6. Add 30+ tests for dynamic detection
+
+    [20251224_TIER2_TODO] FEATURE: Call frequency and confidence scoring
+      Purpose: Quantify call reliability
+      Steps:
+        1. Count call occurrences per pair
+        2. Track conditional calls (if/try blocks)
+        3. Score probability of execution
+        4. Report confidence levels
+        5. Add 25+ tests for scoring
+
+    [20251224_TIER2_TODO] FEATURE: Support async/await call graph
+      Purpose: Handle modern async patterns
+      Steps:
+        1. Detect AsyncFunctionDef definitions
+        2. Track await expressions
+        3. Handle async context managers
+        4. Detect asyncio.create_task() patterns
+        5. Build async call graph
+        6. Add 25+ tests for async support
+
+    [20251224_TIER2_TODO] FEATURE: Framework-specific call patterns
+      Purpose: Understand framework conventions
+      Steps:
+        1. Django URL routing (url() patterns)
+        2. FastAPI route decorators (app.get, app.post)
+        3. Flask route registration
+        4. Middleware chains
+        5. Callback registration patterns
+        6. Add 30+ tests for framework patterns
+
+    [20251224_TIER2_TODO] ENHANCEMENT: Mermaid diagram generation
+      Purpose: Better visualization capabilities
+      Steps:
+        1. Generate Mermaid syntax
+        2. Support multiple diagram styles
+        3. Color-code node types
+        4. Add legend and statistics
+        5. Export to HTML
+        6. Add 15+ tests for diagram generation
+
+    [20251224_TIER2_TODO] FEATURE: Cross-file call tracking
+      Purpose: Understand module boundaries
+      Steps:
+        1. Track calls across files
+        2. Mark external module calls
+        3. Resolve imported function calls
+        4. Detect library calls
+        5. Add 25+ tests for cross-file
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Advanced dynamic resolution
+      Purpose: Sophisticated call inference
+      Steps:
+        1. Use type hints for call inference
+        2. Support Protocol/ABC matching
+        3. Dataflow-based resolution
+        4. Symbol table analysis
+        5. Add 35+ tests for resolution
+
+    [20251224_TIER3_TODO] FEATURE: Machine learning call prediction
+      Purpose: Predict likely calls in dynamic code
+      Steps:
+        1. Train on known call patterns
+        2. Predict probable calls
+        3. Confidence scoring
+        4. Learn from user feedback
+        5. Add 30+ tests for ML prediction
+
+    [20251224_TIER3_TODO] FEATURE: Distributed call graph analysis
+      Purpose: Analyze large monorepos efficiently
+      Steps:
+        1. Parallel file parsing
+        2. Incremental updates
+        3. Caching between runs
+        4. Distributed computation
+        5. Add 25+ tests for distribution
+
+    [20251224_TIER3_TODO] ENHANCEMENT: IDE integration
+      Purpose: Real-time call graph in editor
+      Steps:
+        1. LSP integration
+        2. Real-time updates
+        3. Quick peek implementation
+        4. Go to definition
+        5. Add 20+ tests for IDE features
+
+    [20251224_TIER3_TODO] FEATURE: Advanced visualization
+      Purpose: Interactive call graph exploration
+      Steps:
+        1. Web-based visualization
+        2. Force-directed layout
+        3. Zoom and pan
+        4. Filter by node type
+        5. Search and highlighting
+        6. Add 25+ tests for UI
+
+    [20251224_TIER3_TODO] FEATURE: Performance analysis
+      Purpose: Identify bottleneck functions
+      Steps:
+        1. Integrate with profiling data
+        2. Show call counts from traces
+        3. Identify hot paths
+        4. Suggest optimizations
+        5. Add 20+ tests for performance
     """
 
     def __init__(self, root_path: Path):
@@ -58,15 +211,20 @@ class CallGraphBuilder:
         self.imports: Dict[str, Dict[str, str]] = (
             {}
         )  # file_path -> { alias -> full_name }
-        # [20251221_FEATURE] TODO: Support dynamic call detection (reflection, __getattr__)
-        # [20251221_FEATURE] TODO: Add call frequency and confidence scoring
-        # [20251221_ENHANCEMENT] TODO: Support async/await call graph analysis
-        # [20251221_ENHANCEMENT] TODO: Add framework-specific call patterns (decorators, middleware)
 
     def build(self) -> Dict[str, List[str]]:
         """
         Build the call graph.
         Returns an adjacency list: {"module:caller": ["module:callee", ...]}
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Two-pass graph construction
+          - First pass: collect definitions and imports
+          - Second pass: analyze calls and resolve them
+          - Error handling for malformed code
+          - Add 15+ tests for build process
         """
         # 1. First pass: Collect definitions and imports
         for file_path in self._iter_python_files():
@@ -95,7 +253,54 @@ class CallGraphBuilder:
         return graph
 
     def _iter_python_files(self):
-        """Iterate over all Python files in the project, skipping hidden/ignored dirs."""
+        """
+        Iterate over all Python files in the project, skipping hidden/ignored dirs.
+
+        Yields:
+            Path: Absolute path to each Python file
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Recursively walk directory tree
+          - Use os.walk() for directory traversal
+          - Start from project root
+          - Yield files in consistent order
+          - Add 10+ tests for directory walking
+
+        [20251224_TIER1_TODO] FEATURE: Filter Python files by extension
+          - Check for .py file extension
+          - Skip non-Python files
+          - Handle special cases (__init__.py, setup.py)
+          - Add 8+ tests for file filtering
+
+        [20251224_TIER1_TODO] FEATURE: Skip ignored directories
+          - Skip .git, .venv, venv, __pycache__
+          - Skip node_modules, dist, build
+          - Skip hidden directories (.*)
+          - Add 10+ tests for directory skipping
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Respect .gitignore patterns
+          - Parse .gitignore file
+          - Apply glob patterns
+          - Support negation patterns
+          - Add 12+ tests for gitignore
+
+        [20251224_TIER2_TODO] FEATURE: Handle symbolic links
+          - Detect symlinks to avoid loops
+          - Option to follow symlinks
+          - Track visited inodes
+          - Add 10+ tests for symlinks
+
+        [20251224_TIER2_TODO] FEATURE: Performance optimization
+          - Cache directory structure
+          - Lazy evaluation of files
+          - Parallel file discovery
+          - Add 10+ tests for performance
+        """
         skip_dirs = {
             ".git",
             ".venv",
@@ -112,7 +317,55 @@ class CallGraphBuilder:
                     yield Path(root) / file
 
     def _analyze_definitions(self, tree: ast.AST, rel_path: str):
-        """Extract function/class definitions and imports."""
+        """
+        Extract function/class definitions and imports.
+
+        Args:
+            tree: AST of the file
+            rel_path: Relative path of the file
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Extract function definitions
+          - Walk AST for FunctionDef and AsyncFunctionDef nodes
+          - Store function names in definitions set
+          - Handle nested functions
+          - Add 10+ tests for function extraction
+
+        [20251224_TIER1_TODO] FEATURE: Extract class definitions
+          - Walk AST for ClassDef nodes
+          - Store class names in definitions set
+          - Extract methods from classes
+          - Add 10+ tests for class extraction
+
+        [20251224_TIER1_TODO] FEATURE: Collect import statements
+          - Extract import and from...import statements
+          - Map aliases to full module names
+          - Handle wildcard imports (from x import *)
+          - Add 15+ tests for import collection
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Track relative imports
+          - Resolve relative import dots (.., ...)
+          - Convert relative to absolute paths
+          - Handle package context
+          - Add 10+ tests for relative imports
+
+        [20251224_TIER2_TODO] FEATURE: Extract decorator information
+          - Track decorators on functions and classes
+          - Store decorator metadata
+          - Identify special decorators
+          - Add 10+ tests for decorators
+
+        [20251224_TIER2_TODO] FEATURE: Type hint analysis
+          - Extract type annotations
+          - Store parameter types
+          - Track return types
+          - Add 10+ tests for type hints
+        """
         self.definitions[rel_path] = set()
         self.imports[rel_path] = {}
 
@@ -141,7 +394,59 @@ class CallGraphBuilder:
                     self.imports[rel_path][asname] = full_name
 
     def _analyze_calls(self, tree: ast.AST, rel_path: str) -> Dict[str, List[str]]:
-        """Extract calls from functions and resolve them."""
+        """
+        Extract calls from functions and resolve them.
+
+        Args:
+            tree: AST of the file
+            rel_path: Relative path of the file
+
+        Returns:
+            Dictionary mapping function keys to list of called function names
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Extract function calls by name
+          - Walk AST for Call nodes
+          - Extract function names from ast.Name calls
+          - Track current function scope
+          - Store calls per function
+          - Add 15+ tests for call extraction
+
+        [20251224_TIER1_TODO] FEATURE: Handle attribute method calls
+          - Extract calls like obj.method()
+          - Parse attribute chains
+          - Simplify attribute names
+          - Add 12+ tests for method calls
+
+        [20251224_TIER1_TODO] FEATURE: Resolve local calls
+          - Map called names to definitions
+          - Handle local vs imported functions
+          - Create qualified function names
+          - Add 12+ tests for resolution
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Track call line numbers
+          - Store AST node line information
+          - Create call edges with location data
+          - Support call statistics
+          - Add 10+ tests for line tracking
+
+        [20251224_TIER2_TODO] FEATURE: Detect dynamic calls
+          - Find getattr() calls
+          - Detect __call__ invocations
+          - Handle indirect calls
+          - Add 15+ tests for dynamic detection
+
+        [20251224_TIER2_TODO] FEATURE: Cross-file call resolution
+          - Resolve imported function calls
+          - Handle relative imports
+          - Build cross-file call graphs
+          - Add 15+ tests for cross-file
+        """
         file_graph = {}
 
         class CallVisitor(ast.NodeVisitor):
@@ -236,6 +541,35 @@ class CallGraphBuilder:
 
         Returns:
             CallGraphResult with nodes, edges, and Mermaid diagram
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Collect node information with line numbers
+          - Parse files and extract function locations
+          - Track line numbers and end lines
+          - Build node metadata
+          - Add 15+ tests for node collection
+
+        [20251224_TIER2_TODO] FEATURE: Filter to reachable nodes
+          - BFS/DFS from entry point
+          - Apply depth limit
+          - Mark reachable subset
+          - Handle cycles gracefully
+          - Add 15+ tests for reachability
+
+        [20251224_TIER2_TODO] FEATURE: Build edges list
+          - Create edge objects
+          - Track call line numbers
+          - Filter by reachability
+          - Add 12+ tests for edge building
+
+        [20251224_TIER2_TODO] FEATURE: Generate Mermaid diagram
+          - Create Mermaid syntax
+          - Apply node styling
+          - Show call relationships
+          - Export format
+          - Add 15+ tests for Mermaid
         """
         # Build the base graph first
         base_graph = self.build()
@@ -316,6 +650,34 @@ class CallGraphBuilder:
         - Function named "main"
         - Function decorated with CLI decorators (click.command, etc.)
         - Function called in if __name__ == "__main__" block
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Detect 'main' function by name
+          - Check if node.name == 'main'
+          - Add 5+ tests for main detection
+
+        [20251224_TIER1_TODO] FEATURE: Check for common decorator patterns
+          - Detect @click.command()
+          - Detect @app.route()
+          - Detect @cli.command()
+          - Add 10+ tests for decorator detection
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Detect framework-specific entry patterns
+          - FastAPI: @app.on_event("startup")
+          - Django: management command detection
+          - Flask: @app.before_request, @app.after_request
+          - Add 15+ tests for framework patterns
+
+        [20251224_TIER2_TODO] FEATURE: Confidence scoring for entry points
+          - High confidence: main() or __name__ == '__main__'
+          - Medium confidence: common decorators
+          - Low confidence: CLI-like decorators
+          - Add 10+ tests for confidence calculation
         """
         if func_node.name == "main":
             return True
@@ -347,6 +709,38 @@ class CallGraphBuilder:
         """
         Get all nodes reachable from entry point within depth limit using BFS.
         Handles recursive calls gracefully.
+
+        Args:
+            graph: Call graph mapping caller to callees
+            entry_point: Starting function key (e.g., "file.py:main")
+            max_depth: Maximum depth to traverse
+
+        Returns:
+            Set of reachable node keys
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: BFS traversal with depth limiting
+          - Initialize queue with entry point and depth 0
+          - Process nodes in breadth-first order
+          - Stop when depth exceeds max_depth
+          - Handle missing entry points gracefully
+          - Add 15+ tests for BFS traversal
+
+        [20251224_TIER2_TODO] FEATURE: Cycle detection in reachability
+          - Track visited nodes to prevent infinite loops
+          - Store path information for cycle reporting
+          - Add 12+ tests for cycle handling
+
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Advanced depth analysis
+          - Calculate depth for each reachable node
+          - Identify deepest call paths
+          - Compute call levels and stratification
+          - Add 10+ tests for depth analysis
         """
         # Normalize entry point (might be just "main" or "file:main")
         if ":" not in entry_point:
@@ -383,7 +777,51 @@ class CallGraphBuilder:
         edges: List[CallEdge],
         entry_point: Optional[str],
     ) -> str:
-        """Generate Mermaid flowchart diagram."""
+        """
+        Generate Mermaid flowchart diagram from call graph.
+
+        Args:
+            nodes: List of call nodes to visualize
+            edges: List of call edges to visualize
+            entry_point: Optional entry point to highlight
+
+        Returns:
+            Mermaid diagram syntax
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Basic Mermaid diagram generation
+          - Create graph TD structure
+          - Map nodes to node IDs
+          - Add node labels with line numbers
+          - Create edges between nodes
+          - Add 15+ tests for diagram generation
+
+        [20251224_TIER2_TODO] FEATURE: Node styling based on type
+          - Stadium shape for entry points
+          - Round shape for external functions
+          - Rectangle for internal functions
+          - Color coding for call frequency
+          - Add 10+ tests for styling
+
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Advanced diagram customization
+          - Parameter sizing based on call count
+          - Color gradients for importance
+          - Subgraph clustering for modules
+          - Interactive highlighting
+          - Add 15+ tests for customization
+
+        [20251224_TIER3_TODO] FEATURE: Export to multiple formats
+          - SVG export
+          - PNG rasterization
+          - HTML interactive viewer
+          - GraphML format for other tools
+          - Add 12+ tests for export formats
+        """
         lines = ["graph TD"]
 
         # Create node ID mapping (Mermaid doesn't like special chars)
@@ -437,6 +875,57 @@ class CallGraphBuilder:
         Returns:
             List of cycles, where each cycle is a list of module paths
             e.g., [["a.py", "b.py", "a.py"], ["c.py", "d.py", "e.py", "c.py"]]
+
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Build import graph from AST
+          - Iterate over all Python files
+          - Extract import statements (import, from...import)
+          - Build module adjacency list
+          - Handle relative imports correctly
+          - Add 15+ tests for graph building
+
+        [20251224_TIER1_TODO] FEATURE: Cycle detection using DFS
+          - Implement 3-color DFS (WHITE, GRAY, BLACK)
+          - Detect cycles when finding GRAY node
+          - Extract cycle path from stack
+          - Handle missing/external modules
+          - Add 15+ tests for DFS algorithm
+
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Detailed cycle information
+          - Track cycle depth and impact
+          - Identify common paths in cycles
+          - Suggest import order fixes
+          - Calculate cycle metrics
+          - Add 12+ tests for cycle analysis
+
+        [20251224_TIER2_TODO] FEATURE: Dynamic import resolution
+          - Handle importlib usage
+          - Detect runtime imports
+          - Support conditional imports
+          - Track circular import avoidance
+          - Add 10+ tests for dynamic imports
+
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Visualization of circular imports
+          - Generate dependency diagrams
+          - Highlight cycle paths
+          - Show import count per module
+          - Interactive cycle explorer
+          - Add 12+ tests for visualization
+
+        [20251224_TIER3_TODO] FEATURE: Automated refactoring suggestions
+          - Suggest module reorganization
+          - Identify mediator modules
+          - Propose breaking points
+          - Generate refactoring plan
+          - Add 15+ tests for suggestions
         """
         # Build import graph: module -> modules it imports
         import_graph: Dict[str, Set[str]] = {}

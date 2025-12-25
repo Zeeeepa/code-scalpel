@@ -19,6 +19,46 @@ import networkx as nx
 #     - Detect must-alias and may-alias relationships
 #     - Track alias propagation through function parameters
 
+"""
+TODO ITEMS:
+
+COMMUNITY TIER (Basic Analysis):
+1. TODO: Implement data flow anomaly detection (undefined/unused vars)
+2. TODO: Create undefined variable analysis on PDG
+3. TODO: Add unused variable detection
+4. TODO: Implement variable overwrite detection
+5. TODO: Create basic dependency path finding
+6. TODO: Add reachability analysis for code statements
+7. TODO: Implement backward data flow tracing
+8. TODO: Create anomaly severity classification
+9. TODO: Add comprehensive error reporting
+10. TODO: Document analysis algorithms and techniques
+
+PRO TIER (Advanced Vulnerability Detection):
+11. TODO: Implement taint analysis with custom sources/sinks
+12. TODO: Add SQL injection pattern detection on PDG
+13. TODO: Implement XSS vulnerability detection
+14. TODO: Add command injection detection
+15. TODO: Create sanitizer pattern recognition
+16. TODO: Implement context-sensitive data flow analysis
+17. TODO: Add must-alias vs may-alias relationship detection
+18. TODO: Support field-sensitive taint tracking
+19. TODO: Implement security vulnerability ranking
+20. TODO: Create detailed vulnerability reporting with evidence
+
+ENTERPRISE TIER (Scalable Analysis & Intelligence):
+21. TODO: Implement distributed PDG analysis over sharded graphs
+22. TODO: Add machine learning-based anomaly detection
+23. TODO: Create semantic vulnerability pattern learning
+24. TODO: Implement federated taint analysis across repos
+25. TODO: Add symbolic execution integration for verification
+26. TODO: Support polyglot vulnerability detection (JS, Java)
+27. TODO: Implement zero-day vulnerability prediction
+28. TODO: Add compliance rule checking on PDG (GDPR, HIPAA)
+29. TODO: Create blockchain-based vulnerability proof chains
+30. TODO: Implement AI-powered security recommendation engine
+"""
+
 
 class DependencyType(Enum):
     """Types of dependencies in the PDG."""

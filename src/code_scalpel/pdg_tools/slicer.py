@@ -12,6 +12,46 @@ import networkx as nx
 #     - Add value-dependent slices (track specific constant values)
 #     - Support nondeterministic slicing for concurrent code
 
+"""
+TODO ITEMS:
+
+COMMUNITY TIER (Basic Slicing):
+1. TODO: Implement backward program slicing algorithm
+2. TODO: Create forward program slicing
+3. TODO: Add data dependency slicing
+4. TODO: Implement control dependency slicing
+5. TODO: Create thin slicing (minimal executable slice)
+6. TODO: Add slice caching for performance
+7. TODO: Implement slice size optimization
+8. TODO: Create slice visualization
+9. TODO: Add slice complexity metrics
+10. TODO: Document slicing algorithms and usage
+
+PRO TIER (Advanced Slicing):
+11. TODO: Implement multi-criteria slicing (multiple variables/lines)
+12. TODO: Add context-specific slicing (within function/class scope)
+13. TODO: Create value-dependent slicing (track specific values)
+14. TODO: Implement interprocedural slicing (across functions)
+15. TODO: Add amnestic slicing (limited history)
+16. TODO: Support union and intersection of slices
+17. TODO: Implement dynamic slicing based on runtime traces
+18. TODO: Add slice refinement and iterative slicing
+19. TODO: Create approximate slicing for large programs
+20. TODO: Implement slicing for security policy enforcement
+
+ENTERPRISE TIER (Distributed & Polyglot):
+21. TODO: Implement distributed slicing over sharded PDGs
+22. TODO: Add slicing for polyglot code (JS, Java, C++)
+23. TODO: Create parallel slicing algorithm for multi-core systems
+24. TODO: Implement stream-based slicing for infinite traces
+25. TODO: Add slicing for concurrent/async code
+26. TODO: Support slicing in federated PDG analysis
+27. TODO: Implement AI-guided slicing (heuristic-based)
+28. TODO: Add quantum-safe slice verification
+29. TODO: Create blockchain-based slice provenance
+30. TODO: Implement zero-copy slicing for memory efficiency
+"""
+
 
 class SliceType(Enum):
     """Types of program slices."""

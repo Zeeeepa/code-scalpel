@@ -8,6 +8,10 @@
 
 ## Overview
 
+<!-- TODO [COMMUNITY]: Taint analysis, vulnerability detection, polyglot sink detection (current)
+     TODO [PRO]: Real-time incremental scanning and threat modeling
+     TODO [ENTERPRISE]: ML-powered vulnerability discovery and APT detection -->
+
 The Security Analysis module provides **comprehensive vulnerability detection** across multiple programming languages. It is the backbone of Code Scalpel's security scanning capabilities, implementing:
 
 - **Taint Analysis** - Track untrusted data flow through code
@@ -20,6 +24,10 @@ The Security Analysis module provides **comprehensive vulnerability detection** 
 ---
 
 ## Architecture Overview
+
+<!-- TODO [COMMUNITY]: Basic taint_tracker, security_analyzer, unified_sink_detector (current)
+     TODO [PRO]: Add behavioral analyzer and anomaly detector modules
+     TODO [ENTERPRISE]: Add graph neural network and ML-based vulnerability discovery -->
 
 ### Current Structure (Pre-Migration)
 
@@ -81,12 +89,19 @@ src/code_scalpel/symbolic_execution_tools/
 
 ---
 
+<!-- TODO [COMMUNITY]: Basic variable taint tracking (current)
+     TODO [PRO]: Support for implicit flows (control dependencies)
+     TODO [ENTERPRISE]: Probabilistic taint analysis for transient flows -->
+
 ## Module Details
 
 ### 1. TaintTracker (2,386 lines)
 
 **File:** `symbolic_execution_tools/taint_tracker.py`  
 **Purpose:** Core taint analysis engine  
+<!-- TODO [PRO]: Add TaintContext class for flow-sensitive analysis
+     TODO [ENTERPRISE]: Add TaintGraph for complex dependency tracking -->
+
 **Tests:** 128 test methods
 
 #### Key Classes
@@ -114,6 +129,9 @@ class SecuritySink(Enum):
     XSS_SINK           # render_template(), innerHTML
     COMMAND_EXEC       # os.system(), subprocess.run()
     FILE_OPERATION     # open(), os.remove()
+<!-- TODO [PRO]: Add analyze_implicit_flows() for control-based taint
+     TODO [ENTERPRISE]: Add symbolic_taint() for constraint-based analysis -->
+
     TEMPLATE_RENDER    # Jinja2, Django templates
     XML_PARSE          # XML parsing with XXE risk
     LDAP_QUERY         # LDAP directory search
@@ -156,6 +174,10 @@ for vuln in vulnerabilities:
     print(f"Location: {vuln.location}")
 ```
 
+<!-- TODO [COMMUNITY]: SQL, XSS, command injection detection (current)
+     TODO [PRO]: Add context-aware false positive reduction
+     TODO [ENTERPRISE]: Add semantic-aware vulnerability discovery -->
+
 ### 2. SecurityAnalyzer (975 lines)
 
 **File:** `symbolic_execution_tools/security_analyzer.py`  
@@ -163,6 +185,9 @@ for vuln in vulnerabilities:
 **Tests:** 128 test methods (combined with taint tracker)
 
 #### Detected Vulnerabilities
+
+<!-- TODO [PRO]: Add prototype pollution, DOM clobbering detection
+     TODO [ENTERPRISE]: Add polymorphic attack pattern detection -->
 
 - **SQL Injection (CWE-89)** - Tainted SQL queries
 - **Cross-Site Scripting (CWE-79)** - Unsanitized HTML/JS output
@@ -203,9 +228,16 @@ def login(request):
     # SQL INJECTION!
     query = f"SELECT * FROM users WHERE username='{username}'"
     user = db.query(query)
+<!-- TODO [COMMUNITY]: Python, Java, JavaScript, TypeScript sink detection (current)
+     TODO [PRO]: Add Ruby, Go, C# language support
+     TODO [ENTERPRISE]: Add framework-specific sinks (Django, Rails, Spring, etc) -->
+
     
     # XSS!
     return render_template('welcome.html', message=username)
+<!-- TODO [PRO]: Add framework-aware sink detection
+     TODO [ENTERPRISE]: Add vulnerability chain detection (multiple sinks) -->
+
 """
 
 result = analyze_security(code)
@@ -324,6 +356,10 @@ for vuln in results.vulnerabilities:
 
 ### 5. VulnerabilityScanner (631 lines)
 
+<!-- TODO [COMMUNITY]: Python, JS, Java package manager support (current)
+     TODO [PRO]: Add Go, Rust, .NET package manager support
+     TODO [ENTERPRISE]: Add transitive dependency analysis and license compliance -->
+
 **File:** `symbolic_execution_tools/vulnerability_scanner.py`  
 **Purpose:** Dependency scanning and CVE detection  
 **Tests:** 23 test methods  
@@ -331,9 +367,15 @@ for vuln in results.vulnerabilities:
 
 #### Supported Package Managers
 
+<!-- TODO [PRO]: Add private registry support (Artifactory, Nexus)
+     TODO [ENTERPRISE]: Add supply chain attestation and SBOM generation -->
+
 - **Python:** requirements.txt, pyproject.toml, setup.py
 - **JavaScript/Node:** package.json, package-lock.json
 - **Java:** pom.xml, build.gradle
+<!-- TODO [PRO]: Add GHSA (GitHub Security Advisory) detection
+     TODO [ENTERPRISE]: Add zero-day vulnerability detection via ML -->
+
 
 #### CVE Detection
 
@@ -358,8 +400,15 @@ for vuln in vulns:
 | Level | CVSS Score | Action |
 |-------|-----------|--------|
 | CRITICAL | 9.0-10.0 | Block deployment |
+<!-- TODO [COMMUNITY]: Kafka taint tracking (current)
+     TODO [PRO]: Add AWS Kinesis, GCP Pub/Sub, Azure Service Bus support
+     TODO [ENTERPRISE]: Add real-time event pipeline security monitoring -->
+
 | HIGH | 7.0-8.9 | Require review |
 | MEDIUM | 4.0-6.9 | Plan fix |
+<!-- TODO [PRO]: Add schema registry validation (Confluent)
+     TODO [ENTERPRISE]: Add distributed tracing integration (Jaeger/Zipkin) -->
+
 | LOW | 0.1-3.9 | Track |
 
 ### 6. KafkaTaintTracker (1,080 lines)
@@ -389,6 +438,10 @@ result = tracker.analyze_producer("""
 def publish_user_event(user_data):
     producer.send('user-events', {
         'user_id': user_data['id'],
+<!-- TODO [COMMUNITY]: Basic unit tests for all modules (current)
+     TODO [PRO]: Add integration tests and end-to-end security scenarios
+     TODO [ENTERPRISE]: Add fuzzing and adversarial ML testing -->
+
         'credit_card': user_data['cc']  # SENSITIVE DATA!
     })
 """)
@@ -419,6 +472,10 @@ for issue in result.security_issues:
 
 **Total Test Code:** 5,985 lines
 
+<!-- TODO [COMMUNITY]: Unit tests for basic functionality (current)
+     TODO [PRO]: Add integration tests and real-world scenarios
+     TODO [ENTERPRISE]: Add fuzzing, adversarial testing, and mutation testing -->
+
 ### Running Tests
 
 ```bash
@@ -435,6 +492,10 @@ pytest tests/test_security_analysis.py --cov=code_scalpel.symbolic_execution_too
 ---
 
 ## MCP Tool Integration
+
+<!-- TODO [COMMUNITY]: Basic MCP tools for security scanning (current)
+     TODO [PRO]: Add incremental scanning and caching support
+     TODO [ENTERPRISE]: Add streaming results and real-time scanning -->
 
 The security module powers these Code Scalpel MCP tools:
 
@@ -492,6 +553,10 @@ for sink in result.sinks:
     print(f"Sink: {sink.name} (confidence: {sink.confidence})")
 ```
 
+<!-- TODO [COMMUNITY]: Phase 1 - Core injection and sink detection (complete)
+     TODO [PRO]: Phase 2 - Framework-specific rules and advanced taint analysis
+     TODO [ENTERPRISE]: Phase 3 - ML-powered detection and automated remediation -->
+
 ---
 
 ## Development Roadmap
@@ -504,6 +569,10 @@ for sink in result.sinks:
 - [x] Command injection detection
 - [x] Hardcoded secret detection
 - [x] Weak cryptography detection
+<!-- TODO [PRO]: Add Django, Flask, FastAPI framework-specific rules
+     TODO [PRO]: Add context-sensitive taint tracking for accuracy
+     TODO [ENTERPRISE]: Add transitive dependency analysis and SBOM generation -->
+
 - [x] OSV dependency scanning
 
 ### Phase 2: Enhanced Detection (🔄 Planned)
@@ -513,8 +582,16 @@ for sink in result.sinks:
 - [ ] Flask security rules
 - [ ] FastAPI async security
 - [ ] Spring Boot rules
+
+<!-- TODO [PRO]: Context-sensitive taint tracking
+     TODO [ENTERPRISE]: Probabilistic taint analysis for complex flows -->
+
 - [ ] Express.js middleware rules
 - [ ] React/Next.js SSR rules
+
+
+<!-- TODO [ENTERPRISE]: Transitive dependency tracking and attestation
+     TODO [ENTERPRISE]: License compliance and vulnerability lifecycle tracking -->
 
 **Advanced Taint Analysis** (15 TODOs)
 - [ ] Context-sensitive taint tracking
@@ -523,11 +600,20 @@ for sink in result.sinks:
 - [ ] Interprocedural taint flow
 - [ ] Taint laundering detection
 
+<!-- TODO [ENTERPRISE]: Custom rule definition language and policy enforcement
+     TODO [ENTERPRISE]: SIEM integration and compliance mapping (PCI-DSS, HIPAA)
+     TODO [ENTERPRISE]: Automated remediation and vulnerability lifecycle tracking -->
+
+
 **Supply Chain Security** (10 TODOs)
 - [ ] Transitive dependency tracking
 - [ ] License compliance checking
 - [ ] Supply chain risk assessment
 - [ ] Dependency update recommendations
+
+<!-- TODO [ENTERPRISE]: ML-powered detection and automated fix generation
+     TODO [ENTERPRISE]: Continuous security monitoring and risk trending
+     TODO [ENTERPRISE]: Integration with SAST, DAST, and container scanning -->
 
 **Enterprise Features** (20 TODOs)
 - [ ] Custom rule definition language
@@ -546,6 +632,9 @@ for sink in result.sinks:
 ---
 
 ## Common Use Cases
+
+<!-- TODO [PRO]: Add complexity reduction hints for developers
+     TODO [ENTERPRISE]: Add automated remediation suggestions -->
 
 ### Use Case 1: Find SQL Injections in Web Application
 
@@ -613,6 +702,10 @@ for vuln in results.vulnerabilities:
 
 ## Migration Status
 
+<!-- TODO [COMMUNITY]: Complete migration to security/ directory (v3.1.0)
+     TODO [PRO]: Add backward compatibility layer for existing integrations
+     TODO [ENTERPRISE]: Add migration utilities for users -->
+
 **Current Location:** `src/code_scalpel/symbolic_execution_tools/`  
 **Target Location:** `src/code_scalpel/security/` (Coming in v3.1.0)
 
@@ -627,6 +720,9 @@ for vuln in results.vulnerabilities:
 ---
 
 ## Best Practices
+
+<!-- TODO [PRO]: Add automated best practices linter
+     TODO [ENTERPRISE]: Add industry-specific best practices (OWASP, NIST, CIS) -->
 
 ### 1. Always Mark Taint Sources
 
@@ -655,7 +751,10 @@ cursor.execute(query, (user_id,))
 template = render_template('template.html', user_message=user_input)
 
 # ✅ SAFE
-template = render_template('template.html', user_message=escape(user_input))
+template = render_template('temp
+
+<!-- TODO [PRO]: Add automatic dependency update suggestions
+     TODO [ENTERPRISE]: Add supply chain attack detection for updates -->late.html', user_message=escape(user_input))
 ```
 
 ### 4. Keep Dependencies Updated

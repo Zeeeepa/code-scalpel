@@ -20,6 +20,46 @@ import networkx as nx
 #     - Generate human-readable PDG diffs
 #     - Support merging PDG changes from different branches
 
+"""
+TODO ITEMS:
+
+COMMUNITY TIER (Basic Utilities):
+1. TODO: Implement PDG to JSON serialization
+2. TODO: Add JSON deserialization to reconstruct PDG
+3. TODO: Create GraphML export format
+4. TODO: Implement GML export for compatibility
+5. TODO: Add DOT format export for Graphviz
+6. TODO: Create basic node and edge info accessors
+7. TODO: Implement PDG statistics (size, complexity metrics)
+8. TODO: Add dependency type filtering utilities
+9. TODO: Create scope traversal helpers
+10. TODO: Document utility functions and formats
+
+PRO TIER (Advanced Analysis):
+11. TODO: Implement PDG comparison and structural diffing
+12. TODO: Add semantic diff detection (behavior changes)
+13. TODO: Create human-readable diff reports
+14. TODO: Implement PDG merging from different branches
+15. TODO: Add binary PDG serialization format
+16. TODO: Create compressed PDG storage
+17. TODO: Implement incremental PDG serialization
+18. TODO: Add PDG hashing and fingerprinting
+19. TODO: Support version-based PDG compatibility
+20. TODO: Create performance optimization utilities
+
+ENTERPRISE TIER (Distribution & Intelligence):
+21. TODO: Implement distributed PDG serialization
+22. TODO: Add stream-based serialization for large graphs
+23. TODO: Create polyglot utility support (JS, Java, C++)
+24. TODO: Implement federated PDG comparison
+25. TODO: Add machine learning-based diff prediction
+26. TODO: Support quantum-safe PDG hashing
+27. TODO: Implement blockchain-based PDG integrity verification
+28. TODO: Add zero-knowledge proofs for PDG properties
+29. TODO: Create AI-powered PDG optimization suggestions
+30. TODO: Implement distributed caching for PDG computations
+"""
+
 
 @dataclass
 class NodeInfo:

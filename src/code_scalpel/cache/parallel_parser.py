@@ -34,10 +34,94 @@ def _batch_parse_worker(
 class ParallelParser(Generic[T]):
     """[20251214_FEATURE] Parallel file parsing with cache reuse.
 
-    [20251221_TODO] Phase 2: Implement adaptive batch sizing based on file sizes
-    [20251221_TODO] Phase 2: Add progress callbacks for long-running operations
-    [20251221_TODO] Phase 2: Implement per-worker timeout to handle hung workers
-    [20251221_TODO] Phase 2: Add priority-based scheduling (prioritize hot files)
+    TODO ITEMS: cache/parallel_parser.py
+    ======================================================================
+    COMMUNITY TIER - Core Parallel Parsing
+    ======================================================================
+    1. Add ParallelParser.parse_files() batch parsing
+    2. Add ParallelParser.parse_one() single file parsing
+    3. Add ParallelParser.get_results() result collection
+    4. Add ParallelParser.get_errors() error handling
+    5. Add batch worker function with error recovery
+    6. Add process pool executor with threading fallback
+    7. Add thread pool executor support
+    8. Add worker batch creation (DEFAULT_BATCH_SIZE)
+    9. Add cache lookup for already-parsed files
+    10. Add results dict collection
+    11. Add error list accumulation
+    12. Add future handling with as_completed
+    13. Add worker exception handling
+    14. Add file resolution with Path.resolve()
+    15. Add parse function invocation
+    16. Add result tuple unpacking
+    17. Add worker threading detection
+    18. Add main thread detection
+    19. Add worker count detection (cpu_count)
+    20. Add batch size configuration
+    21. Add parse progress tracking
+    22. Add timing metrics collection
+    23. Add cache hit/miss counting
+    24. Add file parsing statistics
+    25. Add error reporting and logging
+
+    ======================================================================
+    PRO TIER - Advanced Parallel Parsing
+    ======================================================================
+    26. Add implement adaptive batch sizing based on file sizes
+    27. Add progress callbacks for long-running operations
+    28. Add per-worker timeout to handle hung workers
+    29. Add priority-based scheduling (prioritize hot files)
+    30. Add implement memory-aware batching to prevent OOM
+    31. Add worker affinity/pinning for NUMA systems
+    32. Add dynamic worker scaling based on load
+    33. Add incremental result streaming
+    34. Add parse job queuing system
+    35. Add worker health monitoring
+    36. Add graceful worker shutdown
+    37. Add worker restart on failure
+    38. Add parse caching across runs
+    39. Add incremental parsing (delta updates)
+    40. Add parse result validation
+    41. Add distributed parsing support
+    42. Add parse scheduling optimization
+    43. Add parse dependency ordering
+    44. Add parse resource pooling
+    45. Add parse memory pooling
+    46. Add parse profiling instrumentation
+    47. Add parse performance optimization
+    48. Add parse cancellation support
+    49. Add parse retry logic
+    50. Add parse load balancing
+
+    ======================================================================
+    ENTERPRISE TIER - Distributed & Federated Parsing
+    ======================================================================
+    51. Add distributed parsing across agents
+    52. Add federated parsing across organizations
+    53. Add multi-region parsing coordination
+    54. Add parsing consensus and voting
+    55. Add distributed parsing locking
+    56. Add parse event streaming
+    57. Add parse change notifications
+    58. Add parse cost tracking per org
+    59. Add parse quota enforcement
+    60. Add parse SLA monitoring
+    61. Add parse audit trail logging
+    62. Add parse access control (RBAC)
+    63. Add parse multi-tenancy isolation
+    64. Add parse disaster recovery
+    65. Add parse cross-region failover
+    66. Add parse data retention policies
+    67. Add parse billing integration
+    68. Add parse executive reporting
+    69. Add parse anomaly detection
+    70. Add parse circuit breaker
+    71. Add parse health monitoring
+    72. Add parse chaos engineering tests
+    73. Add parse capacity planning
+    74. Add parse AI-based optimization
+    75. Add parse predictive prefetching
+
     [20251221_TODO] Phase 2: Implement memory-aware batching to prevent OOM
     """
 

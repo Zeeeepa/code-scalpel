@@ -2,7 +2,129 @@
 Java Parser Adapter - IParser interface for Java parser.
 
 [20251221_FEATURE] Bridges TreeSitterJavaParser to the IParser interface.
-"""
+============================================================================
+TODO ITEMS: code_parsers/adapters/java_adapter.py
+============================================================================
+COMMUNITY TIER - Core Java Adapter (P0-P2)
+============================================================================
+
+[P0_CRITICAL] Enhance Java-specific extraction:
+    - Extract annotations with full metadata
+    - Parse generic type parameters
+    - Extract lambda expressions
+    - Support method references
+    - Extract nested classes and inner classes
+    - Test count: 30 tests (extraction completeness)
+
+[P1_HIGH] Improve error handling:
+    - Better syntax error messages with context
+    - Support partial parsing on errors
+    - Add error recovery strategies
+    - Provide fix suggestions
+    - Test count: 20 tests (error handling)
+
+[P1_HIGH] Add Java version detection:
+    - Detect Java version from syntax (8, 11, 17, 21)
+    - Support version-specific features
+    - Add compatibility warnings
+    - Handle preview features
+    - Test count: 25 tests (version detection)
+
+[P2_MEDIUM] Enhance metrics calculation:
+    - Add package-level metrics
+    - Calculate inheritance depth
+    - Track coupling metrics
+    - Add cohesion metrics (LCOM)
+    - Test count: 25 tests (metrics accuracy)
+
+[P2_MEDIUM] Add import analysis:
+    - Extract all imports with types
+    - Detect unused imports
+    - Find wildcard imports
+    - Build import dependency graph
+    - Test count: 20 tests (import analysis)
+
+============================================================================
+PRO TIER - Advanced Java Adapter (P1-P3)
+============================================================================
+
+[P1_HIGH] Integrate static analysis:
+    - Add SpotBugs integration
+    - Support PMD checks
+    - Integrate Checkstyle
+    - Add SonarQube analysis
+    - Test count: 35 tests (static analysis integration)
+
+[P1_HIGH] Add semantic analysis:
+    - Resolve type information
+    - Track inheritance chains
+    - Analyze method overrides
+    - Detect polymorphism patterns
+    - Test count: 40 tests (semantic analysis)
+
+[P2_MEDIUM] Implement code transformation:
+    - Support refactoring operations
+    - Add code formatting (Google Java Format)
+    - Generate modified AST
+    - Support code generation
+    - Test count: 30 tests (transformation)
+
+[P2_MEDIUM] Add framework detection:
+    - Detect Spring framework usage
+    - Identify JPA/Hibernate patterns
+    - Find JAX-RS endpoints
+    - Detect JUnit tests
+    - Test count: 30 tests (framework detection)
+
+[P3_LOW] Support bytecode analysis:
+    - Parse compiled .class files
+    - Extract bytecode metrics
+    - Analyze JVM optimizations
+    - Support decompilation
+    - Test count: 35 tests (bytecode analysis)
+
+============================================================================
+ENTERPRISE TIER - Enterprise Java Adapter (P2-P4)
+============================================================================
+
+[P2_MEDIUM] Add security analysis:
+    - Integrate FindSecBugs
+    - Detect OWASP vulnerabilities
+    - Find hardcoded secrets
+    - Analyze authentication/authorization
+    - Test count: 40 tests (security scanning)
+
+[P2_MEDIUM] Implement incremental parsing:
+    - Parse only changed classes
+    - Cache parsed results
+    - Support streaming for large files
+    - Add efficient AST diffing
+    - Test count: 30 tests (incremental parsing)
+
+[P3_LOW] Add enterprise compliance:
+    - Check code against enterprise standards
+    - Enforce mandatory documentation
+    - Validate license headers
+    - Generate compliance reports
+    - Test count: 25 tests (compliance)
+
+[P3_LOW] Implement performance profiling:
+    - Profile parsing time
+    - Track memory usage
+    - Identify bottlenecks
+    - Add optimization hints
+    - Test count: 20 tests (profiling)
+
+[P4_LOW] Add ML-driven analysis:
+    - Predict code quality
+    - Suggest refactorings via ML
+    - Detect code clones
+    - Find potential bugs via anomaly detection
+    - Test count: 30 tests (ML integration)
+
+============================================================================
+TOTAL TEST ESTIMATE: 435 tests (140 COMMUNITY + 165 PRO + 130 ENTERPRISE)
+============================================================================"""
 
 from typing import Any, Dict, List, Optional
 

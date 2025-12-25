@@ -95,10 +95,60 @@ class RefactoringAnalyzer:
     """
     Analyzes code for refactoring opportunities and code smells.
 
-    [20251221_FEATURE] TODO: Detect extract method opportunities
-    [20251221_FEATURE] TODO: Detect extract class opportunities
-    [20251221_ENHANCEMENT] TODO: Support design pattern recommendations
-    [20251221_ENHANCEMENT] TODO: Calculate refactoring priority
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] BUGFIX: Fix circular import in ast_refactoring module
+    [20251224_TIER1_TODO] TEST: Unit tests for dataclass definitions
+    [20251224_TIER1_TODO] TEST: Adversarial tests for edge cases
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Detect extract method opportunities
+      - Find duplicate code blocks
+      - Identify cohesive code segments
+      - Suggest extract method refactoring
+      - Calculate effort and impact
+      - Add 30+ tests for extraction opportunities
+
+    [20251224_TIER2_TODO] FEATURE: Detect extract class opportunities
+      - Identify data clumps (attributes used together)
+      - Detect feature envy (using other class's data too much)
+      - Suggest class extraction
+      - Calculate refactoring complexity
+      - Add 25+ tests for extraction opportunities
+
+    [20251224_TIER2_TODO] FEATURE: Detect code smells
+      - Long Parameter List detection
+      - Long Method/Function detection
+      - Duplicate code block detection
+      - Dead code (unreachable statements)
+      - Add 35+ tests for smell detection
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Design pattern recommendations
+      - Detect singleton candidates
+      - Identify factory pattern opportunities
+      - Suggest adapter/facade patterns
+      - Detect strategy pattern candidates
+      - Add 25+ tests for pattern suggestions
+
+    [20251224_TIER3_TODO] FEATURE: Calculate refactoring priority
+      - Rank by impact/effort ratio
+      - Consider dependencies between refactorings
+      - Support custom prioritization rules
+      - Generate refactoring roadmap
+      - Add 20+ tests for prioritization
+
+    [20251224_TIER3_TODO] FEATURE: Refactoring impact analysis
+      - Estimate complexity reduction
+      - Estimate test coverage impact
+      - Track historical refactoring metrics
+      - Predict breaking changes
+      - Add 30+ tests for impact analysis
     """
 
     def __init__(self):
@@ -115,9 +165,29 @@ class RefactoringAnalyzer:
         Returns:
             Dict containing refactoring opportunities and code smells
 
-        [20251221_FEATURE] TODO: Parse and analyze file
-        [20251221_FEATURE] TODO: Detect all code smells
-        [20251221_FEATURE] TODO: Identify refactoring opportunities
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Parse and analyze file
+          - Load and parse Python file
+          - Extract functions, classes, and methods
+          - Build code structure graph
+          - Add 10+ integration tests
+
+        [20251224_TIER2_TODO] FEATURE: Detect all code smells
+          - Detect God Class (size, complexity, responsibility)
+          - Detect God Function (length, complexity)
+          - Detect Feature Envy
+          - Detect Data Clumps
+          - Detect Long Parameter List
+          - Add 40+ tests for smell detection
+
+        [20251224_TIER2_TODO] FEATURE: Identify refactoring opportunities
+          - Detect duplicate code blocks
+          - Identify extract method candidates
+          - Identify extract class candidates
+          - Prioritize refactorings
+          - Add 35+ tests for opportunity detection
         """
         return {
             "opportunities": [],
@@ -128,9 +198,28 @@ class RefactoringAnalyzer:
         """
         Analyze a function for refactoring opportunities.
 
-        [20251221_FEATURE] TODO: Check for god function smell
-        [20251221_FEATURE] TODO: Identify extract method candidates
-        [20251221_ENHANCEMENT] TODO: Detect duplicated logic
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Check for god function smell
+          - Measure function length (threshold: 20 lines)
+          - Calculate cyclomatic complexity (threshold: 10)
+          - Detect multiple responsibilities
+          - Suggest extract method refactoring
+          - Add 15+ tests for god function detection
+
+        [20251224_TIER2_TODO] FEATURE: Identify extract method candidates
+          - Find duplicate code blocks within function
+          - Identify cohesive code segments
+          - Calculate extraction effort
+          - Estimate complexity reduction
+          - Add 20+ tests for extraction candidates
+
+        [20251224_TIER2_TODO] ENHANCEMENT: Detect common code smells in functions
+          - Detect Long Parameter List (threshold: 4+)
+          - Detect Primitive Obsession
+          - Detect Magic Numbers (suggest extraction)
+          - Add 15+ tests for function smells
         """
         return []
 
@@ -138,9 +227,27 @@ class RefactoringAnalyzer:
         """
         Analyze a class for refactoring opportunities.
 
-        [20251221_FEATURE] TODO: Check for god class smell
-        [20251221_FEATURE] TODO: Identify feature envy violations
-        [20251221_FEATURE] TODO: Detect data clumps
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Check for god class smell
+          - Count methods and attributes (threshold: 10+)
+          - Calculate class complexity (threshold: 15+)
+          - Measure responsibility count
+          - Suggest extract class refactoring
+          - Add 15+ tests for god class detection
+
+        [20251224_TIER2_TODO] FEATURE: Identify feature envy violations
+          - Detect excessive use of other classes' data
+          - Calculate cohesion metrics
+          - Suggest move method refactoring
+          - Add 15+ tests for feature envy detection
+
+        [20251224_TIER2_TODO] ENHANCEMENT: Detect data clumps
+          - Find attributes always used together
+          - Suggest grouping into new class
+          - Calculate extraction effort
+          - Add 12+ tests for data clump detection
         """
         return []
 
@@ -150,8 +257,21 @@ class RefactoringAnalyzer:
 
         A God Class is too large with too many responsibilities.
 
-        [20251221_FEATURE] TODO: Calculate class complexity
-        [20251221_FEATURE] TODO: Analyze method count and cohesion
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Calculate class complexity
+          - Count cyclomatic complexity of all methods
+          - Sum weighted method complexity
+          - Identify complexity hotspots
+          - Add 12+ tests for complexity calculation
+
+        [20251224_TIER2_TODO] FEATURE: Analyze method count and cohesion
+          - Count public vs private methods
+          - Calculate method cohesion
+          - Identify related method clusters
+          - Suggest class extraction candidates
+          - Add 15+ tests for cohesion analysis
         """
         return None
 
@@ -159,8 +279,20 @@ class RefactoringAnalyzer:
         """
         Detect God Function code smell.
 
-        [20251221_FEATURE] TODO: Check for excessive length
-        [20251221_FEATURE] TODO: Identify extract method candidates
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Check for excessive length
+          - Count lines of code (threshold: 20)
+          - Calculate complexity score
+          - Identify dense/sparse sections
+          - Add 12+ tests for length detection
+
+        [20251224_TIER2_TODO] FEATURE: Identify extract method candidates
+          - Find cohesive code blocks
+          - Suggest function decomposition
+          - Estimate extracted function signatures
+          - Add 15+ tests for extraction candidates
         """
         return None
 
@@ -170,8 +302,20 @@ class RefactoringAnalyzer:
 
         Method is more interested in other class's data than its own.
 
-        [20251221_FEATURE] TODO: Analyze method usage of other classes
-        [20251221_FEATURE] TODO: Calculate cohesion metrics
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Analyze method usage of other classes
+          - Count attribute accesses per class
+          - Identify external data usage patterns
+          - Calculate envy ratio
+          - Add 12+ tests for envy detection
+
+        [20251224_TIER2_TODO] FEATURE: Calculate cohesion metrics
+          - Compare internal vs external data usage
+          - Identify move method candidates
+          - Suggest class relocation
+          - Add 15+ tests for cohesion metrics
         """
         return None
 
@@ -181,8 +325,20 @@ class RefactoringAnalyzer:
 
         Multiple attributes are always used together.
 
-        [20251221_FEATURE] TODO: Find highly correlated attributes
-        [20251221_FEATURE] TODO: Suggest grouping into object
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Find highly correlated attributes
+          - Analyze attribute usage patterns
+          - Calculate co-occurrence statistics
+          - Identify attribute groups
+          - Add 12+ tests for correlation detection
+
+        [20251224_TIER2_TODO] FEATURE: Suggest grouping into object
+          - Propose new class for grouped attributes
+          - Suggest method relocation
+          - Estimate refactoring complexity
+          - Add 12+ tests for grouping suggestions
         """
         return None
 
@@ -190,8 +346,20 @@ class RefactoringAnalyzer:
         """
         Detect Long Parameter List code smell.
 
-        [20251221_FEATURE] TODO: Count function parameters
-        [20251221_FEATURE] TODO: Suggest parameter object refactoring
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Count function parameters
+          - Count positional parameters
+          - Count keyword-only parameters
+          - Calculate parameter complexity
+          - Add 10+ tests for parameter counting
+
+        [20251224_TIER2_TODO] FEATURE: Suggest parameter object refactoring
+          - Group related parameters
+          - Suggest parameter class creation
+          - Estimate refactoring effort
+          - Add 10+ tests for parameter grouping
         """
         return None
 
@@ -199,8 +367,21 @@ class RefactoringAnalyzer:
         """
         Detect duplicated code blocks.
 
-        [20251221_FEATURE] TODO: Find similar code blocks
-        [20251221_FEATURE] TODO: Suggest consolidation
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Find similar code blocks
+          - Parse file and extract all code blocks
+          - Calculate code similarity hashes
+          - Identify duplicate patterns
+          - Track block locations
+          - Add 15+ tests for duplication detection
+
+        [20251224_TIER2_TODO] FEATURE: Suggest consolidation
+          - Propose extract method refactoring
+          - Suggest shared utility function
+          - Estimate duplication impact
+          - Add 12+ tests for consolidation suggestions
         """
         return []
 
@@ -208,8 +389,22 @@ class RefactoringAnalyzer:
         """
         Detect dead code (unreachable or unused).
 
-        [20251221_FEATURE] TODO: Use reachability analysis
-        [20251221_FEATURE] TODO: Identify unused variables
+        ====================================================================
+        TIER 2: PRO (Commercial - Medium Priority)
+        ====================================================================
+        [20251224_TIER2_TODO] FEATURE: Use reachability analysis
+          - Build control flow graph
+          - Perform reachability analysis
+          - Identify unreachable statements
+          - Track dead branches
+          - Add 15+ tests for reachability
+
+        [20251224_TIER2_TODO] FEATURE: Identify unused variables
+          - Track variable definitions and uses
+          - Detect unused assignments
+          - Identify unused imports
+          - Identify unused parameters
+          - Add 15+ tests for unused detection
         """
         return []
 
@@ -217,9 +412,22 @@ class RefactoringAnalyzer:
         """
         Suggest code modernization (Python version specific).
 
-        [20251221_FEATURE] TODO: Detect old-style string formatting
-        [20251221_FEATURE] TODO: Suggest f-string conversion
-        [20251221_ENHANCEMENT] TODO: Support targeted Python versions
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Detect old-style string formatting
+          - Identify % formatting usage
+          - Identify str.format() usage
+          - Suggest f-string conversion
+          - Estimate refactoring effort
+          - Add 15+ tests for formatting detection
+
+        [20251224_TIER3_TODO] ENHANCEMENT: Support targeted Python versions
+          - Configure target Python version
+          - Suggest version-specific features
+          - Track deprecated features
+          - Add migration paths
+          - Add 20+ tests for version targeting
         """
         return []
 
@@ -227,21 +435,55 @@ class RefactoringAnalyzer:
         """
         Suggest applicable design patterns.
 
-        [20251221_FEATURE] TODO: Detect singleton candidates
-        [20251221_FEATURE] TODO: Identify factory pattern opportunities
-        [20251221_ENHANCEMENT] TODO: Support pattern-specific recommendations
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Detect singleton candidates
+          - Identify classes with single instances
+          - Suggest singleton pattern
+          - Detect initialization patterns
+          - Add 10+ tests for singleton detection
+
+        [20251224_TIER3_TODO] FEATURE: Identify factory pattern opportunities
+          - Detect object creation logic
+          - Identify duplicate creation patterns
+          - Suggest factory method/class
+          - Add 10+ tests for factory detection
+
+        [20251224_TIER3_TODO] ENHANCEMENT: Support pattern-specific recommendations
+          - Detect more patterns (Strategy, Observer, etc.)
+          - Provide implementation guidance
+          - Estimate migration effort
+          - Add 25+ tests for pattern suggestions
         """
         return []
 
     def calculate_refactoring_impact(
         self, opportunity: RefactoringOpportunity
-    ) -> Dict[str, Any]:  # [20251221_BUGFIX] Fixed type hint: any -> Any
+    ) -> Dict[str, Any]:  # [20251224_BUGFIX] Fixed type hint: any -> Any
         """
         Calculate estimated impact of a refactoring.
 
-        [20251221_FEATURE] TODO: Estimate complexity reduction
-        [20251221_FEATURE] TODO: Estimate test impact
-        [20251221_ENHANCEMENT] TODO: Track historical refactoring metrics
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Estimate complexity reduction
+          - Calculate current complexity score
+          - Estimate post-refactoring complexity
+          - Predict improvement percentage
+          - Add 15+ tests for impact estimation
+
+        [20251224_TIER3_TODO] FEATURE: Estimate test impact
+          - Estimate test coverage changes
+          - Predict test modification needs
+          - Identify risky refactorings
+          - Add 12+ tests for test impact
+
+        [20251224_TIER3_TODO] ENHANCEMENT: Track historical metrics
+          - Store historical refactoring outcomes
+          - Compare estimated vs actual impact
+          - Learn from past refactorings
+          - Add 10+ tests for metrics tracking
         """
         return {}
 
@@ -251,9 +493,29 @@ class RefactoringAnalyzer:
         """
         Prioritize refactoring opportunities.
 
-        [20251221_FEATURE] TODO: Rank by impact/effort ratio
-        [20251221_FEATURE] TODO: Consider dependencies
-        [20251221_ENHANCEMENT] TODO: Support custom prioritization rules
+        ====================================================================
+        TIER 3: ENTERPRISE (Commercial - Lower Priority)
+        ====================================================================
+        [20251224_TIER3_TODO] FEATURE: Rank by impact/effort ratio
+          - Calculate impact score (0-10)
+          - Calculate effort estimate (0-10)
+          - Compute impact/effort ratio
+          - Rank by desirability
+          - Add 15+ tests for prioritization
+
+        [20251224_TIER3_TODO] FEATURE: Consider dependencies
+          - Build dependency graph between refactorings
+          - Identify prerequisite refactorings
+          - Detect conflicting refactorings
+          - Suggest safe ordering
+          - Add 12+ tests for dependency handling
+
+        [20251224_TIER3_TODO] ENHANCEMENT: Support custom rules
+          - Allow custom prioritization functions
+          - Support weighted scoring
+          - Track user preferences
+          - Learn from past selections
+          - Add 15+ tests for custom rules
         """
         return sorted(
             opportunities,

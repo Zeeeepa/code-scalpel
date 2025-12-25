@@ -15,9 +15,47 @@ Solution: Hash verification against cryptographically signed manifest stored in:
 3. External secret store (HashiCorp Vault, AWS Secrets Manager)
 
 Security Model: FAIL CLOSED
-- Missing manifest → DENY ALL
-- Invalid signature → DENY ALL
-- Hash mismatch → DENY ALL
+- Missing manifest -> DENY ALL
+- Invalid signature -> DENY ALL
+- Hash mismatch -> DENY ALL
+
+TODO ITEMS:
+
+COMMUNITY TIER (Core Functionality):
+1. TODO: Implement HMAC-SHA256 manifest verification
+2. TODO: Add policy file hash calculation and comparison
+3. TODO: Create manifest file format (JSON structure)
+4. TODO: Implement fail-closed verification (deny on any error)
+5. TODO: Add support for git history manifest loading
+6. TODO: Implement environment variable manifest loading
+7. TODO: Create verification result reporting
+8. TODO: Add comprehensive error messages for verification failures
+9. TODO: Implement file path normalization across platforms
+10. TODO: Document verification process and manifest format
+
+PRO TIER (Enhanced Features):
+11. TODO: Add RSA-based digital signature support
+12. TODO: Implement ECDSA signature verification
+13. TODO: Create certificate chain validation
+14. TODO: Add algorithm negotiation for signature verification
+15. TODO: Implement manifest versioning and migration
+16. TODO: Create key rotation mechanism for HMAC secrets
+17. TODO: Add integrity check for dependent/included policy files
+18. TODO: Implement partial manifest updates (selective verification)
+19. TODO: Create audit trail for manifest verification events
+20. TODO: Add HashiCorp Vault integration for secret loading
+
+ENTERPRISE TIER (Advanced Capabilities):
+21. TODO: Build X.509 certificate chain validation with OCSP
+22. TODO: Implement blockchain-based manifest storage
+23. TODO: Add quantum-safe post-quantum cryptography (lattice-based)
+24. TODO: Create distributed manifest verification across regions
+25. TODO: Implement zero-knowledge proof manifest verification
+26. TODO: Add hardware security module (HSM) support for signing
+27. TODO: Build federated manifest authority system
+28. TODO: Implement AI-powered tamper detection patterns
+29. TODO: Create advanced forensics for verification failures
+30. TODO: Add decentralized identity verification (DID) support
 """
 
 from __future__ import annotations
@@ -29,7 +67,7 @@ import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional  # [20241224_BUGFIX] v3.2.9 - Added Any
 
 
 class SecurityError(Exception):
@@ -47,17 +85,22 @@ class PolicyManifest:
 
     Attributes:
         version: Manifest format version
-        files: Mapping of filename to SHA-256 hash
-        signature: HMAC-SHA256 signature of the manifest data
+        files: Mapping of filename to SHA-256 hash (or dict with hash/size)
+        signature: HMAC signature of the manifest data
         created_at: ISO timestamp when manifest was created
-        signed_by: Identity of the signer (admin email/name)
+        signed_by: Identity of the signer (admin email/name), optional for legacy
     """
 
     version: str
-    files: Dict[str, str]  # filename -> SHA-256 hash
+    files: Dict[str, str | Dict[str, Any]]  # filename -> SHA-256 hash or {hash, size}
     signature: str  # HMAC signature of the manifest
     created_at: str
-    signed_by: str
+    signed_by: str = "unknown"  # [20241224_BUGFIX] v3.2.9 - Make optional with default
+
+    # TODO [PRO]: Add algorithm field (HMAC-SHA256, HMAC-SHA512, RSA, etc)
+    # TODO [ENTERPRISE]: Add X.509 certificate chain for public-key verification
+    # TODO [ENTERPRISE]: Add revocation_url for checking certificate revocation
+    # TODO [ENTERPRISE]: Add timestamp_server_url for notary/timestamping support
 
 
 @dataclass
@@ -80,6 +123,10 @@ class VerificationResult:
     files_verified: int = 0
     files_failed: List[str] = field(default_factory=list)
     error: Optional[str] = None
+
+    # TODO [PRO]: Add verification_timestamp field
+    # TODO [ENTERPRISE]: Add chain_of_custody field tracking all signature verifications
+    # TODO [ENTERPRISE]: Add remediation_suggestions for recovery after tampering
 
 
 class CryptographicPolicyVerifier:
@@ -112,6 +159,13 @@ class CryptographicPolicyVerifier:
             print(f"SECURITY: {e}")
             # Fail closed - deny all operations
     """
+
+    # TODO [COMMUNITY]: HMAC-SHA256 manifest verification (current)
+    # TODO [PRO]: Add support for RSA-4096 digital signatures
+    # TODO [PRO]: Add manifest versioning with upgrade path
+    # TODO [ENTERPRISE]: Add threshold cryptography (m-of-n signatures required)
+    # TODO [ENTERPRISE]: Add distributed verification across multiple trust anchors
+    # TODO [ENTERPRISE]: Add hardware security module (HSM) integration
 
     def __init__(
         self,
@@ -327,8 +381,17 @@ class CryptographicPolicyVerifier:
         files_failed = []
         files_verified = 0
 
-        for filename, expected_hash in self.manifest.files.items():
+        for filename, expected_hash_or_dict in self.manifest.files.items():
             try:
+                # [20241224_BUGFIX] v3.2.9 - Handle both flat hash strings and nested dicts
+                if isinstance(expected_hash_or_dict, dict):
+                    expected_hash = expected_hash_or_dict.get("hash")
+                    if not expected_hash:
+                        files_failed.append(filename)
+                        continue
+                else:
+                    expected_hash = expected_hash_or_dict
+
                 actual_hash = self._hash_file(filename)
 
                 if actual_hash != expected_hash:
@@ -375,7 +438,17 @@ class CryptographicPolicyVerifier:
                 f"File '{filename}' not in policy manifest. Cannot verify."
             )
 
-        expected_hash = self.manifest.files[filename]
+        # [20241224_BUGFIX] v3.2.9 - Handle both flat hash strings and nested dicts
+        expected_hash_or_dict = self.manifest.files[filename]
+        if isinstance(expected_hash_or_dict, dict):
+            expected_hash = expected_hash_or_dict.get("hash")
+            if not expected_hash:
+                raise SecurityError(
+                    f"Policy manifest for '{filename}' missing hash field. Cannot verify."
+                )
+        else:
+            expected_hash = expected_hash_or_dict
+
         actual_hash = self._hash_file(filename)
 
         if actual_hash != expected_hash:
@@ -400,21 +473,31 @@ class CryptographicPolicyVerifier:
         if not self.manifest:
             return False
 
-        # Reconstruct the signed data (same order as signing)
+        # [20241224_BUGFIX] v3.2.9 - Reconstruct the signed data exactly as it was signed
+        # Only include signed_by if it's not the default value (for backward compatibility)
         signed_data = {
             "version": self.manifest.version,
             "files": self.manifest.files,
             "created_at": self.manifest.created_at,
-            "signed_by": self.manifest.signed_by,
         }
+        if self.manifest.signed_by != "unknown":
+            signed_data["signed_by"] = self.manifest.signed_by
 
-        message = json.dumps(signed_data, sort_keys=True)
+        # [20241224_BUGFIX] v3.2.9 - Use same JSON format as signing
+        message = json.dumps(signed_data, sort_keys=True, separators=(",", ":"))
         expected_signature = hmac.new(
             self.secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()
 
+        # [20241224_BUGFIX] v3.2.9 - Strip hmac-sha256: prefix if present
+        manifest_signature = self.manifest.signature
+        if not manifest_signature:  # [20241224_BUGFIX] v3.2.9 - Handle null signature
+            return False
+        if manifest_signature.startswith("hmac-sha256:"):
+            manifest_signature = manifest_signature[len("hmac-sha256:") :]
+
         # Use constant-time comparison to prevent timing attacks
-        return hmac.compare_digest(expected_signature, self.manifest.signature)
+        return hmac.compare_digest(expected_signature, manifest_signature)
 
     def _hash_file(self, filename: str) -> str:
         """
@@ -429,7 +512,7 @@ class CryptographicPolicyVerifier:
             SHA-256 hash as hex string
 
         Raises:
-            FileNotFoundError: If file doesn't exist
+            FileNotFoundError: If file does not exist
         """
         path = self.policy_dir / filename
 
@@ -442,7 +525,8 @@ class CryptographicPolicyVerifier:
             for chunk in iter(lambda: f.read(8192), b""):
                 hasher.update(chunk)
 
-        return hasher.hexdigest()
+        # [20241224_BUGFIX] v3.2.9 - Return hash with sha256: prefix for compatibility
+        return "sha256:" + hasher.hexdigest()
 
     @staticmethod
     def create_manifest(
@@ -477,7 +561,9 @@ class CryptographicPolicyVerifier:
                 hasher = hashlib.sha256()
                 with open(path, "rb") as f:
                     hasher.update(f.read())
-                files[filename] = hasher.hexdigest()
+                files[filename] = (
+                    "sha256:" + hasher.hexdigest()
+                )  # [20241224_BUGFIX] v3.2.9 - Use prefixed format
 
         manifest_data = {
             "version": "1.0",
@@ -487,7 +573,9 @@ class CryptographicPolicyVerifier:
         }
 
         # Create HMAC signature
-        message = json.dumps(manifest_data, sort_keys=True)
+        message = json.dumps(
+            manifest_data, sort_keys=True, separators=(",", ":")
+        )  # [20241224_BUGFIX] v3.2.9 - Use canonical format
         signature = hmac.new(
             secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()
@@ -562,5 +650,5 @@ def verify_policy_integrity_crypto(policy_dir: str = ".code-scalpel") -> bool:
     except Exception as e:
         # Any unexpected error - FAIL CLOSED
         raise SecurityError(
-            f"Unexpected error during policy verification: {e}. " "Failing CLOSED."
+            f"Unexpected error during policy verification: {e}. Failing CLOSED."
         )

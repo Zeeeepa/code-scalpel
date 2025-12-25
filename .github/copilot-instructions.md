@@ -146,6 +146,12 @@ def _validate_input(self, data: dict) -> bool:
 **DO NOT** commit, push, tag, or release without explicit user permission.
 
 - **Pre-Commit Check:** Always ask: "Have we run the verification script?"
+- **Release Checklist Required:** ALL commits and releases MUST complete the appropriate release checklist:
+  - Use `docs/release_notes/release_checklist_template.md` to create version-specific checklist
+  - Version-specific checklists: `docs/release_notes/RELEASE_v{VERSION}_CHECKLIST.md`
+  - Complete ALL sections before creating release commit
+  - Hotfixes: Use streamlined checklist focused on bug fixes only
+  - Never skip checklist items without explicit user approval
 - **Release Protocol:** Follow the strict Gating System (Security -> Artifact -> TestPyPI -> PyPI).
 - **History Hygiene:** Ensure commit messages explain *why*, not just *what*.
 

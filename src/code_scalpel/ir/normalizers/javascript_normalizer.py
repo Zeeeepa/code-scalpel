@@ -157,6 +157,44 @@ class JavaScriptNormalizer(BaseNormalizer):
     Tree-sitter dependency:
         Requires tree_sitter and tree_sitter_javascript packages:
         pip install tree-sitter tree-sitter-javascript
+
+    TODO ITEMS:
+
+    COMMUNITY TIER (Core JavaScript CST Normalization):
+    1. TODO: Filter tree-sitter noise tokens (keywords, delimiters)
+    2. TODO: Implement function_declaration → IRFunctionDef mapping
+    3. TODO: Support arrow function normalization
+    4. TODO: Handle class_declaration → IRClassDef with methods
+    5. TODO: Normalize all binary operators with proper precedence
+    6. TODO: Support member expressions and dot/bracket notation
+    7. TODO: Implement function calls with argument handling
+    8. TODO: Handle control flow (if/else, for, while, switch)
+    9. TODO: Support try/catch/finally with error types
+    10. TODO: Normalize variable declarations (var, let, const)
+
+    PRO TIER (Advanced JavaScript Features):
+    11. TODO: Support destructuring assignments and parameters
+    12. TODO: Handle template literals and expression interpolation
+    13. TODO: Implement async/await normalization
+    14. TODO: Support generator functions and yield expressions
+    15. TODO: Normalize spread operator in calls and literals
+    16. TODO: Handle rest parameters properly
+    17. TODO: Support default parameter values
+    18. TODO: Implement computed property names
+    19. TODO: Handle symbol declarations and usage
+    20. TODO: Support module imports/exports (ES6)
+
+    ENTERPRISE TIER (Advanced Analysis & Optimization):
+    21. TODO: Implement JSX element normalization
+    22. TODO: Add React component detection and analysis
+    23. TODO: Support React hooks pattern recognition
+    24. TODO: Detect JavaScript design patterns
+    25. TODO: Implement ML-based JavaScript idiom recognition
+    26. TODO: Support distributed JavaScript analysis
+    27. TODO: Add caching for large JavaScript files
+    28. TODO: Implement performance profiling
+    29. TODO: Add AI-driven code optimization suggestions
+    30. TODO: Create JavaScript-specific security pattern detection
     """
 
     def __init__(self):

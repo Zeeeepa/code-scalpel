@@ -8,7 +8,96 @@ from typing import Any, Callable, Union
 
 
 class ASTUtils:
-    """Utility functions for working with ASTs."""
+    """
+    Utility functions for working with ASTs.
+
+    ====================================================================
+    TIER 1: COMMUNITY (Free - High Priority)
+    ====================================================================
+    [20251224_TIER1_TODO] FEATURE: Extract all names from AST
+      - Walk AST for Name nodes
+      - Collect unique names
+      - Distinguish variables vs functions
+      - Add 10+ tests for name extraction
+
+    [20251224_TIER1_TODO] FEATURE: Get function information
+      - Extract function signature
+      - Get parameter names and defaults
+      - Extract decorators and type hints
+      - Add 12+ tests for function info
+
+    [20251224_TIER1_TODO] FEATURE: Find nodes matching condition
+      - Walk entire AST
+      - Apply predicate function
+      - Return matching nodes
+      - Add 10+ tests for finding nodes
+
+    [20251224_TIER1_TODO] FEATURE: Get source code for node
+      - Extract line range from AST node
+      - Pull source from line array
+      - Handle multi-line nodes
+      - Add 10+ tests for source extraction
+
+    ====================================================================
+    TIER 2: PRO (Commercial - Medium Priority)
+    ====================================================================
+    [20251224_TIER2_TODO] FEATURE: Analyze variable dependencies
+      - Track assignments and uses
+      - Build dependency graph
+      - Identify chains of dependencies
+      - Add 15+ tests for dependency analysis
+
+    [20251224_TIER2_TODO] FEATURE: Constant folding and evaluation
+      - Evaluate constant expressions
+      - Simplify arithmetic operations
+      - Fold built-in function calls
+      - Add 15+ tests for folding
+
+    [20251224_TIER2_TODO] FEATURE: Dead code detection
+      - Find unreachable statements
+      - Detect unused variables
+      - Identify dead branches
+      - Add 15+ tests for dead code
+
+    [20251224_TIER2_TODO] FEATURE: Find similar nodes
+      - Compare AST structures
+      - Calculate similarity score
+      - Support pattern-based matching
+      - Add 12+ tests for similarity
+
+    [20251224_TIER2_TODO] FEATURE: Remove comments preserving line numbers
+      - Strip comment text
+      - Replace with whitespace
+      - Maintain line count
+      - Add 12+ tests for comment removal
+
+    ====================================================================
+    TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    ====================================================================
+    [20251224_TIER3_TODO] FEATURE: Data flow analysis utilities
+      - Compute reaching definitions
+      - Calculate liveness sets
+      - Build use-def chains
+      - Add 15+ tests for data flow
+
+    [20251224_TIER3_TODO] FEATURE: Control flow graph generation
+      - Build CFG from AST
+      - Identify basic blocks
+      - Handle loops and branches
+      - Add 15+ tests for CFG
+
+    [20251224_TIER3_TODO] FEATURE: Advanced traversal strategies
+      - Depth-first and breadth-first
+      - Topological ordering
+      - Reverse post-order
+      - Add 12+ tests for traversal
+
+    [20251224_TIER3_TODO] FEATURE: Semantic code comparison
+      - Compare semantics (not syntax)
+      - Identify refactored code
+      - Match equivalent structures
+      - Add 12+ tests for semantic comparison
+    """
 
     # [20251221_FEATURE] TODO: Add constant folding and evaluation
     # [20251221_FEATURE] TODO: Support dead code detection and removal

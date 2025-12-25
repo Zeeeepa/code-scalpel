@@ -11,13 +11,43 @@ Features:
 - Error traces for debugging
 - Analytics queries for usage patterns
 
-[20251220_TODO] Add log rotation and persistence:
-    - Rotate logs by size/time
-    - Persist analytics to database
-    - Historical trend analysis
-    - Long-term metrics aggregation
+TODO ITEMS:
 
-[20251220_TODO] Add alerting and thresholds:
+COMMUNITY TIER (Basic Logging & Metrics):
+1. TODO: Implement structured logging with JSON format
+2. TODO: Add tool invocation tracking (method, tier, duration)
+3. TODO: Track success/failure metrics per tool
+4. TODO: Implement token savings calculation and logging
+5. TODO: Add error trace logging with stack traces
+6. TODO: Create analytics query interface (basic)
+7. TODO: Implement log rotation by time (daily, weekly)
+8. TODO: Add correlation ID tracking through requests
+9. TODO: Create metrics aggregation (hourly summaries)
+10. TODO: Implement log filtering and search
+
+PRO TIER (Advanced Analytics & Monitoring):
+11. TODO: Add cardinality limits to prevent explosion
+12. TODO: Implement distributed tracing with context propagation
+13. TODO: Add real-time alerting for performance thresholds
+14. TODO: Create advanced analytics queries (trends, percentiles)
+15. TODO: Implement log compression for storage efficiency
+16. TODO: Add per-client usage quotas tracking
+17. TODO: Create performance profiling hooks
+18. TODO: Implement anomaly detection for unusual patterns
+19. TODO: Add custom metric definitions per tool
+20. TODO: Create dashboard data export (CSV, Parquet)
+
+ENTERPRISE TIER (Audit, Compliance & ML-Driven Optimization):
+21. TODO: Implement audit logging with immutable records
+22. TODO: Add GDPR compliance logging (PII tracking, retention)
+23. TODO: Create blockchain-based log verification
+24. TODO: Implement encrypted log storage
+25. TODO: Add multi-tenant log isolation
+26. TODO: Create ML-driven performance prediction
+27. TODO: Implement anomaly detection with AI
+28. TODO: Add predictive alerting for resource exhaustion
+29. TODO: Create automated performance tuning recommendations
+30. TODO: Implement quantum-safe log signatures
     - Alert on high error rates
     - Alert on performance degradation
     - Track SLA compliance

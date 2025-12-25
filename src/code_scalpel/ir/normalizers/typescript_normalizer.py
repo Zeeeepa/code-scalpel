@@ -60,6 +60,44 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
     Tree-sitter dependency:
         Requires tree_sitter and tree_sitter_typescript packages:
         pip install tree-sitter tree-sitter-typescript
+
+    TODO ITEMS:
+
+    COMMUNITY TIER (Core TypeScript Type Normalization):
+    1. TODO: Implement interface_declaration → IRClassDef mapping
+    2. TODO: Support type_alias_declaration normalization
+    3. TODO: Preserve type annotations on functions and variables
+    4. TODO: Handle generic type parameters (T, K extends, etc.)
+    5. TODO: Normalize type union types (string | number)
+    6. TODO: Support intersection types (A & B)
+    7. TODO: Handle readonly modifiers and const assertions
+    8. TODO: Implement type guards and type predicates
+    9. TODO: Support abstract classes and methods
+    10. TODO: Normalize enum declarations
+
+    PRO TIER (Advanced TypeScript Features):
+    11. TODO: Support generic type constraints and bounds
+    12. TODO: Implement keyof and typeof type operators
+    13. TODO: Handle mapped types { [K in keyof T]: ... }
+    14. TODO: Support conditional types (T extends U ? X : Y)
+    15. TODO: Normalize index signatures [key: string]: Type
+    16. TODO: Handle template literal types
+    17. TODO: Support infer keyword in conditional types
+    18. TODO: Implement decorator support with metadata
+    19. TODO: Handle never, unknown, and any types
+    20. TODO: Support type-only imports and exports
+
+    ENTERPRISE TIER (Advanced Analysis & Optimization):
+    21. TODO: Implement TypeScript type inference resolution
+    22. TODO: Support cross-file type checking
+    23. TODO: Detect TypeScript-specific design patterns
+    24. TODO: Implement ML-based TypeScript pattern recognition
+    25. TODO: Support distributed TypeScript analysis
+    26. TODO: Add advanced generic type analysis
+    27. TODO: Implement performance optimization detection
+    28. TODO: Support type safety verification
+    29. TODO: Add AI-driven refactoring suggestions
+    30. TODO: Create TypeScript-specific security analysis
     """
 
     def _ensure_parser(self) -> None:
