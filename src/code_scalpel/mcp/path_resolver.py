@@ -27,7 +27,7 @@ COMMUNITY TIER (Basic Path Resolution):
 3. TODO: Support relative path resolution with context
 4. TODO: Implement Docker container path handling
 5. TODO: Add Windows drive letter path resolution
-6. TODO: Support UNC paths (\\server\share)
+6. TODO: Support UNC paths (\\\\server\\share)
 7. TODO: Implement path validation and safety checks
 8. TODO: Add clear error messages with suggestions
 9. TODO: Create path resolution tests for all cases
