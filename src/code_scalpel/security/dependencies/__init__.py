@@ -12,17 +12,35 @@ from .vulnerability_scanner import (
     VulnerabilityScanner,
     ScanResult,
     VulnerabilityFinding,
+    DependencyParser,  # [20251225_BUGFIX] Export for MCP tools
 )
 
 # [20251225_FEATURE] OSV client (moved from ast_tools/)
-from .osv_client import OSVClient, Vulnerability, OSVError
+from .osv_client import (
+    OSVClient,
+    Vulnerability,
+    OSVError,
+    # Constants for backward compatibility
+    OSV_API_URL,
+    OSV_BATCH_URL,
+    DEFAULT_TIMEOUT,
+    MAX_RETRIES,
+    RETRY_DELAY,
+)
 
 __all__ = [
     "VulnerabilityScanner",
     "ScanResult",
     "VulnerabilityFinding",
+    "DependencyParser",
     # OSV client
     "OSVClient",
     "Vulnerability",
     "OSVError",
+    # OSV constants
+    "OSV_API_URL",
+    "OSV_BATCH_URL",
+    "DEFAULT_TIMEOUT",
+    "MAX_RETRIES",
+    "RETRY_DELAY",
 ]

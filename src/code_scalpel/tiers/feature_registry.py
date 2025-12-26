@@ -110,83 +110,83 @@ DEFAULT_FEATURES: Dict[str, Feature] = {
         description="Validate path accessibility",
         category="utilities",
     ),
-    # PRO features
+    # PRO features - Now available at COMMUNITY with parameter restrictions
     "security_scan": Feature(
         name="security_scan",
-        tier="pro",
+        tier="community",  # Available everywhere, features gated
         description="Taint-based vulnerability detection",
         category="security",
     ),
     "unified_sink_detect": Feature(
         name="unified_sink_detect",
-        tier="pro",
+        tier="community",
         description="Polyglot sink detection",
         category="security",
     ),
     "symbolic_execute": Feature(
         name="symbolic_execute",
-        tier="pro",
+        tier="community",
         description="Symbolic execution analysis",
         category="analysis",
     ),
     "generate_unit_tests": Feature(
         name="generate_unit_tests",
-        tier="pro",
+        tier="community",
         description="Test generation from symbolic paths",
         category="testing",
     ),
     "simulate_refactor": Feature(
         name="simulate_refactor",
-        tier="pro",
+        tier="community",
         description="Refactor behavior verification",
         category="surgery",
     ),
     "scan_dependencies": Feature(
         name="scan_dependencies",
-        tier="pro",
+        tier="community",
         description="Dependency vulnerability scanning",
         category="security",
     ),
     "get_cross_file_dependencies": Feature(
         name="get_cross_file_dependencies",
-        tier="pro",
+        tier="community",
         description="Cross-file dependency analysis",
         category="analysis",
     ),
     "get_graph_neighborhood": Feature(
         name="get_graph_neighborhood",
-        tier="pro",
+        tier="community",
         description="Extract graph neighborhood",
         category="analysis",
     ),
-    # ENTERPRISE features
+    # ENTERPRISE features - Now available at COMMUNITY with parameter restrictions
     "cross_file_security_scan": Feature(
         name="cross_file_security_scan",
-        tier="enterprise",
+        tier="community",  # Available everywhere, features gated
         description="Cross-module taint tracking",
         category="security",
     ),
     "verify_policy_integrity": Feature(
         name="verify_policy_integrity",
-        tier="enterprise",
+        tier="community",
         description="Cryptographic policy verification",
         category="governance",
     ),
     "type_evaporation_scan": Feature(
         name="type_evaporation_scan",
-        tier="enterprise",
+        tier="community",
         description="TypeScript type evaporation detection",
         category="security",
     ),
     "autonomous_repair": Feature(
         name="autonomous_repair",
-        tier="enterprise",
+        tier="community",
         description="Supervised autonomous code repair",
         category="autonomy",
     ),
     "compliance_report": Feature(
         name="compliance_report",
-        tier="enterprise",
+        tier="community",
         description="Compliance and audit reporting",
         category="governance",
     ),

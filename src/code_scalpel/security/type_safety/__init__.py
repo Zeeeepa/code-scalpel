@@ -10,9 +10,11 @@ This module contains type safety analysis tools:
 from .type_evaporation_detector import (
     TypeEvaporationDetector,
     TypeEvaporationVulnerability,
+    analyze_type_evaporation_cross_file,  # [20251225_BUGFIX] Export function
 )
 
 __all__ = [
     "TypeEvaporationDetector",
     "TypeEvaporationVulnerability",
+    "analyze_type_evaporation_cross_file",
 ]

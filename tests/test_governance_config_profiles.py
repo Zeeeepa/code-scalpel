@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 import pytest
 
-from code_scalpel.config.governance_config import (
+from code_scalpel.governance import (
     GovernanceConfigLoader,
 )
 
@@ -301,7 +301,7 @@ class TestCriticalPathScenarios:
 
     def test_critical_path_with_nested_directories(self):
         """Test critical path detection with deeply nested files."""
-        from code_scalpel.config.governance_config import BlastRadiusConfig
+        from code_scalpel.governance import BlastRadiusConfig
 
         config = BlastRadiusConfig(critical_paths=["src/core/"])
 
@@ -315,7 +315,7 @@ class TestCriticalPathScenarios:
 
     def test_critical_path_with_specific_files(self):
         """Test critical path with specific file patterns."""
-        from code_scalpel.config.governance_config import BlastRadiusConfig
+        from code_scalpel.governance import BlastRadiusConfig
 
         config = BlastRadiusConfig(
             critical_paths=["config/production.yaml", "src/*/security/*.py"]
@@ -332,7 +332,7 @@ class TestCriticalPathScenarios:
 
     def test_critical_path_windows_paths(self):
         """Test critical path works with Windows-style paths."""
-        from code_scalpel.config.governance_config import BlastRadiusConfig
+        from code_scalpel.governance import BlastRadiusConfig
         from pathlib import Path
 
         config = BlastRadiusConfig(critical_paths=["src/security/"])
@@ -346,7 +346,7 @@ class TestCriticalPathScenarios:
 
     def test_critical_path_empty_list(self):
         """Test behavior with no critical paths."""
-        from code_scalpel.config.governance_config import BlastRadiusConfig
+        from code_scalpel.governance import BlastRadiusConfig
 
         config = BlastRadiusConfig(critical_paths=[])
 
@@ -356,7 +356,7 @@ class TestCriticalPathScenarios:
 
     def test_critical_path_overlapping_patterns(self):
         """Test overlapping critical path patterns."""
-        from code_scalpel.config.governance_config import BlastRadiusConfig
+        from code_scalpel.governance import BlastRadiusConfig
 
         config = BlastRadiusConfig(
             critical_paths=[

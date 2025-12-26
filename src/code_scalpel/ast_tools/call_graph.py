@@ -40,6 +40,11 @@ class CallGraphResult:
     entry_point: Optional[str] = None
     depth_limit: Optional[int] = None
     mermaid: str = ""
+    # [20251225_FEATURE] Tier-friendly metadata for truncation and summaries
+    total_nodes: int = 0
+    total_edges: int = 0
+    nodes_truncated: bool = False
+    edges_truncated: bool = False
 
 
 class CallGraphBuilder:
@@ -212,45 +217,49 @@ class CallGraphBuilder:
             {}
         )  # file_path -> { alias -> full_name }
 
-    def build(self) -> Dict[str, List[str]]:
-        """
-        Build the call graph.
-        Returns an adjacency list: {"module:caller": ["module:callee", ...]}
+    def build(self, advanced_resolution: bool = False) -> Dict[str, List[str]]:
+      """Build the call graph.
 
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-        [20251224_TIER1_TODO] FEATURE: Two-pass graph construction
-          - First pass: collect definitions and imports
-          - Second pass: analyze calls and resolve them
-          - Error handling for malformed code
-          - Add 15+ tests for build process
-        """
-        # 1. First pass: Collect definitions and imports
-        for file_path in self._iter_python_files():
-            rel_path = str(file_path.relative_to(self.root_path))
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    code = f.read()
-                tree = ast.parse(code)
-                self._analyze_definitions(tree, rel_path)
-            except Exception:
-                continue
+      Returns an adjacency list: {"module:caller": ["module:callee", ...]}
 
-        # 2. Second pass: Analyze calls and resolve them
-        graph = {}
-        for file_path in self._iter_python_files():
-            rel_path = str(file_path.relative_to(self.root_path))
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    code = f.read()
-                tree = ast.parse(code)
-                file_calls = self._analyze_calls(tree, rel_path)
-                graph.update(file_calls)
-            except Exception:
-                continue
+      ====================================================================
+      TIER 1: COMMUNITY (Free - High Priority)
+      ====================================================================
+      [20251224_TIER1_TODO] FEATURE: Two-pass graph construction
+        - First pass: collect definitions and imports
+        - Second pass: analyze calls and resolve them
+        - Error handling for malformed code
+        - Add 15+ tests for build process
+      """
+      # 1. First pass: Collect definitions and imports
+      for file_path in self._iter_python_files():
+        rel_path = str(file_path.relative_to(self.root_path))
+        try:
+          with open(file_path, "r", encoding="utf-8") as f:
+            code = f.read()
+          tree = ast.parse(code)
+          self._analyze_definitions(tree, rel_path)
+        except Exception:
+          continue
 
-        return graph
+      # 2. Second pass: Analyze calls and resolve them
+      graph: Dict[str, List[str]] = {}
+      for file_path in self._iter_python_files():
+        rel_path = str(file_path.relative_to(self.root_path))
+        try:
+          with open(file_path, "r", encoding="utf-8") as f:
+            code = f.read()
+          tree = ast.parse(code)
+          file_calls = self._analyze_calls(
+            tree,
+            rel_path,
+            advanced_resolution=advanced_resolution,
+          )
+          graph.update(file_calls)
+        except Exception:
+          continue
+
+      return graph
 
     def _iter_python_files(self):
         """
@@ -393,7 +402,12 @@ class CallGraphBuilder:
                     full_name = f"{module}.{name}" if module else name
                     self.imports[rel_path][asname] = full_name
 
-    def _analyze_calls(self, tree: ast.AST, rel_path: str) -> Dict[str, List[str]]:
+    def _analyze_calls(
+        self,
+        tree: ast.AST,
+        rel_path: str,
+        advanced_resolution: bool = False,
+    ) -> Dict[str, List[str]]:
         """
         Extract calls from functions and resolve them.
 
@@ -453,27 +467,48 @@ class CallGraphBuilder:
             def __init__(self, builder, current_file):
                 self.builder = builder
                 self.current_file = current_file
-                self.current_scope = None
-                self.calls = []
+                self.current_scope: str | None = None
+                self.calls: list[str] = []
+
+                # [20251225_FEATURE] Pro+ scoped method resolution (best-effort)
+                self._advanced_resolution = advanced_resolution
+                self._current_class: str | None = None
+                self._var_types: Dict[str, str] = {}
+
+            def visit_ClassDef(self, node: ast.ClassDef) -> None:
+                if not self._advanced_resolution:
+                    self.generic_visit(node)
+                    return
+
+                old_class = self._current_class
+                self._current_class = node.name
+                self.generic_visit(node)
+                self._current_class = old_class
 
             def visit_FunctionDef(
                 self, node: ast.FunctionDef | ast.AsyncFunctionDef
             ) -> None:
                 old_scope = self.current_scope
-                self.current_scope = node.name
+
+                if self._advanced_resolution and self._current_class:
+                    self.current_scope = f"{self._current_class}.{node.name}"
+                else:
+                    self.current_scope = node.name
+
                 self.calls = []
+                self._var_types = {}
                 self.generic_visit(node)
 
                 # Store calls for this function
-                key = f"{self.current_file}:{node.name}"
+                key = f"{self.current_file}:{self.current_scope}"
                 file_graph[key] = self.calls
 
                 self.current_scope = old_scope
 
-            def visit_AsyncFunctionDef(self, node):
+            def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
                 self.visit_FunctionDef(node)
 
-            def visit_Call(self, node):
+            def visit_Call(self, node: ast.Call) -> None:
                 if self.current_scope:
                     callee = self._get_callee_name(node)
                     if callee:
@@ -481,14 +516,60 @@ class CallGraphBuilder:
                         self.calls.append(resolved)
                 self.generic_visit(node)
 
-            def _get_callee_name(self, node):
+            def visit_Assign(self, node: ast.Assign) -> None:
+                if not (self._advanced_resolution and self.current_scope):
+                    self.generic_visit(node)
+                    return
+
+                # Track simple type assignments: x = ClassName()
+                class_name: str | None = None
+                if isinstance(node.value, ast.Call):
+                    if isinstance(node.value.func, ast.Name):
+                        class_name = node.value.func.id
+                    elif isinstance(node.value.func, ast.Attribute):
+                        # module.ClassName() -> take last segment
+                        class_name = node.value.func.attr
+
+                if class_name:
+                    for target in node.targets:
+                        if isinstance(target, ast.Name):
+                            self._var_types[target.id] = class_name
+
+                self.generic_visit(node)
+
+            def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+                if not (self._advanced_resolution and self.current_scope):
+                    self.generic_visit(node)
+                    return
+
+                # Track simple annotations: x: ClassName = ...
+                if isinstance(node.target, ast.Name):
+                    ann = node.annotation
+                    if isinstance(ann, ast.Name):
+                        self._var_types[node.target.id] = ann.id
+                    elif isinstance(ann, ast.Attribute):
+                        self._var_types[node.target.id] = ann.attr
+
+                self.generic_visit(node)
+
+            def _get_callee_name(self, node: ast.Call) -> str | None:
                 if isinstance(node.func, ast.Name):
                     return node.func.id
-                elif isinstance(node.func, ast.Attribute):
-                    # Handle obj.method() - simplified
+                if isinstance(node.func, ast.Attribute):
                     value = self._get_attribute_value(node.func.value)
-                    if value:
-                        return f"{value}.{node.func.attr}"
+                    if not value:
+                        return None
+
+                    if self._advanced_resolution:
+                        # Resolve self.method() -> ClassName.method()
+                        if value == "self" and self._current_class:
+                            return f"{self._current_class}.{node.func.attr}"
+                        # Resolve instance.method() using simple type tracking
+                        if value in self._var_types:
+                            return f"{self._var_types[value]}.{node.func.attr}"
+
+                    return f"{value}.{node.func.attr}"
+
                 return None
 
             def _get_attribute_value(self, node):
@@ -530,6 +611,8 @@ class CallGraphBuilder:
         self,
         entry_point: Optional[str] = None,
         depth: int = 10,
+        max_nodes: Optional[int] = None,
+        advanced_resolution: bool = False,
     ) -> CallGraphResult:
         """
         Build call graph with detailed node and edge information.
@@ -571,8 +654,8 @@ class CallGraphBuilder:
           - Export format
           - Add 15+ tests for Mermaid
         """
-        # Build the base graph first
-        base_graph = self.build()
+        # [20251225_FEATURE] Pro+ may enable improved method/polymorphism resolution
+        base_graph = self.build(advanced_resolution=advanced_resolution)
 
         # Collect node information with line numbers
         node_info: Dict[str, CallNode] = {}
@@ -583,16 +666,42 @@ class CallGraphBuilder:
                     code = f.read()
                 tree = ast.parse(code)
 
-                for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                        key = f"{rel_path}:{node.name}"
-                        node_info[key] = CallNode(
-                            name=node.name,
-                            file=rel_path,
-                            line=node.lineno,
-                            end_line=getattr(node, "end_lineno", None),
-                            is_entry_point=self._is_entry_point(node, tree),
-                        )
+                if advanced_resolution:
+                    for top in getattr(tree, "body", []):
+                        if isinstance(top, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            key = f"{rel_path}:{top.name}"
+                            node_info[key] = CallNode(
+                                name=top.name,
+                                file=rel_path,
+                                line=top.lineno,
+                                end_line=getattr(top, "end_lineno", None),
+                                is_entry_point=self._is_entry_point(top, tree),
+                            )
+                        elif isinstance(top, ast.ClassDef):
+                            for item in top.body:
+                                if isinstance(
+                                    item, (ast.FunctionDef, ast.AsyncFunctionDef)
+                                ):
+                                    qualified = f"{top.name}.{item.name}"
+                                    key = f"{rel_path}:{qualified}"
+                                    node_info[key] = CallNode(
+                                        name=qualified,
+                                        file=rel_path,
+                                        line=item.lineno,
+                                        end_line=getattr(item, "end_lineno", None),
+                                        is_entry_point=False,
+                                    )
+                else:
+                    for node in ast.walk(tree):
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            key = f"{rel_path}:{node.name}"
+                            node_info[key] = CallNode(
+                                name=node.name,
+                                file=rel_path,
+                                line=node.lineno,
+                                end_line=getattr(node, "end_lineno", None),
+                                is_entry_point=self._is_entry_point(node, tree),
+                            )
             except Exception:
                 continue
 
@@ -602,10 +711,18 @@ class CallGraphBuilder:
         else:
             reachable = set(base_graph.keys())
 
-        # Build nodes list
-        nodes = []
+        reachable_list = sorted(reachable)
+        total_nodes = len(reachable_list)
+        nodes_truncated = False
+        if max_nodes is not None and total_nodes > max_nodes:
+            reachable_list = reachable_list[:max_nodes]
+            nodes_truncated = True
+
+        included = set(reachable_list)
+
+        nodes: List[CallNode] = []
         seen_nodes = set()
-        for key in reachable:
+        for key in reachable_list:
             if key in node_info:
                 nodes.append(node_info[key])
                 seen_nodes.add(key)
@@ -621,13 +738,25 @@ class CallGraphBuilder:
                 seen_nodes.add(key)
 
         # Build edges list
-        edges = []
+        edges_full: List[CallEdge] = []
+        edges: List[CallEdge] = []
         for caller, callees in base_graph.items():
-            if caller not in reachable:
+          if caller not in reachable:
+            continue
+          for callee in callees:
+            edges_full.append(CallEdge(caller=caller, callee=callee))
+
+            # If nodes were truncated, drop edges to truncated nodes.
+            if nodes_truncated:
+              if caller not in included:
                 continue
-            for callee in callees:
-                # Include edge if both ends are in reachable set (or external)
-                edges.append(CallEdge(caller=caller, callee=callee))
+              if callee in reachable and callee not in included:
+                continue
+
+            edges.append(CallEdge(caller=caller, callee=callee))
+
+        total_edges = len(edges_full)
+        edges_truncated = len(edges) != total_edges
 
         # Generate Mermaid diagram
         mermaid = self._generate_mermaid(nodes, edges, entry_point)
@@ -638,6 +767,10 @@ class CallGraphBuilder:
             entry_point=entry_point,
             depth_limit=depth,
             mermaid=mermaid,
+            total_nodes=total_nodes,
+            total_edges=total_edges,
+            nodes_truncated=nodes_truncated,
+            edges_truncated=edges_truncated,
         )
 
     def _is_entry_point(

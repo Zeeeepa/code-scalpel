@@ -1245,3 +1245,20 @@ def get_kafka_taint_bridges(
             bridges.append(bridge)
 
     return bridges
+
+
+# [20251225_FEATURE] Export public API for type checkers
+__all__ = [
+    "KafkaTaintTracker",
+    "KafkaProducer",
+    "KafkaConsumer",
+    "KafkaTaintBridge",
+    "KafkaTopicInfo",
+    "KafkaAnalysisResult",
+    "KafkaLibrary",
+    "KafkaPatternType",
+    "KafkaRiskLevel",
+    "analyze_kafka_file",
+    "analyze_kafka_codebase",
+    "get_kafka_taint_bridges",
+]

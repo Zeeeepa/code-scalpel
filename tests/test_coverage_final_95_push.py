@@ -230,7 +230,7 @@ class TestOSVClientBranches2:
 
     def test_osv_client_init(self):
         """Test OSVClient initialization."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         assert client is not None

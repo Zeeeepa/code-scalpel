@@ -10,7 +10,7 @@ Analyzes whether sanitizers actually prevent vulnerabilities:
 - Missing edge cases (Unicode normalization, encoding tricks)
 
 Example:
-    >>> from code_scalpel.symbolic_execution_tools import SanitizerAnalyzer
+    >>> from code_scalpel.security.sanitization.sanitizer_analyzer import SanitizerAnalyzer
     >>> analyzer = SanitizerAnalyzer()
     >>> effectiveness = analyzer.check_sanitizer(
     ...     sanitizer_code="input.replace(\"'\", \"\\\\'\"))",

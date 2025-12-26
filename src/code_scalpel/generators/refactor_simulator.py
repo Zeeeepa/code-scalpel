@@ -450,10 +450,10 @@ class RefactorSimulator:
         # Prefer the built-in security analyzer (AST + taint + dangerous patterns).
         # This exists in the core package and should be available in normal installs.
         try:
-            from code_scalpel.symbolic_execution_tools.security_analyzer import (
+            from code_scalpel.security.analyzers import (
                 SecurityAnalyzer,
             )
-            from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+            from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
             analyzer = SecurityAnalyzer()
 

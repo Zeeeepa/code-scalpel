@@ -66,17 +66,46 @@
   - [x] Maintains fail-closed security behavior on errors
   - [x] Returns proper PolicyVerificationResult with verification details
 
+#### 3) Policy Integrity Manifest Auto-Generation (Usability Enhancement)
+
+- [x] **Feature**: Auto-generate policy manifests during `code-scalpel init`
+- [x] **Location**: `src/code_scalpel/config/init_config.py`, `src/code_scalpel/cli.py`
+- [x] **Rationale**: Manual manifest creation was complex and error-prone; users needed to write Python code
+- [x] **Implementation**:
+  - [x] Added `generate_secret_key()` function (32-byte cryptographic secret)
+  - [x] Added `validate_config_files()` function (JSON/YAML/Rego validation)
+  - [x] Integrated manifest generation into `init_config_dir()`
+  - [x] Creates `.env` file with SCALPEL_MANIFEST_SECRET and documentation
+  - [x] Added `verify-policies` CLI command for integrity verification
+  - [x] Added `regenerate-manifest` CLI command for manifest updates
+  - [x] Enhanced `init` command output with validation results and security guidance
+- [x] **Testing**:
+  - [x] Verified `code-scalpel init` creates 20 files including policy_manifest.json and .env
+  - [x] Verified configuration validation checks 10 files (JSON/YAML/Rego)
+  - [x] Verified `verify-policies` command works with generated manifest
+  - [x] Verified `regenerate-manifest` command updates manifest correctly
+- [x] **Estimate**: 6 hours (ACTUAL: ~4 hours)
+- [x] **Acceptance**:
+  - [x] `code-scalpel init` generates secure HMAC key automatically
+  - [x] Policy manifest created with cryptographic signature
+  - [x] All config files validated for syntax errors
+  - [x] Security guidance provided for production deployments
+  - [x] Backward compatible with manual manifest creation
+
 ### B) Test Coverage Enhancement
 
 - [x] Regression tests for both P0 bugs verified (exhaustive tests now pass)
-- [x] Main test suite passes (4429 tests, no regressions)
-- [x] Contract tests verified (HTTP transport test passes)
-- [ ] **MINOR**: Updated `tests/test_crypto_verify.py` line 79 to expect 71-char hash with "sha256:" prefix
+- [x] Main test suite passes (4431 tests - 2 new tests added for policy features)
+- [x] Contract tests verified (all 3 transports pass)
+- [x] Updated `tests/test_crypto_verify.py` line 79 to expect 71-char hash with "sha256:" prefix
+- [x] Verified policy manifest generation in temporary directory
+- [x] Verified CLI commands work end-to-end
 
 ### C) Documentation Updates
 
-- [x] Add release notes file: `docs/release_notes/RELEASE_NOTES_v3.2.9.md` → **DONE: Comprehensive release notes created**
+- [x] Add release notes file: `docs/release_notes/RELEASE_NOTES_v3.2.9.md` → **DONE: Comprehensive release notes with new features**
 - [x] Document bug fixes with before/after behavior → **DONE: Detailed in release notes**
+- [x] Document new CLI commands and usage → **DONE: Examples in release notes**
 - [x] Update any tool documentation if error messages change → **N/A: No user-facing error message changes**
 
 ---

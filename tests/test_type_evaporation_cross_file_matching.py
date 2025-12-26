@@ -2,7 +2,7 @@ import pytest
 
 
 def test_type_evaporation_cross_file_matches_axios_and_router_decorators():
-    from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+    from code_scalpel.security.type_safety import (
         analyze_type_evaporation_cross_file,
     )
 
@@ -47,7 +47,7 @@ def submit(payload: dict):
     ],
 )
 def test_endpoint_normalization(ts_endpoint, expected):
-    from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+    from code_scalpel.security.type_safety import (
         TypeEvaporationDetector,
     )
 

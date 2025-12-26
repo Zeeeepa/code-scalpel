@@ -120,7 +120,7 @@ class TestMCPToolVerification:
 
     def test_security_scan_sql_injection(self):
         """Test security_scan detects SQL injection (CWE-89)."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
+        from code_scalpel.security.analyzers.security_analyzer import (
             SecurityAnalyzer,
         )
 
@@ -134,7 +134,7 @@ class TestMCPToolVerification:
 
     def test_security_scan_command_injection(self):
         """Test security_scan detects command injection (CWE-78)."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
+        from code_scalpel.security.analyzers.security_analyzer import (
             SecurityAnalyzer,
         )
 
@@ -148,7 +148,7 @@ class TestMCPToolVerification:
 
     def test_unified_sink_detect_java(self):
         """Test unified_sink_detect with Java code (v2.5.0 feature)."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -166,7 +166,7 @@ class TestMCPToolVerification:
 
     def test_unified_sink_confidence_scores(self):
         """Test that unified_sink_detect returns confidence scores (v2.2.0 feature)."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -179,7 +179,7 @@ class TestMCPToolVerification:
 
     def test_unified_sink_owasp_mapping(self):
         """Test OWASP Top 10 mapping (v2.5.0 Guardian feature)."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -403,7 +403,7 @@ def abs_value(x):
 
     def test_scan_dependencies_osv_format(self):
         """Test scan_dependencies returns OSV-compatible format."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         # Test with a known package
@@ -420,9 +420,9 @@ def abs_value(x):
 
     def test_cross_file_security_scan(self):
         """Test cross_file_security_scan tracks taint across modules."""
-        from code_scalpel.symbolic_execution_tools.cross_file_taint import (
+        from code_scalpel.security.analyzers import (
             CrossFileTaintTracker,
-        )
+        )  # [20251225_BUGFIX]
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create two files with taint flow
@@ -836,7 +836,7 @@ class TestMCPToolRoadmapCompliance:
 
     def test_v220_nexus_confidence_scores(self):
         """v2.2.0 Nexus: Cross-language confidence scores."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 

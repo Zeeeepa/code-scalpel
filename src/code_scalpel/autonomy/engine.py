@@ -97,7 +97,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Callable, Any
 import logging
 
-from code_scalpel.config.governance_config import (
+from code_scalpel.governance import (
     GovernanceConfigLoader,
     GovernanceConfig,
 )

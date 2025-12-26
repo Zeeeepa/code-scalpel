@@ -8,17 +8,17 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestMoreBranches1:
     """More branch coverage."""
 
     def test_taint_multiple_paths(self):
         """Cover multiple taint paths."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         t1 = TaintInfo(source=TaintSource.USER_INPUT)
@@ -30,7 +30,7 @@ class TestMoreBranches1:
 
     def test_taint_untainted_source(self):
         """Cover untainted source check."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers import TaintTracker
 
         tracker = TaintTracker()
         assert not tracker.is_tainted("untainted_var")
@@ -124,7 +124,7 @@ class TestMoreBranches1:
 
     def test_osv_rate_limit(self):
         """Cover rate limit handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         with patch("requests.post") as mock_post:
@@ -143,7 +143,7 @@ class TestMoreBranches1:
 
     def test_secret_scanner_github_token(self):
         """Cover github token detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'GITHUB_TOKEN = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"'
@@ -242,11 +242,7 @@ class TestMoreBranches2:
 
     def test_taint_tracker_fork(self):
         """Cover tracker fork."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)

@@ -13,7 +13,7 @@ Key features:
 - Detect vulnerabilities in multi-file scenarios
 
 Example:
-    >>> from code_scalpel.symbolic_execution_tools.cross_file_taint import CrossFileTaintTracker
+    >>> from code_scalpel.security.analyzers.cross_file_taint import CrossFileTaintTracker
     >>> tracker = CrossFileTaintTracker("/path/to/project")
     >>> tracker.build()
     >>> results = tracker.analyze()

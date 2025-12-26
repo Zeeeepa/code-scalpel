@@ -639,7 +639,7 @@ for sink in result.sinks:
 ### Use Case 1: Find SQL Injections in Web Application
 
 ```python
-from code_scalpel.symbolic_execution_tools import SecurityAnalyzer
+from code_scalpel.security.analyzers import SecurityAnalyzer
 
 analyzer = SecurityAnalyzer()
 
@@ -660,7 +660,7 @@ for vuln in sql_injections:
 ### Use Case 2: Audit Dependency Security
 
 ```python
-from code_scalpel.symbolic_execution_tools import VulnerabilityScanner
+from code_scalpel.security.dependencies import VulnerabilityScanner
 
 scanner = VulnerabilityScanner()
 
@@ -684,7 +684,7 @@ for vuln in critical:
 ### Use Case 3: Multi-File Vulnerability Analysis
 
 ```python
-from code_scalpel.symbolic_execution_tools import CrossFileTaintTracker
+from code_scalpel.security.analyzers.cross_file_taint import CrossFileTaintTracker
 
 tracker = CrossFileTaintTracker()
 

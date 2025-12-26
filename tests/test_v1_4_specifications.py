@@ -23,51 +23,21 @@ class TestSpec_MCP_GetFileContext:
         """
         from code_scalpel.mcp.server import _get_file_context_sync, FileContextResult
 
-        # Create a dummy Python file with known content
-        content = """
-import os
-import json
-
-class MyClass:
-    def method(self):
-        pass
-
-def func_one():
-    pass
-
-def func_two():
-    pass
-"""
+        content = "\nimport os\nimport json\n\nclass MyClass:\n    def method(self):\n        pass\n\ndef func_one():\n    pass\n\ndef func_two():\n    pass\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f_path = f.name
-
         try:
             result = _get_file_context_sync(f_path)
-
-            # Result is instance of FileContextResult
             assert isinstance(result, FileContextResult)
-
-            # Language is python
             assert result.language == "python"
-
-            # Line count is reasonable
             assert result.line_count > 0
-            assert (
-                result.line_count == len(content.strip().split("\n")) + 1
-            )  # +1 for leading newline
-
-            # Has expected functions
+            assert result.line_count == len(content.strip().split("\n")) + 1
             assert "func_one" in result.functions
             assert "func_two" in result.functions
-
-            # Has expected class
             assert "MyClass" in result.classes
-
-            # Has expected imports
             assert "os" in result.imports
             assert "json" in result.imports
-
         finally:
             os.unlink(f_path)
 
@@ -77,35 +47,14 @@ def func_two():
         """
         from code_scalpel.mcp.server import _get_file_context_sync
 
-        # Create file with nested control structures
-        content = """
-def complex_function(x):
-    result = 0
-    for i in range(10):
-        if i % 2 == 0:
-            if x > 5:
-                for j in range(5):
-                    while result < 100:
-                        result += 1
-            else:
-                result -= 1
-        elif i % 3 == 0:
-            result *= 2
-    return result
-"""
+        content = "\ndef complex_function(x):\n    result = 0\n    for i in range(10):\n        if i % 2 == 0:\n            if x > 5:\n                for j in range(5):\n                    while result < 100:\n                        result += 1\n            else:\n                result -= 1\n        elif i % 3 == 0:\n            result *= 2\n    return result\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f_path = f.name
-
         try:
             result = _get_file_context_sync(f_path)
-
-            # Complexity should be calculated
             assert result.complexity_score > 0
-
-            # With nested loops and conditionals, should be > 5
             assert result.complexity_score >= 5
-
         finally:
             os.unlink(f_path)
 
@@ -115,24 +64,16 @@ def complex_function(x):
         """
         from code_scalpel.mcp.server import _get_file_context_sync
 
-        # Create a large file
         lines = ["def func_{}(): pass".format(i) for i in range(50)]
         content = "\n".join(lines)
-
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f_path = f.name
-
         try:
             result = _get_file_context_sync(f_path)
-
-            # Summary should exist
             assert result.summary is not None
             assert len(result.summary) > 0
-
-            # Summary should be much shorter than full content
             assert len(result.summary) < len(content)
-
         finally:
             os.unlink(f_path)
 
@@ -143,10 +84,8 @@ def complex_function(x):
         from code_scalpel.mcp.server import _get_file_context_sync
 
         result = _get_file_context_sync("/nonexistent/path/file.py")
-
         assert result.success is False
         assert result.error is not None
-        # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
         assert (
             "cannot access file" in result.error.lower()
             or "not found" in result.error.lower()
@@ -159,21 +98,14 @@ def complex_function(x):
         """
         from code_scalpel.mcp.server import _get_file_context_sync
 
-        content = """
-def broken_function(
-    # Missing closing paren and colon
-"""
+        content = "\ndef broken_function(\n    # Missing closing paren and colon\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(content)
             f_path = f.name
-
         try:
             result = _get_file_context_sync(f_path)
-
-            # Should not crash - returns error state
             assert result.success is False
             assert result.error is not None
-
         finally:
             os.unlink(f_path)
 
@@ -191,35 +123,19 @@ class TestSpec_MCP_GetSymbolReferences:
         from code_scalpel.mcp.server import _get_symbol_references_sync
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # File A: definition
             def_path = os.path.join(tmpdir, "definitions.py")
             with open(def_path, "w") as f:
                 f.write(
-                    '''
-def target_func():
-    """The target function."""
-    return 42
-'''
+                    '\ndef target_func():\n    """The target function."""\n    return 42\n'
                 )
-
-            # File B: usage
             use_path = os.path.join(tmpdir, "consumer.py")
             with open(use_path, "w") as f:
                 f.write(
-                    """
-from definitions import target_func
-
-result = target_func()
-print(target_func())
-"""
+                    "\nfrom definitions import target_func\n\nresult = target_func()\nprint(target_func())\n"
                 )
-
             result = _get_symbol_references_sync("target_func", tmpdir)
-
             assert result.success is True
-            assert result.total_references >= 2  # Definition + at least one usage
-
-            # Should find reference in consumer.py
+            assert result.total_references >= 2
             consumer_refs = [r for r in result.references if "consumer.py" in r.file]
             assert len(consumer_refs) >= 1
 
@@ -232,19 +148,12 @@ print(target_func())
         with tempfile.TemporaryDirectory() as tmpdir:
             def_path = os.path.join(tmpdir, "module.py")
             with open(def_path, "w") as f:
-                f.write(
-                    """
-class MyClass:
-    pass
-"""
-                )
-
+                f.write("\nclass MyClass:\n    pass\n")
             result = _get_symbol_references_sync("MyClass", tmpdir)
-
             assert result.success is True
             assert result.definition_file is not None
             assert "module.py" in result.definition_file
-            assert result.definition_line == 2  # Class defined on line 2
+            assert result.definition_line == 2
 
     def test_symbol_not_found(self):
         """
@@ -256,10 +165,8 @@ class MyClass:
             file_path = os.path.join(tmpdir, "empty.py")
             with open(file_path, "w") as f:
                 f.write("# Empty file\n")
-
             result = _get_symbol_references_sync("nonexistent_symbol", tmpdir)
-
-            assert result.success is True  # Search succeeded, just found nothing
+            assert result.success is True
             assert result.total_references == 0
 
     def test_invalid_project_root(self):
@@ -269,7 +176,6 @@ class MyClass:
         from code_scalpel.mcp.server import _get_symbol_references_sync
 
         result = _get_symbol_references_sync("any_symbol", "/nonexistent/path")
-
         assert result.success is False
         assert result.error is not None
 
@@ -291,18 +197,15 @@ class TestSpec_Detection_XXE_CWE611:
         """
         REQUIREMENT: All standard library unsafe XML parsers must trigger a finding.
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
-        # Verify sink is registered
         matching_sinks = [
             k for k in SINK_PATTERNS.keys() if sink_name in k or k in sink_name
         ]
         assert len(matching_sinks) > 0, f"No sink pattern found matching {sink_name}"
-
-        # All matching sinks should map to XXE
         for sink in matching_sinks:
             assert SINK_PATTERNS[sink] == SecuritySink.XXE
 
@@ -318,11 +221,8 @@ class TestSpec_Detection_XXE_CWE611:
         """
         REQUIREMENT: Must not flag defusedxml or comments.
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SANITIZER_REGISTRY,
-        )
+        from code_scalpel.security.analyzers.taint_tracker import SANITIZER_REGISTRY
 
-        # defusedxml should be a registered sanitizer
         defused_sanitizers = [k for k in SANITIZER_REGISTRY.keys() if "defusedxml" in k]
         assert len(defused_sanitizers) > 0, "No defusedxml sanitizers registered"
 
@@ -330,22 +230,12 @@ class TestSpec_Detection_XXE_CWE611:
         """
         REQUIREMENT: Detect XXE when user input flows to XML parser.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+        from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
-        code = """
-from flask import request
-import xml.etree.ElementTree as ET
-
-xml_file = request.args.get('file')
-tree = ET.parse(xml_file)
-"""
-
+        code = "\nfrom flask import request\nimport xml.etree.ElementTree as ET\n\nxml_file = request.args.get('file')\ntree = ET.parse(xml_file)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         xxe_vulns = [
             v for v in result.vulnerabilities if v.sink_type == SecuritySink.XXE
         ]
@@ -361,22 +251,12 @@ class TestSpec_Detection_SSTI_CWE1336:
         """
         REQUIREMENT: Detect 'jinja2.Template(x)' where x is variable.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+        from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
-        code = """
-from flask import request
-import jinja2
-
-template = request.args.get('t')
-rendered = jinja2.Template(template).render()
-"""
-
+        code = "\nfrom flask import request\nimport jinja2\n\ntemplate = request.args.get('t')\nrendered = jinja2.Template(template).render()\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         ssti_vulns = [
             v for v in result.vulnerabilities if v.sink_type == SecuritySink.SSTI
         ]
@@ -386,12 +266,11 @@ rendered = jinja2.Template(template).render()
         """
         REQUIREMENT: Do not flag standard environment loaders (best practice).
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             SANITIZER_REGISTRY,
             SecuritySink,
         )
 
-        # render_template should be a sanitizer for SSTI
         assert "render_template" in SANITIZER_REGISTRY
         sanitizer_info = SANITIZER_REGISTRY["render_template"]
         assert SecuritySink.SSTI in sanitizer_info.clears_sinks
@@ -409,13 +288,10 @@ rendered = jinja2.Template(template).render()
         """
         REQUIREMENT: Detect SSTI across multiple template engines.
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SINK_PATTERNS,
-        )
+        from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS
 
-        # Check if any sink pattern matches this engine
         matching = any(
-            template_engine in k or k in template_engine for k in SINK_PATTERNS.keys()
+            (template_engine in k or k in template_engine for k in SINK_PATTERNS.keys())
         )
         assert matching, f"No SSTI sink pattern for {template_engine}"
 
@@ -427,22 +303,12 @@ class TestSpec_Regression_V130:
 
     def test_sql_injection_still_detected(self):
         """v1.3.0 SQL injection detection must still work."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+        from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
-        code = """
-from flask import request
-import sqlite3
-
-user_id = request.args.get('id')
-cursor.execute("SELECT * FROM users WHERE id = " + user_id)
-"""
-
+        code = "\nfrom flask import request\nimport sqlite3\n\nuser_id = request.args.get('id')\ncursor.execute(\"SELECT * FROM users WHERE id = \" + user_id)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         sqli_vulns = [
             v for v in result.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY
         ]
@@ -450,22 +316,12 @@ cursor.execute("SELECT * FROM users WHERE id = " + user_id)
 
     def test_command_injection_still_detected(self):
         """v1.3.0 command injection detection must still work."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+        from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
-        code = """
-from flask import request
-import os
-
-cmd = request.args.get('cmd')
-os.system(cmd)
-"""
-
+        code = "\nfrom flask import request\nimport os\n\ncmd = request.args.get('cmd')\nos.system(cmd)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         cmdi_vulns = [
             v
             for v in result.vulnerabilities
@@ -475,17 +331,12 @@ os.system(cmd)
 
     def test_secret_detection_still_works(self):
         """v1.3.0 secret detection must still work."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
-        code = """
-AWS_KEY = "AKIAIOSFODNN7EXAMPLE"
-GITHUB_TOKEN = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-"""
-
+        code = '\nAWS_KEY = "AKIAIOSFODNN7EXAMPLE"\nGITHUB_TOKEN = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"\n'
         scanner = SecretScanner()
         tree = ast.parse(code)
         secrets = scanner.scan(tree)
-
         assert len(secrets) >= 1, "Secret detection broken"
 
 
@@ -507,24 +358,10 @@ class TestSpec_MCP_Tools_Integration:
             file_path = os.path.join(tmpdir, "module.py")
             with open(file_path, "w") as f:
                 f.write(
-                    """
-def important_function():
-    pass
-
-class ImportantClass:
-    pass
-"""
+                    "\ndef important_function():\n    pass\n\nclass ImportantClass:\n    pass\n"
                 )
-
-            # Get file context
             context = _get_file_context_sync(file_path)
-
-            # Should list important_function
             assert "important_function" in context.functions
-
-            # Symbol references should find it
             refs = _get_symbol_references_sync("important_function", tmpdir)
             assert refs.total_references >= 1
-
-            # Definition should match
             assert refs.definition_line is not None

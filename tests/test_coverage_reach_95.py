@@ -43,7 +43,7 @@ class TestASTToolsInitFull:
 
     def test_osv_client_import(self):
         """[20251217_TEST] Cover osv_client import."""
-        from code_scalpel.ast_tools import osv_client
+        from code_scalpel.security.dependencies import osv_client
 
         assert osv_client is not None
 

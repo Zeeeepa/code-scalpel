@@ -14,7 +14,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from code_scalpel.symbolic_execution_tools.cross_file_taint import (
+from code_scalpel.security.analyzers.cross_file_taint import (
     CrossFileTaintTracker,
     CrossFileTaintResult,
     CrossFileTaintFlow,

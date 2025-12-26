@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from code_scalpel.symbolic_execution_tools.cross_file_taint import CrossFileTaintTracker
+from code_scalpel.security.analyzers import CrossFileTaintTracker
 
 
 def test_cross_file_sql_injection_flow_detected(tmp_path: Path):

@@ -970,3 +970,19 @@ def get_xss_risks(results: List[FrontendAnalysisResult]) -> List[DataFlow]:
     for result in results:
         all_flows.extend(result.dangerous_flows)
     return all_flows
+
+
+# [20251225_FEATURE] Export public API for type checkers
+__all__ = [
+    "FrontendInputTracker",
+    "FrontendAnalysisResult",
+    "FrontendFramework",
+    "InputSource",
+    "InputSourceType",
+    "DangerousSink",
+    "DangerousSinkType",
+    "DataFlow",
+    "analyze_frontend_file",
+    "analyze_frontend_codebase",
+    "get_xss_risks",
+]

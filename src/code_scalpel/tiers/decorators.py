@@ -35,9 +35,20 @@ from __future__ import annotations
 
 import functools
 import logging
+from enum import Enum
 from typing import Any, Callable, Optional, TypeVar, Union
 
 logger = logging.getLogger(__name__)
+
+
+# [20251225_BUGFIX] Local Tier enum for runtime checks (avoid circular import)
+class Tier(Enum):
+    """License tier levels for Code Scalpel."""
+
+    COMMUNITY = "community"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+
 
 # Type variable for decorated functions
 F = TypeVar("F", bound=Callable[..., Any])
@@ -73,7 +84,7 @@ def _tier_level(tier: str) -> int:
 
 
 def requires_tier(
-    tier: Union[str, Any],  # Accept Tier enum or string
+    tier: Union[str, Tier],  # Accept Tier enum or string
     feature_name: Optional[str] = None,
     graceful: bool = False,
     fallback: Any = None,
@@ -101,7 +112,7 @@ def requires_tier(
     Raises:
         TierRequirementError: If tier requirement not met and graceful=False
     """
-    # Convert Tier enum to string if needed
+    # Convert Tier enum to string if needed (use hasattr for duck typing)
     tier_str: str = getattr(tier, "value", str(tier)).lower()
 
     def decorator(func: F) -> F:

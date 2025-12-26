@@ -1,0 +1,6 @@
+
+    # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
+    semantic_summary: Optional[str] = Field(default=None, description="AI-generated semantic summary (Pro)")
+    related_imports: List[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
+    pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
+    access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")

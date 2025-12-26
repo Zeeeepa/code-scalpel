@@ -15,7 +15,7 @@ class TestTaintTrackerExtra:
 
     def test_cross_function_taint(self):
         """Cover cross-function taint analysis via concat."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -32,7 +32,7 @@ class TestTaintTrackerExtra:
 
     def test_taint_with_low_level(self):
         """Cover LOW taint level."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -47,7 +47,7 @@ class TestTaintTrackerExtra:
 
     def test_taint_with_medium_level(self):
         """Cover MEDIUM taint level."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -62,7 +62,7 @@ class TestTaintTrackerExtra:
 
     def test_sanitizer_on_high_taint(self):
         """Cover sanitizer on HIGH taint."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -79,7 +79,7 @@ class TestTaintTrackerExtra:
 
     def test_taint_check_sink(self):
         """Cover sink checking."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -93,7 +93,7 @@ class TestTaintTrackerExtra:
 
     def test_taint_get_vulnerabilities(self):
         """Cover get_vulnerabilities method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -166,7 +166,7 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_file_sinks(self):
         """Cover file operation sinks."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -177,7 +177,7 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_subprocess_sinks(self):
         """Cover subprocess sinks."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -188,7 +188,7 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_yaml_sinks(self):
         """Cover YAML load sinks."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -199,7 +199,7 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_pickle_sinks(self):
         """Cover pickle sinks."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -384,7 +384,7 @@ class TestSecretScannerExtraBranches:
 
     def test_scan_aws_access_key(self):
         """Cover AWS access key detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"'
@@ -394,7 +394,7 @@ class TestSecretScannerExtraBranches:
 
     def test_scan_jwt_token(self):
         """Cover JWT token detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"'
@@ -404,7 +404,7 @@ class TestSecretScannerExtraBranches:
 
     def test_scan_slack_token(self):
         """Cover Slack token detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'SLACK_TOKEN = "xoxb-placeholder-token"'

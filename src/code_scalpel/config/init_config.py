@@ -93,7 +93,11 @@ ENTERPRISE TIER - Distributed & Federated Initialization
 75. Add config health monitoring
 """
 
+import json
+import secrets
+import yaml
 from pathlib import Path
+from typing import List, Dict, Any
 from .templates import (
     POLICY_YAML_TEMPLATE,
     BUDGET_YAML_TEMPLATE,
@@ -113,6 +117,89 @@ from .templates import (
     SECRET_DETECTION_REGO_TEMPLATE,
     PROJECT_STRUCTURE_REGO_TEMPLATE,
 )
+
+
+def generate_secret_key() -> str:
+    """
+    Generate a cryptographically secure random secret key for HMAC.
+
+    [20241225_FEATURE] v3.3.0 - Auto-generate secure HMAC keys
+
+    Returns:
+        64-character hex string (256 bits of entropy)
+    """
+    return secrets.token_hex(32)
+
+
+def validate_config_files(config_dir: Path) -> Dict[str, Any]:
+    """
+    Validate configuration file formats (JSON, YAML, Rego).
+
+    [20241225_FEATURE] v3.3.0 - Configuration validation
+
+    Args:
+        config_dir: Path to .code-scalpel directory
+
+    Returns:
+        Dictionary with validation results
+    """
+    # Ensure config_dir is a Path object
+    if not isinstance(config_dir, Path):
+        config_dir = Path(config_dir)
+
+    validation_results = {
+        "success": True,
+        "errors": [],
+        "warnings": [],
+        "files_validated": [],
+    }
+
+    # Validate JSON files
+    json_files = list(config_dir.glob("*.json"))
+    for json_file in json_files:
+        if json_file.exists():
+            try:
+                with open(json_file) as f:
+                    json.load(f)
+                validation_results["files_validated"].append(str(json_file.name))
+            except json.JSONDecodeError as e:
+                validation_results["success"] = False
+                validation_results["errors"].append(f"{json_file.name}: Invalid JSON - {e}")
+
+    # Validate YAML files
+    yaml_files = list(config_dir.glob("*.yaml")) + list(config_dir.glob("*.yml"))
+    for yaml_file in yaml_files:
+        if yaml_file.exists():
+            try:
+                with open(yaml_file) as f:
+                    yaml.safe_load(f)
+                validation_results["files_validated"].append(str(yaml_file.name))
+            except yaml.YAMLError as e:
+                validation_results["success"] = False
+                validation_results["errors"].append(f"{yaml_file.name}: Invalid YAML - {e}")
+
+    # Validate Rego files (basic syntax check - just ensure they're readable)
+    rego_files = list(config_dir.rglob("*.rego"))
+    for rego_file in rego_files:
+        if rego_file.exists():
+            try:
+                with open(rego_file) as f:
+                    content = f.read()
+                    # Basic check: must contain 'package' declaration
+                    if "package" not in content:
+                        validation_results["warnings"].append(
+                            f"{rego_file.relative_to(config_dir)}: Missing 'package' declaration"
+                        )
+                validation_results["files_validated"].append(
+                    str(rego_file.relative_to(config_dir))
+                )
+            except Exception as e:
+                validation_results["success"] = False
+                validation_results["errors"].append(
+                    f"{rego_file.relative_to(config_dir)}: Read error - {e}"
+                )
+
+    return validation_results
 
 
 def init_config_dir(target_dir: str = ".") -> dict:
@@ -234,9 +321,94 @@ def init_config_dir(target_dir: str = ".") -> dict:
     files_created.append("policies/project/README.md")
     files_created.append("policies/project/structure.rego")
 
+    # ========================================================================
+    # [20241225_FEATURE] v3.3.0 - Policy Integrity Manifest
+    # ========================================================================
+
+    # Generate secure HMAC key
+    secret_key = generate_secret_key()
+
+    # Get list of all policy files to include in manifest
+    policy_files = [
+        "policy.yaml",
+        "dev-governance.yaml",
+        "project-structure.yaml",
+        "policies/architecture/layered_architecture.rego",
+        "policies/devops/docker_security.rego",
+        "policies/devsecops/secret_detection.rego",
+        "policies/project/structure.rego",
+    ]
+
+    # Import crypto_verify dynamically to avoid circular import
+    from ..policy_engine.crypto_verify import CryptographicPolicyVerifier
+
+    try:
+        # Create signed manifest
+        manifest = CryptographicPolicyVerifier.create_manifest(
+            policy_files=policy_files,
+            secret_key=secret_key,
+            signed_by="code-scalpel init (auto-generated)",
+            policy_dir=str(config_dir),
+        )
+
+        # Save manifest
+        manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, str(config_dir))
+        files_created.append("policy_manifest.json")
+
+        # Create .env.example with HMAC secret documentation
+        env_content = f"""# Code Scalpel Environment Variables
+# Generated by: code-scalpel init
+# Documentation: https://github.com/tescolopio/code-scalpel
+
+# ========================================================================
+# POLICY INTEGRITY VERIFICATION
+# ========================================================================
+# CRITICAL: This secret is required for verify_policy_integrity to work.
+# 
+# The HMAC secret verifies that policy files haven't been tampered with.
+# If an agent modifies a policy file, the hash won't match the manifest.
+#
+# Security Model: FAIL CLOSED
+# - Missing secret -> DENY ALL operations
+# - Invalid signature -> DENY ALL operations
+# - Hash mismatch -> DENY ALL operations
+#
+# GENERATED SECRET (DO NOT COMMIT THIS VALUE):
+SCALPEL_MANIFEST_SECRET={secret_key}
+#
+# PRODUCTION DEPLOYMENT:
+# 1. Copy this secret to your CI/CD system (GitHub Secrets, etc.)
+# 2. Never commit the actual secret to git
+# 3. Rotate this secret if compromised
+# 4. After rotation, regenerate manifest: code-scalpel regenerate-manifest
+# ========================================================================
+"""
+        env_file = target_path / ".env"
+        env_file.write_text(env_content)
+        files_created.append(".env")
+
+        # Update .gitignore to exclude .env but include .env.example
+        gitignore_content = gitignore_file.read_text()
+        if ".env\n" not in gitignore_content:
+            gitignore_file.write_text(gitignore_content + "\n# Environment variables with secrets\n.env\n")
+
+        # Validate all config files
+        validation = validate_config_files(config_dir)
+
+    except Exception as e:
+        # If manifest generation fails, still report success but add warning
+        validation = {
+            "success": True,
+            "errors": [],
+            "warnings": [f"Failed to generate policy manifest: {e}"],
+            "files_validated": [],
+        }
+
     return {
         "success": True,
         "message": "Configuration directory created successfully",
         "path": str(config_dir),
         "files_created": files_created,
+        "validation": validation,
+        "manifest_secret": secret_key if "manifest" in locals() else None,
     }

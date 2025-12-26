@@ -6,6 +6,10 @@ Target remaining 39 elements needed for 95%.
 import tempfile
 from pathlib import Path
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestErrorToDiffCoverage:
     """Cover uncovered branches in error_to_diff.py."""
@@ -17,10 +21,7 @@ class TestErrorToDiffCoverage:
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "SyntaxError: invalid syntax (test.py, line 5)"
-            source = """
-def broken:
-    pass
-"""
+            source = "\ndef broken:\n    pass\n"
             result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
@@ -31,10 +32,7 @@ def broken:
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "NameError: name 'undefined_var' is not defined"
-            source = """
-def test():
-    print(undefined_var)
-"""
+            source = "\ndef test():\n    print(undefined_var)\n"
             result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
@@ -118,7 +116,7 @@ class TestASTBuilderCoverage:
         try:
             builder.build_ast("def broken:")
         except SyntaxError:
-            pass  # Expected
+            pass
 
     def test_build_empty_code(self):
         """Cover empty code path."""
@@ -126,7 +124,7 @@ class TestASTBuilderCoverage:
 
         builder = ASTBuilder()
         result = builder.build_ast("")
-        assert result is not None  # Empty module
+        assert result is not None
 
 
 class TestSandboxCoverage:
@@ -149,12 +147,7 @@ class TestTaintTrackerDeepCoverage:
 
     def test_taint_with_none_level(self):
         """Cover NONE taint level."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-            TaintLevel,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo, TaintLevel
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.NONE)
@@ -164,7 +157,7 @@ class TestTaintTrackerDeepCoverage:
 
     def test_taint_source_method(self):
         """Cover taint_source method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers import TaintTracker
 
         tracker = TaintTracker()
         tracker.taint_source("user_data", "request.args")
@@ -172,11 +165,7 @@ class TestTaintTrackerDeepCoverage:
 
     def test_clear_tracker(self):
         """Cover clear method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -226,10 +215,7 @@ class TestSymbolicEngineCoverage:
         """Cover simple function analysis."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def double(x):
-    return x * 2
-"""
+        code = "\ndef double(x):\n    return x * 2\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -238,14 +224,7 @@ def double(x):
         """Cover nested if handling."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def nested(x, y):
-    if x > 0:
-        if y > 0:
-            return 1
-        return 2
-    return 3
-"""
+        code = "\ndef nested(x, y):\n    if x > 0:\n        if y > 0:\n            return 1\n        return 2\n    return 3\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -254,14 +233,7 @@ def nested(x, y):
         """Cover while loop handling."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def countdown(n):
-    _ = 0
-    while n > 0:
-        result += n
-        n -= 1
-    return result
-"""
+        code = "\ndef countdown(n):\n    _ = 0\n    while n > 0:\n        result += n\n        n -= 1\n    return result\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -274,17 +246,7 @@ class TestPDGBuilderDeepCoverage:
         """Cover nested try blocks."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-def nested_try():
-    try:
-        try:
-            x = 1 / 0
-        except ZeroDivisionError:
-            x = 0
-    except Exception:
-        x = -1
-    return x
-"""
+        code = "\ndef nested_try():\n    try:\n        try:\n            x = 1 / 0\n        except ZeroDivisionError:\n            x = 0\n    except Exception:\n        x = -1\n    return x\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -293,12 +255,7 @@ def nested_try():
         """Cover with statement handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-def with_context():
-    with open("file.txt") as f:
-        data = f.read()
-    return data
-"""
+        code = '\ndef with_context():\n    with open("file.txt") as f:\n        data = f.read()\n    return data\n'
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -307,15 +264,7 @@ def with_context():
         """Cover multiple return paths."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-def multi_return(x):
-    if x < 0:
-        return -1
-    elif x == 0:
-        return 0
-    else:
-        return 1
-"""
+        code = "\ndef multi_return(x):\n    if x < 0:\n        return -1\n    elif x == 0:\n        return 0\n    else:\n        return 1\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -328,16 +277,7 @@ class TestSurgicalExtractorDeepCoverage:
         """Cover property extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-class MyClass:
-    @property
-    def value(self):
-        return self._value
-    
-    @value.setter
-    def value(self, v):
-        self._value = v
-"""
+        code = "\nclass MyClass:\n    @property\n    def value(self):\n        return self._value\n    \n    @value.setter\n    def value(self, v):\n        self._value = v\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_method("MyClass", "value")
         assert result is not None
@@ -346,12 +286,7 @@ class MyClass:
         """Cover classmethod extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-class MyClass:
-    @classmethod
-    def from_dict(cls, data):
-        return cls()
-"""
+        code = "\nclass MyClass:\n    @classmethod\n    def from_dict(cls, data):\n        return cls()\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_method("MyClass", "from_dict")
         assert result is not None
@@ -360,16 +295,10 @@ class MyClass:
         """Cover nested class extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-class Outer:
-    class Inner:
-        def inner_method(self):
-            pass
-"""
+        code = "\nclass Outer:\n    class Inner:\n        def inner_method(self):\n            pass\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_class("Outer")
         assert result is not None
-        # Check that Inner is in the code string
         assert "Inner" in result.code
 
 
@@ -381,12 +310,7 @@ class TestTestGeneratorDeepCoverage:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-class Data:
-    @property
-    def items(self):
-        return self._items
-"""
+        code = "\nclass Data:\n    @property\n    def items(self):\n        return self._items\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -395,9 +319,6 @@ class Data:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-async def fetch_data(url):
-    return await http.get(url)
-"""
+        code = "\nasync def fetch_data(url):\n    return await http.get(url)\n"
         result = gen.generate(code)
         assert result is not None

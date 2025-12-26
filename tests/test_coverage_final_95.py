@@ -8,6 +8,10 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestASTBuilderCoverage:
     """Target uncovered lines in ast_tools/builder.py."""
@@ -69,7 +73,7 @@ class TestOSVClientCoverage:
 
     def test_query_network_error(self):
         """[20251217_TEST] Cover network error handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
         import requests
 
         client = OSVClient()
@@ -238,11 +242,7 @@ class TestTaintTrackerCoverage:
 
     def test_propagate_chain(self):
         """[20251217_TEST] Cover chain propagation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -253,11 +253,7 @@ class TestTaintTrackerCoverage:
 
     def test_taint_info_retrieval(self):
         """[20251217_TEST] Cover taint info retrieval."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -340,7 +336,7 @@ class TestSecretScannerCoverage:
 
     def test_scan_no_secrets(self):
         """[20251217_TEST] Cover clean code."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = "x = 42\ny = 'hello'"
@@ -350,7 +346,7 @@ class TestSecretScannerCoverage:
 
     def test_scan_api_key(self):
         """[20251217_TEST] Cover API key detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'API_KEY = "sk-placeholder-token"'

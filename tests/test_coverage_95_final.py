@@ -554,7 +554,7 @@ class TestAdditionalEdgeCases:
 
     def test_taint_tracker_fork_and_clear(self):
         """Test TaintTracker fork and clear."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers.taint_tracker import TaintTracker
 
         tracker = TaintTracker()
         tracker.mark_tainted("x", "input")

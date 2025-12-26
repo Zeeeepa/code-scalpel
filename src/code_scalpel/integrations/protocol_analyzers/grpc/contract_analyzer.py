@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Union
 
 # [20251225_REFACTOR] Updated import path after protocol_analyzers reorganization
-from ..schema import (
+from ..schema.drift_detector import (
     ProtobufParser,
     ProtobufMessage,
     ProtobufEnum,
@@ -868,3 +868,18 @@ def analyze_grpc_file(proto_path: Union[str, Path]) -> GrpcContract:
     """
     analyzer = GrpcContractAnalyzer()
     return analyzer.analyze_file(proto_path)
+
+
+# [20251225_FEATURE] Export public API for type checkers
+__all__ = [
+    "GrpcContractAnalyzer",
+    "GrpcContract",
+    "GrpcService",
+    "RpcMethod",
+    "StreamingType",
+    "ContractIssue",
+    "IssueSeverity",
+    "analyze_grpc_contract",
+    "validate_grpc_contract",
+    "analyze_grpc_file",
+]

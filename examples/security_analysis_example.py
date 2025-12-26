@@ -47,7 +47,8 @@ def vulnerable_login(username):
 # END OF VULNERABLE CODE
 # =============================================================================
 
-from code_scalpel.symbolic_execution_tools import (  # noqa: E402
+# [20251225_REFACTOR] Import from new security.analyzers.security_analyzer location
+from code_scalpel.security.analyzers.security_analyzer import (  # noqa: E402
     analyze_security,
     find_sql_injections,
     find_command_injections,

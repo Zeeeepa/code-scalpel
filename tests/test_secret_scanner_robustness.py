@@ -1,5 +1,5 @@
-from code_scalpel.symbolic_execution_tools.security_analyzer import SecurityAnalyzer
-from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+from code_scalpel.security.analyzers import SecurityAnalyzer
+from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
 
 def test_bytes_secret_detection():

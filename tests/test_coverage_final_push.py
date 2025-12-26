@@ -8,17 +8,17 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestTaintTrackerFinal:
     """Final taint tracker coverage tests."""
 
     def test_clear_all_taints(self):
         """[20251217_TEST] Cover clear all operation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -30,18 +30,14 @@ class TestTaintTrackerFinal:
 
     def test_taint_propagation_chain(self):
         """[20251217_TEST] Cover propagation chain."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
         tracker.mark_tainted("input", taint)
         for i in range(5):
             tracker.propagate_assignment(
-                f"step{i}", [f"step{i-1}" if i > 0 else "input"]
+                f"step{i}", [f"step{i - 1}" if i > 0 else "input"]
             )
         assert tracker.is_tainted("step4")
 
@@ -54,17 +50,7 @@ class TestCallGraphFinal:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmp:
-            code = """
-class Calculator:
-    def add(self, a, b):
-        return a + b
-    
-    def multiply(self, a, b):
-        result = 0
-        for _ in range(b):
-            result = self.add(result, a)
-        return result
-"""
+            code = "\nclass Calculator:\n    def add(self, a, b):\n        return a + b\n    \n    def multiply(self, a, b):\n        result = 0\n        for _ in range(b):\n            result = self.add(result, a)\n        return result\n"
             (Path(tmp) / "calc.py").write_text(code)
             builder = CallGraphBuilder(Path(tmp))
             graph = builder.build()
@@ -91,10 +77,7 @@ class TestPDGBuilderFinal:
         """[20251217_TEST] Cover multiple assignments."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-a = b = c = 1
-x, y, z = 1, 2, 3
-"""
+        code = "\na = b = c = 1\nx, y, z = 1, 2, 3\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -103,12 +86,7 @@ x, y, z = 1, 2, 3
         """[20251217_TEST] Cover augmented assignment."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-x = 1
-x += 2
-x *= 3
-x //= 2
-"""
+        code = "\nx = 1\nx += 2\nx *= 3\nx //= 2\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -121,12 +99,7 @@ class TestSurgicalExtractorFinal:
         """[20251217_TEST] Cover generator extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = '''
-def gen_numbers(n):
-    """Generate numbers."""
-    for i in range(n):
-        yield i * 2
-'''
+        code = '\ndef gen_numbers(n):\n    """Generate numbers."""\n    for i in range(n):\n        yield i * 2\n'
         extractor = SurgicalExtractor(code)
         result = extractor.get_function("gen_numbers")
         assert result is not None
@@ -135,14 +108,7 @@ def gen_numbers(n):
         """[20251217_TEST] Cover inheritance extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-class Parent:
-    def method(self): pass
-
-class Child(Parent):
-    def method(self):
-        super().method()
-"""
+        code = "\nclass Parent:\n    def method(self): pass\n\nclass Child(Parent):\n    def method(self):\n        super().method()\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_class("Child")
         assert result is not None
@@ -156,15 +122,7 @@ class TestTestGeneratorFinal:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-class Person:
-    def __init__(self, name):
-        self._name = name
-    
-    @property
-    def name(self):
-        return self._name
-"""
+        code = "\nclass Person:\n    def __init__(self, name):\n        self._name = name\n    \n    @property\n    def name(self):\n        return self._name\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -173,14 +131,7 @@ class Person:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-class FileHandler:
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, *args):
-        pass
-"""
+        code = "\nclass FileHandler:\n    def __enter__(self):\n        return self\n    \n    def __exit__(self, *args):\n        pass\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -208,16 +159,7 @@ class TestTypeInferenceFinal:
         )
 
         engine = TypeInferenceEngine()
-        code = """
-from dataclasses import dataclass
-
-@dataclass
-class Point:
-    x: int
-    y: int
-
-p = Point(1, 2)
-"""
+        code = "\nfrom dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: int\n    y: int\n\np = Point(1, 2)\n"
         result = engine.infer(code)
         assert result is not None
 
@@ -240,12 +182,7 @@ class TestSymbolicEngineFinal:
         """[20251217_TEST] Cover while loop analysis."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def count_down(n):
-    while n > 0:
-        n -= 1
-    return n
-"""
+        code = "\ndef count_down(n):\n    while n > 0:\n        n -= 1\n    return n\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -259,15 +196,10 @@ class TestPDGAnalyzerFinal:
         from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-x = 1
-y = 2
-z = x + y
-"""
+        code = "\nx = 1\ny = 2\nz = x + y\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         analyzer = PDGAnalyzer(pdg)
-        # Get node IDs from the PDG
         nodes = list(pdg.nodes())
         if nodes:
             slice_result = analyzer.compute_program_slice(nodes[-1])
@@ -278,10 +210,7 @@ z = x + y
         from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-user_input = input()
-result = eval(user_input)
-"""
+        code = "\nuser_input = input()\nresult = eval(user_input)\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         analyzer = PDGAnalyzer(pdg)
@@ -294,7 +223,7 @@ class TestOSVClientFinal:
 
     def test_query_with_vulnerabilities(self):
         """[20251217_TEST] Cover vulnerability found path."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         with patch("requests.post") as mock_post:
@@ -314,7 +243,6 @@ class TestASTBuilderFinal:
         from code_scalpel.ast_tools.builder import ASTBuilder
 
         builder = ASTBuilder()
-        # Add a simple preprocessing hook
         builder.add_preprocessing_hook(lambda code: code.replace("# TODO", ""))
         result = builder.build_ast("x = 1  # TODO: improve")
         assert result is not None
@@ -339,14 +267,10 @@ class TestSecretScannerFinal:
 
     def test_scan_multiple_secrets(self):
         """[20251217_TEST] Cover multiple secret detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
-        code = """
-API_KEY = "sk-placeholder-token"
-PASSWORD = "secret123"
-TOKEN = "ghp_1234"
-"""
+        code = '\nAPI_KEY = "sk-placeholder-token"\nPASSWORD = "secret123"\nTOKEN = "ghp_1234"\n'
         tree = ast.parse(code)
         result = scanner.scan(tree)
         assert isinstance(result, list)
@@ -360,13 +284,7 @@ class TestPDGUtilsFinal:
         from code_scalpel.pdg_tools.utils import find_paths
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-a = 1
-b = a + 1
-c = b + 1
-d = c + 1
-result = d + 1
-"""
+        code = "\na = 1\nb = a + 1\nc = b + 1\nd = c + 1\nresult = d + 1\n"
         builder = PDGBuilder()
         pdg, _ = builder.build(code)
         if pdg.nodes():
@@ -381,26 +299,21 @@ class TestUnifiedSinkDetectorFinal:
 
     def test_detect_sinks(self):
         """[20251217_TEST] Cover sink detection."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
         detector = UnifiedSinkDetector()
-        code = """
-def query(user_input):
-    sql = "SELECT * FROM users WHERE name = '" + user_input + "'"
-    cursor.execute(sql)
-"""
+        code = '\ndef query(user_input):\n    sql = "SELECT * FROM users WHERE name = \'" + user_input + "\'"\n    cursor.execute(sql)\n'
         result = detector.detect_sinks(code, "python")
         assert result is not None
 
     def test_get_owasp_category(self):
         """[20251217_TEST] Cover OWASP category retrieval."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
         detector = UnifiedSinkDetector()
-        # Test with known sink name
         result = detector.get_owasp_category("execute")
         assert result is not None or result is None

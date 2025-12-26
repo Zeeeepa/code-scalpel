@@ -7,7 +7,7 @@ This example shows how to use the UnifiedSinkDetector to detect security sinks
 across multiple programming languages with explicit confidence scoring.
 """
 
-from code_scalpel.symbolic_execution_tools import UnifiedSinkDetector
+from code_scalpel.security.analyzers import UnifiedSinkDetector
 
 
 def example_python_detection():

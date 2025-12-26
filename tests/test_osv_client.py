@@ -17,7 +17,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 import urllib.error
 
-from code_scalpel.ast_tools.osv_client import (
+from code_scalpel.security.dependencies import (
     OSVClient,
     Vulnerability,
     OSVError,

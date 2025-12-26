@@ -13,7 +13,7 @@ Tests cover:
 
 import pytest
 
-from code_scalpel.symbolic_execution_tools.kafka_taint_tracker import (
+from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
     KafkaTaintTracker,
     KafkaProducer,
     KafkaConsumer,

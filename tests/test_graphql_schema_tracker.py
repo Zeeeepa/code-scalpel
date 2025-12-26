@@ -5,7 +5,7 @@ Tests for GraphQL Schema Tracker.
 """
 
 import pytest
-from code_scalpel.symbolic_execution_tools.graphql_schema_tracker import (
+from code_scalpel.integrations.protocol_analyzers.graphql.schema_tracker import (
     GraphQLSchemaTracker,
     GraphQLTypeKind,
     GraphQLChangeType,

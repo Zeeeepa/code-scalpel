@@ -215,7 +215,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_mark_tainted_and_check(self):
         """[20251217_TEST] Cover mark_tainted and is_tainted."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -228,7 +228,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_propagate_assignment(self):
         """[20251217_TEST] Cover taint propagation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -242,7 +242,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_propagate_concat(self):
         """[20251217_TEST] Cover concat propagation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -256,7 +256,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_apply_sanitizer(self):
         """[20251217_TEST] Cover sanitizer application."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -270,7 +270,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_check_sink(self):
         """[20251217_TEST] Cover sink checking."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -285,7 +285,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_taint_source(self):
         """[20251217_TEST] Cover taint_source method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintSource,
         )
@@ -296,7 +296,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_get_taint(self):
         """[20251217_TEST] Cover get_taint method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -310,7 +310,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_fork(self):
         """[20251217_TEST] Cover fork method for branching."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -324,7 +324,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_clear(self):
         """[20251217_TEST] Cover clear method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -338,7 +338,7 @@ class TestTaintTrackerBranchCoverage:
 
     def test_get_vulnerabilities(self):
         """[20251217_TEST] Cover get_vulnerabilities method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintTracker,
             TaintInfo,
             TaintSource,
@@ -656,7 +656,7 @@ class TestOSVClientBranches:
 
     def test_query_with_timeout(self):
         """[20251217_TEST] Cover timeout handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         # Query with very short timeout should handle gracefully
@@ -665,7 +665,7 @@ class TestOSVClientBranches:
 
     def test_query_invalid_package(self):
         """[20251217_TEST] Cover invalid package handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         result = client.query_package("", "", ecosystem="PyPI")

@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 import tempfile
 
-from code_scalpel.config.governance_config import (
+from code_scalpel.governance import (
     BlastRadiusConfig,
     GovernanceConfigLoader,
 )

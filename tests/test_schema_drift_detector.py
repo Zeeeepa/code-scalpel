@@ -6,7 +6,7 @@ Tests for Schema Drift Detector.
 
 import json
 import pytest
-from code_scalpel.symbolic_execution_tools.schema_drift_detector import (
+from code_scalpel.integrations.protocol_analyzers.schema import (
     ChangeType,
     ProtobufParser,
     SchemaDriftDetector,

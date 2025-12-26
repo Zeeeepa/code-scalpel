@@ -485,3 +485,17 @@ class OSVError(Exception):
     """Exception raised for OSV API errors."""
 
     pass
+
+
+# [20251225_FEATURE] Export public API
+__all__ = [
+    "OSVClient",
+    "Vulnerability",
+    "OSVError",
+    # Constants for backward compatibility
+    "OSV_API_URL",
+    "OSV_BATCH_URL",
+    "DEFAULT_TIMEOUT",
+    "MAX_RETRIES",
+    "RETRY_DELAY",
+]

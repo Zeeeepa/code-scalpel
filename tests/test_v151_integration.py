@@ -142,9 +142,7 @@ database = Database()
 
     def test_cross_file_taint_tracking(self, flask_project):
         """Test that CrossFileTaintTracker detects cross-file vulnerabilities."""
-        from code_scalpel.symbolic_execution_tools.cross_file_taint import (
-            CrossFileTaintTracker,
-        )
+        from code_scalpel.security.analyzers import CrossFileTaintTracker
 
         tracker = CrossFileTaintTracker(flask_project)
         result = tracker.analyze(max_depth=3)

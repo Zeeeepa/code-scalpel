@@ -21,7 +21,7 @@ from code_scalpel.autonomy.engine import (
     AutonomyEngine,
     BlastRadiusCalculator,
 )
-from code_scalpel.config.governance_config import GovernanceConfigLoader
+from code_scalpel.governance import GovernanceConfigLoader
 
 
 class TestAutonomyEngineIntegration:

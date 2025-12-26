@@ -25,9 +25,14 @@ uvx code-scalpel --help
 
 Code Scalpel offers three tiers: **Community** (free), **Pro**, and **Enterprise**.
 
-- **Community** (default): Free, full access to basic tools, limited project-wide analysis
-- **Pro**: Unlimited project-wide analysis, deep crawling, no file/depth limits
-- **Enterprise**: All Pro features plus governance and audit capabilities
+> **🎉 All 20 MCP tools available at all tiers!** (v3.3.0+)
+> 
+> What differs is **capabilities and limits** within each tool, not tool availability.
+> Try everything immediately, upgrade when you need more scale/features.
+
+- **Community** (free): All 20 tools with basic limits (e.g., 10 findings, 3 paths, 100 files)
+- **Pro**: All 20 tools with higher limits (unlimited findings, 10 paths, 1000 files) + advanced features
+- **Enterprise**: All 20 tools unlimited + organization-wide features, compliance reporting
 
 **Configure your tier**:
 ```bash
@@ -43,7 +48,9 @@ export CODE_SCALPEL_TIER=enterprise
 code-scalpel mcp
 ```
 
-**📖 Complete tier documentation**: [Tier Configuration Guide](docs/TIER_CONFIGURATION.md)
+**📖 Complete tier documentation**: 
+- [Tier Configuration Guide](docs/TIER_CONFIGURATION.md) - Setup and configuration
+- [Tier Capabilities Matrix](docs/reference/tier_capabilities_matrix.md) - What each tier gets
 
 ---
 

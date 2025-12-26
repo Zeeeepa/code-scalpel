@@ -1,8 +1,8 @@
-# [20251218_TEST] Ultra-targeted final 16 elements for 95%
 """
 Extremely targeted tests for specific uncovered lines to cross 95%.
 Target: 16 more covered elements.
 """
+
 import tempfile
 from pathlib import Path
 import pytest
@@ -32,7 +32,6 @@ class TestAutogenExceptionPaths:
         from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
 
         scalpel_validate_impl("")
-        # May succeed with empty code or may fail
 
 
 class TestLanggraphExceptionPaths:
@@ -85,9 +84,7 @@ class TestCrewAIExceptionPaths:
     def test_crewai_apply_fix_exception(self):
         """Test crewai apply fix exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import (
-                scalpel_apply_fix_impl,
-            )
+            from code_scalpel.autonomy.integrations.crewai import scalpel_apply_fix_impl
 
             result = scalpel_apply_fix_impl("def :", "fix")
             assert result["success"] is False
@@ -97,9 +94,7 @@ class TestCrewAIExceptionPaths:
     def test_crewai_validate_exception(self):
         """Test crewai validate exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import (
-                scalpel_validate_impl,
-            )
+            from code_scalpel.autonomy.integrations.crewai import scalpel_validate_impl
 
             result = scalpel_validate_impl("def foo(:")
             assert result["success"] is False
@@ -132,9 +127,7 @@ class TestMutationGateExceptionPaths:
 
         sandbox = SandboxExecutor(max_cpu_seconds=10)
         gate = MutationTestGate(
-            sandbox=sandbox,
-            min_mutation_score=0.9,
-            max_additional_mutations=10,
+            sandbox=sandbox, min_mutation_score=0.9, max_additional_mutations=10
         )
         assert gate.min_mutation_score == 0.9
         assert gate.max_additional_mutations == 10
@@ -147,11 +140,7 @@ class TestSandboxExceptionPaths:
         """Test SandboxExecutor with docker isolation level."""
         from code_scalpel.autonomy.sandbox import SandboxExecutor
 
-        # Note: docker isolation may not work, but initialization should
-        sandbox = SandboxExecutor(
-            isolation_level="docker",
-            network_enabled=False,
-        )
+        sandbox = SandboxExecutor(isolation_level="docker", network_enabled=False)
         assert sandbox is not None
 
 
@@ -164,13 +153,10 @@ class TestASTCacheExceptionPaths:
 
         with tempfile.TemporaryDirectory() as tmp:
             cache = IncrementalASTCache(cache_dir=tmp)
-
-            # Create test files
             file1 = Path(tmp) / "file1.py"
             file2 = Path(tmp) / "file2.py"
             file1.write_text("import file2")
             file2.write_text("x = 1")
-
             cache.record_dependency(file1, file2)
             stats = cache.get_cache_stats()
             assert stats is not None
@@ -185,16 +171,10 @@ class TestAnalysisCacheExceptionPaths:
 
         with tempfile.TemporaryDirectory() as tmp:
             cache = AnalysisCache(cache_dir=tmp)
-
             test_file = Path(tmp) / "test.py"
             test_file.write_text("x = 1")
-
-            # Store a value
             cache.store(str(test_file), {"key": "value"})
-
-            # Try to retrieve
             _ = cache.get_cached(test_file)
-            # May or may not work depending on implementation
 
 
 class TestCLIExceptionPaths:
@@ -204,7 +184,6 @@ class TestCLIExceptionPaths:
         """Test CLI module attributes."""
         from code_scalpel import cli
 
-        # Check main is callable
         assert callable(cli.main)
 
 
@@ -248,10 +227,9 @@ class TestOSVClientExceptionPaths:
 
     def test_osv_client_query_package(self):
         """Test OSVClient query_package method."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
-        # Don't actually query - just check method exists
         assert hasattr(client, "query_package")
 
 
@@ -264,15 +242,11 @@ class TestCallGraphExceptionPaths:
 
         with tempfile.TemporaryDirectory() as tmp:
             builder = CallGraphBuilder(root_path=Path(tmp))
-
-            # Create test files
             file1 = Path(tmp) / "file1.py"
             file2 = Path(tmp) / "file2.py"
             file1.write_text("import file2")
             file2.write_text("import file1")
-
             _ = builder.detect_circular_imports()
-            # May or may not find circular imports
 
 
 class TestTypeInferenceExceptionPaths:
@@ -295,32 +269,20 @@ class TestTaintTrackerExceptionPaths:
 
     def test_taint_tracker_fork(self):
         """Test TaintTracker fork method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintLevel,
-            TaintInfo,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintLevel, TaintInfo
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user_input")
         tracker.mark_tainted("a", taint_info)
-
-        # Fork the tracker
         forked = tracker.fork()
         assert forked is not None
 
     def test_taint_tracker_clear(self):
         """Test TaintTracker clear method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintLevel,
-            TaintInfo,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintLevel, TaintInfo
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user_input")
         tracker.mark_tainted("a", taint_info)
-
-        # Clear the tracker
         tracker.clear()
         assert not tracker.is_tainted("a")

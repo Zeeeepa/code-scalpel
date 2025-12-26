@@ -440,11 +440,40 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     for filename in result["files_created"]:
         print(f"   - {filename}")
 
+    # [20241225_FEATURE] v3.3.0 - Show validation results
+    if "validation" in result:
+        validation = result["validation"]
+        print(f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:")
+        if validation["success"]:
+            print("   ✅ All files have valid syntax")
+        else:
+            print("   ❌ Found validation errors:")
+            for error in validation["errors"]:
+                print(f"      - {error}")
+        if validation["warnings"]:
+            print("   ⚠️  Warnings:")
+            for warning in validation["warnings"]:
+                print(f"      - {warning}")
+
+    # [20241225_FEATURE] v3.3.0 - Show manifest info
+    if result.get("manifest_secret"):
+        print("\n[SECURITY] Policy Integrity Manifest Generated:")
+        print("   ✅ Cryptographic manifest created: policy_manifest.json")
+        print("   ✅ HMAC secret saved to: .env")
+        print("   ⚠️  CRITICAL: The .env file contains a secret key!")
+        print("   ⚠️  DO NOT commit .env to git (already in .gitignore)")
+        print("\n   Next steps for production:")
+        print("   1. Copy SCALPEL_MANIFEST_SECRET from .env to your CI/CD secrets")
+        print("   2. Delete .env locally (or keep for development)")
+        print("   3. Commit policy_manifest.json to git")
+        print("   4. Test with: code-scalpel verify-policies")
+
     print("\nNext steps:")
     print("   1. Review policy.yaml to configure security rules")
     print("   2. Review budget.yaml to set change limits")
     print("   3. Read README.md for configuration guidance")
-    print("   4. Add .code-scalpel/ to version control (optional)")
+    print("   4. Add .code-scalpel/ to version control (recommended)")
+    print("   5. Set SCALPEL_MANIFEST_SECRET in CI/CD for policy verification")
 
     return 0
 
@@ -533,6 +562,121 @@ def start_mcp_server(
         print("\nMCP Server stopped.")
 
     return 0
+
+
+def verify_policies_command(policy_dir: str = ".code-scalpel", manifest_source: str = "file") -> int:
+    """Verify policy integrity using cryptographic signatures.
+
+    [20241225_FEATURE] v3.3.0 - CLI command for policy verification
+    """
+    import os
+    from .policy_engine.crypto_verify import CryptographicPolicyVerifier
+
+    print("Code Scalpel Policy Integrity Verification")
+    print("=" * 60)
+
+    # Check for HMAC secret
+    secret = os.getenv("SCALPEL_MANIFEST_SECRET")
+    if not secret:
+        print("\n[ERROR] SCALPEL_MANIFEST_SECRET environment variable not set")
+        print("\nThis secret is required to verify policy integrity.")
+        print("Find your secret in: .env (if using code-scalpel init)")
+        print("\nFor production:")
+        print("   export SCALPEL_MANIFEST_SECRET=<your-secret-key>")
+        return 1
+
+    try:
+        verifier = CryptographicPolicyVerifier(
+            policy_dir=policy_dir, 
+            secret_key=secret,
+            manifest_source=manifest_source
+        )
+        result = verifier.verify_all_policies()
+
+        if result.success:
+            print("\n[SUCCESS] ✅ All policies verified successfully")
+            print(f"   Verified {result.files_verified} policy files")
+            if verifier.manifest:
+                print(f"   Manifest signed by: {verifier.manifest.signed_by}")
+                print(f"   Manifest created: {verifier.manifest.created_at}")
+            return 0
+        else:
+            print("\n[FAILURE] ❌ Policy verification failed")
+            print(f"\n   Error: {result.error}")
+            if result.files_failed:
+                print("\n   Failed files:")
+                for filepath in result.files_failed:
+                    print(f"      - {filepath}")
+            return 2
+
+    except Exception as e:
+        print(f"\n[ERROR] Verification failed: {e}")
+        return 1
+
+
+def regenerate_manifest_command(policy_dir: str = ".code-scalpel", signed_by: str = "code-scalpel") -> int:
+    """Regenerate policy manifest after policy changes.
+
+    [20241225_FEATURE] v3.3.0 - CLI command for manifest regeneration
+    """
+    import os
+    from pathlib import Path
+    from .policy_engine.crypto_verify import CryptographicPolicyVerifier
+    from .config.init_config import generate_secret_key
+
+    print("Code Scalpel Policy Manifest Regeneration")
+    print("=" * 60)
+
+    # Check for existing secret or generate new one
+    secret = os.getenv("SCALPEL_MANIFEST_SECRET")
+    if not secret:
+        print("\n[WARNING] SCALPEL_MANIFEST_SECRET not set, generating new secret...")
+        secret = generate_secret_key()
+        print(f"\n   New secret: {secret}")
+        print("   ⚠️  Save this secret securely!")
+        print("   ⚠️  Add it to .env: SCALPEL_MANIFEST_SECRET=<secret>")
+
+    policy_path = Path(policy_dir)
+    if not policy_path.exists():
+        print(f"\n[ERROR] Policy directory not found: {policy_dir}")
+        return 1
+
+    # Find all policy files
+    policy_files = []
+    for pattern in ["*.yaml", "*.yml", "policies/**/*.rego"]:
+        policy_files.extend([str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)])
+
+    if not policy_files:
+        print(f"\n[ERROR] No policy files found in {policy_dir}")
+        return 1
+
+    print(f"\n[INFO] Found {len(policy_files)} policy files:")
+    for filepath in sorted(policy_files):
+        print(f"   - {filepath}")
+
+    try:
+        # Create manifest
+        manifest = CryptographicPolicyVerifier.create_manifest(
+            policy_files=policy_files,
+            secret_key=secret,
+            signed_by=signed_by,
+            policy_dir=policy_dir,
+        )
+
+        # Save manifest
+        manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, policy_dir)
+
+        print(f"\n[SUCCESS] ✅ Manifest regenerated successfully")
+        print(f"   Saved to: {manifest_path}")
+        print(f"   Signed by: {signed_by}")
+        print(f"\nNext steps:")
+        print("   1. Commit policy_manifest.json to git")
+        print("   2. Verify integrity: code-scalpel verify-policies")
+        return 0
+
+    except Exception as e:
+        print(f"\n[ERROR] Failed to regenerate manifest: {e}")
+        return 1
 
 
 def main() -> int:
@@ -676,6 +820,38 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     # Version command
     subparsers.add_parser("version", help="Show version information")
 
+    # [20241225_FEATURE] v3.3.0 - Policy verification commands
+    verify_parser = subparsers.add_parser(
+        "verify-policies",
+        help="Verify policy integrity using cryptographic signatures",
+    )
+    verify_parser.add_argument(
+        "--dir",
+        default=".code-scalpel",
+        help="Policy directory (default: .code-scalpel)",
+    )
+    verify_parser.add_argument(
+        "--manifest-source",
+        choices=["git", "env", "file"],
+        default="file",
+        help="Where to load manifest from (default: file)",
+    )
+
+    regenerate_parser = subparsers.add_parser(
+        "regenerate-manifest",
+        help="Regenerate policy manifest after changes",
+    )
+    regenerate_parser.add_argument(
+        "--dir",
+        default=".code-scalpel",
+        help="Policy directory (default: .code-scalpel)",
+    )
+    regenerate_parser.add_argument(
+        "--signed-by",
+        default="code-scalpel regenerate-manifest",
+        help="Signer identity for manifest",
+    )
+
     args = parser.parse_args()
 
     if args.command == "analyze":
@@ -702,6 +878,12 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
 
     elif args.command == "init":  # [20251219_FEATURE] v3.0.2
         return init_configuration(args.dir, args.force)
+
+    elif args.command == "verify-policies":  # [20241225_FEATURE] v3.3.0
+        return verify_policies_command(args.dir, args.manifest_source)
+
+    elif args.command == "regenerate-manifest":  # [20241225_FEATURE] v3.3.0
+        return regenerate_manifest_command(args.dir, args.signed_by)
 
     elif args.command == "server":
         return start_server(args.host, args.port)

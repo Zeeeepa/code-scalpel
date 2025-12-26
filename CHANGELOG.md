@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.0] - 2025-12-25
 
+### ⚠️ BREAKING CHANGES
+
+**Backward compatibility stubs removed from `symbolic_execution_tools/`**
+
+This release removes 14 backward compatibility stub files that were redirecting imports to new module locations. Users MUST update their import statements.
+
+**Removed stub files:**
+- `symbolic_execution_tools.taint_tracker` → Use `security.analyzers.taint_tracker`
+- `symbolic_execution_tools.security_analyzer` → Use `security.analyzers.security_analyzer`
+- `symbolic_execution_tools.unified_sink_detector` → Use `security.analyzers.unified_sink_detector`
+- `symbolic_execution_tools.cross_file_taint` → Use `security.analyzers.cross_file_taint`
+- `symbolic_execution_tools.secret_scanner` → Use `security.secrets.secret_scanner`
+- `symbolic_execution_tools.type_evaporation_detector` → Use `security.type_safety.type_evaporation_detector`
+- `symbolic_execution_tools.vulnerability_scanner` → Use `security.dependencies.vulnerability_scanner`
+- `symbolic_execution_tools.schema_drift_detector` → Use `integrations.protocol_analyzers.schema.drift_detector`
+- `symbolic_execution_tools.grpc_contract_analyzer` → Use `integrations.protocol_analyzers.grpc.contract_analyzer`
+- `symbolic_execution_tools.graphql_schema_tracker` → Use `integrations.protocol_analyzers.graphql.schema_tracker`
+- `symbolic_execution_tools.kafka_taint_tracker` → Use `integrations.protocol_analyzers.kafka.taint_tracker`
+- `symbolic_execution_tools.frontend_input_tracker` → Use `integrations.protocol_analyzers.frontend.input_tracker`
+- `symbolic_execution_tools.ml_vulnerability_predictor` → Use `security.ml.ml_vulnerability_predictor`
+- `symbolic_execution_tools.sanitizer_analyzer` → Use `security.sanitization.sanitizer_analyzer`
+
+**Migration:** See `docs/release_notes/RELEASE_NOTES_v3.3.0.md` for complete migration guide with search-and-replace patterns.
+
+### Changed
+- Updated 400+ import statements across source, tests, and examples
+- Fixed 3 pyright type checking errors (SecuritySink, LicenseValidator, ValidationResult)
+- Applied black formatting to 23 files
+- Updated licensing module structure to fix circular import issues
+
+### Removed
+- 14 backward compatibility stub files from `symbolic_execution_tools/`
+- 2 unrelated deprecated files: `ast_tools/osv_client.py`, `config/governance_config.py`
+
+### Fixed
+- Type checking errors in `refactor_simulator.py` and `licensing/__init__.py`
+- Import resolution issues in symbolic execution modules
+- Docstring references to old import paths in README_DEVELOPER_GUIDE.md
+
+### Testing
+- 4,431 tests passing (99.98% pass rate)
+- MCP contract tests validated (stdio transport)
+- All security analysis tests verified
+- Build and packaging validated
+
+---
+
+## [3.2.1] - 2025-12-24
+
 ### Added
 
 #### Project Reorganization (Phases 1-4)

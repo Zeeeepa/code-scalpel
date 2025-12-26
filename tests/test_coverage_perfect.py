@@ -12,16 +12,9 @@ NO EXCUSES. If the code exists, we test it.
 """
 
 from unittest.mock import patch
-
-# Suppress warnings for cleaner test output
 import warnings
 
 warnings.filterwarnings("ignore", message="symbolic_execution_tools")
-
-
-# =============================================================================
-# TAINT TRACKER: 2 Partial Branches
-# =============================================================================
 
 
 class TestTaintTrackerPerfectCoverage:
@@ -34,33 +27,21 @@ class TestTaintTrackerPerfectCoverage:
         The code has: `if sink_set:` - we need to hit the False branch.
         This happens when ALL sink names in the config are invalid.
         """
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            load_sanitizers_from_config,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SANITIZER_REGISTRY,
+            load_sanitizers_from_config,
         )
 
-        # Create a config with only invalid sink names
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
-            """
-[tool.code-scalpel.sanitizers]
-"my_func" = ["INVALID_SINK_1", "INVALID_SINK_2", "NOT_A_REAL_SINK"]
-"""
+            '\n[tool.code-scalpel.sanitizers]\n"my_func" = ["INVALID_SINK_1", "INVALID_SINK_2", "NOT_A_REAL_SINK"]\n'
         )
-
-        # Store original registry state
         original_registry = dict(SANITIZER_REGISTRY)
-
         try:
-            # Load config - should NOT register "my_func" because all sinks are invalid
             count = load_sanitizers_from_config(str(config_file))
-
-            # The function processed 1 entry but registered 0 sanitizers
-            # (because sink_set was empty after KeyError on all names)
-            assert count == 1  # It counted the entry
-            assert "my_func" not in SANITIZER_REGISTRY  # But didn't register it
+            assert count == 1
+            assert "my_func" not in SANITIZER_REGISTRY
         finally:
-            # Restore registry
             SANITIZER_REGISTRY.clear()
             SANITIZER_REGISTRY.update(original_registry)
 
@@ -71,18 +52,12 @@ class TestTaintTrackerPerfectCoverage:
         The code has: `for _ in range(10):` - we need to exhaust all 10 iterations
         without finding a config file OR hitting the root directory.
         """
-        from code_scalpel.security.analyzers.taint_tracker import (
-            _find_config_file,
-        )
+        from code_scalpel.security.analyzers.taint_tracker import _find_config_file
 
-        # Mock os functions to create a scenario where:
-        # 1. pyproject.toml never exists
-        # 2. dirname always returns a "parent" (never reaches root)
         call_count = [0]
 
         def mock_dirname(path):
             call_count[0] += 1
-            # Return a different path each time (never equal to input = never at root)
             return f"/fake/path/level{call_count[0]}"
 
         with (
@@ -91,16 +66,8 @@ class TestTaintTrackerPerfectCoverage:
             patch("os.path.dirname", side_effect=mock_dirname),
         ):
             result = _find_config_file()
-
-            # Should return None after exhausting loop
             assert result is None
-            # Should have called dirname 10 times (loop limit)
             assert call_count[0] == 10
-
-
-# =============================================================================
-# SECURITY ANALYZER: 4 Partial Branches
-# =============================================================================
 
 
 class TestSecurityAnalyzerPerfectCoverage:
@@ -113,24 +80,11 @@ class TestSecurityAnalyzerPerfectCoverage:
 
         This happens when a sanitizer is called with arguments that are NOT tainted.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        # Code that calls a sanitizer with non-tainted arguments
-        code = """
-clean_value = "static_string"
-x = 42
-result = html.escape(clean_value)  # clean_value is NOT tainted
-result2 = html.escape(x + y)  # Neither x nor y is tainted
-"""
-
+        code = '\nclean_value = "static_string"\nx = 42\nresult = html.escape(clean_value)  # clean_value is NOT tainted\nresult2 = html.escape(x + y)  # Neither x nor y is tainted\n'
         analyzer = SecurityAnalyzer()
-        # Don't mark anything as tainted
         vulnerabilities = analyzer.analyze(code)
-
-        # No vulnerabilities because no tainted data reaches sinks
-        # The loops in _check_sanitizer_call exhausted without finding taint
         assert vulnerabilities is not None
 
     def test_sanitizer_check_with_binop_no_taint(self):
@@ -139,21 +93,11 @@ result2 = html.escape(x + y)  # Neither x nor y is tainted
 
         Code path: isinstance(arg, ast.BinOp) is True, but no vars are tainted.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-a = 1
-b = 2
-# BinOp argument to sanitizer, but a and b are NOT tainted
-result = html.escape(a + b)
-"""
-
+        code = "\na = 1\nb = 2\n# BinOp argument to sanitizer, but a and b are NOT tainted\nresult = html.escape(a + b)\n"
         analyzer = SecurityAnalyzer()
         vulnerabilities = analyzer.analyze(code)
-
-        # Should complete without error, hitting the BinOp branch
         assert vulnerabilities is not None
 
     def test_sanitizer_with_no_args(self):
@@ -162,15 +106,11 @@ result = html.escape(a + b)
 
         The for loop over node.args has zero iterations.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+
+        code = (
+            "\n# Call sanitizer with no arguments (edge case)\nresult = html.escape()\n"
         )
-
-        code = """
-# Call sanitizer with no arguments (edge case)
-result = html.escape()
-"""
-
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -181,16 +121,9 @@ result = html.escape()
 
         Args that are neither Name nor BinOp (e.g., string literal).
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-# Sanitizer with string literal - not Name, not BinOp
-result = html.escape("literal string")
-result2 = html.escape(123)
-"""
-
+        code = '\n# Sanitizer with string literal - not Name, not BinOp\nresult = html.escape("literal string")\nresult2 = html.escape(123)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -202,19 +135,12 @@ result2 = html.escape(123)
         This happens with deeply nested attribute access like:
         a.b.c.d.e.f.method()
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
+        from code_scalpel.security.analyzers import SecurityAnalyzer
+
+        code = (
+            "\nuser_input = input()\nresult = a.b.c.d.e.f.g.h.i.j.method(user_input)\n"
         )
-
-        # Create a deep attribute chain that will exhaust the while loop
-        code = """
-user_input = input()
-result = a.b.c.d.e.f.g.h.i.j.method(user_input)
-"""
-
         analyzer = SecurityAnalyzer()
-
-        # This should process the deep chain without crashing
         result = analyzer.analyze(code)
         assert result is not None
 
@@ -224,15 +150,9 @@ result = a.b.c.d.e.f.g.h.i.j.method(user_input)
 
         The while loop should exit immediately.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-user_input = input()
-result = some_func(user_input)
-"""
-
+        code = "\nuser_input = input()\nresult = some_func(user_input)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -244,16 +164,9 @@ result = some_func(user_input)
         Code path: The while loop exits, but isinstance(current, ast.Name) is False.
         This happens with: function_call().method() or "literal".method()
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        # function().method() - current ends up as ast.Call (not ast.Name)
-        code = """
-user_input = input()
-result = get_something().execute(user_input)
-"""
-
+        code = "\nuser_input = input()\nresult = get_something().execute(user_input)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -264,24 +177,12 @@ result = get_something().execute(user_input)
 
         The base is an ast.Constant, not ast.Name.
         """
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-user_input = input()
-# String literal method - base is ast.Constant
-result = "{}".format(user_input)
-"""
-
+        code = '\nuser_input = input()\n# String literal method - base is ast.Constant\nresult = "{}".format(user_input)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
-
-
-# =============================================================================
-# IR INTERPRETER: 7 Partial Branches
-# =============================================================================
 
 
 class TestIRInterpreterPerfectCoverage:
@@ -300,16 +201,9 @@ class TestIRInterpreterPerfectCoverage:
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # First set x to a known value, then try to assign an unevaluable expression
-        code = """
-x = 1
-x = unknown_function_that_returns_nothing()
-"""
-
+        code = "\nx = 1\nx = unknown_function_that_returns_nothing()\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Execute - should not crash
         result = interp.execute(ir)
         assert result is not None
 
@@ -325,15 +219,9 @@ x = unknown_function_that_returns_nothing()
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        code = """
-x = 1
-x += unknown_value
-"""
-
+        code = "\nx = 1\nx += unknown_value\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Execute - should handle None gracefully
         result = interp.execute(ir)
         assert result is not None
 
@@ -352,24 +240,14 @@ x += unknown_value
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Use boolean constant - evaluates without semantics
-        code = """
-if True:
-    y = 1
-else:
-    y = 2
-"""
-
+        code = "\nif True:\n    y = 1\nelse:\n    y = 2\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Mock get_semantics to return None to hit the _semantics is None branch
         with patch(
             "code_scalpel.symbolic_execution_tools.ir_interpreter.get_semantics",
             return_value=None,
         ):
             result = interp.execute(ir)
-
         assert result is not None
 
     def test_if_with_to_bool_returning_none(self):
@@ -388,27 +266,19 @@ else:
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Create a partial mock: real semantics for comparisons, None for to_bool
         class MockSemantics(PythonSemantics):
+
             def to_bool(self, value, state):
-                return None  # Force the branch we want to test
+                return None
 
-        code = """
-x = 1
-if x > 0:
-    y = 1
-"""
-
+        code = "\nx = 1\nif x > 0:\n    y = 1\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Patch get_semantics to return our partial mock
         with patch(
             "code_scalpel.symbolic_execution_tools.ir_interpreter.get_semantics",
             return_value=MockSemantics(),
         ):
             result = interp.execute(ir)
-
         assert result is not None
 
     def test_while_loop_without_semantics(self):
@@ -425,22 +295,14 @@ if x > 0:
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Use boolean False to exit loop immediately, but still test the path
-        code = """
-while False:
-    x = 1
-"""
-
+        code = "\nwhile False:\n    x = 1\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Mock get_semantics to return None to hit the _semantics is None branch
         with patch(
             "code_scalpel.symbolic_execution_tools.ir_interpreter.get_semantics",
             return_value=None,
         ):
             result = interp.execute(ir)
-
         assert result is not None
 
     def test_while_with_to_bool_returning_none(self):
@@ -457,28 +319,19 @@ while False:
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Create a partial mock: real semantics for comparisons, None for to_bool
         class MockSemantics(PythonSemantics):
+
             def to_bool(self, value, state):
-                return None  # Force the branch we want to test
+                return None
 
-        code = """
-i = 0
-while i < 3:
-    i += 1
-    break
-"""
-
+        code = "\ni = 0\nwhile i < 3:\n    i += 1\n    break\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Patch get_semantics to return our partial mock
         with patch(
             "code_scalpel.symbolic_execution_tools.ir_interpreter.get_semantics",
             return_value=MockSemantics(),
         ):
             result = interp.execute(ir)
-
         assert result is not None
 
     def test_aug_assign_without_semantics_via_mock(self):
@@ -492,22 +345,14 @@ while i < 3:
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        code = """
-x = 1
-x += 2
-"""
-
+        code = "\nx = 1\nx += 2\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Mock the semantics lookup to return None
         with patch(
             "code_scalpel.symbolic_execution_tools.ir_interpreter.get_semantics",
             return_value=None,
         ):
             result = interp.execute(ir)
-
-        # Should complete but x won't be updated (semantics=None skips the update)
         assert result is not None
 
     def test_constructor_with_explicit_semantics(self):
@@ -522,20 +367,12 @@ x += 2
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        code = """
-x = 1
-y = x + 2
-"""
-
-        # Pass explicit semantics to constructor
+        code = "\nx = 1\ny = x + 2\n"
         custom_semantics = PythonSemantics()
         interp = IRSymbolicInterpreter(semantics=custom_semantics)
-
         ir = PythonNormalizer().normalize(code)
         result = interp.execute(ir)
-
         assert result is not None
-        # Verify the custom semantics was used (not get_semantics)
         assert interp._semantics is custom_semantics
 
     def test_aug_assign_creates_variable(self):
@@ -549,16 +386,10 @@ y = x + 2
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # x is not defined before +=
-        code = """
-x += 1
-"""
-
+        code = "\nx += 1\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
         result = interp.execute(ir)
-
-        # Should complete - x gets created as symbolic
         assert result is not None
 
     def test_division_binary_op(self):
@@ -570,15 +401,10 @@ x += 1
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        code = """
-x = 10
-y = x / 2
-"""
-
+        code = "\nx = 10\ny = x / 2\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
         result = interp.execute(ir)
-
         assert result is not None
 
     def test_generic_visit_unknown_node(self):
@@ -595,8 +421,6 @@ y = x / 2
 
         visitor = IRNodeVisitor()
         unknown_node = UnknownIRNode()
-
-        # generic_visit should be called and return None
         result = visitor.visit(unknown_node)
         assert result is None
 
@@ -611,8 +435,6 @@ y = x / 2
 
         interp = IRSymbolicInterpreter()
         state = SymbolicState()
-
-        # Directly call _eval_expr with None
         result = interp._eval_expr(None, state)
         assert result is None
 
@@ -627,15 +449,9 @@ y = x / 2
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Use a string literal as type (not a name reference)
-        code = """
-x = symbolic("x", "int")
-"""
-
+        code = '\nx = symbolic("x", "int")\n'
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
-
-        # Execute - should return None for invalid type specification
         result = interp.execute(ir)
         assert result is not None
 
@@ -650,23 +466,11 @@ x = symbolic("x", "int")
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        # Use something that might not convert cleanly to bool
-        code = """
-x = unknown_complex_value
-if x:
-    y = 1
-"""
-
+        code = "\nx = unknown_complex_value\nif x:\n    y = 1\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
         result = interp.execute(ir)
-
         assert result is not None
-
-
-# =============================================================================
-# INTEGRATION: Verify No Regressions
-# =============================================================================
 
 
 class TestPerfectCoverageIntegration:
@@ -674,17 +478,14 @@ class TestPerfectCoverageIntegration:
 
     def test_normal_taint_tracking_still_works(self):
         """Verify taint tracking works after edge case tests."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-            TaintLevel,
-            SecuritySink,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo, TaintLevel
 
         tracker = TaintTracker()
+        from code_scalpel.security.analyzers.taint_tracker import (
+            TaintSource,
+            SecuritySink,
+        )  # [20251225_BUGFIX]
 
-        # Normal taint flow
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
             level=TaintLevel.HIGH,
@@ -692,29 +493,19 @@ class TestPerfectCoverageIntegration:
             propagation_path=[],
         )
         tracker.mark_tainted("user_input", taint)
-
-        # Verify taint exists
         result = tracker.get_taint("user_input")
         assert result is not None
         assert result.is_dangerous_for(SecuritySink.SQL_QUERY)
 
     def test_normal_security_analysis_still_works(self):
         """Verify security analysis works after edge case tests."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-user_id = request.args.get("id")
-cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
-"""
-
+        code = '\nuser_id = request.args.get("id")\ncursor.execute(f"SELECT * FROM users WHERE id = {user_id}")\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
-        # Should detect SQL injection
         assert result.has_vulnerabilities
-        assert any("SQL" in str(v) for v in result.vulnerabilities)
+        assert any(("SQL" in str(v) for v in result.vulnerabilities))
 
     def test_normal_symbolic_execution_still_works(self):
         """Verify symbolic execution works after edge case tests."""
@@ -723,16 +514,9 @@ cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
         )
         from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 
-        code = """
-x = 1
-y = x + 2
-if y > 0:
-    z = y * 2
-"""
-
+        code = "\nx = 1\ny = x + 2\nif y > 0:\n    z = y * 2\n"
         interp = IRSymbolicInterpreter()
         ir = PythonNormalizer().normalize(code)
         result = interp.execute(ir)
-
         assert result is not None
         assert result.path_count >= 1

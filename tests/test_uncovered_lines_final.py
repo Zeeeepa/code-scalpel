@@ -204,7 +204,7 @@ class TestOSVClientUncoveredLines:
 
     def test_query_with_error_response(self):
         """Cover error response handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         with patch("requests.post") as mock_post:
@@ -215,7 +215,7 @@ class TestOSVClientUncoveredLines:
 
     def test_query_with_timeout(self):
         """Cover timeout handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
         import requests
 
         client = OSVClient()

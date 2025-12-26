@@ -113,73 +113,123 @@ services:
 
 ## Feature Comparison
 
-### Tool-Level Restrictions
+> **Important**: As of v3.3.0, ALL 20 MCP tools are available at ALL tiers.
+> Tiers differ in **capabilities and limits** within each tool, not in tool availability.
 
-| Feature | Community | Pro | Enterprise |
-|---------|-----------|-----|------------|
-| **All basic tools** | ✅ Full access | ✅ Full access | ✅ Full access |
-| `extract_code` | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
-| `update_symbol` | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
-| `analyze_code` | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
-| `security_scan` | ✅ Unlimited | ✅ Unlimited | ✅ Unlimited |
-| **Project-wide tools** | ⚠️ Limited | ✅ Full | ✅ Full |
-| `crawl_project` | Discovery mode only | Deep analysis | Deep analysis |
-| `get_symbol_references` | 10 files max | Unlimited | Unlimited |
-| `get_call_graph` | 3 hops max | Configurable | Configurable |
-| `get_graph_neighborhood` | 1 hop max | Configurable | Configurable |
+### Tool Availability
 
-### Detailed Feature Breakdown
+| Category | Community | Pro | Enterprise |
+|----------|-----------|-----|------------|
+| **MCP Tools** | ✅ All 20 tools | ✅ All 20 tools | ✅ All 20 tools |
+| **Core Extraction** | ✅ Available | ✅ Available | ✅ Available |
+| **Security Analysis** | ✅ Available | ✅ Available | ✅ Available |
+| **Symbolic Execution** | ✅ Available | ✅ Available | ✅ Available |
+| **Project Analysis** | ✅ Available | ✅ Available | ✅ Available |
+| **Cross-File Analysis** | ✅ Available | ✅ Available | ✅ Available |
 
-#### `crawl_project`
+**The difference is in what each tool can do, not whether it's available.**
 
-**Community (Discovery Mode)**:
-- ✅ File inventory (all .py files with paths)
-- ✅ Line counts and directory structure
-- ✅ Entrypoint detection (main blocks, CLI commands, Flask/Django routes)
-- ✅ Basic statistics
-- ❌ No AST parsing
-- ❌ No complexity analysis
-- ❌ No function/class details
-- ❌ No dependency resolution
+### Capability Progression by Tool
 
-**Pro/Enterprise (Deep Mode)**:
-- ✅ Everything in Community, plus:
-- ✅ Full AST parsing
-- ✅ Complexity analysis (cyclomatic, cognitive)
-- ✅ Function/class inventories with line numbers
-- ✅ Import statements and cross-file dependencies
-- ✅ Complexity warnings
-- ✅ Detailed metrics report
+#### `security_scan` - Security Vulnerability Detection
 
-#### `get_symbol_references`
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Basic vulnerabilities | ✅ | ✅ | ✅ |
+| Max findings | 10 | Unlimited | Unlimited |
+| Vulnerability types | SQL, XSS, Command Injection | All types | All types + custom |
+| Taint analysis | Single-file | Advanced multi-path | Cross-file |
+| Remediation | ❌ | ✅ Suggestions | ✅ Automated |
+| OWASP categorization | ❌ | ✅ | ✅ |
+| Compliance reporting | ❌ | ❌ | ✅ SOC2, HIPAA |
 
-**Community**:
-- ✅ First 10 files with references
-- ⚠️ Truncation warning with upgrade hint
+#### `symbolic_execute` - Symbolic Path Exploration
 
-**Pro/Enterprise**:
-- ✅ Full project-wide search
-- ✅ Unlimited files
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Basic paths | ✅ | ✅ | ✅ |
+| Max paths | 3 | 10 | Unlimited |
+| Constraint solving | Basic (Z3) | Advanced | Advanced + custom |
+| Path prioritization | ❌ | ✅ | ✅ |
+| Branch coverage | ❌ | ✅ | ✅ |
 
-#### `get_call_graph`
+#### `crawl_project` - Project-Wide Analysis
 
-**Community**:
-- ✅ Maximum 3 hops from entry point
-- ⚠️ Depth warning with upgrade hint
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| File discovery | ✅ | ✅ | ✅ |
+| Max files | 100 | 1,000 | Unlimited |
+| Mode | Discovery | Deep AST parsing | Deep + org indexing |
+| Complexity analysis | ❌ | ✅ | ✅ |
+| Dependency graph | ❌ | ✅ | ✅ |
+| Custom metrics | ❌ | ❌ | ✅ |
 
-**Pro/Enterprise**:
-- ✅ Configurable depth (up to 50 hops)
-- ✅ Full control over traversal
+#### `extract_code` - Code Extraction with Dependencies
 
-#### `get_graph_neighborhood`
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Single-file extraction | ✅ | ✅ | ✅ |
+| Cross-file deps | ❌ | ✅ | ✅ |
+| Max dependency depth | 0 | 1 | Unlimited |
+| Org-wide resolution | ❌ | ❌ | ✅ |
 
-**Community**:
-- ✅ 1-hop neighborhood (immediate neighbors only)
-- ⚠️ Hop warning with upgrade hint
+#### `generate_unit_tests` - Test Generation
 
-**Pro/Enterprise**:
-- ✅ Configurable k-hop neighborhoods
-- ✅ Multi-hop exploration
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Basic test generation | ✅ | ✅ | ✅ |
+| Max test cases | 5 | 20 | Unlimited |
+| Test frameworks | pytest | pytest, unittest | All + custom |
+| Coverage targeting | ❌ | ✅ | ✅ |
+
+#### `get_call_graph` - Function Call Analysis
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Basic call graph | ✅ | ✅ | ✅ |
+| Max depth | 3 hops | 10 hops | Unlimited |
+| Circular import check | ✅ | ✅ | ✅ |
+| Mermaid diagram | ✅ | ✅ | ✅ |
+
+#### `get_graph_neighborhood` - Graph Subgraph Extraction
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Neighborhood extraction | ✅ | ✅ | ✅ |
+| Max k-hops | 1 | 2 | Unlimited |
+| Max nodes | 50 | 100 | Unlimited |
+| Confidence filtering | ✅ | ✅ | ✅ |
+
+#### `scan_dependencies` - Vulnerability Scanning
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| OSV database lookup | ✅ | ✅ | ✅ |
+| Max dependencies | 50 | Unlimited | Unlimited |
+| Vulnerability details | Basic | Full | Full + remediation |
+| Auto-update PR | ❌ | ❌ | ✅ |
+
+#### `get_cross_file_dependencies` - Dependency Resolution
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Dependency resolution | ✅ | ✅ | ✅ |
+| Max depth | 1 | 3 | Unlimited |
+| Confidence decay | ✅ | ✅ | ✅ |
+| Circular detection | ✅ | ✅ | ✅ |
+
+#### `cross_file_security_scan` - Multi-File Taint Analysis
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| Cross-file taint | ✅ Limited | ✅ Full | ✅ Full |
+| Max depth | 2 | 5 | Unlimited |
+| Max modules | 50 | 500 | Unlimited |
+| Timeout | 30s | 120s | Configurable |
+
+### All Other Tools
+
+All remaining tools (`analyze_code`, `update_symbol`, `simulate_refactor`, `unified_sink_detect`, `get_file_context`, `get_symbol_references`, `get_project_map`, `validate_paths`, `verify_policy_integrity`, `type_evaporation_scan`) are **fully available** at all tiers with no restrictions in v3.3.0.
 
 ---
 

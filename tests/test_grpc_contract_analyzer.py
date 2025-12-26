@@ -5,7 +5,7 @@ Tests for gRPC Contract Analyzer.
 """
 
 import pytest
-from code_scalpel.symbolic_execution_tools.grpc_contract_analyzer import (
+from code_scalpel.integrations.protocol_analyzers.grpc.contract_analyzer import (
     GrpcContractAnalyzer,
     RpcMethod,
     StreamingType,

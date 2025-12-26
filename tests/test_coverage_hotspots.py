@@ -5,7 +5,7 @@ import networkx as nx
 import pytest
 
 from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
-from code_scalpel.symbolic_execution_tools.cross_file_taint import (
+from code_scalpel.security.analyzers.cross_file_taint import (
     CrossFileTaintTracker,
     CrossFileSink,
 )

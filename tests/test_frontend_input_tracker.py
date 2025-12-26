@@ -15,7 +15,7 @@ Tests:
 
 import pytest
 
-from code_scalpel.symbolic_execution_tools.frontend_input_tracker import (
+from code_scalpel.integrations.protocol_analyzers.frontend.input_tracker import (
     FrontendInputTracker,
     FrontendFramework,
     InputSourceType,

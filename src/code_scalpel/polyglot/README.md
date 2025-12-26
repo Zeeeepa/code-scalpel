@@ -6,12 +6,12 @@
 
 This module provides unified parsing and analysis for multiple programming languages using tree-sitter, with special support for TypeScript/JavaScript ecosystems.
 
-**Key Difference from `code_parser/`:**
+**Key Difference from `code_parsers/`:**
 - **polyglot/** uses tree-sitter (modern, fast, error-tolerant)
-- **code_parser/** uses language-specific parsers (legacy)
+- **code_parsers/** uses language-specific parsers (legacy)
 
 ## Key Components
-
+    
 ### extractor.py (18,613 LOC)
 **Polyglot code extraction**
 

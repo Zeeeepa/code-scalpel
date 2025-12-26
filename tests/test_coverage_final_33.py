@@ -1,4 +1,3 @@
-# [20251218_TEST] Final 33-element coverage push
 """
 Target uncovered branches in:
 - parallel_parser.py (84%) - lines 21-29
@@ -8,6 +7,7 @@ Target uncovered branches in:
 - langgraph.py (87%) - lines 136-145, 199-208
 - mcp/logging.py (86%) - lines 31-33
 """
+
 import ast
 import tempfile
 from pathlib import Path
@@ -60,8 +60,6 @@ class TestParallelParserBranches:
         with tempfile.TemporaryDirectory() as tmp:
             cache = AnalysisCache[ast.AST](cache_dir=tmp)
             parser = ParallelParser(cache=cache, max_workers=1, batch_size=2)
-
-            # Create test files
             test_file = Path(tmp) / "test.py"
             test_file.write_text("x = 1")
 
@@ -69,7 +67,7 @@ class TestParallelParserBranches:
                 return ast.parse(path.read_text())
 
             results, errors = parser.parse_files([test_file], parse_fn)
-            assert len(results) >= 0  # May get result or error
+            assert len(results) >= 0
 
 
 class TestASTCacheBranches:
@@ -140,7 +138,6 @@ class TestErrorToDiffBranches:
             source = "x = 1\nx = 2"
             diff = "x -> y"
             engine._apply_diff(source, diff)
-            # Multiple matches should not modify
 
 
 class TestAutogenBranches:
@@ -375,7 +372,6 @@ class TestMCPLoggingBranches:
             duration_ms=100.0,
             success=True,
         )
-
         assert invocation.tool_name == "test_tool"
         assert invocation.duration_ms == 100.0
 
@@ -403,7 +399,7 @@ class TestMoreBranchCoverage:
 
     def test_osv_client_branches(self):
         """Test OSV client branches."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         assert client is not None
@@ -458,7 +454,6 @@ class TestMoreBranchCoverage:
 
         with tempfile.TemporaryDirectory() as tmp:
             resolve_module_path("python", "os", Path(tmp))
-            # May or may not resolve depending on setup
 
 
 class TestCLIBranches:
@@ -468,7 +463,6 @@ class TestCLIBranches:
         """Test CLI help output."""
         from code_scalpel.cli import main
 
-        # Just verify module imports correctly
         assert main is not None
 
 
@@ -477,25 +471,17 @@ class TestTaintTrackerBranches:
 
     def test_taint_tracker_check_sink(self):
         """Test check_sink method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintLevel,
-            TaintInfo,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintLevel, TaintInfo
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user input")
         tracker.mark_tainted("user_input", taint_info)
-
-        # Check if a sink is dangerous
         is_vuln = tracker.check_sink("user_input", "execute")
-        assert is_vuln is not None or is_vuln is None  # Either is valid
+        assert is_vuln is not None or is_vuln is None
 
     def test_taint_tracker_get_vulnerabilities(self):
         """Test get_vulnerabilities method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-        )
+        from code_scalpel.security.analyzers import TaintTracker
 
         tracker = TaintTracker()
         vulns = tracker.get_vulnerabilities()
@@ -522,7 +508,7 @@ class TestSecretScannerBranches:
 
     def test_secret_scanner_aws_key(self):
         """Test secret scanner with AWS key pattern."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = '\nAWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE"\n'
@@ -532,7 +518,7 @@ class TestSecretScannerBranches:
 
     def test_secret_scanner_private_key(self):
         """Test secret scanner with private key."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = '\nkey = """-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy\n-----END RSA PRIVATE KEY-----"""\n'
@@ -546,7 +532,7 @@ class TestUnifiedSinkBranches:
 
     def test_unified_sink_ldap(self):
         """Test unified sink with LDAP injection."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 

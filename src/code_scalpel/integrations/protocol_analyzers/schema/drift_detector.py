@@ -1118,3 +1118,16 @@ def compare_json_schema_files(
         old_version=old_path.name,
         new_version=new_path.name,
     )
+
+
+# [20251225_FEATURE] Export public API for type checkers
+__all__ = [
+    "SchemaDriftDetector",
+    "SchemaDriftResult",
+    "SchemaChange",
+    "ChangeType",
+    "ChangeSeverity",
+    "ProtobufParser",
+    "compare_protobuf_files",
+    "compare_json_schema_files",
+]

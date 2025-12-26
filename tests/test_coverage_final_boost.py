@@ -9,7 +9,6 @@ import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
@@ -71,8 +70,6 @@ class TestAutonomyIntegrationsCoverage:
             )
         except ImportError:
             pytest.skip("LangGraph not available")
-
-        # Just test it can be created
         graph = create_scalpel_fix_graph()
         assert graph is not None
 
@@ -84,8 +81,6 @@ class TestAutonomyIntegrationsCoverage:
             )
         except ImportError:
             pytest.skip("CrewAI not available")
-
-        # Mock the Crew creation to avoid actual initialization
         with patch("code_scalpel.autonomy.integrations.crewai.Agent"):
             with patch("code_scalpel.autonomy.integrations.crewai.Task"):
                 with patch(
@@ -127,7 +122,6 @@ class TestSymbolicToolsCoverage:
         """[20251217_TEST] Cover type inference with complex types."""
         from code_scalpel.symbolic_execution_tools import type_inference
 
-        # Just verify the module is accessible
         assert type_inference is not None
 
 
@@ -156,13 +150,7 @@ class TestPolyglotCoverage:
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             resolver = AliasResolver(project_root=tmp_dir)
-
-            # Test with various patterns
-            _ = """
-from typing import List as L
-x: L[int] = [1, 2, 3]
-"""
-            # Just verify it initializes correctly
+            _ = "\nfrom typing import List as L\nx: L[int] = [1, 2, 3]\n"
             assert resolver is not None
 
 
@@ -189,7 +177,6 @@ class TestGraphEngineCoverage:
         """[20251217_TEST] Cover HTTP detector edge cases."""
         from code_scalpel.graph_engine import http_detector
 
-        # Just verify the module is accessible
         assert http_detector is not None
 
 
@@ -201,12 +188,9 @@ class TestMCPLoggingCoverage:
         import os
         from code_scalpel.mcp import logging as mcp_logging
 
-        # Test with debug enabled
         original = os.environ.get("SCALPEL_DEBUG")
         try:
             os.environ["SCALPEL_DEBUG"] = "1"
-            # Re-import or re-configure logging
-            # This tests the debug path
             assert mcp_logging is not None
         finally:
             if original:
@@ -220,17 +204,10 @@ class TestTaintTrackerCoverage:
 
     def test_taint_propagation_complex(self):
         """[20251217_TEST] Cover complex taint propagation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintLevel,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintLevel
 
         tracker = TaintTracker()
-
-        # Mark a source as tainted with proper arguments
         tracker.mark_tainted("user_input", TaintLevel.HIGH)
-
-        # Check tracking
         assert tracker is not None
 
 

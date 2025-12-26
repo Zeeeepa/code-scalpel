@@ -11,9 +11,7 @@ class TestDjangoSQLInjection:
 
     def test_rawsql_with_user_input(self):
         """Detect SQL injection via Django RawSQL."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from django.db.models.expressions import RawSQL
@@ -30,9 +28,7 @@ queryset = MyModel.objects.annotate(val=RawSQL(user_input, []))
 
     def test_rawsql_short_import(self):
         """Detect SQL injection via RawSQL short import."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from django.db.models import RawSQL
@@ -48,9 +44,7 @@ qs = Model.objects.annotate(custom=RawSQL(search, []))
 
     def test_queryset_extra_with_tainted_data(self):
         """Detect SQL injection via QuerySet.extra()."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 order_by = request.GET.get("sort")
@@ -64,9 +58,7 @@ qs = extra(order_by)
 
     def test_safe_rawsql_with_params(self):
         """Safe RawSQL with parameterized query should not flag if no taint."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from django.db.models import RawSQL
@@ -86,9 +78,7 @@ class TestSQLAlchemyInjection:
 
     def test_text_with_user_input(self):
         """Detect SQL injection via sqlalchemy.text()."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from sqlalchemy import text
@@ -105,9 +95,7 @@ result = session.execute(text(user_query))
 
     def test_text_full_path(self):
         """Detect SQL injection via full sqlalchemy.text path."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 import sqlalchemy
@@ -123,9 +111,7 @@ stmt = sqlalchemy.text(query_str)
 
     def test_text_expression_module(self):
         """Detect SQL injection via sqlalchemy.sql.expression.text."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from sqlalchemy.sql.expression import text
@@ -140,9 +126,7 @@ query = text(search)
 
     def test_safe_text_with_bindparams(self):
         """Safe sqlalchemy.text with bind parameters should not flag."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from sqlalchemy import text
@@ -162,9 +146,7 @@ class TestFlaskJinja2XSS:
 
     def test_flask_markup_with_user_input(self):
         """Detect XSS via flask.Markup bypassing auto-escape."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from flask import Markup
@@ -181,9 +163,7 @@ safe_html = Markup(user_html)  # DANGEROUS: bypasses auto-escaping
 
     def test_markupsafe_markup_with_tainted_data(self):
         """Detect XSS via markupsafe.Markup."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from markupsafe import Markup
@@ -199,9 +179,7 @@ rendered = Markup(comment)
 
     def test_markup_short_import(self):
         """Detect XSS via Markup short import."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from markupsafe import Markup
@@ -216,9 +194,7 @@ html = Markup(user_input)
 
     def test_safe_markup_with_escaped_content(self):
         """Safe Markup with pre-escaped content should not flag if no taint."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from markupsafe import Markup
@@ -238,9 +214,7 @@ class TestCombinedFrameworkPatterns:
 
     def test_django_and_flask_vulnerabilities(self):
         """Detect both SQL injection and XSS in same codebase."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
         code = """
 from django.db.models import RawSQL
@@ -272,21 +246,21 @@ class TestTaintTrackerFrameworkIntegration:
 
     def test_sink_patterns_include_django(self):
         """Verify Django sinks are registered."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SINK_PATTERNS
+        from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS
 
         assert "RawSQL" in SINK_PATTERNS
         assert "django.db.models.expressions.RawSQL" in SINK_PATTERNS
 
     def test_sink_patterns_include_sqlalchemy(self):
         """Verify SQLAlchemy sinks are registered."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SINK_PATTERNS
+        from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS
 
         assert "text" in SINK_PATTERNS
         assert "sqlalchemy.text" in SINK_PATTERNS
 
     def test_sink_patterns_include_flask(self):
         """Verify Flask/Jinja2 sinks are registered."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SINK_PATTERNS
+        from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS
 
         assert "Markup" in SINK_PATTERNS
         assert "flask.Markup" in SINK_PATTERNS

@@ -220,7 +220,7 @@ class TestTaintTrackerMore:
 
     def test_taint_tracker_taint_source(self):
         """Test taint_source method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers.taint_tracker import TaintTracker
 
         tracker = TaintTracker()
         tracker.taint_source("source", "user_input")
@@ -230,7 +230,7 @@ class TestTaintTrackerMore:
 
     def test_taint_tracker_get_vulnerabilities(self):
         """Test get_vulnerabilities method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers.taint_tracker import TaintTracker
 
         tracker = TaintTracker()
 
@@ -240,7 +240,7 @@ class TestTaintTrackerMore:
 
     def test_taint_tracker_propagate_concat(self):
         """Test propagate_concat method."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import TaintTracker
+        from code_scalpel.security.analyzers.taint_tracker import TaintTracker
 
         tracker = TaintTracker()
         tracker.taint_source("x", "user_input")

@@ -159,7 +159,7 @@ class TestSecretScannerBranches:
 
     def test_secret_scanner_scan(self):
         """[20251217_TEST] Cover secret scanner."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = """
@@ -176,7 +176,7 @@ class TestOSVClientBranches:
 
     def test_osv_client_instantiation(self):
         """[20251217_TEST] Cover OSV client instantiation."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         assert client is not None
@@ -223,7 +223,7 @@ class TestUnifiedSinkDetector:
 
     def test_sink_detector_instantiation(self):
         """[20251217_TEST] Cover UnifiedSinkDetector instantiation."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -232,7 +232,7 @@ class TestUnifiedSinkDetector:
 
     def test_sink_detector_detect_sinks(self):
         """[20251217_TEST] Cover detect_sinks method."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 

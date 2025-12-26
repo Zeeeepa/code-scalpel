@@ -458,8 +458,7 @@ class UniversalGraph:
             max_depth_reached=max(visited_nodes.values()) if visited_nodes else 0,
             truncated=truncated,
             truncation_warning=(
-                f"⚠️ Graph truncated at {max_nodes} nodes. "
-                f"Increase max_nodes or reduce k for complete view."
+                f"Graph truncated at {max_nodes} nodes due to max_nodes limit."
                 if truncated
                 else None
             ),

@@ -8,6 +8,10 @@ import pytest
 import tempfile
 from pathlib import Path
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestErrorToDiffFinalCoverage:
     """Cover more lines in error_to_diff.py."""
@@ -19,10 +23,7 @@ class TestErrorToDiffFinalCoverage:
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "TypeError: unsupported operand type(s) for +: 'int' and 'str'"
-            source = """
-def add():
-    return 1 + "2"
-"""
+            source = '\ndef add():\n    return 1 + "2"\n'
             result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
@@ -33,11 +34,7 @@ def add():
         with tempfile.TemporaryDirectory() as tmp:
             e2d = ErrorToDiffEngine(Path(tmp))
             error_msg = "AttributeError: 'NoneType' object has no attribute 'method'"
-            source = """
-def test():
-    x = None
-    x.method()
-"""
+            source = "\ndef test():\n    x = None\n    x.method()\n"
             result = e2d.analyze_error(error_msg, source, "python")
             assert result is not None
 
@@ -88,7 +85,6 @@ class TestMutationGateCoverage:
 
         with tempfile.TemporaryDirectory() as tmp:
             gate = MutationTestGate(Path(tmp))
-            # Just verify it's created with path
             assert gate is not None
 
 
@@ -99,10 +95,7 @@ class TestMoreBranchCoverage:
         """Cover walrus operator in PDG."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-if (n := len([1,2,3])) > 2:
-    print(n)
-"""
+        code = "\nif (n := len([1,2,3])) > 2:\n    print(n)\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -111,10 +104,7 @@ if (n := len([1,2,3])) > 2:
         """Cover starred assignment in PDG."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-a, *rest, b = [1, 2, 3, 4, 5]
-print(rest)
-"""
+        code = "\na, *rest, b = [1, 2, 3, 4, 5]\nprint(rest)\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -134,10 +124,7 @@ print(rest)
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmp:
-            code = """
-from os.path import join, exists
-result = join("a", "b")
-"""
+            code = '\nfrom os.path import join, exists\nresult = join("a", "b")\n'
             (Path(tmp) / "imports.py").write_text(code)
             builder = CallGraphBuilder(Path(tmp))
             graph = builder.build()
@@ -147,13 +134,7 @@ result = join("a", "b")
         """Cover decorator chain extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-@decorator1
-@decorator2
-@decorator3
-def decorated():
-    pass
-"""
+        code = "\n@decorator1\n@decorator2\n@decorator3\ndef decorated():\n    pass\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_function("decorated")
         assert result is not None
@@ -164,10 +145,7 @@ def decorated():
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-def add(a, b):
-    return a + b
-"""
+        code = "\ndef add(a, b):\n    return a + b\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -176,16 +154,10 @@ def add(a, b):
         from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
-        original = '''
-def documented():
-    """This is a docstring."""
-    pass
-'''
-        modified = '''
-def documented():
-    """Updated docstring."""
-    return None
-'''
+        original = '\ndef documented():\n    """This is a docstring."""\n    pass\n'
+        modified = (
+            '\ndef documented():\n    """Updated docstring."""\n    return None\n'
+        )
         result = sim.simulate(original, modified)
         assert result is not None
 
@@ -195,12 +167,7 @@ class TestFinalBranchCoverage:
 
     def test_taint_tracker_medium_sanitizer(self):
         """Cover MEDIUM level sanitizer."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-            TaintLevel,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo, TaintLevel
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.MEDIUM)
@@ -213,17 +180,14 @@ class TestFinalBranchCoverage:
         """Cover string operations in symbolic engine."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def concat(a, b):
-    return a + b
-"""
+        code = "\ndef concat(a, b):\n    return a + b\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
 
     def test_osv_client_batch_query(self):
         """Cover batch query in OSV client."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         packages = [("requests", "2.25.1"), ("flask", "1.1.2")]
@@ -238,12 +202,7 @@ def concat(a, b):
         from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-def flow(x):
-    y = x + 1
-    z = y * 2
-    return z
-"""
+        code = "\ndef flow(x):\n    y = x + 1\n    z = y * 2\n    return z\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         analyzer = PDGAnalyzer(pdg)
@@ -252,21 +211,17 @@ def flow(x):
 
     def test_secret_scanner_private_key(self):
         """Cover private key detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
-        code = '''
-PRIVATE_KEY = """-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA...
------END RSA PRIVATE KEY-----"""
-'''
+        code = '\nPRIVATE_KEY = """-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"""\n'
         tree = ast.parse(code)
         result = scanner.scan(tree)
         assert isinstance(result, list)
 
     def test_unified_sink_with_ldap(self):
         """Cover LDAP sink detection."""
-        from code_scalpel.symbolic_execution_tools.unified_sink_detector import (
+        from code_scalpel.security.analyzers.unified_sink_detector import (
             UnifiedSinkDetector,
         )
 
@@ -304,27 +259,17 @@ MIIEpAIBAAKCAQEA...
             Edge,
         )
 
-        # Create a unified graph with some test data
         graph = UnifiedGraph()
-
-        # [20251219_BUGFIX] Node uses node_id and node_type, not id and type
-        # Add a Java backend node
         java_node = Node(
-            node_id="java::UserService::getUser",
-            node_type="method",
-            language="java",
+            node_id="java::UserService::getUser", node_type="method", language="java"
         )
         graph.add_node(java_node)
-
-        # Add a TypeScript frontend node
         ts_node = Node(
             node_id="typescript::api::fetchUser",
             node_type="function",
             language="typescript",
         )
         graph.add_node(ts_node)
-
-        # Add an edge from frontend to backend
         edge = Edge(
             from_id="typescript::api::fetchUser",
             to_id="java::UserService::getUser",
@@ -332,8 +277,6 @@ MIIEpAIBAAKCAQEA...
             confidence=0.9,
         )
         graph.add_edge(edge)
-
-        # Create detector and detect breaches
         detector = ContractBreachDetector(graph)
         breaches = detector.detect_breaches("java::UserService::getUser")
         assert isinstance(breaches, list)

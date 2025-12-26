@@ -8,17 +8,17 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+from code_scalpel.security.analyzers.taint_tracker import (
+    TaintSource,
+)  # [20251225_BUGFIX]
+
 
 class TestTaintTrackerMoreBranches:
     """More taint tracker coverage."""
 
     def test_multiple_sanitizers(self):
         """[20251217_TEST] Cover multiple sanitizer application."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -28,11 +28,7 @@ class TestTaintTrackerMoreBranches:
 
     def test_check_multiple_sinks(self):
         """[20251217_TEST] Cover multiple sink checks."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -43,11 +39,7 @@ class TestTaintTrackerMoreBranches:
 
     def test_propagate_concat_multi(self):
         """[20251217_TEST] Cover concat multi propagation."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintTracker,
-            TaintInfo,
-            TaintSource,
-        )
+        from code_scalpel.security.analyzers import TaintTracker, TaintInfo
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -74,14 +66,7 @@ class TestCallGraphMoreBranches:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmp:
-            code = """
-def decorator(f):
-    return f
-
-@decorator
-def decorated():
-    pass
-"""
+            code = "\ndef decorator(f):\n    return f\n\n@decorator\ndef decorated():\n    pass\n"
             (Path(tmp) / "test.py").write_text(code)
             builder = CallGraphBuilder(Path(tmp))
             graph = builder.build()
@@ -95,11 +80,7 @@ class TestPDGBuilderMoreBranches:
         """[20251217_TEST] Cover generator handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-def gen():
-    for i in range(10):
-        yield i
-"""
+        code = "\ndef gen():\n    for i in range(10):\n        yield i\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -108,10 +89,7 @@ def gen():
         """[20251217_TEST] Cover async for handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-async def async_gen():
-    return [1, 2, 3]
-"""
+        code = "\nasync def async_gen():\n    return [1, 2, 3]\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None
@@ -124,11 +102,7 @@ class TestSurgicalExtractorMoreBranches:
         """[20251217_TEST] Cover type hint extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = '''
-def typed_func(x: int, y: str) -> bool:
-    """Docstring."""
-    return len(y) > x
-'''
+        code = '\ndef typed_func(x: int, y: str) -> bool:\n    """Docstring."""\n    return len(y) > x\n'
         extractor = SurgicalExtractor(code)
         result = extractor.get_function("typed_func")
         assert result is not None and hasattr(result, "code")
@@ -138,14 +112,7 @@ def typed_func(x: int, y: str) -> bool:
         """[20251217_TEST] Cover dataclass extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = """
-from dataclasses import dataclass
-
-@dataclass
-class Point:
-    x: int
-    y: int
-"""
+        code = "\nfrom dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: int\n    y: int\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_class("Point")
         assert result is not None
@@ -159,12 +126,7 @@ class TestTestGeneratorMoreBranches:
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-def factorial(n):
-    if n <= 1:
-        return 1
-    return n * factorial(n - 1)
-"""
+        code = "\ndef factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -173,16 +135,7 @@ def factorial(n):
         from code_scalpel.generators.test_generator import TestGenerator
 
         gen = TestGenerator()
-        code = """
-def add(a, b):
-    return a + b
-
-def subtract(a, b):
-    return a - b
-
-def multiply(a, b):
-    return a * b
-"""
+        code = "\ndef add(a, b):\n    return a + b\n\ndef subtract(a, b):\n    return a - b\n\ndef multiply(a, b):\n    return a * b\n"
         result = gen.generate(code)
         assert result is not None
 
@@ -194,12 +147,8 @@ class TestRefactorSimulatorMoreBranches:
         """[20251217_TEST] Cover parameter removal simulation."""
         from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
-        code = """
-def foo(x, y, z):
-    return x + y
-"""
+        code = "\ndef foo(x, y, z):\n    return x + y\n"
         sim = RefactorSimulator()
-        # Simulate by comparing
         result = sim.simulate(code, code)
         assert result is not None or result is None
 
@@ -235,12 +184,7 @@ class TestSymbolicEngineMoreBranches:
         """[20251217_TEST] Cover recursion analysis."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def fib(n):
-    if n <= 1:
-        return n
-    return fib(n-1) + fib(n-2)
-"""
+        code = "\ndef fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -249,14 +193,7 @@ def fib(n):
         """[20251217_TEST] Cover boolean operation analysis."""
         from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
-        code = """
-def check(x, y):
-    if x > 0 and y > 0:
-        return 1
-    elif x > 0 or y > 0:
-        return 2
-    return 0
-"""
+        code = "\ndef check(x, y):\n    if x > 0 and y > 0:\n        return 1\n    elif x > 0 or y > 0:\n        return 2\n    return 0\n"
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze(code)
         assert result is not None
@@ -270,14 +207,7 @@ class TestPDGAnalyzerMoreBranches:
         from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-x = 1
-if x > 0:
-    y = 2
-else:
-    y = 3
-print(y)
-"""
+        code = "\nx = 1\nif x > 0:\n    y = 2\nelse:\n    y = 3\nprint(y)\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         analyzer = PDGAnalyzer(pdg)
@@ -289,12 +219,7 @@ print(y)
         from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = """
-x = 1
-y = 2
-z = x + y
-z = x + y  # duplicate
-"""
+        code = "\nx = 1\ny = 2\nz = x + y\nz = x + y  # duplicate\n"
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         analyzer = PDGAnalyzer(pdg)
@@ -307,7 +232,7 @@ class TestOSVClientMoreBranches:
 
     def test_query_with_empty_result(self):
         """[20251217_TEST] Cover empty result handling."""
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         with patch("requests.post") as mock_post:
@@ -325,7 +250,6 @@ class TestASTBuilderMoreBranches:
         from code_scalpel.ast_tools.builder import ASTBuilder
 
         builder = ASTBuilder()
-        # Code with unicode
         result = builder.build_ast("x = '日本語'")
         assert result is not None
 
@@ -343,7 +267,7 @@ class TestSecretScannerMoreBranches:
 
     def test_scan_with_password(self):
         """[20251217_TEST] Cover password detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'PASSWORD = "hunter2"'
@@ -353,7 +277,7 @@ class TestSecretScannerMoreBranches:
 
     def test_scan_with_token(self):
         """[20251217_TEST] Cover token detection."""
-        from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+        from code_scalpel.security.secrets.secret_scanner import SecretScanner
 
         scanner = SecretScanner()
         code = 'TOKEN = "ghp_1234567890abcdefghij1234567890abcdef"'
@@ -393,11 +317,7 @@ class TestSurgicalPatcherMoreBranches:
         """[20251217_TEST] Cover method update."""
         from code_scalpel.surgical_patcher import SurgicalPatcher
 
-        code = """
-class Foo:
-    def bar(self):
-        pass
-"""
+        code = "\nclass Foo:\n    def bar(self):\n        pass\n"
         patcher = SurgicalPatcher(code)
         result = patcher.update_method("Foo", "bar", "def bar(self): return 42")
         assert result.success

@@ -8,8 +8,8 @@ These tests use obviously fake/example credentials that are documented as safe:
 
 import warnings
 
-from code_scalpel.symbolic_execution_tools.security_analyzer import SecurityAnalyzer
-from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+from code_scalpel.security.analyzers import SecurityAnalyzer
+from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
 # [20251215_TEST] Suppress ast.Str deprecation during legacy coverage check
 warnings.filterwarnings(
@@ -50,7 +50,7 @@ def test_stripe_secret_detection():
     Note: We test the pattern matching directly rather than using a real-looking
     key to avoid triggering GitHub's secret scanner.
     """
-    from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+    from code_scalpel.security.secrets import SecretScanner
 
     scanner = SecretScanner()
 
@@ -202,7 +202,7 @@ api_key, other = "abcdefghijklmnopqrstuvwxyz123456", "val"
 
 def test_duplicate_secret_detection():
     """Test that duplicate secrets at the same location aren't reported twice."""
-    from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+    from code_scalpel.security.secrets import SecretScanner
     import ast
 
     # Code with the same secret appearing multiple times
@@ -220,7 +220,7 @@ key2 = "AKIAIOSFODNN7EXAMPLE"
 
 def test_same_location_dedup():
     """Test that same location is deduplicated (line 106 coverage)."""
-    from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+    from code_scalpel.security.secrets import SecretScanner
     import ast
 
     scanner = SecretScanner()
@@ -242,7 +242,7 @@ def test_same_location_dedup():
 
 def test_invalid_bytes_decoding():
     """Test handling of bytes that fail to decode properly."""
-    from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+    from code_scalpel.security.secrets import SecretScanner
     import ast
 
     # Create an AST node with bytes that might cause decode issues
@@ -276,7 +276,7 @@ key = "AKIAIOSFODNN7EXAMPLE"
 
 def test_deprecated_ast_str_node():
     """Test handling of deprecated ast.Str nodes (Python < 3.8 compatibility)."""
-    from code_scalpel.symbolic_execution_tools.secret_scanner import SecretScanner
+    from code_scalpel.security.secrets import SecretScanner
     import ast
 
     # Create a mock ast.Str node (deprecated in Python 3.8+)

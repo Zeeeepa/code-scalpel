@@ -80,9 +80,10 @@ except ImportError:
     ExtractedSymbol = None
     ExtractionResult = None
 
-# [20251214_FEATURE] v1.5.3 - OSV Client for vulnerability scanning
+# [20251225_DEPRECATE] OSV Client moved to code_scalpel.security.dependencies
+# For backward compatibility, import from new location
 try:
-    from . import osv_client
+    from code_scalpel.security.dependencies import osv_client
 except ImportError:
     osv_client = None
 

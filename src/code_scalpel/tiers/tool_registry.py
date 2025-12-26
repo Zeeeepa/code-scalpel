@@ -145,10 +145,10 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
             "paths": {"type": "array", "required": True},
         },
     ),
-    # PRO tools (8 tools)
+    # PRO tools (8 tools) - Now available at COMMUNITY with restrictions
     "security_scan": MCPTool(
         name="security_scan",
-        tier="pro",
+        tier="community",  # Available at all tiers, features gated
         description="Taint-based vulnerability detection",
         category="security",
         parameters={
@@ -158,7 +158,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "unified_sink_detect": MCPTool(
         name="unified_sink_detect",
-        tier="pro",
+        tier="community",
         description="Unified polyglot sink detection with confidence",
         category="security",
         parameters={
@@ -168,7 +168,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "symbolic_execute": MCPTool(
         name="symbolic_execute",
-        tier="pro",
+        tier="community",
         description="Symbolic path exploration with Z3",
         category="analysis",
         parameters={
@@ -177,7 +177,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "generate_unit_tests": MCPTool(
         name="generate_unit_tests",
-        tier="pro",
+        tier="community",
         description="Symbolic execution test generation",
         category="testing",
         parameters={
@@ -186,7 +186,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "simulate_refactor": MCPTool(
         name="simulate_refactor",
-        tier="pro",
+        tier="community",
         description="Verify refactor preserves behavior",
         category="surgery",
         parameters={
@@ -196,7 +196,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "scan_dependencies": MCPTool(
         name="scan_dependencies",
-        tier="pro",
+        tier="community",
         description="Scan for vulnerable dependencies (OSV API)",
         category="security",
         parameters={
@@ -205,7 +205,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "get_cross_file_dependencies": MCPTool(
         name="get_cross_file_dependencies",
-        tier="pro",
+        tier="community",
         description="Analyze cross-file dependency chains",
         category="analysis",
         parameters={
@@ -214,7 +214,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "get_graph_neighborhood": MCPTool(
         name="get_graph_neighborhood",
-        tier="pro",
+        tier="community",
         description="Extract k-hop neighborhood subgraph",
         category="analysis",
         parameters={
@@ -222,10 +222,10 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
             "hops": {"type": "integer", "required": False},
         },
     ),
-    # ENTERPRISE tools (3 tools)
+    # ENTERPRISE tools (3 tools) - Now available at COMMUNITY with restrictions
     "cross_file_security_scan": MCPTool(
         name="cross_file_security_scan",
-        tier="enterprise",
+        tier="community",  # Available at all tiers, features gated
         description="Cross-module taint tracking",
         category="security",
         parameters={
@@ -234,7 +234,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "verify_policy_integrity": MCPTool(
         name="verify_policy_integrity",
-        tier="enterprise",
+        tier="community",
         description="Cryptographic policy file verification",
         category="governance",
         parameters={
@@ -243,7 +243,7 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
     ),
     "type_evaporation_scan": MCPTool(
         name="type_evaporation_scan",
-        tier="enterprise",
+        tier="community",
         description="Detect TypeScript type evaporation vulnerabilities",
         category="security",
         parameters={

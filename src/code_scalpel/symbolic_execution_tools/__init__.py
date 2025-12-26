@@ -73,7 +73,8 @@ from .constraint_solver import ConstraintSolver
 from .engine import SymbolicExecutionEngine, SymbolicAnalyzer
 
 # v0.3.0: Security Analysis
-from .taint_tracker import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.taint_tracker import (
     TaintTracker,
     TaintSource,
     TaintLevel,
@@ -91,7 +92,9 @@ from .taint_tracker import (
     detect_ssr_vulnerabilities,
     detect_ssr_framework,
 )
-from .security_analyzer import (
+
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.security_analyzer import (
     SecurityAnalyzer,
     SecurityAnalysisResult,
     analyze_security,
@@ -102,7 +105,8 @@ from .security_analyzer import (
 )
 
 # [20251216_FEATURE] v2.3.0: Unified Polyglot Sink Detection
-from .unified_sink_detector import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.unified_sink_detector import (
     UnifiedSinkDetector,
     SinkDefinition,
     DetectedSink,
@@ -112,7 +116,8 @@ from .unified_sink_detector import (
 )
 
 # [20251219_FEATURE] v3.0.4: Schema Drift Detection
-from .schema_drift_detector import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.schema.drift_detector import (
     SchemaDriftDetector,
     SchemaDriftResult,
     SchemaChange,
@@ -124,7 +129,8 @@ from .schema_drift_detector import (
 )
 
 # [20251219_FEATURE] v3.0.4: gRPC Contract Analysis
-from .grpc_contract_analyzer import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.grpc.contract_analyzer import (
     GrpcContractAnalyzer,
     GrpcContract,
     GrpcService,
@@ -138,7 +144,8 @@ from .grpc_contract_analyzer import (
 )
 
 # [20251219_FEATURE] v3.0.4: GraphQL Schema Tracking
-from .graphql_schema_tracker import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.graphql.schema_tracker import (
     GraphQLSchemaTracker,
     GraphQLSchema,
     GraphQLType,
@@ -155,7 +162,8 @@ from .graphql_schema_tracker import (
 )
 
 # [20251220_FEATURE] v3.0.4: Kafka Taint Tracking
-from .kafka_taint_tracker import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
     KafkaTaintTracker,
     KafkaProducer,
     KafkaConsumer,
@@ -171,7 +179,8 @@ from .kafka_taint_tracker import (
 )
 
 # [20251220_FEATURE] v3.0.4: Frontend Input Tracker (TypeScript/JS DOM Detection)
-from .frontend_input_tracker import (
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.frontend.input_tracker import (
     FrontendInputTracker,
     FrontendAnalysisResult,
     FrontendFramework,
@@ -195,8 +204,9 @@ warnings.filterwarnings(
 )
 
 # [20251213_FEATURE] v1.5.1: Cross-File Taint Analysis
+# [20251225_REFACTOR] Import from new location
 try:
-    from .cross_file_taint import (
+    from code_scalpel.security.analyzers.cross_file_taint import (
         CrossFileTaintTracker,
         CrossFileTaintResult,
         CrossFileTaintFlow,

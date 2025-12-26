@@ -79,6 +79,7 @@ from __future__ import annotations
 import ast
 import datetime
 import os
+from fnmatch import fnmatch
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -510,6 +511,9 @@ class ProjectCrawler:
         root_path: str | Path,
         exclude_dirs: frozenset[str] | None = None,
         complexity_threshold: int = DEFAULT_COMPLEXITY_THRESHOLD,
+        max_files: int | None = None,
+        max_depth: int | None = None,
+        respect_gitignore: bool = False,
     ):
         """
         Initialize the project crawler.
@@ -522,11 +526,48 @@ class ProjectCrawler:
         self.root_path = Path(root_path).resolve()
         self.exclude_dirs = exclude_dirs or DEFAULT_EXCLUDE_DIRS
         self.complexity_threshold = complexity_threshold
+        self.max_files = max_files
+        self.max_depth = max_depth
+        self.respect_gitignore = respect_gitignore
+        self._gitignore_patterns: list[str] = []
 
         if not self.root_path.exists():
             raise ValueError(f"Path does not exist: {self.root_path}")
         if not self.root_path.is_dir():
             raise ValueError(f"Path is not a directory: {self.root_path}")
+
+        # [20251225_FEATURE] Minimal .gitignore support for tiered crawling.
+        if self.respect_gitignore:
+            gitignore_file = self.root_path / ".gitignore"
+            if gitignore_file.exists() and gitignore_file.is_file():
+                for raw in gitignore_file.read_text(
+                    encoding="utf-8", errors="ignore"
+                ).splitlines():
+                    line = raw.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if line.startswith("!"):
+                        # Negation patterns are intentionally ignored in this minimal implementation.
+                        continue
+                    self._gitignore_patterns.append(line)
+
+    def _is_gitignored(self, rel_path: Path, *, is_dir: bool) -> bool:
+        if not self._gitignore_patterns:
+            return False
+        rel_posix = rel_path.as_posix().lstrip("./")
+        for pattern in self._gitignore_patterns:
+            pat = pattern
+            if pat.endswith("/"):
+                if not is_dir:
+                    continue
+                pat = pat[:-1]
+            if "/" in pat:
+                if fnmatch(rel_posix, pat):
+                    return True
+            else:
+                if fnmatch(rel_path.name, pat):
+                    return True
+        return False
 
     def crawl(self) -> CrawlResult:
         """
@@ -540,12 +581,35 @@ class ProjectCrawler:
             timestamp=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
+        analyzed_python_files = 0
+        reached_limit = False
         for root, dirs, files in os.walk(self.root_path):
-            # Filter excluded directories in-place
-            dirs[:] = [d for d in dirs if d not in self.exclude_dirs]
+            rel_dir = Path(root).resolve().relative_to(self.root_path)
+            depth = len(rel_dir.parts)
+            if self.max_depth is not None and depth >= self.max_depth:
+                dirs[:] = []
+            else:
+                filtered_dirs: list[str] = []
+                for d in dirs:
+                    if d in self.exclude_dirs:
+                        continue
+                    rel_child = rel_dir / d
+                    if self._is_gitignored(rel_child, is_dir=True):
+                        continue
+                    filtered_dirs.append(d)
+                dirs[:] = filtered_dirs
 
             for filename in files:
+                rel_file = rel_dir / filename
+                if self._is_gitignored(rel_file, is_dir=False):
+                    continue
+
                 if filename.endswith(".py"):
+                    if self.max_files is not None and analyzed_python_files >= self.max_files:
+                        reached_limit = True
+                        dirs[:] = []
+                        break
+                    analyzed_python_files += 1
                     file_path = os.path.join(root, filename)
                     file_result = self._analyze_file(file_path)
 
@@ -553,6 +617,9 @@ class ProjectCrawler:
                         result.files_analyzed.append(file_result)
                     else:
                         result.files_with_errors.append(file_result)
+
+            if reached_limit:
+                break
 
         return result
 

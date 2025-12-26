@@ -17,93 +17,54 @@ class TestWeakCryptographyDetection:
 
     def test_md5_with_user_input(self):
         """Detect MD5 hash of user-controlled data."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import hashlib
-user_data = input("Enter data to hash: ")
-digest = hashlib.md5(user_data.encode()).hexdigest()
-"""
-
+        code = '\nimport hashlib\nuser_data = input("Enter data to hash: ")\ndigest = hashlib.md5(user_data.encode()).hexdigest()\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
         vuln_types = [v.vulnerability_type for v in result.vulnerabilities]
         assert any(
-            "Weak" in str(vt) or "Crypto" in str(vt) or "WEAK_CRYPTO" in str(vt)
-            for vt in vuln_types
+            (
+                "Weak" in str(vt) or "Crypto" in str(vt) or "WEAK_CRYPTO" in str(vt)
+                for vt in vuln_types
+            )
         )
 
     def test_sha1_with_request_data(self):
         """Detect SHA1 hash of request data."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import hashlib
-password = request.form.get("password")
-hashed = hashlib.sha1(password.encode()).hexdigest()
-"""
-
+        code = '\nimport hashlib\npassword = request.form.get("password")\nhashed = hashlib.sha1(password.encode()).hexdigest()\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_des_cipher_with_tainted_key(self):
         """Detect DES encryption with tainted key."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-from cryptography.hazmat.primitives.ciphers.algorithms import DES
-key = request.args.get("key")
-cipher = DES(key.encode())
-"""
-
+        code = '\nfrom cryptography.hazmat.primitives.ciphers.algorithms import DES\nkey = request.args.get("key")\ncipher = DES(key.encode())\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_pycryptodome_md5(self):
         """Detect PyCryptodome MD5 usage."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-from Crypto.Hash import MD5
-user_input = input()
-h = MD5.new(user_input.encode())
-"""
-
+        code = "\nfrom Crypto.Hash import MD5\nuser_input = input()\nh = MD5.new(user_input.encode())\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_safe_sha256_no_vulnerability(self):
         """SHA-256 should NOT be flagged as weak crypto."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import hashlib
-user_data = input("Enter data: ")
-digest = hashlib.sha256(user_data.encode()).hexdigest()
-"""
-
+        code = '\nimport hashlib\nuser_data = input("Enter data: ")\ndigest = hashlib.sha256(user_data.encode()).hexdigest()\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
-        # SHA-256 is NOT weak crypto - should not flag WEAK_CRYPTO
         weak_crypto_vulns = [
             v
             for v in result.vulnerabilities
@@ -117,108 +78,58 @@ class TestSSRFDetection:
 
     def test_requests_get_with_user_url(self):
         """Detect SSRF via requests.get with user-controlled URL."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import requests
-url = request.args.get("url")
-response = requests.get(url)
-"""
-
+        code = '\nimport requests\nurl = request.args.get("url")\nresponse = requests.get(url)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
         vuln_types = [v.vulnerability_type for v in result.vulnerabilities]
-        assert any("SSRF" in str(vt) or "CWE-918" in str(vt) for vt in vuln_types)
+        assert any(("SSRF" in str(vt) or "CWE-918" in str(vt) for vt in vuln_types))
 
     def test_requests_post_with_user_url(self):
         """Detect SSRF via requests.post."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import requests
-target = request.form.get("target")
-requests.post(target, data={"key": "value"})
-"""
-
+        code = '\nimport requests\ntarget = request.form.get("target")\nrequests.post(target, data={"key": "value"})\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_urllib_urlopen_with_tainted_url(self):
         """Detect SSRF via urllib.request.urlopen."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-from urllib.request import urlopen
-user_url = input("Enter URL: ")
-response = urlopen(user_url)
-"""
-
+        code = '\nfrom urllib.request import urlopen\nuser_url = input("Enter URL: ")\nresponse = urlopen(user_url)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_httpx_get_with_user_controlled_url(self):
         """Detect SSRF via httpx.get."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import httpx
-endpoint = request.args.get("endpoint")
-r = httpx.get(endpoint)
-"""
-
+        code = '\nimport httpx\nendpoint = request.args.get("endpoint")\nr = httpx.get(endpoint)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_url_concatenation_ssrf(self):
         """Detect SSRF with URL constructed from user input."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import requests
-base_url = "https://api.example.com/"
-user_path = request.args.get("path")
-full_url = base_url + user_path
-response = requests.get(full_url)
-"""
-
+        code = '\nimport requests\nbase_url = "https://api.example.com/"\nuser_path = request.args.get("path")\nfull_url = base_url + user_path\nresponse = requests.get(full_url)\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
 
     def test_safe_hardcoded_url_no_ssrf(self):
         """Hardcoded URL should NOT be flagged as SSRF."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import requests
-response = requests.get("https://api.example.com/status")
-"""
-
+        code = '\nimport requests\nresponse = requests.get("https://api.example.com/status")\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
-        # No tainted data = no SSRF
         ssrf_vulns = [
             v for v in result.vulnerabilities if "SSRF" in str(v.vulnerability_type)
         ]
@@ -230,26 +141,12 @@ class TestCombinedVulnerabilities:
 
     def test_ssrf_and_weak_crypto_together(self):
         """Detect both SSRF and weak crypto in the same code."""
-        from code_scalpel.symbolic_execution_tools.security_analyzer import (
-            SecurityAnalyzer,
-        )
+        from code_scalpel.security.analyzers import SecurityAnalyzer
 
-        code = """
-import requests
-import hashlib
-
-user_url = request.args.get("url")
-response = requests.get(user_url)  # SSRF
-
-user_data = request.form.get("data")
-digest = hashlib.md5(user_data.encode())  # Weak Crypto
-"""
-
+        code = '\nimport requests\nimport hashlib\n\nuser_url = request.args.get("url")\nresponse = requests.get(user_url)  # SSRF\n\nuser_data = request.form.get("data")\ndigest = hashlib.md5(user_data.encode())  # Weak Crypto\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-
         assert result.has_vulnerabilities
-        # Should have at least 2 vulnerabilities
         assert len(result.vulnerabilities) >= 2
 
 
@@ -258,12 +155,11 @@ class TestTaintTrackerIntegration:
 
     def test_taint_is_dangerous_for_weak_crypto(self):
         """Verify taint is marked dangerous for WEAK_CRYPTO sink."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintInfo,
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintSource,
-            TaintLevel,
             SecuritySink,
-        )
+        )  # [20251225_BUGFIX]
 
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
@@ -271,17 +167,15 @@ class TestTaintTrackerIntegration:
             source_location=(1, 0),
             propagation_path=[],
         )
-
         assert taint.is_dangerous_for(SecuritySink.WEAK_CRYPTO)
 
     def test_taint_is_dangerous_for_ssrf(self):
         """Verify taint is marked dangerous for SSRF sink."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintInfo,
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintSource,
-            TaintLevel,
             SecuritySink,
-        )
+        )  # [20251225_BUGFIX]
 
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
@@ -289,28 +183,21 @@ class TestTaintTrackerIntegration:
             source_location=(1, 0),
             propagation_path=[],
         )
-
         assert taint.is_dangerous_for(SecuritySink.SSRF)
 
     def test_sink_patterns_registered(self):
         """Verify all new sink patterns are registered."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
-        # Weak crypto patterns
         assert SINK_PATTERNS.get("hashlib.md5") == SecuritySink.WEAK_CRYPTO
         assert SINK_PATTERNS.get("hashlib.sha1") == SecuritySink.WEAK_CRYPTO
-
-        # SSRF patterns
         assert SINK_PATTERNS.get("requests.get") == SecuritySink.SSRF
         assert SINK_PATTERNS.get("requests.post") == SecuritySink.SSRF
         assert SINK_PATTERNS.get("urllib.request.urlopen") == SecuritySink.SSRF
         assert SINK_PATTERNS.get("httpx.get") == SecuritySink.SSRF
-
-
-# [20251212_TEST] v1.4.0 - Tests for XXE and SSTI vulnerability detection
 
 
 class TestXXEDetection:
@@ -318,21 +205,20 @@ class TestXXEDetection:
 
     def test_xxe_elementtree_parse(self):
         """Detect XXE via xml.etree.ElementTree.parse with user input."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
-        # Verify sink patterns are registered
         assert SINK_PATTERNS.get("xml.etree.ElementTree.parse") == SecuritySink.XXE
         assert SINK_PATTERNS.get("ElementTree.parse") == SecuritySink.XXE
         assert SINK_PATTERNS.get("ET.parse") == SecuritySink.XXE
 
     def test_xxe_lxml_parse(self):
         """Detect XXE via lxml.etree.parse."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("lxml.etree.parse") == SecuritySink.XXE
@@ -341,9 +227,9 @@ class TestXXEDetection:
 
     def test_xxe_minidom(self):
         """Detect XXE via xml.dom.minidom."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("xml.dom.minidom.parse") == SecuritySink.XXE
@@ -351,41 +237,34 @@ class TestXXEDetection:
 
     def test_xxe_sax(self):
         """Detect XXE via xml.sax."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("xml.sax.parse") == SecuritySink.XXE
 
     def test_xxe_sanitizer_defusedxml(self):
         """Verify defusedxml is recognized as safe sanitizer."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SANITIZER_REGISTRY,
+            SecuritySink,
         )
 
-        # defusedxml should be a sanitizer that clears XXE sink
         assert "defusedxml.parse" in SANITIZER_REGISTRY
         assert "defusedxml.ElementTree.parse" in SANITIZER_REGISTRY
-
         sanitizer_info = SANITIZER_REGISTRY["defusedxml.parse"]
         assert SecuritySink.XXE in sanitizer_info.clears_sinks
 
     def test_taint_dangerous_for_xxe(self):
         """Verify tainted data is dangerous for XXE sink."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintInfo,
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintSource,
-            TaintLevel,
             SecuritySink,
-        )
+        )  # [20251225_BUGFIX]
 
-        taint = TaintInfo(
-            source=TaintSource.USER_INPUT,
-            level=TaintLevel.HIGH,
-        )
-
+        taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
         assert taint.is_dangerous_for(SecuritySink.XXE)
 
 
@@ -394,9 +273,9 @@ class TestSSTIDetection:
 
     def test_ssti_jinja2_template(self):
         """Detect SSTI via jinja2.Template with user input."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("jinja2.Template") == SecuritySink.SSTI
@@ -405,9 +284,9 @@ class TestSSTIDetection:
 
     def test_ssti_mako_template(self):
         """Detect SSTI via mako.template.Template."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("mako.template.Template") == SecuritySink.SSTI
@@ -415,56 +294,48 @@ class TestSSTIDetection:
 
     def test_ssti_django_template(self):
         """Detect SSTI via django.template.Template."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("django.template.Template") == SecuritySink.SSTI
 
     def test_ssti_tornado_template(self):
         """Detect SSTI via tornado.template.Template."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SINK_PATTERNS,
+            SecuritySink,
         )
 
         assert SINK_PATTERNS.get("tornado.template.Template") == SecuritySink.SSTI
 
     def test_ssti_sanitizer_render_template(self):
         """Verify render_template (file-based) is recognized as safe."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            SecuritySink,
+        from code_scalpel.security.analyzers.taint_tracker import (
             SANITIZER_REGISTRY,
+            SecuritySink,
         )
 
-        # File-based templates are safe
         assert "render_template" in SANITIZER_REGISTRY
         assert "flask.render_template" in SANITIZER_REGISTRY
-
         sanitizer_info = SANITIZER_REGISTRY["render_template"]
         assert SecuritySink.SSTI in sanitizer_info.clears_sinks
 
     def test_taint_dangerous_for_ssti(self):
         """Verify tainted data is dangerous for SSTI sink."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import (
-            TaintInfo,
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel
+        from code_scalpel.security.analyzers.taint_tracker import (
             TaintSource,
-            TaintLevel,
             SecuritySink,
-        )
+        )  # [20251225_BUGFIX]
 
-        taint = TaintInfo(
-            source=TaintSource.USER_INPUT,
-            level=TaintLevel.HIGH,
-        )
-
+        taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
         assert taint.is_dangerous_for(SecuritySink.SSTI)
 
     def test_security_sink_enum_values(self):
         """Verify XXE and SSTI are in SecuritySink enum."""
-        from code_scalpel.symbolic_execution_tools.taint_tracker import SecuritySink
+        from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
-        # v1.4.0 additions
         assert hasattr(SecuritySink, "XXE")
         assert hasattr(SecuritySink, "SSTI")

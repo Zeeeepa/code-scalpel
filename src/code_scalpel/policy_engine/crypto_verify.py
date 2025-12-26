@@ -67,7 +67,7 @@ import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional  # [20241224_BUGFIX] v3.2.9 - Added Any
+from typing import Any, Dict, List, Optional  # [20241225_BUGFIX] v3.3.0 - Added Any
 
 
 class SecurityError(Exception):
@@ -95,7 +95,7 @@ class PolicyManifest:
     files: Dict[str, str | Dict[str, Any]]  # filename -> SHA-256 hash or {hash, size}
     signature: str  # HMAC signature of the manifest
     created_at: str
-    signed_by: str = "unknown"  # [20241224_BUGFIX] v3.2.9 - Make optional with default
+    signed_by: str = "unknown"  # [20241225_BUGFIX] v3.3.0 - Make optional with default
 
     # TODO [PRO]: Add algorithm field (HMAC-SHA256, HMAC-SHA512, RSA, etc)
     # TODO [ENTERPRISE]: Add X.509 certificate chain for public-key verification
@@ -383,7 +383,7 @@ class CryptographicPolicyVerifier:
 
         for filename, expected_hash_or_dict in self.manifest.files.items():
             try:
-                # [20241224_BUGFIX] v3.2.9 - Handle both flat hash strings and nested dicts
+                # [20241225_BUGFIX] v3.3.0 - Handle both flat hash strings and nested dicts
                 if isinstance(expected_hash_or_dict, dict):
                     expected_hash = expected_hash_or_dict.get("hash")
                     if not expected_hash:
@@ -473,7 +473,7 @@ class CryptographicPolicyVerifier:
         if not self.manifest:
             return False
 
-        # [20241224_BUGFIX] v3.2.9 - Reconstruct the signed data exactly as it was signed
+        # [20241225_BUGFIX] v3.3.0 - Reconstruct the signed data exactly as it was signed
         # Only include signed_by if it's not the default value (for backward compatibility)
         signed_data = {
             "version": self.manifest.version,
@@ -483,15 +483,15 @@ class CryptographicPolicyVerifier:
         if self.manifest.signed_by != "unknown":
             signed_data["signed_by"] = self.manifest.signed_by
 
-        # [20241224_BUGFIX] v3.2.9 - Use same JSON format as signing
+        # [20241225_BUGFIX] v3.3.0 - Use same JSON format as signing
         message = json.dumps(signed_data, sort_keys=True, separators=(",", ":"))
         expected_signature = hmac.new(
             self.secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()
 
-        # [20241224_BUGFIX] v3.2.9 - Strip hmac-sha256: prefix if present
+        # [20241225_BUGFIX] v3.3.0 - Strip hmac-sha256: prefix if present
         manifest_signature = self.manifest.signature
-        if not manifest_signature:  # [20241224_BUGFIX] v3.2.9 - Handle null signature
+        if not manifest_signature:  # [20241225_BUGFIX] v3.3.0 - Handle null signature
             return False
         if manifest_signature.startswith("hmac-sha256:"):
             manifest_signature = manifest_signature[len("hmac-sha256:") :]
@@ -525,7 +525,7 @@ class CryptographicPolicyVerifier:
             for chunk in iter(lambda: f.read(8192), b""):
                 hasher.update(chunk)
 
-        # [20241224_BUGFIX] v3.2.9 - Return hash with sha256: prefix for compatibility
+        # [20241225_BUGFIX] v3.3.0 - Return hash with sha256: prefix for compatibility
         return "sha256:" + hasher.hexdigest()
 
     @staticmethod
@@ -563,7 +563,7 @@ class CryptographicPolicyVerifier:
                     hasher.update(f.read())
                 files[filename] = (
                     "sha256:" + hasher.hexdigest()
-                )  # [20241224_BUGFIX] v3.2.9 - Use prefixed format
+                )  # [20241225_BUGFIX] v3.3.0 - Use prefixed format
 
         manifest_data = {
             "version": "1.0",
@@ -575,7 +575,7 @@ class CryptographicPolicyVerifier:
         # Create HMAC signature
         message = json.dumps(
             manifest_data, sort_keys=True, separators=(",", ":")
-        )  # [20241224_BUGFIX] v3.2.9 - Use canonical format
+        )  # [20241225_BUGFIX] v3.3.0 - Use canonical format
         signature = hmac.new(
             secret_key.encode(), message.encode(), hashlib.sha256
         ).hexdigest()

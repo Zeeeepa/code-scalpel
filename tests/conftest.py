@@ -83,7 +83,7 @@ def osv_client_no_cache(osv_mock_urlopen):
         OSVClient: Configured client instance
     """
     # Import here to avoid module resolution issues
-    from code_scalpel.ast_tools.osv_client import OSVClient
+    from code_scalpel.security.dependencies import OSVClient
 
     return OSVClient(cache_enabled=False)
 
@@ -102,7 +102,7 @@ def osv_client_with_cache(osv_mock_urlopen):
         OSVClient: Configured client instance with caching
     """
     # Import here to avoid module resolution issues
-    from code_scalpel.ast_tools.osv_client import OSVClient
+    from code_scalpel.security.dependencies import OSVClient
 
     return OSVClient(cache_enabled=True)
 
@@ -179,7 +179,7 @@ def reset_osv_cache():
     yield
     # Cleanup after test
     try:
-        from code_scalpel.ast_tools.osv_client import OSVClient
+        from code_scalpel.security.dependencies import OSVClient
 
         client = OSVClient()
         client.clear_cache()
