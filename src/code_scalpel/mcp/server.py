@@ -948,9 +948,14 @@ class SymbolReference(BaseModel):
     line: int = Field(description="Line number of the reference")
     column: int = Field(default=0, description="Column number")
     context: str = Field(description="Code snippet showing usage context")
-    is_definition: bool = Field(
-        default=False, description="Whether this is the definition"
+
+    # [20251226_BUGFIX] Reference categorization for tiered metadata
+    reference_type: str = Field(
+        default="reference",
+        description="Reference kind (definition, call, read, write, import, reference)",
     )
+
+    is_definition: bool = Field(default=False, description="Whether this is the definition")
 
 
 class SymbolReferencesResult(BaseModel):
@@ -958,6 +963,7 @@ class SymbolReferencesResult(BaseModel):
 
     success: bool = Field(description="Whether search succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
+
     symbol_name: str = Field(description="Name of the searched symbol")
     definition_file: str | None = Field(
         default=None, description="File where symbol is defined"
@@ -965,12 +971,25 @@ class SymbolReferencesResult(BaseModel):
     definition_line: int | None = Field(
         default=None, description="Line where symbol is defined"
     )
+
     references: list[SymbolReference] = Field(
-        default_factory=list, description="References found (max 100)"
+        default_factory=list, description="References found"
     )
+
+    # Aggregate counts
     total_references: int = Field(
         default=0, description="Total reference count before truncation"
     )
+
+    # [20251226_BUGFIX] File-level truncation for community limits
+    files_scanned: int = Field(default=0, description="Number of files scanned")
+    files_truncated: bool = Field(
+        default=False, description="Whether file scanning was truncated"
+    )
+    file_truncation_warning: str | None = Field(
+        default=None, description="Warning if file scanning was truncated"
+    )
+
     # [20251220_FEATURE] v3.0.5 - Truncation communication
     references_truncated: bool = Field(
         default=False, description="Whether references list was truncated"
@@ -978,6 +997,18 @@ class SymbolReferencesResult(BaseModel):
     truncation_warning: str | None = Field(
         default=None, description="Warning if results truncated"
     )
+
+    # [20251226_FEATURE] Optional tier metadata
+    category_counts: dict[str, int] | None = Field(
+        default=None, description="Reference type counts"
+    )
+    owner_counts: dict[str, int] | None = Field(
+        default=None, description="Owner attribution counts (CODEOWNERS)"
+    )
+    change_risk: str | None = Field(
+        default=None, description="Heuristic change risk (low/medium/high)"
+    )
+
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -6408,13 +6439,17 @@ async def get_file_context(file_path: str) -> FileContextResult:
 
 
 def _get_symbol_references_sync(
-    symbol_name: str, project_root: str | None = None
+    symbol_name: str,
+    project_root: str | None = None,
+    max_files_searched: int | None = None,
+    max_references: int | None = None,
+    capabilities: set[str] | None = None,
+    scope_prefix: str | None = None,
+    include_tests: bool = True,
 ) -> SymbolReferencesResult:
-    """
-    Synchronous implementation of get_symbol_references.
+    """Synchronous implementation of get_symbol_references.
 
-    [20251220_FEATURE] v3.0.5 - Optimized single-pass AST walking with deduplication
-    [20251220_PERF] v3.0.5 - Uses AST cache to avoid re-parsing unchanged files
+    [20251226_BUGFIX] Capability-driven limits and optional metadata.
     """
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
@@ -6426,15 +6461,11 @@ def _get_symbol_references_sync(
                 error=f"Project root not found: {root}.",
             )
 
-        references: list[SymbolReference] = []
-        definition_file = None
-        definition_line = None
-        # Track seen (file, line) pairs to avoid duplicates in single pass
-        seen: set[tuple[str, int]] = set()
+        cap_set = set(capabilities or set())
 
-        # Walk through all Python files
-        for py_file in root.rglob("*.py"):
-            # Skip common non-source directories
+        # Collect eligible files deterministically
+        candidates: list[Path] = []
+        for py_file in sorted(root.rglob("*.py")):
             if any(
                 part.startswith(".")
                 or part
@@ -6443,8 +6474,40 @@ def _get_symbol_references_sync(
             ):
                 continue
 
+            rel_path = str(py_file.relative_to(root))
+
+            if scope_prefix and not rel_path.startswith(scope_prefix):
+                continue
+
+            if not include_tests:
+                lowered = rel_path.lower()
+                if "/tests/" in f"/{lowered}" or lowered.startswith("tests/"):
+                    continue
+                if py_file.name.startswith("test_"):
+                    continue
+
+            candidates.append(py_file)
+
+        total_candidate_files = len(candidates)
+        if max_files_searched is not None:
+            files_to_scan = candidates[: int(max_files_searched)]
+        else:
+            files_to_scan = candidates
+
+        files_scanned = len(files_to_scan)
+        files_truncated = (
+            max_files_searched is not None and total_candidate_files > files_scanned
+        )
+
+        references: list[SymbolReference] = []
+        definition_file: str | None = None
+        definition_line: int | None = None
+
+        # Track seen (file, line) pairs to avoid duplicates in single pass
+        seen: set[tuple[str, int]] = set()
+
+        for py_file in files_to_scan:
             try:
-                # [20251220_PERF] v3.0.5 - Use cached AST parsing
                 tree = _parse_file_cached(py_file)
                 if tree is None:
                     continue
@@ -6453,7 +6516,6 @@ def _get_symbol_references_sync(
                 lines = code.splitlines()
                 rel_path = str(py_file.relative_to(root))
 
-                # Single-pass AST walk with optimized checks
                 for node in ast.walk(tree):
                     node_line = getattr(node, "lineno", 0)
                     node_col = getattr(node, "col_offset", 0)
@@ -6463,33 +6525,31 @@ def _get_symbol_references_sync(
                     if loc_key in seen:
                         continue
 
-                    is_def = False
                     matched = False
+                    is_def = False
+                    reference_type = "reference"
 
-                    # Check definitions (FunctionDef, AsyncFunctionDef, ClassDef)
-                    if isinstance(
-                        node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-                    ):
+                    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         if node.name == symbol_name:
                             matched = True
                             is_def = True
+                            reference_type = "definition"
                             if definition_file is None:
                                 definition_file = rel_path
                                 definition_line = node_line
 
-                    # Check function calls
                     elif isinstance(node, ast.Call):
                         func = node.func
                         if isinstance(func, ast.Name) and func.id == symbol_name:
                             matched = True
-                        elif (
-                            isinstance(func, ast.Attribute) and func.attr == symbol_name
-                        ):
+                            reference_type = "call"
+                        elif isinstance(func, ast.Attribute) and func.attr == symbol_name:
                             matched = True
+                            reference_type = "call"
 
-                    # Check name references (but avoid duplicating Call nodes)
                     elif isinstance(node, ast.Name) and node.id == symbol_name:
                         matched = True
+                        reference_type = "reference"
 
                     if matched:
                         seen.add(loc_key)
@@ -6503,32 +6563,89 @@ def _get_symbol_references_sync(
                                 column=node_col,
                                 context=context.strip(),
                                 is_definition=is_def,
+                                reference_type=reference_type,
                             )
                         )
 
-            except (SyntaxError, UnicodeDecodeError):
-                # Skip files that can't be parsed
+            except (SyntaxError, UnicodeDecodeError, OSError):
                 continue
 
         # Sort: definitions first, then by file and line
-        references.sort(key=lambda r: (not r.is_definition, r.file, r.line))
+        references.sort(key=lambda r: (r.reference_type != "definition", r.file, r.line))
 
-        # [20251220_FEATURE] v3.0.5 - Communicate truncation
         total_refs = len(references)
-        refs_truncated = total_refs > 100
+
+        refs_truncated = False
         truncation_msg = None
-        if refs_truncated:
-            truncation_msg = f"Results truncated: showing 100 of {total_refs} references. Use more specific symbol name or filter by file."
+        if max_references is not None and total_refs > int(max_references):
+            refs_truncated = True
+            truncation_msg = (
+                f"Results truncated: showing {int(max_references)} of {total_refs} references."
+            )
+            references = references[: int(max_references)]
+
+        file_truncation_warning = None
+        if files_truncated:
+            file_truncation_warning = (
+                f"File scan truncated: scanned {files_scanned} of {total_candidate_files} files."
+            )
+
+        category_counts: dict[str, int] | None = None
+        if "usage_categorization" in cap_set:
+            category_counts = {}
+            for r in references:
+                category_counts[r.reference_type] = category_counts.get(r.reference_type, 0) + 1
+
+        owner_counts: dict[str, int] | None = None
+        if "codeowners_integration" in cap_set or "ownership_attribution" in cap_set:
+            owners: list[str] = []
+            codeowners_path = root / "CODEOWNERS"
+            if codeowners_path.exists():
+                try:
+                    for raw_line in codeowners_path.read_text(encoding="utf-8").splitlines():
+                        line = raw_line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        parts = line.split()
+                        if not parts:
+                            continue
+                        pattern = parts[0]
+                        if pattern == "*":
+                            owners = parts[1:]
+                            break
+                except OSError:
+                    owners = []
+
+            if owners:
+                owner_counts = {}
+                for r in references:
+                    for owner in owners:
+                        owner_counts[owner] = owner_counts.get(owner, 0) + 1
+
+        change_risk: str | None = None
+        if "change_risk_assessment" in cap_set:
+            if total_refs <= 5:
+                change_risk = "low"
+            elif total_refs <= 20:
+                change_risk = "medium"
+            else:
+                change_risk = "high"
 
         return SymbolReferencesResult(
             success=True,
             symbol_name=symbol_name,
             definition_file=definition_file,
             definition_line=definition_line,
-            references=references[:100],
+            references=references,
             total_references=total_refs,
+            files_scanned=files_scanned,
+            files_truncated=files_truncated,
+            file_truncation_warning=file_truncation_warning,
             references_truncated=refs_truncated,
             truncation_warning=truncation_msg,
+            category_counts=category_counts,
+            owner_counts=owner_counts,
+            change_risk=change_risk,
         )
 
     except Exception as e:
