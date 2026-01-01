@@ -371,7 +371,7 @@ Thank you for helping make Code Scalpel better! 🎉
 
 **Resources:**
 - [Documentation Index](docs/INDEX.md)
-- [Getting Started Guide](docs/getting_started.md)
+- [Getting Started Guide](docs/getting_started/getting_started.md)
 - [Policy Engine Guide](src/code_scalpel/policy_engine/README.md)
 - [Development Roadmap](DEVELOPMENT_ROADMAP.md)
 

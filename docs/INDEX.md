@@ -13,22 +13,19 @@
 |----------|-------------|
 | [**COMPREHENSIVE_GUIDE.md**](COMPREHENSIVE_GUIDE.md) | Full documentation with examples |
 | [**README.md**](../README.md) | Project overview and quick start |
-| [**graph_engine_guide.md**](graph_engine_guide.md) | Unified Graph Engine documentation |
-| [**RELEASE_NOTES_v3.0.0.md**](release_notes/RELEASE_NOTES_v3.0.0.md) | Autonomy release - Comprehensive coverage, stability, autonomy foundation |  <!-- [20251218_DOCS] Added v3.0 notes link -->
+| [**RELEASE_NOTES_v3.3.0.md**](release_notes/RELEASE_NOTES_v3.3.0.md) | Clean Slate release - v3.3.0 latest |
+| [**RELEASE_NOTES_v3.0.0.md**](release_notes/RELEASE_NOTES_v3.0.0.md) | Autonomy release - Comprehensive coverage, stability, autonomy foundation |
 | [**RELEASE_NOTES_v2.5.0.md**](release_notes/RELEASE_NOTES_v2.5.0.md) | Guardian release - Policy, semantic blocking, tamper resistance |
-| [**RELEASE_NOTES_v2.2.0.md**](release_notes/RELEASE_NOTES_v2.2.0.md) | Nexus release - Unified Graph Engine |
 
 ---
 
-## v3.0.0 Release Documentation
+## Current Release - v3.3.0
 
-Critical upgrade and reference guides for v3.0.0:
+Latest version and migration guides:
 
-| Document | Description | Use Case |
-|----------|-------------|----------|
-| [**MIGRATION_v2.5_to_v3.0.md**](./MIGRATION_v2.5_to_v3.0.md) | Step-by-step upgrade guide | Upgrading from v2.5.0 |
-| [**API_CHANGES_v3.0.0.md**](./API_CHANGES_v3.0.0.md) | Detailed API changes and new features | Understanding API differences |
-| [**KNOWN_ISSUES_v3.0.0.md**](./KNOWN_ISSUES_v3.0.0.md) | Known limitations and workarounds | Troubleshooting issues |
+| Document | Description |
+|----------|-------------|
+| [**RELEASE_NOTES_v3.3.0.md**](release_notes/RELEASE_NOTES_v3.3.0.md) | Latest release notes and features |
 
 ---
 
@@ -48,28 +45,20 @@ Detailed reference for each module:
 
 ## Polyglot Parsers Module
 
-The polyglot parsers infrastructure provides static analysis for 10 language families:
+The polyglot parsers infrastructure provides static analysis:
 
-| Language | Status | Documentation |
-|----------|--------|-----------------|
-| **Java** | Phase 1 ✅ | [JAVA_PARSERS_COMPLETION.md](parsers/JAVA_PARSERS_COMPLETION.md) |
-| **Kotlin** | Phase 1 ✅ | [KOTLIN_PARSERS_COMPLETION.md](parsers/KOTLIN_PARSERS_COMPLETION.md) |
-| **JavaScript** | Phase 1 ✅ | [JAVASCRIPT_PARSERS_COMPLETION.md](parsers/JAVASCRIPT_PARSERS_COMPLETION.md) |
-| **TypeScript** | Phase 1 ✅ | [TYPESCRIPT_PARSERS_COMPLETION.md](parsers/TYPESCRIPT_PARSERS_COMPLETION.md) |
-| **Ruby** | Phase 1 ✅ | [RUBY_PARSERS_COMPLETION.md](parsers/RUBY_PARSERS_COMPLETION.md) |
-| **PHP** | Phase 1 ✅ | [PHP_PARSERS_COMPLETION.md](parsers/PHP_PARSERS_COMPLETION.md) |
-| **Swift** | Phase 1 ✅ | [SWIFT_PARSERS_README.md](parsers/SWIFT_PARSERS_README.md) |
-| **C++** | Phase 1 ✅ | [CPP_PARSERS_README.md](parsers/CPP_PARSERS_README.md) |
-| **C#** | Phase 1 ✅ | [CSHARP_PARSERS_README.md](parsers/CSHARP_PARSERS_README.md) |
-| **Go** | Phase 1 ✅ | [GO_PARSERS_README.md](parsers/GO_PARSERS_README.md) |
+| Language | Documentation |
+|----------|-----------------|
+| **C++** | [CPP_PARSERS_README.md](parsers/CPP_PARSERS_README.md) |
+| **C#** | [CSHARP_PARSERS_README.md](parsers/CSHARP_PARSERS_README.md) |
+| **Go** | [GO_PARSERS_README.md](parsers/GO_PARSERS_README.md) |
+| **Swift** | [SWIFT_PARSERS_README.md](parsers/SWIFT_PARSERS_README.md) |
+| **Python** | [python_parser.md](parsers/python_parser.md) |
+| **Base** | [base_parser.md](parsers/base_parser.md) |
 
-**Overview:** [POLYGLOT_PARSERS_SUMMARY.md](parsers/POLYGLOT_PARSERS_SUMMARY.md) - Comprehensive summary of all language modules
-
-**Phase 1 Status:** 10/10 language modules complete ✅
-- All modules have comprehensive factory registries
-- All modules have [20251221_TODO] Phase 2 markers
-- All modules have detailed READMEs with tool specifications
-- Ready for Phase 2 implementation across all tools
+**Reference Documentation:**
+- [PHASE1_DELIVERY_REPORT.md](parsers/PHASE1_DELIVERY_REPORT.md) - Parser implementation status
+- [DOCUMENTATION_INDEX.md](parsers/DOCUMENTATION_INDEX.md) - Parser docs index
 
 ---
 
@@ -100,22 +89,9 @@ code-scalpel/
 | Guide | Description |
 |-------|-------------|
 | [guides/CONTRIBUTING.md](guides/CONTRIBUTING.md) | Developer contribution guide |
-| [guides/PUBLIC_FORK_CHECKLIST_v1.0.md](guides/PUBLIC_FORK_CHECKLIST_v1.0.md) | Public fork + v1.0 go-public checklist and evidence gates | <!-- [20251221_DOCS] Add public-fork checklist link -->
-| [guides/README_CLAIMS_DEMOS_v1.0.md](guides/README_CLAIMS_DEMOS_v1.0.md) | README claim-by-claim demo scripts + evidence artifacts | <!-- [20251221_DOCS] Add README claims demo plan -->
-
----
-
-## Internal Documentation
-
-Team-only documentation:
-
-| Document | Description |
-|----------|-------------|
-| [internal/ROADMAP.md](internal/ROADMAP.md) | Development roadmap |
-| [internal/PRODUCT_BACKLOG.md](internal/PRODUCT_BACKLOG.md) | Feature backlog |
-| [internal/RELEASE_PROTOCOL.md](internal/RELEASE_PROTOCOL.md) | Release process |
-| [internal/CHECKLIST.md](internal/CHECKLIST.md) | Milestone tracking |
-| [internal/COVERAGE_ANALYSIS.md](internal/COVERAGE_ANALYSIS.md) | Test coverage analysis |
+| [guides/README_CLAIMS_DEMOS_v1.0.md](guides/README_CLAIMS_DEMOS_v1.0.md) | README claim validation and demo scripts |
+| [guides/agent_integration.md](guides/agent_integration.md) | AI agent and framework integration |
+| [guides/graph_engine_guide.md](guides/graph_engine_guide.md) | Unified graph engine documentation |
 
 ---
 
