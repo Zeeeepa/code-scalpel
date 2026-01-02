@@ -17,10 +17,11 @@ Phase 2 Enhancement TODOs:
 """
 
 import subprocess
-from defusedxml import ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
+
+from defusedxml import ElementTree as ET
 
 
 @dataclass

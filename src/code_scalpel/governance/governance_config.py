@@ -107,14 +107,14 @@ ENTERPRISE TIER - Distributed & Federated Governance
 75. Add config health monitoring
 """
 
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Optional, List
-import os
-import json
 import hashlib
 import hmac
+import json
 import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -262,7 +262,30 @@ class GovernanceConfigLoader:
             config_path: Optional explicit path to config.json
                         Defaults to .code-scalpel/config.json in current directory
         """
+        # [20251231_FEATURE] Track whether the caller provided an explicit path.
+        # This matters for precedence: profile selection should not override an
+        # explicit constructor path.
+        self._explicit_config_path = config_path is not None
         self.config_path = config_path or Path.cwd() / ".code-scalpel" / "config.json"
+
+    def _select_profile_config_path(self) -> Optional[Path]:
+        """Select a profile config path if configured.
+
+        Uses `SCALPEL_CONFIG_PROFILE` to load `.code-scalpel/config.<profile>.json`.
+
+        [20251231_FEATURE] Governance config profile selection.
+        """
+        profile = (os.getenv("SCALPEL_CONFIG_PROFILE") or "").strip()
+        if not profile:
+            return None
+        # Keep profile string safe and predictable.
+        profile_norm = "".join(
+            ch for ch in profile.lower() if ch.isalnum() or ch in {"-", "_"}
+        )
+        if not profile_norm:
+            return None
+        candidate = Path.cwd() / ".code-scalpel" / f"config.{profile_norm}.json"
+        return candidate
 
     def load(self) -> GovernanceConfig:
         """
@@ -275,10 +298,19 @@ class GovernanceConfigLoader:
             ValueError: If hash/signature validation fails
             FileNotFoundError: Only if config_path explicitly set and doesn't exist
         """
-        # Check for environment variable path override
+        # [20251231_FEATURE] Configuration precedence:
+        # 1) SCALPEL_CONFIG (explicit path override)
+        # 2) explicit constructor config_path
+        # 3) SCALPEL_CONFIG_PROFILE -> .code-scalpel/config.<profile>.json
+        # 4) default .code-scalpel/config.json
+
         config_path_env = os.getenv("SCALPEL_CONFIG")
         if config_path_env:
             self.config_path = Path(config_path_env)
+        elif not self._explicit_config_path:
+            candidate = self._select_profile_config_path()
+            if candidate is not None and candidate.exists():
+                self.config_path = candidate
 
         # Load configuration or use defaults
         if self.config_path.exists():

@@ -40,9 +40,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-from datetime import datetime, timedelta
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -56,27 +56,15 @@ except ImportError:
     sys.exit(1)
 
 
-# [20251225_SECURITY] DEVELOPMENT PRIVATE KEY - DO NOT USE IN PRODUCTION
-# This key corresponds to the public key in jwt_validator.py
-# In production, generate a new key pair and store the private key securely
-DEV_PRIVATE_KEY_PEM = """
------BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA0Z7IpW5nE3cHYvWw6MivlqCKF8r7V6KGPJxGnVDJhHqZR3tU
-KkDqGhFMXvKnVXxPQoGzRmCJY5fBPkx8YvZOhF8tBj7cL8kZpVwN2YXQ7RzUJHtK
-CMEQKGCbN5FnPQoXwX3aKJzGRwDKnFMYT6vNc8rBQP5vN8kZFwXGHbQoP7VnKjMw
-RxGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhF8tBj7cL8kZpVwN2YXQ7RzUJHtKC
-MEQKGCbN5FnPQoXwX3aKJzGRwDKnFMYT6vNc8rBQP5vN8kZFwXGHbQoP7VnKjMwR
-xGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhQIDAQABAoIBAFZm3pW8QN9xHJ5vE
-8kZFwXGHbQoP7VnKjMwRxGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhF8tBj7cL
-8kZpVwN2YXQ7RzUJHtKCMEQKGCbN5FnPQoXwX3aKJzGRwDKnFMYT6vNc8rBQP5v
-N8kZFwXGHbQoP7VnKjMwRxGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhF8tBj7c
-L8kZpVwN2YXQ7RzUJHtKCMEQKGCbN5FnPQoXwX3aKJzGRwDKnFMYT6vNc8rBQP5
-vN8kZFwXGHbQoP7VnKjMwRxGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhF8tBj
-7cL8kZpVwN2YXQ7RzUJHtKCMEQKGCbN5FnPQoXwX3aKJzGRwDKnFMYT6vNc8rBQ
-P5vN8kZFwXGHbQoP7VnKjMwRxGFDcPHGvXBnJzQoGzRmCJY5fBPkx8YvZOhQgYE
-A+1234567890ABCDEF
------END RSA PRIVATE KEY-----
-""".strip()
+# [20251227_SECURITY] Do not ship private keys inside the package.
+# RS256 license generation must use an explicitly provided private key
+# (ideally from a separate issuer tool/service backed by KMS/HSM).
+
+# Keep generator defaults aligned with the runtime validator defaults.
+# This ensures locally minted CI/dev tokens validate without requiring
+# environment overrides.
+DEFAULT_LICENSE_ISSUER = "code-scalpel"
+DEFAULT_LICENSE_AUDIENCE = "code-scalpel"
 
 # Feature lists for each tier
 COMMUNITY_FEATURES = []
@@ -116,6 +104,11 @@ def generate_license(
     algorithm: str = "RS256",
     private_key: Optional[str] = None,
     secret_key: Optional[str] = None,
+    issuer: str = DEFAULT_LICENSE_ISSUER,
+    audience: str = DEFAULT_LICENSE_AUDIENCE,
+    jti: Optional[str] = None,
+    kid: Optional[str] = None,
+    backdate_seconds: int = 10,
 ) -> str:
     """
     Generate a JWT license token.
@@ -146,33 +139,59 @@ def generate_license(
             features = []
 
     # Calculate timestamps
-    now = datetime.utcnow()
+    # [20251228_BUGFIX] Use timezone-aware UTC datetimes. Using a naive UTC
+    # datetime with .timestamp() applies the local timezone offset and can
+    # yield iat/nbf values in the future, causing remote verifiers to reject
+    # the token as "not yet valid (iat)".
+    now = datetime.now(timezone.utc)
     expiration = now + timedelta(days=duration_days)
+    # [20251228_BUGFIX] Backdate IAT/NBF to tolerate verifier clock skew in
+    # dockerized/local environments.
+    issued_at = now - timedelta(seconds=backdate_seconds)
 
-    # Build JWT claims
+    # [20251227_SECURITY] Include standard JWT claims used by production validators.
+    # [20251228_BUGFIX] Include both legacy (sub/organization) and verifier
+    # schema (customer/org/seats) claims so locally minted licenses validate
+    # against the verification service.
+    effective_seats = seats if seats is not None else 1
     claims = {
-        "iss": "code-scalpel-licensing",
+        "iss": issuer,
+        "aud": audience,
         "sub": customer_id,
+        "customer": customer_id,
         "tier": tier,
         "features": features,
+        "seats": int(effective_seats),
+        "jti": jti or str(uuid.uuid4()),
         "exp": int(expiration.timestamp()),
-        "iat": int(now.timestamp()),
+        "iat": int(issued_at.timestamp()),
+        "nbf": int(issued_at.timestamp()),
     }
 
     if organization:
         claims["organization"] = organization
+        claims["org"] = organization
+    else:
+        claims["org"] = customer_id
 
-    if seats:
-        claims["seats"] = seats
+    # seats is always present via effective_seats
+
+    headers = {}
+    if kid:
+        headers["kid"] = kid
 
     # Sign the token
     if algorithm == "RS256":
-        signing_key = private_key or DEV_PRIVATE_KEY_PEM
-        token = jwt.encode(claims, signing_key, algorithm="RS256")
+        if not private_key:
+            raise ValueError(
+                "RS256 license generation requires an explicit private_key. "
+                "Do not embed private keys in this repo/package."
+            )
+        token = jwt.encode(claims, private_key, algorithm="RS256", headers=headers)
     elif algorithm == "HS256":
         if not secret_key:
             raise ValueError("HS256 algorithm requires a secret_key")
-        token = jwt.encode(claims, secret_key, algorithm="HS256")
+        token = jwt.encode(claims, secret_key, algorithm="HS256", headers=headers)
     else:
         raise ValueError(f"Unsupported algorithm: {algorithm}")
 
@@ -216,6 +235,16 @@ def main():
     )
 
     parser.add_argument(
+        "--backdate-seconds",
+        type=int,
+        default=10,
+        help=(
+            "Backdate iat/nbf by this many seconds to tolerate clock skew "
+            "(default: 10)"
+        ),
+    )
+
+    parser.add_argument(
         "--algorithm",
         choices=["RS256", "HS256"],
         default="RS256",
@@ -227,7 +256,25 @@ def main():
     )
 
     parser.add_argument(
-        "--private-key", help="Path to RSA private key (for RS256, uses dev key if not specified)"
+        "--private-key",
+        help="Path to RSA private key (required for RS256; private keys must not ship in the package)",
+    )
+
+    parser.add_argument(
+        "--issuer",
+        default=DEFAULT_LICENSE_ISSUER,
+        help=f"JWT issuer claim (default: {DEFAULT_LICENSE_ISSUER})",
+    )
+
+    parser.add_argument(
+        "--audience",
+        default=DEFAULT_LICENSE_AUDIENCE,
+        help=f"JWT audience claim (default: {DEFAULT_LICENSE_AUDIENCE})",
+    )
+
+    parser.add_argument(
+        "--kid",
+        help="Optional key id (kid) header for key rotation",
     )
 
     parser.add_argument(
@@ -248,6 +295,10 @@ def main():
     # Validate HS256 requirements
     if args.algorithm == "HS256" and not args.secret:
         parser.error("HS256 algorithm requires --secret")
+
+    # [20251227_SECURITY] Require explicit private key for RS256.
+    if args.algorithm == "RS256" and not args.private_key:
+        parser.error("RS256 algorithm requires --private-key")
 
     # Load private key if specified
     private_key = None
@@ -270,6 +321,10 @@ def main():
             algorithm=args.algorithm,
             private_key=private_key,
             secret_key=args.secret,
+            issuer=args.issuer,
+            audience=args.audience,
+            kid=args.kid,
+            backdate_seconds=args.backdate_seconds,
         )
 
         # Output
@@ -281,7 +336,7 @@ def main():
             print(f"License written to: {output_path.absolute()}")
 
             # Print summary
-            print(f"\nLicense Summary:")
+            print("\nLicense Summary:")
             print(f"  Tier: {args.tier}")
             print(f"  Customer: {args.customer}")
             if args.organization:
@@ -293,7 +348,10 @@ def main():
 
             # Decode and show expiration
             claims = jwt.decode(token, options={"verify_signature": False})
-            exp_date = datetime.utcfromtimestamp(claims["exp"])
+            # [20251228_BUGFIX] Avoid deprecated datetime.utcfromtimestamp().
+            exp_date = datetime.fromtimestamp(claims["exp"], tz=timezone.utc).replace(
+                tzinfo=None
+            )
             print(f"  Expires: {exp_date.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
     except Exception as e:

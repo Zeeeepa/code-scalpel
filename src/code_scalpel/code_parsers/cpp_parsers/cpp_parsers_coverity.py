@@ -14,9 +14,9 @@ Coverity Parser - Deep Security and Quality Analysis
 """
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class DefectSeverity(Enum):

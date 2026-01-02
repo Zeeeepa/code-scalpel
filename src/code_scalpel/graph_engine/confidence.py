@@ -133,6 +133,10 @@ class EdgeType(Enum):
     STRING_LITERAL_MATCH = "string_literal_match"  # Heuristic based on string
     FIELD_ACCESS = "field_access"  # object.field
 
+    # [20251229_FEATURE] Semantic and logical relationships (Pro tier)
+    SEMANTIC_SIMILAR = "semantic_similar"  # Semantically related functions
+    LOGICAL_RELATED = "logical_related"  # Logical relationships (sibling, helper, etc.)
+
     # Low confidence (0.3-0.5)
     DYNAMIC_ROUTE = "dynamic_route"  # "/api/" + version + "/user"
     INDIRECT_CALL = "indirect_call"  # Callback, higher-order function

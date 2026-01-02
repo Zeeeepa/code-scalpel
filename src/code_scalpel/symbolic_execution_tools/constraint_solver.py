@@ -19,20 +19,13 @@ This solver ALWAYS returns Python-native types:
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import z3
-from z3 import (
-    ExprRef,
-    BoolRef,
-    Solver,
-    sat,
-    unsat,
-    Not,
-    simplify,
-)
+from z3 import BoolRef, ExprRef, Not, Solver, sat, simplify, unsat
 
 
 class SolverStatus(Enum):

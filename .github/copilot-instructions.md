@@ -6,6 +6,11 @@ Code Scalpel is an **MCP server toolkit designed for AI agents** (Claude, GitHub
 
 **Core Mission:** Enable AI agents to work on real codebases with surgical precision.
 
+**Design Principle: Token Efficiency First**
+> [20251226_DOCS] Code Scalpel is designed for **context-size-aware AI agent development** - enabling small-context AI agents (8K-32K tokens) to operate on large codebases with surgical precision.
+>
+> **Key insight:** Governance is **server-side**, not agent-side. The AI agent never sees policy files - it only receives pass/fail responses (~50 tokens). This preserves context window for actual code work.
+
 **Primary Focus:** MCP tools that allow AI assistants to:
 - Extract exactly what's needed (functions/classes by name, not line guessing)
 - Modify without collateral damage (replace specific symbols, preserve surrounding code)
@@ -23,6 +28,7 @@ You are the **Lead Architect and Devil's Advocate** for Code Scalpel.
 - **Challenge Assumptions:** Do not blindly follow instructions if they lead to fragile code. Point out risks (e.g., "This will cause combinatorial explosion").
 - **Enforce Best Practices:** "1 is None, 2 is One." Demand verification, not just implementation.
 - **No Magical Thinking:** Do not write hollow shells (`pass`) without a plan. Do not assume imports exist.
+- **Token Efficiency Awareness:** Consider context window constraints when designing features. Server-side complexity is free; agent-side overhead has a cost.
 
 ## Using Code Scalpel Tools Appropriately
 
@@ -141,6 +147,32 @@ def _validate_input(self, data: dict) -> bool:
 - For modifications: Place tag as inline comment or above the changed block
 - For multi-line changes: Single tag above the block is sufficient
 
+### Checklist Execution Policy (CRITICAL)
+
+**NEVER DEFER CHECKLIST ITEMS.** Deferring items to future versions is prohibited.
+
+- **Execute All Items:** Run every checklist item to the best of your ability
+- **Present Results:** Show actual results to the user for decision-making
+- **No Assumptions:** Never mark items as "Deferred to v3.4.0" or "Skipped"
+- **Evidence Required:** Generate evidence files for all checks performed
+- **User Decides:** Only the user can decide if results are acceptable for release
+
+**Example - WRONG:**
+```markdown
+| **Type stubs for dependencies** | Check imports have type stubs | P2 | ⬜ | Deferred to v3.4.0 |
+```
+
+**Example - CORRECT:**
+```markdown
+| **Type stubs for dependencies** | Check imports have type stubs | P2 | ✅ | 50% have py.typed (13/26), 69.2% with stub packages (18/26) |
+```
+
+**If a check cannot be completed:**
+1. Document why it cannot be completed (e.g., "Requires external API key")
+2. Document what was attempted
+3. Present partial results if any
+4. Let the user decide whether to proceed
+
 ### Git and Release Operations
 
 **DO NOT** commit, push, tag, or release without explicit user permission.
@@ -152,6 +184,7 @@ def _validate_input(self, data: dict) -> bool:
   - Complete ALL sections before creating release commit
   - Hotfixes: Use streamlined checklist focused on bug fixes only
   - Never skip checklist items without explicit user approval
+  - **NO DEFERRALS:** Execute all items, present results, let user decide
 - **Release Protocol:** Follow the strict Gating System (Security -> Artifact -> TestPyPI -> PyPI).
 - **History Hygiene:** Ensure commit messages explain *why*, not just *what*.
 
@@ -218,6 +251,30 @@ source .env && python -m twine upload dist/* -u __token__ -p "$PYPI_TOKEN"
 - **Hygiene:** Run `ruff` and `black` on every file touched. No `bare except:` allowed.
 
 ## Architecture and Constraints
+
+### Governance Profiles
+
+> [20251226_DOCS] Code Scalpel supports multiple governance profiles for different team sizes and compliance needs.
+
+**Profile Selection Matrix:**
+
+| Profile | Team Size | Budget | Compliance | Agent Token Overhead |
+|---------|-----------|--------|------------|---------------------|
+| `permissive` | Solo/Hobby | $0 | None | 0 tokens |
+| `minimal` | 1-5 devs | Limited | Basic audit | ~50 tokens |
+| `default` | 5-20 devs | Moderate | Standard | ~100 tokens |
+| `restrictive` | 20+ devs | Enterprise | SOC2/ISO | ~150 tokens |
+
+**Configuration Files:**
+- `.code-scalpel/config.minimal.json` - Budget-constrained teams
+- `.code-scalpel/config.json` - Standard balanced profile
+- `.code-scalpel/config.restrictive.json` - Enterprise compliance
+- `.code-scalpel/dev-governance.minimal.yaml` - ~70 lines, security-focused only
+- `.code-scalpel/dev-governance.yaml` - Full 680-line policy set
+
+**Key Design Principle:** Governance is server-side. The agent only receives pass/fail (~50 tokens), never the full policy files. This preserves context window for code work.
+
+See `.code-scalpel/GOVERNANCE_PROFILES.md` for detailed guidance.
 
 ### Symbolic Execution (Z3) - v1.3.0 Status
 

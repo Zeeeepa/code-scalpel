@@ -52,7 +52,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef
+    from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef
 
 
 @dataclass
@@ -139,7 +139,7 @@ def is_react_component(
     Returns:
         ReactComponentInfo with component metadata
     """
-    from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef
+    from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef
 
     name = node.name
     component_type = None

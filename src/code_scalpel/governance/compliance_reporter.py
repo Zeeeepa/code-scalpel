@@ -9,13 +9,13 @@ governance, security reviews, and regulatory audits.
 
 import json
 from collections import defaultdict
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
+from code_scalpel.policy_engine import PolicyEngine
 # [20251221_REFACTOR] v3.1.0 - Use policy_engine's full audit_log implementation
 from code_scalpel.policy_engine.audit_log import AuditLog
-from code_scalpel.policy_engine import PolicyEngine
 
 
 @dataclass
@@ -851,20 +851,20 @@ class ComplianceReporter:
         """
         # [20251216_FEATURE] PDF report rendering with charts and tables
         try:
-            from reportlab.lib.pagesizes import letter  # type: ignore[import-not-found]
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle  # type: ignore[import-not-found]
-            from reportlab.lib.units import inch  # type: ignore[import-not-found]
-            from reportlab.lib import colors  # type: ignore[import-not-found]
-            from reportlab.platypus import (  # type: ignore[import-not-found]
-                SimpleDocTemplate,
-                Paragraph,
-                Spacer,
-                Table,
-                TableStyle,
-                PageBreak,
-            )
-            from reportlab.lib.enums import TA_CENTER  # type: ignore[import-not-found]
             from io import BytesIO
+
+            from reportlab.lib import colors  # type: ignore[import-not-found]
+            from reportlab.lib.enums import \
+                TA_CENTER  # type: ignore[import-not-found]
+            from reportlab.lib.pagesizes import \
+                letter  # type: ignore[import-not-found]
+            from reportlab.lib.styles import (  # type: ignore[import-not-found]
+                ParagraphStyle, getSampleStyleSheet)
+            from reportlab.lib.units import \
+                inch  # type: ignore[import-not-found]
+            from reportlab.platypus import (  # type: ignore[import-not-found]
+                PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table,
+                TableStyle)
         except ImportError:
             # Fallback if reportlab is not installed
             return b"PDF generation requires reportlab package. Install with: pip install reportlab"

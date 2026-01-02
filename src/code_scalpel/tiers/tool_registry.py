@@ -181,7 +181,11 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
         description="Symbolic execution test generation",
         category="testing",
         parameters={
-            "code": {"type": "string", "required": True},
+            # [20251225_FEATURE] Align parameters with server signature (code or file_path).
+            "code": {"type": "string", "required": False},
+            "file_path": {"type": "string", "required": False},
+            "function_name": {"type": "string", "required": False},
+            "framework": {"type": "string", "required": False},
         },
     ),
     "simulate_refactor": MCPTool(
@@ -248,6 +252,20 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
         category="security",
         parameters={
             "file_path": {"type": "string", "required": True},
+        },
+    ),
+    # [20251228_FEATURE] Added code_policy_check tool (21st tool)
+    "code_policy_check": MCPTool(
+        name="code_policy_check",
+        tier="community",
+        description="Check code against style guides, best practices, and compliance standards",
+        category="compliance",
+        parameters={
+            "paths": {"type": "array", "required": True},
+            "rules": {"type": "array", "required": False},
+            "compliance_standards": {"type": "array", "required": False},
+            "custom_rules": {"type": "string", "required": False},
+            "generate_report": {"type": "boolean", "required": False},
         },
     ),
 }

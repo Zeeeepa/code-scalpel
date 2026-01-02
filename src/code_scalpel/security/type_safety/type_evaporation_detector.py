@@ -36,11 +36,13 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 # Type stubs for tree-sitter when not available
 if TYPE_CHECKING:
-    from tree_sitter import Language as TSLanguage, Node as TSNode, Parser as TSParser
+    from tree_sitter import Language as TSLanguage
+    from tree_sitter import Node as TSNode
+    from tree_sitter import Parser as TSParser
 else:
     TSLanguage = Any
     TSNode = Any
@@ -726,7 +728,8 @@ def analyze_type_evaporation_cross_file(
     Returns:
         CrossFileTypeEvaporationResult with correlated findings
     """
-    from code_scalpel.security.analyzers import SecurityAnalyzer  # [20251225_BUGFIX]
+    from code_scalpel.security.analyzers import \
+        SecurityAnalyzer  # [20251225_BUGFIX]
 
     # Analyze frontend
     detector = TypeEvaporationDetector()

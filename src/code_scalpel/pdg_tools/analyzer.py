@@ -6,7 +6,6 @@ from typing import Any, Optional
 
 import networkx as nx
 
-
 # [20251221_TODO] Add taint analysis improvements:
 #     - Support custom taint sources (config files, environment variables)
 #     - Implement context-sensitive taint tracking

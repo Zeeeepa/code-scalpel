@@ -14,9 +14,9 @@ Cppcheck Parser - Static Analysis for C/C++ Code
 """
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class CppcheckSeverity(Enum):

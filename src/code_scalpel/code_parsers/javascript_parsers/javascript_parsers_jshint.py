@@ -45,13 +45,13 @@ Future Enhancements:
     - Comparison with ESLint rules
 """
 
+import json
+import shutil
+import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Optional
-import json
-import subprocess
-import shutil
 
 
 class JSHintSeverity(Enum):

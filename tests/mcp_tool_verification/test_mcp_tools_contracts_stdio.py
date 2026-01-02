@@ -6,14 +6,12 @@ from datetime import timedelta
 from pathlib import Path
 
 import anyio
-from anyio.streams.text import TextReceiveStream
+import mcp.types as mcp_types
 import pytest
-
+from anyio.streams.text import TextReceiveStream
 from mcp import StdioServerParameters
 from mcp.client.session import ClientSession
 from mcp.shared.message import SessionMessage
-import mcp.types as mcp_types
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -51,6 +49,10 @@ class PolicyEngine:
 
     def run(self) -> str:
         return self.h.ping()
+
+def process_request(engine: PolicyEngine) -> str:
+    '''Standalone function for graph neighborhood testing.'''
+    return engine.run()
 """,
         encoding="utf-8",
     )
@@ -102,7 +104,8 @@ default allow = true
 
 
 def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
-    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
+    from code_scalpel.policy_engine.crypto_verify import \
+        CryptographicPolicyVerifier
 
     policy_files = ["policy.rego"]
     manifest = CryptographicPolicyVerifier.create_manifest(
@@ -118,7 +121,7 @@ def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
     )
 
 
-def _tool_json(result) -> dict:
+def _tool_envelope(result) -> dict:
     assert result.isError is False
     assert result.content, "Tool returned empty content"
     first = result.content[0]
@@ -132,14 +135,24 @@ def _tool_json(result) -> dict:
         ) from exc
 
     # [v3.2.8] Validate universal response envelope
-    assert "tier" in envelope, "Response missing 'tier' field"
-    assert "tool_version" in envelope, "Response missing 'tool_version' field"
-    assert "tool_id" in envelope, "Response missing 'tool_id' field"
-    assert "request_id" in envelope, "Response missing 'request_id' field"
-    assert "capabilities" in envelope, "Response missing 'capabilities' field"
-    assert "data" in envelope, "Response missing 'data' field"
+    for key in (
+        "tier",
+        "tool_version",
+        "tool_id",
+        "request_id",
+        "capabilities",
+        "duration_ms",
+        "error",
+        "upgrade_hints",
+        "data",
+    ):
+        assert key in envelope, f"Response missing '{key}' field"
 
-    # Return the data payload (unwrapped)
+    return envelope
+
+
+def _tool_json(result) -> dict:
+    envelope = _tool_envelope(result)
     return envelope["data"]
 
 
@@ -240,6 +253,8 @@ async def _session_for_project(tmp_path: Path):
 
     env = _pythonpath_env(repo_root)
     env["SCALPEL_MANIFEST_SECRET"] = policy_secret
+    # [20251226_BUGFIX] Set tier to enterprise for full feature testing
+    env["CODE_SCALPEL_TIER"] = "enterprise"
 
     params = StdioServerParameters(
         command=sys.executable,
@@ -257,7 +272,7 @@ async def test_tool_analyze_extract_update_and_context(tmp_path: Path):
     with anyio.fail_after(180):
         async with _session_for_project(tmp_path) as (session, paths):
             tools = await session.list_tools()
-            assert len({t.name for t in tools.tools}) == 20
+            assert len({t.name for t in tools.tools}) == 22
 
             ok = await session.call_tool(
                 "analyze_code",
@@ -273,9 +288,12 @@ async def test_tool_analyze_extract_update_and_context(tmp_path: Path):
                 arguments={"code": "def oops(:\n  pass\n", "language": "python"},
                 read_timeout_seconds=timedelta(seconds=30),
             )
-            bad_json = _tool_json(bad)
+            bad_env = _tool_envelope(bad)
+            bad_json = bad_env["data"]
             assert bad_json.get("success") is False
-            assert bad_json.get("error")
+            err = bad_env.get("error")
+            assert isinstance(err, dict)
+            assert isinstance(err.get("error"), str) and err.get("error")
 
             ctx = await session.call_tool(
                 "get_file_context",
@@ -494,7 +512,7 @@ async def test_tool_graphs_cross_file_and_policy(tmp_path: Path):
             neigh_bad = await session.call_tool(
                 "get_graph_neighborhood",
                 arguments={
-                    "center_node_id": "python::pkg.a::function::run",
+                    "center_node_id": "python::pkg.a::function::process_request",
                     "direction": "sideways",
                     "project_root": str(paths["project_root"]),
                 },
@@ -507,7 +525,7 @@ async def test_tool_graphs_cross_file_and_policy(tmp_path: Path):
             neigh_ok = await session.call_tool(
                 "get_graph_neighborhood",
                 arguments={
-                    "center_node_id": "python::pkg.a::function::run",
+                    "center_node_id": "python::pkg.a::function::process_request",
                     "k": 1,
                     "max_nodes": 25,
                     "direction": "both",

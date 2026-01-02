@@ -19,7 +19,7 @@ except ImportError:
     ASTValidator = None
 
 try:
-    from .utils import ASTUtils, is_constant, get_node_type, get_all_names
+    from .utils import ASTUtils, get_all_names, get_node_type, is_constant
 except ImportError:
     ASTUtils = None
     is_constant = None
@@ -52,14 +52,9 @@ def visualize_ast(tree, output_file="ast_visualization", format="png", view=True
 
 # [20251213_FEATURE] v1.5.1 - Import resolution for cross-file analysis
 try:
-    from .import_resolver import (
-        ImportResolver,
-        ImportInfo,
-        ImportType,
-        SymbolDefinition,
-        CircularImport,
-        ImportGraphResult,
-    )
+    from .import_resolver import (CircularImport, ImportGraphResult,
+                                  ImportInfo, ImportResolver, ImportType,
+                                  SymbolDefinition)
 except ImportError:
     ImportResolver = None
     ImportInfo = None
@@ -70,11 +65,8 @@ except ImportError:
 
 # [20251213_FEATURE] v1.5.1 - Cross-file extraction
 try:
-    from .cross_file_extractor import (
-        CrossFileExtractor,
-        ExtractedSymbol,
-        ExtractionResult,
-    )
+    from .cross_file_extractor import (CrossFileExtractor, ExtractedSymbol,
+                                       ExtractionResult)
 except ImportError:
     CrossFileExtractor = None
     ExtractedSymbol = None

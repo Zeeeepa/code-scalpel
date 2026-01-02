@@ -21,10 +21,10 @@ Example:
 """
 
 import ast
-from typing import Dict, Optional, Any, List
-from dataclasses import dataclass, field
-from collections import defaultdict
 import logging
+from collections import defaultdict
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

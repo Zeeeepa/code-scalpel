@@ -11,10 +11,8 @@ from pathlib import Path
 import anyio
 import httpx
 import pytest
-
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamable_http_client
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -146,7 +144,8 @@ default allow = true
 
 
 def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
-    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
+    from code_scalpel.policy_engine.crypto_verify import \
+        CryptographicPolicyVerifier
 
     policy_files = ["policy.rego"]
     manifest = CryptographicPolicyVerifier.create_manifest(
@@ -258,7 +257,7 @@ async def test_http_contract_analyze_extract_and_policy(tmp_path: Path):
     with anyio.fail_after(240):
         async with _http_session_for_project(tmp_path) as (session, paths):
             tools = await session.list_tools()
-            assert len({t.name for t in tools.tools}) == 20
+            assert len({t.name for t in tools.tools}) == 22
 
             ok = await session.call_tool(
                 "analyze_code",

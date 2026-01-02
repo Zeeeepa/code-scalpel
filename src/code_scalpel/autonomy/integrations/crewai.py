@@ -92,7 +92,7 @@ This module provides CrewAI agents and tools that:
 """
 
 try:
-    from crewai import Agent, Task, Crew
+    from crewai import Agent, Crew, Task
     from crewai.tools import BaseTool
     from pydantic import BaseModel, Field
 except ImportError as e:

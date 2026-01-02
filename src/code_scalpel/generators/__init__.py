@@ -93,8 +93,8 @@ ENTERPRISE TIER - Distributed & Federated Generators
 75. Add test generation health monitoring
 """
 
-from .test_generator import TestGenerator, GeneratedTestSuite
-from .refactor_simulator import RefactorSimulator, RefactorResult
+from .refactor_simulator import RefactorResult, RefactorSimulator
+from .test_generator import GeneratedTestSuite, TestGenerator
 
 __all__ = [
     "TestGenerator",

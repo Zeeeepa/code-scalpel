@@ -21,12 +21,12 @@ Usage:
     from code_scalpel.integrations.protocol_analyzers.frontend import FrontendInputTracker
 """
 
+from .frontend import FrontendAnalysisResult, FrontendInputTracker, InputSource
 # [20251225_FEATURE] Re-export main classes from each subdirectory
-from .graphql import GraphQLSchemaTracker, GraphQLSchema, GraphQLSchemaDrift
-from .grpc import GrpcContractAnalyzer, GrpcContract, GrpcService
-from .kafka import KafkaTaintTracker, KafkaAnalysisResult, KafkaTaintBridge
-from .schema import SchemaDriftDetector, SchemaDriftResult, ProtobufSchema
-from .frontend import FrontendInputTracker, FrontendAnalysisResult, InputSource
+from .graphql import GraphQLSchema, GraphQLSchemaDrift, GraphQLSchemaTracker
+from .grpc import GrpcContract, GrpcContractAnalyzer, GrpcService
+from .kafka import KafkaAnalysisResult, KafkaTaintBridge, KafkaTaintTracker
+from .schema import ProtobufSchema, SchemaDriftDetector, SchemaDriftResult
 
 __all__ = [
     # GraphQL

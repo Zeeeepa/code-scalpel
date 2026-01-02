@@ -26,6 +26,7 @@
 | `scan_dependencies` | 50 deps | Unlimited | + Auto-remediation |
 | `get_cross_file_dependencies` | depth=1 | depth=3 | Unlimited depth |
 | `cross_file_security_scan` | depth=2, 50 modules | depth=5, 500 modules | Unlimited |
+| `rename_symbol` | Definition rename only | + Cross-file reference/import updates (bounded) | + Org-wide/unlimited scope |
 
 All other tools: **Fully available at all tiers** (no restrictions).
 
@@ -112,6 +113,25 @@ extract_code(
 | **Restrictions** | None | None | None |
 
 **Summary**: Fully available at all tiers with no restrictions.
+
+---
+
+### 3b. `rename_symbol` - Safe Symbol Renaming
+
+**Purpose**: Rename a function, class, or method safely.
+
+| Capability | Community | Pro | Enterprise |
+|------------|-----------|-----|------------|
+| **Availability** | ✅ | ✅ | ✅ |
+| Definition rename | ✅ | ✅ | ✅ |
+| Backup creation | ✅ | ✅ | ✅ |
+| Cross-file reference updates | ❌ | ✅ bounded | ✅ unlimited |
+| Import updates | ❌ | ✅ bounded | ✅ unlimited |
+
+**Summary**:
+- Community stays single-file (definition-only).
+- Pro adds conservative cross-file reference/import updates within configured limits.
+- Enterprise removes those limits (org-wide/unlimited scope by omission in `limits.toml`).
 
 ---
 

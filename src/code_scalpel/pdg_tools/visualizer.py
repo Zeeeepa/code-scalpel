@@ -1,12 +1,11 @@
-import json
 import base64
+import json
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
 import networkx as nx
 from graphviz import Digraph
-
 
 # [20251221_TODO] Add interactive visualization framework:
 #     - Build web UI for PDG exploration (React/Vue)

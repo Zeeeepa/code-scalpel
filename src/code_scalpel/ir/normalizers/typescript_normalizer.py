@@ -17,15 +17,8 @@ The normalizer uses tree-sitter-typescript for parsing, which handles both
 
 from __future__ import annotations
 
-from ..nodes import (
-    IRFunctionDef,
-    IRClassDef,
-    IRExprStmt,
-    IRName,
-    IRCall,
-    IRConstant,
-    IRExpr,
-)
+from ..nodes import (IRCall, IRClassDef, IRConstant, IRExpr, IRExprStmt,
+                     IRFunctionDef, IRName)
 from .javascript_normalizer import JavaScriptNormalizer
 
 # [20251215_REFACTOR] Trim unused imports and locals for lint compliance (no behavior change).

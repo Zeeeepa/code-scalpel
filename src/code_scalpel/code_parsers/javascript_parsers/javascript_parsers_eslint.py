@@ -53,14 +53,14 @@ Future Enhancements:
     - Performance timing extraction
 """
 
+import json
+import re
+import shutil
+import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
-import json
-import re
-import subprocess
-import shutil
 
 
 class ESLintSeverity(Enum):

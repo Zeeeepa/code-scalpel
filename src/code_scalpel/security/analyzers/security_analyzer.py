@@ -25,27 +25,38 @@ Usage:
 """
 
 from __future__ import annotations
+
 import ast
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, cast
 
-from .taint_tracker import (
-    TaintTracker,
-    TaintInfo,
-    TaintLevel,
-    TaintSource,
-    SecuritySink,
-    Vulnerability,
-    TAINT_SOURCE_PATTERNS,
-    SINK_PATTERNS,
-    SANITIZER_PATTERNS,
-    SANITIZER_REGISTRY,
-    load_sanitizers_from_config,
-    detect_ssr_vulnerabilities,  # [20251216_FEATURE] v2.2.0
-)
+
+class TaintFlowDict(TypedDict):
+    """Taint flow information for a variable."""
+
+    source: str  # TaintSource name
+    level: str  # TaintLevel name
+    path: list[str]  # propagation path
+
+
+class SecurityAnalysisResultDict(TypedDict):
+    """Security analysis result with vulnerabilities and taint flows."""
+
+    vulnerability_count: int
+    vulnerabilities: list[dict[str, Any]]  # VulnerabilityDict from taint_tracker
+    taint_flows: dict[str, TaintFlowDict]
+    analyzed_lines: int
+    functions_analyzed: list[str]
+
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..secrets.secret_scanner import SecretScanner
+from .taint_tracker import \
+    detect_ssr_vulnerabilities  # [20251216_FEATURE] v2.2.0
+from .taint_tracker import (SANITIZER_PATTERNS, SANITIZER_REGISTRY,
+                            SINK_PATTERNS, TAINT_SOURCE_PATTERNS, SecuritySink,
+                            TaintInfo, TaintLevel, TaintSource, TaintTracker,
+                            Vulnerability, load_sanitizers_from_config)
 
 # Auto-load custom sanitizers from pyproject.toml on module import
 _config_loaded = False
@@ -199,22 +210,25 @@ class SecurityAnalysisResult:
             v for v in self.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND
         ]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> SecurityAnalysisResultDict:
         """Convert to dictionary for JSON serialization."""
-        return {
-            "vulnerability_count": self.vulnerability_count,
-            "vulnerabilities": [v.to_dict() for v in self.vulnerabilities],
-            "taint_flows": {
-                name: {
-                    "source": info.source.name,
-                    "level": info.level.name,
-                    "path": info.propagation_path,
-                }
-                for name, info in self.taint_flows.items()
+        return cast(
+            SecurityAnalysisResultDict,
+            {
+                "vulnerability_count": self.vulnerability_count,
+                "vulnerabilities": [v.to_dict() for v in self.vulnerabilities],
+                "taint_flows": {
+                    name: {
+                        "source": info.source.name,
+                        "level": info.level.name,
+                        "path": list(info.propagation_path),
+                    }
+                    for name, info in self.taint_flows.items()
+                },
+                "analyzed_lines": self.analyzed_lines,
+                "functions_analyzed": self.functions_analyzed,
             },
-            "analyzed_lines": self.analyzed_lines,
-            "functions_analyzed": self.functions_analyzed,
-        }
+        )
 
     def summary(self) -> str:
         """Get a human-readable summary."""

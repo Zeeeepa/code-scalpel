@@ -40,7 +40,7 @@ Code Scalpel uses **three complementary policy systems**:
 **Enforced by:** `PolicyEngine` class (OPA/Rego)  
 **When:** Before every AI agent code modification
 
-### 2. Change Budget Policies (`budgets.yaml`)
+### 2. Change Budget Policies (`budget.yaml`)
 **What:** Govern how much code can be changed  
 **Examples:** Max files (10), max lines (500), forbidden paths  
 **Enforced by:** `ChangeBudget` class  
@@ -60,17 +60,66 @@ Code Scalpel uses **three complementary policy systems**:
 
 ## Directory Structure
 
+> [20251230_DOCS] **Directory contract:** `.code-scalpel/` is an optional, project-local configuration directory.
+> 
+> - **Zero-config mode:** MCP tools can run without `.code-scalpel/` (they fall back to defaults).
+> - **Governed mode (recommended):** Add `.code-scalpel/` to your repo to make behavior deterministic and auditable.
+
+### What belongs in `.code-scalpel/` (for tool use)
+
+**Required (for governed mode)**
+- `config.json` - Governance limits (blast radius, critical paths, etc.) loaded by the governance subsystem
+- `budget.yaml` - Change budgeting limits loaded by `load_budget_config()`
+- `policy.yaml` - Policy engine rules (OPA/Rego) for allow/deny decisions
+
+**Recommended (common production setup)**
+- `limits.toml` - Tier/tool capability limits (project-level); can be overridden by `limits.local.toml` (gitignored)
+- `response_config.json` - MCP response shaping for token efficiency
+- `project-structure.yaml` - Project structure expectations used by project-structure policies
+- `dev-governance.yaml` / `dev-governance.minimal.yaml` - Agent development governance policies
+- `policies/` - Rego policy packs referenced by `policy.yaml`
+- `policy.manifest.json` - Policy manifest used for policy integrity workflows
+
+**Templates / examples (committed)**
+- `templates/` - Copy-ready example files (e.g., `templates/policy.yaml.example`)
+
+**Generated at runtime (do not commit)**
+- `audit.log`, `audit.jsonl` - Audit trails
+- `autonomy_audit/` - Autonomy audit artifacts
+- `complexity_history.json` - Local complexity tracking
+- `override_response.json` - Temporary human-override response file (created/consumed during override flow)
+
+**Licensing (do not commit)**
+- `license/` - License files and local runtime state (e.g., `license/license.jwt`, `license/license_state.json`)
+- `archive/` - License downloads / historical license artifacts
+
+**Never commit (secrets/keys)**
+- `*.pem`, `*.key`, `*.jwk.json` and other private key material (example: `development-2025-01.private.pem`)
+- Any token/secret files placed under `.code-scalpel/`
+
+### Current layout (v3.3.0)
+
 ```
 .code-scalpel/
 ├── README.md                  # This file
-├── policy.yaml                # Code modification policies (OPA/Rego)
-├── budgets.yaml               # Change budget constraints
-├── config.yaml                # Unified governance configuration
-├── dev-governance.yaml        # Development governance (AI behavior) ⭐ NEW
-├── audit.log                  # Policy decision audit trail
-├── manifest.json              # Cryptographic manifest
-└── .secrets/
-    └── hmac.key               # HMAC signing key (DO NOT COMMIT)
+├── config.json                # Governance config (primary)
+├── config.*.json              # Optional profiles (restrictive/permissive/testing/ci-cd/etc.)
+├── budget.yaml                # Change budget constraints
+├── policy.yaml                # Policy engine configuration (OPA/Rego)
+├── policies/                  # Rego packs referenced by policy.yaml
+├── policy.manifest.json       # Policy integrity manifest (optional)
+├── limits.toml                # Tier/tool limits (project-level)
+├── response_config.json       # MCP response shaping
+├── response_config.schema.json
+├── project-structure.yaml     # Project structure expectations
+├── dev-governance.yaml        # Development governance policies
+├── dev-governance.minimal.yaml
+├── templates/                 # Copy-ready example files
+├── license/                   # Local license + state (do not commit)
+├── archive/                   # License downloads (do not commit)
+├── audit.log                  # Generated audit log (do not commit)
+├── audit.jsonl                # Generated structured audit (do not commit)
+└── autonomy_audit/            # Generated autonomy audit artifacts (do not commit)
 ```
 
 ## Development Governance
@@ -202,7 +251,7 @@ Both systems work together:
 
 1. **Copy the example policy:**
    ```bash
-   cp .code-scalpel/policy.yaml.example .code-scalpel/policy.yaml
+  cp .code-scalpel/templates/policy.yaml.example .code-scalpel/policy.yaml
    ```
 
 2. **Install OPA CLI:**
@@ -255,13 +304,13 @@ policies:
 | File | Purpose |
 |------|---------|
 | `policy.yaml` | Active production policies (create from example) |
-| `policy.yaml.example` | Template with production-ready policies |
-| `policy_override.yaml` | Temporary policy overrides (time-limited) |
-| `policy_test.yaml` | Test policies for validation |
+| `templates/policy.yaml.example` | Template with production-ready policies |
+| `templates/policy_override.yaml` | Temporary policy overrides (copy into place if needed) |
+| `templates/policy_test.yaml` | Test policies for validation (copy into place if needed) |
 
 ### Example Policies
 
-See `policy.yaml.example` for production-ready templates:
+See `templates/policy.yaml.example` for production-ready templates:
 - **SQL Injection Prevention** - Detect unsafe SQL execution
 - **Spring Security Enforcement** (Java) - Require @PreAuthorize annotations
 - **Safe File Operations** - Prevent path traversal vulnerabilities
@@ -2032,9 +2081,11 @@ SCALPEL_CONFIG=.code-scalpel/config.json code-scalpel --validate-config
    ```
    project/
    ├── .code-scalpel/              # Policy engine (v2.5.0)
-   │   ├── policy.yaml        # OPA/Rego policies
-   │   ├── policy_test.yaml
-   │   └── README.md
+  │   ├── policy.yaml             # OPA/Rego policies (active)
+  │   ├── templates/              # Copy-ready templates/examples
+  │   │   ├── policy.yaml.example
+  │   │   └── policy_test.yaml
+  │   └── README.md
    └── .code-scalpel/         # Governance config (v3.0.0)
        ├── config.json        # Active config
        ├── config.restrictive.json

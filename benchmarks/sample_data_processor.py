@@ -512,9 +512,10 @@ class DataCache:
 # Utility functions
 
 
-def hash_row(row: dict) -> str:
-    """Hash a row for deduplication. [TEST]"""
-    return hashlib.md5(str(sorted(row.items())).encode()).hexdigest()
+def hash_row(row_data):
+    """Hash a row of data using SHA256."""
+    import hashlib
+    return hashlib.sha256(str(row_data).encode()).hexdigest()
 
 
 def merge_rows(
@@ -563,10 +564,12 @@ def unused_utility_function(data: List[DataRow]) -> Dict[str, int]:
     return dict(counts)
 
 
-@lru_cache(maxsize=128)
 def parse_date(date_str: str, format: str = "%Y-%m-%d") -> datetime:
-    """Parse date string with caching."""
-    return datetime.strptime(date_str, format)
+    """Parse date string with improved error handling."""
+    try:
+        return datetime.strptime(date_str, format)
+    except ValueError as e:
+        raise ValidationError(f"Invalid date format: {e}")
 
 
 def with_retry(max_attempts: int = 3, delay: float = 1.0):

@@ -96,7 +96,19 @@ v0.3.1: Now includes taint-based SecurityAnalyzer and SymbolicAnalyzer.
 import asyncio
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Mapping, Optional, Sequence, TypedDict
+
+
+class RefactorResultDict(TypedDict, total=False):
+    """Refactor result dictionary for JSON serialization."""
+
+    original_code: str
+    analysis: dict[str, Any]
+    issues: list[dict[str, Any]]
+    suggestions: list[str]
+    refactored_code: str | None
+    success: bool
+    error: str | None
 
 
 @dataclass
@@ -111,7 +123,7 @@ class RefactorResult:
     success: bool = True
     error: Optional[str] = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> RefactorResultDict:
         """Convert result to dictionary."""
         return {
             "original_code": self.original_code,
@@ -425,7 +437,8 @@ class CrewAIScalpel:
         try:
             # Use the new taint-based SecurityAnalyzer (v0.3.0+)
             try:
-                from ..symbolic_execution_tools import analyze_security as taint_analyze
+                from ..symbolic_execution_tools import \
+                    analyze_security as taint_analyze
 
                 result = taint_analyze(code)
 
@@ -469,7 +482,9 @@ class CrewAIScalpel:
                 "risk_level": "unknown",
             }
 
-    def _calculate_risk_from_vulns(self, vulnerabilities: list[dict]) -> str:
+    def _calculate_risk_from_vulns(
+        self, vulnerabilities: Sequence[Mapping[str, Any]]
+    ) -> str:
         """Calculate risk level from vulnerability list."""
         if not vulnerabilities:
             return "low"

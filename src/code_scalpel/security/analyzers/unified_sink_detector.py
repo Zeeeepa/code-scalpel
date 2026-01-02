@@ -15,16 +15,23 @@ Key Features:
 """
 
 from __future__ import annotations
+
 import ast
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TypedDict
 
-from .taint_tracker import (
-    SecuritySink,
-    TaintInfo,
-    TaintLevel,
-)
+
+class CoverageReportDict(TypedDict, total=False):
+    """Coverage report for security sinks."""
+
+    total_patterns: int
+    by_language: dict[str, int]
+    by_vulnerability: dict[str, dict[str, int]]
+    owasp_coverage: dict[str, dict[str, Any]]
+
+
+from .taint_tracker import SecuritySink, TaintInfo, TaintLevel
 
 
 class Language(Enum):
@@ -83,6 +90,11 @@ class DetectedSink:
     column: int
     code_snippet: str
     vulnerability_type: str = ""
+
+    @property
+    def name(self) -> str:
+        """[20251228_BUGFIX] Backwards-compatible alias for sink name."""
+        return self.pattern.rsplit(".", 1)[-1]
 
 
 # TODO: Add emerging vulnerability types
@@ -1050,13 +1062,21 @@ class UnifiedSinkDetector:
         if language not in ["python", "java", "typescript", "javascript"]:
             raise ValueError(f"Unsupported language: {language}")
 
+        # [20251228_BUGFIX] Return a list-like object with `.sinks` for compatibility.
+        class _DetectedSinkList(list):
+            @property
+            def sinks(self):  # type: ignore[override]
+                return self
+
         # For Python, we can use AST parsing
         if language == "python":
-            return self._detect_python_sinks(code, min_confidence)
-        else:
-            # For other languages, pattern-based detection
-            # This would require tree-sitter or similar for full AST support
-            return self._detect_pattern_sinks(code, language, min_confidence)
+            return _DetectedSinkList(self._detect_python_sinks(code, min_confidence))
+
+        # For other languages, pattern-based detection
+        # This would require tree-sitter or similar for full AST support
+        return _DetectedSinkList(
+            self._detect_pattern_sinks(code, language, min_confidence)
+        )
 
     def _detect_python_sinks(
         self, code: str, min_confidence: float
@@ -1234,14 +1254,14 @@ class UnifiedSinkDetector:
                 return category
         return None
 
-    def get_coverage_report(self) -> Dict[str, Any]:
+    def get_coverage_report(self) -> CoverageReportDict:
         """
         Generate a coverage report showing all supported patterns.
 
         Returns:
             Dictionary with coverage statistics and details
         """
-        report = {
+        report: CoverageReportDict = {
             "total_patterns": 0,
             "by_language": {},
             "by_vulnerability": {},

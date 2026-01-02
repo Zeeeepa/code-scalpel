@@ -846,10 +846,8 @@ class UnifiedExtractor:
         """List symbols in JS/TS/Java code."""
         # Delegate to polyglot if available
         try:
-            from code_scalpel.polyglot import (
-                PolyglotExtractor,
-                Language as PolyglotLang,
-            )
+            from code_scalpel.polyglot import Language as PolyglotLang
+            from code_scalpel.polyglot import PolyglotExtractor
 
             lang_map = {
                 Language.JAVASCRIPT: PolyglotLang.JAVASCRIPT,
@@ -1409,10 +1407,8 @@ class UnifiedExtractor:
         - TODO: Add async function context awareness
         - TODO: Support Protocol and ABC extraction
         """
-        from code_scalpel.surgical_extractor import (
-            SurgicalExtractor,
-            ExtractionResult,
-        )
+        from code_scalpel.surgical_extractor import (ExtractionResult,
+                                                     SurgicalExtractor)
 
         try:
             extractor = SurgicalExtractor(self.code, self.file_path)
@@ -1522,7 +1518,15 @@ class UnifiedExtractor:
         - TODO: Support extracting from .vue SFC files
         - TODO: Add context extraction for JS/TS
         """
-        from code_scalpel.polyglot import PolyglotExtractor, Language as PolyglotLang
+        # [20251228_BUGFIX] Avoid deprecated code_scalpel.polyglot re-export.
+        # Prefer the consolidated implementation in code_parsers/.
+        try:
+            from code_scalpel.code_parsers import PolyglotExtractor
+            from code_scalpel.code_parsers import \
+                PolyglotLanguage as PolyglotLang
+        except Exception:  # pragma: no cover
+            from code_scalpel.polyglot import Language as PolyglotLang
+            from code_scalpel.polyglot import PolyglotExtractor
 
         try:
             # Map unified language to polyglot language

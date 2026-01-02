@@ -7,18 +7,10 @@ This module provides protobuf schema parsing and drift detection:
 - drift_detector.py: Protocol buffer schema comparison and change detection
 """
 
-from .drift_detector import (
-    SchemaDriftDetector,
-    SchemaDriftResult,
-    SchemaChange,
-    ProtobufSchema,
-    ProtobufMessage,
-    ProtobufField,
-    ProtobufEnum,
-    ProtobufParser,
-    ChangeType,
-    ChangeSeverity,
-)
+from .drift_detector import (ChangeSeverity, ChangeType, ProtobufEnum,
+                             ProtobufField, ProtobufMessage, ProtobufParser,
+                             ProtobufSchema, SchemaChange, SchemaDriftDetector,
+                             SchemaDriftResult)
 
 __all__ = [
     "SchemaDriftDetector",

@@ -137,8 +137,9 @@ TODO: Performance optimizations
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Union
 from enum import Enum
+from typing import Any, Dict, List, Union
+
 import z3
 
 

@@ -1,0 +1,179 @@
+{
+  "timestamp": "2026-01-01T22:29:09.627191+00:00",
+  "total_dependencies": 26,
+  "with_type_info": 13,
+  "percentage_typed": 50.0,
+  "inline_typed": [
+    {
+      "package": "PyJWT",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "anthropic",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "crewai",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "cryptography",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "flask",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "langchain",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "mcp",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "openai",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "pydantic",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "structlog",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "tree-sitter",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "urllib3",
+      "status": "py.typed marker"
+    },
+    {
+      "package": "uvicorn",
+      "status": "py.typed marker"
+    }
+  ],
+  "stub_files": [],
+  "missing_types": [
+    {
+      "package": "astor",
+      "status": "no type info"
+    },
+    {
+      "package": "defusedxml",
+      "status": "no type info"
+    },
+    {
+      "package": "esprima",
+      "status": "no type info"
+    },
+    {
+      "package": "graphviz",
+      "status": "no type info"
+    },
+    {
+      "package": "javalang",
+      "status": "no type info"
+    },
+    {
+      "package": "langgraph",
+      "status": "no type info"
+    },
+    {
+      "package": "matplotlib",
+      "status": "no type info"
+    },
+    {
+      "package": "networkx",
+      "status": "no type info"
+    },
+    {
+      "package": "plotly",
+      "status": "no type info"
+    },
+    {
+      "package": "pyyaml",
+      "status": "no type info"
+    },
+    {
+      "package": "requests",
+      "status": "no type info"
+    },
+    {
+      "package": "tqdm",
+      "status": "no type info"
+    },
+    {
+      "package": "z3-solver",
+      "status": "no type info"
+    }
+  ],
+  "errors": [],
+  "stub_package_availability": {
+    "astor": {
+      "stub_package": "types-astor",
+      "available": false
+    },
+    "defusedxml": {
+      "stub_package": "types-defusedxml",
+      "available": true
+    },
+    "esprima": {
+      "stub_package": "types-esprima",
+      "available": false
+    },
+    "graphviz": {
+      "stub_package": "types-graphviz",
+      "available": false
+    },
+    "javalang": {
+      "stub_package": "types-javalang",
+      "available": false
+    },
+    "langgraph": {
+      "stub_package": "types-langgraph",
+      "available": false
+    },
+    "matplotlib": {
+      "stub_package": "types-matplotlib",
+      "available": false
+    },
+    "networkx": {
+      "stub_package": "types-networkx",
+      "available": true
+    },
+    "plotly": {
+      "stub_package": "types-plotly",
+      "available": false
+    },
+    "pyyaml": {
+      "stub_package": "types-pyyaml",
+      "available": true
+    },
+    "requests": {
+      "stub_package": "types-requests",
+      "available": true
+    },
+    "tqdm": {
+      "stub_package": "types-tqdm",
+      "available": true
+    },
+    "z3-solver": {
+      "stub_package": "types-z3-solver",
+      "available": false
+    }
+  },
+  "stub_packages_available": 5,
+  "no_stubs_available": 8,
+  "assessment": {
+    "status": "\u2705 PASSED",
+    "current_percentage": 50.0,
+    "potential_percentage": 69.23,
+    "untyped_without_stubs": 8,
+    "note": "50.0% dependencies have type information (69.2% with stubs)"
+  }
+}

@@ -17,9 +17,9 @@ import os
 import subprocess
 import sys
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from .. import base_parser
 

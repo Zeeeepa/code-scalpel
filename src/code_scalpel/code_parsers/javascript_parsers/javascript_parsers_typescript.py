@@ -61,14 +61,14 @@ Future Enhancements:
     - Module augmentation detection
 """
 
+import re
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional, Union
-import subprocess
-import shutil
-import tempfile
-import re
 
 
 class TypeKind(Enum):

@@ -1,0 +1,134 @@
+[
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 15,
+      "row": 91
+    },
+    "filename": "/mnt/k/backup/Develop/code-scalpel/tests/core/test_architectural_rules.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 18,
+            "row": 91
+          },
+          "location": {
+            "column": 9,
+            "row": 91
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `result`"
+    },
+    "location": {
+      "column": 9,
+      "row": 91
+    },
+    "message": "Local variable `result` is assigned to but never used",
+    "noqa_row": 91,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 12,
+      "row": 145
+    },
+    "filename": "/mnt/k/backup/Develop/code-scalpel/tests/core/test_config_loader.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 15,
+            "row": 145
+          },
+          "location": {
+            "column": 5,
+            "row": 145
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `limits1`"
+    },
+    "location": {
+      "column": 5,
+      "row": 145
+    },
+    "message": "Local variable `limits1` is assigned to but never used",
+    "noqa_row": 145,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 18,
+      "row": 523
+    },
+    "filename": "/mnt/k/backup/Develop/code-scalpel/tests/licensing/test_jwt_validator.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 21,
+            "row": 523
+          },
+          "location": {
+            "column": 9,
+            "row": 523
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `validator`"
+    },
+    "location": {
+      "column": 9,
+      "row": 523
+    },
+    "message": "Local variable `validator` is assigned to but never used",
+    "noqa_row": 523,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 20,
+      "row": 736
+    },
+    "filename": "/mnt/k/backup/Develop/code-scalpel/tests/security/test_refactor_simulator.py",
+    "fix": {
+      "applicability": "unsafe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 23,
+            "row": 736
+          },
+          "location": {
+            "column": 9,
+            "row": 736
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `safe_result`"
+    },
+    "location": {
+      "column": 9,
+      "row": 736
+    },
+    "message": "Local variable `safe_result` is assigned to but never used",
+    "noqa_row": 736,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  }
+]

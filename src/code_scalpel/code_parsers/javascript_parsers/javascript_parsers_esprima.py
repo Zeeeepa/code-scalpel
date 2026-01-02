@@ -66,18 +66,17 @@ Future Enhancements:
     - Design pattern detection improvements
 """
 
+import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Optional, Set
-import math
 
 import esprima  # type: ignore[import-untyped]
 import esprima.error_handler  # type: ignore[import-untyped]
 import esprima.nodes  # type: ignore[import-untyped]
 
 from ..base_parser import BaseParser, Language, ParseResult, PreprocessorConfig
-
 
 # Type aliases for esprima nodes
 JSNode = Any  # esprima.nodes.Node
@@ -1399,7 +1398,10 @@ class JavaScriptParser(BaseParser):
         elif isinstance(node, dict):
             children.extend([v for k, v in node.items() if isinstance(v, (dict, list))])
         elif isinstance(node, esprima.nodes.Node):
-            for field in node.__dict__.values():
+            for key, field in node.__dict__.items():
+                # Prevent cycles after `_set_parent_nodes` attaches back-references.
+                if key == "parent":
+                    continue
                 if isinstance(field, (list, dict, esprima.nodes.Node)):
                     children.append(field)
         return children
@@ -1411,6 +1413,13 @@ class JavaScriptParser(BaseParser):
         :param node: The current AST node.
         :param parent: The parent node.
         """
-        node.parent = parent  # type: ignore[attr-defined]
+        # Some children are container values (lists/dicts) rather than AST nodes.
+        # Only actual Esprima nodes can carry a `.parent` attribute.
+        if isinstance(node, esprima.nodes.Node):
+            node.parent = parent  # type: ignore[attr-defined]
+            next_parent: Optional[JSNode] = node
+        else:
+            next_parent = parent
+
         for child in self.get_children(node):
-            self._set_parent_nodes(child, node)
+            self._set_parent_nodes(child, next_parent)

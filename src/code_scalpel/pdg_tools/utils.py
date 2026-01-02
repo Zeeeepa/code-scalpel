@@ -7,7 +7,6 @@ from typing import Any, Optional
 
 import networkx as nx
 
-
 # [20251221_TODO] Add PDG serialization formats:
 #     - Implement efficient binary PDG format
 #     - Support compressed PDG storage for distribution

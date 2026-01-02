@@ -8,6 +8,9 @@ include README.md
 include LICENSE
 include pyproject.toml
 
+# [20251225_CONFIG] Include tier limits configuration
+include .code-scalpel/limits.toml
+
 # Include the actual source code
 recursive-include src *.py
 recursive-include src *.pyi

@@ -21,15 +21,12 @@ Example:
 
 import ast
 import os
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Union, Tuple
-from dataclasses import dataclass, field
 from collections import deque
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Union
 
-from .import_resolver import (
-    ImportResolver,
-    ImportInfo,
-)
+from .import_resolver import ImportInfo, ImportResolver
 
 
 @dataclass

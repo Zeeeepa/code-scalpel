@@ -92,23 +92,17 @@ v3.0.0 "Autonomy" Release - Config-driven governance integration.
 - [ ] Implement advanced policy engine
 """
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Dict, Optional, Callable, Any
-import logging
+from typing import Any, Callable, Dict, List, Optional
 
-from code_scalpel.governance import (
-    GovernanceConfigLoader,
-    GovernanceConfig,
-)
-from code_scalpel.governance.change_budget import (
-    ChangeBudget,
-    Operation,
-    FileChange,
-    BudgetDecision,
-)
-from code_scalpel.autonomy.fix_loop import FixLoop, FixLoopResult
 from code_scalpel.autonomy.audit import AutonomyAuditTrail
+from code_scalpel.autonomy.fix_loop import FixLoop, FixLoopResult
+from code_scalpel.governance import GovernanceConfig, GovernanceConfigLoader
+from code_scalpel.governance.change_budget import (BudgetDecision,
+                                                   ChangeBudget, FileChange,
+                                                   Operation)
 
 
 @dataclass

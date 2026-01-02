@@ -15,18 +15,15 @@ Detects hardcoded secrets in Python code using comprehensive regex patterns:
 """
 
 import ast
-import warnings
 import re
+import warnings
 from typing import Dict, List, Pattern
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
-from ..analyzers.taint_tracker import (
-    HARDCODED_SECRET_PATTERNS,
-    SECRET_VARIABLE_PATTERNS,  # [20251214_FEATURE] v2.0.0 - Variable name patterns
-    Vulnerability,
-    SecuritySink,
-    TaintSource,
-)
+from ..analyzers.taint_tracker import \
+    SECRET_VARIABLE_PATTERNS  # [20251214_FEATURE] v2.0.0 - Variable name patterns
+from ..analyzers.taint_tracker import (HARDCODED_SECRET_PATTERNS, SecuritySink,
+                                       TaintSource, Vulnerability)
 
 # [20251215_BUGFIX] Silence deprecated ast.Str warnings under Python 3.13+ (tests exercise visit_Str)
 warnings.filterwarnings(

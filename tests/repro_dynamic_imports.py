@@ -1,6 +1,6 @@
+import importlib
 import os
 from sys import path
-import importlib
 
 # [20251214_TEST] Preserve static imports for resolver coverage; keep them referenced to satisfy lint
 _ = (os.name, len(path))

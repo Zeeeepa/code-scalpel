@@ -52,7 +52,6 @@ from typing import Any
 
 from .parser import Decorator, TSNode
 
-
 # [20251216_FEATURE] Security-sensitive decorator patterns
 SECURITY_SINK_DECORATORS = {
     # HTTP endpoint decorators (NestJS, Angular, etc.)

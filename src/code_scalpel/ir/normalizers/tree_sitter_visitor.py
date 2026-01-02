@@ -45,7 +45,6 @@ from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union
 
 from ..nodes import IRNode, SourceLocation
 
-
 # Type variable for the tree-sitter Node type
 TSNode = TypeVar("TSNode")
 

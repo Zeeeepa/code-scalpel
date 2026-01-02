@@ -146,8 +146,9 @@ TOTAL TEST ESTIMATE: 465 tests (175 COMMUNITY + 165 PRO + 125 ENTERPRISE)
 ============================================================================
 """
 
-from .javascript_adapter import JavaScriptParserAdapter, TypeScriptParserAdapter
 from .java_adapter import JavaParserAdapter  # type: ignore[import-not-found]
+from .javascript_adapter import (JavaScriptParserAdapter,
+                                 TypeScriptParserAdapter)
 
 # [20251224_FEATURE] Additional language adapter stubs
 # Note: These are stubs - implementations are in progress

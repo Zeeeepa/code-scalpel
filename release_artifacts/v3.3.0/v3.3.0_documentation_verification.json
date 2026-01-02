@@ -1,184 +1,175 @@
 {
-  "version": "3.3.0",
-  "section": "7",
+  "timestamp": "2026-01-02T18:57:47.608351",
+  "release_version": "3.3.0",
+  "section": 8,
   "title": "Documentation Verification",
-  "timestamp": "2026-01-01T21:31:05.240365Z",
-  "subsections": {
-    "7.1_core_documentation": {
-      "name": "Core Documentation Files",
-      "items_checked": 5,
-      "items_passed": 5,
-      "status": "PASSED",
-      "details": [
-        {
-          "file": "README.md",
-          "size_bytes": 44350,
+  "tests": {
+    "core_documentation": {
+      "subsection": "8.1 Core Documentation",
+      "checks": {
+        "README.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_version": true,
-            "has_quick_start": true,
-            "has_features": true,
-            "has_links": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 44651,
+          "status": "\u2705 PASS",
+          "notes": "Primary documentation file present"
         },
-        {
-          "file": "CHANGELOG.md",
-          "size_bytes": 14937,
+        "CHANGELOG.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_version_entries": true,
-            "is_formatted": true,
-            "has_dates": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 17015,
+          "status": "\u2705 PASS",
+          "notes": "v3.3.0 changelog entries present"
         },
-        {
-          "file": "SECURITY.md",
-          "size_bytes": 3780,
+        "SECURITY.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_reporting": true,
-            "has_policies": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 3855,
+          "status": "\u2705 PASS",
+          "notes": "Security policy documented"
         },
-        {
-          "file": "CONTRIBUTING.md",
-          "size_bytes": 9039,
+        "CONTRIBUTING.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_guidelines": true,
-            "has_process": true,
-            "has_coc": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 9154,
+          "status": "\u2705 PASS",
+          "notes": "Contribution guidelines documented"
         },
-        {
-          "file": "docs/INDEX.md",
-          "size_bytes": 8108,
+        "docs/INDEX.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_toc": true,
-            "has_module_docs": true,
-            "has_guides": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 6659,
+          "status": "\u2705 PASS",
+          "notes": "Documentation index with 8+ sections"
         }
-      ]
+      },
+      "summary": "5/5 core documentation files present \u2705",
+      "result": "PASS"
     },
-    "7.2_release_documentation": {
-      "name": "Release Documentation",
-      "items_checked": 3,
-      "items_passed": 3,
-      "status": "PASSED",
-      "details": [
-        {
-          "item": "Release Notes v3.3.0",
-          "file": "docs/release_notes/RELEASE_NOTES_v3.3.0.md",
-          "size_bytes": 13047,
+    "release_documentation": {
+      "subsection": "8.2 Release Documentation",
+      "checks": {
+        "RELEASE_NOTES_v3.3.0.md": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_features": true,
-            "has_breaking_changes": true,
-            "has_migration_guide": true
-          },
-          "status": "\u2705 PASSED"
+          "size_bytes": 13139,
+          "status": "\u2705 PASS",
+          "notes": "Release notes created for v3.3.0"
         },
-        {
-          "item": "Migration Guide",
-          "file": "docs/guides/migration/MIGRATION_GUIDE.md",
+        "CHANGELOG has v3.3.0 header": {
           "exists": true,
-          "checks": {
-            "file_exists": true,
-            "has_upgrade_steps": true,
-            "has_examples": true
-          },
-          "status": "\u2705 PASSED"
+          "status": "\u2705 PASS",
+          "notes": "## [3.3.0] - 2025-12-26 present in CHANGELOG.md"
         },
-        {
-          "item": "API Changes & Known Issues",
-          "files": [
-            "docs/release_notes/API_CHANGES_v3.0.0.md",
-            "docs/release_notes/KNOWN_ISSUES_v3.0.0.md"
+        "Breaking changes documented": {
+          "exists": true,
+          "status": "\u2705 PASS",
+          "notes": "BREAKING CHANGES section lists 14 removed stub files"
+        }
+      },
+      "summary": "3/3 release documentation checks passed \u2705",
+      "result": "PASS"
+    },
+    "roadmap_documentation": {
+      "subsection": "8.3 Roadmap Documentation",
+      "checks": {
+        "roadmap_count": {
+          "expected": 22,
+          "actual": 22,
+          "status": "\u2705 PASS",
+          "notes": "All 22 tool roadmaps present"
+        },
+        "roadmap_tools": {
+          "tools": [
+            "analyze_code",
+            "code_policy_check",
+            "crawl_project",
+            "cross_file_security_scan",
+            "extract_code",
+            "generate_unit_tests",
+            "get_call_graph",
+            "get_cross_file_dependencies",
+            "get_file_context",
+            "get_graph_neighborhood",
+            "get_project_map",
+            "get_symbol_references",
+            "rename_symbol",
+            "scan_dependencies",
+            "security_scan",
+            "simulate_refactor",
+            "symbolic_execute",
+            "type_evaporation_scan",
+            "unified_sink_detect",
+            "update_symbol",
+            "validate_paths",
+            "verify_policy_integrity"
           ],
-          "exist": true,
-          "checks": {
-            "api_changes_exists": true,
-            "known_issues_exists": true
-          },
-          "status": "\u2705 PASSED"
+          "count": 22
         }
-      ]
+      },
+      "summary": "22/22 tool roadmaps present \u2705",
+      "result": "PASS"
     },
-    "7.3_roadmap_documentation": {
-      "name": "Tool Roadmap Documentation",
-      "items_checked": 22,
-      "items_passed": 22,
-      "status": "\u2705 PASSED",
-      "tools": [
-        "analyze_code",
-        "extract_code",
-        "update_symbol",
-        "security_scan",
-        "unified_sink_detect",
-        "cross_file_security_scan",
-        "generate_unit_tests",
-        "simulate_refactor",
-        "symbolic_execute",
-        "crawl_project",
-        "scan_dependencies",
-        "get_file_context",
-        "get_symbol_references",
-        "get_cross_file_dependencies",
-        "get_call_graph",
-        "get_graph_neighborhood",
-        "get_project_map",
-        "validate_paths",
-        "verify_policy_integrity",
-        "type_evaporation_scan",
-        "code_policy_check",
-        "rename_symbol"
+    "link_validation": {
+      "subsection": "8.4 Link Validation",
+      "files_checked": [
+        "README.md",
+        "CHANGELOG.md",
+        "SECURITY.md",
+        "CONTRIBUTING.md",
+        "docs/INDEX.md"
       ],
-      "all_roadmaps_present": true
+      "results": {
+        "README.md": {
+          "valid": 37,
+          "invalid": 0,
+          "external": 8
+        },
+        "CHANGELOG.md": {
+          "valid": 0,
+          "invalid": 0,
+          "external": 2
+        },
+        "SECURITY.md": {
+          "valid": 0,
+          "invalid": 0,
+          "external": 0
+        },
+        "CONTRIBUTING.md": {
+          "valid": 6,
+          "invalid": 0,
+          "external": 3
+        },
+        "docs/INDEX.md": {
+          "valid": 23,
+          "invalid": 0,
+          "external": 2
+        }
+      },
+      "summary": "66 valid links, 0 invalid \u2705",
+      "status": "\u2705 PASS"
     },
-    "7.4_link_validation": {
-      "name": "Documentation Link Validation",
-      "total_links_checked": 82,
-      "valid_links": 82,
-      "broken_links": 0,
-      "status": "PASSED",
-      "fixed_issues": [
-        "Fixed broken link to docs/getting_started/getting_started.md (was docs/getting_started.md)",
-        "Fixed broken link to docs/guides/migration/MIGRATION_GUIDE.md",
-        "Fixed broken link to docs/release_notes/API_CHANGES_v3.0.0.md",
-        "Fixed broken link to docs/release_notes/KNOWN_ISSUES_v3.0.0.md",
-        "Fixed broken link to docs/guides/graph_engine_guide.md",
-        "Fixed broken link to docs/guides/agent_integration.md",
-        "Fixed broken link to src/code_scalpel/policy_engine/README.md",
-        "Removed references to non-existent internal/ directory files",
-        "Updated docs/INDEX.md parser documentation links to match actual files"
-      ]
+    "version_consistency": {
+      "subsection": "8.5 Version Consistency",
+      "checks": {
+        "pyproject.toml": {
+          "version": "3.3.0",
+          "status": "\u2705 PASS"
+        },
+        "src/code_scalpel/__init__.py": {
+          "version": "3.3.0",
+          "status": "\u2705 PASS"
+        },
+        "CHANGELOG.md": {
+          "version": "3.3.0",
+          "status": "\u2705 PASS"
+        }
+      },
+      "summary": "3/3 version checks consistent \u2705",
+      "result": "PASS"
     }
   },
   "summary": {
-    "total_checks": 10,
-    "passed": 10,
-    "failed": 0,
-    "status": "\u2705 ALL SECTIONS PASSED",
-    "blocking_issues": 0,
-    "warnings": 0
-  },
-  "validation_results": {
-    "core_documentation": "\u2705 PASSED",
-    "release_documentation": "\u2705 PASSED",
-    "roadmap_documentation": "\u2705 PASSED",
-    "link_validation": "\u2705 PASSED"
+    "section_8_checks": "8/8 passed \u2705",
+    "core_documentation": "5/5 \u2705",
+    "release_documentation": "3/3 \u2705",
+    "roadmap_documentation": "22/22 \u2705",
+    "link_validation": "66/66 valid \u2705",
+    "version_consistency": "3/3 \u2705",
+    "overall_status": "\u2705 PASS - 100% (38/38 checks)"
   }
 }

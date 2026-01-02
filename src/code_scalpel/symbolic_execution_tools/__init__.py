@@ -69,132 +69,60 @@ Example (Custom Sanitizer):
     ... )
 """
 
-from .constraint_solver import ConstraintSolver
-from .engine import SymbolicExecutionEngine, SymbolicAnalyzer
-
-# v0.3.0: Security Analysis
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.security.analyzers.taint_tracker import (
-    TaintTracker,
-    TaintSource,
-    TaintLevel,
-    SecuritySink,
-    TaintInfo,
-    TaintedValue,
-    Vulnerability,
-    # v0.3.1: Sanitizer Support
-    SanitizerInfo,
-    SANITIZER_REGISTRY,
-    register_sanitizer,
-    load_sanitizers_from_config,
-    # [20251216_FEATURE] v2.2.0: SSR Security
-    SSR_SINK_PATTERNS,
-    detect_ssr_vulnerabilities,
-    detect_ssr_framework,
-)
-
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.security.analyzers.security_analyzer import (
-    SecurityAnalyzer,
-    SecurityAnalysisResult,
-    analyze_security,
-    find_sql_injections,
-    find_xss,
-    find_command_injections,
-    find_path_traversals,
-)
-
-# [20251216_FEATURE] v2.3.0: Unified Polyglot Sink Detection
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.security.analyzers.unified_sink_detector import (
-    UnifiedSinkDetector,
-    SinkDefinition,
-    DetectedSink,
-    Language,
-    UNIFIED_SINKS,
-    OWASP_COVERAGE,
-)
-
-# [20251219_FEATURE] v3.0.4: Schema Drift Detection
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.integrations.protocol_analyzers.schema.drift_detector import (
-    SchemaDriftDetector,
-    SchemaDriftResult,
-    SchemaChange,
-    ChangeType,
-    ChangeSeverity,
-    ProtobufParser,
-    compare_protobuf_files,
-    compare_json_schema_files,
-)
-
-# [20251219_FEATURE] v3.0.4: gRPC Contract Analysis
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.integrations.protocol_analyzers.grpc.contract_analyzer import (
-    GrpcContractAnalyzer,
-    GrpcContract,
-    GrpcService,
-    RpcMethod,
-    StreamingType,
-    ContractIssue,
-    IssueSeverity,
-    analyze_grpc_contract,
-    validate_grpc_contract,
-    analyze_grpc_file,
-)
-
-# [20251219_FEATURE] v3.0.4: GraphQL Schema Tracking
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.integrations.protocol_analyzers.graphql.schema_tracker import (
-    GraphQLSchemaTracker,
-    GraphQLSchema,
-    GraphQLType,
-    GraphQLTypeKind,
-    GraphQLField,
-    GraphQLArgument,
-    GraphQLSchemaDrift,
-    GraphQLSchemaChange,
-    GraphQLChangeType,
-    GraphQLChangeSeverity,
-    track_graphql_schema,
-    compare_graphql_schemas,
-    compare_graphql_files,
-)
-
-# [20251220_FEATURE] v3.0.4: Kafka Taint Tracking
-# [20251225_REFACTOR] Import from new location
-from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
-    KafkaTaintTracker,
-    KafkaProducer,
-    KafkaConsumer,
-    KafkaTaintBridge,
-    KafkaTopicInfo,
-    KafkaAnalysisResult,
-    KafkaLibrary,
-    KafkaPatternType,
-    KafkaRiskLevel,
-    analyze_kafka_file,
-    analyze_kafka_codebase,
-    get_kafka_taint_bridges,
-)
+import warnings
 
 # [20251220_FEATURE] v3.0.4: Frontend Input Tracker (TypeScript/JS DOM Detection)
 # [20251225_REFACTOR] Import from new location
 from code_scalpel.integrations.protocol_analyzers.frontend.input_tracker import (
-    FrontendInputTracker,
-    FrontendAnalysisResult,
-    FrontendFramework,
-    InputSource,
-    InputSourceType,
-    DangerousSink,
-    DangerousSinkType,
-    DataFlow,
-    analyze_frontend_file,
-    analyze_frontend_codebase,
-    get_xss_risks,
-)
+    DangerousSink, DangerousSinkType, DataFlow, FrontendAnalysisResult,
+    FrontendFramework, FrontendInputTracker, InputSource, InputSourceType,
+    analyze_frontend_codebase, analyze_frontend_file, get_xss_risks)
+# [20251219_FEATURE] v3.0.4: GraphQL Schema Tracking
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.graphql.schema_tracker import (
+    GraphQLArgument, GraphQLChangeSeverity, GraphQLChangeType, GraphQLField,
+    GraphQLSchema, GraphQLSchemaChange, GraphQLSchemaDrift,
+    GraphQLSchemaTracker, GraphQLType, GraphQLTypeKind, compare_graphql_files,
+    compare_graphql_schemas, track_graphql_schema)
+# [20251219_FEATURE] v3.0.4: gRPC Contract Analysis
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.grpc.contract_analyzer import (
+    ContractIssue, GrpcContract, GrpcContractAnalyzer, GrpcService,
+    IssueSeverity, RpcMethod, StreamingType, analyze_grpc_contract,
+    analyze_grpc_file, validate_grpc_contract)
+# [20251220_FEATURE] v3.0.4: Kafka Taint Tracking
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
+    KafkaAnalysisResult, KafkaConsumer, KafkaLibrary, KafkaPatternType,
+    KafkaProducer, KafkaRiskLevel, KafkaTaintBridge, KafkaTaintTracker,
+    KafkaTopicInfo, analyze_kafka_codebase, analyze_kafka_file,
+    get_kafka_taint_bridges)
+# [20251219_FEATURE] v3.0.4: Schema Drift Detection
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.integrations.protocol_analyzers.schema.drift_detector import (
+    ChangeSeverity, ChangeType, ProtobufParser, SchemaChange,
+    SchemaDriftDetector, SchemaDriftResult, compare_json_schema_files,
+    compare_protobuf_files)
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.security_analyzer import (
+    SecurityAnalysisResult, SecurityAnalyzer, analyze_security,
+    find_command_injections, find_path_traversals, find_sql_injections,
+    find_xss)
+# v0.3.0: Security Analysis
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.taint_tracker import (  # v0.3.1: Sanitizer Support; [20251216_FEATURE] v2.2.0: SSR Security
+    SANITIZER_REGISTRY, SSR_SINK_PATTERNS, SanitizerInfo, SecuritySink,
+    TaintedValue, TaintInfo, TaintLevel, TaintSource, TaintTracker,
+    Vulnerability, detect_ssr_framework, detect_ssr_vulnerabilities,
+    load_sanitizers_from_config, register_sanitizer)
+# [20251216_FEATURE] v2.3.0: Unified Polyglot Sink Detection
+# [20251225_REFACTOR] Import from new location
+from code_scalpel.security.analyzers.unified_sink_detector import (
+    OWASP_COVERAGE, UNIFIED_SINKS, DetectedSink, Language, SinkDefinition,
+    UnifiedSinkDetector)
 
-import warnings
+from .constraint_solver import ConstraintSolver
+from .engine import SymbolicAnalyzer, SymbolicExecutionEngine
 
 # [20251215_REFACTOR] Move warning configuration after imports to satisfy import-order lint rules.
 warnings.filterwarnings(
@@ -207,13 +135,8 @@ warnings.filterwarnings(
 # [20251225_REFACTOR] Import from new location
 try:
     from code_scalpel.security.analyzers.cross_file_taint import (
-        CrossFileTaintTracker,
-        CrossFileTaintResult,
-        CrossFileTaintFlow,
-        CrossFileVulnerability,
-        TaintedParameter,
-        CrossFileSink,
-    )
+        CrossFileSink, CrossFileTaintFlow, CrossFileTaintResult,
+        CrossFileTaintTracker, CrossFileVulnerability, TaintedParameter)
 except ImportError:
     CrossFileTaintTracker = None
     CrossFileTaintResult = None
@@ -221,6 +144,12 @@ except ImportError:
     CrossFileVulnerability = None
     TaintedParameter = None
     CrossFileSink = None
+
+# [20251226_FEATURE] v3.2.9: Path Prioritization (Pro Tier - Crash Optimization)
+from .path_prioritization import (CrashPrioritizer, ErrorPattern,
+                                  PathPrioritizer, PathScore,
+                                  PrioritizationStrategy,
+                                  prioritize_for_crashes)
 
 # [20251218_BUGFIX] Disabled import warning - info is in docs
 # warnings.warn(
@@ -332,6 +261,13 @@ __all__ = [
     "CrossFileVulnerability",
     "TaintedParameter",
     "CrossFileSink",
+    # [20251226_FEATURE] v3.2.9: Path Prioritization (Pro Tier)
+    "PathPrioritizer",
+    "PathScore",
+    "PrioritizationStrategy",
+    "ErrorPattern",
+    "prioritize_for_crashes",
+    "CrashPrioritizer",
 ]
 
 # TODO: Module Enhancement Roadmap

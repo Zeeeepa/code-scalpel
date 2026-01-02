@@ -58,10 +58,11 @@ copy_if_not_exists() {
 # 1. Migrate policy files
 echo ""
 echo "1. Migrating policy files..."
+mkdir -p ".code-scalpel/templates"
 copy_if_not_exists ".scalpel/policy.yaml" ".code-scalpel/policy.yaml"
-copy_if_not_exists ".scalpel/policy.yaml.example" ".code-scalpel/policy.yaml.example"
-copy_if_not_exists ".scalpel/policy_override.yaml" ".code-scalpel/policy_override.yaml"
-copy_if_not_exists ".scalpel/policy_test.yaml" ".code-scalpel/policy_test.yaml"
+copy_if_not_exists ".scalpel/policy.yaml.example" ".code-scalpel/templates/policy.yaml.example"
+copy_if_not_exists ".scalpel/policy_override.yaml" ".code-scalpel/templates/policy_override.yaml"
+copy_if_not_exists ".scalpel/policy_test.yaml" ".code-scalpel/templates/policy_test.yaml"
 
 # 2. Migrate config.json with merge check
 echo ""

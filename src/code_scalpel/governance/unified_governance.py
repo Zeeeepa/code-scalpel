@@ -41,6 +41,7 @@ Example:
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -48,12 +49,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 try:
-    from code_scalpel.policy_engine import (
-        PolicyEngine,
-        PolicyDecision,
-        PolicyViolation as EngineViolation,
-        Operation as EngineOperation,
-    )
+    from code_scalpel.policy_engine import Operation as EngineOperation
+    from code_scalpel.policy_engine import PolicyDecision, PolicyEngine
+    from code_scalpel.policy_engine import PolicyViolation as EngineViolation
 
     POLICY_ENGINE_AVAILABLE = True
 except ImportError:
@@ -65,13 +63,12 @@ except ImportError:
 
 # [20251221_REFACTOR] v3.1.0 - ChangeBudget moved from policy/ to governance/
 try:
-    from code_scalpel.governance.change_budget import (
-        ChangeBudget,
-        Operation as BudgetOperation,
-        FileChange,
-        BudgetDecision,
-        BudgetViolation,
-    )
+    from code_scalpel.governance.change_budget import (BudgetDecision,
+                                                       BudgetViolation,
+                                                       ChangeBudget,
+                                                       FileChange)
+    from code_scalpel.governance.change_budget import \
+        Operation as BudgetOperation
 
     BUDGET_AVAILABLE = True
 except ImportError:

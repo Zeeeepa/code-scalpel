@@ -51,7 +51,6 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-
 # TODO: Add support for additional frameworks
 #   - Solid.js (reactive framework)
 #   - Qwik (resumable framework)

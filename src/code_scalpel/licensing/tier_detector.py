@@ -41,7 +41,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,9 @@ class TierDetector:
     ENV_VAR = "CODE_SCALPEL_TIER"
     CONFIG_PATHS = [
         ".code-scalpel/license.json",
+        ".code-Scalpel/license.json",
         "~/.code-scalpel/license.json",
+        "~/.code-Scalpel/license.json",
         "/etc/code-scalpel/license.json",
     ]
 
@@ -102,7 +104,9 @@ class TierDetector:
         # [20251225_FEATURE] P4_LOW: Custom tier definitions
         self._custom_tiers: Dict[str, str] = {}  # custom_name -> standard_tier
 
-    def detect(self, force_refresh: bool = False, license_key: Optional[str] = None) -> TierDetectionResult:
+    def detect(
+        self, force_refresh: bool = False, license_key: Optional[str] = None
+    ) -> TierDetectionResult:
         """
         Detect the current tier.
 
@@ -197,7 +201,7 @@ class TierDetector:
                         config = json.load(f)
 
                     tier_value = config.get("tier", "").lower().strip()
-                    
+
                     # [20251225_FEATURE] P4_LOW: Check for custom tier definitions
                     if tier_value not in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
                         # Check if it's a custom tier name
@@ -216,26 +220,28 @@ class TierDetector:
                                 custom_tier_name=tier_value,
                             )
                         else:
-                            logger.warning(f"Invalid tier '{tier_value}' in {config_path}, ignoring")
+                            logger.warning(
+                                f"Invalid tier '{tier_value}' in {config_path}, ignoring"
+                            )
                             continue
 
                     if tier_value in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
                         logger.debug(
                             f"Detected tier '{tier_value}' from config file {config_path}"
                         )
-                        
+
                         # Extract additional metadata
                         license_key = config.get("license_key")
                         organization = config.get("organization")
-                        
+
                         # Load organization hierarchy if present
                         if "organization_hierarchy" in config:
                             self._load_org_hierarchy(config["organization_hierarchy"])
-                        
+
                         # Load custom tier definitions if present
                         if "custom_tiers" in config:
                             self._load_custom_tiers(config["custom_tiers"])
-                        
+
                         return TierDetectionResult(
                             tier=tier_value,
                             source="config",
@@ -263,25 +269,27 @@ class TierDetector:
         """Check if current tier is ENTERPRISE."""
         return self.get_tier_string() == Tier.ENTERPRISE
 
-    def _detect_from_license_key(self, license_key: str) -> Optional[TierDetectionResult]:
+    def _detect_from_license_key(
+        self, license_key: str
+    ) -> Optional[TierDetectionResult]:
         """
         [20251225_FEATURE] P1_HIGH: Extract tier from license key.
-        
+
         License key format: SCALPEL-{TIER}-{DATA}...
         """
         parts = license_key.split("-")
-        
+
         if len(parts) < 2 or parts[0] != "SCALPEL":
-            logger.warning(f"Invalid license key format, cannot extract tier")
+            logger.warning("Invalid license key format, cannot extract tier")
             return None
-        
+
         tier_value = parts[1].lower()
         valid_tiers = {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}
-        
+
         if tier_value not in valid_tiers:
             logger.warning(f"Invalid tier '{tier_value}' extracted from license key")
             return None
-        
+
         logger.info(f"Extracted tier '{tier_value}' from license key")
         return TierDetectionResult(
             tier=tier_value,
@@ -294,22 +302,22 @@ class TierDetector:
     def _detect_from_organization(self) -> Optional[TierDetectionResult]:
         """
         [20251225_FEATURE] P2_MEDIUM: Detect tier based on organization.
-        
+
         Checks environment variable CODE_SCALPEL_ORGANIZATION and looks up
         the organization's tier from configuration or hierarchy.
         """
         org_name = os.environ.get("CODE_SCALPEL_ORGANIZATION")
         if not org_name:
             return None
-        
+
         logger.debug(f"Attempting organization-based tier detection for: {org_name}")
-        
+
         # Check if organization has a configured tier
         org_tier = self._get_organization_tier(org_name)
         if org_tier:
             # [20251225_FEATURE] P3_LOW: Tier inheritance from parent orgs
             parent_orgs = self._get_parent_organizations(org_name)
-            
+
             return TierDetectionResult(
                 tier=org_tier,
                 source="organization",
@@ -318,13 +326,15 @@ class TierDetector:
                 organization=org_name,
                 parent_organizations=parent_orgs,
             )
-        
+
         return None
 
-    def _validate_and_log_tier(self, result: TierDetectionResult) -> TierDetectionResult:
+    def _validate_and_log_tier(
+        self, result: TierDetectionResult
+    ) -> TierDetectionResult:
         """
         [20251225_FEATURE] P2_MEDIUM: Validate and log tier detection result.
-        
+
         Performs validation checks and logs detailed information about the
         detected tier for audit and debugging purposes.
         """
@@ -343,7 +353,7 @@ class TierDetector:
                 details=f"Validation failed for tier '{result.tier}', defaulting to COMMUNITY",
                 is_validated=True,
             )
-        
+
         # Log tier detection with full context
         log_msg = (
             f"Tier detected: {result.tier.upper()} "
@@ -352,32 +362,32 @@ class TierDetector:
         if result.organization:
             log_msg += f" [org: {result.organization}]"
         if result.license_key:
-            log_msg += f" [has license key]"
+            log_msg += " [has license key]"
         if result.custom_tier_name:
             log_msg += f" [custom: {result.custom_tier_name}]"
-        
+
         logger.info(log_msg)
-        
+
         # Additional validation warnings
         if result.tier in {Tier.PRO, Tier.ENTERPRISE} and not result.license_key:
             logger.warning(
                 f"{result.tier.upper()} tier detected but no license key found. "
                 "License validation may fail."
             )
-        
+
         if result.tier == Tier.ENTERPRISE and not result.organization:
             logger.warning(
                 "ENTERPRISE tier detected but no organization specified. "
                 "Organization-specific features may not work."
             )
-        
+
         result.is_validated = True
         return result
 
     def _get_organization_tier(self, org_name: str) -> Optional[str]:
         """
         [20251225_FEATURE] P2_MEDIUM: Get tier for an organization.
-        
+
         Looks up the tier assigned to an organization. In production, this
         would query a database or API. For now, uses environment variables.
         """
@@ -386,17 +396,17 @@ class TierDetector:
         org_hash = hashlib.sha256(org_name.encode()).hexdigest()[:8].upper()
         env_var = f"CODE_SCALPEL_ORG_{org_hash}_TIER"
         tier_value = os.environ.get(env_var, "").lower().strip()
-        
+
         if tier_value in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
             logger.debug(f"Found tier '{tier_value}' for organization {org_name}")
             return tier_value
-        
+
         return None
 
     def _get_parent_organizations(self, org_name: str) -> List[str]:
         """
         [20251225_FEATURE] P3_LOW: Get parent organizations for tier inheritance.
-        
+
         Returns the hierarchy of parent organizations. Child organizations
         can inherit tier from parent organizations.
         """
@@ -405,20 +415,22 @@ class TierDetector:
     def _load_org_hierarchy(self, hierarchy_config: Dict[str, List[str]]) -> None:
         """
         [20251225_FEATURE] P3_LOW: Load organization hierarchy from config.
-        
+
         Args:
             hierarchy_config: Dict mapping org_name -> [parent_orgs]
         """
         self._org_hierarchy.update(hierarchy_config)
-        logger.debug(f"Loaded organization hierarchy for {len(hierarchy_config)} organizations")
+        logger.debug(
+            f"Loaded organization hierarchy for {len(hierarchy_config)} organizations"
+        )
 
     def _load_custom_tiers(self, custom_tiers_config: Dict[str, str]) -> None:
         """
         [20251225_FEATURE] P4_LOW: Load custom tier definitions from config.
-        
+
         Allows organizations to define custom tier names that map to
         standard tiers (e.g., "startup" -> "pro", "corporate" -> "enterprise").
-        
+
         Args:
             custom_tiers_config: Dict mapping custom_name -> standard_tier
         """
@@ -429,58 +441,62 @@ class TierDetector:
                 logger.warning(
                     f"Invalid standard tier '{standard_tier}' for custom tier '{custom_name}'"
                 )
-        
+
         logger.debug(f"Loaded {len(self._custom_tiers)} custom tier definitions")
 
     def set_custom_tier(self, custom_name: str, standard_tier: str) -> bool:
         """
         [20251225_FEATURE] P4_LOW: Register a custom tier mapping.
-        
+
         Args:
             custom_name: Custom tier name (e.g., "startup", "corporate")
             standard_tier: Standard tier to map to ("community", "pro", "enterprise")
-        
+
         Returns:
             True if successfully registered, False if invalid
         """
         if standard_tier.lower() not in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
-            logger.error(f"Cannot register custom tier: invalid standard tier '{standard_tier}'")
+            logger.error(
+                f"Cannot register custom tier: invalid standard tier '{standard_tier}'"
+            )
             return False
-        
+
         self._custom_tiers[custom_name.lower()] = standard_tier.lower()
         logger.info(f"Registered custom tier '{custom_name}' -> '{standard_tier}'")
-        
+
         # Invalidate cache to force re-detection
         self._cached_result = None
         return True
 
-    def set_organization_tier(self, org_name: str, tier: str, parent_orgs: Optional[List[str]] = None) -> bool:
+    def set_organization_tier(
+        self, org_name: str, tier: str, parent_orgs: Optional[List[str]] = None
+    ) -> bool:
         """
         [20251225_FEATURE] P2_MEDIUM: Assign a tier to an organization.
-        
+
         Args:
             org_name: Organization name
             tier: Tier to assign ("community", "pro", "enterprise")
             parent_orgs: Optional list of parent organizations for inheritance
-        
+
         Returns:
             True if successfully assigned, False if invalid
         """
         if tier.lower() not in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
             logger.error(f"Cannot assign organization tier: invalid tier '{tier}'")
             return False
-        
+
         # Set environment variable for this session
         org_hash = hashlib.sha256(org_name.encode()).hexdigest()[:8].upper()
         env_var = f"CODE_SCALPEL_ORG_{org_hash}_TIER"
         os.environ[env_var] = tier.lower()
-        
+
         # Store hierarchy if provided
         if parent_orgs:
             self._org_hierarchy[org_name] = parent_orgs
-        
+
         logger.info(f"Assigned tier '{tier}' to organization '{org_name}'")
-        
+
         # Invalidate cache to force re-detection
         self._cached_result = None
         return True

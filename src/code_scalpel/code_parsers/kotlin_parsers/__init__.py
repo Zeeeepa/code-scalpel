@@ -139,22 +139,12 @@ from typing import TYPE_CHECKING
 
 # Lazy imports to avoid circular dependencies
 if TYPE_CHECKING:
-    from .kotlin_parsers_Detekt import (
-        DetektParser,
-        DetektFinding,
-        DetektSeverity,
-        DetektRuleSet,
-        DetektConfig,
-        DetektReport,
-    )
-    from .kotlin_parsers_ktlint import (
-        KtlintParser,
-        KtlintViolation,
-        KtlintSeverity,
-        KtlintRuleSet,
-        KtlintConfig,
-        KtlintReport,
-    )
+    from .kotlin_parsers_Detekt import (DetektConfig, DetektFinding,
+                                        DetektParser, DetektReport,
+                                        DetektRuleSet, DetektSeverity)
+    from .kotlin_parsers_ktlint import (KtlintConfig, KtlintParser,
+                                        KtlintReport, KtlintRuleSet,
+                                        KtlintSeverity, KtlintViolation)
 
 __all__ = [
     # Detekt
@@ -184,14 +174,10 @@ def __getattr__(name: str):
         "DetektConfig",
         "DetektReport",
     ):
-        from .kotlin_parsers_Detekt import (  # noqa: F401
-            DetektParser,
-            DetektFinding,
-            DetektSeverity,
-            DetektRuleSet,
-            DetektConfig,
-            DetektReport,
-        )
+        from .kotlin_parsers_Detekt import (DetektConfig,  # noqa: F401
+                                            DetektFinding, DetektParser,
+                                            DetektReport, DetektRuleSet,
+                                            DetektSeverity)
 
         return locals()[name]
 
@@ -203,14 +189,10 @@ def __getattr__(name: str):
         "KtlintConfig",
         "KtlintReport",
     ):
-        from .kotlin_parsers_ktlint import (  # noqa: F401
-            KtlintParser,
-            KtlintViolation,
-            KtlintSeverity,
-            KtlintRuleSet,
-            KtlintConfig,
-            KtlintReport,
-        )
+        from .kotlin_parsers_ktlint import (KtlintConfig,  # noqa: F401
+                                            KtlintParser, KtlintReport,
+                                            KtlintRuleSet, KtlintSeverity,
+                                            KtlintViolation)
 
         return locals()[name]
 

@@ -16,11 +16,24 @@ API Documentation: https://osv.dev/docs/
 """
 
 import json
-import urllib.request
-import urllib.error
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 import time
+import urllib.error
+import urllib.request
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, TypedDict
+
+
+class OSVVulnerabilityDict(TypedDict):
+    """OSV vulnerability for JSON serialization."""
+
+    id: str
+    summary: str
+    severity: str
+    package: str
+    vulnerable_version: str
+    fixed_version: str | None
+    aliases: list[str]
+    references: list[str]
 
 
 # [20251213_FEATURE] OSV API configuration
@@ -48,7 +61,7 @@ class Vulnerability:
     aliases: List[str] = field(default_factory=list)
     references: List[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> OSVVulnerabilityDict:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": self.id,

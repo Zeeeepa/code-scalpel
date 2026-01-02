@@ -137,7 +137,7 @@ TOTAL TEST ESTIMATE: 385 tests (125 COMMUNITY + 120 PRO + 140 ENTERPRISE)
 import re
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 
 class Language(Enum):

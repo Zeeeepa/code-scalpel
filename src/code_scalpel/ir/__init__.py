@@ -57,57 +57,16 @@ Modules:
     - get_variable_scope(ir_node) - Scope analysis helper
 """
 
-from .nodes import (
-    # Base
-    IRNode,
-    SourceLocation,
-    # Statements
-    IRModule,
-    IRFunctionDef,
-    IRClassDef,
-    IRIf,
-    IRFor,
-    IRWhile,
-    IRReturn,
-    IRAssign,
-    IRAugAssign,
-    IRExprStmt,
-    IRPass,
-    IRBreak,
-    IRContinue,
-    # Expressions
-    IRExpr,
-    IRBinaryOp,
-    IRUnaryOp,
-    IRCompare,
-    IRBoolOp,
-    IRCall,
-    IRAttribute,
-    IRSubscript,
-    IRName,
-    IRConstant,
-    IRList,
-    IRDict,
-    IRParameter,
-)
-
-from .operators import (
-    BinaryOperator,
-    UnaryOperator,
-    CompareOperator,
-    BoolOperator,
-)
-
-from .semantics import (
-    LanguageSemantics,
-    PythonSemantics,
-    JavaScriptSemantics,
-)
-
-from .normalizers import (
-    BaseNormalizer,
-    PythonNormalizer,
-)
+from .nodes import (IRAssign, IRAttribute,  # Base; Statements; Expressions
+                    IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak, IRCall,
+                    IRClassDef, IRCompare, IRConstant, IRContinue, IRDict,
+                    IRExpr, IRExprStmt, IRFor, IRFunctionDef, IRIf, IRList,
+                    IRModule, IRName, IRNode, IRParameter, IRPass, IRReturn,
+                    IRSubscript, IRUnaryOp, IRWhile, SourceLocation)
+from .normalizers import BaseNormalizer, PythonNormalizer
+from .operators import (BinaryOperator, BoolOperator, CompareOperator,
+                        UnaryOperator)
+from .semantics import JavaScriptSemantics, LanguageSemantics, PythonSemantics
 
 # TODO ITEMS: IR Module (__init__.py)
 # ======================================================================

@@ -35,11 +35,12 @@ Phase 2 Enhancement TODOs:
 [20251221_TODO] Add source location mapping for error reporting
 """
 
-import tree_sitter_java
-from tree_sitter import Language, Parser
+import hashlib
 from dataclasses import dataclass, field
 from typing import Optional
-import hashlib
+
+import tree_sitter_java
+from tree_sitter import Language, Parser
 
 
 @dataclass

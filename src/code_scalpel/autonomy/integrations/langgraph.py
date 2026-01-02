@@ -94,7 +94,7 @@ This module provides a LangGraph-based fix loop that:
 from typing import TypedDict
 
 try:
-    from langgraph.graph import StateGraph, END
+    from langgraph.graph import END, StateGraph
 except ImportError as e:
     raise ImportError(
         "LangGraph is required for this integration. "

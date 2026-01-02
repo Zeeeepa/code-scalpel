@@ -7,7 +7,8 @@ This module contains sanitization analysis tools:
 - sanitizer_analyzer.py: Sanitizer effectiveness analysis
 """
 
-from .sanitizer_analyzer import SanitizerAnalyzer, SanitizerType, SanitizerEffectiveness
+from .sanitizer_analyzer import (SanitizerAnalyzer, SanitizerEffectiveness,
+                                 SanitizerType)
 
 __all__ = [
     "SanitizerAnalyzer",

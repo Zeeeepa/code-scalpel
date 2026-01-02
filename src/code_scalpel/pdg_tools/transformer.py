@@ -7,7 +7,6 @@ from typing import Any, Optional
 
 import networkx as nx
 
-
 # [20251221_TODO] Add correctness-preserving transformation verification:
 #     - Implement semantic equivalence checking
 #     - Use symbolic execution to verify transformations preserve behavior

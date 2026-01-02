@@ -86,34 +86,20 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .audit_log import AuditLog
-    from .exceptions import (
-        InvalidOverrideCodeError,
-        OverrideTimeoutError,
-        PolicyEngineError,
-        PolicyModificationError,
-        TamperDetectedError,
-    )
+    from .exceptions import (InvalidOverrideCodeError, OverrideTimeoutError,
+                             PolicyEngineError, PolicyModificationError,
+                             TamperDetectedError)
     from .models import HumanResponse
-    from .policy_engine import (
-        Operation,
-        OverrideDecision,
-        Policy,
-        PolicyDecision,
-        PolicyEngine,
-        PolicyError,
-        PolicyViolation,
-    )
+    from .policy_engine import (Operation, OverrideDecision, Policy,
+                                PolicyDecision, PolicyEngine, PolicyError,
+                                PolicyViolation)
     from .semantic_analyzer import SemanticAnalyzer
     from .tamper_resistance import TamperResistance
 
 # [20250108_FEATURE] Cryptographic Policy Verification (v2.5.0 Guardian)
-from .crypto_verify import (
-    CryptographicPolicyVerifier,
-    PolicyManifest,
-    VerificationResult,
-    SecurityError,
-    verify_policy_integrity_crypto,
-)
+from .crypto_verify import (CryptographicPolicyVerifier, PolicyManifest,
+                            SecurityError, VerificationResult,
+                            verify_policy_integrity_crypto)
 
 # TODO [COMMUNITY]: Export minimal API for Community tier (policy verification only)
 # TODO [PRO]: Add support for policy versioning and rollback
@@ -158,13 +144,9 @@ def __getattr__(name: str):
         "HumanResponse",
     }:
         from .audit_log import AuditLog
-        from .exceptions import (
-            InvalidOverrideCodeError,
-            OverrideTimeoutError,
-            PolicyEngineError,
-            PolicyModificationError,
-            TamperDetectedError,
-        )
+        from .exceptions import (InvalidOverrideCodeError,
+                                 OverrideTimeoutError, PolicyEngineError,
+                                 PolicyModificationError, TamperDetectedError)
         from .models import HumanResponse
         from .tamper_resistance import TamperResistance
 

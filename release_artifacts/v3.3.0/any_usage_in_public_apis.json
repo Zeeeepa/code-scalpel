@@ -1,0 +1,262 @@
+{
+  "total_core_public_functions": 401,
+  "functions_using_any": 51,
+  "percentage": 12.72,
+  "functions": [
+    {
+      "file": "analysis/incremental_index.py",
+      "function": "store_analysis",
+      "location": "params"
+    },
+    {
+      "file": "analysis/incremental_indexer.py",
+      "function": "cache_analysis",
+      "location": "params"
+    },
+    {
+      "file": "analysis/incremental_indexer.py",
+      "function": "get_cached_analysis",
+      "location": "return"
+    },
+    {
+      "file": "analysis/incremental_indexer.py",
+      "function": "get_cache_stats",
+      "location": "return"
+    },
+    {
+      "file": "analysis/parallel_crawler.py",
+      "function": "crawl_chunked",
+      "location": "params"
+    },
+    {
+      "file": "analysis/parallel_crawler.py",
+      "function": "crawl_all",
+      "location": "params"
+    },
+    {
+      "file": "analysis/project_crawler.py",
+      "function": "summary",
+      "location": "return"
+    },
+    {
+      "file": "analysis/project_crawler.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "analysis/project_crawler.py",
+      "function": "file_result_to_dict",
+      "location": "return"
+    },
+    {
+      "file": "analysis/project_crawler.py",
+      "function": "crawl_project",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/concolic_engine.py",
+      "function": "execute",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/constraint_solver.py",
+      "function": "solve_constraints",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "from_dict",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "get_all_models",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "from_dict",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/engine.py",
+      "function": "find_inputs",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/ir_interpreter.py",
+      "function": "visit",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/ir_interpreter.py",
+      "function": "generic_visit",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/path_prioritization.py",
+      "function": "select_next_path",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/path_prioritization.py",
+      "function": "update_strategy",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/symbolic_memory.py",
+      "function": "load",
+      "location": "return"
+    },
+    {
+      "file": "symbolic_execution_tools/symbolic_memory.py",
+      "function": "store",
+      "location": "params"
+    },
+    {
+      "file": "symbolic_execution_tools/type_inference.py",
+      "function": "to_z3_sort",
+      "location": "return"
+    },
+    {
+      "file": "polyglot/typescript/analyzer.py",
+      "function": "normalize_typescript_function",
+      "location": "params"
+    },
+    {
+      "file": "polyglot/typescript/analyzer.py",
+      "function": "normalize_typescript_class",
+      "location": "params"
+    },
+    {
+      "file": "polyglot/typescript/decorator_analyzer.py",
+      "function": "extract_decorators_from_code",
+      "location": "return"
+    },
+    {
+      "file": "polyglot/typescript/decorator_analyzer.py",
+      "function": "get_security_metadata",
+      "location": "return"
+    },
+    {
+      "file": "polyglot/typescript/decorator_analyzer.py",
+      "function": "extract_decorators_from_code",
+      "location": "return"
+    },
+    {
+      "file": "security/analyzers/compliance_mapper.py",
+      "function": "map_all_vulnerabilities",
+      "location": "params+return"
+    },
+    {
+      "file": "security/analyzers/compliance_mapper.py",
+      "function": "generate_compliance_report",
+      "location": "params"
+    },
+    {
+      "file": "security/analyzers/confidence_scorer.py",
+      "function": "score_all_vulnerabilities",
+      "location": "params"
+    },
+    {
+      "file": "security/analyzers/confidence_scorer.py",
+      "function": "generate_confidence_report",
+      "location": "params+return"
+    },
+    {
+      "file": "security/analyzers/custom_rules.py",
+      "function": "generate_rules_summary",
+      "location": "return"
+    },
+    {
+      "file": "security/analyzers/false_positive_analyzer.py",
+      "function": "analyze_false_positives",
+      "location": "params+return"
+    },
+    {
+      "file": "security/analyzers/false_positive_analyzer.py",
+      "function": "filter_by_pattern",
+      "location": "params+return"
+    },
+    {
+      "file": "security/analyzers/false_positive_analyzer.py",
+      "function": "generate_false_positive_report",
+      "location": "params"
+    },
+    {
+      "file": "security/analyzers/sanitizer_detector.py",
+      "function": "analyze_sanitizer_coverage",
+      "location": "params+return"
+    },
+    {
+      "file": "security/analyzers/security_analyzer.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "security/analyzers/taint_tracker.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "security/analyzers/unified_sink_detector.py",
+      "function": "get_coverage_report",
+      "location": "return"
+    },
+    {
+      "file": "security/dependencies/false_positive_reducer.py",
+      "function": "assess_vulnerability",
+      "location": "params"
+    },
+    {
+      "file": "security/dependencies/license_compliance.py",
+      "function": "scan_licenses",
+      "location": "params"
+    },
+    {
+      "file": "security/dependencies/osv_client.py",
+      "function": "to_dict",
+      "location": "return"
+    },
+    {
+      "file": "security/dependencies/severity_contextualizer.py",
+      "function": "contextualize_severity",
+      "location": "params"
+    },
+    {
+      "file": "security/dependencies/supply_chain_scorer.py",
+      "function": "assess_supply_chain_risk",
+      "location": "params"
+    },
+    {
+      "file": "security/dependencies/typosquatting_detector.py",
+      "function": "scan_for_typosquatting",
+      "location": "params"
+    },
+    {
+      "file": "security/dependencies/vulnerability_scanner.py",
+      "function": "query_single",
+      "location": "return"
+    },
+    {
+      "file": "security/dependencies/vulnerability_scanner.py",
+      "function": "query_batch",
+      "location": "return"
+    },
+    {
+      "file": "security/ml/ml_vulnerability_predictor.py",
+      "function": "train",
+      "location": "params"
+    }
+  ]
+}

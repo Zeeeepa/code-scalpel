@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import os
 import json
+import os
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 # [20251218_SECURITY] Use defusedxml to prevent XXE attacks (B314)
 from defusedxml import ElementTree as ET

@@ -96,7 +96,7 @@ import ast
 from enum import Enum, auto
 from typing import Any, Dict
 
-from z3 import IntSort, BoolSort, StringSort, RealSort
+from z3 import BoolSort, IntSort, RealSort, StringSort
 
 
 class InferredType(Enum):

@@ -23,11 +23,11 @@ Example:
 """
 
 import ast
-from typing import Dict, List, Set, Optional, Tuple
+import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import defaultdict
-import logging
+from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 

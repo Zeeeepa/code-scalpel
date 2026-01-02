@@ -16,7 +16,7 @@ PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 
 class SmellType(Enum):

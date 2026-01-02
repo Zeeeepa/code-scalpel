@@ -36,15 +36,15 @@ Phase 2 Enhancement TODOs:
 [20251221_TODO] Support more design pattern variants (Abstract Factory, Template Method)
 """
 
+import math
+import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
-import math
-import re
 
 import javalang  # type: ignore[import-untyped]
-import javalang.tree  # type: ignore[import-untyped]
 import javalang.ast  # type: ignore[import-untyped]
+import javalang.tree  # type: ignore[import-untyped]
 
 from ..base_parser import BaseParser, Language, ParseResult, PreprocessorConfig
 

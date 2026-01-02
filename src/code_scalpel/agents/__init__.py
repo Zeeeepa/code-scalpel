@@ -26,13 +26,11 @@ Example Usage:
     result = await agent.execute_ooda_loop("src/main.py")
 """
 
-from .base_agent import BaseCodeAnalysisAgent, AgentContext
+from .base_agent import AgentContext, BaseCodeAnalysisAgent
 from .code_review_agent import CodeReviewAgent
-
 # [20251224_BUGFIX] Correct typo in filename: optimazation_agent -> optimization_agent
 # Note: File exists as optimazation_agent.py - needs rename during refactoring
 from .optimazation_agent import OptimizationAgent
-
 from .security_agent import SecurityAgent
 
 # [20251224_TIER1_TODO] Import stub modules when fully implemented (10 tests)

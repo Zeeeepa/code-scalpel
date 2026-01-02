@@ -93,128 +93,61 @@ Future Enhancements:
     - Unified JavaScriptAnalyzer aggregator
 """
 
-from .javascript_parsers_esprima import (
-    JavaScriptParser,
-    # Dataclasses for analysis
-    FunctionInfo,
-    FunctionCallInfo,
-    HalsteadMetrics,
-    ScopeInfo,
-    SecurityIssue,
-    SecuritySeverity,
-    DesignPatternType,
-    DesignPatternMatch,
-    ImportInfo,
-    ExportInfo,
-    CodeMetrics,
-)
-from .javascript_parsers_eslint import (
-    ESLintParser,
-    ESLintViolation,
-    ESLintFileResult,
-    ESLintConfig,
-    ESLintSeverity,
-)
-from .javascript_parsers_jshint import (
-    JSHintParser,
-    JSHintError,
-    JSHintFileResult,
-    JSHintConfig,
-    JSHintSeverity,
-)
-from .javascript_parsers_prettier import (
-    PrettierFormatter,
-    PrettierConfig,
-    FormatDiff,
-    FormatResult,
-    PrettierParser as PrettierParserType,
-    EndOfLine,
-    QuoteType,
-    TrailingComma,
-    ProseWrap,
-    HTMLWhitespaceSensitivity,
-)
-from .javascript_parsers_standard import (
-    StandardJSParser,
-    StandardViolation,
-    StandardFileResult,
-    StandardConfig,
-    StandardSeverity,
-)
-from .javascript_parsers_treesitter import (
-    TreeSitterJSParser,
-    TreeSitterNode,
-    TreeSitterParseResult,
-    JSLanguageVariant,
-    JSSymbol,
-    JSXComponent,
-    ImportStatement,
-    ExportStatement,
-    SyntaxError as TreeSitterSyntaxError,
-)
-from .javascript_parsers_typescript import (
-    TypeScriptParser,
-    TypeScriptAnalysis,
-    TypeKind,
-    TypeAnnotation,
-    TypeParameter,
-    InterfaceDeclaration,
-    TypeAliasDeclaration,
-    PropertySignature,
-    MethodSignature,
-    IndexSignature,
-    ParameterDeclaration,
-    EnumDeclaration,
-    EnumMember,
-    DecoratorUsage,
-    DecoratorKind,
-    NamespaceDeclaration,
-    TypeGuard,
-)
-from .javascript_parsers_babel import (
-    BabelParser,
-    BabelAnalysis,
-    BabelConfig,
-    BabelPlugin,
-    BabelPreset,
-    ECMAScriptVersion,
-    ProposalStage,
-    SyntaxFeature,
-    TransformationResult,
-    JSXElement,
-    ModernJSSyntax,
-)
-from .javascript_parsers_flow import (
-    FlowParser,
-    FlowAnalysis,
-    FlowConfig,
-    FlowError,
-    FlowCoverage,
-    FlowSeverity,
-    FlowTypeKind,
-    FlowTypeAnnotation,
-    FlowTypeParameter,
-    FlowTypeAlias,
-    FlowInterface,
-    Variance,
-)
-from .javascript_parsers_code_quality import (
-    CodeQualityAnalyzer,
-    CodeQualityResult,
-    CodeSmell,
-    CodeSmellType,
-    CodeSmellSeverity,
-    TodoComment,
-    DuplicateCodeBlock,
-    FrameworkDetection,
-    FrameworkType,
-    ModuleAnalysis,
-    ModuleType,
-)
-from .javascript_parsers_eslint import (
-    ESLintDirective,
-    ESLintDirectiveType,
-)
+from .javascript_parsers_babel import (BabelAnalysis, BabelConfig, BabelParser,
+                                       BabelPlugin, BabelPreset,
+                                       ECMAScriptVersion, JSXElement,
+                                       ModernJSSyntax, ProposalStage,
+                                       SyntaxFeature, TransformationResult)
+from .javascript_parsers_code_quality import (CodeQualityAnalyzer,
+                                              CodeQualityResult, CodeSmell,
+                                              CodeSmellSeverity, CodeSmellType,
+                                              DuplicateCodeBlock,
+                                              FrameworkDetection,
+                                              FrameworkType, ModuleAnalysis,
+                                              ModuleType, TodoComment)
+from .javascript_parsers_eslint import (ESLintConfig, ESLintDirective,
+                                        ESLintDirectiveType, ESLintFileResult,
+                                        ESLintParser, ESLintSeverity,
+                                        ESLintViolation)
+from .javascript_parsers_esprima import (  # Dataclasses for analysis
+    CodeMetrics, DesignPatternMatch, DesignPatternType, ExportInfo,
+    FunctionCallInfo, FunctionInfo, HalsteadMetrics, ImportInfo,
+    JavaScriptParser, ScopeInfo, SecurityIssue, SecuritySeverity)
+from .javascript_parsers_flow import (FlowAnalysis, FlowConfig, FlowCoverage,
+                                      FlowError, FlowInterface, FlowParser,
+                                      FlowSeverity, FlowTypeAlias,
+                                      FlowTypeAnnotation, FlowTypeKind,
+                                      FlowTypeParameter, Variance)
+from .javascript_parsers_jshint import (JSHintConfig, JSHintError,
+                                        JSHintFileResult, JSHintParser,
+                                        JSHintSeverity)
+from .javascript_parsers_prettier import (EndOfLine, FormatDiff, FormatResult,
+                                          HTMLWhitespaceSensitivity,
+                                          PrettierConfig, PrettierFormatter)
+from .javascript_parsers_prettier import PrettierParser as PrettierParserType
+from .javascript_parsers_prettier import ProseWrap, QuoteType, TrailingComma
+from .javascript_parsers_standard import (StandardConfig, StandardFileResult,
+                                          StandardJSParser, StandardSeverity,
+                                          StandardViolation)
+from .javascript_parsers_treesitter import (ExportStatement, ImportStatement,
+                                            JSLanguageVariant, JSSymbol,
+                                            JSXComponent)
+from .javascript_parsers_treesitter import SyntaxError as TreeSitterSyntaxError
+from .javascript_parsers_treesitter import (TreeSitterJSParser, TreeSitterNode,
+                                            TreeSitterParseResult)
+from .javascript_parsers_typescript import (DecoratorKind, DecoratorUsage,
+                                            EnumDeclaration, EnumMember,
+                                            IndexSignature,
+                                            InterfaceDeclaration,
+                                            MethodSignature,
+                                            NamespaceDeclaration,
+                                            ParameterDeclaration,
+                                            PropertySignature,
+                                            TypeAliasDeclaration,
+                                            TypeAnnotation, TypeGuard,
+                                            TypeKind, TypeParameter,
+                                            TypeScriptAnalysis,
+                                            TypeScriptParser)
 
 __all__ = [
     # Core parser (esprima)

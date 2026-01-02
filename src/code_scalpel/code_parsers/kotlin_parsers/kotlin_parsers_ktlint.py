@@ -72,11 +72,11 @@ TODO: LOW PRIORITY - Advanced Features
 [20251221_TODO] Add migration helpers from other formatters
 """
 
+import shutil
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
-import shutil
 
 
 class KtlintSeverity(Enum):

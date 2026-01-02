@@ -93,7 +93,19 @@ ENTERPRISE TIER - Enterprise AutoGen Features
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, TypedDict
+
+
+class AnalysisResultDict(TypedDict, total=False):
+    """Analysis result dictionary for JSON serialization."""
+
+    code: str
+    ast_analysis: dict[str, Any]
+    security_issues: list[dict[str, Any]]
+    style_issues: dict[str, list[str]]
+    suggestions: list[str]
+    refactored_code: str | None
+    error: str | None
 
 
 @dataclass
@@ -108,7 +120,7 @@ class AnalysisResult:
     refactored_code: Optional[str] = None
     error: Optional[str] = None
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> AnalysisResultDict:
         """Convert result to dictionary."""
         return {
             "code": self.code,

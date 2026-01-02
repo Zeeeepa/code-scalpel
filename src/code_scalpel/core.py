@@ -23,9 +23,7 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.analysis.core import (
-    CodeAnalysisToolkit,
-)
+from code_scalpel.analysis.core import CodeAnalysisToolkit
 
 __all__ = [
     "CodeAnalysisToolkit",

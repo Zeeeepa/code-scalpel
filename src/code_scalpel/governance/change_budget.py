@@ -34,12 +34,15 @@ import ast
 import fnmatch
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, BinaryIO, Dict, List, Optional, cast
 
 try:
     import tomli as tomllib
 except ImportError:
     import tomllib  # type: ignore
+
+# [20251227_BUGFIX] Import yaml for .yaml config files
+import yaml
 
 
 @dataclass
@@ -516,21 +519,34 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         config_path = ".code-scalpel/budget.yaml"
 
     config_file = Path(config_path)
+
+    # Default configuration structure
+    default_config = {
+        "default": {
+            "max_files": 5,
+            "max_lines_per_file": 100,
+            "max_total_lines": 300,
+            "max_complexity_increase": 10,
+            "allowed_file_patterns": ["*.py", "*.ts", "*.java"],
+            "forbidden_paths": [".git/", "node_modules/", "__pycache__/"],
+        }
+    }
+
     if not config_file.exists():
         # Return default configuration
-        return {
-            "default": {
-                "max_files": 5,
-                "max_lines_per_file": 100,
-                "max_total_lines": 300,
-                "max_complexity_increase": 10,
-                "allowed_file_patterns": ["*.py", "*.ts", "*.java"],
-                "forbidden_paths": [".git/", "node_modules/", "__pycache__/"],
-            }
-        }
+        return default_config
 
     # Load YAML configuration
-    with open(config_file, "rb") as f:
-        config = tomllib.load(f)
+    # [20251227_BUGFIX] Use yaml.safe_load for .yaml files, tomllib for .toml
+    with open(config_file, "r" if config_file.suffix == ".yaml" else "rb") as f:
+        if config_file.suffix == ".yaml":
+            config = yaml.safe_load(f)
+        else:
+            config = tomllib.load(cast(BinaryIO, f))
 
-    return config.get("budgets", {})
+    # [20251227_BUGFIX] Return default if file doesn't have expected structure
+    budgets = config.get("budgets", {}) if config else {}
+    if not budgets or "default" not in budgets:
+        return default_config
+
+    return budgets

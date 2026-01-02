@@ -16,13 +16,13 @@ Phase 2 Enhancement TODOs:
 [20251221_TODO] Add custom quality profile support
 """
 
+import base64
 import json
 from dataclasses import dataclass, field
 from typing import Optional
-from urllib.request import urlopen, Request
 from urllib.error import URLError
 from urllib.parse import urlparse
-import base64
+from urllib.request import Request, urlopen
 
 
 @dataclass

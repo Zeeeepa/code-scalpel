@@ -95,28 +95,21 @@ ENTERPRISE TIER - Distributed & Federated Initialization
 
 import json
 import secrets
-import yaml
 from pathlib import Path
-from typing import List, Dict, Any
-from .templates import (
-    POLICY_YAML_TEMPLATE,
-    BUDGET_YAML_TEMPLATE,
-    README_TEMPLATE,
-    GITIGNORE_TEMPLATE,
-    CONFIG_JSON_TEMPLATE,
-    ENV_EXAMPLE_TEMPLATE,
-    DEV_GOVERNANCE_YAML_TEMPLATE,
-    PROJECT_STRUCTURE_YAML_TEMPLATE,
-    POLICIES_README_TEMPLATE,
-    ARCHITECTURE_README_TEMPLATE,
-    DEVOPS_README_TEMPLATE,
-    DEVSECOPS_README_TEMPLATE,
-    PROJECT_README_TEMPLATE,
-    LAYERED_ARCHITECTURE_REGO_TEMPLATE,
-    DOCKER_SECURITY_REGO_TEMPLATE,
-    SECRET_DETECTION_REGO_TEMPLATE,
-    PROJECT_STRUCTURE_REGO_TEMPLATE,
-)
+from typing import Any, Dict
+
+import yaml
+
+from .templates import (ARCHITECTURE_README_TEMPLATE, BUDGET_YAML_TEMPLATE,
+                        CONFIG_JSON_TEMPLATE, DEV_GOVERNANCE_YAML_TEMPLATE,
+                        DEVOPS_README_TEMPLATE, DEVSECOPS_README_TEMPLATE,
+                        DOCKER_SECURITY_REGO_TEMPLATE, ENV_EXAMPLE_TEMPLATE,
+                        GITIGNORE_TEMPLATE, LAYERED_ARCHITECTURE_REGO_TEMPLATE,
+                        POLICIES_README_TEMPLATE, POLICY_YAML_TEMPLATE,
+                        PROJECT_README_TEMPLATE,
+                        PROJECT_STRUCTURE_REGO_TEMPLATE,
+                        PROJECT_STRUCTURE_YAML_TEMPLATE, README_TEMPLATE,
+                        SECRET_DETECTION_REGO_TEMPLATE)
 
 
 def generate_secret_key() -> str:
@@ -164,7 +157,9 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(json_file.name))
             except json.JSONDecodeError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(f"{json_file.name}: Invalid JSON - {e}")
+                validation_results["errors"].append(
+                    f"{json_file.name}: Invalid JSON - {e}"
+                )
 
     # Validate YAML files
     yaml_files = list(config_dir.glob("*.yaml")) + list(config_dir.glob("*.yml"))
@@ -176,7 +171,9 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(yaml_file.name))
             except yaml.YAMLError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(f"{yaml_file.name}: Invalid YAML - {e}")
+                validation_results["errors"].append(
+                    f"{yaml_file.name}: Invalid YAML - {e}"
+                )
 
     # Validate Rego files (basic syntax check - just ensure they're readable)
     rego_files = list(config_dir.rglob("*.rego"))
@@ -202,16 +199,29 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
     return validation_results
 
 
-def init_config_dir(target_dir: str = ".") -> dict:
+def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     """
     Initialize .code-scalpel configuration directory with templates.
 
     Args:
         target_dir: Directory where .code-scalpel should be created (default: current dir)
+        mode: Initialization mode.
+            - "full": CLI-style init (creates policy manifest + generates secret + writes .env)
+            - "templates_only": create `.code-scalpel/` structure without secrets/manifest
 
     Returns:
         Dictionary with status information
     """
+    # [20251230_FEATURE] Allow MCP server to auto-init without creating secrets by default.
+    mode = (mode or "full").strip().lower()
+    if mode not in {"full", "templates_only"}:
+        return {
+            "success": False,
+            "message": f"Invalid init mode: {mode}. Expected 'full' or 'templates_only'.",
+            "path": str(Path(target_dir).resolve() / ".code-scalpel"),
+            "files_created": [],
+        }
+
     target_path = Path(target_dir).resolve()
     config_dir = target_path / ".code-scalpel"
 
@@ -255,9 +265,11 @@ def init_config_dir(target_dir: str = ".") -> dict:
     files_created.append("config.json")
 
     # Create .env.example with environment variable documentation
-    env_example_file = target_path / ".env.example"
-    env_example_file.write_text(ENV_EXAMPLE_TEMPLATE)
-    files_created.append(".env.example")
+    # NOTE: Server auto-init mode should not write env files by default.
+    if mode == "full":
+        env_example_file = target_path / ".env.example"
+        env_example_file.write_text(ENV_EXAMPLE_TEMPLATE)
+        files_created.append(".env.example")
 
     # Initialize empty audit.log
     audit_log_file = config_dir / "audit.log"
@@ -322,8 +334,38 @@ def init_config_dir(target_dir: str = ".") -> dict:
     files_created.append("policies/project/structure.rego")
 
     # ========================================================================
+    # [20251229_FEATURE] v3.3.0 - License Directory
+    # ========================================================================
+    license_dir = config_dir / "license"
+    license_dir.mkdir(exist_ok=True)
+
+    license_readme = license_dir / "README.md"
+    license_readme.write_text(
+        """# Code Scalpel License Directory
+
+This directory stores license keys and cached license state.
+
+- `license.jwt`: Place your Pro/Enterprise license key here.
+- `license_state.json`: Automatically generated cache of license validation results.
+
+Do not commit `license.jwt` to version control if it contains sensitive information.
+"""
+    )
+    files_created.append("license/README.md")
+
+    # ========================================================================
     # [20241225_FEATURE] v3.3.0 - Policy Integrity Manifest
     # ========================================================================
+
+    if mode == "templates_only":
+        return {
+            "success": True,
+            "message": "Configuration directory created successfully (templates only)",
+            "path": str(config_dir),
+            "files_created": files_created,
+            "validation": validate_config_files(config_dir),
+            "manifest_secret": None,
+        }
 
     # Generate secure HMAC key
     secret_key = generate_secret_key()
@@ -352,8 +394,11 @@ def init_config_dir(target_dir: str = ".") -> dict:
         )
 
         # Save manifest
-        manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, str(config_dir))
-        files_created.append("policy_manifest.json")
+        manifest_path = CryptographicPolicyVerifier.save_manifest(
+            manifest, str(config_dir)
+        )
+        # [20251230_BUGFIX] init creates policy.manifest.json (not policy_manifest.json)
+        files_created.append("policy.manifest.json")
 
         # Create .env.example with HMAC secret documentation
         env_content = f"""# Code Scalpel Environment Variables
@@ -390,7 +435,9 @@ SCALPEL_MANIFEST_SECRET={secret_key}
         # Update .gitignore to exclude .env but include .env.example
         gitignore_content = gitignore_file.read_text()
         if ".env\n" not in gitignore_content:
-            gitignore_file.write_text(gitignore_content + "\n# Environment variables with secrets\n.env\n")
+            gitignore_file.write_text(
+                gitignore_content + "\n# Environment variables with secrets\n.env\n"
+            )
 
         # Validate all config files
         validation = validate_config_files(config_dir)

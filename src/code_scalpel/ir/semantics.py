@@ -151,16 +151,7 @@ Example:
 from abc import ABC, abstractmethod
 from typing import Any
 
-from z3 import (
-    ExprRef,
-    ArithRef,
-    BoolRef,
-    SeqRef,
-    Concat,
-    And,
-    Or,
-    Not,
-)
+from z3 import And, ArithRef, BoolRef, Concat, ExprRef, Not, Or, SeqRef
 
 
 class LanguageSemantics(ABC):

@@ -80,9 +80,12 @@ ParserLanguage: Any = None
 _detect_language_func: Optional[Callable[..., Any]] = None
 
 try:
-    from .code_parsers.factory import ParserFactory as _PF  # type: ignore[import-not-found]
-    from .code_parsers.interface import Language as _PL  # type: ignore[import-not-found]
-    from .code_parsers.language_detection import detect_language as _dl  # type: ignore[import-not-found]
+    from .code_parsers.factory import \
+        ParserFactory as _PF  # type: ignore[import-not-found]
+    from .code_parsers.interface import \
+        Language as _PL  # type: ignore[import-not-found]
+    from .code_parsers.language_detection import \
+        detect_language as _dl  # type: ignore[import-not-found]
 
     ParserFactory = _PF
     ParserLanguage = _PL
@@ -1445,7 +1448,10 @@ class CodeAnalyzer:
 
 # Convenience function for quick analysis
 def analyze_code(
-    code: str, level: AnalysisLevel = AnalysisLevel.STANDARD
+    code: str,
+    level: AnalysisLevel = AnalysisLevel.STANDARD,
+    *,
+    language: AnalysisLanguage | str = "python",
 ) -> AnalysisResult:
     """
     Convenience function to quickly analyze code.
@@ -1453,9 +1459,20 @@ def analyze_code(
     Args:
         code: Python source code
         level: Analysis level
+        language: Language hint (accepted for MCP parity). Only "python"/"auto" are supported.
 
     Returns:
         AnalysisResult with all analysis data
     """
+    # [20251228_BUGFIX] Accept `language=` for parity with MCP API and tests.
+    # [20260101_BUGFIX] Proper type handling for language parameter (enum or str)
+    from enum import Enum
+
+    lang_value = language.value if isinstance(language, Enum) else str(language)
+    if lang_value.lower() not in {"python", "auto"}:
+        raise ValueError(
+            "This convenience analyze_code() only supports Python. "
+            "Use code_scalpel.mcp.server.analyze_code for polyglot analysis."
+        )
     analyzer = CodeAnalyzer(level=level)
     return analyzer.analyze(code)

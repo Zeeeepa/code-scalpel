@@ -214,20 +214,15 @@ State Machine:
 - [ ] Implement advanced monitoring
 """
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Optional, Callable, List
 import logging
 import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Callable, List, Optional
 
-from code_scalpel.autonomy.stubs import (
-    ErrorAnalysis,
-    FixHint,
-    SandboxResult,
-    SandboxExecutor,
-    ErrorToDiffEngine,
-    FileChange,
-)
+from code_scalpel.autonomy.stubs import (ErrorAnalysis, ErrorToDiffEngine,
+                                         FileChange, FixHint, SandboxExecutor,
+                                         SandboxResult)
 
 
 @dataclass

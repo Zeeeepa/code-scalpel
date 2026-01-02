@@ -249,10 +249,10 @@ def scalpel_validate_impl(code: str) -> dict[str, Any]:
     [20251217_FEATURE] Sandbox validation implementation for AutoGen.
     """
     try:
-        from ...symbolic_execution_tools import analyze_security
-
         # Validate code parses
         import ast
+
+        from ...symbolic_execution_tools import analyze_security
 
         ast.parse(code)
 

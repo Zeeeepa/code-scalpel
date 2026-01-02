@@ -22,45 +22,24 @@ using different analysis tools.
     See consolidation plan in TODOs below.
 """
 from .base_parser import BaseParser, Language, ParseResult, PreprocessorConfig
-from .interface import IParser
+# [20251224_FEATURE] Import from polyglot extractor (migrated from polyglot/)
+from .extractor import EXTENSION_MAP
+from .extractor import \
+    Language as \
+    PolyglotLanguage  # Alias to avoid conflict with base_parser.Language
+from .extractor import (PolyglotExtractionResult, PolyglotExtractor,
+                        detect_language, extract_from_code, extract_from_file)
 from .factory import ParserFactory
+from .interface import IParser
 from .python_parser import PythonParser
-
 # Import parsers from python_parsers submodule
 # These use lazy imports to avoid loading all dependencies at startup
-from .python_parsers import (
-    PythonASTParser,
-    RuffParser,
-    # These will be available when their modules are complete
-    # BanditParser,
-    # Flake8Parser,
-    # MypyParser,
-    # PylintParser,
-    # PydocstyleParser,
-    # PycodestyleParser,
-    # ProspectorParser,
-)
-
-# [20251224_FEATURE] Import from polyglot extractor (migrated from polyglot/)
-from .extractor import (
-    PolyglotExtractor,
-    PolyglotExtractionResult,
-    detect_language,
-    extract_from_file,
-    extract_from_code,
-    EXTENSION_MAP,
-    Language as PolyglotLanguage,  # Alias to avoid conflict with base_parser.Language
-)
-
+from .python_parsers import (  # These will be available when their modules are complete; BanditParser,; Flake8Parser,; MypyParser,; PylintParser,; PydocstyleParser,; PycodestyleParser,; ProspectorParser,
+    PythonASTParser, RuffParser)
 # [20251224_FEATURE] TypeScript parser exports (migrated from polyglot/typescript/)
-from .typescript_parsers import (
-    TypeScriptParser,
-    TypeScriptAnalyzer,
-    TypeNarrowing,
-    DecoratorAnalyzer,
-    AliasResolver,
-)
-
+from .typescript_parsers import (AliasResolver, DecoratorAnalyzer,
+                                 TypeNarrowing, TypeScriptAnalyzer,
+                                 TypeScriptParser)
 
 __all__ = [
     # Base classes

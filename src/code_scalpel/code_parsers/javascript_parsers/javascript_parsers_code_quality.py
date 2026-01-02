@@ -56,11 +56,11 @@ Future Enhancements:
     - Technical debt scoring
 """
 
+import hashlib
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
-import re
-import hashlib
 
 
 class CodeSmellType(Enum):

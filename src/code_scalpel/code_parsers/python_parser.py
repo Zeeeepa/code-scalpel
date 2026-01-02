@@ -128,7 +128,8 @@ TOTAL TEST ESTIMATE: 435 tests (145 COMMUNITY + 150 PRO + 140 ENTERPRISE)
 
 import ast
 from typing import Any, List
-from .interface import IParser, ParseResult, Language
+
+from .interface import IParser, Language, ParseResult
 
 
 class PythonParser(IParser):

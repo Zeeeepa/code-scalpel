@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import ast
 import os
-from pathlib import Path
-from typing import Dict, List, Set, Optional
-from dataclasses import dataclass, field
 from collections import deque
-
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 # [20251213_FEATURE] v1.5.0 - Enhanced call graph with line numbers and Mermaid support
 
@@ -217,49 +216,527 @@ class CallGraphBuilder:
             {}
         )  # file_path -> { alias -> full_name }
 
+        # [20251231_FEATURE] v1.0 - JS/TS support for get_call_graph
+        # Raw JS/TS import metadata: file -> local_name -> (module_spec, imported_name)
+        self._js_imports_raw: Dict[str, Dict[str, tuple[str, str]]] = {}
+        # Export index: file -> exported symbol names
+        self._js_exports: Dict[str, Set[str]] = {}
+
     def build(self, advanced_resolution: bool = False) -> Dict[str, List[str]]:
-      """Build the call graph.
+        """Build the call graph.
 
-      Returns an adjacency list: {"module:caller": ["module:callee", ...]}
+        Returns an adjacency list: {"module:caller": ["module:callee", ...]}
 
-      ====================================================================
-      TIER 1: COMMUNITY (Free - High Priority)
-      ====================================================================
-      [20251224_TIER1_TODO] FEATURE: Two-pass graph construction
-        - First pass: collect definitions and imports
-        - Second pass: analyze calls and resolve them
-        - Error handling for malformed code
-        - Add 15+ tests for build process
-      """
-      # 1. First pass: Collect definitions and imports
-      for file_path in self._iter_python_files():
-        rel_path = str(file_path.relative_to(self.root_path))
+        ====================================================================
+        TIER 1: COMMUNITY (Free - High Priority)
+        ====================================================================
+        [20251224_TIER1_TODO] FEATURE: Two-pass graph construction
+          - First pass: collect definitions and imports
+          - Second pass: analyze calls and resolve them
+          - Error handling for malformed code
+          - Add 15+ tests for build process
+        """
+        # 1. First pass: Collect definitions and imports
+        for file_path in self._iter_source_files():
+            rel_path = str(file_path.relative_to(self.root_path))
+            suffix = file_path.suffix.lower()
+
+            if suffix == ".py":
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        code = f.read()
+                    tree = ast.parse(code)
+                    self._analyze_definitions(tree, rel_path)
+                except Exception:
+                    continue
+            elif suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+                self._analyze_definitions_js_ts(file_path, rel_path)
+
+        # 2. Second pass: Analyze calls and resolve them
+        graph: Dict[str, List[str]] = {}
+        for file_path in self._iter_source_files():
+            rel_path = str(file_path.relative_to(self.root_path))
+            suffix = file_path.suffix.lower()
+
+            if suffix == ".py":
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        code = f.read()
+                    tree = ast.parse(code)
+                    file_calls = self._analyze_calls(
+                        tree,
+                        rel_path,
+                        advanced_resolution=advanced_resolution,
+                    )
+                    graph.update(file_calls)
+                except Exception:
+                    continue
+            elif suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+                file_calls = self._analyze_calls_js_ts(
+                    file_path,
+                    rel_path,
+                    advanced_resolution=advanced_resolution,
+                )
+                graph.update(file_calls)
+
+        return graph
+
+    def _iter_source_files(self):
+        """Iterate over supported source files (.py/.js/.ts) in project."""
+        skip_dirs = {
+            ".git",
+            ".venv",
+            "venv",
+            "__pycache__",
+            "node_modules",
+            "dist",
+            "build",
+        }
+        for root, dirs, files in os.walk(self.root_path):
+            dirs[:] = [d for d in dirs if d not in skip_dirs and not d.startswith(".")]
+            for file in files:
+                lower = file.lower()
+                if lower.endswith(
+                    (
+                        ".py",
+                        ".js",
+                        ".jsx",
+                        ".ts",
+                        ".tsx",
+                        ".mjs",
+                        ".cjs",
+                    )
+                ):
+                    yield Path(root) / file
+
+    def _analyze_definitions_js_ts(self, file_path: Path, rel_path: str) -> None:
+        """Extract JS/TS definitions and import/export metadata.
+
+        Prefers tree-sitter (when available) and falls back to the Esprima-based
+        parser shipped with Code Scalpel.
+        """
+        # ------------------------------------------------------------------
+        # Tree-sitter path (preferred)
+        # ------------------------------------------------------------------
         try:
-          with open(file_path, "r", encoding="utf-8") as f:
-            code = f.read()
-          tree = ast.parse(code)
-          self._analyze_definitions(tree, rel_path)
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
+                TREE_SITTER_AVAILABLE, TreeSitterJSParser)
         except Exception:
-          continue
+            TREE_SITTER_AVAILABLE = False
+            TreeSitterJSParser = None  # type: ignore[assignment]
 
-      # 2. Second pass: Analyze calls and resolve them
-      graph: Dict[str, List[str]] = {}
-      for file_path in self._iter_python_files():
-        rel_path = str(file_path.relative_to(self.root_path))
+        if TREE_SITTER_AVAILABLE and TreeSitterJSParser is not None:
+            try:
+                parser = TreeSitterJSParser()
+                result = parser.parse_file(str(file_path))
+            except Exception:
+                result = None
+
+            if result is not None:
+                # Definitions
+                self.definitions[rel_path] = set()
+                for sym in result.symbols:
+                    if sym.kind == "function":
+                        self.definitions[rel_path].add(sym.name)
+                    elif sym.kind == "class":
+                        self.definitions[rel_path].add(sym.name)
+                    elif sym.kind == "method" and sym.parent_name:
+                        self.definitions[rel_path].add(f"{sym.parent_name}.{sym.name}")
+
+                # Imports (raw)
+                self._js_imports_raw.setdefault(rel_path, {})
+                for imp in result.imports:
+                    module = imp.module
+                    # import foo from './x'
+                    if imp.default_import:
+                        self._js_imports_raw[rel_path][imp.default_import] = (
+                            module,
+                            "<default>",
+                        )
+                    # import * as ns from './x'
+                    if imp.namespace_import:
+                        self._js_imports_raw[rel_path][imp.namespace_import] = (
+                            module,
+                            "*",
+                        )
+                    # import { a as b } from './x'
+                    for name, alias in imp.named_imports:
+                        local = alias or name
+                        self._js_imports_raw[rel_path][local] = (module, name)
+
+                # Exports index (best-effort)
+                self._js_exports.setdefault(rel_path, set())
+                for ex in result.exports:
+                    if ex.name:
+                        self._js_exports[rel_path].add(ex.name)
+                    if ex.kind == "default":
+                        self._js_exports[rel_path].add("<default>")
+                return
+
+        # ------------------------------------------------------------------
+        # Esprima fallback (portable)
+        # ------------------------------------------------------------------
         try:
-          with open(file_path, "r", encoding="utf-8") as f:
-            code = f.read()
-          tree = ast.parse(code)
-          file_calls = self._analyze_calls(
-            tree,
-            rel_path,
-            advanced_resolution=advanced_resolution,
-          )
-          graph.update(file_calls)
+            import esprima  # type: ignore[import-untyped]
+            import esprima.nodes  # type: ignore[import-untyped]
         except Exception:
-          continue
+            return
 
-      return graph
+        try:
+            code = file_path.read_text(encoding="utf-8")
+        except Exception:
+            return
+
+        try:
+            # Prefer module parsing so `import`/`export` works.
+            ast_js = esprima.parseModule(code, loc=True, tolerant=True)
+        except Exception:
+            try:
+                ast_js = esprima.parseScript(code, loc=True, tolerant=True)
+            except Exception:
+                return
+
+        def _children(n):
+            if isinstance(n, list):
+                for item in n:
+                    if isinstance(item, esprima.nodes.Node):
+                        yield item
+                return
+            if not isinstance(n, esprima.nodes.Node):
+                return
+
+            for field in n.__dict__.values():
+                if isinstance(field, esprima.nodes.Node):
+                    yield field
+                elif isinstance(field, list):
+                    for item in field:
+                        if isinstance(item, esprima.nodes.Node):
+                            yield item
+
+        # Definitions
+        self.definitions[rel_path] = set()
+        stack: list[esprima.nodes.Node] = [ast_js]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, esprima.nodes.FunctionDeclaration):
+                func_id = getattr(cur, "id", None)
+                name = getattr(func_id, "name", None)
+                if name:
+                    self.definitions[rel_path].add(name)
+            for ch in _children(cur):
+                stack.append(ch)
+
+        # Imports (raw)
+        self._js_imports_raw.setdefault(rel_path, {})
+        stack: list[esprima.nodes.Node] = [ast_js]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, esprima.nodes.ImportDeclaration):
+                module_val = getattr(getattr(cur, "source", None), "value", None)
+                module = str(module_val) if module_val is not None else ""
+                for spec in getattr(cur, "specifiers", []) or []:
+                    if isinstance(spec, esprima.nodes.ImportDefaultSpecifier):
+                        local = getattr(getattr(spec, "local", None), "name", None)
+                        if local:
+                            self._js_imports_raw[rel_path][local] = (
+                                module,
+                                "<default>",
+                            )
+                    elif isinstance(spec, esprima.nodes.ImportNamespaceSpecifier):
+                        local = getattr(getattr(spec, "local", None), "name", None)
+                        if local:
+                            self._js_imports_raw[rel_path][local] = (module, "*")
+                    elif isinstance(spec, esprima.nodes.ImportSpecifier):
+                        imported = getattr(
+                            getattr(spec, "imported", None), "name", None
+                        )
+                        local = (
+                            getattr(getattr(spec, "local", None), "name", None)
+                            or imported
+                        )
+                        if imported and local:
+                            self._js_imports_raw[rel_path][local] = (
+                                module,
+                                str(imported),
+                            )
+
+            for ch in _children(cur):
+                stack.append(ch)
+
+        # Exports index (best-effort)
+        self._js_exports.setdefault(rel_path, set())
+        stack: list[esprima.nodes.Node] = [ast_js]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, esprima.nodes.ExportDefaultDeclaration):
+                self._js_exports[rel_path].add("<default>")
+                decl = getattr(cur, "declaration", None)
+                name = getattr(getattr(decl, "id", None), "name", None)
+                if name:
+                    self._js_exports[rel_path].add(name)
+            elif isinstance(cur, esprima.nodes.ExportNamedDeclaration):
+                decl = getattr(cur, "declaration", None)
+                exported_name = getattr(getattr(decl, "id", None), "name", None)
+                if exported_name:
+                    self._js_exports[rel_path].add(exported_name)
+                for spec in getattr(cur, "specifiers", []) or []:
+                    exported = getattr(getattr(spec, "exported", None), "name", None)
+                    if exported:
+                        self._js_exports[rel_path].add(exported)
+
+            for ch in _children(cur):
+                stack.append(ch)
+
+    def _resolve_js_module_path(self, from_file: str, module_spec: str) -> str | None:
+        """Resolve a relative JS/TS module specifier to a project-relative file path."""
+        if not module_spec or not module_spec.startswith("."):
+            return None
+
+        base_dir = (self.root_path / from_file).parent
+        # Handle './x', './x.js', './x.ts', './x/index.js', etc.
+        candidate_bases = [module_spec]
+        if not any(
+            module_spec.endswith(ext)
+            for ext in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
+        ):
+            candidate_bases.extend(
+                [
+                    module_spec + ext
+                    for ext in (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")
+                ]
+            )
+
+        candidates: list[Path] = []
+        for base in candidate_bases:
+            candidates.append((base_dir / base).resolve())
+        # index.* fallback
+        if module_spec and not module_spec.endswith(
+            (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")
+        ):
+            for ext in (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"):
+                candidates.append((base_dir / module_spec / f"index{ext}").resolve())
+
+        for p in candidates:
+            try:
+                if p.exists() and p.is_file() and self.root_path in p.parents:
+                    return str(p.relative_to(self.root_path))
+            except Exception:
+                continue
+        return None
+
+    def _analyze_calls_js_ts(
+        self,
+        file_path: Path,
+        rel_path: str,
+        advanced_resolution: bool = False,
+    ) -> Dict[str, List[str]]:
+        """Build per-file call graph for JS/TS.
+
+        Prefers tree-sitter (when available) and falls back to Esprima.
+        """
+        # ------------------------------------------------------------------
+        # Tree-sitter path (preferred)
+        # ------------------------------------------------------------------
+        try:
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
+                TREE_SITTER_AVAILABLE, TreeSitterJSParser)
+        except Exception:
+            TREE_SITTER_AVAILABLE = False
+            TreeSitterJSParser = None  # type: ignore[assignment]
+
+        if TREE_SITTER_AVAILABLE and TreeSitterJSParser is not None:
+            try:
+                parser = TreeSitterJSParser()
+                result = parser.parse_file(str(file_path))
+                root = result.root_node
+            except Exception:
+                result = None
+                root = None
+        else:
+            result = None
+            root = None
+
+        def _resolve_callee(raw_callee: str, caller_parent: str | None) -> str:
+            # Resolve this.method() to Class.method when inside a class method.
+            if advanced_resolution and caller_parent and raw_callee.startswith("this."):
+                return f"{rel_path}:{caller_parent}.{raw_callee.split('.', 1)[1]}"
+
+            # Local direct definition in same file
+            if raw_callee in self.definitions.get(rel_path, set()):
+                return f"{rel_path}:{raw_callee}"
+
+            if advanced_resolution:
+                # Resolve namespace imports: ns.foo()
+                if "." in raw_callee:
+                    base, member = raw_callee.split(".", 1)
+                    imp = self._js_imports_raw.get(rel_path, {}).get(base)
+                    if imp and imp[1] == "*":
+                        mod = self._resolve_js_module_path(rel_path, imp[0])
+                        if mod and member in self._js_exports.get(mod, set()):
+                            return f"{mod}:{member}"
+
+                # Resolve imported identifiers
+                imp = self._js_imports_raw.get(rel_path, {}).get(raw_callee)
+                if imp:
+                    module_spec, imported_name = imp
+                    mod = self._resolve_js_module_path(rel_path, module_spec)
+                    if mod:
+                        if imported_name == "<default>":
+                            return f"{mod}:<default>"
+                        if imported_name in self._js_exports.get(mod, set()):
+                            return f"{mod}:{imported_name}"
+                        # Best-effort even if exports index is incomplete
+                        return f"{mod}:{imported_name}"
+
+            return raw_callee
+
+        if result is not None and root is not None:
+            # Build a list of callable symbol ranges for caller attribution
+            callable_ranges: list[tuple[int, int, str, str | None]] = []
+            for sym in result.symbols:
+                if sym.kind == "function":
+                    end_line = sym.end_line or sym.line
+                    callable_ranges.append((sym.line, end_line, sym.name, None))
+                elif sym.kind == "method" and sym.parent_name:
+                    end_line = sym.end_line or sym.line
+                    callable_ranges.append(
+                        (sym.line, end_line, sym.name, sym.parent_name)
+                    )
+
+            def _caller_for_line(line: int) -> tuple[str, str | None] | None:
+                # Choose the smallest enclosing range (most specific)
+                best: tuple[int, int, str, str | None] | None = None
+                for start, end, name, parent in callable_ranges:
+                    if start <= line <= end:
+                        if best is None or (end - start) < (best[1] - best[0]):
+                            best = (start, end, name, parent)
+                if best is None:
+                    return None
+                return (best[2], best[3])
+
+            def _callee_from_call(node) -> str | None:
+                # call_expression: function field
+                fn = node.child_by_field("function")
+                if not fn:
+                    return None
+                # Identifier call
+                if fn.type == "identifier":
+                    return str(fn.text)
+                # member_expression: obj.prop
+                if fn.type == "member_expression":
+                    obj = fn.child_by_field("object")
+                    prop = fn.child_by_field("property")
+                    if obj and prop:
+                        return f"{str(obj.text)}.{str(prop.text)}"
+                    return str(fn.text)
+                return str(fn.text)
+
+                # Walk tree to find call expressions
+                file_graph: Dict[str, List[str]] = {}
+
+                def visit(node) -> None:
+                    if node.type in {"call_expression", "new_expression"}:
+                        line = getattr(node, "start_line", None)
+                        if isinstance(line, int):
+                            caller = _caller_for_line(line)
+                            if caller:
+                                caller_name, caller_parent = caller
+                                caller_key = (
+                                    f"{rel_path}:{caller_parent}.{caller_name}"
+                                    if caller_parent
+                                    else f"{rel_path}:{caller_name}"
+                                )
+                                raw = _callee_from_call(node)
+                                if raw:
+                                    file_graph.setdefault(caller_key, []).append(
+                                        _resolve_callee(raw, caller_parent)
+                                    )
+
+                    for child in getattr(node, "named_children", []) or []:
+                        visit(child)
+
+                visit(root)
+                return file_graph
+
+        # ------------------------------------------------------------------
+        # Esprima fallback
+        # ------------------------------------------------------------------
+        try:
+            import esprima  # type: ignore[import-untyped]
+            import esprima.nodes  # type: ignore[import-untyped]
+        except Exception:
+            return {}
+
+        try:
+            code = file_path.read_text(encoding="utf-8")
+        except Exception:
+            return {}
+
+        try:
+            ast_js = esprima.parseModule(code, loc=True, tolerant=True)
+        except Exception:
+            try:
+                ast_js = esprima.parseScript(code, loc=True, tolerant=True)
+            except Exception:
+                return {}
+
+        def _children(n):
+            if isinstance(n, list):
+                for item in n:
+                    if isinstance(item, esprima.nodes.Node):
+                        yield item
+                return
+            if not isinstance(n, esprima.nodes.Node):
+                return
+
+            for field in n.__dict__.values():
+                if isinstance(field, esprima.nodes.Node):
+                    yield field
+                elif isinstance(field, list):
+                    for item in field:
+                        if isinstance(item, esprima.nodes.Node):
+                            yield item
+
+        def _callee_name(call_node) -> str | None:
+            callee = getattr(call_node, "callee", None)
+            if isinstance(callee, esprima.nodes.Identifier):
+                return callee.name
+            if isinstance(callee, esprima.nodes.MemberExpression):
+                obj = getattr(callee, "object", None)
+                prop = getattr(callee, "property", None)
+                if isinstance(obj, esprima.nodes.Identifier) and isinstance(
+                    prop, esprima.nodes.Identifier
+                ):
+                    return f"{obj.name}.{prop.name}"
+            return None
+
+        file_graph: Dict[str, List[str]] = {}
+
+        # Walk while tracking current function context.
+        stack: list[tuple[object, str]] = [(ast_js, "<global>")]
+        while stack:
+            cur, current_fn = stack.pop()
+            if isinstance(cur, esprima.nodes.FunctionDeclaration):
+                name = getattr(getattr(cur, "id", None), "name", None) or "<anonymous>"
+                # Traverse into the function body with new context.
+                for ch in _children(cur):
+                    stack.append((ch, name))
+                continue
+
+            if isinstance(
+                cur, (esprima.nodes.CallExpression, esprima.nodes.NewExpression)
+            ):
+                raw = _callee_name(cur)
+                if raw and current_fn not in {"<global>", "<anonymous>", "<arrow>"}:
+                    caller_key = f"{rel_path}:{current_fn}"
+                    file_graph.setdefault(caller_key, []).append(
+                        _resolve_callee(raw, None)
+                    )
+
+            for ch in _children(cur):
+                stack.append((ch, current_fn))
+
+        return file_graph
 
     def _iter_python_files(self):
         """
@@ -659,8 +1136,13 @@ class CallGraphBuilder:
 
         # Collect node information with line numbers
         node_info: Dict[str, CallNode] = {}
-        for file_path in self._iter_python_files():
+
+        # Python nodes
+        for file_path in self._iter_source_files():
             rel_path = str(file_path.relative_to(self.root_path))
+            suffix = file_path.suffix.lower()
+            if suffix != ".py":
+                continue
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     code = f.read()
@@ -705,11 +1187,174 @@ class CallGraphBuilder:
             except Exception:
                 continue
 
+        # JS/TS nodes
+        tree_sitter_available = False
+        TreeSitterJSParser = None  # type: ignore[assignment]
+        try:
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import \
+                TREE_SITTER_AVAILABLE
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import \
+                TreeSitterJSParser as _TSParser
+
+            tree_sitter_available = bool(TREE_SITTER_AVAILABLE)
+            TreeSitterJSParser = _TSParser
+        except Exception:
+            tree_sitter_available = False
+
+        def _add_js_nodes_esprima(file_path: Path, rel_path: str) -> None:
+            try:
+                import esprima  # type: ignore[import-untyped]
+                import esprima.nodes  # type: ignore[import-untyped]
+            except Exception:
+                return
+
+            try:
+                code = file_path.read_text(encoding="utf-8")
+            except Exception:
+                return
+
+            try:
+                ast_js = esprima.parseModule(code, loc=True, tolerant=True)
+            except Exception:
+                try:
+                    ast_js = esprima.parseScript(code, loc=True, tolerant=True)
+                except Exception:
+                    return
+
+            def _children(n):
+                if isinstance(n, list):
+                    for item in n:
+                        if isinstance(item, esprima.nodes.Node):
+                            yield item
+                    return
+                if not isinstance(n, esprima.nodes.Node):
+                    return
+                for field in n.__dict__.values():
+                    if isinstance(field, esprima.nodes.Node):
+                        yield field
+                    elif isinstance(field, list):
+                        for item in field:
+                            if isinstance(item, esprima.nodes.Node):
+                                yield item
+
+            def _callee_ident(call_node) -> str | None:
+                callee = getattr(call_node, "callee", None)
+                if isinstance(callee, esprima.nodes.Identifier):
+                    return callee.name
+                return None
+
+            # Determine top-level called identifiers.
+            top_level_called: Set[str] = set()
+            call_stack: list[tuple[esprima.nodes.Node, str]] = [(ast_js, "<global>")]
+            while call_stack:
+                cur, current_fn = call_stack.pop()
+                if isinstance(cur, esprima.nodes.FunctionDeclaration):
+                    name = (
+                        getattr(getattr(cur, "id", None), "name", None) or "<anonymous>"
+                    )
+                    for ch in _children(cur):
+                        call_stack.append((ch, name))
+                    continue
+
+                if current_fn == "<global>" and isinstance(
+                    cur, esprima.nodes.CallExpression
+                ):
+                    ident = _callee_ident(cur)
+                    if ident:
+                        top_level_called.add(ident)
+
+                for ch in _children(cur):
+                    call_stack.append((ch, current_fn))
+
+            # Extract function declarations.
+            func_stack: list[esprima.nodes.Node] = [ast_js]
+            while func_stack:
+                cur = func_stack.pop()
+                if isinstance(cur, esprima.nodes.FunctionDeclaration):
+                    name = getattr(getattr(cur, "id", None), "name", None)
+                    if name:
+                        loc = getattr(cur, "loc", None)
+                        start = getattr(loc, "start", None) if loc else None
+                        end = getattr(loc, "end", None) if loc else None
+                        line = getattr(start, "line", 0) if start else 0
+                        end_line = getattr(end, "line", None) if end else None
+                        key = f"{rel_path}:{name}"
+                        is_entry = name == "main" or name in top_level_called
+                        node_info[key] = CallNode(
+                            name=name,
+                            file=rel_path,
+                            line=line,
+                            end_line=end_line,
+                            is_entry_point=is_entry,
+                        )
+                for ch in _children(cur):
+                    func_stack.append(ch)
+
+        if tree_sitter_available and TreeSitterJSParser is not None:
+            js_parser = TreeSitterJSParser()
+            for file_path in self._iter_source_files():
+                rel_path = str(file_path.relative_to(self.root_path))
+                suffix = file_path.suffix.lower()
+                if suffix not in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+                    continue
+                try:
+                    parsed = js_parser.parse_file(str(file_path))
+                except Exception:
+                    # tree-sitter may be "available" but lack language bindings at runtime.
+                    _add_js_nodes_esprima(file_path, rel_path)
+                    continue
+
+                # Best-effort JS entry-point detection: functions invoked as direct root statements.
+                top_level_called: Set[str] = set()
+                try:
+                    for child in getattr(parsed.root_node, "named_children", []) or []:
+                        if child.type != "expression_statement":
+                            continue
+                        expr = child.child_by_field("expression")
+                        if expr and expr.type == "call_expression":
+                            fn = expr.child_by_field("function")
+                            if fn and fn.type == "identifier":
+                                top_level_called.add(str(fn.text))
+                except Exception:
+                    pass
+
+                for sym in parsed.symbols:
+                    if sym.kind == "function":
+                        key = f"{rel_path}:{sym.name}"
+                        is_entry = sym.name == "main" or sym.name in top_level_called
+                        node_info[key] = CallNode(
+                            name=sym.name,
+                            file=rel_path,
+                            line=sym.line,
+                            end_line=sym.end_line,
+                            is_entry_point=is_entry,
+                        )
+                    elif (
+                        sym.kind == "method" and sym.parent_name and advanced_resolution
+                    ):
+                        qualified = f"{sym.parent_name}.{sym.name}"
+                        key = f"{rel_path}:{qualified}"
+                        node_info[key] = CallNode(
+                            name=qualified,
+                            file=rel_path,
+                            line=sym.line,
+                            end_line=sym.end_line,
+                            is_entry_point=False,
+                        )
+        else:
+            for file_path in self._iter_source_files():
+                rel_path = str(file_path.relative_to(self.root_path))
+                suffix = file_path.suffix.lower()
+                if suffix not in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+                    continue
+                _add_js_nodes_esprima(file_path, rel_path)
+
         # If entry_point is specified, filter to reachable nodes
         if entry_point:
             reachable = self._get_reachable_nodes(base_graph, entry_point, depth)
         else:
-            reachable = set(base_graph.keys())
+            # "Includes all functions" should include leaf nodes too (nodes with no outgoing edges).
+            reachable = set(node_info.keys()) | set(base_graph.keys())
 
         reachable_list = sorted(reachable)
         total_nodes = len(reachable_list)
@@ -741,19 +1386,19 @@ class CallGraphBuilder:
         edges_full: List[CallEdge] = []
         edges: List[CallEdge] = []
         for caller, callees in base_graph.items():
-          if caller not in reachable:
-            continue
-          for callee in callees:
-            edges_full.append(CallEdge(caller=caller, callee=callee))
-
-            # If nodes were truncated, drop edges to truncated nodes.
-            if nodes_truncated:
-              if caller not in included:
+            if caller not in reachable:
                 continue
-              if callee in reachable and callee not in included:
-                continue
+            for callee in callees:
+                edges_full.append(CallEdge(caller=caller, callee=callee))
 
-            edges.append(CallEdge(caller=caller, callee=callee))
+                # If nodes were truncated, drop edges to truncated nodes.
+                if nodes_truncated:
+                    if caller not in included:
+                        continue
+                    if callee in reachable and callee not in included:
+                        continue
+
+                edges.append(CallEdge(caller=caller, callee=callee))
 
         total_edges = len(edges_full)
         edges_truncated = len(edges) != total_edges
@@ -814,6 +1459,45 @@ class CallGraphBuilder:
         """
         if func_node.name == "main":
             return True
+
+        # Detect calls in if __name__ == "__main__" blocks
+        try:
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.If):
+                    continue
+
+                test = node.test
+                if not isinstance(test, ast.Compare):
+                    continue
+
+                if not (
+                    isinstance(test.left, ast.Name)
+                    and test.left.id == "__name__"
+                    and len(test.ops) == 1
+                    and isinstance(test.ops[0], ast.Eq)
+                    and len(test.comparators) == 1
+                ):
+                    continue
+
+                comp = test.comparators[0]
+                value = None
+                if isinstance(comp, ast.Constant) and isinstance(comp.value, str):
+                    value = comp.value
+                elif isinstance(comp, ast.Str):
+                    value = comp.s
+
+                if value != "__main__":
+                    continue
+
+                for stmt in node.body:
+                    for inner in ast.walk(stmt):
+                        if isinstance(inner, ast.Call) and isinstance(
+                            inner.func, ast.Name
+                        ):
+                            if inner.func.id == func_node.name:
+                                return True
+        except Exception:
+            pass
 
         # Check for CLI decorators
         for decorator in getattr(func_node, "decorator_list", []):
@@ -1063,26 +1747,48 @@ class CallGraphBuilder:
         # Build import graph: module -> modules it imports
         import_graph: Dict[str, Set[str]] = {}
 
-        for file_path in self._iter_python_files():
+        for file_path in self._iter_source_files():
             rel_path = str(file_path.relative_to(self.root_path))
+            suffix = file_path.suffix.lower()
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    code = f.read()
-                tree = ast.parse(code)
+                if suffix == ".py":
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        code = f.read()
+                    tree = ast.parse(code)
 
-                imports = set()
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.Import):
-                        for alias in node.names:
-                            # Convert module name to potential file path
-                            mod_path = alias.name.replace(".", "/") + ".py"
-                            imports.add(mod_path)
-                    elif isinstance(node, ast.ImportFrom):
-                        if node.module:
-                            mod_path = node.module.replace(".", "/") + ".py"
-                            imports.add(mod_path)
+                    imports = set()
+                    for node in ast.walk(tree):
+                        if isinstance(node, ast.Import):
+                            for alias in node.names:
+                                # Convert module name to potential file path
+                                mod_path = alias.name.replace(".", "/") + ".py"
+                                imports.add(mod_path)
+                        elif isinstance(node, ast.ImportFrom):
+                            if node.module:
+                                mod_path = node.module.replace(".", "/") + ".py"
+                                imports.add(mod_path)
 
-                import_graph[rel_path] = imports
+                    import_graph[rel_path] = imports
+
+                elif suffix in {".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}:
+                    # Best-effort JS/TS cycle detection via relative imports
+                    try:
+                        from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
+                            TREE_SITTER_AVAILABLE, TreeSitterJSParser)
+                    except Exception:
+                        continue
+
+                    if not TREE_SITTER_AVAILABLE:
+                        continue
+
+                    parser = TreeSitterJSParser()
+                    result = parser.parse_file(str(file_path))
+                    imports = set()
+                    for imp in result.imports:
+                        mod = self._resolve_js_module_path(rel_path, imp.module)
+                        if mod:
+                            imports.add(mod)
+                    import_graph[rel_path] = imports
             except Exception:
                 continue
 

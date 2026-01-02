@@ -46,51 +46,23 @@ ENTERPRISE TIER (P2-P4) - Complete Module
 """
 
 # [20251225_FEATURE] Re-export from analyzers (core security)
-from .analyzers import (
-    SecurityAnalyzer,
-    SecurityAnalysisResult,
-    TaintTracker,
-    TaintLevel,
-    TaintInfo,
-    UnifiedSinkDetector,
-    DetectedSink,
-    CrossFileTaintTracker,
-)
-
-# [20251225_FEATURE] Re-export from type_safety
-from .type_safety import (
-    TypeEvaporationDetector,
-    TypeEvaporationVulnerability,
-)
-
-# [20251225_FEATURE] Re-export from dependencies
-from .dependencies import (
-    VulnerabilityScanner,
-    ScanResult,
-    VulnerabilityFinding,
-)
-
-# [20251225_FEATURE] Re-export from sanitization
-from .sanitization import (
-    SanitizerAnalyzer,
-    SanitizerType,
-    SanitizerEffectiveness,
-)
-
-# [20251225_FEATURE] Re-export from secrets
-from .secrets import (
-    SecretScanner,
-)
-
-# [20251225_FEATURE] Re-export from ml
-from .ml import (
-    VulnerabilityPredictor,
-    VulnerabilityPrediction,
-)
-
+from .analyzers import (CrossFileTaintTracker, DetectedSink,
+                        SecurityAnalysisResult, SecurityAnalyzer, TaintInfo,
+                        TaintLevel, TaintTracker, UnifiedSinkDetector)
 # [20251225_FEATURE] Import contract_breach_detector from current location
-from .contract_breach_detector import ContractBreachDetector, ContractBreach
-
+from .contract_breach_detector import ContractBreach, ContractBreachDetector
+# [20251225_FEATURE] Re-export from dependencies
+from .dependencies import (ScanResult, VulnerabilityFinding,
+                           VulnerabilityScanner)
+# [20251225_FEATURE] Re-export from ml
+from .ml import VulnerabilityPrediction, VulnerabilityPredictor
+# [20251225_FEATURE] Re-export from sanitization
+from .sanitization import (SanitizerAnalyzer, SanitizerEffectiveness,
+                           SanitizerType)
+# [20251225_FEATURE] Re-export from secrets
+from .secrets import SecretScanner
+# [20251225_FEATURE] Re-export from type_safety
+from .type_safety import TypeEvaporationDetector, TypeEvaporationVulnerability
 
 __all__ = [
     # Core Analyzers

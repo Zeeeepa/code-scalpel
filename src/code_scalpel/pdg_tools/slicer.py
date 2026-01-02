@@ -5,7 +5,6 @@ from typing import Optional, Union
 
 import networkx as nx
 
-
 # [20251221_TODO] Add multi-dimensional slicing:
 #     - Support simultaneous slicing by multiple criteria
 #     - Implement context-specific slices (class/function scope)

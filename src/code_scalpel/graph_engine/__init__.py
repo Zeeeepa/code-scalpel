@@ -107,30 +107,12 @@ ENTERPRISE TIER - Distributed Graph Features
 75. Add executive reporting on graph metrics
 """
 
-from .confidence import (
-    CONFIDENCE_RULES,
-    ConfidenceEngine,
-    ConfidenceLevel,
-    EdgeType,
-)
-from .graph import (
-    GraphBuilder,
-    GraphEdge,
-    GraphNode,
-    NeighborhoodResult,
-    UniversalGraph,
-)
-from .http_detector import (
-    HTTPLink,
-    HTTPLinkDetector,
-    HTTPMethod,
-)
-from .node_id import (
-    NodeType,
-    UniversalNodeID,
-    create_node_id,
-    parse_node_id,
-)
+from .confidence import (CONFIDENCE_RULES, ConfidenceEngine, ConfidenceLevel,
+                         EdgeType)
+from .graph import (GraphBuilder, GraphEdge, GraphNode, NeighborhoodResult,
+                    UniversalGraph)
+from .http_detector import HTTPLink, HTTPLinkDetector, HTTPMethod
+from .node_id import NodeType, UniversalNodeID, create_node_id, parse_node_id
 
 __all__ = [
     # Node ID system

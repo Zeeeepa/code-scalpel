@@ -18,7 +18,7 @@ JWT License Architecture (v3.3.0+):
     License keys are cryptographically signed and tamper-proof.
     Community tier is free and requires no license.
     Pro/Enterprise tiers require valid JWT tokens.
-    
+
     JWT Claims Structure:
     {
         "iss": "code-scalpel-licensing",
@@ -37,10 +37,10 @@ Configuration:
 
 Usage (v3.3.0+):
     from code_scalpel.licensing import get_current_tier, get_license_info
-    
+
     # Simple tier check
     tier = get_current_tier()  # Returns: "community", "pro", or "enterprise"
-    
+
     # Detailed license info
     info = get_license_info()
     print(f"Tier: {info['tier']}")
@@ -125,10 +125,10 @@ from typing import TYPE_CHECKING
 # [20251225_FEATURE] Import from submodules
 # Use TYPE_CHECKING to avoid circular import issues during runtime
 if TYPE_CHECKING:
-    from .tier_detector import TierDetector, get_current_tier
-    from .license_manager import LicenseManager, LicenseInfo
-    from .validator import LicenseValidator, ValidationResult
     from .cache import LicenseCache
+    from .license_manager import LicenseInfo, LicenseManager
+    from .tier_detector import TierDetector, get_current_tier
+    from .validator import LicenseValidator, ValidationResult
 else:
     # Runtime imports after Tier enum is defined
     pass
@@ -152,27 +152,20 @@ class Tier(Enum):
         return cls.COMMUNITY  # Default to COMMUNITY
 
 
-# [20251225_FEATURE] Runtime imports after Tier enum definition
-from .tier_detector import TierDetector, get_current_tier as legacy_get_current_tier
-from .license_manager import LicenseManager, LicenseInfo
-from .validator import LicenseValidator, ValidationResult
 from .cache import LicenseCache
-from .features import (
-    get_tool_capabilities,
-    has_capability,
-    get_all_tools_for_tier,
-    TOOL_CAPABILITIES,
-)
-
+# [20251225_CONFIG] v3.3.0 - TOML-based tier limits configuration
+from .config_loader import (clear_cache, get_cached_limits, get_tool_limits,
+                            load_limits, merge_limits, reload_config)
+from .features import (TOOL_CAPABILITIES, get_all_tools_for_tier,
+                       get_tool_capabilities, has_capability)
 # [20251225_FEATURE] v3.3.0 - JWT license validation
-from .jwt_validator import (
-    JWTLicenseValidator,
-    JWTLicenseData,
-    JWTAlgorithm,
-    get_current_tier,
-    get_license_info,
-)
-
+from .jwt_validator import (JWTAlgorithm, JWTLicenseData, JWTLicenseValidator,
+                            get_current_tier, get_license_info)
+from .license_manager import LicenseInfo, LicenseManager
+# [20251225_FEATURE] Runtime imports after Tier enum definition
+from .tier_detector import TierDetector
+from .tier_detector import get_current_tier as legacy_get_current_tier
+from .validator import LicenseValidator, ValidationResult
 
 __all__ = [
     # Tier enum
@@ -199,6 +192,13 @@ __all__ = [
     "has_capability",
     "get_all_tools_for_tier",
     "TOOL_CAPABILITIES",
+    # Config loader (NEW in v3.3.0)
+    "load_limits",
+    "get_tool_limits",
+    "get_cached_limits",
+    "clear_cache",
+    "reload_config",
+    "merge_limits",
 ]
 
 __version__ = "1.0.0"

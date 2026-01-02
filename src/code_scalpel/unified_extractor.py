@@ -24,19 +24,10 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.surgery.unified_extractor import (
-    UnifiedExtractor,
-    UnifiedExtractionResult,
-    Language,
-    SymbolInfo,
-    ImportInfo,
-    FileSummary,
-    SignatureInfo,
-    # Convenience functions
-    detect_language,
-    extract_from_file,
-    extract_from_code,
-)
+from code_scalpel.surgery.unified_extractor import (  # Convenience functions
+    FileSummary, ImportInfo, Language, SignatureInfo, SymbolInfo,
+    UnifiedExtractionResult, UnifiedExtractor, detect_language,
+    extract_from_code, extract_from_file)
 
 __all__ = [
     "UnifiedExtractor",

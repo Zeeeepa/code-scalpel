@@ -95,29 +95,14 @@ TOTAL ESTIMATED TESTS: 260 tests
 """
 
 # [20251224_REFACTOR] Import from submodules
-from .surgical_extractor import (
-    SurgicalExtractor,
-    ExtractionResult,
-    ContextualExtraction,
-    CrossFileSymbol,
-    CrossFileResolution,
-)
-from .surgical_patcher import (
-    SurgicalPatcher,
-    PatchResult,
-    PatchLanguage,
-    UnifiedPatcher,
-    PolyglotPatcher,
-)
-from .unified_extractor import (
-    UnifiedExtractor,
-    UnifiedExtractionResult,
-    Language,
-    SymbolInfo,
-    ImportInfo,
-    FileSummary,
-    SignatureInfo,
-)
+from .surgical_extractor import (ContextualExtraction, CrossFileResolution,
+                                 CrossFileSymbol, ExtractionResult,
+                                 SurgicalExtractor)
+from .surgical_patcher import (PatchLanguage, PatchResult, PolyglotPatcher,
+                               SurgicalPatcher, UnifiedPatcher)
+from .unified_extractor import (FileSummary, ImportInfo, Language,
+                                SignatureInfo, SymbolInfo,
+                                UnifiedExtractionResult, UnifiedExtractor)
 
 __all__ = [
     # Surgical Extractor

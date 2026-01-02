@@ -33,12 +33,31 @@ This module tracks taint through:
 """
 
 from __future__ import annotations
+
 import ast  # [20251216_FEATURE] v2.2.0 - Required for SSR vulnerability detection
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict
 
 from z3 import ExprRef, String
+
+
+class VulnerabilityDict(TypedDict):
+    """Vulnerability information for JSON serialization."""
+
+    type: str  # vulnerability_type
+    cwe: str  # CWE-ID
+    sink: str  # SecuritySink name
+    source: str  # TaintSource name
+    taint_path: list[str]
+    taint_flow: list[str]  # Alias for clarity
+    sink_location: tuple[int, int] | None
+    source_location: tuple[int, int] | None
+    sanitizers: list[str]
+    description: str
+    severity: str  # critical, high, medium, low
+    recommendation: str
+    cwe_link: str
 
 
 # TODO: Enhanced taint source tracking
@@ -1126,7 +1145,7 @@ class Vulnerability:
         else:
             return f"{self.vulnerability_type}: {source_desc} ({flow_desc})"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> VulnerabilityDict:
         """Convert to dictionary for JSON serialization."""
         return {
             "type": self.vulnerability_type,

@@ -43,15 +43,26 @@ import logging
 import os
 import platform
 import time
-import uuid
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Optional
 from urllib import request
 from urllib.error import URLError
 
 logger = logging.getLogger(__name__)
+
+
+def _utcnow_naive() -> datetime:
+    # [20251228_BUGFIX] Avoid deprecated datetime.utcnow() while preserving
+    # existing naive-UTC behavior.
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def _utcfromtimestamp_naive(timestamp: int) -> datetime:
+    # [20251228_BUGFIX] Avoid deprecated datetime.utcfromtimestamp() while
+    # preserving existing naive-UTC behavior.
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).replace(tzinfo=None)
 
 
 class ValidationStatus(Enum):
@@ -88,7 +99,7 @@ class ValidationResult:
         """Calculate days until expiration."""
         if not self.expiration_date:
             return None
-        delta = self.expiration_date - datetime.utcnow()
+        delta = self.expiration_date - _utcnow_naive()
         return max(0, delta.days)
 
 
@@ -119,7 +130,9 @@ class LicenseValidator:
 
     # [20251225_FEATURE] Secret key for signature verification (in production, load from secure storage)
     # This is a placeholder - in production, use a secure key management system
-    _SIGNATURE_SECRET = os.getenv("CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1")
+    _SIGNATURE_SECRET = os.getenv(
+        "CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1"
+    )
 
     def __init__(self):
         """Initialize the validator."""
@@ -291,10 +304,14 @@ class LicenseValidator:
             self._SIGNATURE_SECRET.encode(),
             data_to_sign.encode(),
             hashlib.sha256,
-        ).hexdigest()[:8]  # Use first 8 chars for brevity
+        ).hexdigest()[
+            :8
+        ]  # Use first 8 chars for brevity
 
         # Compare signatures (timing-safe comparison)
-        if not hmac.compare_digest(provided_signature.lower(), expected_signature.lower()):
+        if not hmac.compare_digest(
+            provided_signature.lower(), expected_signature.lower()
+        ):
             logger.warning(f"Signature verification failed for {tier} license key")
             return ValidationResult(
                 status=ValidationStatus.INVALID,
@@ -318,9 +335,7 @@ class LicenseValidator:
         logger.info(f"Performing offline validation for {tier} tier")
         return self.validate(license_key, tier)
 
-    def validate_online(
-        self, license_key: str, timeout: int = 5
-    ) -> ValidationResult:
+    def validate_online(self, license_key: str, timeout: int = 5) -> ValidationResult:
         """
         [20251225_FEATURE] P2_MEDIUM: Validate license key with online license server.
 
@@ -409,9 +424,9 @@ class LicenseValidator:
             # Check if it looks like a Unix timestamp (10 digits)
             if timestamp_str.isdigit() and len(timestamp_str) == 10:
                 expiration_timestamp = int(timestamp_str)
-                expiration_date = datetime.utcfromtimestamp(expiration_timestamp)
+                expiration_date = _utcfromtimestamp_naive(expiration_timestamp)
 
-                if datetime.utcnow() > expiration_date:
+                if _utcnow_naive() > expiration_date:
                     return ValidationResult(
                         status=ValidationStatus.EXPIRED,
                         tier=tier,

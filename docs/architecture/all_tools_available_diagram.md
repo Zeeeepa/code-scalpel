@@ -233,90 +233,113 @@ Result: All 20/20 tools available, capabilities differ by tier
         ┌───────▼──────────┐     ┌───────▼──────────┐
         │ Get capabilities │     │ Get capabilities │
         │ max_findings: 10 │     │ max_findings: ∞  │
+        │ basic_vuln_types │     │ all_vuln_types   │
         └───────┬──────────┘     └───────┬──────────┘
                 │                         │
         ┌───────▼──────────┐     ┌───────▼──────────┐
-        │ Run scan         │     │ Run scan         │
+        │ Run scan         │     │ Run full scan    │
         │ → 25 vulns found │     │ → 25 vulns found │
+        │ (basic patterns) │     │ (all patterns)   │
         └───────┬──────────┘     └───────┬──────────┘
                 │                         │
         ┌───────▼──────────┐     ┌───────▼──────────┐
         │ Truncate to 10   │     │ Return all 25    │
-        │ truncated: true  │     │                  │
-        └───────┬──────────┘     └───────┬──────────┘
-                │                         │
-        ┌───────▼──────────┐     ┌───────▼──────────┐
-        │ Add upgrade hint │     │ Add taint flows  │
-        │ "Upgrade to PRO" │     │ Add remediation  │
+        │ truncated: true  │     │ + taint analysis │
         └───────┬──────────┘     └───────┬──────────┘
                 │                         │
         ┌───────▼──────────┐     ┌───────▼──────────┐
         │ Return {         │     │ Return {         │
         │   vulns: [10],   │     │   vulns: [25],   │
         │   truncated: true│     │   taint_flows,   │
-        │   hints: [...]   │     │   remediation    │
-        │ }                │     │ }                │
+        │   tier: community│     │   remediation,   │
+        │ }                │     │   owasp_cats     │
+        │                  │     │ }                │
         └──────────────────┘     └──────────────────┘
+        
+        Note: No upgrade hints in response
+        (users consult documentation)
 ```
 
-## Upgrade Hint Generation
+## Tier Information in Responses
 
 ```
-get_upgrade_hint("security_scan", "advanced_taint_flow", "community")
-    │
-    ├─ Look up feature requirements
-    │   TOOL_CAPABILITIES["security_scan"]["pro"]["capabilities"]
-    │   contains "advanced_taint_flow"
-    │
-    ├─ Determine required tier: "pro"
-    │
-    ├─ Generate hint:
-    │   "advanced_taint_flow requires PRO tier. Upgrade to access
-    │    multi-path taint analysis and data flow tracking."
-    │
-    └─ Return hint string
+Every tool response includes tier information:
+
+{
+  "tier": "community",           // Current active tier
+  "truncated": true,             // If results were limited by scope
+  "results": [...],              // Actual data (scope-limited)
+  "tier_limited": [              // Features not available at this tier
+    "advanced_taint_flow",
+    "remediation_suggestions"
+  ]
+}
+
+Users consult documentation to understand:
+- What their current tier provides
+- What additional features are available in Pro/Enterprise
+- Upgrade options and pricing
+
+No marketing messages in tool responses—keeps context clean.
 ```
 
-## Tool Categories by Restriction Type
+## Tool Categories by Tier Progression
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    ALL 20 TOOLS                             │
-├─────────────────────────────────┬───────────────────────────┤
-│  10 TOOLS WITH TIER LIMITS      │  10 TOOLS NO LIMITS       │
-│  (Gated by parameters/features) │  (Fully available)        │
+│                    ALL 21 TOOLS AVAILABLE AT ALL TIERS      │
+├─────────────────────────────────────────────────────────────┤
+│  Limits are on SCOPE (how much) and FEATURES (what kind)   │
+│  NOT on technical constraints like timeouts or connections  │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────┬───────────────────────────┐
+│  TOOLS WITH SCOPE LIMITS        │  TOOLS WITH FEATURE GATES │
+│  (Result count/depth/breadth)   │  (Analysis capabilities)  │
 ├─────────────────────────────────┼───────────────────────────┤
-│ • security_scan                 │ • analyze_code            │
-│   Max findings (10 → ∞)         │   No restrictions         │
+│ • security_scan                 │ • security_scan           │
+│   Findings: 10 → ∞ → ∞          │   +taint, +remediation    │
 │                                 │                           │
-│ • symbolic_execute              │ • update_symbol           │
-│   Max paths (3 → 10 → ∞)        │   No restrictions         │
+│ • symbolic_execute              │ • crawl_project           │
+│   Paths: 10 → 100 → ∞           │   +framework detect       │
+│   Depth: 5 → 10 → ∞             │   +entry points           │
 │                                 │                           │
-│ • crawl_project                 │ • unified_sink_detect     │
-│   Max files (100 → 1K → ∞)      │   No restrictions         │
-│   Mode (discovery → deep)       │                           │
-│                                 │ • simulate_refactor       │
-│ • extract_code                  │   No restrictions         │
-│   Depth (0 → 1 → ∞)             │                           │
-│                                 │ • get_file_context        │
-│ • generate_unit_tests           │   No restrictions         │
-│   Max tests (5 → 20 → ∞)        │                           │
-│                                 │ • get_symbol_references   │
-│ • get_call_graph                │   No restrictions         │
-│   Depth (3 → 10 → ∞)            │                           │
-│                                 │ • get_project_map         │
-│ • get_graph_neighborhood        │   No restrictions         │
-│   k-hops (1 → 2 → ∞)            │                           │
-│                                 │ • validate_paths          │
-│ • scan_dependencies             │   No restrictions         │
-│   Max deps (50 → ∞)             │                           │
-│                                 │ • verify_policy_integrity │
-│ • get_cross_file_dependencies   │   No restrictions         │
-│   Depth (1 → 3 → ∞)             │                           │
-│                                 │ • type_evaporation_scan   │
-│ • cross_file_security_scan      │   No restrictions         │
-│   Depth/modules (limited → ∞)   │                           │
+│ • crawl_project                 │ • get_call_graph          │
+│   Files: 100 → 1000 → ∞         │   +polymorphism           │
+│                                 │   +runtime trace          │
+│ • get_call_graph                │                           │
+│   Depth: 3 → 10 → ∞             │ • verify_policy_integrity │
+│   Nodes: 50 → 500 → ∞           │   +signature validation   │
+│                                 │   +compliance reports     │
+│ • get_graph_neighborhood        │                           │
+│   Hops: 2 → 5 → ∞               │ • scan_dependencies       │
+│   Nodes: 100 → 1000 → ∞         │   +reachability           │
+│                                 │   +license compliance     │
+│ • get_symbol_references         │                           │
+│   Files: 10 → 200 → ∞           │ • type_evaporation_scan   │
+│                                 │   +implicit any tracking  │
+│ • cross_file_security_scan      │   +schema generation      │
+│   Depth: 5 → 10 → ∞             │                           │
+│   Modules: 100 → 500 → ∞        │ • get_file_context        │
+│                                 │   +semantic summary       │
+│ • scan_dependencies             │   +PII redaction          │
+│   Deps: 50 → ∞ → ∞              │                           │
+│                                 │                           │
+│ • get_cross_file_dependencies   │ • code_policy_check       │
+│   Depth: 1 → 3 → ∞              │   +best practices         │
+│                                 │   +compliance audits      │
+│ • generate_unit_tests           │                           │
+│   Tests: 5 → 20 → ∞             │                           │
 └─────────────────────────────────┴───────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  TOOLS WITH NO TIER DIFFERENCES (Fully functional all tiers)│
+├─────────────────────────────────────────────────────────────┤
+│ • analyze_code          • update_symbol                     │
+│ • extract_code          • simulate_refactor                 │
+│ • unified_sink_detect   • validate_paths                    │
+│ • get_project_map                                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Capability Progression Example: security_scan
@@ -325,38 +348,47 @@ get_upgrade_hint("security_scan", "advanced_taint_flow", "community")
 ┌────────────────────────────────────────────────────────────────┐
 │                        COMMUNITY TIER                          │
 ├────────────────────────────────────────────────────────────────┤
-│ Capabilities:                                                  │
-│   ✅ basic_vulnerabilities                                     │
-│   ✅ single_file_taint                                         │
+│ Scope Limits:                                                  │
+│   • max_findings: 10 (result truncation)                       │
+│   • vulnerability_types: 10 common patterns                    │
 │                                                                │
-│ Limits:                                                        │
-│   • max_findings: 10                                           │
-│   • vulnerability_types: [sql_injection, xss, command_injection]│
+│ Features Available:                                            │
+│   ✅ basic_vulnerabilities (OWASP Top 10 patterns)             │
+│   ✅ single_file_taint (within one file)                       │
+│   ✅ cwe_mapping (security categorization)                     │
 │                                                                │
-│ Result:                                                        │
+│ Features NOT Available:                                        │
+│   ❌ advanced_taint_flow (multi-path analysis)                 │
+│   ❌ remediation_suggestions (how to fix)                      │
+│   ❌ owasp_categorization (severity scoring)                   │
+│                                                                │
+│ Example Result:                                                │
 │   {                                                            │
+│     "tier": "community",                                       │
 │     "vulnerabilities": [10 of 25],                             │
-│     "truncated": true,                                         │
-│     "upgrade_hints": ["Upgrade to PRO for unlimited findings"] │
+│     "truncated": true                                          │
 │   }                                                            │
+│                                                                │
+│ Note: No upgrade hints in response—users consult docs          │
 └────────────────────────────────────────────────────────────────┘
                              ▼ UPGRADE
 ┌────────────────────────────────────────────────────────────────┐
 │                           PRO TIER                             │
 ├────────────────────────────────────────────────────────────────┤
-│ Capabilities:                                                  │
-│   ✅ All COMMUNITY capabilities +                              │
-│   ✅ advanced_taint_flow                                       │
-│   ✅ full_vulnerability_list                                   │
-│   ✅ remediation_suggestions                                   │
-│   ✅ owasp_categorization                                      │
+│ Scope Limits:                                                  │
+│   • max_findings: unlimited                                    │
+│   • vulnerability_types: all patterns + custom                 │
 │                                                                │
-│ Limits:                                                        │
-│   • max_findings: None (unlimited)                             │
-│   • vulnerability_types: "all"                                 │
+│ Features Available:                                            │
+│   ✅ All COMMUNITY features +                                  │
+│   ✅ advanced_taint_flow (multi-path, cross-function)          │
+│   ✅ remediation_suggestions (actionable fixes)                │
+│   ✅ owasp_categorization (risk scoring)                       │
+│   ✅ context_aware_analysis (sanitizer recognition)            │
 │                                                                │
-│ Result:                                                        │
+│ Example Result:                                                │
 │   {                                                            │
+│     "tier": "pro",                                             │
 │     "vulnerabilities": [all 25],                               │
 │     "taint_flows": [...],                                      │
 │     "remediation": [...],                                      │
@@ -367,25 +399,31 @@ get_upgrade_hint("security_scan", "advanced_taint_flow", "community")
 ┌────────────────────────────────────────────────────────────────┐
 │                       ENTERPRISE TIER                          │
 ├────────────────────────────────────────────────────────────────┤
-│ Capabilities:                                                  │
-│   ✅ All PRO capabilities +                                    │
-│   ✅ cross_file_taint                                          │
-│   ✅ compliance_reporting                                      │
-│   ✅ custom_security_rules                                     │
-│   ✅ automated_remediation                                     │
-│   ✅ org_wide_scanning                                         │
+│ Scope Limits:                                                  │
+│   • No limits (unlimited scale)                                │
 │                                                                │
-│ Limits:                                                        │
-│   • max_findings: None (unlimited)                             │
-│   • vulnerability_types: "all" + custom                        │
+│ Features Available:                                            │
+│   ✅ All PRO features +                                        │
+│   ✅ cross_file_taint (global data flow)                       │
+│   ✅ compliance_reporting (HIPAA, SOC2, GDPR)                  │
+│   ✅ custom_security_rules (org-specific policies)             │
+│   ✅ automated_remediation (auto-fix generation)               │
+│   ✅ audit_trail (change tracking)                             │
+│   ✅ multi_repo_analysis (organization-wide)                   │
 │                                                                │
-│ Result:                                                        │
+│ Example Result:                                                │
 │   {                                                            │
+│     "tier": "enterprise",                                      │
 │     "vulnerabilities": [all + custom rules],                   │
 │     "taint_flows": [...],                                      │
 │     "remediation": [...],                                      │
-│     "compliance_report": {"soc2": "passed", "hipaa": "passed"},│
-│     "automated_fixes": [...]                                   │
+│     "compliance_report": {                                     │
+│       "soc2": "passed",                                        │
+│       "hipaa": "passed",                                       │
+│       "gdpr": "compliant"                                      │
+│     },                                                         │
+│     "automated_fixes": [...],                                  │
+│     "audit_trail": [...]                                       │
 │   }                                                            │
 └────────────────────────────────────────────────────────────────┘
 ```

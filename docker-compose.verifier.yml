@@ -1,0 +1,33 @@
+# Docker Compose override: connect Code Scalpel MCP server to an external license verifier.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.verifier.yml up -d --build mcp-server
+#
+# This assumes you already have the tier-management verifier stack running and exposing
+# an external Docker network named `code_scalpel_tier_management_scalpel-network`.
+#
+# [20251228_TEST] Local docker-based boot/validation wiring for remote verifier integration.
+
+services:
+  mcp-server:
+    networks:
+      - code-scalpel-network
+      - scalpel-verifier-network
+    environment:
+      - CODE_SCALPEL_LICENSE_VERIFIER_URL=http://scalpel-verifier:8000
+      - CODE_SCALPEL_LICENSE_PATH=/workspace/.code-scalpel/license.jwt
+      - CODE_SCALPEL_LICENSE_CACHE_PATH=/workspace/.code-scalpel/license_cache.json
+
+  mcp-server-https:
+    networks:
+      - code-scalpel-network
+      - scalpel-verifier-network
+    environment:
+      - CODE_SCALPEL_LICENSE_VERIFIER_URL=http://scalpel-verifier:8000
+      - CODE_SCALPEL_LICENSE_PATH=/workspace/.code-scalpel/license.jwt
+      - CODE_SCALPEL_LICENSE_CACHE_PATH=/workspace/.code-scalpel/license_cache.json
+
+networks:
+  scalpel-verifier-network:
+    external: true
+    name: code_scalpel_tier_management_scalpel-network

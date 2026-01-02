@@ -58,6 +58,33 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
+class UpgradeRequiredError(RuntimeError):
+    """Raised when a caller requests a capability unavailable at current tier.
+
+    [20251228_FEATURE] Enables structured upgrade-required errors with upgrade URL.
+    """
+
+    def __init__(
+        self,
+        *,
+        tool_id: str,
+        feature: str,
+        required_tier: str,
+        upgrade_url: str,
+        message: str | None = None,
+    ) -> None:
+        if message is None:
+            message = (
+                f"Feature '{feature}' requires {required_tier.upper()} tier. "
+                f"Upgrade: {upgrade_url}"
+            )
+        super().__init__(message)
+        self.tool_id = tool_id
+        self.feature = feature
+        self.required_tier = required_tier
+        self.upgrade_url = upgrade_url
+
+
 ErrorCode = Literal[
     "invalid_argument",
     "invalid_path",
@@ -89,28 +116,49 @@ class ToolError(BaseModel):
 
 
 class ToolResponseEnvelope(BaseModel):
-    tier: str = Field(description="One of: community, pro, enterprise")
-    tool_version: str = Field(description="Semantic version of tool implementation")
-    tool_id: str = Field(description="Canonical MCP tool ID")
-    request_id: str = Field(
-        description="Correlation ID (caller-provided or server-generated)"
+    tier: str | None = Field(
+        default=None,
+        description="One of: community, pro, enterprise (omitted by default for token efficiency)",
     )
-    capabilities: list[str] = Field(description="Capabilities for this invocation")
+    tool_version: str | None = Field(
+        default=None,
+        description="Semantic version of tool implementation (omitted by default)",
+    )
+    tool_id: str | None = Field(
+        default=None,
+        description="Canonical MCP tool ID (omitted by default - client knows which tool was called)",
+    )
+    request_id: str | None = Field(
+        default=None,
+        description="Correlation ID (omitted by default unless client-provided)",
+    )
+    capabilities: list[str] | None = Field(
+        default=None,
+        description="Capabilities for this invocation (omitted by default)",
+    )
     duration_ms: int | None = Field(
-        default=None, description="End-to-end runtime in milliseconds"
+        default=None,
+        description="End-to-end runtime in milliseconds (omitted by default)",
     )
     error: ToolError | None = Field(
-        default=None, description="Standardized error model"
+        default=None,
+        description="Standardized error model (only included when error occurs)",
     )
-    upgrade_hints: list[UpgradeHint] = Field(
+    upgrade_hints: list[UpgradeHint] | None = Field(
+        default=None,
+        description="Upgrade hints when a feature is unavailable at this tier (only included when hints exist)",
+    )
+    warnings: list[str] = Field(
         default_factory=list,
-        description="Upgrade hints when a feature is unavailable at this tier",
+        description="Non-fatal warnings emitted by the MCP boundary (e.g., governance WARN mode)",
     )
     data: Any | None = Field(default=None, description="Tool-specific payload")
 
 
 def _classify_exception(exc: BaseException) -> ErrorCode:
     # Keep classification conservative; do not leak details.
+    if isinstance(exc, UpgradeRequiredError):
+        return "upgrade_required"
     if isinstance(exc, (ValueError, TypeError)):
         return "invalid_argument"
     if isinstance(exc, FileNotFoundError):
@@ -164,6 +212,10 @@ def _classify_failure_message(message: str | None) -> ErrorCode | None:
         return "forbidden"
     if "timeout" in lowered:
         return "timeout"
+    if "requires pro tier" in lowered or "requires enterprise tier" in lowered:
+        return "upgrade_required"
+    if "upgrade:" in lowered or "upgrade at" in lowered:
+        return "upgrade_required"
     if "too large" in lowered or "exceeds maximum" in lowered:
         return "too_large"
     if "not implemented" in lowered:

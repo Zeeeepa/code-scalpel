@@ -154,27 +154,13 @@ from typing import TYPE_CHECKING
 
 # Lazy imports to avoid circular dependencies
 if TYPE_CHECKING:
-    from .php_parsers_PHPCS import (
-        PHPCSParser,
-        PHPCSViolation,
-        PHPCSSeverity,
-        PHPCSStandard,
-        PHPCSConfig,
-    )
-    from .php_parsers_PHPStan import (
-        PHPStanParser,
-        PHPStanError,
-        PHPStanLevel,
-        PHPStanErrorType,
-        PHPStanConfig,
-    )
-    from .php_parsers_Psalm import (
-        PsalmParser,
-        PsalmError,
-        PsalmSeverity,
-        PsalmErrorType,
-        PsalmConfig,
-    )
+    from .php_parsers_PHPCS import (PHPCSConfig, PHPCSParser, PHPCSSeverity,
+                                    PHPCSStandard, PHPCSViolation)
+    from .php_parsers_PHPStan import (PHPStanConfig, PHPStanError,
+                                      PHPStanErrorType, PHPStanLevel,
+                                      PHPStanParser)
+    from .php_parsers_Psalm import (PsalmConfig, PsalmError, PsalmErrorType,
+                                    PsalmParser, PsalmSeverity)
 
 __all__ = [
     # PHPCS
@@ -207,13 +193,9 @@ def __getattr__(name: str):
         "PHPCSStandard",
         "PHPCSConfig",
     ):
-        from .php_parsers_PHPCS import (  # noqa: F401
-            PHPCSParser,
-            PHPCSViolation,
-            PHPCSSeverity,
-            PHPCSStandard,
-            PHPCSConfig,
-        )
+        from .php_parsers_PHPCS import (PHPCSConfig, PHPCSParser,  # noqa: F401
+                                        PHPCSSeverity, PHPCSStandard,
+                                        PHPCSViolation)
 
         return locals()[name]
     elif name in (
@@ -223,13 +205,9 @@ def __getattr__(name: str):
         "PHPStanErrorType",
         "PHPStanConfig",
     ):
-        from .php_parsers_PHPStan import (  # noqa: F401
-            PHPStanParser,
-            PHPStanError,
-            PHPStanLevel,
-            PHPStanErrorType,
-            PHPStanConfig,
-        )
+        from .php_parsers_PHPStan import (PHPStanConfig,  # noqa: F401
+                                          PHPStanError, PHPStanErrorType,
+                                          PHPStanLevel, PHPStanParser)
 
         return locals()[name]
     elif name in (
@@ -239,13 +217,9 @@ def __getattr__(name: str):
         "PsalmErrorType",
         "PsalmConfig",
     ):
-        from .php_parsers_Psalm import (  # noqa: F401
-            PsalmParser,
-            PsalmError,
-            PsalmSeverity,
-            PsalmErrorType,
-            PsalmConfig,
-        )
+        from .php_parsers_Psalm import (PsalmConfig, PsalmError,  # noqa: F401
+                                        PsalmErrorType, PsalmParser,
+                                        PsalmSeverity)
 
         return locals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

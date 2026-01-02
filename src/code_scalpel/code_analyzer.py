@@ -24,16 +24,13 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.analysis.code_analyzer import (
-    CodeAnalyzer,
-    AnalysisResult,
-    AnalysisMetrics,
-    AnalysisLevel,
-    AnalysisLanguage,
-    DeadCodeItem,
-    RefactorSuggestion,
-    analyze_code,
-)
+from code_scalpel.analysis.code_analyzer import (AnalysisLanguage,
+                                                 AnalysisLevel,
+                                                 AnalysisMetrics,
+                                                 AnalysisResult, CodeAnalyzer,
+                                                 DeadCodeItem,
+                                                 RefactorSuggestion,
+                                                 analyze_code)
 
 __all__ = [
     "CodeAnalyzer",

@@ -163,15 +163,13 @@ Acceptance Criteria (P1):
 - [ ] Implement disaster recovery
 """
 
-from dataclasses import dataclass
-from typing import List
-from enum import Enum
 import ast
 import copy
+from dataclasses import dataclass
+from enum import Enum
+from typing import List
 
-from code_scalpel.autonomy.stubs import (
-    SandboxExecutor,
-)
+from code_scalpel.autonomy.stubs import SandboxExecutor
 
 
 class MutationType(Enum):

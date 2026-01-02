@@ -1,0 +1,585 @@
+PLR0915 Too many statements (71 > 50)
+   --> src/code_scalpel/analysis/project_crawler.py:802:9
+    |
+800 |         return False
+801 |
+802 |     def crawl(self) -> CrawlResult:
+    |         ^^^^^
+803 |         """
+804 |         Crawl the project and analyze all Python files.
+    |
+
+PLR0915 Too many statements (102 > 50)
+   --> src/code_scalpel/ast_tools/call_graph.py:313:9
+    |
+311 |                     yield Path(root) / file
+312 |
+313 |     def _analyze_definitions_js_ts(self, file_path: Path, rel_path: str) -> None:
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+314 |         """Extract JS/TS definitions and import/export metadata.
+    |
+
+PLR0915 Too many statements (114 > 50)
+   --> src/code_scalpel/ast_tools/call_graph.py:530:9
+    |
+528 |         return None
+529 |
+530 |     def _analyze_calls_js_ts(
+    |         ^^^^^^^^^^^^^^^^^^^^
+531 |         self,
+532 |         file_path: Path,
+    |
+
+PLR0915 Too many statements (155 > 50)
+    --> src/code_scalpel/ast_tools/call_graph.py:1092:9
+     |
+1090 |     # [20251213_FEATURE] v1.5.0 - Enhanced call graph methods
+1091 |
+1092 |     def build_with_details(
+     |         ^^^^^^^^^^^^^^^^^^
+1093 |         self,
+1094 |         entry_point: Optional[str] = None,
+     |
+
+PLR0915 Too many statements (51 > 50)
+    --> src/code_scalpel/ast_tools/call_graph.py:1209:13
+     |
+1207 |             tree_sitter_available = False
+1208 |
+1209 |         def _add_js_nodes_esprima(file_path: Path, rel_path: str) -> None:
+     |             ^^^^^^^^^^^^^^^^^^^^^
+1210 |             try:
+1211 |                 import esprima  # type: ignore[import-untyped]
+     |
+
+PLR0915 Too many statements (52 > 50)
+    --> src/code_scalpel/ast_tools/call_graph.py:1690:9
+     |
+1688 |         return "\n".join(lines)
+1689 |
+1690 |     def detect_circular_imports(self) -> List[List[str]]:
+     |         ^^^^^^^^^^^^^^^^^^^^^^^
+1691 |         """
+1692 |         Detect circular import cycles in the project.
+     |
+
+PLR0915 Too many statements (92 > 50)
+   --> src/code_scalpel/cli.py:796:5
+    |
+796 | def main() -> int:
+    |     ^^^^
+797 |     """Main CLI entry point."""
+798 |     from . import __version__
+    |
+
+PLR0915 Too many statements (61 > 50)
+    --> src/code_scalpel/code_parsers/python_parsers/python_parsers_mypy.py:1274:9
+     |
+1272 |         return report
+1273 |
+1274 |     def analyze_with_context(
+     |         ^^^^^^^^^^^^^^^^^^^^
+1275 |         self,
+1276 |         target: str | Path | list[str | Path],
+     |
+
+PLR0915 Too many statements (88 > 50)
+   --> src/code_scalpel/config/init_config.py:209:5
+    |
+209 | def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
+    |     ^^^^^^^^^^^^^^^
+210 |     """
+211 |     Initialize .code-scalpel configuration directory with templates.
+    |
+
+PLR0915 Too many statements (81 > 50)
+   --> src/code_scalpel/generators/refactor_simulator.py:580:9
+    |
+578 |         return None
+579 |
+580 |     def _check_js_syntax_heuristic(self, code: str, language: str) -> str | None:
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+581 |         """Heuristic-based JavaScript/TypeScript syntax validation.
+    |
+
+PLR0915 Too many statements (54 > 50)
+    --> src/code_scalpel/generators/test_generator.py:1007:9
+     |
+1005 |         return test_cases
+1006 |
+1007 |     def _safe_interpret_return(
+     |         ^^^^^^^^^^^^^^^^^^^^^^
+1008 |         self,
+1009 |         code: str,
+     |
+
+PLR0915 Too many statements (62 > 50)
+    --> src/code_scalpel/generators/test_generator.py:1301:9
+     |
+1299 |         return None
+1300 |
+1301 |     def _infer_expected_result(
+     |         ^^^^^^^^^^^^^^^^^^^^^^
+1302 |         self, conditions: list[str], return_map: dict[str, Any], inputs: dict[str, Any]
+1303 |     ) -> Any:
+     |
+
+PLR0915 Too many statements (59 > 50)
+   --> src/code_scalpel/governance/compliance_reporter.py:842:9
+    |
+840 |         return html
+841 |
+842 |     def _render_pdf(self, report: ComplianceReport) -> bytes:
+    |         ^^^^^^^^^^^
+843 |         """
+844 |         Render report as PDF.
+    |
+
+PLR0915 Too many statements (58 > 50)
+   --> src/code_scalpel/graph/path_constraints.py:263:9
+    |
+261 |         return paths
+262 |
+263 |     def _evaluate_path(
+    |         ^^^^^^^^^^^^^^
+264 |         self,
+265 |         path_node_ids: List[str],
+    |
+
+PLR0915 Too many statements (64 > 50)
+   --> src/code_scalpel/integrations/protocol_analyzers/kafka/taint_tracker.py:639:17
+    |
+637 |                 self._handle_function(node)
+638 |
+639 |             def visit_Call(self, node: ast.Call):
+    |                 ^^^^^^^^^^
+640 |                 # Check for producer.send() or producer.produce()
+641 |                 if isinstance(node.func, ast.Attribute):
+    |
+
+PLR0915 Too many statements (71 > 50)
+   --> src/code_scalpel/integrations/rest_api_server.py:127:5
+    |
+127 | def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
+    |     ^^^^^^^^^^
+128 |     """
+129 |     Create and configure the Flask MCP server application.
+    |
+
+PLR0915 Too many statements (67 > 50)
+  --> src/code_scalpel/licensing/authorization.py:25:5
+   |
+25 | def compute_effective_tier_for_startup(
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+26 |     *,
+27 |     requested_tier: str | None,
+   |
+
+PLR0915 Too many statements (52 > 50)
+   --> src/code_scalpel/licensing/jwt_generator.py:201:5
+    |
+201 | def main():
+    |     ^^^^
+202 |     """CLI entry point for license generation."""
+203 |     parser = argparse.ArgumentParser(
+    |
+
+PLR0915 Too many statements (64 > 50)
+   --> src/code_scalpel/licensing/jwt_validator.py:559:9
+    |
+557 |             return "License revocation list invalid"
+558 |
+559 |     def validate_token(self, token: str) -> JWTLicenseData:
+    |         ^^^^^^^^^^^^^^
+560 |         """
+561 |         Validate a JWT license token.
+    |
+
+PLR0915 Too many statements (111 > 50)
+   --> src/code_scalpel/mcp/server.py:352:5
+    |
+352 | def _evaluate_change_budget_for_write_tool(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+353 |     *,
+354 |     tool_id: str,
+    |
+
+PLR0915 Too many statements (76 > 50)
+   --> src/code_scalpel/mcp/server.py:678:5
+    |
+678 | def _maybe_enforce_governance_before_tool(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+679 |     *,
+680 |     tool_id: str,
+    |
+
+PLR0915 Too many statements (74 > 50)
+    --> src/code_scalpel/mcp/server.py:2427:5
+     |
+2427 | def _add_tool_with_envelope_output(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2428 |     fn: Callable[..., Any], **add_tool_kwargs: Any
+2429 | ) -> Any:
+     |
+
+PLR0915 Too many statements (68 > 50)
+    --> src/code_scalpel/mcp/server.py:2441:15
+     |
+2439 |     original_run = tool.run
+2440 |
+2441 |     async def _enveloped_run(
+     |               ^^^^^^^^^^^^^^
+2442 |         arguments: dict[str, Any], context: Any = None, convert_result: bool = False
+2443 |     ) -> dict[str, Any]:
+     |
+
+PLR0915 Too many statements (71 > 50)
+    --> src/code_scalpel/mcp/server.py:3018:5
+     |
+3018 | def _analyze_javascript_code(code: str, is_typescript: bool = False) -> AnalysisResult:
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^
+3019 |     """
+3020 |     Analyze JavaScript/TypeScript code using tree-sitter.
+     |
+
+PLR0915 Too many statements (173 > 50)
+    --> src/code_scalpel/mcp/server.py:3510:5
+     |
+3510 | def _analyze_code_sync(
+     |     ^^^^^^^^^^^^^^^^^^
+3511 |     code: str, language: str = "auto", file_path: str | None = None
+3512 | ) -> AnalysisResult:
+     |
+
+PLR0915 Too many statements (182 > 50)
+    --> src/code_scalpel/mcp/server.py:3962:5
+     |
+3962 | def _security_scan_sync(
+     |     ^^^^^^^^^^^^^^^^^^^
+3963 |     code: Optional[str] = None,
+3964 |     file_path: Optional[str] = None,
+     |
+
+PLR0915 Too many statements (94 > 50)
+    --> src/code_scalpel/mcp/server.py:4974:5
+     |
+4974 | def _unified_sink_detect_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+4975 |     code: str,
+4976 |     language: str,
+     |
+
+PLR0915 Too many statements (61 > 50)
+    --> src/code_scalpel/mcp/server.py:5365:5
+     |
+5365 | def _type_evaporation_scan_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5366 |     frontend_code: str,
+5367 |     backend_code: str,
+     |
+
+PLR0915 Too many statements (53 > 50)
+    --> src/code_scalpel/mcp/server.py:6278:5
+     |
+6278 | def _generate_type_compliance_report(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+6279 |     vulnerabilities: list[Any],
+6280 |     api_contract: dict[str, Any] | None,
+     |
+
+PLR0915 Too many statements (102 > 50)
+    --> src/code_scalpel/mcp/server.py:7085:5
+     |
+7085 | def _scan_dependencies_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^
+7086 |     project_root: str | None = None,
+7087 |     path: str | None = None,
+     |
+
+PLR0915 Too many statements (94 > 50)
+    --> src/code_scalpel/mcp/server.py:8021:5
+     |
+8021 | def _symbolic_execute_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+8022 |     code: str,
+8023 |     max_paths: int | None = None,
+     |
+
+PLR0915 Too many statements (57 > 50)
+    --> src/code_scalpel/mcp/server.py:8299:5
+     |
+8299 | def _generate_tests_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^
+8300 |     code: str | None = None,
+8301 |     file_path: str | None = None,
+     |
+
+PLR0915 Too many statements (53 > 50)
+    --> src/code_scalpel/mcp/server.py:8640:5
+     |
+8640 | def _simulate_refactor_sync(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^
+8641 |     original_code: str,
+8642 |     new_code: str | None = None,
+     |
+
+PLR0915 Too many statements (78 > 50)
+    --> src/code_scalpel/mcp/server.py:8881:5
+     |
+8881 | def _crawl_project_discovery(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^
+8882 |     root_path: str,
+8883 |     exclude_dirs: list[str] | None = None,
+     |
+
+PLR0915 Too many statements (242 > 50)
+    --> src/code_scalpel/mcp/server.py:9111:5
+     |
+9111 | def _crawl_project_sync(
+     |     ^^^^^^^^^^^^^^^^^^^
+9112 |     root_path: str,
+9113 |     exclude_dirs: list[str] | None = None,
+     |
+
+PLR0915 Too many statements (107 > 50)
+    --> src/code_scalpel/mcp/server.py:9926:11
+     |
+9925 | @mcp.tool()
+9926 | async def extract_code(
+     |           ^^^^^^^^^^^^
+9927 |     target_type: str,
+9928 |     target_name: str,
+     |
+
+PLR0915 Too many statements (166 > 50)
+     --> src/code_scalpel/mcp/server.py:10989:11
+      |
+10988 | @mcp.tool()
+10989 | async def update_symbol(
+      |           ^^^^^^^^^^^^^
+10990 |     file_path: str,
+10991 |     target_type: str,
+      |
+
+PLR0915 Too many statements (141 > 50)
+     --> src/code_scalpel/mcp/server.py:13521:5
+      |
+13521 | def _get_file_context_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^^
+13522 |     file_path: str, tier: str | None = None, capabilities: dict | None = None
+13523 | ) -> FileContextResult:
+      |
+
+PLR0915 Too many statements (370 > 50)
+     --> src/code_scalpel/mcp/server.py:14394:5
+      |
+14394 | def _get_symbol_references_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14395 |     symbol_name: str,
+14396 |     project_root: str | None = None,
+      |
+
+PLR0915 Too many statements (79 > 50)
+     --> src/code_scalpel/mcp/server.py:15350:5
+      |
+15350 | def _get_call_graph_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^
+15351 |     project_root: str | None,
+15352 |     entry_point: str | None,
+      |
+
+PLR0915 Too many statements (136 > 50)
+     --> src/code_scalpel/mcp/server.py:15867:11
+      |
+15866 | @mcp.tool()
+15867 | async def get_graph_neighborhood(
+      |           ^^^^^^^^^^^^^^^^^^^^^^
+15868 |     center_node_id: str,
+15869 |     k: int = 2,
+      |
+
+PLR0915 Too many statements (330 > 50)
+     --> src/code_scalpel/mcp/server.py:16561:5
+      |
+16561 | def _get_project_map_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^
+16562 |     project_root: str | None,
+16563 |     include_complexity: bool,
+      |
+
+PLR0915 Too many statements (199 > 50)
+     --> src/code_scalpel/mcp/server.py:17728:5
+      |
+17728 | def _get_cross_file_dependencies_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+17729 |     target_file: str,
+17730 |     target_symbol: str,
+      |
+
+PLR0915 Too many statements (117 > 50)
+     --> src/code_scalpel/mcp/server.py:18407:5
+      |
+18407 | def _cross_file_security_scan_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+18408 |     project_root: str | None,
+18409 |     entry_points: list[str] | None,
+      |
+
+PLR0915 Too many statements (94 > 50)
+     --> src/code_scalpel/mcp/server.py:18875:5
+      |
+18875 | def _validate_paths_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^
+18876 |     paths: list[str],
+18877 |     project_root: str | None,
+      |
+
+PLR0915 Too many statements (72 > 50)
+     --> src/code_scalpel/mcp/server.py:19209:5
+      |
+19209 | def _verify_policy_integrity_sync(
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+19210 |     policy_dir: str | None = None,
+19211 |     manifest_source: str = "file",
+      |
+
+PLR0915 Too many statements (66 > 50)
+     --> src/code_scalpel/mcp/server.py:19693:5
+      |
+19693 | def run_server(
+      |     ^^^^^^^^^^
+19694 |     transport: str = "stdio",
+19695 |     host: str = "127.0.0.1",
+      |
+
+PLR0915 Too many statements (57 > 50)
+  --> src/code_scalpel/policy_engine/code_policy_check/analyzer.py:67:9
+   |
+65 |     """
+66 |
+67 |     def __init__(
+   |         ^^^^^^^^
+68 |         self,
+69 |         tier: str = "community",
+   |
+
+PLR0915 Too many statements (52 > 50)
+   --> src/code_scalpel/policy_engine/code_policy_check/analyzer.py:191:9
+    |
+189 |         self._audit_entries: list[AuditEntry] = []
+190 |
+191 |     def check_files(
+    |         ^^^^^^^^^^^
+192 |         self,
+193 |         paths: list[str],
+    |
+
+PLR0915 Too many statements (53 > 50)
+   --> src/code_scalpel/policy_engine/policy_engine.py:442:9
+    |
+441 |     @staticmethod
+442 |     def _basic_validate_rego(rule: str, policy_name: str) -> None:
+    |         ^^^^^^^^^^^^^^^^^^^^
+443 |         if not rule or not isinstance(rule, str):
+444 |             raise PolicyError(
+    |
+
+PLR0915 Too many statements (89 > 50)
+   --> src/code_scalpel/surgery/rename_symbol_refactor.py:201:5
+    |
+201 | def _collect_reference_edits(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+202 |     code: str,
+203 |     *,
+    |
+
+PLR0915 Too many statements (74 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:1248:9
+     |
+1246 |         )
+1247 |
+1248 |     def get_method_with_context(
+     |         ^^^^^^^^^^^^^^^^^^^^^^^
+1249 |         self, class_name: str, method_name: str, max_depth: int = 2
+1250 |     ) -> ContextualExtraction:
+     |
+
+PLR0915 Too many statements (65 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:1408:9
+     |
+1406 |         )
+1407 |
+1408 |     def resolve_cross_file_dependencies(
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1409 |         self,
+1410 |         target_name: str,
+     |
+
+PLR0915 Too many statements (62 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:2242:5
+     |
+2242 | def extract_as_microservice(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^
+2243 |     code: str, function_name: str, host: str = "0.0.0.0", port: int = 8000
+2244 | ) -> MicroserviceExtractionResult:
+     |
+
+PLR0915 Too many statements (72 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:2673:5
+     |
+2673 | def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisResult:
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^
+2674 |     """
+2675 |     Detect variables captured from outer scopes (closures).
+     |
+
+PLR0915 Too many statements (63 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:2905:5
+     |
+2905 | def suggest_dependency_injection(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2906 |     code: str, function_name: str
+2907 | ) -> DependencyInjectionResult:
+     |
+
+PLR0915 Too many statements (60 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:3331:5
+     |
+3331 | def extract_with_custom_pattern(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3332 |     pattern: str,
+3333 |     pattern_type: str = "regex",
+     |
+
+PLR0915 Too many statements (59 > 50)
+    --> src/code_scalpel/surgery/surgical_extractor.py:3556:5
+     |
+3556 | def detect_service_boundaries(
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+3557 |     project_root: str | None = None,
+3558 |     min_isolation_score: float = 0.6,
+     |
+
+PLR0915 Too many statements (68 > 50)
+    --> src/code_scalpel/surgery/surgical_patcher.py:1359:9
+     |
+1357 |         self.length = len(code)
+1358 |
+1359 |     def find_matching_brace(self, start_pos: int) -> int:
+     |         ^^^^^^^^^^^^^^^^^^^
+1360 |         """
+1361 |         Find the position of the closing brace matching the opening brace at start_pos.
+     |
+
+PLR0915 Too many statements (56 > 50)
+   --> src/code_scalpel/symbolic_execution_tools/engine.py:384:9
+    |
+382 |         return result
+383 |
+384 |     def _analyze_uncached(self, code: str, language: str) -> AnalysisResult:
+    |         ^^^^^^^^^^^^^^^^^
+385 |         """Perform symbolic analysis without caching (internal method)."""
+386 |         # Fresh components for this analysis
+    |
+
+Found 60 errors.

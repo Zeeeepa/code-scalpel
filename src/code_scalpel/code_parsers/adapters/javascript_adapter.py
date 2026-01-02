@@ -133,10 +133,9 @@ from ..interface import IParser, Language, ParseResult
 
 # Try to import the JavaScript parser
 try:
-    from ..javascript_parsers.javascript_parsers_esprima import (
-        JavaScriptParser as EsprimaParser,
-    )
     from ..base_parser import ParseResult as BaseParseResult
+    from ..javascript_parsers.javascript_parsers_esprima import \
+        JavaScriptParser as EsprimaParser
 
     JAVASCRIPT_PARSER_AVAILABLE = True
 except ImportError:
@@ -398,7 +397,6 @@ class TypeScriptParserAdapter(JavaScriptParserAdapter):
         # Remove type annotations after colons (simplified)
         # function foo(x: number): string { }
         # This is NOT comprehensive - just basic support
-
         # Remove interface/type declarations
         code = re.sub(
             r"^\s*(?:export\s+)?interface\s+\w+\s*\{[^}]*\}",

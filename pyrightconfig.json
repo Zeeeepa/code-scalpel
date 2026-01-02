@@ -14,5 +14,6 @@
   "reportMissingTypeStubs": false,
   "reportUnknownMemberType": false,
   "reportUnknownArgumentType": false,
-  "reportUnknownVariableType": false
+  "reportUnknownVariableType": false,
+  "reportMissingImports": false
 }

@@ -615,8 +615,8 @@ class ErrorScanner:
         errors = []
 
         try:
-            import subprocess
             import json
+            import subprocess
 
             result = subprocess.run(
                 [

@@ -147,7 +147,7 @@ License key format options considered:
 4. **Self-Contained**
    - All claims embedded in token
    - No database lookup required for validation
-   - Offline verification possible
+   - Offline verification possible (file-based mode); hosted deployments may prefer a remote verifier
 
 5. **Debuggable**
    - Can decode JWT at jwt.io for inspection
@@ -232,25 +232,29 @@ def validate_license(token: str) -> dict:
 **Tier Detection:**
 ```python
 def get_current_tier() -> str:
-    """Get current tier from environment or license file."""
-    # 1. Check for license file
-    license_path = os.getenv("CODE_SCALPEL_LICENSE", ".scalpel-license")
-    
-    if os.path.exists(license_path):
-        with open(license_path) as f:
+   """Get current tier from a license file (file-only discovery)."""
+   # 1. Explicit override (path to file)
+   license_path = os.getenv("CODE_SCALPEL_LICENSE_PATH")
+
+   # 2. Standard search paths
+   candidate_paths = [
+      ".code-scalpel/license.jwt",
+      os.path.expanduser("~/.config/code-scalpel/license.jwt"),
+      os.path.expanduser("~/.code-scalpel/license.jwt"),
+      ".scalpel-license",
+   ]
+
+   paths_to_try = [license_path] if license_path else []
+   paths_to_try.extend(candidate_paths)
+
+   for path in paths_to_try:
+      if path and os.path.exists(path):
+         with open(path) as f:
             token = f.read().strip()
-        
-        result = validate_license(token)
-        return result["tier"]
-    
-    # 2. Check environment variable
-    token = os.getenv("CODE_SCALPEL_LICENSE_KEY")
-    if token:
-        result = validate_license(token)
-        return result["tier"]
-    
-    # 3. Default to community
-    return "community"
+         return validate_license(token)["tier"]
+
+   # Default to community
+   return "community"
 ```
 
 ### Key Management
@@ -271,7 +275,7 @@ def get_current_tier() -> str:
 
 1. **Non-Repudiation**: Only Code Scalpel can issue valid licenses
 2. **Integrity**: Any modification invalidates the signature
-3. **Expiration**: Built-in expiration with grace period
+3. **Expiration**: Built-in expiration with strict posture (expired licenses never grant paid tier; grace period is informational only)
 4. **Revocation**: Can add revocation list check (optional)
 
 ---
@@ -401,7 +405,7 @@ ENTERPRISE ($Y/month):
   - Multi-repo architecture support
   - 24/7 priority support
 
-Visit https://code-scalpel.dev/pricing for details.
+Visit http://codescalpel.dev/pricing for details.
 ```
 
 This is acceptable because:
@@ -524,15 +528,20 @@ This is acceptable because:
 ### Q1: Should we support license key in `.env` file?
 
 **Answer:** Yes, add support for:
-- `.scalpel-license` file (recommended)
-- `CODE_SCALPEL_LICENSE_KEY` environment variable
-- `~/.config/code-scalpel/license` global file
+- `.code-scalpel/license.jwt` project-local file (recommended)
+- `CODE_SCALPEL_LICENSE_PATH` environment variable (path to file)
+- `~/.config/code-scalpel/license.jwt` global file
+- `.scalpel-license` legacy filename
 
 ### Q2: Grace period for expired licenses?
 
-**Answer:** 7-day grace period where:
-- License marked as "expiring soon" (warning, still Pro)
-- After 7 days, downgrade to Community
+**Answer:**
+
+> [20251227_DOCS] Updated posture: grace period is informational only.
+
+- A 7-day window can be used to display renewal reminders (`is_in_grace_period`).
+- Expired licenses do **not** grant paid tier during this window.
+- Effective tier remains `community` until a valid (unexpired) license is provided.
 
 ### Q3: Should we log tier enforcement events?
 

@@ -5,13 +5,15 @@ Pytest configuration and fixtures for Code Scalpel tests.
 [20251214_FEATURE] v1.5.3 - OSV client import in ast_tools __init__ for full-suite fix.
 """
 
+import json
 import os
 import sys
-import json
-import warnings
-import pytest
-from unittest.mock import MagicMock, patch
+import time
 import urllib.error
+import warnings
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # [20251216_TEST] Silence upstream astor ast.Num deprecation noise on Python 3.13
 warnings.filterwarnings(
@@ -214,3 +216,174 @@ def disable_health_server(monkeypatch):
         original_start(self)
 
     monkeypatch.setattr(threading.Thread, "start", patched_start)
+
+
+# [20251227_BUGFIX] Do not collect Ninja Warrior torture-tests by default
+def pytest_ignore_collect(collection_path, config):
+    """Skip opt-in Ninja Warrior torture-tests unless explicitly enabled.
+
+    These torture-tests are designed for manual/contract validation and can
+    include intentionally duplicated basenames (e.g., multiple test_edge_cases.py)
+    and framework-specific harness imports.
+
+    Enable collection by setting RUN_NINJA_WARRIOR=1.
+    """
+
+    path_str = str(collection_path)
+    if "tests/Code-Scalpel-Ninja-Warrior" in path_str:
+        return os.environ.get("RUN_NINJA_WARRIOR") not in {
+            "1",
+            "true",
+            "TRUE",
+            "yes",
+            "YES",
+        }
+    return False
+
+
+# =====================================================================
+# Licensing Fixtures (Test Helpers)
+# =====================================================================
+# [20251228_TEST] Shared fixtures for generating HS256 licenses/CRLs in tests.
+
+
+@pytest.fixture(scope="function")
+def hs256_test_secret() -> str:
+    """Stable secret key for HS256 test tokens."""
+
+    return "test-secret"
+
+
+@pytest.fixture(scope="function")
+def write_hs256_license_jwt(tmp_path, hs256_test_secret):
+    """Factory: write a license JWT to disk and return its path."""
+
+    from pathlib import Path
+
+    from code_scalpel.licensing.jwt_generator import generate_license
+
+    def _write(
+        *,
+        tier: str = "pro",
+        customer_id: str = "user@example.com",
+        duration_days: int = 7,
+        jti: str,
+        filename: str = "license.jwt",
+        base_dir: Path | None = None,
+    ) -> Path:
+        token = generate_license(
+            tier=tier,
+            customer_id=customer_id,
+            duration_days=duration_days,
+            algorithm="HS256",
+            secret_key=hs256_test_secret,
+            jti=jti,
+        )
+
+        out_dir = base_dir if base_dir is not None else tmp_path
+        path = Path(out_dir) / filename
+        path.write_text(token + "\n", encoding="utf-8")
+        return path
+
+    return _write
+
+
+@pytest.fixture(scope="function")
+def write_hs256_crl_jwt(tmp_path, hs256_test_secret):
+    """Factory: write a CRL JWT (revoked jti list) to disk and return its path."""
+
+    from pathlib import Path
+
+    import jwt
+
+    def _write(
+        *,
+        revoked_jtis: list[str],
+        filename: str = "crl.jwt",
+        base_dir: Path | None = None,
+        issuer: str = "code-scalpel",
+        audience: str = "code-scalpel-users",
+        expires_in_seconds: int = 3600,
+    ) -> Path:
+        now = int(time.time())
+        claims = {
+            "iss": issuer,
+            "aud": audience,
+            "iat": now - 10,
+            "exp": now + expires_in_seconds,
+            "revoked": revoked_jtis,
+        }
+        token = jwt.encode(claims, hs256_test_secret, algorithm="HS256")
+
+        out_dir = base_dir if base_dir is not None else tmp_path
+        path = Path(out_dir) / filename
+        path.write_text(token + "\n", encoding="utf-8")
+        return path
+
+    return _write
+
+
+@pytest.fixture(scope="function")
+def set_hs256_license_env(monkeypatch, hs256_test_secret):
+    """Helper to enable HS256 validation in-process via env vars."""
+
+    def _apply(*, license_path: str, crl_path: str | None = None) -> None:
+        monkeypatch.setenv("CODE_SCALPEL_ALLOW_HS256", "1")
+        monkeypatch.setenv("CODE_SCALPEL_SECRET_KEY", hs256_test_secret)
+        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", license_path)
+        if crl_path is not None:
+            monkeypatch.setenv("CODE_SCALPEL_LICENSE_CRL_PATH", crl_path)
+        else:
+            monkeypatch.delenv("CODE_SCALPEL_LICENSE_CRL_PATH", raising=False)
+        monkeypatch.delenv("CODE_SCALPEL_LICENSE_CRL_JWT", raising=False)
+
+    return _apply
+
+
+@pytest.fixture(scope="function")
+def hs256_license_state_paths(tmp_path, write_hs256_license_jwt, write_hs256_crl_jwt):
+    """Prebuilt license-state artifacts.
+
+    Returns a dict with:
+    - missing: None
+    - valid: license path
+    - expired: license path
+    - revoked: (license path, crl path)
+
+    [20251228_TEST] Canonical fixtures for valid/expired/revoked license states.
+    """
+
+    valid_jti = "lic-valid"
+    expired_jti = "lic-expired"
+    revoked_jti = "lic-revoked"
+
+    valid = write_hs256_license_jwt(
+        jti=valid_jti,
+        duration_days=7,
+        base_dir=tmp_path,
+        filename="license_valid.jwt",
+    )
+    expired = write_hs256_license_jwt(
+        jti=expired_jti,
+        duration_days=-1,
+        base_dir=tmp_path,
+        filename="license_expired.jwt",
+    )
+    revoked_license = write_hs256_license_jwt(
+        jti=revoked_jti,
+        duration_days=7,
+        base_dir=tmp_path,
+        filename="license_revoked.jwt",
+    )
+    revoked_crl = write_hs256_crl_jwt(
+        revoked_jtis=[revoked_jti],
+        base_dir=tmp_path,
+        filename="crl_revoked.jwt",
+    )
+
+    return {
+        "missing": None,
+        "valid": valid,
+        "expired": expired,
+        "revoked": (revoked_license, revoked_crl),
+    }

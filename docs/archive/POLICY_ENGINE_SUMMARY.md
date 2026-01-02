@@ -40,7 +40,7 @@ Successfully implemented complete P0 Policy Engine with declarative policy enfor
 3. `.code-scalpel/README.md` - Policy configuration guide (64 lines)
 
 ### Examples
-1. `.code-scalpel/policy.yaml.example` - Production-ready policy templates (85 lines)
+1. `.code-scalpel/templates/policy.yaml.example` - Production-ready policy templates (85 lines)
 2. `examples/policy_engine_example.py` - Working demonstrations (258 lines)
 
 ## Acceptance Criteria - ALL MET [COMPLETE]

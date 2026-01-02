@@ -22,15 +22,15 @@ Example:
 """
 
 import ast
-import os
 import logging
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple, Union
-from dataclasses import dataclass, field
+import os
 from collections import defaultdict
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple, Union
 
-from code_scalpel.cache import AnalysisCache, ParallelParser, IncrementalAnalyzer
-
+from code_scalpel.cache import (AnalysisCache, IncrementalAnalyzer,
+                                ParallelParser)
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,8 @@ class ImportInfo:
         level: Relative import level (0 for absolute, 1 for ., 2 for .., etc.)
         line: Line number in source file
         file: Source file path
+        is_reexport: Whether this import is re-exported via __all__ (Pro tier)
+        original_module: For re-exports, the original source module
     """
 
     module: str
@@ -80,6 +82,10 @@ class ImportInfo:
     level: int = 0
     line: int = 0
     file: str = ""
+    is_reexport: bool = False  # [20251230_FEATURE] Pro tier: Re-export tracking
+    original_module: Optional[str] = (
+        None  # [20251230_FEATURE] Pro tier: Original source for re-exports
+    )
 
     @property
     def effective_name(self) -> str:
@@ -92,6 +98,11 @@ class ImportInfo:
         if self.module and self.name != "*":
             return f"{self.module}.{self.name}"
         return self.module or self.name
+
+    @property
+    def source_module(self) -> str:
+        """Get the original source module (resolving re-exports)."""
+        return self.original_module if self.original_module else self.module
 
 
 class DynamicImportVisitor(ast.NodeVisitor):
@@ -1154,6 +1165,159 @@ class ImportResolver:
             module: list(symbols.values()) for module, symbols in self.symbols.items()
         }
 
+    # [20251230_FEATURE] Pro tier: Wildcard import __all__ expansion
+    def expand_wildcard_import(self, module_name: str) -> List[str]:
+        """
+        Expand a wildcard import (`from module import *`) to its actual symbols.
+
+        This method checks for `__all__` in the target module. If `__all__` is defined,
+        returns those symbols. Otherwise, returns all public symbols (not starting with _).
+
+        Args:
+            module_name: The module to expand (e.g., "mypackage.utils")
+
+        Returns:
+            List of symbol names that would be imported by `from module import *`
+
+        Example:
+            >>> resolver.build()
+            >>> symbols = resolver.expand_wildcard_import("mypackage.utils")
+            >>> print(symbols)  # ['helper_func', 'HelperClass', 'CONSTANT']
+        """
+        if not self._built:
+            self._warnings.append("expand_wildcard_import called before build()")
+            return []
+
+        # Get file path for the module
+        file_path = self.module_to_file.get(module_name)
+        if not file_path:
+            return []
+
+        # Parse the module to find __all__
+        all_symbols = self._extract_dunder_all(file_path)
+        if all_symbols is not None:
+            return all_symbols
+
+        # No __all__ defined - return all public symbols
+        return self._get_public_symbols(module_name)
+
+    def _extract_dunder_all(self, file_path: str) -> Optional[List[str]]:
+        """
+        Extract __all__ from a Python file.
+
+        Args:
+            file_path: Path to the Python file
+
+        Returns:
+            List of symbol names if __all__ is defined, None otherwise
+        """
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                source = f.read()
+            tree = ast.parse(source)
+        except (OSError, SyntaxError) as e:
+            self._warnings.append(f"Failed to parse {file_path} for __all__: {e}")
+            return None
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id == "__all__":
+                        return self._extract_all_value(node.value)
+            elif isinstance(node, ast.AugAssign):
+                # __all__ += [...]
+                if isinstance(node.target, ast.Name) and node.target.id == "__all__":
+                    # This is an augmented assignment - harder to track
+                    # For now, skip and fall back to public symbols
+                    pass
+
+        return None  # __all__ not found
+
+    def _extract_all_value(self, node: ast.AST) -> Optional[List[str]]:
+        """
+        Extract string values from an __all__ assignment.
+
+        Handles:
+        - __all__ = ["a", "b", "c"]
+        - __all__ = ("a", "b", "c")
+        - __all__ = [...] + [...]  (limited support)
+
+        Args:
+            node: The AST node representing the __all__ value
+
+        Returns:
+            List of symbol names, or None if unable to parse
+        """
+        if isinstance(node, (ast.List, ast.Tuple)):
+            symbols = []
+            for elt in node.elts:
+                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                    symbols.append(elt.value)
+                elif isinstance(elt, ast.Str):  # Python 3.7 compatibility
+                    symbols.append(elt.s)
+            return symbols if symbols else None
+
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            # __all__ = [...] + [...]
+            left = self._extract_all_value(node.left)
+            right = self._extract_all_value(node.right)
+            if left is not None and right is not None:
+                return left + right
+
+        return None
+
+    def _get_public_symbols(self, module_name: str) -> List[str]:
+        """
+        Get all public symbols (not starting with _) from a module.
+
+        Args:
+            module_name: The module name
+
+        Returns:
+            List of public symbol names
+        """
+        module_symbols = self.symbols.get(module_name, {})
+        return [name for name in module_symbols.keys() if not name.startswith("_")]
+
+    def get_wildcard_imports(self, module_name: str) -> List[ImportInfo]:
+        """
+        Get all wildcard imports in a module.
+
+        Args:
+            module_name: The module to check
+
+        Returns:
+            List of ImportInfo objects for wildcard imports
+        """
+        return [
+            imp
+            for imp in self.imports.get(module_name, [])
+            if imp.import_type == ImportType.WILDCARD
+        ]
+
+    def expand_all_wildcards(self, module_name: str) -> Dict[str, List[str]]:
+        """
+        Expand all wildcard imports in a module.
+
+        Args:
+            module_name: The module containing wildcard imports
+
+        Returns:
+            Dict mapping source module to list of expanded symbols
+
+        Example:
+            >>> # If module has: from utils import *
+            >>> resolver.expand_all_wildcards("mymodule")
+            {'utils': ['helper_func', 'HelperClass']}
+        """
+        result = {}
+        for imp in self.get_wildcard_imports(module_name):
+            if imp.module:
+                expanded = self.expand_wildcard_import(imp.module)
+                if expanded:
+                    result[imp.module] = expanded
+        return result
+
     def find_symbol(self, symbol_name: str) -> List[Tuple[str, SymbolDefinition]]:
         """
         Find all definitions of a symbol across the project.
@@ -1208,3 +1372,183 @@ class ImportResolver:
                     )
 
         return "\n".join(lines)
+
+    # ========================================================================
+    # [20251230_FEATURE] Pro tier: Re-export and Chained Alias Resolution
+    # ========================================================================
+
+    def detect_reexports(self, module_name: str) -> Dict[str, str]:
+        """
+        Detect symbols that are re-exported from other modules.
+
+        A re-export occurs when:
+        1. A symbol is imported from another module
+        2. That symbol is included in the module's __all__
+
+        Args:
+            module_name: The module to analyze
+
+        Returns:
+            Dict mapping re-exported symbol name to its original module
+
+        Example:
+            >>> # mypackage/__init__.py:
+            >>> # from mypackage.utils import helper_func
+            >>> # __all__ = ['helper_func']
+            >>> resolver.detect_reexports("mypackage")
+            {'helper_func': 'mypackage.utils'}
+        """
+        reexports = {}
+        file_path = self.module_to_file.get(module_name)
+        if not file_path:
+            return reexports
+
+        # Get __all__ if defined
+        all_symbols = self._extract_dunder_all(file_path)
+        if all_symbols is None:
+            return reexports  # No __all__ = no explicit re-exports
+
+        # Check each symbol in __all__
+        for symbol_name in all_symbols:
+            # If it's defined locally, it's not a re-export
+            if module_name in self.symbols and symbol_name in self.symbols[module_name]:
+                continue
+
+            # Check if it comes from an import
+            for imp in self.imports.get(module_name, []):
+                if imp.effective_name == symbol_name:
+                    # This is a re-export
+                    source = imp.module
+                    if imp.import_type == ImportType.WILDCARD:
+                        # For wildcards, the symbol comes from the source module
+                        source = imp.module
+                    reexports[symbol_name] = source
+                    break
+
+        return reexports
+
+    def resolve_alias_chain(
+        self, module_name: str, symbol_name: str, max_depth: int = 5
+    ) -> Tuple[Optional[str], Optional[str], List[str]]:
+        """
+        Resolve an alias chain to find the original definition.
+
+        Follows import chains like:
+        - package/__init__.py: from package.utils import helper as h
+        - package/utils.py: from package.internal import helper
+        - package/internal.py: def helper(): ...
+
+        Args:
+            module_name: Starting module
+            symbol_name: Symbol name to resolve
+            max_depth: Maximum chain length to follow (default: 5)
+
+        Returns:
+            Tuple of (original_module, original_name, chain_path)
+            - original_module: Module where symbol is defined
+            - original_name: Original symbol name (may differ due to aliases)
+            - chain_path: List of modules in the resolution chain
+
+        Example:
+            >>> resolver.resolve_alias_chain("mypackage", "h")
+            ('mypackage.internal', 'helper', ['mypackage', 'mypackage.utils', 'mypackage.internal'])
+        """
+        chain = [module_name]
+        current_module = module_name
+        current_name = symbol_name
+        visited = {(module_name, symbol_name)}
+
+        for _ in range(max_depth):
+            # Check if symbol is defined locally
+            if (
+                current_module in self.symbols
+                and current_name in self.symbols[current_module]
+            ):
+                return current_module, current_name, chain
+
+            # Look for import that brings in this symbol
+            found_import = None
+            for imp in self.imports.get(current_module, []):
+                if imp.effective_name == current_name:
+                    found_import = imp
+                    break
+                # Also check wildcard imports
+                if imp.import_type == ImportType.WILDCARD:
+                    expanded = self.expand_wildcard_import(imp.module)
+                    if current_name in expanded:
+                        found_import = ImportInfo(
+                            module=imp.module,
+                            name=current_name,
+                            import_type=ImportType.WILDCARD,
+                        )
+                        break
+
+            if not found_import:
+                # Symbol not found through imports
+                self._warnings.append(
+                    f"Could not resolve alias chain for {symbol_name} in {module_name}"
+                )
+                return None, None, chain
+
+            # Move to the source module
+            next_module = found_import.module
+            next_name = found_import.name if found_import.name != "*" else current_name
+
+            # Detect cycles
+            if (next_module, next_name) in visited:
+                self._warnings.append(
+                    f"Circular alias chain detected: {current_module}.{current_name} "
+                    f"-> {next_module}.{next_name}"
+                )
+                return None, None, chain
+
+            visited.add((next_module, next_name))
+            chain.append(next_module)
+            current_module = next_module
+            current_name = next_name
+
+        self._warnings.append(
+            f"Alias chain exceeded max depth {max_depth} for {symbol_name} in {module_name}"
+        )
+        return None, None, chain
+
+    def get_symbol_origin(
+        self, module_name: str, symbol_name: str
+    ) -> Optional[Tuple[str, str]]:
+        """
+        Get the original module and name for a symbol, resolving re-exports.
+
+        This is a convenience method that wraps resolve_alias_chain.
+
+        Args:
+            module_name: Module where symbol is referenced
+            symbol_name: Symbol name as it appears in the module
+
+        Returns:
+            Tuple of (original_module, original_name) or None if not found
+        """
+        orig_module, orig_name, _ = self.resolve_alias_chain(module_name, symbol_name)
+        if orig_module and orig_name:
+            return orig_module, orig_name
+        return None
+
+    def get_all_reexports(self) -> Dict[str, Dict[str, str]]:
+        """
+        Get all re-exports across the entire project.
+
+        Returns:
+            Dict mapping module -> {symbol_name -> original_module}
+
+        Example:
+            >>> resolver.get_all_reexports()
+            {
+                'mypackage': {'helper_func': 'mypackage.utils'},
+                'mypackage.api': {'Client': 'mypackage.client'}
+            }
+        """
+        all_reexports = {}
+        for module_name in self.module_to_file:
+            reexports = self.detect_reexports(module_name)
+            if reexports:
+                all_reexports[module_name] = reexports
+        return all_reexports

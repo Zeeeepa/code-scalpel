@@ -105,23 +105,12 @@ need to be copied.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, cast
 
-from z3 import (
-    ExprRef,
-    BoolRef,
-    Sort,
-    IntSort,
-    BoolSort,
-    StringSort,
-    Int,
-    Bool,
-    String,
-    Solver,
-    And,
-    sat,
-)
+from z3 import (And, Bool, BoolRef, BoolSort, ExprRef, Int, IntSort, Real,
+                RealSort, Solver, Sort, String, StringSort, sat)
 
 
 @dataclass
@@ -134,7 +123,7 @@ class SymbolicVariable:
 
     Attributes:
         name: The variable name (e.g., "x", "counter")
-        sort: The Z3 sort (IntSort(), BoolSort(), StringSort())
+        sort: The Z3 sort (IntSort(), BoolSort(), StringSort(), RealSort())
         expr: The underlying Z3 expression
     """
 
@@ -150,6 +139,9 @@ class SymbolicVariable:
             self.expr = Bool(self.name)
         elif self.sort == StringSort():
             self.expr = String(self.name)
+        elif self.sort == RealSort():
+            # [20251226_FEATURE] v3.2.9 Pro tier - Float constraint support
+            self.expr = Real(self.name)
         else:
             raise ValueError(f"Unsupported sort: {self.sort}")
 
@@ -203,7 +195,7 @@ class SymbolicState:
 
         Args:
             name: Variable name
-            sort: Z3 sort (IntSort(), BoolSort(), or StringSort())
+            sort: Z3 sort (IntSort(), BoolSort(), StringSort(), or RealSort())
 
         Returns:
             The Z3 expression for the variable
@@ -227,11 +219,13 @@ class SymbolicState:
             expr = Bool(name)
         elif sort == StringSort():
             expr = String(name)
+        elif sort == RealSort():
+            # [20251226_FEATURE] v3.2.9 Pro tier - Float constraint support
+            expr = Real(name)
         else:
-            # [20251216_BUGFIX] Reject unsupported sorts (e.g., RealSort) to match current engine guarantees
             raise ValueError(
                 f"Unsupported sort: {sort}. "
-                "Supported: IntSort, BoolSort, StringSort."
+                "Supported: IntSort, BoolSort, StringSort, RealSort."
             )
 
         self._variables[name] = expr

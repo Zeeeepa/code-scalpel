@@ -88,15 +88,16 @@ ENTERPRISE (Advanced Capabilities):
 from __future__ import annotations
 
 import ast
+import io
 import os
 import re
 import shutil
 import tempfile
+import tokenize
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Optional
-
 
 __all__ = [
     # Core Python patcher
@@ -186,6 +187,122 @@ class _SymbolLocation:
     col_offset: int
     node: ast.AST
     parent_class: str | None = None  # For methods
+
+
+# [20251231_FEATURE] Same-file reference rename helpers for Community tier
+def _tokenize_code(code: str) -> list[tokenize.TokenInfo]:
+    """Tokenize Python code, returning list of tokens."""
+    try:
+        return list(tokenize.generate_tokens(io.StringIO(code).readline))
+    except getattr(tokenize, "TokenizeError", Exception):
+        return []
+
+
+def _apply_token_replacements(
+    tokens: list[tokenize.TokenInfo],
+    replacements: dict[tuple[int, int], tuple[str, str]],
+) -> str:
+    """Apply token replacements and reconstruct code."""
+    new_tokens: list[tokenize.TokenInfo] = []
+    for tok in tokens:
+        repl = replacements.get(tok.start)
+        if repl and tok.type == tokenize.NAME and tok.string == repl[0]:
+            tok = tokenize.TokenInfo(tok.type, repl[1], tok.start, tok.end, tok.line)
+        new_tokens.append(tok)
+    return tokenize.untokenize(new_tokens)
+
+
+def _collect_same_file_references(
+    code: str,
+    target_type: str,
+    target_name: str,
+    new_name: str,
+    definition_line: int,
+) -> dict[tuple[int, int], tuple[str, str]]:
+    """
+    Collect token positions for all references to a symbol within the same file.
+
+    [20251231_FEATURE] Implements same-file reference updates for rename_symbol.
+
+    This finds:
+    - Function/method calls: old_name(...) -> new_name(...)
+    - Variable references: x = old_name -> x = new_name
+    - Decorator usage: @old_name -> @new_name
+    - Type hints: -> OldClass, param: OldClass -> -> NewClass, param: NewClass
+    - Attribute access for methods: self.old_method -> self.new_method
+
+    Excludes:
+    - The definition line itself (already renamed separately)
+    - String literals and comments (handled by tokenizer)
+    - Import statements (those are cross-file concerns)
+
+    Args:
+        code: The source code (definition already renamed)
+        target_type: "function", "class", or "method"
+        target_name: Original full name (e.g., "my_func" or "ClassName.method")
+        new_name: New name to use
+        definition_line: Line number of definition (1-indexed) to skip
+
+    Returns:
+        Dict mapping (line, col) -> (old_token, new_token) for replacements
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return {}
+
+    replacements: dict[tuple[int, int], tuple[str, str]] = {}
+
+    # For methods, we only care about the short name
+    if target_type == "method":
+        if "." in target_name:
+            class_name, old_short = target_name.split(".", 1)
+        else:
+            old_short = target_name
+        new_short = new_name
+    else:
+        old_short = target_name
+        new_short = new_name
+
+    # Walk AST to find references
+    for node in ast.walk(tree):
+        # Skip nodes without line info
+        if not hasattr(node, "lineno") or not hasattr(node, "col_offset"):
+            continue
+
+        # Skip the definition line
+        # [20260101_BUGFIX] Type assertion for lineno attribute
+        if getattr(node, "lineno", -1) == definition_line:
+            continue
+
+        # Skip import statements - those are cross-file concerns
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            continue
+
+        # Case 1: Direct Name reference (function/class calls, type hints, decorators)
+        if isinstance(node, ast.Name) and target_type in {"function", "class"}:
+            if node.id == old_short:
+                replacements[(node.lineno, node.col_offset)] = (old_short, new_short)
+
+        # Case 2: Attribute access for methods (self.method_name, obj.method_name)
+        elif isinstance(node, ast.Attribute) and target_type == "method":
+            if node.attr == old_short:
+                # For methods, rename the attribute
+                # Calculate position of the attribute name
+                if hasattr(node, "end_col_offset") and node.end_col_offset is not None:
+                    attr_col = node.end_col_offset - len(old_short)
+                    replacements[(node.lineno, attr_col)] = (old_short, new_short)
+
+        # Case 3: Attribute access for class attributes (ClassName.attr after class rename)
+        elif isinstance(node, ast.Attribute) and target_type == "class":
+            # Check if the value is a Name node with the old class name
+            if isinstance(node.value, ast.Name) and node.value.id == old_short:
+                replacements[(node.value.lineno, node.value.col_offset)] = (
+                    old_short,
+                    new_short,
+                )
+
+    return replacements
 
 
 class SurgicalPatcher:
@@ -640,6 +757,136 @@ class SurgicalPatcher:
             lines_after=lines_added,
         )
 
+    def insert_function(self, new_code: str) -> PatchResult:
+        """
+        Insert a new function at the end of the file.
+
+        Args:
+            new_code: New function definition
+
+        Returns:
+            PatchResult
+        """
+        self._ensure_parsed()
+
+        try:
+            self._validate_replacement(new_code, "function")
+        except ValueError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="function",
+                error=str(e),
+            )
+
+        tree = ast.parse(new_code)
+        # [20260101_BUGFIX] Type assertion for FunctionDef/AsyncFunctionDef node
+        first_node = tree.body[0]
+        if not isinstance(first_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="function",
+                error="Parsed node is not a function definition",
+            )
+        name = first_node.name
+
+        if name in self._symbols:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=name,
+                target_type="function",
+                error=f"Symbol '{name}' already exists",
+            )
+
+        if not self.current_code.endswith("\n"):
+            self.current_code += "\n"
+
+        if not self.current_code.strip():
+            self.current_code += new_code + "\n"
+        else:
+            self.current_code += "\n\n" + new_code + "\n"
+
+        self._parsed = False
+        self._modified = True
+
+        return PatchResult(
+            success=True,
+            file_path=self.file_path or "",
+            target_name=name,
+            target_type="function",
+            lines_before=0,
+            lines_after=len(new_code.splitlines()),
+        )
+
+    def insert_class(self, new_code: str) -> PatchResult:
+        """
+        Insert a new class at the end of the file.
+
+        Args:
+            new_code: New class definition
+
+        Returns:
+            PatchResult
+        """
+        self._ensure_parsed()
+
+        try:
+            self._validate_replacement(new_code, "class")
+        except ValueError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="class",
+                error=str(e),
+            )
+
+        tree = ast.parse(new_code)
+        # [20260101_BUGFIX] Type assertion for ClassDef node
+        first_node = tree.body[0]
+        if not isinstance(first_node, ast.ClassDef):
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="class",
+                error="Parsed node is not a class definition",
+            )
+        name = first_node.name
+
+        if name in self._symbols:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=name,
+                target_type="class",
+                error=f"Symbol '{name}' already exists",
+            )
+
+        if not self.current_code.endswith("\n"):
+            self.current_code += "\n"
+
+        if not self.current_code.strip():
+            self.current_code += new_code + "\n"
+        else:
+            self.current_code += "\n\n" + new_code + "\n"
+
+        self._parsed = False
+        self._modified = True
+
+        return PatchResult(
+            success=True,
+            file_path=self.file_path or "",
+            target_name=name,
+            target_type="class",
+            lines_before=0,
+            lines_after=len(new_code.splitlines()),
+        )
+
     def update_method(
         self, class_name: str, method_name: str, new_code: str
     ) -> PatchResult:
@@ -701,6 +948,254 @@ class SurgicalPatcher:
             target_type="method",
             lines_before=lines_before,
             lines_after=lines_added,
+        )
+
+    def insert_method(self, class_name: str, new_code: str) -> PatchResult:
+        """
+        Insert a new method into an existing class.
+
+        Args:
+            class_name: Name of the class
+            new_code: New method definition
+
+        Returns:
+            PatchResult
+        """
+        self._ensure_parsed()
+
+        if class_name not in self._symbols:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=class_name,
+                target_type="class",
+                error=f"Class '{class_name}' not found",
+            )
+
+        class_symbol = self._symbols[class_name]
+        if class_symbol.node_type != "class":
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=class_name,
+                target_type="class",
+                error=f"'{class_name}' is not a class",
+            )
+
+        try:
+            self._validate_replacement(new_code, "method")
+        except ValueError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="method",
+                error=str(e),
+            )
+
+        tree = ast.parse(new_code)
+        # [20260101_BUGFIX] Type assertion for FunctionDef/AsyncFunctionDef node
+        first_node = tree.body[0]
+        if not isinstance(first_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="method",
+                error="Parsed node is not a method definition",
+            )
+        method_name = first_node.name
+        key = f"{class_name}.{method_name}"
+
+        if key in self._symbols:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=key,
+                target_type="method",
+                error=f"Method '{method_name}' already exists in '{class_name}'",
+            )
+
+        lines = self.current_code.splitlines(keepends=True)
+        end_line = class_symbol.line_end
+
+        # Determine indentation
+        class_line = lines[class_symbol.line_start - 1]
+        class_indent = class_line[: len(class_line) - len(class_line.lstrip())]
+        method_indent = class_indent + "    "  # Default
+
+        # Try to find existing methods to guess indent
+        for sym in self._symbols.values():
+            if sym.parent_class == class_name:
+                method_line = lines[sym.line_start - 1]
+                method_indent = method_line[
+                    : len(method_line) - len(method_line.lstrip())
+                ]
+                break
+
+        # Prepare new code
+        new_lines = new_code.splitlines(keepends=True)
+        indented_lines = []
+
+        first_non_empty = next(
+            (line for line in new_lines if line.strip()), new_lines[0]
+        )
+        base_indent = first_non_empty[
+            : len(first_non_empty) - len(first_non_empty.lstrip())
+        ]
+
+        for line in new_lines:
+            if line.strip():
+                if line.startswith(base_indent):
+                    line = method_indent + line[len(base_indent) :]
+            indented_lines.append(line)
+
+        if indented_lines and not indented_lines[-1].endswith("\n"):
+            indented_lines[-1] += "\n"
+
+        # Insert at end of class
+        insert_pos = end_line
+        final_lines = ["\n"] + indented_lines
+
+        result_lines = lines[:insert_pos] + final_lines + lines[insert_pos:]
+
+        self.current_code = "".join(result_lines)
+        self._parsed = False
+        self._modified = True
+
+        return PatchResult(
+            success=True,
+            file_path=self.file_path or "",
+            target_name=key,
+            target_type="method",
+            lines_before=0,
+            lines_after=len(indented_lines),
+        )
+
+    def rename_symbol(
+        self, target_type: str, target_name: str, new_name: str
+    ) -> PatchResult:
+        """
+        Rename a symbol (function, class, or method) in the file.
+
+        [20251231_FEATURE] Now updates both definition AND all references in the same file.
+
+        This updates:
+        - The definition (def/class statement)
+        - All calls and references within the same file
+        - Type hints referencing the symbol
+        - Decorator usage (for functions/classes)
+        - Attribute access (for methods: self.old_method -> self.new_method)
+
+        Args:
+            target_type: "function", "class", or "method"
+            target_name: Current name (e.g., "my_func" or "MyClass.my_method")
+            new_name: New name (e.g., "new_func" or "new_method")
+
+        Returns:
+            PatchResult with lines_before/after indicating references updated
+        """
+        self._ensure_parsed()
+
+        if target_name not in self._symbols:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"{target_type.capitalize()} '{target_name}' not found",
+            )
+
+        symbol = self._symbols[target_name]
+        if symbol.node_type != target_type:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"'{target_name}' is a {symbol.node_type}, not a {target_type}",
+            )
+
+        # 1. Rename the definition
+        lines = self.current_code.splitlines(keepends=True)
+        def_line_idx = symbol.line_start - 1
+        def_line = lines[def_line_idx]
+
+        if target_type == "method":
+            old_short_name = target_name.split(".")[-1]
+        else:
+            old_short_name = target_name
+
+        prefix = "class" if target_type == "class" else "def"
+
+        # Regex to match "def old_name" or "class old_name"
+        match = re.search(rf"{prefix}\s+{re.escape(old_short_name)}\b", def_line)
+
+        if not match:
+            # Maybe it's async def?
+            match = re.search(rf"async\s+def\s+{re.escape(old_short_name)}\b", def_line)
+
+        if match:
+            if "async" in match.group(0):
+                new_def_line = re.sub(
+                    rf"(async\s+def\s+){re.escape(old_short_name)}\b",
+                    rf"\g<1>{new_name}",
+                    def_line,
+                    count=1,
+                )
+            else:
+                new_def_line = re.sub(
+                    rf"({prefix}\s+){re.escape(old_short_name)}\b",
+                    rf"\g<1>{new_name}",
+                    def_line,
+                    count=1,
+                )
+            lines[def_line_idx] = new_def_line
+        else:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"Could not locate definition of '{old_short_name}' on line {symbol.line_start}",
+            )
+
+        # Update current_code with definition rename
+        self.current_code = "".join(lines)
+
+        # 2. [20251231_FEATURE] Update all same-file references
+        references_updated = 0
+        try:
+            replacements = _collect_same_file_references(
+                self.current_code,
+                target_type,
+                target_name,
+                new_name,
+                symbol.line_start,
+            )
+
+            if replacements:
+                tokens = _tokenize_code(self.current_code)
+                if tokens:
+                    new_code = _apply_token_replacements(tokens, replacements)
+                    if new_code != self.current_code:
+                        self.current_code = new_code
+                        references_updated = len(replacements)
+        except Exception:
+            # If reference update fails, we still have the definition renamed
+            # This is a best-effort enhancement
+            pass
+
+        self._parsed = False
+        self._modified = True
+
+        return PatchResult(
+            success=True,
+            file_path=self.file_path or "",
+            target_name=target_name,
+            target_type=target_type,
+            lines_before=1,
+            lines_after=1 + references_updated,  # 1 for def + N for references
         )
 
     def get_modified_code(self) -> str:
@@ -1023,6 +1518,7 @@ class JavaScriptParser:
     """
 
     # Regex patterns for JS/TS symbols
+    # [20251231_BUGFIX] Added TypeScript return type annotation support
     FUNCTION_PATTERN = re.compile(
         r"^(\s*)"  # Indentation
         r"(export\s+)?"  # Optional export
@@ -1032,6 +1528,7 @@ class JavaScriptParser:
         r"(\*?\s*)"  # Optional generator *
         r"(\w+)"  # Function name
         r"\s*\([^)]*\)"  # Parameters
+        r"(?:\s*:\s*[^{]+)?"  # Optional return type annotation (TS)
         r"\s*{",  # Opening brace
         re.MULTILINE,
     )
@@ -1041,14 +1538,17 @@ class JavaScriptParser:
         r"(export\s+)?"  # Optional export
         r"(const|let|var)\s+"  # Variable declaration
         r"(\w+)"  # Function name
+        r"(?:\s*:\s*[^=]+)?"  # Optional type annotation (TS)
         r"\s*=\s*"
         r"(async\s+)?"  # Optional async
         r"(\([^)]*\)|[a-zA-Z_]\w*)"  # Parameters or single param
+        r"(?:\s*:\s*[^=]+)?"  # Optional return type annotation (TS)
         r"\s*=>\s*"  # Arrow
         r"({|\(|[^;{(])",  # Body start
         re.MULTILINE,
     )
 
+    # [20251231_BUGFIX] Added TypeScript generics support
     CLASS_PATTERN = re.compile(
         r"^(\s*)"  # Indentation
         r"(export\s+)?"  # Optional export
@@ -1056,8 +1556,9 @@ class JavaScriptParser:
         r"(abstract\s+)?"  # Optional abstract (TS)
         r"class\s+"  # class keyword
         r"(\w+)"  # Class name
-        r"(?:\s+extends\s+\w+)?"  # Optional extends
-        r"(?:\s+implements\s+[\w,\s]+)?"  # Optional implements (TS)
+        r"(?:\s*<[^>]+>)?"  # Optional generics (TS)
+        r"(?:\s+extends\s+\w+(?:<[^>]+>)?)?"  # Optional extends (with generics)
+        r"(?:\s+implements\s+[\w,\s<>]+)?"  # Optional implements (TS)
         r"\s*{",  # Opening brace
         re.MULTILINE,
     )
@@ -1119,7 +1620,10 @@ class JavaScriptParser:
 
         for match in self.CLASS_PATTERN.finditer(self.code):
             class_name = match.group(5)
-            line_start = self.code[: match.start()].count("\n") + 1
+            # [20251231_BUGFIX] Account for newlines in captured indentation group
+            indent = match.group(1) or ""
+            indent_newlines = indent.count("\n")
+            line_start = self.code[: match.start()].count("\n") + 1 + indent_newlines
             line_end = self.brace_matcher.find_block_end(line_start)
 
             modifiers = []
@@ -1205,7 +1709,10 @@ class JavaScriptParser:
         # Regular functions
         for match in self.FUNCTION_PATTERN.finditer(self.code):
             func_name = match.group(6)
-            line_start = self.code[: match.start()].count("\n") + 1
+            # [20251231_BUGFIX] Account for newlines in captured indentation group
+            indent = match.group(1) or ""
+            indent_newlines = indent.count("\n")
+            line_start = self.code[: match.start()].count("\n") + 1 + indent_newlines
             line_end = self.brace_matcher.find_block_end(line_start)
 
             modifiers = []
@@ -1234,7 +1741,10 @@ class JavaScriptParser:
         # Arrow functions (named via const/let/var)
         for match in self.ARROW_FUNCTION_PATTERN.finditer(self.code):
             func_name = match.group(4)
-            line_start = self.code[: match.start()].count("\n") + 1
+            # [20251231_BUGFIX] Account for newlines in captured indentation group
+            indent = match.group(1) or ""
+            indent_newlines = indent.count("\n")
+            line_start = self.code[: match.start()].count("\n") + 1 + indent_newlines
 
             # Find arrow function end
             body_start = match.group(7)
@@ -1281,7 +1791,10 @@ class JavaScriptParser:
 
         for match in self.INTERFACE_PATTERN.finditer(self.code):
             interface_name = match.group(3)
-            line_start = self.code[: match.start()].count("\n") + 1
+            # [20251231_BUGFIX] Account for newlines in captured indentation group
+            indent = match.group(1) or ""
+            indent_newlines = indent.count("\n")
+            line_start = self.code[: match.start()].count("\n") + 1 + indent_newlines
             line_end = self.brace_matcher.find_block_end(line_start)
 
             modifiers = []
@@ -1994,6 +2507,224 @@ class PolyglotPatcher:
         self.original_code = self.current_code
 
         return backup_path
+
+    def rename_symbol(
+        self, target_type: str, target_name: str, new_name: str
+    ) -> PatchResult:
+        """
+        Rename a symbol (function, class, or method) in JS/TS/Java file.
+
+        [20251231_FEATURE] JavaScript/TypeScript/Java rename support for Community tier.
+
+        This updates:
+        - The definition (function/class/method declaration)
+        - All references within the same file (calls, type annotations, etc.)
+
+        Args:
+            target_type: "function", "class", or "method"
+            target_name: Current name (e.g., "myFunc" or "ClassName.methodName")
+            new_name: New name (e.g., "newFunc" or "newMethodName")
+
+        Returns:
+            PatchResult with success status
+        """
+        self._ensure_parsed()
+
+        # For methods, use qualified name lookup
+        if target_type == "method" and "." not in target_name:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error="Method name must be qualified as 'ClassName.methodName'",
+            )
+
+        symbol = self._symbols.get(target_name)
+        if not symbol:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"{target_type.capitalize()} '{target_name}' not found",
+            )
+
+        expected_types = {
+            "function": {"function"},
+            "class": {"class", "interface"},
+            "method": {"method", "constructor"},
+        }
+        if symbol.symbol_type not in expected_types.get(target_type, set()):
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"'{target_name}' is a {symbol.symbol_type}, not a {target_type}",
+            )
+
+        # Get the short name for replacement
+        if target_type == "method":
+            old_short_name = target_name.split(".")[-1]
+        else:
+            old_short_name = target_name
+
+        # 1. Rename the definition using regex replacement
+        lines = self.current_code.splitlines(keepends=True)
+        def_line_idx = symbol.line_start - 1
+
+        if def_line_idx >= len(lines):
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"Definition line {symbol.line_start} out of range",
+            )
+
+        def_line = lines[def_line_idx]
+
+        # Build pattern based on target type and language
+        if target_type == "function":
+            # Match: function name, const name =, let name =, var name =, async function name
+            patterns = [
+                (
+                    rf"(function\s+){re.escape(old_short_name)}(\s*[\(<])",
+                    rf"\g<1>{new_name}\g<2>",
+                ),
+                (
+                    rf"(const|let|var)(\s+){re.escape(old_short_name)}(\s*=)",
+                    rf"\g<1>\g<2>{new_name}\g<3>",
+                ),
+                (
+                    rf"(async\s+function\s+){re.escape(old_short_name)}(\s*[\(<])",
+                    rf"\g<1>{new_name}\g<2>",
+                ),
+            ]
+        elif target_type == "class":
+            patterns = [
+                (
+                    rf"(class\s+){re.escape(old_short_name)}(\s*[{{<]|\s+extends|\s+implements)",
+                    rf"\g<1>{new_name}\g<2>",
+                ),
+                (
+                    rf"(interface\s+){re.escape(old_short_name)}(\s*[{{<]|\s+extends)",
+                    rf"\g<1>{new_name}\g<2>",
+                ),
+            ]
+        elif target_type == "method":
+            # Match method definitions: methodName(, async methodName(, get methodName(, set methodName(
+            patterns = [
+                (
+                    rf"(\s+)(async\s+)?{re.escape(old_short_name)}(\s*[\(<])",
+                    rf"\g<1>\g<2>{new_name}\g<3>",
+                ),
+                (
+                    rf"(\s+)(get|set)(\s+){re.escape(old_short_name)}(\s*[\(<])",
+                    rf"\g<1>\g<2>\g<3>{new_name}\g<4>",
+                ),
+                (
+                    rf"(\s+)(static\s+)?(async\s+)?{re.escape(old_short_name)}(\s*[\(<])",
+                    rf"\g<1>\g<2>\g<3>{new_name}\g<4>",
+                ),
+            ]
+        else:
+            patterns = []
+
+        renamed_def = False
+        for pattern, replacement in patterns:
+            new_def_line, count = re.subn(pattern, replacement, def_line, count=1)
+            if count > 0:
+                lines[def_line_idx] = new_def_line
+                renamed_def = True
+                break
+
+        if not renamed_def:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name=target_name,
+                target_type=target_type,
+                error=f"Could not locate definition of '{old_short_name}' on line {symbol.line_start}",
+            )
+
+        self.current_code = "".join(lines)
+
+        # 2. Update all same-file references
+        references_updated = self._rename_js_references(
+            old_short_name, new_name, target_type, symbol.line_start
+        )
+
+        self._parsed = False
+        self._modified = True
+
+        return PatchResult(
+            success=True,
+            file_path=self.file_path or "",
+            target_name=target_name,
+            target_type=target_type,
+            lines_before=1,
+            lines_after=1 + references_updated,
+        )
+
+    def _rename_js_references(
+        self, old_name: str, new_name: str, target_type: str, definition_line: int
+    ) -> int:
+        """
+        Rename references to a symbol in JS/TS code.
+
+        [20251231_FEATURE] Same-file reference updates for JS/TS.
+
+        Uses regex-based replacement since we don't have a full JS AST.
+        Conservative approach: only rename clear identifier patterns.
+
+        Returns:
+            Number of references updated
+        """
+        lines = self.current_code.splitlines(keepends=True)
+        references_updated = 0
+
+        # Pattern for identifiers (word boundary matching)
+        # This matches the old name when it's a standalone identifier
+        if target_type == "function":
+            # Match function calls and references: oldName( or oldName, or oldName; etc.
+            # But NOT .oldName (that would be a method/property)
+            pattern = re.compile(
+                rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}\s]|$)"
+            )
+        elif target_type == "class":
+            # Match class references: new ClassName, : ClassName, extends ClassName, etc.
+            pattern = re.compile(
+                rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}<:\s]|$)"
+            )
+        elif target_type == "method":
+            # Match method calls via this. or object.
+            pattern = re.compile(rf"(?<=\.){re.escape(old_name)}(?=\s*[\(])")
+        else:
+            return 0
+
+        for i, line in enumerate(lines):
+            line_num = i + 1
+            # Skip the definition line
+            if line_num == definition_line:
+                continue
+
+            # Skip import/export statements for function/class (cross-file concern)
+            if target_type in ("function", "class"):
+                stripped = line.strip()
+                if stripped.startswith(("import ", "export ", "from ")):
+                    continue
+
+            new_line, count = pattern.subn(new_name, line)
+            if count > 0:
+                lines[i] = new_line
+                references_updated += count
+
+        if references_updated > 0:
+            self.current_code = "".join(lines)
+
+        return references_updated
 
     def discard_changes(self) -> None:
         """Discard all modifications."""

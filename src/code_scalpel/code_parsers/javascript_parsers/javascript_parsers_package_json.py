@@ -15,7 +15,7 @@ Reference: https://docs.npmjs.com/cli/v10/configuring-npm/package-json
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 
 @dataclass

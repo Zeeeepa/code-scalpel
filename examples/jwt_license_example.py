@@ -44,7 +44,7 @@ def example_1_generate_test_licenses():
         secret_key="test_secret_key_12345",
     )
 
-    print(f"\nPro License (HS256):")
+    print("\nPro License (HS256):")
     print(f"Token: {pro_license[:50]}...{pro_license[-20:]}")
     print(f"Length: {len(pro_license)} characters")
 
@@ -59,10 +59,10 @@ def example_1_generate_test_licenses():
         secret_key="test_secret_key_12345",
     )
 
-    print(f"\nEnterprise License (HS256):")
+    print("\nEnterprise License (HS256):")
     print(f"Token: {enterprise_license[:50]}...{enterprise_license[-20:]}")
-    print(f"Seats: 50")
-    print(f"Duration: 730 days")
+    print("Seats: 50")
+    print("Duration: 730 days")
 
     # Save to file
     license_file = Path(".scalpel-license-test")
@@ -96,7 +96,7 @@ def example_2_validate_from_string():
     # Validate token
     result = validator.validate_token(token)
 
-    print(f"\nValidation Result:")
+    print("\nValidation Result:")
     print(f"  Tier: {result.tier}")
     print(f"  Valid: {result.is_valid}")
     print(f"  Customer ID: {result.customer_id}")
@@ -132,14 +132,14 @@ def example_3_validate_from_file():
 
     result = validator.validate()
 
-    print(f"\nValidation Result:")
+    print("\nValidation Result:")
     print(f"  Tier: {result.tier}")
     print(f"  Valid: {result.is_valid}")
-    print(f"  Source: License file (.scalpel-license)")
+    print("  Source: License file (.scalpel-license)")
 
     # Clean up
     license_file.unlink()
-    print(f"\nCleaned up license file")
+    print("\nCleaned up license file")
 
 
 def example_4_validate_from_environment():
@@ -161,7 +161,7 @@ def example_4_validate_from_environment():
 
     # Set environment variable
     os.environ["CODE_SCALPEL_LICENSE_KEY"] = token
-    print(f"\nSet CODE_SCALPEL_LICENSE_KEY environment variable")
+    print("\nSet CODE_SCALPEL_LICENSE_KEY environment variable")
 
     # Validate
     validator = JWTLicenseValidator(
@@ -170,12 +170,12 @@ def example_4_validate_from_environment():
 
     result = validator.validate()
 
-    print(f"\nValidation Result:")
+    print("\nValidation Result:")
     print(f"  Tier: {result.tier}")
     print(f"  Valid: {result.is_valid}")
     print(f"  Organization: {result.organization}")
     print(f"  Seats: {result.seats}")
-    print(f"  Source: Environment variable")
+    print("  Source: Environment variable")
 
     # Clean up
     del os.environ["CODE_SCALPEL_LICENSE_KEY"]
@@ -188,7 +188,6 @@ def example_5_expired_license_grace_period():
     print("=" * 80)
 
     # Generate expired license (negative duration)
-    from datetime import datetime, timedelta
     import jwt
 
     # Create claims for expired license
@@ -206,7 +205,7 @@ def example_5_expired_license_grace_period():
 
     expired_token = jwt.encode(claims, "test_secret_key_12345", algorithm="HS256")
 
-    print(f"\nGenerated expired license (expired 3 days ago)")
+    print("\nGenerated expired license (expired 3 days ago)")
 
     # Validate expired license
     validator = JWTLicenseValidator(
@@ -215,7 +214,7 @@ def example_5_expired_license_grace_period():
 
     result = validator.validate_token(expired_token)
 
-    print(f"\nValidation Result:")
+    print("\nValidation Result:")
     print(f"  Tier: {result.tier}")
     print(f"  Valid: {result.is_valid}")
     print(f"  Expired: {result.is_expired}")
@@ -293,7 +292,7 @@ def example_7_license_info_api():
     # Get detailed info
     info = get_license_info()
 
-    print(f"\nLicense Information:")
+    print("\nLicense Information:")
     print(f"  Tier: {info['tier']}")
     print(f"  Valid: {info['is_valid']}")
     print(f"  Customer ID: {info['customer_id']}")

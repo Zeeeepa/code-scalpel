@@ -22,14 +22,14 @@ Example:
 """
 
 import ast
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Union, Tuple, Callable, cast
-from dataclasses import dataclass, field
 from collections import defaultdict, deque
+from dataclasses import dataclass, field
 from enum import Enum, auto
+from pathlib import Path
+from typing import Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
-from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportInfo
+from code_scalpel.ast_tools.import_resolver import ImportInfo, ImportResolver
 
 
 class CrossFileTaintSource(Enum):

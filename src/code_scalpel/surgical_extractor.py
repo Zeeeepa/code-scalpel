@@ -24,18 +24,10 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.surgery.surgical_extractor import (
-    SurgicalExtractor,
-    ExtractionResult,
-    ContextualExtraction,
-    CrossFileSymbol,
-    CrossFileResolution,
-    # Convenience functions
-    extract_function,
-    extract_class,
-    extract_method,
-    extract_with_context,
-)
+from code_scalpel.surgery.surgical_extractor import (  # Convenience functions
+    ContextualExtraction, CrossFileResolution, CrossFileSymbol,
+    ExtractionResult, SurgicalExtractor, extract_class, extract_function,
+    extract_method, extract_with_context)
 
 __all__ = [
     "SurgicalExtractor",

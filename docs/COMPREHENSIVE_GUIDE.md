@@ -501,6 +501,8 @@ cursor.execute("SELECT * FROM users WHERE name='" + safe_input + "'")
 
 The Model Context Protocol server exposes Code Scalpel to AI assistants.
 
+**🆕 v3.3.0**: Fully configurable response output for maximum token efficiency. See [Configurable Response Output](guides/configurable_response_output.md).
+
 ### Starting the Server
 
 ```bash
@@ -512,7 +514,36 @@ python -m code_scalpel.mcp.server --transport streamable-http --port 8593
 
 # Using CLI
 code-scalpel mcp --port 8593
+
+# Debug mode (includes all metadata)
+SCALPEL_MCP_INFO=DEBUG code-scalpel mcp
 ```
+
+### Response Configuration
+
+**v3.3.0**: Customize which fields are returned via `.code-scalpel/response_config.json`:
+
+```json
+{
+  "global": {
+    "profile": "minimal",
+    "exclude_empty_arrays": true,
+    "exclude_null_values": true
+  },
+  "tool_overrides": {
+    "analyze_code": {
+      "include_only": ["functions", "classes", "complexity"]
+    }
+  }
+}
+```
+
+**Profiles:**
+- `minimal` (default): Just the data - maximum token efficiency
+- `standard`: Balanced output with essential metadata
+- `debug`: Full output including all metadata
+
+**Token Savings**: ~150-200 tokens per response (1000 calls = 150K-200K tokens preserved)
 
 ### Available Tools
 
@@ -523,9 +554,14 @@ code-scalpel mcp --port 8593
 | `symbolic_execute` | Explore execution paths with Z3 |
 | `generate_unit_tests` | Generate pytest/unittest from paths |
 | `simulate_refactor` | Verify a refactor is safe before applying |
-| `extract_code` | **NEW** Token-efficient extraction from file path |
-| `update_symbol` | **NEW** Surgical modification with validation |
-| `crawl_project` | **NEW** Project structure discovery |
+| `extract_code` | Token-efficient extraction from file path |
+| `update_symbol` | Surgical modification with validation |
+| `crawl_project` | Project structure discovery |
+| `code_policy_check` | Code policy enforcement (v3.3.0) |
+| `verify_policy_integrity` | Cryptographic policy verification (v3.3.0) |
+| `type_evaporation_scan` | TypeScript type safety validation (v3.3.0) |
+
+**Total**: 21 tools available at all tiers (Community, Pro, Enterprise)
 
 ### Using with Claude Desktop
 
@@ -546,6 +582,7 @@ Add to `claude_desktop_config.json`:
 
 #### analyze_code
 
+**Default Response (v3.3.0 - minimal profile):**
 ```json
 {
   "code": "def hello(): return 42",
@@ -556,13 +593,42 @@ Add to `claude_desktop_config.json`:
 Response:
 ```json
 {
-  "success": true,
-  "server_version": "1.1.0",
-  "functions": ["hello"],
-  "classes": [],
-  "imports": [],
-  "function_count": 1,
-  "class_count": 0,
+  "data": {
+    "functions": ["hello"],
+    "classes": [],
+    "imports": [],
+    "complexity": 1,
+    "lines_of_code": 1,
+    "function_details": [
+      {"name": "hello", "lineno": 1, "end_lineno": 1, "is_async": false}
+    ],
+    "class_details": []
+  }
+}
+```
+
+**Debug Mode Response (SCALPEL_MCP_INFO=DEBUG):**
+```json
+{
+  "tier": "community",
+  "tool_version": "3.3.0",
+  "tool_id": "analyze_code",
+  "request_id": "abc123",
+  "capabilities": ["envelope-v1"],
+  "duration_ms": 5,
+  "data": {
+    "functions": ["hello"],
+    "classes": [],
+    "imports": [],
+    "function_count": 1,
+    "class_count": 0,
+    "complexity": 1,
+    "lines_of_code": 1
+  }
+}
+```
+
+**Customization**: Configure which fields to include via `.code-scalpel/response_config.json`.
   "complexity": 1,
   "lines_of_code": 1
 }

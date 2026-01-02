@@ -59,12 +59,12 @@ ENTERPRISE TIER (Distributed & Advanced):
 31. Cross-platform Windows/Linux path translation (TODO)
 """
 
+import logging
 import os
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple, cast
-from dataclasses import dataclass
-import logging
 
 logger = logging.getLogger(__name__)
 

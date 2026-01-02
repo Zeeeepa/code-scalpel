@@ -2,6 +2,7 @@
 
 **[20251225_DOCS] Created comprehensive licensing documentation**
 **[20251225_FEATURE] v3.3.0 - JWT-based license validation system (NEW)**
+**[20251228_DOCS] Updated license installation to file-only discovery (`CODE_SCALPEL_LICENSE_PATH` / `--license-file`) and strict expiration posture**
 
 This directory contains the licensing system for Code Scalpel, providing tier-based feature access control and license validation.
 
@@ -24,22 +25,46 @@ print(f"Expires: {info['days_until_expiration']} days")
 
 ### Install a License
 
-Three ways to provide your JWT license token:
+Three ways to provide your JWT license (file-only discovery):
 
-**Option 1: Environment Variable**
+**Option 1: MCP Server CLI (explicit override)**
 ```bash
-export CODE_SCALPEL_LICENSE_KEY="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+code-scalpel mcp --license-file /path/to/license.jwt
 ```
 
-**Option 2: License File**
+**Option 2: Environment Variable (path to file)**
 ```bash
-echo "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." > .scalpel-license
+export CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
 ```
 
-**Option 3: User Config**
+**Option 3: Default License Locations (no env needed)**
 ```bash
+# Project-local (recommended)
+mkdir -p .code-scalpel
+cp /path/to/license.jwt .code-scalpel/license.jwt
+
+# Or user config
 mkdir -p ~/.config/code-scalpel
-echo "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..." > ~/.config/code-scalpel/license
+cp /path/to/license.jwt ~/.config/code-scalpel/license.jwt
+
+# Or legacy filename (still supported)
+cp /path/to/license.jwt .scalpel-license
+```
+
+### Remote Verifier Mode (Beta/Production)
+
+> [20251228_DOCS] Documented beta/prod verifier availability assumption and local-dev Docker usage.
+
+If `CODE_SCALPEL_LICENSE_VERIFIER_URL` is set (defaults to `https://verifier.codescalpel.dev`), the MCP server consults the remote
+verifier as the source of truth for paid-tier entitlements.
+
+- **Beta/production:** assumes the verifier/auth server is reachable
+- **Local development:** use the Docker verifier container and set the verifier URL
+- **Outage tolerance:** cached entitlements can be used briefly if the verifier is down
+
+```bash
+# Override default (https://verifier.codescalpel.dev) for local dev:
+export CODE_SCALPEL_LICENSE_VERIFIER_URL="http://scalpel-verifier:8000"
 ```
 
 ### Generate Test Licenses
@@ -72,11 +97,11 @@ get_current_tier()
     ↓
 JWTLicenseValidator.validate()
     ↓
-Load token (env var / file)
+Load token (license file)
     ↓
 Verify JWT signature (RS256/HS256)
     ↓
-Check expiration (7-day grace period)
+Check expiration (strict: expired never grants paid tier)
     ↓
 Return tier: "community", "pro", or "enterprise"
 ```
@@ -86,9 +111,10 @@ Return tier: "community", "pro", or "enterprise"
 - **Industry Standard**: RFC 7519 compliant JWT tokens
 - **Cryptographically Secure**: RS256 (RSA) or HS256 (HMAC) signature verification
 - **Tamper-Proof**: Invalid signature = invalid license
-- **Offline Validation**: No network required
-- **Grace Period**: 7 days after expiration before downgrade
-- **Flexible Configuration**: Environment variable, file, or default
+- **Offline Validation (File-Based)**: No network required when validating from a local license file
+- **Remote Verifier (Optional)**: If `CODE_SCALPEL_LICENSE_VERIFIER_URL` is set, the verifier is authoritative; cache/grace is for temporary outages
+- **Strict Expiration**: Expired licenses downgrade immediately
+- **Flexible Configuration**: `CODE_SCALPEL_LICENSE_PATH` or standard license file locations
 
 ### JWT Token Structure
 
@@ -191,13 +217,14 @@ token = generate_license(
 
 ### License Loading Priority
 
-License tokens are loaded in this order:
+License files are discovered in this order (file-only discovery):
 
-1. **Environment Variable**: `CODE_SCALPEL_LICENSE_KEY`
-2. **Local File**: `.scalpel-license`
-3. **User Config**: `~/.config/code-scalpel/license`
-4. **System Config**: `/etc/code-scalpel/license`
-5. **Default**: Community tier (no license required)
+1. **Environment Variable (path)**: `CODE_SCALPEL_LICENSE_PATH`
+2. **Local Project**: `.code-scalpel/license.jwt`
+3. **User Config**: `~/.config/code-scalpel/license.jwt`
+4. **Legacy User Config**: `~/.code-scalpel/license.jwt`
+5. **Legacy Local**: `.scalpel-license`
+6. **Default**: Community tier (no license required)
 
 ### Signature Algorithms
 
@@ -217,6 +244,8 @@ License tokens are loaded in this order:
 
 ### Expiration & Grace Period
 
+> [20251227_DOCS] Strict posture: expired licenses never grant paid tier. The "grace period" is informational only (used for renewal messaging).
+
 **Valid License**
 ```python
 {
@@ -232,7 +261,7 @@ License tokens are loaded in this order:
 {
     "is_valid": False,
     "is_expired": True,
-    "tier": "pro",  # Still licensed tier during grace
+    "tier": "pro",  # Tier claim may still be present for messaging
     "is_in_grace_period": True,
     "days_until_expiration": -3
 }
@@ -243,7 +272,7 @@ License tokens are loaded in this order:
 {
     "is_valid": False,
     "is_expired": True,
-    "tier": "community",  # Downgraded
+    "tier": "pro",  # Tier claim may still be present; effective tier remains community
     "is_in_grace_period": False
 }
 ```
@@ -708,7 +737,7 @@ graph TD
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `CODE_SCALPEL_TIER` | Override detected tier | `community` |
-| `CODE_SCALPEL_LICENSE_KEY` | License key to use | None |
+| `CODE_SCALPEL_LICENSE_PATH` | Path to JWT license file | None |
 | `CODE_SCALPEL_LICENSE_SERVER` | Online validation server URL | `https://license.code-scalpel.dev/api/validate` |
 | `CODE_SCALPEL_SIGNATURE_SECRET` | Secret for signature verification | `scalpel-signing-key-v1` |
 | `CODE_SCALPEL_ORGANIZATION` | Organization name (enables org-based detection) | None |
@@ -939,15 +968,17 @@ The LicenseManager persists license state to disk for:
 
 ## Grace Period Handling
 
-When a license expires, a grace period allows continued operation with warnings.
+> [20251227_DOCS] NOTE: JWT tier enforcement is strict fail-closed. Expired licenses do not grant paid tier.
+>
+> This section describes renewal messaging behavior (legacy/UX) and should not be interpreted as authorization. The authoritative source for effective tier is `get_current_tier()`.
 
-**Default Grace Period:** 30 days
+When a license expires, Code Scalpel can surface renewal messaging during an informational grace window.
 
-**Grace Period Behavior:**
-- **Days 1-7:** Warning messages, full functionality
-- **Days 8-14:** Urgent warnings, full functionality
-- **Days 15-30:** Critical warnings, full functionality
-- **After Day 30:** License invalid, features disabled
+**Default JWT Informational Grace Window:** 7 days (see `JWTLicenseData.is_in_grace_period`)
+
+**Behavior:**
+- During the informational grace window: `is_in_grace_period=True`, but `is_valid=False`
+- Effective tier remains `community` until a valid, unexpired license is provided
 
 **Example:**
 ```python
@@ -1101,7 +1132,7 @@ When a feature is not available due to tier limitations:
 if not manager.is_feature_available("cross_file_security_scan"):
     print(manager.get_upgrade_message("cross_file_security_scan"))
     # Output: "This feature requires PRO or ENTERPRISE tier. 
-    #          Upgrade at https://code-scalpel.dev/pricing"
+    #          Upgrade at http://codescalpel.dev/pricing"
 ```
 
 ## Testing
@@ -1190,12 +1221,15 @@ License validation works in containerized environments. Set environment variable
 
 ```dockerfile
 ENV CODE_SCALPEL_TIER=pro
-ENV CODE_SCALPEL_LICENSE_KEY=SCALPEL-PRO-...
+ENV CODE_SCALPEL_LICENSE_PATH=/run/secrets/code-scalpel/license.jwt
 ```
 
 Or mount config file:
 ```bash
-docker run -v /path/to/license.json:/app/.code-scalpel/license.json code-scalpel
+docker run \
+    -v /path/to/license.jwt:/app/.code-scalpel/license.jwt \
+    -e CODE_SCALPEL_LICENSE_PATH=/app/.code-scalpel/license.jwt \
+    code-scalpel
 ```
 
 ### CI/CD
@@ -1204,12 +1238,14 @@ Store license keys in secrets:
 ```yaml
 # GitHub Actions
 env:
-  CODE_SCALPEL_LICENSE_KEY: ${{ secrets.SCALPEL_LICENSE_KEY }}
+    CODE_SCALPEL_LICENSE_PATH: .code-scalpel/license.jwt
 ```
 
 ```bash
 # GitLab CI
-export CODE_SCALPEL_LICENSE_KEY="${SCALPEL_LICENSE_KEY}"
+mkdir -p .code-scalpel
+printf "%s" "$SCALPEL_LICENSE_JWT" > .code-scalpel/license.jwt
+export CODE_SCALPEL_LICENSE_PATH=.code-scalpel/license.jwt
 ```
 
 ### Production
@@ -1221,7 +1257,11 @@ import boto3
 # Load from AWS Secrets Manager
 client = boto3.client('secretsmanager')
 secret = client.get_secret_value(SecretId='code-scalpel-license')
-os.environ['CODE_SCALPEL_LICENSE_KEY'] = secret['SecretString']
+os.makedirs('.code-scalpel', exist_ok=True)
+license_path = os.path.join('.code-scalpel', 'license.jwt')
+with open(license_path, 'w', encoding='utf-8') as f:
+    f.write(secret['SecretString'])
+os.environ['CODE_SCALPEL_LICENSE_PATH'] = license_path
 ```
 
 ## License Generation
@@ -1376,7 +1416,7 @@ Offline validation using embedded signatures.
 ## Support
 
 For licensing questions or issues:
-- **Documentation:** https://code-scalpel.dev/docs/licensing
+- **Documentation:** http://codescalpel.dev/docs/licensing
 - **Support:** support@code-scalpel.dev
 - **Sales:** sales@code-scalpel.dev
 - **Security Issues:** security@code-scalpel.dev

@@ -190,7 +190,7 @@ def requires_feature(
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            from .feature_registry import is_feature_enabled, get_feature_tier
+            from .feature_registry import get_feature_tier, is_feature_enabled
 
             if is_feature_enabled(feature_name):
                 return func(*args, **kwargs)

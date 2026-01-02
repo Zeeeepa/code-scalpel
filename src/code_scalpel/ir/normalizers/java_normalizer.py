@@ -15,33 +15,18 @@ Key Mappings:
 
 from typing import Any, Dict, List, Optional, cast
 
-from ..nodes import (
-    IRAssign,
-    IRBinaryOp,
-    IRCall,
-    IRClassDef,
-    IRFunctionDef,
-    IRIf,
-    IRConstant,
-    IRModule,
-    IRName,
-    IRReturn,
-    IRWhile,
-    IRParameter,
-    IRNode,
-    SourceLocation,  # [20251214_FEATURE] Add location tracking for polyglot extraction
-    # [20251215_FEATURE] v2.0.0 - Additional nodes for complete Java support
-    IRImport,
-    IRTry,
-    IRRaise,
-    IRSwitch,
-    IRFor,
-)
+import tree_sitter_java
+from tree_sitter import Language, Parser
+
+from ..nodes import \
+    SourceLocation  # [20251214_FEATURE] Add location tracking for polyglot extraction
+from ..nodes import (  # [20251215_FEATURE] v2.0.0 - Additional nodes for complete Java support
+    IRAssign, IRBinaryOp, IRCall, IRClassDef, IRConstant, IRFor, IRFunctionDef,
+    IRIf, IRImport, IRModule, IRName, IRNode, IRParameter, IRRaise, IRReturn,
+    IRSwitch, IRTry, IRWhile)
 from ..operators import BinaryOperator
 from .base import BaseNormalizer
 from .tree_sitter_visitor import TreeSitterVisitor
-import tree_sitter_java
-from tree_sitter import Language, Parser
 
 
 class JavaVisitor(TreeSitterVisitor):

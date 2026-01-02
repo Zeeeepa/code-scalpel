@@ -46,7 +46,6 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-
 # TODO: SchemaDriftDetector Enhancement Roadmap
 # =============================================
 #

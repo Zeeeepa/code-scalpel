@@ -40,7 +40,25 @@ import pickle
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Generic, Optional, TypeVar
+from typing import Any, Callable, Dict, Generic, Optional, TypedDict, TypeVar
+
+
+class CacheStatsDict(TypedDict):
+    """Cache statistics dictionary for JSON serialization."""
+
+    memory_hits: int
+    disk_hits: int
+    misses: int
+    stores: int
+    invalidations: int
+    evictions: int
+    total_entries: int
+    size_bytes: int
+    total_requests: int
+    hit_rate: float
+    memory_hit_rate: float
+    disk_hit_rate: float
+
 
 # Import tool version for cache invalidation
 try:
@@ -169,7 +187,7 @@ class CacheStats:
         total = self.total_requests
         return self.disk_hits / total if total > 0 else 0.0
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> CacheStatsDict:
         """Convert statistics to dictionary."""
         return {
             "memory_hits": self.memory_hits,

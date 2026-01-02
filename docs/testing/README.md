@@ -12,6 +12,10 @@ This directory contains documentation related to testing, test coverage, and qua
 - **[GOVERNANCE_TEST_QUICK_REFERENCE.md](GOVERNANCE_TEST_QUICK_REFERENCE.md)** - Quick reference for governance tests
 - **[POLICY_GOVERNANCE_TEST_COVERAGE.md](POLICY_GOVERNANCE_TEST_COVERAGE.md)** - Policy-specific test coverage
 
+### MCP Testing
+- **[MANUAL_MCP_SMOKE_TEST_CHECKLIST.md](MANUAL_MCP_SMOKE_TEST_CHECKLIST.md)** - Minimal release-gate smoke checks for MCP transports
+- **[MCP_TIER_TOOLING_NEXT_TESTS.md](MCP_TIER_TOOLING_NEXT_TESTS.md)** - Tier/license + tooling follow-on validation plan
+
 ## Related Documentation
 
 For general testing information, see:

@@ -46,13 +46,13 @@ Future Enhancements:
     - Migration helpers from other linters
 """
 
+import json
+import shutil
+import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
-import json
-import subprocess
-import shutil
 
 
 class StandardSeverity(Enum):

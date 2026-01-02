@@ -6,7 +6,6 @@ from typing import Optional
 
 import networkx as nx
 
-
 # [20251221_TODO] Add support for non-local scope analysis:
 #     - Properly handle nonlocal and global declarations
 #     - Track variable scope chains across nested functions

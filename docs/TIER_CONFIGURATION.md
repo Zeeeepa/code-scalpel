@@ -1,6 +1,7 @@
 # Tier Configuration Guide
 
-**Last Updated**: v3.2.8 (2025-12-23)
+**Last Updated**: v3.3.0 (2025-12-28)
+> [20251228_DOCS] Updated for strict licensing posture and file-only license discovery (`CODE_SCALPEL_LICENSE_PATH` / `--license-file` / `.code-scalpel/license.jwt`).
 
 Code Scalpel uses an **open-core licensing model** with three tiers: Community (free), Pro (commercial), and Enterprise (commercial). All code ships in a single MIT-licensed package, but features are restricted at runtime based on your configured tier.
 
@@ -11,8 +12,31 @@ Code Scalpel uses an **open-core licensing model** with three tiers: Community (
 | Tier | License | Cost | Configuration |
 |------|---------|------|---------------|
 | **Community** | MIT | Free | Default (no configuration needed) |
-| **Pro** | Commercial | Paid | Set `CODE_SCALPEL_TIER=pro` |
-| **Enterprise** | Commercial | Paid | Set `CODE_SCALPEL_TIER=enterprise` |
+| **Pro** | Commercial | Paid | Request `pro` tier + provide a valid license file |
+| **Enterprise** | Commercial | Paid | Request `enterprise` tier + provide a valid license file |
+
+### License File (Required for Pro/Enterprise)
+
+Code Scalpel uses **file-only** license discovery for paid tiers.
+
+- Preferred: put your license at `.code-scalpel/license.jwt` in your project
+- Or set `CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt`
+- Or pass `--license-file /path/to/license.jwt` when starting the MCP server
+
+## Keysets, Rotation, and Environments
+
+> [20251228_DOCS] Documented how to configure keysets for rotation and beta/prod separation.
+
+Code Scalpel supports verifying multiple signing keys via `kid`.
+
+- `CODE_SCALPEL_LICENSE_PUBLIC_KEYS_PATH`: path to a JSON dict mapping `kid → public key PEM`
+- `CODE_SCALPEL_LICENSE_PUBLIC_KEYS_JSON`: inline JSON dict mapping `kid → public key PEM`
+
+Recommended deployment posture:
+- Production deployments load a keyset that contains only `prod-*` keys.
+- Beta deployments load a keyset that contains only `beta-*` keys.
+
+This ensures beta and production licenses cannot be mixed accidentally.
 
 ---
 
@@ -27,10 +51,12 @@ Set the `CODE_SCALPEL_TIER` environment variable before starting the MCP server:
 code-scalpel mcp
 
 # Pro
+export CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
 export CODE_SCALPEL_TIER=pro
 code-scalpel mcp
 
 # Enterprise
+export CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
 export CODE_SCALPEL_TIER=enterprise
 code-scalpel mcp
 ```
@@ -44,10 +70,10 @@ Pass the `--tier` flag when starting the server:
 code-scalpel mcp --tier community
 
 # Pro
-code-scalpel mcp --tier pro
+code-scalpel mcp --tier pro --license-file /path/to/license.jwt
 
 # Enterprise
-code-scalpel mcp --tier enterprise
+code-scalpel mcp --tier enterprise --license-file /path/to/license.jwt
 ```
 
 ### 3. MCP Configuration File
@@ -62,7 +88,8 @@ For **VS Code / GitHub Copilot**, configure in `.vscode/mcp.json`:
       "command": "uvx",
       "args": ["code-scalpel", "mcp"],
       "env": {
-        "CODE_SCALPEL_TIER": "pro"
+        "CODE_SCALPEL_TIER": "pro",
+        "CODE_SCALPEL_LICENSE_PATH": "/path/to/license.jwt"
       }
     }
   }
@@ -78,7 +105,8 @@ For **Claude Desktop**, configure in `claude_desktop_config.json`:
       "command": "uvx",
       "args": ["code-scalpel", "mcp"],
       "env": {
-        "CODE_SCALPEL_TIER": "pro"
+        "CODE_SCALPEL_TIER": "pro",
+        "CODE_SCALPEL_LICENSE_PATH": "/path/to/license.jwt"
       }
     }
   }
@@ -91,10 +119,18 @@ When running in Docker:
 
 ```bash
 # Pro tier
-docker run -e CODE_SCALPEL_TIER=pro -p 8593:8593 code-scalpel
+docker run \
+  -e CODE_SCALPEL_TIER=pro \
+  -e CODE_SCALPEL_LICENSE_PATH=/app/.code-scalpel/license.jwt \
+  -v /path/to/license.jwt:/app/.code-scalpel/license.jwt \
+  -p 8593:8593 code-scalpel
 
 # Enterprise tier
-docker run -e CODE_SCALPEL_TIER=enterprise -p 8593:8593 code-scalpel
+docker run \
+  -e CODE_SCALPEL_TIER=enterprise \
+  -e CODE_SCALPEL_LICENSE_PATH=/app/.code-scalpel/license.jwt \
+  -v /path/to/license.jwt:/app/.code-scalpel/license.jwt \
+  -p 8593:8593 code-scalpel
 ```
 
 Or in `docker-compose.yml`:
@@ -105,6 +141,9 @@ services:
     image: code-scalpel
     environment:
       CODE_SCALPEL_TIER: pro
+      CODE_SCALPEL_LICENSE_PATH: /app/.code-scalpel/license.jwt
+    volumes:
+      - /path/to/license.jwt:/app/.code-scalpel/license.jwt
     ports:
       - "8593:8593"
 ```
@@ -470,6 +509,65 @@ Enterprise tier includes additional governance and audit features (when availabl
 2. **Audit Trail**: Monitor tier logs for compliance tracking
 3. **Policy Enforcement**: Ensure proper licenses for Pro/Enterprise usage
 4. **Support Contracts**: Consider Enterprise tier for priority support
+
+---
+
+## Budget-Conscious Governance Selection
+
+> [20251226_DOCS] Guide for selecting tier AND governance profile based on budget constraints.
+
+### The Core Tension: Token Efficiency vs. Governance Overhead
+
+Code Scalpel is designed for **context-size-aware AI agent development** - enabling small-context AI agents (8K-32K tokens) to operate on large codebases with surgical precision.
+
+**Key insight:** Governance is **server-side**, not agent-side. The AI agent never sees policy files - it only receives pass/fail responses (~50 tokens).
+
+### Break-Even Analysis
+
+| Team Size | Annual Dev Cost | Governance Setup | ROI Threshold |
+|-----------|-----------------|------------------|---------------|
+| 1 solo | $0 (hobby) | 2 hours | Not worth it |
+| 1 contractor | $50K | 4 hours | 1 prevented bug = ROI |
+| 2-5 devs | $300K | 8 hours | 1 security incident avoided |
+| 5-20 devs | $1M+ | 16 hours | Audit compliance = mandatory |
+| 20+ devs | $5M+ | 40 hours | Full Enterprise tier justified |
+
+### Tier + Governance Profile Matrix
+
+| Scenario | Recommended Tier | Governance Profile | Total Overhead |
+|----------|-----------------|-------------------|----------------|
+| Solo hobby project | Community | `permissive` | 0 tokens |
+| Contractor, client work | Community/Pro | `minimal` | ~50 tokens |
+| Small team, internal tools | Pro | `minimal` | ~50 tokens |
+| Startup, pre-revenue | Pro | `minimal` | ~50 tokens |
+| Standard enterprise | Pro | `default` | ~100 tokens |
+| Regulated industry | Enterprise | `restrictive` | ~150 tokens |
+| Multi-agent orchestration | Enterprise | `default`/`restrictive` | ~100-150 tokens |
+
+### When Governance Is NOT Worth It
+
+- Solo development, side projects → Skip governance entirely
+- Rapid prototyping / hackathons → Use `permissive` profile
+- Learning and experimentation → Use `permissive` profile
+- One-off scripts → No governance needed
+
+### When Governance IS Worth It
+
+- Client deliverables → Audit trail for liability protection
+- Team > 2 people → Coordination and standards
+- Any paid project → Basic compliance coverage
+- Production code → Quality assurance
+- Regulated industry → Legal requirement
+
+### Governance Profile Quick Start
+
+```bash
+# Set governance profile alongside tier
+export CODE_SCALPEL_TIER=pro
+export CODE_SCALPEL_CONFIG_PROFILE=minimal
+```
+
+See [Governance Profile Selection Guide](../.code-scalpel/GOVERNANCE_PROFILES.md) for detailed profile comparison.
 
 ---
 

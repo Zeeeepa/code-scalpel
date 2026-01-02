@@ -17,14 +17,14 @@ from typing import Any, Dict, List, Optional, cast
 
 import z3
 
-from .type_inference import InferredType, TypeInferenceEngine
-from .state_manager import SymbolicState
-from ..ir.normalizers.python_normalizer import PythonNormalizer
-from ..ir.normalizers.javascript_normalizer import JavaScriptNormalizer
-from ..ir.normalizers.java_normalizer import JavaNormalizer
 from ..ir.nodes import IRFunctionDef, IRModule
-from .ir_interpreter import IRSymbolicInterpreter
+from ..ir.normalizers.java_normalizer import JavaNormalizer
+from ..ir.normalizers.javascript_normalizer import JavaScriptNormalizer
+from ..ir.normalizers.python_normalizer import PythonNormalizer
 from .constraint_solver import ConstraintSolver, SolverStatus
+from .ir_interpreter import IRSymbolicInterpreter
+from .state_manager import SymbolicState
+from .type_inference import InferredType, TypeInferenceEngine
 
 logger = logging.getLogger(__name__)
 

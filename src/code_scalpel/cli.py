@@ -58,6 +58,7 @@ ENTERPRISE (Advanced Capabilities):
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -443,7 +444,9 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     # [20241225_FEATURE] v3.3.0 - Show validation results
     if "validation" in result:
         validation = result["validation"]
-        print(f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:")
+        print(
+            f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:"
+        )
         if validation["success"]:
             print("   ✅ All files have valid syntax")
         else:
@@ -513,15 +516,37 @@ def start_mcp_server(
     tier: str | None = None,
     ssl_certfile: str | None = None,
     ssl_keyfile: str | None = None,
+    license_file: str | None = None,
 ) -> int:
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
+    import inspect
+
     from .mcp.server import run_server
+
+    # [20251228_FEATURE] Support explicit license file path for deployments.
+    # Fail fast to avoid silently falling back to other discovery paths.
+    if license_file:
+        license_path = Path(license_file).expanduser()
+        if not (license_path.exists() and license_path.is_file()):
+            print(f"Error: License file not found: {license_file}", file=sys.stderr)
+            return 1
+        try:
+            license_path.open("rb").close()
+        except OSError as e:
+            print(
+                f"Error: License file not readable: {license_file} ({e})",
+                file=sys.stderr,
+            )
+            return 1
+        os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
     # [20251215_FEATURE] Determine protocol based on SSL config
     use_https = ssl_certfile and ssl_keyfile
     protocol = "https" if use_https else "http"
 
     if transport == "stdio":
+        # NOTE: CLI tests expect this banner on stdout.
+        # The MCP stdio integration tests invoke `code_scalpel.mcp.server` directly.
         print("Starting Code Scalpel MCP Server (stdio transport)")
         print("   This server communicates via stdin/stdout.")
         print("   Add to your Claude Desktop config or use with MCP Inspector.")
@@ -556,20 +581,109 @@ def start_mcp_server(
             }
         )
 
+    def _filter_kwargs_for_callable(func, kwargs: dict) -> dict:
+        try:
+            sig = inspect.signature(func)
+        except Exception:
+            return kwargs
+
+        # If the callable accepts **kwargs, keep all.
+        for param in sig.parameters.values():
+            if param.kind == inspect.Parameter.VAR_KEYWORD:
+                return kwargs
+
+        allowed = set(sig.parameters.keys())
+        return {k: v for k, v in kwargs.items() if k in allowed}
+
     try:
-        run_server(**server_kwargs)
+        run_server(**_filter_kwargs_for_callable(run_server, server_kwargs))
     except KeyboardInterrupt:
-        print("\nMCP Server stopped.")
+        if transport == "stdio":
+            print("\nMCP Server stopped.", file=sys.stderr)
+        else:
+            print("\nMCP Server stopped.")
 
     return 0
 
 
-def verify_policies_command(policy_dir: str = ".code-scalpel", manifest_source: str = "file") -> int:
+def _license_install(
+    source_path: str, dest_path: str | None = None, force: bool = False
+) -> int:
+    """[20251228_FEATURE] Implements `code-scalpel license install`.
+
+    Args:
+        source_path: Path to the license JWT file provided by the user.
+        dest_path: Optional explicit destination path. Defaults to XDG user config.
+        force: Overwrite destination if it exists.
+    """
+
+    from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
+
+    src = Path(source_path).expanduser()
+    if not (src.exists() and src.is_file()):
+        print(f"Error: License file not found: {source_path}", file=sys.stderr)
+        return 1
+
+    try:
+        token = src.read_text(encoding="utf-8").strip()
+    except OSError as e:
+        print(f"Error: License file not readable: {source_path} ({e})", file=sys.stderr)
+        return 1
+
+    if not token:
+        print("Error: License file is empty", file=sys.stderr)
+        return 1
+
+    validator = JWTLicenseValidator()
+    data = validator.validate_token(token)
+    if not data.is_valid:
+        msg = data.error_message or "Invalid license"
+        print(f"Error: {msg}", file=sys.stderr)
+        return 1
+
+    # Default destination: XDG user config
+    if dest_path is None:
+        xdg_home = Path(os.getenv("XDG_CONFIG_HOME") or (Path.home() / ".config"))
+        dest = xdg_home / "code-scalpel" / "license.jwt"
+    else:
+        dest = Path(dest_path).expanduser()
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    if dest.exists() and not force:
+        print(
+            f"Error: Destination already exists: {dest} (use --force to overwrite)",
+            file=sys.stderr,
+        )
+        return 1
+
+    try:
+        dest.write_text(token + "\n", encoding="utf-8")
+        try:
+            os.chmod(dest, 0o600)
+        except OSError:
+            # Best-effort; permissions may be controlled externally (Windows, some FS).
+            pass
+    except OSError as e:
+        print(f"Error: Failed to write license to {dest} ({e})", file=sys.stderr)
+        return 1
+
+    # Do not print token content.
+    print("✓ License valid")
+    print(f"✓ Tier: {data.tier}")
+    print(f"✓ Installed to: {dest}")
+    return 0
+
+
+def verify_policies_command(
+    policy_dir: str = ".code-scalpel", manifest_source: str = "file"
+) -> int:
     """Verify policy integrity using cryptographic signatures.
 
     [20241225_FEATURE] v3.3.0 - CLI command for policy verification
     """
     import os
+
     from .policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     print("Code Scalpel Policy Integrity Verification")
@@ -587,9 +701,7 @@ def verify_policies_command(policy_dir: str = ".code-scalpel", manifest_source: 
 
     try:
         verifier = CryptographicPolicyVerifier(
-            policy_dir=policy_dir, 
-            secret_key=secret,
-            manifest_source=manifest_source
+            policy_dir=policy_dir, secret_key=secret, manifest_source=manifest_source
         )
         result = verifier.verify_all_policies()
 
@@ -614,15 +726,18 @@ def verify_policies_command(policy_dir: str = ".code-scalpel", manifest_source: 
         return 1
 
 
-def regenerate_manifest_command(policy_dir: str = ".code-scalpel", signed_by: str = "code-scalpel") -> int:
+def regenerate_manifest_command(
+    policy_dir: str = ".code-scalpel", signed_by: str = "code-scalpel"
+) -> int:
     """Regenerate policy manifest after policy changes.
 
     [20241225_FEATURE] v3.3.0 - CLI command for manifest regeneration
     """
     import os
     from pathlib import Path
-    from .policy_engine.crypto_verify import CryptographicPolicyVerifier
+
     from .config.init_config import generate_secret_key
+    from .policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     print("Code Scalpel Policy Manifest Regeneration")
     print("=" * 60)
@@ -644,7 +759,9 @@ def regenerate_manifest_command(policy_dir: str = ".code-scalpel", signed_by: st
     # Find all policy files
     policy_files = []
     for pattern in ["*.yaml", "*.yml", "policies/**/*.rego"]:
-        policy_files.extend([str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)])
+        policy_files.extend(
+            [str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)]
+        )
 
     if not policy_files:
         print(f"\n[ERROR] No policy files found in {policy_dir}")
@@ -666,10 +783,10 @@ def regenerate_manifest_command(policy_dir: str = ".code-scalpel", signed_by: st
         # Save manifest
         manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, policy_dir)
 
-        print(f"\n[SUCCESS] ✅ Manifest regenerated successfully")
+        print("\n[SUCCESS] ✅ Manifest regenerated successfully")
         print(f"   Saved to: {manifest_path}")
         print(f"   Signed by: {signed_by}")
-        print(f"\nNext steps:")
+        print("\nNext steps:")
         print("   1. Commit policy_manifest.json to git")
         print("   2. Verify integrity: code-scalpel verify-policies")
         return 0
@@ -805,6 +922,11 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         default=None,
         help="Tool tier (default: enterprise or CODE_SCALPEL_TIER/SCALPEL_TIER)",
     )
+    mcp_parser.add_argument(
+        "--license-file",
+        default=None,
+        help="Path to license JWT file (sets CODE_SCALPEL_LICENSE_PATH)",
+    )
     # [20251215_FEATURE] SSL/TLS support for HTTPS - required for Claude API and production
     mcp_parser.add_argument(
         "--ssl-cert",
@@ -815,6 +937,30 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         "--ssl-key",
         default=None,
         help="Path to SSL private key file for HTTPS (required for Claude API)",
+    )
+
+    # License management commands
+    license_parser = subparsers.add_parser(
+        "license", help="Manage Code Scalpel licenses"
+    )
+    license_subparsers = license_parser.add_subparsers(dest="license_command")
+
+    install_parser = license_subparsers.add_parser(
+        "install", help="Validate and install a license JWT"
+    )
+    install_parser.add_argument(
+        "license_file",
+        help="Path to the license JWT file to install",
+    )
+    install_parser.add_argument(
+        "--dest",
+        default=None,
+        help="Optional destination path (default: ~/.config/code-scalpel/license.jwt)",
+    )
+    install_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite destination if it already exists",
     )
 
     # Version command
@@ -888,6 +1034,15 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     elif args.command == "server":
         return start_server(args.host, args.port)
 
+    elif args.command == "license":
+        if args.license_command == "install":
+            return _license_install(
+                args.license_file, dest_path=args.dest, force=args.force
+            )
+
+        license_parser.print_help()
+        return 1
+
     elif args.command == "mcp":
         transport = args.transport
         if args.http:
@@ -898,6 +1053,7 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         tier = getattr(args, "tier", None)
         ssl_certfile = getattr(args, "ssl_cert", None)
         ssl_keyfile = getattr(args, "ssl_key", None)
+        license_file = getattr(args, "license_file", None)
 
         # [20251216_BUGFIX] Only override host if allow_lan and host is default
         if allow_lan and args.host == "127.0.0.1":
@@ -913,6 +1069,8 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
             "root_path": root_path,
             "tier": tier,
         }
+        if license_file:
+            start_kwargs["license_file"] = license_file
         if ssl_certfile and ssl_keyfile:
             start_kwargs.update(
                 {
@@ -921,7 +1079,25 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
                 }
             )
 
-        return start_mcp_server(**start_kwargs)
+        # Keep main() compatible with older stubs/tests by filtering unknown kwargs.
+        import inspect
+
+        def _filter_kwargs_for_callable(func, kwargs: dict) -> dict:
+            try:
+                sig = inspect.signature(func)
+            except Exception:
+                return kwargs
+
+            for param in sig.parameters.values():
+                if param.kind == inspect.Parameter.VAR_KEYWORD:
+                    return kwargs
+
+            allowed = set(sig.parameters.keys())
+            return {k: v for k, v in kwargs.items() if k in allowed}
+
+        return start_mcp_server(
+            **_filter_kwargs_for_callable(start_mcp_server, start_kwargs)
+        )
 
     elif args.command == "version":
         print(f"Code Scalpel v{__version__}")

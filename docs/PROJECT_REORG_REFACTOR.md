@@ -266,7 +266,7 @@ src/code_scalpel/licensing/
 ├── __init__.py
 ├── client/
 │   ├── __init__.py
-│   ├── license_manager.py    # Load CODE_SCALPEL_LICENSE_KEY
+│   ├── license_manager.py    # Load CODE_SCALPEL_LICENSE_PATH
 │   ├── validator.py          # Local HMAC verification
 │   ├── cache.py              # License cache (24h grace)
 │   └── exceptions.py         # LicenseError, ExpiredError, etc.

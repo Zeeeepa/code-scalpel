@@ -126,9 +126,9 @@ TOTAL TEST ESTIMATE: 355 tests (90 COMMUNITY + 130 PRO + 135 ENTERPRISE)
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, List, Dict
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List
 
 
 class Language(Enum):

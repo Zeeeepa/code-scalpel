@@ -55,14 +55,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from .operators import (
-    BinaryOperator,
-    UnaryOperator,
-    CompareOperator,
-    BoolOperator,
-    AugAssignOperator,
-)
-
+from .operators import (AugAssignOperator, BinaryOperator, BoolOperator,
+                        CompareOperator, UnaryOperator)
 
 # TODO ITEMS: nodes.py
 # ======================================================================
