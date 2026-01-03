@@ -67,49 +67,42 @@ import os
 import re
 import sys
 import time
-import code_scalpel.licensing as licensing
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Optional, Set, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, Optional, Set, cast
 
 if TYPE_CHECKING:
     from code_scalpel import SurgicalExtractor
     from code_scalpel.graph_engine.graph import UniversalGraph
     from code_scalpel.mcp.contract import ToolError
 
-from pydantic import BaseModel, Field
-
-from mcp.server.fastmcp import FastMCP, Context
-
-
 from typing import TypedDict
+
+from mcp.server.fastmcp import Context, FastMCP
+from pydantic import BaseModel, Field
 
 
 class TreeNodeDict(TypedDict, total=False):
     """Represents a file or directory node in the project tree."""
+
     name: str
     type: str  # "file" or "directory"
     children: list[TreeNodeDict]  # Only present for directories
 
 
+# [20251226_BUGFIX] Import version from package for result models
+from code_scalpel import __version__
+from code_scalpel.licensing.features import (get_tool_capabilities,
+                                             has_capability)
+# [20251225_BUGFIX] Import tier helpers from concrete modules for type checkers.
+from code_scalpel.licensing.jwt_validator import \
+    get_current_tier as get_current_tier_from_license
+from code_scalpel.mcp.contract import ToolResponseEnvelope
+from code_scalpel.mcp.response_config import (filter_tool_response,
+                                              get_response_config)
 # [20251226_BUGFIX] Repaired corrupted unified sink import stub.
 from code_scalpel.security.analyzers import UnifiedSinkDetector
 from code_scalpel.security.analyzers.policy_engine import PolicyEngine
-
-# [20251226_BUGFIX] Import version from package for result models
-from code_scalpel import __version__
-
-from code_scalpel.mcp.contract import ToolResponseEnvelope
-from code_scalpel.mcp.response_config import get_response_config, filter_tool_response
-
-# [20251225_BUGFIX] Import tier helpers from concrete modules for type checkers.
-from code_scalpel.licensing.jwt_validator import (
-    get_current_tier as get_current_tier_from_license,
-)
-from code_scalpel.licensing.features import (
-    get_tool_capabilities,
-    has_capability,
-)
 
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
@@ -132,14 +125,14 @@ _SESSION_AUDIT_TRAIL: list[dict[str, Any]] = []  # Enterprise: audit trail
 # [20260101_BUGFIX] Pyright: resolve_file_path utility for path resolution
 def resolve_file_path(path: str, check_exists: bool = False) -> Path:
     """Resolve file path to absolute Path object.
-    
+
     Args:
         path: File path string to resolve
         check_exists: If True, raise FileNotFoundError if path doesn't exist
-        
+
     Returns:
         Resolved absolute Path object
-        
+
     Raises:
         FileNotFoundError: If check_exists=True and path doesn't exist
     """
@@ -394,12 +387,10 @@ def _evaluate_change_budget_for_write_tool(
         (allowed, details)
     """
     try:
-        from code_scalpel.governance.change_budget import (
-            ChangeBudget,
-            FileChange,
-            Operation,
-            load_budget_config,
-        )
+        from code_scalpel.governance.change_budget import (ChangeBudget,
+                                                           FileChange,
+                                                           Operation,
+                                                           load_budget_config)
         from code_scalpel.mcp.path_resolver import resolve_path
         from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
     except Exception as e:
@@ -421,13 +412,8 @@ def _evaluate_change_budget_for_write_tool(
         """
         try:
             from code_scalpel.surgery.rename_symbol_refactor import (
-                module_name_for_file,
-                iter_python_files,
-                _collect_reference_edits,
-                _apply_token_replacements,
-                _tokenize,
-                _read_text,
-            )
+                _apply_token_replacements, _collect_reference_edits,
+                _read_text, _tokenize, iter_python_files, module_name_for_file)
         except Exception:
             return []
 
@@ -588,10 +574,7 @@ def _evaluate_change_budget_for_write_tool(
     if is_rename_op and tier in {"pro", "enterprise"}:
         try:
             from code_scalpel.licensing.config_loader import (
-                get_cached_limits,
-                get_tool_limits,
-                merge_limits,
-            )
+                get_cached_limits, get_tool_limits, merge_limits)
             from code_scalpel.licensing.features import get_tool_capabilities
 
             caps = get_tool_capabilities("rename_symbol", tier)
@@ -955,11 +938,11 @@ def _maybe_enforce_governance_before_tool(
             )
 
         try:
-            from code_scalpel.policy_engine import PolicyEngine as OpaPolicyEngine
-            from code_scalpel.policy_engine.policy_engine import (
-                Operation as PolicyOperation,
-                PolicyError,
-            )
+            from code_scalpel.policy_engine import \
+                PolicyEngine as OpaPolicyEngine
+            from code_scalpel.policy_engine.policy_engine import \
+                Operation as PolicyOperation
+            from code_scalpel.policy_engine.policy_engine import PolicyError
 
             file_path = str(arguments.get("file_path") or "")
             # Provide the most relevant code view we have pre-mutation.
@@ -1404,9 +1387,7 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
     """Get or create singleton UnifiedSinkDetector."""
     global _SINK_DETECTOR
     if _SINK_DETECTOR is None:
-        from code_scalpel.security.analyzers import (
-            UnifiedSinkDetector,
-        )
+        from code_scalpel.security.analyzers import UnifiedSinkDetector
 
         _SINK_DETECTOR = UnifiedSinkDetector()
     return _SINK_DETECTOR  # type: ignore[return-value]
@@ -2527,9 +2508,7 @@ def _add_tool_with_envelope_output(
             upgrade_hints = []
             if success is False and err_msg:
                 from code_scalpel.mcp.contract import (
-                    ToolError,
-                    _classify_failure_message,
-                )
+                    ToolError, _classify_failure_message)
 
                 code = _classify_failure_message(err_msg) or "internal_error"
                 error_details = None
@@ -2566,7 +2545,7 @@ def _add_tool_with_envelope_output(
             # Token efficiency is applied to the tool-specific `data` payload, not by
             # omitting top-level envelope keys. This keeps the wire schema stable for
             # MCP clients and tests.
-            response_config = get_response_config()
+            get_response_config()
 
             # Filter tool response data
             if isinstance(result, BaseModel):
@@ -2613,17 +2592,14 @@ def _add_tool_with_envelope_output(
 
         except BaseException as exc:
             duration_ms = int((time_module.perf_counter() - started) * 1000)
-            from code_scalpel.mcp.contract import (
-                ToolError,
-                UpgradeHint,
-                UpgradeRequiredError,
-                _classify_exception,
-            )
+            from code_scalpel.mcp.contract import (ToolError, UpgradeHint,
+                                                   UpgradeRequiredError,
+                                                   _classify_exception)
 
             code = _classify_exception(exc)
 
             # [20251228_BUGFIX] Contract-stable envelope: always include required fields.
-            response_config = get_response_config()
+            get_response_config()
 
             # [20251228_FEATURE] Structured upgrade-required errors.
             if isinstance(exc, UpgradeRequiredError):
@@ -2723,7 +2699,6 @@ def _calculate_cognitive_complexity_python(tree: ast.AST) -> int:
         int: Cognitive complexity score
     """
     complexity = 0
-    nesting_level = 0
 
     def visit_node(node: ast.AST, parent_nesting: int) -> None:
         nonlocal complexity
@@ -2770,7 +2745,7 @@ def _detect_code_smells_python(tree: ast.AST, code: str) -> list[str]:
         list[str]: List of code smell descriptions
     """
     smells = []
-    lines = code.splitlines()
+    code.splitlines()
 
     def _max_nesting(n: ast.AST, depth: int = 0) -> int:
         depths = [depth]
@@ -3013,9 +2988,8 @@ def _detect_organization_patterns_python(tree: ast.AST) -> list[str]:
 def _analyze_java_code(code: str) -> AnalysisResult:
     """Analyze Java code using tree-sitter."""
     try:
-        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import (
-            JavaParser,
-        )
+        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import \
+            JavaParser
 
         parser = JavaParser()
         result = parser.parse(code)
@@ -3592,7 +3566,8 @@ def _analyze_code_sync(
     # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
     if language == "auto" or language is None:
         # [20251228_BUGFIX] Avoid deprecated shim imports.
-        from code_scalpel.surgery.unified_extractor import detect_language, Language
+        from code_scalpel.surgery.unified_extractor import (Language,
+                                                            detect_language)
 
         detected = detect_language(None, code)
         lang_map = {
@@ -3855,9 +3830,8 @@ def _analyze_code_sync(
 
         if has_capability("analyze_code", "technical_debt_scoring", tier):
             try:
-                from code_scalpel.code_parsers.python_parsers.python_parsers_code_quality import (
-                    PythonCodeQualityAnalyzer,
-                )
+                from code_scalpel.code_parsers.python_parsers.python_parsers_code_quality import \
+                    PythonCodeQualityAnalyzer
 
                 analyzer = PythonCodeQualityAnalyzer()
                 report = analyzer.analyze_string(code, filename=file_path or "<string>")
@@ -4468,9 +4442,8 @@ def _security_scan_sync(
 
             if detected_language == "typescript":
                 try:
-                    from code_scalpel.security.type_safety import (
-                        TypeEvaporationDetector,
-                    )
+                    from code_scalpel.security.type_safety import \
+                        TypeEvaporationDetector
 
                     te_detector = TypeEvaporationDetector()
                     te_result = te_detector.analyze(code, file_path or "<string>")
@@ -4488,9 +4461,7 @@ def _security_scan_sync(
                 except ImportError:
                     pass
         else:
-            from code_scalpel.security.analyzers import (
-                SecurityAnalyzer,
-            )
+            from code_scalpel.security.analyzers import SecurityAnalyzer
 
             analyzer = SecurityAnalyzer()
             result = analyzer.analyze(code).to_dict()
@@ -5423,9 +5394,8 @@ def _type_evaporation_scan_sync(
     try:
         # [20251230_FIX][tiering] Community tier is frontend-only per capability matrix.
         if frontend_only:
-            from code_scalpel.security.type_safety.type_evaporation_detector import (
-                TypeEvaporationDetector,
-            )
+            from code_scalpel.security.type_safety.type_evaporation_detector import \
+                TypeEvaporationDetector
 
             detector = TypeEvaporationDetector()
             frontend_result = detector.analyze(frontend_code, frontend_file)
@@ -5484,9 +5454,8 @@ def _type_evaporation_scan_sync(
                 compliance_report=None,
             )
 
-        from code_scalpel.security.type_safety import (
-            analyze_type_evaporation_cross_file,
-        )
+        from code_scalpel.security.type_safety import \
+            analyze_type_evaporation_cross_file
 
         result = analyze_type_evaporation_cross_file(
             frontend_code, backend_code, frontend_file, backend_file
@@ -6756,8 +6725,8 @@ def _fetch_package_license(package_name: str, ecosystem: str) -> str | None:
     Returns:
         License string or None if unavailable
     """
-    import urllib.request
     import json
+    import urllib.request
 
     try:
         if ecosystem.lower() == "pypi":
@@ -7163,10 +7132,8 @@ def _scan_dependencies_sync(
     resolved_path_str = project_root or path or str(PROJECT_ROOT)
 
     try:
-        from code_scalpel.security.dependencies import (
-            VulnerabilityScanner,
-            DependencyParser,
-        )
+        from code_scalpel.security.dependencies import (DependencyParser,
+                                                        VulnerabilityScanner)
 
         resolved_path = Path(resolved_path_str)
         if not resolved_path.is_absolute():
@@ -7222,12 +7189,10 @@ def _scan_dependencies_sync(
         # [20251229_FEATURE] v3.3.1 - Enforce tier limits
         max_dependencies = limits.get("max_dependencies")
         original_count = len(all_deps)
-        truncated = False
 
         if max_dependencies is not None and max_dependencies > 0:
             if len(all_deps) > max_dependencies:
                 all_deps = all_deps[:max_dependencies]
-                truncated = True
                 errors.append(
                     f"Dependency count ({original_count}) exceeds tier limit "
                     f"({max_dependencies}). Only first {max_dependencies} analyzed."
@@ -7487,9 +7452,7 @@ def _scan_dependencies_sync_legacy(
     [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
     """
     try:
-        from code_scalpel.security.dependencies import (
-            VulnerabilityScanner,
-        )
+        from code_scalpel.security.dependencies import VulnerabilityScanner
 
         resolved_path = Path(path)
         if not resolved_path.is_absolute():
@@ -8945,10 +8908,10 @@ def _crawl_project_discovery(
     [20251223_FEATURE] v3.2.8 - Community tier discovery crawl.
     """
     import os
+    import re
+    from datetime import datetime
     from fnmatch import fnmatch
     from pathlib import Path
-    from datetime import datetime
-    import re
 
     try:
         root = Path(root_path)
@@ -9165,9 +9128,9 @@ def _crawl_project_sync(
 ) -> ProjectCrawlResult:
     """Synchronous implementation of crawl_project."""
     try:
-        from code_scalpel.analysis.project_crawler import ProjectCrawler
         import json
-        import hashlib
+
+        from code_scalpel.analysis.project_crawler import ProjectCrawler
 
         # [20251229_FEATURE] Enterprise: Incremental indexing with cache
         cache_file = None
@@ -9202,20 +9165,28 @@ def _crawl_project_sync(
                         include_extensions = tuple(custom_config["include_extensions"])
                         # [20260102_DEBUG] Log config loading for debugging
                         import logging
+
                         logger = logging.getLogger(__name__)
-                        logger.info(f"Loaded include_extensions from config: {include_extensions}")
+                        logger.info(
+                            f"Loaded include_extensions from config: {include_extensions}"
+                        )
                     # Merge exclude_dirs from config
                     if "exclude_dirs" in custom_config:
                         custom_exclude_dirs.extend(custom_config["exclude_dirs"])
                 except Exception as e:
                     # [20260102_BUGFIX] Don't silently ignore errors - log them for debugging
                     import logging
+
                     logger = logging.getLogger(__name__)
-                    logger.warning(f"Failed to load custom crawl config from {config_file}: {e}")
+                    logger.warning(
+                        f"Failed to load custom crawl config from {config_file}: {e}"
+                    )
 
         crawler = ProjectCrawler(
             root_path,
-            exclude_dirs=frozenset(custom_exclude_dirs) if custom_exclude_dirs else None,
+            exclude_dirs=(
+                frozenset(custom_exclude_dirs) if custom_exclude_dirs else None
+            ),
             complexity_threshold=complexity_threshold,
             max_files=max_files,
             max_depth=max_depth,
@@ -9771,8 +9742,8 @@ async def _extract_polyglot(
     """
     # [20251221_FEATURE] v3.1.0 - Use UnifiedExtractor instead of PolyglotExtractor
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.surgery.unified_extractor import UnifiedExtractor
     from code_scalpel.mcp.path_resolver import resolve_path
+    from code_scalpel.surgery.unified_extractor import UnifiedExtractor
 
     if file_path is None and code is None:
         return _extraction_error(
@@ -10064,14 +10035,10 @@ async def extract_code(
         await _fetch_and_cache_roots(ctx)
 
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.surgery.surgical_extractor import (
-        ContextualExtraction,
-        ExtractionResult,
-    )
-    from code_scalpel.surgery.unified_extractor import (
-        Language,
-        detect_language,
-    )
+    from code_scalpel.surgery.surgical_extractor import (ContextualExtraction,
+                                                         ExtractionResult)
+    from code_scalpel.surgery.unified_extractor import (Language,
+                                                        detect_language)
 
     # [20251228_FEATURE] Tier-limited option: cross-file dependency resolution.
     tier = _get_current_tier()
@@ -10218,7 +10185,8 @@ async def extract_code(
                     target_name, "variable_promotion requires PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import promote_variables
+                from code_scalpel.surgery.surgical_extractor import \
+                    promote_variables
 
                 promoted = promote_variables(_load_source_for_adv(), target_name)
                 if getattr(promoted, "success", False):
@@ -10248,9 +10216,8 @@ async def extract_code(
                     target_name, "closure_detection requires PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    detect_closure_variables as _detect_closures,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    detect_closure_variables as _detect_closures
 
                 clos = _detect_closures(_load_source_for_adv(), target_name)
                 if getattr(clos, "success", False):
@@ -10291,9 +10258,8 @@ async def extract_code(
                     target_name, "dependency injection suggestions require PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    suggest_dependency_injection as _suggest_di,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    suggest_dependency_injection as _suggest_di
 
                 di = _suggest_di(_load_source_for_adv(), target_name)
                 if getattr(di, "success", False):
@@ -10335,9 +10301,8 @@ async def extract_code(
                     target_name, "as_microservice requires ENTERPRISE tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    extract_as_microservice as _extract_microservice,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    extract_as_microservice as _extract_microservice
 
                 ms = _extract_microservice(
                     _load_source_for_adv(),
@@ -10373,9 +10338,8 @@ async def extract_code(
                     target_name, "organization_wide requires 'code' input"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    resolve_organization_wide as _resolve_org,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    resolve_organization_wide as _resolve_org
 
                 org = _resolve_org(
                     code=code, function_name=target_name, workspace_root=workspace_root
@@ -10448,14 +10412,12 @@ async def rename_symbol(
     Returns:
         PatchResultModel with success status.
     """
-    from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
-    from code_scalpel.mcp.path_resolver import resolve_path
-    from code_scalpel.licensing.config_loader import (
-        get_cached_limits,
-        get_tool_limits,
-        merge_limits,
-    )
+    from code_scalpel.licensing.config_loader import (get_cached_limits,
+                                                      get_tool_limits,
+                                                      merge_limits)
     from code_scalpel.licensing.features import get_tool_capabilities
+    from code_scalpel.mcp.path_resolver import resolve_path
+    from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
 
     warnings: list[str] = []
 
@@ -10504,9 +10466,8 @@ async def rename_symbol(
             (max_files_searched == 0) and (max_files_updated == 0)
         ):
             try:
-                from code_scalpel.surgery.rename_symbol_refactor import (
-                    rename_references_across_project,
-                )
+                from code_scalpel.surgery.rename_symbol_refactor import \
+                    rename_references_across_project
 
                 xres = rename_references_across_project(
                     project_root=Path(PROJECT_ROOT),
@@ -10579,8 +10540,8 @@ async def _perform_atomic_git_refactor(
 
     try:
         import subprocess
-        from pathlib import Path
         from datetime import datetime
+        from pathlib import Path
 
         # Get project root (look for .git)
         file_path_obj = Path(file_path).resolve()
@@ -10724,7 +10685,6 @@ async def _update_cross_file_references(
             return result
 
         # Check if signature changed
-        old_sig = None
         new_sig = None
 
         try:
@@ -11098,8 +11058,8 @@ async def update_symbol(
             - Original indentation preserved
     """
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
     from code_scalpel.mcp.path_resolver import resolve_path
+    from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
     tier = _get_current_tier()
@@ -11245,10 +11205,8 @@ async def update_symbol(
         is_polyglot = file_ext in {".js", ".jsx", ".ts", ".tsx", ".java"}
 
         if is_polyglot:
-            from code_scalpel.surgery.surgical_patcher import (
-                PolyglotPatcher,
-                PatchLanguage,
-            )
+            from code_scalpel.surgery.surgical_patcher import (PatchLanguage,
+                                                               PolyglotPatcher)
 
             if file_ext in {".js", ".jsx"}:
                 patcher = PolyglotPatcher.from_file(file_path, PatchLanguage.JAVASCRIPT)
@@ -11350,7 +11308,9 @@ async def update_symbol(
             # [20251229_FEATURE] Auto-insert if not found
             if not result.success and "not found" in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_function") and callable(getattr(patcher, "insert_function")):
+                if hasattr(patcher, "insert_function") and callable(
+                    getattr(patcher, "insert_function")
+                ):
                     result = patcher.insert_function(new_code)  # type: ignore[attr-defined]
                 if result.success:
                     warnings.append(
@@ -11362,7 +11322,9 @@ async def update_symbol(
             # [20251229_FEATURE] Auto-insert if not found
             if not result.success and "not found" in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_class") and callable(getattr(patcher, "insert_class")):
+                if hasattr(patcher, "insert_class") and callable(
+                    getattr(patcher, "insert_class")
+                ):
                     result = patcher.insert_class(new_code)  # type: ignore[attr-defined]
                 if result.success:
                     warnings.append(
@@ -11388,7 +11350,9 @@ async def update_symbol(
                 and "Class" not in (result.error or "")
             ):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_method") and callable(getattr(patcher, "insert_method")):
+                if hasattr(patcher, "insert_method") and callable(
+                    getattr(patcher, "insert_method")
+                ):
                     result = patcher.insert_method(class_name, new_code)  # type: ignore[attr-defined]
                 if result.success:
                     warnings.append(
@@ -11673,7 +11637,7 @@ async def detect_closure_variables(
     # Check tier capability
     tier = _get_current_tier()
     caps = get_tool_capabilities("extract_code", tier)
-    capabilities = caps.get("capabilities", set())
+    caps.get("capabilities", set())
 
     # Closure detection is a Pro feature (not explicitly listed but part of Pro smart extract)
     if tier == "community":
@@ -11699,9 +11663,8 @@ async def detect_closure_variables(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the closure detection function
-    from code_scalpel.surgery.surgical_extractor import (
-        detect_closure_variables as detect_closures,
-    )
+    from code_scalpel.surgery.surgical_extractor import \
+        detect_closure_variables as detect_closures
 
     # Perform closure analysis
     result = detect_closures(source_code, target_name)
@@ -11786,9 +11749,8 @@ async def suggest_dependency_injection(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the DI suggestion function
-    from code_scalpel.surgery.surgical_extractor import (
-        suggest_dependency_injection as suggest_di,
-    )
+    from code_scalpel.surgery.surgical_extractor import \
+        suggest_dependency_injection as suggest_di
 
     # Perform DI analysis
     result = suggest_di(source_code, target_name)
@@ -11882,9 +11844,8 @@ async def extract_as_microservice(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the microservice extraction function
-    from code_scalpel.surgery.surgical_extractor import (
-        extract_as_microservice as extract_microservice,
-    )
+    from code_scalpel.surgery.surgical_extractor import \
+        extract_as_microservice as extract_microservice
 
     # Perform microservice extraction
     result = extract_microservice(source_code, target_name, host, port)
@@ -11937,11 +11898,12 @@ async def resolve_organization_wide(
         >>> result["cross_repo_imports"][0]["repo_name"]
         'backend-service'
     """
-    from code_scalpel.surgery.surgical_extractor import resolve_organization_wide
+    from code_scalpel.surgery.surgical_extractor import \
+        resolve_organization_wide
 
     # Enterprise tier capability check
     tier = _get_current_tier()
-    capabilities = get_tool_capabilities("extract_code", tier)
+    get_tool_capabilities("extract_code", tier)
     if not has_capability("extract_code", "cross_file_deps_unlimited", tier):
         return {
             "success": False,
@@ -12012,13 +11974,12 @@ async def extract_with_custom_pattern(
         >>> len(result["matches"])
         5
     """
-    from code_scalpel.surgery.surgical_extractor import (
-        extract_with_custom_pattern as extract_pattern,
-    )
+    from code_scalpel.surgery.surgical_extractor import \
+        extract_with_custom_pattern as extract_pattern
 
     # Enterprise tier capability check
     tier = _get_current_tier()
-    capabilities = get_tool_capabilities("extract_code", tier)
+    get_tool_capabilities("extract_code", tier)
     if not has_capability("extract_code", "custom_patterns", tier):
         return {
             "success": False,
@@ -12085,13 +12046,12 @@ async def detect_service_boundaries(
         payment-service: 5 files
         stripe-wrapper: 2 files
     """
-    from code_scalpel.surgery.surgical_extractor import (
-        detect_service_boundaries as detect_boundaries,
-    )
+    from code_scalpel.surgery.surgical_extractor import \
+        detect_service_boundaries as detect_boundaries
 
     # Enterprise tier capability check
     tier = _get_current_tier()
-    capabilities = get_tool_capabilities("extract_code", tier)
+    get_tool_capabilities("extract_code", tier)
     if not has_capability("extract_code", "service_boundaries", tier):
         return {
             "success": False,
@@ -12246,9 +12206,8 @@ async def crawl_project(
                 pass
         else:
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    extract_with_custom_pattern as _extract_pattern,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    extract_with_custom_pattern as _extract_pattern
 
                 pattern_result = await asyncio.to_thread(
                     _extract_pattern,
@@ -12323,6 +12282,7 @@ def get_project_call_graph() -> str:
     Use this to trace function calls across files and understand dependencies.
     """
     import json
+
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
     builder = CallGraphBuilder(PROJECT_ROOT)
@@ -12337,6 +12297,7 @@ def get_project_dependencies() -> str:
     Use this to verify if libraries used in generated code actually exist in the project.
     """
     import json
+
     from code_scalpel.ast_tools.dependency_parser import DependencyParser
 
     parser = DependencyParser(str(PROJECT_ROOT))
@@ -12534,6 +12495,7 @@ def get_analysis_resource(path: str) -> str:
         JSON string with analysis results
     """
     import json
+
     from code_scalpel.mcp.path_resolver import resolve_path
 
     try:
@@ -12674,6 +12636,7 @@ def get_symbol_resource(file_path: str, symbol_name: str) -> str:
         JSON with extracted code and metadata
     """
     import json
+
     from code_scalpel.mcp.path_resolver import resolve_path
 
     try:
@@ -12739,6 +12702,7 @@ def get_security_resource(path: str) -> str:
         JSON string with security scan results
     """
     import json
+
     from code_scalpel.mcp.path_resolver import resolve_path
 
     try:
@@ -12788,7 +12752,9 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
         JSON with extracted code, metadata, and JSX/TSX information
     """
     import json
-    from code_scalpel.mcp.module_resolver import resolve_module_path, get_mime_type
+
+    from code_scalpel.mcp.module_resolver import (get_mime_type,
+                                                  resolve_module_path)
 
     try:
         # Resolve module to file path
@@ -16112,13 +16078,9 @@ async def get_graph_neighborhood(
             )
 
             # Convert call graph to UniversalGraph
-            from code_scalpel.graph_engine import (
-                GraphNode,
-                GraphEdge,
-                UniversalNodeID,
-                NodeType,
-                EdgeType,
-            )
+            from code_scalpel.graph_engine import (EdgeType, GraphEdge,
+                                                   GraphNode, NodeType,
+                                                   UniversalNodeID)
 
             graph = UniversalGraph()
 
@@ -16187,7 +16149,8 @@ async def get_graph_neighborhood(
         # [20251229_FEATURE] Enterprise tier: Query language support
         if query and "graph_query_language" in cap_set:
             from code_scalpel.graph.graph_query import GraphQueryEngine
-            from code_scalpel.graph_engine import NeighborhoodResult, UniversalGraph
+            from code_scalpel.graph_engine import (NeighborhoodResult,
+                                                   UniversalGraph)
 
             try:
                 engine = GraphQueryEngine(graph)
@@ -16275,7 +16238,8 @@ async def get_graph_neighborhood(
         # [20251229_FEATURE] Pro tier: Add semantic neighbors
         semantic_neighbor_ids: Set[str] = set()
         if "semantic_neighbors" in cap_set:
-            from code_scalpel.graph.semantic_neighbors import SemanticNeighborFinder
+            from code_scalpel.graph.semantic_neighbors import \
+                SemanticNeighborFinder
 
             try:
                 # Extract center function name from node_id
@@ -16298,9 +16262,7 @@ async def get_graph_neighborhood(
                             # Add edge from center to semantic neighbor
                             if result.subgraph:
                                 from code_scalpel.graph_engine import (
-                                    GraphEdge,
-                                    EdgeType,
-                                )
+                                    EdgeType, GraphEdge)
 
                                 result.subgraph.add_edge(
                                     GraphEdge(
@@ -16311,15 +16273,14 @@ async def get_graph_neighborhood(
                                         evidence=f"Semantic: {', '.join(neighbor.relationship_types)}",
                                     )
                                 )
-            except Exception as e:
+            except Exception:
                 # Semantic neighbor discovery is best-effort, don't fail the whole query
                 pass
 
         # [20251229_FEATURE] Pro tier: Add logical relationships
         if "logical_relationship_detection" in cap_set:
-            from code_scalpel.graph.logical_relationships import (
-                LogicalRelationshipDetector,
-            )
+            from code_scalpel.graph.logical_relationships import \
+                LogicalRelationshipDetector
 
             try:
                 center_name = center_node_id.split("::")[-1]
@@ -16332,7 +16293,8 @@ async def get_graph_neighborhood(
                     for rel in relationship_result.relationships:
                         # Add logical relationship as an edge
                         if result.subgraph and rel.source_node in result.node_depths:
-                            from code_scalpel.graph_engine import GraphEdge, EdgeType
+                            from code_scalpel.graph_engine import (EdgeType,
+                                                                   GraphEdge)
 
                             # Ensure target node exists in the graph
                             if rel.target_node not in result.node_depths:
@@ -16347,7 +16309,7 @@ async def get_graph_neighborhood(
                                     evidence=f"Logical: {rel.relationship_type} - {rel.evidence}",
                                 )
                             )
-            except Exception as e:
+            except Exception:
                 # Logical relationship detection is best-effort, don't fail the whole query
                 pass
 
@@ -16641,6 +16603,7 @@ def _get_project_map_sync(
     and passed through to avoid re-resolving tier in worker threads.
     """
     import ast
+
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
     root_path = Path(project_root) if project_root else PROJECT_ROOT
@@ -17399,7 +17362,10 @@ def _get_project_map_sync(
                     try:
                         # [20260101_BUGFIX] Dynamic import to avoid Pyright errors
                         from code_scalpel.ast_tools import architectural_rules
-                        ArchitecturalRulesEngine = getattr(architectural_rules, "ArchitecturalRulesEngine", None)
+
+                        ArchitecturalRulesEngine = getattr(
+                            architectural_rules, "ArchitecturalRulesEngine", None
+                        )
                         if ArchitecturalRulesEngine is None:
                             raise ImportError("ArchitecturalRulesEngine not found")
 
@@ -17592,9 +17558,8 @@ async def get_project_map(
                 pass
         else:
             try:
-                from code_scalpel.surgery.surgical_extractor import (
-                    detect_service_boundaries as _detect_boundaries,
-                )
+                from code_scalpel.surgery.surgical_extractor import \
+                    detect_service_boundaries as _detect_boundaries
 
                 boundaries = await asyncio.to_thread(
                     _detect_boundaries,
@@ -17857,10 +17822,8 @@ def _get_cross_file_dependencies_sync(
     )
 
     try:
-        from concurrent.futures import (
-            ThreadPoolExecutor,
-            TimeoutError as FuturesTimeoutError,
-        )
+        from concurrent.futures import ThreadPoolExecutor
+        from concurrent.futures import TimeoutError as FuturesTimeoutError
 
         def run_with_timeout(func, timeout_seconds, *args, **kwargs):
             """
@@ -17905,7 +17868,7 @@ def _get_cross_file_dependencies_sync(
         try:
             # [20251227_REFACTOR] Generous timeout safeguard (not tier-limited)
             extractor = run_with_timeout(build_extractor, build_timeout)
-        except TimeoutError as e:
+        except TimeoutError:
             # [20251227_FEATURE] Context-window aware error messaging for AI agents
             return CrossFileDependenciesResult(
                 success=False,
@@ -17932,7 +17895,7 @@ def _get_cross_file_dependencies_sync(
             extraction_result = run_with_timeout(
                 extract_dependencies, extraction_timeout
             )
-        except TimeoutError as e:
+        except TimeoutError:
             # [20251227_FEATURE] Context-window aware error messaging for AI agents
             return CrossFileDependenciesResult(
                 success=False,
@@ -18485,11 +18448,8 @@ def _cross_file_security_scan_sync(
     capabilities: dict | None = None,
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
-    from code_scalpel.security.analyzers import (
-        CrossFileTaintTracker,
-    )
-
     from code_scalpel.licensing.features import get_tool_capabilities
+    from code_scalpel.security.analyzers import CrossFileTaintTracker
 
     tier = tier or _get_current_tier()
     caps = capabilities or get_tool_capabilities("cross_file_security_scan", tier)
@@ -18958,12 +18918,11 @@ def _validate_paths_sync(
     import json
     import re
     from pathlib import Path as PathLib
-    from code_scalpel.mcp.path_resolver import PathResolver
-    from code_scalpel.licensing.features import get_tool_capabilities
+
     from code_scalpel.licensing.config_loader import (
-        filter_response,
-        get_cached_response_config,
-    )
+        filter_response, get_cached_response_config)
+    from code_scalpel.licensing.features import get_tool_capabilities
+    from code_scalpel.mcp.path_resolver import PathResolver
 
     # Resolve capabilities if not provided
     if capabilities is None:
@@ -19291,6 +19250,7 @@ def _verify_policy_integrity_sync(
       - Enterprise: Full cryptographic verification with audit logging
     """
     from datetime import datetime
+
     from code_scalpel.licensing.features import get_tool_capabilities
 
     dir_path = policy_dir or ".code-scalpel"
@@ -19325,8 +19285,9 @@ def _verify_policy_integrity_sync(
     try:
         # Community tier: Basic policy file existence and format checking
         if "basic_verification" in caps_set:
-            from pathlib import Path
             import json
+            from pathlib import Path
+
             import yaml
 
             policy_path = Path(dir_path)
@@ -19382,9 +19343,7 @@ def _verify_policy_integrity_sync(
         # Pro/Enterprise tier: Full cryptographic verification
         if "signature_validation" in caps_set and signature_validation_enabled:
             from code_scalpel.policy_engine.crypto_verify import (
-                CryptographicPolicyVerifier,
-                SecurityError,
-            )
+                CryptographicPolicyVerifier, SecurityError)
 
             try:
                 verifier = CryptographicPolicyVerifier(
@@ -19594,19 +19553,24 @@ def _code_policy_check_sync(
         rules_applied=result.rules_applied,
         summary=result.summary,
         tier=tier,
-        violations=[cast(dict[str, Any], v.to_dict() if hasattr(v, 'to_dict') else v) for v in result.violations],
+        violations=[
+            cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
+            for v in result.violations
+        ],
         error=result.error,
     )
 
     # Add Pro tier fields if available
-    cap_set = set(capabilities.get("capabilities", []))
+    set(capabilities.get("capabilities", []))
 
     if tier in ("pro", "enterprise"):
         mcp_result.best_practices_violations = [
-            cast(dict[str, Any], v.to_dict() if hasattr(v, 'to_dict') else v) for v in result.best_practices_violations
+            cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
+            for v in result.best_practices_violations
         ]
         mcp_result.security_warnings = [
-            cast(dict[str, Any], w.to_dict() if hasattr(w, 'to_dict') else w) for w in result.security_warnings
+            cast(dict[str, Any], w.to_dict() if hasattr(w, "to_dict") else w)
+            for w in result.security_warnings
         ]
         mcp_result.custom_rule_results = result.custom_rule_results
 
@@ -19734,7 +19698,7 @@ async def code_policy_check(
 
     # Apply tier limits
     limits = capabilities.get("limits", {})
-    max_files = limits.get("max_files")
+    limits.get("max_files")
 
     # If compliance_standards requested but not enterprise tier, filter out
     if compliance_standards and tier != "enterprise":
@@ -19802,13 +19766,10 @@ def run_server(
 
     # [20251228_FEATURE] Optional CRL fetch/cache/refresh.
     # This is opt-in to preserve offline-first posture.
-    from code_scalpel.licensing.crl_fetcher import (
-        ensure_crl_available,
-        start_crl_refresh_thread,
-    )
-    from code_scalpel.licensing.runtime_revalidator import (
-        start_license_revalidation_thread,
-    )
+    from code_scalpel.licensing.crl_fetcher import (ensure_crl_available,
+                                                    start_crl_refresh_thread)
+    from code_scalpel.licensing.runtime_revalidator import \
+        start_license_revalidation_thread
 
     ensure_crl_available()
     start_crl_refresh_thread(interval_seconds=3600)
@@ -19819,8 +19780,9 @@ def run_server(
     # - The license determines the maximum allowed tier.
     # - CLI/env can only request a tier <= licensed tier.
     # - If Pro/Enterprise is requested without a valid license, fail closed.
+    from code_scalpel.licensing.authorization import \
+        compute_effective_tier_for_startup
     from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
-    from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
 
     requested_tier = (
         tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
@@ -19973,9 +19935,9 @@ def _register_http_health_endpoint(
     This endpoint is separate from the MCP protocol and provides a simple
     200 OK response for container orchestration health checks.
     """
-    import threading
-    from http.server import HTTPServer, BaseHTTPRequestHandler
     import json
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
     use_https = ssl_certfile and ssl_keyfile
 

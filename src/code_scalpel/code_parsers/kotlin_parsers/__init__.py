@@ -174,8 +174,8 @@ def __getattr__(name: str):
         "DetektConfig",
         "DetektReport",
     ):
-        from .kotlin_parsers_Detekt import (DetektConfig,  # noqa: F401
-                                            DetektFinding, DetektParser,
+        from .kotlin_parsers_Detekt import DetektConfig  # noqa: F401
+        from .kotlin_parsers_Detekt import (DetektFinding, DetektParser,
                                             DetektReport, DetektRuleSet,
                                             DetektSeverity)
 
@@ -189,8 +189,8 @@ def __getattr__(name: str):
         "KtlintConfig",
         "KtlintReport",
     ):
-        from .kotlin_parsers_ktlint import (KtlintConfig,  # noqa: F401
-                                            KtlintParser, KtlintReport,
+        from .kotlin_parsers_ktlint import KtlintConfig  # noqa: F401
+        from .kotlin_parsers_ktlint import (KtlintParser, KtlintReport,
                                             KtlintRuleSet, KtlintSeverity,
                                             KtlintViolation)
 

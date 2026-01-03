@@ -37,10 +37,8 @@ from .typosquatting_detector import (TyposquattingAlert, TyposquattingDetector,
 # [20251226_FEATURE] Pro tier features
 from .vulnerability_reachability import (ReachabilityResult,
                                          VulnerabilityReachabilityAnalyzer)
-from .vulnerability_scanner import \
-    DependencyParser  # [20251225_BUGFIX] Export for MCP tools
-from .vulnerability_scanner import (ScanResult, VulnerabilityFinding,
-                                    VulnerabilityScanner)
+from .vulnerability_scanner import (  # [20251225_BUGFIX] Export for MCP tools
+    DependencyParser, ScanResult, VulnerabilityFinding, VulnerabilityScanner)
 
 __all__ = [
     # Community tier

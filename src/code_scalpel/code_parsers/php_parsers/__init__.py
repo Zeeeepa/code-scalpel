@@ -193,9 +193,9 @@ def __getattr__(name: str):
         "PHPCSStandard",
         "PHPCSConfig",
     ):
-        from .php_parsers_PHPCS import (PHPCSConfig, PHPCSParser,  # noqa: F401
-                                        PHPCSSeverity, PHPCSStandard,
-                                        PHPCSViolation)
+        from .php_parsers_PHPCS import PHPCSParser  # noqa: F401
+        from .php_parsers_PHPCS import (PHPCSConfig, PHPCSSeverity,
+                                        PHPCSStandard, PHPCSViolation)
 
         return locals()[name]
     elif name in (
@@ -205,8 +205,8 @@ def __getattr__(name: str):
         "PHPStanErrorType",
         "PHPStanConfig",
     ):
-        from .php_parsers_PHPStan import (PHPStanConfig,  # noqa: F401
-                                          PHPStanError, PHPStanErrorType,
+        from .php_parsers_PHPStan import PHPStanConfig  # noqa: F401
+        from .php_parsers_PHPStan import (PHPStanError, PHPStanErrorType,
                                           PHPStanLevel, PHPStanParser)
 
         return locals()[name]
@@ -217,9 +217,9 @@ def __getattr__(name: str):
         "PsalmErrorType",
         "PsalmConfig",
     ):
-        from .php_parsers_Psalm import (PsalmConfig, PsalmError,  # noqa: F401
-                                        PsalmErrorType, PsalmParser,
-                                        PsalmSeverity)
+        from .php_parsers_Psalm import PsalmError  # noqa: F401
+        from .php_parsers_Psalm import (PsalmConfig, PsalmErrorType,
+                                        PsalmParser, PsalmSeverity)
 
         return locals()[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

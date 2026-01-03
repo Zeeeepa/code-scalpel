@@ -16,40 +16,41 @@ License files must be generated with the correct signing key.
 from pathlib import Path
 
 import pytest
-import pytest_asyncio
 
 
 @pytest.fixture(autouse=True)
 def clear_tier_cache():
     """
     Clear tier detection cache before and after each test.
-    
+
     This ensures that tier environment variable changes or mocked tier
     functions work correctly across sequential tests without cache leakage.
-    
+
     [20260102_BUGFIX] Fixes: Tests were picking up cached tier from previous test
     """
     # Clear the JWT validation cache BEFORE test
     from code_scalpel.licensing import jwt_validator
+
     jwt_validator._LICENSE_VALIDATION_CACHE = None
-    
+
     # Clear the config loader cache BEFORE test
     from code_scalpel.licensing import config_loader
+
     config_loader.clear_cache()
-    
+
     # Also reset any module-level state in server
-    import importlib
     from code_scalpel.mcp import server
+
     # Clear any cached tier detection
-    if hasattr(server, '_cached_tier'):
+    if hasattr(server, "_cached_tier"):
         server._cached_tier = None
-    
+
     yield
-    
+
     # Cleanup AFTER test
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
-    if hasattr(server, '_cached_tier'):
+    if hasattr(server, "_cached_tier"):
         server._cached_tier = None
 
 

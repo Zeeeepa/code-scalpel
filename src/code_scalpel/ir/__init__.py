@@ -57,12 +57,12 @@ Modules:
     - get_variable_scope(ir_node) - Scope analysis helper
 """
 
-from .nodes import (IRAssign, IRAttribute,  # Base; Statements; Expressions
-                    IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak, IRCall,
-                    IRClassDef, IRCompare, IRConstant, IRContinue, IRDict,
-                    IRExpr, IRExprStmt, IRFor, IRFunctionDef, IRIf, IRList,
-                    IRModule, IRName, IRNode, IRParameter, IRPass, IRReturn,
-                    IRSubscript, IRUnaryOp, IRWhile, SourceLocation)
+from .nodes import IRAttribute  # Base; Statements; Expressions
+from .nodes import (IRAssign, IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak,
+                    IRCall, IRClassDef, IRCompare, IRConstant, IRContinue,
+                    IRDict, IRExpr, IRExprStmt, IRFor, IRFunctionDef, IRIf,
+                    IRList, IRModule, IRName, IRNode, IRParameter, IRPass,
+                    IRReturn, IRSubscript, IRUnaryOp, IRWhile, SourceLocation)
 from .normalizers import BaseNormalizer, PythonNormalizer
 from .operators import (BinaryOperator, BoolOperator, CompareOperator,
                         UnaryOperator)

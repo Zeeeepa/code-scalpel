@@ -15,8 +15,8 @@ import z3  # noqa: E402
 from code_scalpel.ir.normalizers.python_normalizer import \
     PythonNormalizer  # noqa: E402
 # [20251225_BUGFIX] Imports after backward compat stub removal
-from code_scalpel.security.analyzers import (TaintInfo,  # noqa: E402
-                                             TaintLevel, TaintTracker)
+from code_scalpel.security.analyzers import TaintInfo  # noqa: E402
+from code_scalpel.security.analyzers import TaintLevel, TaintTracker
 from code_scalpel.security.analyzers.security_analyzer import (  # noqa: E402
     analyze_security, find_command_injections, find_sql_injections, find_xss)
 from code_scalpel.security.analyzers.taint_tracker import (  # noqa: E402
