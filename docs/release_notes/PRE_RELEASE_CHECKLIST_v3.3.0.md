@@ -1240,34 +1240,34 @@ grep "analyze_code" .code-scalpel/limits.toml  # Limits defined
 **Evidence File:** release_artifacts/v3.3.0/v3.3.0_build_package_verification.json
 **Test Results:** To be collected
 
-### 8.1 Package Build
+### 9.1 Package Build
 
-| Check | Command | Status | Notes | GO Threshold | NO-GO Threshold |
-|-------|---------|--------|-------|--------|--------|
-| Clean build | `rm -rf dist/ build/ && python -m build` | ⬜ | Successfully built both artifacts | Build succeeds | Build fails |
-| Wheel created | `ls dist/*.whl` | ⬜ | code_scalpel-3.3.0-py3-none-any.whl (1.9 MB) | File exists, valid size | Missing or corrupted |
-| Source dist created | `ls dist/*.tar.gz` | ⬜ | code_scalpel-3.3.0.tar.gz (1.7 MB) | File exists, valid size | Missing or corrupted |
-| Package installable | Package structure valid | ⬜ | Wheel contains all required modules | All modules present | Missing modules |
-
-**Subsection Status:** 4/4 PASSED ✅
-### 8.2 Version Consistency
-
-| Location | Expected | Actual | Status | GO Threshold | NO-GO Threshold |
-|----------|----------|--------|--------|--------|--------|
-| `pyproject.toml` | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
-| `src/code_scalpel/__init__.py` | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
-| `CHANGELOG.md` header | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
-| Release notes filename | v3.3.0 | v3.3.0 | ⬜ PASSED | Matches (v3.3.0) | Mismatch |
+| Check | Severity | Command | Status | Notes | GO Threshold | NO-GO Threshold |
+|-------|----------|---------|--------|-------|--------|--------|
+| Clean build | P0 | `rm -rf dist/ build/ && python -m build` | ⬜ | Successfully built both artifacts | Build succeeds | Build fails |
+| Wheel created | P0 | `ls dist/*.whl` | ⬜ | code_scalpel-3.3.0-py3-none-any.whl (1.9 MB) | File exists, valid size | Missing or corrupted |
+| Source dist created | P0 | `ls dist/*.tar.gz` | ⬜ | code_scalpel-3.3.0.tar.gz (1.7 MB) | File exists, valid size | Missing or corrupted |
+| Package installable | P0 | Package structure valid | ⬜ | Wheel contains all required modules | All modules present | Missing modules |
 
 **Subsection Status:** 4/4 PASSED ✅
+### 9.2 Version Consistency
 
-### 8.3 Docker Build
+| Location | Severity | Expected | Actual | Status | GO Threshold | NO-GO Threshold |
+|----------|----------|----------|--------|--------|--------|--------|
+| `pyproject.toml` | P0 | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
+| `src/code_scalpel/__init__.py` | P0 | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
+| `CHANGELOG.md` header | P0 | 3.3.0 | 3.3.0 | ⬜ PASSED | Matches (3.3.0) | Mismatch |
+| Release notes filename | P0 | v3.3.0 | v3.3.0 | ⬜ PASSED | Matches (v3.3.0) | Mismatch |
 
-| Check | Command | Status | Notes | GO Threshold | NO-GO Threshold |
-|-------|---------|--------|-------|--------|--------|
-| Dockerfile exists | Verify `Dockerfile` presence | ⬜ | Dockerfile confirmed present | File exists | File missing |
-| Docker build succeeds | `docker build -t code-scalpel:3.3.0 .` | ⏳ | Deferred to Section 11 (CI/CD) | Build succeeds | Build fails |
-| Container health check | `docker-compose up -d && docker-compose ps` | ⏳ | Deferred to Section 11 (CI/CD) | Health check passes | Health check fails |
+**Subsection Status:** 4/4 PASSED ✅
+
+### 9.3 Docker Build
+
+| Check | Severity | Command | Status | Notes | GO Threshold | NO-GO Threshold |
+|-------|----------|---------|--------|-------|--------|--------|
+| Dockerfile exists | P1 | Verify `Dockerfile` presence | ⬜ | Dockerfile confirmed present | File exists | File missing |
+| Docker build succeeds | P0 | `docker build -t code-scalpel:3.3.0 .` | ⏳ | Deferred to Section 11 (CI/CD) | Build succeeds | Build fails |
+| Container health check | P0 | `docker-compose up -d && docker-compose ps` | ⏳ | Deferred to Section 11 (CI/CD) | Health check passes | Health check fails |
 
 **Note:** Docker build verification deferred to Section 11: CI/CD Green Light due to buildx environment constraints.
 
@@ -1280,52 +1280,52 @@ grep "analyze_code" .code-scalpel/limits.toml  # Limits defined
 **Purpose**: Final verification before release commit.
 **What is being tested**: Git cleanliness, test reproducibility, commit conventions, CI/CD readiness.
 
-**Status:** ⬜ PENDINGD - All pre-release final checks passed  
+**Status:** ⬜ PENDING - All pre-release final checks to be verified  
 **Evidence File:** release_artifacts/v3.3.0/v3.3.0_pre_release_final_checks.json
 **Test Results:** To be collected
 
-### 9.1 Git Hygiene
+### 10.1 Git Hygiene
 
-| Check | Status | Notes | GO Threshold | NO-GO Threshold |
-|-------|--------|-------|--------|--------|
-| No uncommitted changes | ⬜ PENDING | Sections 7-8 verification changes committed | Clean working tree | Uncommitted changes |
-| All tests pass on clean clone | ⬜ PENDING | 4,702/4,731 tests passing (99.98%) | ≥ 99% pass rate | < 95% pass rate |
-| Commit messages follow convention | ⬜ PENDING | All commits include [20260101_TEST] tags | All tagged | Untagged commits |
-| No merge conflicts | ⬜ PENDING | `git diff --name-only --diff-filter=U` empty | 0 conflicts | > 0 conflicts |
+| Check | Severity | Status | Notes | GO Threshold | NO-GO Threshold |
+|-------|----------|--------|-------|--------|--------|
+| No uncommitted changes | P0 | ⬜ PENDING | Sections 7-8 verification changes committed | Clean working tree | Uncommitted changes |
+| All tests pass on clean clone | P0 | ⬜ PENDING | 4,702/4,731 tests passing (99.98%) | ≥ 99% pass rate | < 95% pass rate |
+| Commit messages follow convention | P0 | ⬜ PENDING | All commits include [20260101_TEST] tags | All tagged | Untagged commits |
+| No merge conflicts | P0 | ⬜ PENDING | `git diff --name-only --diff-filter=U` empty | 0 conflicts | > 0 conflicts |
 
-**Subsection Status:** 4/4 PASSED ✅
+**Subsection Status:** 4/4 to be verified ⏳
 
-### 9.2 CI/CD Preparation
+### 10.2 CI/CD Preparation
 
-| Check | Status | Notes | GO Threshold | NO-GO Threshold |
-|-------|--------|-------|--------|--------|
-| Build artifacts created | ⬜ PENDING | Wheel and source distribution verified | Both artifacts exist | Missing artifacts |
-| Version consistency verified | ⬜ PENDING | All 4 version checks passed | 4/4 consistent | < 4/4 consistent |
+| Check | Severity | Status | Notes | GO Threshold | NO-GO Threshold |
+|-------|----------|--------|-------|--------|--------|
+| Build artifacts created | P0 | ⬜ PENDING | Wheel and source distribution verified | Both artifacts exist | Missing artifacts |
+| Version consistency verified | P0 | ⬜ PENDING | All 4 version checks passed | 4/4 consistent | < 4/4 consistent |
 
-**Subsection Status:** 2/2 PASSED ✅
+**Subsection Status:** 2/2 to be verified ⏳
 
 **Section Status:** To be tested
 
 ---
 
-## 10. MCP-First Testing Matrix (P0 - BLOCKING)
+## 11. MCP-First Testing Matrix (P0 - BLOCKING)
 
 **Purpose**: Verify all 22 MCP tools work correctly across all transports and tiers.
 **What is being tested**: Tool functionality on stdio/HTTP, tier limit enforcement, response envelope compliance, workflow integration.
 
-### 10.1 Transport × Tier × Tool Matrix Validation
+### 11.1 Transport × Tier × Tool Matrix Validation
 
 **Objective**: Verify all 22 tools work correctly on all transports (stdio, HTTP/SSE) at all 3 tiers
 
-| Check | Command | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|---------|----------|--------|--------|--------|
-| **All tools × stdio × Community** | `CODE_SCALPEL_TIER=community pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **All tools × stdio × Pro** | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-pro.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **All tools × stdio × Enterprise** | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-enterprise.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **All tools × HTTP/SSE × Community** | `CODE_SCALPEL_TIER=community pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **All tools × HTTP/SSE × Pro** | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-pro.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **All tools × HTTP/SSE × Enterprise** | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-enterprise.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | P0 | ⬜ | 22/22 tools pass | < 22/22 tools |
-| **MCP matrix validation script** | `python scripts/validate_mcp_matrix.py --output release_artifacts/v3.3.0/mcp_matrix_report.json` | P0 | ⬜ | Report generated successfully | Report fails |
+| Check | Severity | Command | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|---------|--------|--------|--------|
+| **All tools × stdio × Community** | P0 | `CODE_SCALPEL_TIER=community pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **All tools × stdio × Pro** | P0 | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-pro.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **All tools × stdio × Enterprise** | P0 | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-enterprise.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_stdio.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **All tools × HTTP/SSE × Community** | P0 | `CODE_SCALPEL_TIER=community pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **All tools × HTTP/SSE × Pro** | P0 | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-pro.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **All tools × HTTP/SSE × Enterprise** | P0 | `CODE_SCALPEL_LICENSE_PATH=.code-scalpel/dev-enterprise.jwt pytest tests/mcp_tool_verification/test_mcp_tools_contracts_http.py -v` | ⬜ | 22/22 tools pass | < 22/22 tools |
+| **MCP matrix validation script** | P0 | `python scripts/validate_mcp_matrix.py --output release_artifacts/v3.3.0/mcp_matrix_report.json` | ⬜ | Report generated successfully | Report fails |
 
 **Matrix Coverage**: 22 tools × 2 transports × 3 tiers = **132 test scenarios** (GO: all passing, NO-GO: > 1 failure)
 
@@ -1338,60 +1338,60 @@ grep "analyze_code" .code-scalpel/limits.toml  # Limits defined
 | **Dependency audit workflow** | `pytest tests/mcp/test_dependency_audit_workflow.py -v` | P1 | ⬜ | crawl_project → scan_dependencies (100%) | Any step fails |
 | **Graph analysis workflow** | `pytest tests/mcp/test_graph_workflow.py -v` | P1 | ⬜ | get_call_graph → get_graph_neighborhood (100%) | Any step fails |
 
-### 10.3 Response Envelope Validation
+### 11.2 Response Envelope Validation
 
-| Check | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|------|----------|--------|--------|--------|
-| **Envelope structure (all tools)** | `pytest tests/mcp/test_response_envelope_contract.py -v` | P0 | ⬜ | All tools return ToolResponseEnvelope | Any tool fails |
-| **Tier metadata accuracy** | `pytest tests/mcp/test_envelope_tier_metadata.py -v` | P0 | ⬜ | `tier` field matches actual tier (100%) | Mismatch detected |
-| **Upgrade hints (Community)** | `pytest tests/mcp/test_upgrade_hints_community.py -v` | P1 | ⬜ | Hints appropriate (factual only) | Marketing language found |
-| **Capabilities field** | `pytest tests/mcp/test_capabilities_field.py -v` | P1 | ⬜ | Capabilities match tier matrix (100%) | Mismatch found |
-| **Duration tracking** | `pytest tests/mcp/test_duration_ms.py -v` | P2 | ⬜ | duration_ms present and ≤ 30s | Missing or > 60s |
+| Check | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|------|--------|--------|--------|
+| **Envelope structure (all tools)** | P0 | `pytest tests/mcp/test_response_envelope_contract.py -v` | ⬜ | All tools return ToolResponseEnvelope | Any tool fails |
+| **Tier metadata accuracy** | P0 | `pytest tests/mcp/test_envelope_tier_metadata.py -v` | ⬜ | `tier` field matches actual tier (100%) | Mismatch detected |
+| **Upgrade hints (Community)** | P1 | `pytest tests/mcp/test_upgrade_hints_community.py -v` | ⬜ | Hints appropriate (factual only) | Marketing language found |
+| **Capabilities field** | P1 | `pytest tests/mcp/test_capabilities_field.py -v` | ⬜ | Capabilities match tier matrix (100%) | Mismatch found |
+| **Duration tracking** | P2 | `pytest tests/mcp/test_duration_ms.py -v` | ⬜ | duration_ms present and ≤ 30s | Missing or > 60s |
 
-### 10.4 Silent Degradation UX Verification
+### 11.3 Silent Degradation UX Verification
 
-| Check | Validation | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|-----------|----------|--------|--------|--------|
-| **No marketing in truncation** | Manual review of all tool responses | P0 | ⬜ | Factual messages only (100%) | Marketing language found |
-| **Factual tier info** | `grep -r "upgrade\|unlock\|buy now" src/code_scalpel/mcp/server.py` | P0 | ⬜ | 0 marketing phrases | > 0 phrases |
-| **Community tier messaging** | `pytest tests/mcp/test_community_tier_messaging.py -v` | P1 | ⬜ | Messages explain limits (100%) | Unclear messaging |
-| **Graceful capability reduction** | `pytest tests/mcp/test_graceful_degradation.py -v` | P1 | ⬜ | Partial results returned (100%) | Errors returned |
+| Check | Severity | Validation | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|-----------|--------|--------|--------|
+| **No marketing in truncation** | P0 | Manual review of all tool responses | ⬜ | Factual messages only (100%) | Marketing language found |
+| **Factual tier info** | P0 | `grep -r "upgrade\|unlock\|buy now" src/code_scalpel/mcp/server.py` | ⬜ | 0 marketing phrases | > 0 phrases |
+| **Community tier messaging** | P1 | `pytest tests/mcp/test_community_tier_messaging.py -v` | ⬜ | Messages explain limits (100%) | Unclear messaging |
+| **Graceful capability reduction** | P1 | `pytest tests/mcp/test_graceful_degradation.py -v` | ⬜ | Partial results returned (100%) | Errors returned |
 
 **Acceptance Criteria**:
 - ⬜ Truncation messages follow pattern: "Results limited to X (Community tier limit). Full results available in Pro tier."
 - ⬜ No emotional manipulation ("Buy now!", "Unlock features!")
 - ⬜ Clear limit explanation (GO: clear, NO-GO: unclear)
 
-### 10.5 Auto-Generated Documentation Freshness
+### 11.4 Auto-Generated Documentation Freshness
 
-| Check | Command | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|---------|----------|--------|--------|--------|
-| **MCP tools reference current** | `python scripts/generate_mcp_tools_reference.py && git diff docs/reference/mcp_tools_current.md` | P1 | ⬜ | No diff (docs up-to-date) | Diff exists |
-| **Tier matrix current** | `python scripts/generate_mcp_tier_matrix.py && git diff docs/reference/mcp_tools_by_tier.md` | P1 | ⬜ | No diff (docs up-to-date) | Diff exists |
+| Check | Severity | Command | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|---------|--------|--------|--------|
+| **MCP tools reference current** | P1 | `python scripts/generate_mcp_tools_reference.py && git diff docs/reference/mcp_tools_current.md` | ⬜ | No diff (docs up-to-date) | Diff exists |
+| **Tier matrix current** | P1 | `python scripts/generate_mcp_tier_matrix.py && git diff docs/reference/mcp_tools_by_tier.md` | ⬜ | No diff (docs up-to-date) | Diff exists |
 
 ---
 
-## 11. Red Team Security Testing (P0 - BLOCKING)
+## 12. Red Team Security Testing (P0 - BLOCKING)
 
 **Purpose**: Validate security controls against adversarial attack vectors.
 **What is being tested**: License bypass attempts, cache manipulation, policy integrity, environment variable security, timing attacks, revocation handling.
 
-### 11.1 License Bypass Attempts
+### 12.1 License Bypass Attempts
 
 **Authentication Flow** (Two-Stage Validation):
 1. **Offline**: Public key (vault-prod-2026-01.pem) verifies JWT signature locally
 2. **Online**: Remote verifier checks revocation every 24h (with 24h grace = 48h total)
 
-| Attack Vector | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|--------------|------|----------|--------|--------|--------|
-| **JWT signature forgery** | `pytest tests/security/test_jwt_signature_forgery.py -v` | P0 | ⬜ | Public key rejects invalid signatures | Forgery succeeds |
-| **JWT expiration bypass** | `pytest tests/security/test_jwt_expiration_bypass.py -v` | P0 | ⬜ | Expired tokens rejected locally | Expiration bypassed |
-| **JWT algorithm confusion (HS256→RS256)** | `pytest tests/security/test_jwt_algo_confusion.py -v` | P0 | ⬜ | Algorithm mismatch rejected | Confusion succeeds |
-| **JWT replay attacks** | `pytest tests/security/test_jwt_replay.py -v` | P0 | ⬜ | Revoked licenses rejected via remote verifier | Replay succeeds |
-| **Tier downgrade via env vars** | `pytest tests/security/test_tier_downgrade_env.py -v` | P0 | ⬜ | Downgrade allowed, escalation blocked | Escalation possible |
-| **License file tampering** | `pytest tests/security/test_license_tampering.py -v` | P0 | ⬜ | Signature verification detects tampering | Tampering undetected |
-| **Clock manipulation attacks** | `pytest tests/security/test_clock_manipulation.py -v` | P1 | ⬜ | Leeway limits prevent abuse (≤ 5 min) | Leeway exploitable |
-| **Public key substitution** | `pytest tests/security/test_public_key_substitution.py -v` | P0 | ⬜ | Embedded key not overrideable |
+| Attack Vector | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|--------------|----------|------|--------|--------|--------|
+| **JWT signature forgery** | P0 | `pytest tests/security/test_jwt_signature_forgery.py -v` | ⬜ | Public key rejects invalid signatures | Forgery succeeds |
+| **JWT expiration bypass** | P0 | `pytest tests/security/test_jwt_expiration_bypass.py -v` | ⬜ | Expired tokens rejected locally | Expiration bypassed |
+| **JWT algorithm confusion (HS256→RS256)** | P0 | `pytest tests/security/test_jwt_algo_confusion.py -v` | ⬜ | Algorithm mismatch rejected | Confusion succeeds |
+| **JWT replay attacks** | P0 | `pytest tests/security/test_jwt_replay.py -v` | ⬜ | Revoked licenses rejected via remote verifier | Replay succeeds |
+| **Tier downgrade via env vars** | P0 | `pytest tests/security/test_tier_downgrade_env.py -v` | ⬜ | Downgrade allowed, escalation blocked | Escalation possible |
+| **License file tampering** | P0 | `pytest tests/security/test_license_tampering.py -v` | ⬜ | Signature verification detects tampering | Tampering undetected |
+| **Clock manipulation attacks** | P1 | `pytest tests/security/test_clock_manipulation.py -v` | ⬜ | Leeway limits prevent abuse (≤ 5 min) | Leeway exploitable |
+| **Public key substitution** | P0 | `pytest tests/security/test_public_key_substitution.py -v` | ⬜ | Embedded key not overrideable | Substitution succeeds |
 
 **Red Team Comprehensive Script**:
 ```bash
@@ -1399,74 +1399,74 @@ python scripts/red_team_license_validation.py --report release_artifacts/v3.3.0/
 ```
 **Expected**: All 50+ attack attempts fail with proper error handling
 
-### 11.2 Cache Manipulation Attacks
+### 12.2 Cache Manipulation Attacks
 
 **Remote Verifier Cache Policy**: 24h refresh + 24h offline grace = 48h total
 
-| Attack Vector | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|--------------|------|----------|--------|--------|--------|
-| **License validation cache poisoning** | `pytest tests/security/test_cache_poisoning.py -v` | P0 | ⬜ | Cache keyed by token hash | Poisoning succeeds |
-| **Remote verifier cache bypass** | `pytest tests/security/test_verifier_cache_bypass.py -v` | P0 | ⬜ | 24h refresh enforced | Bypass succeeds |
-| **Offline grace period abuse** | `pytest tests/security/test_grace_period_abuse.py -v` | P0 | ⬜ | Token hash must match cached | Abuse succeeds |
-| **Mid-session license swap** | `pytest tests/security/test_license_swap.py -v` | P1 | ⬜ | Cache invalidation on change | Swap succeeds |
+| Attack Vector | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|--------------|----------|------|--------|--------|--------|
+| **License validation cache poisoning** | P0 | `pytest tests/security/test_cache_poisoning.py -v` | ⬜ | Cache keyed by token hash | Poisoning succeeds |
+| **Remote verifier cache bypass** | P0 | `pytest tests/security/test_verifier_cache_bypass.py -v` | ⬜ | 24h refresh enforced | Bypass succeeds |
+| **Offline grace period abuse** | P0 | `pytest tests/security/test_grace_period_abuse.py -v` | ⬜ | Token hash must match cached | Abuse succeeds |
+| **Mid-session license swap** | P1 | `pytest tests/security/test_license_swap.py -v` | ⬜ | Cache invalidation on change | Swap succeeds |
 
-### 11.3 Policy Manifest Integrity Attacks
+### 12.3 Policy Manifest Integrity Attacks
 
-| Attack Vector | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|--------------|------|----------|--------|--------|--------|
-| **Manifest signature bypass** | `pytest tests/security/test_manifest_signature.py -v` | P0 | ⬜ | RSA signature required (valid) | Bypass succeeds |
-| **File hash mismatch** | `pytest tests/security/test_policy_hash_mismatch.py -v` | P0 | ⬜ | SHA-256 verification passed | Mismatch accepted |
-| **Manifest version rollback** | `pytest tests/security/test_manifest_rollback.py -v` | P1 | ⬜ | Version monotonicity enforced | Rollback succeeds |
+| Attack Vector | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|--------------|----------|------|--------|--------|--------|
+| **Manifest signature bypass** | P0 | `pytest tests/security/test_manifest_signature.py -v` | ⬜ | RSA signature required (valid) | Bypass succeeds |
+| **File hash mismatch** | P0 | `pytest tests/security/test_policy_hash_mismatch.py -v` | ⬜ | SHA-256 verification passed | Mismatch accepted |
+| **Manifest version rollback** | P1 | `pytest tests/security/test_manifest_rollback.py -v` | ⬜ | Version monotonicity enforced | Rollback succeeds |
 
-### 11.4 Environment Variable Security
+### 12.4 Environment Variable Security
 
 **Design**: ENV vars allow tier **downgrade** only, never escalation without valid JWT
 
-| Attack Vector | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|--------------|------|----------|--------|--------|--------|
-| **Tier escalation via ENV** | `pytest tests/security/test_tier_escalation_env.py -v` | P0 | ⬜ | Escalation blocked | Escalation succeeds |
-| **CODE_SCALPEL_TIER=enterprise without JWT** | `pytest tests/security/test_tier_env_without_jwt.py -v` | P0 | ⬜ | Fallback to Community | Enterprise granted |
-| **Multiple tier env vars** | `pytest tests/security/test_conflicting_tier_envs.py -v` | P1 | ⬜ | Precedence enforced | Undefined behavior |
-| **License path traversal** | `pytest tests/security/test_license_path_traversal.py -v` | P0 | ⬜ | Path validation prevents escape | Traversal succeeds |
+| Attack Vector | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|--------------|----------|------|--------|--------|--------|
+| **Tier escalation via ENV** | P0 | `pytest tests/security/test_tier_escalation_env.py -v` | ⬜ | Escalation blocked | Escalation succeeds |
+| **CODE_SCALPEL_TIER=enterprise without JWT** | P0 | `pytest tests/security/test_tier_env_without_jwt.py -v` | ⬜ | Fallback to Community | Enterprise granted |
+| **Multiple tier env vars** | P1 | `pytest tests/security/test_conflicting_tier_envs.py -v` | ⬜ | Precedence enforced | Undefined behavior |
+| **License path traversal** | P0 | `pytest tests/security/test_license_path_traversal.py -v` | ⬜ | Path validation prevents escape | Traversal succeeds |
 
-### 11.5 Timing & Side-Channel Analysis
+### 12.5 Timing & Side-Channel Analysis
 
-| Check | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|------|----------|--------|--------|--------|
-| **Constant-time comparison** | Review JWT validation code | P1 | ⬜ | Uses cryptography library | Uses ==, not constant-time |
-| **No timing leaks in tier checks** | `pytest tests/security/test_timing_attacks.py -v` | P2 | ⬜ | Response times ± 5% variance | > 10% variance |
+| Check | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|------|--------|--------|--------|
+| **Constant-time comparison** | P1 | Review JWT validation code | ⬜ | Uses cryptography library | Uses ==, not constant-time |
+| **No timing leaks in tier checks** | P2 | `pytest tests/security/test_timing_attacks.py -v` | ⬜ | Response times ± 5% variance | > 10% variance |
 
-### 11.6 CRL Fetch & Revocation Bypass
+### 12.6 CRL Fetch & Revocation Bypass
 
-| Check | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|------|----------|--------|--------|--------|
-| **CRL fetch failure handling** | `pytest tests/security/test_crl_fetch_failure.py -v` | P1 | ⬜ | Graceful downgrade to Community | Error thrown |
-| **Revoked license rejection** | `pytest tests/security/test_revoked_license.py -v` | P0 | ⬜ | License immediately downgraded | Revocation ignored |
+| Check | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|------|--------|--------|--------|
+| **CRL fetch failure handling** | P1 | `pytest tests/security/test_crl_fetch_failure.py -v` | ⬜ | Graceful downgrade to Community | Error thrown |
+| **Revoked license rejection** | P0 | `pytest tests/security/test_revoked_license.py -v` | ⬜ | License immediately downgraded | Revocation ignored |
 
-### 11.7 Security Event Logging Validation
+### 12.7 Security Event Logging Validation
 
-| Check | Test | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|------|----------|--------|--------|--------|
-| **License failures logged** | `pytest tests/security/test_security_logging.py -v` | P1 | ⬜ | All failures in logs (100%) | < 100% logged |
-| **Attack attempts logged** | Manual review of test output | P1 | ⬜ | Security events recorded (≥ 7) | < 7 events |
+| Check | Severity | Test | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|------|--------|--------|--------|
+| **License failures logged** | P1 | `pytest tests/security/test_security_logging.py -v` | ⬜ | All failures in logs (100%) | < 100% logged |
+| **Attack attempts logged** | P1 | Manual review of test output | ⬜ | Security events recorded (≥ 7) | < 7 events |
 
 **Success Criteria**: All attack attempts fail gracefully with logging (GO: all fail, NO-GO: > 1 succeeds)
 
 ---
 
-## 12. Community Tier Separation (P0 - BLOCKING)
+## 13. Community Tier Separation (P0 - BLOCKING)
 
 **Purpose**: Ensure Community tier operates independently without Pro/Enterprise dependencies.
 **What is being tested**: Import isolation, runtime tier enforcement, PyPI package correctness, MCP server accuracy.
 
-### 12.1 Standalone Community Code Verification
+### 13.1 Standalone Community Code Verification
 
-| Check | Test Command | Priority | Status | GO Threshold | NO-GO Threshold |
-|-------|-------------|----------|--------|--------------|-----------------|
-| **Community imports work** | `python -c "import code_scalpel; code_scalpel.mcp.server.main()"` | P0 | ⬜ | No ImportError | ImportError thrown |
-| **No Pro/Enterprise deps** | `python scripts/verify_distribution_separation.py` | P0 | ⬜ | Zero dependency errors | Any dependency error |
-| **PyJWT optional for Community** | `pip uninstall PyJWT -y && pytest tests/core/ -k community` | P0 | ⬜ | Community tests pass (100%) | Any test fails |
-| **Fresh venv install** | `python -m venv /tmp/test_venv && /tmp/test_venv/bin/pip install dist/*.whl && /tmp/test_venv/bin/code-scalpel --help` | P0 | ⬜ | CLI works (exit 0) | CLI fails (exit ≠ 0) |
+| Check | Severity | Test Command | Status | GO Threshold | NO-GO Threshold |
+|-------|----------|-------------|--------|--------------|-----------------|
+| **Community imports work** | P0 | `python -c "import code_scalpel; code_scalpel.mcp.server.main()"` | ⬜ | No ImportError | ImportError thrown |
+| **No Pro/Enterprise deps** | P0 | `python scripts/verify_distribution_separation.py` | ⬜ | Zero dependency errors | Any dependency error |
+| **PyJWT optional for Community** | P0 | `pip uninstall PyJWT -y && pytest tests/core/ -k community` | ⬜ | Community tests pass (100%) | Any test fails |
+| **Fresh venv install** | P0 | `python -m venv /tmp/test_venv && /tmp/test_venv/bin/pip install dist/*.whl && /tmp/test_venv/bin/code-scalpel --help` | ⬜ | CLI works (exit 0) | CLI fails (exit ≠ 0) |
 
 ### 12.2 Runtime Tier Restriction Enforcement
 
@@ -1503,7 +1503,7 @@ python scripts/red_team_license_validation.py --report release_artifacts/v3.3.0/
 
 ---
 
-## 13. Documentation Accuracy & Evidence (P1 - CRITICAL)
+## 14. Documentation Accuracy & Evidence (P1 - CRITICAL)
 
 **Purpose**: Ensure all quantitative claims in documentation are backed by test evidence.
 **What is being tested**: Token savings claims, test count accuracy, coverage percentages, tool counts, vulnerability detection claims, performance benchmarks.
