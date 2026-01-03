@@ -137,12 +137,12 @@ isort src/ tests/
 
 | Check | Command | Priority | Status | Result | GO Threshold | NO-GO Threshold |
 |-------|---------|----------|--------|--------|--------------|-----------------|
-| **McCabe complexity** | `ruff check --select C901 --show-source src/` | P0 | ⬜ | 263 violations | ≤ 300 | > 500 |
-| **Function length (PLR0915)** | `ruff check --select PLR0915 src/` | P1 | ⬜ | 60 violations | ≤ 80 | > 150 |
+| **McCabe complexity** | `ruff check --select C901 --show-source src/` | P0 | ✅ PASS | 263 violations (≤300 threshold) | ≤ 300 | > 500 |
+| **Function length (PLR0915)** | `ruff check --select PLR0915 src/` | P1 | ✅ PASS | 61 violations | ≤ 80 | > 150 |
 | **File length** | Python file analysis: files > 1000 lines | P2 | ❌ | 41 files > 1000 lines | ≤ 25 files | > 40 files |
-| **Too many arguments (PLR0913)** | `ruff check --select PLR0913 src/` | P1 | ⬜ | 51 violations | ≤ 60 | > 100 |
-| **Too many branches (PLR0912)** | `ruff check --select PLR0912 src/` | P1 | ⬜ | 154 violations | ≤ 180 | > 300 |
-| **Too many statements** | `ruff check --select PLR0912 src/` | P1 | ⬜ | 154 violations | ≤ 80 | > 150 |
+| **Too many arguments (PLR0913)** | `ruff check --select PLR0913 src/` | P1 | ✅ PASS | 51 violations | ≤ 60 | > 100 |
+| **Too many branches (PLR0912)** | `ruff check --select PLR0912 src/` | P1 | ✅ PASS | 156 violations | ≤ 180 | > 300 |
+| **Too many statements** | `ruff check --select PLR0912 src/` | P1 | ❌ | 156 violations | ≤ 80 | > 150 |
 | **Duplicate code detection** | Hash analysis of function/class definitions | P2 | ⚠️ | 227 duplicates (95% intentional) | Document and categorize | > 50 actual duplicates |
 
 ### 1.4 Code Smell Detection
