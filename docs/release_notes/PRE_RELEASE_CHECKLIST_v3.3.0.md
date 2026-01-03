@@ -149,9 +149,9 @@ isort src/ tests/
 
 | Check | Tool | Priority | Status | Result | GO Threshold | NO-GO Threshold |
 |-------|------|----------|--------|--------|--------------|-----------------|
-| **Circular imports** | `pytest --collect-only 2>&1 \| grep -i circular` | P0 | ⬜ | No circular imports detected (static analysis) | ≤ 50 | > 100 runtime issues |
-| **Dead code detection** | `vulture src/ --min-confidence 80` | P1 | ⬜ | 78 unused items found (mostly in parser adapters) | Document findings | > 200 unused |
-| **Security issues (basic)** | `bandit -r src/ -f json` | P0 | ⬜ | 2 HIGH (MD5 hashing), 10 MEDIUM, 301 LOW | 0 HIGH (security), ≤ 15 MEDIUM | > 0 HIGH (security), > 30 MEDIUM |
+| **Circular imports** | `pytest --collect-only 2>&1 \| grep -i circular` | P0 | ✅ PASS | No circular import runtime issues | ≤ 50 | > 100 runtime issues |
+| **Dead code detection** | `vulture src/ --min-confidence 80` | P1 | ⚠️ | 79 unused items (mostly parser/symbolic utilities) | Document findings | > 200 unused |
+| **Security issues (basic)** | `bandit -r src/ -f json` | P0 | ⚠️ | 2 HIGH, 10 MEDIUM, 302 LOW | 0 HIGH (security), ≤ 15 MEDIUM | > 0 HIGH (security), > 30 MEDIUM |
 | **Deprecated API usage** | `grep -r "warnings.warn\|DeprecationWarning" src/` | P1 | ✅ | 0 uses (no deprecated APIs) | Document all | > 100 unintentional |
 | **Duplicate code detection** | Hash analysis of function/class definitions | P2 | ⬜ | 111 actual duplicate patterns (128 functions) - mostly in adapters/parsers; documented as known technical debt | Document and categorize | > 50 actual duplicates |
 
