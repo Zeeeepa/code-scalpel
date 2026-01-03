@@ -521,11 +521,7 @@ pytest tests/core tests/integration tests/security --cov=src/code_scalpel \
 
 **MCP Tool Verification (40/40 tests passing)**:
 - ✅ `analyze_code` - Structure analysis working
-- ✅ `extract_code` - Surgical extraction working  
-- ✅ `update_symbol` - Core replacement logic working
-- ✅ `security_scan` - Vulnerability detection working
 - ✅ `symbolic_execute` - Path exploration working
-- ✅ `generate_unit_tests` - Test generation working (pytest/unittest)
 - ✅ `crawl_project` - Project metrics working
 - ✅ `get_project_map` - Structure/complexity working
 - ✅ `cross_file_security_scan` - Taint tracking working
