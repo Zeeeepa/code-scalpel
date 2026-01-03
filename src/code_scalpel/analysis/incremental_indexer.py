@@ -268,7 +268,10 @@ class IncrementalIndexer:
                 cache_key = f"scalpel:analysis:{file_hash}"
                 cached = self.redis_client.get(cache_key)
                 if cached:
-                    return json.loads(cached)
+                    # Redis may return bytes when decode_responses=False; normalize to str for json.loads
+                    if isinstance(cached, (bytes, bytearray)):
+                        cached = cached.decode()
+                    return json.loads(str(cached))
             except Exception:
                 pass
 

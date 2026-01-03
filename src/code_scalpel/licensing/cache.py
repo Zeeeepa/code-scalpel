@@ -556,7 +556,10 @@ class LicenseCache:
         try:
             data = self._redis_client.get(f"scalpel:cache:{key}")
             if data:
-                entry_dict = json.loads(data)
+                # Redis may return bytes when decode_responses=False; normalize to str for json.loads
+                if isinstance(data, (bytes, bytearray)):
+                    data = data.decode()
+                entry_dict = json.loads(str(data))
                 return CacheEntry(**entry_dict)
         except Exception as e:
             logger.warning(f"Failed to get from distributed cache: {e}")

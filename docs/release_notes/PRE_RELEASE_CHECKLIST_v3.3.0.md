@@ -122,7 +122,7 @@ isort src/ tests/
 
 | Check | Command | Priority | Status | Result | GO Threshold | NO-GO Threshold |
 |-------|---------|----------|--------|--------|--------------|-----------------|
-| **Pyright basic mode (src/)** | `pyright src/ --outputjson` | P0 | ⬜ | 0 errors, 0 warnings (complete clean run) | ≤ 100 total, 0 critical | > 200 total OR > 0 critical |
+| **Pyright basic mode (src/)** | `pyright src/ --outputjson` | P0 | ✅ PASS | 0 errors, 0 warnings (clean run) | ≤ 100 total, 0 critical | > 200 total OR > 0 critical |
 | **Type coverage (src/)** | AST analysis of public functions | P1 | ⬜ | 2,419/2,531 functions with return type hints (95.6% coverage) | ≥ 85% | < 80% |
 | **No `Any` in public APIs** | Manual review of public function signatures | P1 | ⬜ | <10% use Any (target achieved) | ≤ 10% (target <40 functions) | > 25% |
 | **Py.typed marker exists** | `test -f src/code_scalpel/py.typed` | P0 | ⬜ | File present and valid | Must exist | Does not exist |
