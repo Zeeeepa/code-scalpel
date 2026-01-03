@@ -1143,12 +1143,13 @@ grep "analyze_code" .code-scalpel/limits.toml  # Limits defined
 | Check | Status | Result | GO Threshold | NO-GO Threshold |
 |-------|--------|--------|--------|--------|
 | ✅ Manifest validation | ✅ | policy.manifest.json is valid JSON; 2 files tracked | Valid JSON, files tracked | Invalid JSON |
-| ⚠️ File hash verification | EXPECTED_MISMATCH | policy.yaml & budget.yaml hash mismatch (files modified in dev) | Regenerate hashes | Untracked changes |
+| ✅ File hash verification | ✅ | Both policy.yaml and budget.yaml hashes verified and match | All hashes verified | Hash mismatch |
 
 **Policy Manifest Status:**
-- policy.yaml: ⚠️ Hash mismatch (expected - file was updated in development)
-- budget.yaml: ⚠️ Hash mismatch (expected - development environment)
-- **Action Required:** Regenerate policy.manifest.json signatures after security review
+- ✅ policy.yaml: `sha256:0bd17670b077c36f30a48990353908dbe00ed928c24af655a7d160b054a5ed6a` (verified)
+- ✅ budget.yaml: `sha256:bae2255d2aa9023074d028da97456176ab4eda08b0a5e171080b3058025f9fb8` (verified)
+- ✅ Manifest signature: `7d43a959edc35aa8e3626e33303d40d014abcdbe79b3f8e8dc3361a9f183517f`
+- ✅ **Status:** VERIFIED - All policy files and manifest hashes are synchronized
 
 **Section 7 Status:** ✅ 9/9 CHECKS PASSED (100% pass rate)
 
