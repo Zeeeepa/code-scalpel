@@ -139,12 +139,22 @@ from typing import TYPE_CHECKING
 
 # Lazy imports to avoid circular dependencies
 if TYPE_CHECKING:
-    from .kotlin_parsers_Detekt import (DetektConfig, DetektFinding,
-                                        DetektParser, DetektReport,
-                                        DetektRuleSet, DetektSeverity)
-    from .kotlin_parsers_ktlint import (KtlintConfig, KtlintParser,
-                                        KtlintReport, KtlintRuleSet,
-                                        KtlintSeverity, KtlintViolation)
+    from .kotlin_parsers_Detekt import (
+        DetektConfig,
+        DetektFinding,
+        DetektParser,
+        DetektReport,
+        DetektRuleSet,
+        DetektSeverity,
+    )
+    from .kotlin_parsers_ktlint import (
+        KtlintConfig,
+        KtlintParser,
+        KtlintReport,
+        KtlintRuleSet,
+        KtlintSeverity,
+        KtlintViolation,
+    )
 
 __all__ = [
     # Detekt
@@ -175,9 +185,13 @@ def __getattr__(name: str):
         "DetektReport",
     ):
         from .kotlin_parsers_Detekt import DetektConfig  # noqa: F401
-        from .kotlin_parsers_Detekt import (DetektFinding, DetektParser,
-                                            DetektReport, DetektRuleSet,
-                                            DetektSeverity)
+        from .kotlin_parsers_Detekt import (
+            DetektFinding,
+            DetektParser,
+            DetektReport,
+            DetektRuleSet,
+            DetektSeverity,
+        )
 
         return locals()[name]
 
@@ -190,9 +204,13 @@ def __getattr__(name: str):
         "KtlintReport",
     ):
         from .kotlin_parsers_ktlint import KtlintConfig  # noqa: F401
-        from .kotlin_parsers_ktlint import (KtlintParser, KtlintReport,
-                                            KtlintRuleSet, KtlintSeverity,
-                                            KtlintViolation)
+        from .kotlin_parsers_ktlint import (
+            KtlintParser,
+            KtlintReport,
+            KtlintRuleSet,
+            KtlintSeverity,
+            KtlintViolation,
+        )
 
         return locals()[name]
 

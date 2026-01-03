@@ -67,8 +67,7 @@ class TestFinal17Elements:
 
     def test_taint_tracker_basic(self):
         """Test taint tracker basic."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user_input")
@@ -78,8 +77,9 @@ class TestFinal17Elements:
 
     def test_type_inference_function(self):
         """Test type inference on function."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "\ndef add(a: int, b: int) -> int:\n    return a + b\n"
@@ -95,8 +95,7 @@ class TestFinal17Elements:
 
     def test_refactor_simulator_unchanged(self):
         """Test refactor simulator with unchanged code."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
         code = "x = 1"
@@ -106,8 +105,9 @@ class TestFinal17Elements:
     def test_crewai_import(self):
         """Test CrewAI integration import."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                scalpel_analyze_error_impl as crewai_analyze
+            from code_scalpel.autonomy.integrations.crewai import (
+                scalpel_analyze_error_impl as crewai_analyze,
+            )
 
             assert crewai_analyze is not None
         except ImportError:
@@ -124,8 +124,9 @@ class TestFinal17Elements:
 
     def test_unified_sink_detector_python(self):
         """Test unified sink detector with Python code."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "\nimport os\nos.system(user_input)\n"
@@ -160,8 +161,10 @@ class TestFinal17Elements:
 
     def test_tsx_functions(self):
         """Test TSX helper functions."""
-        from code_scalpel.polyglot.tsx_analyzer import (has_jsx_syntax,
-                                                        normalize_jsx_syntax)
+        from code_scalpel.polyglot.tsx_analyzer import (
+            has_jsx_syntax,
+            normalize_jsx_syntax,
+        )
 
         code = "function App() { return <div>Hello</div>; }"
         has_jsx = has_jsx_syntax(code)
@@ -186,8 +189,9 @@ class TestFinal17Elements:
 
     def test_contract_breach_detector_init(self):
         """Test contract breach detector init."""
-        from code_scalpel.polyglot.contract_breach_detector import \
-            ContractBreachDetector
+        from code_scalpel.polyglot.contract_breach_detector import (
+            ContractBreachDetector,
+        )
 
         code = "\ndef add(a: int, b: int) -> int:\n    return a + b\n"
         tree = ast.parse(code)

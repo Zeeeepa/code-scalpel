@@ -27,8 +27,11 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 if JWT_AVAILABLE:
-    from code_scalpel.licensing import (get_current_tier, get_license_info,
-                                        get_tool_capabilities)
+    from code_scalpel.licensing import (
+        get_current_tier,
+        get_license_info,
+        get_tool_capabilities,
+    )
     from code_scalpel.licensing.jwt_generator import generate_license
 
 

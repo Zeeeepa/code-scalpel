@@ -1407,8 +1407,7 @@ class UnifiedExtractor:
         - TODO: Add async function context awareness
         - TODO: Support Protocol and ABC extraction
         """
-        from code_scalpel.surgical_extractor import (ExtractionResult,
-                                                     SurgicalExtractor)
+        from code_scalpel.surgical_extractor import ExtractionResult, SurgicalExtractor
 
         try:
             extractor = SurgicalExtractor(self.code, self.file_path)
@@ -1522,8 +1521,7 @@ class UnifiedExtractor:
         # Prefer the consolidated implementation in code_parsers/.
         try:
             from code_scalpel.code_parsers import PolyglotExtractor
-            from code_scalpel.code_parsers import \
-                PolyglotLanguage as PolyglotLang
+            from code_scalpel.code_parsers import PolyglotLanguage as PolyglotLang
         except Exception:  # pragma: no cover
             from code_scalpel.polyglot import Language as PolyglotLang
             from code_scalpel.polyglot import PolyglotExtractor

@@ -195,8 +195,10 @@ class TestPromptDiscoverability:
 
     def test_prompts_return_strings(self):
         """Test that prompts return string content."""
-        from code_scalpel.mcp.server import (safe_refactor_workflow_prompt,
-                                             security_audit_workflow_prompt)
+        from code_scalpel.mcp.server import (
+            safe_refactor_workflow_prompt,
+            security_audit_workflow_prompt,
+        )
 
         audit_result = security_audit_workflow_prompt("/project")
         refactor_result = safe_refactor_workflow_prompt("/file.py", "func")
@@ -256,9 +258,11 @@ class TestAcceptanceCriteria:
         """Acceptance: Prompts are discoverable via MCP protocol."""
         # The @mcp.prompt decorator makes them discoverable
         # This is handled by the FastMCP framework
-        from code_scalpel.mcp.server import (mcp,
-                                             safe_refactor_workflow_prompt,
-                                             security_audit_workflow_prompt)
+        from code_scalpel.mcp.server import (
+            mcp,
+            safe_refactor_workflow_prompt,
+            security_audit_workflow_prompt,
+        )
 
         # The mcp instance exists and prompts are registered via decorators
         assert mcp is not None
@@ -269,8 +273,10 @@ class TestAcceptanceCriteria:
 
     def test_prompts_include_concrete_tool_invocations(self):
         """Acceptance: Prompts include concrete tool invocation examples."""
-        from code_scalpel.mcp.server import (safe_refactor_workflow_prompt,
-                                             security_audit_workflow_prompt)
+        from code_scalpel.mcp.server import (
+            safe_refactor_workflow_prompt,
+            security_audit_workflow_prompt,
+        )
 
         audit = security_audit_workflow_prompt("/project")
         refactor = safe_refactor_workflow_prompt("/file.py", "func")
@@ -285,8 +291,10 @@ class TestAcceptanceCriteria:
 
     def test_prompts_handle_edge_cases(self):
         """Acceptance: Prompts handle edge cases (missing files, etc.)."""
-        from code_scalpel.mcp.server import (safe_refactor_workflow_prompt,
-                                             security_audit_workflow_prompt)
+        from code_scalpel.mcp.server import (
+            safe_refactor_workflow_prompt,
+            security_audit_workflow_prompt,
+        )
 
         # Should not crash with various inputs
         audit1 = security_audit_workflow_prompt("")

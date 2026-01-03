@@ -12,10 +12,15 @@ from datetime import datetime
 
 import pytest
 
-from code_scalpel.mcp.logging import (MCPAnalytics, ToolInvocation,
-                                      _sanitize_params, get_analytics,
-                                      log_tool_error, log_tool_invocation,
-                                      log_tool_success)
+from code_scalpel.mcp.logging import (
+    MCPAnalytics,
+    ToolInvocation,
+    _sanitize_params,
+    get_analytics,
+    log_tool_error,
+    log_tool_invocation,
+    log_tool_success,
+)
 
 
 class TestToolInvocation:

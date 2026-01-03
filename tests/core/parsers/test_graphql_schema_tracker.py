@@ -7,8 +7,13 @@ Tests for GraphQL Schema Tracker.
 import pytest
 
 from code_scalpel.integrations.protocol_analyzers.graphql.schema_tracker import (
-    GraphQLChangeSeverity, GraphQLChangeType, GraphQLSchemaTracker,
-    GraphQLTypeKind, compare_graphql_schemas, track_graphql_schema)
+    GraphQLChangeSeverity,
+    GraphQLChangeType,
+    GraphQLSchemaTracker,
+    GraphQLTypeKind,
+    compare_graphql_schemas,
+    track_graphql_schema,
+)
 
 # =============================================================================
 # TEST FIXTURES

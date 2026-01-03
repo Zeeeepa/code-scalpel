@@ -109,8 +109,22 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, cast
 
-from z3 import (And, Bool, BoolRef, BoolSort, ExprRef, Int, IntSort, Real,
-                RealSort, Solver, Sort, String, StringSort, sat)
+from z3 import (
+    And,
+    Bool,
+    BoolRef,
+    BoolSort,
+    ExprRef,
+    Int,
+    IntSort,
+    Real,
+    RealSort,
+    Solver,
+    Sort,
+    String,
+    StringSort,
+    sat,
+)
 
 
 @dataclass

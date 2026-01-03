@@ -4,9 +4,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from code_scalpel.policy_engine.policy_engine import (Operation,
-                                                      PolicyDecision,
-                                                      PolicyEngine)
+from code_scalpel.policy_engine.policy_engine import (
+    Operation,
+    PolicyDecision,
+    PolicyEngine,
+)
 
 # [20251216_TEST] Cover PolicyEngine happy-path and failure-path behavior
 

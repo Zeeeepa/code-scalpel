@@ -8,8 +8,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestTaintTrackerMoreBranches:
@@ -144,8 +145,7 @@ class TestRefactorSimulatorMoreBranches:
 
     def test_simulate_remove_parameter(self):
         """[20251217_TEST] Cover parameter removal simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         code = "\ndef foo(x, y, z):\n    return x + y\n"
         sim = RefactorSimulator()
@@ -158,8 +158,9 @@ class TestTypeInferenceMoreBranches:
 
     def test_infer_walrus_operator(self):
         """[20251217_TEST] Cover walrus operator."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("if (n := len([1, 2, 3])) > 2: print(n)")
@@ -167,8 +168,9 @@ class TestTypeInferenceMoreBranches:
 
     def test_infer_ternary(self):
         """[20251217_TEST] Cover ternary expression."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = 1 if True else 'a'")
@@ -180,8 +182,7 @@ class TestSymbolicEngineMoreBranches:
 
     def test_analyze_with_recursion(self):
         """[20251217_TEST] Cover recursion analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n"
         analyzer = SymbolicAnalyzer()
@@ -190,8 +191,7 @@ class TestSymbolicEngineMoreBranches:
 
     def test_analyze_with_boolean_ops(self):
         """[20251217_TEST] Cover boolean operation analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef check(x, y):\n    if x > 0 and y > 0:\n        return 1\n    elif x > 0 or y > 0:\n        return 2\n    return 0\n"
         analyzer = SymbolicAnalyzer()

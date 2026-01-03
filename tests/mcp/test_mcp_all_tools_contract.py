@@ -425,8 +425,7 @@ def add(a: int, b: int) -> int:
 
 
 def _write_signed_policy_manifest(policy_dir: Path, secret: str) -> None:
-    from code_scalpel.policy_engine.crypto_verify import \
-        CryptographicPolicyVerifier
+    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     policy_dir.mkdir(parents=True, exist_ok=True)
     (policy_dir / "policy.rego").write_text(

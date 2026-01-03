@@ -81,8 +81,7 @@ import datetime
 import multiprocessing as mp
 import os
 import re
-from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
-                                as_completed)
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 from pathlib import Path

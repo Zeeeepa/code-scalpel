@@ -1,5 +1,4 @@
-from code_scalpel.polyglot.typescript.type_narrowing import (NarrowedType,
-                                                             TypeNarrowing)
+from code_scalpel.polyglot.typescript.type_narrowing import NarrowedType, TypeNarrowing
 
 # [20251216_TEST] Cover regex fallback and negated guard branches
 

@@ -18,8 +18,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from code_scalpel.security.dependencies import (OSV_API_URL, OSVClient,
-                                                OSVError, Vulnerability)
+from code_scalpel.security.dependencies import (
+    OSV_API_URL,
+    OSVClient,
+    OSVError,
+    Vulnerability,
+)
 
 
 class TestVulnerability:

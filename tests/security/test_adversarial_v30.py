@@ -16,7 +16,11 @@ import pytest
 from code_scalpel.ast_tools.cross_file_extractor import calculate_confidence
 from code_scalpel.generators.refactor_simulator import RefactorSimulator
 from code_scalpel.polyglot.contract_breach_detector import (
-    ContractBreachDetector, Edge, Node, UnifiedGraph)
+    ContractBreachDetector,
+    Edge,
+    Node,
+    UnifiedGraph,
+)
 from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
 

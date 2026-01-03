@@ -3,8 +3,7 @@ import textwrap
 import pytest
 
 from code_scalpel.mcp.server import security_scan
-from code_scalpel.security.analyzers.taint_tracker import (SINK_PATTERNS,
-                                                           SecuritySink)
+from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS, SecuritySink
 
 
 @pytest.mark.parametrize(

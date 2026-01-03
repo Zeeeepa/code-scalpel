@@ -16,8 +16,7 @@ If the Safety Check tests hang, the engine is BROKEN.
 from z3 import IntSort
 
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
-from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-    IRSymbolicInterpreter
+from code_scalpel.symbolic_execution_tools.ir_interpreter import IRSymbolicInterpreter
 
 
 class SymbolicInterpreter:

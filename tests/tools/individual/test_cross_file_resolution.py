@@ -9,9 +9,11 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.surgical_extractor import (CrossFileResolution,
-                                             CrossFileSymbol,
-                                             SurgicalExtractor)
+from code_scalpel.surgical_extractor import (
+    CrossFileResolution,
+    CrossFileSymbol,
+    SurgicalExtractor,
+)
 
 
 class TestCrossFileResolution:

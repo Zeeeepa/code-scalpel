@@ -8,8 +8,7 @@ import pytest
 from code_scalpel import cli
 from code_scalpel.analysis.code_analyzer import AnalysisLevel, CodeAnalyzer
 from code_scalpel.integrations.crewai import CrewAIScalpel
-from code_scalpel.integrations.rest_api_server import (MCPServerConfig,
-                                                       create_app)
+from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 from code_scalpel.mcp import server as mcp_server
 from code_scalpel.pdg_tools.visualizer import PDGVisualizer

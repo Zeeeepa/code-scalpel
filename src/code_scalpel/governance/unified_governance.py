@@ -63,12 +63,13 @@ except ImportError:
 
 # [20251221_REFACTOR] v3.1.0 - ChangeBudget moved from policy/ to governance/
 try:
-    from code_scalpel.governance.change_budget import (BudgetDecision,
-                                                       BudgetViolation,
-                                                       ChangeBudget,
-                                                       FileChange)
-    from code_scalpel.governance.change_budget import \
-        Operation as BudgetOperation
+    from code_scalpel.governance.change_budget import (
+        BudgetDecision,
+        BudgetViolation,
+        ChangeBudget,
+        FileChange,
+    )
+    from code_scalpel.governance.change_budget import Operation as BudgetOperation
 
     BUDGET_AVAILABLE = True
 except ImportError:

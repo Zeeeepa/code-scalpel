@@ -5,9 +5,13 @@ Tests the precision extraction capabilities for token-efficient LLM interactions
 
 import pytest
 
-from code_scalpel.surgical_extractor import (SurgicalExtractor, extract_class,
-                                             extract_function, extract_method,
-                                             extract_with_context)
+from code_scalpel.surgical_extractor import (
+    SurgicalExtractor,
+    extract_class,
+    extract_function,
+    extract_method,
+    extract_with_context,
+)
 
 
 class TestSurgicalExtractor:

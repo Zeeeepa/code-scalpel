@@ -21,8 +21,12 @@ class TestAstToolsImports:
 
     def test_core_imports_available(self):
         """Test that core imports are always available."""
-        from code_scalpel.ast_tools import (ASTAnalyzer, ASTBuilder,
-                                            ClassMetrics, FunctionMetrics)
+        from code_scalpel.ast_tools import (
+            ASTAnalyzer,
+            ASTBuilder,
+            ClassMetrics,
+            FunctionMetrics,
+        )
 
         assert ASTAnalyzer is not None
         assert ASTBuilder is not None

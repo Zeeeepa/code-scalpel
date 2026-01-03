@@ -11,8 +11,12 @@ Comprehensive tests for CallGraphBuilder enhancements:
 
 import pytest
 
-from code_scalpel.ast_tools.call_graph import (CallEdge, CallGraphBuilder,
-                                               CallGraphResult, CallNode)
+from code_scalpel.ast_tools.call_graph import (
+    CallEdge,
+    CallGraphBuilder,
+    CallGraphResult,
+    CallNode,
+)
 
 # ============================================================================
 # Test Data Classes

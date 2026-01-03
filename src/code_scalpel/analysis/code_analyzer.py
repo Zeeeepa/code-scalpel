@@ -80,12 +80,15 @@ ParserLanguage: Any = None
 _detect_language_func: Optional[Callable[..., Any]] = None
 
 try:
-    from .code_parsers.factory import \
-        ParserFactory as _PF  # type: ignore[import-not-found]
-    from .code_parsers.interface import \
-        Language as _PL  # type: ignore[import-not-found]
-    from .code_parsers.language_detection import \
-        detect_language as _dl  # type: ignore[import-not-found]
+    from .code_parsers.factory import (
+        ParserFactory as _PF,  # type: ignore[import-not-found]
+    )
+    from .code_parsers.interface import (
+        Language as _PL,  # type: ignore[import-not-found]
+    )
+    from .code_parsers.language_detection import (
+        detect_language as _dl,  # type: ignore[import-not-found]
+    )
 
     ParserFactory = _PF
     ParserLanguage = _PL

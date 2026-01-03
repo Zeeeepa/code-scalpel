@@ -66,8 +66,7 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(
     _make_python_deep_chain_project(root)
 
     # Capture the effective limits passed into the underlying tracker.
-    from code_scalpel.security.analyzers.cross_file_taint import \
-        CrossFileTaintTracker
+    from code_scalpel.security.analyzers.cross_file_taint import CrossFileTaintTracker
 
     state: dict[str, object] = {}
     orig_init = CrossFileTaintTracker.__init__
@@ -140,8 +139,7 @@ async def test_cross_file_security_scan_pro_clamps_limits(tmp_path: Path, monkey
     root.mkdir()
     _make_python_deep_chain_project(root)
 
-    from code_scalpel.security.analyzers.cross_file_taint import \
-        CrossFileTaintTracker
+    from code_scalpel.security.analyzers.cross_file_taint import CrossFileTaintTracker
 
     state: dict[str, object] = {}
     orig_analyze = CrossFileTaintTracker.analyze

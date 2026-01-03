@@ -47,26 +47,49 @@ Architecture & Metrics:
 # [20251221_TODO] Support Java 21+ features (pattern matching, virtual threads)
 """
 
-from .java_parser_treesitter import (JavaAnnotation, JavaClass, JavaEnum,
-                                     JavaEnumConstant, JavaField,
-                                     JavaInterface, JavaMethod, JavaModule,
-                                     JavaModuleDirective, JavaParameter)
+from .java_parser_treesitter import (
+    JavaAnnotation,
+    JavaClass,
+    JavaEnum,
+    JavaEnumConstant,
+    JavaField,
+    JavaInterface,
+    JavaMethod,
+    JavaModule,
+    JavaModuleDirective,
+    JavaParameter,
+)
 from .java_parser_treesitter import JavaParser as TreeSitterJavaParser
-from .java_parser_treesitter import (JavaParseResult, JavaRecord,
-                                     JavaRecordComponent,
-                                     JavaStaticInitializer)
+from .java_parser_treesitter import (
+    JavaParseResult,
+    JavaRecord,
+    JavaRecordComponent,
+    JavaStaticInitializer,
+)
 from .java_parsers_Checkstyle import CheckstyleParser, CheckstyleViolation
 from .java_parsers_ErrorProne import ErrorProneIssue, ErrorProneParser
 from .java_parsers_FindSecBugs import FindSecBugsParser, SecurityBug
 from .java_parsers_Infer import InferIssue, InferParser
-from .java_parsers_JArchitect import (DependencyIssue, JArchitectParser,
-                                      JArchitectReport, QualityMetric)
-from .java_parsers_javalang import (CodeMetrics, DesignPatternMatch,
-                                    HalsteadMetrics)
+from .java_parsers_JArchitect import (
+    DependencyIssue,
+    JArchitectParser,
+    JArchitectReport,
+    QualityMetric,
+)
+from .java_parsers_javalang import (
+    CodeMetrics,
+    DesignPatternMatch,
+    HalsteadMetrics,
+)
 from .java_parsers_javalang import JavaParser as JavalangParser
-from .java_parsers_javalang import (MethodCallInfo, MethodMetrics,
-                                    SecurityIssue, ThreadSafetyInfo,
-                                    TryCatchPattern, TypeHierarchy)
+from .java_parsers_javalang import (
+    MethodCallInfo,
+    MethodMetrics,
+    SecurityIssue,
+    ThreadSafetyInfo,
+    TryCatchPattern,
+    TypeHierarchy,
+)
 from .java_parsers_PMD import PMDParser, PMDViolation
 from .java_parsers_SonarQube import SonarIssue, SonarMetrics, SonarQubeParser
 from .java_parsers_SpotBugs import SpotBug, SpotBugsParser

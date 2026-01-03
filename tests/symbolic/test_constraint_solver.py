@@ -15,11 +15,24 @@ when trying to serialize results.
 
 import math
 
-from z3 import (BitVec, Bool, Implies, Int, IntSort, Not, Or, Real, RealVal,
-                String, StringVal)
+from z3 import (
+    BitVec,
+    Bool,
+    Implies,
+    Int,
+    IntSort,
+    Not,
+    Or,
+    Real,
+    RealVal,
+    String,
+    StringVal,
+)
 
 from code_scalpel.symbolic_execution_tools.constraint_solver import (
-    ConstraintSolver, SolverStatus)
+    ConstraintSolver,
+    SolverStatus,
+)
 
 # =============================================================================
 # SECTION 1: Basic Satisfiability
@@ -521,8 +534,7 @@ class TestStateIntegration:
 
     def test_solve_from_state_constraints(self):
         """Can solve constraints from a SymbolicState."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         x = state.create_variable("x", IntSort())
@@ -537,8 +549,7 @@ class TestStateIntegration:
 
     def test_check_state_feasibility(self):
         """Solver agrees with state.is_feasible()."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         x = state.create_variable("x", IntSort())
@@ -668,8 +679,9 @@ class TestCoverageCompleteness:
 
     def test_convenience_create_solver(self):
         """create_solver() convenience function works."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            create_solver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            create_solver,
+        )
 
         solver = create_solver(timeout_ms=1000)
 
@@ -678,8 +690,9 @@ class TestCoverageCompleteness:
 
     def test_convenience_solve_constraints_sat(self):
         """solve_constraints() returns model when SAT."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            solve_constraints
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            solve_constraints,
+        )
 
         x = Int("x")
         model = solve_constraints([x > 0, x < 10], [x])
@@ -690,8 +703,9 @@ class TestCoverageCompleteness:
 
     def test_convenience_solve_constraints_unsat(self):
         """solve_constraints() returns None when UNSAT."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            solve_constraints
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            solve_constraints,
+        )
 
         x = Int("x")
         model = solve_constraints([x > 10, x < 5], [x])
@@ -700,8 +714,9 @@ class TestCoverageCompleteness:
 
     def test_convenience_is_satisfiable_true(self):
         """is_satisfiable() returns True for satisfiable constraints."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            is_satisfiable
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            is_satisfiable,
+        )
 
         x = Int("x")
         result = is_satisfiable([x > 0, x < 100])
@@ -710,8 +725,9 @@ class TestCoverageCompleteness:
 
     def test_convenience_is_satisfiable_false(self):
         """is_satisfiable() returns False for unsatisfiable constraints."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            is_satisfiable
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            is_satisfiable,
+        )
 
         x = Int("x")
         result = is_satisfiable([x > 10, x < 5])
@@ -747,8 +763,7 @@ class TestCoverageCompleteness:
 
     def test_solver_type_enum_exists(self):
         """SolverType enum exists for legacy compatibility."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            SolverType
+        from code_scalpel.symbolic_execution_tools.constraint_solver import SolverType
 
         # Verify the enum exists and has expected values
         assert hasattr(SolverType, "Z3")
@@ -769,8 +784,9 @@ class TestCoverageCompleteness:
 
     def test_legacy_constraint_type_enum(self):
         """ConstraintType enum exists for legacy compatibility."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintType
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintType,
+        )
 
         assert hasattr(ConstraintType, "ARITHMETIC")
         assert hasattr(ConstraintType, "BOOLEAN")
@@ -781,7 +797,9 @@ class TestCoverageCompleteness:
     def test_legacy_solver_config(self):
         """SolverConfig dataclass exists for legacy compatibility."""
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            SolverConfig, SolverType)
+            SolverConfig,
+            SolverType,
+        )
 
         config = SolverConfig()
         assert config.solver_type == SolverType.Z3

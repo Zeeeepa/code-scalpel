@@ -24,10 +24,12 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.quality_assurance.error_scanner import (CodeError,
-                                                          ErrorScanner,
-                                                          ErrorSeverity,
-                                                          ScanResults)
+from code_scalpel.quality_assurance.error_scanner import (
+    CodeError,
+    ErrorScanner,
+    ErrorSeverity,
+    ScanResults,
+)
 
 __all__ = [
     "ErrorScanner",

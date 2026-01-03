@@ -17,7 +17,11 @@ class TestTaintTrackerExtra:
     def test_cross_function_taint(self):
         """Cover cross-function taint analysis via concat."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
@@ -30,7 +34,11 @@ class TestTaintTrackerExtra:
     def test_taint_with_low_level(self):
         """Cover LOW taint level."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.LOW)
@@ -41,7 +49,11 @@ class TestTaintTrackerExtra:
     def test_taint_with_medium_level(self):
         """Cover MEDIUM taint level."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.MEDIUM)
@@ -52,7 +64,11 @@ class TestTaintTrackerExtra:
     def test_sanitizer_on_high_taint(self):
         """Cover sanitizer on HIGH taint."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
@@ -65,7 +81,10 @@ class TestTaintTrackerExtra:
     def test_taint_check_sink(self):
         """Cover sink checking."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -76,7 +95,10 @@ class TestTaintTrackerExtra:
     def test_taint_get_vulnerabilities(self):
         """Cover get_vulnerabilities method."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT)
@@ -91,8 +113,9 @@ class TestTypeInferenceExtra:
 
     def test_infer_set_literal(self):
         """Cover set literal inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("s = {1, 2, 3}")
@@ -100,8 +123,9 @@ class TestTypeInferenceExtra:
 
     def test_infer_tuple_literal(self):
         """Cover tuple literal inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("t = (1, 'a', True)")
@@ -109,8 +133,9 @@ class TestTypeInferenceExtra:
 
     def test_infer_nested_call(self):
         """Cover nested call inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = str(int(float('1.5')))")
@@ -118,8 +143,9 @@ class TestTypeInferenceExtra:
 
     def test_infer_walrus_operator(self):
         """Cover walrus operator inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("if (n := len([1,2,3])) > 0: pass")
@@ -127,8 +153,9 @@ class TestTypeInferenceExtra:
 
     def test_infer_starred_expression(self):
         """Cover starred expression inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("a, *rest, b = [1, 2, 3, 4, 5]")
@@ -140,8 +167,9 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_file_sinks(self):
         """Cover file operation sinks."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "with open(user_input, 'w') as f: f.write(data)"
@@ -150,8 +178,9 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_subprocess_sinks(self):
         """Cover subprocess sinks."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "subprocess.run(user_command, shell=True)"
@@ -160,8 +189,9 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_yaml_sinks(self):
         """Cover YAML load sinks."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "yaml.load(user_data)"
@@ -170,8 +200,9 @@ class TestUnifiedSinkDetectorExtra:
 
     def test_detect_pickle_sinks(self):
         """Cover pickle sinks."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "pickle.loads(untrusted_data)"
@@ -246,8 +277,7 @@ class TestSymbolicExtraBranches:
 
     def test_symbolic_floordiv(self):
         """Cover floor division."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = """
 def div(a, b):
@@ -259,8 +289,7 @@ def div(a, b):
 
     def test_symbolic_power(self):
         """Cover power operation."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = """
 def power(base, exp):
@@ -272,8 +301,7 @@ def power(base, exp):
 
     def test_symbolic_bitwise(self):
         """Cover bitwise operations."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = """
 def bits(a, b):
@@ -285,8 +313,7 @@ def bits(a, b):
 
     def test_symbolic_shift(self):
         """Cover shift operations."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = """
 def shift(x):
@@ -393,8 +420,7 @@ class TestRefactorSimulatorExtraBranches:
 
     def test_simulate_with_generator(self):
         """Cover generator function refactor."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
         original = """
@@ -411,8 +437,7 @@ def gen():
 
     def test_simulate_with_class_rename(self):
         """Cover class rename simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
         original = """

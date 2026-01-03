@@ -241,8 +241,7 @@ class TestCrewAIAdditionalGaps:
     def test_generate_fix_tool_syntax_error_path(self):
         """[20251217_TEST] Cover ScalpelGenerateFixTool syntax error path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelGenerateFixTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelGenerateFixTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -259,8 +258,7 @@ class TestCrewAIAdditionalGaps:
     def test_generate_fix_tool_exception_path(self):
         """[20251217_TEST] Cover ScalpelGenerateFixTool exception handling."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelGenerateFixTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelGenerateFixTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -277,8 +275,7 @@ class TestCrewAIAdditionalGaps:
     def test_analyze_tool_exception_path(self):
         """[20251217_TEST] Cover ScalpelAnalyzeTool with malformed input."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelAnalyzeTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelAnalyzeTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -295,8 +292,7 @@ class TestLangGraphAdditionalGaps:
     def test_analyze_error_node_exception(self):
         """[20251217_TEST] Cover analyze_error_node exception handling."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                analyze_error_node
+            from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -313,8 +309,7 @@ class TestLangGraphAdditionalGaps:
     def test_generate_fix_node_paths(self):
         """[20251217_TEST] Cover generate_fix_node various paths."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                generate_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -389,8 +384,7 @@ class TestMiscCoverageGaps:
     def test_import_error_handling(self):
         """[20251217_TEST] Cover module import error handling."""
         # Test that modules handle optional dependencies gracefully
-        from code_scalpel.autonomy.integrations import (autogen, crewai,
-                                                        langgraph)
+        from code_scalpel.autonomy.integrations import autogen, crewai, langgraph
 
         assert autogen is not None
         assert crewai is not None

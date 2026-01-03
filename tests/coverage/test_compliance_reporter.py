@@ -11,11 +11,17 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from code_scalpel.governance import (AuditLog, ComplianceReport,
-                                     ComplianceReporter, OverrideAnalysis,
-                                     PolicyEngine, Recommendation,
-                                     ReportSummary, SecurityPosture,
-                                     ViolationAnalysis)
+from code_scalpel.governance import (
+    AuditLog,
+    ComplianceReport,
+    ComplianceReporter,
+    OverrideAnalysis,
+    PolicyEngine,
+    Recommendation,
+    ReportSummary,
+    SecurityPosture,
+    ViolationAnalysis,
+)
 
 
 class TestAuditLog:

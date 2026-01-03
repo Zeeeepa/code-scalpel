@@ -7,9 +7,15 @@ This module provides gRPC contract parsing and analysis:
 - contract_analyzer.py: gRPC service definition parsing and issue detection
 """
 
-from .contract_analyzer import (ContractIssue, GrpcContract,
-                                GrpcContractAnalyzer, GrpcService,
-                                IssueSeverity, RpcMethod, StreamingType)
+from .contract_analyzer import (
+    ContractIssue,
+    GrpcContract,
+    GrpcContractAnalyzer,
+    GrpcService,
+    IssueSeverity,
+    RpcMethod,
+    StreamingType,
+)
 
 __all__ = [
     "GrpcContractAnalyzer",

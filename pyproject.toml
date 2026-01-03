@@ -173,6 +173,17 @@ partial_branches = [
 ]
 
 # ============================================================================
+# IMPORT SORTING CONFIGURATION
+# ============================================================================
+
+[tool.isort]
+profile = "black"  # Compatible with Black formatter
+line_length = 88
+skip_gitignore = true
+known_first_party = ["code_scalpel"]
+extend_skip = ["__pycache__", ".pytest_cache"]
+
+# ============================================================================
 # TYPE CHECKING CONFIGURATION
 # ============================================================================
 

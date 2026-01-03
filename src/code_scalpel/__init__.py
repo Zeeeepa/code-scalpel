@@ -29,42 +29,77 @@ __email__ = "3dtsus@gmail.com"
 
 # [20251228_BUGFIX] Prefer reorganized modules to avoid importing deprecated
 # shims (keeps backward-compatible top-level symbols without warning noise).
-from .analysis.code_analyzer import (AnalysisLevel, AnalysisMetrics,
-                                     AnalysisResult, CodeAnalyzer,
-                                     DeadCodeItem, RefactorSuggestion,
-                                     analyze_code)
+from .analysis.code_analyzer import (
+    AnalysisLevel,
+    AnalysisMetrics,
+    AnalysisResult,
+    CodeAnalyzer,
+    DeadCodeItem,
+    RefactorSuggestion,
+    analyze_code,
+)
+
 # Project Crawler
-from .analysis.project_crawler import (CrawlResult, FileAnalysisResult,
-                                       ProjectCrawler, crawl_project)
+from .analysis.project_crawler import (
+    CrawlResult,
+    FileAnalysisResult,
+    ProjectCrawler,
+    crawl_project,
+)
+
 # Core analysis
 # AST tools
-from .ast_tools import (ASTAnalyzer, ASTBuilder, ClassMetrics, FunctionMetrics,
-                        build_ast, build_ast_from_file)
+from .ast_tools import (
+    ASTAnalyzer,
+    ASTBuilder,
+    ClassMetrics,
+    FunctionMetrics,
+    build_ast,
+    build_ast_from_file,
+)
+
 # Autonomy (Error-to-Diff Engine) - v3.0.0
 # [20251217_FEATURE] v3.0.0 Autonomy - Error-to-Diff Engine
-from .autonomy import (ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint,
-                       ParsedError)
+from .autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint, ParsedError
+
 # REST API Server (legacy, renamed from mcp_server)
-from .integrations.rest_api_server import (MCPServerConfig, create_app,
-                                           run_server)
+from .integrations.rest_api_server import MCPServerConfig, create_app, run_server
+
 # PDG tools
 from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg
+
 # Surgical Extractor (Token-efficient extraction)
-from .surgery.surgical_extractor import (ContextualExtraction,
-                                         CrossFileResolution, CrossFileSymbol,
-                                         ExtractionResult, SurgicalExtractor,
-                                         extract_class, extract_function,
-                                         extract_method, extract_with_context)
+from .surgery.surgical_extractor import (
+    ContextualExtraction,
+    CrossFileResolution,
+    CrossFileSymbol,
+    ExtractionResult,
+    SurgicalExtractor,
+    extract_class,
+    extract_function,
+    extract_method,
+    extract_with_context,
+)
+
 # Surgical Patcher (Safe code modification)
-from .surgery.surgical_patcher import (PatchResult, SurgicalPatcher,
-                                       update_class_in_file,
-                                       update_function_in_file,
-                                       update_method_in_file)
+from .surgery.surgical_patcher import (
+    PatchResult,
+    SurgicalPatcher,
+    update_class_in_file,
+    update_function_in_file,
+    update_method_in_file,
+)
+
 # Unified Extractor (Multi-language extraction) - v3.1.0
 # [20251221_FEATURE] v3.1.0 - Unified interface for all languages
-from .surgery.unified_extractor import (Language, UnifiedExtractionResult,
-                                        UnifiedExtractor, detect_language,
-                                        extract_from_code, extract_from_file)
+from .surgery.unified_extractor import (
+    Language,
+    UnifiedExtractionResult,
+    UnifiedExtractor,
+    detect_language,
+    extract_from_code,
+    extract_from_file,
+)
 
 __all__ = [
     # Version info
@@ -193,8 +228,7 @@ def symbolic_execute(
     code: str, max_paths: int | None = None, max_depth: int | None = None
 ):
     """[20251228_FEATURE] Sync wrapper for MCP symbolic_execute tool."""
-    from code_scalpel.mcp.server import \
-        symbolic_execute as _symbolic_execute_async
+    from code_scalpel.mcp.server import symbolic_execute as _symbolic_execute_async
 
     # Allow mixed value types for optional numeric parameters
     kwargs: dict[str, str | int] = {"code": code}
@@ -212,8 +246,9 @@ def generate_unit_tests(
     framework: str = "pytest",
 ):
     """[20251228_FEATURE] Sync wrapper for MCP generate_unit_tests tool."""
-    from code_scalpel.mcp.server import \
-        generate_unit_tests as _generate_unit_tests_async
+    from code_scalpel.mcp.server import (
+        generate_unit_tests as _generate_unit_tests_async,
+    )
 
     return _run_mcp_tool_sync(
         _generate_unit_tests_async,
@@ -231,8 +266,7 @@ def simulate_refactor(
     strict_mode: bool = False,
 ):
     """[20251228_FEATURE] Sync wrapper for MCP simulate_refactor tool."""
-    from code_scalpel.mcp.server import \
-        simulate_refactor as _simulate_refactor_async
+    from code_scalpel.mcp.server import simulate_refactor as _simulate_refactor_async
 
     return _run_mcp_tool_sync(
         _simulate_refactor_async,

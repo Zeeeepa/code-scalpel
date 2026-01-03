@@ -312,8 +312,7 @@ class TestRefactorSimulatorUncovered:
 
     def test_scan_security_new_vulnerabilities(self):
         """Test _scan_security detecting new vulnerabilities - line 283-298."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -332,8 +331,7 @@ _ = os.system(user_input)
 
     def test_generate_warnings_large_deletion(self):
         """Test _generate_warnings with large deletion."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -351,8 +349,7 @@ _ = os.system(user_input)
 
     def test_generate_warnings_large_addition(self):
         """Test _generate_warnings with large addition."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -377,7 +374,10 @@ class TestTSXAnalyzerUncovered:
         """[20251219_TEST] Test TSX analyzer functions with minimal content."""
         from code_scalpel.ir.nodes import IRFunctionDef
         from code_scalpel.polyglot.tsx_analyzer import (
-            detect_server_directive, has_jsx_syntax, is_react_component)
+            detect_server_directive,
+            has_jsx_syntax,
+            is_react_component,
+        )
 
         # Test detect_server_directive
         assert detect_server_directive("'use server'") == "use server"
@@ -413,8 +413,7 @@ class TestComplianceReporterUncovered:
         """Test ComplianceReporter initialization."""
         try:
             from code_scalpel.governance.audit_log import AuditLog
-            from code_scalpel.governance.compliance_reporter import \
-                ComplianceReporter
+            from code_scalpel.governance.compliance_reporter import ComplianceReporter
             from code_scalpel.policy_engine import PolicyEngine
 
             audit_log = AuditLog()
@@ -436,8 +435,7 @@ class TestPolicyEngineUncovered:
     def test_semantic_analyzer_edge_cases(self):
         """Test semantic analyzer methods."""
         try:
-            from code_scalpel.policy_engine.semantic_analyzer import \
-                SemanticAnalyzer
+            from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
             analyzer = SemanticAnalyzer()
             result = analyzer.contains_sql_sink("execute(query)", "python")
@@ -455,8 +453,7 @@ class TestPolicyEngineUncovered:
         import tempfile
         from pathlib import Path
 
-        from code_scalpel.policy_engine.crypto_verify import \
-            CryptographicPolicyVerifier
+        from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
         # [20251219_BUGFIX] CryptographicPolicyVerifier requires secret_key and valid manifest
         # Create a temp directory with valid policy structure

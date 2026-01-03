@@ -6,8 +6,13 @@ Tests for v2.0.0 Polyglot Extraction - Multi-language support.
 
 # [20251215_TEST] Lint cleanup for polyglot extractor tests (remove unused imports).
 
-from code_scalpel.polyglot import (EXTENSION_MAP, Language, PolyglotExtractor,
-                                   detect_language, extract_from_code)
+from code_scalpel.polyglot import (
+    EXTENSION_MAP,
+    Language,
+    PolyglotExtractor,
+    detect_language,
+    extract_from_code,
+)
 
 
 class TestLanguageDetection:

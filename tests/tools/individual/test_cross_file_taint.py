@@ -16,9 +16,17 @@ from pathlib import Path
 import pytest
 
 from code_scalpel.security.analyzers.cross_file_taint import (
-    DANGEROUS_SINKS, TAINT_SOURCES, CallInfo, CrossFileSink,
-    CrossFileTaintFlow, CrossFileTaintResult, CrossFileTaintTracker,
-    CrossFileVulnerability, FunctionTaintInfo, SinkInfo)
+    DANGEROUS_SINKS,
+    TAINT_SOURCES,
+    CallInfo,
+    CrossFileSink,
+    CrossFileTaintFlow,
+    CrossFileTaintResult,
+    CrossFileTaintTracker,
+    CrossFileVulnerability,
+    FunctionTaintInfo,
+    SinkInfo,
+)
 
 # =============================================================================
 # Fixtures

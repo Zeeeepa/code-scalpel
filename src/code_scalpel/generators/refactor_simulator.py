@@ -777,8 +777,7 @@ class RefactorSimulator:
         if language == "python":
             try:
                 from code_scalpel.security.analyzers import SecurityAnalyzer
-                from code_scalpel.security.analyzers.taint_tracker import \
-                    SecuritySink
+                from code_scalpel.security.analyzers.taint_tracker import SecuritySink
 
                 analyzer = SecurityAnalyzer()
 
@@ -1888,8 +1887,7 @@ class RefactorSimulator:
             # If project_root provided, analyze call graph
             if project_root and changed_functions:
                 try:
-                    from code_scalpel.ast_tools.call_graph import \
-                        CallGraphBuilder
+                    from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
                     root_path = Path(project_root)
                     if root_path.exists():

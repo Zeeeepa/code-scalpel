@@ -21,7 +21,10 @@ from typing import Generator
 import pytest
 
 from code_scalpel.ast_tools.architectural_rules import (
-    ArchitecturalRuleEngine, ViolationAction, ViolationSeverity)
+    ArchitecturalRuleEngine,
+    ViolationAction,
+    ViolationSeverity,
+)
 
 
 @pytest.fixture

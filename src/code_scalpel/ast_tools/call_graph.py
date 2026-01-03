@@ -320,7 +320,9 @@ class CallGraphBuilder:
         # ------------------------------------------------------------------
         try:
             from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
-                TREE_SITTER_AVAILABLE, TreeSitterJSParser)
+                TREE_SITTER_AVAILABLE,
+                TreeSitterJSParser,
+            )
         except Exception:
             TREE_SITTER_AVAILABLE = False
             TreeSitterJSParser = None  # type: ignore[assignment]
@@ -539,7 +541,9 @@ class CallGraphBuilder:
         # ------------------------------------------------------------------
         try:
             from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
-                TREE_SITTER_AVAILABLE, TreeSitterJSParser)
+                TREE_SITTER_AVAILABLE,
+                TreeSitterJSParser,
+            )
         except Exception:
             TREE_SITTER_AVAILABLE = False
             TreeSitterJSParser = None  # type: ignore[assignment]
@@ -1191,10 +1195,12 @@ class CallGraphBuilder:
         tree_sitter_available = False
         TreeSitterJSParser = None  # type: ignore[assignment]
         try:
-            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import \
-                TREE_SITTER_AVAILABLE
-            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import \
-                TreeSitterJSParser as _TSParser
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
+                TREE_SITTER_AVAILABLE,
+            )
+            from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
+                TreeSitterJSParser as _TSParser,
+            )
 
             tree_sitter_available = bool(TREE_SITTER_AVAILABLE)
             TreeSitterJSParser = _TSParser
@@ -1774,7 +1780,9 @@ class CallGraphBuilder:
                     # Best-effort JS/TS cycle detection via relative imports
                     try:
                         from code_scalpel.code_parsers.javascript_parsers.javascript_parsers_treesitter import (
-                            TREE_SITTER_AVAILABLE, TreeSitterJSParser)
+                            TREE_SITTER_AVAILABLE,
+                            TreeSitterJSParser,
+                        )
                     except Exception:
                         continue
 

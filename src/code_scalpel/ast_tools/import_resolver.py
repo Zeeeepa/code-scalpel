@@ -29,8 +29,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-from code_scalpel.cache import (AnalysisCache, IncrementalAnalyzer,
-                                ParallelParser)
+from code_scalpel.cache import AnalysisCache, IncrementalAnalyzer, ParallelParser
 
 logger = logging.getLogger(__name__)
 

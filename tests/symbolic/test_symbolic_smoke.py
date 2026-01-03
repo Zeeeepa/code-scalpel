@@ -12,8 +12,7 @@ import warnings
 import pytest
 
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
-from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-    IRSymbolicInterpreter
+from code_scalpel.symbolic_execution_tools.ir_interpreter import IRSymbolicInterpreter
 
 
 class SymbolicInterpreter:
@@ -37,23 +36,22 @@ class TestSymbolicImports:
         with warnings.catch_warnings(record=True):
             warnings.simplefilter("always")
             # Force reimport by importing a submodule directly
-            from code_scalpel.symbolic_execution_tools import \
-                engine  # noqa: F401
+            from code_scalpel.symbolic_execution_tools import engine  # noqa: F401
 
             # Check that at least one warning was about experimental status
             # (may have already been imported, so check if any warnings match)
 
     def test_import_constraint_solver(self):
         """Test importing the constraint solver."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         assert ConstraintSolver is not None
 
     def test_import_engine(self):
         """Test importing the symbolic execution engine."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         assert SymbolicExecutionEngine is not None
 
@@ -66,16 +64,16 @@ class TestSymbolicInstantiation:
 
     def test_instantiate_constraint_solver(self):
         """Test creating a ConstraintSolver instance."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         assert solver is not None
 
     def test_instantiate_engine_no_args(self):
         """Test that SymbolicAnalyzer can be created without arguments."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         # New API: no solver required, uses internal components
         analyzer = SymbolicAnalyzer()
@@ -83,8 +81,7 @@ class TestSymbolicInstantiation:
 
     def test_instantiate_engine_with_solver(self):
         """Test creating a SymbolicExecutionEngine with a solver."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         # Note: SymbolicExecutionEngine is now an alias for SymbolicAnalyzer
         # which doesn't require a solver argument
@@ -101,8 +98,7 @@ class TestSymbolicExecution:
 
         This now works! Phase 1 supports Int/Bool analysis.
         """
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("x = 1 + 2")
@@ -114,8 +110,7 @@ class TestSymbolicExecution:
 
     def test_execute_conditional(self):
         """Test executing code with conditionals - NOW WORKING!"""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
 
@@ -132,8 +127,7 @@ else:
 
     def test_execute_loop(self):
         """Test executing code with loops - NOW WORKING!"""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
 
@@ -152,16 +146,18 @@ class TestConstraintSolver:
 
     def test_solver_has_solve(self):
         """Test that solver has solve method."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         assert hasattr(solver, "solve")
 
     def test_solver_has_prove(self):
         """Test that solver has prove method."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         assert hasattr(solver, "prove")
@@ -171,7 +167,9 @@ class TestConstraintSolver:
         import z3
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -184,7 +182,9 @@ class TestConstraintSolver:
         import z3
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -195,8 +195,9 @@ class TestConstraintSolver:
         """Test solver returns correct model."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -211,7 +212,9 @@ class TestConstraintSolver:
         import z3
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -224,7 +227,9 @@ class TestConstraintSolver:
         import z3
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -237,8 +242,9 @@ class TestConstraintSolver:
         """Test SolverResult __bool__ method."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -249,8 +255,9 @@ class TestConstraintSolver:
         """Test SolverResult is_sat method."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -265,8 +272,7 @@ class TestAnalyzerAdvanced:
         """Test declaring symbolic integer variable."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", z3.IntSort())
@@ -276,8 +282,7 @@ class TestAnalyzerAdvanced:
         """Test declaring symbolic boolean variable."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         b = analyzer.declare_symbolic("b", z3.BoolSort())
@@ -288,8 +293,7 @@ class TestAnalyzerAdvanced:
         import pytest
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         with pytest.raises(NotImplementedError):
@@ -299,8 +303,7 @@ class TestAnalyzerAdvanced:
         """Test adding preconditions."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", z3.IntSort())
@@ -311,10 +314,10 @@ class TestAnalyzerAdvanced:
 
     def test_get_solver(self):
         """Test getting the underlying solver."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         solver = analyzer.get_solver()
@@ -322,8 +325,7 @@ class TestAnalyzerAdvanced:
 
     def test_custom_timeout(self):
         """Test creating analyzer with custom timeout."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer(solver_timeout=5000)
         assert analyzer.solver_timeout == 5000
@@ -334,8 +336,7 @@ class TestEngineEdgeCases:
 
     def test_analyze_empty_code(self):
         """Test analyzing empty code."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("")
@@ -345,8 +346,7 @@ class TestEngineEdgeCases:
         """Test analyzing code with syntax error."""
         import pytest
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         # Syntax error should raise ValueError
@@ -356,8 +356,7 @@ class TestEngineEdgeCases:
 
     def test_analyze_only_comments(self):
         """Test analyzing code with only comments."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("# This is a comment\n# Another comment")
@@ -365,8 +364,7 @@ class TestEngineEdgeCases:
 
     def test_analyze_multiple_branches(self):
         """Test analyzing code with multiple conditional branches."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         code = """
@@ -386,8 +384,7 @@ else:
 
     def test_analyze_with_function_def(self):
         """Test analyzing code with function definition."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         code = """
@@ -401,8 +398,7 @@ result = add(1, 2)
 
     def test_path_result_properties(self):
         """Test AnalysisResult object has expected properties."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("x = 1")
@@ -415,8 +411,7 @@ result = add(1, 2)
 
     def test_get_feasible_paths(self):
         """Test getting feasible paths from result."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("x = 1")
@@ -536,8 +531,7 @@ class TestEngineCoverage:
         """Test PathResult.to_dict() serialization."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import (PathResult,
-                                                                  PathStatus)
+        from code_scalpel.symbolic_execution_tools.engine import PathResult, PathStatus
 
         x = z3.Int("x")
         path = PathResult(
@@ -556,8 +550,7 @@ class TestEngineCoverage:
 
     def test_path_result_from_dict(self):
         """Test PathResult.from_dict() deserialization."""
-        from code_scalpel.symbolic_execution_tools.engine import (PathResult,
-                                                                  PathStatus)
+        from code_scalpel.symbolic_execution_tools.engine import PathResult, PathStatus
 
         data = {
             "path_id": 2,
@@ -575,9 +568,11 @@ class TestEngineCoverage:
     def test_analysis_result_to_dict(self):
         """Test AnalysisResult.to_dict() serialization."""
         from code_scalpel.symbolic_execution_tools.engine import (
-            AnalysisResult, PathResult, PathStatus)
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            InferredType
+            AnalysisResult,
+            PathResult,
+            PathStatus,
+        )
+        from code_scalpel.symbolic_execution_tools.type_inference import InferredType
 
         result = AnalysisResult(
             paths=[
@@ -626,8 +621,7 @@ class TestEngineCoverage:
 
     def test_get_all_models(self):
         """Test AnalysisResult.get_all_models()."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("x = 5")
@@ -637,8 +631,7 @@ class TestEngineCoverage:
 
     def test_analyze_javascript(self):
         """Test analyzing JavaScript code."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         result = analyzer.analyze("var x = 5;", language="javascript")
@@ -647,8 +640,7 @@ class TestEngineCoverage:
 
     def test_analyze_java(self):
         """Test analyzing Java code."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         code = """
@@ -665,8 +657,7 @@ public class Test {
         """Test analyzing with unsupported language raises ValueError."""
         import pytest
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         with pytest.raises(ValueError, match="Unsupported language"):
@@ -676,8 +667,7 @@ public class Test {
         """Test declaring symbolic string variable."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         s = analyzer.declare_symbolic("s", z3.StringSort())
@@ -687,10 +677,10 @@ public class Test {
         """Test find_inputs method (when solver has solve method)."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", z3.IntSort())
@@ -707,8 +697,9 @@ public class Test {
         """Test finding inputs with impossible condition using solver directly."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -721,8 +712,7 @@ public class Test {
         """Test reset() clears analyzer state."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", z3.IntSort())
@@ -736,8 +726,7 @@ public class Test {
 
     def test_create_analyzer_factory(self):
         """Test create_analyzer factory function."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            create_analyzer
+        from code_scalpel.symbolic_execution_tools.engine import create_analyzer
 
         analyzer = create_analyzer(max_loop_iterations=5, solver_timeout=1000)
         assert analyzer is not None
@@ -746,8 +735,7 @@ public class Test {
 
     def test_analyzer_with_cache_disabled(self):
         """Test analyzer with caching disabled."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer(enable_cache=False)
         result = analyzer.analyze("x = 5")
@@ -756,8 +744,7 @@ public class Test {
 
     def test_infeasible_path_handling(self):
         """Test handling of infeasible paths."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         # This will create branches, some may be infeasible depending on concrete values
@@ -792,8 +779,7 @@ if x < 0:
         """Test cache hit returns cached AnalysisResult."""
         import uuid
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=True)
         # Use unique code to avoid pre-existing cache entries from other tests
@@ -811,8 +797,7 @@ if x < 0:
 
     def test_engine_cache_stores_result(self):
         """Test cache stores result for future retrieval."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=True)
         code = "y = 123"
@@ -822,8 +807,7 @@ if x < 0:
 
     def test_engine_infeasible_path_count(self):
         """Test engine counts infeasible paths correctly."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine()
         code = """
@@ -842,8 +826,9 @@ else:
         """Test find_inputs creates solver lazily."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -856,8 +841,9 @@ else:
         """Test find_inputs returns None for unsatisfiable condition."""
         import z3
 
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
 
         solver = ConstraintSolver()
         x = z3.Int("x")
@@ -868,8 +854,7 @@ else:
 
     def test_path_result_unknown_status(self):
         """Test PathResult with UNKNOWN status."""
-        from code_scalpel.symbolic_execution_tools.engine import (PathResult,
-                                                                  PathStatus)
+        from code_scalpel.symbolic_execution_tools.engine import PathResult, PathStatus
 
         path = PathResult(
             path_id=1, status=PathStatus.UNKNOWN, constraints=[], variables={}
@@ -880,8 +865,7 @@ else:
 
     def test_engine_process_path_unsat(self):
         """Test engine processes UNSAT path correctly."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine()
         # Code with contradictory constraints after concrete assignment
@@ -898,8 +882,7 @@ if x > 10:
         """Test engine performs uncached analysis on cache miss."""
         import uuid
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=True)
         # Unique code guaranteed not to be cached
@@ -912,8 +895,7 @@ if x > 10:
 
     def test_engine_cache_disabled(self):
         """Test engine with cache explicitly disabled."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=False)
         code = "no_cache_var = 123"
@@ -926,8 +908,7 @@ if x > 10:
 
     def test_engine_multiple_path_processing(self):
         """Test engine processes multiple paths from branching code."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine()
         code = """
@@ -944,8 +925,7 @@ else:
 
     def test_engine_path_feasible_and_infeasible_counts(self):
         """Test engine correctly counts feasible and infeasible paths."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine()
         code = """
@@ -963,8 +943,7 @@ if x < 5:
 
     def test_engine_unknown_path_status(self):
         """Test engine handles paths with UNKNOWN status."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(solver_timeout=1)  # Very short timeout
         code = "simple_var = 42"
@@ -976,8 +955,7 @@ if x < 5:
 
     def test_engine_infeasible_path_increment(self):
         """Test engine increments infeasible_count for contradictory paths."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine()
         # Code with impossible condition
@@ -995,8 +973,7 @@ if x > 100:
 
     def test_engine_path_with_complex_constraint(self):
         """Test engine with complex constraints that may timeout."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(solver_timeout=100)
         code = """
@@ -1013,8 +990,7 @@ else:
 
     def test_engine_analyze_javascript(self):
         """Test engine can analyze JavaScript code (line 270 coverage)."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1026,8 +1002,7 @@ else:
 
     def test_engine_analyze_java(self):
         """Test engine can analyze Java code (line 272 coverage)."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1045,8 +1020,7 @@ public class Main {
 
     def test_engine_analyze_unsupported_language(self):
         """Test engine raises ValueError for unsupported language."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1073,8 +1047,9 @@ public class Main {
 
         # Create engine with cache enabled - should handle ImportError gracefully
         try:
-            from code_scalpel.symbolic_execution_tools.engine import \
-                SymbolicExecutionEngine
+            from code_scalpel.symbolic_execution_tools.engine import (
+                SymbolicExecutionEngine,
+            )
 
             eng = SymbolicExecutionEngine(enable_cache=True)
             # Engine should still work, just without cache
@@ -1089,8 +1064,7 @@ class TestEngineMocking:
 
     def test_cache_returns_dict(self, monkeypatch):
         """Test engine handles cache returning a dict (converted via from_dict)."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         # Create a mock cache that returns dict
         class MockCache:
@@ -1117,8 +1091,7 @@ class TestEngineMocking:
 
     def test_cache_set_exception(self, monkeypatch):
         """Test engine handles exception in cache.set()."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         # Create a mock cache that raises on set
         class MockCache:
@@ -1139,9 +1112,10 @@ class TestEngineMocking:
     def test_solver_returns_unknown(self, monkeypatch):
         """Test engine handles UNKNOWN solver status."""
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            SolverResult, SolverStatus)
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicExecutionEngine
+            SolverResult,
+            SolverStatus,
+        )
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicExecutionEngine
 
         # Create engine and mock the solver to return UNKNOWN
         engine = SymbolicExecutionEngine(enable_cache=False)
@@ -1167,8 +1141,7 @@ class TestSymbolicAnalyzerCoverage:
         """Test find_inputs returns model when solution exists."""
         from z3 import Int
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", Int("x").sort())
@@ -1184,8 +1157,7 @@ class TestSymbolicAnalyzerCoverage:
         """Test find_inputs returns None when no solution exists."""
         from z3 import Int
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", Int("x").sort())
@@ -1199,8 +1171,7 @@ class TestSymbolicAnalyzerCoverage:
         """Test find_inputs respects preconditions."""
         from z3 import Int
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", Int("x").sort())
@@ -1217,10 +1188,10 @@ class TestSymbolicAnalyzerCoverage:
 
     def test_get_solver_creates_solver(self):
         """Test get_solver creates solver on demand."""
-        from code_scalpel.symbolic_execution_tools.constraint_solver import \
-            ConstraintSolver
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.constraint_solver import (
+            ConstraintSolver,
+        )
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
 
@@ -1234,8 +1205,7 @@ class TestSymbolicAnalyzerCoverage:
         """Test reset clears preconditions and symbols."""
         from z3 import Int
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", Int("x").sort())
@@ -1258,8 +1228,7 @@ class TestAnalyzerSolverBranches:
 
     def test_get_solver_twice_uses_same_solver(self):
         """Calling get_solver twice returns the same solver instance."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
 
@@ -1275,8 +1244,7 @@ class TestAnalyzerSolverBranches:
         """Calling find_inputs twice uses the same solver instance."""
         from z3 import Int
 
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer()
         x = analyzer.declare_symbolic("x", Int("x").sort())
@@ -1301,7 +1269,10 @@ class TestEnginePathCoverage:
     def test_engine_path_infeasible_increment(self, monkeypatch):
         """Test engine increments infeasible_count for UNSAT paths."""
         from code_scalpel.symbolic_execution_tools.engine import (
-            PathResult, PathStatus, SymbolicExecutionEngine)
+            PathResult,
+            PathStatus,
+            SymbolicExecutionEngine,
+        )
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1324,9 +1295,15 @@ class TestEnginePathCoverage:
     def test_engine_path_unknown_status(self, monkeypatch):
         """Test engine handles UNKNOWN path status from solver timeout."""
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverResult, SolverStatus)
+            ConstraintSolver,
+            SolverResult,
+            SolverStatus,
+        )
         from code_scalpel.symbolic_execution_tools.engine import (
-            PathResult, PathStatus, SymbolicExecutionEngine)
+            PathResult,
+            PathStatus,
+            SymbolicExecutionEngine,
+        )
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1354,11 +1331,15 @@ class TestEnginePathCoverage:
         from unittest.mock import MagicMock
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverResult, SolverStatus)
+            ConstraintSolver,
+            SolverResult,
+            SolverStatus,
+        )
         from code_scalpel.symbolic_execution_tools.engine import (
-            PathStatus, SymbolicExecutionEngine)
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+            PathStatus,
+            SymbolicExecutionEngine,
+        )
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         engine = SymbolicExecutionEngine(enable_cache=False, solver_timeout=1)
 
@@ -1389,11 +1370,15 @@ class TestEnginePathCoverage:
         import z3
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverResult, SolverStatus)
+            ConstraintSolver,
+            SolverResult,
+            SolverStatus,
+        )
         from code_scalpel.symbolic_execution_tools.engine import (
-            PathStatus, SymbolicExecutionEngine)
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+            PathStatus,
+            SymbolicExecutionEngine,
+        )
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1424,11 +1409,15 @@ class TestEnginePathCoverage:
         from unittest.mock import MagicMock
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverResult, SolverStatus)
+            ConstraintSolver,
+            SolverResult,
+            SolverStatus,
+        )
         from code_scalpel.symbolic_execution_tools.engine import (
-            PathStatus, SymbolicExecutionEngine)
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+            PathStatus,
+            SymbolicExecutionEngine,
+        )
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         engine = SymbolicExecutionEngine(enable_cache=False)
 
@@ -1454,7 +1443,9 @@ class TestConstraintSolverCoverage:
         from z3 import Int
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         # Very short timeout
         solver = ConstraintSolver(timeout_ms=1)
@@ -1471,7 +1462,9 @@ class TestConstraintSolverCoverage:
         from z3 import Int
 
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver(timeout_ms=1)
         x = Int("x")
@@ -1529,10 +1522,10 @@ y = x / 2
 
     def test_none_expression_fallback(self):
         """Test expression evaluation with None input (line 1035)."""
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         interp = IRSymbolicInterpreter()
         state = SymbolicState()
@@ -1553,10 +1546,11 @@ y = x + 1
 
     def test_default_semantics_path(self):
         """Test interpreter with default semantics (line 657)."""
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
         from code_scalpel.symbolic_execution_tools.ir_interpreter import (
-            IRSymbolicInterpreter, PythonSemantics)
+            IRSymbolicInterpreter,
+            PythonSemantics,
+        )
 
         # Create interpreter with explicit semantics
         interp = IRSymbolicInterpreter(semantics=PythonSemantics())
@@ -1578,8 +1572,7 @@ result = add(1, 2)
     def test_generic_visit_fallback(self):
         """Test generic_visit returns None for unknown nodes (line 159)."""
         from code_scalpel.ir.nodes import IRNode
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRNodeVisitor
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import IRNodeVisitor
 
         class UnknownNode(IRNode):
             pass
@@ -1626,10 +1619,10 @@ y = 1 < x < 10
 
     def test_augmented_assign_no_semantics(self):
         """Test augmented assign when semantics is None (line 807->826)."""
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         # Create interpreter without semantics
         interp = IRSymbolicInterpreter(semantics=None)

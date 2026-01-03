@@ -93,9 +93,16 @@ ENTERPRISE TIER - Distributed & Federated Caching
 
 from .incremental_analyzer import IncrementalAnalyzer
 from .parallel_parser import ParallelParser
+
 # [20251223_CONSOLIDATION] Export from unified cache implementation
-from .unified_cache import (AnalysisCache, CacheConfig, CacheEntry, CacheStats,
-                            get_cache, reset_cache)
+from .unified_cache import (
+    AnalysisCache,
+    CacheConfig,
+    CacheEntry,
+    CacheStats,
+    get_cache,
+    reset_cache,
+)
 
 __all__ = [
     "AnalysisCache",

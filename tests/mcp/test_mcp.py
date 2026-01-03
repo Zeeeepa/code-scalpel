@@ -340,8 +340,11 @@ class TestMCPIntegration:
         # FastMCP should have our tools
         assert mcp is not None
         # The tools should be callable
-        from code_scalpel.mcp.server import (analyze_code, security_scan,
-                                             symbolic_execute)
+        from code_scalpel.mcp.server import (
+            analyze_code,
+            security_scan,
+            symbolic_execute,
+        )
 
         assert callable(analyze_code)
         assert callable(security_scan)
@@ -349,8 +352,11 @@ class TestMCPIntegration:
 
     async def test_result_models_are_valid(self):
         """Test that result models are proper Pydantic models."""
-        from code_scalpel.mcp.server import (AnalysisResult, SecurityResult,
-                                             SymbolicResult)
+        from code_scalpel.mcp.server import (
+            AnalysisResult,
+            SecurityResult,
+            SymbolicResult,
+        )
 
         # Should be importable and usable
         assert AnalysisResult is not None
@@ -359,8 +365,11 @@ class TestMCPIntegration:
 
     async def test_code_validation(self):
         """Test code validation for all tools."""
-        from code_scalpel.mcp.server import (analyze_code, security_scan,
-                                             symbolic_execute)
+        from code_scalpel.mcp.server import (
+            analyze_code,
+            security_scan,
+            symbolic_execute,
+        )
 
         # All should reject empty code
         result1 = await analyze_code("")
@@ -383,8 +392,11 @@ class TestMCPIntegration:
 
     async def test_analysis_pipeline(self):
         """Test running multiple analyses on the same code."""
-        from code_scalpel.mcp.server import (analyze_code, security_scan,
-                                             symbolic_execute)
+        from code_scalpel.mcp.server import (
+            analyze_code,
+            security_scan,
+            symbolic_execute,
+        )
 
         code = """
 def process_user(user_id):

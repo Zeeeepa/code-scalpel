@@ -2,8 +2,11 @@ import json
 
 import pytest
 
-from code_scalpel.integrations.rest_api_server import (MCPServerConfig,
-                                                       _elapsed_ms, create_app)
+from code_scalpel.integrations.rest_api_server import (
+    MCPServerConfig,
+    _elapsed_ms,
+    create_app,
+)
 
 
 def test_elapsed_ms_positive():

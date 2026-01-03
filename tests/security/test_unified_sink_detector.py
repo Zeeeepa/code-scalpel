@@ -8,12 +8,17 @@ import textwrap
 
 import pytest
 
-from code_scalpel.symbolic_execution_tools import (OWASP_COVERAGE,
-                                                   UNIFIED_SINKS, DetectedSink,
-                                                   SecuritySink,
-                                                   SinkDefinition, TaintInfo,
-                                                   TaintLevel, TaintSource,
-                                                   UnifiedSinkDetector)
+from code_scalpel.symbolic_execution_tools import (
+    OWASP_COVERAGE,
+    UNIFIED_SINKS,
+    DetectedSink,
+    SecuritySink,
+    SinkDefinition,
+    TaintInfo,
+    TaintLevel,
+    TaintSource,
+    UnifiedSinkDetector,
+)
 
 
 class TestUnifiedSinksStructure:

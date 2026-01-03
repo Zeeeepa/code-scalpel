@@ -8,8 +8,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestTaintTrackerFinal:
@@ -140,8 +141,7 @@ class TestRefactorSimulatorFinal:
 
     def test_simulate_no_change(self):
         """[20251217_TEST] Cover no-change simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         code = "def foo(): return 42"
         sim = RefactorSimulator()
@@ -154,8 +154,9 @@ class TestTypeInferenceFinal:
 
     def test_infer_dataclass(self):
         """[20251217_TEST] Cover dataclass type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "\nfrom dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: int\n    y: int\n\np = Point(1, 2)\n"
@@ -164,8 +165,9 @@ class TestTypeInferenceFinal:
 
     def test_infer_nested_comprehension(self):
         """[20251217_TEST] Cover nested comprehension."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "matrix = [[i*j for j in range(3)] for i in range(3)]"
@@ -178,8 +180,7 @@ class TestSymbolicEngineFinal:
 
     def test_analyze_while_loop(self):
         """[20251217_TEST] Cover while loop analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef count_down(n):\n    while n > 0:\n        n -= 1\n    return n\n"
         analyzer = SymbolicAnalyzer()
@@ -298,8 +299,9 @@ class TestUnifiedSinkDetectorFinal:
 
     def test_detect_sinks(self):
         """[20251217_TEST] Cover sink detection."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = '\ndef query(user_input):\n    sql = "SELECT * FROM users WHERE name = \'" + user_input + "\'"\n    cursor.execute(sql)\n'
@@ -308,8 +310,9 @@ class TestUnifiedSinkDetectorFinal:
 
     def test_get_owasp_category(self):
         """[20251217_TEST] Cover OWASP category retrieval."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         result = detector.get_owasp_category("execute")

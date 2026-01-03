@@ -33,8 +33,9 @@ class TestAutogenFunctionBranches2:
 
     def test_scalpel_analyze_error_exception(self):
         """Test analyze error exception handling."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_analyze_error_impl
+        from code_scalpel.autonomy.integrations.autogen import (
+            scalpel_analyze_error_impl,
+        )
 
         # Test with code that triggers exception path
         result = scalpel_analyze_error_impl("", "error")
@@ -42,8 +43,7 @@ class TestAutogenFunctionBranches2:
 
     def test_scalpel_validate_exception_path(self):
         """Test validate exception path."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_validate_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
 
         # Test with invalid code
         result = scalpel_validate_impl("def foo(:")
@@ -55,8 +55,7 @@ class TestLanggraphExceptionBranches2:
 
     def test_analyze_error_node_exception(self):
         """Test analyze_error_node exception handling."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            analyze_error_node
+        from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
 
         # Empty state that might trigger exception
         state = {
@@ -72,8 +71,7 @@ class TestLanggraphExceptionBranches2:
 
     def test_generate_fix_node_exception(self):
         """Test generate_fix_node exception handling."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            generate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -177,8 +175,7 @@ class TestRefactorSimulatorBranches2:
 
     def test_simulate_with_behavior_change(self):
         """Test simulate with behavior change."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 

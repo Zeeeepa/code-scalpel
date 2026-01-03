@@ -5,9 +5,12 @@ import unittest
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from code_scalpel.code_parsers.base_parser import (CodeParser, Language,
-                                                   ParseResult,
-                                                   PreprocessorConfig)
+from code_scalpel.code_parsers.base_parser import (
+    CodeParser,
+    Language,
+    ParseResult,
+    PreprocessorConfig,
+)
 
 
 class TestCodeParser(unittest.TestCase):

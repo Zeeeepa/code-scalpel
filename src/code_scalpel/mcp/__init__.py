@@ -71,8 +71,14 @@ from typing import TYPE_CHECKING, Any
 
 # [20251228_BUGFIX] Avoid stdlib `logging` shadowing when server is run as a script.
 from .mcp_logging import ToolInvocation  # noqa: E402
-from .mcp_logging import (MCPAnalytics, get_analytics, log_tool_error,
-                          log_tool_invocation, log_tool_success, mcp_logger)
+from .mcp_logging import (
+    MCPAnalytics,
+    get_analytics,
+    log_tool_error,
+    log_tool_invocation,
+    log_tool_success,
+    mcp_logger,
+)
 
 if TYPE_CHECKING:
     # Make `mcp` visible to type checkers without eagerly importing at runtime.

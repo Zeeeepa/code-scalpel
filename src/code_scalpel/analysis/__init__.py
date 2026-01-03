@@ -94,12 +94,24 @@ TOTAL ESTIMATED TESTS: 220 tests
 """
 
 # [20251224_REFACTOR] Import from submodules
-from .code_analyzer import (AnalysisLanguage, AnalysisLevel, AnalysisMetrics,
-                            AnalysisResult, CodeAnalyzer, DeadCodeItem,
-                            RefactorSuggestion)
+from .code_analyzer import (
+    AnalysisLanguage,
+    AnalysisLevel,
+    AnalysisMetrics,
+    AnalysisResult,
+    CodeAnalyzer,
+    DeadCodeItem,
+    RefactorSuggestion,
+)
 from .core import CodeAnalysisToolkit
-from .project_crawler import (ClassInfo, CrawlResult, FileAnalysisResult,
-                              FunctionInfo, ProjectCrawler, crawl_project)
+from .project_crawler import (
+    ClassInfo,
+    CrawlResult,
+    FileAnalysisResult,
+    FunctionInfo,
+    ProjectCrawler,
+    crawl_project,
+)
 
 __all__ = [
     # Code Analyzer

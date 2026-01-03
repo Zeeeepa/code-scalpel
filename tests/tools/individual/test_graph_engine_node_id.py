@@ -6,8 +6,12 @@ Tests for universal node ID system.
 
 import pytest
 
-from code_scalpel.graph_engine.node_id import (NodeType, UniversalNodeID,
-                                               create_node_id, parse_node_id)
+from code_scalpel.graph_engine.node_id import (
+    NodeType,
+    UniversalNodeID,
+    create_node_id,
+    parse_node_id,
+)
 
 
 class TestUniversalNodeID:

@@ -100,9 +100,12 @@ from typing import Any, Callable, Dict, List, Optional
 from code_scalpel.autonomy.audit import AutonomyAuditTrail
 from code_scalpel.autonomy.fix_loop import FixLoop, FixLoopResult
 from code_scalpel.governance import GovernanceConfig, GovernanceConfigLoader
-from code_scalpel.governance.change_budget import (BudgetDecision,
-                                                   ChangeBudget, FileChange,
-                                                   Operation)
+from code_scalpel.governance.change_budget import (
+    BudgetDecision,
+    ChangeBudget,
+    FileChange,
+    Operation,
+)
 
 
 @dataclass

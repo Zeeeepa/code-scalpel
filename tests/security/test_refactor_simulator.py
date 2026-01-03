@@ -242,7 +242,9 @@ def foo():
         """Test warning verdict when deletions dominate additions."""
         # [20251215_TEST] Cover warning path for deletion-heavy changes in strict mode
         from code_scalpel.generators.refactor_simulator import (
-            RefactorSimulator, RefactorStatus)
+            RefactorSimulator,
+            RefactorStatus,
+        )
 
         original = """
 def foo():

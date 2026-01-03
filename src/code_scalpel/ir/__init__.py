@@ -58,14 +58,37 @@ Modules:
 """
 
 from .nodes import IRAttribute  # Base; Statements; Expressions
-from .nodes import (IRAssign, IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak,
-                    IRCall, IRClassDef, IRCompare, IRConstant, IRContinue,
-                    IRDict, IRExpr, IRExprStmt, IRFor, IRFunctionDef, IRIf,
-                    IRList, IRModule, IRName, IRNode, IRParameter, IRPass,
-                    IRReturn, IRSubscript, IRUnaryOp, IRWhile, SourceLocation)
+from .nodes import (
+    IRAssign,
+    IRAugAssign,
+    IRBinaryOp,
+    IRBoolOp,
+    IRBreak,
+    IRCall,
+    IRClassDef,
+    IRCompare,
+    IRConstant,
+    IRContinue,
+    IRDict,
+    IRExpr,
+    IRExprStmt,
+    IRFor,
+    IRFunctionDef,
+    IRIf,
+    IRList,
+    IRModule,
+    IRName,
+    IRNode,
+    IRParameter,
+    IRPass,
+    IRReturn,
+    IRSubscript,
+    IRUnaryOp,
+    IRWhile,
+    SourceLocation,
+)
 from .normalizers import BaseNormalizer, PythonNormalizer
-from .operators import (BinaryOperator, BoolOperator, CompareOperator,
-                        UnaryOperator)
+from .operators import BinaryOperator, BoolOperator, CompareOperator, UnaryOperator
 from .semantics import JavaScriptSemantics, LanguageSemantics, PythonSemantics
 
 # TODO ITEMS: IR Module (__init__.py)

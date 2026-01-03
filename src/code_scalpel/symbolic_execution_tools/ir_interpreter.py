@@ -140,16 +140,48 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, cast
 
-from z3 import (ArithRef, BoolRef, BoolSort, BoolVal, ExprRef, IntSort, IntVal,
-                Not, Or, RealVal, Solver, Sort, StringVal, sat)
+from z3 import (
+    ArithRef,
+    BoolRef,
+    BoolSort,
+    BoolVal,
+    ExprRef,
+    IntSort,
+    IntVal,
+    Not,
+    Or,
+    RealVal,
+    Solver,
+    Sort,
+    StringVal,
+    sat,
+)
 
-from ..ir.nodes import (IRAssign, IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak,
-                        IRCall, IRClassDef, IRCompare, IRConstant, IRContinue,
-                        IRExpr, IRExprStmt, IRFor, IRFunctionDef, IRIf,
-                        IRModule, IRName, IRNode, IRPass, IRReturn, IRUnaryOp,
-                        IRWhile)
-from ..ir.operators import (BinaryOperator, BoolOperator, CompareOperator,
-                            UnaryOperator)
+from ..ir.nodes import (
+    IRAssign,
+    IRAugAssign,
+    IRBinaryOp,
+    IRBoolOp,
+    IRBreak,
+    IRCall,
+    IRClassDef,
+    IRCompare,
+    IRConstant,
+    IRContinue,
+    IRExpr,
+    IRExprStmt,
+    IRFor,
+    IRFunctionDef,
+    IRIf,
+    IRModule,
+    IRName,
+    IRNode,
+    IRPass,
+    IRReturn,
+    IRUnaryOp,
+    IRWhile,
+)
+from ..ir.operators import BinaryOperator, BoolOperator, CompareOperator, UnaryOperator
 from .state_manager import SymbolicState
 
 # =============================================================================

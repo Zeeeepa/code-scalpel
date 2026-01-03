@@ -79,12 +79,15 @@ warnings.warn(
 )
 
 # [20251224_REFACTOR] Import from new locations for backward compatibility
-from code_scalpel.code_parsers.extractor import (EXTENSION_MAP, Language,
-                                                 PolyglotExtractionResult,
-                                                 PolyglotExtractor,
-                                                 detect_language,
-                                                 extract_from_code,
-                                                 extract_from_file)
+from code_scalpel.code_parsers.extractor import (
+    EXTENSION_MAP,
+    Language,
+    PolyglotExtractionResult,
+    PolyglotExtractor,
+    detect_language,
+    extract_from_code,
+    extract_from_file,
+)
 
 __all__ = [
     "Language",

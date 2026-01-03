@@ -3,8 +3,7 @@ from unittest.mock import MagicMock, patch
 import networkx as nx
 import pytest
 
-from code_scalpel.pdg_tools.visualizer import (PDGVisualizer,
-                                               VisualizationConfig)
+from code_scalpel.pdg_tools.visualizer import PDGVisualizer, VisualizationConfig
 
 
 class TestPDGVisualizer:

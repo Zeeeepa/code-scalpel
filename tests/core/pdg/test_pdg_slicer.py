@@ -8,8 +8,13 @@ import networkx as nx
 import pytest
 
 from code_scalpel.pdg_tools.builder import PDGBuilder
-from code_scalpel.pdg_tools.slicer import (ProgramSlicer, SliceInfo, SliceType,
-                                           SlicingCriteria, compute_slice)
+from code_scalpel.pdg_tools.slicer import (
+    ProgramSlicer,
+    SliceInfo,
+    SliceType,
+    SlicingCriteria,
+    compute_slice,
+)
 
 
 class TestSlicingCriteria:

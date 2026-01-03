@@ -26,13 +26,26 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from .models import (AuditEntry, BestPracticeViolation, Certification,
-                     CodePolicyResult, ComplianceReport, CustomRule,
-                     PatternMatch, PolicyViolation, SecurityWarning,
-                     ViolationSeverity)
-from .patterns import (ASYNC_PATTERNS, BEST_PRACTICE_PATTERNS,
-                       SECURITY_PATTERNS, PatternDefinition,
-                       get_compliance_patterns, get_patterns_for_tier)
+from .models import (
+    AuditEntry,
+    BestPracticeViolation,
+    Certification,
+    CodePolicyResult,
+    ComplianceReport,
+    CustomRule,
+    PatternMatch,
+    PolicyViolation,
+    SecurityWarning,
+    ViolationSeverity,
+)
+from .patterns import (
+    ASYNC_PATTERNS,
+    BEST_PRACTICE_PATTERNS,
+    SECURITY_PATTERNS,
+    PatternDefinition,
+    get_compliance_patterns,
+    get_patterns_for_tier,
+)
 from .policy_loader import load_effective_policy
 
 logger = logging.getLogger(__name__)
@@ -75,8 +88,11 @@ class CodePolicyChecker:
             # Allow explicit override (relative to CWD)
             explicit = Path(policy_path).expanduser().resolve()
             if explicit.is_file():
-                from .policy_loader import (compute_policy_hash,
-                                            load_policy_file, resolve_policy)
+                from .policy_loader import (
+                    compute_policy_hash,
+                    load_policy_file,
+                    resolve_policy,
+                )
 
                 raw = load_policy_file(explicit)
                 policy = resolve_policy(raw, explicit.parent)

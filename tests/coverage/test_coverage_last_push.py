@@ -8,8 +8,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestMoreBranches1:
@@ -82,8 +83,9 @@ class TestMoreBranches1:
 
     def test_type_inference_with_none(self):
         """Cover None type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = None")
@@ -91,8 +93,9 @@ class TestMoreBranches1:
 
     def test_type_inference_bool(self):
         """Cover bool type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = True and False")
@@ -100,8 +103,7 @@ class TestMoreBranches1:
 
     def test_symbolic_with_comparison(self):
         """Cover comparison in symbolic."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef compare(a, b):\n    if a == b:\n        return 0\n    elif a > b:\n        return 1\n    return -1\n"
         analyzer = SymbolicAnalyzer()
@@ -160,8 +162,7 @@ class TestMoreBranches1:
 
     def test_refactor_simulator_inline_simple(self):
         """Cover simple inline."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         code = "\ndef const():\n    return 42\n\ndef main():\n    x = const()\n"
         sim = RefactorSimulator()
@@ -210,8 +211,9 @@ class TestMoreBranches2:
 
     def test_type_inference_bytes(self):
         """Cover bytes type."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = b'hello'")
@@ -219,8 +221,9 @@ class TestMoreBranches2:
 
     def test_type_inference_slice(self):
         """Cover slice type."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = [1,2,3][1:2]")
@@ -253,8 +256,7 @@ class TestMoreBranches2:
 
     def test_symbolic_unary_op(self):
         """Cover unary ops."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef negate(x):\n    return -x if x > 0 else x\n"
         analyzer = SymbolicAnalyzer()
@@ -303,8 +305,7 @@ class TestMoreBranches2:
 
     def test_symbolic_modulo(self):
         """Cover modulo operation."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef is_even(n):\n    return n % 2 == 0\n"
         analyzer = SymbolicAnalyzer()

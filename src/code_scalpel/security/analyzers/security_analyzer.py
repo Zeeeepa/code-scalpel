@@ -51,12 +51,20 @@ class SecurityAnalysisResultDict(TypedDict):
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..secrets.secret_scanner import SecretScanner
-from .taint_tracker import \
-    detect_ssr_vulnerabilities  # [20251216_FEATURE] v2.2.0
-from .taint_tracker import (SANITIZER_PATTERNS, SANITIZER_REGISTRY,
-                            SINK_PATTERNS, TAINT_SOURCE_PATTERNS, SecuritySink,
-                            TaintInfo, TaintLevel, TaintSource, TaintTracker,
-                            Vulnerability, load_sanitizers_from_config)
+from .taint_tracker import detect_ssr_vulnerabilities  # [20251216_FEATURE] v2.2.0
+from .taint_tracker import (
+    SANITIZER_PATTERNS,
+    SANITIZER_REGISTRY,
+    SINK_PATTERNS,
+    TAINT_SOURCE_PATTERNS,
+    SecuritySink,
+    TaintInfo,
+    TaintLevel,
+    TaintSource,
+    TaintTracker,
+    Vulnerability,
+    load_sanitizers_from_config,
+)
 
 # Auto-load custom sanitizers from pyproject.toml on module import
 _config_loaded = False

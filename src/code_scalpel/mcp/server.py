@@ -92,14 +92,15 @@ class TreeNodeDict(TypedDict, total=False):
 
 # [20251226_BUGFIX] Import version from package for result models
 from code_scalpel import __version__
-from code_scalpel.licensing.features import (get_tool_capabilities,
-                                             has_capability)
+from code_scalpel.licensing.features import get_tool_capabilities, has_capability
+
 # [20251225_BUGFIX] Import tier helpers from concrete modules for type checkers.
-from code_scalpel.licensing.jwt_validator import \
-    get_current_tier as get_current_tier_from_license
+from code_scalpel.licensing.jwt_validator import (
+    get_current_tier as get_current_tier_from_license,
+)
 from code_scalpel.mcp.contract import ToolResponseEnvelope
-from code_scalpel.mcp.response_config import (filter_tool_response,
-                                              get_response_config)
+from code_scalpel.mcp.response_config import filter_tool_response, get_response_config
+
 # [20251226_BUGFIX] Repaired corrupted unified sink import stub.
 from code_scalpel.security.analyzers import UnifiedSinkDetector
 from code_scalpel.security.analyzers.policy_engine import PolicyEngine
@@ -387,10 +388,12 @@ def _evaluate_change_budget_for_write_tool(
         (allowed, details)
     """
     try:
-        from code_scalpel.governance.change_budget import (ChangeBudget,
-                                                           FileChange,
-                                                           Operation,
-                                                           load_budget_config)
+        from code_scalpel.governance.change_budget import (
+            ChangeBudget,
+            FileChange,
+            Operation,
+            load_budget_config,
+        )
         from code_scalpel.mcp.path_resolver import resolve_path
         from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
     except Exception as e:
@@ -412,8 +415,13 @@ def _evaluate_change_budget_for_write_tool(
         """
         try:
             from code_scalpel.surgery.rename_symbol_refactor import (
-                _apply_token_replacements, _collect_reference_edits,
-                _read_text, _tokenize, iter_python_files, module_name_for_file)
+                _apply_token_replacements,
+                _collect_reference_edits,
+                _read_text,
+                _tokenize,
+                iter_python_files,
+                module_name_for_file,
+            )
         except Exception:
             return []
 
@@ -574,7 +582,10 @@ def _evaluate_change_budget_for_write_tool(
     if is_rename_op and tier in {"pro", "enterprise"}:
         try:
             from code_scalpel.licensing.config_loader import (
-                get_cached_limits, get_tool_limits, merge_limits)
+                get_cached_limits,
+                get_tool_limits,
+                merge_limits,
+            )
             from code_scalpel.licensing.features import get_tool_capabilities
 
             caps = get_tool_capabilities("rename_symbol", tier)
@@ -938,11 +949,13 @@ def _maybe_enforce_governance_before_tool(
             )
 
         try:
-            from code_scalpel.policy_engine import \
-                PolicyEngine as OpaPolicyEngine
-            from code_scalpel.policy_engine.policy_engine import \
-                Operation as PolicyOperation
-            from code_scalpel.policy_engine.policy_engine import PolicyError
+            from code_scalpel.policy_engine import PolicyEngine as OpaPolicyEngine
+            from code_scalpel.policy_engine.policy_engine import (
+                Operation as PolicyOperation,
+            )
+            from code_scalpel.policy_engine.policy_engine import (
+                PolicyError,
+            )
 
             file_path = str(arguments.get("file_path") or "")
             # Provide the most relevant code view we have pre-mutation.
@@ -2508,7 +2521,9 @@ def _add_tool_with_envelope_output(
             upgrade_hints = []
             if success is False and err_msg:
                 from code_scalpel.mcp.contract import (
-                    ToolError, _classify_failure_message)
+                    ToolError,
+                    _classify_failure_message,
+                )
 
                 code = _classify_failure_message(err_msg) or "internal_error"
                 error_details = None
@@ -2592,9 +2607,12 @@ def _add_tool_with_envelope_output(
 
         except BaseException as exc:
             duration_ms = int((time_module.perf_counter() - started) * 1000)
-            from code_scalpel.mcp.contract import (ToolError, UpgradeHint,
-                                                   UpgradeRequiredError,
-                                                   _classify_exception)
+            from code_scalpel.mcp.contract import (
+                ToolError,
+                UpgradeHint,
+                UpgradeRequiredError,
+                _classify_exception,
+            )
 
             code = _classify_exception(exc)
 
@@ -2988,8 +3006,9 @@ def _detect_organization_patterns_python(tree: ast.AST) -> list[str]:
 def _analyze_java_code(code: str) -> AnalysisResult:
     """Analyze Java code using tree-sitter."""
     try:
-        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import \
-            JavaParser
+        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import (
+            JavaParser,
+        )
 
         parser = JavaParser()
         result = parser.parse(code)
@@ -3566,8 +3585,7 @@ def _analyze_code_sync(
     # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
     if language == "auto" or language is None:
         # [20251228_BUGFIX] Avoid deprecated shim imports.
-        from code_scalpel.surgery.unified_extractor import (Language,
-                                                            detect_language)
+        from code_scalpel.surgery.unified_extractor import Language, detect_language
 
         detected = detect_language(None, code)
         lang_map = {
@@ -3830,8 +3848,9 @@ def _analyze_code_sync(
 
         if has_capability("analyze_code", "technical_debt_scoring", tier):
             try:
-                from code_scalpel.code_parsers.python_parsers.python_parsers_code_quality import \
-                    PythonCodeQualityAnalyzer
+                from code_scalpel.code_parsers.python_parsers.python_parsers_code_quality import (
+                    PythonCodeQualityAnalyzer,
+                )
 
                 analyzer = PythonCodeQualityAnalyzer()
                 report = analyzer.analyze_string(code, filename=file_path or "<string>")
@@ -4442,8 +4461,9 @@ def _security_scan_sync(
 
             if detected_language == "typescript":
                 try:
-                    from code_scalpel.security.type_safety import \
-                        TypeEvaporationDetector
+                    from code_scalpel.security.type_safety import (
+                        TypeEvaporationDetector,
+                    )
 
                     te_detector = TypeEvaporationDetector()
                     te_result = te_detector.analyze(code, file_path or "<string>")
@@ -5394,8 +5414,9 @@ def _type_evaporation_scan_sync(
     try:
         # [20251230_FIX][tiering] Community tier is frontend-only per capability matrix.
         if frontend_only:
-            from code_scalpel.security.type_safety.type_evaporation_detector import \
-                TypeEvaporationDetector
+            from code_scalpel.security.type_safety.type_evaporation_detector import (
+                TypeEvaporationDetector,
+            )
 
             detector = TypeEvaporationDetector()
             frontend_result = detector.analyze(frontend_code, frontend_file)
@@ -5454,8 +5475,9 @@ def _type_evaporation_scan_sync(
                 compliance_report=None,
             )
 
-        from code_scalpel.security.type_safety import \
-            analyze_type_evaporation_cross_file
+        from code_scalpel.security.type_safety import (
+            analyze_type_evaporation_cross_file,
+        )
 
         result = analyze_type_evaporation_cross_file(
             frontend_code, backend_code, frontend_file, backend_file
@@ -7132,8 +7154,10 @@ def _scan_dependencies_sync(
     resolved_path_str = project_root or path or str(PROJECT_ROOT)
 
     try:
-        from code_scalpel.security.dependencies import (DependencyParser,
-                                                        VulnerabilityScanner)
+        from code_scalpel.security.dependencies import (
+            DependencyParser,
+            VulnerabilityScanner,
+        )
 
         resolved_path = Path(resolved_path_str)
         if not resolved_path.is_absolute():
@@ -10035,10 +10059,11 @@ async def extract_code(
         await _fetch_and_cache_roots(ctx)
 
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.surgery.surgical_extractor import (ContextualExtraction,
-                                                         ExtractionResult)
-    from code_scalpel.surgery.unified_extractor import (Language,
-                                                        detect_language)
+    from code_scalpel.surgery.surgical_extractor import (
+        ContextualExtraction,
+        ExtractionResult,
+    )
+    from code_scalpel.surgery.unified_extractor import Language, detect_language
 
     # [20251228_FEATURE] Tier-limited option: cross-file dependency resolution.
     tier = _get_current_tier()
@@ -10185,8 +10210,7 @@ async def extract_code(
                     target_name, "variable_promotion requires PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    promote_variables
+                from code_scalpel.surgery.surgical_extractor import promote_variables
 
                 promoted = promote_variables(_load_source_for_adv(), target_name)
                 if getattr(promoted, "success", False):
@@ -10216,8 +10240,9 @@ async def extract_code(
                     target_name, "closure_detection requires PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    detect_closure_variables as _detect_closures
+                from code_scalpel.surgery.surgical_extractor import (
+                    detect_closure_variables as _detect_closures,
+                )
 
                 clos = _detect_closures(_load_source_for_adv(), target_name)
                 if getattr(clos, "success", False):
@@ -10258,8 +10283,9 @@ async def extract_code(
                     target_name, "dependency injection suggestions require PRO tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    suggest_dependency_injection as _suggest_di
+                from code_scalpel.surgery.surgical_extractor import (
+                    suggest_dependency_injection as _suggest_di,
+                )
 
                 di = _suggest_di(_load_source_for_adv(), target_name)
                 if getattr(di, "success", False):
@@ -10301,8 +10327,9 @@ async def extract_code(
                     target_name, "as_microservice requires ENTERPRISE tier"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    extract_as_microservice as _extract_microservice
+                from code_scalpel.surgery.surgical_extractor import (
+                    extract_as_microservice as _extract_microservice,
+                )
 
                 ms = _extract_microservice(
                     _load_source_for_adv(),
@@ -10338,8 +10365,9 @@ async def extract_code(
                     target_name, "organization_wide requires 'code' input"
                 )
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    resolve_organization_wide as _resolve_org
+                from code_scalpel.surgery.surgical_extractor import (
+                    resolve_organization_wide as _resolve_org,
+                )
 
                 org = _resolve_org(
                     code=code, function_name=target_name, workspace_root=workspace_root
@@ -10412,9 +10440,11 @@ async def rename_symbol(
     Returns:
         PatchResultModel with success status.
     """
-    from code_scalpel.licensing.config_loader import (get_cached_limits,
-                                                      get_tool_limits,
-                                                      merge_limits)
+    from code_scalpel.licensing.config_loader import (
+        get_cached_limits,
+        get_tool_limits,
+        merge_limits,
+    )
     from code_scalpel.licensing.features import get_tool_capabilities
     from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
@@ -10466,8 +10496,9 @@ async def rename_symbol(
             (max_files_searched == 0) and (max_files_updated == 0)
         ):
             try:
-                from code_scalpel.surgery.rename_symbol_refactor import \
-                    rename_references_across_project
+                from code_scalpel.surgery.rename_symbol_refactor import (
+                    rename_references_across_project,
+                )
 
                 xres = rename_references_across_project(
                     project_root=Path(PROJECT_ROOT),
@@ -11205,8 +11236,10 @@ async def update_symbol(
         is_polyglot = file_ext in {".js", ".jsx", ".ts", ".tsx", ".java"}
 
         if is_polyglot:
-            from code_scalpel.surgery.surgical_patcher import (PatchLanguage,
-                                                               PolyglotPatcher)
+            from code_scalpel.surgery.surgical_patcher import (
+                PatchLanguage,
+                PolyglotPatcher,
+            )
 
             if file_ext in {".js", ".jsx"}:
                 patcher = PolyglotPatcher.from_file(file_path, PatchLanguage.JAVASCRIPT)
@@ -11663,8 +11696,9 @@ async def detect_closure_variables(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the closure detection function
-    from code_scalpel.surgery.surgical_extractor import \
-        detect_closure_variables as detect_closures
+    from code_scalpel.surgery.surgical_extractor import (
+        detect_closure_variables as detect_closures,
+    )
 
     # Perform closure analysis
     result = detect_closures(source_code, target_name)
@@ -11749,8 +11783,9 @@ async def suggest_dependency_injection(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the DI suggestion function
-    from code_scalpel.surgery.surgical_extractor import \
-        suggest_dependency_injection as suggest_di
+    from code_scalpel.surgery.surgical_extractor import (
+        suggest_dependency_injection as suggest_di,
+    )
 
     # Perform DI analysis
     result = suggest_di(source_code, target_name)
@@ -11844,8 +11879,9 @@ async def extract_as_microservice(
         return {"success": False, "error": "Must provide either file_path or code"}
 
     # Import the microservice extraction function
-    from code_scalpel.surgery.surgical_extractor import \
-        extract_as_microservice as extract_microservice
+    from code_scalpel.surgery.surgical_extractor import (
+        extract_as_microservice as extract_microservice,
+    )
 
     # Perform microservice extraction
     result = extract_microservice(source_code, target_name, host, port)
@@ -11898,8 +11934,7 @@ async def resolve_organization_wide(
         >>> result["cross_repo_imports"][0]["repo_name"]
         'backend-service'
     """
-    from code_scalpel.surgery.surgical_extractor import \
-        resolve_organization_wide
+    from code_scalpel.surgery.surgical_extractor import resolve_organization_wide
 
     # Enterprise tier capability check
     tier = _get_current_tier()
@@ -11974,8 +12009,9 @@ async def extract_with_custom_pattern(
         >>> len(result["matches"])
         5
     """
-    from code_scalpel.surgery.surgical_extractor import \
-        extract_with_custom_pattern as extract_pattern
+    from code_scalpel.surgery.surgical_extractor import (
+        extract_with_custom_pattern as extract_pattern,
+    )
 
     # Enterprise tier capability check
     tier = _get_current_tier()
@@ -12046,8 +12082,9 @@ async def detect_service_boundaries(
         payment-service: 5 files
         stripe-wrapper: 2 files
     """
-    from code_scalpel.surgery.surgical_extractor import \
-        detect_service_boundaries as detect_boundaries
+    from code_scalpel.surgery.surgical_extractor import (
+        detect_service_boundaries as detect_boundaries,
+    )
 
     # Enterprise tier capability check
     tier = _get_current_tier()
@@ -12206,8 +12243,9 @@ async def crawl_project(
                 pass
         else:
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    extract_with_custom_pattern as _extract_pattern
+                from code_scalpel.surgery.surgical_extractor import (
+                    extract_with_custom_pattern as _extract_pattern,
+                )
 
                 pattern_result = await asyncio.to_thread(
                     _extract_pattern,
@@ -12753,8 +12791,7 @@ async def get_code_resource(language: str, module: str, symbol: str) -> str:
     """
     import json
 
-    from code_scalpel.mcp.module_resolver import (get_mime_type,
-                                                  resolve_module_path)
+    from code_scalpel.mcp.module_resolver import get_mime_type, resolve_module_path
 
     try:
         # Resolve module to file path
@@ -16078,9 +16115,13 @@ async def get_graph_neighborhood(
             )
 
             # Convert call graph to UniversalGraph
-            from code_scalpel.graph_engine import (EdgeType, GraphEdge,
-                                                   GraphNode, NodeType,
-                                                   UniversalNodeID)
+            from code_scalpel.graph_engine import (
+                EdgeType,
+                GraphEdge,
+                GraphNode,
+                NodeType,
+                UniversalNodeID,
+            )
 
             graph = UniversalGraph()
 
@@ -16149,8 +16190,7 @@ async def get_graph_neighborhood(
         # [20251229_FEATURE] Enterprise tier: Query language support
         if query and "graph_query_language" in cap_set:
             from code_scalpel.graph.graph_query import GraphQueryEngine
-            from code_scalpel.graph_engine import (NeighborhoodResult,
-                                                   UniversalGraph)
+            from code_scalpel.graph_engine import NeighborhoodResult, UniversalGraph
 
             try:
                 engine = GraphQueryEngine(graph)
@@ -16238,8 +16278,7 @@ async def get_graph_neighborhood(
         # [20251229_FEATURE] Pro tier: Add semantic neighbors
         semantic_neighbor_ids: Set[str] = set()
         if "semantic_neighbors" in cap_set:
-            from code_scalpel.graph.semantic_neighbors import \
-                SemanticNeighborFinder
+            from code_scalpel.graph.semantic_neighbors import SemanticNeighborFinder
 
             try:
                 # Extract center function name from node_id
@@ -16262,7 +16301,9 @@ async def get_graph_neighborhood(
                             # Add edge from center to semantic neighbor
                             if result.subgraph:
                                 from code_scalpel.graph_engine import (
-                                    EdgeType, GraphEdge)
+                                    EdgeType,
+                                    GraphEdge,
+                                )
 
                                 result.subgraph.add_edge(
                                     GraphEdge(
@@ -16279,8 +16320,9 @@ async def get_graph_neighborhood(
 
         # [20251229_FEATURE] Pro tier: Add logical relationships
         if "logical_relationship_detection" in cap_set:
-            from code_scalpel.graph.logical_relationships import \
-                LogicalRelationshipDetector
+            from code_scalpel.graph.logical_relationships import (
+                LogicalRelationshipDetector,
+            )
 
             try:
                 center_name = center_node_id.split("::")[-1]
@@ -16293,8 +16335,7 @@ async def get_graph_neighborhood(
                     for rel in relationship_result.relationships:
                         # Add logical relationship as an edge
                         if result.subgraph and rel.source_node in result.node_depths:
-                            from code_scalpel.graph_engine import (EdgeType,
-                                                                   GraphEdge)
+                            from code_scalpel.graph_engine import EdgeType, GraphEdge
 
                             # Ensure target node exists in the graph
                             if rel.target_node not in result.node_depths:
@@ -17558,8 +17599,9 @@ async def get_project_map(
                 pass
         else:
             try:
-                from code_scalpel.surgery.surgical_extractor import \
-                    detect_service_boundaries as _detect_boundaries
+                from code_scalpel.surgery.surgical_extractor import (
+                    detect_service_boundaries as _detect_boundaries,
+                )
 
                 boundaries = await asyncio.to_thread(
                     _detect_boundaries,
@@ -18920,7 +18962,9 @@ def _validate_paths_sync(
     from pathlib import Path as PathLib
 
     from code_scalpel.licensing.config_loader import (
-        filter_response, get_cached_response_config)
+        filter_response,
+        get_cached_response_config,
+    )
     from code_scalpel.licensing.features import get_tool_capabilities
     from code_scalpel.mcp.path_resolver import PathResolver
 
@@ -19343,7 +19387,9 @@ def _verify_policy_integrity_sync(
         # Pro/Enterprise tier: Full cryptographic verification
         if "signature_validation" in caps_set and signature_validation_enabled:
             from code_scalpel.policy_engine.crypto_verify import (
-                CryptographicPolicyVerifier, SecurityError)
+                CryptographicPolicyVerifier,
+                SecurityError,
+            )
 
             try:
                 verifier = CryptographicPolicyVerifier(
@@ -19766,10 +19812,13 @@ def run_server(
 
     # [20251228_FEATURE] Optional CRL fetch/cache/refresh.
     # This is opt-in to preserve offline-first posture.
-    from code_scalpel.licensing.crl_fetcher import (ensure_crl_available,
-                                                    start_crl_refresh_thread)
-    from code_scalpel.licensing.runtime_revalidator import \
-        start_license_revalidation_thread
+    from code_scalpel.licensing.crl_fetcher import (
+        ensure_crl_available,
+        start_crl_refresh_thread,
+    )
+    from code_scalpel.licensing.runtime_revalidator import (
+        start_license_revalidation_thread,
+    )
 
     ensure_crl_available()
     start_crl_refresh_thread(interval_seconds=3600)
@@ -19780,8 +19829,7 @@ def run_server(
     # - The license determines the maximum allowed tier.
     # - CLI/env can only request a tier <= licensed tier.
     # - If Pro/Enterprise is requested without a valid license, fail closed.
-    from code_scalpel.licensing.authorization import \
-        compute_effective_tier_for_startup
+    from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
     from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
     requested_tier = (

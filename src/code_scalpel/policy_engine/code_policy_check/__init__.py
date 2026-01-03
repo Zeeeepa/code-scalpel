@@ -20,9 +20,17 @@ Usage:
 """
 
 from .analyzer import CodePolicyChecker
-from .models import (AuditEntry, BestPracticeViolation, Certification,
-                     CodePolicyResult, ComplianceReport, PatternMatch,
-                     PolicyViolation, SecurityWarning, ViolationSeverity)
+from .models import (
+    AuditEntry,
+    BestPracticeViolation,
+    Certification,
+    CodePolicyResult,
+    ComplianceReport,
+    PatternMatch,
+    PolicyViolation,
+    SecurityWarning,
+    ViolationSeverity,
+)
 from .patterns import ASYNC_PATTERNS, PYTHON_ANTIPATTERNS, SECURITY_PATTERNS
 
 __all__ = [

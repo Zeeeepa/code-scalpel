@@ -11,9 +11,11 @@ This module tests detection of SSR-specific vulnerabilities in modern web framew
 
 import ast
 
-from code_scalpel.symbolic_execution_tools import (SecurityAnalyzer,
-                                                   detect_ssr_framework,
-                                                   detect_ssr_vulnerabilities)
+from code_scalpel.symbolic_execution_tools import (
+    SecurityAnalyzer,
+    detect_ssr_framework,
+    detect_ssr_vulnerabilities,
+)
 
 
 class TestSSRFrameworkDetection:
@@ -254,8 +256,7 @@ class TestSSRSinkPatterns:
 
     def test_ssr_sink_patterns_imported(self):
         """Verify SSR_SINK_PATTERNS are available."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            SSR_SINK_PATTERNS
+        from code_scalpel.security.analyzers.taint_tracker import SSR_SINK_PATTERNS
 
         assert SSR_SINK_PATTERNS is not None
         assert len(SSR_SINK_PATTERNS) > 0
@@ -268,8 +269,7 @@ class TestSSRSinkPatterns:
 
     def test_ssr_framework_imports_available(self):
         """Verify SSR framework detection patterns are available."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            SSR_FRAMEWORK_IMPORTS
+        from code_scalpel.security.analyzers.taint_tracker import SSR_FRAMEWORK_IMPORTS
 
         assert SSR_FRAMEWORK_IMPORTS is not None
         assert len(SSR_FRAMEWORK_IMPORTS) > 0

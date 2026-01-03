@@ -134,8 +134,9 @@ from ..interface import IParser, Language, ParseResult
 # Try to import the JavaScript parser
 try:
     from ..base_parser import ParseResult as BaseParseResult
-    from ..javascript_parsers.javascript_parsers_esprima import \
-        JavaScriptParser as EsprimaParser
+    from ..javascript_parsers.javascript_parsers_esprima import (
+        JavaScriptParser as EsprimaParser,
+    )
 
     JAVASCRIPT_PARSER_AVAILABLE = True
 except ImportError:

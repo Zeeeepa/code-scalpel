@@ -28,7 +28,9 @@ class TestTaintTrackerPerfectCoverage:
         This happens when ALL sink names in the config are invalid.
         """
         from code_scalpel.security.analyzers.taint_tracker import (
-            SANITIZER_REGISTRY, load_sanitizers_from_config)
+            SANITIZER_REGISTRY,
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -50,8 +52,7 @@ class TestTaintTrackerPerfectCoverage:
         The code has: `for _ in range(10):` - we need to exhaust all 10 iterations
         without finding a config file OR hitting the root directory.
         """
-        from code_scalpel.security.analyzers.taint_tracker import \
-            _find_config_file
+        from code_scalpel.security.analyzers.taint_tracker import _find_config_file
 
         call_count = [0]
 
@@ -195,10 +196,10 @@ class TestIRInterpreterPerfectCoverage:
         Code path: value_expr is None, AND state.has_variable(name) is True
         This means we skip creating a placeholder (variable already exists).
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = 1\nx = unknown_function_that_returns_nothing()\n"
         interp = IRSymbolicInterpreter()
@@ -213,10 +214,10 @@ class TestIRInterpreterPerfectCoverage:
         Code path: `if right is not None and self._semantics is not None`
         We need right to be None.
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = 1\nx += unknown_value\n"
         interp = IRSymbolicInterpreter()
@@ -234,10 +235,10 @@ class TestIRInterpreterPerfectCoverage:
         so that _eval_expr returns a non-None value even without semantics.
         Otherwise comparison expressions return None and trigger early exit.
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nif True:\n    y = 1\nelse:\n    y = 2\n"
         interp = IRSymbolicInterpreter()
@@ -259,10 +260,11 @@ class TestIRInterpreterPerfectCoverage:
         1. Returns valid Z3 comparisons for compare_gt, compare_lt, etc.
         2. Returns None from to_bool()
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
         from code_scalpel.symbolic_execution_tools.ir_interpreter import (
-            IRSymbolicInterpreter, PythonSemantics)
+            IRSymbolicInterpreter,
+            PythonSemantics,
+        )
 
         class MockSemantics(PythonSemantics):
 
@@ -288,10 +290,10 @@ class TestIRInterpreterPerfectCoverage:
         Key: Use boolean constant as condition so _eval_expr returns
         non-None even without semantics.
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nwhile False:\n    x = 1\n"
         interp = IRSymbolicInterpreter()
@@ -311,10 +313,11 @@ class TestIRInterpreterPerfectCoverage:
         1. Returns valid Z3 comparisons for compare operations
         2. Returns None from to_bool()
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
         from code_scalpel.symbolic_execution_tools.ir_interpreter import (
-            IRSymbolicInterpreter, PythonSemantics)
+            IRSymbolicInterpreter,
+            PythonSemantics,
+        )
 
         class MockSemantics(PythonSemantics):
 
@@ -337,10 +340,10 @@ class TestIRInterpreterPerfectCoverage:
 
         We mock get_semantics to return None to hit the False branch.
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = 1\nx += 2\n"
         interp = IRSymbolicInterpreter()
@@ -358,10 +361,11 @@ class TestIRInterpreterPerfectCoverage:
 
         Code path: `if self._default_semantics is not None`
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
         from code_scalpel.symbolic_execution_tools.ir_interpreter import (
-            IRSymbolicInterpreter, PythonSemantics)
+            IRSymbolicInterpreter,
+            PythonSemantics,
+        )
 
         code = "\nx = 1\ny = x + 2\n"
         custom_semantics = PythonSemantics()
@@ -377,10 +381,10 @@ class TestIRInterpreterPerfectCoverage:
 
         Code path: `if current is None` -> create_variable
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx += 1\n"
         interp = IRSymbolicInterpreter()
@@ -392,10 +396,10 @@ class TestIRInterpreterPerfectCoverage:
         """
         Line 1099: binary_div for true division (/).
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = 10\ny = x / 2\n"
         interp = IRSymbolicInterpreter()
@@ -408,8 +412,7 @@ class TestIRInterpreterPerfectCoverage:
         Line 159: generic_visit returns None for unknown IR node types.
         """
         from code_scalpel.ir.nodes import IRNode
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRNodeVisitor
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import IRNodeVisitor
 
         class UnknownIRNode(IRNode):
             """A custom IR node type with no visitor."""
@@ -425,10 +428,10 @@ class TestIRInterpreterPerfectCoverage:
         """
         Line 1035: _eval_expr returns None when expr is None.
         """
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         interp = IRSymbolicInterpreter()
         state = SymbolicState()
@@ -441,10 +444,10 @@ class TestIRInterpreterPerfectCoverage:
 
         Code path: `if isinstance(type_arg, IRName)` evaluates to False
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = '\nx = symbolic("x", "int")\n'
         interp = IRSymbolicInterpreter()
@@ -458,10 +461,10 @@ class TestIRInterpreterPerfectCoverage:
 
         This happens when the semantics can't convert a value to boolean.
         """
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = unknown_complex_value\nif x:\n    y = 1\n"
         interp = IRSymbolicInterpreter()
@@ -475,12 +478,13 @@ class TestPerfectCoverageIntegration:
 
     def test_normal_taint_tracking_still_works(self):
         """Verify taint tracking works after edge case tests."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
-            SecuritySink, TaintSource)
+            SecuritySink,
+            TaintSource,
+        )
 
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
@@ -505,10 +509,10 @@ class TestPerfectCoverageIntegration:
 
     def test_normal_symbolic_execution_still_works(self):
         """Verify symbolic execution works after edge case tests."""
-        from code_scalpel.ir.normalizers.python_normalizer import \
-            PythonNormalizer
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            IRSymbolicInterpreter
+        from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            IRSymbolicInterpreter,
+        )
 
         code = "\nx = 1\ny = x + 2\nif y > 0:\n    z = y * 2\n"
         interp = IRSymbolicInterpreter()

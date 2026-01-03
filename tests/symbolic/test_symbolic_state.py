@@ -16,7 +16,9 @@ import pytest
 from z3 import BoolSort, Int, IntSort, Not, Or, Solver, sat, unsat
 
 from code_scalpel.symbolic_execution_tools.state_manager import (
-    SymbolicState, SymbolicVariable)
+    SymbolicState,
+    SymbolicVariable,
+)
 
 # =============================================================================
 # SECTION 1: Basic Variable Storage

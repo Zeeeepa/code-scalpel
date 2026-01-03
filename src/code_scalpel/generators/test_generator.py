@@ -756,8 +756,7 @@ class TestGenerator:
     def _run_symbolic_execution(self, code: str, language: str) -> dict[str, Any]:
         """Run symbolic execution on the code."""
         try:
-            from code_scalpel.symbolic_execution_tools.engine import \
-                SymbolicAnalyzer
+            from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
             analyzer = SymbolicAnalyzer(enable_cache=False)
             result = analyzer.analyze(code, language=language)

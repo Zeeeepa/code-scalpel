@@ -215,7 +215,10 @@ class TestTaintTrackerBranchCoverage:
     def test_mark_tainted_and_check(self):
         """[20251217_TEST] Cover mark_tainted and is_tainted."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -225,7 +228,10 @@ class TestTaintTrackerBranchCoverage:
     def test_propagate_assignment(self):
         """[20251217_TEST] Cover taint propagation."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -236,7 +242,10 @@ class TestTaintTrackerBranchCoverage:
     def test_propagate_concat(self):
         """[20251217_TEST] Cover concat propagation."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -247,7 +256,10 @@ class TestTaintTrackerBranchCoverage:
     def test_apply_sanitizer(self):
         """[20251217_TEST] Cover sanitizer application."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -258,7 +270,10 @@ class TestTaintTrackerBranchCoverage:
     def test_check_sink(self):
         """[20251217_TEST] Cover sink checking."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -270,7 +285,9 @@ class TestTaintTrackerBranchCoverage:
     def test_taint_source(self):
         """[20251217_TEST] Cover taint_source method."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintSource, TaintTracker)
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         tracker.taint_source("user_input", TaintSource.USER_INPUT, "request.form")
@@ -279,7 +296,10 @@ class TestTaintTrackerBranchCoverage:
     def test_get_taint(self):
         """[20251217_TEST] Cover get_taint method."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -290,7 +310,10 @@ class TestTaintTrackerBranchCoverage:
     def test_fork(self):
         """[20251217_TEST] Cover fork method for branching."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -301,7 +324,10 @@ class TestTaintTrackerBranchCoverage:
     def test_clear(self):
         """[20251217_TEST] Cover clear method."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -312,7 +338,10 @@ class TestTaintTrackerBranchCoverage:
     def test_get_vulnerabilities(self):
         """[20251217_TEST] Cover get_vulnerabilities method."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint_info = TaintInfo(source=TaintSource.USER_INPUT)
@@ -491,8 +520,7 @@ class TestRefactorSimulatorBranches:
 
     def test_simulate_rename(self):
         """[20251217_TEST] Cover rename simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -511,8 +539,7 @@ def calculate(value):
 
     def test_simulate_add_function(self):
         """[20251217_TEST] Cover function addition simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -532,8 +559,7 @@ def bar():
 
     def test_simulate_remove_function(self):
         """[20251217_TEST] Cover function removal simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -562,8 +588,9 @@ class TestTypeInferenceBranches:
 
     def test_infer_int_type(self):
         """[20251217_TEST] Cover int type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "x = 42"
@@ -572,8 +599,9 @@ class TestTypeInferenceBranches:
 
     def test_infer_string_type(self):
         """[20251217_TEST] Cover string type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = 'x = "hello"'
@@ -582,8 +610,9 @@ class TestTypeInferenceBranches:
 
     def test_infer_list_type(self):
         """[20251217_TEST] Cover list type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "x = [1, 2, 3]"
@@ -592,8 +621,9 @@ class TestTypeInferenceBranches:
 
     def test_infer_dict_type(self):
         """[20251217_TEST] Cover dict type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = 'x = {"a": 1}'
@@ -602,8 +632,9 @@ class TestTypeInferenceBranches:
 
     def test_infer_function_return(self):
         """[20251217_TEST] Cover function return type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = """

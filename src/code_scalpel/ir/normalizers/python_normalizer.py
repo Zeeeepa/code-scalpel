@@ -13,14 +13,45 @@ from __future__ import annotations
 import ast
 from typing import List, Optional, Union, cast
 
-from ..nodes import (IRAssign, IRAttribute, IRAugAssign, IRBinaryOp, IRBoolOp,
-                     IRBreak, IRCall, IRClassDef, IRCompare, IRConstant,
-                     IRContinue, IRDict, IRExpr, IRExprStmt, IRFor,
-                     IRFunctionDef, IRIf, IRList, IRModule, IRName, IRNode,
-                     IRParameter, IRPass, IRRaise, IRReturn, IRSubscript,
-                     IRTry, IRUnaryOp, IRWhile, SourceLocation)
-from ..operators import (AugAssignOperator, BinaryOperator, BoolOperator,
-                         CompareOperator, UnaryOperator)
+from ..nodes import (
+    IRAssign,
+    IRAttribute,
+    IRAugAssign,
+    IRBinaryOp,
+    IRBoolOp,
+    IRBreak,
+    IRCall,
+    IRClassDef,
+    IRCompare,
+    IRConstant,
+    IRContinue,
+    IRDict,
+    IRExpr,
+    IRExprStmt,
+    IRFor,
+    IRFunctionDef,
+    IRIf,
+    IRList,
+    IRModule,
+    IRName,
+    IRNode,
+    IRParameter,
+    IRPass,
+    IRRaise,
+    IRReturn,
+    IRSubscript,
+    IRTry,
+    IRUnaryOp,
+    IRWhile,
+    SourceLocation,
+)
+from ..operators import (
+    AugAssignOperator,
+    BinaryOperator,
+    BoolOperator,
+    CompareOperator,
+    UnaryOperator,
+)
 from .base import BaseNormalizer
 
 

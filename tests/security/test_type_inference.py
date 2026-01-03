@@ -17,7 +17,9 @@ from z3 import BoolSort, IntSort
 
 # This import will fail until we implement the module
 from code_scalpel.symbolic_execution_tools.type_inference import (
-    InferredType, TypeInferenceEngine)
+    InferredType,
+    TypeInferenceEngine,
+)
 
 
 class TestIntegerInference:

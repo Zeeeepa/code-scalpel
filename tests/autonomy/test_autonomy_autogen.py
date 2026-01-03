@@ -17,10 +17,14 @@ try:
     AUTOGEN_AVAILABLE = True
     try:
         from code_scalpel.autonomy.integrations.autogen import (
-            create_scalpel_autogen_agents, scalpel_analyze_error_impl,
-            scalpel_analyze_error_schema, scalpel_apply_fix_impl,
-            scalpel_apply_fix_schema, scalpel_validate_impl,
-            scalpel_validate_schema)
+            create_scalpel_autogen_agents,
+            scalpel_analyze_error_impl,
+            scalpel_analyze_error_schema,
+            scalpel_apply_fix_impl,
+            scalpel_apply_fix_schema,
+            scalpel_validate_impl,
+            scalpel_validate_schema,
+        )
     except ImportError:
         AUTOGEN_AVAILABLE = False
 except ImportError:

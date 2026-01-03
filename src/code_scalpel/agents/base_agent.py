@@ -19,9 +19,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 # Import MCP tools for agent use
-from code_scalpel.mcp.server import (extract_code, get_file_context,
-                                     get_symbol_references, security_scan,
-                                     simulate_refactor, update_symbol)
+from code_scalpel.mcp.server import (
+    extract_code,
+    get_file_context,
+    get_symbol_references,
+    security_scan,
+    simulate_refactor,
+    update_symbol,
+)
 
 
 class AgentContext:

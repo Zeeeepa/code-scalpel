@@ -12,10 +12,15 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.project_crawler import (ClassInfo, CodeAnalyzerVisitor,
-                                          CrawlResult, FileAnalysisResult,
-                                          FunctionInfo, ProjectCrawler,
-                                          crawl_project)
+from code_scalpel.project_crawler import (
+    ClassInfo,
+    CodeAnalyzerVisitor,
+    CrawlResult,
+    FileAnalysisResult,
+    FunctionInfo,
+    ProjectCrawler,
+    crawl_project,
+)
 
 
 class TestCodeAnalyzerVisitor:

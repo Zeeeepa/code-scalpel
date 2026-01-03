@@ -3,11 +3,9 @@ from __future__ import annotations
 import logging
 import os
 import threading
-from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
-                                as_completed)
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import (Callable, Dict, Generic, List, Optional, Sequence, Tuple,
-                    TypeVar)
+from typing import Callable, Dict, Generic, List, Optional, Sequence, Tuple, TypeVar
 
 # [20251223_CONSOLIDATION] Import from unified_cache
 from .unified_cache import AnalysisCache

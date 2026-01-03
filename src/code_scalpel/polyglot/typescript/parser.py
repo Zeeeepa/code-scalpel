@@ -60,8 +60,7 @@ ENTERPRISE TIER (Advanced Capabilities):
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import \
-    Any  # [20251216_REFACTOR] Remove unused Optional import (CodeQL)
+from typing import Any  # [20251216_REFACTOR] Remove unused Optional import (CodeQL)
 
 
 class TSNodeType(Enum):

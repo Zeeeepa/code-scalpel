@@ -22,8 +22,7 @@ class TestSpec_MCP_GetFileContext:
         """
         REQUIREMENT: The output must strictly adhere to the FileContext schema.
         """
-        from code_scalpel.mcp.server import (FileContextResult,
-                                             _get_file_context_sync)
+        from code_scalpel.mcp.server import FileContextResult, _get_file_context_sync
 
         content = "\nimport os\nimport json\n\nclass MyClass:\n    def method(self):\n        pass\n\ndef func_one():\n    pass\n\ndef func_two():\n    pass\n"
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
@@ -200,7 +199,9 @@ class TestSpec_Detection_XXE_CWE611:
         REQUIREMENT: All standard library unsafe XML parsers must trigger a finding.
         """
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         matching_sinks = [
             k for k in SINK_PATTERNS.keys() if sink_name in k or k in sink_name
@@ -221,8 +222,7 @@ class TestSpec_Detection_XXE_CWE611:
         """
         REQUIREMENT: Must not flag defusedxml or comments.
         """
-        from code_scalpel.security.analyzers.taint_tracker import \
-            SANITIZER_REGISTRY
+        from code_scalpel.security.analyzers.taint_tracker import SANITIZER_REGISTRY
 
         defused_sanitizers = [k for k in SANITIZER_REGISTRY.keys() if "defusedxml" in k]
         assert len(defused_sanitizers) > 0, "No defusedxml sanitizers registered"
@@ -268,7 +268,9 @@ class TestSpec_Detection_SSTI_CWE1336:
         REQUIREMENT: Do not flag standard environment loaders (best practice).
         """
         from code_scalpel.security.analyzers.taint_tracker import (
-            SANITIZER_REGISTRY, SecuritySink)
+            SANITIZER_REGISTRY,
+            SecuritySink,
+        )
 
         assert "render_template" in SANITIZER_REGISTRY
         sanitizer_info = SANITIZER_REGISTRY["render_template"]
@@ -348,8 +350,10 @@ class TestSpec_MCP_Tools_Integration:
         """
         REQUIREMENT: get_file_context and get_symbol_references should be consistent.
         """
-        from code_scalpel.mcp.server import (_get_file_context_sync,
-                                             _get_symbol_references_sync)
+        from code_scalpel.mcp.server import (
+            _get_file_context_sync,
+            _get_symbol_references_sync,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             file_path = os.path.join(tmpdir, "module.py")

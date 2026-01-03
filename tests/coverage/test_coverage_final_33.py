@@ -145,8 +145,9 @@ class TestAutogenBranches:
 
     def test_scalpel_analyze_error_impl_syntax_error(self):
         """Test analyze error with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_analyze_error_impl
+        from code_scalpel.autonomy.integrations.autogen import (
+            scalpel_analyze_error_impl,
+        )
 
         code = "def foo(:"
         error = "SyntaxError"
@@ -157,8 +158,9 @@ class TestAutogenBranches:
 
     def test_scalpel_analyze_error_impl_runtime(self):
         """Test analyze error with runtime error."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_analyze_error_impl
+        from code_scalpel.autonomy.integrations.autogen import (
+            scalpel_analyze_error_impl,
+        )
 
         code = "x = 1 + 2"
         error = "Runtime error"
@@ -168,8 +170,7 @@ class TestAutogenBranches:
 
     def test_scalpel_apply_fix_impl_success(self):
         """Test apply fix with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_apply_fix_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
 
         code = "x = 1"
         fix = "x = 2"
@@ -178,8 +179,7 @@ class TestAutogenBranches:
 
     def test_scalpel_apply_fix_impl_error(self):
         """Test apply fix with invalid code."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_apply_fix_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
 
         code = "def foo(:"
         fix = "fix"
@@ -188,8 +188,7 @@ class TestAutogenBranches:
 
     def test_scalpel_validate_impl_success(self):
         """Test validate with valid code."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_validate_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
 
         code = "x = 1"
         result = scalpel_validate_impl(code)
@@ -197,8 +196,7 @@ class TestAutogenBranches:
 
     def test_scalpel_validate_impl_syntax_error(self):
         """Test validate with syntax error."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_validate_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
 
         code = "def foo(:"
         result = scalpel_validate_impl(code)
@@ -210,8 +208,7 @@ class TestLanggraphBranches:
 
     def test_analyze_error_node_syntax(self):
         """Test analyze_error_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            analyze_error_node
+        from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
 
         state = {
             "code": "def foo(:",
@@ -225,8 +222,7 @@ class TestLanggraphBranches:
 
     def test_generate_fix_node_syntax(self):
         """Test generate_fix_node with syntax error."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            generate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -240,8 +236,7 @@ class TestLanggraphBranches:
 
     def test_generate_fix_node_runtime(self):
         """Test generate_fix_node with runtime error."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            generate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "x = undefined",
@@ -255,8 +250,7 @@ class TestLanggraphBranches:
 
     def test_validate_fix_node_no_fix(self):
         """Test validate_fix_node with no fix."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            validate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "x = 1",
@@ -270,8 +264,7 @@ class TestLanggraphBranches:
 
     def test_validate_fix_node_with_fix(self):
         """Test validate_fix_node with fix."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            validate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "x = 1",
@@ -314,8 +307,7 @@ class TestLanggraphBranches:
 
     def test_has_valid_fixes_true(self):
         """Test has_valid_fixes when True."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            has_valid_fixes
+        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
 
         state = {
             "code": "",
@@ -328,8 +320,7 @@ class TestLanggraphBranches:
 
     def test_has_valid_fixes_false(self):
         """Test has_valid_fixes when False."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            has_valid_fixes
+        from code_scalpel.autonomy.integrations.langgraph import has_valid_fixes
 
         state = {
             "code": "",
@@ -440,8 +431,7 @@ class TestMoreBranchCoverage:
 
     def test_refactor_simulator_branches(self):
         """Test refactor simulator branches."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
         original = "x = 1"
@@ -482,8 +472,7 @@ class TestTaintTrackerBranches:
 
     def test_taint_tracker_check_sink(self):
         """Test check_sink method."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user input")
@@ -505,8 +494,9 @@ class TestTypeInferenceBranches:
 
     def test_type_inference_complex_type(self):
         """Test type inference with complex type."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = "\ndef process(data: list[dict[str, int]]) -> dict[str, list[int]]:\n    result = {}\n    for item in data:\n        for k, v in item.items():\n            if k not in result:\n                result[k] = []\n            result[k].append(v)\n    return result\n"
@@ -543,8 +533,9 @@ class TestUnifiedSinkBranches:
 
     def test_unified_sink_ldap(self):
         """Test unified sink with LDAP injection."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = '\nimport ldap\n\ndef search_user(user_input):\n    conn = ldap.initialize("ldap://server")\n    conn.search_s("dc=example,dc=com", ldap.SCOPE_SUBTREE, f"(cn={user_input})")\n'

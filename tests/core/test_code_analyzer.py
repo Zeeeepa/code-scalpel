@@ -15,9 +15,13 @@ import unittest
 # Add src to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from code_scalpel.code_analyzer import (AnalysisLevel, AnalysisMetrics,
-                                        AnalysisResult, CodeAnalyzer,
-                                        analyze_code)
+from code_scalpel.code_analyzer import (
+    AnalysisLevel,
+    AnalysisMetrics,
+    AnalysisResult,
+    CodeAnalyzer,
+    analyze_code,
+)
 
 
 class TestCodeAnalyzerBasic(unittest.TestCase):

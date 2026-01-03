@@ -92,6 +92,7 @@ TOTAL ESTIMATED TESTS: 175 tests
 """
 
 from .error_fixer import ErrorFixer, FixResult, FixResults
+
 # [20251224_REFACTOR] Import from submodules
 from .error_scanner import CodeError, ErrorScanner, ErrorSeverity, ScanResults
 

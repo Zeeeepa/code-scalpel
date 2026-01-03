@@ -92,8 +92,7 @@ def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
 def _ensure_signed_policy_dir(policy_dir: Path, *, secret: str) -> None:
     """Create a minimal allow-all policy dir + signed manifest for tests."""
 
-    from code_scalpel.policy_engine.crypto_verify import \
-        CryptographicPolicyVerifier
+    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     policy_dir.mkdir(parents=True, exist_ok=True)
 

@@ -169,8 +169,7 @@ def is_even(n):
 
     def test_generated_suite_structure(self):
         """Test GeneratedTestSuite structure."""
-        from code_scalpel.generators.test_generator import (GeneratedTestSuite,
-                                                            TestCase)
+        from code_scalpel.generators.test_generator import GeneratedTestSuite, TestCase
 
         suite = GeneratedTestSuite(
             function_name="my_func",

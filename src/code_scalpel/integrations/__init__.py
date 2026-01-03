@@ -107,9 +107,9 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     # Agent integrations
-    from .autogen import (AnalysisResult, AutogenCodeAnalysisAgent,
-                          AutogenScalpel)
+    from .autogen import AnalysisResult, AutogenCodeAnalysisAgent, AutogenScalpel
     from .crewai import CrewAIScalpel, RefactorResult
+
     # Legacy REST API server (Flask)
     from .rest_api_server import MCPServerConfig, create_app
     from .rest_api_server import run_server as run_rest_server
@@ -133,8 +133,11 @@ def __getattr__(name: str) -> Any:
     """Lazy attribute loading for optional integrations (PEP 562)."""
     if name in {"AutogenScalpel", "AutogenCodeAnalysisAgent", "AnalysisResult"}:
         try:
-            from .autogen import (AnalysisResult, AutogenCodeAnalysisAgent,
-                                  AutogenScalpel)
+            from .autogen import (
+                AnalysisResult,
+                AutogenCodeAnalysisAgent,
+                AutogenScalpel,
+            )
         except ImportError as e:  # pragma: no cover
             raise ImportError(
                 "AutoGen integration requires optional dependencies. "

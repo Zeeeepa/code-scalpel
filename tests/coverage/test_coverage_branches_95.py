@@ -121,8 +121,7 @@ class TestRefactorSimulatorBranches:
 
     def test_simulate_add_parameter(self):
         """[20251217_TEST] Cover add parameter simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         original = """
 def greet(name):
@@ -138,8 +137,7 @@ def greet(name, greeting="Hello"):
 
     def test_simulate_rename_variable(self):
         """[20251217_TEST] Cover rename variable simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         original = """
 def calculate(x):
@@ -226,16 +224,18 @@ class TestUnifiedSinkDetector:
 
     def test_sink_detector_instantiation(self):
         """[20251217_TEST] Cover UnifiedSinkDetector instantiation."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         assert detector is not None
 
     def test_sink_detector_detect_sinks(self):
         """[20251217_TEST] Cover detect_sinks method."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
 

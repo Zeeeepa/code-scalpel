@@ -6,8 +6,10 @@ import warnings
 
 import pytest
 
-from code_scalpel.ir.normalizers.tree_sitter_visitor import (SourceLocation,
-                                                             TreeSitterVisitor)
+from code_scalpel.ir.normalizers.tree_sitter_visitor import (
+    SourceLocation,
+    TreeSitterVisitor,
+)
 
 
 class _FakeNode:

@@ -17,9 +17,14 @@ try:
     CREWAI_AVAILABLE = True
     try:
         from code_scalpel.autonomy.integrations.crewai import (
-            ScalpelAnalyzeTool, ScalpelErrorToDiffTool, ScalpelGenerateFixTool,
-            ScalpelSandboxTool, ScalpelSecurityScanTool,
-            ScalpelValidateASTTool, create_scalpel_fix_crew)
+            ScalpelAnalyzeTool,
+            ScalpelErrorToDiffTool,
+            ScalpelGenerateFixTool,
+            ScalpelSandboxTool,
+            ScalpelSecurityScanTool,
+            ScalpelValidateASTTool,
+            create_scalpel_fix_crew,
+        )
     except ImportError:
         CREWAI_AVAILABLE = False
 except ImportError:

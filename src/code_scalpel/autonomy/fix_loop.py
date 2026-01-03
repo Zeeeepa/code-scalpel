@@ -220,9 +220,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Callable, List, Optional
 
-from code_scalpel.autonomy.stubs import (ErrorAnalysis, ErrorToDiffEngine,
-                                         FileChange, FixHint, SandboxExecutor,
-                                         SandboxResult)
+from code_scalpel.autonomy.stubs import (
+    ErrorAnalysis,
+    ErrorToDiffEngine,
+    FileChange,
+    FixHint,
+    SandboxExecutor,
+    SandboxResult,
+)
 
 
 @dataclass

@@ -19,9 +19,26 @@ import tree_sitter_java
 from tree_sitter import Language, Parser
 
 from ..nodes import (  # [20251214_FEATURE] Add location tracking for polyglot extraction; [20251215_FEATURE] v2.0.0 - Additional nodes for complete Java support
-    IRAssign, IRBinaryOp, IRCall, IRClassDef, IRConstant, IRFor, IRFunctionDef,
-    IRIf, IRImport, IRModule, IRName, IRNode, IRParameter, IRRaise, IRReturn,
-    IRSwitch, IRTry, IRWhile, SourceLocation)
+    IRAssign,
+    IRBinaryOp,
+    IRCall,
+    IRClassDef,
+    IRConstant,
+    IRFor,
+    IRFunctionDef,
+    IRIf,
+    IRImport,
+    IRModule,
+    IRName,
+    IRNode,
+    IRParameter,
+    IRRaise,
+    IRReturn,
+    IRSwitch,
+    IRTry,
+    IRWhile,
+    SourceLocation,
+)
 from ..operators import BinaryOperator
 from .base import BaseNormalizer
 from .tree_sitter_visitor import TreeSitterVisitor

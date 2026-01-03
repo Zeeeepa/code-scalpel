@@ -437,8 +437,7 @@ class CrewAIScalpel:
         try:
             # Use the new taint-based SecurityAnalyzer (v0.3.0+)
             try:
-                from ..symbolic_execution_tools import \
-                    analyze_security as taint_analyze
+                from ..symbolic_execution_tools import analyze_security as taint_analyze
 
                 result = taint_analyze(code)
 

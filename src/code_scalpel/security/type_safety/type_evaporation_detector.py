@@ -728,8 +728,7 @@ def analyze_type_evaporation_cross_file(
     Returns:
         CrossFileTypeEvaporationResult with correlated findings
     """
-    from code_scalpel.security.analyzers import \
-        SecurityAnalyzer  # [20251225_BUGFIX]
+    from code_scalpel.security.analyzers import SecurityAnalyzer  # [20251225_BUGFIX]
 
     # Analyze frontend
     detector = TypeEvaporationDetector()

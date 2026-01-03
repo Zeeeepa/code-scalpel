@@ -17,9 +17,14 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from code_scalpel.policy_engine import (Operation, Policy, PolicyDecision,
-                                        PolicyEngine, PolicyError,
-                                        SemanticAnalyzer)
+from code_scalpel.policy_engine import (
+    Operation,
+    Policy,
+    PolicyDecision,
+    PolicyEngine,
+    PolicyError,
+    SemanticAnalyzer,
+)
 
 # =============================================================================
 # Fixtures

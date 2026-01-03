@@ -13,9 +13,14 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.policy_engine import (AuditLog, Operation, PolicyDecision,
-                                        PolicyModificationError,
-                                        TamperDetectedError, TamperResistance)
+from code_scalpel.policy_engine import (
+    AuditLog,
+    Operation,
+    PolicyDecision,
+    PolicyModificationError,
+    TamperDetectedError,
+    TamperResistance,
+)
 
 
 @pytest.fixture

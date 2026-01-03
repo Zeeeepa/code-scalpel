@@ -24,8 +24,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from code_scalpel.mcp.server import (analyze_code, extract_code, security_scan,
-                                     validate_paths)
+from code_scalpel.mcp.server import (
+    analyze_code,
+    extract_code,
+    security_scan,
+    validate_paths,
+)
 
 # [20251215_TEST] Lint cleanup for adversarial tests (remove unused imports).
 

@@ -58,7 +58,9 @@ def start_license_revalidation_thread(interval_seconds: int = 24 * 60 * 60) -> N
                 # [20251228_FEATURE] If a remote verifier is configured, force-refresh
                 # the persisted cache on the revalidation interval.
                 from code_scalpel.licensing.remote_verifier import (
-                    refresh_cache, remote_verifier_configured)
+                    refresh_cache,
+                    remote_verifier_configured,
+                )
 
                 if remote_verifier_configured():
                     token = validator.load_license_token()

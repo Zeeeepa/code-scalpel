@@ -12,20 +12,32 @@ import warnings
 
 import z3  # noqa: E402
 
-from code_scalpel.ir.normalizers.python_normalizer import \
-    PythonNormalizer  # noqa: E402
+from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer  # noqa: E402
+
 # [20251225_BUGFIX] Imports after backward compat stub removal
 from code_scalpel.security.analyzers import TaintInfo  # noqa: E402
 from code_scalpel.security.analyzers import TaintLevel, TaintTracker
 from code_scalpel.security.analyzers.security_analyzer import (  # noqa: E402
-    analyze_security, find_command_injections, find_sql_injections, find_xss)
+    analyze_security,
+    find_command_injections,
+    find_sql_injections,
+    find_xss,
+)
 from code_scalpel.security.analyzers.taint_tracker import (  # noqa: E402
-    SANITIZER_REGISTRY, SecuritySink, TaintedValue, TaintSource, Vulnerability,
-    register_sanitizer)
-from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-    IRSymbolicInterpreter  # noqa: E402
+    SANITIZER_REGISTRY,
+    SecuritySink,
+    TaintedValue,
+    TaintSource,
+    Vulnerability,
+    register_sanitizer,
+)
+from code_scalpel.symbolic_execution_tools.ir_interpreter import (  # noqa: E402
+    IRSymbolicInterpreter,
+)
 from code_scalpel.symbolic_execution_tools.type_inference import (  # noqa: E402
-    InferredType, TypeInferenceEngine)
+    InferredType,
+    TypeInferenceEngine,
+)
 
 # Suppress the BETA warning for cleaner test output
 warnings.filterwarnings("ignore", message="symbolic_execution_tools")
@@ -498,8 +510,7 @@ class TestSymbolicStringSupport:
 
     def test_state_manager_creates_string_variable(self):
         """SymbolicState should create String variables."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         expr = state.create_variable("s", z3.StringSort())
@@ -510,7 +521,9 @@ class TestSymbolicStringSupport:
     def test_constraint_solver_handles_string(self):
         """ConstraintSolver should handle string constraints."""
         from code_scalpel.symbolic_execution_tools.constraint_solver import (
-            ConstraintSolver, SolverStatus)
+            ConstraintSolver,
+            SolverStatus,
+        )
 
         solver = ConstraintSolver()
         s = z3.String("s")
@@ -620,16 +633,18 @@ class TestConfigLoader:
 
     def test_load_from_nonexistent_file(self, tmp_path):
         """Should return 0 for nonexistent file."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         result = load_sanitizers_from_config(str(tmp_path / "nonexistent.toml"))
         assert result == 0
 
     def test_load_sql_sanitizer_from_config(self, tmp_path):
         """Should load SQL sanitizer from config."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -652,8 +667,9 @@ class TestConfigLoader:
 
     def test_load_full_clear_sanitizer(self, tmp_path):
         """Should load full clear sanitizer with ALL."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -675,8 +691,9 @@ class TestConfigLoader:
 
     def test_load_multiple_sanitizers(self, tmp_path):
         """Should load multiple sanitizers."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -701,8 +718,9 @@ class TestConfigLoader:
 
     def test_load_multi_sink_sanitizer(self, tmp_path):
         """Should load sanitizer that clears multiple sinks."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -724,8 +742,9 @@ class TestConfigLoader:
 
     def test_invalid_sink_name_skipped(self, tmp_path):
         """Should skip invalid sink names gracefully."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text(
@@ -1100,8 +1119,9 @@ cursor.execute(f"SELECT * FROM users WHERE name='{name}' AND age={age}")
 
     def test_find_path_traversals_helper(self):
         """Test find_path_traversals convenience function."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            find_path_traversals
+        from code_scalpel.security.analyzers.security_analyzer import (
+            find_path_traversals,
+        )
 
         code = """
 filename = request.args.get("file")
@@ -1117,8 +1137,9 @@ class TestTaintTrackerCoverage:
 
     def test_load_sanitizers_from_nonexistent_config(self):
         """Test load_sanitizers_from_config with no config file."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         count = load_sanitizers_from_config("/nonexistent/path/pyproject.toml")
         assert count == 0
@@ -1128,8 +1149,9 @@ class TestTaintTrackerCoverage:
         import os
         import tempfile
 
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         # Create a temp file with invalid content
         with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
@@ -1147,8 +1169,7 @@ class TestTaintTrackerCoverage:
         """Test _find_config_file when no config exists."""
         import os
 
-        from code_scalpel.security.analyzers.taint_tracker import \
-            _find_config_file
+        from code_scalpel.security.analyzers.taint_tracker import _find_config_file
 
         # Change to temp directory with no pyproject.toml
         original_cwd = os.getcwd()
@@ -1164,7 +1185,11 @@ class TestTaintTrackerCoverage:
     def test_taint_info_merge_with_lower_level(self):
         """Test TaintInfo merging takes higher severity level."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
 
@@ -1196,7 +1221,11 @@ class TestTaintTrackerCoverage:
     def test_propagate_concat(self):
         """Test propagate_concat delegates to propagate_assignment."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
         taint = TaintInfo(
@@ -1240,7 +1269,11 @@ class TestTaintTrackerCoverage:
     def test_propagate_assignment_merge_taint_levels(self):
         """Test propagate_assignment merges taint from multiple sources."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
 
@@ -1271,8 +1304,9 @@ class TestTaintTrackerCoverage:
 
     def test_load_sanitizers_from_config_invalid_format(self):
         """Test load_sanitizers_from_config handles invalid formats."""
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         # Test with non-existent path returns 0
         count = load_sanitizers_from_config("/nonexistent/path/config.toml")
@@ -1304,8 +1338,7 @@ class TestSecurityAnalyzerAdvanced:
 
     def test_analyze_assignment_no_targets(self):
         """Test analyze handles assignment with empty targets."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = "x = 1"  # Simple assignment
@@ -1318,8 +1351,7 @@ class TestSecurityAnalyzerAdvanced:
 
     def test_analyze_sanitizer_detection(self):
         """Test analyzer detects sanitizer usage."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1334,8 +1366,7 @@ output = render_template_string(safe_input)
 
     def test_analyze_call_no_function_name(self):
         """Test analyze handles call without identifiable function name."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = "(lambda: 1)()"  # Lambda call - no named function
@@ -1348,8 +1379,7 @@ output = render_template_string(safe_input)
         """Test _get_subscript_base handles attribute access."""
         import ast
 
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
 
@@ -1365,8 +1395,7 @@ output = render_template_string(safe_input)
         """Test _extract_variable_names from complex expression."""
         import ast
 
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
 
@@ -1381,8 +1410,7 @@ output = render_template_string(safe_input)
 
     def test_analyze_binop_in_call_argument(self):
         """Test analyzer detects tainted BinOp in call argument."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1397,8 +1425,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
 
     def test_sanitizer_with_binop_argument(self):
         """Test sanitizer detection with BinOp in argument."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
 
@@ -1416,8 +1443,7 @@ safe = html.escape("prefix" + user_input)
 
     def test_analyze_assignment_call_sink(self):
         """Test analyzing assignment where RHS is a sink call."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1432,8 +1458,7 @@ subprocess.call(user_input, shell=True)
 
     def test_check_sanitizer_call_non_sanitizer(self):
         """Test analyzer handles non-sanitizer call correctly."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
 
@@ -1449,8 +1474,7 @@ x = print("hello")
 
     def test_analyze_try_except_control_flow(self):
         """Test analyzer handles try/except blocks."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1469,8 +1493,7 @@ except:
         """Test _get_call_name with deeply nested attribute."""
         import ast
 
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
 
@@ -1485,8 +1508,7 @@ except:
 
     def test_analyze_assignment_with_no_targets(self):
         """Test analyzer handles assignment with unparseable targets."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Analyze code that may have edge case targets
@@ -1500,8 +1522,7 @@ except:
 
     def test_analyze_call_with_lambda(self):
         """Test analyzer handles lambda calls (no function name)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1514,8 +1535,7 @@ result = (lambda x: x + 1)(5)
 
     def test_check_sanitizer_call_no_func_name(self):
         """Test _check_sanitizer_call handles None func_name."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Analyze code with call that has no identifiable name
@@ -1529,8 +1549,7 @@ x = (lambda: 1)()
 
     def test_analyze_subscript_taint_source(self):
         """Test analyzer detects subscript taint sources."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         code = """
@@ -1548,8 +1567,7 @@ class TestSecurityAnalyzerEdgeCases:
 
     def test_assignment_with_no_name_targets(self):
         """Test assignment where targets aren't Name nodes (line 248)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Assignment to subscript/attribute - not Name targets
@@ -1564,8 +1582,7 @@ arr[0] = user_input
 
     def test_check_sanitizer_returns_none(self):
         """Test _check_sanitizer returns None when no sanitizer matches (line 320)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Code without any sanitizer calls
@@ -1579,8 +1596,7 @@ result = regular_function(user_input)
 
     def test_get_call_name_complex_returns_none(self):
         """Test _get_call_name returns None for complex expressions (line 428)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Call with computed function name
@@ -1600,8 +1616,9 @@ class TestTaintTrackerConfigEdgeCases:
         """Test load_sanitizers_from_config returns 0 when config is None (line 383)."""
         from unittest.mock import patch
 
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         # Mock both os.path.exists and _load_toml
         with (
@@ -1619,8 +1636,9 @@ class TestTaintTrackerConfigEdgeCases:
         """Test load_sanitizers_from_config skips invalid format (line 390)."""
         from unittest.mock import patch
 
-        from code_scalpel.security.analyzers.taint_tracker import \
-            load_sanitizers_from_config
+        from code_scalpel.security.analyzers.taint_tracker import (
+            load_sanitizers_from_config,
+        )
 
         # Config with invalid sanitizer format (not a list)
         fake_config = {
@@ -1669,7 +1687,11 @@ class TestTaintTrackerConfigEdgeCases:
         To hit line 612, second source must have LOWER value than first.
         """
         from code_scalpel.security.analyzers.taint_tracker import (
-            TaintInfo, TaintLevel, TaintSource, TaintTracker)
+            TaintInfo,
+            TaintLevel,
+            TaintSource,
+            TaintTracker,
+        )
 
         tracker = TaintTracker()
 
@@ -1704,8 +1726,7 @@ class TestSecurityAnalyzerBranchCoverage:
 
     def test_expr_node_not_call(self):
         """ast.Expr where node.value is not Call (line 211->exit)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Expression statement that is NOT a call (e.g., just a name)
@@ -1719,8 +1740,7 @@ user_input  # This is an ast.Expr with ast.Name, not ast.Call
 
     def test_tuple_unpacking_with_nested_tuple(self):
         """Tuple unpacking where inner element is not a Name (line 244->243)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Nested tuple unpacking - inner tuple should be handled
@@ -1733,8 +1753,7 @@ user_input = request.args.get('id')
 
     def test_sanitizer_check_no_tainted_arg(self):
         """Sanitizer check where argument is not tainted (line 320)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Call a registered sanitizer with clean (non-tainted) data
@@ -1749,8 +1768,7 @@ sanitized = html.escape(clean_data)
 
     def test_sanitizer_with_binop_untainted(self):
         """Sanitizer check with BinOp arg where variables are not tainted (line 315-320)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Call a sanitizer with a BinOp expression where both operands are clean
@@ -1766,8 +1784,7 @@ sanitized = html.escape(combined)
 
     def test_sanitizer_multiple_clean_args(self):
         """Sanitizer with multiple clean args - loop continues (312->307, 315->307)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Multiple args to sanitizer, all clean - tests loop continuation
@@ -1783,8 +1800,7 @@ result2 = escape_string(b)
 
     def test_sanitizer_binop_first_then_name(self):
         """Sanitizer with BinOp first, then Name arg (312->307 branch)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Custom function with 2 args - BinOp first, then Name
@@ -1804,8 +1820,7 @@ result2 = html.escape(c)
 
     def test_sanitizer_binop_with_mixed_vars(self):
         """Sanitizer with BinOp containing multiple vars (317->315)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # BinOp with multiple vars - tests inner loop iteration
@@ -1821,8 +1836,7 @@ result = html.escape(combined)
 
     def test_subscript_not_in_source_patterns(self):
         """Subscript base not in source patterns (386->394)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Subscript with base that's not a known source
@@ -1835,8 +1849,7 @@ cursor.execute(data)
 
     def test_subscript_base_complex_value(self):
         """Subscript with complex value that's not Attribute chain (line 428)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Subscript where value is a Call, not Attribute
@@ -1849,8 +1862,7 @@ result = cursor.execute(data)
 
     def test_attribute_chain_not_ending_in_name(self):
         """Attribute chain where base is not a Name (line 408->412)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Attribute access where base is a call
@@ -1863,8 +1875,7 @@ cursor.execute(data)
 
     def test_extract_variable_from_attribute_non_name(self):
         """_extract_variable_names with Attribute whose value is not Name (line 448->451)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         # Attribute where value is another attribute (chained)

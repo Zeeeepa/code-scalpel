@@ -23,8 +23,7 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture
 def normalizer():
     """Create a JavaScriptNormalizer instance."""
-    from code_scalpel.ir.normalizers.javascript_normalizer import \
-        JavaScriptNormalizer
+    from code_scalpel.ir.normalizers.javascript_normalizer import JavaScriptNormalizer
 
     return JavaScriptNormalizer()
 

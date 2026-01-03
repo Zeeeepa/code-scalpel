@@ -75,8 +75,12 @@ ENTERPRISE TIER (Scalability & Intelligence):
 30. TODO: Implement AI-powered PDG-based code recommendations
 """
 
-from .analyzer import (DataFlowAnomaly, DependencyType, PDGAnalyzer,
-                       SecurityVulnerability)
+from .analyzer import (
+    DataFlowAnomaly,
+    DependencyType,
+    PDGAnalyzer,
+    SecurityVulnerability,
+)
 from .builder import NodeType, PDGBuilder, Scope, build_pdg
 from .slicer import ProgramSlicer, SliceInfo, SliceType, SlicingCriteria
 

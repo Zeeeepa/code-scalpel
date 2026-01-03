@@ -69,8 +69,7 @@ class TestRefactorSimulatorMore:
 
     def test_simulate_with_syntax_error(self):
         """Test simulate with syntax error in new code."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -83,8 +82,7 @@ class TestRefactorSimulatorMore:
 
     def test_simulate_non_python(self):
         """Test simulate for non-Python language."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 
@@ -196,8 +194,7 @@ class TestPolyglotModules:
 
     def test_typescript_type_narrowing_basic(self):
         """[20251219_TEST] Test TypeScript type narrowing analysis."""
-        from code_scalpel.polyglot.typescript.type_narrowing import \
-            TypeNarrowing
+        from code_scalpel.polyglot.typescript.type_narrowing import TypeNarrowing
 
         analyzer = TypeNarrowing()
         code = """
@@ -349,8 +346,7 @@ class TestPolicyEngineMore:
     def test_tamper_resistance_basic(self):
         """Test TamperResistance basic functionality."""
         try:
-            from code_scalpel.policy_engine.tamper_resistance import \
-                TamperResistance
+            from code_scalpel.policy_engine.tamper_resistance import TamperResistance
 
             tr = TamperResistance()
             assert tr is not None

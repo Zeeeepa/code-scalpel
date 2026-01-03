@@ -210,29 +210,37 @@ References:
 
 # [20251217_FEATURE] Audit Trail
 from code_scalpel.autonomy.audit import AuditEntry, AutonomyAuditTrail
+
 # [20251217_FEATURE] Error-to-Diff Engine (primary exports)
-from code_scalpel.autonomy.error_to_diff import (ErrorAnalysis,
-                                                 ErrorToDiffEngine, ErrorType,
-                                                 FixHint, ParsedError)
+from code_scalpel.autonomy.error_to_diff import (
+    ErrorAnalysis,
+    ErrorToDiffEngine,
+    ErrorType,
+    FixHint,
+    ParsedError,
+)
+
 # [20251217_FEATURE] Fix Loop Termination
 from code_scalpel.autonomy.fix_loop import FixAttempt, FixLoop, FixLoopResult
+
 # [20251217_FEATURE] Mutation Test Gate
-from code_scalpel.autonomy.mutation_gate import (Mutation, MutationGateResult,
-                                                 MutationResult,
-                                                 MutationTestGate,
-                                                 MutationType)
+from code_scalpel.autonomy.mutation_gate import (
+    Mutation,
+    MutationGateResult,
+    MutationResult,
+    MutationTestGate,
+    MutationType,
+)
+
 # [20251217_FEATURE] Sandboxed Execution
-from code_scalpel.autonomy.sandbox import (ExecutionTestResult, FileChange,
-                                           LintResult)
-from code_scalpel.autonomy.sandbox import \
-    SandboxExecutor as SandboxExecutorImpl
+from code_scalpel.autonomy.sandbox import ExecutionTestResult, FileChange, LintResult
+from code_scalpel.autonomy.sandbox import SandboxExecutor as SandboxExecutorImpl
 from code_scalpel.autonomy.sandbox import SandboxResult as SandboxResultImpl
+
 # [20251217_FEATURE] Stubs for external implementations (aliased to avoid conflicts)
 from code_scalpel.autonomy.stubs import ErrorAnalysis as StubErrorAnalysis
-from code_scalpel.autonomy.stubs import \
-    ErrorToDiffEngine as StubErrorToDiffEngine
-from code_scalpel.autonomy.stubs import \
-    ExecutionTestResult as StubExecutionTestResult
+from code_scalpel.autonomy.stubs import ErrorToDiffEngine as StubErrorToDiffEngine
+from code_scalpel.autonomy.stubs import ExecutionTestResult as StubExecutionTestResult
 from code_scalpel.autonomy.stubs import FileChange as StubFileChange
 from code_scalpel.autonomy.stubs import FixHint as StubFixHint
 from code_scalpel.autonomy.stubs import SandboxExecutor as StubSandboxExecutor

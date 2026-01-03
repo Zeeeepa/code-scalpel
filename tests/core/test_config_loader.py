@@ -9,10 +9,14 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.licensing.config_loader import (clear_cache,
-                                                  get_cached_limits,
-                                                  get_tool_limits, load_limits,
-                                                  merge_limits, reload_config)
+from code_scalpel.licensing.config_loader import (
+    clear_cache,
+    get_cached_limits,
+    get_tool_limits,
+    load_limits,
+    merge_limits,
+    reload_config,
+)
 from code_scalpel.licensing.features import get_tool_capabilities
 
 

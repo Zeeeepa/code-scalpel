@@ -36,8 +36,7 @@ class StubParser:
 
 
 def test_normalize_reports_syntax_error_when_root_has_error(monkeypatch):
-    from code_scalpel.ir.normalizers.javascript_normalizer import \
-        JavaScriptNormalizer
+    from code_scalpel.ir.normalizers.javascript_normalizer import JavaScriptNormalizer
 
     # [20251214_TEST] Cover parse-error path without real tree-sitter parser.
     monkeypatch.setattr(JavaScriptNormalizer, "_ensure_parser", lambda self: None)
@@ -62,8 +61,7 @@ def test_normalize_reports_syntax_error_when_root_has_error(monkeypatch):
 
 
 def test_normalize_node_skips_noise_and_warns_unknown(monkeypatch):
-    from code_scalpel.ir.normalizers.javascript_normalizer import \
-        JavaScriptNormalizer
+    from code_scalpel.ir.normalizers.javascript_normalizer import JavaScriptNormalizer
 
     # [20251214_TEST] Ensure noise nodes are skipped and unknowns warn instead of crashing.
     monkeypatch.setattr(JavaScriptNormalizer, "_ensure_parser", lambda self: None)

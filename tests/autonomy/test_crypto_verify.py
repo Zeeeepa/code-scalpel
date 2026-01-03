@@ -11,8 +11,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from code_scalpel.policy_engine.crypto_verify import (
-    CryptographicPolicyVerifier, PolicyManifest, SecurityError,
-    verify_policy_integrity_crypto)
+    CryptographicPolicyVerifier,
+    PolicyManifest,
+    SecurityError,
+    verify_policy_integrity_crypto,
+)
 
 
 class TestPolicyManifest:

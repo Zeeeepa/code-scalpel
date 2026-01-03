@@ -4,12 +4,14 @@ Tests for HTTP link detector.
 [20251216_FEATURE] v2.1.0 - Test HTTP link detection between client and server
 """
 
-from code_scalpel.graph_engine.http_detector import (HTTP_CLIENT_PATTERNS,
-                                                     HTTP_ENDPOINT_PATTERNS,
-                                                     HTTPLink,
-                                                     HTTPLinkDetector,
-                                                     HTTPMethod,
-                                                     RoutePatternMatcher)
+from code_scalpel.graph_engine.http_detector import (
+    HTTP_CLIENT_PATTERNS,
+    HTTP_ENDPOINT_PATTERNS,
+    HTTPLink,
+    HTTPLinkDetector,
+    HTTPMethod,
+    RoutePatternMatcher,
+)
 
 
 class TestHTTPMethod:

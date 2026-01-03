@@ -21,8 +21,12 @@ from typing import Dict, List, Pattern
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..analyzers.taint_tracker import (  # [20251214_FEATURE] v2.0.0 - Variable name patterns
-    HARDCODED_SECRET_PATTERNS, SECRET_VARIABLE_PATTERNS, SecuritySink,
-    TaintSource, Vulnerability)
+    HARDCODED_SECRET_PATTERNS,
+    SECRET_VARIABLE_PATTERNS,
+    SecuritySink,
+    TaintSource,
+    Vulnerability,
+)
 
 # [20251215_BUGFIX] Silence deprecated ast.Str warnings under Python 3.13+ (tests exercise visit_Str)
 warnings.filterwarnings(

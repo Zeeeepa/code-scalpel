@@ -1494,8 +1494,7 @@ def get_tool_capabilities(tool_id: str, tier: str) -> Dict[str, Any]:
     # [20251231_CONFIG] Merge TOML-configured LIMITS into hardcoded defaults.
     # Capabilities remain code-defined (license-gated) and are NOT granted via config.
     try:
-        from .config_loader import (get_cached_limits, get_tool_limits,
-                                    merge_limits)
+        from .config_loader import get_cached_limits, get_tool_limits, merge_limits
 
         overrides = get_tool_limits(
             tool_id, normalized_tier, config=get_cached_limits()

@@ -7,8 +7,13 @@ Tests for gRPC Contract Analyzer.
 import pytest
 
 from code_scalpel.integrations.protocol_analyzers.grpc.contract_analyzer import (
-    GrpcContractAnalyzer, IssueSeverity, RpcMethod, StreamingType,
-    analyze_grpc_contract, validate_grpc_contract)
+    GrpcContractAnalyzer,
+    IssueSeverity,
+    RpcMethod,
+    StreamingType,
+    analyze_grpc_contract,
+    validate_grpc_contract,
+)
 
 # =============================================================================
 # TEST FIXTURES

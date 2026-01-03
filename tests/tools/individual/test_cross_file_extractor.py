@@ -16,8 +16,10 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.ast_tools.cross_file_extractor import (CrossFileExtractor,
-                                                         ExtractedSymbol)
+from code_scalpel.ast_tools.cross_file_extractor import (
+    CrossFileExtractor,
+    ExtractedSymbol,
+)
 
 # =============================================================================
 # Fixtures

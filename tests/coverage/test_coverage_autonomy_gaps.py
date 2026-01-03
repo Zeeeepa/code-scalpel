@@ -251,8 +251,7 @@ class TestCrewAICoverageGaps:
     def test_error_to_diff_tool_line_extraction(self):
         """[20251217_TEST] Cover line number extraction in error-to-diff tool."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelErrorToDiffTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelErrorToDiffTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -268,8 +267,7 @@ class TestCrewAICoverageGaps:
     def test_error_to_diff_tool_various_error_types(self):
         """[20251217_TEST] Cover various error type detection paths."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelErrorToDiffTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelErrorToDiffTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -296,8 +294,7 @@ class TestCrewAICoverageGaps:
     def test_sandbox_tool_execution(self):
         """[20251217_TEST] Cover ScalpelSandboxTool execution."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelSandboxTool
+            from code_scalpel.autonomy.integrations.crewai import ScalpelSandboxTool
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -310,8 +307,9 @@ class TestCrewAICoverageGaps:
     def test_security_scan_tool_clean_code(self):
         """[20251217_TEST] Cover ScalpelSecurityScanTool with clean code."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelSecurityScanTool
+            from code_scalpel.autonomy.integrations.crewai import (
+                ScalpelSecurityScanTool,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -324,8 +322,9 @@ class TestCrewAICoverageGaps:
     def test_security_scan_tool_vulnerable_code(self):
         """[20251217_TEST] Cover ScalpelSecurityScanTool with vulnerable code."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                ScalpelSecurityScanTool
+            from code_scalpel.autonomy.integrations.crewai import (
+                ScalpelSecurityScanTool,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
 
@@ -342,8 +341,7 @@ class TestLangGraphCoverageGaps:
     def test_validate_fix_node_no_fix(self):
         """[20251217_TEST] Cover validate_fix_node with no fix to validate."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                validate_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -361,8 +359,7 @@ class TestLangGraphCoverageGaps:
     def test_validate_fix_node_with_vulnerability(self):
         """[20251217_TEST] Cover validate_fix_node security check failure."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                validate_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -381,8 +378,7 @@ class TestLangGraphCoverageGaps:
     def test_apply_fix_node_success(self):
         """[20251217_TEST] Cover apply_fix_node success path."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                apply_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import apply_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -400,8 +396,7 @@ class TestLangGraphCoverageGaps:
     def test_apply_fix_node_with_no_fix_attempts(self):
         """[20251217_TEST] Cover apply_fix_node with no prior fix attempts."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                apply_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import apply_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -531,8 +526,9 @@ class TestAutogenCoverageGaps:
     def test_scalpel_fix_agent_tool_registration(self):
         """[20251217_TEST] Cover AutoGen tool registration paths."""
         try:
-            from code_scalpel.autonomy.integrations.autogen import \
-                create_scalpel_fix_agent
+            from code_scalpel.autonomy.integrations.autogen import (
+                create_scalpel_fix_agent,
+            )
         except ImportError:
             pytest.skip("AutoGen not available")
 

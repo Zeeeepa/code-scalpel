@@ -12,7 +12,11 @@ Acceptance Criteria:
 """
 
 from code_scalpel.polyglot.typescript.type_narrowing import (
-    BranchState, NarrowedType, TypeNarrowing, analyze_type_narrowing)
+    BranchState,
+    NarrowedType,
+    TypeNarrowing,
+    analyze_type_narrowing,
+)
 
 
 class TestTypeofDetection:

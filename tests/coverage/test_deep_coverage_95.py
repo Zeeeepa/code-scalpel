@@ -6,8 +6,9 @@ Target remaining 39 elements needed for 95%.
 import tempfile
 from pathlib import Path
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestErrorToDiffCoverage:
@@ -146,8 +147,7 @@ class TestTaintTrackerDeepCoverage:
 
     def test_taint_with_none_level(self):
         """Cover NONE taint level."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.NONE)
@@ -179,8 +179,9 @@ class TestTypeInferenceDeepCoverage:
 
     def test_infer_complex_expression(self):
         """Cover complex expression inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = (1 + 2) * (3 - 4) / 5.0")
@@ -188,8 +189,9 @@ class TestTypeInferenceDeepCoverage:
 
     def test_infer_multiple_assignment(self):
         """Cover multiple assignment inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("a = b = c = 1")
@@ -197,8 +199,9 @@ class TestTypeInferenceDeepCoverage:
 
     def test_infer_augmented_assignment(self):
         """Cover augmented assignment inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = 1; x += 2")
@@ -210,8 +213,7 @@ class TestSymbolicEngineCoverage:
 
     def test_analyze_simple_function(self):
         """Cover simple function analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef double(x):\n    return x * 2\n"
         analyzer = SymbolicAnalyzer()
@@ -220,8 +222,7 @@ class TestSymbolicEngineCoverage:
 
     def test_analyze_nested_if(self):
         """Cover nested if handling."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef nested(x, y):\n    if x > 0:\n        if y > 0:\n            return 1\n        return 2\n    return 3\n"
         analyzer = SymbolicAnalyzer()
@@ -230,8 +231,7 @@ class TestSymbolicEngineCoverage:
 
     def test_analyze_while_loop(self):
         """Cover while loop handling."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef countdown(n):\n    _ = 0\n    while n > 0:\n        result += n\n        n -= 1\n    return result\n"
         analyzer = SymbolicAnalyzer()

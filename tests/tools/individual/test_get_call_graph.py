@@ -7,9 +7,13 @@ Tests the MCP interface, Pydantic models, and async wrapper.
 
 import pytest
 
-from code_scalpel.mcp.server import (CallEdgeModel, CallGraphResultModel,
-                                     CallNodeModel, _get_call_graph_sync,
-                                     get_call_graph)
+from code_scalpel.mcp.server import (
+    CallEdgeModel,
+    CallGraphResultModel,
+    CallNodeModel,
+    _get_call_graph_sync,
+    get_call_graph,
+)
 
 # ============================================================================
 # Test Pydantic Models

@@ -35,9 +35,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 if JWT_AVAILABLE:
     import code_scalpel.licensing.jwt_validator as jwt_validator_module
     from code_scalpel.licensing.jwt_generator import generate_license
-    from code_scalpel.licensing.jwt_validator import (JWTAlgorithm,
-                                                      JWTLicenseValidator,
-                                                      get_license_info)
+    from code_scalpel.licensing.jwt_validator import (
+        JWTAlgorithm,
+        JWTLicenseValidator,
+        get_license_info,
+    )
 
 
 # Skip all tests if JWT not available

@@ -119,8 +119,7 @@ database = Database()
 
     def test_cross_file_extractor_extracts_dependencies(self, flask_project):
         """Test that CrossFileExtractor can extract search_users with all deps."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(flask_project)
         extractor.build()
@@ -155,8 +154,10 @@ database = Database()
         """Test that the MCP tools work end-to-end."""
         import asyncio
 
-        from code_scalpel.mcp.server import (cross_file_security_scan,
-                                             get_cross_file_dependencies)
+        from code_scalpel.mcp.server import (
+            cross_file_security_scan,
+            get_cross_file_dependencies,
+        )
 
         async def run_tests():
             # Test get_cross_file_dependencies - use a function instead of variable
@@ -225,8 +226,7 @@ def func_{i}(x):
 
     def test_cross_file_extractor_scales(self, large_project):
         """Test that CrossFileExtractor handles deep dependency chains."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(large_project)
         extractor.build()
@@ -288,8 +288,7 @@ def other_func():
 
     def test_cross_file_extractor_handles_circular(self, circular_project):
         """Test that CrossFileExtractor doesn't infinite loop on circular deps."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(circular_project)
         extractor.build()
@@ -445,8 +444,7 @@ def func_5():
 
     def test_calculate_confidence_formula(self):
         """Test that confidence decay formula is correct."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            calculate_confidence
+        from code_scalpel.ast_tools.cross_file_extractor import calculate_confidence
 
         # Formula: C_effective = 1.0 × 0.9^depth
         assert calculate_confidence(0) == 1.0  # Base confidence
@@ -457,8 +455,7 @@ def func_5():
 
     def test_calculate_confidence_custom_decay_factor(self):
         """Test confidence calculation with custom decay factor."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            calculate_confidence
+        from code_scalpel.ast_tools.cross_file_extractor import calculate_confidence
 
         # More aggressive decay (0.8)
         assert calculate_confidence(0, decay_factor=0.8) == 1.0
@@ -471,8 +468,7 @@ def func_5():
 
     def test_extracted_symbol_has_depth_and_confidence(self, deep_dependency_project):
         """Test that extracted symbols include depth and confidence fields."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
@@ -500,8 +496,7 @@ def func_5():
 
     def test_confidence_decays_with_depth(self, deep_dependency_project):
         """Test that confidence properly decays with increasing depth."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
@@ -530,7 +525,9 @@ def func_5():
     def test_low_confidence_count_tracked(self, deep_dependency_project):
         """Test that low confidence symbols are counted."""
         from code_scalpel.ast_tools.cross_file_extractor import (
-            DEFAULT_LOW_CONFIDENCE_THRESHOLD, CrossFileExtractor)
+            DEFAULT_LOW_CONFIDENCE_THRESHOLD,
+            CrossFileExtractor,
+        )
 
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
@@ -558,8 +555,7 @@ def func_5():
 
     def test_low_confidence_warning_generated(self, deep_dependency_project):
         """Test that warning is generated for low confidence symbols."""
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_dependency_project)
         extractor.build()
@@ -679,9 +675,14 @@ class TestGraphNeighborhood:
     @pytest.fixture
     def sample_graph(self):
         """Create a sample graph for testing neighborhood extraction."""
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 

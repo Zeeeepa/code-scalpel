@@ -56,8 +56,7 @@ def compute_effective_tier_for_startup(
     # [20251229_BUGFIX] Remote verifier is authoritative when configured.
     # Avoid local JWT signature validation in this mode; only verifier + cache/grace.
     try:
-        from .remote_verifier import (authorize_token,
-                                      remote_verifier_configured)
+        from .remote_verifier import authorize_token, remote_verifier_configured
 
         if remote_verifier_configured():
             token = (validator.load_license_token() or "").strip()

@@ -19,8 +19,7 @@ class TestASTToolsInitFull:
 
     def test_import_resolver_import(self):
         """[20251217_TEST] Cover ImportResolver imports."""
-        from code_scalpel.ast_tools import (ImportInfo, ImportResolver,
-                                            ImportType)
+        from code_scalpel.ast_tools import ImportInfo, ImportResolver, ImportType
 
         assert ImportResolver is not None
         assert ImportInfo is not None
@@ -28,8 +27,11 @@ class TestASTToolsInitFull:
 
     def test_cross_file_extractor_import(self):
         """[20251217_TEST] Cover CrossFileExtractor imports."""
-        from code_scalpel.ast_tools import (CrossFileExtractor,
-                                            ExtractedSymbol, ExtractionResult)
+        from code_scalpel.ast_tools import (
+            CrossFileExtractor,
+            ExtractedSymbol,
+            ExtractionResult,
+        )
 
         assert CrossFileExtractor is not None
         assert ExtractedSymbol is not None
@@ -66,8 +68,7 @@ class TestLangGraphFull:
     def test_exception_in_analyze_node(self):
         """[20251217_TEST] Cover exception handling in analyze_error_node."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                analyze_error_node
+            from code_scalpel.autonomy.integrations.langgraph import analyze_error_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -85,8 +86,7 @@ class TestLangGraphFull:
     def test_generate_fix_exception_path(self):
         """[20251217_TEST] Cover exception path in generate_fix_node."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                generate_fix_node
+            from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
         except ImportError:
             pytest.skip("LangGraph not available")
 
@@ -106,8 +106,7 @@ class TestSemanticAnalyzerFull:
 
     def test_detect_java_sql(self):
         """[20251217_TEST] Cover Java SQL detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
 
@@ -122,8 +121,7 @@ ResultSet rs = stmt.executeQuery(query);
 
     def test_detect_javascript_sql(self):
         """[20251217_TEST] Cover JavaScript SQL detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
 
@@ -137,8 +135,7 @@ db.query(query);
 
     def test_parameterization_check(self):
         """[20251217_TEST] Cover parameterization check."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
 
@@ -149,8 +146,7 @@ db.query(query);
 
     def test_annotation_check(self):
         """[20251217_TEST] Cover annotation check."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
 
@@ -165,8 +161,7 @@ def old_function():
 
     def test_tainted_path_input(self):
         """[20251217_TEST] Cover tainted path input check."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
 
@@ -240,8 +235,7 @@ class TestRefactorSimulatorFull:
 
     def test_simulator_basic(self):
         """[20251217_TEST] Cover basic simulator operations."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
 

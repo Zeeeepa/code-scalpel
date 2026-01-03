@@ -24,13 +24,15 @@ warnings.warn(
 )
 
 # Re-export everything from new location for backward compatibility
-from code_scalpel.analysis.project_crawler import (ClassInfo,
-                                                   CodeAnalyzerVisitor,
-                                                   CrawlResult,
-                                                   FileAnalysisResult,
-                                                   FunctionInfo,
-                                                   ProjectCrawler,
-                                                   crawl_project)
+from code_scalpel.analysis.project_crawler import (
+    ClassInfo,
+    CodeAnalyzerVisitor,
+    CrawlResult,
+    FileAnalysisResult,
+    FunctionInfo,
+    ProjectCrawler,
+    crawl_project,
+)
 
 __all__ = [
     "ProjectCrawler",

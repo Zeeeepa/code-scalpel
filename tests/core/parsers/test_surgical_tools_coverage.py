@@ -8,11 +8,14 @@ from unittest.mock import patch
 
 import pytest
 
-from code_scalpel.surgical_extractor import (ContextualExtraction,
-                                             CrossFileResolution,
-                                             CrossFileSymbol, ExtractionResult,
-                                             SurgicalExtractor,
-                                             extract_with_context)
+from code_scalpel.surgical_extractor import (
+    ContextualExtraction,
+    CrossFileResolution,
+    CrossFileSymbol,
+    ExtractionResult,
+    SurgicalExtractor,
+    extract_with_context,
+)
 from code_scalpel.surgical_patcher import SurgicalPatcher
 
 

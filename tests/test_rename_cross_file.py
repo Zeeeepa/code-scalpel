@@ -2,8 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from code_scalpel.surgery.rename_symbol_refactor import \
-    rename_references_across_project
+from code_scalpel.surgery.rename_symbol_refactor import rename_references_across_project
 
 
 class TestRenameCrossFile(unittest.TestCase):

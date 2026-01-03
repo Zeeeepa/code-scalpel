@@ -9,7 +9,10 @@ import json
 import pytest
 
 from code_scalpel.integrations.protocol_analyzers.schema import (
-    ChangeType, ProtobufParser, SchemaDriftDetector)
+    ChangeType,
+    ProtobufParser,
+    SchemaDriftDetector,
+)
 
 # =============================================================================
 # PROTOBUF TEST FIXTURES

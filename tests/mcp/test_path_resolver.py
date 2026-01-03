@@ -11,8 +11,12 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from code_scalpel.mcp.path_resolver import (PathResolutionResult, PathResolver,
-                                            get_default_resolver, resolve_path)
+from code_scalpel.mcp.path_resolver import (
+    PathResolutionResult,
+    PathResolver,
+    get_default_resolver,
+    resolve_path,
+)
 
 
 class TestPathResolverInit:

@@ -26,8 +26,10 @@ from .confidence_scorer import ConfidenceScorer
 from .cross_file_taint import CrossFileTaintTracker
 from .custom_rules import CustomRule, CustomRuleResult, CustomRulesEngine
 from .false_positive_analyzer import FalsePositiveAnalyzer
+
 # Enterprise tier
 from .policy_engine import PolicyEngine, PolicyViolation
+
 # Pro tier
 from .sanitizer_detector import SanitizerDetector, SanitizerMatch
 from .security_analyzer import SecurityAnalysisResult, SecurityAnalyzer

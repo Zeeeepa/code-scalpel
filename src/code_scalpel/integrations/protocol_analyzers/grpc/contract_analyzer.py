@@ -37,9 +37,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Union
 
 # [20251225_REFACTOR] Updated import path after protocol_analyzers reorganization
-from ..schema.drift_detector import (ProtobufEnum, ProtobufMessage,
-                                     ProtobufParser, SchemaDriftDetector,
-                                     SchemaDriftResult)
+from ..schema.drift_detector import (
+    ProtobufEnum,
+    ProtobufMessage,
+    ProtobufParser,
+    SchemaDriftDetector,
+    SchemaDriftResult,
+)
 
 # TODO: GrpcContractAnalyzer Enhancement Roadmap
 # ===============================================

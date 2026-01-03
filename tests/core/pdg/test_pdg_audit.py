@@ -24,8 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 
 from code_scalpel.pdg_tools.analyzer import PDGAnalyzer
 from code_scalpel.pdg_tools.builder import PDGBuilder, build_pdg
-from code_scalpel.pdg_tools.slicer import (ProgramSlicer, SliceType,
-                                           SlicingCriteria)
+from code_scalpel.pdg_tools.slicer import ProgramSlicer, SliceType, SlicingCriteria
 
 
 # =============================================================================

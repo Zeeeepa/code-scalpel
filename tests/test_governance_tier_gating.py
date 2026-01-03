@@ -37,8 +37,7 @@ def _write_policy_file(policy_dir: Path) -> Path:
 
 
 def _write_manifest(policy_dir: Path, secret: str) -> Path:
-    from code_scalpel.policy_engine.crypto_verify import \
-        CryptographicPolicyVerifier
+    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
 
     manifest = CryptographicPolicyVerifier.create_manifest(
         policy_files=["policy.yaml"],

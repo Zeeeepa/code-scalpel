@@ -83,7 +83,9 @@ def level_{i}_func():
         but rather ~34% (compound decay).
         """
         from code_scalpel.ast_tools.cross_file_extractor import (
-            CrossFileExtractor, calculate_confidence)
+            CrossFileExtractor,
+            calculate_confidence,
+        )
 
         # First verify the formula directly
         expected_confidence_depth_10 = 0.9**10
@@ -145,8 +147,7 @@ def level_{i}_func():
         ...
         Level 10: 0.349
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -183,8 +184,7 @@ def level_{i}_func():
         With decay_factor=0, ANY dependency beyond depth 0 should have
         confidence = 0. This tests the boundary condition.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -212,8 +212,7 @@ def level_{i}_func():
         With decay_factor=1.0, confidence should NOT decay at all.
         All dependencies should have confidence = 1.0.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -247,8 +246,7 @@ def level_{i}_func():
 
         REMEDIATION: Add input validation to clamp decay_factor to [0.0, 1.0]
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -279,8 +277,7 @@ def level_{i}_func():
 
         REMEDIATION: Add input validation to reject negative decay_factor
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -304,8 +301,7 @@ def level_{i}_func():
 
         With very small decay factors and deep chains, verify no underflow/overflow.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(ten_hop_chain_project)
         extractor.build()
@@ -368,7 +364,9 @@ def level_{i}_func():
         These should be identified as low confidence.
         """
         from code_scalpel.ast_tools.cross_file_extractor import (
-            DEFAULT_LOW_CONFIDENCE_THRESHOLD, CrossFileExtractor)
+            DEFAULT_LOW_CONFIDENCE_THRESHOLD,
+            CrossFileExtractor,
+        )
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -406,8 +404,7 @@ def level_{i}_func():
         """
         Verify warning is generated when extracting low-confidence symbols.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -472,7 +469,9 @@ def level_{i}_func():
         Verify boundary behavior is EXACTLY correct.
         """
         from code_scalpel.ast_tools.cross_file_extractor import (
-            DEFAULT_LOW_CONFIDENCE_THRESHOLD, CrossFileExtractor)
+            DEFAULT_LOW_CONFIDENCE_THRESHOLD,
+            CrossFileExtractor,
+        )
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -509,8 +508,7 @@ def level_{i}_func():
         If the API allows custom thresholds, verify the system still
         uses a MINIMUM threshold that cannot be set to 0.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -537,8 +535,7 @@ def level_{i}_func():
 
         Negative depth is nonsensical. System should reject or clamp to 0.
         """
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -566,8 +563,7 @@ def level_{i}_func():
         """
         import time
 
-        from code_scalpel.ast_tools.cross_file_extractor import \
-            CrossFileExtractor
+        from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
 
         extractor = CrossFileExtractor(deep_chain_project)
         extractor.build()
@@ -619,9 +615,14 @@ class TestADV253ContextExplosion:
         - Hub node: "common_util" connected to 500 caller nodes
         - Each caller connects to the hub
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 
@@ -748,9 +749,14 @@ class TestADV254Relevance:
         - Medium confidence path: center -> med_1 -> med_2 (conf 0.7)
         - Low confidence path: center -> low_1 -> low_2 (conf 0.3)
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 
@@ -928,9 +934,14 @@ class TestADV254Relevance:
         With 500 nodes and max_nodes=10, memory usage should NOT
         explode to hold the full graph.
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 
@@ -979,9 +990,14 @@ class TestADV254Relevance:
         """
         ADV-2.5.3 ADVERSARIAL: max_nodes=0 should return only center or fail.
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
         hub_id = UniversalNodeID(
@@ -1031,8 +1047,12 @@ class TestADV254Relevance:
         """
         ADV-2.5.3 ADVERSARIAL: Negative max_nodes should be rejected.
         """
-        from code_scalpel.graph_engine import (GraphNode, NodeType,
-                                               UniversalGraph, UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
         hub_id = UniversalNodeID(
@@ -1060,8 +1080,12 @@ class TestADV254Relevance:
         """
         ADV-2.5.3 ADVERSARIAL: Negative k (radius) should be rejected.
         """
-        from code_scalpel.graph_engine import (GraphNode, NodeType,
-                                               UniversalGraph, UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
         hub_id = UniversalNodeID(
@@ -1091,9 +1115,14 @@ class TestADV254Relevance:
         """
         ADV-2.5.3 ADVERSARIAL: Huge k should still respect max_nodes.
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 
@@ -1165,9 +1194,14 @@ class TestADV254Relevance:
 
         Create graph with identical confidence values and verify consistent ordering.
         """
-        from code_scalpel.graph_engine import (EdgeType, GraphEdge, GraphNode,
-                                               NodeType, UniversalGraph,
-                                               UniversalNodeID)
+        from code_scalpel.graph_engine import (
+            EdgeType,
+            GraphEdge,
+            GraphNode,
+            NodeType,
+            UniversalGraph,
+            UniversalNodeID,
+        )
 
         graph = UniversalGraph()
 
@@ -1299,8 +1333,10 @@ policies:
         policy_file.write_text(malicious_content)
 
         # Step 3: Verification MUST fail
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1332,8 +1368,10 @@ policies:
         original_content = policy_file.read_text()
         policy_file.write_text(original_content + "\n# Added comment")
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1403,8 +1441,10 @@ class TestADV256ManifestTamper:
             json.dump(manifest_data, f)
 
         # Verification must fail
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1437,8 +1477,10 @@ class TestADV256ManifestTamper:
         with open(manifest_file, "w") as f:
             json.dump(manifest_data, f)
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1456,8 +1498,10 @@ class TestADV256ManifestTamper:
         """
         policy_dir, _ = signed_policy_dir
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # Use wrong secret key
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": "wrong-secret"}):
@@ -1536,8 +1580,10 @@ class TestADV256ManifestTamper:
         with open(manifest_file, "w") as f:
             json.dump(manifest_data, f)
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1566,8 +1612,10 @@ class TestADV256ManifestTamper:
         with open(manifest_file, "w") as f:
             json.dump(manifest_data, f)
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
             verifier = CryptographicPolicyVerifier(
@@ -1598,8 +1646,10 @@ class TestADV256ManifestTamper:
         with open(manifest_file, "w") as f:
             json.dump(manifest_data, f)
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # System should fail closed at load time (CORRECT BEHAVIOR)
         with patch.dict(os.environ, {"SCALPEL_MANIFEST_SECRET": secret_key}):
@@ -1776,8 +1826,10 @@ class TestADV256ManifestTamper:
         with open(manifest_file, "w") as f:
             json.dump(manifest_data, f)
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # System fails closed at load time when manifest has unknown fields
         # This is CORRECT security behavior
@@ -1796,8 +1848,10 @@ class TestADV256ManifestTamper:
         """
         policy_dir, _ = signed_policy_dir
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # Empty string in env should trigger failure
         # Note: patch.dict with "" may be interpreted as "missing"
@@ -1817,8 +1871,10 @@ class TestADV256ManifestTamper:
         """
         policy_dir, _ = signed_policy_dir
 
-        from code_scalpel.policy_engine import (CryptographicPolicyVerifier,
-                                                SecurityError)
+        from code_scalpel.policy_engine import (
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # Clear environment completely, system should fail closed
         env_without_secret = {

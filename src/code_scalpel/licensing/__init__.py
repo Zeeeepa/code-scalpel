@@ -153,15 +153,33 @@ class Tier(Enum):
 
 
 from .cache import LicenseCache
+
 # [20251225_CONFIG] v3.3.0 - TOML-based tier limits configuration
-from .config_loader import (clear_cache, get_cached_limits, get_tool_limits,
-                            load_limits, merge_limits, reload_config)
-from .features import (TOOL_CAPABILITIES, get_all_tools_for_tier,
-                       get_tool_capabilities, has_capability)
+from .config_loader import (
+    clear_cache,
+    get_cached_limits,
+    get_tool_limits,
+    load_limits,
+    merge_limits,
+    reload_config,
+)
+from .features import (
+    TOOL_CAPABILITIES,
+    get_all_tools_for_tier,
+    get_tool_capabilities,
+    has_capability,
+)
+
 # [20251225_FEATURE] v3.3.0 - JWT license validation
-from .jwt_validator import (JWTAlgorithm, JWTLicenseData, JWTLicenseValidator,
-                            get_current_tier, get_license_info)
+from .jwt_validator import (
+    JWTAlgorithm,
+    JWTLicenseData,
+    JWTLicenseValidator,
+    get_current_tier,
+    get_license_info,
+)
 from .license_manager import LicenseInfo, LicenseManager
+
 # [20251225_FEATURE] Runtime imports after Tier enum definition
 from .tier_detector import TierDetector
 from .tier_detector import get_current_tier as legacy_get_current_tier

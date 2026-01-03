@@ -16,8 +16,7 @@ class TestRefactorSimulatorUncoveredLines:
 
     def test_simulate_security_issue_detection(self):
         """Cover security issue detection in simulate."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
         original = """
@@ -39,8 +38,7 @@ class TestSemanticAnalyzerUncoveredLines:
 
     def test_has_parameterization_with_placeholder(self):
         """Cover parameterization detection with ?."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = 'cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))'
@@ -49,8 +47,7 @@ class TestSemanticAnalyzerUncoveredLines:
 
     def test_has_parameterization_with_percent_s(self):
         """Cover parameterization detection with %s."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = 'cursor.execute("SELECT * FROM users WHERE id=%s", (user_id,))'
@@ -59,8 +56,7 @@ class TestSemanticAnalyzerUncoveredLines:
 
     def test_has_parameterization_java(self):
         """Cover Java PreparedStatement detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = """
@@ -72,8 +68,7 @@ stmt.setString(1, userId);
 
     def test_has_parameterization_java_setint(self):
         """Cover Java setInt detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = """stmt.setInt(1, userId);"""
@@ -82,8 +77,7 @@ stmt.setString(1, userId);
 
     def test_has_file_operation(self):
         """Cover file operation detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = 'open(user_filename, "w")'
@@ -92,8 +86,7 @@ stmt.setString(1, userId);
 
     def test_tainted_path_input(self):
         """Cover tainted path input detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = """
@@ -105,8 +98,7 @@ open(path)
 
     def test_contains_sql_sink(self):
         """Cover SQL sink detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = 'cursor.execute("SELECT * FROM users WHERE id=" + user_id)'
@@ -115,8 +107,7 @@ open(path)
 
     def test_has_annotation_python(self):
         """Cover Python annotation detection."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = """
@@ -133,8 +124,7 @@ class TestTamperResistanceUncoveredLines:
 
     def test_verify_policy_integrity(self):
         """Cover policy integrity verification."""
-        from code_scalpel.policy_engine.tamper_resistance import \
-            TamperResistance
+        from code_scalpel.policy_engine.tamper_resistance import TamperResistance
 
         tr = TamperResistance()
         result = tr.verify_policy_integrity()
@@ -142,8 +132,7 @@ class TestTamperResistanceUncoveredLines:
 
     def test_is_override_valid(self):
         """Cover override validation - may fail with invalid token."""
-        from code_scalpel.policy_engine.tamper_resistance import \
-            TamperResistance
+        from code_scalpel.policy_engine.tamper_resistance import TamperResistance
 
         tr = TamperResistance()
         # This may raise or return False for invalid tokens

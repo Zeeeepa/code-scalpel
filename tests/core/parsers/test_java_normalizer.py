@@ -1,9 +1,17 @@
 import unittest
 from unittest.mock import MagicMock
 
-from code_scalpel.ir.nodes import (IRAssign, IRCall, IRClassDef, IRConstant,
-                                   IRFunctionDef, IRIf, IRName, IRReturn,
-                                   IRWhile)
+from code_scalpel.ir.nodes import (
+    IRAssign,
+    IRCall,
+    IRClassDef,
+    IRConstant,
+    IRFunctionDef,
+    IRIf,
+    IRName,
+    IRReturn,
+    IRWhile,
+)
 from code_scalpel.ir.normalizers import JavaNormalizer
 from code_scalpel.ir.normalizers.java_normalizer import JavaVisitor
 from code_scalpel.ir.operators import BinaryOperator

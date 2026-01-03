@@ -43,19 +43,30 @@ Usage:
 
 from code_scalpel.graph.graph_query import GraphQueryEngine, QueryResult
 from code_scalpel.graph.logical_relationships import (
-    LogicalRelationship, LogicalRelationshipDetector,
-    LogicalRelationshipResult)
-from code_scalpel.graph.path_constraints import (ConstrainedPath,
-                                                 ConstraintSet, ConstraintType,
-                                                 PathConstraint,
-                                                 PathConstraintEngine,
-                                                 PathConstraintResult)
-from code_scalpel.graph.semantic_neighbors import (SemanticNeighbor,
-                                                   SemanticNeighborFinder,
-                                                   SemanticNeighborResult)
-from code_scalpel.graph.traversal_rules import (RuleType, TraversalPath,
-                                                TraversalResult, TraversalRule,
-                                                TraversalRuleEngine)
+    LogicalRelationship,
+    LogicalRelationshipDetector,
+    LogicalRelationshipResult,
+)
+from code_scalpel.graph.path_constraints import (
+    ConstrainedPath,
+    ConstraintSet,
+    ConstraintType,
+    PathConstraint,
+    PathConstraintEngine,
+    PathConstraintResult,
+)
+from code_scalpel.graph.semantic_neighbors import (
+    SemanticNeighbor,
+    SemanticNeighborFinder,
+    SemanticNeighborResult,
+)
+from code_scalpel.graph.traversal_rules import (
+    RuleType,
+    TraversalPath,
+    TraversalResult,
+    TraversalRule,
+    TraversalRuleEngine,
+)
 
 __all__ = [
     # Pro tier - Semantic Neighbors

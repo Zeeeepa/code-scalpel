@@ -115,8 +115,12 @@ DISABLE_LICENSE_DISCOVERY_ENV_VAR = "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"
 # Try to import PyJWT, but make it optional for Community tier
 try:
     import jwt
-    from jwt.exceptions import (DecodeError, ExpiredSignatureError,
-                                InvalidSignatureError, InvalidTokenError)
+    from jwt.exceptions import (
+        DecodeError,
+        ExpiredSignatureError,
+        InvalidSignatureError,
+        InvalidTokenError,
+    )
 
     JWT_AVAILABLE = True
 except ImportError:
@@ -923,7 +927,9 @@ def get_current_tier() -> str:
     # only offline grace (based on cached entitlements + license hash) is allowed.
     try:
         from code_scalpel.licensing.remote_verifier import (
-            authorize_token, remote_verifier_configured)
+            authorize_token,
+            remote_verifier_configured,
+        )
 
         if remote_verifier_configured():
             token = validator.load_license_token()
@@ -959,7 +965,9 @@ def get_license_info() -> Dict:
     # We still return the same shape as the local validator helper.
     try:
         from code_scalpel.licensing.remote_verifier import (
-            authorize_token, remote_verifier_configured)
+            authorize_token,
+            remote_verifier_configured,
+        )
 
         if remote_verifier_configured():
             token = validator.load_license_token()

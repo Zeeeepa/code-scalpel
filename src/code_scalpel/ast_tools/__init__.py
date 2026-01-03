@@ -52,9 +52,14 @@ def visualize_ast(tree, output_file="ast_visualization", format="png", view=True
 
 # [20251213_FEATURE] v1.5.1 - Import resolution for cross-file analysis
 try:
-    from .import_resolver import (CircularImport, ImportGraphResult,
-                                  ImportInfo, ImportResolver, ImportType,
-                                  SymbolDefinition)
+    from .import_resolver import (
+        CircularImport,
+        ImportGraphResult,
+        ImportInfo,
+        ImportResolver,
+        ImportType,
+        SymbolDefinition,
+    )
 except ImportError:
     ImportResolver = None
     ImportInfo = None
@@ -65,8 +70,11 @@ except ImportError:
 
 # [20251213_FEATURE] v1.5.1 - Cross-file extraction
 try:
-    from .cross_file_extractor import (CrossFileExtractor, ExtractedSymbol,
-                                       ExtractionResult)
+    from .cross_file_extractor import (
+        CrossFileExtractor,
+        ExtractedSymbol,
+        ExtractionResult,
+    )
 except ImportError:
     CrossFileExtractor = None
     ExtractedSymbol = None

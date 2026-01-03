@@ -2,8 +2,7 @@ import warnings
 
 import pytest
 
-from code_scalpel.ir.normalizers.javascript_normalizer import \
-    JavaScriptNormalizer
+from code_scalpel.ir.normalizers.javascript_normalizer import JavaScriptNormalizer
 
 
 # [20251214_TEST] Exercise JavaScript normalizer helpers with fake CST nodes to raise coverage without tree-sitter.

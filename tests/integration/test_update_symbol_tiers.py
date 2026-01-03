@@ -15,18 +15,25 @@ from unittest.mock import MagicMock
 import pytest
 
 from code_scalpel.licensing.features import get_tool_capabilities
+
 # Test imports
-from code_scalpel.mcp.server import (_SESSION_AUDIT_TRAIL,
-                                     _SESSION_UPDATE_COUNTS, _add_audit_entry,
-                                     _check_code_review_approval,
-                                     _check_compliance, _get_audit_trail,
-                                     _get_session_update_count,
-                                     _increment_session_update_count,
-                                     _run_post_update_hook,
-                                     _run_pre_update_hook)
-from code_scalpel.surgery.surgical_patcher import (PatchLanguage,
-                                                   PolyglotPatcher,
-                                                   SurgicalPatcher)
+from code_scalpel.mcp.server import (
+    _SESSION_AUDIT_TRAIL,
+    _SESSION_UPDATE_COUNTS,
+    _add_audit_entry,
+    _check_code_review_approval,
+    _check_compliance,
+    _get_audit_trail,
+    _get_session_update_count,
+    _increment_session_update_count,
+    _run_post_update_hook,
+    _run_pre_update_hook,
+)
+from code_scalpel.surgery.surgical_patcher import (
+    PatchLanguage,
+    PolyglotPatcher,
+    SurgicalPatcher,
+)
 
 
 class TestSessionTracking:

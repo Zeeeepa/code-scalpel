@@ -7,7 +7,9 @@ import pytest
 from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
 from code_scalpel.pdg_tools.transformer import PDGTransformer
 from code_scalpel.security.analyzers.cross_file_taint import (
-    CrossFileSink, CrossFileTaintTracker)
+    CrossFileSink,
+    CrossFileTaintTracker,
+)
 
 
 def _write(tmp_path: Path, relative: str, content: str) -> Path:

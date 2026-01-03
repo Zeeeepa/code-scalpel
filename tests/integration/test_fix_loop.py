@@ -17,10 +17,15 @@ from datetime import datetime
 from unittest.mock import Mock
 
 from code_scalpel.autonomy import FixAttempt, FixLoop
+
 # [20251217_BUGFIX] Use stub classes for fix_loop tests (different from error_to_diff classes)
-from code_scalpel.autonomy.stubs import (ErrorAnalysis, ErrorToDiffEngine,
-                                         FixHint, SandboxExecutor,
-                                         SandboxResult)
+from code_scalpel.autonomy.stubs import (
+    ErrorAnalysis,
+    ErrorToDiffEngine,
+    FixHint,
+    SandboxExecutor,
+    SandboxResult,
+)
 
 
 class TestFixLoopTermination:

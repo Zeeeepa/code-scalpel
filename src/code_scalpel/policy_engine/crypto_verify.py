@@ -68,8 +68,7 @@ import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import (Any, Dict, List,  # [20241225_BUGFIX] v3.3.0 - Added Any
-                    Optional)
+from typing import Any, Dict, List, Optional  # [20241225_BUGFIX] v3.3.0 - Added Any
 
 
 class SecurityError(Exception):

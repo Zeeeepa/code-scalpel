@@ -1,8 +1,7 @@
 import networkx as nx
 import pytest
 
-from code_scalpel.pdg_tools.transformer import (PDGTransformer,
-                                                TransformationType)
+from code_scalpel.pdg_tools.transformer import PDGTransformer, TransformationType
 
 
 class TestPDGTransformer:

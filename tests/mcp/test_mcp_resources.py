@@ -21,9 +21,13 @@ from unittest.mock import patch
 
 # Import the server module to access resource functions
 import code_scalpel.mcp.server as server_module
-from code_scalpel.mcp.server import (get_capabilities, get_project_call_graph,
-                                     get_project_dependencies,
-                                     get_project_structure, get_version)
+from code_scalpel.mcp.server import (
+    get_capabilities,
+    get_project_call_graph,
+    get_project_dependencies,
+    get_project_structure,
+    get_version,
+)
 
 
 class TestProjectCallGraphResource:

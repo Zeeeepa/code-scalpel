@@ -279,13 +279,15 @@ class PolyglotExtractor:
 
         if is_jsx:
             # Use TSX normalizer for JSX files (TSX parser handles JSX syntax)
-            from code_scalpel.ir.normalizers.typescript_normalizer import \
-                TypeScriptTSXNormalizer
+            from code_scalpel.ir.normalizers.typescript_normalizer import (
+                TypeScriptTSXNormalizer,
+            )
 
             normalizer = TypeScriptTSXNormalizer()
         else:
-            from code_scalpel.ir.normalizers.javascript_normalizer import \
-                JavaScriptNormalizer
+            from code_scalpel.ir.normalizers.javascript_normalizer import (
+                JavaScriptNormalizer,
+            )
 
             normalizer = JavaScriptNormalizer()
 
@@ -314,13 +316,15 @@ class PolyglotExtractor:
                 is_tsx = True
 
         if is_tsx:
-            from code_scalpel.ir.normalizers.typescript_normalizer import \
-                TypeScriptTSXNormalizer
+            from code_scalpel.ir.normalizers.typescript_normalizer import (
+                TypeScriptTSXNormalizer,
+            )
 
             normalizer = TypeScriptTSXNormalizer()
         else:
-            from code_scalpel.ir.normalizers.typescript_normalizer import \
-                TypeScriptNormalizer
+            from code_scalpel.ir.normalizers.typescript_normalizer import (
+                TypeScriptNormalizer,
+            )
 
             normalizer = TypeScriptNormalizer()
 
@@ -484,7 +488,9 @@ class PolyglotExtractor:
             if self.language in (Language.TYPESCRIPT, Language.JAVASCRIPT):
                 # [20251224_REFACTOR] Updated import for typescript_parsers location
                 from code_scalpel.code_parsers.typescript_parsers.tsx_analyzer import (
-                    is_react_component, normalize_jsx_syntax)
+                    is_react_component,
+                    normalize_jsx_syntax,
+                )
 
                 # Analyze for React component patterns
                 react_info = is_react_component(target_node, code)

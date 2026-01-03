@@ -17,8 +17,12 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.ast_tools.import_resolver import (CircularImport, ImportInfo,
-                                                    ImportResolver, ImportType)
+from code_scalpel.ast_tools.import_resolver import (
+    CircularImport,
+    ImportInfo,
+    ImportResolver,
+    ImportType,
+)
 
 # =============================================================================
 # Fixtures

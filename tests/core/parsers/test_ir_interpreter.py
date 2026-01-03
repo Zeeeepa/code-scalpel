@@ -10,13 +10,25 @@ doesn't regress behavior.
 
 from z3 import BoolSort, BoolVal, IntSort, IntVal, simplify
 
-from code_scalpel.ir.nodes import (IRAssign, IRBinaryOp, IRCompare, IRConstant,
-                                   IRIf, IRModule, IRName)
+from code_scalpel.ir.nodes import (
+    IRAssign,
+    IRBinaryOp,
+    IRCompare,
+    IRConstant,
+    IRIf,
+    IRModule,
+    IRName,
+)
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
 from code_scalpel.ir.operators import BinaryOperator, CompareOperator
 from code_scalpel.symbolic_execution_tools.ir_interpreter import (
-    IRExecutionResult, IRNodeVisitor, IRSymbolicInterpreter,
-    JavaScriptSemantics, PythonSemantics, get_semantics)
+    IRExecutionResult,
+    IRNodeVisitor,
+    IRSymbolicInterpreter,
+    JavaScriptSemantics,
+    PythonSemantics,
+    get_semantics,
+)
 
 
 class TestIRInterpreterBasics:
@@ -1115,8 +1127,7 @@ class TestIRExecutionResult:
 
     def test_execution_result_custom_values(self):
         """Test IRExecutionResult with custom values."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         result = IRExecutionResult(states=[state], path_count=5, pruned_count=2)
@@ -1130,8 +1141,9 @@ class TestLanguageSemanticsAbstract:
 
     def test_abstract_methods_exist(self):
         """Verify LanguageSemantics has all required abstract methods."""
-        from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-            LanguageSemantics
+        from code_scalpel.symbolic_execution_tools.ir_interpreter import (
+            LanguageSemantics,
+        )
 
         abstract_methods = [
             "name",
@@ -1369,8 +1381,7 @@ for i in range(10):
 
     def test_eval_unary_op_unsupported_operator(self):
         """Test unary op with unsupported operator returns None."""
-        from code_scalpel.ir.nodes import (IRAssign, IRConstant, IRName,
-                                           IRUnaryOp)
+        from code_scalpel.ir.nodes import IRAssign, IRConstant, IRName, IRUnaryOp
         from code_scalpel.ir.operators import UnaryOperator
 
         # INVERT (~) is not supported
@@ -1448,8 +1459,7 @@ for i in range(10):
 
     def test_assign_to_non_name_target(self):
         """Test assignment to non-name target (tuple, attribute)."""
-        from code_scalpel.ir.nodes import (IRAssign, IRAttribute, IRConstant,
-                                           IRName)
+        from code_scalpel.ir.nodes import IRAssign, IRAttribute, IRConstant, IRName
 
         # Assign to attribute - not a simple name
         attr = IRAttribute(value=IRName(id="obj"), attr="x")
@@ -1463,8 +1473,7 @@ for i in range(10):
 
     def test_aug_assign_to_non_name(self):
         """Test augmented assignment to non-name target."""
-        from code_scalpel.ir.nodes import (IRAttribute, IRAugAssign,
-                                           IRConstant, IRName)
+        from code_scalpel.ir.nodes import IRAttribute, IRAugAssign, IRConstant, IRName
         from code_scalpel.ir.operators import AugAssignOperator
 
         attr = IRAttribute(value=IRName(id="obj"), attr="x")
@@ -1498,8 +1507,7 @@ for i in range(10):
 
     def test_while_unevaluable_condition(self):
         """Test while loop with unevaluable condition."""
-        from code_scalpel.ir.nodes import (IRAssign, IRCall, IRConstant,
-                                           IRName, IRWhile)
+        from code_scalpel.ir.nodes import IRAssign, IRCall, IRConstant, IRName, IRWhile
 
         call = IRCall(func=IRName(id="unknown_func"), args=[], kwargs={})
         while_stmt = IRWhile(
@@ -1516,8 +1524,14 @@ for i in range(10):
 
     def test_for_loop_non_name_target(self):
         """Test for loop with non-name target."""
-        from code_scalpel.ir.nodes import (IRAssign, IRAttribute, IRCall,
-                                           IRConstant, IRFor, IRName)
+        from code_scalpel.ir.nodes import (
+            IRAssign,
+            IRAttribute,
+            IRCall,
+            IRConstant,
+            IRFor,
+            IRName,
+        )
 
         # For loop target is attribute, not simple name
         attr = IRAttribute(value=IRName(id="obj"), attr="x")
@@ -1711,8 +1725,7 @@ while True:
 
     def test_bool_op_with_none_value_in_chain(self):
         """Test bool op where one value evaluates to None."""
-        from code_scalpel.ir.nodes import (IRAssign, IRBoolOp, IRCall,
-                                           IRConstant, IRName)
+        from code_scalpel.ir.nodes import IRAssign, IRBoolOp, IRCall, IRConstant, IRName
         from code_scalpel.ir.operators import BoolOperator
 
         # and with an unevaluable call

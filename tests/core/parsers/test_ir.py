@@ -10,9 +10,22 @@ Tests cover:
 import pytest
 
 from code_scalpel.ir import (  # Nodes; Operators; Semantics; Normalizers
-    BinaryOperator, CompareOperator, IRAssign, IRBinaryOp, IRCompare,
-    IRConstant, IRFunctionDef, IRIf, IRModule, IRName, IRParameter,
-    JavaScriptSemantics, PythonNormalizer, PythonSemantics, SourceLocation)
+    BinaryOperator,
+    CompareOperator,
+    IRAssign,
+    IRBinaryOp,
+    IRCompare,
+    IRConstant,
+    IRFunctionDef,
+    IRIf,
+    IRModule,
+    IRName,
+    IRParameter,
+    JavaScriptSemantics,
+    PythonNormalizer,
+    PythonSemantics,
+    SourceLocation,
+)
 
 
 class TestIRNodes:

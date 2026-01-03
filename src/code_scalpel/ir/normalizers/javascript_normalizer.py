@@ -28,13 +28,47 @@ import warnings
 from typing import Any, List, Optional, Union, cast
 
 from ..nodes import (  # [20251215_FEATURE] v2.0.0 - New IR nodes for polyglot support
-    IRAssign, IRAttribute, IRAugAssign, IRBinaryOp, IRBoolOp, IRBreak, IRCall,
-    IRClassDef, IRCompare, IRConstant, IRContinue, IRDict, IRExport, IRExpr,
-    IRExprStmt, IRFor, IRFunctionDef, IRIf, IRImport, IRList, IRModule, IRName,
-    IRNode, IRParameter, IRRaise, IRReturn, IRSubscript, IRSwitch, IRTernary,
-    IRTry, IRUnaryOp, IRWhile, SourceLocation)
-from ..operators import (AugAssignOperator, BinaryOperator, BoolOperator,
-                         CompareOperator, UnaryOperator)
+    IRAssign,
+    IRAttribute,
+    IRAugAssign,
+    IRBinaryOp,
+    IRBoolOp,
+    IRBreak,
+    IRCall,
+    IRClassDef,
+    IRCompare,
+    IRConstant,
+    IRContinue,
+    IRDict,
+    IRExport,
+    IRExpr,
+    IRExprStmt,
+    IRFor,
+    IRFunctionDef,
+    IRIf,
+    IRImport,
+    IRList,
+    IRModule,
+    IRName,
+    IRNode,
+    IRParameter,
+    IRRaise,
+    IRReturn,
+    IRSubscript,
+    IRSwitch,
+    IRTernary,
+    IRTry,
+    IRUnaryOp,
+    IRWhile,
+    SourceLocation,
+)
+from ..operators import (
+    AugAssignOperator,
+    BinaryOperator,
+    BoolOperator,
+    CompareOperator,
+    UnaryOperator,
+)
 from .base import BaseNormalizer
 
 # =============================================================================

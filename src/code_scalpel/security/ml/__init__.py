@@ -7,8 +7,7 @@ This module contains ML-based security analysis:
 - ml_vulnerability_predictor.py: ML-based vulnerability prediction
 """
 
-from .ml_vulnerability_predictor import (VulnerabilityPrediction,
-                                         VulnerabilityPredictor)
+from .ml_vulnerability_predictor import VulnerabilityPrediction, VulnerabilityPredictor
 
 __all__ = [
     "VulnerabilityPredictor",

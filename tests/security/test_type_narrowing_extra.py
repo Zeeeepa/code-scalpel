@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from textwrap import dedent
 
-from code_scalpel.polyglot.typescript.type_narrowing import (NarrowedType,
-                                                             NarrowingResult,
-                                                             TypeNarrowing)
+from code_scalpel.polyglot.typescript.type_narrowing import (
+    NarrowedType,
+    NarrowingResult,
+    TypeNarrowing,
+)
 
 # [20251216_TEST] Cover regex fallback and taint helpers
 

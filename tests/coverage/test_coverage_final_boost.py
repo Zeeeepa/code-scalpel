@@ -66,8 +66,9 @@ class TestAutonomyIntegrationsCoverage:
     def test_langgraph_create_graph(self):
         """[20251217_TEST] Cover LangGraph graph creation."""
         try:
-            from code_scalpel.autonomy.integrations.langgraph import \
-                create_scalpel_fix_graph
+            from code_scalpel.autonomy.integrations.langgraph import (
+                create_scalpel_fix_graph,
+            )
         except ImportError:
             pytest.skip("LangGraph not available")
         graph = create_scalpel_fix_graph()
@@ -76,8 +77,9 @@ class TestAutonomyIntegrationsCoverage:
     def test_crewai_crew_creation(self):
         """[20251217_TEST] Cover CrewAI crew creation."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                create_scalpel_fix_crew
+            from code_scalpel.autonomy.integrations.crewai import (
+                create_scalpel_fix_crew,
+            )
         except ImportError:
             pytest.skip("CrewAI not available")
         with patch("code_scalpel.autonomy.integrations.crewai.Agent"):
@@ -105,8 +107,7 @@ class TestErrorToDiffFinalGaps:
 
     def test_test_fix_generator(self):
         """[20251217_TEST] Cover TestFixGenerator paths."""
-        from code_scalpel.autonomy.error_to_diff import (ErrorToDiffEngine,
-                                                         ErrorType)
+        from code_scalpel.autonomy.error_to_diff import ErrorToDiffEngine, ErrorType
 
         engine = ErrorToDiffEngine(project_root="/tmp")
         error_output = "AssertionError: assert 10 == 5"
@@ -130,8 +131,7 @@ class TestPolicyEngineCoverage:
 
     def test_semantic_analyzer(self):
         """[20251217_TEST] Cover semantic analyzer."""
-        from code_scalpel.policy_engine.semantic_analyzer import \
-            SemanticAnalyzer
+        from code_scalpel.policy_engine.semantic_analyzer import SemanticAnalyzer
 
         analyzer = SemanticAnalyzer()
         code = "cursor.execute('SELECT * FROM users WHERE id=' + user_id)"

@@ -7,8 +7,11 @@ Additional coverage for TestGenerator utility helpers and fallbacks.
 import ast
 from fractions import Fraction
 
-from code_scalpel.generators.test_generator import (GeneratedTestSuite,
-                                                    TestCase, TestGenerator)
+from code_scalpel.generators.test_generator import (
+    GeneratedTestSuite,
+    TestCase,
+    TestGenerator,
+)
 
 
 def test_to_pytest_true_and_false_assertions():

@@ -17,9 +17,16 @@ try:
     LANGGRAPH_AVAILABLE = True
     try:
         from code_scalpel.autonomy.integrations.langgraph import (
-            ScalpelState, analyze_error_node, apply_fix_node,
-            create_scalpel_fix_graph, escalate_node, fix_passed,
-            generate_fix_node, has_valid_fixes, validate_fix_node)
+            ScalpelState,
+            analyze_error_node,
+            apply_fix_node,
+            create_scalpel_fix_graph,
+            escalate_node,
+            fix_passed,
+            generate_fix_node,
+            has_valid_fixes,
+            validate_fix_node,
+        )
     except ImportError:
         LANGGRAPH_AVAILABLE = False
 except ImportError:

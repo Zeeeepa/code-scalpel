@@ -10,8 +10,12 @@ import unittest
 # Add src directory to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from code_scalpel.integrations import (AnalysisResult, AutogenScalpel,
-                                       CrewAIScalpel, RefactorResult)
+from code_scalpel.integrations import (
+    AnalysisResult,
+    AutogenScalpel,
+    CrewAIScalpel,
+    RefactorResult,
+)
 from code_scalpel.integrations.rest_api_server import create_app
 
 
@@ -414,8 +418,10 @@ class TestMCPServerConfig(unittest.TestCase):
 
     def test_create_app_with_custom_config(self):
         """Test creating app with custom config."""
-        from code_scalpel.integrations.rest_api_server import (MCPServerConfig,
-                                                               create_app)
+        from code_scalpel.integrations.rest_api_server import (
+            MCPServerConfig,
+            create_app,
+        )
 
         config = MCPServerConfig(cache_enabled=False)
         app = create_app(config)
@@ -427,8 +433,10 @@ class TestMCPServerConfig(unittest.TestCase):
 
     def test_code_size_limit_enforced(self):
         """Test that code size limit is enforced."""
-        from code_scalpel.integrations.rest_api_server import (MCPServerConfig,
-                                                               create_app)
+        from code_scalpel.integrations.rest_api_server import (
+            MCPServerConfig,
+            create_app,
+        )
 
         # Create app with very small max code size
         config = MCPServerConfig(max_code_size=10)

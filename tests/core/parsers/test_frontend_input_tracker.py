@@ -16,8 +16,12 @@ Tests:
 import pytest
 
 from code_scalpel.integrations.protocol_analyzers.frontend.input_tracker import (
-    DangerousSinkType, FrontendFramework, FrontendInputTracker,
-    InputSourceType, get_xss_risks)
+    DangerousSinkType,
+    FrontendFramework,
+    FrontendInputTracker,
+    InputSourceType,
+    get_xss_risks,
+)
 
 # =============================================================================
 # Framework Detection Tests

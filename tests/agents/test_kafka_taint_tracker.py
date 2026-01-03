@@ -14,9 +14,17 @@ Tests cover:
 import pytest
 
 from code_scalpel.integrations.protocol_analyzers.kafka.taint_tracker import (
-    KafkaAnalysisResult, KafkaConsumer, KafkaLibrary, KafkaPatternType,
-    KafkaProducer, KafkaRiskLevel, KafkaTaintTracker, KafkaTopicInfo,
-    analyze_kafka_file, get_kafka_taint_bridges)
+    KafkaAnalysisResult,
+    KafkaConsumer,
+    KafkaLibrary,
+    KafkaPatternType,
+    KafkaProducer,
+    KafkaRiskLevel,
+    KafkaTaintTracker,
+    KafkaTopicInfo,
+    analyze_kafka_file,
+    get_kafka_taint_bridges,
+)
 
 # =============================================================================
 # Test Fixtures

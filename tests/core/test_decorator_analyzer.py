@@ -5,7 +5,10 @@ Tests for TypeScript Decorator Analyzer.
 """
 
 from code_scalpel.polyglot.typescript.decorator_analyzer import (
-    Decorator, DecoratorAnalyzer, extract_decorators_from_code)
+    Decorator,
+    DecoratorAnalyzer,
+    extract_decorators_from_code,
+)
 
 
 class TestDecoratorExtraction:

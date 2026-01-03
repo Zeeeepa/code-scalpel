@@ -6,8 +6,7 @@ Tests for Bundler/Module Alias Resolver.
 
 import json
 
-from code_scalpel.polyglot.alias_resolver import (AliasResolver,
-                                                  create_alias_resolver)
+from code_scalpel.polyglot.alias_resolver import AliasResolver, create_alias_resolver
 
 
 class TestTsconfigAliases:

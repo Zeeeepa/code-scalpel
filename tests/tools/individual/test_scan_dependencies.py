@@ -20,10 +20,13 @@ from unittest.mock import patch
 
 import pytest
 
-from code_scalpel.mcp.server import (DependencyInfo, DependencyScanResult,
-                                     DependencyVulnerability,
-                                     _scan_dependencies_sync,
-                                     scan_dependencies)
+from code_scalpel.mcp.server import (
+    DependencyInfo,
+    DependencyScanResult,
+    DependencyVulnerability,
+    _scan_dependencies_sync,
+    scan_dependencies,
+)
 
 
 class TestDependencyScanResult:

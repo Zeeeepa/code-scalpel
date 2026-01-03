@@ -17,9 +17,13 @@ import pytest
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from code_scalpel.autonomy.sandbox import (FileChange, LintResult,
-                                           SandboxExecutor, SandboxResult,
-                                           TestResult)
+from code_scalpel.autonomy.sandbox import (
+    FileChange,
+    LintResult,
+    SandboxExecutor,
+    SandboxResult,
+    TestResult,
+)
 
 
 class TestFileChange:

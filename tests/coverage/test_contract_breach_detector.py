@@ -5,8 +5,14 @@ Tests for Contract Breach Detector.
 """
 
 from code_scalpel.polyglot.contract_breach_detector import (
-    BreachType, ContractBreachDetector, Edge, Node, Severity, UnifiedGraph,
-    detect_breaches)
+    BreachType,
+    ContractBreachDetector,
+    Edge,
+    Node,
+    Severity,
+    UnifiedGraph,
+    detect_breaches,
+)
 
 
 class TestUnifiedGraph:

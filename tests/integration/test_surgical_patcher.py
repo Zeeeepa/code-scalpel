@@ -5,10 +5,12 @@ Tests the precision code modification capabilities for safe LLM-driven refactori
 
 import pytest
 
-from code_scalpel.surgical_patcher import (SurgicalPatcher,
-                                           update_class_in_file,
-                                           update_function_in_file,
-                                           update_method_in_file)
+from code_scalpel.surgical_patcher import (
+    SurgicalPatcher,
+    update_class_in_file,
+    update_function_in_file,
+    update_method_in_file,
+)
 
 
 class TestSurgicalPatcher:

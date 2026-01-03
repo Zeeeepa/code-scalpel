@@ -4,8 +4,7 @@
 
 import json
 
-from code_scalpel.integrations.rest_api_server import (MCPServerConfig,
-                                                       create_app)
+from code_scalpel.integrations.rest_api_server import MCPServerConfig, create_app
 
 
 def _client(max_code_size: int = 100000):

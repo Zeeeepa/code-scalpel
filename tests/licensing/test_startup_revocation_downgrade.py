@@ -20,8 +20,7 @@ def test_revoked_license_downgrades_at_startup(
     crl_path = write_hs256_crl_jwt(revoked_jtis=[jti])
     set_hs256_license_env(license_path=str(license_path), crl_path=str(crl_path))
 
-    from code_scalpel.licensing.authorization import \
-        compute_effective_tier_for_startup
+    from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
     from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
     effective, warning = compute_effective_tier_for_startup(

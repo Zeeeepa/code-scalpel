@@ -9,8 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestErrorToDiffFinalCoverage:
@@ -111,8 +112,9 @@ class TestMoreBranchCoverage:
 
     def test_type_inference_with_complex_type(self):
         """Cover complex type inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x: dict[str, list[int]] = {}")
@@ -150,8 +152,7 @@ class TestMoreBranchCoverage:
 
     def test_refactor_with_docstring(self):
         """Cover docstring handling in refactor."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
         original = '\ndef documented():\n    """This is a docstring."""\n    pass\n'
@@ -167,8 +168,7 @@ class TestFinalBranchCoverage:
 
     def test_taint_tracker_medium_sanitizer(self):
         """Cover MEDIUM level sanitizer."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.MEDIUM)
@@ -179,8 +179,7 @@ class TestFinalBranchCoverage:
 
     def test_symbolic_engine_with_string_ops(self):
         """Cover string operations in symbolic engine."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef concat(a, b):\n    return a + b\n"
         analyzer = SymbolicAnalyzer()
@@ -223,8 +222,9 @@ class TestFinalBranchCoverage:
 
     def test_unified_sink_with_ldap(self):
         """Cover LDAP sink detection."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         code = "ldap.search(user_filter)"
@@ -255,7 +255,11 @@ class TestFinalBranchCoverage:
     def test_contract_breach_detector(self):
         """[20251219_TEST] Cover contract breach detection with proper initialization."""
         from code_scalpel.polyglot.contract_breach_detector import (
-            ContractBreachDetector, Edge, Node, UnifiedGraph)
+            ContractBreachDetector,
+            Edge,
+            Node,
+            UnifiedGraph,
+        )
 
         graph = UnifiedGraph()
         java_node = Node(

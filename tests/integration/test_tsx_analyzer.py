@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef
-from code_scalpel.polyglot.tsx_analyzer import (detect_server_directive,
-                                                has_jsx_syntax,
-                                                is_react_component)
+from code_scalpel.polyglot.tsx_analyzer import (
+    detect_server_directive,
+    has_jsx_syntax,
+    is_react_component,
+)
 
 # [20251216_TEST] Cover JSX detection and component classification paths
 

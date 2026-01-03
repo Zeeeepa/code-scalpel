@@ -355,8 +355,11 @@ class TestSymbolicCaching:
         import time
         from pathlib import Path
 
-        from code_scalpel.cache.unified_cache import (AnalysisCache,
-                                                      CacheConfig, reset_cache)
+        from code_scalpel.cache.unified_cache import (
+            AnalysisCache,
+            CacheConfig,
+            reset_cache,
+        )
 
         # Reset global cache to ensure clean state
         reset_cache()
@@ -373,8 +376,9 @@ class TestSymbolicCaching:
             cache_module.get_cache = lambda *args, **kwargs: cache
 
             try:
-                from code_scalpel.symbolic_execution_tools.engine import \
-                    SymbolicAnalyzer
+                from code_scalpel.symbolic_execution_tools.engine import (
+                    SymbolicAnalyzer,
+                )
 
                 analyzer = SymbolicAnalyzer(enable_cache=True)
                 code = """
@@ -413,8 +417,7 @@ else:
 
     def test_symbolic_analyzer_cache_disabled(self):
         """Test that caching can be disabled."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         analyzer = SymbolicAnalyzer(enable_cache=False)
         assert analyzer._cache is None
@@ -431,8 +434,11 @@ else:
         import tempfile
         from pathlib import Path
 
-        from code_scalpel.cache.unified_cache import (AnalysisCache,
-                                                      CacheConfig, reset_cache)
+        from code_scalpel.cache.unified_cache import (
+            AnalysisCache,
+            CacheConfig,
+            reset_cache,
+        )
 
         reset_cache()
 
@@ -446,8 +452,9 @@ else:
             cache_module.get_cache = lambda *args, **kwargs: cache
 
             try:
-                from code_scalpel.symbolic_execution_tools.engine import \
-                    SymbolicAnalyzer
+                from code_scalpel.symbolic_execution_tools.engine import (
+                    SymbolicAnalyzer,
+                )
 
                 code = "x = 10"
 

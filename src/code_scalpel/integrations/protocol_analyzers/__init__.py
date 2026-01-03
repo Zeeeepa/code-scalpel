@@ -22,6 +22,7 @@ Usage:
 """
 
 from .frontend import FrontendAnalysisResult, FrontendInputTracker, InputSource
+
 # [20251225_FEATURE] Re-export main classes from each subdirectory
 from .graphql import GraphQLSchema, GraphQLSchemaDrift, GraphQLSchemaTracker
 from .grpc import GrpcContract, GrpcContractAnalyzer, GrpcService

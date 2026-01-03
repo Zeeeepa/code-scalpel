@@ -3,9 +3,14 @@ import os
 import networkx as nx
 import pytest
 
-from code_scalpel.pdg_tools.utils import (NodeInfo, PDGUtils, export_pdg,
-                                          find_paths, get_node_info,
-                                          import_pdg)
+from code_scalpel.pdg_tools.utils import (
+    NodeInfo,
+    PDGUtils,
+    export_pdg,
+    find_paths,
+    get_node_info,
+    import_pdg,
+)
 
 
 class TestPDGUtils:

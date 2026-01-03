@@ -65,8 +65,7 @@ from pathlib import Path
 from typing import Any, Callable, Generator, Optional
 
 try:
-    from tree_sitter import (Language, Node,  # type: ignore[import-untyped]
-                             Parser, Tree)
+    from tree_sitter import Language, Node, Parser, Tree  # type: ignore[import-untyped]
 
     TREE_SITTER_AVAILABLE = True
 except ImportError:

@@ -25,9 +25,15 @@ warnings.warn(
 
 # Re-export everything from new location for backward compatibility
 from code_scalpel.surgery.surgical_patcher import (  # Convenience functions
-    PatchLanguage, PatchResult, PolyglotPatcher, SurgicalPatcher,
-    UnifiedPatcher, update_class_in_file, update_function_in_file,
-    update_method_in_file)
+    PatchLanguage,
+    PatchResult,
+    PolyglotPatcher,
+    SurgicalPatcher,
+    UnifiedPatcher,
+    update_class_in_file,
+    update_function_in_file,
+    update_method_in_file,
+)
 
 __all__ = [
     "SurgicalPatcher",

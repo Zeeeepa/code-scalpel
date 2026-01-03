@@ -2,8 +2,7 @@ import pytest
 
 
 def test_type_evaporation_cross_file_matches_axios_and_router_decorators():
-    from code_scalpel.security.type_safety import \
-        analyze_type_evaporation_cross_file
+    from code_scalpel.security.type_safety import analyze_type_evaporation_cross_file
 
     ts_code = """
 // Frontend: template string base + axios call

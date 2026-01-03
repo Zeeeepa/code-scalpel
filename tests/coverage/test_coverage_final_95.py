@@ -8,8 +8,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from code_scalpel.security.analyzers.taint_tracker import \
-    TaintSource  # [20251225_BUGFIX]
+from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
+    TaintSource,
+)
 
 
 class TestASTBuilderCoverage:
@@ -219,8 +220,7 @@ class TestRefactorSimulatorCoverage:
 
     def test_simulate_inline(self):
         """[20251217_TEST] Cover inline simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         code = "\ndef helper():\n    return 42\n\ndef main():\n    x = helper()\n    return x\n"
         sim = RefactorSimulator()
@@ -229,8 +229,7 @@ class TestRefactorSimulatorCoverage:
 
     def test_simulate_safe_change(self):
         """[20251217_TEST] Cover safe change simulation."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         sim = RefactorSimulator()
         original = "def foo(x): return x + 1"
@@ -269,8 +268,9 @@ class TestTypeInferenceCoverage:
 
     def test_infer_nested_dict(self):
         """[20251217_TEST] Cover nested structure inference."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer('x = {"a": {"b": 1}}')
@@ -278,8 +278,9 @@ class TestTypeInferenceCoverage:
 
     def test_infer_generator_expr(self):
         """[20251217_TEST] Cover generator expression."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         result = engine.infer("x = (i*2 for i in range(10))")
@@ -291,8 +292,7 @@ class TestSymbolicEngineCoverage:
 
     def test_analyze_simple(self):
         """[20251217_TEST] Cover basic analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef simple(x):\n    if x > 0:\n        return x\n    return -x\n"
         analyzer = SymbolicAnalyzer()
@@ -301,8 +301,7 @@ class TestSymbolicEngineCoverage:
 
     def test_analyze_with_loop(self):
         """[20251217_TEST] Cover loop analysis."""
-        from code_scalpel.symbolic_execution_tools.engine import \
-            SymbolicAnalyzer
+        from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
 
         code = "\ndef loop_fn(n):\n    total = 0\n    for i in range(n):\n        total += i\n    return total\n"
         analyzer = SymbolicAnalyzer()
@@ -315,8 +314,7 @@ class TestStateManagerCoverage:
 
     def test_state_fork(self):
         """[20251217_TEST] Cover state forking."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         state.set_variable("x", 42)
@@ -325,8 +323,7 @@ class TestStateManagerCoverage:
 
     def test_state_multiple_vars(self):
         """[20251217_TEST] Cover multiple variable operations."""
-        from code_scalpel.symbolic_execution_tools.state_manager import \
-            SymbolicState
+        from code_scalpel.symbolic_execution_tools.state_manager import SymbolicState
 
         state = SymbolicState()
         state.set_variable("x", 1)

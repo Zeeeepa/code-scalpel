@@ -7,8 +7,13 @@ Tests the MCP interface, Pydantic models, and async wrapper.
 
 import pytest
 
-from code_scalpel.mcp.server import (ModuleInfo, PackageInfo, ProjectMapResult,
-                                     _get_project_map_sync, get_project_map)
+from code_scalpel.mcp.server import (
+    ModuleInfo,
+    PackageInfo,
+    ProjectMapResult,
+    _get_project_map_sync,
+    get_project_map,
+)
 
 # ============================================================================
 # Test Pydantic Models

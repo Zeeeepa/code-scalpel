@@ -54,8 +54,7 @@ ENTERPRISE TIER (Advanced Analysis & Optimization):
 """
 
 from .base import BaseNormalizer
-from .java_normalizer import \
-    JavaNormalizer  # [20251215_FEATURE] Export Java normalizer
+from .java_normalizer import JavaNormalizer  # [20251215_FEATURE] Export Java normalizer
 from .python_normalizer import PythonNormalizer
 from .tree_sitter_visitor import TreeSitterVisitor, VisitorContext
 

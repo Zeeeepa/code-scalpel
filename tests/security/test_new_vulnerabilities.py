@@ -157,7 +157,9 @@ class TestTaintTrackerIntegration:
         """Verify taint is marked dangerous for WEAK_CRYPTO sink."""
         from code_scalpel.security.analyzers import TaintInfo, TaintLevel
         from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
-            SecuritySink, TaintSource)
+            SecuritySink,
+            TaintSource,
+        )
 
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
@@ -171,7 +173,9 @@ class TestTaintTrackerIntegration:
         """Verify taint is marked dangerous for SSRF sink."""
         from code_scalpel.security.analyzers import TaintInfo, TaintLevel
         from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
-            SecuritySink, TaintSource)
+            SecuritySink,
+            TaintSource,
+        )
 
         taint = TaintInfo(
             source=TaintSource.USER_INPUT,
@@ -184,7 +188,9 @@ class TestTaintTrackerIntegration:
     def test_sink_patterns_registered(self):
         """Verify all new sink patterns are registered."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("hashlib.md5") == SecuritySink.WEAK_CRYPTO
         assert SINK_PATTERNS.get("hashlib.sha1") == SecuritySink.WEAK_CRYPTO
@@ -200,7 +206,9 @@ class TestXXEDetection:
     def test_xxe_elementtree_parse(self):
         """Detect XXE via xml.etree.ElementTree.parse with user input."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("xml.etree.ElementTree.parse") == SecuritySink.XXE
         assert SINK_PATTERNS.get("ElementTree.parse") == SecuritySink.XXE
@@ -209,7 +217,9 @@ class TestXXEDetection:
     def test_xxe_lxml_parse(self):
         """Detect XXE via lxml.etree.parse."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("lxml.etree.parse") == SecuritySink.XXE
         assert SINK_PATTERNS.get("lxml.etree.fromstring") == SecuritySink.XXE
@@ -218,7 +228,9 @@ class TestXXEDetection:
     def test_xxe_minidom(self):
         """Detect XXE via xml.dom.minidom."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("xml.dom.minidom.parse") == SecuritySink.XXE
         assert SINK_PATTERNS.get("minidom.parseString") == SecuritySink.XXE
@@ -226,14 +238,18 @@ class TestXXEDetection:
     def test_xxe_sax(self):
         """Detect XXE via xml.sax."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("xml.sax.parse") == SecuritySink.XXE
 
     def test_xxe_sanitizer_defusedxml(self):
         """Verify defusedxml is recognized as safe sanitizer."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SANITIZER_REGISTRY, SecuritySink)
+            SANITIZER_REGISTRY,
+            SecuritySink,
+        )
 
         assert "defusedxml.parse" in SANITIZER_REGISTRY
         assert "defusedxml.ElementTree.parse" in SANITIZER_REGISTRY
@@ -244,7 +260,9 @@ class TestXXEDetection:
         """Verify tainted data is dangerous for XXE sink."""
         from code_scalpel.security.analyzers import TaintInfo, TaintLevel
         from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
-            SecuritySink, TaintSource)
+            SecuritySink,
+            TaintSource,
+        )
 
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
         assert taint.is_dangerous_for(SecuritySink.XXE)
@@ -256,7 +274,9 @@ class TestSSTIDetection:
     def test_ssti_jinja2_template(self):
         """Detect SSTI via jinja2.Template with user input."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("jinja2.Template") == SecuritySink.SSTI
         assert SINK_PATTERNS.get("Environment.from_string") == SecuritySink.SSTI
@@ -265,7 +285,9 @@ class TestSSTIDetection:
     def test_ssti_mako_template(self):
         """Detect SSTI via mako.template.Template."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("mako.template.Template") == SecuritySink.SSTI
         assert SINK_PATTERNS.get("mako.Template") == SecuritySink.SSTI
@@ -273,21 +295,27 @@ class TestSSTIDetection:
     def test_ssti_django_template(self):
         """Detect SSTI via django.template.Template."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("django.template.Template") == SecuritySink.SSTI
 
     def test_ssti_tornado_template(self):
         """Detect SSTI via tornado.template.Template."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SINK_PATTERNS, SecuritySink)
+            SINK_PATTERNS,
+            SecuritySink,
+        )
 
         assert SINK_PATTERNS.get("tornado.template.Template") == SecuritySink.SSTI
 
     def test_ssti_sanitizer_render_template(self):
         """Verify render_template (file-based) is recognized as safe."""
         from code_scalpel.security.analyzers.taint_tracker import (
-            SANITIZER_REGISTRY, SecuritySink)
+            SANITIZER_REGISTRY,
+            SecuritySink,
+        )
 
         assert "render_template" in SANITIZER_REGISTRY
         assert "flask.render_template" in SANITIZER_REGISTRY
@@ -298,7 +326,9 @@ class TestSSTIDetection:
         """Verify tainted data is dangerous for SSTI sink."""
         from code_scalpel.security.analyzers import TaintInfo, TaintLevel
         from code_scalpel.security.analyzers.taint_tracker import (  # [20251225_BUGFIX]
-            SecuritySink, TaintSource)
+            SecuritySink,
+            TaintSource,
+        )
 
         taint = TaintInfo(source=TaintSource.USER_INPUT, level=TaintLevel.HIGH)
         assert taint.is_dangerous_for(SecuritySink.SSTI)

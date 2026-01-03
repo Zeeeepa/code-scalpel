@@ -121,8 +121,7 @@ class TestMCPToolVerification:
 
     def test_security_scan_sql_injection(self):
         """Test security_scan detects SQL injection (CWE-89)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(VULNERABLE_PYTHON_CODE)
@@ -134,8 +133,7 @@ class TestMCPToolVerification:
 
     def test_security_scan_command_injection(self):
         """Test security_scan detects command injection (CWE-78)."""
-        from code_scalpel.security.analyzers.security_analyzer import \
-            SecurityAnalyzer
+        from code_scalpel.security.analyzers.security_analyzer import SecurityAnalyzer
 
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(VULNERABLE_PYTHON_CODE)
@@ -147,8 +145,9 @@ class TestMCPToolVerification:
 
     def test_unified_sink_detect_java(self):
         """Test unified_sink_detect with Java code (v2.5.0 feature)."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         # Use string "java" not enum
@@ -164,8 +163,9 @@ class TestMCPToolVerification:
 
     def test_unified_sink_confidence_scores(self):
         """Test that unified_sink_detect returns confidence scores (v2.2.0 feature)."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         sinks = detector.detect_sinks(VULNERABLE_JAVA_CODE, "java")
@@ -176,8 +176,9 @@ class TestMCPToolVerification:
 
     def test_unified_sink_owasp_mapping(self):
         """Test OWASP Top 10 mapping (v2.5.0 Guardian feature)."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
         sinks = detector.detect_sinks(VULNERABLE_JAVA_CODE, "java")
@@ -359,8 +360,7 @@ def abs_value(x):
 
     def test_simulate_refactor_safe_change(self):
         """Test simulate_refactor correctly identifies safe changes."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         original = '''def greet(name):
     return f"Hello, {name}"'''
@@ -377,8 +377,7 @@ def abs_value(x):
 
     def test_simulate_refactor_detects_security_regression(self):
         """Test simulate_refactor detects security regressions."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         # Test structural change detection (security regression detection is separate)
         original = """def get_user(user_id):
@@ -419,8 +418,9 @@ def abs_value(x):
 
     def test_cross_file_security_scan(self):
         """Test cross_file_security_scan tracks taint across modules."""
-        from code_scalpel.security.analyzers import \
-            CrossFileTaintTracker  # [20251225_BUGFIX]
+        from code_scalpel.security.analyzers import (  # [20251225_BUGFIX]
+            CrossFileTaintTracker,
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create two files with taint flow
@@ -459,7 +459,9 @@ def get_user(user_id):
         import os
 
         from code_scalpel.policy_engine.crypto_verify import (
-            CryptographicPolicyVerifier, SecurityError)
+            CryptographicPolicyVerifier,
+            SecurityError,
+        )
 
         # Ensure secret is not set
         old_secret = os.environ.pop("SCALPEL_MANIFEST_SECRET", None)
@@ -833,8 +835,9 @@ class TestMCPToolRoadmapCompliance:
 
     def test_v220_nexus_confidence_scores(self):
         """v2.2.0 Nexus: Cross-language confidence scores."""
-        from code_scalpel.security.analyzers.unified_sink_detector import \
-            UnifiedSinkDetector
+        from code_scalpel.security.analyzers.unified_sink_detector import (
+            UnifiedSinkDetector,
+        )
 
         detector = UnifiedSinkDetector()
 

@@ -207,20 +207,39 @@ TOTAL ESTIMATED TESTS: 570 tests
 """
 
 from .alias_resolver import AliasResolver, create_alias_resolver
-from .analyzer import (NormalizedClass, NormalizedFunction, TSAnalysisResult,
-                       TypeScriptAnalyzer, normalize_typescript_class,
-                       normalize_typescript_function)
-from .decorator_analyzer import (SECURITY_SINK_DECORATORS, DecoratorAnalyzer,
-                                 extract_decorators_from_code)
+from .analyzer import (
+    NormalizedClass,
+    NormalizedFunction,
+    TSAnalysisResult,
+    TypeScriptAnalyzer,
+    normalize_typescript_class,
+    normalize_typescript_function,
+)
+from .decorator_analyzer import (
+    SECURITY_SINK_DECORATORS,
+    DecoratorAnalyzer,
+    extract_decorators_from_code,
+)
+
 # [20251224_REFACTOR] Updated imports for new location
-from .parser import (Decorator, TSNode, TSNodeType, TSParseResult,
-                     TypeScriptParser)
-from .tsx_analyzer import (ReactComponentInfo, detect_server_directive,
-                           has_jsx_syntax, is_react_component,
-                           normalize_jsx_syntax)
-from .type_narrowing import (REDUCED_RISK_TYPES, SAFE_PRIMITIVE_TYPES,
-                             BranchState, NarrowedType, NarrowingResult,
-                             TypeGuard, TypeNarrowing, analyze_type_narrowing)
+from .parser import Decorator, TSNode, TSNodeType, TSParseResult, TypeScriptParser
+from .tsx_analyzer import (
+    ReactComponentInfo,
+    detect_server_directive,
+    has_jsx_syntax,
+    is_react_component,
+    normalize_jsx_syntax,
+)
+from .type_narrowing import (
+    REDUCED_RISK_TYPES,
+    SAFE_PRIMITIVE_TYPES,
+    BranchState,
+    NarrowedType,
+    NarrowingResult,
+    TypeGuard,
+    TypeNarrowing,
+    analyze_type_narrowing,
+)
 
 __all__ = [
     # Parser

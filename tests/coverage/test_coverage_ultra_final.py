@@ -14,24 +14,23 @@ class TestAutogenExceptionPaths:
 
     def test_analyze_error_analysis_exception(self):
         """Test when analysis itself throws exception."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_analyze_error_impl
+        from code_scalpel.autonomy.integrations.autogen import (
+            scalpel_analyze_error_impl,
+        )
 
         result = scalpel_analyze_error_impl("x" * 10000, "error")
         assert "success" in result
 
     def test_apply_fix_parse_exception(self):
         """Test apply_fix with code that triggers exception."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_apply_fix_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_apply_fix_impl
 
         result = scalpel_apply_fix_impl("def :", "fix")
         assert result["success"] is False
 
     def test_validate_general_exception(self):
         """Test validate with code that triggers general exception."""
-        from code_scalpel.autonomy.integrations.autogen import \
-            scalpel_validate_impl
+        from code_scalpel.autonomy.integrations.autogen import scalpel_validate_impl
 
         scalpel_validate_impl("")
 
@@ -41,8 +40,7 @@ class TestLanggraphExceptionPaths:
 
     def test_generate_fix_with_exception(self):
         """Test generate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            generate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import generate_fix_node
 
         state = {
             "code": "x = 1",
@@ -56,8 +54,7 @@ class TestLanggraphExceptionPaths:
 
     def test_validate_fix_with_exception(self):
         """Test validate_fix_node when exception occurs."""
-        from code_scalpel.autonomy.integrations.langgraph import \
-            validate_fix_node
+        from code_scalpel.autonomy.integrations.langgraph import validate_fix_node
 
         state = {
             "code": "def foo(:",
@@ -76,8 +73,9 @@ class TestCrewAIExceptionPaths:
     def test_crewai_analyze_exception(self):
         """Test crewai analyze error with exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                scalpel_analyze_error_impl
+            from code_scalpel.autonomy.integrations.crewai import (
+                scalpel_analyze_error_impl,
+            )
 
             result = scalpel_analyze_error_impl("", "error")
             assert "success" in result
@@ -87,8 +85,7 @@ class TestCrewAIExceptionPaths:
     def test_crewai_apply_fix_exception(self):
         """Test crewai apply fix exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                scalpel_apply_fix_impl
+            from code_scalpel.autonomy.integrations.crewai import scalpel_apply_fix_impl
 
             result = scalpel_apply_fix_impl("def :", "fix")
             assert result["success"] is False
@@ -98,8 +95,7 @@ class TestCrewAIExceptionPaths:
     def test_crewai_validate_exception(self):
         """Test crewai validate exception path."""
         try:
-            from code_scalpel.autonomy.integrations.crewai import \
-                scalpel_validate_impl
+            from code_scalpel.autonomy.integrations.crewai import scalpel_validate_impl
 
             result = scalpel_validate_impl("def foo(:")
             assert result["success"] is False
@@ -197,8 +193,7 @@ class TestRefactorSimulatorExceptionPaths:
 
     def test_simulate_with_syntax_error(self):
         """Test simulate with syntax error in modified code."""
-        from code_scalpel.generators.refactor_simulator import \
-            RefactorSimulator
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
 
         simulator = RefactorSimulator()
         original = "def foo(): return 1"
@@ -260,8 +255,9 @@ class TestTypeInferenceExceptionPaths:
 
     def test_infer_with_generic_types(self):
         """Test type inference with generic types."""
-        from code_scalpel.symbolic_execution_tools.type_inference import \
-            TypeInferenceEngine
+        from code_scalpel.symbolic_execution_tools.type_inference import (
+            TypeInferenceEngine,
+        )
 
         engine = TypeInferenceEngine()
         code = '\nfrom typing import List, Dict\n\ndef process(items: List[int]) -> Dict[str, int]:\n    return {"count": len(items)}\n'
@@ -274,8 +270,7 @@ class TestTaintTrackerExceptionPaths:
 
     def test_taint_tracker_fork(self):
         """Test TaintTracker fork method."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user_input")
@@ -285,8 +280,7 @@ class TestTaintTrackerExceptionPaths:
 
     def test_taint_tracker_clear(self):
         """Test TaintTracker clear method."""
-        from code_scalpel.security.analyzers import (TaintInfo, TaintLevel,
-                                                     TaintTracker)
+        from code_scalpel.security.analyzers import TaintInfo, TaintLevel, TaintTracker
 
         tracker = TaintTracker()
         taint_info = TaintInfo(level=TaintLevel.HIGH, source="user_input")

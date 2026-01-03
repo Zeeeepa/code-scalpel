@@ -10,11 +10,9 @@ If these tests pass, Operation Redemption is COMPLETE.
 from z3 import Bool, Int, IntSort
 
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer
-from code_scalpel.symbolic_execution_tools.constraint_solver import \
-    ConstraintSolver
+from code_scalpel.symbolic_execution_tools.constraint_solver import ConstraintSolver
 from code_scalpel.symbolic_execution_tools.engine import SymbolicAnalyzer
-from code_scalpel.symbolic_execution_tools.ir_interpreter import \
-    IRSymbolicInterpreter
+from code_scalpel.symbolic_execution_tools.ir_interpreter import IRSymbolicInterpreter
 
 
 class SymbolicInterpreter:
