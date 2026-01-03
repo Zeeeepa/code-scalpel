@@ -145,6 +145,51 @@ isort src/ tests/
 | **Too many statements** | `ruff check --select PLR0912 src/` | P1 | ❌ | 156 violations | ≤ 80 | > 150 |
 | **Duplicate code detection** | Hash analysis of function/class definitions | P2 | ⚠️ | 227 duplicates (95% intentional) | Document and categorize | > 50 actual duplicates |
 
+**File Length Findings (>1000 LOC) and Refactor Plan**
+| File | Lines | Refactor plan |
+|------|-------|---------------|
+| [src/code_scalpel/mcp/server.py](src/code_scalpel/mcp/server.py) | 20,136 | Split into protocol adapters (REST/WebSocket), request routing, auth middleware, and tool registry modules; move schemas to separate files. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_ast.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_ast.py) | 4,049 | Extract node visitors per feature (lint, type hints, docstrings), isolate helper utilities, and share traversal mixins. |
+| [src/code_scalpel/surgery/surgical_extractor.py](src/code_scalpel/surgery/surgical_extractor.py) | 3,688 | Separate diff generation, node matching, and rewrite strategies into submodules; add strategy registry. |
+| [src/code_scalpel/surgery/surgical_patcher.py](src/code_scalpel/surgery/surgical_patcher.py) | 2,884 | Split patch planning, application, and rollback/validation into focused modules with shared abstractions. |
+| [src/code_scalpel/security/analyzers/taint_tracker.py](src/code_scalpel/security/analyzers/taint_tracker.py) | 2,516 | Break into graph builder, sink/source catalogs, and path exploration; move sanitizer rules to data files. |
+| [src/code_scalpel/generators/refactor_simulator.py](src/code_scalpel/generators/refactor_simulator.py) | 1,993 | Isolate simulation steps (parse, mutate, validate) and result rendering; reuse common diff utilities. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_bandit.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_bandit.py) | 1,905 | Split rule adapters per severity, shared AST helpers, and reporting layer. |
+| [src/code_scalpel/ast_tools/call_graph.py](src/code_scalpel/ast_tools/call_graph.py) | 1,834 | Separate graph construction, resolution, and export; move visitors to dedicated modules. |
+| [src/code_scalpel/ir/normalizers/javascript_normalizer.py](src/code_scalpel/ir/normalizers/javascript_normalizer.py) | 1,831 | Extract node mappers per syntax kind; share literal/identifier normalization helpers. |
+| [src/code_scalpel/security/analyzers/cross_file_taint.py](src/code_scalpel/security/analyzers/cross_file_taint.py) | 1,695 | Split into taint propagation engine, interprocedural graph linking, and report generation. |
+| [src/code_scalpel/code_parsers/java_parsers/java_parsers_javalang.py](src/code_scalpel/code_parsers/java_parsers/java_parsers_javalang.py) | 1,693 | Partition visitor rules by construct (classes, methods, expressions); centralize symbol table helpers. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_pylint.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_pylint.py) | 1,687 | Split rule adapters by category; share message formatting and node utilities. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_mypy.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_mypy.py) | 1,673 | Separate stub generation, error mapping, and config resolution modules. |
+| [src/code_scalpel/surgery/unified_extractor.py](src/code_scalpel/surgery/unified_extractor.py) | 1,668 | Break out language detectors, extractor strategies, and output assemblers; reduce monolithic functions. |
+| [src/code_scalpel/licensing/features.py](src/code_scalpel/licensing/features.py) | 1,593 | Split feature evaluation, policy enforcement, and serialization; move constants to config. |
+| [src/code_scalpel/ast_tools/import_resolver.py](src/code_scalpel/ast_tools/import_resolver.py) | 1,553 | Extract resolvers per language, cache layer, and cycle detection helpers; shrink long functions. |
+| [src/code_scalpel/generators/test_generator.py](src/code_scalpel/generators/test_generator.py) | 1,504 | Separate strategy selection, path enumeration, and code emission; template the output writers. |
+| [src/code_scalpel/analysis/code_analyzer.py](src/code_scalpel/analysis/code_analyzer.py) | 1,481 | Split metrics, dead-code detection, and refactor suggestions into submodules; shorten branching functions. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_code_quality.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_code_quality.py) | 1,454 | Divide rule adapters by linter domain; centralize reporting helpers. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_pydocstyle.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_pydocstyle.py) | 1,436 | Split docstring rule mapping from parsing; share formatting utilities. |
+| [src/code_scalpel/code_parsers/javascript_parsers/javascript_parsers_esprima.py](src/code_scalpel/code_parsers/javascript_parsers/javascript_parsers_esprima.py) | 1,425 | Partition per construct visitors; reuse normalization helpers; move diagnostics to separate module. |
+| [src/code_scalpel/symbolic_execution_tools/ir_interpreter.py](src/code_scalpel/symbolic_execution_tools/ir_interpreter.py) | 1,370 | Extract instruction handlers into table-driven registry; separate memory/state management. |
+| [src/code_scalpel/security/dependencies/schema_tracker.py](src/code_scalpel/security/dependencies/schema_tracker.py) | 1,366 | Split schema loaders, validators, and change detectors; cache normalization logic. |
+| [src/code_scalpel/integrations/protocol_analyzers/graphql/schema_tracker.py](src/code_scalpel/integrations/protocol_analyzers/graphql/schema_tracker.py) | 1,366 | Isolate schema diffing, validation rules, and reporter; reuse core schema utilities. |
+| [src/code_scalpel/security/analyzers/unified_sink_detector.py](src/code_scalpel/security/analyzers/unified_sink_detector.py) | 1,293 | Separate sink registry, taint matching, and reporting; externalize sink definitions. |
+| [src/code_scalpel/integrations/protocol_analyzers/kafka/taint_tracker.py](src/code_scalpel/integrations/protocol_analyzers/kafka/taint_tracker.py) | 1,264 | Split protocol parsing, taint propagation, and sink/source catalogs. |
+| [src/code_scalpel/policy_engine/code_policy_check/analyzer.py](src/code_scalpel/policy_engine/code_policy_check/analyzer.py) | 1,237 | Separate policy loading, rule evaluation, and remediation suggestions. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_flake8.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_flake8.py) | 1,228 | Split rule adapters by error class; centralize message mapping; share AST helpers. |
+| [src/code_scalpel/analysis/project_crawler.py](src/code_scalpel/analysis/project_crawler.py) | 1,218 | Break crawl orchestration, aggregation, and reporting into modules; shrink branch-heavy routines. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_ruff.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_ruff.py) | 1,191 | Isolate rule mapping, parsing, and reporting; reuse common adapters. |
+| [src/code_scalpel/integrations/protocol_analyzers/schema/drift_detector.py](src/code_scalpel/integrations/protocol_analyzers/schema/drift_detector.py) | 1,132 | Split schema loaders, drift rules, and reporting; add cache layer. |
+| [src/code_scalpel/code_parsers/java_parsers/java_parser_treesitter.py](src/code_scalpel/code_parsers/java_parsers/java_parser_treesitter.py) | 1,117 | Partition parse phases, symbol resolution, and diagnostics; share visitor utilities. |
+| [src/code_scalpel/cli.py](src/code_scalpel/cli.py) | 1,113 | Split CLI commands into subcommands/modules; move shared output formatting to helpers. |
+| [src/code_scalpel/ir/normalizers/python_normalizer.py](src/code_scalpel/ir/normalizers/python_normalizer.py) | 1,101 | Extract node mappers per construct; reuse literal/type normalization helpers. |
+| [src/code_scalpel/code_parsers/python_parsers/python_parsers_prospector.py](src/code_scalpel/code_parsers/python_parsers/python_parsers_prospector.py) | 1,091 | Split rule adapters and config handling; centralize message/diagnostic mapping. |
+| [src/code_scalpel/security/analyzers/security_analyzer.py](src/code_scalpel/security/analyzers/security_analyzer.py) | 1,084 | Separate vulnerability detection, classification, and reporting modules. |
+| [src/code_scalpel/ast_tools/cross_file_extractor.py](src/code_scalpel/ast_tools/cross_file_extractor.py) | 1,069 | Split dependency gathering, stitching logic, and output assembly; shorten branching paths. |
+| [src/code_scalpel/ir/normalizers/java_normalizer.py](src/code_scalpel/ir/normalizers/java_normalizer.py) | 1,066 | Extract grammar rule handlers; share normalization helpers with other languages. |
+| [src/code_scalpel/licensing/jwt_validator.py](src/code_scalpel/licensing/jwt_validator.py) | 1,050 | Separate JWT parsing, signature/claim validation, and error reporting modules. |
+| [src/code_scalpel/code_parsers/javascript_parsers/javascript_parsers_code_quality.py](src/code_scalpel/code_parsers/javascript_parsers/javascript_parsers_code_quality.py) | 1,048 | Split lint rule adapters; centralize diagnostics mapping and visitor helpers. |
+| [src/code_scalpel/governance/compliance_reporter.py](src/code_scalpel/governance/compliance_reporter.py) | 1,028 | Break into data collection, scoring, and report rendering modules; externalize templates. |
+
 ### 1.4 Code Smell Detection
 
 | Check | Tool | Priority | Status | Result | GO Threshold | NO-GO Threshold |
