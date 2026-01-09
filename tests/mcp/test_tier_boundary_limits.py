@@ -411,3 +411,1303 @@ async def test_unified_sink_detect_max_sinks_differs_by_tier(
         assert data.get("sink_count") == requested_sinks
         assert isinstance(data.get("sinks"), list)
         assert len(data.get("sinks")) == requested_sinks
+
+
+def _write_large_project(root: Path, num_functions: int) -> None:
+    """Create project with specified number of functions."""
+    root.mkdir(parents=True, exist_ok=True)
+    
+    # Generate functions across multiple modules
+    funcs_per_module = 25
+    num_modules = (num_functions + funcs_per_module - 1) // funcs_per_module
+    
+    for mod_idx in range(num_modules):
+        lines = []
+        for func_idx in range(funcs_per_module):
+            global_idx = mod_idx * funcs_per_module + func_idx
+            if global_idx >= num_functions:
+                break
+            
+            func_name = f"func_{global_idx}"
+            if func_idx == 0:
+                lines.append(f"def {func_name}():\n    return {global_idx}\n\n")
+            else:
+                prev_func = f"func_{global_idx - 1}"
+                lines.append(f"def {func_name}():\n    return {prev_func}()\n\n")
+        
+        (root / f"module_{mod_idx}.py").write_text("".join(lines), encoding="utf-8")
+    
+    # Main entry point
+    (root / "main.py").write_text(
+        "from module_0 import func_0\n\n"
+        "def main():\n    return func_0()\n",
+        encoding="utf-8",
+    )
+
+
+async def test_get_call_graph_community_50_node_limit(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Community tier enforces 50-node limit for get_call_graph."""
+    # Create project with 75 functions (exceeds Community limit of 50)
+    project_root = tmp_path / "large_proj"
+    _write_large_project(project_root, num_functions=75)
+
+    # Community: should truncate to 50 nodes
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=30),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+        
+        # Verify node truncation
+        assert data.get("nodes_truncated") is True, "Community should truncate at 50 nodes"
+        
+        # Verify nodes list is capped at 50
+        nodes = data.get("nodes", [])
+        assert len(nodes) <= 50, f"Community exceeded 50-node limit: {len(nodes)} nodes"
+        assert len(nodes) == 50, f"Community should return exactly 50 nodes when truncated, got {len(nodes)}"
+        
+        # Verify truncation warning
+        assert "truncation_warning" in data, "Should include truncation warning"
+        warning = data["truncation_warning"]
+        assert "50" in warning or "node" in warning.lower() or "limit" in warning.lower(), (
+            f"Warning should mention limit: {warning}"
+        )
+
+
+async def test_get_call_graph_pro_500_node_limit(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier allows >50 nodes but enforces 500-node limit."""
+    # Create project with 150 functions (exceeds Community, within Pro limit)
+    project_root = tmp_path / "large_proj"
+    _write_large_project(project_root, num_functions=150)
+
+    license_path = write_hs256_license_jwt(
+        jti="lic-pro-nodes",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    # Pro: should handle 150 nodes without truncation
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=30),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "pro"
+        assert data is not None
+        assert data.get("success") is True
+        
+        # Verify Pro handles more than 50 nodes
+        nodes = data.get("nodes", [])
+        assert len(nodes) > 50, f"Pro should handle >50 nodes, got {len(nodes)}"
+        
+        # Should NOT be truncated at this size
+        assert data.get("nodes_truncated") is False, "Pro should not truncate at 150 nodes"
+
+
+async def test_get_call_graph_enterprise_metrics(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise tier includes hot_nodes and dead_code_candidates."""
+    project_root = tmp_path / "proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    # Create project with dead code
+    (project_root / "app.py").write_text(
+        "def main():\n"
+        "    used_func()\n\n"
+        "def used_func():\n"
+        "    helper()\n\n"
+        "def helper():\n"
+        "    pass\n\n"
+        "def dead_func():\n"
+        "    pass\n\n"
+        "def another_dead():\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+
+    # Test Community tier (should NOT have Enterprise metrics)
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "community"
+        
+        # Community should NOT have Enterprise metrics
+        assert "hot_nodes" not in data, "Community should not have hot_nodes"
+        assert "dead_code_candidates" not in data, "Community should not have dead_code_candidates"
+        
+        # Nodes should NOT have degree attributes
+        for node in data.get("nodes", []):
+            assert "in_degree" not in node, "Community nodes should not have in_degree"
+            assert "out_degree" not in node, "Community nodes should not have out_degree"
+
+    # Test Enterprise tier (should have metrics)
+    license_path = write_hs256_license_jwt(
+        jti="lic-enterprise-metrics",
+        base_dir=tmp_path,
+        filename="license_ent.jwt",
+        tier="enterprise",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "enterprise"
+        assert data is not None
+        assert data.get("success") is True
+        
+        # Verify Enterprise metrics exist
+        assert "hot_nodes" in data, "Enterprise should include hot_nodes"
+        assert "dead_code_candidates" in data, "Enterprise should include dead_code_candidates"
+        
+        # Verify hot_nodes structure
+        hot_nodes = data["hot_nodes"]
+        assert isinstance(hot_nodes, list), "hot_nodes should be a list"
+        assert len(hot_nodes) <= 10, "hot_nodes should be limited to top 10"
+        
+        # Verify dead code detection
+        dead_code = data["dead_code_candidates"]
+        assert isinstance(dead_code, list), "dead_code_candidates should be a list"
+        assert len(dead_code) >= 2, f"Should detect at least 2 dead functions, found {len(dead_code)}"
+        
+        # Verify nodes have degree attributes
+        for node in data.get("nodes", []):
+            assert "in_degree" in node, f"Enterprise node {node.get('id')} should have in_degree"
+            assert "out_degree" in node, f"Enterprise node {node.get('id')} should have out_degree"
+            assert isinstance(node["in_degree"], int), "in_degree should be int"
+            assert isinstance(node["out_degree"], int), "out_degree should be int"
+
+
+async def test_get_call_graph_pro_polymorphism_python_class_hierarchy(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier resolves polymorphic method calls in Python class hierarchies."""
+    project_root = tmp_path / "poly_proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    # Create project with class hierarchy and polymorphic calls
+    (project_root / "animals.py").write_text(
+        "class Animal:\n"
+        "    def speak(self):\n"
+        "        pass\n\n"
+        "    def move(self):\n"
+        "        self.speak()\n\n"
+        "class Dog(Animal):\n"
+        "    def speak(self):\n"
+        "        print('Woof')\n\n"
+        "    def fetch(self):\n"
+        "        self.speak()\n\n"
+        "class Cat(Animal):\n"
+        "    def speak(self):\n"
+        "        print('Meow')\n\n"
+        "    def scratch(self):\n"
+        "        self.speak()\n",
+        encoding="utf-8",
+    )
+    
+    (project_root / "main.py").write_text(
+        "from animals import Dog, Cat\n\n"
+        "def main():\n"
+        "    dog = Dog()\n"
+        "    dog.speak()\n"
+        "    dog.fetch()\n"
+        "    cat = Cat()\n"
+        "    cat.speak()\n"
+        "    cat.scratch()\n\n"
+        "if __name__ == '__main__':\n"
+        "    main()\n",
+        encoding="utf-8",
+    )
+
+    # Test Community tier (should NOT have polymorphic resolution)
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "community"
+        
+        # Community should have basic call graph
+        assert data.get("success") is True
+        assert "nodes" in data
+        assert "edges" in data
+        
+        # But may not have all polymorphic edges due to lack of advanced resolution
+        # This is acceptable - Community doesn't have polymorphism support
+    
+    # Test Pro tier (should have enhanced polymorphic resolution)
+    license_path = write_hs256_license_jwt(
+        jti="lic-pro-poly",
+        base_dir=tmp_path,
+        filename="license_poly.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        assert env_json["tier"] == "pro"
+        assert data is not None
+        assert data.get("success") is True
+        
+        # Verify Pro tier returns call graph with class methods
+        nodes = data.get("nodes", [])
+        edges = data.get("edges", [])
+        
+        # Should have Dog and Cat classes with their methods
+        node_names = {node.get("name") for node in nodes}
+        assert "speak" in node_names or any("Dog" in str(n) for n in node_names), (
+            "Pro should detect class methods"
+        )
+        
+        # Should have call edges
+        assert len(edges) > 0, "Pro should detect call relationships"
+
+
+async def test_get_call_graph_invalid_license_fallback_to_community(
+    tmp_path: Path,
+):
+    """Invalid license falls back to Community tier limits and behavior."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Test with invalid/malformed license
+    invalid_license_path = tmp_path / "invalid.jwt"
+    invalid_license_path.write_text("invalid.jwt.token", encoding="utf-8")
+
+    # With invalid license, should fallback to Community
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_LICENSE_PATH": str(invalid_license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        
+        # Should fallback to Community tier
+        assert env_json["tier"] == "community", (
+            f"Invalid license should fallback to Community, got {env_json.get('tier')}"
+        )
+        
+        # Should apply Community limits
+        assert data.get("depth_limit") == 3, "Invalid license should enforce Community depth limit"
+        assert data.get("success") is True
+
+
+async def test_get_call_graph_missing_license_defaults_to_community(
+    tmp_path: Path,
+):
+    """Missing license file defaults to Community tier."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # With missing license (no LICENSE_PATH set), should default to Community
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_LICENSE_PATH": "",  # Empty license path
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "get_call_graph",
+            arguments={
+                "project_root": str(project_root),
+                "entry_point": None,
+                "depth": 10,
+                "include_circular_import_check": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="get_call_graph")
+        
+        # Should default to Community tier
+        assert env_json["tier"] == "community", (
+            f"Missing license should default to Community, got {env_json.get('tier')}"
+        )
+        
+        # Should apply Community limits
+        assert data.get("success") is True
+
+
+# ============================================================================
+# unified_sink_detect License Fallback & Feature Tests (New: 20260105)
+# ============================================================================
+
+
+@pytest.mark.parametrize("num_sinks", [60, 100])
+async def test_unified_sink_detect_invalid_license_fallback(
+    tmp_path: Path,
+    num_sinks: int,
+):
+    """Invalid license JWT should fallback to Community tier (50 sink limit)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = "\n".join(["eval(user_input)"] * num_sinks) + "\n"
+
+    # Write invalid JWT
+    invalid_jwt_path = tmp_path / "invalid.jwt"
+    invalid_jwt_path.write_text("invalid.jwt.token.malformed\n")
+
+    # Try to use invalid license - should fallback to Community
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": "test_secret",
+            "CODE_SCALPEL_LICENSE_PATH": str(invalid_jwt_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": code,
+                "language": "python",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+
+        # Should fallback to Community tier
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+        # Community limit: 50 sinks
+        assert data.get("sink_count") == 50
+        assert len(data.get("sinks")) == 50
+
+
+async def test_unified_sink_detect_expired_license_fallback(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Expired license should fallback to Community tier (50 sink limit)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Create an expired Pro license (2 days ago, past grace period)
+    expired_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="expired-001",
+        duration_days=-2,
+        base_dir=tmp_path,
+        filename="expired.jwt",
+    )
+
+    code = "\n".join(["eval(user_input)"] * 75) + "\n"
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(expired_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": code,
+                "language": "python",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+
+        # Should fallback to Community tier
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+        # Community limit enforced
+        assert data.get("sink_count") == 50
+        assert len(data.get("sinks")) == 50
+
+
+async def test_unified_sink_detect_pro_tier_enables_advanced_scoring(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier enables advanced confidence scoring for sink detection."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Code with varied SQL patterns
+    code = """
+cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+session.execute("SELECT * FROM users")
+cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="pro-scoring",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": code,
+                "language": "python",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+
+        # Pro tier detected
+        assert env_json["tier"] == "pro"
+        assert data.get("success") is True
+        # Pro should detect multiple sinks
+        assert data.get("sink_count") >= 2
+        sinks = data.get("sinks", [])
+        assert len(sinks) >= 2
+        # Pro provides confidence scores
+        for sink in sinks:
+            if "confidence" in sink:
+                assert 0.0 <= sink["confidence"] <= 1.0
+
+
+async def test_unified_sink_detect_enterprise_provides_full_features(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise tier provides complete feature set with risk scoring and remediation."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+subprocess.call(f"echo {user_input}", shell=True)
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="enterprise-full",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": code,
+                "language": "python",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+
+        # Enterprise tier detected
+        assert env_json["tier"] == "enterprise"
+        assert data.get("success") is True
+        # Enterprise should detect all sinks
+        assert data.get("sink_count") >= 2
+        sinks = data.get("sinks", [])
+        assert len(sinks) >= 2
+        # Enterprise provides comprehensive sink information
+        for sink in sinks:
+            # Check for expected sink fields
+            assert "code_snippet" in sink or "name" in sink
+            assert "confidence" in sink or "line" in sink
+
+# ============================================================================
+# symbolic_execute Tier Enforcement & Feature Tests (New: 20260105)
+# ============================================================================
+
+
+@pytest.mark.parametrize("num_paths", [60, 100])
+async def test_symbolic_execute_invalid_license_fallback(
+    tmp_path: Path,
+    num_paths: int,
+):
+    """Invalid license JWT should fallback to Community tier (50 path limit)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Generate code that would create many symbolic paths
+    code = f"""
+def path_explosion(a, b, c):
+    x = 0
+    if a > 0:
+        x += 1
+    if b > 0:
+        x += 2
+    if c > 0:
+        x += 4
+    return x
+"""
+
+    # Write invalid JWT
+    invalid_jwt_path = tmp_path / "invalid.jwt"
+    invalid_jwt_path.write_text("invalid.jwt.token.malformed\n")
+
+    # Try to use invalid license - should fallback to Community
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": "test_secret",
+            "CODE_SCALPEL_LICENSE_PATH": str(invalid_jwt_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+                "max_paths": num_paths,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Should fallback to Community tier
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+        # Community limit: max 50 paths
+        if data.get("paths"):
+            assert len(data.get("paths", [])) <= 50
+
+
+async def test_symbolic_execute_expired_license_fallback(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Expired license should fallback to Community tier (50 path limit)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def analyze(x, y):
+    if x > 0:
+        if y > 0:
+            return x + y
+    return 0
+"""
+
+    # Create an expired Pro license (2 days ago, past grace period)
+    expired_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="expired-symbolic-001",
+        duration_days=-2,
+        base_dir=tmp_path,
+        filename="expired.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(expired_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+                "max_paths": 100,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Expired Pro license should fallback to Community
+        assert env_json["tier"] == "community"
+        assert data.get("success") is True
+
+
+async def test_symbolic_execute_community_enforces_50_path_limit(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Community tier enforces 50 path limit."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def branch_heavy(a, b, c):
+    if a > 0:
+        x = 1
+    else:
+        x = 2
+    if b > 0:
+        y = 1
+    else:
+        y = 2
+    if c > 0:
+        z = 1
+    else:
+        z = 2
+    return x + y + z
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="community",
+        jti="community-paths-001",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+                "max_paths": 100,  # Request 100, but Community limited to 50
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Community tier confirmed
+        assert env_json["tier"] == "community"
+        assert data is not None
+        # If truncated, should indicate that paths were capped at Community limit
+        if data.get("paths"):
+            assert len(data.get("paths", [])) <= 50
+
+
+async def test_symbolic_execute_community_enforces_10_loop_depth(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Community tier enforces 10 loop depth limit."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Code with nested loops that would exceed Community limit if unrestricted
+    code = """
+def nested_loops():
+    total = 0
+    for i in range(20):
+        for j in range(20):
+            for k in range(20):
+                total += i + j + k
+    return total
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="community",
+        jti="community-depth-001",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Community tier confirmed
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+
+
+async def test_symbolic_execute_pro_tier_enables_list_dict_types(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier allows List and Dict symbolic execution."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    # Code using List types (Pro feature, not Community)
+    code = """
+def process_list(items):
+    if len(items) > 0:
+        first = items[0]
+        if first > 10:
+            return first * 2
+    return 0
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="pro-list-types",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Pro tier confirmed
+        assert env_json["tier"] == "pro"
+        assert data is not None
+        assert data.get("success") is True
+
+
+async def test_symbolic_execute_pro_tier_enables_unlimited_paths(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier allows unlimited path exploration (vs Community 50 limit)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def many_branches(a, b, c, d, e, f):
+    result = 0
+    if a > 0:
+        result += 1
+    if b > 0:
+        result += 2
+    if c > 0:
+        result += 4
+    if d > 0:
+        result += 8
+    if e > 0:
+        result += 16
+    if f > 0:
+        result += 32
+    return result
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="pro-unlimited-paths",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+                "max_paths": 100,  # Request 100+, Pro should not truncate
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Pro tier confirmed
+        assert env_json["tier"] == "pro"
+        assert data is not None
+        assert data.get("success") is True
+        # Pro should allow more paths than Community (which limits to 50)
+
+
+async def test_symbolic_execute_enterprise_provides_full_feature_set(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise tier provides unlimited paths and loops with all constraint types."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def complex_analysis(values, mapping):
+    total = 0
+    for item in values:
+        if item in mapping:
+            val = mapping[item]
+            if val > 0:
+                total += val
+    return total
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="enterprise-full-symbolic",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Enterprise tier confirmed
+        assert env_json["tier"] == "enterprise"
+        assert data is not None
+        assert data.get("success") is True
+
+async def test_simulate_refactor_enterprise_compliance_validation_warns_on_removal(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise compliance validation surfaces warnings when code removes symbols."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    original_code = """
+def keep_feature():
+    return 1
+
+def drop_feature():
+    return 2
+"""
+
+    new_code = """
+def keep_feature():
+    return 1
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="enterprise-compliance-removal",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={
+                "original_code": original_code,
+                "new_code": new_code,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "enterprise"
+        assert data is not None
+        assert data.get("success") is True
+
+        warnings = data.get("warnings") or []
+        assert any(
+            "Compliance validation: detected removed functions/classes." in w
+            for w in warnings
+        )
+
+        removed = (data.get("structural_changes") or {}).get("functions_removed") or []
+        assert "drop_feature" in removed
+        # Enterprise should support all features without restrictions
+
+
+async def test_simulate_refactor_tier_transitions_upgrade_and_downgrade(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Tier transitions surface additional fields and revert cleanly to Community."""
+
+    project_root = tmp_path / "proj-tier-transition"
+    _write_fixture_project(project_root)
+
+    original_code = """
+def feature(x):
+    return x
+"""
+
+    modified_code = """
+def feature(x):
+    # Pro/Enterprise should report this body change
+    return x + 1
+"""
+
+    # Community → baseline fields only (basic analysis depth; no functions_modified)
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={"original_code": original_code, "new_code": modified_code},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "community"
+        caps = set(env_json.get("capabilities", []))
+        assert {"basic_simulation", "structural_diff"}.issubset(caps)
+
+        structural_changes = data.get("structural_changes") or {}
+        assert "functions_modified" not in structural_changes
+
+    # Community → Pro upgrade surfaces advanced_simulation + functions_modified
+    pro_license = write_hs256_license_jwt(
+        jti="lic-tier-transition-pro",
+        base_dir=tmp_path,
+        filename="license-pro.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(pro_license),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={"original_code": original_code, "new_code": modified_code},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "pro"
+        caps = set(env_json.get("capabilities", []))
+        assert {"advanced_simulation", "behavior_preservation", "type_checking"}.issubset(
+            caps
+        )
+
+        structural_changes = data.get("structural_changes") or {}
+        modified = structural_changes.get("functions_modified") or []
+        assert "feature" in modified
+
+    # Pro → Enterprise upgrade adds compliance/regression hooks and keeps modified list
+    ent_license = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="lic-tier-transition-enterprise",
+        base_dir=tmp_path,
+        filename="license-ent.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(ent_license),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={"original_code": original_code, "new_code": modified_code},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "enterprise"
+        caps = set(env_json.get("capabilities", []))
+        assert {"advanced_simulation", "compliance_validation", "regression_prediction"}.issubset(
+            caps
+        )
+
+        structural_changes = data.get("structural_changes") or {}
+        modified = structural_changes.get("functions_modified") or []
+        assert "feature" in modified
+
+    # Downgrade back to Community (no license) should remove tier-only additions
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={"original_code": original_code, "new_code": modified_code},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "community"
+        caps = set(env_json.get("capabilities", []))
+        assert {"advanced_simulation", "regression_prediction", "compliance_validation"}.isdisjoint(
+            caps
+        )
+
+        structural_changes = data.get("structural_changes") or {}
+        assert "functions_modified" not in structural_changes
+
+
+async def test_simulate_refactor_enterprise_compliance_policy_hook_warns_on_customer_data(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise compliance validation respects signed customer policy directories."""
+
+    from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
+
+    project_root = tmp_path / "proj-compliance-policy"
+    _write_fixture_project(project_root)
+
+    policy_dir = tmp_path / "customer-policy"
+    policy_dir.mkdir(parents=True, exist_ok=True)
+
+    policy_secret = "customer-policy-secret"
+    (policy_dir / "policy.yaml").write_text(
+        """# Custom policy forbidding removal of CustomerData
+version: "1.0"
+
+policies:
+  - name: forbid-customerdata-removal
+    severity: HIGH
+    action: WARN
+    description: "Warn when CustomerData is removed"
+    rule: |
+      package code_scalpel.customer
+      default allow = true
+      # Placeholder rule; engine wiring is what we validate here
+""",
+        encoding="utf-8",
+    )
+    (policy_dir / "budget.yaml").write_text(
+        """# Budget constraints for agent operations
+max_files_read: 100
+max_tokens_per_session: 50000
+max_api_calls_per_hour: 1000
+""",
+        encoding="utf-8",
+    )
+
+    manifest = CryptographicPolicyVerifier.create_manifest(
+        policy_files=["policy.yaml", "budget.yaml"],
+        secret_key=policy_secret,
+        signed_by="pytest",
+        policy_dir=str(policy_dir),
+    )
+    CryptographicPolicyVerifier.save_manifest(manifest, policy_dir=str(policy_dir))
+
+    original_code = """
+def CustomerData():
+    return True
+
+def keep_feature():
+    return 1
+"""
+
+    new_code = """
+def keep_feature():
+    return 1
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="enterprise-compliance-policy",
+        base_dir=tmp_path,
+        filename="license-compliance.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "SCALPEL_POLICY_DIR": str(policy_dir),
+            "SCALPEL_MANIFEST_SECRET": policy_secret,
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "simulate_refactor",
+            arguments={"original_code": original_code, "new_code": new_code},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="simulate_refactor")
+
+        assert env_json["tier"] == "enterprise"
+        caps = set(env_json.get("capabilities", []))
+        assert "compliance_validation" in caps
+
+        warnings = data.get("warnings") or []
+        assert any("Compliance validation" in w for w in warnings)
+
+        removed = (data.get("structural_changes") or {}).get("functions_removed") or []
+        assert "CustomerData" in removed

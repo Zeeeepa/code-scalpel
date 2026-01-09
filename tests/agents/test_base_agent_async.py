@@ -1,3 +1,4 @@
+import tempfile
 from typing import Any, Dict
 
 # [20251214_REFACTOR] Remove unused test imports flagged by ruff.
@@ -17,8 +18,9 @@ class DummyResult:
 
 
 class DummyAgent(BaseCodeAnalysisAgent):
-    def __init__(self):
-        super().__init__(workspace_root="/tmp/workspace")
+    def __init__(self, workspace_root: str | None = None):
+        root = workspace_root or tempfile.mkdtemp(prefix="scalpel-agent-")
+        super().__init__(workspace_root=root)
         self.calls: list[str] = []
 
     async def observe(self, target: str) -> Dict[str, Any]:
@@ -73,7 +75,7 @@ async def test_execute_ooda_loop_success():
     assert set(agent.calls) == {"observe", "orient", "decide", "act"}
     assert result["phases"]["observe"]["target"] == "target-file"
     summary = agent.get_context_summary()
-    assert summary["workspace_root"] == "/tmp/workspace"
+    assert summary["workspace_root"] == agent.workspace_root
     assert summary["recent_operations_count"] == 0
 
 

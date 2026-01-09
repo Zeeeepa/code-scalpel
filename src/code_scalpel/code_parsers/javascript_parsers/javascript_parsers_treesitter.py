@@ -310,9 +310,35 @@ class TreeSitterJSParser:
                     pass
 
         except ImportError:
-            # Fallback to manual language loading
-            if self._language_path:
-                self._load_language_from_path(self._language_path)
+            # [20260103_BUGFIX] Fallback to individual tree-sitter language packages
+            try:
+                import tree_sitter_javascript
+                import tree_sitter_typescript
+
+                # JavaScript and JSX use the same parser
+                js_lang = Language(tree_sitter_javascript.language())
+                js_parser = Parser(js_lang)
+                self._languages[JSLanguageVariant.JAVASCRIPT] = js_lang
+                self._parsers[JSLanguageVariant.JAVASCRIPT] = js_parser
+                self._languages[JSLanguageVariant.JSX] = js_lang
+                self._parsers[JSLanguageVariant.JSX] = js_parser
+
+                # TypeScript
+                ts_lang = Language(tree_sitter_typescript.language_typescript())
+                ts_parser = Parser(ts_lang)
+                self._languages[JSLanguageVariant.TYPESCRIPT] = ts_lang
+                self._parsers[JSLanguageVariant.TYPESCRIPT] = ts_parser
+
+                # TSX
+                tsx_lang = Language(tree_sitter_typescript.language_tsx())
+                tsx_parser = Parser(tsx_lang)
+                self._languages[JSLanguageVariant.TSX] = tsx_lang
+                self._parsers[JSLanguageVariant.TSX] = tsx_parser
+
+            except ImportError:
+                # Final fallback to manual language loading
+                if self._language_path:
+                    self._load_language_from_path(self._language_path)
 
     def _load_language_from_path(self, path: str) -> None:
         """Load language from compiled .so file."""

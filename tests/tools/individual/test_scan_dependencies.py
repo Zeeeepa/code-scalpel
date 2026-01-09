@@ -15,6 +15,7 @@ Tests cover:
 
 import json
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -554,3 +555,169 @@ dependencies = [
             assert "express" in names
             assert "jest" in names
             assert "webpack" in names
+
+
+class TestPriorityValidationAndReliability:
+    def test_compliance_report_content(self):
+        """Compliance report should include frameworks, score, status, and recommendations."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req_path = Path(tmpdir) / "requirements.txt"
+            # Typosquat triggers compliance deductions without network
+            req_path.write_text("reqests==1.0.0\n", encoding="utf-8")
+
+            caps = {
+                "capabilities": {
+                    "compliance_reporting",
+                    "typosquatting_detection",
+                },
+                "limits": {},
+            }
+
+            result = _scan_dependencies_sync(
+                project_root=tmpdir,
+                scan_vulnerabilities=False,
+                tier="enterprise",
+                capabilities=caps,
+            )
+
+            assert result.success is True
+            assert result.compliance_report is not None
+            report = result.compliance_report
+            if hasattr(report, "dict"):
+                report_data = report.dict()
+            elif isinstance(report, dict):
+                report_data = report
+            else:
+                report_data = report.__dict__
+
+            assert "compliance_score" in report_data
+            assert 0 <= report_data.get("compliance_score", 0) <= 100
+            assert report_data.get("status") in {"COMPLIANT", "NEEDS_ATTENTION", "NON_COMPLIANT"}
+            assert "frameworks" in report_data and {"SOC2", "ISO27001"}.issubset(set(report_data.get("frameworks", [])))
+            assert isinstance(report_data.get("recommendations"), list)
+
+    def test_invalid_path_type_returns_error(self):
+        """Invalid path types should return a clear error instead of raising."""
+        result = _scan_dependencies_sync(project_root=123, scan_vulnerabilities=False)
+        assert result.success is False
+        assert "Invalid path" in (result.error or "")
+
+    def test_missing_path_returns_error(self):
+        """Nonexistent path should return a clear error."""
+        result = _scan_dependencies_sync(path="/no/such/path/for/scan", scan_vulnerabilities=False)
+        assert result.success is False
+        assert "Path not found" in (result.error or "")
+
+    def test_truncated_manifest_graceful(self):
+        """Partially written manifest should yield errors but not crash."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pkg_json = Path(tmpdir) / "package.json"
+            pkg_json.write_text('{ "dependencies": { "foo": "1.0.0" ', encoding="utf-8")
+
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
+            assert result.success is True
+            errors = result.errors or []
+            assert any("Failed to parse" in e for e in errors), errors
+
+    def test_invalid_encoding_manifest(self):
+        """Non-UTF-8 manifest should surface a clear parse error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req = Path(tmpdir) / "requirements.txt"
+            req.write_bytes(b"\xff\xfe\xfa\xfb")
+
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            assert result.success is True
+            errors = result.errors or []
+            assert any("Failed to parse" in e for e in errors), errors
+
+    def test_large_manifest_truncates_with_warning(self):
+        """Large manifest should respect Community cap and warn without crashing."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req_path = Path(tmpdir) / "requirements.txt"
+            req_path.write_text("\n".join([f"pkg{i}==1.0.0" for i in range(400)]) + "\n", encoding="utf-8")
+
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            assert result.success is True
+            assert result.total_dependencies == 50
+            errors = result.errors or []
+            assert any("exceeds tier limit" in e for e in errors), errors
+
+    def test_no_hallucinations_exact_dependencies(self):
+        """Returned dependencies should match the manifest exactly (no extras/drops)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            req_path = Path(tmpdir) / "requirements.txt"
+            expected = {"alpha", "beta", "gamma"}
+            req_path.write_text("\n".join([f"{name}==1.0.0" for name in expected]) + "\n", encoding="utf-8")
+
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            assert result.success is True
+            names = {d.name for d in result.dependencies}
+            assert names == expected
+
+    def test_unsupported_manifest_ignored(self):
+        """Unsupported manifest types should be ignored, producing zero deps."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            (Path(tmpdir) / "random.lock").write_text("foo", encoding="utf-8")
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            assert result.success is True
+            assert result.total_dependencies == 0
+
+    def test_optional_fields_absent_for_community(self):
+        """Community tier should not include Pro/Enterprise fields."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
+            assert result.compliance_report is None
+            assert result.policy_violations is None
+            for dep in result.dependencies:
+                assert dep.supply_chain_risk_score is None
+                assert dep.typosquatting_risk is None
+
+    def test_sequential_scans_stable(self):
+        """Multiple sequential scans should not regress or leak errors."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            for _ in range(50):
+                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+                assert result.success is True
+
+    def test_concurrent_scans_stable(self):
+        """Concurrent scans should complete without deadlock/timeouts."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+
+            def run_scan():
+                res = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+                assert res.success is True
+                return res.total_dependencies
+
+            with ThreadPoolExecutor(max_workers=5) as pool:
+                totals = list(pool.map(lambda _: run_scan(), range(5)))
+            assert all(t == totals[0] for t in totals)
+
+    def test_osv_timeout_returns_error(self, monkeypatch):
+        """OSV timeouts should be surfaced as errors, not crashes."""
+
+        class FakeScanner:
+            def __init__(self, timeout: float = 30.0):
+                self.osv_client = self
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def query_batch(self, deps):
+                raise TimeoutError("OSV timeout")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+
+            with monkeypatch.context() as m:
+                m.setattr("code_scalpel.security.dependencies.VulnerabilityScanner", FakeScanner)
+                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=True)
+
+            assert result.success is True
+            errors = result.errors or []
+            assert any("OSV timeout" in e for e in errors), errors

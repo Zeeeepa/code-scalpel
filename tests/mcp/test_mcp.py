@@ -1490,8 +1490,13 @@ class MyClass:
         assert result.success is True
         assert result.language == "python"
         assert result.line_count > 0
-        assert "helper_function" in result.functions
-        assert "MyClass" in result.classes
+        # [20260104_BUGFIX] Functions/classes are FunctionInfo/ClassInfo objects
+        function_names = [
+            f.name if hasattr(f, "name") else f for f in result.functions
+        ]
+        class_names = [c.name if hasattr(c, "name") else c for c in result.classes]
+        assert "helper_function" in function_names
+        assert "MyClass" in class_names
         assert "os" in result.imports
         assert result.complexity_score >= 0
 

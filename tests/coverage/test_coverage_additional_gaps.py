@@ -14,6 +14,9 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
+# [20260102_BUGFIX] Use system temp dir helper to avoid hardcoded /tmp paths in tests.
+SAFE_TMP = tempfile.gettempdir()
+
 
 class TestErrorToDiffAdditionalGaps:
     """Additional error_to_diff.py coverage tests."""
@@ -22,7 +25,7 @@ class TestErrorToDiffAdditionalGaps:
         """[20251217_TEST] Cover multiple match case (ambiguous) in diff application."""
         from code_scalpel.autonomy import ErrorToDiffEngine
 
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         # Source with duplicate lines - should skip modification
         error_output = """  File "test.py", line 3
@@ -39,7 +42,7 @@ x = foo()"""
         """[20251217_TEST] Cover no-match case in diff application."""
         from code_scalpel.autonomy import ErrorToDiffEngine
 
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """  File "test.py", line 1
 SyntaxError: unexpected token"""
@@ -54,7 +57,7 @@ SyntaxError: unexpected token"""
         """[20251217_TEST] Cover linter 'unused' pattern in error generator."""
         from code_scalpel.autonomy import ErrorToDiffEngine
 
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """warning: unused import 'os' at test.py:1"""
         source_code = """import os
@@ -67,7 +70,7 @@ print("hello")"""
         """[20251217_TEST] Cover linter 'undefined' pattern in error generator."""
         from code_scalpel.autonomy import ErrorToDiffEngine
 
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """error: undefined name 'xyz' at test.py:1"""
         source_code = """result = xyz"""

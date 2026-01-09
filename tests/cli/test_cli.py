@@ -830,9 +830,9 @@ def main():
             SimpleNamespace(run_server=fake_run_server),
         )
 
-        assert cli.start_server("0.0.0.0", 9000) == 0
+        assert cli.start_server("127.0.0.1", 9000) == 0
 
-    def test_start_mcp_server_http_and_lan(self, capsys, monkeypatch):
+    def test_start_mcp_server_http_and_lan(self, capsys, monkeypatch, tmp_path):
         import sys
         from types import SimpleNamespace
 
@@ -1152,7 +1152,9 @@ class TestCLIDirectImport:
         assert exit_code == 0
         assert calls == {"host": "127.0.0.1", "port": 1234, "debug": False}
 
-    def test_start_mcp_server_http_allows_lan_host_rewrite(self, capsys, monkeypatch):
+    def test_start_mcp_server_http_allows_lan_host_rewrite(
+        self, capsys, monkeypatch, tmp_path
+    ):
         from code_scalpel import cli
 
         calls = {}
@@ -1187,7 +1189,7 @@ class TestCLIDirectImport:
             host="127.0.0.1",
             port=8081,
             allow_lan=True,
-            root_path="/tmp",
+            root_path=str(tmp_path),
         )
         capsys.readouterr()
 

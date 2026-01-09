@@ -47,6 +47,7 @@ compliance_reports/
 .code-scalpel/audit.log  # Policy engine audit log
 .code-scalpel/limits.local.toml  # [20251225_CONFIG] Local tier limit overrides
 certs/  # Certificate and private key files for signing/encryption
+code_scalpel_community/
 
 # [20251228_TEST] Local remote-verifier integration artifacts (never commit)
 .code-scalpel/license.jwt

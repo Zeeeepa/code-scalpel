@@ -21,6 +21,47 @@ It is designed to:
 
 ---
 
+## Polyglot Architecture Definition
+
+**Current Status:** Partially polyglot (Python full, JS/TS/Java single-symbol; cross-file deps Python-only)
+
+### Language Support Matrix
+
+| Language | Community | Pro | Enterprise | Cross-File Deps | Implementation | Status |
+|----------|-----------|-----|------------|-----------------|----------------|--------|
+| Python | ✅ Full | ✅ Full | ✅ Full | ✅ Depth-limited | surgical_extractor | ✅ Stable |
+| JavaScript | ✅ Single symbol | ✅ React metadata | ✅ React metadata | ❌ | tree-sitter + unified_extractor | ⚠️ Limited (no deps) |
+| TypeScript | ✅ Single symbol | ✅ React metadata | ✅ React metadata | ❌ | tree-sitter + unified_extractor | ⚠️ Limited (no deps) |
+| Java | ✅ Single symbol | ✅ Single symbol | ✅ Single symbol | ❌ | tree-sitter + unified_extractor | ⚠️ Limited (no deps) |
+| Go | ❌ Not implemented | ❌ | ❌ | ❌ | N/A | 🔴 Missing |
+| Rust | ❌ Not implemented | ❌ | ❌ | ❌ | N/A | 🔴 Missing |
+| PHP | ❌ Not implemented | ❌ | ❌ | ❌ | N/A | 🔴 Missing |
+| Ruby | ❌ Not implemented | ❌ | ❌ | ❌ | N/A | 🔴 Missing |
+| Kotlin | ❌ Not implemented | ❌ | ❌ | ❌ | N/A | 🔴 Missing |
+
+### Capability Gaps
+
+- Cross-file dependency extraction exists **only for Python** (Pro/Enterprise); all other languages stop at single-symbol extraction
+- Confidence scoring and depth clamping apply only to Python dependency paths
+- React metadata exists for JS/TS but is not paired with cross-file deps
+- No unified equivalence contract for dependency representation across languages
+
+### Requirements for True Polyglot Shape
+
+1. Implement language-specific dependency resolvers (JS/TS, Java first; then Go/Rust/PHP/Ruby/Kotlin)
+2. Unify dependency schema and confidence semantics across languages
+3. Support tier-gated depth clamping for all languages
+4. Add cross-file tests per language with ≥95% accuracy on representative repos
+5. Keep API contract stable (single entry point, same response fields) across languages
+
+### Polyglot Completion Timeline
+
+- **v1.1 (Q1 2026):** JS/TS + Java cross-file dependency resolution + unified schema
+- **v1.2 (Q2 2026):** Add Rust/Go/PHP single-symbol extraction; add JS/TS/Java dependency accuracy hardening
+- **v1.3 (Q3 2026):** Ruby/Kotlin extraction + dependency decoders; performance tuning
+- **v1.4 (Q4 2026):** Polyglot validation (accuracy + perf) and confidence calibration across languages
+
+
 ## Current Capabilities (v1.0)
 
 ### Community Tier
@@ -180,9 +221,63 @@ It is designed to:
 
 ### Enterprise Tier Response
 
+
+## Known Gaps for Polyglot Shape
+
+### Gap #1: Cross-File Dependencies Python-Only
+**Issue:** Dependency extraction + confidence scoring exist only for Python. JS/TS/Java return single-symbol without deps.
+
+**Status:** 🔴 BLOCKING polyglot shape
+
+**Resolution Target:** v1.1 (Q1 2026) — Add JS/TS/Java dependency resolvers with unified schema
+
+**Acceptance Criteria:**
+- JS/TS/Java support `cross_file_deps` with depth + confidence
+- Tier clamping enforced for all languages
+- ≥90% correctness on benchmark repos
+
+### Gap #2: Missing Language Implementations (Go/Rust/PHP/Ruby/Kotlin)
+**Issue:** Languages listed in roadmap have no extraction implementation.
+
+**Status:** 🟡 MAJOR
+
+**Resolution Target:** v1.2 (Q2 2026) — Add single-symbol extraction for Go/Rust/PHP; plan Ruby/Kotlin for v1.3
+
+**Acceptance Criteria:**
+- ≥95% single-symbol extraction success on curated corpus per new language
+- Median extraction latency <200ms for files <1k LOC
+
+### Gap #3: No Cross-Language Dependency Equivalence
+**Issue:** Dependency payload shape and confidence semantics are not defined for non-Python languages.
+
+**Status:** 🟡 MAJOR
+
+**Resolution Target:** v1.1 (Q1 2026)
+
+**Acceptance Criteria:**
+- Documented schema for `cross_file_deps` across languages
+- Confidence decay model applied consistently
+- Tests covering multi-language dependency cases
+
+### Gap #4: React Metadata Without Dependency Context
+**Issue:** React metadata exists for JS/TS but is not linked to cross-file deps.
+
+**Status:** 🟠 MINOR (dependent on Gap #1)
+
+**Resolution Target:** v1.2 (Q2 2026)
+
+**Acceptance Criteria:**
+- React components include cross-file deps for hooks/utilities
+- Metadata and deps share consistent confidence scoring
+
+---
+
+## Roadmap
+
+### Polyglot Blockers (Must Complete First)
+- [ ] **Gap #1:** Add JS/TS/Java cross-file dependency resolution with depth + confidence (target v1.1)
+- [ ] **Gap #3:** Define unified `cross_file_deps` schema and confidence semantics across languages (target v1.1)
 ```json
-{
-  "jsonrpc": "2.0",
   "result": {
     "success": true,
     "symbol_name": "calculate_tax",
@@ -280,6 +375,7 @@ It is designed to:
 - [ ] Conditional import handling (`TYPE_CHECKING`, platform guards)
 - [ ] Cross-file resolution: stronger re-export following + alias handling
 - [ ] Optional: include test-only dependencies (opt-in, bounded)
+- [ ] **Deliver JS/TS/Java cross-file dependency resolution** with depth + confidence (addresses Gap #1)
 
 **Pro Research Queries**
 - Does dependency ordering measurably improve downstream LLM task success?
@@ -308,6 +404,7 @@ It is designed to:
 - [ ] Rust function extraction (single-symbol)
 - [ ] Go function extraction (single-symbol)
 - [ ] PHP function extraction (single-symbol)
+- [ ] Harden JS/TS/Java cross-file dependency accuracy (precision/recall targets)
 
 **All-Tiers Research Queries**
 - Which parsing backend yields best stability/latency per language (tree-sitter vs native parsers)?

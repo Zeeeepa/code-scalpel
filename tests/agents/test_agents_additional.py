@@ -43,8 +43,8 @@ class _FailingAgent(BaseCodeAnalysisAgent):
 
 
 @pytest.mark.asyncio
-async def test_base_agent_ooda_success_and_context(monkeypatch):
-    agent = _DummyAgent(workspace_root="/tmp/work")
+async def test_base_agent_ooda_success_and_context(monkeypatch, tmp_path):
+    agent = _DummyAgent(workspace_root=str(tmp_path))
 
     # [20251215_TEST] Stub MCP hooks to avoid network/file IO
     monkeypatch.setattr(
@@ -57,13 +57,13 @@ async def test_base_agent_ooda_success_and_context(monkeypatch):
     result = await agent.execute_ooda_loop("demo.py")
     assert result["success"] is True
     summary = agent.get_context_summary()
-    assert summary["workspace_root"] == "/tmp/work"
+    assert summary["workspace_root"] == str(tmp_path)
     assert summary["recent_operations_count"] >= 0
 
 
 @pytest.mark.asyncio
-async def test_base_agent_ooda_failure_short_circuits():
-    agent = _FailingAgent()
+async def test_base_agent_ooda_failure_short_circuits(tmp_path):
+    agent = _FailingAgent(workspace_root=str(tmp_path))
     result = await agent.execute_ooda_loop("demo.py")
     assert result == {"success": False, "phase": "observe", "error": "boom"}
 

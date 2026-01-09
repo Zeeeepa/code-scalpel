@@ -94,6 +94,7 @@ import re
 import shutil
 import tempfile
 import tokenize
+import keyword
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -122,6 +123,73 @@ __all__ = [
     "update_java_method",
     "update_java_class",
 ]
+
+
+# [20260108_BUGFIX] Validate Python identifiers before applying renames
+def _is_valid_python_identifier(name: str) -> bool:
+    return bool(name) and name.isidentifier() and not keyword.iskeyword(name)
+
+
+# [20260108_BUGFIX] Basic JavaScript/TypeScript identifier validation with reserved words
+_JS_TS_RESERVED = {
+    # Keywords
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "export",
+    "extends",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceof",
+    "new",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "while",
+    "with",
+    "yield",
+    "let",
+    "enum",
+    "await",
+    "implements",
+    "package",
+    "protected",
+    "static",
+    "interface",
+    "private",
+    "public",
+    "null",
+    "true",
+    "false",
+}
+
+
+def _is_valid_js_identifier(name: str) -> tuple[bool, str]:
+    if not name:
+        return False, ""
+    if not re.match(r"^[A-Za-z_$][A-Za-z0-9_$]*$", name):
+        return False, " (invalid identifier)"
+    if name.lower() in _JS_TS_RESERVED:
+        return False, " (reserved word)"
+    return True, ""
 
 
 @dataclass
@@ -413,7 +481,8 @@ class SurgicalPatcher:
         try:
             with open(file_path, "r", encoding=encoding) as f:
                 code = f.read()
-        except IOError as e:
+        except (IOError, UnicodeDecodeError) as e:
+            # [20260108_BUGFIX] Added UnicodeDecodeError handling for invalid encoding
             raise ValueError(f"Cannot read file {file_path}: {e}")
 
         return cls(code, file_path=os.path.abspath(file_path))
@@ -2227,8 +2296,12 @@ class PolyglotPatcher:
             else:
                 raise ValueError(f"Cannot detect language for extension: {ext}")
 
-        with open(file_path, "r", encoding=encoding) as f:
-            code = f.read()
+        try:
+            with open(file_path, "r", encoding=encoding) as f:
+                code = f.read()
+        except (IOError, UnicodeDecodeError) as e:
+            # [20260108_BUGFIX] Added error handling for file read and encoding errors
+            raise ValueError(f"Cannot read file {file_path}: {e}")
 
         return cls(code, language, file_path=os.path.abspath(file_path))
 
@@ -2528,6 +2601,17 @@ class PolyglotPatcher:
         Returns:
             PatchResult with success status
         """
+        if self.language in (PatchLanguage.JAVASCRIPT, PatchLanguage.TYPESCRIPT):
+            valid, reason = _is_valid_js_identifier(new_name)
+            if not valid:
+                return PatchResult(
+                    success=False,
+                    file_path=self.file_path or "",
+                    target_name=target_name,
+                    target_type=target_type,
+                    error=f"Invalid JavaScript/TypeScript identifier: {new_name}{reason}",
+                )
+
         self._ensure_parsed()
 
         # For methods, use qualified name lookup
@@ -2822,9 +2906,57 @@ class UnifiedPatcher:
         """Get the current (possibly modified) code."""
         return self._patcher.get_modified_code()
 
+    @property
+    def original_code(self) -> str:
+        """[20260103_BUGFIX] Expose underlying original code for governance budget checks."""
+        return getattr(self._patcher, "original_code", "")
+
+    @property
+    def current_code(self) -> str:
+        """[20260103_BUGFIX] Expose current (possibly modified) code for budget diffing."""
+        return getattr(self._patcher, "current_code", self.get_modified_code())
+
     def save(self, backup: bool = True) -> Optional[str]:
         """Write modified code back to file."""
         return self._patcher.save(backup=backup)
+
+    def rename_symbol(self, target_type: str, target_name: str, new_name: str) -> PatchResult:
+        """[20260103_BUGFIX] Forward rename operations to the concrete patcher."""
+        file_path = str(getattr(self._patcher, "file_path", ""))
+        language = getattr(self._patcher, "language", None)
+        is_python = bool(
+            file_path.endswith(".py")
+            or language == PatchLanguage.PYTHON
+            or (language and getattr(language, "name", "") == "PYTHON")
+        )
+
+        # [20260108_BUGFIX] Reject invalid Python identifiers before patching
+        if is_python and not _is_valid_python_identifier(new_name):
+            return PatchResult(
+                success=False,
+                file_path=file_path,
+                target_name=target_name,
+                target_type=target_type,
+                error=f"Invalid Python identifier: {new_name}",
+            )
+
+        is_js_ts = bool(
+            language in (PatchLanguage.JAVASCRIPT, PatchLanguage.TYPESCRIPT)
+            or (file_path.endswith(('.js', '.jsx', '.ts', '.tsx', '.mts', '.cts')))
+        )
+
+        if is_js_ts:
+            valid, reason = _is_valid_js_identifier(new_name)
+            if not valid:
+                return PatchResult(
+                    success=False,
+                    file_path=file_path,
+                    target_name=target_name,
+                    target_type=target_type,
+                    error=f"Invalid JavaScript/TypeScript identifier: {new_name}{reason}",
+                )
+
+        return self._patcher.rename_symbol(target_type, target_name, new_name)
 
     def discard_changes(self) -> None:
         """Discard all modifications."""

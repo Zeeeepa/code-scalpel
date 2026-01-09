@@ -26,6 +26,38 @@ Latest version and migration guides:
 | Document | Description |
 |----------|-------------|
 | [**RELEASE_NOTES_v3.3.0.md**](release_notes/RELEASE_NOTES_v3.3.0.md) | Latest release notes and features |
+| [**CHANGELOG.md**](release_notes/CHANGELOG.md) | Chronological change log |
+| [**EXECUTIVE_SUMMARY.md**](release_notes/EXECUTIVE_SUMMARY.md) | High-level summary of project state |
+| [**IMPLEMENTATION_CHECKLIST.md**](release_notes/IMPLEMENTATION_CHECKLIST.md) | Implementation checklist and gates |
+
+---
+
+## Tool Documentation
+
+> [20260103_DOCS] Added comprehensive tool documentation structure
+
+**NEW:** Layered documentation for all 20 MCP tools:
+
+| Layer | Location | Audience | Purpose |
+|-------|----------|----------|---------|
+| **Deep Dive** | [tools/deep_dive/](tools/deep_dive/) | Developers, Contributors | Complete technical reference |
+| **User Guides** | [tools/user_guides/](tools/user_guides/) | End Users, Integrators | Practical how-to guides |
+| **Quick Reference** | [tools/quick_reference/](tools/quick_reference/) | Experienced Users | Fast parameter lookups |
+| **Marketing** | [tools/marketing/](tools/marketing/) | Decision Makers | Feature highlights |
+
+**Getting Started:**
+- [Tool Documentation README](tools/README.md) - Overview and structure
+- [Tool Documentation Template](reference/TOOL_DOCUMENTATION_TEMPLATE.md) - Deep dive template
+- [Tool Documentation Guide](reference/TOOL_DOCUMENTATION_GUIDE.md) - How to create tool docs
+
+**Available Tools (v3.1.0):** 20 MCP tools for surgical code operations
+- Code Analysis: `analyze_code`, `get_file_context`, `get_project_map`, `crawl_project`
+- Code Extraction: `extract_code`, `get_symbol_references`, `get_cross_file_dependencies`
+- Code Modification: `update_symbol`
+- Code Flow: `get_call_graph`, `get_graph_neighborhood`, `symbolic_execute`
+- Security: `security_scan`, `unified_sink_detect`, `cross_file_security_scan`, `type_evaporation_scan`, `scan_dependencies`
+- Testing: `generate_unit_tests`, `simulate_refactor`
+- Utilities: `validate_paths`, `verify_policy_integrity`
 
 ---
 
@@ -84,11 +116,44 @@ code-scalpel/
 
 ---
 
+## Compliance
+
+| Document | Description |
+|----------|-------------|
+| [**LICENSING_SYSTEM_GUIDE.md**](compliance/LICENSING_SYSTEM_GUIDE.md) | Licensing system overview and guidance |
+| [**policy_integrity_verification.md**](guides/policy_integrity_verification.md) | Policy integrity verification guide |
+
+---
+
+## Deployment
+
+| Document | Description |
+|----------|-------------|
+| [**PUBLIC_REPO_PREPARATION.md**](deployment/PUBLIC_REPO_PREPARATION.md) | Steps for preparing public repository |
+
+---
+
+## Research
+
+| Document | Description |
+|----------|-------------|
+| [**FEATURE_EXTRACTION_PLAN.md**](research/FEATURE_EXTRACTION_PLAN.md) | Feature extraction planning document |
+| [**FEATURE_EXTRACTION_PLANNING_INDEX.md**](research/FEATURE_EXTRACTION_PLANNING_INDEX.md) | Index of feature extraction planning |
+
+---
+
+## Community Edition
+
+| Document | Description |
+|----------|-------------|
+| [**README_COMMUNITY_EDITION.md**](code_scalpel_community/README_COMMUNITY_EDITION.md) | Community Edition overview and docs links |
+
 ## Guides
 
 | Guide | Description |
 |-------|-------------|
 | [guides/CONTRIBUTING.md](guides/CONTRIBUTING.md) | Developer contribution guide |
+| [internal/CONTRIBUTING_ROOT.md](internal/CONTRIBUTING_ROOT.md) | Legacy root CONTRIBUTING (archived reference) |
 | [guides/README_CLAIMS_DEMOS_v1.0.md](guides/README_CLAIMS_DEMOS_v1.0.md) | README claim validation and demo scripts |
 | [guides/agent_integration.md](guides/agent_integration.md) | AI agent and framework integration |
 | [guides/graph_engine_guide.md](guides/graph_engine_guide.md) | Unified graph engine documentation |

@@ -152,6 +152,8 @@ class Tier(Enum):
         return cls.COMMUNITY  # Default to COMMUNITY
 
 
+# [20260102_REFACTOR] Tier enum defined first; imports remain below for compatibility.
+# ruff: noqa: E402
 from .cache import LicenseCache
 
 # [20251225_CONFIG] v3.3.0 - TOML-based tier limits configuration

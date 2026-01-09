@@ -300,6 +300,22 @@ async def _assert_core_mcp_contract(
     )
     assert deps.isError is False
 
+    if "simulate_refactor" in tool_names:
+        sim = await session.call_tool(
+            "simulate_refactor",
+            arguments={
+                "original_code": "def add(a, b):\n    return a + b\n",
+                "new_code": "def add(a, b):\n    return a - b\n",
+                "language": "python",
+                "strict_mode": False,
+            },
+            read_timeout_seconds=timedelta(seconds=30),
+        )
+        # Transport-level contract: tool responds without transport error
+        assert sim.isError is False
+        # Response should include serialized content (text/json) for envelope wrapping
+        assert sim.content
+
 
 async def test_mcp_stdio_transport_end_to_end(tmp_path: Path):
     with anyio.fail_after(120):

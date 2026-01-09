@@ -13,10 +13,13 @@ Tests P0 Acceptance Criteria:
 - Audit Trail: Includes error analysis and fix applied (P0)
 """
 
+import tempfile
 from datetime import datetime
 from unittest.mock import Mock
 
 from code_scalpel.autonomy import FixAttempt, FixLoop
+
+SAFE_TMP = tempfile.gettempdir()
 
 # [20251217_BUGFIX] Use stub classes for fix_loop tests (different from error_to_diff classes)
 from code_scalpel.autonomy.stubs import (

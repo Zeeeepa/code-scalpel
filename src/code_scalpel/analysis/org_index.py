@@ -291,9 +291,16 @@ class ElasticsearchBackend(SearchBackend):
     ) -> Dict[str, Any]:
         """Make HTTP request to Elasticsearch."""
         import urllib.error
+        import urllib.parse
         import urllib.request
 
         url = f"{self.host}/{path}"
+        parsed = urllib.parse.urlparse(url)
+        # [20260102_BUGFIX] Enforce network URL schemes to block file:// access.
+        if parsed.scheme not in {"http", "https"}:
+            raise ValueError(
+                f"Unsupported URL scheme for Elasticsearch host: {parsed.scheme}"
+            )
         headers = {"Content-Type": "application/json"}
 
         data = json.dumps(body).encode() if body else None
@@ -366,7 +373,9 @@ class ElasticsearchBackend(SearchBackend):
         """Index a file in Elasticsearch."""
         self._ensure_indices()
 
-        doc_id = hashlib.md5(f"{file.repo_name}:{file.file_path}".encode()).hexdigest()
+        doc_id = hashlib.sha256(
+            f"{file.repo_name}:{file.file_path}".encode()
+        ).hexdigest()
 
         doc = {
             "repo_name": file.repo_name,
@@ -389,7 +398,7 @@ class ElasticsearchBackend(SearchBackend):
         """Index a symbol in Elasticsearch."""
         self._ensure_indices()
 
-        doc_id = hashlib.md5(
+        doc_id = hashlib.sha256(
             f"{symbol.repo_name}:{symbol.file_path}:{symbol.name}:{symbol.line_number}".encode()
         ).hexdigest()
 

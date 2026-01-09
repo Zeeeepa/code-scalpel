@@ -14,6 +14,8 @@ import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
+SAFE_TMP = tempfile.gettempdir()
+
 
 class TestASTToolsInitCoverage:
     """Tests for ast_tools/__init__.py gaps."""

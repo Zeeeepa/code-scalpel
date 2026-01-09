@@ -308,6 +308,6 @@ def test_run_server_disables_debug_in_production(monkeypatch) -> None:
     monkeypatch.setattr(rest_api_server, "create_app", lambda config=None: StubApp())
 
     with pytest.warns(RuntimeWarning):
-        rest_api_server.run_server(host="0.0.0.0", port=5000, debug=True)
+        rest_api_server.run_server(host="127.0.0.1", port=5000, debug=True)
 
-    assert calls == {"host": "0.0.0.0", "port": 5000, "debug": False}
+    assert calls == {"host": "127.0.0.1", "port": 5000, "debug": False}

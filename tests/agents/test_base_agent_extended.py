@@ -1,6 +1,7 @@
 """Additional coverage for BaseCodeAnalysisAgent behavior and error paths."""
 
 import asyncio
+import tempfile
 
 
 class HappyAgent:
@@ -22,7 +23,7 @@ class HappyAgent:
             async def act(self, decisions):
                 return {"success": True, "done": decisions}
 
-        self.impl = _Agent(workspace_root="/tmp/ws")
+        self.impl = _Agent(workspace_root=tempfile.mkdtemp(prefix="scalpel-ws-"))
 
 
 def test_execute_ooda_loop_success():
@@ -82,8 +83,10 @@ def test_observe_file_records_failed_operation(monkeypatch):
         async def act(self, decisions):  # pragma: no cover - not used here
             return {"success": True}
 
-    agent = StubAgent()
-    result = asyncio.run(agent.observe_file("/tmp/missing.py"))
+    agent = StubAgent(workspace_root=tempfile.mkdtemp(prefix="scalpel-ws-"))
+    missing = tempfile.NamedTemporaryFile(prefix="scalpel-missing-", delete=True)
+    missing.close()
+    result = asyncio.run(agent.observe_file(missing.name))
 
     assert result["success"] is False
     assert "error" in result

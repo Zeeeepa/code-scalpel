@@ -142,6 +142,10 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
                 "ldap_injection_detection",
                 "secret_detection",  # API keys, passwords
                 "confidence_scoring",  # Per-finding confidence
+                # [20260107_FEATURE] v1.0 roadmap advanced vulnerability types
+                "csrf_detection",  # Cross-Site Request Forgery
+                "ssrf_detection",  # Server-Side Request Forgery
+                "jwt_vulnerability_detection",  # JWT security issues
             },
             "limits": {
                 "max_findings": None,
@@ -172,6 +176,10 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
                 "ldap_injection_detection",
                 "secret_detection",
                 "confidence_scoring",
+                # [20260107_FEATURE] v1.0 roadmap advanced vulnerability types
+                "csrf_detection",  # Cross-Site Request Forgery
+                "ssrf_detection",  # Server-Side Request Forgery
+                "jwt_vulnerability_detection",  # JWT security issues
                 "cross_file_taint",
                 "custom_policy_engine",
                 "org_specific_rules",

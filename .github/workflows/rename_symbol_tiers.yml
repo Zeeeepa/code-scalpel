@@ -1,0 +1,264 @@
+# [20260108_CI] rename_symbol tier-specific test matrix
+name: rename_symbol Tier Tests
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*' ]
+    paths:
+      - 'src/code_scalpel/surgery/rename_symbol_refactor.py'
+      - 'src/code_scalpel/surgery/surgical_patcher.py'
+      - 'tests/tools/rename_symbol/**'
+      - 'tests/test_rename_*.py'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/code_scalpel/surgery/rename_symbol_refactor.py'
+      - 'src/code_scalpel/surgery/surgical_patcher.py'
+      - 'tests/tools/rename_symbol/**'
+      - 'tests/test_rename_*.py'
+  workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  # [20260108_CI] Community tier tests (fast, no license required)
+  community-tier:
+    name: Community Tier Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run Community tier tests
+      env:
+        SCALPEL_TIER: community
+        SCALPEL_GOVERNANCE_ENFORCEMENT: permissive
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_rename_tiers.py::test_community_tier_same_file_only \
+                     tests/tools/rename_symbol/test_rename_tiers.py::test_community_limits_search_and_update \
+                     tests/tools/rename_symbol/test_python_breadth.py \
+                     tests/test_rename_cross_file.py \
+                     -m "not enterprise" --tb=short
+
+  # [20260108_CI] Pro tier tests (cross-file, governance)
+  pro-tier:
+    name: Pro Tier Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run Pro tier tests
+      env:
+        SCALPEL_TIER: pro
+        SCALPEL_GOVERNANCE_ENFORCEMENT: default
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_rename_tiers.py::test_pro_tier_cross_file \
+                     tests/tools/rename_symbol/test_rename_tiers.py::test_pro_limits_500_search_200_update \
+                     tests/tools/rename_symbol/test_rename_governance_matrix.py \
+                     tests/test_governance_budget_enforcement.py::test_pro_block_mode_denies_rename_symbol_when_budget_exceeded \
+                     -m "not enterprise" --tb=short
+
+  # [20260108_CI] Enterprise tier tests (all workflows)
+  enterprise-tier:
+    name: Enterprise Tier Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run Enterprise tier tests
+      env:
+        SCALPEL_TIER: enterprise
+        SCALPEL_GOVERNANCE_ENFORCEMENT: restrictive
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_audit_trail.py \
+                     tests/tools/rename_symbol/test_compliance.py \
+                     tests/tools/rename_symbol/test_approval_workflow.py \
+                     tests/tools/rename_symbol/test_multi_repo.py \
+                     tests/tools/rename_symbol/test_repo_wide.py \
+                     --tb=short
+
+  # [20260108_CI] Performance stress tests
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run performance tests
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_rename_performance.py --tb=short
+    
+    - name: Upload performance metrics
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-metrics
+        path: |
+          test-results/
+          *.log
+
+  # [20260108_CI] Concurrency tests
+  concurrency:
+    name: Concurrency Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run concurrency tests
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_rename_concurrency.py --tb=short
+
+  # [20260108_CI] Conflict/error handling tests
+  conflicts:
+    name: Conflict & Error Handling Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run conflict tests
+      run: |
+        pytest -xvs tests/tools/rename_symbol/test_rename_conflicts.py --tb=short
+
+  # [20260108_CI] Multi-language support (JS/TS)
+  multi-language:
+    name: Multi-Language Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run JS/TS tests
+      run: |
+        pytest -xvs tests/test_rename_js_ts.py --tb=short
+
+  # [20260108_CI] Full rename suite (all tests together)
+  full-suite:
+    name: Full rename_symbol Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [community-tier, pro-tier, enterprise-tier, performance, concurrency, conflicts, multi-language]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Run full rename_symbol suite
+      run: |
+        pytest -q tests/tools/rename_symbol/ tests/test_rename_*.py --tb=short
+    
+    - name: Generate test report
+      if: always()
+      run: |
+        pytest tests/tools/rename_symbol/ tests/test_rename_*.py \
+          --tb=short \
+          --junit-xml=test-results/junit.xml \
+          --cov=src/code_scalpel/surgery \
+          --cov-report=html:htmlcov/rename \
+          --cov-report=term
+    
+    - name: Upload coverage
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-rename-symbol
+        path: htmlcov/rename/

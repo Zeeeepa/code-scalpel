@@ -3,6 +3,7 @@ Pytest configuration and fixtures for Code Scalpel tests.
 
 [20251213_FEATURE] v1.5.2 - OSV client test isolation fixtures with proper mock cleanup.
 [20251214_FEATURE] v1.5.3 - OSV client import in ast_tools __init__ for full-suite fix.
+[20260108_BUGFIX] Removed pytest_plugins auto-registration; fixtures auto-discover via conftest hierarchy.
 """
 
 import json
@@ -14,6 +15,40 @@ import warnings
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+# [20260104_TEST] Lightweight fallback for pytest-mock's `mocker` fixture used in tier tests.
+@pytest.fixture
+def mocker():
+    """Provide a minimal mocker fixture compatible with pytest-mock's API surface.
+
+    The project does not depend on pytest-mock at runtime; a simple wrapper suffices
+    for tests that only need `.patch(...)` and automatic cleanup.
+    """
+
+    class _SimpleMocker:
+        def __init__(self) -> None:
+            self._patches: list[patch] = []
+
+        def patch(self, target: str, *args, **kwargs):
+            p = patch(target, *args, **kwargs)
+            started = p.start()
+            self._patches.append(p)
+            return started
+
+        def stopall(self) -> None:
+            for p in reversed(self._patches):
+                try:
+                    p.stop()
+                except Exception:
+                    pass
+            self._patches.clear()
+
+    m = _SimpleMocker()
+    try:
+        yield m
+    finally:
+        m.stopall()
 
 # [20251216_TEST] Silence upstream astor ast.Num deprecation noise on Python 3.13
 warnings.filterwarnings(

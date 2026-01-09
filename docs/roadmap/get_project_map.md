@@ -1,7 +1,7 @@
 # get_project_map Tool Roadmap
 
 **Tool Name:** `get_project_map`  
-**Tool Version:** v1.1  
+**Tool Version:** V1.0  
 **Code Scalpel Version:** v3.3.1  
 **Current Status:** Stable  
 **Primary Module:** `src/code_scalpel/mcp/server.py`  
@@ -61,7 +61,7 @@ The `get_project_map` tool generates comprehensive project structure maps showin
 
 ---
 
-## Current Capabilities (v1.1)
+## Current Capabilities (V1.0)
 
 ### Community Tier
 - ✅ Package/module hierarchy (`packages`, `modules` fields)
@@ -381,8 +381,8 @@ result = await get_project_map(
 ### Export Formats
 | Format | Status | Use Case |
 |--------|--------|----------|
-| **Mermaid** | ✅ v1.1 | Documentation, README diagrams |
-| **JSON** | ✅ v1.1 | Programmatic analysis |
+| **Mermaid** | ✅ V1.0 | Documentation, README diagrams |
+| **JSON** | ✅ V1.0 | Programmatic analysis |
 | **HTML Report** | 🔄 v1.2 | Stakeholder presentations |
 | **SARIF** | 🔄 v1.3 | CI/CD integration |
 
@@ -516,7 +516,7 @@ None planned for v1.x series.
 
 ## Changelog
 
-### v1.1 (December 31, 2025)
+### V1.0 (December 31, 2025)
 - **Pro Tier:** Added `git_blame_integration` and `code_ownership_mapping` capabilities
 - **Enterprise:** Added `multi_repository_maps` capability with `multi_repo_summary` field
 - **Enterprise:** Added `historical_architecture_trends` capability with `historical_trends` field

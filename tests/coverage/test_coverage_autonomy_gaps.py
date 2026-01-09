@@ -11,9 +11,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from code_scalpel.autonomy import ErrorToDiffEngine, ErrorType
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from code_scalpel.autonomy import ErrorToDiffEngine, ErrorType
+# [20260102_BUGFIX] Use system temp dir helper to avoid hardcoded /tmp paths in tests.
+SAFE_TMP = tempfile.gettempdir()
 
 
 class TestErrorToDiffCoverageGaps:
@@ -21,7 +24,7 @@ class TestErrorToDiffCoverageGaps:
 
     def test_ast_validation_exception_path(self):
         """[20251217_TEST] Cover ValueError/TypeError exception in AST validation."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         # Trigger validation with code that causes parse issues
         error_output = """  File "test.py", line 1
@@ -37,7 +40,7 @@ SyntaxError: invalid syntax"""
 
     def test_javascript_syntax_error_parsing(self):
         """[20251217_TEST] Cover JavaScript SyntaxError path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """SyntaxError: Unexpected token at main.js:10:5"""
         source_code = """const x = {"""
@@ -47,7 +50,7 @@ SyntaxError: invalid syntax"""
 
     def test_javascript_reference_error_parsing(self):
         """[20251217_TEST] Cover JavaScript ReferenceError path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """ReferenceError: undefinedVar is not defined at main.js:5:1"""
         source_code = """console.log(undefinedVar);"""
@@ -57,7 +60,7 @@ SyntaxError: invalid syntax"""
 
     def test_javascript_type_error_parsing(self):
         """[20251217_TEST] Cover JavaScript TypeError path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = (
             """TypeError: Cannot read property 'foo' of undefined at main.js:10:5"""
@@ -69,7 +72,7 @@ SyntaxError: invalid syntax"""
 
     def test_javascript_unknown_location(self):
         """[20251217_TEST] Cover JavaScript error without location."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """Error: Something went wrong"""
         source_code = """const x = 1;"""
@@ -80,7 +83,7 @@ SyntaxError: invalid syntax"""
 
     def test_typescript_cannot_find_module_path(self):
         """[20251217_TEST] Cover TypeScript 'Cannot find' import error path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = (
             """file.ts(5,10): error TS2307: Cannot find module 'missing-module'"""
@@ -92,7 +95,7 @@ SyntaxError: invalid syntax"""
 
     def test_typescript_unknown_error_type(self):
         """[20251217_TEST] Cover TypeScript unknown error type path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """file.ts(1,1): error TS9999: Unknown error"""
         source_code = """const x = 1;"""
@@ -102,7 +105,7 @@ SyntaxError: invalid syntax"""
 
     def test_java_incompatible_types_path(self):
         """[20251217_TEST] Cover Java 'incompatible types' error path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """Main.java:10: error: incompatible types: String cannot be converted to int"""
         source_code = """int x = "hello";"""
@@ -112,7 +115,7 @@ SyntaxError: invalid syntax"""
 
     def test_java_unknown_error_type(self):
         """[20251217_TEST] Cover Java unknown error type path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """Main.java:5: error: some unknown error"""
         source_code = """System.out.println("test");"""
@@ -122,7 +125,7 @@ SyntaxError: invalid syntax"""
 
     def test_java_unknown_location(self):
         """[20251217_TEST] Cover Java error without location."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """error: cannot access Main"""
         source_code = """public class Main {}"""
@@ -133,7 +136,7 @@ SyntaxError: invalid syntax"""
 
     def test_balance_parentheses_close_excess(self):
         """[20251217_TEST] Cover closing parenthesis excess path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """  File "test.py", line 1
 SyntaxError: unmatched ')'"""
@@ -147,7 +150,7 @@ SyntaxError: unmatched ')'"""
 
     def test_balance_parentheses_open_excess(self):
         """[20251217_TEST] Cover opening parenthesis excess path."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """  File "test.py", line 1
 SyntaxError: '(' was never closed"""
@@ -161,7 +164,7 @@ SyntaxError: '(' was never closed"""
 
     def test_linter_fix_unused_pattern(self):
         """[20251217_TEST] Cover linter 'unused' fix generation."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """warning: unused variable 'x' at file.py:5"""
         source_code = """x = 1
@@ -173,7 +176,7 @@ print("hello")"""
 
     def test_linter_fix_undefined_pattern(self):
         """[20251217_TEST] Cover linter 'undefined' fix generation."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """error: undefined name 'x' at file.py:1"""
         source_code = """print(x)"""
@@ -183,7 +186,7 @@ print("hello")"""
 
     def test_import_error_module_pattern(self):
         """[20251217_TEST] Cover ImportError 'No module named' fix generation."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """ModuleNotFoundError: No module named 'missing_module'"""
         source_code = """import missing_module"""
@@ -200,7 +203,7 @@ print("hello")"""
 
     def test_assertion_fix_line_match(self):
         """[20251217_TEST] Cover assertion fix when line contains expected value."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """  File "test.py", line 1
 AssertionError: assert 100 == 99"""
@@ -220,7 +223,7 @@ AssertionError: assert 100 == 99"""
 
     def test_non_python_language_ast_skip(self):
         """[20251217_TEST] Cover non-Python language AST validation skip."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """user.ts(5,10): error TS2741: Property 'name' is missing"""
         source_code = """const user: User = {};"""
@@ -233,7 +236,7 @@ AssertionError: assert 100 == 99"""
 
     def test_general_syntax_fix_path(self):
         """[20251217_TEST] Cover general syntax fix (low confidence)."""
-        engine = ErrorToDiffEngine(project_root="/tmp")
+        engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
         error_output = """  File "test.py", line 1
 SyntaxError: invalid character in identifier"""
@@ -581,7 +584,7 @@ class TestStubsCoverageGaps:
 
         # Test execute_with_changes
         result = executor.execute_with_changes(
-            project_path="/tmp",
+            project_path=SAFE_TMP,
             changes=changes,
             test_command="pytest",
         )

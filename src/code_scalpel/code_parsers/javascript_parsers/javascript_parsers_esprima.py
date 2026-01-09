@@ -551,7 +551,7 @@ class JavaScriptParser(BaseParser):
                 complexity += 1
             elif isinstance(child, esprima.nodes.ConditionalExpression):
                 complexity += 1
-            elif isinstance(child, esprima.nodes.LogicalExpression):
+            elif isinstance(child, esprima.nodes.BinaryExpression):
                 if hasattr(child, "operator") and child.operator in ("&&", "||", "??"):
                     complexity += 1
             complexity += self._calculate_cyclomatic_complexity(child)
@@ -600,7 +600,7 @@ class JavaScriptParser(BaseParser):
             complexity += 1 + nesting
 
         # Increment for logical operators sequences
-        if isinstance(node, esprima.nodes.LogicalExpression):
+        if isinstance(node, esprima.nodes.BinaryExpression):
             if hasattr(node, "operator") and node.operator in ("&&", "||", "??"):
                 complexity += 1
 
@@ -670,8 +670,8 @@ class JavaScriptParser(BaseParser):
         elif isinstance(node, esprima.nodes.AssignmentExpression):
             if hasattr(node, "operator"):
                 operators[node.operator] += 1
-        elif isinstance(node, esprima.nodes.LogicalExpression):
-            if hasattr(node, "operator"):
+        elif isinstance(node, esprima.nodes.BinaryExpression):
+            if hasattr(node, "operator") and node.operator in ("&&", "||", "??"):
                 operators[node.operator] += 1
         elif isinstance(node, esprima.nodes.Identifier):
             if hasattr(node, "name"):

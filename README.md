@@ -660,6 +660,24 @@ Code Scalpel provides **22 MCP tools** organized into 5 categories. Every tool l
 - **External APIs** (1 tool): `scan_dependencies` (OSV vulnerability database)
 - **Cryptographic** (1 tool): `verify_policy_integrity` (HMAC-SHA256)
 
+### get_project_map: Multi-Language Example
+
+> [20260104_DOCS] `get_project_map` now reports language distribution across mixed codebases (Python, Java, JavaScript/TypeScript, YAML, Markdown, HTML, CSS, JSON).
+
+Example MCP request payload (core params):
+
+```json
+{
+  "method": "get_project_map",
+  "params": {
+    "path": "./your-repo",
+    "detail_level": "comprehensive"
+  }
+}
+```
+
+Expected result includes per-language file counts, module/package detection, complexity hotspots, and entry points. Tier limits apply (Community: 100 files, Pro: 1000 files, Enterprise: unlimited).
+
 ### Tier Capability Matrix
 
 **Community Tier (Free)**

@@ -105,6 +105,113 @@ result = mcp_code-scalpel_security_scan(code=test_code)
 
 ## Critical Rules
 
+### Rule 1: Release Recommendations Restriction
+
+**IMPORTANT**: DO NOT provide release recommendations, release readiness assessments, or go/no-go guidance **UNLESS EXPLICITLY ASKED** by the user.
+
+- If a user asks you to "update documentation" or "improve tests," do NOT add release recommendations.
+- If a user asks "should we release this," then you may provide a recommendation.
+- Focus on the task requested, not on determining readiness for release.
+- If you completed work on a component, describe what was accomplished—do not evaluate whether it's release-ready.
+- Never volunteer opinions about release timing, readiness, or quality gates unless explicitly requested.
+
+**Exception**: You may mention release status ONLY if the user explicitly asks for a release assessment.
+
+### Rule 2: No Documentation Creation Without Explicit Direction
+
+**CRITICAL**: DO NOT automatically create documentation, summaries, status files, or change logs.
+
+Documentation creation requires explicit user direction using clear language like:
+- "Update the `validate_paths_test_assessment` document to show current state"
+- "Create document xyz for purposes abc"
+- "Document the changes in release notes"
+
+**Do NOT**:
+- Create temporary status documentation during work
+- Generate automatic summary files after completing tasks
+- Create "COMPLETION_REPORT.md" or "TEST_SUMMARY.md" files unprompted
+- Add automatic change logs or progress summaries
+- Create documentation unless the user explicitly directs you to do so
+
+**When completing work**: Describe what was accomplished in your response to the user. Only create documentation if the user directs it.
+
+### Rule 3: Change Management Protocol for Documentation
+
+Documentation updates must follow strict change management:
+
+**Required for any documentation change**:
+1. User must provide explicit direction (e.g., "Update [document] to show [what]")
+2. You must understand the purpose of the change
+3. You may only update the specific document and sections requested
+4. You must NOT expand scope beyond what was explicitly requested
+
+**Example - CORRECT**:
+- User: "Update the `validate_paths_test_assessment` document to show current state."
+- You: Update only that document with current test counts and status
+
+**Example - WRONG**:
+- User: "Update the `validate_paths_test_assessment` document to show current state."
+- You: Create three additional summary files, update multiple other documents, and add release recommendations
+
+### Rule 4: Proper Organization for Documentation
+
+All documentation must be organized in appropriate locations, not dumped in the root directory.
+
+**Documentation Taxonomy** (as defined in this file):
+
+**Root-Level Documents** (Project Status & Governance):
+- `README.md` - Project overview
+- `SECURITY.md` - Security policies
+- `DEVELOPMENT_ROADMAP.md` - Strategic direction
+- `LICENSE` - Licensing terms
+- `DOCKER_QUICK_START.md` - Quick Docker guide
+
+**Never create** `.md` files in the root that should go in `docs/`:
+- Do NOT create `TESTING.md` in root → put in `docs/testing/`
+- Do NOT create `ARCHITECTURE.md` in root → put in `docs/architecture/`
+- Do NOT create `DEPLOYMENT.md` in root → put in `docs/deployment/`
+- Do NOT create arbitrary status files in root → use proper subdirectory
+
+**Proper subdirectories**:
+- `docs/guides/` - How-to guides
+- `docs/architecture/` - System design
+- `docs/deployment/` - Deployment procedures
+- `docs/release_notes/` - Release documentation
+- `release_artifacts/v{VERSION}/` - Evidence files
+- `examples/` - Code examples
+- `docs/testing/` - Testing documentation
+
+**When adding new documentation**: Determine the category first, place in appropriate directory, then update `docs/INDEX.md` with cross-references.
+
+### Rule 5: No Deferrals or Dismissals Without Explicit User Direction
+
+**CRITICAL**: DO NOT defer, dismiss, or categorize issues as "future enhancements" without explicit user direction.
+
+- **Document Actual State:** Present factual information about what exists and what doesn't
+- **No Assumptions About Priority:** Never decide what constitutes a blocker vs. enhancement
+- **No Deferrals:** Never mark issues as "Deferred to v3.4.0" or "Future Enhancement" 
+- **User Decides Severity:** Only the user determines what's blocking vs. acceptable
+- **Present Options, Don't Decide:** Offer choices but don't make product decisions
+
+**Example - WRONG:**
+```markdown
+**Status**: ⚠️ **FUTURE ENHANCEMENT** - Performance tests not critical for v1.0
+```
+
+**Example - CORRECT:**
+```markdown
+**Status**: 🔴 **MISSING** - No performance tests
+**Impact**: Unknown performance characteristics under load
+```
+
+**If something is missing or incomplete:**
+1. Document what's missing factually (e.g., "🔴 MISSING - No performance tests")
+2. Document the impact (e.g., "Unknown performance characteristics")
+3. Present to user for decision
+4. **Do NOT** decide whether it's a blocker or acceptable
+
+**Critical Principle**: Your role is to document facts and implement solutions. The user's role is to make product decisions and set priorities. Never cross this boundary without explicit user direction.
+
 ### Change Tagging (Required)
 
 ALL COMMITS and RELEASES MUST MEET RELEASE CRITERIA FOUND IN THE DEVELOPMENT_ROADMAP.md FILE.

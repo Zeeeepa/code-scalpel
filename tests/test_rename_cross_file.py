@@ -192,6 +192,76 @@ def run():
         b = self._read("b.py")
         self.assertIn("return a.OldClass.new_method", b)
 
+    def test_method_instance_call_updates(self):
+        a = self._write(
+            "a.py",
+            """
+class OldClass:
+    def old_method(self):
+        return 1
+""".lstrip(),
+        )
+        self._write(
+            "b.py",
+            """
+from a import OldClass
+
+def run():
+    inst = OldClass()
+    return inst.old_method()
+""".lstrip(),
+        )
+
+        res = rename_references_across_project(
+            project_root=self.root,
+            target_file=a,
+            target_type="method",
+            target_name="OldClass.old_method",
+            new_name="new_method",
+            create_backup=False,
+            max_files_searched=None,
+            max_files_updated=None,
+        )
+        self.assertTrue(res.success)
+
+        b = self._read("b.py")
+        self.assertIn("return inst.new_method()", b)
+
+    def test_method_instance_call_with_module_alias_updates(self):
+        a = self._write(
+            "a.py",
+            """
+class OldClass:
+    def old_method(self):
+        return 1
+""".lstrip(),
+        )
+        self._write(
+            "b.py",
+            """
+import a as lib
+
+def run():
+    obj = lib.OldClass()
+    return obj.old_method()
+""".lstrip(),
+        )
+
+        res = rename_references_across_project(
+            project_root=self.root,
+            target_file=a,
+            target_type="method",
+            target_name="OldClass.old_method",
+            new_name="new_method",
+            create_backup=False,
+            max_files_searched=None,
+            max_files_updated=None,
+        )
+        self.assertTrue(res.success)
+
+        b = self._read("b.py")
+        self.assertIn("return obj.new_method()", b)
+
 
 if __name__ == "__main__":
     unittest.main()

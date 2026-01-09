@@ -404,13 +404,13 @@ class TestMCPServerConfig(unittest.TestCase):
         from code_scalpel.integrations.rest_api_server import MCPServerConfig
 
         config = MCPServerConfig(
-            host="0.0.0.0",
+            host="127.0.0.1",
             port=9000,
             debug=True,
             cache_enabled=False,
             max_code_size=50000,
         )
-        self.assertEqual(config.host, "0.0.0.0")
+        self.assertEqual(config.host, "127.0.0.1")
         self.assertEqual(config.port, 9000)
         self.assertTrue(config.debug)
         self.assertFalse(config.cache_enabled)

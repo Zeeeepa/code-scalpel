@@ -134,6 +134,8 @@ class Tier(Enum):
         return other > self
 
 
+# [20260102_REFACTOR] Imports below remain for backward-compatible API surface.
+# ruff: noqa: E402
 # [20251225_FEATURE] Import from submodules
 from .decorators import TierRequirementError, requires_feature, requires_tier
 from .feature_registry import (

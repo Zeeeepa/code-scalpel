@@ -2,7 +2,7 @@
 
 **Tool Name:** `get_cross_file_dependencies`  
 **Tool Version:** v1.0  
-**Code Scalpel Version:** v3.4.0  
+**Code Scalpel Version:** v3.3.0  
 **Current Status:** Stable  
 **Primary Modules:**
 - `src/code_scalpel/mcp/server.py` (MCP tool handler)
@@ -37,10 +37,10 @@ The `get_cross_file_dependencies` tool analyzes import/require statements and tr
 - ✅ Transitive dependency mapping (A → B → C chains)
 - ✅ Dependency chain visualization (up to 25 chains)
 - ✅ Deep coupling analysis (deps/files ratio score)
-- ✅ **Import alias resolution** (`import X as Y` → origin tracking) **ENHANCED v3.4.0**
-- ✅ **Wildcard import handling** (`from x import *` → `__all__` expansion) **ENHANCED v3.4.0**
-- ✅ **Re-export chain resolution** (package `__init__.py` → original module) **NEW v3.4.0**
-- ✅ **Chained alias resolution** (multi-hop alias tracking) **NEW v3.4.0**
+- ✅ **Import alias resolution** (`import X as Y` → origin tracking) **ENHANCED v3.3.0**
+- ✅ **Wildcard import handling** (`from x import *` → `__all__` expansion) **ENHANCED v3.3.0**
+- ✅ **Re-export chain resolution** (package `__init__.py` → original module) **NEW v3.3.0**
+- ✅ **Chained alias resolution** (multi-hop alias tracking) **NEW v3.3.0**
 - **Limits:** max_depth: 5, max_files: 500
 
 ### Enterprise Tier
@@ -48,10 +48,10 @@ The `get_cross_file_dependencies` tool analyzes import/require statements and tr
 - ✅ Architectural firewall (layer boundary enforcement)
 - ✅ Boundary violation alerts (presentation → data detection)
 - ✅ Layer constraint enforcement (upward dependency detection)
-- ✅ **Configurable dependency rule engine** (user-defined rules via architecture.toml) **ENHANCED v3.4.0**
-- ✅ **Custom architectural rules** (allow/deny patterns with severity levels) **NEW v3.4.0**
-- ✅ **Coupling limit validation** (fan-in, fan-out, depth limits) **NEW v3.4.0**
-- ✅ **Exemption patterns** (exclude tests, utilities from rule checking) **NEW v3.4.0**
+- ✅ **Configurable dependency rule engine** (user-defined rules via architecture.toml) **ENHANCED v3.3.0**
+- ✅ **Custom architectural rules** (allow/deny patterns with severity levels) **NEW v3.3.0**
+- ✅ **Coupling limit validation** (fan-in, fan-out, depth limits) **NEW v3.3.0**
+- ✅ **Exemption patterns** (exclude tests, utilities from rule checking) **NEW v3.3.0**
 - ✅ Architectural alerts with recommendations
 - **Limits:** unlimited depth, unlimited files
 
@@ -269,7 +269,7 @@ The `get_cross_file_dependencies` tool analyzes import/require statements and tr
 
 ---
 
-## Recent Implementations (v3.4.0)
+## Recent Implementations (v3.3.0)
 
 ### Pro Tier Enhancements
 
@@ -349,19 +349,19 @@ modules = ["__init__", "utils", "helpers"]
 #### Community Tier
 - [ ] Better error messages for unresolved imports with suggestions
 - [ ] Relative import path resolution improvements
-- [x] Package alias handling (`import X as Y`) **Completed v3.4.0**
+- [x] Package alias handling (`import X as Y`) **Completed v3.3.0**
 - [ ] Progress reporting during extraction
 
 #### Pro Tier
 - [ ] Dynamic import detection (`importlib.import_module()`, `__import__()`)
 - [ ] Conditional import tracking (`if TYPE_CHECKING:`)
-- [x] Module re-export handling (`__all__` traversal) **Completed v3.4.0**
+- [x] Module re-export handling (`__all__` traversal) **Completed v3.3.0**
 - [ ] Lazy import detection
 
 #### Enterprise Tier
 - [ ] Monorepo workspace resolution (Nx, Turborepo, Lerna)
 - [ ] Private package registry support (Artifactory, Nexus)
-- [x] Custom module resolution rules (configurable via architecture.toml) **Completed v3.4.0**
+- [x] Custom module resolution rules (configurable via architecture.toml) **Completed v3.3.0**
 - [ ] Import cost analysis (bundle size impact)
 
 **Research Queries:**
@@ -516,9 +516,9 @@ modules = ["__init__", "utils", "helpers"]
 |--------|---------|---------|
 | `ast_tools/import_resolver.py` | Import resolution engine | v1.6.0+ |
 | `ast_tools/cross_file_extractor.py` | Code extraction | v1.5.1+ |
-| `ast_tools/architectural_rules.py` | Architectural rule engine | v3.4.0+ **NEW** |
+| `ast_tools/architectural_rules.py` | Architectural rule engine | v3.3.0+ **NEW** |
 | `licensing/features.py` | Tier capability gating | v3.0.0+ |
-| `mcp/server.py` | MCP tool handler | v3.4.0+ |
+| `mcp/server.py` | MCP tool handler | v3.3.0+ |
 
 ### External Dependencies
 | Package | Purpose | Version |

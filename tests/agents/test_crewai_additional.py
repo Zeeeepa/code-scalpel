@@ -224,11 +224,13 @@ def test_analyze_security_ast_fallback(monkeypatch):
     """Cover analyze_security AST fallback path when symbolic tools missing."""
 
     scalpel = CrewAIScalpel()
+    # [20260104_BUGFIX] Preserve original __import__ to avoid recursive calls.
+    original_import = builtins.__import__
 
     def fake_import(name, *args, **kwargs):
         if name.endswith("symbolic_execution_tools"):
             raise ImportError("missing")
-        return builtins.__import__(name, *args, **kwargs)
+        return original_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 

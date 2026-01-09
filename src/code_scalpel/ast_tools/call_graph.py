@@ -407,11 +407,12 @@ class CallGraphBuilder:
             if not isinstance(n, esprima.nodes.Node):
                 return
 
-            for field in n.__dict__.values():
-                if isinstance(field, esprima.nodes.Node):
-                    yield field
-                elif isinstance(field, list):
-                    for item in field:
+            # [20260102_REFACTOR] Avoid shadowing the imported esprima field helper
+            for node_field in n.__dict__.values():
+                if isinstance(node_field, esprima.nodes.Node):
+                    yield node_field
+                elif isinstance(node_field, list):
+                    for item in node_field:
                         if isinstance(item, esprima.nodes.Node):
                             yield item
 
@@ -693,11 +694,12 @@ class CallGraphBuilder:
             if not isinstance(n, esprima.nodes.Node):
                 return
 
-            for field in n.__dict__.values():
-                if isinstance(field, esprima.nodes.Node):
-                    yield field
-                elif isinstance(field, list):
-                    for item in field:
+            # [20260102_REFACTOR] Avoid shadowing the imported esprima field helper
+            for node_field in n.__dict__.values():
+                if isinstance(node_field, esprima.nodes.Node):
+                    yield node_field
+                elif isinstance(node_field, list):
+                    for item in node_field:
                         if isinstance(item, esprima.nodes.Node):
                             yield item
 
@@ -1235,11 +1237,12 @@ class CallGraphBuilder:
                     return
                 if not isinstance(n, esprima.nodes.Node):
                     return
-                for field in n.__dict__.values():
-                    if isinstance(field, esprima.nodes.Node):
-                        yield field
-                    elif isinstance(field, list):
-                        for item in field:
+                # [20260102_REFACTOR] Avoid shadowing the imported esprima field helper
+                for node_field in n.__dict__.values():
+                    if isinstance(node_field, esprima.nodes.Node):
+                        yield node_field
+                    elif isinstance(node_field, list):
+                        for item in node_field:
                             if isinstance(item, esprima.nodes.Node):
                                 yield item
 

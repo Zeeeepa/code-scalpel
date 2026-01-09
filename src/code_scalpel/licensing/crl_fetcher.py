@@ -67,12 +67,19 @@ def _max_cache_age_seconds() -> int:
 
 
 def fetch_crl_token(url: str, timeout_seconds: float = 10.0) -> str:
-    req = urllib.request.Request(
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(url)
+    # [20260102_BUGFIX] Restrict CRL fetch to HTTP(S) to avoid file:// access.
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"Unsupported CRL URL scheme: {parsed.scheme}")
+
+    req = urllib.request.Request(  # type: ignore
         url,
         headers={"User-Agent": "code-scalpel/CRLFetcher"},
         method="GET",
     )
-    with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+    with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:  # type: ignore
         body = resp.read().decode("utf-8", errors="replace")
     token = body.strip()
     if not token:

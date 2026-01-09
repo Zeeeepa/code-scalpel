@@ -160,10 +160,26 @@ def process(user_input):
         assert hasattr(server, "get_file_context")
 
     async def test_get_symbol_references_community(self):
-        """Test get_symbol_references at community tier."""
+        """[20260109_TEST] Test get_symbol_references at community tier returns valid results."""
         from code_scalpel.mcp import server
+        import tempfile
+        import os
 
-        assert hasattr(server, "get_symbol_references")
+        # Create a minimal test project
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_file = os.path.join(tmpdir, "test.py")
+            with open(test_file, "w") as f:
+                f.write("def my_function():\n    pass\n\nresult = my_function()\n")
+
+            result = await server.get_symbol_references(
+                "my_function", project_root=tmpdir
+            )
+
+            assert result.success is True
+            assert result.symbol_name == "my_function"
+            assert result.definition_file is not None
+            assert len(result.references) > 0
+            assert result.total_references >= 1
 
     async def test_get_cross_file_dependencies_community(self):
         """Test get_cross_file_dependencies at community tier."""

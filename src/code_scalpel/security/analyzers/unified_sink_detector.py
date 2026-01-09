@@ -31,6 +31,8 @@ class CoverageReportDict(TypedDict, total=False):
     owasp_coverage: dict[str, dict[str, Any]]
 
 
+# [20260102_REFACTOR] Keep imports below to allow type declarations before heavy modules.
+# ruff: noqa: E402
 from .taint_tracker import SecuritySink, TaintInfo, TaintLevel
 
 

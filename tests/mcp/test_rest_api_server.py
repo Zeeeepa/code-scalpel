@@ -134,8 +134,8 @@ def test_run_server_forces_debug_off_in_production(monkeypatch):
     # to validate the guard; suppress the warning to keep suite output clean.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        rest_api_server.run_server(host="0.0.0.0", port=9999, debug=True)
+        rest_api_server.run_server(host="127.0.0.1", port=9999, debug=True)
 
-    assert captured["config"].host == "0.0.0.0"
+    assert captured["config"].host == "127.0.0.1"
     assert captured["config"].port == 9999
     assert captured["debug"] is False

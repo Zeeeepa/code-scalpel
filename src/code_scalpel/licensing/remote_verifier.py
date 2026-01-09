@@ -302,7 +302,18 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
             f"Remote verifier URL not configured. Set {VERIFIER_BASE_URL_ENV_VAR}."
         )
 
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(base)
+    # [20260102_BUGFIX] Enforce network-only verifier base URL.
+    if parsed.scheme not in {"http", "https"}:
+        raise RuntimeError(f"Unsupported verifier scheme: {parsed.scheme}")
+
     url = f"{base}/verify"
+    parsed = urllib.parse.urlparse(url)
+    # [20260102_BUGFIX] Restrict verifier endpoint to HTTP(S).
+    if parsed.scheme not in {"http", "https"}:
+        raise RuntimeError(f"Unsupported verifier URL scheme: {parsed.scheme}")
 
     # Contract tests expect the verifier request to include the full token under
     # `token`. The verifier is responsible for not logging sensitive data.
@@ -315,14 +326,14 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
         "User-Agent": "code-scalpel-mcp/remote-verifier",
     }
 
-    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")  # type: ignore
 
     token_hash_hint = _hash_hint(sha256_token(token.strip()))
 
     last_exc: Exception | None = None
     for attempt in range(_verify_retries() + 1):
         try:
-            with urllib.request.urlopen(req, timeout=_verify_timeout_seconds()) as resp:
+            with urllib.request.urlopen(req, timeout=_verify_timeout_seconds()) as resp:  # type: ignore
                 raw = resp.read().decode("utf-8")
             parsed = json.loads(raw)
             if not isinstance(parsed, dict):
@@ -374,7 +385,7 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
                 error=(str(error) if error is not None else None),
             )
         except (
-            urllib.error.URLError,
+            urllib.error.URLError,  # type: ignore
             TimeoutError,
             json.JSONDecodeError,
             RuntimeError,

@@ -316,6 +316,44 @@ class MyClass {
 
             os.unlink(f.name)
 
+    def test_js_reserved_word_rejected(self):
+        """Renaming to JS reserved word should be rejected."""
+        code = """
+function oldFunc() {
+    return 1;
+}
+"""
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".js") as f:
+            f.write(code)
+            f.flush()
+
+            patcher = PolyglotPatcher.from_file(f.name)
+            result = patcher.rename_symbol("function", "oldFunc", "class")
+
+            self.assertFalse(result.success)
+            self.assertIn("reserved", result.error.lower())
+
+            os.unlink(f.name)
+
+    def test_ts_reserved_word_rejected(self):
+        """Renaming to TS reserved word should be rejected."""
+        code = """
+function oldFunc(): number {
+    return 1;
+}
+"""
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".ts") as f:
+            f.write(code)
+            f.flush()
+
+            patcher = PolyglotPatcher.from_file(f.name)
+            result = patcher.rename_symbol("function", "oldFunc", "let")
+
+            self.assertFalse(result.success)
+            self.assertIn("reserved", result.error.lower())
+
+            os.unlink(f.name)
+
 
 if __name__ == "__main__":
     unittest.main()

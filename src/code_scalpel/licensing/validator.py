@@ -47,7 +47,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Optional
-from urllib import request
+from urllib import parse, request
 from urllib.error import URLError
 
 logger = logging.getLogger(__name__)
@@ -360,6 +360,11 @@ class LicenseValidator:
                     "timestamp": int(time.time()),
                 }
             ).encode()
+
+            parsed = parse.urlparse(self.LICENSE_SERVER_URL)
+            # [20260102_BUGFIX] Restrict license server scheme to HTTP(S).
+            if parsed.scheme not in {"http", "https"}:
+                raise ValueError(f"Unsupported license server scheme: {parsed.scheme}")
 
             req = request.Request(
                 self.LICENSE_SERVER_URL,

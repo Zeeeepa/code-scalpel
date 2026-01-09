@@ -2240,7 +2240,7 @@ class MicroserviceExtractionResult:
 
 
 def extract_as_microservice(
-    code: str, function_name: str, host: str = "0.0.0.0", port: int = 8000
+    code: str, function_name: str, host: str = "127.0.0.1", port: int = 8000
 ) -> MicroserviceExtractionResult:
     """
     Extract a function as a standalone microservice with Dockerfile and API spec.
@@ -2253,6 +2253,9 @@ def extract_as_microservice(
     - OpenAPI specification for the API endpoint
     - requirements.txt with detected dependencies
     - README with deployment instructions
+
+    [20260102_BUGFIX] Default host limited to loopback to avoid exposing
+    generated services on all interfaces by default.
 
     Args:
         code: Python source code containing the function

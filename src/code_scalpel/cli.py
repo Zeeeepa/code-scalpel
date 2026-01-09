@@ -1055,11 +1055,6 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         ssl_keyfile = getattr(args, "ssl_key", None)
         license_file = getattr(args, "license_file", None)
 
-        # [20251216_BUGFIX] Only override host if allow_lan and host is default
-        if allow_lan and args.host == "127.0.0.1":
-            # LAN access is intentional when --allow-lan is used.
-            args.host = "0.0.0.0"  # nosec B104
-
         # Build kwargs for server startup
         start_kwargs = {
             "transport": transport,

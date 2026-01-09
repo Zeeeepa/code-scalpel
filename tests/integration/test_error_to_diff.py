@@ -4,7 +4,11 @@ Tests for Error-to-Diff Engine (v3.0.0 Autonomy).
 [20251217_TEST] Comprehensive tests for error parsing and fix generation
 """
 
+import tempfile
+
 from code_scalpel.autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType
+
+SAFE_TMP = tempfile.gettempdir()
 
 
 class TestErrorParsing:

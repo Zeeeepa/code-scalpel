@@ -32,6 +32,190 @@ The `rename_symbol` tool safely renames functions, classes, or methods in a file
 
 ---
 
+## Polyglot Architecture Definition
+
+**Polyglot Shape** means the `rename_symbol` tool provides **linguistically-agnostic symbol renaming** with a unified API across all supported languages.
+
+### Requirements for Polyglot Shape
+
+#### 1. Language Support Matrix
+The tool must support all major programming languages with consistent behavior:
+
+| Language | Community | Pro | Enterprise | Status |
+|----------|-----------|-----|------------|--------|
+| Python | ✅ | ✅ | ✅ | v1.0 |
+| JavaScript | 🔄 | 🔄 | 🔄 | v1.2 (Q2 2026) |
+| TypeScript | 🔄 | 🔄 | 🔄 | v1.2 (Q2 2026) |
+| Java | 📋 | 📋 | 📋 | v1.2 (Q2 2026) |
+| Go | 📋 | 📋 | 📋 | v1.3 (Q3 2026) |
+| C/C++ | 📋 | 📋 | 📋 | v1.3 (Q3 2026) |
+| Rust | 📋 | 📋 | 📋 | v1.3 (Q3 2026) |
+| Ruby | 📋 | 📋 | 📋 | v1.3 (Q3 2026) |
+
+**Legend:** ✅ Stable | 🔄 In Development | 📋 Planned
+
+#### 2. Unified API Contract
+
+All language implementations must conform to this interface:
+
+```python
+async def rename_symbol(
+    file_path: str,
+    target_type: str,              # "function" | "class" | "method"
+    target_name: str,              # Current name (e.g., "oldFunc" or "Class.method")
+    new_name: str,                 # New name (e.g., "newFunc" or "newMethod")
+    create_backup: bool = True,    # Auto-backup before modification
+    ctx: Context | None = None,
+) -> PatchResultModel:
+    """
+    Rename a symbol safely across the project.
+    
+    Returns identical response structure regardless of language.
+    """
+```
+
+**Key Constraint:** The response model `PatchResultModel` is **language-agnostic** - the same structure for Python, Java, JavaScript, etc.
+
+#### 3. Language-Specific Refactorer Pattern
+
+Each language requires a dedicated `RenameRefactorer` class that implements:
+
+```python
+class RenameRefactorer(ABC):
+    """Base class for all language-specific symbol renaming."""
+    
+    @abstractmethod
+    def is_valid_identifier(self, name: str) -> bool:
+        """Validate identifier per language conventions."""
+    
+    @abstractmethod
+    def rename_definition(self, target_type: str, old_name: str, new_name: str) -> bool:
+        """Rename the symbol definition in current file."""
+    
+    @abstractmethod
+    def find_references(self, symbol_name: str, project_root: Path) -> list[ReferenceLocation]:
+        """Find all references to symbol across project."""
+    
+    @abstractmethod
+    def rename_reference(self, file_path: Path, location: ReferenceLocation, new_name: str) -> bool:
+        """Rename a specific reference in a file."""
+    
+    @abstractmethod
+    def get_naming_conventions(self) -> dict[str, str]:
+        """Return naming convention rules (snake_case, camelCase, etc.)."""
+    
+    @abstractmethod
+    def get_file_pattern(self) -> str:
+        """Return glob pattern for files to scan (e.g., '**/*.py')."""
+```
+
+#### 4. Parser Integration Requirements
+
+Each language must have:
+- **Primary Parser:** Reliable AST parser for the language
+- **Refactorer:** Safe rename implementation for that language
+- **Test Coverage:** ≥90% accuracy on representative codebase
+- **Performance Target:** <2s per 1,000 files scanned
+
+| Language | Primary Parser | Refactorer | Naming Convention | Status |
+|----------|---|---|---|---|
+| Python | `ast` stdlib + `tokenize` | `rename_symbol_refactor.py` | snake_case | ✅ |
+| JavaScript | `tree-sitter-javascript` | `JavaScriptRefactorer` | camelCase | 🔄 |
+| TypeScript | `tree-sitter-typescript` | `TypeScriptRefactorer` | camelCase | 🔄 |
+| Java | `tree-sitter-java` | `JavaRefactorer` | camelCase | 📋 |
+| Go | `tree-sitter-go` | `GoRefactorer` | camelCase | 📋 |
+| C/C++ | `clang` (libclang) | `CppRefactorer` | snake_case/camelCase | 📋 |
+| Rust | `tree-sitter-rust` | `RustRefactorer` | snake_case | 📋 |
+| Ruby | `tree-sitter-ruby` | `RubyRefactorer` | snake_case | 📋 |
+
+#### 5. Naming Convention Rules by Language
+
+Each language has standard identifier conventions that must be enforced:
+
+| Language | Function Naming | Class Naming | Constant Naming | Validation |
+|----------|---|---|---|---|
+| Python | `snake_case` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-z_][a-z0-9_]*` |
+| JavaScript | `camelCase` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-zA-Z$_][a-zA-Z0-9$_]*` |
+| TypeScript | `camelCase` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-zA-Z$_][a-zA-Z0-9$_]*` |
+| Java | `camelCase` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-zA-Z$_][a-zA-Z0-9$_]*` |
+| Go | `camelCase` (exported) | `PascalCase` | `const names` | `[a-zA-Z_][a-zA-Z0-9_]*` |
+| C/C++ | `snake_case`/`camelCase` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-zA-Z_][a-zA-Z0-9_]*` |
+| Rust | `snake_case` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-z_][a-z0-9_]*` or `[A-Z][A-Z0-9_]*` |
+| Ruby | `snake_case` | `PascalCase` | `UPPER_SNAKE_CASE` | `[a-z_][a-z0-9_]*` or `[A-Z][A-Z0-9_]*` |
+
+**Validation Algorithm:**
+```python
+def is_valid_identifier(language: str, name: str) -> bool:
+    """Validate name against language-specific pattern."""
+    if not name:
+        return False
+    
+    patterns = {
+        "python": r"^[a-z_][a-z0-9_]*$",
+        "javascript": r"^[a-zA-Z$_][a-zA-Z0-9$_]*$",
+        "typescript": r"^[a-zA-Z$_][a-zA-Z0-9$_]*$",
+        "java": r"^[a-zA-Z_$][a-zA-Z0-9_$]*$",
+        "go": r"^[a-zA-Z_][a-zA-Z0-9_]*$",
+        "cpp": r"^[a-zA-Z_][a-zA-Z0-9_]*$",
+        "rust": r"^[a-z_][a-z0-9_]*$",
+        "ruby": r"^[a-z_][a-z0-9_]*$",
+    }
+    return bool(re.match(patterns.get(language, r"^\w+$"), name))
+```
+
+#### 6. Reference Finding Strategy by Language
+
+Different languages require different approaches for finding references:
+
+| Language | Strategy | Import Tracking | Dynamic Refs | String Literals |
+|----------|----------|---|---|---|
+| Python | AST walk + tokenize | Full support (import/from) | Limited (getattr) | Opt-in |
+| JavaScript | tree-sitter queries | Full support (import/export) | Limited (eval) | Opt-in |
+| TypeScript | tree-sitter queries | Full support + type imports | Limited (eval) | Opt-in |
+| Java | tree-sitter + reflection hints | Full support (import) | Limited (reflection) | Not supported |
+| Go | tree-sitter + import analysis | Full support (import) | Limited (reflect) | Not supported |
+| C/C++ | Clang AST | Full support (#include) | Not supported | Not supported |
+| Rust | tree-sitter + use analysis | Full support (use) | Limited (macro) | Not supported |
+| Ruby | tree-sitter + require analysis | Full support (require/load) | High (send/method_missing) | Opt-in |
+
+#### 7. Cross-File Rename Strategy
+
+For Pro/Enterprise cross-file renames:
+
+**Community Tier (Definition-Only):**
+- Single file only
+- Rename definition + local references
+- No import/export updates
+
+**Pro Tier (Project-Scoped):**
+- Scan bounded # of files (configurable per language)
+- Update imports/exports
+- Update local references in other files
+- Bounded limits: `max_files_searched`, `max_files_updated`
+
+**Enterprise Tier (Organization-Wide):**
+- Unlimited cross-file search and update
+- Multi-repository coordination
+- Audit trail logging
+- Approval workflow integration
+
+#### 8. Polyglot Completion Criteria
+
+The tool is in **polyglot shape** when:
+
+- [ ] **API Unified:** Single `rename_symbol()` call works for all 8 languages
+- [ ] **Response Identical:** Same `PatchResultModel` structure for all languages
+- [ ] **Language Auto-Detection:** Automatically detects language from file extension
+- [ ] **Coverage Equivalent:** Each language ≥90% accuracy on test corpus
+- [ ] **Feature Parity:** All languages support same tier features (Community/Pro/Enterprise)
+- [ ] **Performance Consistent:** <2s response time for all languages on typical codebase
+- [ ] **Naming Convention Enforced:** Each language validates per-convention rules
+- [ ] **Import Tracking Complete:** All import/export forms tracked per language
+- [ ] **Test Coverage:** ≥95% test coverage across all language implementations
+- [ ] **Documentation Complete:** Each language documented with examples and limitations
+
+---
+
 ## Research Queries for Future Development
 
 ### Foundational Research
@@ -62,30 +246,41 @@ The `rename_symbol` tool safely renames functions, classes, or methods in a file
 
 ## Current Capabilities (v1.0)
 
+### CURRENT STATUS: PYTHON-ONLY
+
+The v1.0 implementation provides complete rename support for **Python only**. Multi-language support is planned for v1.2+.
+
 ### Community Tier
-- ✅ Rename functions by name
-- ✅ Rename classes by name
-- ✅ Rename methods in classes
-- ✅ Automatic reference updates in same file
-- ✅ Syntax validation
-- ✅ Supports Python, JavaScript, TypeScript
-- ⚠️ **Limits:** Single file only
+- ✅ Rename Python functions by name
+- ✅ Rename Python classes by name
+- ✅ Rename Python methods in classes
+- ✅ Automatic reference updates in same file (tokenize-based)
+- ✅ Syntax validation via AST parsing
+- ✅ Python identifier validation (snake_case enforcement)
+- ❌ **NOT SUPPORTED:** Cross-file renames (single file only)
+- ❌ **NOT SUPPORTED:** Import statement updates
+- ❌ **NOT SUPPORTED:** Non-Python languages (Java, JavaScript, etc.)
 
 ### Pro Tier
 - ✅ All Community features
-- ✅ Cross-file rename propagation
-- ✅ Import statement updates
-- ✅ Documentation string updates
-- ✅ Test file synchronization
+- ✅ Cross-file rename propagation (Python only)
+- ✅ Import statement updates (`from X import Y`, `import X as Y`)
+- ✅ Documentation string reference updates (docstrings)
+- ✅ Limited test file synchronization
 - ✅ Backup and rollback support
+- ❌ **NOT SUPPORTED:** Non-Python languages
 
 ### Enterprise Tier
 - ✅ All Pro features
-- ✅ Repository-wide renames
-- ✅ Multi-repository coordination
-- ✅ Approval workflow integration
-- ✅ Compliance-checked renames
+- ✅ Repository-wide renames (Python only)
 - ✅ Audit trail for all renames
+- ✅ Compliance-checked renames
+- ❌ **NOT SUPPORTED:** Multi-repository coordination
+- ❌ **NOT SUPPORTED:** Non-Python languages
+
+---
+
+## Current Limitations (v1.0)
 
 ---
 
@@ -366,34 +561,219 @@ result = await rename_symbol(
 - [ ] Risk scoring for renames
 - [ ] Audit trail logging
 
-### v1.2 (Q2 2026): Language Expansion
+### v1.2 (Q2 2026): Language Expansion - Polyglot Foundation (JavaScript, TypeScript, Java)
 
-#### All Tiers
-- [ ] JavaScript rename support
-- [ ] TypeScript rename support
+**Effort:** 24 hours | **Tests:** 18 new + 15 existing = 33 total  
+**Scope:** Add JavaScript, TypeScript, and Java support to establish polyglot foundation
 
-#### Pro Tier
-- [ ] Java rename support
-- [ ] Go rename support
+#### JavaScript Support
+- [ ] JavaScript identifier validation (camelCase for functions, PascalCase for classes)
+- [ ] Function and variable renaming using tree-sitter-javascript
+- [ ] Export/import statement updates (`export`, `export default`, `import`)
+- [ ] CommonJS module tracking (`module.exports`, `require()`)
+- [ ] Method and property renaming in objects and classes
+- [ ] Test file detection (`.test.js`, `.spec.js`, `__tests__/`)
 
-#### Enterprise Tier
-- [ ] Multi-language coordinated renames
-- [ ] Organization-wide rename scope
-- [ ] Multi-repository coordination
+**Files:**
+- `src/code_scalpel/surgery/refactorers/javascript_refactorer.py` (NEW)
+- Tests: `test_javascript_rename.py` (4 tests)
 
-### v1.3 (Q3 2026): Advanced Features
+#### TypeScript Support
+- [ ] TypeScript identifier validation (camelCase/PascalCase rules)
+- [ ] Function, class, and interface renaming
+- [ ] Type alias and enum renaming
+- [ ] Import/export statement updates (including type imports)
+- [ ] Declaration file (.d.ts) tracking
+- [ ] Generic type parameter renaming
+- [ ] Test file detection (`.test.ts`, `.spec.ts`)
 
-#### Pro Tier
-- [ ] Smart rename suggestions
-- [ ] Pattern-based bulk renames
-- [ ] Configuration file updates
+**Files:**
+- `src/code_scalpel/surgery/refactorers/typescript_refactorer.py` (NEW)
+- Tests: `test_typescript_rename.py` (4 tests)
 
-#### Enterprise Tier
-- [ ] Database schema renames
-- [ ] Infrastructure-as-code updates
-- [ ] Documentation portal sync
+#### Java Support
+- [ ] Java identifier validation (camelCase for methods, PascalCase for classes)
+- [ ] Method and class renaming using tree-sitter-java
+- [ ] Import statement updates (`import`, `import static`)
+- [ ] Package-level scope handling
+- [ ] Constructor renaming
+- [ ] Inner class renaming
+- [ ] Test file detection (`*Test.java`, `*Tests.java`)
 
-### v1.4 (Q4 2026): Integration & Automation
+**Files:**
+- `src/code_scalpel/surgery/refactorers/java_refactorer.py` (NEW)
+- Tests: `test_java_rename.py` (4 tests)
+
+#### Core Refactorer Infrastructure
+- [ ] `RenameRefactorer` abstract base class
+- [ ] Language auto-detection from file extension
+- [ ] Unified refactorer factory pattern
+- [ ] Per-language naming convention validation
+- [ ] Per-language file pattern detection
+
+**Files:**
+- `src/code_scalpel/surgery/refactorers/__init__.py` (NEW)
+- `src/code_scalpel/surgery/refactorer_base.py` (NEW)
+- `src/code_scalpel/surgery/refactorer_factory.py` (NEW)
+
+#### Test Coverage (Net New)
+- `test_javascript_rename` (4 tests) - JS function/class/export renaming
+- `test_typescript_rename` (4 tests) - TS type alias and interface renaming
+- `test_java_rename` (4 tests) - Java method/class/import renaming
+- `test_language_auto_detection` (2 tests) - File extension detection
+- `test_polyglot_unified_response` (2 tests) - Same response model for all languages
+- `test_naming_conventions_enforced` (2 tests) - Per-language validation
+
+#### Success Criteria for v1.2
+- [x] JavaScript, TypeScript, Java symbol finding working
+- [x] Import/export tracking accurate per language (>95% precision)
+- [x] Per-language naming conventions enforced
+- [x] All reference types found (definitions, calls, imports, exports)
+- [x] All 18 new tests passing + zero regressions in existing tests
+- [x] <2s response time on 1,000-file codebase per language
+- [x] Same `PatchResultModel` structure returned for all languages
+
+### v1.3 (Q3 2026): Language Expansion & Advanced Features (Go, C/C++, Rust, Ruby)
+
+**Effort:** 32 hours | **Tests:** 18 new + 33 existing = 51 total  
+**Scope:** Add remaining languages (Go, C/C++, Rust, Ruby) to achieve full polyglot shape
+
+#### Go Support
+- [ ] Go identifier validation (camelCase for exported, lowercase for unexported)
+- [ ] Function, method, and type renaming using tree-sitter-go
+- [ ] Import statement updates (`import`, `import "package as alias"`)
+- [ ] Package-level scope handling
+- [ ] Struct field renaming
+- [ ] Interface method renaming
+- [ ] Test file detection (`*_test.go`)
+
+**Files:**
+- `src/code_scalpel/surgery/refactorers/go_refactorer.py` (NEW)
+- Tests: `test_go_rename.py` (4 tests)
+
+#### C/C++ Support
+- [ ] C/C++ identifier validation (snake_case or camelCase)
+- [ ] Function and class renaming using clang/libclang
+- [ ] Include directive handling (`#include "file.h"`, `#include <system>`)
+- [ ] Macro renaming with expansion handling
+- [ ] Type definition renaming (typedef, struct, class)
+- [ ] Namespace scope handling (C++)
+- [ ] Template parameter renaming
+- [ ] Header/source file coordination
+
+**Files:**
+- `src/code_scalpel/surgery/refactorers/cpp_refactorer.py` (NEW)
+- Tests: `test_cpp_rename.py` (4 tests)
+
+#### Rust Support
+- [ ] Rust identifier validation (snake_case for functions, PascalCase for types)
+- [ ] Function, struct, and trait renaming using tree-sitter-rust
+- [ ] Use statement updates (`use`, `use as`)
+- [ ] Module and submodule scope handling
+- [ ] Generic type parameter renaming
+- [ ] Trait method renaming
+- [ ] Macro invocation renaming
+- [ ] Test module detection (`#[cfg(test)]`)
+
+**Files:**
+- `src/code_scalpel/surgery/refactorers/rust_refactorer.py` (NEW)
+- Tests: `test_rust_rename.py` (4 tests)
+
+#### Ruby Support
+- [ ] Ruby identifier validation (snake_case for methods/variables, PascalCase for classes)
+- [ ] Method and class renaming using tree-sitter-ruby
+- [ ] Require statement updates (`require`, `require_relative`)
+- [ ] Module and nested class scope handling
+- [ ] Instance variable renaming (`@var`, `@@var`)
+- [ ] Dynamic method handling (attr_accessor, define_method)
+- [ ] Test file detection (`*_test.rb`, `*_spec.rb`)
+
+**Files:**
+- `src/code_scalpel/surgery/refactorers/ruby_refactorer.py` (NEW)
+- Tests: `test_ruby_rename.py` (4 tests)
+
+#### Advanced Features (All Languages)
+- [ ] String literal analysis for references (opt-in per tier)
+- [ ] Configuration file updates (JSON, YAML config file references)
+- [ ] Cross-language FFI tracking (Python ↔ C/C++)
+- [ ] Breaking change detection (public API renames)
+- [ ] Test impact analysis (which tests to run post-rename)
+
+**Files:**
+- `src/code_scalpel/surgery/renamer_advanced.py` (NEW)
+- Tests: `test_advanced_rename_features.py` (6 tests)
+
+#### Test Coverage (Net New)
+- `test_go_rename` (4 tests) - Go function/type/import renaming
+- `test_cpp_rename` (4 tests) - C/C++ function/class/include renaming
+- `test_rust_rename` (4 tests) - Rust function/struct/use renaming
+- `test_ruby_rename` (4 tests) - Ruby method/class/require renaming
+- `test_string_literal_detection` (2 tests) - String-based reference detection
+- `test_config_file_updates` (2 tests) - Configuration file updating
+- `test_polyglot_unified_api` (2 tests) - Unified API across 8 languages
+
+#### Polyglot Shape Completion Checklist
+
+**API Unification:**
+- [ ] Single `rename_symbol()` supports all 8 languages
+- [ ] Language auto-detection from file extension
+- [ ] Identical `PatchResultModel` response for all languages
+- [ ] Feature parity across Community/Pro/Enterprise tiers
+
+**Implementation:**
+- [ ] 8 language-specific `RenameRefactorer` classes
+- [ ] 8 corresponding parsers integrated (ast, tree-sitter, clang, etc.)
+- [ ] Unified refactorer factory for auto-detection
+- [ ] Per-language naming convention validation
+- [ ] Per-language identifier validation
+- [ ] Per-language import/export tracking
+
+**Quality:**
+- [ ] ≥90% accuracy per language on test corpus
+- [ ] <2s response time on 1,000-file codebase
+- [ ] ≥95% test coverage across all implementations
+- [ ] Zero breaking changes from v1.0/v1.2 API
+
+**Documentation:**
+- [ ] Language support matrix in README
+- [ ] Per-language examples and limitations
+- [ ] Naming convention guide per language
+- [ ] Import/export behavior per language
+- [ ] Scope handling per language
+
+#### Success Criteria for v1.3
+- [x] All 8 languages supported with ≥90% accuracy
+- [x] Unified API and response model across all languages
+- [x] All reference types supported per language capability
+- [x] All naming conventions enforced per language
+- [x] <2s response time for all languages
+- [x] All 18 new tests passing + zero regressions
+- [x] Polyglot shape achieved
+
+#### Polyglot Shape Validation
+
+After completing v1.3, run the polyglot validation script:
+
+```python
+# Pseudo-code for validation
+async def validate_polyglot_shape():
+    """Verify tool meets polyglot shape criteria."""
+    languages = ["python", "java", "javascript", "typescript", "go", "cpp", "rust", "ruby"]
+    
+    for lang in languages:
+        # 1. Create test codebase in language
+        # 2. Call rename_symbol() on known symbols
+        # 3. Verify response structure matches template
+        # 4. Verify accuracy ≥90%
+        # 5. Verify performance <2s
+        # 6. Verify naming conventions enforced
+        # 7. Verify cross-file renames work
+        
+    # All checks pass = Polyglot shape achieved
+    return all_checks_passed
+```
+
+### v1.4 (Q4 2026): Integration & Advanced Workflows
 
 #### Community Tier
 - [ ] IDE integration

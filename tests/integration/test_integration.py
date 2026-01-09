@@ -248,7 +248,7 @@ class TestMockedExternalServices:
         # Simulate agent making API call
         import requests
 
-        response = requests.get("http://example.com/api")
+        response = requests.get("http://example.com/api", timeout=5)
 
         assert response.status_code == 200
         mock_get.assert_called_once()

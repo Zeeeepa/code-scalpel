@@ -49,6 +49,8 @@ class SecurityAnalysisResultDict(TypedDict):
     functions_analyzed: list[str]
 
 
+# [20260102_REFACTOR] Keep imports below to allow class/type definitions before heavy modules.
+# ruff: noqa: E402
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..secrets.secret_scanner import SecretScanner
 from .taint_tracker import detect_ssr_vulnerabilities  # [20251216_FEATURE] v2.2.0

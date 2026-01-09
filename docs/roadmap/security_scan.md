@@ -1,8 +1,8 @@
 # security_scan Tool Roadmap
 
 **Tool Name:** `security_scan`  
-**Tool Version:** v1.1  
-**Code Scalpel Version:** v3.3.1  
+**Tool Version:** v1.0  
+**Code Scalpel Version:** v3.3.0  
 **Current Status:** Stable  
 **Primary Module:** `src/code_scalpel/mcp/server.py` (line 3712)  
 **Tier Availability:** All tiers (Community, Pro, Enterprise)
@@ -21,6 +21,46 @@ The `security_scan` tool detects security vulnerabilities using taint-based anal
 - **Compliance ready:** OWASP categorization for audit trails
 
 ---
+
+## Polyglot Architecture Definition
+
+**Current Status:** Partially polyglot. Python has full taint + sanitizer + remediation; JavaScript/TypeScript/Java rely on sink detection only (no taint flows), with optional TypeScript type-evaporation check.
+
+### Language Support Matrix
+
+| Language | Community | Pro | Enterprise | Taint Flows | Sanitizers | Remediation | Type Safety | Status |
+|----------|-----------|-----|------------|-------------|------------|-------------|-------------|--------|
+| Python | ✅ Full | ✅ Full | ✅ Full | ✅ | ✅ | ✅ | N/A | ✅ Stable |
+| JavaScript | ✅ Sink detection | ✅ Sink detection | ✅ Sink detection | ❌ | ❌ | ❌ | ❌ | ⚠️ Limited |
+| TypeScript | ✅ Sink detection | ✅ Sink + type evaporation | ✅ Sink + type evaporation | ❌ | ❌ | ❌ | ⚠️ Partial (type evap only) | ⚠️ Limited |
+| Java | ✅ Sink detection | ✅ Sink detection | ✅ Sink detection | ❌ | ❌ | ❌ | ❌ | ⚠️ Limited |
+| Go | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 🔴 Missing |
+| Rust | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 🔴 Missing |
+| PHP | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 🔴 Missing |
+| Ruby | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 🔴 Missing |
+| C/C++ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | 🔴 Missing |
+
+### Capability Gaps (vs. true polyglot taint)
+- Non-Python languages only run **sink detection**; there is **no taint flow** or sanitizer awareness.
+- Confidence scoring and remediation are sink-only for JS/TS/Java; sanitizer detection is Python-only.
+- TypeScript type-evaporation detector is bolt-on and not integrated into the main vulnerability list.
+- Language detection is file-extension-based only (no content-based fallback).
+- No Go/Rust/PHP/Ruby/C/C++ support despite roadmap expansion goals.
+
+### Requirements for True Polyglot Shape
+1. Add language-specific taint engines for JS/TS/Java (sources, sinks, sanitizers, frameworks).
+2. Unify sanitizer detection and confidence scoring across languages; expose consistent fields.
+3. Integrate TypeScript type-evaporation findings into the main vulnerability list (shared CWE, severity, remediation).
+4. Implement content-based language detection fallback to avoid misclassification.
+5. Extend sink + taint coverage to Go/Rust/PHP/Ruby/C/C++ (sink coverage first, taint next).
+6. Build cross-language test suites with ≥90% precision/recall per language and FP/FN budgets.
+
+### Polyglot Completion Timeline
+- **v1.1 (Q1 2026):** JS/TS/Java taint MVP (sources, sinks, sanitizers) + content-based language detection
+- **v1.2 (Q2 2026):** Integrate TS type-evaporation into main findings; harden JS/TS/Java sanitizer + remediation
+- **v1.3 (Q3 2026):** Add Go/Rust/PHP sink detection + taint MVP; add Ruby/C/C++ sink coverage
+- **v1.4 (Q4 2026):** Polyglot validation: precision/recall, FP/FN budgets, confidence calibration across languages
+
 
 ## Research Queries for Future Development
 
@@ -50,7 +90,7 @@ The `security_scan` tool detects security vulnerabilities using taint-based anal
 
 ---
 
-## Current Capabilities (v1.1)
+## Current Capabilities (v1.0)
 
 ### Community Tier
 - ✅ SQL Injection detection (CWE-89) - `sql_injection_detection`
@@ -68,11 +108,14 @@ The `security_scan` tool detects security vulnerabilities using taint-based anal
 - ✅ NoSQL Injection (MongoDB, etc.) - `nosql_injection_detection`
 - ✅ LDAP Injection - `ldap_injection_detection`
 - ✅ Secret detection (API keys, passwords) - `secret_detection`
+- ✅ **CSRF Detection** (Cross-Site Request Forgery) - `csrf_detection` [20260107]
+- ✅ **SSRF Detection** (Server-Side Request Forgery) - `ssrf_detection` [20260107]
+- ✅ **JWT Vulnerabilities** (insecure decode, 'none' algorithm) - `jwt_vulnerability_detection` [20260107]
 - ✅ Advanced taint tracking - `data_flow_sensitive_analysis`
 - ✅ Sanitizer detection (false positive reduction) - `sanitizer_recognition`
 - ✅ Confidence scoring - `confidence_scoring`
 - ✅ Context-aware scanning - `context_aware_scanning`
-- ✅ Remediation suggestions - `remediation_suggestions`
+- ✅ Remediation suggestions - `remediation_suggestions` [20260107 - Now implemented in SecurityResult]
 - ✅ OWASP categorization - `owasp_categorization`
 - ✅ Full vulnerability list - `full_vulnerability_list`
 
@@ -80,6 +123,18 @@ The `security_scan` tool detects security vulnerabilities using taint-based anal
 - ✅ All Pro features
 - ✅ Custom vulnerability rules - `custom_security_rules`
 - ✅ Compliance mapping (OWASP, CWE, PCI-DSS, HIPAA, SOC2) - `compliance_rule_checking`
+
+### v1.1 (Q1 2026): Polyglot Taint Foundations
+
+#### All Tiers
+- [ ] JS/TS/Java taint flows (sources→sinks) with sanitizer awareness
+- [ ] Content-based language detection fallback (reduce extension misclass)
+- [ ] Confidence + remediation attached to non-Python findings
+
+#### Pro/Enterprise
+- [ ] Reachability + priority ordering for JS/TS/Java findings
+- [ ] Type-evaporation findings mapped into `vulnerabilities` with CWE/severity
+
 - ✅ False positive tuning - `false_positive_tuning`
 - ✅ Priority-based finding ordering - `priority_finding_ordering`
 - ✅ Vulnerability reachability analysis - `vulnerability_reachability_analysis`
@@ -105,10 +160,11 @@ class SecurityResult(BaseModel):
     scan_duration_ms: int                      # Scan time
     
     # Pro Tier
-    sanitized_flows: list[TaintFlow]           # Safely sanitized data flows
-    confidence_scores: dict[str, float]        # Per-finding confidence
-    remediation_hints: list[RemediationHint]   # Fix suggestions
-    owasp_mapping: dict[str, list[str]]        # OWASP category -> vulns
+    sanitizer_paths: list[str] | None               # Detected sanitizers (Pro/Enterprise)
+    confidence_scores: dict[str, float] | None      # Per-finding confidence
+    remediation_suggestions: list[str] | None       # Fix suggestions [20260107 - Implemented]
+    false_positive_analysis: dict[str, Any] | None  # FP reduction metadata
+    taint_sources: list[str]                        # Identified taint sources
     
     # Enterprise Tier
     compliance_violations: list[ComplianceViol] # HIPAA/SOC2/PCI violations
@@ -169,7 +225,7 @@ result = await security_scan(
 ### Export Formats
 | Format | Status | Use Case |
 |--------|--------|----------|
-| **JSON** | ✅ v1.1 | Programmatic analysis |
+| **JSON** | ✅ v1.0 | Programmatic analysis |
 | **SARIF** | 🔄 v1.4 | IDE/CI/CD integration |
 | **HTML Report** | 🔄 v1.2 | Stakeholder reports |
 | **CSV** | 🔄 v1.2 | Spreadsheet tracking |
@@ -402,9 +458,62 @@ result = await security_scan(
 
 ---
 
+## Known Gaps for Polyglot Shape
+
+### Gap #1: Taint is Python-Only
+**Issue:** JS/TS/Java use sink detection without taint flows, sanitizers, or remediation.
+
+**Status:** 🔴 BLOCKING polyglot shape
+
+**Resolution Target:** v1.1 (Q1 2026)
+
+**Acceptance Criteria:**
+- JS/TS/Java have source→sink taint flows with sanitizer awareness
+- Vulnerabilities include CWE, severity, remediation, and confidence (not sink-only)
+- Benchmarks show ≥90% precision/recall on curated JS/TS/Java repos
+
+### Gap #2: TypeScript Type Evaporation Not Integrated
+**Issue:** Type-evaporation findings are separate from main vulnerability list.
+
+**Status:** 🟡 MAJOR
+
+**Resolution Target:** v1.2 (Q2 2026)
+
+**Acceptance Criteria:**
+- Type-evaporation findings appear in `vulnerabilities` with CWE/severity/remediation
+- Confidence and reachability are computed for type-evaporation issues
+
+### Gap #3: Language Detection Is Extension-Only
+**Issue:** No content-based language detection fallback; misclassification risk on mixed extensions.
+
+**Status:** 🟠 MINOR
+
+**Resolution Target:** v1.1 (Q1 2026)
+
+**Acceptance Criteria:**
+- Content-based detection backs file-extension inference
+- Fallback path documented; <1% mis-detected language rate on mixed-language corpus
+
+### Gap #4: Missing Languages (Go/Rust/PHP/Ruby/C/C++)
+**Issue:** Roadmap lists languages but there is no implementation.
+
+**Status:** 🟡 MAJOR
+
+**Resolution Target:** v1.3 (Q3 2026) for sink coverage; taint MVP prioritized per demand
+
+**Acceptance Criteria:**
+- Sink detection for Go/Rust/PHP/Ruby/C/C++ with CWE/severity/confidence
+- Taint MVP added for at least Go/Rust/PHP with sanitizer hooks
+
+---
+
 ## Roadmap
 
-### v1.1 (Q1 2026): Enhanced Detection
+### Polyglot Blockers (Must Complete First)
+- [ ] **Gap #1:** Add JS/TS/Java taint flows with sanitizer + remediation (target v1.1)
+- [ ] **Gap #3:** Add content-based language detection fallback (target v1.1)
+
+### v1.0 (Q1 2026): Enhanced Detection
 
 #### Community Tier
 - [ ] Regex DoS detection
@@ -425,9 +534,11 @@ result = await security_scan(
 ### v1.2 (Q2 2026): Language Expansion
 
 #### All Tiers
-- [ ] Rust security scanning
-- [ ] Go security scanning
-- [ ] PHP security scanning
+- [ ] Rust security scanning (sink + taint MVP)
+- [ ] Go security scanning (sink + taint MVP)
+- [ ] PHP security scanning (sink + taint MVP)
+- [ ] Harden JS/TS/Java sanitizers + remediation (post-taint rollout)
+- [ ] Integrate TypeScript type-evaporation into main vulnerability list (CWE/severity/remediation)
 
 #### Pro Tier
 - [ ] Ruby security scanning
@@ -473,7 +584,7 @@ result = await security_scan(
 - **Dynamic code:** Cannot analyze eval() contents
 
 ### Planned Fixes
-- v1.1: Expanded sanitizer library
+- v1.0: Expanded sanitizer library
 - v1.2: Improved interprocedural analysis
 - v1.3: Partial dynamic code inference
 
@@ -517,4 +628,4 @@ None planned for v1.x series.
 
 **Last Updated:** December 30, 2025  
 **Next Review:** March 31, 2026
-**Changelog:** v1.1 - Added capability names, configuration file references, TypeScript support
+**Changelog:** v1.0 - Added capability names, configuration file references, TypeScript support

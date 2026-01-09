@@ -15,6 +15,65 @@ The `generate_unit_tests` tool automatically creates unit tests from code using 
 
 ---
 
+## Polyglot Architecture Definition
+
+> [20260109_DOCS] Added explicit polyglot architecture, current status, gaps, blockers, and acceptance criteria.
+
+Design goal: a language-agnostic test case model with language-specific renderers (templates) and an optional symbolic/CFG path source. The architecture mirrors `symbolic_execute` (front-ends → IR) and adds per-framework template emitters.
+
+- **Front-Ends (Code Under Test):**
+  - Python (existing)
+  - JavaScript/TypeScript (tree-sitter): model async/await conservatively
+  - Java (compiler AST or tree-sitter): primitives + simple objects
+  - Go/C/C++/Rust (Enterprise later): minimal CFG extraction for initial cases
+
+- **Common Test Case Model:**
+  - Path-derived inputs (`dict[str, Any]`), optional expected output/exception, path conditions metadata
+  - Framework-agnostic representation; serializable and stable
+
+- **Path Source:**
+  - Preferred: `symbolic_execute` IR → constraints → example inputs (polyglot when available)
+  - Fallback: CFG-only heuristic inputs when symbolic is unavailable for a language
+
+- **Template Renderers (Per Framework):**
+  - Python: `pytest`, `unittest` (existing)
+  - JS/TS: `jest`, `mocha`
+  - Java: `junit`
+  - Renderers are pure string templates with deterministic ordering/naming
+
+- **Router & Parameters:**
+  - `language` (optional, default `python`) + `framework` (required)
+  - Future `file_path`/extension detection → selects front-end + renderer
+
+---
+
+## Current Polyglot Status
+
+- Implementation is Python-only at the MCP layer; generates Python tests (`pytest`/`unittest`).
+- Crash log parsing can recognize Python/JS/Java shapes, but output is still Python tests.
+- No `language` parameter or non-Python renderers/templates are wired.
+
+---
+
+## Known Gaps
+
+- No language router; cannot accept non-Python source for generation
+- Missing JS/TS/JUnit/Jest/Mocha renderers and template libraries
+- No mapping layer from IR test cases to non-Python framework idioms (param tables, subtests)
+- Limited mocking/fixture generation across languages
+- Deterministic naming and import resolution rules not defined for non-Python targets
+
+---
+
+## Polyglot Blockers
+
+- Dependency on `symbolic_execute` polyglot IR for high-fidelity inputs
+- Async semantics (JS/TS) make path → test scheduling tricky; conservative modeling first
+- Java object/field assertions and exception modeling need stable conventions
+- Systems languages require bounded memory/pointer abstractions before auto-inputs are reliable
+
+---
+
 ## Current Capabilities (v1.0)
 
 ### Community Tier
@@ -267,9 +326,15 @@ This tool enforces tier rules in the MCP handler:
 ### v1.2 (Q2 2026): Framework Support
 
 #### All Tiers
+- [ ] Router accepts `language` and chooses renderer accordingly
 - [ ] Jest test generation (JavaScript)
+  - [ ] Deterministic test naming and import resolution
+  - [ ] Parametrization via arrays/tables when applicable
 - [ ] JUnit test generation (Java)
+  - [ ] Gradle/Maven-neutral imports; basic assertions for primitives/strings
+  - [ ] Subtests or parameterized tests when applicable
 - [ ] Mocha test generation (JavaScript)
+  - [ ] Deterministic `describe`/`it` structure with stable ordering
 
 **All-Tiers Research Queries**
 - What is the minimum viable “multi-language” contract: language parameter, per-framework templates, or separate tools?
@@ -281,8 +346,11 @@ This tool enforces tier rules in the MCP handler:
 
 #### Pro Tier
 - [ ] React component test generation
+  - [ ] Minimal auto-mocking strategy documented; deterministic render
 - [ ] API test generation
+  - [ ] Safe baseline assertions (status code, shape) without over-mocking
 - [ ] E2E test generation
+  - [ ] Stable selectors and flake-reduction guidance
 
 **Pro Research Queries**
 - What is safe auto-mocking for React/APIs without creating tests that over-mock and miss regressions?
@@ -294,7 +362,9 @@ This tool enforces tier rules in the MCP handler:
 
 #### Enterprise Tier
 - [ ] Custom test framework support
+  - [ ] Template sandboxing + allowlists; deterministic rendering
 - [ ] Multi-framework test suites
+  - [ ] Single test case model rendered to multiple frameworks predictably
 
 **Enterprise Research Queries**
 - How do we support custom templates safely (sandboxing, allowlists, deterministic rendering)?
@@ -384,9 +454,234 @@ This tool enforces tier rules in the MCP handler:
 - **Crash-log inputs are best-effort:** Bug reproduction currently extracts limited input information from logs.
 
 ### Planned Fixes
-- v1.2: Multi-language test generation
+- v1.2: Multi-language test generation (router + Jest/JUnit/Mocha renderers)
 - v1.3: Improved assertion logic
 - v1.4: Better dependency handling
+
+---
+
+## Acceptance Criteria
+
+> [20260109_DOCS] Define concrete criteria to validate polyglot generation.
+
+- **Routing & Contract:**
+  - `language` param optional (default `python`), `framework` required
+  - If unsupported language + `strict_language=True` → structured error; else fallback to CFG-only with warning
+  - Result schema stable; renderer-specific code returned in appropriate field (e.g., `jest_code`, `junit_code`) without breaking existing `pytest_code`/`unittest_code`
+
+- **Syntactic Validity:**
+  - ≥95% syntactically valid outputs on curated fixtures for each new framework (lint/compile checks)
+
+- **Determinism:**
+  - Stable test names and ordering across runs and environments
+
+- **Performance:**
+  - <5s median generation time on functions <200 LOC (fixture baseline)
+
+- **Fallback Behavior:**
+  - When symbolic inputs unavailable, generator still emits scaffold tests with clear TODOs and non-failing placeholders
+
+## Validation & Test Plan
+
+- **Fixtures per Language:** Curated sets covering branches, loops, exceptions
+- **Compile/Run Hooks:**
+  - JS/TS: `node --check` or `tsc --noEmit`, run `jest --findRelatedTests` (dry)
+  - Java: `javac` compile check or `mvn -q -DskipTests` with test compile phase
+- **Determinism Checks:** Compare rendered outputs (hash) across two runs
+- **Router Tests:** Matrix over (`language`, `framework`, `file_path`) to ensure correct renderer selection and error paths
+
+---
+
+## Proposed API Additions
+
+> [20260109_DOCS] Concrete MCP examples for language routing and polyglot test generation.
+
+### JavaScript/Jest Example
+
+#### MCP Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "mcp_code-scalpel_generate_unit_tests",
+    "arguments": {
+      "code": "export function calculateDiscount(price, isMember) {\n  if (price > 100) {\n    return isMember ? price * 0.8 : price * 0.9;\n  }\n  return price;\n}",
+      "language": "javascript",
+      "framework": "jest",
+      "function_name": "calculateDiscount"
+    }
+  },
+  "id": 1
+}
+```
+
+#### MCP Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "success": true,
+    "function_name": "calculateDiscount",
+    "test_count": 3,
+    "test_cases": [
+      {
+        "path_id": 1,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 150, "isMember": true},
+        "description": "price > 100 and isMember = true",
+        "path_conditions": ["price > 100", "isMember === true"]
+      },
+      {
+        "path_id": 2,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 150, "isMember": false},
+        "description": "price > 100 and isMember = false",
+        "path_conditions": ["price > 100", "isMember === false"]
+      },
+      {
+        "path_id": 3,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 50, "isMember": true},
+        "description": "price <= 100",
+        "path_conditions": ["price <= 100"]
+      }
+    ],
+    "total_test_cases": 3,
+    "jest_code": "describe('calculateDiscount', () => {\n  it('should apply 20% discount for high-price members', () => {\n    const result = calculateDiscount(150, true);\n    expect(result).toBe(120);\n  });\n\n  it('should apply 10% discount for high-price non-members', () => {\n    const result = calculateDiscount(150, false);\n    expect(result).toBe(135);\n  });\n\n  it('should return original price for low-price purchases', () => {\n    const result = calculateDiscount(50, true);\n    expect(result).toBe(50);\n  });\n});\n",
+    "truncated": false,
+    "truncation_warning": null
+  },
+  "id": 1
+}
+```
+
+### Java/JUnit Example
+
+#### MCP Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "mcp_code-scalpel_generate_unit_tests",
+    "arguments": {
+      "code": "public class Calculator {\n  public static double calculateDiscount(double price, boolean isMember) {\n    if (price > 100) {\n      return isMember ? price * 0.8 : price * 0.9;\n    }\n    return price;\n  }\n}",
+      "language": "java",
+      "framework": "junit",
+      "function_name": "calculateDiscount"
+    }
+  },
+  "id": 2
+}
+```
+
+#### MCP Response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "success": true,
+    "function_name": "calculateDiscount",
+    "test_count": 3,
+    "test_cases": [
+      {
+        "path_id": 1,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 150.0, "isMember": true},
+        "description": "price > 100 and isMember = true",
+        "path_conditions": ["price > 100.0", "isMember == true"]
+      },
+      {
+        "path_id": 2,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 150.0, "isMember": false},
+        "description": "price > 100 and isMember = false",
+        "path_conditions": ["price > 100.0", "isMember == false"]
+      },
+      {
+        "path_id": 3,
+        "function_name": "calculateDiscount",
+        "inputs": {"price": 50.0, "isMember": true},
+        "description": "price <= 100",
+        "path_conditions": ["price <= 100.0"]
+      }
+    ],
+    "total_test_cases": 3,
+    "junit_code": "import static org.junit.jupiter.api.Assertions.assertEquals;\nimport org.junit.jupiter.api.Test;\n\npublic class CalculatorTest {\n  @Test\n  public void testCalculateDiscountMemberHighPrice() {\n    double result = Calculator.calculateDiscount(150.0, true);\n    assertEquals(120.0, result, 0.01);\n  }\n\n  @Test\n  public void testCalculateDiscountNonMemberHighPrice() {\n    double result = Calculator.calculateDiscount(150.0, false);\n    assertEquals(135.0, result, 0.01);\n  }\n\n  @Test\n  public void testCalculateDiscountLowPrice() {\n    double result = Calculator.calculateDiscount(50.0, true);\n    assertEquals(50.0, result, 0.01);\n  }\n}\n",
+    "truncated": false,
+    "truncation_warning": null
+  },
+  "id": 2
+}
+```
+
+### TypeScript/Jest Example (with Data-Driven, Pro Tier)
+
+#### MCP Request
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "mcp_code-scalpel_generate_unit_tests",
+    "arguments": {
+      "code": "export function validate(age: number): 'invalid' | 'minor' | 'adult' {\n  if (age < 0) return 'invalid';\n  if (age < 18) return 'minor';\n  return 'adult';\n}",
+      "language": "typescript",
+      "framework": "jest",
+      "function_name": "validate",
+      "data_driven": true
+    }
+  },
+  "id": 3
+}
+```
+
+#### MCP Response (Parametrized)
+
+```json
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "success": true,
+    "function_name": "validate",
+    "test_count": 3,
+    "test_cases": [
+      {
+        "path_id": 1,
+        "function_name": "validate",
+        "inputs": {"age": -1},
+        "expected_output": "invalid",
+        "description": "age < 0"
+      },
+      {
+        "path_id": 2,
+        "function_name": "validate",
+        "inputs": {"age": 10},
+        "expected_output": "minor",
+        "description": "age < 18"
+      },
+      {
+        "path_id": 3,
+        "function_name": "validate",
+        "inputs": {"age": 25},
+        "expected_output": "adult",
+        "description": "age >= 18"
+      }
+    ],
+    "total_test_cases": 3,
+    "jest_code": "describe('validate', () => {\n  it.each([\n    [-1, 'invalid'],\n    [10, 'minor'],\n    [25, 'adult'],\n  ])('returns %s for age %d', (age, expected) => {\n    expect(validate(age)).toBe(expected);\n  });\n});\n",
+    "data_driven": true,
+    "truncated": false
+  },
+  "id": 3
+}
+```
 
 ---
 

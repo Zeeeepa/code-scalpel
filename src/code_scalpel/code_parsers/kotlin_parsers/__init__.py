@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# [20260102_REFACTOR] Lazy exports via __getattr__; suppress unused-import lint for optional parsers.
+# ruff: noqa: F401
 """
 Kotlin Parser Module - Comprehensive Kotlin code analysis tooling.
 
@@ -77,6 +79,9 @@ TODO: Add Jetpack Compose component detection
 TODO: Add Ktor route detection
 TODO: Add Spring Boot Kotlin detection
 TODO: Add kotlinx.serialization usage
+
+# [20260102_REFACTOR] Lazy exports via __getattr__; imported parsers appear unused locally.
+# ruff: noqa: F401
 
 TODO: LOW PRIORITY - Advanced Analysis
 =======================================

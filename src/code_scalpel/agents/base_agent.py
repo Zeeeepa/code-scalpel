@@ -158,8 +158,17 @@ class BaseCodeAnalysisAgent(ABC):
     def __init__(self, workspace_root: Optional[str] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.context = AgentContext()
-        self.context.workspace_root = workspace_root
+        self.workspace_root = workspace_root
         self._setup_logging()
+
+    @property
+    def workspace_root(self) -> Optional[str]:
+        """[20260104_BUGFIX] Keep workspace_root accessible on the agent while syncing context."""
+        return self.context.workspace_root
+
+    @workspace_root.setter
+    def workspace_root(self, value: Optional[str]) -> None:
+        self.context.workspace_root = value
 
     def _setup_logging(self):
         """Setup logging for the agent."""

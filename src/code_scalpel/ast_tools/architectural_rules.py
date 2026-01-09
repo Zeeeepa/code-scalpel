@@ -237,6 +237,11 @@ class ArchitecturalRuleEngine:
             exempt_modules=["__init__", "utils", "helpers", "constants"],
         )
 
+    @property
+    def layers(self) -> List[str]:
+        """Expose configured layers for compatibility with older helpers."""
+        return self.config.layers
+
     def _parse_config(self, data: Dict) -> None:
         """Parse TOML configuration data."""
         # Parse layers
@@ -632,3 +637,15 @@ class ArchitecturalRuleEngine:
     def warnings(self) -> List[str]:
         """Get warnings generated during config loading."""
         return self._warnings.copy()
+
+
+def load_architecture_config(project_root: str) -> ArchitectureConfig:
+    """Convenience loader for backward compatibility.
+
+    Some callers patch or import this helper directly; keep behavior simple:
+    return a fully constructed ArchitectureConfig whether loaded from disk or
+    the default fallback.
+    """
+    engine = ArchitecturalRuleEngine(project_root)
+    engine.load_config()
+    return engine.config

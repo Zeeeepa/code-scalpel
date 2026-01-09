@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# [20260102_REFACTOR] Lazy exports via __getattr__; suppress unused-import lint for optional parsers.
+# ruff: noqa: F401
 """
 PHP Parser Module - Comprehensive PHP code analysis tooling.
 
@@ -68,6 +70,9 @@ TODO: MEDIUM PRIORITY - PHP-Specific Features
 [20251221_TODO] Add enum detection (PHP 8.1+)
 [20251221_TODO] Add readonly properties detection (PHP 8.1+)
 [20251221_TODO] Add first-class callable syntax detection (PHP 8.1+)
+
+# [20260102_REFACTOR] Lazy exports via __getattr__; imported parsers appear unused locally.
+# ruff: noqa: F401
 
 TODO: MEDIUM PRIORITY - Security Analysis
 ==========================================

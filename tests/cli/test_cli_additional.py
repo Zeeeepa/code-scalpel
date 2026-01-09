@@ -192,7 +192,7 @@ def test_scan_security_text_branches(monkeypatch, tmp_path, capsys):
     assert "No vulnerabilities detected" in out_clean
 
 
-def test_start_mcp_server_http_keyboard_interrupt(monkeypatch, capsys):
+def test_start_mcp_server_http_keyboard_interrupt(monkeypatch, capsys, tmp_path):
     """Cover HTTP branch and KeyboardInterrupt handling in start_mcp_server."""
 
     import code_scalpel.mcp.server as mcp_server
@@ -203,7 +203,11 @@ def test_start_mcp_server_http_keyboard_interrupt(monkeypatch, capsys):
     monkeypatch.setattr(mcp_server, "run_server", _boom)
 
     exit_code = cli.start_mcp_server(
-        transport="sse", host="127.0.0.1", port=9100, allow_lan=True, root_path="/tmp"
+        transport="sse",
+        host="127.0.0.1",
+        port=9100,
+        allow_lan=True,
+        root_path=str(tmp_path),
     )
 
     out = capsys.readouterr().out
@@ -249,12 +253,16 @@ def test_main_mcp_allows_lan(monkeypatch):
         return 0
 
     monkeypatch.setattr(cli, "start_mcp_server", fake_start_mcp_server)
-    monkeypatch.setattr(sys, "argv", ["prog", "mcp", "--allow-lan", "--port", "9999"])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prog", "mcp", "--allow-lan", "--port", "9999", "--host", "127.0.0.1"],
+    )
 
     exit_code = cli.main()
 
     assert exit_code == 0
-    assert captured["host"] == "0.0.0.0"
+    assert captured["host"] == "127.0.0.1"
     assert captured["allow_lan"] is True
     assert captured["transport"] == "stdio"
 
@@ -341,6 +349,8 @@ def test_main_mcp_http_allow_lan(monkeypatch):
             "--allow-lan",
             "--port",
             "9000",
+            "--host",
+            "127.0.0.1",
         ],
     )
 
@@ -348,7 +358,7 @@ def test_main_mcp_http_allow_lan(monkeypatch):
 
     assert result == 0
     assert called["transport"] == "sse"
-    assert called["host"] == "0.0.0.0"
+    assert called["host"] == "127.0.0.1"
     assert called["port"] == 9000
     assert called["allow_lan"] is True
 

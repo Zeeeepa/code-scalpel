@@ -554,7 +554,9 @@ class LicenseCache:
             return None
 
         try:
-            data = self._redis_client.get(f"scalpel:cache:{key}")
+            # [20260102_BUGFIX] Normalize cache key to hash to avoid command injection via key names.
+            safe_key = hashlib.sha256(key.encode()).hexdigest()
+            data = self._redis_client.get(f"scalpel:cache:{safe_key}")
             if data:
                 # Redis may return bytes when decode_responses=False; normalize to str for json.loads
                 if isinstance(data, (bytes, bytearray)):
@@ -576,7 +578,8 @@ class LicenseCache:
         try:
             data = json.dumps(asdict(entry))
             ttl = int(entry.ttl_seconds)
-            self._redis_client.setex(f"scalpel:cache:{key}", ttl, data)
+            safe_key = hashlib.sha256(key.encode()).hexdigest()
+            self._redis_client.setex(f"scalpel:cache:{safe_key}", ttl, data)
         except Exception as e:
             logger.warning(f"Failed to set in distributed cache: {e}")
 
@@ -588,6 +591,7 @@ class LicenseCache:
             return
 
         try:
-            self._redis_client.delete(f"scalpel:cache:{key}")
+            safe_key = hashlib.sha256(key.encode()).hexdigest()
+            self._redis_client.delete(f"scalpel:cache:{safe_key}")
         except Exception as e:
             logger.warning(f"Failed to delete from distributed cache: {e}")

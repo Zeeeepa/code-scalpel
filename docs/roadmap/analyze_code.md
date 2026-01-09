@@ -23,6 +23,139 @@ It extracts functions/classes/imports, computes a basic complexity score, and re
 
 ---
 
+## Polyglot Architecture Definition
+
+**Current Status:** Partially polyglot (4 languages, Python-heavy enrichments)
+
+### Language Support Matrix
+
+The tool supports 4 languages but with vastly different enrichment capabilities:
+
+| Language | Community | Pro | Enterprise | Implementation | Status |
+|----------|-----------|-----|------------|---|---|
+| Python | ✅ Full | ✅ Full | ✅ Full | ast stdlib | ✅ Stable |
+| JavaScript | ✅ Basic | ⚠️ Limited | ⚠️ Limited | tree-sitter | ✅ Working |
+| TypeScript | ✅ Basic | ⚠️ Limited | ⚠️ Limited | tree-sitter | ✅ Working |
+| Java | ✅ Basic | ⚠️ Limited | ⚠️ Limited | tree-sitter | ✅ Working |
+| **Go** | ❌ **Not implemented** | ❌ | ❌ | Config only | 🔴 **Advertised but missing** |
+| **Rust** | ❌ **Not implemented** | ❌ | ❌ | Config only | 🔴 **Advertised but missing** |
+
+### Enrichment Capability Matrix (The Real Polyglot Gap)
+
+While basic structure extraction (functions, classes, imports) works across all 4 supported languages, **enrichments are predominantly Python-only**:
+
+| Enrichment | Python | Java | JS/TS | Status | Notes |
+|---|---|---|---|---|---|
+| Functions/Classes | ✅ | ✅ | ✅ | Stable | Unified format |
+| Imports | ✅ | ✅ | ✅ | Stable | Unified format |
+| Cyclomatic Complexity | ✅ | ⚠️ | ⚠️ | Partial | Basic for non-Python |
+| **Cognitive Complexity** | ✅ Pro | ❌ | ❌ | **Python-only** | Sonar metric |
+| **Code Smells** | ✅ Pro | ❌ | ❌ | **Python-only** | 7+ patterns |
+| **Halstead Metrics** | ✅ Pro | ❌ | ❌ | **Python-only** | n1, n2, N1, N2, volume, effort |
+| **Duplicate Detection** | ✅ Pro | ❌ | ❌ | **Python-only** | Sliding window analysis |
+| **Dependency Graph** | ✅ Pro | ❌ | ❌ | **Python-only** | Call graph |
+| Framework Detection | ✅ | ✅ | ✅ | Best-effort | Heuristic-based |
+| **Dead Code Hints** | ✅ Pro | ❌ | ❌ | **Python-only** | Unused imports, unreachable |
+| **Decorator Summary** | ✅ Pro | ❌ | ❌ | **Python-only** | Annotation inventory |
+| Type Summary | ✅ Pro | ❌ | ✅ | Partial | Basic for TS |
+| **Naming Conventions** | ✅ Enterprise | ❌ | ❌ | **Python-only** | PEP8 validation |
+| **Compliance Checks** | ✅ Enterprise | ❌ | ❌ | **Python-only** | Bare except, plaintext passwords |
+| **Custom Rules** | ✅ Enterprise | ❌ | ❌ | **Python-only** | User-supplied patterns |
+| **Architecture Patterns** | ✅ Enterprise | ❌ | ❌ | **Python-only** | Service, controller detection |
+| **Technical Debt** | ✅ Enterprise | ❌ | ❌ | **Python-only** | Effort estimation |
+| **API Surface** | ✅ Enterprise | ✅ | ✅ | Best-effort | Public symbols inventory |
+
+### Current Limitation: Not True Polyglot
+
+The tool is **partially polyglot** because:
+
+1. **Advertised-but-missing languages:** Config advertises Go/Rust but MCP implementation routes only Python/JavaScript/TypeScript/Java
+2. **Enrichment asymmetry:** Pro/Enterprise tiers are Python-centric; non-Python languages get basic structure extraction only
+3. **No unified contract:** No definition of what "code smell" means in Java vs Python; no cross-language complexity equivalence
+4. **Language-specific heuristics:** Cognitive complexity, code smells, naming violations use Python AST patterns not portable to other languages
+
+### Requirements for True Polyglot Shape
+
+To achieve polyglot shape, the tool must:
+
+1. **Resolve advertised languages:** Either implement Go/Rust analyzers or remove from documentation
+2. **Unify enrichment interface:** Define `LanguageAnalyzer` interface all languages implement:
+   ```python
+   class LanguageAnalyzer(ABC):
+       def extract_structure(self, code: str) -> StructureInfo: ...
+       def calculate_cognitive_complexity(self, code: str) -> int: ...
+       def detect_code_smells(self, code: str) -> List[CodeSmell]: ...
+       def detect_naming_violations(self, code: str) -> List[str]: ...
+       def build_dependency_graph(self, code: str) -> Dict[str, List[str]]: ...
+   ```
+3. **Port enrichments:** Implement language-specific equivalents of cognitive complexity, code smells, dependency graphs, dead code detection
+4. **Define equivalence:** Document what enrichments mean per language (e.g., "cognitive complexity" in Python = cyclomatic + nesting in Java)
+5. **Tier consistency:** All languages provide same tier-gated enrichments (not Python-only)
+6. **Validation:** Unified test suite proving all languages produce comparable outputs
+
+### Polyglot Completion Timeline
+
+- **v1.1 (Q1 2026):** Resolve Go/Rust gap + unify core enrichments for Python/Java/JS/TS
+- **v1.2 (Q2 2026):** Add Go, Rust, Ruby support with full enrichment parity
+- **v1.3 (Q3 2026):** Performance optimization and polyglot validation
+- **Tool is polyglot:** When all 7 languages provide equivalent enrichments at all tiers
+
+---
+
+## Known Gaps for Polyglot Shape
+
+### Gap #1: Advertised But Not Implemented
+
+**Issue:** Config files advertise Go/Rust support, but MCP handler only routes Python/JavaScript/TypeScript/Java
+
+**Status:** 🔴 BLOCKING polyglot shape
+
+**Resolution:** Q1 2026 - Either:
+- Implement Go/Rust analyzers with full enrichments, OR
+- Remove Go/Rust from `.code-scalpel/limits.toml` and update documentation
+
+**Acceptance Criteria:**
+- Routing and documentation agree on supported languages
+- No advertised but unimplemented languages
+
+### Gap #2: Enrichments Are Python-Only
+
+**Issue:** Cognitive complexity, code smells, halstead metrics, dead code hints, naming violations, compliance checks, custom rules, architecture patterns, and technical debt scoring are **all Python-exclusive**
+
+**Status:** 🟡 MAJOR - Prevents true polyglot shape
+
+**Current State:**
+- Python: 17+ enrichments across all tiers
+- Java/JS/TS: Basic structure extraction only
+
+**Resolution:** v1.2 (Q2 2026) - Port all enrichments to Java, JavaScript, TypeScript
+- Implement language-specific code smell detectors
+- Implement language-specific cognitive complexity metrics
+- Implement language-specific dead code detection
+- Implement language-specific naming convention validators
+
+**Acceptance Criteria:**
+- All 4 supported languages have ≥90% of enrichments implemented
+- Tier-gating applied consistently across languages
+- No enrichments marked as Python-only
+
+### Gap #3: No Unified Contract Across Languages
+
+**Issue:** No definition of "equivalence" for enrichments across languages
+
+**Example:** What does "cognitive complexity = 8" mean in Python vs Java? Are they comparable?
+
+**Status:** 🟡 MAJOR - Prevents meaningful comparison
+
+**Resolution:** v1.1 (Q1 2026) - Document cross-language enrichment equivalence
+
+**Acceptance Criteria:**
+- Language-independent definitions for each enrichment metric
+- Justification for why metrics are/aren't comparable across languages
+- Guidance for users interpreting scores across languages
+
+---
+
 ## Current Capabilities (v1.0)
 
 ### Community Tier
@@ -221,14 +354,19 @@ It extracts functions/classes/imports, computes a basic complexity score, and re
 - Quality gates: measurable FP/FN budgets per feature category with tracked regressions
 - Security hygiene: zero known secret exfiltration paths in generated artifacts; routine scanning in CI
 
-### Q1 2026: Enhanced Language Support
+### Q1 2026: Resolve Polyglot Gaps & Enhanced Language Support
+
+#### Blocker Items (Must Complete First)
+- [ ] **POLYGLOT GAP #1:** Reconcile `.code-scalpel/limits.toml` language lists with MCP routing
+  - **Acceptance:** Routing and docs agree on supported languages (remove Go/Rust or implement)
+  - **Effort:** 3 hours
+  - **Blocker:** Must resolve before adding new languages
 
 #### Community Tier
-- [ ] Add Rust AST parsing support
+- [ ] Add Rust AST parsing support (only if Gap #1 resolution includes Rust)
 - [ ] Add PHP AST parsing support
 - [ ] Improve TypeScript generic handling
 - [ ] Enhanced error messages for parsing failures
-- [ ] Reconcile `.code-scalpel/limits.toml` language lists with MCP routing (either implement routing or narrow config/docs)
 
 **Research topics (Q1 / Community):**
 - Rust parsing options tradeoffs (tree-sitter-rust vs rust-analyzer AST vs `syn`-based parsing)
@@ -239,7 +377,41 @@ It extracts functions/classes/imports, computes a basic complexity score, and re
 **Success metrics (Q1 / Community):**
 - New languages: function/class extraction accuracy meets or exceeds existing Community baselines
 - Error UX: parse failures include actionable reason + localized span for the majority of failures
-- Limits alignment: config and routing agree (no “advertised but unsupported” languages)
+- Limits alignment: config and routing agree (no "advertised but unsupported" languages)
+
+### Q2 2026: Polyglot Enrichment Parity & Performance
+
+#### Polyglot Enrichment Porting (BLOCKING for true polyglot shape)
+- [ ] **Port cognitive complexity** to Java, JavaScript, TypeScript
+  - Implement language-appropriate complexity metrics
+  - Validate against reference implementations
+  - Test on representative codebases
+  - **Effort:** 20 hours per language (60 hours total)
+
+- [ ] **Port code smell detection** to Java, JavaScript, TypeScript
+  - Map Python smells to language-specific patterns
+  - Implement language naming convention validators
+  - Long method/function detection per language
+  - God class/module detection per language
+  - **Effort:** 16 hours per language (48 hours total)
+
+- [ ] **Port dead code detection** to Java, JavaScript, TypeScript
+  - Unused import/variable detection per language
+  - Unreachable code detection per language
+  - **Effort:** 12 hours per language (36 hours total)
+
+- [ ] **Port dependency graph building** to Java, JavaScript, TypeScript
+  - Function/method call graph per language
+  - Cross-file dependency tracking
+  - **Effort:** 14 hours per language (42 hours total)
+
+**Total Polyglot Porting Effort:** ~186 hours
+
+**Success Criteria:**
+- All 4 supported languages provide ≥15 enrichments
+- Enrichment outputs are tier-gated identically across languages
+- No enrichments marked as "Python-only"
+- Test coverage ≥95% for all language-specific implementations
 
 #### Pro Tier
 - [ ] Add Swift AST parsing
@@ -247,7 +419,7 @@ It extracts functions/classes/imports, computes a basic complexity score, and re
 - [ ] Cross-language dependency tracking
 - [ ] Semantic code search within analysis
 
-**Research topics (Q1 / Pro):**
+**Research topics (Q2 / Pro):**
 - “Good enough” dependency graphs across languages: import graphs vs symbol graphs vs call graphs
 - Multi-language symbol resolution strategies (LSP-backed vs static heuristics)
 - Semantic search quality metrics (precision/recall, hallucination avoidance) and privacy constraints

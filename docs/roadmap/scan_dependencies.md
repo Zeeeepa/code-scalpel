@@ -79,13 +79,13 @@ The `scan_dependencies` tool scans project dependencies for known vulnerabilitie
 - ✅ Typosquatting detection (`typosquatting_detection`)
 - ✅ Supply chain risk scoring (`supply_chain_risk_scoring`)
 - ✅ False positive reduction via reachability (`false_positive_reduction`)
-- ✅ Update recommendations (`update_recommendations`)
+- 🔄 Update recommendations (`update_recommendations`) - **Planned for v1.1**
 
 ### Enterprise Tier
 - ✅ All Pro features
-- ✅ Custom vulnerability database (`custom_vulnerability_database`) - placeholder
-- ✅ Private dependency scanning (`private_dependency_scanning`) - placeholder
-- ✅ Automated remediation PRs (`automated_remediation`) - placeholder
+- 🔄 Custom vulnerability database (`custom_vulnerability_database`) - **Planned for v1.1**
+- 🔄 Private dependency scanning (`private_dependency_scanning`) - **Planned for v1.1**
+- 🔄 Automated remediation PRs (`automated_remediation`) - **Planned for v1.1**
 - ✅ Policy-based blocking (`policy_based_blocking`)
 - ✅ Compliance reporting (SOC2, ISO) (`compliance_reporting`)
 
@@ -403,6 +403,28 @@ result = await scan_dependencies(
 
 ## Roadmap
 
+### v1.1 (Q1 2026): Core Feature Completion
+
+#### Pro Tier
+- [ ] Update recommendations (`update_recommendations`)
+  - Analyze breaking changes in upgrades
+  - Suggest safe upgrade paths
+  - Provide rollback guidance
+
+#### Enterprise Tier
+- [ ] Custom vulnerability database (`custom_vulnerability_database`)
+  - Support private vulnerability databases
+  - Integrate with internal security tools
+  - Custom CVE definitions
+- [ ] Private dependency scanning (`private_dependency_scanning`)
+  - Scan private NPM/PyPI registries
+  - Support authenticated package sources
+  - Internal package vulnerability tracking
+- [ ] Automated remediation PRs (`automated_remediation`)
+  - Automatic pull request creation
+  - Safe dependency version updates
+  - Automated testing verification
+
 ### v1.2 (Q1 2026): Enhanced Detection
 
 #### Community Tier
@@ -513,19 +535,22 @@ None planned for v1.x series.
 
 ## Changelog
 
-### v1.1 (December 31, 2025)
+### v1.0 (December 31, 2025)
+- **Community Tier:** CVE detection via OSV API with CVSS severity scoring
+- **Community Tier:** Multi-language support (Python, JavaScript, Java)
+- **Community Tier:** Basic remediation suggestions via `fixed_version` field
 - **Pro Tier:** Added `reachability_analysis` capability with import scanning
 - **Pro Tier:** Added `license_compliance` capability with PyPI/npm license lookup
 - **Pro Tier:** Added `typosquatting_detection` with Levenshtein distance algorithm
 - **Pro Tier:** Added `supply_chain_risk_scoring` with multi-factor risk calculation
 - **Pro Tier:** Added `false_positive_reduction` via reachability analysis
-- **Enterprise:** Added `compliance_reporting` with SOC2/ISO framework support
+- **Enterprise:** Added `compliance_reporting` with SOC2/ISO framework support (server.py#L7150-7250)
 - **Enterprise:** Added `policy_based_blocking` with violation detection
 - **Model:** Added `DependencyInfo.supply_chain_risk_score` and `supply_chain_risk_factors` fields
 - **Model:** Added `DependencyScanResult.compliance_report` and `policy_violations` fields
-- **Documentation:** Updated roadmap to reflect actual implementation
+- **Documentation:** Initial roadmap and testing documentation
 
 ---
 
-**Last Updated:** December 31, 2025  
+**Last Updated:** January 8, 2026  
 **Next Review:** March 31, 2026

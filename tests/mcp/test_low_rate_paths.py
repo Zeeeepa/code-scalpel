@@ -138,10 +138,10 @@ def test_run_server_http_with_lan_warning(monkeypatch, capsys):
         _StubTransportSecurity,
     )
 
-    mcp_server.run_server(transport="streamable-http", host="0.0.0.0", allow_lan=True)
+    mcp_server.run_server(transport="streamable-http", host="127.0.0.1", allow_lan=True)
     captured = capsys.readouterr()
 
-    assert stub.settings.host == "0.0.0.0"
+    assert stub.settings.host == "127.0.0.1"
     assert stub.settings.port == 8080
     assert stub.run_calls[-1][1].get("transport") == "streamable-http"
     assert "LAN access enabled" in captured.out

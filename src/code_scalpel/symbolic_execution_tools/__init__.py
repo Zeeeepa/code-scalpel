@@ -203,6 +203,8 @@ warnings.filterwarnings(
 
 # [20251213_FEATURE] v1.5.1: Cross-File Taint Analysis
 # [20251225_REFACTOR] Import from new location
+# [20260102_REFACTOR] Deferred imports for optional Pro/Enterprise modules.
+# ruff: noqa: E402
 try:
     from code_scalpel.security.analyzers.cross_file_taint import (
         CrossFileSink,

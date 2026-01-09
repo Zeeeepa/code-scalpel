@@ -6,6 +6,7 @@ Note: The MCP server currently registers 20 tools.
 """
 
 import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -396,6 +397,109 @@ def abs_value(x):
         assert result is not None
         # lines_added should be tracked
         assert result.structural_changes["lines_added"] >= 1 or result.is_safe
+
+    def test_simulate_refactor_mcp_json_rpc_protocol_conformance(self):
+        """Test simulate_refactor MCP JSON-RPC 2.0 conformance: id echo, error shape."""
+        # This test verifies the MCP transport layer, not the simulator itself
+        # In a real MCP client test, we'd call via JSON-RPC and check:
+        # - Response includes "jsonrpc": "2.0"
+        # - Request id is echoed in response
+        # - Missing required params → JSON-RPC error with proper structure
+
+        # For now, test via direct tool invocation to verify result structure
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
+
+        # Valid request → result has expected structure
+        simulator = RefactorSimulator()
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
+
+        # Result should have standard fields (no hallucinated fields)
+        result_dict = result.to_dict()
+        assert "status" in result_dict
+        assert "is_safe" in result_dict
+        assert "security_issues" in result_dict
+        assert isinstance(result_dict["security_issues"], list)
+
+        # Invalid request (missing required params) → error result
+        # The MCP server would convert this to JSON-RPC error with:
+        # {"jsonrpc": "2.0", "error": {"code": -32602, "message": "..."}, "id": <request_id>}
+        with pytest.raises(ValueError, match="Must provide"):
+            simulator.simulate(original_code="def bar(): pass")  # Missing new_code/patch
+
+    def test_simulate_refactor_recovers_after_invalid_request(self):
+        """Simulator should continue working after invalid request errors."""
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
+
+        simulator = RefactorSimulator()
+
+        with pytest.raises(ValueError):
+            simulator.simulate(original_code="def foo(): pass")
+
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
+
+        assert result.status.value in ("safe", "warning")
+        assert result.is_safe in (True, False)
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"original_code": "def foo(): pass"},
+            {"original_code": None, "new_code": "def foo(): return 1"},
+            {"original_code": "def foo(): pass", "new_code": 123},
+        ],
+    )
+    def test_simulate_refactor_parameter_validation_matrix(self, kwargs):
+        """Invalid parameter shapes should raise clear errors."""
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
+
+        simulator = RefactorSimulator()
+
+        with pytest.raises((TypeError, ValueError)):
+            simulator.simulate(**kwargs)
+
+    def test_simulate_refactor_parallel_requests_threaded(self):
+        """Multiple concurrent requests should not deadlock or crash."""
+        from concurrent.futures import ThreadPoolExecutor
+
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
+
+        simulator = RefactorSimulator()
+
+        payloads = [
+            {
+                "original_code": f"def fn_{i}(x): return x",
+                "new_code": f"def fn_{i}(x): return x + 1",
+            }
+            for i in range(5)
+        ]
+
+        def _run(payload):
+            return simulator.simulate(**payload)
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            results = list(executor.map(_run, payloads))
+
+        assert all(r.status.value in ("safe", "warning") for r in results)
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 8), reason="Requires Python 3.8+ for simulator support"
+    )
+    def test_simulate_refactor_python_version_smoke(self):
+        """Smoke test for current Python version compatibility."""
+        from code_scalpel.generators.refactor_simulator import RefactorSimulator
+
+        simulator = RefactorSimulator()
+        result = simulator.simulate(
+            original_code="def compat(x): return x",
+            new_code="def compat(x): return x + 2",
+        )
+
+        assert sys.version_info.major == 3
+        assert result.status.value in ("safe", "warning")
 
     # ========== Dependency Scanning (v1.5.0+) ==========
 

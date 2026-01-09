@@ -663,57 +663,91 @@ def func_5():
 
 
 # [20250108_TEST] v2.5.0 Graph Neighborhood View tests
-class TestGraphNeighborhood:
-    """Tests for Graph Neighborhood View feature (v2.5.0).
-
+@pytest.fixture
+def sample_graph():
+    """Create a sample graph for testing neighborhood extraction.
+    
+    Tests for Graph Neighborhood View feature (v2.5.0).
     Graph Neighborhood extracts k-hop subgraphs around a center node,
     preventing graph explosion on large codebases.
-
     Formula: N(v, k) = {u ∈ V : d(v, u) ≤ k}
     """
+    from code_scalpel.graph_engine import (
+        EdgeType,
+        GraphEdge,
+        GraphNode,
+        NodeType,
+        UniversalGraph,
+        UniversalNodeID,
+    )
 
-    @pytest.fixture
-    def sample_graph(self):
-        """Create a sample graph for testing neighborhood extraction."""
-        from code_scalpel.graph_engine import (
-            EdgeType,
-            GraphEdge,
-            GraphNode,
-            NodeType,
-            UniversalGraph,
-            UniversalNodeID,
-        )
+    graph = UniversalGraph()
 
-        graph = UniversalGraph()
+    # Create a star topology: center -> [A, B, C, D]
+    # And chains: A -> A1 -> A2, B -> B1 -> B2
+    center_id = UniversalNodeID(
+        language="python",
+        module="main",
+        node_type=NodeType.FUNCTION,
+        name="center",
+        line=1,
+    )
+    graph.add_node(GraphNode(id=center_id, metadata={"file": "main.py"}))
 
-        # Create a star topology: center -> [A, B, C, D]
-        # And chains: A -> A1 -> A2, B -> B1 -> B2
-        center_id = UniversalNodeID(
+    # First level nodes
+    for letter in ["A", "B", "C", "D"]:
+        node_id = UniversalNodeID(
             language="python",
-            module="main",
+            module="module_" + letter.lower(),
             node_type=NodeType.FUNCTION,
-            name="center",
-            line=1,
+            name=f"func_{letter}",
+            line=10,
         )
-        graph.add_node(GraphNode(id=center_id, metadata={"file": "main.py"}))
+        graph.add_node(
+            GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"})
+        )
 
-        # First level nodes
-        for letter in ["A", "B", "C", "D"]:
+        # Edge from center to this node
+        graph.add_edge(
+            GraphEdge(
+                from_id=str(center_id),
+                to_id=str(node_id),
+                edge_type=EdgeType.DIRECT_CALL,
+                confidence=0.9,
+                evidence="Direct call",
+            )
+        )
+
+    # Second level nodes (chains from A and B)
+    for letter in ["A", "B"]:
+        for level in [1, 2]:
+            parent_name = (
+                f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
+            )
+            parent_module = (
+                f"module_{letter.lower()}"
+                if level == 1
+                else f"module_{letter.lower()}{level-1}"
+            )
+
             node_id = UniversalNodeID(
                 language="python",
-                module="module_" + letter.lower(),
+                module=f"module_{letter.lower()}{level}",
                 node_type=NodeType.FUNCTION,
-                name=f"func_{letter}",
-                line=10,
+                name=f"func_{letter}{level}",
+                line=10 + level,
             )
             graph.add_node(
-                GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"})
+                GraphNode(
+                    id=node_id,
+                    metadata={"file": f"module_{letter.lower()}{level}.py"},
+                )
             )
 
-            # Edge from center to this node
+            parent_id = f"python::{parent_module}::function::{parent_name}"
             graph.add_edge(
                 GraphEdge(
-                    from_id=str(center_id),
+                    from_id=parent_id,
                     to_id=str(node_id),
                     edge_type=EdgeType.DIRECT_CALL,
                     confidence=0.9,
@@ -721,44 +755,7 @@ class TestGraphNeighborhood:
                 )
             )
 
-        # Second level nodes (chains from A and B)
-        for letter in ["A", "B"]:
-            for level in [1, 2]:
-                parent_name = (
-                    f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
-                )
-                parent_module = (
-                    f"module_{letter.lower()}"
-                    if level == 1
-                    else f"module_{letter.lower()}{level-1}"
-                )
-
-                node_id = UniversalNodeID(
-                    language="python",
-                    module=f"module_{letter.lower()}{level}",
-                    node_type=NodeType.FUNCTION,
-                    name=f"func_{letter}{level}",
-                    line=10 + level,
-                )
-                graph.add_node(
-                    GraphNode(
-                        id=node_id,
-                        metadata={"file": f"module_{letter.lower()}{level}.py"},
-                    )
-                )
-
-                parent_id = f"python::{parent_module}::function::{parent_name}"
-                graph.add_edge(
-                    GraphEdge(
-                        from_id=parent_id,
-                        to_id=str(node_id),
-                        edge_type=EdgeType.DIRECT_CALL,
-                        confidence=0.9,
-                        evidence="Direct call",
-                    )
-                )
-
-        return graph
+    return graph
 
 
 def test_get_graph_neighborhood_fast_fail_avoids_graph_build(monkeypatch, tmp_path):
@@ -791,107 +788,115 @@ def test_get_graph_neighborhood_fast_fail_avoids_graph_build(monkeypatch, tmp_pa
     assert result.success is False
     assert result.error
 
-    def test_basic_neighborhood_extraction(self, sample_graph):
-        """Test basic k-hop neighborhood extraction."""
-        center_id = "python::main::function::center"
 
-        result = sample_graph.get_neighborhood(center_id, k=1)
+def test_basic_neighborhood_extraction(sample_graph):
+    """Test basic k-hop neighborhood extraction."""
+    center_id = "python::main::function::center"
 
-        assert result.success
-        assert not result.truncated
+    result = sample_graph.get_neighborhood(center_id, k=1)
 
-        # Should have center + 4 first-level nodes
-        assert len(result.subgraph.nodes) == 5
+    assert result.success
+    assert not result.truncated
 
-        # Verify center is at depth 0
-        assert result.node_depths[center_id] == 0
+    # Should have center + 4 first-level nodes
+    assert len(result.subgraph.nodes) == 5
 
-        # Verify first-level nodes at depth 1
-        for letter in ["A", "B", "C", "D"]:
-            node_id = f"python::module_{letter.lower()}::function::func_{letter}"
-            assert node_id in result.node_depths
-            assert result.node_depths[node_id] == 1
+    # Verify center is at depth 0
+    assert result.node_depths[center_id] == 0
 
-    def test_deeper_neighborhood(self, sample_graph):
-        """Test k=2 neighborhood includes second-level nodes."""
-        center_id = "python::main::function::center"
+    # Verify first-level nodes at depth 1
+    for letter in ["A", "B", "C", "D"]:
+        node_id = f"python::module_{letter.lower()}::function::func_{letter}"
+        assert node_id in result.node_depths
+    assert result.node_depths[node_id] == 1
 
-        result = sample_graph.get_neighborhood(center_id, k=2)
 
-        assert result.success
+def test_deeper_neighborhood(sample_graph):
+    """Test k=2 neighborhood includes second-level nodes."""
+    center_id = "python::main::function::center"
 
-        # Should have center + 4 first-level + 2 second-level (A1, B1)
-        assert len(result.subgraph.nodes) == 7
+    result = sample_graph.get_neighborhood(center_id, k=2)
 
-        # Verify depth 2 nodes
-        assert result.node_depths["python::module_a1::function::func_A1"] == 2
-        assert result.node_depths["python::module_b1::function::func_B1"] == 2
+    assert result.success
 
-    def test_neighborhood_truncation(self, sample_graph):
-        """Test graph is truncated when exceeding max_nodes."""
-        center_id = "python::main::function::center"
+    # Should have center + 4 first-level + 2 second-level (A1, B1)
+    assert len(result.subgraph.nodes) == 7
 
-        result = sample_graph.get_neighborhood(center_id, k=3, max_nodes=3)
+    # Verify depth 2 nodes
+    assert result.node_depths["python::module_a1::function::func_A1"] == 2
+    assert result.node_depths["python::module_b1::function::func_B1"] == 2
 
-        assert result.success
-        assert result.truncated
-        assert result.truncation_warning is not None
-        assert "truncated" in result.truncation_warning.lower()
 
-        # Should have exactly max_nodes
-        assert len(result.subgraph.nodes) <= 3
+def test_neighborhood_truncation(sample_graph):
+    """Test graph is truncated when exceeding max_nodes."""
+    center_id = "python::main::function::center"
 
-    def test_neighborhood_direction_outgoing(self, sample_graph):
-        """Test outgoing-only neighborhood extraction."""
-        center_id = "python::main::function::center"
+    result = sample_graph.get_neighborhood(center_id, k=3, max_nodes=3)
 
-        result = sample_graph.get_neighborhood(center_id, k=2, direction="outgoing")
+    assert result.success
+    assert result.truncated
+    assert result.truncation_warning is not None
+    assert "truncated" in result.truncation_warning.lower()
 
-        assert result.success
+    # Should have exactly max_nodes
+    assert len(result.subgraph.nodes) <= 3
 
-        # Outgoing from center should find all downstream nodes
-        assert len(result.subgraph.nodes) >= 5  # center + first level
 
-    def test_neighborhood_direction_incoming(self, sample_graph):
-        """Test incoming-only neighborhood extraction."""
-        # Test from a leaf node - should find path back to center
-        leaf_id = "python::module_a1::function::func_A1"
+def test_neighborhood_direction_outgoing(sample_graph):
+    """Test outgoing-only neighborhood extraction."""
+    center_id = "python::main::function::center"
 
-        result = sample_graph.get_neighborhood(leaf_id, k=2, direction="incoming")
+    result = sample_graph.get_neighborhood(center_id, k=2, direction="outgoing")
 
-        assert result.success
-        # Incoming edges from a leaf may be limited
-        assert len(result.subgraph.nodes) >= 1
+    assert result.success
 
-    def test_neighborhood_nonexistent_node(self, sample_graph):
-        """Test error handling for nonexistent center node."""
-        result = sample_graph.get_neighborhood(
-            "python::nonexistent::function::fake", k=1
-        )
+    # Outgoing from center should find all downstream nodes
+    assert len(result.subgraph.nodes) >= 5  # center + first level
 
-        assert not result.success
-        # Node not found should be handled gracefully
 
-    def test_neighborhood_confidence_filtering(self, sample_graph):
-        """Test filtering by minimum confidence."""
-        center_id = "python::main::function::center"
+def test_neighborhood_direction_incoming(sample_graph):
+    """Test incoming-only neighborhood extraction."""
+    # Test from a leaf node - should find path back to center
+    leaf_id = "python::module_a1::function::func_A1"
 
-        # All edges have 0.9 confidence
-        result_high = sample_graph.get_neighborhood(center_id, k=2, min_confidence=0.95)
-        result_low = sample_graph.get_neighborhood(center_id, k=2, min_confidence=0.5)
+    result = sample_graph.get_neighborhood(leaf_id, k=2, direction="incoming")
 
-        # High confidence filter should exclude more edges
-        assert len(result_low.subgraph.nodes) >= len(result_high.subgraph.nodes)
+    assert result.success
+    # Incoming edges from a leaf may be limited
+    assert len(result.subgraph.nodes) >= 1
 
-    def test_mcp_tool_graph_neighborhood(self, tmp_path):
-        """Test the MCP tool for graph neighborhood extraction."""
-        import asyncio
 
-        from code_scalpel.mcp.server import get_graph_neighborhood
+def test_neighborhood_nonexistent_node(sample_graph):
+    """Test error handling for nonexistent center node."""
+    result = sample_graph.get_neighborhood(
+        "python::nonexistent::function::fake", k=1
+    )
 
-        # Create a simple test project
-        (tmp_path / "main.py").write_text(
-            """
+    assert not result.success
+    # Node not found should be handled gracefully
+
+
+def test_neighborhood_confidence_filtering(sample_graph):
+    """Test filtering by minimum confidence."""
+    center_id = "python::main::function::center"
+
+    # All edges have 0.9 confidence
+    result_high = sample_graph.get_neighborhood(center_id, k=2, min_confidence=0.95)
+    result_low = sample_graph.get_neighborhood(center_id, k=2, min_confidence=0.5)
+
+    # High confidence filter should exclude more edges
+    assert len(result_low.subgraph.nodes) >= len(result_high.subgraph.nodes)
+
+
+def test_mcp_tool_graph_neighborhood(tmp_path):
+    """Test the MCP tool for graph neighborhood extraction."""
+    import asyncio
+
+    from code_scalpel.mcp.server import get_graph_neighborhood
+
+    # Create a simple test project
+    (tmp_path / "main.py").write_text(
+        """
 def entry_point():
     helper()
     
@@ -901,85 +906,88 @@ def helper():
 def util():
     pass
 """
+    )
+
+    async def run_test():
+        # Use the actual project - it has a call graph
+        result = await get_graph_neighborhood(
+            center_node_id="python::tmp_cov::function::main",
+            k=2,
+            max_nodes=50,
+            project_root=None,  # Use default PROJECT_ROOT
         )
+        return result
 
-        async def run_test():
-            # Use the actual project - it has a call graph
-            result = await get_graph_neighborhood(
-                center_node_id="python::tmp_cov::function::main",
-                k=2,
-                max_nodes=50,
-                project_root=None,  # Use default PROJECT_ROOT
-            )
-            return result
+    result = asyncio.run(run_test())
 
-        result = asyncio.run(run_test())
+    # Tool should return a valid response
+    assert hasattr(result, "success")
+    assert hasattr(result, "nodes")
+    assert hasattr(result, "edges")
+    assert hasattr(result, "truncated")
+    assert hasattr(result, "mermaid")
 
-        # Tool should return a valid response
-        assert hasattr(result, "success")
-        assert hasattr(result, "nodes")
-        assert hasattr(result, "edges")
-        assert hasattr(result, "truncated")
-        assert hasattr(result, "mermaid")
 
-    def test_mcp_tool_generates_mermaid(self, tmp_path):
-        """Test MCP tool generates Mermaid visualization."""
-        import asyncio
+def test_mcp_tool_generates_mermaid(tmp_path):
+    """Test MCP tool generates Mermaid visualization."""
+    import asyncio
 
-        from code_scalpel.mcp.server import get_graph_neighborhood
+    from code_scalpel.mcp.server import get_graph_neighborhood
 
-        async def run_test():
-            result = await get_graph_neighborhood(
-                center_node_id="python::tmp_cov::function::load_coverage",
-                k=2,
-                max_nodes=20,
-            )
-            return result
+    async def run_test():
+        result = await get_graph_neighborhood(
+            center_node_id="python::tmp_cov::function::load_coverage",
+            k=2,
+            max_nodes=20,
+        )
+        return result
 
-        result = asyncio.run(run_test())
+    result = asyncio.run(run_test())
 
-        if result.success and result.nodes:
-            assert result.mermaid is not None
-            assert "graph TD" in result.mermaid
-            # Center node should have special styling
-            assert "center" in result.mermaid
+    if result.success and result.nodes:
+        assert result.mermaid is not None
+        assert "graph TD" in result.mermaid
+        # Center node should have special styling
+        assert "center" in result.mermaid
 
-    def test_mcp_tool_invalid_parameters(self):
-        """Test MCP tool handles invalid parameters gracefully."""
-        import asyncio
 
-        from code_scalpel.mcp.server import get_graph_neighborhood
+def test_mcp_tool_invalid_parameters():
+    """Test MCP tool handles invalid parameters gracefully."""
+    import asyncio
 
-        async def run_test():
-            # Invalid k value
-            result = await get_graph_neighborhood(
-                center_node_id="python::test::function::test",
-                k=0,  # Invalid - must be >= 1
-            )
-            return result
+    from code_scalpel.mcp.server import get_graph_neighborhood
 
-        result = asyncio.run(run_test())
+    async def run_test():
+        # Invalid k value
+        result = await get_graph_neighborhood(
+            center_node_id="python::test::function::test",
+            k=0,  # Invalid - must be >= 1
+        )
+        return result
 
-        assert not result.success
-        assert result.error is not None
-        assert (
-            "must be at least 1" in result.error
-        )  # Updated for standardized error format
+    result = asyncio.run(run_test())
 
-    def test_mcp_tool_invalid_direction(self):
-        """Test MCP tool validates direction parameter."""
-        import asyncio
+    assert not result.success
+    assert result.error is not None
+    assert (
+        "must be at least 1" in result.error
+    )  # Updated for standardized error format
 
-        from code_scalpel.mcp.server import get_graph_neighborhood
 
-        async def run_test():
-            result = await get_graph_neighborhood(
-                center_node_id="python::test::function::test",
-                direction="invalid",  # Invalid direction
-            )
-            return result
+def test_mcp_tool_invalid_direction():
+    """Test MCP tool validates direction parameter."""
+    import asyncio
 
-        result = asyncio.run(run_test())
+    from code_scalpel.mcp.server import get_graph_neighborhood
 
-        assert not result.success
-        assert "direction" in result.error.lower()
+    async def run_test():
+        result = await get_graph_neighborhood(
+            center_node_id="python::test::function::test",
+            direction="invalid",  # Invalid direction
+        )
+        return result
+
+    result = asyncio.run(run_test())
+
+    assert not result.success
+    assert "direction" in result.error.lower()

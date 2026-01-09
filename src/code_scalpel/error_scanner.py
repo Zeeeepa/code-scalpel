@@ -23,6 +23,8 @@ warnings.warn(
     stacklevel=2,
 )
 
+# [20260102_REFACTOR] Backward-compat shim keeps imports below for legacy users.
+# ruff: noqa: E402
 # Re-export everything from new location for backward compatibility
 from code_scalpel.quality_assurance.error_scanner import (
     CodeError,
