@@ -2366,6 +2366,25 @@ class FileContextResult(BaseModel):
 
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
+
+    # [20260111_FEATURE] v1.0 - Output metadata fields for transparency
+    tier_applied: str = Field(
+        default="community",
+        description="The tier used for analysis (community, pro, enterprise)",
+    )
+    max_context_lines_applied: int | None = Field(
+        default=None,
+        description="The max context lines limit applied (None = unlimited for Enterprise)",
+    )
+    pro_features_enabled: bool = Field(
+        default=False,
+        description="Whether Pro tier features were enabled (code smells, doc coverage, maintainability)",
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False,
+        description="Whether Enterprise tier features were enabled (metadata, compliance, owners)",
+    )
+
     file_path: str = Field(description="Path to the analyzed file")
     language: str = Field(default="python", description="Detected language")
     line_count: int = Field(description="Total lines in file")
@@ -14251,6 +14270,31 @@ def _get_file_context_sync(
     limits = limits or {}
     max_context_lines = limits.get("max_context_lines", limits.get("context_lines"))
 
+    # [20260111_FEATURE] v1.0 - Calculate output metadata flags for transparency
+    PRO_CAPABILITIES = {
+        "code_smell_detection",
+        "documentation_coverage",
+        "maintainability_index",
+        "semantic_summarization",
+        "intent_extraction",
+        "related_imports_inclusion",
+        "smart_context_expansion",
+    }
+    ENTERPRISE_CAPABILITIES = {
+        "pii_redaction",
+        "secret_masking",
+        "api_key_detection",
+        "rbac_aware_retrieval",
+        "file_access_control",
+        "custom_metadata_extraction",
+        "compliance_flags",
+        "technical_debt_scoring",
+        "owner_team_mapping",
+        "historical_metrics",
+    }
+    pro_features_enabled = bool(cap_set & PRO_CAPABILITIES)
+    enterprise_features_enabled = bool(cap_set & ENTERPRISE_CAPABILITIES)
+
     try:
         # [20251214_FEATURE] Use PathResolver for intelligent path resolution
         try:
@@ -14262,6 +14306,10 @@ def _get_file_context_sync(
                 success=False,
                 file_path=file_path,
                 line_count=0,
+                tier_applied=tier,
+                max_context_lines_applied=max_context_lines,
+                pro_features_enabled=pro_features_enabled,
+                enterprise_features_enabled=enterprise_features_enabled,
                 error=str(e),
             )
 
@@ -14275,6 +14323,10 @@ def _get_file_context_sync(
                 success=False,
                 file_path=str(path),
                 line_count=line_count,
+                tier_applied=tier,
+                max_context_lines_applied=max_context_lines,
+                pro_features_enabled=pro_features_enabled,
+                enterprise_features_enabled=enterprise_features_enabled,
                 summary="",
                 imports_truncated=False,
                 total_imports=0,
@@ -14305,6 +14357,10 @@ def _get_file_context_sync(
             return FileContextResult(
                 success=analysis.success if analysis.success is not None else True,
                 file_path=str(path),
+                tier_applied=tier,
+                max_context_lines_applied=max_context_lines,
+                pro_features_enabled=pro_features_enabled,
+                enterprise_features_enabled=enterprise_features_enabled,
                 language=detected_lang,
                 line_count=line_count,
                 functions=analysis.functions,
@@ -14331,6 +14387,10 @@ def _get_file_context_sync(
                 success=False,
                 file_path=str(path),
                 line_count=line_count,
+                tier_applied=tier,
+                max_context_lines_applied=max_context_lines,
+                pro_features_enabled=pro_features_enabled,
+                enterprise_features_enabled=enterprise_features_enabled,
                 error=f"Syntax error at line {e.lineno}: {e.msg}.",
             )
 
@@ -14540,6 +14600,10 @@ def _get_file_context_sync(
         return FileContextResult(
             success=True,
             file_path=str(path),
+            tier_applied=tier,
+            max_context_lines_applied=max_context_lines,
+            pro_features_enabled=pro_features_enabled,
+            enterprise_features_enabled=enterprise_features_enabled,
             language="python",
             line_count=line_count,
             functions=functions,
@@ -14574,6 +14638,7 @@ def _get_file_context_sync(
             success=False,
             file_path=str(file_path),
             line_count=0,
+            tier_applied=tier if "tier" in dir() else "community",
             error=f"Analysis failed: {str(e)}",
         )
 

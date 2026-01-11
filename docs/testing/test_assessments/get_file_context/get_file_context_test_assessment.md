@@ -1,6 +1,6 @@
 ## get_file_context Test Assessment Report
-**Date**: January 3, 2026 (Updated)
-**Assessment Version**: 3.0 (Complete Testing Validation + Performance Benchmarks)
+**Date**: January 8, 2026 (Updated)
+**Assessment Version**: 3.1 (Output Metadata Fields + Tier Transparency)
 **Tool Version**: v3.3.0  
 **Roadmap Reference**: [docs/roadmap/get_file_context.md](../../roadmap/get_file_context.md)
 
@@ -12,18 +12,19 @@
 
 **Initial Assessment**: 🔴 BLOCKING (claimed "No tier tests")  
 **Investigation Finding**: ✅ All 9 features ARE fully implemented and tier-gated  
-**Testing Update**: ✅ COMPREHENSIVE TEST SUITE COMPLETE - 110+ tests covering all tiers, features, languages  
+**Testing Update**: ✅ COMPREHENSIVE TEST SUITE COMPLETE - 122 tests covering all tiers, features, languages  
+**Output Metadata Enhancement (v3.1)**: ✅ Added tier transparency fields for AI agent introspection
 **Current Status**: 🟢 PRODUCTION READY - All tier-specific features validated with proper capability gating
 
 ---
 
 ## Test Inventory Summary
 
-**Total Tests**: 123+ PASSING | 0 FAILED | 0 SKIPPED  
+**Total Tests**: 122 PASSING | 0 FAILED | 0 SKIPPED  
 **Pass Rate**: 100%  
-**Test Modules**: 6 files (community, pro, enterprise, multi-language, licensing, performance)  
-**Lines of Test Code**: 3,465  
-**Combined Execution Time**: ~25-30 seconds (includes fixture creation + performance benchmarks)
+**Test Modules**: 7 files (community, pro, enterprise, multi-language, licensing, performance, tier metadata)  
+**Lines of Test Code**: 3,850+  
+**Combined Execution Time**: ~27-32 seconds (includes fixture creation + performance benchmarks)
 
 ### Test Distribution by Location
 
@@ -80,9 +81,73 @@
    - Memory leak detection (1.00x growth over 25 calls)
    - Deterministic output verification (identical across 3 calls)
 
+**TIER METADATA TESTS** (tests/tools/tiers/):
+
+7. **test_get_file_context_tiers.py** - 21 tests (✅ 21/21 passing) - **[20260108_FEATURE]**
+   - Output metadata field validation for Community tier (5 tests)
+   - Output metadata field validation for Pro tier (5 tests)
+   - Output metadata field validation for Enterprise tier (5 tests)
+   - Output metadata field validation on error cases (4 tests)
+   - Output metadata consistency validation (2 tests)
+
 **LEGACY TESTS** (still passing):
-- tests/tools/individual/test_get_file_context_tiers_clean.py - 2 tests
-- tests/mcp/test_v1_4_specifications.py - 6 tests
+- tests/tools/individual/test_get_file_context_tiers_clean.py - 2 tests (2 in common, not counted)
+
+---
+
+## Output Metadata Fields - Tier Transparency Feature
+
+**[20260108_FEATURE]** Added output metadata fields to `FileContextResult` for AI agent tier introspection.
+
+### New Fields Added
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tier_applied` | `str` | The tier that was applied ("community", "pro", "enterprise") |
+| `max_context_lines_applied` | `int \| None` | The line limit applied (500, 2000, None for unlimited) |
+| `pro_features_enabled` | `bool` | Whether Pro tier features were enabled |
+| `enterprise_features_enabled` | `bool` | Whether Enterprise tier features were enabled |
+
+### Tier-Specific Values
+
+| Tier | tier_applied | max_context_lines_applied | pro_features_enabled | enterprise_features_enabled |
+|------|--------------|---------------------------|----------------------|----------------------------|
+| Community | "community" | 500 | False | False |
+| Pro | "pro" | 2000 | True | False |
+| Enterprise | "enterprise" | None | True | True |
+
+### Test Coverage
+
+**TestOutputMetadataFieldsCommunity (5 tests)**:
+- `test_tier_applied_is_community`: Validates tier_applied = "community"
+- `test_max_context_lines_applied_is_500`: Validates 500-line limit reported
+- `test_pro_features_enabled_is_false`: Validates Pro features disabled
+- `test_enterprise_features_enabled_is_false`: Validates Enterprise features disabled
+- `test_all_metadata_fields_present`: Validates all 4 metadata fields exist
+
+**TestOutputMetadataFieldsPro (5 tests)**:
+- `test_tier_applied_is_pro`: Validates tier_applied = "pro"
+- `test_max_context_lines_applied_is_2000`: Validates 2000-line limit reported
+- `test_pro_features_enabled_is_true`: Validates Pro features enabled
+- `test_enterprise_features_enabled_is_false`: Validates Enterprise features disabled
+- `test_all_metadata_fields_present`: Validates all 4 metadata fields exist
+
+**TestOutputMetadataFieldsEnterprise (5 tests)**:
+- `test_tier_applied_is_enterprise`: Validates tier_applied = "enterprise"
+- `test_max_context_lines_applied_is_none`: Validates unlimited context reported
+- `test_pro_features_enabled_is_true`: Validates Pro features enabled (inherited)
+- `test_enterprise_features_enabled_is_true`: Validates Enterprise features enabled
+- `test_all_metadata_fields_present`: Validates all 4 metadata fields exist
+
+**TestOutputMetadataFieldsOnError (4 tests)**:
+- `test_file_not_found_includes_metadata`: Validates metadata present on FileNotFoundError
+- `test_line_limit_exceeded_includes_metadata`: Validates metadata present when file exceeds limit
+- `test_non_python_file_includes_metadata`: Validates metadata present for non-Python files
+- `test_syntax_error_includes_metadata`: Validates metadata present on syntax error
+
+**TestOutputMetadataConsistency (2 tests)**:
+- `test_metadata_consistent_across_calls`: Validates metadata identical across 3 calls
+- `test_metadata_matches_capabilities`: Validates Pro features enabled implies Pro capabilities active
 
 ---
 
@@ -190,6 +255,9 @@
 | **Performance & scalability** | ✅ | Fully Tested | test_performance.py (response time, memory, stress tests) |
 | **Memory leak detection** | ✅ | Validated | test_performance.py (no memory growth over 25 calls) |
 | **Cross-platform stability** | ✅ | Deterministic | test_performance.py (identical output across calls) |
+| **Output metadata fields** | ✅ | Fully Tested | test_get_file_context_tiers.py (21 tests) [20260108_FEATURE] |
+| **Tier transparency** | ✅ | Fully Tested | tier_applied, max_context_lines_applied validated per tier |
+| **Feature flag reporting** | ✅ | Fully Tested | pro_features_enabled, enterprise_features_enabled |
 
 ---
 

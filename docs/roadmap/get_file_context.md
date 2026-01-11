@@ -124,6 +124,12 @@ class FileContextResult(BaseModel):
     imports_truncated: bool                 # Whether imports were truncated
     total_imports: int                      # Total imports before truncation
     
+    # Output Metadata Fields (All Tiers) - [20260108_FEATURE]
+    tier_applied: str                       # "community", "pro", or "enterprise"
+    max_context_lines_applied: int | None   # 500, 2000, or None (unlimited)
+    pro_features_enabled: bool              # Whether Pro tier features were enabled
+    enterprise_features_enabled: bool       # Whether Enterprise tier features were enabled
+    
     # Pro Tier
     semantic_summary: str | None            # Enhanced summary with docstring
     intent_tags: list[str]                  # Extracted intents/topics
@@ -143,6 +149,60 @@ class FileContextResult(BaseModel):
     technical_debt_score: float | None      # Hours estimate
     owners: list[str]                       # From CODEOWNERS
     historical_metrics: dict | None         # Git metrics
+```
+
+---
+
+## Output Metadata Fields - Tier Transparency
+
+**[20260108_FEATURE]** Four new output metadata fields provide AI agents with introspection into which tier configuration was applied to their request.
+
+### Why This Matters for AI Agents
+
+When an AI agent calls `get_file_context`, it needs to understand:
+1. Which tier's configuration was applied to the response
+2. What limits were in effect (e.g., line truncation)
+3. Whether Pro/Enterprise features were actually enabled
+
+This transparency enables:
+- **Debugging**: Agent can verify expected tier is active
+- **Adaptive behavior**: Agent can adjust requests based on tier capabilities
+- **User communication**: Agent can inform user which features were available
+
+### Metadata Field Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tier_applied` | `str` | The tier that was applied: "community", "pro", or "enterprise" |
+| `max_context_lines_applied` | `int \| None` | Line limit: 500 (Community), 2000 (Pro), None (Enterprise) |
+| `pro_features_enabled` | `bool` | True if Pro tier capabilities were active |
+| `enterprise_features_enabled` | `bool` | True if Enterprise tier capabilities were active |
+
+### Tier-Specific Values
+
+| Tier | tier_applied | max_context_lines_applied | pro_features_enabled | enterprise_features_enabled |
+|------|--------------|---------------------------|----------------------|----------------------------|
+| Community | "community" | 500 | False | False |
+| Pro | "pro" | 2000 | True | False |
+| Enterprise | "enterprise" | None | True | True |
+
+### Example Usage
+
+```python
+result = await get_file_context("/src/utils.py")
+
+# Check which tier was applied
+if result.tier_applied == "community":
+    print(f"Community tier: Limited to {result.max_context_lines_applied} lines")
+    
+# Verify expected capabilities
+if not result.pro_features_enabled:
+    print("Note: Code smell detection not available in current tier")
+    
+# Adaptive agent behavior
+if result.enterprise_features_enabled:
+    # Can rely on PII redaction being active
+    print("Enterprise: Full security features active")
 ```
 
 ---
@@ -234,7 +294,11 @@ result = await get_file_context("/src/services/auth.py")
     ],
     "summary": "Utility module with 3 functions and 2 classes for financial calculations",
     "imports_truncated": false,
-    "total_imports": 3
+    "total_imports": 3,
+    "tier_applied": "community",
+    "max_context_lines_applied": 500,
+    "pro_features_enabled": false,
+    "enterprise_features_enabled": false
   },
   "id": 1
 }
@@ -262,6 +326,10 @@ result = await get_file_context("/src/services/auth.py")
     "summary": "Utility module with 3 functions and 2 classes for financial calculations",
     "imports_truncated": false,
     "total_imports": 3,
+    "tier_applied": "pro",
+    "max_context_lines_applied": 2000,
+    "pro_features_enabled": true,
+    "enterprise_features_enabled": false,
     "semantic_summary": "Financial utility module. Docstring: Provides tax calculation, currency formatting, and email validation utilities for the billing system.",
     "intent_tags": ["financial", "tax", "currency", "validation", "utility"],
     "related_imports": [
@@ -312,6 +380,10 @@ result = await get_file_context("/src/services/auth.py")
     "summary": "Utility module with 3 functions and 2 classes for financial calculations",
     "imports_truncated": false,
     "total_imports": 3,
+    "tier_applied": "enterprise",
+    "max_context_lines_applied": null,
+    "pro_features_enabled": true,
+    "enterprise_features_enabled": true,
     "semantic_summary": "Financial utility module. Docstring: Provides tax calculation...",
     "intent_tags": ["financial", "tax", "currency", "validation", "utility"],
     "related_imports": ["/home/user/project/src/config.py"],
