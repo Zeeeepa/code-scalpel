@@ -2572,6 +2572,27 @@ class SymbolReferencesResult(BaseModel):
         description="Ratio of references with CODEOWNERS attribution (Enterprise)",
     )
     error: str | None = Field(default=None, description="Error message if failed")
+    # [20260111_FEATURE] v3.3.2 - Output metadata fields for tier transparency
+    tier_applied: str | None = Field(
+        default=None,
+        description="The tier that was applied for this operation (community, pro, enterprise)",
+    )
+    max_files_applied: int | None = Field(
+        default=None,
+        description="The max_files_searched limit that was applied (None = unlimited)",
+    )
+    max_references_applied: int | None = Field(
+        default=None,
+        description="The max_references limit that was applied (None = unlimited)",
+    )
+    pro_features_enabled: list[str] | None = Field(
+        default=None,
+        description="List of Pro features enabled (e.g., usage_categorization, scope_filtering)",
+    )
+    enterprise_features_enabled: list[str] | None = Field(
+        default=None,
+        description="List of Enterprise features enabled (e.g., impact_analysis, codeowners_integration)",
+    )
 
 
 # ============================================================================
@@ -16099,6 +16120,31 @@ async def get_symbol_references(
         enable_categorization,
         enable_codeowners,
         enable_impact_analysis,
+    )
+
+    # [20260111_FEATURE] v3.3.2 - Populate output metadata for tier transparency
+    result.tier_applied = tier
+    result.max_files_applied = max_files
+    result.max_references_applied = max_references
+
+    # Categorize enabled features by tier
+    pro_features = [
+        "usage_categorization",
+        "read_write_classification",
+        "import_classification",
+        "scope_filtering",
+        "test_file_filtering",
+        "project_wide_search",
+    ]
+    enterprise_features = [
+        "codeowners_integration",
+        "ownership_attribution",
+        "impact_analysis",
+        "change_risk_assessment",
+    ]
+    result.pro_features_enabled = [f for f in pro_features if f in cap_set] or None
+    result.enterprise_features_enabled = (
+        [f for f in enterprise_features if f in cap_set] or None
     )
 
     if ctx:
