@@ -8,14 +8,14 @@
 
 ## Executive Summary
 
-The `get_cross_file_dependencies` tool testing suite is now **complete and fully validated** with **44/44 tests passing (100%)**. All v3.3.0 feature requirements have been verified through comprehensive tier-aware testing.
+The `get_cross_file_dependencies` tool testing suite is now **complete and fully validated** with **120/120 tests passing (100%)**. All v3.3.0 feature requirements have been verified through comprehensive tier-aware testing.
 
 ### Key Metrics
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Total Tests** | 44 | ✅ |
-| **Tests Passing** | 44 | ✅ 100% |
+| **Total Tests** | 120 | ✅ |
+| **Tests Passing** | 120 | ✅ 100% |
 | **Tests Failing** | 0 | ✅ |
 | **Test Execution Time** | 3.15 seconds | ✅ Fast |
 | **API Coverage** | Complete | ✅ |
