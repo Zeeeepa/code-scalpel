@@ -550,5 +550,41 @@ None planned for v1.x series.
 
 ---
 
-**Last Updated:** December 30, 2025  
+## v1.0 Validation Status
+
+**Validated:** January 11, 2026  
+**Validator:** GitHub Copilot Agent  
+**Test Suite:** `tests/tools/extract_code/` - **126 tests passing**
+
+### Improvements Made
+
+| Change | Type | Description |
+|--------|------|-------------|
+| Community max_depth fix | BUGFIX | Fixed limits.toml Community max_depth (was 1, now 0 to match features.py) |
+| Output metadata fields | FEATURE | Added tier_applied, language_detected, cross_file_deps_enabled, max_depth_applied to ContextualExtractionResult |
+| Metadata test suite | TEST | Added test_output_metadata.py with 7 validation tests |
+
+### Test Breakdown
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| test_language_support.py | 13 | Python, JS, TS, Java |
+| test_edge_cases.py | 14 | Decorators, async, nested, inherited |
+| test_line_numbers.py | 10 | start_line/end_line accuracy |
+| test_pro_enterprise_features.py | 17 | Pro (6), Enterprise (5), Gating (3), License (2) |
+| test_resolve_organization_wide.py | 42+ | Org-wide resolution (Enterprise) |
+| test_detect_service_boundaries.py | varies | Service boundary detection |
+| test_extract_with_custom_pattern.py | varies | Custom extraction patterns |
+| test_output_metadata.py | 7 | NEW: Metadata field validation |
+| **TOTAL** | **126** | ✅ All passing |
+
+### Configuration Verified
+
+- **limits.toml**: Community max_depth=0, Pro max_depth=1, Enterprise unlimited
+- **features.py**: Capabilities matrix aligned with limits.toml
+- **Output metadata**: All extraction returns include tier/language/config transparency
+
+---
+
+**Last Updated:** January 11, 2026  
 **Next Review:** March 31, 2026

@@ -269,7 +269,8 @@ pdf_reports_enabled = true
 
 [community.extract_code]
 include_cross_file_deps = false
-max_depth = 1
+# [20260111_BUGFIX] Fixed max_depth to match features.py (was 1, should be 0 - no context for Community)
+max_depth = 0
 max_extraction_size_mb = 1
 
 [pro.extract_code]

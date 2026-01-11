@@ -1,10 +1,10 @@
 # extract_code Test Assessment - Roadmap-Driven Evaluation
 
 **Framework**: MCP Tool Test Evaluation Checklist v1.0 + Roadmap Goals  
-**Date Assessed**: January 3, 2026 (Updated)  
+**Date Assessed**: January 11, 2026 (v1.0 Validation)  
 **Tool**: `extract_code` - Surgical symbol extraction with cross-file dependency support  
 **Roadmap Source**: `/docs/roadmap/extract_code.md`  
-**Assessment Status**: ✅ **RELEASE READY** - Core features comprehensively tested, Pro/Enterprise documented  
+**Assessment Status**: ✅ **RELEASE READY (v1.0)** - 126 tests passing, metadata fields added  
 
 ---
 
@@ -93,6 +93,7 @@
 | **NEW: test_edge_cases.py** | tests/tools/extract_code/ | Functional | ✅ PASSING | **14 tests** - Decorators, async, nested, inherited |
 | **NEW: test_line_numbers.py** | tests/tools/extract_code/ | Functional | ✅ PASSING | **10 tests** - start_line/end_line accuracy |
 | **NEW: test_pro_enterprise_features.py** | tests/tools/extract_code/ | Tier-Gated | ✅ PASSING | **17 tests** - Pro (6), Enterprise (5), Gating (3), License (2) |
+| **NEW: test_output_metadata.py** | tests/tools/extract_code/ | v1.0 | ✅ PASSING | **7 tests** - tier_applied, language_detected, cross_file_deps, max_depth |
 
 ---
 
