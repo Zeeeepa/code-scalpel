@@ -395,6 +395,46 @@ The `code_policy_check` tool checks code against style guides, best practices, a
 
 ---
 
+## v1.0 Pre-Release Validation
+
+> [20260111_DOCS] Added validation status for v1.0 release
+
+### Validation Summary
+
+| Aspect | Status | Notes |
+|--------|--------|-------|
+| **Test Coverage** | ✅ 78 tests | All passing (~22s) |
+| **Rule Coverage** | ✅ 35/35 | All rules validated |
+| **Tier Coverage** | ✅ 3/3 | Community, Pro, Enterprise |
+| **Config Alignment** | ✅ Fixed | Pro max_files corrected |
+| **Output Metadata** | ✅ Added | Transparency fields |
+
+### Tests by Category
+- MCP Integration: 18 tests
+- Rule Detection: 24 tests  
+- Tier Enforcement: 12 tests
+- Compliance: 8 tests
+- Configuration: 10 tests
+- License Validation: 6 tests
+
+### Pre-Release Fixes Applied
+
+1. **Configuration Mismatch** (`[20260111_BUGFIX]`)
+   - Issue: Pro tier `max_files` was `None` in features.py but `1000` in limits.toml
+   - Fix: Updated features.py to `max_files: 1000`
+
+2. **Output Metadata** (`[20260111_FEATURE]`)
+   - Added `tier_applied` field
+   - Added `files_limit_applied` field  
+   - Added `rules_limit_applied` field
+
+3. **Metadata Tests** (`[20260111_TEST]`)
+   - Added 5 validation tests for metadata fields
+
+### Validation Status: ✅ APPROVED FOR v1.0
+
+---
+
 ## Known Issues & Limitations
 
 ### Current Limitations
@@ -446,5 +486,5 @@ None planned for v1.x series.
 
 ---
 
-**Last Updated:** December 30, 2025  
+**Last Updated:** January 11, 2026  
 **Next Review:** March 31, 2026

@@ -2180,6 +2180,16 @@ class ProjectCrawlResult(BaseModel):
     )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
+    # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
+    tier_applied: str | None = Field(
+        default=None, description="Which tier's rules were applied (community/pro/enterprise)"
+    )
+    crawl_mode: str | None = Field(
+        default=None, description="Crawl mode used: 'discovery' (Community) or 'deep' (Pro/Enterprise)"
+    )
+    files_limit_applied: int | None = Field(
+        default=None, description="Max files limit that was applied (None = unlimited)"
+    )
     # Tier-gated fields (best-effort, optional)
     language_breakdown: dict[str, int] | None = Field(
         default=None, description="Counts of files per detected language"
@@ -12673,6 +12683,9 @@ async def crawl_project(
     max_depth = limits.get("max_depth")
     respect_gitignore = "gitignore_respect" in capabilities
 
+    # [20260106_FEATURE] v1.0 pre-release - Determine crawl mode for output metadata
+    crawl_mode = "discovery" if tier == "community" else "deep"
+
     if tier == "community":
         # Community: Discovery crawl (inventory + entrypoints)
         result = await asyncio.to_thread(
@@ -12696,6 +12709,21 @@ async def crawl_project(
             max_depth,
             respect_gitignore,
         )
+
+    # [20260106_FEATURE] v1.0 pre-release - Add output transparency metadata
+    try:
+        result = result.model_copy(
+            update={
+                "tier_applied": tier,
+                "crawl_mode": crawl_mode,
+                "files_limit_applied": max_files,
+            }
+        )
+    except Exception:
+        # Fallback for older Pydantic or if model_copy fails
+        result.tier_applied = tier
+        result.crawl_mode = crawl_mode
+        result.files_limit_applied = max_files
 
     # Enterprise feature: project-wide custom pattern extraction (not a standalone MCP tool).
     if pattern:
@@ -20670,6 +20698,20 @@ class CodePolicyCheckResult(BaseModel):
     summary: str = Field(description="Human-readable summary")
     tier: str = Field(default="community", description="Current tier level")
 
+    # [20260111_FEATURE] Output metadata for transparency
+    tier_applied: str = Field(
+        default="community",
+        description="Tier used for this analysis (community/pro/enterprise)",
+    )
+    files_limit_applied: int | None = Field(
+        default=None,
+        description="Max files limit applied (None=unlimited for Enterprise)",
+    )
+    rules_limit_applied: int | None = Field(
+        default=None,
+        description="Max rules limit applied (None=unlimited for Enterprise)",
+    )
+
     # Core violations (all tiers)
     violations: list[dict[str, Any]] = Field(
         default_factory=list, description="List of policy violations found"
@@ -20734,6 +20776,11 @@ def _code_policy_check_sync(
         generate_report=generate_report and tier == "enterprise",
     )
 
+    # [20260111_FEATURE] Get tier limits for metadata
+    limits = capabilities.get("limits", {})
+    files_limit = limits.get("max_files")
+    rules_limit = limits.get("max_rules")
+
     # Convert to MCP result model
     mcp_result = CodePolicyCheckResult(
         success=result.success,
@@ -20741,6 +20788,10 @@ def _code_policy_check_sync(
         rules_applied=result.rules_applied,
         summary=result.summary,
         tier=tier,
+        # [20260111_FEATURE] Output metadata for transparency
+        tier_applied=tier,
+        files_limit_applied=files_limit,
+        rules_limit_applied=rules_limit,
         violations=[
             cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
             for v in result.violations

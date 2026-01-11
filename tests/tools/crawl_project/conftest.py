@@ -21,16 +21,19 @@ def disable_license_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture
 def community_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
+    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
 
 
 @pytest.fixture
 def pro_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
 
 
 @pytest.fixture
 def enterprise_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
+    monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
 
 
 @pytest.fixture

@@ -92,7 +92,8 @@ complexity_analysis = false
 respect_gitignore = true
 
 [pro.crawl_project]
-max_files = 1000
+# [20260106_FIX] max_files unlimited for Pro tier - removed hardcoded 1000 limit
+# to match features.py TOOL_CAPABILITIES which sets max_files = None
 parsing_enabled = true
 complexity_analysis = true
 respect_gitignore = true

@@ -955,7 +955,8 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
                 "custom_rules",
             },
             "limits": {
-                "max_files": None,
+                # [20260111_BUGFIX] Fixed Pro tier max_files to match limits.toml (was None/unlimited)
+                "max_files": 1000,
                 "max_rules": 200,
             },
             "description": "Advanced analysis with best practices and security patterns",

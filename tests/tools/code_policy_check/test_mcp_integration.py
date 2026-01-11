@@ -181,3 +181,72 @@ def broken(
         
         # Should return result (may report error in summary)
         assert hasattr(result, "success"), "Should return result object"
+
+
+# [20260111_TEST] Added output metadata validation tests
+class TestOutputMetadata:
+    """Test output metadata fields for transparency and debugging."""
+
+    @pytest.mark.asyncio
+    async def test_result_has_tier_applied_metadata(self, tmp_path):
+        """Result should include tier_applied metadata."""
+        test_file = tmp_path / "test.py"
+        test_file.write_text("x = 1\n")
+        
+        result = await code_policy_check(paths=[str(test_file)])
+        
+        assert hasattr(result, "tier_applied"), "Result missing tier_applied metadata"
+        assert result.tier_applied in ("community", "pro", "enterprise"), \
+            f"Invalid tier_applied value: {result.tier_applied}"
+
+    @pytest.mark.asyncio
+    async def test_result_has_files_limit_metadata(self, tmp_path):
+        """Result should include files_limit_applied metadata."""
+        test_file = tmp_path / "test.py"
+        test_file.write_text("x = 1\n")
+        
+        result = await code_policy_check(paths=[str(test_file)])
+        
+        assert hasattr(result, "files_limit_applied"), \
+            "Result missing files_limit_applied metadata"
+        # Value is int or None (None = unlimited for Enterprise)
+        assert result.files_limit_applied is None or isinstance(result.files_limit_applied, int), \
+            f"files_limit_applied should be int or None, got: {type(result.files_limit_applied)}"
+
+    @pytest.mark.asyncio
+    async def test_result_has_rules_limit_metadata(self, tmp_path):
+        """Result should include rules_limit_applied metadata."""
+        test_file = tmp_path / "test.py"
+        test_file.write_text("x = 1\n")
+        
+        result = await code_policy_check(paths=[str(test_file)])
+        
+        assert hasattr(result, "rules_limit_applied"), \
+            "Result missing rules_limit_applied metadata"
+        # Value is int or None (None = unlimited for Enterprise)
+        assert result.rules_limit_applied is None or isinstance(result.rules_limit_applied, int), \
+            f"rules_limit_applied should be int or None, got: {type(result.rules_limit_applied)}"
+
+    @pytest.mark.asyncio
+    async def test_tier_applied_matches_tier(self, tmp_path):
+        """tier_applied should match tier field."""
+        test_file = tmp_path / "test.py"
+        test_file.write_text("x = 1\n")
+        
+        result = await code_policy_check(paths=[str(test_file)])
+        
+        assert result.tier_applied == result.tier, \
+            f"tier_applied ({result.tier_applied}) should match tier ({result.tier})"
+
+    @pytest.mark.asyncio
+    async def test_metadata_included_in_serialization(self, tmp_path):
+        """Metadata fields should be included in model serialization."""
+        test_file = tmp_path / "test.py"
+        test_file.write_text("x = 1\n")
+        
+        result = await code_policy_check(paths=[str(test_file)])
+        result_dict = result.model_dump()
+        
+        assert "tier_applied" in result_dict, "tier_applied missing from serialization"
+        assert "files_limit_applied" in result_dict, "files_limit_applied missing from serialization"
+        assert "rules_limit_applied" in result_dict, "rules_limit_applied missing from serialization"

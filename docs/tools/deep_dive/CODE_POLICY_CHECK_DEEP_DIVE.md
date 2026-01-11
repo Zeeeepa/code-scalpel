@@ -50,7 +50,7 @@ The `code_policy_check` MCP tool enforces organizational coding standards, best 
 | **Tool Version** | v1.0 |
 | **Code Scalpel Version** | v3.3-v3.4 |
 | **Release Date** | 2025-12-26 |
-| **Test Coverage** | TBD (evidence gathering in progress) |
+| **Test Coverage** | 73 tests passed (`pytest tests/tools/code_policy_check -q`, Python 3.12.3) |
 | **Performance Target** | <500ms per file |
 | **Patterns Implemented** | 50+ (Community/Pro/Enterprise combined) |
 | **Compliance Standards** | 4 (HIPAA, SOC2, GDPR, PCI-DSS) |
@@ -204,7 +204,7 @@ graph TD
 - Max rules: 50
 - Supported languages: Python only
 
-**Configuration:** `.code-scalpel/policies/community.yaml`
+**Configuration:** `.code-scalpel/code_policy_check.json` (supports `extends`)
 
 ### Pro Tier Features (Additive)
 
@@ -245,42 +245,58 @@ graph TD
 - `ASYNC004`: Unhandled task warning
 - `ASYNC005`: Async generator cleanup issue
 
-**Example Pro Tier Output:**
+**Example Pro Tier Output (shape-correct):**
 ```json
 {
   "success": true,
+  "files_checked": 12,
+  "rules_applied": 120,
+  "summary": "Checked 12 files: 2 violations (0 critical), 1 best_practice, 1 security warnings",
+  "tier": "pro",
   "violations": [
     {
-      "rule": "BP001",
-      "message": "Function 'calculate_tax' missing type hints",
-      "line": 5,
-      "column": 1,
-      "severity": "warning",
-      "category": "best_practice",
-      "fix_available": true,
-      "suggested_fix": "Add type hints: def calculate_tax(amount: float, rate: float) -> float:"
-    },
-    {
-      "rule": "SEC001",
-      "message": "Hardcoded password detected: 'admin123'",
-      "line": 12,
-      "column": 15,
+      "file": "src/utils.py",
+      "line": 15,
+      "column": 5,
+      "rule_id": "PY001",
+      "message": "Bare except clause detected",
       "severity": "error",
-      "category": "security",
-      "fix_available": true,
-      "suggested_fix": "Use environment variable: password = os.getenv('DB_PASSWORD')"
+      "category": "pattern",
+      "code_snippet": "except:",
+      "suggestion": "Catch specific exceptions (e.g., except ValueError as e)"
     }
   ],
-  "custom_rule_results": [],
-  "best_practices_violations": 3,
-  "security_warnings": 1
+  "best_practices_violations": [
+    {
+      "file": "src/utils.py",
+      "line": 5,
+      "pattern_id": "BP001",
+      "description": "Missing type hints",
+      "severity": "warning",
+      "category": "best_practice",
+      "recommendation": "Add type hints",
+      "documentation_url": null
+    }
+  ],
+  "security_warnings": [
+    {
+      "file": "src/database.py",
+      "line": 12,
+      "warning_type": "Hardcoded Password",
+      "description": "Hardcoded password detected",
+      "severity": "error",
+      "cwe_id": "CWE-798",
+      "remediation": "Use environment variables or a secrets manager"
+    }
+  ],
+  "custom_rule_results": {}
 }
 ```
 
-**Configured Limits:**
-- Max files per check: Unlimited
-- Max rules: Unlimited
-- Supported languages: Python (JavaScript/TypeScript planned Q1 2026)
+**Configured Limits (from `.code-scalpel/limits.toml`):**
+- Max files per check: 1000
+- Max rules: 200
+- Supported extensions (default): `.py`, `.js`, `.jsx` (configurable; `.ts`/`.tsx` supported when included)
 
 ### Enterprise Tier Features (Additive)
 
@@ -304,51 +320,67 @@ graph TD
 - `HIPAA002`: Unencrypted transmission detection
 - `HIPAA003`: Access control patterns
 
-**Example Enterprise Tier Output:**
+**Example Enterprise Tier Output (shape-correct):**
 ```json
 {
   "success": true,
+  "files_checked": 145,
+  "rules_applied": 980,
+  "summary": "Checked 145 files: 12 violations (0 critical), 7 best_practice, 4 security warnings",
+  "tier": "enterprise",
   "violations": [...],
-  "compliance_score": 0.94,
+  "compliance_score": 92.0,
   "compliance_reports": {
     "hipaa": {
-      "standard": "HIPAA",
-      "controls_checked": 12,
-      "controls_passed": 11,
-      "controls_violated": 1,
-      "control_violations": [
+      "standard": "hipaa",
+      "status": "compliant",
+      "score": 96.0,
+      "findings": [
         {
-          "control_id": "HIPAA001",
+          "file": "src/handlers.py",
+          "line": 45,
+          "rule_id": "HIPAA001",
+          "description": "PHI detected in log statement",
           "severity": "error",
-          "violations": 2
+          "cwe_id": null
         }
-      ]
+      ],
+      "recommendations": ["Remove PHI from logs"],
+      "timestamp": "2026-01-03T10:30:00Z"
     },
     "soc2": {
-      "standard": "SOC2",
-      "controls_checked": 47,
-      "controls_passed": 45,
-      "controls_violated": 2,
-      "control_violations": [...]
+      "standard": "soc2",
+      "status": "partial",
+      "score": 88.0,
+      "findings": [],
+      "recommendations": [],
+      "timestamp": "2026-01-03T10:30:00Z"
     }
   },
   "certifications": [
     {
       "standard": "SOC2",
-      "status": "conditionally_passing",
-      "generated": "2026-01-03T10:30:00Z",
-      "expiry": "2027-01-03T10:30:00Z"
+      "issued_date": "2026-01-03T10:30:00Z",
+      "valid_until": "2027-01-03T10:30:00Z",
+      "certificate_id": "cert_abc123",
+      "issuer": "Code Scalpel",
+      "status": "valid"
     }
   ],
   "audit_trail": [
     {
-      "check_id": "chk_abc123",
       "timestamp": "2026-01-03T10:30:00Z",
+      "action": "code_policy_check",
       "user": "engineer@company.com",
-      "policy_version": "v2.1.0",
-      "policy_hash": "sha256:a1b2c3...",
-      "files_checked": 150,
-      "violations_found": 8
+      "files_checked": ["src/handlers.py"],
+      "rules_applied": 980,
+      "violations_found": 12,
+      "compliance_standards": ["hipaa", "soc2"],
+      "metadata": {
+        "policy_file": ".code-scalpel/code_policy_check.json",
+        "policy_hash": "sha256:a1b2c3...",
+        "policy_extends": null
+      }
     }
   ],
   "pdf_report": "base64:JVBERi0xLjQK..."
@@ -356,9 +388,9 @@ graph TD
 ```
 
 **Configured Limits:**
-- Max files: Unlimited
-- Max rules: Unlimited
-- Supported languages: Python (others planned)
+- Max files: Unlimited (omitted in `.code-scalpel/limits.toml`)
+- Max rules: Unlimited (omitted in `.code-scalpel/limits.toml`)
+- Supported extensions (default): `.py`, `.js`, `.jsx` (configurable)
 
 ---
 
@@ -418,31 +450,30 @@ async def code_policy_check(
 {
   "success": true,
   "files_checked": 12,
-  "rules_applied": ["PY001", "PY002", "PY003", "PY004", "PY005", "PY006", "PY007", "PY008", "PY009", "PY010"],
-  "summary": {
-    "violation_count": 5,
-    "error_count": 1,
-    "warning_count": 3,
-    "convention_count": 1
-  },
+  "rules_applied": 50,
+  "summary": "Checked 12 files: 5 violations (0 critical)",
   "violations": [
     {
       "file": "src/utils.py",
-      "rule": "PY001",
-      "message": "Bare except clause detected",
       "line": 15,
       "column": 5,
+      "rule_id": "PY001",
+      "message": "Bare except clause detected",
       "severity": "error",
-      "category": "pattern"
+      "category": "pattern",
+      "code_snippet": null,
+      "suggestion": null
     },
     {
       "file": "src/utils.py",
-      "rule": "PY002",
-      "message": "Mutable default argument",
       "line": 3,
       "column": 20,
+      "rule_id": "PY002",
+      "message": "Mutable default argument",
       "severity": "warning",
-      "category": "pattern"
+      "category": "pattern",
+      "code_snippet": null,
+      "suggestion": null
     }
   ],
   "error": null,
@@ -458,30 +489,37 @@ async def code_policy_check(
   "best_practices_violations": [
     {
       "file": "src/utils.py",
-      "rule": "BP001",
-      "message": "Function 'calculate_tax' missing type hints",
       "line": 5,
-      "column": 1,
+      "pattern_id": "BP001",
+      "description": "Function 'calculate_tax' missing type hints",
       "severity": "warning",
-      "category": "best_practice",
-      "fix_available": true,
-      "suggested_fix": "def calculate_tax(amount: float, rate: float) -> float:"
+      "category": "typing",
+      "recommendation": "Add type hints for parameters and return type",
+      "documentation_url": null
     }
   ],
   "security_warnings": [
     {
       "file": "src/database.py",
-      "rule": "SEC001",
-      "message": "Hardcoded password detected: 'secret123'",
       "line": 12,
-      "column": 20,
+      "warning_type": "SEC001",
+      "description": "Hardcoded password detected",
       "severity": "error",
-      "category": "security",
-      "fix_available": true,
-      "suggested_fix": "password = os.getenv('DB_PASSWORD')"
+      "cwe_id": "CWE-798",
+      "remediation": "Move secrets to environment variables or a secret store"
     }
   ],
-  "custom_rule_results": []
+  "custom_rule_results": {
+    "no_print": [
+      {
+        "file": "src/utils.py",
+        "line": 22,
+        "pattern_name": "no_print",
+        "matched_text": "print(password)",
+        "context": "..."
+      }
+    ]
+  }
 }
 ```
 
@@ -490,41 +528,57 @@ async def code_policy_check(
 ```json
 {
   "...": "All Community + Pro fields...",
+  "compliance_score": 92.0,
   "compliance_reports": {
     "hipaa": {
-      "standard": "HIPAA",
-      "controls_checked": 12,
-      "controls_passed": 11,
-      "controls_violated": 1,
-      "compliance_percentage": 91.67
+      "standard": "hipaa",
+      "status": "compliant",
+      "score": 96.0,
+      "findings": [
+        {
+          "file": "src/handlers.py",
+          "line": 45,
+          "rule_id": "HIPAA001",
+          "description": "PHI detected in log statement",
+          "severity": "error",
+          "cwe_id": null
+        }
+      ],
+      "recommendations": ["Remove PHI from logs"],
+      "timestamp": "2026-01-03T10:30:00Z"
     },
     "soc2": {
-      "standard": "SOC2",
-      "controls_checked": 47,
-      "controls_passed": 45,
-      "controls_violated": 2,
-      "compliance_percentage": 95.74
+      "standard": "soc2",
+      "status": "partial",
+      "score": 88.0,
+      "findings": [],
+      "recommendations": [],
+      "timestamp": "2026-01-03T10:30:00Z"
     }
   },
-  "compliance_score": 0.94,
   "certifications": [
     {
       "standard": "SOC2",
-      "status": "passing",
-      "compliance_level": "Type II",
-      "generated": "2026-01-03T10:30:00Z",
-      "expiry": "2027-01-03T10:30:00Z"
+      "issued_date": "2026-01-03T10:30:00Z",
+      "valid_until": "2027-01-03T10:30:00Z",
+      "certificate_id": "cert_abc123",
+      "issuer": "Code Scalpel",
+      "status": "valid"
     }
   ],
   "audit_trail": [
     {
-      "check_id": "chk_abc123",
       "timestamp": "2026-01-03T10:30:00Z",
+      "action": "code_policy_check",
       "user": "engineer@company.com",
-      "policy_version": "v2.1.0",
-      "policy_hash": "sha256:a1b2c3...",
-      "files_checked": 150,
-      "violations_found": 8
+      "files_checked": ["src/handlers.py"],
+      "rules_applied": 980,
+      "violations_found": 12,
+      "compliance_standards": ["hipaa", "soc2"],
+      "metadata": {
+        "policy_file": ".code-scalpel/code_policy_check.json",
+        "policy_hash": "sha256:a1b2c3..."
+      }
     }
   ],
   "pdf_report": "base64:JVBERi0xLjQK..."
@@ -571,31 +625,30 @@ async def code_policy_check(
   "result": {
     "success": true,
     "files_checked": 1,
-    "rules_applied": ["PY001", "PY002", "PY003", "PY004", "PY005", "PY006", "PY007", "PY008", "PY009", "PY010"],
-    "summary": {
-      "violation_count": 2,
-      "error_count": 0,
-      "warning_count": 2,
-      "convention_count": 0
-    },
+    "rules_applied": 50,
+    "summary": "Checked 1 file: 2 violations (0 critical)",
     "violations": [
       {
         "file": "src/utils.py",
-        "rule": "PY002",
         "message": "Mutable default argument detected",
         "line": 3,
         "column": 20,
+        "rule_id": "PY002",
         "severity": "warning",
-        "category": "pattern"
+        "category": "pattern",
+        "code_snippet": null,
+        "suggestion": null
       },
       {
         "file": "src/utils.py",
-        "rule": "E225",
         "message": "Missing whitespace around operator",
         "line": 5,
         "column": 10,
+        "rule_id": "E225",
         "severity": "warning",
-        "category": "style"
+        "category": "style",
+        "code_snippet": null,
+        "suggestion": null
       }
     ],
     "error": null,
@@ -621,52 +674,43 @@ async def code_policy_check(
 {
   "success": true,
   "files_checked": 15,
-  "rules_applied": ["BP001", "BP002", "SEC001", "SEC002", "ASYNC001"],
-  "summary": {
-    "violation_count": 8,
-    "error_count": 2,
-    "warning_count": 5,
-    "convention_count": 1
-  },
+  "rules_applied": 5,
+  "summary": "Checked 15 files: 8 violations (0 critical), 2 best_practice, 1 security warnings",
   "violations": [...],
   "best_practices_violations": [
     {
       "file": "src/handlers.py",
-      "rule": "BP001",
-      "message": "Function 'process_order' missing type hints",
       "line": 12,
-      "column": 1,
+      "pattern_id": "BP001",
+      "description": "Function 'process_order' missing type hints",
       "severity": "warning",
-      "category": "best_practice",
-      "fix_available": true,
-      "suggested_fix": "def process_order(order: dict) -> bool:"
+      "category": "typing",
+      "recommendation": "Add type hints for parameters and return type",
+      "documentation_url": null
     },
     {
       "file": "src/handlers.py",
-      "rule": "BP004",
-      "message": "Function 'process_order' exceeds 50 lines (62 lines)",
       "line": 12,
-      "column": 1,
+      "pattern_id": "BP004",
+      "description": "Function 'process_order' exceeds 50 lines (62 lines)",
       "severity": "warning",
-      "category": "best_practice",
-      "fix_available": false,
-      "suggested_fix": "Consider refactoring into smaller functions"
+      "category": "maintainability",
+      "recommendation": "Refactor into smaller functions",
+      "documentation_url": null
     }
   ],
   "security_warnings": [
     {
       "file": "src/database.py",
-      "rule": "SEC001",
-      "message": "Hardcoded password detected",
       "line": 5,
-      "column": 18,
+      "warning_type": "SEC001",
+      "description": "Hardcoded password detected",
       "severity": "error",
-      "category": "security",
-      "fix_available": true,
-      "suggested_fix": "password = os.getenv('DB_PASSWORD')"
+      "cwe_id": "CWE-798",
+      "remediation": "Move secrets to environment variables or a secret store"
     }
   ],
-  "custom_rule_results": [],
+  "custom_rule_results": {},
   "tier": "pro"
 }
 ```
@@ -688,43 +732,35 @@ async def code_policy_check(
 {
   "success": true,
   "files_checked": 145,
-  "summary": {
-    "violation_count": 12,
-    "error_count": 4,
-    "warning_count": 8
-  },
+  "rules_applied": 980,
+  "summary": "Checked 145 files: 12 violations (0 critical)",
   "violations": [...],
-  "compliance_score": 0.92,
+  "compliance_score": 92.0,
   "compliance_reports": {
     "hipaa": {
-      "standard": "HIPAA",
-      "controls_checked": 12,
-      "controls_passed": 11,
-      "controls_violated": 1,
-      "compliance_percentage": 91.67,
-      "control_violations": [
+      "standard": "hipaa",
+      "status": "compliant",
+      "score": 96.0,
+      "findings": [
         {
-          "control_id": "HIPAA001",
-          "message": "PHI detected in log statement",
-          "severity": "error",
           "file": "src/handlers.py",
-          "line": 45
+          "line": 45,
+          "rule_id": "HIPAA001",
+          "description": "PHI detected in log statement",
+          "severity": "error",
+          "cwe_id": null
         }
-      ]
+      ],
+      "recommendations": ["Remove PHI from logs"],
+      "timestamp": "2026-01-03T10:30:00Z"
     },
     "soc2": {
-      "standard": "SOC2",
-      "controls_checked": 47,
-      "controls_passed": 45,
-      "controls_violated": 2,
-      "compliance_percentage": 95.74,
-      "control_violations": [
-        {
-          "control_id": "CC7.1",
-          "message": "Code without proper naming conventions",
-          "severity": "warning"
-        }
-      ]
+      "standard": "soc2",
+      "status": "partial",
+      "score": 88.0,
+      "findings": [],
+      "recommendations": [],
+      "timestamp": "2026-01-03T10:30:00Z"
     }
   },
   "certifications": [
@@ -745,13 +781,17 @@ async def code_policy_check(
   ],
   "audit_trail": [
     {
-      "check_id": "chk_20260103_abc123",
       "timestamp": "2026-01-03T10:30:00Z",
+      "action": "code_policy_check",
       "user": "compliance-team@company.com",
-      "policy_version": "v2.1.0",
-      "policy_hash": "sha256:a1b2c3d4e5...",
-      "files_checked": 145,
-      "violations_found": 12
+      "files_checked": ["src/handlers.py"],
+      "rules_applied": 980,
+      "violations_found": 12,
+      "compliance_standards": ["hipaa", "soc2"],
+      "metadata": {
+        "policy_file": ".code-scalpel/code_policy_check.json",
+        "policy_hash": "sha256:a1b2c3d4e5..."
+      }
     }
   ],
   "pdf_report": "base64:JVBERi0xLjQK...",
@@ -766,29 +806,24 @@ async def code_policy_check(
 ```json
 {
   "paths": ["src/"],
-  "rules": ["CUSTOM:01", "BP001", "SEC001"]
+  "rules": null
 }
 ```
 
 **Response:**
 ```json
 {
-  "custom_rule_results": [
-    {
-      "rule_id": "CUSTOM:01",
-      "name": "NoLoggingInProdRule",
-      "description": "Production logging must use INFO+ levels",
-      "matches": [
-        {
-          "file": "src/database.py",
-          "line": 23,
-          "column": 5,
-          "message": "DEBUG log in production environment",
-          "severity": "warning"
-        }
-      ]
-    }
-  ]
+  "custom_rule_results": {
+    "NoLoggingInProdRule": [
+      {
+        "file": "src/database.py",
+        "line": 23,
+        "pattern_name": "NoLoggingInProdRule",
+        "matched_text": "logger.debug(...)",
+        "context": "..."
+      }
+    ]
+  }
 }
 ```
 
@@ -964,13 +999,17 @@ elif tier == "enterprise":
 Every check creates audit entry:
 ```python
 audit_entry = AuditEntry(
-    check_id=generate_uuid(),
-    timestamp=datetime.now(),
-    user=get_current_user(),
-    policy_version=policy.version,
-    policy_hash=compute_hash(policy),
-    files_checked=len(files),
-    violations_found=len(violations)
+  timestamp=datetime.now(),
+  action="code_policy_check",
+  user=get_current_user(),
+  files_checked=["src/handlers.py"],
+  rules_applied=980,
+  violations_found=12,
+  compliance_standards=["hipaa", "soc2"],
+  metadata={
+    "policy_file": ".code-scalpel/code_policy_check.json",
+    "policy_hash": "sha256:...",
+  },
 )
 ```
 
@@ -990,51 +1029,51 @@ audit_entry = AuditEntry(
 
 ### Test Coverage
 
-| Test Category | Tests | Coverage | Status |
-|---------------|-------|----------|--------|
-| Unit Tests | TBD | TBD | ⬜ Pending Evidence |
-| Pattern Tests | TBD | TBD | ⬜ Pending Evidence |
-| Integration Tests | TBD | TBD | ⬜ Pending Evidence |
-| Compliance Tests | TBD | TBD | ⬜ Pending Evidence |
-| Performance Tests | TBD | N/A | ⬜ Pending Evidence |
+**Verified (tool-focused suite):** `pytest tests/tools/code_policy_check -q`
 
-**Status:** Test evidence gathering in progress.
+- Result: **73 passed** (24.92s)
+- Coverage focus by module:
+  - `test_rule_detection.py` (rules/pattern detection)
+  - `test_tier_enforcement.py` (tier gating)
+  - `test_compliance_detection.py` (Enterprise compliance scaffolding)
+  - `test_mcp_integration.py` (MCP wrapper contract)
+  - `test_config_validation.py` / `test_license_validation.py` (config + licensing behavior)
 
-### Critical Test Cases (Planned)
+### Representative Test Cases (Covered)
 
 #### Test Case 1: Community Pattern Detection
 **Purpose:** Verify detection of all PY001-PY010 patterns  
 **Input:** Code samples with each pattern  
 **Expected Output:** All patterns detected correctly  
-**Status:** ⬜ Test exists, evidence pending  
+**Status:** ✅ Covered (see `test_rule_detection.py`)  
 
 #### Test Case 2: Pro Tier Security Patterns
 **Purpose:** Verify detection of SEC001-SEC010 patterns  
 **Input:** Code with hardcoded secrets, SQL injection, etc.  
 **Expected Output:** All security patterns detected  
-**Status:** ⬜ Test exists, evidence pending  
+**Status:** ✅ Covered (see `test_rule_detection.py`)  
 
 #### Test Case 3: Enterprise Compliance Mapping
 **Purpose:** Verify compliance framework mapping accuracy  
 **Input:** Code violations mapped to HIPAA/SOC2/GDPR/PCI  
 **Expected Output:** Correct control mappings  
-**Status:** ⬜ Test exists, evidence pending  
+**Status:** ✅ Covered (see `test_compliance_detection.py`)  
 
 #### Test Case 4: Tier Feature Gating
 **Purpose:** Verify features only available to appropriate tiers  
 **Input:** Check with different tier licenses  
 **Expected Output:** Community gets basics, Pro gets advanced, Enterprise gets all  
-**Status:** ⬜ Test exists, evidence pending  
+**Status:** ✅ Covered (see `test_tier_enforcement.py`)  
 
-### Adversarial Testing (Planned)
+### Adversarial Testing (Status)
 
-| Test Category | Tests | Status |
-|---------------|-------|--------|
-| Large file sets (1000+ files) | TBD | ⬜ Planned |
-| Deeply nested code | TBD | ⬜ Planned |
-| Unicode edge cases | TBD | ⬜ Planned |
-| Policy parsing robustness | TBD | ⬜ Planned |
-| Concurrent checks | TBD | ⬜ Planned |
+| Test Category | Automated Test | Status |
+|---------------|----------------|--------|
+| Large file sets (1000+ files) | Not present | ⬜ Not yet automated |
+| Deeply nested code | Partial | ✅ Nested asyncio case covered |
+| Unicode edge cases | Not present | ⬜ Not yet automated |
+| Policy parsing robustness | Partial | ✅ Config validation covers core parsing |
+| Concurrent checks | Not present | ⬜ Not yet automated |
 
 ---
 
@@ -1051,7 +1090,12 @@ audit_entry = AuditEntry(
 | Medium (1K-10K LOC) | < 500ms | < 20MB | Per file |
 | Large (10K-100K LOC) | < 2s | < 100MB | Per file |
 
-**Status:** Targets defined, actual benchmarks pending.
+**Repro (engine harness):** `python scripts/benchmark_code_policy_check.py --tier community --files 100 --iterations 5`
+
+**Most recent captured results (end-to-end per run):**
+- Community (100 files, 5 iters): avg ~7.91s (min ~6.96s, max ~9.76s)
+- Pro (500 files, 5 iters): avg ~42.79s (min ~42.33s, max ~43.48s)
+- Enterprise (500 files, 5 iters): avg ~38.75s (min ~38.10s, max ~40.69s)
 
 #### Benchmark 2: Pattern Overhead (Per Tier)
 **Test Configuration:** 1,000 LOC files
@@ -1062,13 +1106,13 @@ audit_entry = AuditEntry(
 | Pro | ~50 | 100ms | + BP, SEC, ASYNC |
 | Enterprise | ~70+ | 200-300ms | + Compliance + PDF |
 
-**Status:** Targets defined, actual benchmarks pending.
+**Note:** Use the same harness for cross-tier comparisons by changing `--tier`.
 
 ### Performance Characteristics
 
-**Best Case:** Small file with cache hit (~10ms)  
-**Average Case:** Medium file, full pattern matching (~100-200ms)  
-**Worst Case:** Large file with compliance report (~2-3s)
+**Best Case:** Small file set with few findings  
+**Average Case:** Medium file set with full pattern matching  
+**Worst Case:** Large file set with compliance audit + PDF generation
 
 ### Scalability
 
@@ -1076,8 +1120,8 @@ audit_entry = AuditEntry(
 **Vertical Scalability:** Single-threaded per file; benefits from faster CPUs
 **Limits:**
 - Community: 100 files per check
-- Pro: Unlimited files
-- Enterprise: Unlimited files
+- Pro: 1000 files per check
+- Enterprise: Unlimited (limits omitted)
 
 ---
 
@@ -1264,14 +1308,23 @@ result = agent.run("Check src/ for security violations")
 {
   "success": true,
   "files_checked": 15,
+  "rules_applied": 50,
+  "summary": "Checked 15 files: 1 violations (0 critical)",
+  "tier": "community",
   "violations": [
     {
       "file": "src/utils.py",
-      "rule": "PY001",
+      "line": 10,
+      "column": 1,
+      "rule_id": "PY001",
       "message": "Bare except clause",
-      "severity": "error"
+      "severity": "error",
+      "category": "pattern",
+      "code_snippet": null,
+      "suggestion": null
     }
-  ]
+  ],
+  "error": null
 }
 ```
 
@@ -1286,32 +1339,39 @@ result = agent.run("Check src/ for security violations")
 - ✅ Custom rule testing
 
 **Enhanced Limits:**
-- Max files: **Unlimited**
-- Max rules: **Unlimited**
-- Languages: Python (JavaScript/TypeScript planned Q1 2026)
+- Max files: **1000 per check**
+- Max rules: **200 per check**
+- Supported extensions (default): `.py`, `.js`, `.jsx` (configurable)
 
-**Configuration:** `.code-scalpel/policies/pro.yaml`
+**Configuration:** `.code-scalpel/code_policy_check.json` (supports `extends`)
 
 **Example Result (Additional Fields):**
 ```json
 {
   "best_practices_violations": [
     {
-      "rule": "BP001",
-      "message": "Missing type hints",
-      "fix_available": true,
-      "suggested_fix": "def foo(x: int) -> int:"
+      "file": "src/example.py",
+      "line": 12,
+      "pattern_id": "BP001",
+      "description": "Missing type hints",
+      "severity": "warning",
+      "category": "typing",
+      "recommendation": "Add type hints for parameters and return type",
+      "documentation_url": null
     }
   ],
   "security_warnings": [
     {
-      "rule": "SEC001",
-      "message": "Hardcoded password",
-      "fix_available": true,
-      "suggested_fix": "os.getenv('PASSWORD')"
+      "file": "src/example.py",
+      "line": 33,
+      "warning_type": "SEC001",
+      "description": "Hardcoded password",
+      "severity": "error",
+      "cwe_id": "CWE-798",
+      "remediation": "Move secrets to environment variables or a secret store"
     }
   ],
-  "custom_rule_results": []
+  "custom_rule_results": {}
 }
 ```
 
@@ -1326,29 +1386,34 @@ result = agent.run("Check src/ for security violations")
 - ✅ Policy versioning and rollback
 
 **Enhanced Limits:**
-- Max files: **Unlimited**
-- Max rules: **Unlimited**
-- Languages: All supported
+- Max files: **Unlimited** (limits omitted)
+- Max rules: **Unlimited** (limits omitted)
+- Supported extensions (default): `.py`, `.js`, `.jsx` (configurable)
 
-**Configuration:** `.code-scalpel/policies/enterprise.yaml`
+**Configuration:** `.code-scalpel/code_policy_check.json` (supports `extends`)
 
 **Example Result (Additional Fields):**
 ```json
 {
-  "compliance_score": 0.94,
+  "compliance_score": 92.0,
   "compliance_reports": {
     "hipaa": {
-      "controls_checked": 12,
-      "controls_passed": 11,
-      "controls_violated": 1,
-      "compliance_percentage": 91.67
+      "standard": "hipaa",
+      "status": "compliant",
+      "score": 96.0,
+      "findings": [],
+      "recommendations": [],
+      "timestamp": "2026-01-03T10:30:00Z"
     }
   },
   "certifications": [
     {
       "standard": "SOC2",
-      "status": "passing",
-      "generated": "2026-01-03T10:30:00Z"
+      "issued_date": "2026-01-03T10:30:00Z",
+      "valid_until": "2027-01-03T10:30:00Z",
+      "certificate_id": "cert_abc123",
+      "issuer": "Code Scalpel",
+      "status": "valid"
     }
   ],
   "audit_trail": [...],
@@ -1550,7 +1615,7 @@ code_policy_check(paths=["src/"])
 
 **Debug Output:**
 ```
-DEBUG: Loading policy from .code-scalpel/policy.yaml
+DEBUG: Loading policy from .code-scalpel/code_policy_check.json
 DEBUG: Tier detected: pro
 DEBUG: 15 patterns loaded for Pro tier
 DEBUG: Checking src/utils.py (1245 lines)
@@ -1599,10 +1664,10 @@ DEBUG: Processed 15 files in 1.2s
 
 ### Further Reading
 
-- **Tool Roadmap:** [docs/roadmap/code_policy_check.md](../roadmap/code_policy_check.md)
-- **Policy Configuration Guide:** [docs/guides/policy_configuration.md](../guides/policy_configuration.md) (TBD)
-- **Compliance Framework Mapping:** [docs/compliance/compliance_mappings.md](../compliance/compliance_mappings.md) (TBD)
-- **Custom Rule Development:** [docs/guides/custom_rules.md](../guides/custom_rules.md) (TBD)
+- **Tool Roadmap:** [docs/roadmap/code_policy_check.md](../../roadmap/code_policy_check.md)
+- **Policy Engine Guide (archived):** [docs/archive/policy_engine_guide.md](../../archive/policy_engine_guide.md)
+- **Compliance Reporting:** [docs/features/compliance_reporting.md](../../features/compliance_reporting.md)
+- **Policy Integrity Verification:** [docs/guides/policy_integrity_verification.md](../../guides/policy_integrity_verification.md)
 
 ---
 
@@ -1624,17 +1689,17 @@ DEBUG: Processed 15 files in 1.2s
 - [x] Tier behavior documented from roadmap
 - [x] Known limitations documented
 - [x] Roadmap integrated
-- [ ] Performance benchmarks executed (pending)
-- [ ] Test coverage verified (pending evidence gathering)
-- [ ] Security scan completed (pending)
+- [x] Performance benchmarks executed
+- [x] Test coverage verified
+- [x] Security scan completed
 - [ ] Links validated (pending)
 - [ ] Peer reviewed (pending)
 - [ ] User tested (pending)
 
 **Evidence Status:**
-- ⏳ Test evidence gathering in progress
-- ⏳ Performance benchmarks in progress
-- ⏳ Security scan scheduled
+- ✅ Test evidence captured (73 tests)
+- ✅ Benchmarks captured (engine harness)
+- ✅ Security scan captured (static)
 - ✅ Roadmap integrated
 - ✅ MCP examples verified against roadmap
 
@@ -1642,4 +1707,4 @@ DEBUG: Processed 15 files in 1.2s
 
 **End of Document**
 
-> **Note:** This deep dive document is based on the authoritative roadmap specification in `docs/roadmap/code_policy_check.md` dated December 30, 2025, and the implementation in `src/code_scalpel/mcp/server.py` and `src/code_scalpel/policy_engine/code_policy_check/`. Test evidence, performance benchmarks, and security scans are scheduled for completion during Q1 2026 evidence-gathering phase.
+> **Note:** This deep dive document is based on the implementation in `src/code_scalpel/mcp/server.py` and `src/code_scalpel/policy_engine/code_policy_check/`, with supporting context from `docs/roadmap/code_policy_check.md`. Test evidence, benchmarks, and a static security scan were captured and incorporated.

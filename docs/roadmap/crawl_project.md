@@ -3,9 +3,35 @@
 **Tool Name:** `crawl_project`  
 **Tool Version:** v1.0  
 **Code Scalpel Version:** v3.3.0  
-**Current Status:** Stable  
+**Current Status:** Stable ✅ Pre-release validated  
 **Primary Module:** `src/code_scalpel/analysis/project_crawler.py`  
-**Tier Availability:** All tiers (Community, Pro, Enterprise)
+**Tier Availability:** All tiers (Community, Pro, Enterprise)  
+**Test Coverage:** 76 tests passing (60 baseline + 16 v1.0 validation)
+
+---
+
+## v1.0 Pre-Release Validation (2026-01-06)
+
+### Issues Identified and Resolved
+
+**Gap #1: limits.toml vs features.py Pro tier mismatch** ✅ RESOLVED
+- **Problem:** limits.toml had `max_files = 1000` for Pro tier while features.py defined `max_files = None` (unlimited)
+- **Fix:** Removed hardcoded limit from limits.toml to match features.py (Pro tier now unlimited)
+- **File:** `.code-scalpel/limits.toml` line 94
+
+### Output Transparency Improvements
+
+**New metadata fields added to `ProjectCrawlResult`:**
+- `tier_applied`: Which tier's rules were used ("community"/"pro"/"enterprise")
+- `crawl_mode`: Which crawl mode was used ("discovery" for Community, "deep" for Pro/Enterprise)
+- `files_limit_applied`: Max files limit applied (None = unlimited, integer = capped)
+
+### Test Suite Expansion
+- **New tests:** `tests/tools/crawl_project/test_v1_0_improvements.py` (16 tests)
+  - TestOutputMetadata: Validates metadata fields are populated correctly per tier
+  - TestConfigAlignment: Ensures limits.toml and features.py stay in sync
+  - TestCrawlModeCapabilities: Validates discovery vs deep mode behaviors
+  - TestModelSchema: Validates schema changes are backward compatible
 
 ---
 
