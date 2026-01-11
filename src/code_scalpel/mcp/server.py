@@ -1799,6 +1799,16 @@ class AnalysisResult(BaseModel):
         default=None,
         description="Historical complexity trend summary keyed by file_path (ENTERPRISE; None if unavailable)",
     )
+    
+    # [20260110_FEATURE] v1.0 - Output metadata for transparency
+    language_detected: str | None = Field(
+        default=None,
+        description="Language that was actually analyzed (python/javascript/typescript/java)",
+    )
+    tier_applied: str | None = Field(
+        default=None,
+        description="Tier applied for feature gating (community/pro/enterprise)",
+    )
 
     # [20251228_BUGFIX] Backward-compatible convenience counts used by tests.
     @property
@@ -3702,6 +3712,19 @@ def _analyze_code_sync(
             Language.JAVA: "java",
         }
         language = lang_map.get(detected, "python")
+    
+    # [20260110_FEATURE] v1.0 - Explicit language validation
+    SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
+    if language.lower() not in SUPPORTED_LANGUAGES:
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            complexity=0,
+            lines_of_code=0,
+            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
+        )
 
     # Check cache first
     cache = _get_cache()
@@ -3725,6 +3748,10 @@ def _analyze_code_sync(
     if language.lower() == "java":
         result = _analyze_java_code(code)
         if result.success:
+            # [20260110_FEATURE] Populate metadata fields
+            result.language_detected = "java"
+            result.tier_applied = tier
+            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "java", result.imports
@@ -3755,6 +3782,10 @@ def _analyze_code_sync(
     if language.lower() == "javascript":
         result = _analyze_javascript_code(code, is_typescript=False)
         if result.success:
+            # [20260110_FEATURE] Populate metadata fields
+            result.language_detected = "javascript"
+            result.tier_applied = tier
+            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "javascript", result.imports
@@ -3784,6 +3815,10 @@ def _analyze_code_sync(
     if language.lower() == "typescript":
         result = _analyze_javascript_code(code, is_typescript=True)
         if result.success:
+            # [20260110_FEATURE] Populate metadata fields
+            result.language_detected = "typescript"
+            result.tier_applied = tier
+            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "typescript", result.imports
@@ -4025,6 +4060,9 @@ def _analyze_code_sync(
             api_surface=api_surface,
             prioritized=prioritized,
             complexity_trends=complexity_trends,
+            # [20260110_FEATURE] v1.0 - Metadata fields
+            language_detected="python",
+            tier_applied=tier,
         )
 
         # Cache successful result

@@ -35,7 +35,8 @@ languages = ["python", "javascript", "typescript", "java"]
 
 [pro.analyze_code]
 max_file_size_mb = 10
-languages = ["python", "javascript", "typescript", "java", "go", "rust"]
+# [20260110_BUGFIX] Removed go/rust until implementation exists (roadmap: Q1 2026)
+languages = ["python", "javascript", "typescript", "java"]
 
 [enterprise.analyze_code]
 max_file_size_mb = 100
