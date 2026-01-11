@@ -16133,6 +16133,22 @@ class CallGraphResultModel(BaseModel):
     dead_code_candidates: list[str] = Field(
         default_factory=list, description="Potentially unreferenced nodes"
     )
+    # [20260111_FEATURE] v1.0 validation - Output metadata for transparency
+    tier_applied: str = Field(
+        default="community", description="Tier used for analysis"
+    )
+    max_depth_applied: int | None = Field(
+        default=None, description="Max depth limit applied (None = unlimited)"
+    )
+    max_nodes_applied: int | None = Field(
+        default=None, description="Max nodes limit applied (None = unlimited)"
+    )
+    advanced_resolution_enabled: bool = Field(
+        default=False, description="Whether advanced call resolution was enabled"
+    )
+    enterprise_metrics_enabled: bool = Field(
+        default=False, description="Whether enterprise metrics were enabled"
+    )
     error: str | None = Field(default=None, description="Error message if failed")
 
 
@@ -16490,6 +16506,13 @@ async def get_call_graph(
         paths_to,
         focus_functions,
     )
+
+    # [20260111_FEATURE] v1.0 validation - Populate output metadata
+    result.tier_applied = tier
+    result.max_depth_applied = max_depth
+    result.max_nodes_applied = max_nodes
+    result.advanced_resolution_enabled = advanced_resolution
+    result.enterprise_metrics_enabled = include_enterprise_metrics
 
     if ctx:
         node_count = len(result.nodes) if result.nodes else 0

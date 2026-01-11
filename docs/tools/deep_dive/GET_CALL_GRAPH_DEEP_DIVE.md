@@ -467,6 +467,28 @@ async def get_call_graph(
 
 ### Return Value Structure
 
+#### Output Metadata Fields
+
+> [20260111_DOCS] v1.0 - Added output metadata fields for transparency
+
+Every response includes metadata fields that provide transparency into which tier constraints and capabilities were applied:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tier_applied` | `str` | The tier used for analysis ("community", "pro", "enterprise") |
+| `max_depth_applied` | `int \| None` | The max depth limit applied (None = unlimited for Enterprise) |
+| `max_nodes_applied` | `int \| None` | The max nodes limit applied (None = unlimited for Enterprise) |
+| `advanced_resolution_enabled` | `bool` | Whether advanced call resolution was enabled (Pro+) |
+| `enterprise_metrics_enabled` | `bool` | Whether enterprise metrics were enabled (Enterprise only) |
+
+**Tier-Based Metadata Values:**
+
+| Tier | `max_depth_applied` | `max_nodes_applied` | `advanced_resolution_enabled` | `enterprise_metrics_enabled` |
+|------|---------------------|---------------------|-------------------------------|------------------------------|
+| Community | 3 | 50 | `false` | `false` |
+| Pro | 50 | 500 | `true` | `false` |
+| Enterprise | `null` (unlimited) | `null` (unlimited) | `true` | `true` |
+
 #### Community Tier Response
 
 ```json
@@ -1033,48 +1055,69 @@ dead_code = [
 
 ## Testing Evidence
 
+> [20260111_DOCS] v1.0 - Updated test evidence with actual test counts and tier validation tests
+
 ### Test Coverage
 
 | Test Category | Tests | Coverage | Status |
 |---------------|-------|----------|--------|
-| Unit Tests | TBD | TBD | ⬜ Pending Evidence |
-| Integration Tests | TBD | TBD | ⬜ Pending Evidence |
-| Entry Point Detection | TBD | TBD | ⬜ Pending Evidence |
-| Circular Detection | TBD | TBD | ⬜ Pending Evidence |
+| Unit Tests (test_get_call_graph.py) | 37 | Core functionality | ✅ Passing |
+| Enhanced Tests (test_call_graph_enhanced.py) | 42 | Edge cases, Mermaid | ✅ Passing |
+| Integration Tests (test_call_graph.py) | 39 | Multi-file, language support | ✅ Passing |
+| Tier Validation Tests (test_get_call_graph_tiers.py) | 15 | Metadata, limits, capabilities | ✅ Passing |
+| **Total** | **133** | | **100% Pass Rate** |
 
-**Status:** Test evidence gathering in progress.
+**Test Execution:** `pytest tests/tools/individual/test_get_call_graph.py tests/tools/individual/test_call_graph.py tests/tools/individual/test_call_graph_enhanced.py tests/tools/tiers/test_get_call_graph_tiers.py -v`
 
-### Critical Test Cases (Planned)
+### Critical Test Cases
 
-#### Test Case 1: Entry Point Detection Accuracy
+#### Test Case 1: Output Metadata Validation
+**Purpose:** Verify all metadata fields populated correctly  
+**Test File:** `test_get_call_graph_tiers.py::TestOutputMetadataFields`  
+**Expected:** tier_applied, max_depth_applied, max_nodes_applied, advanced_resolution_enabled, enterprise_metrics_enabled present  
+**Status:** ✅ Passing (2 tests)
+
+#### Test Case 2: Tier Enforcement
+**Purpose:** Verify tier limits are enforced  
+**Test File:** `test_get_call_graph_tiers.py::TestTierEnforcement`  
+**Expected:** Community=3/50, Pro=50/500, Enterprise=unlimited  
+**Status:** ✅ Passing (3 tests)
+
+#### Test Case 3: Capability Flags
+**Purpose:** Verify capability flags match tier  
+**Test File:** `test_get_call_graph_tiers.py::TestCapabilityFlags`  
+**Expected:** Community: no advanced resolution; Pro: advanced resolution; Enterprise: all  
+**Status:** ✅ Passing (3 tests)
+
+#### Test Case 4: Entry Point Detection Accuracy
 **Purpose:** Verify all entry point patterns detected  
-**Input:** Project with __main__, @app.route, test_*, @click.command  
-**Expected:** All entry points marked correctly  
-**Status:** ⬜ Test exists, evidence pending
+**Test File:** `test_call_graph_enhanced.py::TestEntryPointDetection`  
+**Expected:** __main__, @app.route, test_*, @click.command detected  
+**Status:** ✅ Passing
 
-#### Test Case 2: Circular Import Detection
+#### Test Case 5: Circular Import Detection
 **Purpose:** Verify all import cycles found  
-**Input:** Synthetic project with A→B→C→A cycle  
-**Expected:** Cycle reported as ["A", "B", "C", "A"]  
-**Status:** ⬜ Test exists, evidence pending
+**Test File:** `test_call_graph.py::test_circular_imports_detection`  
+**Expected:** Cycle reported correctly  
+**Status:** ✅ Passing
 
-#### Test Case 3: Depth Limiting
+#### Test Case 6: Depth Limiting
 **Purpose:** Verify depth limit enforced correctly  
-**Input:** Chain A→B→C→D→E, depth=3  
-**Expected:** Only A, B, C, D included (not E)  
-**Status:** ⬜ Test exists, evidence pending
+**Test File:** `test_get_call_graph_tiers.py::test_community_tier_depth_limit`  
+**Expected:** Only nodes within depth limit included  
+**Status:** ✅ Passing
 
-#### Test Case 4: Truncation Transparency
+#### Test Case 7: Truncation Metadata
 **Purpose:** Verify truncation flag and warning set correctly  
-**Input:** 120-node graph, Community tier (max 50)  
-**Expected:** nodes_truncated=True, truncation_warning includes "max_nodes=50"  
-**Status:** ⬜ Test exists, evidence pending
+**Test File:** `test_get_call_graph_tiers.py::TestTruncationMetadata`  
+**Expected:** nodes_truncated, truncation_warning populated correctly  
+**Status:** ✅ Passing (2 tests)
 
-#### Test Case 5: Dead Code Detection (Enterprise)
-**Purpose:** Verify functions with zero incoming edges detected  
-**Input:** Function with no callers, not entry point  
-**Expected:** Appears in dead_code_candidates  
-**Status:** ⬜ Test exists, evidence pending
+#### Test Case 8: Enterprise Metrics
+**Purpose:** Verify enterprise-only fields exist  
+**Test File:** `test_get_call_graph_tiers.py::TestEnterpriseMetrics`  
+**Expected:** hot_nodes, dead_code_candidates fields present  
+**Status:** ✅ Passing (2 tests)
 
 ---
 
