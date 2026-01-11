@@ -1,6 +1,6 @@
 ## cross_file_security_scan Test Assessment Report
-**Date**: January 3, 2026 (FINAL - Pro/Enterprise Testing Complete)  
-**Tool Version**: v3.1.0+  
+**Date**: January 4, 2026 (v3.3.0 Pre-release Update)  
+**Tool Version**: v3.3.0  
 **Roadmap Reference**: [docs/roadmap/cross_file_security_scan.md](../../roadmap/cross_file_security_scan.md)  
 **Assessment Status**: ✅ **COMPREHENSIVE SUITE WITH PRO/ENTERPRISE TESTS** - 93 organized tests, 100% pass rate
 
@@ -10,6 +10,21 @@
 
 **Final Test Count**: 93 tests across 5 organized test modules (12 tier tests, 30 core tests, 16 edge case tests, 15 Pro/Enterprise feature tests, 19 MCP tests)  
 **Test Execution**: ✅ **100% PASS RATE (92/93 passing, 1 skipped)**
+
+---
+
+## v3.3.0 Pre-release Updates (January 4, 2026)
+
+The following output fields were added to match roadmap/deep-dive documentation:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `depth_reached` | `int` | Actual maximum depth reached during analysis |
+| `truncated` | `bool` | Whether results were truncated due to tier limits |
+| `truncation_reason` | `str \| None` | Reason for truncation (e.g., "Module limit reached (10)") |
+| `scan_duration_ms` | `int \| None` | Scan duration in milliseconds |
+
+These fields provide transparency into analysis execution and help users understand when results are limited by their tier.
 
 ---
 

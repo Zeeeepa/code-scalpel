@@ -1799,16 +1799,6 @@ class AnalysisResult(BaseModel):
         default=None,
         description="Historical complexity trend summary keyed by file_path (ENTERPRISE; None if unavailable)",
     )
-    
-    # [20260110_FEATURE] v1.0 - Output metadata for transparency
-    language_detected: str | None = Field(
-        default=None,
-        description="Language that was actually analyzed (python/javascript/typescript/java)",
-    )
-    tier_applied: str | None = Field(
-        default=None,
-        description="Tier applied for feature gating (community/pro/enterprise)",
-    )
 
     # [20251228_BUGFIX] Backward-compatible convenience counts used by tests.
     @property
@@ -2180,16 +2170,6 @@ class ProjectCrawlResult(BaseModel):
     )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
-    # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
-    tier_applied: str | None = Field(
-        default=None, description="Which tier's rules were applied (community/pro/enterprise)"
-    )
-    crawl_mode: str | None = Field(
-        default=None, description="Crawl mode used: 'discovery' (Community) or 'deep' (Pro/Enterprise)"
-    )
-    files_limit_applied: int | None = Field(
-        default=None, description="Max files limit that was applied (None = unlimited)"
-    )
     # Tier-gated fields (best-effort, optional)
     language_breakdown: dict[str, int] | None = Field(
         default=None, description="Counts of files per detected language"
@@ -3722,19 +3702,6 @@ def _analyze_code_sync(
             Language.JAVA: "java",
         }
         language = lang_map.get(detected, "python")
-    
-    # [20260110_FEATURE] v1.0 - Explicit language validation
-    SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
-    if language.lower() not in SUPPORTED_LANGUAGES:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            complexity=0,
-            lines_of_code=0,
-            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
-        )
 
     # Check cache first
     cache = _get_cache()
@@ -3758,10 +3725,6 @@ def _analyze_code_sync(
     if language.lower() == "java":
         result = _analyze_java_code(code)
         if result.success:
-            # [20260110_FEATURE] Populate metadata fields
-            result.language_detected = "java"
-            result.tier_applied = tier
-            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "java", result.imports
@@ -3792,10 +3755,6 @@ def _analyze_code_sync(
     if language.lower() == "javascript":
         result = _analyze_javascript_code(code, is_typescript=False)
         if result.success:
-            # [20260110_FEATURE] Populate metadata fields
-            result.language_detected = "javascript"
-            result.tier_applied = tier
-            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "javascript", result.imports
@@ -3825,10 +3784,6 @@ def _analyze_code_sync(
     if language.lower() == "typescript":
         result = _analyze_javascript_code(code, is_typescript=True)
         if result.success:
-            # [20260110_FEATURE] Populate metadata fields
-            result.language_detected = "typescript"
-            result.tier_applied = tier
-            
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "typescript", result.imports
@@ -4070,9 +4025,6 @@ def _analyze_code_sync(
             api_surface=api_surface,
             prioritized=prioritized,
             complexity_trends=complexity_trends,
-            # [20260110_FEATURE] v1.0 - Metadata fields
-            language_detected="python",
-            tier_applied=tier,
         )
 
         # Cache successful result
@@ -12683,9 +12635,6 @@ async def crawl_project(
     max_depth = limits.get("max_depth")
     respect_gitignore = "gitignore_respect" in capabilities
 
-    # [20260106_FEATURE] v1.0 pre-release - Determine crawl mode for output metadata
-    crawl_mode = "discovery" if tier == "community" else "deep"
-
     if tier == "community":
         # Community: Discovery crawl (inventory + entrypoints)
         result = await asyncio.to_thread(
@@ -12709,21 +12658,6 @@ async def crawl_project(
             max_depth,
             respect_gitignore,
         )
-
-    # [20260106_FEATURE] v1.0 pre-release - Add output transparency metadata
-    try:
-        result = result.model_copy(
-            update={
-                "tier_applied": tier,
-                "crawl_mode": crawl_mode,
-                "files_limit_applied": max_files,
-            }
-        )
-    except Exception:
-        # Fallback for older Pydantic or if model_copy fails
-        result.tier_applied = tier
-        result.crawl_mode = crawl_mode
-        result.files_limit_applied = max_files
 
     # Enterprise feature: project-wide custom pattern extraction (not a standalone MCP tool).
     if pattern:
@@ -19496,6 +19430,20 @@ class CrossFileSecurityResult(BaseModel):
     )
     risk_level: str = Field(default="low", description="Overall risk level")
 
+    # [20251230_FEATURE] v3.3.0 - Analysis metadata (matches roadmap/deep-dive documentation)
+    depth_reached: int = Field(
+        default=0, description="Actual maximum depth reached during analysis"
+    )
+    truncated: bool = Field(
+        default=False, description="Whether results were truncated due to limits"
+    )
+    truncation_reason: str | None = Field(
+        default=None, description="Reason for truncation if truncated"
+    )
+    scan_duration_ms: int | None = Field(
+        default=None, description="Scan duration in milliseconds"
+    )
+
     # Detailed findings
     vulnerabilities: list[CrossFileVulnerabilityModel] = Field(
         default_factory=list, description="Cross-file vulnerabilities found"
@@ -19592,6 +19540,14 @@ def _cross_file_security_scan_sync(
             error=f"Project root not found: {root_path}.",
         )
 
+    # [20251230_FEATURE] Track timing for scan_duration_ms field
+    start_time = time.time()
+    
+    # Track truncation state
+    truncated = False
+    truncation_reason: str | None = None
+    depth_reached = 0
+    
     try:
         tracker = CrossFileTaintTracker(root_path)
         # [20251220_PERF] Pass timeout and module limit to prevent hanging
@@ -19842,12 +19798,39 @@ def _cross_file_security_scan_sync(
             if global_flows:
                 distributed_trace = _build_distributed_trace(global_flows)
 
+        # [20251230_FEATURE] Calculate depth_reached from flow paths and detect truncation
+        depth_reached = 0
+        for flow in taint_flows:
+            flow_depth = len(flow.flow_path) if flow.flow_path else 0
+            if flow_depth > depth_reached:
+                depth_reached = flow_depth
+        
+        # Detect truncation (results limited by tier constraints)
+        effective_max_modules = max_modules or 500
+        effective_max_depth = max_depth
+        if result.modules_analyzed >= effective_max_modules:
+            truncated = True
+            truncation_reason = f"Module limit reached ({effective_max_modules})"
+        elif depth_reached >= effective_max_depth:
+            truncated = True
+            truncation_reason = f"Depth limit reached ({effective_max_depth})"
+        else:
+            truncated = False
+            truncation_reason = None
+        
+        # Calculate scan duration
+        scan_duration_ms = int((time.time() - start_time) * 1000)
+
         return CrossFileSecurityResult(
             success=True,
             files_analyzed=result.modules_analyzed,  # Use modules_analyzed
             has_vulnerabilities=vuln_count > 0,
             vulnerability_count=vuln_count,
             risk_level=risk_level,
+            depth_reached=depth_reached,
+            truncated=truncated,
+            truncation_reason=truncation_reason,
+            scan_duration_ms=scan_duration_ms,
             vulnerabilities=vulnerabilities,
             taint_flows=taint_flows,
             taint_sources=taint_sources,
@@ -20698,20 +20681,6 @@ class CodePolicyCheckResult(BaseModel):
     summary: str = Field(description="Human-readable summary")
     tier: str = Field(default="community", description="Current tier level")
 
-    # [20260111_FEATURE] Output metadata for transparency
-    tier_applied: str = Field(
-        default="community",
-        description="Tier used for this analysis (community/pro/enterprise)",
-    )
-    files_limit_applied: int | None = Field(
-        default=None,
-        description="Max files limit applied (None=unlimited for Enterprise)",
-    )
-    rules_limit_applied: int | None = Field(
-        default=None,
-        description="Max rules limit applied (None=unlimited for Enterprise)",
-    )
-
     # Core violations (all tiers)
     violations: list[dict[str, Any]] = Field(
         default_factory=list, description="List of policy violations found"
@@ -20776,11 +20745,6 @@ def _code_policy_check_sync(
         generate_report=generate_report and tier == "enterprise",
     )
 
-    # [20260111_FEATURE] Get tier limits for metadata
-    limits = capabilities.get("limits", {})
-    files_limit = limits.get("max_files")
-    rules_limit = limits.get("max_rules")
-
     # Convert to MCP result model
     mcp_result = CodePolicyCheckResult(
         success=result.success,
@@ -20788,10 +20752,6 @@ def _code_policy_check_sync(
         rules_applied=result.rules_applied,
         summary=result.summary,
         tier=tier,
-        # [20260111_FEATURE] Output metadata for transparency
-        tier_applied=tier,
-        files_limit_applied=files_limit,
-        rules_limit_applied=rules_limit,
         violations=[
             cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
             for v in result.violations
