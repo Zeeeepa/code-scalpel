@@ -631,12 +631,17 @@ class TestPriorityValidationAndReliability:
             assert any("Failed to parse" in e for e in errors), errors
 
     def test_large_manifest_truncates_with_warning(self):
-        """Large manifest should respect Community cap and warn without crashing."""
+        """Large manifest should respect Community cap and warn without crashing.
+
+        [20260111_BUGFIX] v3.3.1 - Fixed test to explicitly pass tier='community'
+        to ensure tier limit enforcement is tested correctly.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
             req_path.write_text("\n".join([f"pkg{i}==1.0.0" for i in range(400)]) + "\n", encoding="utf-8")
 
-            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            # [20260111_BUGFIX] Explicitly pass tier="community" to test limit enforcement
+            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False, tier="community")
             assert result.success is True
             assert result.total_dependencies == 50
             errors = result.errors or []

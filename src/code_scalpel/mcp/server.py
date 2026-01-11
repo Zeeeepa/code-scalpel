@@ -6961,6 +6961,7 @@ class DependencyScanResult(BaseModel):
 
     [20251220_FEATURE] v3.0.5 - Comprehensive scan result with dependency-level tracking.
     [20251231_FEATURE] v3.3.1 - Added compliance reporting fields per roadmap v1.0.
+    [20260111_FEATURE] v3.3.2 - Added output metadata fields for tier transparency.
     """
 
     success: bool = Field(description="Whether the scan completed successfully")
@@ -6993,6 +6994,19 @@ class DependencyScanResult(BaseModel):
     errors: list[str] = Field(
         default_factory=list,
         description="Non-fatal errors/warnings encountered during scan (e.g. tier truncation warnings)",
+    )
+    # [20260111_FEATURE] v3.3.2 - Output metadata fields for tier transparency
+    tier_applied: str | None = Field(
+        default=None, description="The tier that was applied for this scan (community, pro, enterprise)"
+    )
+    max_dependencies_applied: int | None = Field(
+        default=None, description="The max_dependencies limit that was applied (None = unlimited)"
+    )
+    pro_features_enabled: list[str] | None = Field(
+        default=None, description="List of Pro features enabled (e.g., reachability_analysis, typosquatting_detection)"
+    )
+    enterprise_features_enabled: list[str] | None = Field(
+        default=None, description="List of Enterprise features enabled (e.g., compliance_reporting, policy_based_blocking)"
     )
 
 
@@ -7760,6 +7774,16 @@ def _scan_dependencies_sync(
                         }
                     )
 
+        # [20260111_FEATURE] v3.3.2 - Compute output metadata fields for tier transparency
+        pro_features = [
+            cap for cap in caps_set
+            if cap in {"reachability_analysis", "license_compliance", "typosquatting_detection", "supply_chain_risk_scoring"}
+        ]
+        enterprise_features = [
+            cap for cap in caps_set
+            if cap in {"policy_based_blocking", "compliance_reporting"}
+        ]
+
         return DependencyScanResult(
             success=True,
             total_dependencies=len(dependency_infos),
@@ -7770,6 +7794,11 @@ def _scan_dependencies_sync(
             compliance_report=compliance_report,
             policy_violations=policy_violations,
             errors=errors,
+            # [20260111_FEATURE] v3.3.2 - Output metadata fields
+            tier_applied=tier,
+            max_dependencies_applied=max_dependencies,
+            pro_features_enabled=pro_features if pro_features else None,
+            enterprise_features_enabled=enterprise_features if enterprise_features else None,
         )
 
     except ImportError as e:

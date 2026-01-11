@@ -993,3 +993,178 @@ async def test_pro_license_compliance_flags_gpl(
                     f"Expected requests (Apache 2.0) to be compliant, got: {requests_dep}"
         
         break
+
+
+# =============================================================================
+# OUTPUT METADATA FIELD TESTS
+# [20260111_TEST] v3.3.2 - Tests for tier transparency metadata fields
+# =============================================================================
+
+
+async def test_community_output_metadata_fields(tmp_path: Path):
+    """Community tier should report tier_applied and max_dependencies_applied.
+    
+    [20260111_TEST] v3.3.2 - Validates output metadata fields for Community tier.
+    """
+    project = tmp_path / "metadata_community"
+    project.mkdir(parents=True, exist_ok=True)
+    _make_requirements(project, 10)
+
+    async for session in _session(project):
+        payload = await session.call_tool(
+            "scan_dependencies",
+            arguments={
+                "project_root": str(project),
+                "scan_vulnerabilities": False,
+                "include_dev": False,
+            },
+        )
+        env_json = _tool_json(payload)
+        data = env_json.get("data") or {}
+        
+        # tier_applied should be present and correct
+        assert "tier_applied" in data, "tier_applied field missing from response"
+        assert data["tier_applied"] == "community", f"Expected tier_applied='community', got: {data['tier_applied']}"
+        
+        # max_dependencies_applied should be 50 for Community tier
+        assert "max_dependencies_applied" in data, "max_dependencies_applied field missing from response"
+        assert data["max_dependencies_applied"] == 50, f"Expected max_dependencies_applied=50, got: {data['max_dependencies_applied']}"
+        
+        # pro_features_enabled should be None or empty at Community tier
+        pro_features = data.get("pro_features_enabled")
+        assert pro_features is None or pro_features == [], f"Expected no Pro features at Community tier, got: {pro_features}"
+        
+        # enterprise_features_enabled should be None or empty at Community tier
+        enterprise_features = data.get("enterprise_features_enabled")
+        assert enterprise_features is None or enterprise_features == [], f"Expected no Enterprise features at Community tier, got: {enterprise_features}"
+        
+        break
+
+
+async def test_pro_output_metadata_fields(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+    """Pro tier should report tier_applied, unlimited dependencies, and pro features.
+    
+    [20260111_TEST] v3.3.2 - Validates output metadata fields for Pro tier.
+    """
+    project = tmp_path / "metadata_pro"
+    project.mkdir(parents=True, exist_ok=True)
+    _make_requirements(project, 10)
+
+    license_path = write_hs256_license_jwt(
+        jti="scan-pro-metadata",
+        base_dir=tmp_path,
+        filename="license.jwt",
+        tier="pro",
+    )
+
+    async for session in _session(
+        project,
+        extra_env={
+            "CODE_SCALPEL_TIER": "pro",
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ):
+        payload = await session.call_tool(
+            "scan_dependencies",
+            arguments={
+                "project_root": str(project),
+                "scan_vulnerabilities": False,
+                "include_dev": False,
+            },
+            read_timeout_seconds=timedelta(seconds=60),
+        )
+        env_json = _tool_json(payload)
+        data = env_json.get("data") or {}
+        
+        # tier_applied should be "pro"
+        assert "tier_applied" in data, "tier_applied field missing from response"
+        assert data["tier_applied"] == "pro", f"Expected tier_applied='pro', got: {data['tier_applied']}"
+        
+        # max_dependencies_applied should be None (unlimited) at Pro tier
+        # Note: Pydantic with exclude_none=True omits None values from JSON output,
+        # so absent field means unlimited (None). Present field with None also means unlimited.
+        max_deps = data.get("max_dependencies_applied")
+        assert max_deps is None, f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
+        
+        # pro_features_enabled should list Pro features
+        pro_features = data.get("pro_features_enabled")
+        assert pro_features is not None, "pro_features_enabled should be populated at Pro tier"
+        assert isinstance(pro_features, list), f"Expected pro_features_enabled to be a list, got: {type(pro_features)}"
+        # Check for expected Pro features
+        expected_pro_features = {"reachability_analysis", "license_compliance", "typosquatting_detection", "supply_chain_risk_scoring"}
+        actual_pro_features = set(pro_features)
+        assert actual_pro_features == expected_pro_features or actual_pro_features.issubset(expected_pro_features), \
+            f"Pro features mismatch. Expected subset of {expected_pro_features}, got: {actual_pro_features}"
+        
+        # enterprise_features_enabled should be None or empty at Pro tier
+        enterprise_features = data.get("enterprise_features_enabled")
+        assert enterprise_features is None or enterprise_features == [], f"Expected no Enterprise features at Pro tier, got: {enterprise_features}"
+        
+        break
+
+
+async def test_enterprise_output_metadata_fields(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
+    """Enterprise tier should report tier_applied, unlimited dependencies, and all features.
+    
+    [20260111_TEST] v3.3.2 - Validates output metadata fields for Enterprise tier.
+    """
+    project = tmp_path / "metadata_enterprise"
+    project.mkdir(parents=True, exist_ok=True)
+    _make_requirements(project, 10)
+
+    license_path = write_hs256_license_jwt(
+        jti="scan-enterprise-metadata",
+        base_dir=tmp_path,
+        filename="license.jwt",
+        tier="enterprise",
+    )
+
+    async for session in _session(
+        project,
+        extra_env={
+            "CODE_SCALPEL_TIER": "enterprise",
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ):
+        payload = await session.call_tool(
+            "scan_dependencies",
+            arguments={
+                "project_root": str(project),
+                "scan_vulnerabilities": False,
+                "include_dev": False,
+            },
+            read_timeout_seconds=timedelta(seconds=60),
+        )
+        env_json = _tool_json(payload)
+        data = env_json.get("data") or {}
+        
+        # tier_applied should be "enterprise"
+        assert "tier_applied" in data, "tier_applied field missing from response"
+        assert data["tier_applied"] == "enterprise", f"Expected tier_applied='enterprise', got: {data['tier_applied']}"
+        
+        # max_dependencies_applied should be None (unlimited) at Enterprise tier
+        # Note: Pydantic with exclude_none=True omits None values from JSON output,
+        # so absent field means unlimited (None). Present field with None also means unlimited.
+        max_deps = data.get("max_dependencies_applied")
+        assert max_deps is None, f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
+        
+        # pro_features_enabled should list Pro features (Enterprise includes all Pro features)
+        pro_features = data.get("pro_features_enabled")
+        assert pro_features is not None, "pro_features_enabled should be populated at Enterprise tier"
+        assert isinstance(pro_features, list), f"Expected pro_features_enabled to be a list, got: {type(pro_features)}"
+        
+        # enterprise_features_enabled should list Enterprise features
+        enterprise_features = data.get("enterprise_features_enabled")
+        assert enterprise_features is not None, "enterprise_features_enabled should be populated at Enterprise tier"
+        assert isinstance(enterprise_features, list), f"Expected enterprise_features_enabled to be a list, got: {type(enterprise_features)}"
+        # Check for expected Enterprise features
+        expected_enterprise_features = {"policy_based_blocking", "compliance_reporting"}
+        actual_enterprise_features = set(enterprise_features)
+        assert actual_enterprise_features == expected_enterprise_features or actual_enterprise_features.issubset(expected_enterprise_features), \
+            f"Enterprise features mismatch. Expected subset of {expected_enterprise_features}, got: {actual_enterprise_features}"
+        
+        break
