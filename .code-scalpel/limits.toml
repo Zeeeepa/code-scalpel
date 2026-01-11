@@ -208,7 +208,8 @@ languages = ["python", "javascript", "typescript", "java"]
 max_sinks = 50
 
 [pro.unified_sink_detect]
-languages = ["python", "javascript", "typescript", "java", "go", "rust"]
+# [20260110_BUGFIX] Align tier language contract with UnifiedSinkDetector (python/js/ts/java only)
+languages = ["python", "javascript", "typescript", "java"]
 # max_sinks unlimited - omit
 
 [enterprise.unified_sink_detect]
@@ -285,6 +286,8 @@ max_extraction_size_mb = 100
 [community.update_symbol]
 backup_enabled = true
 validation_level = "syntax"
+# [20260110_FEATURE] Roadmap v1.0: 10 updates per session (Community)
+max_updates_per_session = 10
 
 [pro.update_symbol]
 backup_enabled = true

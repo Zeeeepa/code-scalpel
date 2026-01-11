@@ -1,5 +1,5 @@
 ## unified_sink_detect Test Assessment Report
-**Date**: January 3, 2026  
+**Date**: January 10, 2026  
 **Tool Version**: v1.0  
 **Roadmap Reference**: [docs/roadmap/unified_sink_detect.md](../../roadmap/unified_sink_detect.md)
 
@@ -69,6 +69,23 @@
 ---
 
 ## Test Discovery Results
+
+## [20260110_DOCS] Recent Test Runs (Evidence)
+
+**Targeted MCP runs (unified_sink_detect):**
+- `pytest -q tests/mcp/test_unified_sink_detect_enterprise_features.py` → 5 passed
+- `pytest -q tests/mcp/test_tier_boundary_limits.py -k unified_sink_detect` → 8 passed
+
+**Full MCP suite run (repo-wide signal):**
+- `pytest -q tests/mcp` → **551 passed, 11 failed, 9 skipped**
+- The 11 failures are **not** in unified_sink_detect tests; they span other MCP tools/harnesses. Keeping them recorded here as cross-suite context.
+
+**Failures observed in `pytest -q tests/mcp` (Jan 10, 2026):**
+- `tests/mcp/scan_dependencies/test_tier_transitions.py` (5 tests): MCP stdio session teardown hits AnyIO/asyncio cancel-scope error (`Attempted to exit cancel scope in a different task than it was entered in`).
+- `tests/mcp/test_mcp.py::TestUpdateSymbolTool::test_update_function_not_found`: test expects insert-with-warning, but tool currently returns not-found error.
+- `tests/mcp/test_mcp.py::TestGetCrossFileDependencies::test_invalid_project_root`: tool raises `UnboundLocalError` on invalid root (likely a sync-impl error path).
+- `tests/mcp/test_resource_templates.py` (2 tests): `get_code_resource` denies access for temp roots unless allowed roots / `SCALPEL_ROOT` are configured.
+- `tests/mcp/test_v1_4_specifications.py` (2 tests): spec assertions assume `functions` is `list[str]`, but implementation returns structured `FunctionInfo` objects.
 
 **Test Files Found**: Integrated into tier boundary tests
 **Total Tests Collected**: 88 unified_sink tests (81 original + 7 new)
@@ -147,11 +164,16 @@
   - **BEST IN CLASS**: 7 tier tests (only tool with this level of coverage!)
 
 ### Pro/Enterprise Tests ✅ (2 tests - NOW TESTED!)
-- **ZERO Pro-specific feature tests**
-- **ZERO Enterprise-specific feature tests**
-- **ZERO custom sink definition tests**
-- **ZERO framework-specific sink tests**
-- **ZERO compliance mapping tests**
+**Enterprise MCP feature tests** (5 tests) - `tests/mcp/test_unified_sink_detect_enterprise_features.py`:
+- ✅ Compliance mapping returned (`compliance_mapping.violations`)
+- ✅ Risk scoring returned (`risk_assessments`, `sink_categories`)
+- ✅ Remediation suggestions returned (`remediation_suggestions`)
+- ✅ Pro cannot access Enterprise-only fields (negative gating)
+- ✅ Full Enterprise enrichment shape present (`historical_comparison`, etc.)
+
+**Pro-only deep feature tests**:
+- 🔴 MISSING: Framework-specific sinks
+- 🔴 MISSING: Custom sink definitions
 
 ---
 
@@ -176,8 +198,8 @@
 | **Enterprise features** | ✅ | 1 | **NEW: Full feature set** |
 | **Invalid license** | ✅ | 2 | **NEW: Invalid JWT + Expired JWT** |
 | **License fallback** | ✅ | 2 | **NEW: Community tier enforcement** |
-| **Custom sinks** | ⚠️ | 0 | Deferred to v3.2.0 |
-| **Framework-specific** | ⚠️ | 0 | Deferred to v3.2.0 |
+| **Custom sinks** | 🔴 | 0 | Missing (no tests) |
+| **Framework-specific** | 🔴 | 0 | Missing (no tests) |
 
 ---
 
@@ -204,7 +226,7 @@
 **All license fallback tests now passing** ✅
 **All Pro/Enterprise feature tests now passing** ✅
 
-### ⚠️ MEDIUM: Pro Framework-Specific Sinks (Deferred to v3.2.0)
+### 🔴 MISSING: Pro Framework-Specific Sinks
 
 **Claimed capabilities** (from features.py line 1070+):
 1. `advanced_confidence_scoring` - **NOW TESTED** ✅
@@ -213,9 +235,9 @@
 4. `custom_sink_definitions` - Deferred to v3.2.0
 5. `sink_coverage_analysis` - Deferred to v3.2.0
 
-**Status**: Core Pro features (scoring, context-awareness) now validated [20260105]. Advanced framework support deferred to v3.2.0.
+**Status**: Core Pro features (scoring, context-awareness) validated [20260105]. Framework/custom sink capabilities are currently unverified by tests.
 
-### ⚠️ MEDIUM: Enterprise Feature Tests (Deferred to v3.3.0+)
+### ✅ Enterprise Feature Tests (MCP)
 
 **Claimed capabilities** (from features.py line 1115+):
 1. `organization_sink_rules` - Deferred to v3.3.0
@@ -224,7 +246,7 @@
 4. `historical_sink_tracking` - Deferred to v3.3.0
 5. `automated_sink_remediation` - Deferred to v3.3.0
 
-**Status**: Enterprise tier now validated with full feature set inspection [20260105]. Advanced features deferred to v3.3.0+.
+**Status**: Enterprise tier validated with dedicated MCP feature tests [20260110]. Organization-specific rules remain unverified by tests.
 
 ### ✅ RESOLVED: License Fallback Now Tested!
 
@@ -243,7 +265,7 @@
 - JavaScript: ✅ Good coverage (8+ tests)
 - TypeScript: ✅ Good coverage (8+ tests)
 
-**Status**: All primary languages validated. Extended language support (Go, Rust) deferred to future release.
+**Status**: All primary languages validated. (No v1.0 requirements recorded here for Go/Rust.)
 
 ---
 

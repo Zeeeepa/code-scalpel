@@ -4,7 +4,7 @@
 **Tool Version:** v1.0  
 **Code Scalpel Version:** v3.3.1  
 **Current Status:** Stable  
-**Primary Module:** `src/code_scalpel/mcp/server.py` (line 4358)  
+**Primary Module:** `src/code_scalpel/mcp/server.py`  
 **Tier Availability:** All tiers (Community, Pro, Enterprise)
 
 ---
@@ -52,6 +52,11 @@ The `unified_sink_detect` tool detects dangerous sinks (eval, execute, system, e
 
 ## Current Capabilities (v1.0)
 
+### v1.0 Hardening Notes (Pre-release)
+- Stable `sink_id` per sink for correlation across runs
+- Snippet truncation with explicit indicators (`code_snippet_truncated`, `code_snippet_original_len`)
+- Unsupported-language failures return `error_code=UNIFIED_SINK_DETECT_UNSUPPORTED_LANGUAGE` consistently (including detector-level rejections)
+
 ### Community Tier
 - ✅ Python sink detection - `python_sink_detection`
 - ✅ JavaScript sink detection - `javascript_sink_detection`
@@ -79,43 +84,58 @@ The `unified_sink_detect` tool detects dangerous sinks (eval, execute, system, e
 
 ---
 
-## Return Model: UnifiedSinkResult
+## Return Model: UnifiedSinkResult (Actual v1.0)
+
+The canonical return schema is defined in `src/code_scalpel/mcp/server.py` as `UnifiedSinkResult` and `UnifiedDetectedSink`.
 
 ```python
+class UnifiedDetectedSink(BaseModel):
+  # Core sink fields (All tiers)
+  sink_id: str
+  pattern: str
+  sink_type: str
+  confidence: float
+  line: int
+  column: int
+  code_snippet: str
+  code_snippet_truncated: bool
+  code_snippet_original_len: int | None
+  vulnerability_type: str | None
+  owasp_category: str | None
+  cwe_id: str | None
+
 class UnifiedSinkResult(BaseModel):
-    # Core fields (All Tiers)
-    success: bool                              # Whether detection succeeded
-    sinks: list[SinkInfo]                      # Detected sinks
-    sink_count: int                            # Total sinks found
-    coverage: dict[str, bool]                  # Category coverage map
-    language: str                              # Detected/specified language
-    
-    # Pro Tier
-    context_analysis: dict[str, str]           # Sink context information
-    framework_sinks: list[SinkInfo]            # Framework-specific sinks
-    custom_matches: list[CustomSinkMatch]      # User-defined patterns
-    coverage_gaps: list[str]                   # Categories not covered
-    
-    # Enterprise Tier
-    risk_scores: dict[str, int]                # Per-sink risk (0-100)
-    compliance_tags: dict[str, list[str]]      # OWASP/SANS/CWE per sink
-    historical_trend: TrendData                # Sink count over time
-    remediation_suggestions: list[Remediation] # How to fix each sink
-    
-    error: str | None                          # Error message if failed
-```
+  # Core fields (All tiers)
+  success: bool
+  error_code: str | None
+  server_version: str
+  language: str
+  sink_count: int
+  sinks: list[UnifiedDetectedSink]
+  coverage_summary: dict[str, Any]
 
-### SinkInfo Model
+  # Pro tier enrichments
+  context_analysis: dict[str, Any] | None
+  framework_sinks: list[dict[str, Any]]
+  logic_sinks: list[dict[str, Any]]
+  confidence_scores: dict[str, float]
+  extended_language_sinks: dict[str, list[dict[str, Any]]]
 
-```python
-class SinkInfo(BaseModel):
-    name: str                                  # Function/method name
-    line: int                                  # Line number
-    column: int                                # Column number
-    cwe: str                                   # CWE identifier
-    confidence: float                          # 0.0-1.0 confidence
-    category: str                              # "code_injection", "sql_injection", etc.
-    context: str | None                        # Code snippet (Pro+)
+  # Enterprise tier enrichments
+  sink_categories: dict[str, list[dict[str, Any]]]
+  risk_assessments: list[dict[str, Any]]
+  custom_sink_matches: list[dict[str, Any]]
+  compliance_mapping: dict[str, Any] | None
+  historical_comparison: dict[str, Any] | None
+  remediation_suggestions: list[dict[str, Any]]
+
+  # Limit observability (All tiers, populated when applicable)
+  truncated: bool | None
+  sinks_detected: int | None
+  max_sinks_applied: int | None
+
+  # Human-readable error message
+  error: str | None
 ```
 
 ---
@@ -128,8 +148,8 @@ result = await unified_sink_detect(
     code="eval(user_input)",
     language="python"
 )
-# Returns: sinks=[SinkInfo(name="eval", line=1, cwe="CWE-94", confidence=0.95)],
-#          sink_count=1, coverage={code_injection: True, sql_injection: False, ...}
+# Returns: sinks=[UnifiedDetectedSink(pattern="eval", line=1, cwe_id="CWE-94", confidence=...)],
+#          sink_count=1, coverage_summary={...}
 # Max 50 sinks
 ```
 
@@ -199,12 +219,13 @@ result = await unified_sink_detect(
 ### Numeric Limits
 - **File:** `.code-scalpel/limits.toml` (lines 195-205)
 - **Community:** `max_sinks=50`, languages: python, javascript, typescript, java
-- **Pro:** Unlimited sinks, languages: +go, rust
+- **Pro:** Unlimited sinks. **Note:** current config lists `go` and `rust`, but the underlying detector only supports python/javascript/typescript/java. v1.0 roadmap item: align `limits.toml` with actual detector support to avoid misleading contracts.
 - **Enterprise:** Unlimited, all languages
 
 ### Response Verbosity
-- **File:** `.code-scalpel/response_config.json` (line 161)
-- **Exclude fields:** `detection_metadata`, `pattern_match_details`
+- **File:** `.code-scalpel/response_config.json` (line 161) (tool payload filtering inside envelope `data`)
+- **Exclude fields (current):** `detection_metadata`, `pattern_match_details`
+- **Note:** these fields are not present in the actual `UnifiedSinkResult` schema, so the current exclude list is effectively a no-op. v1.0 roadmap item: align response filtering with real high-payload fields (e.g., `sinks.code_snippet`, `context_analysis`, `framework_sinks`, `compliance_mapping`, `historical_comparison`, `remediation_suggestions`).
 
 ---
 

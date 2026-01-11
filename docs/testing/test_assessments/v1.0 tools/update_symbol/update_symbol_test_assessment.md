@@ -96,6 +96,11 @@
 | test_cross_platform.py | tests/tools/update_symbol/ | 12 | ✅ COMPLETE | Cross-platform compatibility |
 | test_tier_enforcement.py | tests/tools/update_symbol/ | 12 | 🔵 OPERATIONAL | Real license validation infrastructure |
 
+Additional MCP response filtering coverage:
+- ✅ `tests/mcp/test_response_config.py::test_mcp_wrapper_preserves_update_symbol_error_code_in_tool_data_when_filtered`
+   - Validates `error_code` survives `response_config.json` minimal filtering even if excluded by profile + tool override
+   - Ensures failures remain machine-readable under token-efficiency filtering
+
 ### ⚠️ **Critical Finding: Tier Testing Methodology**
 
 **Testing Approach Verification (2026-01-05)**:
@@ -195,13 +200,17 @@ The tier tests (test_community_tier.py, test_pro_tier.py, test_enterprise_tier.p
 **Roadmap Goal**: Enforce 10 updates per session in Community tier  
 **Acceptance Criteria**:
 - After 10 updates in same session, further calls return error
-- Error message mentions "upgrade to Pro"
+- Error response is machine-readable (`error_code == UPDATE_SYMBOL_SESSION_LIMIT_REACHED`)
+- Error response includes limit observability fields (`max_updates_per_session`, `updates_used`, `updates_remaining`)
+- Error message is neutral and actionable (no tier upsell text)
 - Pro tier has no such limit
 
 **Evidence**:
 - ✅ `test_session_limit_10_updates` - Validates exactly 10 updates allowed
 - ✅ `test_session_limit_enforced_on_11th` - Validates 11th update rejected
-- ✅ `test_session_limit_error_message_suggests_upgrade` - Validates error message offers Pro upgrade
+- ✅ `tests/integration/test_update_symbol_tiers.py::TestUpdateSymbolSessionLimit::test_rename_counts_toward_update_symbol_limit`
+   - Confirms `operation="rename"` counts toward the limit (no bypass)
+   - Confirms `error_code` and limit observability fields are present when blocked
 - Implementation tested (lines 11099-11108 of server.py)
 - All session limit behavior validated with 3 comprehensive tests
 

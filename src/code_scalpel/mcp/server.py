@@ -1874,12 +1874,22 @@ class SecurityResult(BaseModel):
 class UnifiedDetectedSink(BaseModel):
     """Detected sink with confidence and OWASP mapping."""
 
+    # [20260110_FEATURE] v1.0 - Stable identifier for correlation across runs
+    sink_id: str = Field(description="Stable sink identifier (for correlation across runs)")
+
     pattern: str = Field(description="Sink pattern matched")
     sink_type: str = Field(description="Sink type classification")
     confidence: float = Field(description="Confidence score (0.0-1.0)")
     line: int = Field(default=0, description="Line number of sink occurrence")
     column: int = Field(default=0, description="Column offset of sink occurrence")
     code_snippet: str = Field(default="", description="Snippet around the sink")
+    # [20260110_FEATURE] v1.0 - Snippet truncation observability
+    code_snippet_truncated: bool = Field(
+        default=False, description="Whether code_snippet was truncated"
+    )
+    code_snippet_original_len: int | None = Field(
+        default=None, description="Original snippet length before truncation"
+    )
     vulnerability_type: str | None = Field(
         default=None, description="Vulnerability category key"
     )
@@ -1896,6 +1906,8 @@ class UnifiedSinkResult(BaseModel):
     """Result of unified polyglot sink detection."""
 
     success: bool = Field(description="Whether detection succeeded")
+    # [20260110_FEATURE] v1.0 - Machine-readable failures
+    error_code: str | None = Field(default=None, description="Machine-readable error code")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
@@ -1943,6 +1955,15 @@ class UnifiedSinkResult(BaseModel):
     remediation_suggestions: list[dict[str, Any]] = Field(
         default_factory=list,
         description="[Enterprise] Automated remediation suggestions",
+    )
+
+    # [20260110_FEATURE] v1.0 - Limit observability (populated when applicable)
+    truncated: bool | None = Field(default=None, description="Whether results were truncated")
+    sinks_detected: int | None = Field(
+        default=None, description="Total sinks detected before truncation"
+    )
+    max_sinks_applied: int | None = Field(
+        default=None, description="max_sinks limit applied to this response"
     )
     error: str | None = Field(default=None, description="Error message if failed")
 
@@ -2252,6 +2273,23 @@ class PatchResultModel(BaseModel):
     lines_after: int = Field(default=0, description="Lines in replacement code")
     lines_delta: int = Field(default=0, description="Change in line count")
     backup_path: str | None = Field(default=None, description="Path to backup file")
+    # [20260110_FEATURE] Machine-readable failure signaling for minimal output profiles.
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code if failed"
+    )
+    hint: str | None = Field(
+        default=None, description="Actionable hint to remediate failure"
+    )
+    # [20260110_FEATURE] Session limit observability for update_symbol.
+    max_updates_per_session: int | None = Field(
+        default=None, description="Session max updates applied for this tool"
+    )
+    updates_used: int | None = Field(
+        default=None, description="Updates used in this session for this tool"
+    )
+    updates_remaining: int | None = Field(
+        default=None, description="Remaining updates in this session for this tool"
+    )
     # [20251225_FEATURE] Optional warnings for tier-aware behavior (neutral messaging).
     warnings: list[str] = Field(
         default_factory=list,
@@ -5090,9 +5128,41 @@ def _unified_sink_detect_sync(
 
     lang = (language or "").lower()
 
+    def _make_sink_id(
+        *,
+        pattern: str,
+        sink_type: str,
+        line: int,
+        column: int,
+        vulnerability_type: str | None,
+        cwe_id: str | None,
+    ) -> str:
+        """Generate a stable sink id for correlation across runs."""
+
+        raw = (
+            f"{lang}|{pattern}|{sink_type}|{line}|{column}|"
+            f"{vulnerability_type or ''}|{cwe_id or ''}"
+        )
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
+
+    def _snippet_from_source(line_no: int) -> str:
+        if line_no <= 0:
+            return ""
+        lines = code.splitlines()
+        if 1 <= line_no <= len(lines):
+            return lines[line_no - 1]
+        return ""
+
+    def _truncate_snippet(snippet: str, *, max_len: int = 200) -> tuple[str, bool, int | None]:
+        if len(snippet) <= max_len:
+            return snippet, False, None
+        # Keep output length stable at max_len, ending with an ellipsis.
+        return snippet[: max_len - 1] + "…", True, len(snippet)
+
     if code is None or code.strip() == "":
         return UnifiedSinkResult(
             success=False,
+            error_code="UNIFIED_SINK_DETECT_MISSING_CODE",
             language=lang,
             sink_count=0,
             error="Parameter 'code' is required.",
@@ -5102,6 +5172,7 @@ def _unified_sink_detect_sync(
     if not 0.0 <= min_confidence <= 1.0:
         return UnifiedSinkResult(
             success=False,
+            error_code="UNIFIED_SINK_DETECT_INVALID_MIN_CONFIDENCE",
             language=lang,
             sink_count=0,
             error="Parameter 'min_confidence' must be between 0.0 and 1.0.",
@@ -5127,6 +5198,7 @@ def _unified_sink_detect_sync(
             if lang not in allowed_langs_lower:
                 return UnifiedSinkResult(
                     success=False,
+                    error_code="UNIFIED_SINK_DETECT_UNSUPPORTED_LANGUAGE",
                     language=lang,
                     sink_count=0,
                     error=f"Unsupported language for tier {tier.title()}: {language}",
@@ -5138,11 +5210,18 @@ def _unified_sink_detect_sync(
     try:
         detected = detector.detect_sinks(code, lang, min_confidence)
     except ValueError as e:
+        msg = str(e)
+        lower_msg = msg.lower()
+        if "unsupported" in lower_msg and "language" in lower_msg:
+            error_code = "UNIFIED_SINK_DETECT_UNSUPPORTED_LANGUAGE"
+        else:
+            error_code = "UNIFIED_SINK_DETECT_DETECTOR_ERROR"
         return UnifiedSinkResult(
             success=False,
+            error_code=error_code,
             language=lang,
             sink_count=0,
-            error=str(e),
+            error=msg,
             coverage_summary=_sink_coverage_summary(detector),
         )
 
@@ -5152,15 +5231,33 @@ def _unified_sink_detect_sync(
         owasp = detector.get_owasp_category(sink.vulnerability_type)
         # [20251231_FEATURE] v1.0 - Map CWE from vulnerability type
         cwe_id = _get_cwe_for_sink(sink.vulnerability_type, sink.sink_type)
+
+        sink_type = getattr(sink.sink_type, "name", str(sink.sink_type))
+        line = int(getattr(sink, "line", 0) or 0)
+        column = int(getattr(sink, "column", 0) or 0)
+        vulnerability_type = getattr(sink, "vulnerability_type", None)
+
+        raw_snippet = getattr(sink, "code_snippet", "") or _snippet_from_source(line)
+        code_snippet, snippet_truncated, original_len = _truncate_snippet(raw_snippet)
         sinks.append(
             UnifiedDetectedSink(
+                sink_id=_make_sink_id(
+                    pattern=sink.pattern,
+                    sink_type=sink_type,
+                    line=line,
+                    column=column,
+                    vulnerability_type=vulnerability_type,
+                    cwe_id=cwe_id,
+                ),
                 pattern=sink.pattern,
-                sink_type=getattr(sink.sink_type, "name", str(sink.sink_type)),
+                sink_type=sink_type,
                 confidence=sink.confidence,
-                line=sink.line,
-                column=getattr(sink, "column", 0),
-                code_snippet=getattr(sink, "code_snippet", ""),
-                vulnerability_type=getattr(sink, "vulnerability_type", None),
+                line=line,
+                column=column,
+                code_snippet=code_snippet,
+                code_snippet_truncated=snippet_truncated,
+                code_snippet_original_len=original_len,
+                vulnerability_type=vulnerability_type,
                 owasp_category=owasp,
                 cwe_id=cwe_id,
             )
@@ -5168,8 +5265,14 @@ def _unified_sink_detect_sync(
 
     # Enforce max_sinks limit
     max_sinks = limits.get("max_sinks")
+    truncated: bool | None = None
+    sinks_detected: int | None = None
+    max_sinks_applied: int | None = None
     if max_sinks is not None and len(sinks) > max_sinks:
+        sinks_detected = len(sinks)
         sinks = sinks[:max_sinks]
+        truncated = True
+        max_sinks_applied = int(max_sinks)
 
     # Tier-specific enrichments
     logic_sinks: list[dict[str, Any]] = []
@@ -5220,8 +5323,8 @@ def _unified_sink_detect_sync(
 
     # Confidence scoring (Pro/Enterprise)
     if "sink_confidence_scoring" in caps_set or "logic_sink_detection" in caps_set:
-        for idx, sink in enumerate(sinks):
-            key = f"sink_{idx}"
+        for sink in sinks:
+            key = sink.sink_id
             base = sink.confidence or min_confidence
             multiplier = 1.0
             vuln = (sink.vulnerability_type or sink.sink_type or "").upper()
@@ -5252,7 +5355,7 @@ def _unified_sink_detect_sync(
     # Enterprise: Categorization and risk assessments
     if "sink_categorization" in caps_set or "risk_level_tagging" in caps_set:
         sink_categories = {"critical": [], "high": [], "medium": [], "low": []}
-        for idx, sink in enumerate(sinks):
+        for sink in sinks:
             vuln = (sink.vulnerability_type or sink.sink_type or "").upper()
             if "SQL" in vuln:
                 category = "critical"
@@ -5264,9 +5367,9 @@ def _unified_sink_detect_sync(
                 category = "low"
             sink_categories[category].append(
                 {
-                    "sink_id": f"sink_{idx}",
+                    "sink_id": sink.sink_id,
                     "type": vuln,
-                    "confidence": confidence_scores.get(f"sink_{idx}", sink.confidence),
+                    "confidence": confidence_scores.get(sink.sink_id, sink.confidence),
                 }
             )
 
@@ -5341,6 +5444,9 @@ def _unified_sink_detect_sync(
         compliance_mapping=compliance_mapping,
         historical_comparison=historical_comparison,
         remediation_suggestions=remediation_suggestions,
+        truncated=truncated,
+        sinks_detected=sinks_detected,
+        max_sinks_applied=max_sinks_applied,
     )
 
 
@@ -11360,9 +11466,13 @@ async def update_symbol(
                 file_path=file_path or "",
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_SESSION_LIMIT_REACHED",
+                hint="Start a new session or reduce updates per session.",
+                max_updates_per_session=int(max_updates),
+                updates_used=int(current_count),
+                updates_remaining=0,
                 warnings=warnings,
-                error=f"Session limit reached: {max_updates} updates per session. "
-                f"Upgrade to Pro tier for unlimited updates.",
+                error=f"Session limit reached: {max_updates} updates per session.",
             )
 
     # [20251228_BUGFIX] Honor create_backup unless the tier explicitly requires it.
@@ -11415,6 +11525,7 @@ async def update_symbol(
             file_path=file_path or "",
             target_name=target_name,
             target_type=target_type,
+            error_code="UPDATE_SYMBOL_INVALID_OPERATION",
             warnings=warnings,
             error="Invalid operation. Use 'replace' or 'rename'.",
         )
@@ -11426,6 +11537,7 @@ async def update_symbol(
             file_path="",
             target_name=target_name,
             target_type=target_type,
+            error_code="UPDATE_SYMBOL_MISSING_FILE_PATH",
             warnings=warnings,
             error="Parameter 'file_path' is required.",
         )
@@ -11437,6 +11549,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_MISSING_NEW_CODE",
                 warnings=warnings,
                 error="Parameter 'new_code' cannot be empty for operation='replace'.",
             )
@@ -11447,6 +11560,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_MISSING_NEW_NAME",
                 warnings=warnings,
                 error="Parameter 'new_name' is required for operation='rename'.",
             )
@@ -11457,6 +11571,7 @@ async def update_symbol(
             file_path=file_path,
             target_name=target_name,
             target_type=target_type,
+            error_code="UPDATE_SYMBOL_INVALID_TARGET_TYPE",
             warnings=warnings,
             error=f"Invalid target_type: {target_type}. Use 'function', 'class', or 'method'.",
         )
@@ -11471,6 +11586,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_SEMANTIC_VALIDATION_FAILED",
                 warnings=warnings,
                 error=semantic_error,
             )
@@ -11492,6 +11608,7 @@ async def update_symbol(
             file_path=file_path,
             target_name=target_name,
             target_type=target_type,
+            error_code="UPDATE_SYMBOL_FILE_NOT_FOUND",
             warnings=warnings,
             error=f"File not found: {file_path}.",
         )
@@ -11501,6 +11618,7 @@ async def update_symbol(
             file_path=file_path,
             target_name=target_name,
             target_type=target_type,
+            error_code="UPDATE_SYMBOL_INVALID_INPUT",
             warnings=warnings,
             error=str(e),
         )
@@ -11516,6 +11634,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_APPROVAL_REQUIRED",
                 warnings=warnings,
                 error=f"Code review approval required: {approval_result.get('reason', 'Pending review')}",
             )
@@ -11531,6 +11650,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_COMPLIANCE_FAILED",
                 warnings=warnings,
                 error=f"Compliance check failed: {compliance_result.get('violations', [])}",
             )
@@ -11548,6 +11668,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_PRE_HOOK_BLOCKED",
                 warnings=warnings,
                 error=f"Pre-update hook blocked: {hook_result.get('reason', 'Hook returned false')}",
             )
@@ -11560,12 +11681,75 @@ async def update_symbol(
             # Tier-aware rename support. Delegates to the dedicated tool which
             # enforces tier limits/capabilities (Community definition-only; Pro/Ent
             # may update references depending on configured limits).
-            return await rename_symbol(
+            rename_result = await rename_symbol(
                 file_path=file_path,
                 target_type=target_type,
                 target_name=target_name,
                 new_name=str(new_name),
                 create_backup=create_backup,
+            )
+
+            # [20260110_BUGFIX] Prevent session-limit bypass via update_symbol(operation='rename').
+            if getattr(rename_result, "success", False):
+                new_count = _increment_session_update_count("update_symbol")
+
+                if "audit_trail" in capabilities:
+                    _add_audit_entry(
+                        tool_name="update_symbol",
+                        file_path=file_path,
+                        target_name=target_name,
+                        operation=operation,
+                        success=True,
+                        tier=tier,
+                        metadata={
+                            "rename_delegated": True,
+                            "new_name": str(new_name),
+                            "backup_path": getattr(rename_result, "backup_path", None),
+                        },
+                    )
+
+                merged_warnings: list[str] = []
+                merged_warnings.extend(warnings)
+                merged_warnings.extend(getattr(rename_result, "warnings", []) or [])
+
+                return PatchResultModel(
+                    success=True,
+                    file_path=getattr(rename_result, "file_path", file_path),
+                    target_name=getattr(rename_result, "target_name", target_name),
+                    target_type=getattr(rename_result, "target_type", target_type),
+                    lines_before=getattr(rename_result, "lines_before", 0),
+                    lines_after=getattr(rename_result, "lines_after", 0),
+                    lines_delta=getattr(rename_result, "lines_delta", 0),
+                    backup_path=getattr(rename_result, "backup_path", None),
+                    max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
+                    updates_used=(int(new_count) if max_updates > 0 else None),
+                    updates_remaining=(
+                        int(max_updates - new_count) if max_updates > 0 else None
+                    ),
+                    warnings=merged_warnings,
+                )
+
+            # Failure case (or no session tracking): return as-is.
+            return PatchResultModel(
+                success=getattr(rename_result, "success", False),
+                file_path=getattr(rename_result, "file_path", file_path),
+                target_name=getattr(rename_result, "target_name", target_name),
+                target_type=getattr(rename_result, "target_type", target_type),
+                lines_before=getattr(rename_result, "lines_before", 0),
+                lines_after=getattr(rename_result, "lines_after", 0),
+                lines_delta=getattr(rename_result, "lines_delta", 0),
+                backup_path=getattr(rename_result, "backup_path", None),
+                error=getattr(rename_result, "error", None),
+                error_code=getattr(rename_result, "error_code", None),
+                hint=getattr(rename_result, "hint", None),
+                max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
+                updates_used=(int(_get_session_update_count("update_symbol")) if max_updates > 0 else None),
+                updates_remaining=(
+                    int(max_updates - _get_session_update_count("update_symbol"))
+                    if max_updates > 0
+                    else None
+                ),
+                warnings=(getattr(rename_result, "warnings", []) or []) if not warnings else (warnings + (getattr(rename_result, "warnings", []) or [])),
             )
 
         # At this point we are performing a replacement, which requires concrete code.
@@ -11606,6 +11790,7 @@ async def update_symbol(
                     file_path=file_path,
                     target_name=target_name,
                     target_type=target_type,
+                    error_code="UPDATE_SYMBOL_INVALID_METHOD_NAME",
                     warnings=warnings,
                     error="Method name must be 'ClassName.method_name' format.",
                 )
@@ -11643,6 +11828,7 @@ async def update_symbol(
                 file_path=file_path,
                 target_name=target_name,
                 target_type=target_type,
+                error_code="UPDATE_SYMBOL_PATCH_FAILED",
                 warnings=warnings,
                 error=result.error,
             )
@@ -11743,12 +11929,13 @@ async def update_symbol(
                     file_path=file_path,
                     target_name=target_name,
                     target_type=target_type,
+                    error_code="UPDATE_SYMBOL_POST_SAVE_VERIFICATION_FAILED",
                     warnings=warnings,
                     error=f"Post-save verification failed: {e}",
                 )
 
         # [20250101_FEATURE] v1.0 roadmap: Increment session counter on success
-        _increment_session_update_count("update_symbol")
+        new_count = _increment_session_update_count("update_symbol")
 
         # [20250101_FEATURE] v1.0 roadmap: Enterprise audit trail
         if "audit_trail" in capabilities:
@@ -11775,6 +11962,11 @@ async def update_symbol(
             lines_after=result.lines_after,
             lines_delta=result.lines_delta,
             backup_path=backup_path,
+            max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
+            updates_used=(int(new_count) if max_updates > 0 else None),
+            updates_remaining=(
+                int(max_updates - new_count) if max_updates > 0 else None
+            ),
             warnings=warnings,
         )
 
@@ -11796,6 +11988,7 @@ async def update_symbol(
             target_name=target_name,
             target_type=target_type,
             warnings=warnings,
+            error_code="UPDATE_SYMBOL_INTERNAL_ERROR",
             error=f"Patch failed: {str(e)}",
         )
 
@@ -15632,7 +15825,29 @@ async def get_symbol_references(
 
 # ============================================================================
 # [20251213_FEATURE] v1.5.0 - get_call_graph MCP Tool
+# [20260110_FEATURE] v3.3.0 - Pre-release: confidence, context, paths, focus
 # ============================================================================
+
+
+class CallContextModel(BaseModel):
+    """Context information about where a call is made.
+
+    [20260110_FEATURE] v3.3.0 - Call context metadata for security analysis.
+    Knowing if a call is conditional or in a try block helps agents assess risk.
+    """
+
+    in_loop: bool = Field(default=False, description="Call is inside a loop")
+    in_try_block: bool = Field(default=False, description="Call is inside a try block")
+    in_conditional: bool = Field(
+        default=False, description="Call is inside an if/else block"
+    )
+    condition_summary: str | None = Field(
+        default=None, description="Summary of condition, e.g., 'if user.is_admin'"
+    )
+    in_async: bool = Field(default=False, description="Call is in an async function")
+    in_except_handler: bool = Field(
+        default=False, description="Call is in an except handler"
+    )
 
 
 class CallNodeModel(BaseModel):
@@ -15645,6 +15860,10 @@ class CallNodeModel(BaseModel):
     is_entry_point: bool = Field(
         default=False, description="Whether function is an entry point"
     )
+    # [20260110_FEATURE] v3.3.0 - source_uri for IDE click-through
+    source_uri: str | None = Field(
+        default=None, description="IDE-friendly URI: file:///path#L42"
+    )
     # [20251225_FEATURE] Enterprise metrics (best-effort)
     in_degree: int | None = Field(default=None, description="Inbound call count")
     out_degree: int | None = Field(default=None, description="Outbound call count")
@@ -15655,6 +15874,22 @@ class CallEdgeModel(BaseModel):
 
     caller: str = Field(description="Caller function (file:name)")
     callee: str = Field(description="Callee function (file:name or external name)")
+    # [20260110_FEATURE] v3.3.0 - Confidence scoring for call edges
+    confidence: float = Field(
+        default=1.0,
+        ge=0.0,
+        le=1.0,
+        description="Confidence: 1.0=static, 0.8=type_hint, 0.5=inferred",
+    )
+    inference_source: str = Field(
+        default="static",
+        description="How edge was inferred: static, type_hint, class_hierarchy, pattern_match",
+    )
+    call_line: int | None = Field(default=None, description="Line number of the call")
+    # [20260110_FEATURE] v3.3.0 - Call context metadata
+    context: CallContextModel | None = Field(
+        default=None, description="Context where call is made"
+    )
 
 
 class CallGraphResultModel(BaseModel):
@@ -15675,6 +15910,15 @@ class CallGraphResultModel(BaseModel):
     mermaid: str = Field(default="", description="Mermaid diagram representation")
     circular_imports: list[list[str]] = Field(
         default_factory=list, description="Detected import cycles"
+    )
+    # [20260110_FEATURE] v3.3.0 - Path query results
+    paths: list[list[str]] = Field(
+        default_factory=list,
+        description="Paths between source and sink (if paths_from/paths_to specified)",
+    )
+    # [20260110_FEATURE] v3.3.0 - Subgraph focus mode
+    focus_functions: list[str] | None = Field(
+        default=None, description="Functions the subgraph is focused on"
     )
     # [20251225_FEATURE] Neutral truncation metadata (tier limits)
     total_nodes: int | None = Field(
@@ -15708,6 +15952,9 @@ def _get_call_graph_sync(
     max_nodes: int | None = None,
     advanced_resolution: bool = False,
     include_enterprise_metrics: bool = False,
+    paths_from: str | None = None,
+    paths_to: str | None = None,
+    focus_functions: list[str] | None = None,
 ) -> CallGraphResultModel:
     """Synchronous implementation of get_call_graph."""
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
@@ -15769,7 +16016,7 @@ def _get_call_graph_sync(
             advanced_resolution=advanced_resolution,
         )
 
-        # Convert dataclasses to Pydantic models
+        # [20260110_FEATURE] v3.3.0 - Convert dataclasses to Pydantic models with new fields
         nodes = [
             CallNodeModel(
                 name=n.name,
@@ -15777,11 +16024,35 @@ def _get_call_graph_sync(
                 line=n.line,
                 end_line=n.end_line,
                 is_entry_point=n.is_entry_point,
+                # [20260110_FEATURE] v3.3.0 - Source URI for IDE click-through
+                source_uri=n.source_uri,
             )
             for n in result.nodes
         ]
 
-        edges = [CallEdgeModel(caller=e.caller, callee=e.callee) for e in result.edges]
+        # [20260110_FEATURE] v3.3.0 - Convert edges with context/confidence metadata
+        edges = []
+        for e in result.edges:
+            context_model = None
+            if e.context is not None:
+                context_model = CallContextModel(
+                    in_loop=e.context.in_loop,
+                    in_try_block=e.context.in_try_block,
+                    in_conditional=e.context.in_conditional,
+                    condition_summary=e.context.condition_summary,
+                    in_async=e.context.in_async,
+                    in_except_handler=e.context.in_except_handler,
+                )
+            edges.append(
+                CallEdgeModel(
+                    caller=e.caller,
+                    callee=e.callee,
+                    call_line=e.call_line,
+                    confidence=e.confidence,
+                    inference_source=e.inference_source,
+                    context=context_model,
+                )
+            )
 
         # [20251226_FEATURE] Add heuristic polymorphism edges when enabled.
         if advanced_resolution:
@@ -15877,6 +16148,33 @@ def _get_call_graph_sync(
         if include_circular_import_check:
             circular_imports = builder.detect_circular_imports()
 
+        # [20260110_FEATURE] v3.3.0 - Path query API
+        paths: list[list[str]] = []
+        if paths_from and paths_to:
+            # Build adjacency list from edges for path finding
+            adj_list: dict[str, list[str]] = {}
+            for e in edges:
+                adj_list.setdefault(e.caller, []).append(e.callee)
+            paths = builder.find_paths(paths_from, paths_to, max_depth=depth, graph=adj_list)
+
+        # [20260110_FEATURE] v3.3.0 - Focus mode: filter to subgraph around focus_functions
+        actual_focus_functions: list[str] | None = None
+        if focus_functions:
+            # Find k-hop neighborhood around focus functions
+            focus_set = set(focus_functions)
+            related: set[str] = set(focus_functions)
+
+            # Add all nodes that call or are called by focus functions (1-hop)
+            for e in edges:
+                if e.caller in focus_set or e.callee in focus_set:
+                    related.add(e.caller)
+                    related.add(e.callee)
+
+            # Filter nodes and edges to only those in the related set
+            nodes = [n for n in nodes if f"{n.file}:{n.name}" in related or n.name in related]
+            edges = [e for e in edges if e.caller in related or e.callee in related]
+            actual_focus_functions = focus_functions
+
         return CallGraphResultModel(
             nodes=nodes,
             edges=edges,
@@ -15884,6 +16182,8 @@ def _get_call_graph_sync(
             depth_limit=result.depth_limit,
             mermaid=result.mermaid,
             circular_imports=circular_imports,
+            paths=paths,
+            focus_functions=actual_focus_functions,
             total_nodes=total_nodes,
             total_edges=total_edges,
             nodes_truncated=nodes_truncated,
@@ -15899,13 +16199,15 @@ def _get_call_graph_sync(
             error=f"Call graph analysis failed: {str(e)}",
         )
 
-
 @mcp.tool()
 async def get_call_graph(
     project_root: str | None = None,
     entry_point: str | None = None,
     depth: int = 10,
     include_circular_import_check: bool = True,
+    paths_from: str | None = None,
+    paths_to: str | None = None,
+    focus_functions: list[str] | None = None,
     ctx: Context | None = None,
 ) -> CallGraphResultModel:
     """
@@ -15925,12 +16227,21 @@ async def get_call_graph(
 
     [v3.0.5] Now reports progress during graph construction.
     [v3.2.8] Tier-based depth limiting for Community tier.
+    [v3.3.0] Added path queries, focus mode, call context, and confidence scoring.
+
+    **v3.3.0 Features:**
+    - **Path Queries:** Use paths_from and paths_to to find all call paths between functions
+    - **Focus Mode:** Use focus_functions to extract a subgraph centered on specific functions
+    - **Call Context:** Each edge includes context (in_loop, in_try_block, in_conditional)
+    - **Confidence Scoring:** Each edge includes confidence (1.0=static, 0.8=type_hint, 0.5=inferred)
+    - **Source URIs:** Each node includes source_uri for IDE click-through (file:///path#L42)
 
     Why AI agents need this:
     - Navigation: Quickly understand how functions connect
     - Impact analysis: See what breaks if you change a function
     - Refactoring: Identify tightly coupled code
     - Documentation: Generate visual diagrams of code flow
+    - Security: Find call paths from user input to dangerous sinks
 
     Args:
         project_root: Project root directory (default: server's project root)
@@ -15938,9 +16249,12 @@ async def get_call_graph(
                     If None, includes all functions
         depth: Maximum depth to traverse from entry point (default: 10)
         include_circular_import_check: Check for circular imports (default: True)
+        paths_from: Source function for path query (e.g., "routes.py:handle_request")
+        paths_to: Sink function for path query (e.g., "db.py:execute_query")
+        focus_functions: List of functions to focus the subgraph on
 
     Returns:
-        CallGraphResultModel with nodes, edges, Mermaid diagram, and any circular imports
+        CallGraphResultModel with nodes, edges, Mermaid diagram, paths, and any circular imports
     """
     # [20251220_FEATURE] v3.0.5 - Progress reporting
     if ctx:
@@ -15980,6 +16294,9 @@ async def get_call_graph(
         max_nodes,
         advanced_resolution,
         include_enterprise_metrics,
+        paths_from,
+        paths_to,
+        focus_functions,
     )
 
     if ctx:
@@ -19586,6 +19903,27 @@ class PathValidationResult(BaseModel):
     success: bool = Field(description="Whether all paths were accessible")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     error: str | None = Field(default=None, description="Error message if failed")
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code (when failed)"
+    )
+
+    # [20260110_FEATURE] Limits-aware metadata (present when max_paths truncation occurs)
+    truncated: bool | None = Field(
+        default=None,
+        description="Whether input paths were truncated due to tier limits",
+    )
+    paths_received: int | None = Field(
+        default=None,
+        description="Number of input paths received before truncation",
+    )
+    paths_checked: int | None = Field(
+        default=None,
+        description="Number of paths actually validated",
+    )
+    max_paths_applied: int | None = Field(
+        default=None,
+        description="Applied max_paths limit when truncation occurred",
+    )
     accessible: list[str] = Field(
         default_factory=list, description="Paths that were successfully resolved"
     )
@@ -19657,194 +19995,240 @@ def _validate_paths_sync(
     caps_set: set[str] = set((capabilities.get("capabilities", []) or []))
     limits = capabilities.get("limits", {}) or {}
 
-    # Enforce path processing limits
-    max_paths = limits.get("max_paths")
-    if max_paths is not None and len(paths) > max_paths:
-        paths = paths[:max_paths]
+    # [20260110_FEATURE] Make tier limits observable for safe batching.
+    paths_received = len(paths)
+    truncated = False
+    max_paths_applied: int | None = None
 
-    resolver = PathResolver()
-    accessible, inaccessible = resolver.validate_paths(paths, project_root)
+    try:
+        max_paths = limits.get("max_paths")
+        if max_paths is not None and len(paths) > max_paths:
+            truncated = True
+            max_paths_applied = int(max_paths)
+            paths = paths[: max_paths_applied]
 
-    suggestions: list[str] = []
-    if inaccessible:
-        if resolver.is_docker:
+        resolver = PathResolver()
+        accessible, inaccessible = resolver.validate_paths(paths, project_root)
+
+        # [20260110_BUGFIX] Deterministic ordering for stable outputs.
+        workspace_roots_sorted = sorted(resolver.workspace_roots)
+
+        suggestions: list[str] = []
+        if truncated and max_paths_applied is not None:
             suggestions.append(
-                "Running in Docker: Mount your project with -v /path/to/project:/workspace"
+                f"Input exceeded max_paths={max_paths_applied}; validated first {len(paths)} of {paths_received}."
             )
-            suggestions.append(
-                "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
-            )
-        else:
-            suggestions.append(
-                "Ensure files exist and use absolute paths or place in workspace roots:"
-            )
-            for root in resolver.workspace_roots[:3]:
-                suggestions.append(f"  - {root}")
-        suggestions.append("Set WORKSPACE_ROOT env variable to specify custom root")
+            suggestions.append("Consider batching into smaller chunks and retrying.")
 
-    # Initialize tier-specific outputs
-    alias_resolutions: list[dict] = []
-    dynamic_imports: list[dict] = []
-    traversal_vulnerabilities: list[dict] = []
-    boundary_violations: list[dict] = []
-    security_score: float | None = None
+        if inaccessible:
+            if resolver.is_docker:
+                suggestions.append(
+                    "Running in Docker: Mount your project with -v /path/to/project:/workspace"
+                )
+                suggestions.append(
+                    "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
+                )
+            else:
+                suggestions.append(
+                    "Ensure files exist and use absolute paths or place in workspace roots:"
+                )
+                for root in workspace_roots_sorted[:3]:
+                    suggestions.append(f"  - {root}")
+            suggestions.append("Set WORKSPACE_ROOT env variable to specify custom root")
 
-    # Pro: Path alias resolution via tsconfig.json
-    if "path_alias_resolution" in caps_set and project_root:
-        if "tsconfig_paths_support" in caps_set:
-            tsconfig_path = PathLib(project_root) / "tsconfig.json"
-            if tsconfig_path.exists():
-                try:
-                    tsconfig = json.loads(tsconfig_path.read_text())
-                    compiler_options = tsconfig.get("compilerOptions", {})
-                    paths_config = compiler_options.get("paths", {})
-                    base_url = compiler_options.get("baseUrl", ".")
-                    for alias, target_patterns in paths_config.items():
-                        for target in target_patterns:
-                            alias_key = alias.replace("/*", "")
-                            target_path = target.replace("/*", "")
-                            resolved = str(
-                                PathLib(project_root) / base_url / target_path
-                            )
+        # Initialize tier-specific outputs
+        alias_resolutions: list[dict] = []
+        dynamic_imports: list[dict] = []
+        traversal_vulnerabilities: list[dict] = []
+        boundary_violations: list[dict] = []
+        security_score: float | None = None
+
+        # Pro: Path alias resolution via tsconfig.json
+        if "path_alias_resolution" in caps_set and project_root:
+            if "tsconfig_paths_support" in caps_set:
+                tsconfig_path = PathLib(project_root) / "tsconfig.json"
+                if tsconfig_path.exists():
+                    try:
+                        tsconfig = json.loads(tsconfig_path.read_text())
+                        compiler_options = tsconfig.get("compilerOptions", {})
+                        paths_config = compiler_options.get("paths", {})
+                        base_url = compiler_options.get("baseUrl", ".")
+                        for alias, target_patterns in paths_config.items():
+                            for target in target_patterns:
+                                alias_key = alias.replace("/*", "")
+                                target_path = target.replace("/*", "")
+                                resolved = str(
+                                    PathLib(project_root) / base_url / target_path
+                                )
+                                alias_resolutions.append(
+                                    {
+                                        "alias": alias_key,
+                                        "original_path": target,
+                                        "resolved_path": resolved,
+                                        "source": "tsconfig.json",
+                                    }
+                                )
+                    except Exception as e:  # noqa: BLE001
+                        suggestions.append(f"Could not parse tsconfig.json: {e}")
+
+            # Pro: webpack alias support (simple detection)
+            if "webpack_alias_support" in caps_set:
+                webpack_path = PathLib(project_root) / "webpack.config.js"
+                if webpack_path.exists():
+                    try:
+                        content = webpack_path.read_text()
+                        alias_pattern = r"[\"'](@[^\"']+)[\"']\s*:\s*"
+                        matches = re.findall(alias_pattern, content)
+                        for alias in matches:
                             alias_resolutions.append(
                                 {
-                                    "alias": alias_key,
-                                    "original_path": target,
-                                    "resolved_path": resolved,
-                                    "source": "tsconfig.json",
+                                    "alias": alias,
+                                    "original_path": f"src/{alias.replace('@', '')}",
+                                    "resolved_path": str(
+                                        PathLib(project_root)
+                                        / "src"
+                                        / alias.replace("@", "")
+                                    ),
+                                    "source": "webpack.config.js",
                                 }
                             )
-                except Exception as e:  # noqa: BLE001
-                    suggestions.append(f"Could not parse tsconfig.json: {e}")
+                    except Exception as e:  # noqa: BLE001
+                        suggestions.append(f"Could not parse webpack.config.js: {e}")
 
-        # Pro: webpack alias support (simple detection)
-        if "webpack_alias_support" in caps_set:
-            webpack_path = PathLib(project_root) / "webpack.config.js"
-            if webpack_path.exists():
+        # Pro: Dynamic import detection (simplified)
+        if "dynamic_import_resolution" in caps_set:
+            for apath in accessible:
+                if apath.endswith((".js", ".ts", ".jsx", ".tsx")):
+                    try:
+                        content = PathLib(apath).read_text()
+                        if "import(" in content:
+                            dynamic_imports.append(
+                                {
+                                    "source_file": apath,
+                                    "import_pattern": "dynamic_import_detected",
+                                    "resolved_paths": [],
+                                }
+                            )
+                    except Exception:  # noqa: BLE001
+                        pass
+
+        # Enterprise: Path traversal simulation
+        if "path_traversal_simulation" in caps_set:
+            for p in paths:
+                # Traversal simulation should only flag explicit parent directory
+                # traversal sequences (".."). Absolute paths outside the workspace
+                # are handled by boundary testing, not traversal.
+                if ".." in p:
+                    severity = "high"
+                    if p.count("..") > 2:
+                        severity = "critical"
+                    traversal_vulnerabilities.append(
+                        {
+                            "path": p,
+                            "escape_attempt": f"Contains {p.count('..')} parent directory references",
+                            "severity": severity,
+                            "recommendation": "Remove traversal sequences or validate against whitelist",
+                        }
+                    )
+
+        # Enterprise: Security boundary testing
+        if "security_boundary_testing" in caps_set:
+            for p in paths:
                 try:
-                    content = webpack_path.read_text()
-                    alias_pattern = r"[\"'](@[^\"']+)[\"']\s*:\s*"
-                    matches = re.findall(alias_pattern, content)
-                    for alias in matches:
-                        alias_resolutions.append(
+                    abs_path = PathLib(p).resolve()
+                    is_within = False
+                    for root in resolver.workspace_roots:
+                        try:
+                            abs_path.relative_to(PathLib(root).resolve())
+                            is_within = True
+                            break
+                        except ValueError:
+                            continue
+                    if not is_within and not p.startswith(("/usr/", "/lib/", "/etc/")):
+                        boundary_violations.append(
                             {
-                                "alias": alias,
-                                "original_path": f"src/{alias.replace('@', '')}",
-                                "resolved_path": str(
-                                    PathLib(project_root)
-                                    / "src"
-                                    / alias.replace("@", "")
+                                "path": str(abs_path),
+                                "boundary": (
+                                    resolver.workspace_roots[0]
+                                    if resolver.workspace_roots
+                                    else "unknown"
                                 ),
-                                "source": "webpack.config.js",
-                            }
-                        )
-                except Exception as e:  # noqa: BLE001
-                    suggestions.append(f"Could not parse webpack.config.js: {e}")
-
-    # Pro: Dynamic import detection (simplified)
-    if "dynamic_import_resolution" in caps_set:
-        for apath in accessible:
-            if apath.endswith((".js", ".ts", ".jsx", ".tsx")):
-                try:
-                    content = PathLib(apath).read_text()
-                    if "import(" in content:
-                        dynamic_imports.append(
-                            {
-                                "source_file": apath,
-                                "import_pattern": "dynamic_import_detected",
-                                "resolved_paths": [],
+                                "violation_type": "workspace_escape",
+                                "risk": "high",
                             }
                         )
                 except Exception:  # noqa: BLE001
                     pass
 
-    # Enterprise: Path traversal simulation
-    if "path_traversal_simulation" in caps_set:
-        for p in paths:
-            if ".." in p or (
-                p.startswith("/")
-                and not any(p.startswith(root) for root in resolver.workspace_roots)
-            ):
-                severity = "high"
-                if p.count("..") > 2:
-                    severity = "critical"
-                traversal_vulnerabilities.append(
-                    {
-                        "path": p,
-                        "escape_attempt": f"Contains {p.count('..')} parent directory references",
-                        "severity": severity,
-                        "recommendation": "Remove traversal sequences or validate against whitelist",
-                    }
-                )
+        # Enterprise: Security score calculation
+        if "security_boundary_testing" in caps_set:
+            score = 10.0
+            critical_count = sum(
+                1
+                for v in traversal_vulnerabilities
+                if v.get("severity") == "critical"
+            )
+            high_count = sum(
+                1 for v in traversal_vulnerabilities if v.get("severity") == "high"
+            )
+            score -= critical_count * 3.0 + high_count * 1.5
+            score -= len(boundary_violations) * 2.0
+            score -= len(inaccessible) * 0.5
+            security_score = max(0.0, min(10.0, score))
 
-    # Enterprise: Security boundary testing
-    if "security_boundary_testing" in caps_set:
-        for p in paths:
-            try:
-                abs_path = PathLib(p).resolve()
-                is_within = False
-                for root in resolver.workspace_roots:
-                    try:
-                        abs_path.relative_to(PathLib(root).resolve())
-                        is_within = True
-                        break
-                    except ValueError:
-                        continue
-                if not is_within and not p.startswith(("/usr/", "/lib/", "/etc/")):
-                    boundary_violations.append(
-                        {
-                            "path": str(abs_path),
-                            "boundary": (
-                                resolver.workspace_roots[0]
-                                if resolver.workspace_roots
-                                else "unknown"
-                            ),
-                            "violation_type": "workspace_escape",
-                            "risk": "high",
-                        }
-                    )
-            except Exception:  # noqa: BLE001
-                pass
-
-    # Enterprise: Security score calculation
-    if "security_boundary_testing" in caps_set:
-        score = 10.0
-        critical_count = sum(
-            1 for v in traversal_vulnerabilities if v.get("severity") == "critical"
+        # Build result
+        result = PathValidationResult(
+            success=len(inaccessible) == 0,
+            accessible=accessible,
+            inaccessible=inaccessible,
+            suggestions=suggestions,
+            workspace_roots=workspace_roots_sorted,
+            is_docker=resolver.is_docker,
+            alias_resolutions=alias_resolutions,
+            dynamic_imports=dynamic_imports,
+            traversal_vulnerabilities=traversal_vulnerabilities,
+            boundary_violations=boundary_violations,
+            security_score=security_score,
+            truncated=True if truncated else None,
+            paths_received=paths_received if truncated else None,
+            paths_checked=len(paths) if truncated else None,
+            max_paths_applied=max_paths_applied if truncated else None,
         )
-        high_count = sum(
-            1 for v in traversal_vulnerabilities if v.get("severity") == "high"
+
+        # [20251231_FEATURE] Apply response_config.json filtering
+        # Note: Response filtering is applied to the dict representation, then we
+        # reconstruct the model. Fields excluded by config will use defaults.
+        response_config = get_cached_response_config()
+        try:
+            filtered_dict = filter_response(
+                result.model_dump(), "validate_paths", response_config
+            )
+
+            return PathValidationResult(**filtered_dict)
+        except Exception as e:  # noqa: BLE001
+            # [20260110_BUGFIX] Fail open on filtering errors; prefer returning data over crashing.
+            _ = e
+            return result
+
+    except Exception as e:  # noqa: BLE001
+        # [20260110_BUGFIX] Return machine-readable failure instead of raising.
+        return PathValidationResult(
+            success=False,
+            error=str(e),
+            error_code="VALIDATE_PATHS_INTERNAL_ERROR",
+            accessible=[],
+            inaccessible=[],
+            suggestions=[
+                "Internal error while validating paths.",
+                "Retry, and if it persists, report the error_code and error message.",
+            ],
+            workspace_roots=[],
+            is_docker=False,
+            truncated=True if truncated else None,
+            paths_received=paths_received if truncated else None,
+            paths_checked=len(paths) if truncated else None,
+            max_paths_applied=max_paths_applied if truncated else None,
         )
-        score -= critical_count * 3.0 + high_count * 1.5
-        score -= len(boundary_violations) * 2.0
-        score -= len(inaccessible) * 0.5
-        security_score = max(0.0, min(10.0, score))
-
-    # Build result
-    result = PathValidationResult(
-        success=len(inaccessible) == 0,
-        accessible=accessible,
-        inaccessible=inaccessible,
-        suggestions=suggestions,
-        workspace_roots=resolver.workspace_roots,
-        is_docker=resolver.is_docker,
-        alias_resolutions=alias_resolutions,
-        dynamic_imports=dynamic_imports,
-        traversal_vulnerabilities=traversal_vulnerabilities,
-        boundary_violations=boundary_violations,
-        security_score=security_score,
-    )
-
-    # [20251231_FEATURE] Apply response_config.json filtering
-    # Note: Response filtering is applied to the dict representation, then we
-    # reconstruct the model. Fields excluded by config will use defaults.
-    response_config = get_cached_response_config()
-    filtered_dict = filter_response(
-        result.model_dump(), "validate_paths", response_config
-    )
-
-    # Reconstruct with filtered values (preserves type safety)
-    return PathValidationResult(**filtered_dict)
 
 
 @mcp.tool()
@@ -19854,7 +20238,7 @@ async def validate_paths(
     """
     Validate that paths are accessible before running file-based operations.
 
-    [v1.5.3] Use this tool to check path accessibility before attempting
+    [v1.0] Use this tool to check path accessibility before attempting
     file-based operations. Essential for Docker deployments where volume
     mounts must be configured correctly.
 
@@ -19940,6 +20324,12 @@ class PolicyVerificationResult(BaseModel):
     error: str | None = Field(
         default=None, description="Error message if verification failed"
     )
+    error_code: str | None = Field(
+        default=None,
+        description=(
+            "Stable, machine-readable error code for failures (non-breaking additive field)"
+        ),
+    )
     manifest_source: str | None = Field(
         default=None, description="Source of the policy manifest"
     )
@@ -20006,6 +20396,7 @@ def _verify_policy_integrity_sync(
         signature_validated=False,
         tamper_detection_enabled=tamper_detection_enabled,
         audit_log_entry=None,
+        error_code=None,
     )
 
     try:
@@ -20019,6 +20410,7 @@ def _verify_policy_integrity_sync(
             policy_path = Path(dir_path)
             if not policy_path.exists():
                 result.error = f"Policy directory not found: {dir_path}"
+                result.error_code = "POLICY_DIR_NOT_FOUND"
                 return result
 
             # Check for policy files
@@ -20032,8 +20424,12 @@ def _verify_policy_integrity_sync(
                 if pf.name != "policy.manifest.json"
             ]
 
+            # [20260110_BUGFIX] Deterministic ordering to prevent flaky outputs/tests
+            policy_files = sorted(policy_files, key=lambda p: p.name)
+
             if not policy_files:
                 result.error = f"No policy files found in {dir_path}"
+                result.error_code = "NO_POLICY_FILES"
                 return result
 
             # [20260103_FEATURE] Check tier limits for max_policy_files
@@ -20049,6 +20445,7 @@ def _verify_policy_integrity_sync(
                     f"Upgrade to a higher tier for more policy files."
                 )
                 result.success = False
+                result.error_code = "POLICY_FILE_LIMIT_EXCEEDED"
                 return result
 
             # Validate format of each file
@@ -20085,6 +20482,7 @@ def _verify_policy_integrity_sync(
                 result.success = len(files_failed) == 0
                 if files_failed:
                     result.error = f"Invalid policy files: {', '.join(files_failed)}"
+                    result.error_code = "POLICY_PARSE_ERROR"
                 return result
 
         # Pro/Enterprise tier: Full cryptographic verification
@@ -20112,6 +20510,7 @@ def _verify_policy_integrity_sync(
             except SecurityError as e:
                 result.success = False
                 result.error = str(e)
+                result.error_code = "SECURITY_ERROR"
                 result.signature_validated = False
 
         # Enterprise tier: Audit logging
@@ -20132,10 +20531,12 @@ def _verify_policy_integrity_sync(
 
     except ImportError as e:
         result.error = f"Policy engine not available: {str(e)}."
+        result.error_code = "POLICY_ENGINE_UNAVAILABLE"
         return result
     except Exception as e:
         # Handle SecurityError and other exceptions
         result.error = f"Verification failed: {str(e)}."
+        result.error_code = "INTERNAL_ERROR"
         return result
 
 

@@ -378,6 +378,9 @@ async def test_unified_sink_detect_max_sinks_differs_by_tier(
         assert data.get("sink_count") == 50
         assert isinstance(data.get("sinks"), list)
         assert len(data.get("sinks")) == 50
+        assert data.get("truncated") is True
+        assert data.get("sinks_detected") == requested_sinks
+        assert data.get("max_sinks_applied") == 50
 
     # Pro: no max_sinks limit; should return all detected sinks.
     license_path = write_hs256_license_jwt(
@@ -411,6 +414,154 @@ async def test_unified_sink_detect_max_sinks_differs_by_tier(
         assert data.get("sink_count") == requested_sinks
         assert isinstance(data.get("sinks"), list)
         assert len(data.get("sinks")) == requested_sinks
+        assert data.get("truncated") in (None, False)
+
+
+async def test_unified_sink_detect_failure_includes_error_code(tmp_path: Path):
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": "",
+                "language": "python",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is False
+        assert data.get("error_code") == "UNIFIED_SINK_DETECT_MISSING_CODE"
+        assert isinstance(data.get("error"), str)
+
+
+async def test_unified_sink_detect_sinks_include_stable_sink_id(tmp_path: Path):
+    """Sinks include a stable sink_id for correlation across runs.
+
+    [20260110_TEST] Verify sink_id exists and is stable for identical input.
+    """
+
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = "eval(user_input)\n"
+
+    async with _stdio_session(project_root=project_root) as session:
+        payload_1 = await session.call_tool(
+            "unified_sink_detect",
+            arguments={"code": code, "language": "python", "min_confidence": 0.0},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        data_1 = _assert_envelope(_tool_json(payload_1), tool_name="unified_sink_detect")
+        assert data_1 is not None
+        assert data_1.get("success") is True
+
+        payload_2 = await session.call_tool(
+            "unified_sink_detect",
+            arguments={"code": code, "language": "python", "min_confidence": 0.0},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        data_2 = _assert_envelope(_tool_json(payload_2), tool_name="unified_sink_detect")
+        assert data_2 is not None
+        assert data_2.get("success") is True
+
+        sinks_1 = data_1.get("sinks")
+        sinks_2 = data_2.get("sinks")
+        assert isinstance(sinks_1, list) and len(sinks_1) >= 1
+        assert isinstance(sinks_2, list) and len(sinks_2) >= 1
+
+        sink_id_1 = sinks_1[0].get("sink_id")
+        sink_id_2 = sinks_2[0].get("sink_id")
+        assert isinstance(sink_id_1, str) and len(sink_id_1) == 12
+        assert sink_id_1 == sink_id_2
+
+        assert sinks_1[0].get("code_snippet_truncated") is False
+        assert sinks_1[0].get("code_snippet_original_len") is None
+
+
+async def test_unified_sink_detect_snippet_truncation_flags(tmp_path: Path):
+    """Long snippets are truncated with explicit observability flags.
+
+    [20260110_TEST] Verify code_snippet_truncated/original_len for large lines.
+    """
+
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    long_payload = "A" * 500
+    code = f"eval({long_payload})\n"
+
+    async with _stdio_session(project_root=project_root) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={"code": code, "language": "python", "min_confidence": 0.0},
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        data = _assert_envelope(_tool_json(payload), tool_name="unified_sink_detect")
+        assert data is not None
+        assert data.get("success") is True
+
+        sinks = data.get("sinks")
+        assert isinstance(sinks, list) and len(sinks) >= 1
+        sink0 = sinks[0]
+        assert sink0.get("code_snippet_truncated") is True
+        assert isinstance(sink0.get("code_snippet_original_len"), int)
+        assert sink0.get("code_snippet_original_len") > 200
+
+        snippet = sink0.get("code_snippet")
+        assert isinstance(snippet, str)
+        assert len(snippet) == 200
+        assert snippet.endswith("…")
+
+
+async def test_unified_sink_detect_enterprise_unsupported_language_error_code(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise: detector-level unsupported languages map to UNSUPPORTED_LANGUAGE.
+
+    [20260110_TEST] Enterprise does not pre-filter languages; detector rejection must be mapped.
+    """
+
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="lic-enterprise-unsupported-lang",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "unified_sink_detect",
+            arguments={
+                "code": "eval(user_input)\n",
+                "language": "go",
+                "min_confidence": 0.0,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="unified_sink_detect")
+        assert env_json["tier"] == "enterprise"
+        assert data is not None
+        assert data.get("success") is False
+        assert data.get("error_code") == "UNIFIED_SINK_DETECT_UNSUPPORTED_LANGUAGE"
 
 
 def _write_large_project(root: Path, num_functions: int) -> None:
