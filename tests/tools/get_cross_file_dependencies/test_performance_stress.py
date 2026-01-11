@@ -256,9 +256,11 @@ class TestTimeoutProtection:
             timeout_seconds=0.001  # 1ms - will timeout
         )
         
-        # Should either succeed quickly or indicate timeout
-        # (timeout_seconds may not be supported on all backends)
-        assert result.success is True or hasattr(result, 'timeout')
+        # Should either succeed quickly or indicate timeout in error message
+        # [20260111_FIX] Check error field for TIMEOUT instead of hasattr
+        is_timeout = result.error and "TIMEOUT" in result.error if result.error else False
+        assert result.success is True or is_timeout, \
+            f"Expected success or timeout, got error: {result.error}"
 
 
 class TestMemoryEfficiency:

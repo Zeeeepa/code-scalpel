@@ -7,6 +7,7 @@ Provides:
 - Helper validation functions
 
 [20260103_TEST] v3.3.0 - Symbol-level API fixtures matching actual implementation
+[20260111_FIX] v3.3.0 - Fixed tier mocking to properly patch _get_current_tier()
 """
 
 import pytest
@@ -22,7 +23,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 @pytest.fixture
 def community_server():
-    """MCP server with Community tier license (mocked)."""
+    """MCP server with Community tier license (properly mocked).
+    
+    [20260111_FIX] Uses patch to mock _get_current_tier() so tier limits
+    are actually enforced (max_depth=1, max_files=50).
+    """
     from code_scalpel.mcp.server import get_cross_file_dependencies
     
     class MockCommunityServer:
@@ -30,19 +35,24 @@ def community_server():
             self._tier = 'community'
         
         async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
-            """Symbol-level API with Community tier limits."""
-            return await get_cross_file_dependencies(
-                target_file=target_file,
-                target_symbol=target_symbol,
-                **kwargs
-            )
+            """Symbol-level API with Community tier limits enforced."""
+            with patch('code_scalpel.mcp.server._get_current_tier', return_value='community'):
+                return await get_cross_file_dependencies(
+                    target_file=target_file,
+                    target_symbol=target_symbol,
+                    **kwargs
+                )
     
     return MockCommunityServer()
 
 
 @pytest.fixture
 def pro_server():
-    """MCP server with Pro tier license (mocked)."""
+    """MCP server with Pro tier license (properly mocked).
+    
+    [20260111_FIX] Uses patch to mock _get_current_tier() so tier limits
+    are actually enforced (max_depth=5, max_files=500).
+    """
     from code_scalpel.mcp.server import get_cross_file_dependencies
     
     class MockProServer:
@@ -50,19 +60,24 @@ def pro_server():
             self._tier = 'pro'
         
         async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
-            """Symbol-level API with Pro tier features."""
-            return await get_cross_file_dependencies(
-                target_file=target_file,
-                target_symbol=target_symbol,
-                **kwargs
-            )
+            """Symbol-level API with Pro tier features and limits enforced."""
+            with patch('code_scalpel.mcp.server._get_current_tier', return_value='pro'):
+                return await get_cross_file_dependencies(
+                    target_file=target_file,
+                    target_symbol=target_symbol,
+                    **kwargs
+                )
     
     return MockProServer()
 
 
 @pytest.fixture
 def enterprise_server():
-    """MCP server with Enterprise tier license (mocked)."""
+    """MCP server with Enterprise tier license (properly mocked).
+    
+    [20260111_FIX] Uses patch to mock _get_current_tier() so unlimited
+    depth/files is available.
+    """
     from code_scalpel.mcp.server import get_cross_file_dependencies
     
     class MockEnterpriseServer:
@@ -70,12 +85,13 @@ def enterprise_server():
             self._tier = 'enterprise'
         
         async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
-            """Symbol-level API with Enterprise tier features."""
-            return await get_cross_file_dependencies(
-                target_file=target_file,
-                target_symbol=target_symbol,
-                **kwargs
-            )
+            """Symbol-level API with Enterprise tier features (unlimited)."""
+            with patch('code_scalpel.mcp.server._get_current_tier', return_value='enterprise'):
+                return await get_cross_file_dependencies(
+                    target_file=target_file,
+                    target_symbol=target_symbol,
+                    **kwargs
+                )
     
     return MockEnterpriseServer()
 

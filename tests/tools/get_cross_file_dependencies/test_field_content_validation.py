@@ -293,8 +293,12 @@ class TestDependencyChainContent:
                     assert isinstance(file_path, str), \
                         f"Chain element should be string, got {type(file_path)}"
                 
-                # Chain length should match depth constraints
-                assert len(chain) <= result.max_depth_reached
+                # Chain length is nodes, max_depth_reached is edges.
+                # A chain of depth 3 has 4 nodes: a→b→c→d (3 edges, 4 files).
+                # So len(chain) should be <= max_depth_reached + 1
+                # [20260111_FIX] Fixed off-by-one: chain nodes = edges + 1
+                assert len(chain) <= result.max_depth_reached + 1, \
+                    f"Chain length {len(chain)} exceeds depth limit {result.max_depth_reached}+1"
 
 
 class TestCircularImportContent:
