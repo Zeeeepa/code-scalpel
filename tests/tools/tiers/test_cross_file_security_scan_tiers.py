@@ -56,6 +56,121 @@ def run_query(user_supplied: str) -> str:
     return pkg
 
 
+# ============================================================================
+# [20260111_TEST] v1.0 validation - Output metadata field tests
+# ============================================================================
+
+
+class TestOutputMetadataFields:
+    """Test that output metadata fields are present and correctly populated."""
+
+    async def test_metadata_fields_exist_on_model(self):
+        """CrossFileSecurityResult should define all metadata fields."""
+        from code_scalpel.mcp.server import CrossFileSecurityResult
+
+        fields = CrossFileSecurityResult.model_fields
+
+        # Check all metadata fields exist
+        assert "tier_applied" in fields
+        assert "max_depth_applied" in fields
+        assert "max_modules_applied" in fields
+        assert "framework_aware_enabled" in fields
+        assert "enterprise_features_enabled" in fields
+
+    async def test_metadata_fields_have_defaults(self):
+        """Metadata fields should have sensible defaults."""
+        from code_scalpel.mcp.server import CrossFileSecurityResult
+
+        result = CrossFileSecurityResult(success=True)
+
+        # Verify defaults are applied
+        assert result.tier_applied == "community"  # Default tier
+        assert result.max_depth_applied is None  # No limit by default
+        assert result.max_modules_applied is None  # No limit by default
+        assert result.framework_aware_enabled is False  # Disabled by default
+        assert result.enterprise_features_enabled is False  # Disabled by default
+
+    async def test_community_tier_metadata(self, tmp_path: Path, monkeypatch):
+        """Community tier should report correct metadata."""
+        from code_scalpel.mcp import server
+
+        monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+
+        root = tmp_path / "repo"
+        root.mkdir()
+        _make_python_deep_chain_project(root)
+
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        r = await cross_file_security_scan(
+            project_root=str(root),
+            max_depth=50,
+            max_modules=999,
+        )
+
+        assert r.success is True
+        assert r.tier_applied == "community"
+        assert r.max_depth_applied == 3
+        assert r.max_modules_applied == 10
+        assert r.framework_aware_enabled is False
+        assert r.enterprise_features_enabled is False
+
+    async def test_pro_tier_metadata(self, tmp_path: Path, monkeypatch):
+        """Pro tier should report correct metadata."""
+        from code_scalpel.mcp import server
+
+        monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+
+        root = tmp_path / "repo"
+        root.mkdir()
+        _make_python_deep_chain_project(root)
+
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        r = await cross_file_security_scan(
+            project_root=str(root),
+            max_depth=50,
+            max_modules=999,
+        )
+
+        assert r.success is True
+        assert r.tier_applied == "pro"
+        assert r.max_depth_applied == 10
+        assert r.max_modules_applied == 100
+        assert r.framework_aware_enabled is True
+        assert r.enterprise_features_enabled is False
+
+    async def test_enterprise_tier_metadata(self, tmp_path: Path, monkeypatch):
+        """Enterprise tier should report correct metadata."""
+        from code_scalpel.mcp import server
+
+        monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
+
+        root = tmp_path / "repo"
+        root.mkdir()
+        _make_python_deep_chain_project(root)
+
+        from code_scalpel.mcp.server import cross_file_security_scan
+
+        r = await cross_file_security_scan(
+            project_root=str(root),
+            max_depth=50,
+            max_modules=999,
+        )
+
+        assert r.success is True
+        assert r.tier_applied == "enterprise"
+        assert r.max_depth_applied is None  # Unlimited
+        assert r.max_modules_applied is None  # Unlimited
+        assert r.framework_aware_enabled is True
+        assert r.enterprise_features_enabled is True
+
+
+# ============================================================================
+# Original tier enforcement tests
+# ============================================================================
+
+
 async def test_cross_file_security_scan_community_enforces_depth_cap(
     tmp_path: Path, monkeypatch
 ):

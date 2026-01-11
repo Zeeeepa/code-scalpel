@@ -19635,6 +19635,28 @@ class CrossFileSecurityResult(BaseModel):
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
 
+    # [20260111_FEATURE] v1.0 - Output metadata fields for transparency
+    tier_applied: str = Field(
+        default="community",
+        description="The tier used for analysis (community, pro, enterprise)",
+    )
+    max_depth_applied: int | None = Field(
+        default=None,
+        description="The max depth limit applied (None = unlimited for Enterprise)",
+    )
+    max_modules_applied: int | None = Field(
+        default=None,
+        description="The max modules limit applied (None = unlimited for Enterprise)",
+    )
+    framework_aware_enabled: bool = Field(
+        default=False,
+        description="Whether framework-aware taint tracking was enabled (Pro+)",
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False,
+        description="Whether enterprise features were enabled (global flows, microservice boundaries)",
+    )
+
     # Summary
     files_analyzed: int = Field(default=0, description="Number of files analyzed")
     has_vulnerabilities: bool = Field(
@@ -19991,8 +20013,33 @@ def _cross_file_security_scan_sync(
             if global_flows:
                 distributed_trace = _build_distributed_trace(global_flows)
 
+        # [20260111_FEATURE] v1.0 - Compute metadata flags for transparency
+        framework_aware_enabled = bool(
+            {
+                "framework_aware_taint",
+                "spring_bean_tracking",
+                "react_context_tracking",
+                "dependency_injection_resolution",
+            }
+            & caps_set
+        )
+        enterprise_features_enabled = bool(
+            {
+                "global_taint_flow",
+                "frontend_to_backend_tracing",
+                "api_to_database_tracing",
+                "microservice_boundary_crossing",
+            }
+            & caps_set
+        )
+
         return CrossFileSecurityResult(
             success=True,
+            tier_applied=tier,
+            max_depth_applied=max_depth_limit,
+            max_modules_applied=max_modules_limit,
+            framework_aware_enabled=framework_aware_enabled,
+            enterprise_features_enabled=enterprise_features_enabled,
             files_analyzed=result.modules_analyzed,  # Use modules_analyzed
             has_vulnerabilities=vuln_count > 0,
             vulnerability_count=vuln_count,
