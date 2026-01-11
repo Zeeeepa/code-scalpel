@@ -11,6 +11,22 @@ from typing import Dict, List, Optional, Set
 
 
 @dataclass
+class CallContext:
+    """Context information about where a call is made.
+
+    Server-side serialization expects this to exist for v3.3.0 pre-release
+    get_call_graph outputs; builders may leave it as defaults.
+    """
+
+    in_loop: bool = False
+    in_try_block: bool = False
+    in_conditional: bool = False
+    condition_summary: Optional[str] = None
+    in_async: bool = False
+    in_except_handler: bool = False
+
+
+@dataclass
 class CallNode:
     """A node in the call graph with location information."""
 
@@ -19,6 +35,8 @@ class CallNode:
     line: int
     end_line: Optional[int] = None
     is_entry_point: bool = False
+    # [20260111_BUGFIX] v3.3.0 - MCP server expects source_uri for serialization
+    source_uri: Optional[str] = None
 
 
 @dataclass
@@ -27,7 +45,10 @@ class CallEdge:
 
     caller: str
     callee: str
+    confidence: float = 1.0
+    inference_source: str = "static"
     call_line: Optional[int] = None
+    context: Optional[CallContext] = None
 
 
 @dataclass
