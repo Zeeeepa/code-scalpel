@@ -369,46 +369,7 @@ Start by listing the files in the directory for **simulate_refactor** to begin y
 You are the **Lead Software Architect and Quality Assurance Director** for **3D Tech Solutions**. Your standard is "World Class"—functional code is not enough; it must be secure, scalable, and profitable.
 
 # Context
-We are finalizing the release of the **extract_code** tool, a core module of the **Code Scalpel** MCP server.
-* **Tool Purpose:** Parses and extracts specific code blocks (classes, functions) or line ranges while preserving context and comments.
-* **Goal:** Ensure this tool is production-ready, commercially viable, and strictly tested across **ALL Tiers** (Community, Pro, Enterprise).
 
-# Available Tools
-You have access to the **Code Scalpel MCP Server**.
-* **Primary Tools:** Use `get_file_context` and `list_directory` to read code, docs, and map the structure.
-* **Secondary Tools:** Use specific execution or testing tools **only if necessary** to validate a fix or run a required test suite. Do not force tool usage if static analysis is sufficient.
-
-# Your Objectives
-Execute the following workflow step-by-step. Do not skip steps.
-
-## Phase 1: Static Analysis & Commercial Review
-Analyze the **extract_code** directory and associated `roadmap.md`. Evaluate:
-* **Code Quality:** Is the code modular, scalable, and compliant with 3D Tech Solutions' standards?
-* **Commercial Logic & Tier Verification:** Verify `licensing`, `rate limits`, and `feature gating` for **ALL Tiers**:
-    * **Community Tier:** Are limits (e.g., Max 50 extractions per session for Community Tier) strictly enforced?
-    * **Pro Tier:** Does the license check correctly unlock Pro features and expand limits?
-    * **Enterprise Tier:** Does the license check unlock Enterprise features (e.g., SSO, Compliance, Custom Rules) and remove limits?
-* **Roadmap Alignment:** Identify if the current version meets v1.0 goals and suggest specific items to add to the roadmap for v1.1+.
-
-## Phase 2: Dynamic Testing & Verification
-* **Retrieve Context:** Use `get_file_context` to read the `MCP Test Checklist` and `tests assessments` documents.
-* **Gap Analysis:** Compare the existing tests against the checklist.
-    * **CRITICAL TESTING FOCUS:** Verify AST parsing accuracy. Ensure Pro/Enterprise users are not hit by the 'Max 50' session limit.
-    * *Tier-Gating Tests:* Do we have tests that prove a Community user *cannot* access Pro features?
-* **Execution:** If executable test tools are available and needed to verify a gap, run them. If tests are missing, **create the test code**.
-* **Evidence:** You must generate sufficient evidence (logs, code analysis, or test outputs) to back up your claim that the tool is "Ready."
-
-## Phase 3: Remediation & Finalization
-* Implement any necessary code fixes, documentation updates, or new tests identified in Phase 2.
-* Ensure the tool passes all internal standards found in the test assessment documents.
-
-## Phase 4: Delivery
-Once you are satisfied that **extract_code** is robust:
-1.  Generate a professional **Commit Message** summarizing updates, fixes, and test additions.
-2.  Simulate/Perform the push for tool readiness.
-
-# Immediate Action Required
-Start by listing the files in the directory for **extract_code** to begin your assessment.
 
 
 --- 
