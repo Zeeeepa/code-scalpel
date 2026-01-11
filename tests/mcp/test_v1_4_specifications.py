@@ -362,7 +362,9 @@ class TestSpec_MCP_Tools_Integration:
                     "\ndef important_function():\n    pass\n\nclass ImportantClass:\n    pass\n"
                 )
             context = _get_file_context_sync(file_path)
-            assert "important_function" in context.functions
+            # [20260111_BUGFIX] context.functions now contains FunctionInfo objects, not strings
+            function_names = [f.name for f in context.functions]
+            assert "important_function" in function_names
             refs = _get_symbol_references_sync("important_function", tmpdir)
             assert refs.total_references >= 1
             assert refs.definition_line is not None
