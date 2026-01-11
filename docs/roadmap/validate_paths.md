@@ -4,7 +4,7 @@
 **Tool Version:** v1.0  
 **Code Scalpel Version:** v3.3.1  
 **Current Status:** Stable  
-**Primary Module:** `src/code_scalpel/mcp/server.py` (lines 17438-17680)  
+**Primary Module:** `src/code_scalpel/mcp/server.py` (lines ~20368-20770)  
 **Tier Availability:** All tiers (Community, Pro, Enterprise)
 
 ---
@@ -84,40 +84,37 @@ The `validate_paths` tool checks if file paths are accessible before running ope
 
 ```python
 class PathValidationResult(BaseModel):
-    # Core fields (All Tiers)
-    success: bool                              # Whether validation succeeded
-    paths_checked: int                         # Number of paths validated
-    all_valid: bool                            # Quick check if all accessible
-    results: list[PathResult]                  # Per-path validation results
-    docker_detected: bool                      # Running in container
-    workspace_root: str | None                 # Detected workspace root
-    suggestions: list[str]                     # Mount/fix suggestions
-    
-    # Pro Tier
-    permission_details: dict[str, PermInfo]    # Read/write/execute per path
-    symlink_resolution: dict[str, str]         # Symlink target paths
-    mount_recommendations: list[MountRec]      # Docker volume suggestions
-    
-    # Enterprise Tier
-    policy_violations: list[PolicyViolation]   # Path policy violations
-    audit_log: list[AuditEntry]                # Path access attempts logged
-    compliance_status: str                     # Policy compliance status
-    
-    error: str | None                          # Error message if failed
+  # Core fields (All Tiers)
+  success: bool                              # Whether all paths were accessible
+  error: str | None                          # Error message when failed
+  error_code: str | None                     # Machine-readable error code (when failed)
+
+  # Tier limit signaling (Community only)
+  truncated: bool | None                     # True when input exceeded max_paths
+  paths_received: int | None                 # Original number of input paths
+  paths_checked: int | None                  # Number of paths actually validated
+  max_paths_applied: int | None              # Applied max_paths value
+
+  # Core results (All Tiers)
+  accessible: list[str]                      # Resolved/accessible paths
+  inaccessible: list[str]                    # Paths that could not be resolved
+  suggestions: list[str]                     # Actionable guidance (mounts, batching, roots)
+  workspace_roots: list[str]                 # Detected workspace root directories
+  is_docker: bool                            # Whether running in a Docker container
+
+  # Pro Tier (v1.0: preview features now implemented)
+  alias_resolutions: list[dict]              # tsconfig/webpack alias mappings
+  dynamic_imports: list[dict]                # Detected dynamic import patterns
+
+  # Enterprise Tier (v1.0: preview features now implemented)
+  traversal_vulnerabilities: list[dict]      # Traversal sequence detection (..)
+  boundary_violations: list[dict]            # Workspace boundary escape warnings
+  security_score: float | None               # 0.0-10.0 score derived from findings
 ```
 
-### PathResult Model
-
-```python
-class PathResult(BaseModel):
-    path: str                                  # The validated path
-    exists: bool                               # Path exists
-    accessible: bool                           # Can be accessed
-    is_file: bool                              # Is a file (vs directory)
-    is_directory: bool                         # Is a directory
-    error_message: str | None                  # Why inaccessible
-    suggestion: str | None                     # How to fix
-```
+Notes:
+- Community-tier limit behavior is truncation, not hard failure: when `max_paths=100` is exceeded, the tool validates the first 100 and sets `truncated`, `paths_received`, `paths_checked`, and `max_paths_applied`, plus batching suggestions.
+- Output verbosity is controlled by `.code-scalpel/response_config.json` and may exclude empty/default fields.
 
 ---
 
@@ -128,29 +125,27 @@ class PathResult(BaseModel):
 result = await validate_paths(
     paths=["/app/src/main.py", "/app/data/config.json"]
 )
-# Returns: all_valid, results per path, docker_detected, suggestions
-# Max 100 paths
+# Returns: accessible/inaccessible lists, workspace_roots, is_docker, suggestions
+# Max 100 paths; when exceeded, truncation fields are set
 ```
 
 ### Pro Tier
 ```python
 result = await validate_paths(
-    paths=["/app/src", "/app/data"],
-    check_permissions=True,
-    resolve_symlinks=True
+  paths=["/app/src", "/app/data"],
+  project_root="/workspace/project"
 )
-# Additional: permission_details, symlink_resolution, mount_recommendations
+# Additional (tier-gated): alias_resolutions, dynamic_imports
 # Unlimited paths
 ```
 
 ### Enterprise Tier
 ```python
 result = await validate_paths(
-    paths=["/sensitive/data", "/app/logs"],
-    enforce_policy=True,
-    audit=True
+  paths=["../secrets", "/app/logs"],
+  project_root="/workspace/project"
 )
-# Additional: policy_violations, audit_log, compliance_status
+# Additional (tier-gated): traversal_vulnerabilities, boundary_violations, security_score
 ```
 
 ---
@@ -210,43 +205,15 @@ result = await validate_paths(
 {
   "jsonrpc": "2.0",
   "result": {
-    "success": true,
-    "paths_checked": 2,
-    "all_valid": false,
-    "results": [
-      {
-        "path": "/app/src/main.py",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      },
-      {
-        "path": "/app/data/config.json",
-        "exists": false,
-        "accessible": false,
-        "is_file": false,
-        "is_directory": false,
-        "error_message": "Path does not exist",
-        "suggestion": "Check if volume mount is configured for /app/data"
-      }
-    ],
-    "docker_detected": true,
-    "workspace_root": "/app",
+    "success": false,
+    "accessible": ["/app/src/main.py"],
+    "inaccessible": ["/app/data/config.json"],
     "suggestions": [
-      "Docker detected: Ensure volume mount for '/app/data' in docker-compose.yml:",
-      "  volumes:",
-      "    - ./data:/app/data"
+      "Running in Docker: Mount your project with -v /path/to/project:/workspace",
+      "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
     ],
-    "permission_details": null,
-    "symlink_resolution": null,
-    "mount_recommendations": null,
-    "policy_violations": null,
-    "audit_log": null,
-    "compliance_status": null,
-    "error": null
+    "workspace_roots": ["/app"],
+    "is_docker": true
   },
   "id": 1
 }
@@ -259,71 +226,26 @@ result = await validate_paths(
   "jsonrpc": "2.0",
   "result": {
     "success": true,
-    "paths_checked": 2,
-    "all_valid": true,
-    "results": [
-      {
-        "path": "/app/src/main.py",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      },
-      {
-        "path": "/app/data/config.json",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      }
-    ],
-    "docker_detected": true,
-    "workspace_root": "/app",
+    "accessible": ["/workspace/project/src/index.ts"],
+    "inaccessible": [],
     "suggestions": [],
-    "permission_details": {
-      "/app/src/main.py": {
-        "readable": true,
-        "writable": true,
-        "executable": false,
-        "owner": "app",
-        "group": "app",
-        "mode": "0644"
-      },
-      "/app/data/config.json": {
-        "readable": true,
-        "writable": false,
-        "executable": false,
-        "owner": "root",
-        "group": "root",
-        "mode": "0444"
-      }
-    },
-    "symlink_resolution": {
-      "/app/src/main.py": "/app/src/main.py",
-      "/app/data/config.json": "/mnt/config/app.json"
-    },
-    "mount_recommendations": [
+    "workspace_roots": ["/workspace/project"],
+    "is_docker": true,
+    "alias_resolutions": [
       {
-        "source_path": "/home/user/project/src",
-        "container_path": "/app/src",
-        "type": "bind",
-        "status": "mounted"
-      },
-      {
-        "source_path": "/home/user/project/data",
-        "container_path": "/app/data",
-        "type": "bind",
-        "status": "mounted"
+        "alias": "@app",
+        "original_path": "src/*",
+        "resolved_path": "/workspace/project/src",
+        "source": "tsconfig.json"
       }
     ],
-    "policy_violations": null,
-    "audit_log": null,
-    "compliance_status": null,
-    "error": null
+    "dynamic_imports": [
+      {
+        "source_file": "/workspace/project/src/index.ts",
+        "import_pattern": "dynamic_import_detected",
+        "resolved_paths": []
+      }
+    ]
   },
   "id": 1
 }
@@ -336,121 +258,28 @@ result = await validate_paths(
   "jsonrpc": "2.0",
   "result": {
     "success": true,
-    "paths_checked": 2,
-    "all_valid": true,
-    "results": [
-      {
-        "path": "/app/src/main.py",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      },
-      {
-        "path": "/app/data/config.json",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      }
-    ],
-    "docker_detected": true,
-    "workspace_root": "/app",
+    "accessible": ["/workspace/project/app.py"],
+    "inaccessible": [],
     "suggestions": [],
-    "permission_details": {
-      "/app/src/main.py": {
-        "readable": true,
-        "writable": true,
-        "executable": false
-      },
-      "/app/data/config.json": {
-        "readable": true,
-        "writable": false,
-        "executable": false
-      }
-    },
-    "symlink_resolution": {},
-    "mount_recommendations": [],
-    "policy_violations": [],
-    "audit_log": [
+    "workspace_roots": ["/workspace/project"],
+    "is_docker": true,
+    "traversal_vulnerabilities": [
       {
-        "timestamp": "2025-12-29T14:30:22Z",
-        "action": "path_validation",
-        "paths": ["/app/src/main.py", "/app/data/config.json"],
-        "result": "all_valid",
-        "user": "ai-agent-001",
-        "audit_id": "audit-path-20251229-143022-abc123"
+        "path": "../secrets",
+        "escape_attempt": "Contains 1 parent directory references",
+        "severity": "high",
+        "recommendation": "Remove traversal sequences or validate against whitelist"
       }
     ],
-    "compliance_status": "compliant",
-    "error": null
-  },
-  "id": 1
-}
-```
-
-### Enterprise Tier Response (Policy Violation)
-
-```json
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "success": true,
-    "paths_checked": 2,
-    "all_valid": false,
-    "results": [
+    "boundary_violations": [
       {
-        "path": "/app/src/main.py",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": null,
-        "suggestion": null
-      },
-      {
-        "path": "/etc/passwd",
-        "exists": true,
-        "accessible": true,
-        "is_file": true,
-        "is_directory": false,
-        "error_message": "Path blocked by policy",
-        "suggestion": "Access to /etc/passwd is restricted by security policy"
+        "path": "/secrets",
+        "boundary": "/workspace/project",
+        "violation_type": "workspace_escape",
+        "risk": "high"
       }
     ],
-    "docker_detected": true,
-    "workspace_root": "/app",
-    "suggestions": [
-      "Remove restricted path /etc/passwd from request"
-    ],
-    "permission_details": {},
-    "symlink_resolution": {},
-    "mount_recommendations": [],
-    "policy_violations": [
-      {
-        "path": "/etc/passwd",
-        "policy": "restricted-paths",
-        "rule": "no-system-files",
-        "severity": "critical",
-        "message": "Access to system files is not permitted"
-      }
-    ],
-    "audit_log": [
-      {
-        "timestamp": "2025-12-29T14:30:25Z",
-        "action": "path_validation",
-        "paths": ["/app/src/main.py", "/etc/passwd"],
-        "result": "policy_violation",
-        "violation_count": 1,
-        "audit_id": "audit-path-20251229-143025-def456"
-      }
-    ],
-    "compliance_status": "violation",
-    "error": null
+    "security_score": 7.5
   },
   "id": 1
 }
@@ -463,20 +292,20 @@ result = await validate_paths(
 ### v1.1 (Q1 2026): Enhanced Validation
 
 #### All Tiers
-- [ ] Permission checking (read/write/execute)
-- [ ] Symlink resolution
-- [ ] Network path support
-- [ ] Path normalization suggestions
+- [ ] Per-path detail results (exists/is_file/is_dir/reason) while keeping token-efficient defaults
+- [ ] Permission checking (read/write/execute) surfaced as structured output (Enterprise)
+- [ ] Symlink resolution + symlink loop detection
+- [ ] Network path support (UNC/NFS) with smarter suggestions
+- [ ] Better mount suggestions keyed to common layouts (/app, /workspace)
 
 #### Pro Tier
-- [ ] Automated mount detection
-- [ ] Volume mount recommendations
-- [ ] Path conflict detection
+- [ ] Deeper alias resolution (globs, multiple targets, monorepo workspaces)
+- [ ] Dynamic import path enrichment (optional)
 
 #### Enterprise Tier
-- [ ] Custom validation rules
-- [ ] Policy-based path restrictions
-- [ ] Audit logging for path access
+- [ ] Custom allow/deny policy rules integrated with governance config
+- [ ] Audit logging for path validation calls
+- [ ] Boundary enforcement modes (warn vs deny)
 
 ### v1.2 (Q2 2026): Integration Features
 

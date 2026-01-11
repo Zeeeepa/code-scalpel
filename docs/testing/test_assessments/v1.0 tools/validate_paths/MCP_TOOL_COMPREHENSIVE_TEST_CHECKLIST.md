@@ -67,7 +67,7 @@ def test_no_hallucinations():
 | **Boundary Conditions** | Empty input | ✅ | [tests/mcp/test_path_resolver.py](tests/mcp/test_path_resolver.py) | Empty/whitespace path lists handled |
 | | Minimal valid input (1 character, 1 line, etc.) | ✅ | [tests/tools/validate_paths/test_core.py](tests/tools/validate_paths/test_core.py) | Single-path validation passes |
 | | Maximum size input (at tier limit) | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Community max_paths=100 enforced |
-| | Input at tier boundary (e.g., 1MB + 1 byte for Community tier) | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | 101st path rejected with clear error |
+| | Input at tier boundary (exceeds Community max_paths) | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | 101st path triggers truncation + truncation fields |
 | **Special Constructs** | Decorators / annotations | N/A | | Path tool (no code parsing) |
 | | Async / await | N/A | | Path tool (no code parsing) |
 | | Nested structures (functions, classes, blocks) | N/A | | Path tool (no code parsing) |
@@ -184,7 +184,7 @@ def test_community_file_size_limit():
 | Test Category | Item | Status | Test File/Function | Notes/Findings |
 |--------------|------|--------|-------------------|----------------|
 | **Feature Availability** | All Community features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Baseline retained under Pro |
-| | All Pro-exclusive features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Permission details, symlink resolution, mount recommendations |
+| | All Pro-exclusive features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Alias resolution + dynamic import detection |
 | | New fields populated in response | ✅ | [tests/tools/validate_paths/mcp/test_mcp_interface.py](tests/tools/validate_paths/mcp/test_mcp_interface.py) | Pro response envelopes include extras |
 | **Feature Gating** | Pro fields ARE in response | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Pro capability keys present |
 | | Enterprise fields NOT in response (or empty) | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Enterprise-only fields suppressed |
@@ -226,7 +226,7 @@ def test_pro_increased_limits():
 |--------------|------|--------|-------------------|----------------|
 | **Feature Availability** | All Community features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Community set preserved |
 | | All Pro features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Pro feature set retained |
-| | All Enterprise-exclusive features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Policy violations, audit log, compliance status |
+| | All Enterprise-exclusive features work | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Traversal simulation + boundary testing + security score |
 | | Maximum features and limits available | ✅ | [tests/tools/validate_paths/mcp/test_mcp_interface.py](tests/tools/validate_paths/mcp/test_mcp_interface.py) | Enterprise envelope includes full fields |
 | **Feature Gating** | Enterprise fields ARE in response | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Enterprise capability keys present |
 | | Enterprise features return actual data | ✅ | [tests/tools/validate_paths/tiers/test_tier_enforcement.py](tests/tools/validate_paths/tiers/test_tier_enforcement.py) | Policy/audit/compliance data populated |

@@ -28,12 +28,12 @@
 
 ### Pro Tier (v1.0)
 - All Community features
-- **Additional**: Permission details, symlink resolution, mount recommendations
+- **Additional**: Alias resolution (tsconfig/webpack), dynamic import detection
 - **Limits**: Unlimited paths
 
 ### Enterprise Tier (v1.0)
 - All Pro features
-- **Additional**: Policy violations, audit log, compliance status
+- **Additional**: Traversal simulation, workspace boundary testing, security score
 - **Limits**: Unlimited paths
 
 ---
@@ -58,7 +58,7 @@
    - Each capability key checked at MCP boundary
 
 4. **Limit Enforcement**
-   - Community: Max 100 paths validated, excess paths rejected with error
+   - Community: Max 100 paths validated; excess paths truncated and signaled via truncation fields
    - Pro/Enterprise: Unlimited path validation
 
 ### Critical Test Cases Needed
