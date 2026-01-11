@@ -17381,6 +17381,28 @@ class ProjectMapResult(BaseModel):
     )
     mermaid: str = Field(default="", description="Mermaid diagram of package structure")
 
+    # [20260111_FEATURE] Output metadata fields for tier transparency
+    tier_applied: str = Field(
+        default="community",
+        description="The tier that was applied to this request (community, pro, enterprise)",
+    )
+    max_files_applied: int | None = Field(
+        default=None,
+        description="The max_files limit applied (100 for Community, 1000 for Pro, None for Enterprise)",
+    )
+    max_modules_applied: int | None = Field(
+        default=None,
+        description="The max_modules limit applied (50 for Community, 200 for Pro, 1000 for Enterprise)",
+    )
+    pro_features_enabled: bool = Field(
+        default=False,
+        description="Whether Pro tier features were enabled (coupling_metrics, architectural_layers, etc.)",
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False,
+        description="Whether Enterprise tier features were enabled (city_map, force_graph, etc.)",
+    )
+
     # [20251226_BUGFIX] Provide tier-gated attributes via properties when model schema differs
     def _get_extra_value(self, name: str):  # type: ignore[override]
         try:
@@ -17532,10 +17554,16 @@ def _get_project_map_sync(
     root_path = Path(project_root) if project_root else PROJECT_ROOT
 
     if not root_path.exists():
+        tier_val = (tier or _get_current_tier() or "community").lower()
         return ProjectMapResult(
             success=False,
             project_root=str(root_path),
             error=f"Project root not found: {root_path}.",
+            tier_applied=tier_val,
+            max_files_applied=None,
+            max_modules_applied=None,
+            pro_features_enabled=tier_val in {"pro", "enterprise"},
+            enterprise_features_enabled=tier_val == "enterprise",
         )
 
     try:
@@ -17554,6 +17582,32 @@ def _get_project_map_sync(
 
         if effective_max_modules is None:
             effective_max_modules = 50
+
+        # [20260111_FEATURE] Calculate output metadata for tier transparency
+        PRO_CAPABILITIES = {
+            "module_relationship_visualization",
+            "dependency_tracking",
+            "import_dependency_diagram",
+            "architectural_layer_detection",
+            "coupling_analysis",
+            "git_blame_integration",
+            "code_ownership_mapping",
+        }
+        ENTERPRISE_CAPABILITIES = {
+            "force_directed_graph",
+            "interactive_city_map",
+            "code_churn_visualization",
+            "bug_hotspot_heatmap",
+            "multi_repository_maps",
+            "historical_architecture_trends",
+            "custom_map_metrics",
+            "compliance_overlay",
+        }
+        tier_applied = (tier or "community").lower()
+        max_files_applied = effective_max_files
+        max_modules_applied = effective_max_modules
+        pro_features_enabled = bool(caps_set & PRO_CAPABILITIES) or tier_applied in {"pro", "enterprise"}
+        enterprise_features_enabled = bool(caps_set & ENTERPRISE_CAPABILITIES) or tier_applied == "enterprise"
 
         modules: list[ModuleInfo] = []
         packages: dict[str, PackageInfo] = {}
@@ -18398,13 +18452,25 @@ def _get_project_map_sync(
             compliance_overlay=compliance_overlay,
             modules_in_diagram=modules_in_diagram,
             diagram_truncated=diagram_truncated,
+            # [20260111_FEATURE] Output metadata fields for tier transparency
+            tier_applied=tier_applied,
+            max_files_applied=max_files_applied,
+            max_modules_applied=max_modules_applied,
+            pro_features_enabled=pro_features_enabled,
+            enterprise_features_enabled=enterprise_features_enabled,
         )
 
     except Exception as e:
+        tier_val = (tier or "community").lower()
         return ProjectMapResult(
             success=False,
             project_root=str(root_path),
             error=f"Project map analysis failed: {str(e)}",
+            tier_applied=tier_val,
+            max_files_applied=None,
+            max_modules_applied=None,
+            pro_features_enabled=tier_val in {"pro", "enterprise"},
+            enterprise_features_enabled=tier_val == "enterprise",
         )
 
 

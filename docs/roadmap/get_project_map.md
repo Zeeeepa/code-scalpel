@@ -128,7 +128,33 @@ class ProjectMapResult(BaseModel):
     bug_hotspots: list[str]                 # High-bug-rate files
     city_map_data: CityMapData              # 3D city visualization data
     force_graph: ForceGraphData             # Force-directed graph data
+    
+    # Output Metadata (All Tiers) - v1.1
+    # [20260111_FEATURE] Added for tier transparency to AI agents
+    tier_applied: str                       # Which tier was used: "community"|"pro"|"enterprise"
+    max_files_applied: int | None           # Effective file limit (None=unlimited)
+    max_modules_applied: int | None         # Effective module limit (None=unlimited)
+    pro_features_enabled: bool              # Whether Pro features are available
+    enterprise_features_enabled: bool       # Whether Enterprise features are available
 ```
+
+### Output Metadata Fields
+
+> [20260111_FEATURE] These fields provide transparency to AI agents about which tier configuration was applied.
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `tier_applied` | `str` | Which license tier was applied: `"community"`, `"pro"`, or `"enterprise"` |
+| `max_files_applied` | `int \| None` | The file limit that was enforced. `None` indicates unlimited (Enterprise). |
+| `max_modules_applied` | `int \| None` | The module limit that was enforced. `None` indicates unlimited. |
+| `pro_features_enabled` | `bool` | `True` if Pro-tier features (coupling metrics, git ownership, etc.) are available |
+| `enterprise_features_enabled` | `bool` | `True` if Enterprise-tier features (city map, compliance overlay, etc.) are available |
+
+**Why These Fields Matter:**
+- AI agents can verify they're operating with expected permissions
+- Debugging tier configuration issues becomes straightforward
+- Output is self-documenting - no need to check external config files
+- Consistent with `get_file_context` tool pattern for cross-tool consistency
 
 ---
 
@@ -225,7 +251,12 @@ result = await get_project_map(
     "mermaid": "graph TD\n  src[src/]\n  src --> main.py\n  src --> utils.py\n  src --> handlers.py",
     "truncated": false,
     "files_limit": 100,
-    "modules_limit": 50
+    "modules_limit": 50,
+    "tier_applied": "community",
+    "max_files_applied": 100,
+    "max_modules_applied": 50,
+    "pro_features_enabled": false,
+    "enterprise_features_enabled": false
   },
   "id": 1
 }
@@ -283,7 +314,12 @@ result = await get_project_map(
       {"from": "handlers.py", "to": "utils.py", "type": "import"},
       {"from": "handlers.py", "to": "db/queries.py", "type": "import"}
     ],
-    "dependency_diagram": "graph LR\n  handlers --> utils\n  handlers --> db/queries"
+    "dependency_diagram": "graph LR\n  handlers --> utils\n  handlers --> db/queries",
+    "tier_applied": "pro",
+    "max_files_applied": 1000,
+    "max_modules_applied": 200,
+    "pro_features_enabled": true,
+    "enterprise_features_enabled": false
   },
   "id": 1
 }
@@ -359,7 +395,12 @@ result = await get_project_map(
     "force_graph": {
       "nodes": [],
       "links": []
-    }
+    },
+    "tier_applied": "enterprise",
+    "max_files_applied": null,
+    "max_modules_applied": 1000,
+    "pro_features_enabled": true,
+    "enterprise_features_enabled": true
   },
   "id": 1
 }
