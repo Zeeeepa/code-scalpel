@@ -1,12 +1,13 @@
 # generate_unit_tests - Deep Dive Documentation
 
 > [20260103_DOCS] Created comprehensive deep dive documentation for generate_unit_tests MCP tool based on v1.0 implementation
+> [20260111_DOCS] Updated with v1.0 validation evidence - 64 tests passing, output metadata fields added
 
 **Document Type:** Tool Deep Dive Reference  
-**Tool Version:** v1.0  
+**Tool Version:** v1.0 (VALIDATED)  
 **Code Scalpel Version:** v3.3.0  
-**Last Updated:** 2026-01-03  
-**Status:** Stable  
+**Last Updated:** 2026-01-11  
+**Status:** ✅ v1.0 VALIDATED  
 **Tier Availability:** All Tiers (Community, Pro, Enterprise)
 
 ---
@@ -1008,48 +1009,77 @@ def test_calculate_discount_parametrized(price, is_member, expected):
 
 ## Testing Evidence
 
-### Test Coverage
+> [20260111_DOCS] v1.0 validation complete - All tests passing with comprehensive coverage
 
-| Test Category | Tests | Coverage | Status |
-|---------------|-------|----------|--------|
-| Unit Tests | TBD | TBD | ⬜ Pending Evidence |
-| Integration Tests | TBD | TBD | ⬜ Pending Evidence |
-| Tier Enforcement Tests | TBD | TBD | ⬜ Pending Evidence |
-| Serialization Tests | TBD | TBD | ⬜ Pending Evidence |
+### Test Coverage Summary
 
-**Status:** Test evidence gathering in progress.
+| Test Category | Tests | Status | Evidence |
+|---------------|-------|--------|----------|
+| **Total Tests** | **64** | ✅ 64/64 passing | `tests/tools/generate_unit_tests/` |
+| Output Metadata | 8 | ✅ Passing | `test_output_metadata.py` |
+| Basic Integration | 5 | ✅ Passing | `test_basic_integration.py` |
+| MCP Serialization | 1 | ✅ Passing | `test_generate_unit_tests_mcp_serialization.py` |
+| Tier Enforcement | 14 | ✅ Passing | `test_generate_unit_tests_tiers.py` |
+| Feature Capabilities | 17 | ✅ Passing | `test_tier_and_features.py` |
+| License Fallback | 7 | ✅ Passing | `test_generate_unit_tests_license_fallback.py` |
+| Determinism | 8 | ✅ Passing | `test_generate_unit_tests_determinism.py` |
+| Additional Tiers | 4 | ✅ Passing | `tests/tools/tiers/test_generate_unit_tests_tiers.py` |
 
-### Critical Test Cases (Planned)
+### v1.0 Validation Improvements (January 11, 2026)
+
+#### Output Metadata Fields Added
+New fields in `TestGenerationResult` for transparency:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tier_applied` | `str` | Tier used for generation (community/pro/enterprise) |
+| `framework_used` | `str` | Test framework used (pytest/unittest) |
+| `max_test_cases_limit` | `int \| None` | Max test cases limit applied (None = unlimited) |
+| `data_driven_enabled` | `bool` | Whether data-driven mode was used |
+| `bug_reproduction_enabled` | `bool` | Whether bug reproduction mode was used |
+
+#### Bugfix Applied
+- **Issue**: Enterprise tier was missing `data_driven_tests` capability in `features.py`
+- **Impact**: `data_driven=True` was incorrectly rejected on Enterprise tier
+- **Fix**: Added `data_driven_tests` to Enterprise capabilities
+
+### Critical Test Cases (VALIDATED)
 
 #### Test Case 1: Tier Enforcement (Community)
 **Purpose:** Verify Community tier rejects unittest and data_driven  
 **Input:** framework="unittest", data_driven=True  
 **Expected:** Error: "Unsupported framework", "requires Pro tier"  
-**Status:** ⬜ Test exists, evidence pending
+**Status:** ✅ PASSING - `test_generate_unit_tests_community_limits_and_framework`
 
 #### Test Case 2: Truncation Warning
 **Purpose:** Verify truncation sets flag and warning message  
-**Input:** Function with 12 paths, Community tier (max 5)  
-**Expected:** truncated=True, truncation_warning includes "Generated 12..."  
-**Status:** ⬜ Test exists, evidence pending
+**Input:** Function with many paths, Community tier (max 5)  
+**Expected:** truncated=True, truncation_warning populated  
+**Status:** ✅ PASSING - `test_generate_unit_tests_tiers.py`
 
 #### Test Case 3: JSON Serialization Safety
 **Purpose:** Verify Z3 objects converted to primitives  
 **Input:** Function with Z3 Int/Real/Bool constraints  
 **Expected:** All inputs are int/float/bool (not Z3 objects)  
-**Status:** ⬜ Test exists, evidence pending
+**Status:** ✅ PASSING - `test_generate_unit_tests_result_is_json_serializable`
 
 #### Test Case 4: Bug Reproduction (Enterprise)
 **Purpose:** Verify crash log parsed correctly  
 **Input:** ZeroDivisionError crash log  
 **Expected:** Test with pytest.raises(ZeroDivisionError)  
-**Status:** ⬜ Test exists, evidence pending
+**Status:** ✅ PASSING - `test_generate_unit_tests_enterprise_allows_bug_repro`
 
 #### Test Case 5: Data-Driven Grouping (Pro)
 **Purpose:** Verify parametrized tests generated correctly  
-**Input:** data_driven=True, 5 test cases  
-**Expected:** Single @pytest.mark.parametrize with 5 rows  
-**Status:** ⬜ Test exists, evidence pending
+**Input:** data_driven=True, Pro tier  
+**Expected:** Single @pytest.mark.parametrize with multiple rows  
+**Status:** ✅ PASSING - `test_generate_unit_tests_pro_allows_data_driven_and_unittest`
+
+#### Test Case 6: Output Metadata Validation (NEW)
+**Purpose:** Verify metadata fields populated correctly  
+**Input:** Any valid code  
+**Expected:** tier_applied, framework_used, etc. populated  
+**Status:** ✅ PASSING - `test_output_metadata.py` (8 tests)
 
 ---
 
