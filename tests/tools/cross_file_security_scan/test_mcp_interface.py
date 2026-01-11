@@ -19,7 +19,8 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.asyncio
+# [20260111_BUGFIX] Removed module-level pytestmark to avoid warnings on sync tests
+# Individual async tests should use @pytest.mark.asyncio decorator
 
 
 # =============================================================================
@@ -30,7 +31,7 @@ pytestmark = pytest.mark.asyncio
 class TestToolAvailability:
     """Tests for tool registration and availability."""
 
-    def test_cross_file_security_scan_registered(self):
+    async def test_cross_file_security_scan_registered(self):
         """[20260103_TEST] cross_file_security_scan is registered as an MCP tool."""
         from code_scalpel.mcp.server import cross_file_security_scan
 
@@ -38,6 +39,7 @@ class TestToolAvailability:
         assert callable(cross_file_security_scan)
         assert hasattr(cross_file_security_scan, '__name__')
 
+    @pytest.mark.asyncio
     async def test_cross_file_security_scan_callable(self):
         """[20260103_TEST] Tool is callable with proper signature."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -61,7 +63,7 @@ class TestToolAvailability:
         assert expected_params.issubset(params), \
             f"Missing parameters: {expected_params - params}"
 
-    def test_tool_in_server_registry(self):
+    async def test_tool_in_server_registry(self):
         """[20260103_TEST] Tool is in MCP server registry."""
         try:
             from code_scalpel.mcp.server import TOOLS
@@ -84,7 +86,7 @@ class TestToolAvailability:
 class TestParameterValidation:
     """Tests for parameter validation and type checking."""
 
-    def test_project_root_required(self):
+    async def test_project_root_required(self):
         """[20260103_TEST] project_root parameter is required."""
         from code_scalpel.mcp.server import cross_file_security_scan
         import inspect
@@ -93,6 +95,7 @@ class TestParameterValidation:
         sig = inspect.signature(cross_file_security_scan)
         assert 'project_root' in sig.parameters
 
+    @pytest.mark.asyncio
     async def test_project_root_accepts_string(self):
         """[20260103_TEST] project_root accepts string paths."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -110,6 +113,7 @@ class TestParameterValidation:
             assert result is not None
             assert hasattr(result, 'success')
 
+    @pytest.mark.asyncio
     async def test_max_depth_parameter(self):
         """[20260103_TEST] max_depth parameter is respected."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -125,6 +129,7 @@ class TestParameterValidation:
 
             assert result is not None
 
+    @pytest.mark.asyncio
     async def test_max_modules_parameter(self):
         """[20260103_TEST] max_modules parameter is respected."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -140,6 +145,7 @@ class TestParameterValidation:
 
             assert result is not None
 
+    @pytest.mark.asyncio
     async def test_include_diagram_parameter(self):
         """[20260103_TEST] include_diagram parameter controls diagram generation."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -170,6 +176,7 @@ class TestParameterValidation:
                 # With diagram might have populated mermaid_diagram
                 pass
 
+    @pytest.mark.asyncio
     async def test_timeout_seconds_parameter(self):
         """[20260103_TEST] timeout_seconds parameter is respected."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -194,6 +201,7 @@ class TestParameterValidation:
 class TestResultFormat:
     """Tests for result format and serialization."""
 
+    @pytest.mark.asyncio
     async def test_result_is_serializable(self):
         """[20260103_TEST] Result can be serialized to dict/JSON."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -219,6 +227,7 @@ class TestResultFormat:
             except Exception as e:
                 pytest.fail(f"Result should be serializable: {e}")
 
+    @pytest.mark.asyncio
     async def test_result_has_success_field(self):
         """[20260103_TEST] Result includes success indicator."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -235,6 +244,7 @@ class TestResultFormat:
             assert hasattr(result, 'success')
             assert isinstance(result.success, (bool, type(None)))
 
+    @pytest.mark.asyncio
     async def test_result_has_vulnerability_fields(self):
         """[20260103_TEST] Result includes vulnerability information."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -254,6 +264,7 @@ class TestResultFormat:
                 assert hasattr(result, field), \
                     f"Result should have '{field}' field"
 
+    @pytest.mark.asyncio
     async def test_result_has_taint_flow_info(self):
         """[20260103_TEST] Result includes taint flow information."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -282,6 +293,7 @@ class TestResultFormat:
 class TestEndToEndWorkflow:
     """Tests for complete E2E workflows."""
 
+    @pytest.mark.asyncio
     async def test_simple_vulnerability_detection_workflow(self):
         """[20260103_TEST] E2E workflow detects SQL injection."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -324,6 +336,7 @@ def query(user_id):
             assert result is not None
             assert result.success
 
+    @pytest.mark.asyncio
     async def test_safe_code_workflow(self):
         """[20260103_TEST] E2E workflow for safe code."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -363,6 +376,7 @@ def calculate(x, y):
             assert result is not None
             assert result.success
 
+    @pytest.mark.asyncio
     async def test_mermaid_diagram_workflow(self):
         """[20260103_TEST] E2E workflow with diagram generation."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -396,6 +410,7 @@ def calculate(x, y):
 class TestErrorHandling:
     """Tests for error handling in MCP interface."""
 
+    @pytest.mark.asyncio
     async def test_invalid_project_root(self):
         """[20260103_TEST] Invalid project root handled gracefully."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -413,6 +428,7 @@ class TestErrorHandling:
         # May report success=False or empty results
         assert hasattr(result, 'success')
 
+    @pytest.mark.asyncio
     async def test_negative_max_depth(self):
         """[20260103_TEST] Negative max_depth handled."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -433,6 +449,7 @@ class TestErrorHandling:
                 # Also acceptable to raise
                 pass
 
+    @pytest.mark.asyncio
     async def test_zero_timeout(self):
         """[20260103_TEST] Zero timeout handled."""
         from code_scalpel.mcp.server import cross_file_security_scan
@@ -458,6 +475,7 @@ class TestErrorHandling:
 class TestRegressions:
     """Regression tests for known issues."""
 
+    @pytest.mark.asyncio
     async def test_crossfile_hard_fixture(self):
         """[20260103_TEST] Ninja Warrior crossfile-hard fixture detection."""
         from code_scalpel.mcp.server import cross_file_security_scan
