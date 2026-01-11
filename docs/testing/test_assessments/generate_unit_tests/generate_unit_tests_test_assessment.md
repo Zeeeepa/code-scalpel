@@ -1,21 +1,55 @@
 ## generate_unit_tests Test Assessment Report
 **Framework**: MCP Tool Test Evaluation Checklist v1.0 + Roadmap Goals  
-**Date Assessed**: January 3, 2026 (Updated)
-**Assessment Version**: 3.0 (Roadmap-Aligned with Licensing Contract)
+**Date Assessed**: January 11, 2026 (Updated)
+**Assessment Version**: 4.0 (v1.0 Validation Complete - Metadata Fields Added)
 **Tool Version**: v3.3.0  
 **Roadmap Reference**: [docs/roadmap/generate_unit_tests.md](../../roadmap/generate_unit_tests.md)
 **Tool Purpose**: Generate unit tests from code using symbolic execution, covering all execution paths
-**Test Suite Location**: `tests/tools/tiers/` and `tests/symbolic/`
-**Current Results**: 54/54 PASSING | 0 FAILED | 0 SKIPPED
+**Test Suite Location**: `tests/tools/generate_unit_tests/`, `tests/tools/tiers/`
+**Current Results**: 64/64 PASSING | 0 FAILED | 0 SKIPPED
 
 ---
 
-## Assessment Status: ✅ PRODUCTION READY - ALL REQUIREMENTS MET
+## Assessment Status: ✅ v1.0 VALIDATED - ALL REQUIREMENTS MET
 
-**Initial Assessment**: 🔴 BLOCKING (claimed Pro/Enterprise features not tested)  
-**Actual Finding**: ✅ 54/54 tests PASSING - All tier features comprehensively tested with explicit license/determinism validation  
+**v1.0 Validation**: ✅ COMPLETE (January 11, 2026)  
+**Test Count**: 64 tests (56 existing + 8 new metadata tests)  
+**Output Metadata**: ✅ tier_applied, framework_used, max_test_cases_limit, data_driven_enabled, bug_reproduction_enabled  
 **License Validation**: ✅ 7 explicit license fallback tests  
-**Determinism Validation**: ✅ 8 explicit stability tests
+**Determinism Validation**: ✅ 8 explicit stability tests  
+**Bugfix Applied**: ✅ Enterprise tier was missing `data_driven_tests` capability - FIXED
+
+---
+
+## v1.0 Validation Enhancements (January 11, 2026)
+
+### Output Metadata Fields Added
+[20260111_FEATURE] Added metadata fields to `TestGenerationResult` for transparency:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tier_applied` | `str` | The tier used for generation (community/pro/enterprise) |
+| `framework_used` | `str` | Test framework used (pytest/unittest) |
+| `max_test_cases_limit` | `int \| None` | Max test cases limit applied (None = unlimited) |
+| `data_driven_enabled` | `bool` | Whether data-driven mode was used |
+| `bug_reproduction_enabled` | `bool` | Whether bug reproduction mode was used |
+
+### Bugfix: Enterprise Missing data_driven_tests
+[20260111_BUGFIX] Fixed `features.py` Enterprise capabilities - was missing `data_driven_tests` which caused data_driven=True to fail even on Enterprise tier.
+
+### New Metadata Validation Tests (8 tests)
+Located at: `tests/tools/generate_unit_tests/test_output_metadata.py`
+
+| Test Name | Purpose |
+|-----------|---------|
+| `test_basic_generation_includes_metadata` | Verify all metadata fields present on success |
+| `test_unittest_framework_metadata` | Framework reflected correctly in metadata |
+| `test_data_driven_flag_in_metadata` | Data-driven mode reflected in metadata |
+| `test_metadata_present_regardless_of_code_complexity` | Metadata present even with edge cases |
+| `test_test_generation_result_has_metadata_fields` | Model defines all required fields |
+| `test_metadata_fields_have_defaults` | Fields have sensible defaults |
+| `test_metadata_fields_can_be_set` | Fields accept valid values |
+| `test_unsupported_framework_error_has_metadata` | Error responses include metadata |
 
 ---
 
@@ -90,19 +124,41 @@
 
 
 
-**Total Tests**: 47 PASSING | 0 FAILED | 0 SKIPPED  
+**Total Tests**: 64 PASSING | 0 FAILED | 0 SKIPPED  
 **Pass Rate**: 100%  
-**Combined Execution Time**: ~2.77 seconds
+**Combined Execution Time**: ~2.36 seconds
 
 ### Test Distribution by Location
 
-1. **tests/tools/tiers/test_generate_unit_tests_tiers.py** - 4 tests (✅ 4/4 passing)
+1. **tests/tools/generate_unit_tests/test_output_metadata.py** - 8 tests (✅ 8/8 passing) [NEW - 20260111]
+   - Output metadata field validation
+   - Model field definitions
+   - Default value verification
+   - Framework/tier metadata accuracy
+
+2. **tests/tools/generate_unit_tests/test_basic_integration.py** - 5 tests (✅ 5/5 passing)
+   - Basic test generation integration
+   - Framework validation
+
+3. **tests/tools/generate_unit_tests/test_generate_unit_tests_mcp_serialization.py** - 1 test (✅ 1/1 passing)
+   - MCP transport safety
+   - JSON serialization validation
+
+4. **tests/tools/generate_unit_tests/test_generate_unit_tests_tiers.py** - 14 tests (✅ 14/14 passing)
    - Tier enforcement (Community, Pro, Enterprise)
    - Framework gating (pytest/unittest)
    - Limit enforcement (5/20/unlimited)
+
+5. **tests/tools/generate_unit_tests/test_tier_and_features.py** - 17 tests (✅ 17/17 passing)
+   - Feature capabilities per tier
+   - Large code handling
+   - Edge cases
+
+6. **tests/tools/tiers/test_generate_unit_tests_tiers.py** - 4 tests (✅ 4/4 passing)
+   - Additional tier enforcement
    - TOML configuration override
 
-2. **tests/tools/tiers/test_generate_unit_tests_license_fallback.py** - 7 tests (✅ 7/7 passing) [NEW - 20260103]
+7. **tests/tools/tiers/test_generate_unit_tests_license_fallback.py** - 7 tests (✅ 7/7 passing)
    - Invalid license fallback scenarios
    - Expired license fallback scenarios
    - Missing license default behavior
@@ -110,7 +166,7 @@
    - Community feature preservation
    - Warning message validation
 
-3. **tests/tools/tiers/test_generate_unit_tests_determinism.py** - 8 tests (✅ 8/8 passing) [NEW - 20260103]
+8. **tests/tools/tiers/test_generate_unit_tests_determinism.py** - 8 tests (✅ 8/8 passing)
    - Deterministic output across runs
    - Stable test naming (no random elements)
    - Consistent test ordering
@@ -119,25 +175,6 @@
    - Complex control flow determinism
    - Framework consistency (pytest/unittest)
    - Boundary value determinism
-
-4. **tests/tools/individual/test_generate_unit_tests_mcp_serialization.py** - 1 test (✅ 1/1 passing)
-   - MCP transport safety
-   - JSON serialization validation
-
-5. **tests/symbolic/test_test_generator.py** - 20 tests (✅ 20/20 passing)
-   - Core test generation functionality
-   - Framework output validation (pytest/unittest)
-   - Edge case handling
-   - Symbolic execution integration
-
-6. **tests/symbolic/test_test_generator_branches.py** - 5 tests (✅ 5/5 passing)
-   - Path analysis and branch coverage
-   - Constraint handling
-   - Multi-language support
-
-7. **tests/mcp_tool_verification/test_mcp_tools_live.py** - 2 tests (✅ 2/2 passing)
-   - Live MCP tool verification
-   - Framework selection validation
 
 ---
 

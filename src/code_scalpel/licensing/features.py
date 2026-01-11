@@ -410,6 +410,8 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
                 "advanced_test_generation",
                 "edge_case_detection",
                 "custom_test_templates",
+                # [20251229_FEATURE] v3.3.0 - Parametrized/data-driven tests (inherited from Pro).
+                "data_driven_tests",
                 # [20251229_FEATURE] v3.3.0 - Bug reproduction from crash logs.
                 "bug_reproduction",
                 "coverage_optimization",

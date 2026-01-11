@@ -3,9 +3,34 @@
 **Tool Name:** `generate_unit_tests`  
 **Tool Version:** v1.0  
 **Code Scalpel Version:** v3.3.0  
-**Current Status:** Stable  
+**Current Status:** ✅ v1.0 VALIDATED (January 11, 2026)  
 **Primary Module:** `src/code_scalpel/generators/test_generator.py`  
 **Tier Availability:** All tiers (Community, Pro, Enterprise)
+
+---
+
+## v1.0 Validation Status
+
+> [20260111_DOCS] v1.0 validation complete with metadata fields and bugfix.
+
+| Aspect | Status | Details |
+|--------|--------|---------|
+| **Tests** | ✅ 64/64 passing | 56 existing + 8 new metadata tests |
+| **Output Metadata** | ✅ Added | tier_applied, framework_used, max_test_cases_limit, data_driven_enabled, bug_reproduction_enabled |
+| **Config Alignment** | ✅ Verified | limits.toml matches features.py |
+| **Tier Enforcement** | ✅ Working | Community/Pro/Enterprise properly gated |
+| **Bugfix Applied** | ✅ Fixed | Enterprise tier was missing `data_driven_tests` capability |
+
+### Output Metadata Fields (v1.0)
+```python
+class TestGenerationResult(BaseModel):
+    # ... existing fields ...
+    tier_applied: str = "community"           # Tier used for generation
+    framework_used: str = "pytest"            # Test framework used
+    max_test_cases_limit: int | None = None   # Max limit applied
+    data_driven_enabled: bool = False         # Data-driven mode status
+    bug_reproduction_enabled: bool = False    # Bug reproduction mode status
+```
 
 ---
 

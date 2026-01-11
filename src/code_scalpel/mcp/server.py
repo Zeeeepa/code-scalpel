@@ -2075,6 +2075,28 @@ class TestGenerationResult(BaseModel):
     unittest_code: str = Field(default="", description="Generated unittest code")
     error: str | None = Field(default=None, description="Error message if failed")
 
+    # [20260111_FEATURE] Output metadata for transparency
+    tier_applied: str = Field(
+        default="community",
+        description="Tier used for this generation (community/pro/enterprise)",
+    )
+    framework_used: str = Field(
+        default="pytest",
+        description="Test framework used for generation",
+    )
+    max_test_cases_limit: int | None = Field(
+        default=None,
+        description="Max test cases limit applied (None=unlimited)",
+    )
+    data_driven_enabled: bool = Field(
+        default=False,
+        description="Whether data-driven/parametrized tests were generated",
+    )
+    bug_reproduction_enabled: bool = Field(
+        default=False,
+        description="Whether bug reproduction mode was used",
+    )
+
 
 class RefactorSecurityIssue(BaseModel):
     """A security issue found in refactored code."""
@@ -8974,6 +8996,11 @@ async def generate_unit_tests(
             test_count=0,
             total_test_cases=0,
             error="Data-driven test generation requires Pro tier or higher.",
+            tier_applied=tier,
+            framework_used=framework,
+            max_test_cases_limit=max_test_cases,
+            data_driven_enabled=False,
+            bug_reproduction_enabled=False,
         )
 
     # [20251229_FEATURE] v3.3.0 - Enterprise tier enforcement for bug reproduction
@@ -8984,6 +9011,11 @@ async def generate_unit_tests(
             test_count=0,
             total_test_cases=0,
             error="Bug reproduction test generation requires Enterprise tier.",
+            tier_applied=tier,
+            framework_used=framework,
+            max_test_cases_limit=max_test_cases,
+            data_driven_enabled=data_driven,
+            bug_reproduction_enabled=False,
         )
 
     if isinstance(allowed_frameworks, list) and framework not in allowed_frameworks:
@@ -8993,9 +9025,15 @@ async def generate_unit_tests(
             test_count=0,
             total_test_cases=0,
             error=f"Unsupported framework: {framework}",
+            tier_applied=tier,
+            framework_used=framework,
+            max_test_cases_limit=max_test_cases,
+            data_driven_enabled=data_driven,
+            bug_reproduction_enabled=crash_log is not None,
         )
 
-    return await asyncio.to_thread(
+    # [20260111_FEATURE] Call sync implementation and add metadata
+    result = await asyncio.to_thread(
         _generate_tests_sync,
         code,
         file_path,
@@ -9005,6 +9043,15 @@ async def generate_unit_tests(
         data_driven,
         crash_log,
     )
+
+    # Add output metadata for transparency
+    result.tier_applied = tier
+    result.framework_used = framework
+    result.max_test_cases_limit = max_test_cases
+    result.data_driven_enabled = data_driven
+    result.bug_reproduction_enabled = crash_log is not None
+
+    return result
 
 
 # ============================================================================
