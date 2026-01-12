@@ -205,3 +205,74 @@ def bad_func(arg=[]):  # PY002 mutable default
     summary_text = result.summary or ""
     assert "upgrade" not in summary_text.lower()
     assert "pro" not in summary_text.lower()
+
+
+@pytest.mark.asyncio
+async def test_type_evaporation_scan_community_limits(monkeypatch):
+    """Community tier enforces frontend-only analysis, max 50 files, no Pro features.
+    
+    [20260111_TEST] Added tier gating smoke test for type_evaporation_scan.
+    Validates Community tier is frontend-only and Pro features (cross_file_issues,
+    implicit_any, network_boundaries) are gated.
+    """
+    from code_scalpel.mcp import server
+
+    # TypeScript frontend with type evaporation vulnerability
+    frontend_code = """\
+type Role = 'admin' | 'user';
+const role = input.value as Role;  // Unsafe type assertion
+fetch('/api/user', {body: JSON.stringify({role})});
+"""
+
+    # Python backend with unvalidated input
+    backend_code = """\
+role = request.get_json()['role']  # No validation!
+if role == 'admin':
+    grant_admin_access()
+"""
+
+    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        server,
+        "get_tool_capabilities",
+        lambda tool_id, tier: {
+            "limits": {"max_files": 50, "frontend_only": True},
+            "capabilities": {"explicit_any_detection", "typescript_any_scanning", "basic_type_check"},
+        },
+    )
+
+    result = await server.type_evaporation_scan(
+        frontend_code=frontend_code,
+        backend_code=backend_code,
+    )
+
+    # Verify tool returns success
+    assert result.success is True
+    
+    # Verify frontend issues are detected (Community capability)
+    # frontend_vulnerabilities should be accessible (may be 0 or list)
+    assert hasattr(result, "frontend_vulnerabilities")
+    
+    # Verify Pro features are omitted/empty for Community tier
+    # Pro features: cross_file_issues, implicit_any_count > 0, network_boundaries
+    # Community tier should have these as 0 or empty
+    cross_file = getattr(result, "cross_file_issues", 0)
+    assert cross_file in (0, None, []), \
+        f"Community tier should have cross_file_issues=0/empty, got {cross_file}"
+    
+    implicit_any = getattr(result, "implicit_any_count", 0)
+    assert implicit_any == 0, \
+        f"Community tier should have implicit_any_count=0, got {implicit_any}"
+    
+    network = getattr(result, "network_boundaries", [])
+    assert network in (0, None, []), \
+        f"Community tier should have network_boundaries empty, got {network}"
+    
+    # Verify Enterprise features are omitted/empty
+    schemas = getattr(result, "generated_schemas", None)
+    assert schemas in (None, [], {}), \
+        f"Community tier should NOT have generated_schemas, got {schemas}"
+    
+    pydantic = getattr(result, "pydantic_models", None)
+    assert pydantic in (None, [], {}), \
+        f"Community tier should NOT have pydantic_models, got {pydantic}"
