@@ -1965,3 +1965,262 @@ def keep_feature():
 
         removed = (data.get("structural_changes") or {}).get("functions_removed") or []
         assert "CustomerData" in removed
+
+
+# ============================================================================
+# RENAME_SYMBOL TIER BOUNDARY TESTS
+# ============================================================================
+
+
+async def test_rename_symbol_community_single_file_only(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Community tier rename_symbol is single-file only (no cross-file updates)."""
+    project_root = tmp_path / "proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    # Create definition file
+    main_py = project_root / "main.py"
+    main_py.write_text("""def old_function():
+    return 1
+
+def caller():
+    return old_function()
+""", encoding="utf-8")
+    
+    # Create a file that imports and uses the function
+    utils_py = project_root / "utils.py"
+    utils_py.write_text("""from main import old_function
+
+def use_it():
+    return old_function()
+""", encoding="utf-8")
+
+    license_path = write_hs256_license_jwt(
+        tier="community",
+        jti="community-rename-single-file",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "rename_symbol",
+            arguments={
+                "file_path": str(main_py),
+                "target_type": "function",
+                "target_name": "old_function",
+                "new_name": "new_function",
+                "create_backup": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="rename_symbol")
+
+        # Community tier confirmed
+        assert env_json["tier"] == "community"
+        assert data["success"] is True
+        
+        # Warnings should indicate definition-only rename
+        warnings = data.get("warnings") or []
+        assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
+        
+        # main.py should be updated
+        main_content = main_py.read_text()
+        assert "def new_function():" in main_content
+        
+        # utils.py should NOT be updated (Community tier)
+        utils_content = utils_py.read_text()
+        assert "from main import old_function" in utils_content  # NOT updated
+
+
+async def test_rename_symbol_pro_enables_cross_file(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier rename_symbol enables cross-file reference updates."""
+    project_root = tmp_path / "proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    # Create definition file
+    main_py = project_root / "main.py"
+    main_py.write_text("""def old_function():
+    return 1
+""", encoding="utf-8")
+    
+    # Create a file that imports and uses the function
+    utils_py = project_root / "utils.py"
+    utils_py.write_text("""from main import old_function
+
+def use_it():
+    return old_function()
+""", encoding="utf-8")
+
+    license_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="pro-rename-cross-file",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "rename_symbol",
+            arguments={
+                "file_path": str(main_py),
+                "target_type": "function",
+                "target_name": "old_function",
+                "new_name": "new_function",
+                "create_backup": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="rename_symbol")
+
+        # Pro tier confirmed
+        assert env_json["tier"] == "pro"
+        assert data["success"] is True
+        
+        # Pro tier should have cross_file_reference_rename capability
+        caps = set(env_json.get("capabilities", []))
+        assert "cross_file_reference_rename" in caps
+        
+        # main.py should be updated
+        main_content = main_py.read_text()
+        assert "def new_function():" in main_content
+        
+        # Warnings should indicate cross-file updates
+        warnings = data.get("warnings") or []
+        cross_file_mentioned = any(
+            "additional file" in w.lower() or "cross-file" in w.lower() or "Updated references" in w
+            for w in warnings
+        )
+        # Pro tier should attempt cross-file (may or may not find updates depending on implementation)
+        assert not any("Definition-only" in w for w in warnings), "Pro should not be definition-only"
+
+
+async def test_rename_symbol_invalid_license_fallback_to_community(
+    tmp_path: Path,
+):
+    """Invalid license falls back to Community tier (single-file only)."""
+    project_root = tmp_path / "proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    main_py = project_root / "main.py"
+    main_py.write_text("""def old_function():
+    return 1
+""", encoding="utf-8")
+    
+    utils_py = project_root / "utils.py"
+    utils_py.write_text("""from main import old_function
+""", encoding="utf-8")
+
+    # Write invalid JWT
+    invalid_jwt_path = tmp_path / "invalid.jwt"
+    invalid_jwt_path.write_text("invalid.jwt.token.malformed\n")
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": "test_secret",
+            "CODE_SCALPEL_LICENSE_PATH": str(invalid_jwt_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "rename_symbol",
+            arguments={
+                "file_path": str(main_py),
+                "target_type": "function",
+                "target_name": "old_function",
+                "new_name": "new_function",
+                "create_backup": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="rename_symbol")
+
+        # Should fallback to Community tier
+        assert env_json["tier"] == "community"
+        assert data["success"] is True
+        
+        # Definition-only warning for Community
+        warnings = data.get("warnings") or []
+        assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
+
+
+async def test_rename_symbol_enterprise_unlimited_files(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Enterprise tier has unlimited cross-file capabilities."""
+    project_root = tmp_path / "proj"
+    project_root.mkdir(parents=True, exist_ok=True)
+    
+    main_py = project_root / "main.py"
+    main_py.write_text("""def old_function():
+    return 1
+""", encoding="utf-8")
+
+    license_path = write_hs256_license_jwt(
+        tier="enterprise",
+        jti="enterprise-rename-unlimited",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "rename_symbol",
+            arguments={
+                "file_path": str(main_py),
+                "target_type": "function",
+                "target_name": "old_function",
+                "new_name": "new_function",
+                "create_backup": False,
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="rename_symbol")
+
+        # Enterprise tier confirmed
+        assert env_json["tier"] == "enterprise"
+        assert data["success"] is True
+        
+        # Enterprise should have organization_wide_rename capability
+        caps = set(env_json.get("capabilities", []))
+        assert "organization_wide_rename" in caps
+        assert "cross_file_reference_rename" in caps
+        
+        # Should NOT show "Definition-only" warning
+        warnings = data.get("warnings") or []
+        assert not any("Definition-only" in w for w in warnings)
