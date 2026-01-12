@@ -17,13 +17,22 @@ import pytest
 class TestProTierFeatures:
     """Pro tier feature tests: cross-file deps, confidence scoring, React metadata, decorators."""
 
+    @pytest.fixture(autouse=True)
+    def setup_pro_tier(self, monkeypatch):
+        """[20260111_FIX] Ensure Pro tier is active for all tests in this class."""
+        # Clear any license discovery disabling from other tests
+        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+        # Force Pro tier via test override
+        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+        monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+        yield
+
     @pytest.mark.asyncio
     async def test_pro_tier_cross_file_deps_python(self, monkeypatch, tmp_path: Path):
         """Pro tier extracts cross-file dependencies for Python."""
         from code_scalpel.mcp import server
 
         monkeypatch.setattr(server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False)
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
         # Create dependency chain: utils.py -> a.py -> b.py
         (tmp_path / "b.py").write_text("class B:\n    pass\n")
@@ -173,13 +182,22 @@ class TestProTierFeatures:
 class TestEnterpriseTierFeatures:
     """Enterprise tier feature tests: org-wide resolution, custom patterns, service boundaries."""
 
+    @pytest.fixture(autouse=True)
+    def setup_enterprise_tier(self, monkeypatch):
+        """[20260111_FIX] Ensure Enterprise tier is active for all tests in this class."""
+        # Clear any license discovery disabling from other tests
+        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+        # Force Enterprise tier via test override
+        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+        monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
+        yield
+
     @pytest.mark.asyncio
     async def test_enterprise_tier_org_wide_resolution(self, monkeypatch, tmp_path: Path):
         """Enterprise tier performs org-wide resolution across multiple files."""
         from code_scalpel.mcp import server
 
         monkeypatch.setattr(server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False)
-        monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
         # Create multi-module structure
         (tmp_path / "services").mkdir()
@@ -317,6 +335,15 @@ class TestEnterpriseTierFeatures:
 class TestFeatureGating:
     """Feature gating tests: verify tier-based access control."""
 
+    @pytest.fixture(autouse=True)
+    def setup_clean_tier_environment(self, monkeypatch):
+        """[20260111_FIX] Ensure clean tier environment for feature gating tests."""
+        # Clear any license discovery disabling from other tests
+        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+        # Enable test override - individual tests set their own tier
+        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+        yield
+
     @pytest.mark.asyncio
     async def test_community_tier_blocks_cross_file_deps(self, monkeypatch, tmp_path: Path):
         """Community tier blocks cross-file dependency extraction."""
@@ -412,6 +439,15 @@ class TestFeatureGating:
 
 class TestLicenseInvalidation:
     """License validation and fallback tests."""
+
+    @pytest.fixture(autouse=True)
+    def setup_clean_license_environment(self, monkeypatch):
+        """[20260111_FIX] Ensure clean license environment for fallback tests."""
+        # Clear any license discovery disabling from other tests
+        monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+        monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
+        monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
+        yield
 
     @pytest.mark.asyncio
     async def test_invalid_license_fallback_to_community(self, monkeypatch, tmp_path: Path):

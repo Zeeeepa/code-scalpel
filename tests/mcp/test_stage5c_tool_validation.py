@@ -12,9 +12,6 @@ at all tiers, but feature limits are enforced via limits.toml.
 
 import os
 
-# Ensure deterministic Community tier even if license files exist on disk.
-os.environ.setdefault("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-
 import pytest
 
 from code_scalpel.licensing import get_current_tier
@@ -25,8 +22,13 @@ class TestStage5CToolValidation:
     """Stage 5C-Z: Per-tool validation at community tier."""
 
     @pytest.fixture(autouse=True)
-    def verify_tier(self):
-        """Verify we're testing at community tier."""
+    def verify_tier(self, monkeypatch):
+        """Ensure deterministic Community tier for test isolation."""
+        # [20260111_FIX] Use monkeypatch for proper test isolation instead of
+        # module-level os.environ.setdefault which polluted subsequent test sessions.
+        monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+        monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
+        monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
         tier = get_current_tier()
         assert tier == "community", f"Expected community tier, got {tier}"
         yield
