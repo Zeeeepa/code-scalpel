@@ -167,8 +167,8 @@ tools = {
     # --- Batch 3 Tools ---
     "analyze_code": {
         "purpose": "Performs static code analysis to calculate complexity metrics (Cyclomatic, Halstead) and maintainability indices.",
-        "tier_limits": "Max file size 50KB for Community Tier",
-        "testing_focus": "Verify the 50KB limit blocks analysis for Community. Ensure Pro/Enterprise users can analyze larger files."
+        "tier_limits": "Max file size 1MB for Community Tier (10MB Pro, 100MB Enterprise)",
+        "testing_focus": "Verify the 1MB limit blocks analysis for Community. Ensure Pro/Enterprise users can analyze larger files."
     },
     "code_policy_check": {
         "purpose": "Enforces coding standards and policy compliance (formatting, docstrings, forbidden patterns) based on configuration.",
