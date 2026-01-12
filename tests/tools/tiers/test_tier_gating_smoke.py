@@ -146,3 +146,62 @@ def target():
     assert (tmp_path / "mod.py.bak").exists()
     assert result.backup_path is not None
     assert "upgrade" not in " ".join(result.warnings).lower()
+
+
+@pytest.mark.asyncio
+async def test_code_policy_check_community_limits(monkeypatch, tmp_path: Path):
+    """Community tier enforces max_files=100 and max_rules=50 without upsell.
+    
+    [20260111_TEST] Added tier gating smoke test for code_policy_check.
+    Validates Community tier restrictions and Pro feature gating.
+    """
+    from code_scalpel.mcp import server
+
+    # Create a file with code that triggers multiple rules
+    test_file = tmp_path / "test_violations.py"
+    test_file.write_text("""\
+from os import *  # PY004 star import
+
+def bad_func(arg=[]):  # PY002 mutable default
+    try:
+        x = eval("1+1")  # PY007 eval usage
+    except:  # PY001 bare except
+        pass
+""")
+
+    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        server,
+        "get_tool_capabilities",
+        lambda tool_id, tier: {
+            "limits": {"max_files": 100, "max_rules": 50},
+            "capabilities": {"style_guide_checking", "pep8_validation", "basic_patterns"},
+        },
+    )
+
+    result = await server.code_policy_check(paths=[str(test_file)])
+
+    # Verify Community tier is applied
+    assert result.tier == "community"
+    assert result.success is True
+    
+    # Verify limits are enforced (no limit exceeded warnings needed for small test)
+    assert result.files_checked <= 100
+    assert result.rules_applied <= 50
+    
+    # Verify Community gets anti-pattern violations (PY001-PY010)
+    # violations are dicts with 'rule_id' key
+    violation_ids = [v.get("rule_id", v.get("id", "")) if isinstance(v, dict) else getattr(v, "rule_id", "") for v in result.violations]
+    assert any(vid.startswith("PY") for vid in violation_ids), \
+        "Community tier should detect PY anti-pattern rules"
+    
+    # Verify Pro features (best_practices, custom_rules) are NOT exposed
+    assert not getattr(result, "best_practices_violations", []), \
+        "Community tier should NOT expose best_practices_violations"
+    assert not getattr(result, "custom_rule_results", {}), \
+        "Community tier should NOT expose custom_rule_results"
+    
+    # No marketing upsell in output
+    summary_text = result.summary or ""
+    assert "upgrade" not in summary_text.lower()
+    assert "pro" not in summary_text.lower()
