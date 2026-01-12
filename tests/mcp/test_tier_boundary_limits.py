@@ -1578,6 +1578,109 @@ def complex_analysis(values, mapping):
         assert data is not None
         assert data.get("success") is True
 
+
+async def test_symbolic_execute_community_no_smart_path_prioritization(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Community tier does NOT get smart_path_prioritization (Pro+ feature)."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def prioritize_me(x, y):
+    if x > 0:
+        if y > 0:
+            return x + y
+    return 0
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="community",
+        jti="community-no-prioritization",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Community tier confirmed
+        assert env_json["tier"] == "community"
+        assert data is not None
+        assert data.get("success") is True
+        # Community tier should NOT have path_prioritization (Pro+ feature)
+        assert data.get("path_prioritization") is None
+
+
+async def test_symbolic_execute_pro_has_smart_path_prioritization(
+    tmp_path: Path,
+    hs256_test_secret,
+    write_hs256_license_jwt,
+):
+    """Pro tier DOES get smart_path_prioritization feature."""
+    project_root = tmp_path / "proj"
+    _write_fixture_project(project_root)
+
+    code = """
+def prioritize_me(x, y):
+    if x > 0:
+        if y > 0:
+            return x + y
+    return 0
+"""
+
+    license_path = write_hs256_license_jwt(
+        tier="pro",
+        jti="pro-path-prioritization",
+        base_dir=tmp_path,
+        filename="license.jwt",
+    )
+
+    async with _stdio_session(
+        project_root=project_root,
+        extra_env={
+            "CODE_SCALPEL_ALLOW_HS256": "1",
+            "CODE_SCALPEL_SECRET_KEY": hs256_test_secret,
+            "CODE_SCALPEL_LICENSE_PATH": str(license_path),
+        },
+    ) as session:
+        payload = await session.call_tool(
+            "symbolic_execute",
+            arguments={
+                "code": code,
+                "language": "python",
+            },
+            read_timeout_seconds=timedelta(seconds=20),
+        )
+        env_json = _tool_json(payload)
+        data = _assert_envelope(env_json, tool_name="symbolic_execute")
+
+        # Pro tier confirmed
+        assert env_json["tier"] == "pro"
+        assert data is not None
+        assert data.get("success") is True
+        # Pro tier SHOULD have path_prioritization
+        assert data.get("path_prioritization") is not None
+
+
 async def test_simulate_refactor_enterprise_compliance_validation_warns_on_removal(
     tmp_path: Path,
     hs256_test_secret,
