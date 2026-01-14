@@ -230,20 +230,17 @@ class ControlFlowBuilder:
         Returns:
             List of (loop_header, body_blocks) tuples
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Identify strongly connected components
+        TODO [PRO][FEATURE]: Identify strongly connected components
         TODO [PRO]: Tarjan's algorithm for SCCs
         TODO [PRO]: Detect cycles in CFG
         TODO [PRO]: Mark cycle members
         TODO [PRO]: Add 15+ tests for SCC detection
-                TODO [PRO][FEATURE]: Detect loop headers and back edges
+        TODO [PRO][FEATURE]: Detect loop headers and back edges
         TODO [PRO]: Identify back edges (to ancestors)
         TODO [PRO]: Mark loop entry points
         TODO [PRO]: Find loop exit edges
         TODO [PRO]: Add 15+ tests for loop detection
-                TODO [ENTERPRISE][ENHANCEMENT]: Classify loop types
+        TODO [ENTERPRISE][ENHANCEMENT]: Classify loop types
         TODO [ENTERPRISE]: Distinguish for/while/do-while patterns
         TODO [ENTERPRISE]: Detect infinite loops
         TODO [ENTERPRISE]: Calculate loop bounds if possible
@@ -257,15 +254,12 @@ class ControlFlowBuilder:
         Returns:
             Dict mapping block ID to set of dominating block IDs
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Implement dominator tree algorithm
+        TODO [ENTERPRISE][FEATURE]: Implement dominator tree algorithm
         TODO [ENTERPRISE]: Compute dominators via fixed-point iteration
         TODO [ENTERPRISE]: Build dominator tree structure
         TODO [ENTERPRISE]: Mark dominator relationships
         TODO [ENTERPRISE]: Add 15+ tests for dominance
-                TODO [ENTERPRISE][ENHANCEMENT]: Compute immediate dominators
+        TODO [ENTERPRISE][ENHANCEMENT]: Compute immediate dominators
         TODO [ENTERPRISE]: Find direct dominator for each block
         TODO [ENTERPRISE]: Build idom edges
         TODO [ENTERPRISE]: Support dominance frontier queries
@@ -279,15 +273,12 @@ class ControlFlowBuilder:
         Returns:
             Dict mapping each block to set of blocks it reaches
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Fixed-point iteration for reachability
+        TODO [ENTERPRISE][FEATURE]: Fixed-point iteration for reachability
         TODO [ENTERPRISE]: BFS/DFS from entry block
         TODO [ENTERPRISE]: Mark reachable blocks
         TODO [ENTERPRISE]: Build reachability matrix
         TODO [ENTERPRISE]: Add 15+ tests for reachability
-                TODO [ENTERPRISE][FEATURE]: Identify unreachable code
+        TODO [ENTERPRISE][FEATURE]: Identify unreachable code
         TODO [ENTERPRISE]: Find blocks with no path from entry
         TODO [ENTERPRISE]: Report unreachable statement locations
         TODO [ENTERPRISE]: Suggest dead code removal
@@ -298,15 +289,12 @@ class ControlFlowBuilder:
         """
         Identify loop invariant statements.
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Detect statements independent of loop
+        TODO [ENTERPRISE][FEATURE]: Detect statements independent of loop
         TODO [ENTERPRISE]: Analyze data dependencies
         TODO [ENTERPRISE]: Find statements with no loop data dependencies
         TODO [ENTERPRISE]: Mark invariant code
         TODO [ENTERPRISE]: Add 15+ tests for invariant detection
-                TODO [ENTERPRISE][FEATURE]: Flag for code motion optimization
+        TODO [ENTERPRISE][FEATURE]: Flag for code motion optimization
         TODO [ENTERPRISE]: Suggest statement hoisting
         TODO [ENTERPRISE]: Calculate performance impact
         TODO [ENTERPRISE]: Verify safety of motion
@@ -317,23 +305,20 @@ class ControlFlowBuilder:
         """
         Generate visualization of control flow graph.
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Generate Graphviz DOT format
+        TODO [PRO][FEATURE]: Generate Graphviz DOT format
         TODO [PRO]: Create node definitions
         TODO [PRO]: Create edge definitions
         TODO [PRO]: Add graph properties
         TODO [PRO]: Output DOT syntax
         TODO [PRO]: Add 10+ tests for DOT generation
-                TODO [PRO][FEATURE]: Color-code different block types
+        TODO [PRO][FEATURE]: Color-code different block types
         TODO [PRO]: Entry block: green
         TODO [PRO]: Exit block: red
         TODO [PRO]: Normal blocks: blue
         TODO [PRO]: Branch blocks: yellow
         TODO [PRO]: Exception blocks: orange
         TODO [PRO]: Add 8+ tests for coloring
-                TODO [ENTERPRISE][ENHANCEMENT]: Support interactive visualization
+        TODO [ENTERPRISE][ENHANCEMENT]: Support interactive visualization
         TODO [ENTERPRISE]: Generate SVG with interactivity
         TODO [ENTERPRISE]: Add hover details (statements)
         TODO [ENTERPRISE]: Support HTML export
