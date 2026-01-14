@@ -32,11 +32,11 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "min_readme_sections": 5,
             "max_lines_per_function_undocumented": 20,
         }
-        # [20251221_FEATURE] TODO: Support Google/NumPy/Sphinx docstring styles
-        # [20251221_FEATURE] TODO: Generate type hints from code analysis
-        # [20251221_FEATURE] TODO: Create API documentation from docstrings
-        # [20251221_ENHANCEMENT] TODO: Generate usage examples from test code
-        # [20251221_ENHANCEMENT] TODO: Add documentation linting and validation
+        # TODO [FEATURE]: Support Google/NumPy/Sphinx docstring styles
+        # TODO [FEATURE]: Generate type hints from code analysis
+        # TODO [FEATURE]: Create API documentation from docstrings
+        # TODO [ENHANCEMENT]: Generate usage examples from test code
+        # TODO [ENHANCEMENT]: Add documentation linting and validation
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """
@@ -182,9 +182,9 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         """
         Analyze docstring coverage and identify gaps.
 
-        [20251221_FEATURE] TODO: Parse existing docstrings and validate completeness
-        [20251221_FEATURE] TODO: Identify missing parameter documentation
-        [20251221_FEATURE] TODO: Detect return type documentation gaps
+        TODO [FEATURE]: Parse existing docstrings and validate completeness
+        TODO [FEATURE]: Identify missing parameter documentation
+        TODO [FEATURE]: Detect return type documentation gaps
         """
         gaps = []
         # Implementation placeholder
@@ -194,9 +194,9 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         """
         Analyze type hint coverage.
 
-        [20251221_FEATURE] TODO: Detect functions without type hints
-        [20251221_FEATURE] TODO: Infer types from code analysis
-        [20251221_FEATURE] TODO: Detect incomplete type hints (missing return types)
+        TODO [FEATURE]: Detect functions without type hints
+        TODO [FEATURE]: Infer types from code analysis
+        TODO [FEATURE]: Detect incomplete type hints (missing return types)
         """
         gaps = []
         # Implementation placeholder
@@ -208,9 +208,9 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         """
         Identify API documentation needs.
 
-        [20251221_FEATURE] TODO: Identify public API functions/classes
-        [20251221_FEATURE] TODO: Generate API reference structure
-        [20251221_FEATURE] TODO: Create usage example documentation
+        TODO [FEATURE]: Identify public API functions/classes
+        TODO [FEATURE]: Generate API reference structure
+        TODO [FEATURE]: Create usage example documentation
         """
         docs = []
         # Implementation placeholder
@@ -231,9 +231,9 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         """
         Generate documentation for a target.
 
-        [20251221_FEATURE] TODO: Use LLM for natural language generation
-        [20251221_FEATURE] TODO: Extract examples from test code
-        [20251221_ENHANCEMENT] TODO: Support markdown/RST/HTML output formats
+        TODO [FEATURE]: Use LLM for natural language generation
+        TODO [FEATURE]: Extract examples from test code
+        TODO [ENHANCEMENT]: Support markdown/RST/HTML output formats
         """
         return {
             "success": True,

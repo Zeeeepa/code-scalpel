@@ -1,6 +1,7 @@
 """Test basic ProjectCrawler tool execution and functionality."""
 
 import pytest
+
 from code_scalpel.analysis.project_crawler import ProjectCrawler
 
 
@@ -30,7 +31,7 @@ class TestBasicExecution:
     def test_error_handling_nonexistent_path(self):
         """Verify ProjectCrawler raises error for nonexistent path."""
         nonexistent = "/nonexistent/path/to/project"
-        
+
         # ProjectCrawler should raise ValueError for nonexistent paths
         with pytest.raises(ValueError):
             ProjectCrawler(nonexistent)
@@ -40,7 +41,13 @@ class TestBasicExecution:
         crawler = ProjectCrawler(str(small_python_extended))
         result = crawler.crawl()
 
-        required_fields = ["root_path", "timestamp", "total_files", "total_functions", "total_classes"]
+        required_fields = [
+            "root_path",
+            "timestamp",
+            "total_files",
+            "total_functions",
+            "total_classes",
+        ]
         for field in required_fields:
             assert hasattr(result, field), f"Result missing required field: {field}"
 
@@ -53,4 +60,6 @@ class TestBasicExecution:
         required_fields = ["path", "language", "status"]
         for file_result in result.files_analyzed:
             for field in required_fields:
-                assert hasattr(file_result, field), f"FileAnalysisResult missing required field: {field}"
+                assert hasattr(
+                    file_result, field
+                ), f"FileAnalysisResult missing required field: {field}"

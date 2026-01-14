@@ -151,7 +151,7 @@ def target():
 @pytest.mark.asyncio
 async def test_code_policy_check_community_limits(monkeypatch, tmp_path: Path):
     """Community tier enforces max_files=100 and max_rules=50 without upsell.
-    
+
     [20260111_TEST] Added tier gating smoke test for code_policy_check.
     Validates Community tier restrictions and Pro feature gating.
     """
@@ -159,7 +159,8 @@ async def test_code_policy_check_community_limits(monkeypatch, tmp_path: Path):
 
     # Create a file with code that triggers multiple rules
     test_file = tmp_path / "test_violations.py"
-    test_file.write_text("""\
+    test_file.write_text(
+        """\
 from os import *  # PY004 star import
 
 def bad_func(arg=[]):  # PY002 mutable default
@@ -167,7 +168,8 @@ def bad_func(arg=[]):  # PY002 mutable default
         x = eval("1+1")  # PY007 eval usage
     except:  # PY001 bare except
         pass
-""")
+"""
+    )
 
     monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
     monkeypatch.setattr(
@@ -175,7 +177,11 @@ def bad_func(arg=[]):  # PY002 mutable default
         "get_tool_capabilities",
         lambda tool_id, tier: {
             "limits": {"max_files": 100, "max_rules": 50},
-            "capabilities": {"style_guide_checking", "pep8_validation", "basic_patterns"},
+            "capabilities": {
+                "style_guide_checking",
+                "pep8_validation",
+                "basic_patterns",
+            },
         },
     )
 
@@ -184,23 +190,33 @@ def bad_func(arg=[]):  # PY002 mutable default
     # Verify Community tier is applied
     assert result.tier == "community"
     assert result.success is True
-    
+
     # Verify limits are enforced (no limit exceeded warnings needed for small test)
     assert result.files_checked <= 100
     assert result.rules_applied <= 50
-    
+
     # Verify Community gets anti-pattern violations (PY001-PY010)
     # violations are dicts with 'rule_id' key
-    violation_ids = [v.get("rule_id", v.get("id", "")) if isinstance(v, dict) else getattr(v, "rule_id", "") for v in result.violations]
-    assert any(vid.startswith("PY") for vid in violation_ids), \
-        "Community tier should detect PY anti-pattern rules"
-    
+    violation_ids = [
+        (
+            v.get("rule_id", v.get("id", ""))
+            if isinstance(v, dict)
+            else getattr(v, "rule_id", "")
+        )
+        for v in result.violations
+    ]
+    assert any(
+        vid.startswith("PY") for vid in violation_ids
+    ), "Community tier should detect PY anti-pattern rules"
+
     # Verify Pro features (best_practices, custom_rules) are NOT exposed
-    assert not getattr(result, "best_practices_violations", []), \
-        "Community tier should NOT expose best_practices_violations"
-    assert not getattr(result, "custom_rule_results", {}), \
-        "Community tier should NOT expose custom_rule_results"
-    
+    assert not getattr(
+        result, "best_practices_violations", []
+    ), "Community tier should NOT expose best_practices_violations"
+    assert not getattr(
+        result, "custom_rule_results", {}
+    ), "Community tier should NOT expose custom_rule_results"
+
     # No marketing upsell in output
     summary_text = result.summary or ""
     assert "upgrade" not in summary_text.lower()
@@ -210,7 +226,7 @@ def bad_func(arg=[]):  # PY002 mutable default
 @pytest.mark.asyncio
 async def test_type_evaporation_scan_community_limits(monkeypatch):
     """Community tier enforces frontend-only analysis, max 50 files, no Pro features.
-    
+
     [20260111_TEST] Added tier gating smoke test for type_evaporation_scan.
     Validates Community tier is frontend-only and Pro features (cross_file_issues,
     implicit_any, network_boundaries) are gated.
@@ -237,7 +253,11 @@ if role == 'admin':
         "get_tool_capabilities",
         lambda tool_id, tier: {
             "limits": {"max_files": 50, "frontend_only": True},
-            "capabilities": {"explicit_any_detection", "typescript_any_scanning", "basic_type_check"},
+            "capabilities": {
+                "explicit_any_detection",
+                "typescript_any_scanning",
+                "basic_type_check",
+            },
         },
     )
 
@@ -248,31 +268,44 @@ if role == 'admin':
 
     # Verify tool returns success
     assert result.success is True
-    
+
     # Verify frontend issues are detected (Community capability)
     # frontend_vulnerabilities should be accessible (may be 0 or list)
     assert hasattr(result, "frontend_vulnerabilities")
-    
+
     # Verify Pro features are omitted/empty for Community tier
     # Pro features: cross_file_issues, implicit_any_count > 0, network_boundaries
     # Community tier should have these as 0 or empty
     cross_file = getattr(result, "cross_file_issues", 0)
-    assert cross_file in (0, None, []), \
-        f"Community tier should have cross_file_issues=0/empty, got {cross_file}"
-    
+    assert cross_file in (
+        0,
+        None,
+        [],
+    ), f"Community tier should have cross_file_issues=0/empty, got {cross_file}"
+
     implicit_any = getattr(result, "implicit_any_count", 0)
-    assert implicit_any == 0, \
-        f"Community tier should have implicit_any_count=0, got {implicit_any}"
-    
+    assert (
+        implicit_any == 0
+    ), f"Community tier should have implicit_any_count=0, got {implicit_any}"
+
     network = getattr(result, "network_boundaries", [])
-    assert network in (0, None, []), \
-        f"Community tier should have network_boundaries empty, got {network}"
-    
+    assert network in (
+        0,
+        None,
+        [],
+    ), f"Community tier should have network_boundaries empty, got {network}"
+
     # Verify Enterprise features are omitted/empty
     schemas = getattr(result, "generated_schemas", None)
-    assert schemas in (None, [], {}), \
-        f"Community tier should NOT have generated_schemas, got {schemas}"
-    
+    assert schemas in (
+        None,
+        [],
+        {},
+    ), f"Community tier should NOT have generated_schemas, got {schemas}"
+
     pydantic = getattr(result, "pydantic_models", None)
-    assert pydantic in (None, [], {}), \
-        f"Community tier should NOT have pydantic_models, got {pydantic}"
+    assert pydantic in (
+        None,
+        [],
+        {},
+    ), f"Community tier should NOT have pydantic_models, got {pydantic}"

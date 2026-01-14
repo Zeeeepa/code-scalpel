@@ -1,0 +1,12 @@
+{
+  "id": "op_20260114112532092945_e8186084",
+  "timestamp": "2026-01-14T11:25:32.092987",
+  "event_type": "SANDBOX_EXECUTION",
+  "operation": "verify_fix",
+  "input_hash": "a4ca01c3933c4310385ed67b958c68b6317bf06469de02d09c2775c3d54beeff",
+  "output_hash": "027f906e2bb3dbfd1f18674dd17fb726e32dd17e36823baa5fad10105d782438",
+  "success": true,
+  "duration_ms": 0,
+  "metadata": {},
+  "parent_id": "op_20260114112532064871_44427b46"
+}

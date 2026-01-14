@@ -1,7 +1,5 @@
 """Test error handling and edge cases."""
 
-import pytest
-from pathlib import Path
 from code_scalpel.analysis.project_crawler import ProjectCrawler
 
 
@@ -46,7 +44,7 @@ class TestErrorHandling:
         """Verify crawl handles very large files."""
         project_dir = tmp_path / "large"
         project_dir.mkdir()
-        
+
         # Create a large Python file
         large_file = project_dir / "large.py"
         with open(large_file, "w") as f:
@@ -65,12 +63,12 @@ class TestErrorHandling:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         (project_dir / "main.py").write_text("print('hello')")
-        
+
         # Create a symlink
         symlink_dir = tmp_path / "symlink"
         try:
             symlink_dir.symlink_to(project_dir)
-            
+
             crawler = ProjectCrawler(str(project_dir))
             result = crawler.crawl()
             assert result is not None
@@ -95,15 +93,15 @@ class TestErrorHandling:
         project_dir = tmp_path / "project"
         project_dir.mkdir()
         (project_dir / "main.py").write_text("print('hello')")
-        
+
         try:
             # Create circular symlink
             link_dir = project_dir / "link"
             link_dir.symlink_to(project_dir)
-            
+
             crawler = ProjectCrawler(str(project_dir))
             result = crawler.crawl()
-            
+
             # Should complete without infinite loop
             assert result is not None
         except (OSError, RecursionError):

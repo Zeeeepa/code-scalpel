@@ -81,7 +81,9 @@ async def test_validate_paths_timeout_propagates_cleanly(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync)
+    monkeypatch.setattr(
+        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
+    )
 
     with pytest.raises(asyncio.TimeoutError):
         await asyncio.wait_for(
@@ -109,7 +111,9 @@ async def test_validate_paths_timeout_respects_tier_limit(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync)
+    monkeypatch.setattr(
+        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
+    )
 
     tier_limits = {
         "capabilities": [],
@@ -208,7 +212,9 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
 
     monkeypatch.setattr(mcp_server, "_validate_paths_sync", fast_validate_paths_sync)
     monkeypatch.setattr(
-        mcp_server, "get_tool_capabilities", lambda tool, tier: {"capabilities": [], "limits": {"max_paths": None}}
+        mcp_server,
+        "get_tool_capabilities",
+        lambda tool, tier: {"capabilities": [], "limits": {"max_paths": None}},
     )
 
     batches = {
@@ -225,4 +231,6 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
         duration = time.monotonic() - start
         total = len(result.accessible) + len(result.inaccessible)
         assert total == len(paths)
-        assert duration < thresholds[key], f"{key} batch exceeded threshold: {duration:.2f}s"
+        assert (
+            duration < thresholds[key]
+        ), f"{key} batch exceeded threshold: {duration:.2f}s"

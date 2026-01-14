@@ -27,66 +27,66 @@ TODO ITEMS: analysis/__init__.py
 COMMUNITY TIER - Core Analysis Features (P0-P2)
 ============================================================================
 
-# [P0_CRITICAL] Complete module integration:
-#     - Ensure CodeAnalyzer and ProjectCrawler work seamlessly together
-#     - Unified configuration for analysis depth/scope
-#     - Test count: 20 tests (integration)
+# TODO [COMMUNITY][P0_CRITICAL]: Complete module integration
+# TODO [COMMUNITY]: Ensure CodeAnalyzer and ProjectCrawler work seamlessly together
+# TODO [COMMUNITY]: Unified configuration for analysis depth/scope
+# TODO [COMMUNITY]: Test count: 20 tests (integration)
 
-# [P1_HIGH] Add analysis orchestration:
-#     - analyze_project() convenience function
-#     - Combined metrics from all analyzers
-#     - Unified report generation
-#     - Test count: 25 tests (orchestration)
+# TODO [COMMUNITY][P1_HIGH]: Add analysis orchestration
+# TODO [COMMUNITY]: analyze_project() convenience function
+# TODO [COMMUNITY]: Combined metrics from all analyzers
+# TODO [COMMUNITY]: Unified report generation
+# TODO [COMMUNITY]: Test count: 25 tests (orchestration)
 
-# [P2_MEDIUM] Add caching layer:
-#     - Cache analysis results
-#     - Incremental analysis support
-#     - Cache invalidation on file change
-#     - Test count: 20 tests (caching)
+# TODO [COMMUNITY][P2_MEDIUM]: Add caching layer
+# TODO [COMMUNITY]: Cache analysis results
+# TODO [COMMUNITY]: Incremental analysis support
+# TODO [COMMUNITY]: Cache invalidation on file change
+# TODO [COMMUNITY]: Test count: 20 tests (caching)
 
 ============================================================================
 PRO TIER - Advanced Analysis Features (P1-P3)
 ============================================================================
 
-# [P1_HIGH] Multi-language analysis:
-#     - JavaScript/TypeScript analysis
-#     - Java analysis
-#     - Unified metrics across languages
-#     - Test count: 40 tests (multi-lang)
+# TODO [PRO][P1_HIGH]: Multi-language analysis
+# TODO [PRO]: JavaScript/TypeScript analysis
+# TODO [PRO]: Java analysis
+# TODO [PRO]: Unified metrics across languages
+# TODO [PRO]: Test count: 40 tests (multi-lang)
 
-# [P2_MEDIUM] Advanced metrics:
-#     - Cognitive complexity
-#     - Halstead metrics
-#     - Maintainability index
-#     - Test count: 30 tests (metrics)
+# TODO [PRO][P2_MEDIUM]: Advanced metrics
+# TODO [PRO]: Cognitive complexity
+# TODO [PRO]: Halstead metrics
+# TODO [PRO]: Maintainability index
+# TODO [PRO]: Test count: 30 tests (metrics)
 
-# [P3_LOW] CI/CD integration:
-#     - JUnit XML reports
-#     - Threshold-based exit codes
-#     - GitHub Actions integration
-#     - Test count: 15 tests (CI/CD)
+# TODO [PRO][P3_LOW]: CI/CD integration
+# TODO [PRO]: JUnit XML reports
+# TODO [PRO]: Threshold-based exit codes
+# TODO [PRO]: GitHub Actions integration
+# TODO [PRO]: Test count: 15 tests (CI/CD)
 
 ============================================================================
 ENTERPRISE TIER - Enterprise Analysis Features (P2-P4)
 ============================================================================
 
-# [P2_MEDIUM] Security analysis:
-#     - SAST rule engine
-#     - Vulnerability scanning
-#     - SARIF output
-#     - Test count: 35 tests (security)
+# TODO [ENTERPRISE][P2_MEDIUM]: Security analysis
+# TODO [ENTERPRISE]: SAST rule engine
+# TODO [ENTERPRISE]: Vulnerability scanning
+# TODO [ENTERPRISE]: SARIF output
+# TODO [ENTERPRISE]: Test count: 35 tests (security)
 
-# [P3_LOW] Advanced visualization:
-#     - Interactive HTML reports
-#     - D3.js graphs
-#     - Trend analysis
-#     - Test count: 20 tests (visualization)
+# TODO [ENTERPRISE][P3_LOW]: Advanced visualization
+# TODO [ENTERPRISE]: Interactive HTML reports
+# TODO [ENTERPRISE]: D3.js graphs
+# TODO [ENTERPRISE]: Trend analysis
+# TODO [ENTERPRISE]: Test count: 20 tests (visualization)
 
-# [P4_LOW] Enterprise features:
-#     - Parallel analysis
-#     - Distributed workers
-#     - Neo4j export
-#     - Test count: 15 tests (enterprise)
+# TODO [ENTERPRISE][P4_LOW]: Enterprise features
+# TODO [ENTERPRISE]: Parallel analysis
+# TODO [ENTERPRISE]: Distributed workers
+# TODO [ENTERPRISE]: Neo4j export
+# TODO [ENTERPRISE]: Test count: 15 tests (enterprise)
 
 ============================================================================
 TOTAL ESTIMATED TESTS: 220 tests

@@ -42,10 +42,10 @@ OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
 DEFAULT_TIMEOUT = 10  # seconds
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # seconds
-# [20251221_FEATURE] TODO: Add local vulnerability database caching
-# [20251221_FEATURE] TODO: Support ecosystem-specific vulnerability scoring
-# [20251221_ENHANCEMENT] TODO: Add advisory enrichment with CVSS and exploit data
-# [20251221_ENHANCEMENT] TODO: Support batch vulnerability checks with deduplication
+# TODO [FEATURE]: Add local vulnerability database caching
+# TODO [FEATURE]: Support ecosystem-specific vulnerability scoring
+# TODO [ENHANCEMENT]: Add advisory enrichment with CVSS and exploit data
+# TODO [ENHANCEMENT]: Support batch vulnerability checks with deduplication
 
 
 @dataclass
@@ -84,28 +84,21 @@ class OSVClient:
 
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Basic single package vulnerability query
+    ====================================================================        TODO [COMMUNITY][FEATURE]: Basic single package vulnerability query
       - Query OSV API for individual package
       - Parse vulnerability response
       - Extract CVE/GHSA identifiers
       - Return Vulnerability objects
-      - Add 15+ tests for single package queries
-
-    [20251224_TIER1_TODO] FEATURE: Batch vulnerability checking
+      - Add 15+ tests for single package queries        TODO [COMMUNITY][FEATURE]: Batch vulnerability checking
       - Query multiple packages in single request
       - Build batch payload
       - Parse results mapping
       - Handle large batches (100+ packages)
-      - Add 15+ tests for batch queries
-
-    [20251224_TIER1_TODO] FEATURE: Severity classification
+      - Add 15+ tests for batch queries        TODO [COMMUNITY][FEATURE]: Severity classification
       - Parse CVSS scores from OSV response
       - Convert numeric scores to severity levels
       - Handle multiple severity formats
-      - Add 12+ tests for severity parsing
-
-    [20251224_TIER1_TODO] FEATURE: Error handling and retries
+      - Add 12+ tests for severity parsing        TODO [COMMUNITY][FEATURE]: Error handling and retries
       - Implement exponential backoff retry logic
       - Handle network timeouts
       - Graceful fallback on API failure
@@ -113,34 +106,25 @@ class OSVClient:
 
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
-    [20251224_TIER2_TODO] FEATURE: In-memory vulnerability caching
+    ====================================================================        TODO [PRO][FEATURE]: In-memory vulnerability caching
       - LRU cache for package queries
       - TTL-based cache invalidation
       - Cache statistics and metrics
-      - Add 15+ tests for caching
-
-    [20251224_TIER2_TODO] FEATURE: Ecosystem-specific vulnerability scoring
+      - Add 15+ tests for caching        TODO [PRO][FEATURE]: Ecosystem-specific vulnerability scoring
       - Custom scoring for PyPI vulnerabilities
       - npm-specific vulnerability assessment
       - Maven/Java-specific scoring
       - Framework-aware risk calculation
-      - Add 15+ tests for ecosystem scoring
-
-    [20251224_TIER2_TODO] FEATURE: Advisory enrichment with CVSS and exploit data
+      - Add 15+ tests for ecosystem scoring        TODO [PRO][FEATURE]: Advisory enrichment with CVSS and exploit data
       - Parse CVSS v3 and v4 scores
       - Extract exploit availability flags
       - Include CWE identifiers
       - Track advisory publication dates
-      - Add 15+ tests for enrichment
-
-    [20251224_TIER2_TODO] FEATURE: Batch vulnerability deduplication
+      - Add 15+ tests for enrichment        TODO [PRO][FEATURE]: Batch vulnerability deduplication
       - Detect duplicate vulnerabilities across packages
       - Aggregate impact across dependencies
       - Identify critical vulnerabilities
-      - Add 12+ tests for deduplication
-
-    [20251224_TIER2_TODO] FEATURE: Local vulnerability database fallback
+      - Add 12+ tests for deduplication        TODO [PRO][FEATURE]: Local vulnerability database fallback
       - Cache vulnerability database locally
       - Periodic sync with OSV
       - Offline query capability
@@ -148,26 +132,19 @@ class OSVClient:
 
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
-    [20251224_TIER3_TODO] FEATURE: ML-based vulnerability risk prediction
+    ====================================================================        TODO [ENTERPRISE][FEATURE]: ML-based vulnerability risk prediction
       - Predict exploitability from CVE description
       - Estimate patch time based on ecosystem
       - Prioritize vulnerabilities by impact
-      - Add 15+ tests for predictions
-
-    [20251224_TIER3_TODO] FEATURE: Vulnerability trend analysis
+      - Add 15+ tests for predictions        TODO [ENTERPRISE][FEATURE]: Vulnerability trend analysis
       - Track vulnerability discovery trends
       - Identify ecosystem-specific patterns
       - Predict future vulnerabilities
-      - Add 12+ tests for trend analysis
-
-    [20251224_TIER3_TODO] FEATURE: Integration with dependency lock files
+      - Add 12+ tests for trend analysis        TODO [ENTERPRISE][FEATURE]: Integration with dependency lock files
       - Parse poetry.lock, package-lock.json, Cargo.lock
       - Match OSV vulnerabilities to lock file entries
       - Generate security reports
-      - Add 15+ tests for lock file parsing
-
-    [20251224_TIER3_TODO] FEATURE: Vulnerability remediation recommendations
+      - Add 15+ tests for lock file parsing        TODO [ENTERPRISE][FEATURE]: Vulnerability remediation recommendations
       - Identify safe upgrade paths
       - Suggest dependency updates
       - Check compatibility with current code

@@ -3,14 +3,20 @@
 Quick test to verify how limits.toml omission affects get_graph_neighborhood.
 """
 
-from code_scalpel.licensing.features import get_tool_capabilities, TOOL_CAPABILITIES
-from code_scalpel.licensing.config_loader import load_limits, get_tool_limits, merge_limits
+from code_scalpel.licensing.config_loader import (
+    get_tool_limits,
+    load_limits,
+    merge_limits,
+)
+from code_scalpel.licensing.features import TOOL_CAPABILITIES, get_tool_capabilities
 
 # Check hardcoded defaults
 print("=" * 80)
 print("HARDCODED DEFAULTS from features.py:")
 print("=" * 80)
-enterprise_defaults = TOOL_CAPABILITIES.get("get_graph_neighborhood", {}).get("enterprise", {})
+enterprise_defaults = TOOL_CAPABILITIES.get("get_graph_neighborhood", {}).get(
+    "enterprise", {}
+)
 print(f"Enterprise limits (hardcoded): {enterprise_defaults.get('limits', {})}")
 print()
 

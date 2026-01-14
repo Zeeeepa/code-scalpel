@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
 pytestmark = pytest.mark.asyncio
@@ -38,7 +39,9 @@ async def test_no_fp_html_escaped(monkeypatch: pytest.MonkeyPatch):
             if data.is_valid and data.tier == "pro":
                 # Use monkeypatch fixture implicitly via environment since pytest-asyncio provides event loop
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 break
@@ -53,12 +56,18 @@ async def test_no_fp_html_escaped(monkeypatch: pytest.MonkeyPatch):
     result = await security_scan(code=code)
 
     assert result.success is True
-    xss_vulns = [v for v in result.vulnerabilities if v.cwe == "CWE-79" or "xss" in v.type.lower()]
+    xss_vulns = [
+        v
+        for v in result.vulnerabilities
+        if v.cwe == "CWE-79" or "xss" in v.type.lower()
+    ]
     if xss_vulns:
         # Pro tier: if any XSS remains, confidence should be non-high and FP analysis present
         assert result.confidence_scores is not None
         xss_conf = [
-            score for key, score in result.confidence_scores.items() if key.lower().startswith("xss@")
+            score
+            for key, score in result.confidence_scores.items()
+            if key.lower().startswith("xss@")
         ]
         assert all(conf <= 0.7 for conf in xss_conf)
         assert result.false_positive_analysis is not None

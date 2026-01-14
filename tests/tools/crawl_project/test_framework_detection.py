@@ -1,6 +1,5 @@
 """Test framework detection across different Python frameworks."""
 
-import pytest
 from code_scalpel.analysis.project_crawler import ProjectCrawler
 
 
@@ -51,9 +50,12 @@ class TestFrameworkDetection:
         assert result.files_analyzed
         languages = {f.language for f in result.files_analyzed}
         # Should detect TypeScript/JavaScript
-        assert any(
-            lang in languages for lang in ["javascript", "typescript", "tsx", "jsx"]
-        ) or True  # Fallback if framework detection is minimal
+        assert (
+            any(
+                lang in languages for lang in ["javascript", "typescript", "tsx", "jsx"]
+            )
+            or True
+        )  # Fallback if framework detection is minimal
 
     def test_framework_info_in_summary(self, flask_project):
         """Verify framework info is available in result summary."""

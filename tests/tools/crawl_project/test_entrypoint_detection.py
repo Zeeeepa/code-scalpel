@@ -1,6 +1,5 @@
 """Test entrypoint and main function detection."""
 
-import pytest
 from code_scalpel.analysis.project_crawler import ProjectCrawler
 
 
@@ -46,7 +45,11 @@ class TestEntrypointDetection:
         # Django urls should be found
         file_paths = {f.path for f in result.files_analyzed}
         # Django projects have urls.py
-        django_files = [p for p in file_paths if any(name in str(p) for name in ["urls.py", "views.py", "manage.py"])]
+        django_files = [
+            p
+            for p in file_paths
+            if any(name in str(p) for name in ["urls.py", "views.py", "manage.py"])
+        ]
         assert len(django_files) > 0
 
     def test_function_count_includes_entry_functions(self, flask_project):

@@ -50,7 +50,7 @@ async def test_invalid_license_falls_back_to_community(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    
+
     # Simulate invalid license by mocking tier detection
     monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
@@ -95,7 +95,7 @@ async def test_expired_license_falls_back_to_community(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    
+
     # Simulate expired license by clamping to community
     monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
@@ -139,7 +139,7 @@ async def test_missing_license_defaults_to_community(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    
+
     # Disable license discovery and no license path provided
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)

@@ -51,7 +51,7 @@ process = [{'id': item['id'], 'value': item['value']} for item in items]
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -87,7 +87,7 @@ def get_array(count: int) -> List[T]:
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -141,7 +141,7 @@ class User:
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -199,7 +199,7 @@ nested = {
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -257,7 +257,7 @@ async def with_try_except(user_id):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -307,7 +307,7 @@ class MyComponent:
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -339,7 +339,7 @@ index = arr[0] if arr else None
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -371,7 +371,7 @@ first, *rest = array
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -410,16 +410,20 @@ query = sorted(
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
 async def test_edge_case_many_small_functions(tmp_path: Path):
     """Test handling of code with many small functions."""
     # Create code with 50 small functions
-    funcs_ts = "\n".join([f"const func{i} = () => fetch('/api/{i}');" for i in range(50)])
-    funcs_py = "\n".join([f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)])
-    
+    funcs_ts = "\n".join(
+        [f"const func{i} = () => fetch('/api/{i}');" for i in range(50)]
+    )
+    funcs_py = "\n".join(
+        [f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)]
+    )
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -434,7 +438,7 @@ async def test_edge_case_many_small_functions(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -464,7 +468,7 @@ url = "/api/data"
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]
 
 
@@ -502,5 +506,5 @@ def process(data):  # end of line
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") in [True, False]

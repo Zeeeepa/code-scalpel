@@ -32,11 +32,11 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "max_method_length": 20,
             "max_nesting_depth": 3,
         }
-        # [20251221_FEATURE] TODO: Support extract method refactoring with parameter analysis
-        # [20251221_FEATURE] TODO: Add extract class detection and execution
-        # [20251221_FEATURE] TODO: Support move method/field across classes
-        # [20251221_ENHANCEMENT] TODO: Add design pattern refactoring templates
-        # [20251221_ENHANCEMENT] TODO: Support inline method/variable refactoring with usage updates
+        # TODO [FEATURE]: Support extract method refactoring with parameter analysis
+        # TODO [FEATURE]: Add extract class detection and execution
+        # TODO [FEATURE]: Support move method/field across classes
+        # TODO [ENHANCEMENT]: Add design pattern refactoring templates
+        # TODO [ENHANCEMENT]: Support inline method/variable refactoring with usage updates
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """
@@ -179,8 +179,8 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         """
         Analyze file structure for extraction opportunities.
 
-        [20251221_FEATURE] TODO: Implement extract method detection
-        [20251221_FEATURE] TODO: Implement extract class detection
+        TODO [FEATURE]: Implement extract method detection
+        TODO [FEATURE]: Implement extract class detection
         """
         opportunities = []
         # Implementation placeholder
@@ -192,9 +192,9 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         """
         Detect design pattern violations and anti-patterns.
 
-        [20251221_FEATURE] TODO: Detect God Object pattern
-        [20251221_FEATURE] TODO: Detect Feature Envy pattern
-        [20251221_FEATURE] TODO: Detect Data Clump pattern
+        TODO [FEATURE]: Detect God Object pattern
+        TODO [FEATURE]: Detect Feature Envy pattern
+        TODO [FEATURE]: Detect Data Clump pattern
         """
         violations = []
         # Implementation placeholder
@@ -206,8 +206,8 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         """
         Identify opportunities for better modularization.
 
-        [20251221_FEATURE] TODO: Detect tightly coupled components
-        [20251221_FEATURE] TODO: Suggest module/package splits
+        TODO [FEATURE]: Detect tightly coupled components
+        TODO [FEATURE]: Suggest module/package splits
         """
         opportunities = []
         # Implementation placeholder
@@ -235,8 +235,8 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         """
         Execute a specific refactoring safely.
 
-        [20251221_FEATURE] TODO: Use simulate_code_change before applying
-        [20251221_FEATURE] TODO: Apply safe change with apply_safe_change
+        TODO [FEATURE]: Use simulate_code_change before applying
+        TODO [FEATURE]: Apply safe change with apply_safe_change
         """
         return {
             "success": True,

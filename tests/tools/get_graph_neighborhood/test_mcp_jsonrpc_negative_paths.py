@@ -9,12 +9,11 @@ Validates JSON-RPC compliance for:
 """
 
 import json
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import mcp.types as mcp_types
-from code_scalpel.mcp.server import get_graph_neighborhood, GraphNeighborhoodResult
+import pytest
+
+from code_scalpel.mcp.server import GraphNeighborhoodResult, get_graph_neighborhood
 
 pytestmark = pytest.mark.asyncio
 
@@ -52,7 +51,9 @@ class TestJSONRPCMissingParameters:
 
     async def test_missing_optional_params_use_defaults(self):
         """Missing optional parameters should use default values."""
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -73,7 +74,9 @@ class TestJSONRPCMissingParameters:
         """Null values for typed params should cause validation errors."""
         # [20260104_TEST] Tool should handle None gracefully or reject
         # Python type hints don't enforce at runtime; MCP SDK handles validation
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -90,7 +93,10 @@ class TestJSONRPCMissingParameters:
                     assert isinstance(result, GraphNeighborhoodResult)
                     if not result.success:
                         # Tool rejected invalid type
-                        assert "invalid" in result.error.lower() or "none" in result.error.lower()
+                        assert (
+                            "invalid" in result.error.lower()
+                            or "none" in result.error.lower()
+                        )
                 except TypeError:
                     # Tool doesn't handle None; that's acceptable too
                     pass
@@ -243,7 +249,9 @@ class TestJSONRPCProtocolViolations:
         # Note: Python function calls reject unexpected keyword arguments
         # MCP SDK validates schema before tool dispatch
         # Test that tool handles missing required params gracefully
-        with pytest.raises(TypeError, match="got an unexpected keyword argument|missing.*required"):
+        with pytest.raises(
+            TypeError, match="got an unexpected keyword argument|missing.*required"
+        ):
             # This should raise TypeError in function signature validation
             result = await get_graph_neighborhood(
                 center_node_id="python::test::function::foo",
@@ -253,7 +261,9 @@ class TestJSONRPCProtocolViolations:
 
     async def test_wrong_param_type_coercion(self):
         """Wrong parameter types should be coerced or rejected."""
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -270,4 +280,6 @@ class TestJSONRPCProtocolViolations:
                 # Either way, response must be well-formed
                 # Expecting ValidationError or result
                 # This test validates tool doesn't crash on type errors
-                assert isinstance(result, GraphNeighborhoodResult) or True  # Exception also acceptable
+                assert (
+                    isinstance(result, GraphNeighborhoodResult) or True
+                )  # Exception also acceptable

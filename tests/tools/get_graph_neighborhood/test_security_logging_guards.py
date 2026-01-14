@@ -9,12 +9,11 @@ Validates:
 """
 
 import logging
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
-from io import StringIO
+from unittest.mock import mock_open, patch
 
-from code_scalpel.mcp.server import get_graph_neighborhood, GraphNeighborhoodResult
+import pytest
+
+from code_scalpel.mcp.server import GraphNeighborhoodResult, get_graph_neighborhood
 
 pytestmark = pytest.mark.asyncio
 
@@ -34,7 +33,9 @@ class TestSecretRedaction:
         project_dir.mkdir()
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -56,11 +57,15 @@ class TestSecretRedaction:
     async def test_token_in_path_redacted(self, tmp_path, caplog):
         """Tokens in file paths should be redacted from logs."""
         # Path containing what looks like a token
-        sensitive_path = f"/home/user/.secrets/token_abc123def456/project"
-        
+        sensitive_path = "/home/user/.secrets/token_abc123def456/project"
+
         with caplog.at_level(logging.INFO):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -78,7 +83,9 @@ class TestSecretRedaction:
 
     async def test_password_in_node_name_redacted(self):
         """Passwords in node names should trigger redaction warnings."""
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -107,7 +114,9 @@ class TestPathSanitization:
 
     async def test_dot_dot_traversal_rejected(self):
         """Path traversal using ../ should be rejected or sanitized."""
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -124,7 +133,10 @@ class TestPathSanitization:
                 assert result.success is False
                 if result.error:
                     # Error should not contain sensitive system paths
-                    assert "/etc/passwd" not in result.error or "not found" in result.error.lower()
+                    assert (
+                        "/etc/passwd" not in result.error
+                        or "not found" in result.error.lower()
+                    )
 
     async def test_absolute_path_outside_root_rejected(self, tmp_path):
         """Absolute paths outside project root should be rejected."""
@@ -132,7 +144,9 @@ class TestPathSanitization:
         project_dir.mkdir()
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -161,7 +175,9 @@ class TestPathSanitization:
         except (OSError, NotImplementedError):
             pytest.skip("Symlink creation not supported")
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -195,8 +211,12 @@ class TestNetworkCallPrevention:
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
         with patch("urllib.request.urlopen") as mock_urlopen:
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -219,8 +239,12 @@ class TestNetworkCallPrevention:
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
         with patch("socket.socket") as mock_socket:
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -243,8 +267,12 @@ class TestNetworkCallPrevention:
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
         with patch("socket.getaddrinfo") as mock_getaddrinfo:
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -278,7 +306,7 @@ class TestFileWritePrevention:
         with patch("builtins.open", new_callable=mock_open) as mock_file:
             # Configure mock to allow reads but track writes
             original_open = open
-            
+
             def mock_open_wrapper(file, mode="r", *args, **kwargs):
                 if "w" in mode or "a" in mode or "+" in mode:
                     # Track write attempts
@@ -287,8 +315,13 @@ class TestFileWritePrevention:
                 return original_open(file, mode, *args, **kwargs)
 
             with patch("builtins.open", side_effect=mock_open_wrapper):
-                with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                    with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+                with patch(
+                    "code_scalpel.mcp.server._get_current_tier",
+                    return_value="community",
+                ):
+                    with patch(
+                        "code_scalpel.mcp.server.get_tool_capabilities"
+                    ) as mock_caps:
                         mock_caps.return_value = {
                             "capabilities": ["basic_neighborhood"],
                             "limits": {"max_k": 1, "max_nodes": 20},
@@ -303,10 +336,14 @@ class TestFileWritePrevention:
 
                         # No write-mode opens should have been attempted
                         write_calls = [
-                            call for call in mock_file.call_args_list
-                            if len(call[0]) > 1 and ("w" in call[0][1] or "a" in call[0][1])
+                            call
+                            for call in mock_file.call_args_list
+                            if len(call[0]) > 1
+                            and ("w" in call[0][1] or "a" in call[0][1])
                         ]
-                        assert len(write_calls) == 0, f"Unexpected write attempts: {write_calls}"
+                        assert (
+                            len(write_calls) == 0
+                        ), f"Unexpected write attempts: {write_calls}"
 
     async def test_no_file_deletion(self, tmp_path):
         """Tool should not delete files."""
@@ -317,8 +354,13 @@ class TestFileWritePrevention:
 
         with patch("os.remove") as mock_remove:
             with patch("os.unlink") as mock_unlink:
-                with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                    with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+                with patch(
+                    "code_scalpel.mcp.server._get_current_tier",
+                    return_value="community",
+                ):
+                    with patch(
+                        "code_scalpel.mcp.server.get_tool_capabilities"
+                    ) as mock_caps:
                         mock_caps.return_value = {
                             "capabilities": ["basic_neighborhood"],
                             "limits": {"max_k": 1, "max_nodes": 20},
@@ -347,8 +389,13 @@ class TestFileWritePrevention:
         with patch("os.mkdir") as mock_mkdir:
             with patch("os.makedirs") as mock_makedirs:
                 with patch("os.rmdir") as mock_rmdir:
-                    with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                        with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+                    with patch(
+                        "code_scalpel.mcp.server._get_current_tier",
+                        return_value="community",
+                    ):
+                        with patch(
+                            "code_scalpel.mcp.server.get_tool_capabilities"
+                        ) as mock_caps:
                             mock_caps.return_value = {
                                 "capabilities": ["basic_neighborhood"],
                                 "limits": {"max_k": 1, "max_nodes": 20},
@@ -382,10 +429,14 @@ class TestLoggingSecurity:
         (project_dir / "main.py").write_text("def foo():\n    return 1\n")
 
         fake_api_key = "sk-1234567890abcdef"
-        
+
         with caplog.at_level(logging.DEBUG):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -404,10 +455,14 @@ class TestLoggingSecurity:
     async def test_file_paths_sanitized_in_logs(self, caplog):
         """Sensitive file paths should be sanitized in logs."""
         sensitive_path = "/home/user/.ssh/keys/project"
-        
+
         with caplog.at_level(logging.INFO):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -426,8 +481,12 @@ class TestLoggingSecurity:
         """Stack traces should not expose sensitive information."""
         # [20260104_TEST] Verify error handling and logging
         with caplog.at_level(logging.ERROR):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -441,5 +500,7 @@ class TestLoggingSecurity:
 
         # Tool should handle gracefully and not expose stack traces
         # Error handling should be clean
-        assert result.success is False or result.error  # Either fails gracefully or has error
+        assert (
+            result.success is False or result.error
+        )  # Either fails gracefully or has error
         # The response structure is valid regardless of path sensitivity

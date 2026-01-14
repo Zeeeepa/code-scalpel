@@ -74,7 +74,7 @@
 
     "symbolic_execute": {
       "profile": "minimal",
-      "exclude_fields": ["solver_statistics", "constraint_dump", "z3_model_dump", "path_conditions_raw"]
+      "exclude_fields": ["solver_statistics", "constraint_dump", "z3_model_dump", "path_conditions_raw", "concolic_results", "state_space_analysis", "memory_model"]
     },
 
     "generate_unit_tests": {
@@ -150,12 +150,12 @@
 
     "code_policy_check": {
       "profile": "minimal",
-      "exclude_fields": ["check_metadata", "rule_evaluation_log"]
+      "exclude_fields": ["check_metadata", "rule_evaluation_log", "best_practices_violations", "security_warnings"]
     },
 
     "type_evaporation_scan": {
       "profile": "minimal",
-      "exclude_fields": ["scan_metadata", "ast_locations_raw"]
+      "exclude_fields": ["scan_metadata", "ast_locations_raw", "compliance_report", "validation_code", "summary", "validation_code", "summary"]
     },
 
     "unified_sink_detect": {
@@ -175,7 +175,7 @@
 
     "get_project_map": {
       "profile": "minimal",
-      "exclude_fields": ["map_metadata", "file_modification_times"]
+      "exclude_fields": ["map_metadata", "file_modification_times", "city_map_data", "churn_heatmap", "historical_trends", "git_ownership", "bug_hotspots", "architectural_layers", "coupling_metrics"]
     },
 
     "validate_paths": {

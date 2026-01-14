@@ -1,14 +1,13 @@
 """
 Tests for get_file_context output metadata fields.
 
-[20260111_TEST] v1.0 - Tests for tier_applied, max_context_lines_applied, 
+[20260111_TEST] v1.0 - Tests for tier_applied, max_context_lines_applied,
 pro_features_enabled, and enterprise_features_enabled output fields.
 
 These tests ensure that the tool correctly reports which tier configuration
 was applied, enabling AI agents to understand the context of responses.
 """
 
-import pytest
 import sys
 from pathlib import Path
 
@@ -24,9 +23,9 @@ class TestOutputMetadataFieldsCommunity:
         """Community tier reports tier_applied='community'."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is True
         assert result.tier_applied == "community"
 
@@ -34,9 +33,9 @@ class TestOutputMetadataFieldsCommunity:
         """Community tier reports max_context_lines_applied=500."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is True
         assert result.max_context_lines_applied == 500
 
@@ -44,9 +43,9 @@ class TestOutputMetadataFieldsCommunity:
         """Community tier reports pro_features_enabled=False."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is True
         assert result.pro_features_enabled is False
 
@@ -54,9 +53,9 @@ class TestOutputMetadataFieldsCommunity:
         """Community tier reports enterprise_features_enabled=False."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is True
         assert result.enterprise_features_enabled is False
 
@@ -65,9 +64,9 @@ class TestOutputMetadataFieldsCommunity:
         test_file = tmp_path / "test.py"
         # Code with potential smells - long function
         test_file.write_text("def long_func():\n" + "    x = 1\n" * 60)
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is True
         assert result.tier_applied == "community"
         assert result.code_smells == []  # Not populated at Community
@@ -82,9 +81,9 @@ class TestOutputMetadataFieldsPro:
         """Pro tier reports tier_applied='pro'."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="pro")
-        
+
         assert result.success is True
         assert result.tier_applied == "pro"
 
@@ -92,9 +91,9 @@ class TestOutputMetadataFieldsPro:
         """Pro tier reports max_context_lines_applied=2000."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="pro")
-        
+
         assert result.success is True
         assert result.max_context_lines_applied == 2000
 
@@ -102,9 +101,9 @@ class TestOutputMetadataFieldsPro:
         """Pro tier reports pro_features_enabled=True."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="pro")
-        
+
         assert result.success is True
         assert result.pro_features_enabled is True
 
@@ -112,19 +111,21 @@ class TestOutputMetadataFieldsPro:
         """Pro tier reports enterprise_features_enabled=False."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="pro")
-        
+
         assert result.success is True
         assert result.enterprise_features_enabled is False
 
     def test_pro_tier_has_code_quality_metrics(self, tmp_path):
         """Verify Pro tier returns code quality metrics."""
         test_file = tmp_path / "test.py"
-        test_file.write_text('"""Module docstring."""\ndef hello():\n    """Func doc."""\n    pass\n')
-        
+        test_file.write_text(
+            '"""Module docstring."""\ndef hello():\n    """Func doc."""\n    pass\n'
+        )
+
         result = _get_file_context_sync(str(test_file), tier="pro")
-        
+
         assert result.success is True
         assert result.tier_applied == "pro"
         assert result.pro_features_enabled is True
@@ -140,9 +141,9 @@ class TestOutputMetadataFieldsEnterprise:
         """Enterprise tier reports tier_applied='enterprise'."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="enterprise")
-        
+
         assert result.success is True
         assert result.tier_applied == "enterprise"
 
@@ -150,9 +151,9 @@ class TestOutputMetadataFieldsEnterprise:
         """Enterprise tier reports max_context_lines_applied=None (unlimited)."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="enterprise")
-        
+
         assert result.success is True
         assert result.max_context_lines_applied is None
 
@@ -160,9 +161,9 @@ class TestOutputMetadataFieldsEnterprise:
         """Enterprise tier reports pro_features_enabled=True (includes Pro features)."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="enterprise")
-        
+
         assert result.success is True
         assert result.pro_features_enabled is True
 
@@ -170,9 +171,9 @@ class TestOutputMetadataFieldsEnterprise:
         """Enterprise tier reports enterprise_features_enabled=True."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def hello(): pass\n")
-        
+
         result = _get_file_context_sync(str(test_file), tier="enterprise")
-        
+
         assert result.success is True
         assert result.enterprise_features_enabled is True
 
@@ -180,9 +181,9 @@ class TestOutputMetadataFieldsEnterprise:
         """Verify Enterprise tier returns all feature types."""
         test_file = tmp_path / "test.py"
         test_file.write_text('"""Module."""\ndef hello():\n    """Func."""\n    pass\n')
-        
+
         result = _get_file_context_sync(str(test_file), tier="enterprise")
-        
+
         assert result.success is True
         assert result.tier_applied == "enterprise"
         assert result.pro_features_enabled is True
@@ -198,7 +199,7 @@ class TestOutputMetadataFieldsOnError:
     def test_file_not_found_includes_tier(self, tmp_path):
         """File not found error still reports tier_applied."""
         result = _get_file_context_sync("/nonexistent/file.py", tier="community")
-        
+
         assert result.success is False
         assert result.tier_applied == "community"
         assert result.error is not None
@@ -206,7 +207,7 @@ class TestOutputMetadataFieldsOnError:
     def test_file_not_found_includes_limits(self, tmp_path):
         """File not found error still reports max_context_lines_applied."""
         result = _get_file_context_sync("/nonexistent/file.py", tier="pro")
-        
+
         assert result.success is False
         assert result.tier_applied == "pro"
         assert result.max_context_lines_applied == 2000
@@ -215,9 +216,9 @@ class TestOutputMetadataFieldsOnError:
         """Syntax error result includes metadata fields."""
         test_file = tmp_path / "bad.py"
         test_file.write_text("def broken(\n")  # Syntax error
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is False
         assert result.tier_applied == "community"
         assert result.pro_features_enabled is False
@@ -229,9 +230,9 @@ class TestOutputMetadataFieldsOnError:
         test_file = tmp_path / "large.py"
         # Create file with 600 lines (exceeds Community 500 limit)
         test_file.write_text("# line\n" * 600)
-        
+
         result = _get_file_context_sync(str(test_file), tier="community")
-        
+
         assert result.success is False
         assert result.tier_applied == "community"
         assert result.max_context_lines_applied == 500
@@ -245,10 +246,10 @@ class TestOutputMetadataConsistency:
         """All successful responses include metadata fields."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def func(): pass\n")
-        
+
         for tier in ["community", "pro", "enterprise"]:
             result = _get_file_context_sync(str(test_file), tier=tier)
-            
+
             assert result.success is True
             assert hasattr(result, "tier_applied")
             assert hasattr(result, "max_context_lines_applied")
@@ -260,17 +261,17 @@ class TestOutputMetadataConsistency:
         """Metadata values correctly reflect tier configuration."""
         test_file = tmp_path / "test.py"
         test_file.write_text("def func(): pass\n")
-        
+
         # Expected configurations
         expected = {
             "community": {"max": 500, "pro": False, "enterprise": False},
             "pro": {"max": 2000, "pro": True, "enterprise": False},
             "enterprise": {"max": None, "pro": True, "enterprise": True},
         }
-        
+
         for tier, config in expected.items():
             result = _get_file_context_sync(str(test_file), tier=tier)
-            
+
             assert result.tier_applied == tier
             assert result.max_context_lines_applied == config["max"]
             assert result.pro_features_enabled == config["pro"]

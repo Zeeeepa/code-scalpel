@@ -172,6 +172,9 @@ docs/_build/
 docs/_static/
 docs/_templates/
 
+# Pre-release marketing drafts (generated content; keep local)
+docs/marketing-pack/
+
 # Environment configurations
 .env.*
 !.env.example

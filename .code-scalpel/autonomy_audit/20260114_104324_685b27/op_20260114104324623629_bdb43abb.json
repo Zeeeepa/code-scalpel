@@ -1,0 +1,15 @@
+{
+  "id": "op_20260114104324623629_bdb43abb",
+  "timestamp": "2026-01-14T10:43:24.623635",
+  "event_type": "CODE_REVIEW",
+  "operation": "review_pr",
+  "input_hash": "44f1423501a896ea45080eb55ed07b93140d6aa47eefc8f24ac75a5535384a7f",
+  "output_hash": "900c4956a8aa002f7d1794fa83e7272a3b749e56bd7c3ed31b2e9a804409848b",
+  "success": true,
+  "duration_ms": 450,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

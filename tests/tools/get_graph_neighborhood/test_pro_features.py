@@ -28,10 +28,9 @@ Tests semantic neighbor detection and logical relationship mapping.
 - Tests use temporary project directories with sample code
 """
 
-import pytest
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+
+import pytest
 
 # =============================================================================
 # Test Class 1: Semantic Neighbor Detection
@@ -107,9 +106,7 @@ def unrelated_function(x):
         file_path.write_text(code)
         return temp_project_dir
 
-    def test_name_similarity_finds_related_functions(
-        self, project_with_similar_names
-    ):
+    def test_name_similarity_finds_related_functions(self, project_with_similar_names):
         """Functions with similar names are detected as semantic neighbors."""
         from code_scalpel.graph.semantic_neighbors import find_semantic_neighbors
 
@@ -306,9 +303,10 @@ def test_validate_items():
             target_names = [r.target_node for r in result.relationships]
 
             # May find test_calculate_total
-            assert any(
-                "test_calculate_total" in name.lower() for name in target_names
-            ) or "test_for" in relationship_types
+            assert (
+                any("test_calculate_total" in name.lower() for name in target_names)
+                or "test_for" in relationship_types
+            )
 
     def test_tested_by_relationship_detected(self, project_with_tests):
         """Test function finds its implementation."""
@@ -324,9 +322,10 @@ def test_validate_items():
             target_names = [r.target_node for r in result.relationships]
 
             # May find calculate_total
-            assert any(
-                "calculate_total" in name.lower() for name in target_names
-            ) or "tested_by" in relationship_types
+            assert (
+                any("calculate_total" in name.lower() for name in target_names)
+                or "tested_by" in relationship_types
+            )
 
 
 class TestLogicalHelperRelationships:
@@ -398,9 +397,7 @@ class Calculator:
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_class)
-        result = detector.find_relationships(
-            "add", relationship_types={"same_class"}
-        )
+        result = detector.find_relationships("add", relationship_types={"same_class"})
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]

@@ -7,22 +7,23 @@ This conftest provides:
 - Community, Pro, and Enterprise capability fixtures
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
-from pathlib import Path
-import tempfile
 import shutil
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock
 
+import pytest
 
 # ============================================================================
 # TIER CAPABILITY FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def community_tier_caps():
     """
     Community tier capabilities - basic extraction only, no code quality metrics.
-    
+
     Returns:
         dict: Capability dictionary for Community tier
     """
@@ -37,7 +38,7 @@ def community_tier_caps():
 def pro_tier_caps():
     """
     Pro tier capabilities - adds code quality metrics.
-    
+
     Returns:
         dict: Capability dictionary for Pro tier with code quality features
     """
@@ -57,7 +58,7 @@ def pro_tier_caps():
 def enterprise_tier_caps():
     """
     Enterprise tier capabilities - adds organizational metadata and compliance.
-    
+
     Returns:
         dict: Capability dictionary for Enterprise tier with all features
     """
@@ -84,16 +85,17 @@ def enterprise_tier_caps():
 # TEST PROJECT FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def temp_python_project():
     """
     Create a temporary Python project with well-written and smelly code.
-    
+
     Returns:
         Path: Path to temporary project directory
     """
     tmpdir = Path(tempfile.mkdtemp())
-    
+
     # Good code example
     good_code = '''"""
     Well-written module with proper documentation.
@@ -123,7 +125,7 @@ class DataProcessor:
         """Process input data and return result."""
         return {k: v * 2 for k, v in data.items()}
 '''
-    
+
     # Smelly code example
     smelly_code = '''
 def process_user_data(u, p, e, a, ph, c, z):
@@ -187,9 +189,9 @@ try:
 except:
     pass
 '''
-    
+
     # Undocumented code
-    undocumented = '''
+    undocumented = """
 def process(x):
     return x * 2
 
@@ -199,15 +201,15 @@ class Handler:
 
 def fetch_data(url):
     pass
-'''
-    
+"""
+
     # Write files
     (tmpdir / "good_code.py").write_text(good_code)
     (tmpdir / "smelly_code.py").write_text(smelly_code)
     (tmpdir / "undocumented.py").write_text(undocumented)
-    
+
     yield tmpdir
-    
+
     # Cleanup
     shutil.rmtree(tmpdir)
 
@@ -216,13 +218,13 @@ def fetch_data(url):
 def temp_javascript_project():
     """
     Create a temporary JavaScript project for multi-language testing.
-    
+
     Returns:
         Path: Path to temporary JavaScript project
     """
     tmpdir = Path(tempfile.mkdtemp())
-    
-    js_code = '''
+
+    js_code = """
 /**
  * Calculate sum of numbers
  * @param {number[]} numbers - Numbers to sum
@@ -243,12 +245,12 @@ class DataProcessor {
 }
 
 export { calculateSum, DataProcessor };
-'''
-    
+"""
+
     (tmpdir / "processor.js").write_text(js_code)
-    
+
     yield tmpdir
-    
+
     shutil.rmtree(tmpdir)
 
 
@@ -256,13 +258,13 @@ export { calculateSum, DataProcessor };
 def temp_typescript_project():
     """
     Create a temporary TypeScript project for multi-language testing.
-    
+
     Returns:
         Path: Path to temporary TypeScript project
     """
     tmpdir = Path(tempfile.mkdtemp())
-    
-    ts_code = '''
+
+    ts_code = """
 /**
  * Well-typed TypeScript module
  */
@@ -292,12 +294,12 @@ export class UserProcessor {
     return { ...data, name: this.name };
   }
 }
-'''
-    
+"""
+
     (tmpdir / "user.ts").write_text(ts_code)
-    
+
     yield tmpdir
-    
+
     shutil.rmtree(tmpdir)
 
 
@@ -305,13 +307,13 @@ export class UserProcessor {
 def temp_java_project():
     """
     Create a temporary Java project for multi-language testing.
-    
+
     Returns:
         Path: Path to temporary Java project
     """
     tmpdir = Path(tempfile.mkdtemp())
-    
-    java_code = '''
+
+    java_code = """
 /**
  * Data processor utility
  */
@@ -342,12 +344,12 @@ public class DataProcessor {
         return result;
     }
 }
-'''
-    
+"""
+
     (tmpdir / "DataProcessor.java").write_text(java_code)
-    
+
     yield tmpdir
-    
+
     shutil.rmtree(tmpdir)
 
 
@@ -355,7 +357,7 @@ public class DataProcessor {
 def mock_server():
     """
     Mock the MCP server for testing get_file_context.
-    
+
     Returns:
         MagicMock: Mocked server with required methods
     """
@@ -367,11 +369,12 @@ def mock_server():
 # MCP REQUEST FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def community_request(community_tier_caps):
     """
     Create a Community tier MCP request.
-    
+
     Returns:
         dict: MCP request parameters
     """
@@ -386,7 +389,7 @@ def community_request(community_tier_caps):
 def pro_request(pro_tier_caps):
     """
     Create a Pro tier MCP request.
-    
+
     Returns:
         dict: MCP request parameters
     """
@@ -401,7 +404,7 @@ def pro_request(pro_tier_caps):
 def enterprise_request(enterprise_tier_caps):
     """
     Create an Enterprise tier MCP request.
-    
+
     Returns:
         dict: MCP request parameters
     """

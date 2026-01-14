@@ -9,13 +9,12 @@ Validates tool provides useful observability through:
 - No excessive logging (not spammy)
 """
 
-import json
 import logging
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-from code_scalpel.mcp.server import get_graph_neighborhood, GraphNeighborhoodResult
+import pytest
+
+from code_scalpel.mcp.server import GraphNeighborhoodResult, get_graph_neighborhood
 
 pytestmark = pytest.mark.asyncio
 
@@ -34,7 +33,9 @@ class TestErrorLogging:
         assert result.success is False
         assert result.error  # Error message present
         # Verify error indicates what went wrong
-        assert "not found" in result.error.lower() or "nonexistent" in result.error.lower()
+        assert (
+            "not found" in result.error.lower() or "nonexistent" in result.error.lower()
+        )
 
     async def test_error_logged_on_invalid_parameters(self, caplog):
         """Errors logged when invalid parameters provided."""
@@ -182,7 +183,9 @@ class TestErrorMessageClarity:
     async def test_invalid_k_value_error_is_clear(self, caplog):
         """Invalid k parameter produces clear error."""
         # k should be >= 1
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -230,7 +233,9 @@ class TestContextualErrorMessages:
 
     async def test_tier_limit_error_includes_limit_info(self, caplog):
         """Tier limit violations include what the limits are."""
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],

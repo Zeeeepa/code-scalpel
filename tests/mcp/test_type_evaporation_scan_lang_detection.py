@@ -22,7 +22,7 @@ pytestmark = [pytest.mark.asyncio]
 
 async def test_language_detection_python_backend(tmp_path: Path):
     """Python backend is auto-detected from syntax patterns."""
-    
+
     # Clear Python code with def/async def/type hints
     python_code = """
 from typing import Dict, Any
@@ -39,10 +39,10 @@ def get_user():
     data = request.get_json()
     return validate_user(data['id'])
 """
-    
+
     # Minimal frontend code (won't be analyzed - focus is on backend)
     minimal_frontend = "const x = 1;"
-    
+
     # Don't specify backend_language parameter - should auto-detect
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
@@ -55,10 +55,10 @@ def get_user():
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Backend should be identified (check backend_vulnerabilities field exists)
     assert "backend_vulnerabilities" in data
@@ -66,7 +66,7 @@ def get_user():
 
 async def test_language_detection_typescript_frontend(tmp_path: Path):
     """TypeScript frontend is auto-detected from syntax patterns."""
-    
+
     # Clear TypeScript code with type annotations, async/await, arrow functions
     typescript_code = """
 interface User {
@@ -88,10 +88,10 @@ const processRole = (role: 'admin' | 'user'): void => {
 type Role = 'admin' | 'user' | 'guest';
 const roles: Role[] = ['admin', 'user'];
 """
-    
+
     # Minimal backend code (won't be analyzed - focus is on frontend)
     minimal_backend = "pass"
-    
+
     # Don't specify frontend_language parameter - should auto-detect
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
@@ -104,10 +104,10 @@ const roles: Role[] = ['admin', 'user'];
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Frontend should be identified (check frontend_vulnerabilities field exists)
     assert "frontend_vulnerabilities" in data
@@ -115,7 +115,7 @@ const roles: Role[] = ['admin', 'user'];
 
 async def test_language_detection_javascript_frontend(tmp_path: Path):
     """JavaScript (no types) is auto-detected and handled."""
-    
+
     # Plain JavaScript without TypeScript type annotations
     javascript_code = """
 async function fetchData(endpoint) {
@@ -139,10 +139,10 @@ xhr.onload = function() {
     console.log(result);
 };
 """
-    
+
     # Minimal backend code
     minimal_backend = "pass"
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -154,10 +154,10 @@ xhr.onload = function() {
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Should still analyze for vulnerabilities
     assert "frontend_vulnerabilities" in data
@@ -165,7 +165,7 @@ xhr.onload = function() {
 
 async def test_language_override_parameter(tmp_path: Path):
     """Explicit language parameter overrides auto-detection."""
-    
+
     # Ambiguous code that could be JavaScript or TypeScript
     ambiguous_code = """
 async function getData() {
@@ -173,10 +173,10 @@ async function getData() {
     return resp.json();
 }
 """
-    
+
     # Minimal backend code
     minimal_backend = "pass"
-    
+
     # Test 1: With .js file extension (would default to JavaScript)
     async with _stdio_session(project_root=tmp_path) as session:
         js_payload = await session.call_tool(
@@ -190,11 +190,11 @@ async function getData() {
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     js_env = _tool_json(js_payload)
     js_data = _assert_envelope(js_env, tool_name="type_evaporation_scan")
     assert js_data.get("success") is True
-    
+
     # Test 2: Override to TypeScript despite .js extension
     # Note: The tool may not support explicit language override in current impl
     # This test documents expected behavior for future enhancement
@@ -209,31 +209,31 @@ async function getData() {
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     ts_env = _tool_json(ts_payload)
     ts_data = _assert_envelope(ts_env, tool_name="type_evaporation_scan")
     assert ts_data.get("success") is True
-    
+
     # Both should succeed (language detection flexible)
     # Core functionality works regardless of detected language
 
 
 async def test_language_detection_from_file_extension(tmp_path: Path):
     """File extension hints language detection."""
-    
+
     simple_code = "function test() { return fetch('/api'); }"
-    
+
     # Minimal backend code
     minimal_backend = "pass"
-    
+
     # Test with different extensions
     extensions = [
-        ("app.js", True),    # JavaScript
-        ("app.ts", True),    # TypeScript
-        ("app.jsx", True),   # React JavaScript
-        ("app.tsx", True),   # React TypeScript
+        ("app.js", True),  # JavaScript
+        ("app.ts", True),  # TypeScript
+        ("app.jsx", True),  # React JavaScript
+        ("app.tsx", True),  # React TypeScript
     ]
-    
+
     for filename, should_succeed in extensions:
         async with _stdio_session(project_root=tmp_path) as session:
             payload = await session.call_tool(
@@ -246,10 +246,10 @@ async def test_language_detection_from_file_extension(tmp_path: Path):
                 },
                 read_timeout_seconds=timedelta(seconds=120),
             )
-        
+
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-        
+
         if should_succeed:
             assert data.get("success") is True, f"Failed for {filename}"
         # Tool should handle all common JS/TS extensions
@@ -257,7 +257,7 @@ async def test_language_detection_from_file_extension(tmp_path: Path):
 
 async def test_language_detection_mixed_syntax(tmp_path: Path):
     """Mixed TypeScript and Python syntax is handled correctly."""
-    
+
     typescript_frontend = """
 type UserRole = 'admin' | 'user';
 
@@ -268,7 +268,7 @@ async function setRole(role: UserRole): Promise<void> {
     });
 }
 """
-    
+
     python_backend = """
 from flask import Flask, request
 from typing import Literal
@@ -283,7 +283,7 @@ def set_role():
     role: Role = data['role']
     return {'role': role}
 """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -295,10 +295,10 @@ def set_role():
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Both languages should be correctly identified
     assert "frontend_vulnerabilities" in data

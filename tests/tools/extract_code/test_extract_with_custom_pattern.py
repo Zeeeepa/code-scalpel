@@ -16,8 +16,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 class TestExtractWithCustomPatternRegex:
     """Test regex pattern matching."""
@@ -311,18 +309,9 @@ class TestExtractWithCustomPatternMultipleFiles:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         # Create multiple files
-        (tmp_path / "service1.py").write_text(
-            "def get_user():\n"
-            "    pass\n"
-        )
-        (tmp_path / "service2.py").write_text(
-            "def get_product():\n"
-            "    pass\n"
-        )
-        (tmp_path / "service3.py").write_text(
-            "def get_order():\n"
-            "    pass\n"
-        )
+        (tmp_path / "service1.py").write_text("def get_user():\n" "    pass\n")
+        (tmp_path / "service2.py").write_text("def get_product():\n" "    pass\n")
+        (tmp_path / "service3.py").write_text("def get_order():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="get_",
@@ -341,9 +330,7 @@ class TestExtractWithCustomPatternMultipleFiles:
 
         # Create test files
         for i in range(5):
-            (tmp_path / f"module_{i}.py").write_text(
-                f"def func_{i}():\n    pass\n"
-            )
+            (tmp_path / f"module_{i}.py").write_text(f"def func_{i}():\n    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="func",
@@ -363,10 +350,7 @@ class TestExtractWithCustomPatternMatchProperties:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         module_file = tmp_path / "test.py"
-        module_file.write_text(
-            "def calculate_sum(a, b):\n"
-            "    return a + b\n"
-        )
+        module_file.write_text("def calculate_sum(a, b):\n" "    return a + b\n")
 
         result = extract_with_custom_pattern(
             pattern="calculate",
@@ -391,11 +375,7 @@ class TestExtractWithCustomPatternMatchProperties:
 
         module_file = tmp_path / "models.py"
         module_file.write_text(
-            "class UserModel:\n"
-            "    pass\n"
-            "\n"
-            "def get_user():\n"
-            "    pass\n"
+            "class UserModel:\n" "    pass\n" "\n" "def get_user():\n" "    pass\n"
         )
 
         result = extract_with_custom_pattern(
@@ -414,10 +394,7 @@ class TestExtractWithCustomPatternMatchProperties:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         module_file = tmp_path / "test.py"
-        module_file.write_text(
-            "def test_pattern():\n"
-            "    pass\n"
-        )
+        module_file.write_text("def test_pattern():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="test",
@@ -454,11 +431,7 @@ class TestExtractWithCustomPatternEdgeCases:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         (tmp_path / "module.py").write_text(
-            "def func_a():\n"
-            "    pass\n"
-            "\n"
-            "def func_b():\n"
-            "    pass\n"
+            "def func_a():\n" "    pass\n" "\n" "def func_b():\n" "    pass\n"
         )
 
         result = extract_with_custom_pattern(
@@ -475,10 +448,7 @@ class TestExtractWithCustomPatternEdgeCases:
         """Test error handling with invalid pattern type."""
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
-        (tmp_path / "module.py").write_text(
-            "def func():\n"
-            "    pass\n"
-        )
+        (tmp_path / "module.py").write_text("def func():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="test",
@@ -494,10 +464,7 @@ class TestExtractWithCustomPatternEdgeCases:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         # Create valid file
-        (tmp_path / "valid.py").write_text(
-            "def calculate():\n"
-            "    pass\n"
-        )
+        (tmp_path / "valid.py").write_text("def calculate():\n" "    pass\n")
 
         # Create invalid file
         (tmp_path / "invalid.py").write_text("this is not valid python !@#$%^&*()")
@@ -518,10 +485,7 @@ class TestExtractWithCustomPatternEdgeCases:
 
         monkeypatch.chdir(tmp_path)
 
-        (tmp_path / "module.py").write_text(
-            "def search_function():\n"
-            "    pass\n"
-        )
+        (tmp_path / "module.py").write_text("def search_function():\n" "    pass\n")
 
         result = extract_with_custom_pattern(
             pattern="search",
@@ -597,11 +561,7 @@ class TestExtractWithCustomPatternExplanation:
         from code_scalpel.surgery.surgical_extractor import extract_with_custom_pattern
 
         (tmp_path / "module.py").write_text(
-            "def func1():\n"
-            "    pass\n"
-            "\n"
-            "def func2():\n"
-            "    pass\n"
+            "def func1():\n" "    pass\n" "\n" "def func2():\n" "    pass\n"
         )
 
         result = extract_with_custom_pattern(
@@ -612,4 +572,6 @@ class TestExtractWithCustomPatternExplanation:
 
         assert result.success is True
         assert result.explanation is not None
-        assert "Scanned" in result.explanation or "scanned" in result.explanation.lower()
+        assert (
+            "Scanned" in result.explanation or "scanned" in result.explanation.lower()
+        )

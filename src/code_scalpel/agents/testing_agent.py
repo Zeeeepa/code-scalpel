@@ -32,11 +32,11 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "max_uncovered_functions": 5,
             "min_test_per_function": 1,
         }
-        # [20251221_FEATURE] TODO: Support symbolic execution-based test generation
-        # [20251221_FEATURE] TODO: Add mutation testing for test quality verification
-        # [20251221_FEATURE] TODO: Generate integration test scenarios from call graphs
-        # [20251221_ENHANCEMENT] TODO: Support property-based testing with hypothesis
-        # [20251221_ENHANCEMENT] TODO: Add test maintenance and flakiness detection
+        # TODO [FEATURE]: Support symbolic execution-based test generation
+        # TODO [FEATURE]: Add mutation testing for test quality verification
+        # TODO [FEATURE]: Generate integration test scenarios from call graphs
+        # TODO [ENHANCEMENT]: Support property-based testing with hypothesis
+        # TODO [ENHANCEMENT]: Add test maintenance and flakiness detection
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """
@@ -182,9 +182,9 @@ class TestingAgent(BaseCodeAnalysisAgent):
         """
         Analyze code coverage and identify gaps.
 
-        [20251221_FEATURE] TODO: Parse coverage reports (.coverage file)
-        [20251221_FEATURE] TODO: Identify uncovered lines and branches
-        [20251221_FEATURE] TODO: Calculate coverage impact per function
+        TODO [FEATURE]: Parse coverage reports (.coverage file)
+        TODO [FEATURE]: Identify uncovered lines and branches
+        TODO [FEATURE]: Calculate coverage impact per function
         """
         gaps = []
         # Implementation placeholder
@@ -194,9 +194,9 @@ class TestingAgent(BaseCodeAnalysisAgent):
         """
         Identify edge cases and error paths.
 
-        [20251221_FEATURE] TODO: Use symbolic execution for path discovery
-        [20251221_FEATURE] TODO: Identify null/empty/boundary cases
-        [20251221_FEATURE] TODO: Detect error handling paths
+        TODO [FEATURE]: Use symbolic execution for path discovery
+        TODO [FEATURE]: Identify null/empty/boundary cases
+        TODO [FEATURE]: Detect error handling paths
         """
         cases = []
         # Implementation placeholder
@@ -208,8 +208,8 @@ class TestingAgent(BaseCodeAnalysisAgent):
         """
         Identify opportunities for integration testing.
 
-        [20251221_FEATURE] TODO: Analyze call graphs for integration scenarios
-        [20251221_FEATURE] TODO: Detect module boundary testing needs
+        TODO [FEATURE]: Analyze call graphs for integration scenarios
+        TODO [FEATURE]: Detect module boundary testing needs
         """
         tests = []
         # Implementation placeholder
@@ -227,9 +227,9 @@ class TestingAgent(BaseCodeAnalysisAgent):
         """
         Generate a test case.
 
-        [20251221_FEATURE] TODO: Use generate_unit_tests for symbolic execution
-        [20251221_FEATURE] TODO: Format test with pytest/unittest framework
-        [20251221_ENHANCEMENT] TODO: Support test parameterization
+        TODO [FEATURE]: Use generate_unit_tests for symbolic execution
+        TODO [FEATURE]: Format test with pytest/unittest framework
+        TODO [ENHANCEMENT]: Support test parameterization
         """
         return {
             "success": True,

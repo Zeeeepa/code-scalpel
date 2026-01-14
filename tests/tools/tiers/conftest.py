@@ -57,7 +57,9 @@ def clear_tier_cache():
 # Paths to test license files (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 # [20260106_TEST] Prefer signed fixture licenses that validate against vault-prod-2026-01
-PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
+PRO_LICENSE_PATH = (
+    PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
+)
 ENTERPRISE_LICENSE_PATH = (
     PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt"
 )

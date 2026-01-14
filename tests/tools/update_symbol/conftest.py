@@ -14,20 +14,16 @@ fixtures from tests/tools/tiers/conftest.py which use real JWT licenses.
 [20260108_BUGFIX] Removed pytest_plugins declaration - moved to top-level conftest.py
 """
 
-import asyncio
-import json
-import os
-import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
 import pytest
 
-
 # =============================================================================
 # Real Tier Fixtures (copied from tests/tools/tiers/conftest.py)
 # =============================================================================
+
 
 @pytest.fixture(autouse=True)
 def clear_tier_cache():
@@ -50,7 +46,7 @@ def clear_tier_cache():
     # Clear any cached tier detection
     if hasattr(server, "_cached_tier"):
         server._cached_tier = None
-    
+
     # Clear session update limits (the actual variable name is _SESSION_UPDATE_COUNTS)
     if hasattr(server, "_SESSION_UPDATE_COUNTS"):
         server._SESSION_UPDATE_COUNTS = {}
@@ -181,11 +177,13 @@ def community_tier(monkeypatch):
 # File Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def temp_python_file(tmp_path):
     """Create a temporary Python file with sample code."""
     py_file = tmp_path / "sample.py"
-    py_file.write_text("""
+    py_file.write_text(
+        """
 def add_numbers(a, b):
     '''Add two numbers.'''
     return a + b
@@ -200,7 +198,8 @@ class Calculator:
     def multiply(self, x, y):
         '''Multiply two numbers.'''
         return x * y
-""")
+"""
+    )
     return py_file
 
 
@@ -208,7 +207,8 @@ class Calculator:
 def temp_js_file(tmp_path):
     """Create a temporary JavaScript file with sample code."""
     js_file = tmp_path / "sample.js"
-    js_file.write_text("""
+    js_file.write_text(
+        """
 function addNumbers(a, b) {
     // Add two numbers
     return a + b;
@@ -227,7 +227,8 @@ class Calculator {
         return x * y;
     }
 }
-""")
+"""
+    )
     return js_file
 
 
@@ -236,10 +237,11 @@ def temp_multifile_project(tmp_path):
     """Create a temporary project with multiple files."""
     src_dir = tmp_path / "src"
     src_dir.mkdir()
-    
+
     # File 1: utils.py
     utils_file = src_dir / "utils.py"
-    utils_file.write_text("""
+    utils_file.write_text(
+        """
 def calculate_discount(price, rate=0.1):
     '''Calculate discount.'''
     return price * (1 - rate)
@@ -247,11 +249,13 @@ def calculate_discount(price, rate=0.1):
 def validate_price(price):
     '''Validate price.'''
     return price > 0
-""")
-    
+"""
+    )
+
     # File 2: services.py
     services_file = src_dir / "services.py"
-    services_file.write_text("""
+    services_file.write_text(
+        """
 from utils import calculate_discount
 
 def apply_discount(price):
@@ -262,18 +266,16 @@ def process_order(items):
     '''Process order.'''
     total = sum(items)
     return apply_discount(total)
-""")
-    
-    return {
-        "root": tmp_path,
-        "utils": utils_file,
-        "services": services_file
-    }
+"""
+    )
+
+    return {"root": tmp_path, "utils": utils_file, "services": services_file}
 
 
 # =============================================================================
 # License/JWT Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def mock_community_license():
@@ -283,7 +285,7 @@ def mock_community_license():
         "tier": "community",
         "max_updates_per_session": 10,
         "features": ["basic_verification"],
-        "expires_at": (datetime.now() + timedelta(days=365)).isoformat()
+        "expires_at": (datetime.now() + timedelta(days=365)).isoformat(),
     }
 
 
@@ -298,9 +300,9 @@ def mock_pro_license():
             "atomic_multifile_updates",
             "rollback_available",
             "import_auto_adjustment",
-            "formatting_preserved"
+            "formatting_preserved",
         ],
-        "expires_at": (datetime.now() + timedelta(days=365)).isoformat()
+        "expires_at": (datetime.now() + timedelta(days=365)).isoformat(),
     }
 
 
@@ -319,9 +321,9 @@ def mock_enterprise_license():
             "approval_workflow",
             "compliance_check",
             "audit_trail",
-            "policy_enforcement"
+            "policy_enforcement",
         ],
-        "expires_at": (datetime.now() + timedelta(days=365)).isoformat()
+        "expires_at": (datetime.now() + timedelta(days=365)).isoformat(),
     }
 
 
@@ -332,7 +334,7 @@ def mock_expired_license():
         "tier": "pro",
         "max_updates_per_session": -1,
         "features": ["basic_verification"],
-        "expires_at": (datetime.now() - timedelta(days=1)).isoformat()
+        "expires_at": (datetime.now() - timedelta(days=1)).isoformat(),
     }
 
 
@@ -345,6 +347,7 @@ def mock_invalid_license():
 # =============================================================================
 # Mock Operation Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def update_result_community():
@@ -366,7 +369,7 @@ def update_result_community():
         "compliance_check": None,
         "audit_id": None,
         "mutation_policy": None,
-        "error": None
+        "error": None,
     }
 
 
@@ -387,7 +390,7 @@ def update_result_pro():
             {
                 "file": "/src/utils.py",
                 "action": "added",
-                "import": "from decimal import Decimal"
+                "import": "from decimal import Decimal",
             }
         ],
         "rollback_available": True,
@@ -397,7 +400,7 @@ def update_result_pro():
         "compliance_check": None,
         "audit_id": None,
         "mutation_policy": None,
-        "error": None
+        "error": None,
     }
 
 
@@ -423,11 +426,11 @@ def update_result_enterprise():
             "passed": True,
             "rules_checked": ["code-style", "security-scan", "type-safety"],
             "warnings": [],
-            "violations": []
+            "violations": [],
         },
         "audit_id": "audit-update-20260103-100000-abc123",
         "mutation_policy": "standard-update-policy",
-        "error": None
+        "error": None,
     }
 
 
@@ -435,12 +438,14 @@ def update_result_enterprise():
 # Update Operation Mocks
 # =============================================================================
 
+
 @pytest.fixture
 def mock_update_symbol_success(mocker, update_result_community):
     """Mock successful update_symbol operation."""
+
     async def _mock_update(*args, **kwargs):
         return update_result_community
-    
+
     return mocker.AsyncMock(return_value=update_result_community)
 
 
@@ -463,7 +468,7 @@ def mock_update_symbol_syntax_error(mocker):
         "compliance_check": None,
         "audit_id": None,
         "mutation_policy": None,
-        "error": "Syntax error in new code: unexpected indent at line 3, column 4"
+        "error": "Syntax error in new code: unexpected indent at line 3, column 4",
     }
     return mocker.AsyncMock(return_value=error_result)
 
@@ -487,7 +492,7 @@ def mock_update_symbol_not_found(mocker):
         "compliance_check": None,
         "audit_id": None,
         "mutation_policy": None,
-        "error": "Symbol 'nonexistent_function' not found in /src/utils.py"
+        "error": "Symbol 'nonexistent_function' not found in /src/utils.py",
     }
     return mocker.AsyncMock(return_value=error_result)
 
@@ -495,6 +500,7 @@ def mock_update_symbol_not_found(mocker):
 # =============================================================================
 # Tier Configuration Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def tier_config_community():
@@ -511,9 +517,15 @@ def tier_config_community():
         "compliance_check": False,
         "audit_logging": False,
         "response_fields": [
-            "success", "file_path", "symbol_name", "symbol_type",
-            "backup_path", "lines_changed", "syntax_valid", "error"
-        ]
+            "success",
+            "file_path",
+            "symbol_name",
+            "symbol_type",
+            "backup_path",
+            "lines_changed",
+            "syntax_valid",
+            "error",
+        ],
     }
 
 
@@ -532,11 +544,19 @@ def tier_config_pro():
         "compliance_check": False,
         "audit_logging": False,
         "response_fields": [
-            "success", "file_path", "symbol_name", "symbol_type",
-            "backup_path", "lines_changed", "syntax_valid",
-            "files_affected", "imports_adjusted", "rollback_available",
-            "formatting_preserved", "error"
-        ]
+            "success",
+            "file_path",
+            "symbol_name",
+            "symbol_type",
+            "backup_path",
+            "lines_changed",
+            "syntax_valid",
+            "files_affected",
+            "imports_adjusted",
+            "rollback_available",
+            "formatting_preserved",
+            "error",
+        ],
     }
 
 
@@ -555,12 +575,23 @@ def tier_config_enterprise():
         "compliance_check": True,
         "audit_logging": True,
         "response_fields": [
-            "success", "file_path", "symbol_name", "symbol_type",
-            "backup_path", "lines_changed", "syntax_valid",
-            "files_affected", "imports_adjusted", "rollback_available",
-            "formatting_preserved", "approval_status", "compliance_check",
-            "audit_id", "mutation_policy", "error"
-        ]
+            "success",
+            "file_path",
+            "symbol_name",
+            "symbol_type",
+            "backup_path",
+            "lines_changed",
+            "syntax_valid",
+            "files_affected",
+            "imports_adjusted",
+            "rollback_available",
+            "formatting_preserved",
+            "approval_status",
+            "compliance_check",
+            "audit_id",
+            "mutation_policy",
+            "error",
+        ],
     }
 
 
@@ -568,9 +599,11 @@ def tier_config_enterprise():
 # Assertion Helpers
 # =============================================================================
 
+
 @pytest.fixture
 def assert_result_has_community_fields():
     """Assert result has only Community tier fields."""
+
     def _assert(result):
         # Should have these
         assert "success" in result
@@ -579,21 +612,30 @@ def assert_result_has_community_fields():
         assert "backup_path" in result
         assert "lines_changed" in result
         assert "syntax_valid" in result
-        
+
         # Should NOT expose these (gated to Pro+)
         # These should either be None or not in response
-        pro_fields = ["files_affected", "imports_adjusted", "rollback_available", "formatting_preserved"]
-        for field in pro_fields:
-            if field in result:
-                assert result[field] is None, f"Community tier should not expose {field}"
-        
+        pro_fields = [
+            "files_affected",
+            "imports_adjusted",
+            "rollback_available",
+            "formatting_preserved",
+        ]
+        for field_name in pro_fields:
+            if field_name in result:
+                assert (
+                    result[field_name] is None
+                ), f"Community tier should not expose {field_name}"
+
         return True
+
     return _assert
 
 
 @pytest.fixture
 def assert_result_has_pro_fields():
     """Assert result has Community + Pro tier fields."""
+
     def _assert(result):
         # Community fields
         assert "success" in result
@@ -602,55 +644,89 @@ def assert_result_has_pro_fields():
         assert "backup_path" in result
         assert "lines_changed" in result
         assert "syntax_valid" in result
-        
+
         # Pro fields
         assert "files_affected" in result
         assert "imports_adjusted" in result
         assert "rollback_available" in result
         assert "formatting_preserved" in result
-        
+
         # Enterprise fields should not be exposed
-        enterprise_fields = ["approval_status", "compliance_check", "audit_id", "mutation_policy"]
-        for field in enterprise_fields:
-            if field in result:
-                assert result[field] is None, f"Pro tier should not expose {field}"
-        
+        enterprise_fields = [
+            "approval_status",
+            "compliance_check",
+            "audit_id",
+            "mutation_policy",
+        ]
+        for field_name in enterprise_fields:
+            if field_name in result:
+                assert (
+                    result[field_name] is None
+                ), f"Pro tier should not expose {field_name}"
+
         return True
+
     return _assert
 
 
 @pytest.fixture
 def assert_result_has_enterprise_fields():
     """Assert result has all tier fields (Community + Pro + Enterprise)."""
+
     def _assert(result):
         # All fields should be present
         all_fields = [
-            "success", "file_path", "symbol_name", "symbol_type",
-            "backup_path", "lines_changed", "syntax_valid",
-            "files_affected", "imports_adjusted", "rollback_available",
-            "formatting_preserved", "approval_status", "compliance_check",
-            "audit_id", "mutation_policy", "error"
+            "success",
+            "file_path",
+            "symbol_name",
+            "symbol_type",
+            "backup_path",
+            "lines_changed",
+            "syntax_valid",
+            "files_affected",
+            "imports_adjusted",
+            "rollback_available",
+            "formatting_preserved",
+            "approval_status",
+            "compliance_check",
+            "audit_id",
+            "mutation_policy",
+            "error",
         ]
-        for field in all_fields:
-            assert field in result, f"Enterprise result missing field: {field}"
-        
+        for field_name in all_fields:
+            assert (
+                field_name in result
+            ), f"Enterprise result missing field: {field_name}"
+
         return True
+
     return _assert
+
 
 # =============================================================================
 # [20260103_TEST] Performance Testing Infrastructure
 # =============================================================================
 
 import time
+
 # import psutil  # [20260103_TEST] Not needed for Phase 1 simplified tests
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
+
+# Simple memory tracking fallback when psutil is not available
+try:
+    import psutil
+
+    _HAS_PSUTIL = True
+except ImportError:
+    _HAS_PSUTIL = False
 
 
 @dataclass
 class PerformanceMetrics:
     """Performance measurement results for update_symbol operations."""
+
     duration_ms: float
     memory_delta_mb: float
     success: bool
@@ -659,7 +735,7 @@ class PerformanceMetrics:
     median_ms: Optional[float] = None
     p95_ms: Optional[float] = None
     p99_ms: Optional[float] = None
-    
+
     def __post_init__(self):
         """Calculate percentiles if multiple iterations."""
         if len(self.durations) > 1:
@@ -674,38 +750,44 @@ class PerformanceMetrics:
 def measure_performance(iterations: int = 1):
     """
     Context manager for measuring performance of update_symbol operations.
-    
+
     Usage:
         with measure_performance(iterations=100) as durations:
             for _ in range(100):
                 start = time.perf_counter()
                 # ... perform operation ...
                 durations.append((time.perf_counter() - start) * 1000)
-        
+
         # Context manager yields PerformanceMetrics on exit
     """
-    process = psutil.Process()
-    mem_before = process.memory_info().rss / 1024 / 1024  # MB
+    if _HAS_PSUTIL:
+        process = psutil.Process()
+        mem_before = process.memory_info().rss / 1024 / 1024  # MB
+    else:
+        mem_before = 0.0
     durations: List[float] = []
-    
+
     overall_start = time.perf_counter()
     try:
         yield durations
     finally:
         overall_end = time.perf_counter()
-        mem_after = process.memory_info().rss / 1024 / 1024  # MB
-        
+        if _HAS_PSUTIL:
+            mem_after = process.memory_info().rss / 1024 / 1024  # MB
+        else:
+            mem_after = 0.0
+
         overall_duration_ms = (overall_end - overall_start) * 1000
         memory_delta = mem_after - mem_before
-        
+
         metrics = PerformanceMetrics(
             duration_ms=overall_duration_ms,
             memory_delta_mb=memory_delta,
             success=True,
             iterations=iterations,
-            durations=durations
+            durations=durations,
         )
-        
+
         # Store in context for retrieval
         durations.clear()
         durations.append(metrics)
@@ -715,53 +797,46 @@ def measure_performance(iterations: int = 1):
 def performance_threshold():
     """
     Fixture providing performance thresholds for update_symbol operations.
-    
+
     Thresholds based on roadmap targets:
     - Update time: <100ms per symbol (median)
     - Success rate: >99%
     """
     return {
         # Single symbol update thresholds (milliseconds)
-        "small_symbol": 50,         # <50ms for small symbols (<50 LOC)
-        "medium_symbol": 100,        # <100ms for medium symbols (50-200 LOC)
-        "large_symbol": 200,         # <200ms for large symbols (200-500 LOC)
-        "very_large_symbol": 500,    # <500ms for very large symbols (500+ LOC)
-        
+        "small_symbol": 50,  # <50ms for small symbols (<50 LOC)
+        "medium_symbol": 100,  # <100ms for medium symbols (50-200 LOC)
+        "large_symbol": 200,  # <200ms for large symbols (200-500 LOC)
+        "very_large_symbol": 500,  # <500ms for very large symbols (500+ LOC)
         # File size impact thresholds
-        "small_file": 100,           # <100ms in small file (<500 LOC)
-        "medium_file": 150,          # <150ms in medium file (500-2000 LOC)
-        "large_file": 300,           # <300ms in large file (2000-5000 LOC)
-        "very_large_file": 500,      # <500ms in very large file (5000+ LOC)
-        
+        "small_file": 100,  # <100ms in small file (<500 LOC)
+        "medium_file": 150,  # <150ms in medium file (500-2000 LOC)
+        "large_file": 300,  # <300ms in large file (2000-5000 LOC)
+        "very_large_file": 500,  # <500ms in very large file (5000+ LOC)
         # Batch operations (Pro tier)
         "batch_10_same_file": 1000,  # <1s for 10 updates in same file
-        "batch_10_diff_files": 1500, # <1.5s for 10 updates in different files
-        "batch_50_updates": 5000,    # <5s for 50 updates
+        "batch_10_diff_files": 1500,  # <1.5s for 10 updates in different files
+        "batch_50_updates": 5000,  # <5s for 50 updates
         "batch_100_updates": 10000,  # <10s for 100 updates
-        
         # Multi-file atomic (Pro tier)
-        "multifile_3": 500,          # <500ms for 3-file atomic
-        "multifile_10": 2000,        # <2s for 10-file atomic
-        "multifile_25": 5000,        # <5s for 25-file atomic
-        
+        "multifile_3": 500,  # <500ms for 3-file atomic
+        "multifile_10": 2000,  # <2s for 10-file atomic
+        "multifile_25": 5000,  # <5s for 25-file atomic
         # Feature overhead thresholds
-        "import_overhead": 50,       # <50ms import adjustment overhead
-        "compliance_overhead": 50,   # <50ms compliance check overhead
-        "audit_overhead": 30,        # <30ms audit logging overhead
-        
+        "import_overhead": 50,  # <50ms import adjustment overhead
+        "compliance_overhead": 50,  # <50ms compliance check overhead
+        "audit_overhead": 30,  # <30ms audit logging overhead
         # Error handling (fast-fail)
-        "syntax_error": 50,          # <50ms syntax error detection
-        "file_not_found": 10,        # <10ms file not found
-        "session_limit": 5,          # <5ms session limit check
-        "license_validation": 20,    # <20ms license validation
-        
+        "syntax_error": 50,  # <50ms syntax error detection
+        "file_not_found": 10,  # <10ms file not found
+        "session_limit": 5,  # <5ms session limit check
+        "license_validation": 20,  # <20ms license validation
         # Memory thresholds (MB)
         "single_update_memory": 50,  # <50MB increase per update
-        "batch_100_memory": 500,     # <500MB for 100 updates
-        
+        "batch_100_memory": 500,  # <500MB for 100 updates
         # Success rate thresholds (percentage)
-        "normal_success_rate": 99.0, # >99% for normal operations
-        "edge_case_success_rate": 95.0, # >95% for edge cases
+        "normal_success_rate": 99.0,  # >99% for normal operations
+        "edge_case_success_rate": 95.0,  # >95% for edge cases
     }
 
 
@@ -769,15 +844,15 @@ def performance_threshold():
 def large_file_fixture(tmp_path):
     """
     Generate large Python file for performance testing.
-    
+
     Creates a 5000-line file with 100 functions (50 lines each).
     """
     file_path = tmp_path / "large_module.py"
-    
+
     lines = []
     lines.append('"""Large module for performance testing."""')
     lines.append("")
-    
+
     for i in range(100):
         lines.append(f"def function_{i}(x, y):")
         lines.append(f'    """Function {i} for testing."""')
@@ -785,7 +860,7 @@ def large_file_fixture(tmp_path):
             lines.append(f"    # Processing line {j}")
         lines.append(f"    return x + y + {i}")
         lines.append("")
-    
+
     file_path.write_text("\n".join(lines))
     return file_path
 
@@ -794,15 +869,15 @@ def large_file_fixture(tmp_path):
 def very_large_file_fixture(tmp_path):
     """
     Generate very large Python file (8000+ lines) for stress testing.
-    
+
     Creates an 8000-line file with 160 functions (50 lines each).
     """
     file_path = tmp_path / "very_large_module.py"
-    
+
     lines = []
     lines.append('"""Very large module for stress testing."""')
     lines.append("")
-    
+
     for i in range(160):
         lines.append(f"def function_{i}(x, y):")
         lines.append(f'    """Function {i} for testing."""')
@@ -810,6 +885,6 @@ def very_large_file_fixture(tmp_path):
             lines.append(f"    # Processing line {j}")
         lines.append(f"    return x + y + {i}")
         lines.append("")
-    
+
     file_path.write_text("\n".join(lines))
     return file_path

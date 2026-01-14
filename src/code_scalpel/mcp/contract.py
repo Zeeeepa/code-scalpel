@@ -61,7 +61,8 @@ from pydantic import BaseModel, Field
 class UpgradeRequiredError(RuntimeError):
     """Raised when a caller requests a capability unavailable at current tier.
 
-    [20251228_FEATURE] Enables structured upgrade-required errors with upgrade URL.
+    [20251228_FEATURE] Enables structured upgrade-required errors.
+    [20260112_REFACTOR] Removed upgrade_url from message - hints belong in docs only.
     """
 
     def __init__(
@@ -70,19 +71,16 @@ class UpgradeRequiredError(RuntimeError):
         tool_id: str,
         feature: str,
         required_tier: str,
-        upgrade_url: str,
+        upgrade_url: str | None = None,  # Deprecated, kept for backwards compat
         message: str | None = None,
     ) -> None:
         if message is None:
-            message = (
-                f"Feature '{feature}' requires {required_tier.upper()} tier. "
-                f"Upgrade: {upgrade_url}"
-            )
+            message = f"Feature '{feature}' requires {required_tier.upper()} tier."
         super().__init__(message)
         self.tool_id = tool_id
         self.feature = feature
         self.required_tier = required_tier
-        self.upgrade_url = upgrade_url
+        self.upgrade_url = upgrade_url  # Deprecated - do not use in new code
 
 
 ErrorCode = Literal[

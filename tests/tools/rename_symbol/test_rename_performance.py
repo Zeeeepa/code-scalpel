@@ -23,12 +23,12 @@ def _generate_synthetic_project(
     root: Path, *, num_files: int = 100, refs_per_file: int = 10
 ) -> Path:
     """Generate synthetic project with controlled reference count.
-    
+
     Args:
         root: Project root directory
         num_files: Number of Python files to create
         refs_per_file: References to target symbol per file
-        
+
     Returns:
         Path to target file containing the symbol definition
     """
@@ -46,7 +46,9 @@ def _generate_synthetic_project(
 
 
 @pytest.mark.timeout(15)
-def test_rename_1k_references_under_10s_community(tmp_path: Path, scope_filesystem: None):
+def test_rename_1k_references_under_10s_community(
+    tmp_path: Path, scope_filesystem: None
+):
     """[20260108_TEST] Community tier handles 1k references within 10s budget."""
     target = _generate_synthetic_project(tmp_path, num_files=100, refs_per_file=10)
 
@@ -94,7 +96,9 @@ def test_rename_5k_references_under_30s_pro(tmp_path: Path, scope_filesystem: No
 
 
 @pytest.mark.timeout(65)
-def test_rename_10k_references_under_60s_enterprise(tmp_path: Path, scope_filesystem: None):
+def test_rename_10k_references_under_60s_enterprise(
+    tmp_path: Path, scope_filesystem: None
+):
     """[20260108_TEST] Enterprise tier handles 10k references within 60s budget."""
     target = _generate_synthetic_project(tmp_path, num_files=1000, refs_per_file=10)
 
@@ -161,7 +165,9 @@ def test_budget_enforcement_at_scale(tmp_path: Path, scope_filesystem: None):
     assert result.success
     # Should stop at update limit with warning
     assert len(result.changed_files) <= 50
-    assert any("max_files_updated" in w or "limit" in w.lower() for w in result.warnings)
+    assert any(
+        "max_files_updated" in w or "limit" in w.lower() for w in result.warnings
+    )
 
 
 def test_performance_with_deep_nesting(tmp_path: Path, scope_filesystem: None):
@@ -176,8 +182,8 @@ def test_performance_with_deep_nesting(tmp_path: Path, scope_filesystem: None):
         for j in range(10):
             module = current / f"module_{j}.py"
             module.write_text(
-                f"from target import old_symbol\n\n"
-                f"def func():\n    return old_symbol()\n",
+                "from target import old_symbol\n\n"
+                "def func():\n    return old_symbol()\n",
                 encoding="utf-8",
             )
 
@@ -201,6 +207,7 @@ def test_performance_with_deep_nesting(tmp_path: Path, scope_filesystem: None):
     # Should complete in reasonable time even with deep nesting
     assert elapsed < 5.0, f"Deep nesting took {elapsed:.2f}s (expected <5s)"
 
+
 def test_large_file_rename_memory_ceiling(tmp_path: Path, scope_filesystem: None):
     """[20260108_TEST] Large (~2MB) file renames complete without memory/time blowup."""
     target = tmp_path / "large.py"
@@ -209,7 +216,9 @@ def test_large_file_rename_memory_ceiling(tmp_path: Path, scope_filesystem: None
     # Build ~2MB payload
     filler = ("x" * 1024 + "\n") * 2048  # ~2MB
     target.write_text(f"def old_symbol():\n    return 1\n{filler}", encoding="utf-8")
-    ref.write_text("from large import old_symbol\nvalue = old_symbol()\n", encoding="utf-8")
+    ref.write_text(
+        "from large import old_symbol\nvalue = old_symbol()\n", encoding="utf-8"
+    )
 
     start = time.perf_counter()
     result = rename_references_across_project(
@@ -230,6 +239,7 @@ def test_large_file_rename_memory_ceiling(tmp_path: Path, scope_filesystem: None
 
     # Large file rename may require explicit patcher call first
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
+
     patcher = UnifiedPatcher.from_file(str(target))
     patcher.rename_symbol("function", "old_symbol", "new_symbol")
     patcher.save(backup=False)

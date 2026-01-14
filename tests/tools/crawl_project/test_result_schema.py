@@ -1,7 +1,9 @@
 """Test result schema validation and data types."""
 
 import json
+
 import pytest
+
 from code_scalpel.analysis.project_crawler import ProjectCrawler
 
 

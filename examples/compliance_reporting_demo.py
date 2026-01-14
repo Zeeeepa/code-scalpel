@@ -175,19 +175,10 @@ def main():
     audit_log = create_sample_audit_data()
 
     # Create policy engine
+    # [20260114_BUGFIX] PolicyEngine loads policies from YAML file, not programmatically.
+    # Using default path (will use empty policy if .code-scalpel/policy.yaml doesn't exist)
     policy_engine = PolicyEngine()
-    policy_engine.load_policy(
-        "security_policy",
-        {"severity": "HIGH", "category": "security"},
-    )
-    policy_engine.load_policy(
-        "quality_policy",
-        {"severity": "MEDIUM", "category": "quality"},
-    )
-    policy_engine.load_policy(
-        "style_policy",
-        {"severity": "LOW", "category": "style"},
-    )
+    print(f"✓ Policy engine initialized (policies loaded: {len(policy_engine.policies)})")
 
     # Generate reports
     generate_reports(audit_log, policy_engine)

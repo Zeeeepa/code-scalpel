@@ -169,6 +169,7 @@ from .features import (
     TOOL_CAPABILITIES,
     get_all_tools_for_tier,
     get_tool_capabilities,
+    get_upgrade_hint,
     has_capability,
 )
 
@@ -211,6 +212,7 @@ __all__ = [
     "get_tool_capabilities",
     "has_capability",
     "get_all_tools_for_tier",
+    "get_upgrade_hint",
     "TOOL_CAPABILITIES",
     # Config loader (NEW in v3.3.0)
     "load_limits",

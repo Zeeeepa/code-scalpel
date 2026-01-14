@@ -5,9 +5,10 @@ Policy file limit enforcement tests for verify_policy_integrity.
 
 Tests verify that tier limits for max_policy_files are enforced:
 - Community: 50 files max
-- Pro: 200 files max  
+- Pro: 200 files max
 - Enterprise: unlimited
 """
+
 from pathlib import Path
 
 import pytest
@@ -20,7 +21,7 @@ def test_community_50_policy_files_allowed(
 ) -> None:
     """
     Community tier: 50 policy files should be allowed (at limit).
-    
+
     Validates:
     - Community tier max_policy_files = 50 from limits.toml
     - Tool accepts exactly 50 files
@@ -29,20 +30,22 @@ def test_community_50_policy_files_allowed(
     from code_scalpel.mcp.server import _verify_policy_integrity_sync
 
     policy_dir = tmp_path / ".code-scalpel"
-    
+
     # Create exactly 50 policy files (Community limit)
     create_multiple_policies(policy_dir, 50)
-    
+
     # Community tier doesn't require secret
     monkeypatch.delenv("SCALPEL_MANIFEST_SECRET", raising=False)
-    
+
     result = _verify_policy_integrity_sync(
         policy_dir=str(policy_dir),
         manifest_source="file",
         tier="community",
     )
-    
-    assert result.success is True, f"Expected success at 50 files, got error: {result.error}"
+
+    assert (
+        result.success is True
+    ), f"Expected success at 50 files, got error: {result.error}"
     assert result.tier == "community"
     assert result.files_verified == 50
     assert result.error is None
@@ -55,7 +58,7 @@ def test_community_51_policy_files_rejected(
 ) -> None:
     """
     Community tier: 51 policy files should be rejected (over limit).
-    
+
     Validates:
     - Community tier max_policy_files = 50 from limits.toml
     - Tool rejects 51 files with clear error message
@@ -64,25 +67,29 @@ def test_community_51_policy_files_rejected(
     from code_scalpel.mcp.server import _verify_policy_integrity_sync
 
     policy_dir = tmp_path / ".code-scalpel"
-    
+
     # Create 51 policy files (1 over Community limit)
     create_multiple_policies(policy_dir, 51)
-    
+
     monkeypatch.delenv("SCALPEL_MANIFEST_SECRET", raising=False)
-    
+
     result = _verify_policy_integrity_sync(
         policy_dir=str(policy_dir),
         manifest_source="file",
         tier="community",
     )
-    
+
     assert result.success is False, "Expected failure with 51 files on Community tier"
     assert result.tier == "community"
     assert result.error is not None
     assert "51" in result.error, f"Error should mention 51 files: {result.error}"
     assert "50" in result.error, f"Error should mention 50 limit: {result.error}"
-    assert "community" in result.error.lower(), f"Error should mention tier: {result.error}"
-    assert "limit exceeded" in result.error.lower(), f"Error should be clear: {result.error}"
+    assert (
+        "community" in result.error.lower()
+    ), f"Error should mention tier: {result.error}"
+    assert (
+        "limit exceeded" in result.error.lower()
+    ), f"Error should be clear: {result.error}"
 
 
 def test_pro_200_policy_files_allowed(
@@ -93,7 +100,7 @@ def test_pro_200_policy_files_allowed(
 ) -> None:
     """
     Pro tier: 200 policy files should be allowed (at limit).
-    
+
     Validates:
     - Pro tier max_policy_files = 200 from limits.toml
     - Tool accepts exactly 200 files
@@ -102,22 +109,24 @@ def test_pro_200_policy_files_allowed(
     from code_scalpel.mcp.server import _verify_policy_integrity_sync
 
     policy_dir = tmp_path / ".code-scalpel"
-    
+
     # Create exactly 200 policy files (Pro limit)
     policy_files = create_multiple_policies(policy_dir, 200)
-    
+
     # Pro tier requires secret and manifest
     secret = "test-secret-pro-200"
     monkeypatch.setenv("SCALPEL_MANIFEST_SECRET", secret)
     create_manifest(policy_dir, secret, [pf.name for pf in policy_files])
-    
+
     result = _verify_policy_integrity_sync(
         policy_dir=str(policy_dir),
         manifest_source="file",
         tier="pro",
     )
-    
-    assert result.success is True, f"Expected success at 200 files on Pro, got error: {result.error}"
+
+    assert (
+        result.success is True
+    ), f"Expected success at 200 files on Pro, got error: {result.error}"
     assert result.tier == "pro"
     assert result.files_verified == 200
     assert result.signature_validated is True
@@ -132,7 +141,7 @@ def test_enterprise_unlimited_policy_files(
 ) -> None:
     """
     Enterprise tier: Unlimited policy files (test with 250 > Pro limit).
-    
+
     Validates:
     - Enterprise tier has no max_policy_files limit
     - Tool accepts >200 files (more than Pro limit)
@@ -141,21 +150,23 @@ def test_enterprise_unlimited_policy_files(
     from code_scalpel.mcp.server import _verify_policy_integrity_sync
 
     policy_dir = tmp_path / ".code-scalpel"
-    
+
     # Create 250 policy files (exceeds Pro limit of 200)
     policy_files = create_multiple_policies(policy_dir, 250)
-    
+
     secret = "test-secret-enterprise-unlimited"
     monkeypatch.setenv("SCALPEL_MANIFEST_SECRET", secret)
     create_manifest(policy_dir, secret, [pf.name for pf in policy_files])
-    
+
     result = _verify_policy_integrity_sync(
         policy_dir=str(policy_dir),
         manifest_source="file",
         tier="enterprise",
     )
-    
-    assert result.success is True, f"Expected success with 250 files on Enterprise, got error: {result.error}"
+
+    assert (
+        result.success is True
+    ), f"Expected success with 250 files on Enterprise, got error: {result.error}"
     assert result.tier == "enterprise"
     assert result.files_verified == 250
     assert result.signature_validated is True

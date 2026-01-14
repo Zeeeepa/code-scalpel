@@ -150,9 +150,9 @@ docs/tools/
 
 ---
 
-## Available Tools (v3.1.0)
+## Available Tools (v3.3.0)
 
-Code Scalpel provides **20 MCP tools** for surgical code operations:
+Code Scalpel provides **22 MCP tools** for surgical code operations:
 
 ### Code Analysis Tools
 - **analyze_code** - Parse and extract code structure
@@ -167,6 +167,7 @@ Code Scalpel provides **20 MCP tools** for surgical code operations:
 
 ### Code Modification Tools
 - **update_symbol** - Safely replace functions/classes/methods
+- **rename_symbol** - Safely rename symbols across the codebase
 
 ### Code Flow Analysis Tools
 - **get_call_graph** - Generate call graphs and trace execution flow
@@ -179,6 +180,9 @@ Code Scalpel provides **20 MCP tools** for surgical code operations:
 - **cross_file_security_scan** - Cross-module taint tracking
 - **type_evaporation_scan** - Detect TypeScript type evaporation
 - **scan_dependencies** - Scan for vulnerable dependencies (OSV API)
+
+### Policy & Compliance Tools
+- **code_policy_check** - Check code against style and compliance rules
 
 ### Testing Tools
 - **generate_unit_tests** - Symbolic execution test generation

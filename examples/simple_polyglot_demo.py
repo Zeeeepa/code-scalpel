@@ -3,6 +3,7 @@
 Simple Polyglot Demo - Direct usage without package installation.
 
 [20251221_FEATURE] Quick demonstration of multi-language support.
+[20260114_BUGFIX] Updated to use current PolyglotExtractor API.
 
 Run from code-scalpel root: python examples/simple_polyglot_demo.py
 """
@@ -16,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 def demo_java():
     """Show Java method extraction."""
-    from code_scalpel.polyglot_extractor import PolyglotExtractor
+    from code_scalpel.code_parsers.extractor import Language, PolyglotExtractor
 
     print("\n" + "=" * 60)
     print(" JAVA EXTRACTION ".center(60, "="))
@@ -34,21 +35,23 @@ public class Calculator {
 }
 """
 
-    extractor = PolyglotExtractor(java_code, language="java")
+    extractor = PolyglotExtractor(java_code, language=Language.JAVA)
 
     print(f"Language: {extractor.language}")
-    print(f"Methods found: {extractor.list_functions()}")
 
-    result = extractor.get_function("add")
+    result = extractor.extract("method", "add")
     print("\nExtracted method 'add':")
     print(f"  Success: {result.success}")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"\nCode:\n{result.code}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"\nCode:\n{result.code}")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_javascript():
     """Show JavaScript function extraction."""
-    from code_scalpel.polyglot_extractor import PolyglotExtractor
+    from code_scalpel.code_parsers.extractor import Language, PolyglotExtractor
 
     print("\n" + "=" * 60)
     print(" JAVASCRIPT EXTRACTION ".center(60, "="))
@@ -69,21 +72,23 @@ const formatCurrency = (value) => {
 };
 """
 
-    extractor = PolyglotExtractor(js_code, language="javascript")
+    extractor = PolyglotExtractor(js_code, language=Language.JAVASCRIPT)
 
     print(f"Language: {extractor.language}")
-    print(f"Functions found: {extractor.list_functions()}")
 
-    result = extractor.get_function("processPayment")
+    result = extractor.extract("function", "processPayment")
     print("\nExtracted async function 'processPayment':")
     print(f"  Success: {result.success}")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"\nCode:\n{result.code}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"\nCode:\n{result.code}")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_typescript():
     """Show TypeScript function extraction."""
-    from code_scalpel.polyglot_extractor import PolyglotExtractor
+    from code_scalpel.code_parsers.extractor import Language, PolyglotExtractor
 
     print("\n" + "=" * 60)
     print(" TYPESCRIPT EXTRACTION ".center(60, "="))
@@ -106,39 +111,40 @@ class UserService {
 }
 """
 
-    extractor = PolyglotExtractor(ts_code, language="typescript")
+    extractor = PolyglotExtractor(ts_code, language=Language.TYPESCRIPT)
 
     print(f"Language: {extractor.language}")
-    print(f"Functions found: {extractor.list_functions()}")
-    print(f"Classes found: {extractor.list_classes()}")
 
-    result = extractor.get_function("greet")
+    result = extractor.extract("function", "greet")
     print("\nExtracted function 'greet':")
     print(f"  Success: {result.success}")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"\nCode:\n{result.code}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"\nCode:\n{result.code}")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_auto_detection():
     """Show automatic language detection."""
-    from code_scalpel.polyglot_extractor import PolyglotExtractor
+    from code_scalpel.code_parsers.extractor import Language, PolyglotExtractor
 
     print("\n" + "=" * 60)
     print(" AUTO-DETECTION ".center(60, "="))
     print("=" * 60)
 
     test_cases = [
-        ("function test() {}", "JavaScript"),
-        ("public class Test {}", "Java"),
-        ("def test(): pass", "Python"),
-        ("const add = (a: number) => a", "TypeScript"),
+        ("function test() { return 1; }", "javascript"),
+        ("public class Test { }", "java"),
+        ("def test(): pass", "python"),
+        ("const add = (a: number): number => a", "typescript"),
     ]
 
     for code, expected_lang in test_cases:
-        extractor = PolyglotExtractor(code)
-        detected = extractor.language
-        status = "✓" if expected_lang.lower() in detected else "?"
-        print(f"{status} Detected {detected:12s} for: {code[:30]}")
+        extractor = PolyglotExtractor(code, language=Language.AUTO)
+        detected = extractor.language.value
+        status = "✓" if expected_lang.lower() == detected.lower() else "?"
+        print(f"{status} Detected {detected:12s} for: {code[:35]}")
 
 
 def main():

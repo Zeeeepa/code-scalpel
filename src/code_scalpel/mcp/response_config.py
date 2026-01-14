@@ -9,6 +9,7 @@ via .code-scalpel/response_config.json configuration file.
 
 import json
 import logging
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Set, TypedDict, cast
 
@@ -71,7 +72,10 @@ DEFAULT_CONFIG = {
 
 
 class ResponseConfig:
-    """Load and apply response configuration for token efficiency."""
+    """
+    Load and apply response configuration for token efficiency.
+    Supports hot-reloading when the configuration file changes.
+    """
 
     def __init__(self, config_path: Optional[Path] = None):
         """
@@ -80,6 +84,9 @@ class ResponseConfig:
         Args:
             config_path: Path to response_config.json. If None, searches common locations.
         """
+        self._config_path: Optional[Path] = None
+        self._last_mtime: float = 0.0
+        self._last_check_time: float = 0.0
         self.config = self._load_config(config_path)
 
     def _load_config(self, config_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -89,6 +96,10 @@ class ResponseConfig:
                 with open(config_path, "r") as f:
                     config = json.load(f)
                     logger.info(f"Loaded response config from {config_path}")
+
+                    # Update tracking for hot reload
+                    self._config_path = config_path
+                    self._last_mtime = config_path.stat().st_mtime
                     return config
             except Exception as e:
                 logger.warning(
@@ -110,12 +121,41 @@ class ResponseConfig:
                     with open(path, "r") as f:
                         config = json.load(f)
                         logger.info(f"Loaded response config from {path}")
+
+                        # Update tracking for hot reload
+                        self._config_path = path
+                        self._last_mtime = path.stat().st_mtime
                         return config
                 except Exception as e:
                     logger.warning(f"Failed to load response config from {path}: {e}")
 
         logger.info("Using default response configuration")
+        self._config_path = None
         return DEFAULT_CONFIG
+
+    def _check_reload(self) -> None:
+        """Check if config file has changed and reload if necessary."""
+        # Throttle checks to once per second to avoid excessive I/O
+        current_time = time.time()
+        if current_time - self._last_check_time < 1.0:
+            return
+
+        self._last_check_time = current_time
+
+        if self._config_path and self._config_path.exists():
+            try:
+                current_mtime = self._config_path.stat().st_mtime
+                if current_mtime > self._last_mtime:
+                    logger.info(f"Detected change in {self._config_path}, reloading...")
+                    new_config = self._load_config(self._config_path)
+
+                    # Only apply if load was successful (basic partial update check)
+                    # _load_config will return DEFAULT_CONFIG if file vanishes/fails,
+                    # but if it returns a dict, we assume it's good or fell back safely.
+                    if new_config:
+                        self.config = new_config
+            except Exception as e:
+                logger.warning(f"Error checking config reload: {e}")
 
     def get_profile(self, tool_name: Optional[str] = None) -> str:
         """Get the profile to use for a tool."""

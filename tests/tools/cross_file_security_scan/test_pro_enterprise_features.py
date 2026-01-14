@@ -13,7 +13,6 @@ Tests validate Pro and Enterprise tier specific capabilities:
 """
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -29,7 +28,7 @@ def _write(p: Path, content: str) -> None:
 def _make_flask_app_with_di(root: Path) -> Path:
     """
     Create a Flask app with dependency injection patterns.
-    
+
     This includes:
     - Flask request context
     - Injected service dependency
@@ -110,7 +109,7 @@ def execute_parameterized(sql: str, params: tuple):
 def _make_microservice_project(root: Path) -> Path:
     """
     Create a multi-service project with REST boundaries.
-    
+
     Services:
     - api-gateway: Entry point, handles requests
     - user-service: Manages users
@@ -194,7 +193,7 @@ def query():
 async def test_pro_tier_confidence_scoring_populated(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier populates confidence_scores in results.
-    
+
     Confidence scoring should reflect heuristic assessment of taint flow quality.
     Scores should be between 0.0 and 1.0.
     """
@@ -217,24 +216,25 @@ async def test_pro_tier_confidence_scoring_populated(tmp_path: Path, monkeypatch
     )
 
     assert r.success is True
-    
+
     # Pro tier should populate confidence_scores when vulnerabilities found
     if r.vulnerability_count > 0:
-        assert r.confidence_scores is not None, \
-            "Pro tier should populate confidence_scores for vulnerabilities"
-        assert isinstance(r.confidence_scores, dict), \
-            "confidence_scores should be a dictionary"
-        
+        assert (
+            r.confidence_scores is not None
+        ), "Pro tier should populate confidence_scores for vulnerabilities"
+        assert isinstance(
+            r.confidence_scores, dict
+        ), "confidence_scores should be a dictionary"
+
         # All scores should be valid floats in [0, 1]
         for score in r.confidence_scores.values():
-            assert 0.0 <= score <= 1.0, \
-                f"Confidence score {score} should be in [0, 1]"
+            assert 0.0 <= score <= 1.0, f"Confidence score {score} should be in [0, 1]"
 
 
 async def test_pro_tier_framework_context_detection(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier detects framework context (Flask, Django, etc).
-    
+
     Framework awareness helps provide targeted mitigation strategies.
     Should detect:
     - Flask decorators and context
@@ -260,27 +260,29 @@ async def test_pro_tier_framework_context_detection(tmp_path: Path, monkeypatch)
     )
 
     assert r.success is True
-    
+
     # Pro tier should detect Flask framework
     if r.vulnerability_count > 0:
-        assert r.framework_contexts is not None, \
-            "Pro tier should populate framework_contexts when framework detected"
-        assert isinstance(r.framework_contexts, list), \
-            "framework_contexts should be a list of dicts"
-        
+        assert (
+            r.framework_contexts is not None
+        ), "Pro tier should populate framework_contexts when framework detected"
+        assert isinstance(
+            r.framework_contexts, list
+        ), "framework_contexts should be a list of dicts"
+
         # Should have Flask context
         flask_contexts = [
-            ctx for ctx in r.framework_contexts
+            ctx
+            for ctx in r.framework_contexts
             if isinstance(ctx, dict) and ctx.get("framework") == "flask"
         ]
-        assert len(flask_contexts) > 0, \
-            "Should detect Flask framework in app structure"
+        assert len(flask_contexts) > 0, "Should detect Flask framework in app structure"
 
 
 async def test_pro_tier_dependency_chain_analysis(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier tracks dependency chains through DI.
-    
+
     Should identify:
     - Service dependencies (UserService injection)
     - Call chains through injected objects
@@ -305,19 +307,21 @@ async def test_pro_tier_dependency_chain_analysis(tmp_path: Path, monkeypatch):
     )
 
     assert r.success is True
-    
+
     # Pro tier should track dependency chains
     if r.vulnerability_count > 0:
-        assert r.dependency_chains is not None, \
-            "Pro tier should populate dependency_chains for DI patterns"
-        assert isinstance(r.dependency_chains, list), \
-            "dependency_chains should be a list"
+        assert (
+            r.dependency_chains is not None
+        ), "Pro tier should populate dependency_chains for DI patterns"
+        assert isinstance(
+            r.dependency_chains, list
+        ), "dependency_chains should be a list"
 
 
 async def test_pro_tier_sanitizer_detection(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier identifies sanitizers and safe patterns.
-    
+
     Pro tier should:
     - Detect parameterized query patterns
     - Identify common sanitizers (escape functions)
@@ -342,20 +346,18 @@ async def test_pro_tier_sanitizer_detection(tmp_path: Path, monkeypatch):
     )
 
     assert r.success is True
-    
+
     # Pro tier result should have result structure even if no vulnerabilities found
     # The module should contain both safe and unsafe query patterns
     # Safe flow exists in execute_parameterized function
-    assert hasattr(r, 'taint_flows'), \
-        "Pro tier should have taint_flows field"
-    assert isinstance(r.taint_flows, list), \
-        "taint_flows should be a list"
+    assert hasattr(r, "taint_flows"), "Pro tier should have taint_flows field"
+    assert isinstance(r.taint_flows, list), "taint_flows should be a list"
 
 
 async def test_pro_tier_advanced_taint_sources(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier identifies advanced taint sources.
-    
+
     Beyond basic HTTP request sources, Pro should detect:
     - Header-based sources (X-User-ID, etc)
     - Cookie sources
@@ -414,8 +416,8 @@ def query(sql):
     assert r.success is True
     # Pro tier should detect taint flows even if vulnerabilities not explicitly reported
     # The tool identifies multiple taint sources and sinks
-    assert hasattr(r, 'taint_flows'), "Should have taint_flows field"
-    assert hasattr(r, 'dependency_chains'), "Pro tier should have dependency_chains"
+    assert hasattr(r, "taint_flows"), "Should have taint_flows field"
+    assert hasattr(r, "dependency_chains"), "Pro tier should have dependency_chains"
 
 
 # =============================================================================
@@ -428,7 +430,7 @@ async def test_enterprise_tier_microservice_boundary_detection(
 ):
     """
     [20260103_TEST] Enterprise tier detects microservice/service boundaries.
-    
+
     Should identify:
     - HTTP service boundaries (Flask routes handling external requests)
     - Service-to-service calls (requests.get, httpx.get)
@@ -453,13 +455,15 @@ async def test_enterprise_tier_microservice_boundary_detection(
     )
 
     assert r.success is True
-    
+
     # Enterprise should detect service boundaries
     if r.vulnerability_count > 0:
-        assert r.microservice_boundaries is not None, \
-            "Enterprise tier should detect microservice boundaries"
-        assert isinstance(r.microservice_boundaries, list), \
-            "microservice_boundaries should be a list"
+        assert (
+            r.microservice_boundaries is not None
+        ), "Enterprise tier should detect microservice boundaries"
+        assert isinstance(
+            r.microservice_boundaries, list
+        ), "microservice_boundaries should be a list"
 
 
 async def test_enterprise_tier_cross_service_vulnerability_tracking(
@@ -467,10 +471,10 @@ async def test_enterprise_tier_cross_service_vulnerability_tracking(
 ):
     """
     [20260103_TEST] Enterprise tier tracks vulnerabilities across services.
-    
+
     Should trace taint flow:
     api-gateway -> user-service -> db-service (SQL injection)
-    
+
     Including:
     - Service-to-service boundaries
     - Data transformation at boundaries
@@ -495,10 +499,9 @@ async def test_enterprise_tier_cross_service_vulnerability_tracking(
     )
 
     assert r.success is True
-    
+
     # Enterprise should identify cross-service flows
-    assert len(r.taint_flows) >= 1, \
-        "Should detect taint flows across services"
+    assert len(r.taint_flows) >= 1, "Should detect taint flows across services"
 
 
 async def test_enterprise_tier_distributed_trace_representation(
@@ -506,7 +509,7 @@ async def test_enterprise_tier_distributed_trace_representation(
 ):
     """
     [20260103_TEST] Enterprise tier provides distributed trace view.
-    
+
     Should generate trace representation showing:
     - Service name at each hop
     - Operation/function name
@@ -532,11 +535,12 @@ async def test_enterprise_tier_distributed_trace_representation(
     )
 
     assert r.success is True
-    
+
     # Enterprise may provide distributed trace view
     if r.vulnerability_count > 0:
-        assert r.distributed_trace is None or isinstance(r.distributed_trace, dict), \
-            "distributed_trace should be None or dict (best-effort)"
+        assert r.distributed_trace is None or isinstance(
+            r.distributed_trace, dict
+        ), "distributed_trace should be None or dict (best-effort)"
 
 
 async def test_enterprise_tier_global_flows_across_services(
@@ -544,7 +548,7 @@ async def test_enterprise_tier_global_flows_across_services(
 ):
     """
     [20260103_TEST] Enterprise tier identifies global taint flows.
-    
+
     Should track:
     - All entry points across services
     - All exit points (sinks) across services
@@ -570,18 +574,17 @@ async def test_enterprise_tier_global_flows_across_services(
     )
 
     assert r.success is True
-    
+
     # Enterprise may provide global flows
-    assert r.global_flows is None or isinstance(r.global_flows, list), \
-        "global_flows should be None or list (best-effort)"
+    assert r.global_flows is None or isinstance(
+        r.global_flows, list
+    ), "global_flows should be None or list (best-effort)"
 
 
-async def test_enterprise_tier_compliance_impact_mapping(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_compliance_impact_mapping(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier maps vulnerabilities to compliance impact.
-    
+
     Should identify:
     - Which compliance standards are violated (PCI-DSS, HIPAA, GDPR)
     - Which requirements each vulnerability affects
@@ -606,20 +609,18 @@ async def test_enterprise_tier_compliance_impact_mapping(
     )
 
     assert r.success is True
-    
+
     # Enterprise should identify compliance implications
     if r.vulnerability_count > 0:
         for vuln in r.vulnerabilities:
             # Vulnerability should reference compliance if Enterprise
-            assert hasattr(vuln, 'cwe'), "Vulnerability should have CWE"
+            assert hasattr(vuln, "cwe"), "Vulnerability should have CWE"
 
 
-async def test_enterprise_tier_unlimited_module_analysis(
-    tmp_path: Path, monkeypatch
-):
+async def test_enterprise_tier_unlimited_module_analysis(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier analyzes unlimited modules.
-    
+
     With no cap on module count, Enterprise should:
     - Analyze all services in microservice project
     - Find flows spanning many services
@@ -631,7 +632,7 @@ async def test_enterprise_tier_unlimited_module_analysis(
 
     root = tmp_path / "repo"
     root.mkdir()
-    
+
     # Create a project with many small modules
     for i in range(20):
         service = root / f"service_{i}"
@@ -656,14 +657,15 @@ def service_{i}_handler(data):
 
     assert r.success is True
     # Should analyze all (or most) of the 20 services
-    assert r.files_analyzed >= 15, \
-        "Enterprise should analyze most/all modules without capping"
+    assert (
+        r.files_analyzed >= 15
+    ), "Enterprise should analyze most/all modules without capping"
 
 
 async def test_enterprise_tier_result_completeness(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier returns complete result structure.
-    
+
     Verifies all Enterprise-specific fields are present and properly typed:
     - microservice_boundaries: list or None
     - distributed_trace: dict or None
@@ -691,17 +693,19 @@ async def test_enterprise_tier_result_completeness(tmp_path: Path, monkeypatch):
     )
 
     assert r.success is True
-    
+
     # All fields should be present
-    assert hasattr(r, 'microservice_boundaries'), "Missing microservice_boundaries"
-    assert hasattr(r, 'distributed_trace'), "Missing distributed_trace"
-    assert hasattr(r, 'global_flows'), "Missing global_flows"
-    assert hasattr(r, 'framework_contexts'), "Missing framework_contexts"
-    assert hasattr(r, 'dependency_chains'), "Missing dependency_chains"
-    assert hasattr(r, 'confidence_scores'), "Missing confidence_scores"
-    
+    assert hasattr(r, "microservice_boundaries"), "Missing microservice_boundaries"
+    assert hasattr(r, "distributed_trace"), "Missing distributed_trace"
+    assert hasattr(r, "global_flows"), "Missing global_flows"
+    assert hasattr(r, "framework_contexts"), "Missing framework_contexts"
+    assert hasattr(r, "dependency_chains"), "Missing dependency_chains"
+    assert hasattr(r, "confidence_scores"), "Missing confidence_scores"
+
     # All should have correct types
-    assert r.microservice_boundaries is None or isinstance(r.microservice_boundaries, list)
+    assert r.microservice_boundaries is None or isinstance(
+        r.microservice_boundaries, list
+    )
     assert r.distributed_trace is None or isinstance(r.distributed_trace, dict)
     assert r.global_flows is None or isinstance(r.global_flows, list)
     assert r.framework_contexts is None or isinstance(r.framework_contexts, list)
@@ -717,7 +721,7 @@ async def test_enterprise_tier_result_completeness(tmp_path: Path, monkeypatch):
 async def test_community_tier_gating_no_pro_features(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Community tier strictly gated from Pro features.
-    
+
     Verify that Community tier results do NOT include:
     - confidence_scores (should be None)
     - dependency_chains (should be None)
@@ -740,18 +744,20 @@ async def test_community_tier_gating_no_pro_features(tmp_path: Path, monkeypatch
     )
 
     assert r.success is True
-    
+
     # Community tier should not have Pro features
-    assert r.confidence_scores is None, \
-        "Community tier should not have confidence_scores"
-    assert r.dependency_chains is None or len(r.dependency_chains) == 0, \
-        "Community tier should not have dependency_chains"
+    assert (
+        r.confidence_scores is None
+    ), "Community tier should not have confidence_scores"
+    assert (
+        r.dependency_chains is None or len(r.dependency_chains) == 0
+    ), "Community tier should not have dependency_chains"
 
 
 async def test_pro_tier_gating_no_enterprise_features(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Pro tier strictly gated from Enterprise features.
-    
+
     Verify that Pro tier results do NOT include:
     - distributed_trace (should be None)
     - microservice_boundaries beyond basic detection (should be None)
@@ -776,18 +782,16 @@ async def test_pro_tier_gating_no_enterprise_features(tmp_path: Path, monkeypatc
     )
 
     assert r.success is True
-    
+
     # Pro tier should not have Enterprise features
-    assert r.distributed_trace is None, \
-        "Pro tier should not have distributed_trace"
-    assert r.global_flows is None, \
-        "Pro tier should not have global_flows"
+    assert r.distributed_trace is None, "Pro tier should not have distributed_trace"
+    assert r.global_flows is None, "Pro tier should not have global_flows"
 
 
 async def test_enterprise_tier_all_features_available(tmp_path: Path, monkeypatch):
     """
     [20260103_TEST] Enterprise tier has access to all features.
-    
+
     Verify Enterprise tier CAN use:
     - Unlimited depth/modules
     - confidence_scores (Pro+)
@@ -816,7 +820,7 @@ async def test_enterprise_tier_all_features_available(tmp_path: Path, monkeypatc
     )
 
     assert r.success is True
-    
+
     # Enterprise should be able to request high limits without clamping
     # (internal implementation enforces, not MCP layer)
     assert r.files_analyzed > 0, "Should analyze project"

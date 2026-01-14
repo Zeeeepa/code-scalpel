@@ -222,7 +222,6 @@ def _get_current_tier() -> str:
     """
     # [20251228_FEATURE] Compute effective tier from live license state.
     # This is evaluated per tool invocation and provides mid-session downgrade.
-    from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
@@ -1799,7 +1798,7 @@ class AnalysisResult(BaseModel):
         default=None,
         description="Historical complexity trend summary keyed by file_path (ENTERPRISE; None if unavailable)",
     )
-    
+
     # [20260110_FEATURE] v1.0 - Output metadata for transparency
     language_detected: str | None = Field(
         default=None,
@@ -1858,6 +1857,11 @@ class SecurityResult(BaseModel):
     false_positive_analysis: dict[str, Any] | None = Field(
         default=None, description="False-positive reduction metadata"
     )
+    # [20260118_FEATURE] v1.0 - Pro tier remediation suggestions
+    remediation_suggestions: list[str] | None = Field(
+        default=None,
+        description="Remediation suggestions per vulnerability (Pro/Enterprise)",
+    )
     policy_violations: list[dict[str, Any]] | None = Field(
         default=None, description="Custom policy violations (Enterprise)"
     )
@@ -1885,7 +1889,9 @@ class UnifiedDetectedSink(BaseModel):
     """Detected sink with confidence and OWASP mapping."""
 
     # [20260110_FEATURE] v1.0 - Stable identifier for correlation across runs
-    sink_id: str = Field(description="Stable sink identifier (for correlation across runs)")
+    sink_id: str = Field(
+        description="Stable sink identifier (for correlation across runs)"
+    )
 
     pattern: str = Field(description="Sink pattern matched")
     sink_type: str = Field(description="Sink type classification")
@@ -1917,7 +1923,9 @@ class UnifiedSinkResult(BaseModel):
 
     success: bool = Field(description="Whether detection succeeded")
     # [20260110_FEATURE] v1.0 - Machine-readable failures
-    error_code: str | None = Field(default=None, description="Machine-readable error code")
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code"
+    )
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
@@ -1968,7 +1976,9 @@ class UnifiedSinkResult(BaseModel):
     )
 
     # [20260110_FEATURE] v1.0 - Limit observability (populated when applicable)
-    truncated: bool | None = Field(default=None, description="Whether results were truncated")
+    truncated: bool | None = Field(
+        default=None, description="Whether results were truncated"
+    )
     sinks_detected: int | None = Field(
         default=None, description="Total sinks detected before truncation"
     )
@@ -2204,10 +2214,12 @@ class ProjectCrawlResult(BaseModel):
     error: str | None = Field(default=None, description="Error if failed")
     # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
     tier_applied: str | None = Field(
-        default=None, description="Which tier's rules were applied (community/pro/enterprise)"
+        default=None,
+        description="Which tier's rules were applied (community/pro/enterprise)",
     )
     crawl_mode: str | None = Field(
-        default=None, description="Crawl mode used: 'discovery' (Community) or 'deep' (Pro/Enterprise)"
+        default=None,
+        description="Crawl mode used: 'discovery' (Community) or 'deep' (Pro/Enterprise)",
     )
     files_limit_applied: int | None = Field(
         default=None, description="Max files limit that was applied (None = unlimited)"
@@ -2506,6 +2518,29 @@ class SymbolReferencesResult(BaseModel):
 
     success: bool = Field(description="Whether search succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
+
+    # [20250112_FEATURE] Output metadata fields for tier transparency
+    tier_applied: str = Field(
+        default="community",
+        description="The tier that was applied to this request (community, pro, enterprise)",
+    )
+    max_files_applied: int | None = Field(
+        default=None,
+        description="The max_files_searched limit applied",
+    )
+    max_references_applied: int | None = Field(
+        default=None,
+        description="The max_references limit applied",
+    )
+    pro_features_enabled: list[str] | None = Field(
+        default=None,
+        description="List of Pro tier features enabled (None if community tier)",
+    )
+    enterprise_features_enabled: list[str] | None = Field(
+        default=None,
+        description="List of Enterprise tier features enabled (None if not enterprise)",
+    )
+
     symbol_name: str = Field(description="Name of the searched symbol")
     definition_file: str | None = Field(
         default=None, description="File where symbol is defined"
@@ -2572,27 +2607,6 @@ class SymbolReferencesResult(BaseModel):
         description="Ratio of references with CODEOWNERS attribution (Enterprise)",
     )
     error: str | None = Field(default=None, description="Error message if failed")
-    # [20260111_FEATURE] v3.3.2 - Output metadata fields for tier transparency
-    tier_applied: str | None = Field(
-        default=None,
-        description="The tier that was applied for this operation (community, pro, enterprise)",
-    )
-    max_files_applied: int | None = Field(
-        default=None,
-        description="The max_files_searched limit that was applied (None = unlimited)",
-    )
-    max_references_applied: int | None = Field(
-        default=None,
-        description="The max_references limit that was applied (None = unlimited)",
-    )
-    pro_features_enabled: list[str] | None = Field(
-        default=None,
-        description="List of Pro features enabled (e.g., usage_categorization, scope_filtering)",
-    )
-    enterprise_features_enabled: list[str] | None = Field(
-        default=None,
-        description="List of Enterprise features enabled (e.g., impact_analysis, codeowners_integration)",
-    )
 
 
 # ============================================================================
@@ -2727,16 +2741,9 @@ def _add_tool_with_envelope_output(
                 error_details = None
 
                 if code == "upgrade_required":
-                    # [20251228_FEATURE] Parse upgrade URL and emit structured hint.
-                    upgrade_url = None
-                    lowered = err_msg.lower()
-                    if "upgrade:" in lowered:
-                        upgrade_url = err_msg.split("Upgrade:", 1)[-1].strip()
-                    elif "upgrade at" in lowered:
-                        upgrade_url = err_msg.split("upgrade at", 1)[-1].strip()
-                    error_details = {
-                        "upgrade_url": upgrade_url or "http://codescalpel.dev/pricing"
-                    }
+                    # [20260112_REFACTOR] Removed inline upgrade URL parsing - hints belong in docs only.
+                    # Error details kept minimal for token efficiency.
+                    error_details = None
 
                     from code_scalpel.mcp.contract import UpgradeHint
 
@@ -2796,21 +2803,40 @@ def _add_tool_with_envelope_output(
             if tool_caps_dict:
                 tool_caps_raw = tool_caps_dict.get("capabilities", [])
                 # Convert set to list if needed (TOOL_CAPABILITIES uses sets)
-                tool_caps_list = list(tool_caps_raw) if isinstance(tool_caps_raw, set) else tool_caps_raw
+                tool_caps_list = (
+                    list(tool_caps_raw)
+                    if isinstance(tool_caps_raw, set)
+                    else tool_caps_raw
+                )
                 envelope_caps.extend(tool_caps_list)
 
-            return ToolResponseEnvelope(
-                tier=tier,
-                tool_version=__version__,
-                tool_id=tool.name,
-                request_id=request_id,
-                capabilities=envelope_caps,
-                duration_ms=duration_ms,
-                error=error_obj,
-                upgrade_hints=upgrade_hints,
-                warnings=gov_warnings,
+            # [20260112_FEATURE] Filter envelope fields based on response_config profile
+            # This allows users to control metadata verbosity for token efficiency
+            response_cfg = get_response_config()
+            envelope_fields = response_cfg.get_envelope_fields(tool.name)
+
+            # Build envelope with conditional field inclusion
+            envelope = ToolResponseEnvelope(
+                tier=tier if "tier" in envelope_fields else None,
+                tool_version=__version__ if "tool_version" in envelope_fields else None,
+                tool_id=tool.name if "tool_id" in envelope_fields else None,
+                request_id=request_id if "request_id" in envelope_fields else None,
+                capabilities=(
+                    envelope_caps if "capabilities" in envelope_fields else None
+                ),
+                duration_ms=duration_ms if "duration_ms" in envelope_fields else None,
+                error=(
+                    error_obj if "error" in envelope_fields or error_obj else error_obj
+                ),  # Always include errors
+                upgrade_hints=(
+                    upgrade_hints if "upgrade_hints" in envelope_fields else None
+                ),
+                warnings=(
+                    gov_warnings if gov_warnings else []
+                ),  # Always include governance warnings
                 data=filtered_data,
-            ).model_dump(mode="json", exclude_none=False)
+            )
+            return envelope.model_dump(mode="json", exclude_none=True)
 
         except BaseException as exc:
             duration_ms = int((time_module.perf_counter() - started) * 1000)
@@ -2823,37 +2849,51 @@ def _add_tool_with_envelope_output(
 
             code = _classify_exception(exc)
 
-            # [20251228_BUGFIX] Contract-stable envelope: always include required fields.
-            get_response_config()
+            # [20260112_REFACTOR] Use response_config for envelope filtering in error path too
+            response_cfg = get_response_config()
+            envelope_fields = response_cfg.get_envelope_fields(tool.name)
 
             # [20251228_FEATURE] Structured upgrade-required errors.
             if isinstance(exc, UpgradeRequiredError):
-                return ToolResponseEnvelope(
-                    tier=tier,
-                    tool_version=__version__,
-                    tool_id=tool.name,
-                    request_id=request_id,
-                    capabilities=["envelope-v1"],
-                    duration_ms=duration_ms,
+                # Build minimal error details (no upgrade_url - hints belong in docs)
+                error_details = {
+                    "feature": exc.feature,
+                    "required_tier": exc.required_tier,
+                }
+
+                envelope = ToolResponseEnvelope(
+                    tier=tier if "tier" in envelope_fields else None,
+                    tool_version=(
+                        __version__ if "tool_version" in envelope_fields else None
+                    ),
+                    tool_id=tool.name if "tool_id" in envelope_fields else None,
+                    request_id=request_id if "request_id" in envelope_fields else None,
+                    capabilities=(
+                        ["envelope-v1"] if "capabilities" in envelope_fields else None
+                    ),
+                    duration_ms=(
+                        duration_ms if "duration_ms" in envelope_fields else None
+                    ),
                     error=ToolError(
                         error=str(exc) or "Upgrade required",
                         error_code="upgrade_required",
-                        error_details={
-                            "feature": exc.feature,
-                            "required_tier": exc.required_tier,
-                            "upgrade_url": exc.upgrade_url,
-                        },
+                        error_details=error_details,
                     ),
-                    upgrade_hints=[
-                        UpgradeHint(
-                            feature=exc.feature,
-                            tier=exc.required_tier,
-                            reason=f"Unavailable at {tier.title()} tier",
-                        )
-                    ],
-                    warnings=gov_warnings,
+                    upgrade_hints=(
+                        [
+                            UpgradeHint(
+                                feature=exc.feature,
+                                tier=exc.required_tier,
+                                reason=f"Unavailable at {tier.title()} tier",
+                            )
+                        ]
+                        if "upgrade_hints" in envelope_fields
+                        else None
+                    ),
+                    warnings=gov_warnings if gov_warnings else [],
                     data=None,
-                ).model_dump(mode="json", exclude_none=False)
+                )
+                return envelope.model_dump(mode="json", exclude_none=True)
 
             # [20251228_BUGFIX] Avoid leaking stack traces/details to clients.
             # Only include raw exception message for non-internal error codes.
@@ -2865,18 +2905,21 @@ def _add_tool_with_envelope_output(
             else:
                 safe_message = str(exc) or "Tool error"
 
-            return ToolResponseEnvelope(
-                tier=tier,
-                tool_version=__version__,
-                tool_id=tool.name,
-                request_id=request_id,
-                capabilities=["envelope-v1"],
-                duration_ms=duration_ms,
+            envelope = ToolResponseEnvelope(
+                tier=tier if "tier" in envelope_fields else None,
+                tool_version=__version__ if "tool_version" in envelope_fields else None,
+                tool_id=tool.name if "tool_id" in envelope_fields else None,
+                request_id=request_id if "request_id" in envelope_fields else None,
+                capabilities=(
+                    ["envelope-v1"] if "capabilities" in envelope_fields else None
+                ),
+                duration_ms=duration_ms if "duration_ms" in envelope_fields else None,
                 error=ToolError(error=safe_message, error_code=code),
-                upgrade_hints=[],
-                warnings=gov_warnings,
+                upgrade_hints=None,  # No hints on generic errors
+                warnings=gov_warnings if gov_warnings else [],
                 data=None,
-            ).model_dump(mode="json", exclude_none=False)
+            )
+            return envelope.model_dump(mode="json", exclude_none=True)
 
     # Replace the tool's run method (Tool is a Pydantic model, use object.__setattr__)
     object.__setattr__(tool, "run", _enveloped_run)
@@ -3802,7 +3845,7 @@ def _analyze_code_sync(
             Language.JAVA: "java",
         }
         language = lang_map.get(detected, "python")
-    
+
     # [20260110_FEATURE] v1.0 - Explicit language validation
     SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
     if language.lower() not in SUPPORTED_LANGUAGES:
@@ -3841,7 +3884,7 @@ def _analyze_code_sync(
             # [20260110_FEATURE] Populate metadata fields
             result.language_detected = "java"
             result.tier_applied = tier
-            
+
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "java", result.imports
@@ -3875,7 +3918,7 @@ def _analyze_code_sync(
             # [20260110_FEATURE] Populate metadata fields
             result.language_detected = "javascript"
             result.tier_applied = tier
-            
+
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "javascript", result.imports
@@ -3908,7 +3951,7 @@ def _analyze_code_sync(
             # [20260110_FEATURE] Populate metadata fields
             result.language_detected = "typescript"
             result.tier_applied = tier
-            
+
             if has_capability("analyze_code", "framework_detection", tier):
                 result.frameworks = _detect_frameworks_from_code(
                     code, "typescript", result.imports
@@ -4566,6 +4609,47 @@ def _security_scan_sync(
             ),
         }
 
+    def _build_remediation_suggestions_list(
+        vulns: list[VulnerabilityInfo],
+    ) -> list[str]:
+        """Build remediation suggestions for Pro/Enterprise tier.
+
+        [20260118_FEATURE] v1.0 - Pro tier remediation suggestions
+
+        Returns a list of actionable remediation strings based on vulnerability types.
+        """
+        remediation_map = {
+            "CWE-89": "Use parameterized queries or ORM to prevent SQL injection",
+            "CWE-78": "Avoid shell=True in subprocess; use list-based arguments",
+            "CWE-94": "Avoid eval()/exec(); use safe alternatives like ast.literal_eval()",
+            "CWE-79": "Escape user input before rendering; use template auto-escaping",
+            "CWE-22": "Validate and sanitize file paths; use pathlib with resolve()",
+            "CWE-90": "Use parameterized LDAP queries; escape special characters",
+            "CWE-943": "Use parameterized NoSQL queries; validate input types",
+            "CWE-502": "Avoid deserializing untrusted data; use JSON instead of pickle",
+            "CWE-918": "Validate and whitelist URLs for SSRF prevention",
+            "CWE-352": "Implement CSRF tokens for state-changing operations",
+            "CWE-347": "Always verify JWT signatures; avoid algorithm='none'",
+            "CWE-327": "Use strong cryptographic algorithms (e.g., SHA-256, bcrypt)",
+            "CWE-798": "Move secrets to environment variables or secret managers",
+            "CWE-611": "Disable external entities in XML parsers",
+            "CWE-1336": "Avoid rendering user input directly in templates (SSTI)",
+        }
+
+        suggestions: list[str] = []
+        seen_cwes: set[str] = set()
+
+        for vuln in vulns:
+            cwe = vuln.cwe
+            if cwe and cwe not in seen_cwes:
+                seen_cwes.add(cwe)
+                if cwe in remediation_map:
+                    suggestions.append(f"{cwe}: {remediation_map[cwe]}")
+                else:
+                    suggestions.append(f"{cwe}: Review and remediate {vuln.type}")
+
+        return suggestions
+
     # Handle file_path parameter
     if file_path is not None:
         try:
@@ -4773,6 +4857,8 @@ def _security_scan_sync(
     policy_violations: list[dict[str, Any]] | None = None
     compliance_mappings: dict[str, list[str]] | None = None
     custom_rule_results: list[dict[str, Any]] | None = None
+    # [20260118_FEATURE] Pro tier remediation suggestions
+    remediation_suggestions: list[str] | None = None
     # [20251230_FEATURE] v1.0 roadmap Enterprise tier fields
     priority_ordered_findings: list[dict[str, Any]] | None = None
     reachability_analysis: dict[str, Any] | None = None
@@ -4797,6 +4883,11 @@ def _security_scan_sync(
         if custom_rule_results == []:
             custom_rule_results = None
 
+    # [20260118_FEATURE] Pro tier remediation suggestions
+    if "remediation_suggestions" in caps_set:
+        remediation_suggestions = _build_remediation_suggestions_list(vulnerabilities)
+        if not remediation_suggestions:
+            remediation_suggestions = None
     # [20251230_FEATURE] v1.0 roadmap Enterprise tier features
     if "priority_finding_ordering" in caps_set:
         priority_ordered_findings = _build_priority_ordered_findings(vulnerabilities)
@@ -4819,6 +4910,7 @@ def _security_scan_sync(
         sanitizer_paths=sanitizer_paths,
         confidence_scores=confidence_scores,
         false_positive_analysis=false_positive_analysis,
+        remediation_suggestions=remediation_suggestions,
         policy_violations=policy_violations,
         compliance_mappings=compliance_mappings,
         custom_rule_results=custom_rule_results,
@@ -5281,7 +5373,9 @@ def _unified_sink_detect_sync(
             return lines[line_no - 1]
         return ""
 
-    def _truncate_snippet(snippet: str, *, max_len: int = 200) -> tuple[str, bool, int | None]:
+    def _truncate_snippet(
+        snippet: str, *, max_len: int = 200
+    ) -> tuple[str, bool, int | None]:
         if len(snippet) <= max_len:
             return snippet, False, None
         # Keep output length stable at max_len, ending with an ellipsis.
@@ -5752,7 +5846,6 @@ def _enforce_file_limits(
     if max_files is not None and max_files >= 0 and total_files > max_files:
         # Reserve at least one slot for backend code
         allowed_frontend = max(max_files - len(backend_files), 0)
-        truncated = len(frontend_files) - allowed_frontend
         warnings.append(
             f"Truncated virtual files from {total_files} to {max_files} due to tier max_files limit"
         )
@@ -6982,7 +7075,6 @@ class DependencyScanResult(BaseModel):
 
     [20251220_FEATURE] v3.0.5 - Comprehensive scan result with dependency-level tracking.
     [20251231_FEATURE] v3.3.1 - Added compliance reporting fields per roadmap v1.0.
-    [20260111_FEATURE] v3.3.2 - Added output metadata fields for tier transparency.
     """
 
     success: bool = Field(description="Whether the scan completed successfully")
@@ -7015,19 +7107,6 @@ class DependencyScanResult(BaseModel):
     errors: list[str] = Field(
         default_factory=list,
         description="Non-fatal errors/warnings encountered during scan (e.g. tier truncation warnings)",
-    )
-    # [20260111_FEATURE] v3.3.2 - Output metadata fields for tier transparency
-    tier_applied: str | None = Field(
-        default=None, description="The tier that was applied for this scan (community, pro, enterprise)"
-    )
-    max_dependencies_applied: int | None = Field(
-        default=None, description="The max_dependencies limit that was applied (None = unlimited)"
-    )
-    pro_features_enabled: list[str] | None = Field(
-        default=None, description="List of Pro features enabled (e.g., reachability_analysis, typosquatting_detection)"
-    )
-    enterprise_features_enabled: list[str] | None = Field(
-        default=None, description="List of Enterprise features enabled (e.g., compliance_reporting, policy_based_blocking)"
     )
 
 
@@ -7795,16 +7874,6 @@ def _scan_dependencies_sync(
                         }
                     )
 
-        # [20260111_FEATURE] v3.3.2 - Compute output metadata fields for tier transparency
-        pro_features = [
-            cap for cap in caps_set
-            if cap in {"reachability_analysis", "license_compliance", "typosquatting_detection", "supply_chain_risk_scoring"}
-        ]
-        enterprise_features = [
-            cap for cap in caps_set
-            if cap in {"policy_based_blocking", "compliance_reporting"}
-        ]
-
         return DependencyScanResult(
             success=True,
             total_dependencies=len(dependency_infos),
@@ -7815,11 +7884,6 @@ def _scan_dependencies_sync(
             compliance_report=compliance_report,
             policy_violations=policy_violations,
             errors=errors,
-            # [20260111_FEATURE] v3.3.2 - Output metadata fields
-            tier_applied=tier,
-            max_dependencies_applied=max_dependencies,
-            pro_features_enabled=pro_features if pro_features else None,
-            enterprise_features_enabled=enterprise_features if enterprise_features else None,
         )
 
     except ImportError as e:
@@ -10267,7 +10331,7 @@ def _extraction_error(
     language: str | None = None,
 ) -> ContextualExtractionResult:
     """Create a standardized error result for extraction failures.
-    
+
     [20260111_FEATURE] Added tier and language metadata for transparency.
     """
     return ContextualExtractionResult(
@@ -10650,10 +10714,7 @@ async def extract_code(
             line_start=0,
             line_end=0,
             token_estimate=0,
-            error=(
-                "Feature 'cross_file_deps' requires PRO tier. "
-                "Upgrade: http://codescalpel.dev/pricing"
-            ),
+            error="Feature 'cross_file_deps' requires PRO tier.",
             # [20260111_FEATURE] Output metadata for transparency
             tier_applied=tier,
             language_detected=language,
@@ -11952,7 +12013,9 @@ async def update_symbol(
                     lines_after=getattr(rename_result, "lines_after", 0),
                     lines_delta=getattr(rename_result, "lines_delta", 0),
                     backup_path=getattr(rename_result, "backup_path", None),
-                    max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
+                    max_updates_per_session=(
+                        int(max_updates) if max_updates > 0 else None
+                    ),
                     updates_used=(int(new_count) if max_updates > 0 else None),
                     updates_remaining=(
                         int(max_updates - new_count) if max_updates > 0 else None
@@ -11974,13 +12037,21 @@ async def update_symbol(
                 error_code=getattr(rename_result, "error_code", None),
                 hint=getattr(rename_result, "hint", None),
                 max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
-                updates_used=(int(_get_session_update_count("update_symbol")) if max_updates > 0 else None),
+                updates_used=(
+                    int(_get_session_update_count("update_symbol"))
+                    if max_updates > 0
+                    else None
+                ),
                 updates_remaining=(
                     int(max_updates - _get_session_update_count("update_symbol"))
                     if max_updates > 0
                     else None
                 ),
-                warnings=(getattr(rename_result, "warnings", []) or []) if not warnings else (warnings + (getattr(rename_result, "warnings", []) or [])),
+                warnings=(
+                    (getattr(rename_result, "warnings", []) or [])
+                    if not warnings
+                    else (warnings + (getattr(rename_result, "warnings", []) or []))
+                ),
             )
 
         # At this point we are performing a replacement, which requires concrete code.
@@ -12258,10 +12329,7 @@ async def extract_code_with_variable_promotion(
     if not has_capability("extract_code", "variable_promotion", tier):
         return {
             "success": False,
-            "error": (
-                "Feature 'variable_promotion' requires PRO tier. "
-                "Upgrade: http://codescalpel.dev/pricing"
-            ),
+            "error": "Feature 'variable_promotion' requires PRO tier.",
         }
 
     # Load code
@@ -12335,10 +12403,7 @@ async def detect_closure_variables(
     if tier == "community":
         return {
             "success": False,
-            "error": (
-                "Closure variable detection requires PRO tier. "
-                "Upgrade: http://codescalpel.dev/pricing"
-            ),
+            "error": "Closure variable detection requires PRO tier.",
         }
 
     # Load code
@@ -12422,10 +12487,7 @@ async def suggest_dependency_injection(
     if tier == "community":
         return {
             "success": False,
-            "error": (
-                "Dependency injection suggestions require PRO tier. "
-                "Upgrade: http://codescalpel.dev/pricing"
-            ),
+            "error": "Dependency injection suggestions require PRO tier.",
         }
 
     # Load code
@@ -12520,10 +12582,7 @@ async def extract_as_microservice(
     if not has_capability("extract_code", "dockerfile_generation", tier):
         return {
             "success": False,
-            "error": (
-                "Feature 'dockerfile_generation' requires ENTERPRISE tier. "
-                "Upgrade: http://codescalpel.dev/pricing"
-            ),
+            "error": "Feature 'dockerfile_generation' requires ENTERPRISE tier.",
         }
 
     # Load code
@@ -15254,6 +15313,9 @@ def _get_symbol_references_sync(
     enable_categorization: bool = False,
     enable_codeowners: bool = False,
     enable_impact_analysis: bool = False,
+    *,
+    tier: str | None = None,
+    capabilities: list[str] | None = None,
 ) -> SymbolReferencesResult:
     """
     Synchronous implementation of get_symbol_references.
@@ -15261,7 +15323,30 @@ def _get_symbol_references_sync(
     [20251220_FEATURE] v3.0.5 - Optimized single-pass AST walking with deduplication
     [20251220_PERF] v3.0.5 - Uses AST cache to avoid re-parsing unchanged files
     [20251226_FEATURE] Enterprise impact analysis with risk scoring
+    [20250112_FEATURE] v3.3.0 - Output metadata fields for tier transparency
     """
+    # Resolve tier early for metadata
+    tier = tier or _get_current_tier()
+    capabilities = capabilities or []
+
+    # Determine Pro and Enterprise feature lists
+    pro_features = [
+        "usage_categorization",
+        "read_write_classification",
+        "import_classification",
+        "scope_filtering",
+        "test_file_filtering",
+    ]
+    enterprise_features = [
+        "codeowners_integration",
+        "ownership_attribution",
+        "impact_analysis",
+        "change_risk_assessment",
+    ]
+
+    enabled_pro = [f for f in capabilities if f in pro_features] or None
+    enabled_enterprise = [f for f in capabilities if f in enterprise_features] or None
+
     try:
         root = Path(project_root) if project_root else PROJECT_ROOT
 
@@ -15270,6 +15355,9 @@ def _get_symbol_references_sync(
                 success=False,
                 symbol_name=symbol_name,
                 error=f"Project root not found: {root}.",
+                tier_applied=tier,
+                pro_features_enabled=tier in ("pro", "enterprise"),
+                enterprise_features_enabled=tier == "enterprise",
             )
 
         references: list[SymbolReference] = []
@@ -15996,6 +16084,12 @@ def _get_symbol_references_sync(
             complexity_hotspots=complexity_hotspots_list,
             impact_mermaid=impact_mermaid,
             codeowners_coverage=codeowners_coverage,
+            # [20250112_FEATURE] Output metadata fields
+            tier_applied=tier,
+            max_files_applied=max_files,
+            max_references_applied=max_references,
+            pro_features_enabled=enabled_pro,
+            enterprise_features_enabled=enabled_enterprise,
         )
 
     except Exception as e:
@@ -16003,6 +16097,9 @@ def _get_symbol_references_sync(
             success=False,
             symbol_name=symbol_name,
             error=f"Search failed: {str(e)}",
+            tier_applied=tier,
+            pro_features_enabled=enabled_pro,
+            enterprise_features_enabled=enabled_enterprise,
         )
 
 
@@ -16120,31 +16217,8 @@ async def get_symbol_references(
         enable_categorization,
         enable_codeowners,
         enable_impact_analysis,
-    )
-
-    # [20260111_FEATURE] v3.3.2 - Populate output metadata for tier transparency
-    result.tier_applied = tier
-    result.max_files_applied = max_files
-    result.max_references_applied = max_references
-
-    # Categorize enabled features by tier
-    pro_features = [
-        "usage_categorization",
-        "read_write_classification",
-        "import_classification",
-        "scope_filtering",
-        "test_file_filtering",
-        "project_wide_search",
-    ]
-    enterprise_features = [
-        "codeowners_integration",
-        "ownership_attribution",
-        "impact_analysis",
-        "change_risk_assessment",
-    ]
-    result.pro_features_enabled = [f for f in pro_features if f in cap_set] or None
-    result.enterprise_features_enabled = (
-        [f for f in enterprise_features if f in cap_set] or None
+        tier=tier,
+        capabilities=list(cap_set),
     )
 
     if ctx:
@@ -16274,9 +16348,7 @@ class CallGraphResultModel(BaseModel):
         default_factory=list, description="Potentially unreferenced nodes"
     )
     # [20260111_FEATURE] v1.0 validation - Output metadata for transparency
-    tier_applied: str = Field(
-        default="community", description="Tier used for analysis"
-    )
+    tier_applied: str = Field(default="community", description="Tier used for analysis")
     max_depth_applied: int | None = Field(
         default=None, description="Max depth limit applied (None = unlimited)"
     )
@@ -16503,7 +16575,9 @@ def _get_call_graph_sync(
             adj_list: dict[str, list[str]] = {}
             for e in edges:
                 adj_list.setdefault(e.caller, []).append(e.callee)
-            paths = builder.find_paths(paths_from, paths_to, max_depth=depth, graph=adj_list)
+            paths = builder.find_paths(
+                paths_from, paths_to, max_depth=depth, graph=adj_list
+            )
 
         # [20260110_FEATURE] v3.3.0 - Focus mode: filter to subgraph around focus_functions
         actual_focus_functions: list[str] | None = None
@@ -16519,7 +16593,9 @@ def _get_call_graph_sync(
                     related.add(e.callee)
 
             # Filter nodes and edges to only those in the related set
-            nodes = [n for n in nodes if f"{n.file}:{n.name}" in related or n.name in related]
+            nodes = [
+                n for n in nodes if f"{n.file}:{n.name}" in related or n.name in related
+            ]
             edges = [e for e in edges if e.caller in related or e.callee in related]
             actual_focus_functions = focus_functions
 
@@ -16546,6 +16622,7 @@ def _get_call_graph_sync(
             success=False,
             error=f"Call graph analysis failed: {str(e)}",
         )
+
 
 @mcp.tool()
 async def get_call_graph(
@@ -17628,21 +17705,20 @@ def _get_project_map_sync(
 
     root_path = Path(project_root) if project_root else PROJECT_ROOT
 
+    # [20250112_FIX] Resolve tier before try block so it's available in except
+    tier = tier or _get_current_tier()
+
     if not root_path.exists():
-        tier_val = (tier or _get_current_tier() or "community").lower()
         return ProjectMapResult(
             success=False,
             project_root=str(root_path),
             error=f"Project root not found: {root_path}.",
-            tier_applied=tier_val,
-            max_files_applied=None,
-            max_modules_applied=None,
-            pro_features_enabled=tier_val in {"pro", "enterprise"},
-            enterprise_features_enabled=tier_val == "enterprise",
+            tier_applied=tier,
+            pro_features_enabled=tier in ("pro", "enterprise"),
+            enterprise_features_enabled=tier == "enterprise",
         )
 
     try:
-        tier = tier or _get_current_tier()
         caps = capabilities or get_tool_capabilities("get_project_map", tier) or {}
         caps_set = set(caps.get("capabilities", set()) or [])
         limits = caps.get("limits", {}) or {}
@@ -17657,32 +17733,6 @@ def _get_project_map_sync(
 
         if effective_max_modules is None:
             effective_max_modules = 50
-
-        # [20260111_FEATURE] Calculate output metadata for tier transparency
-        PRO_CAPABILITIES = {
-            "module_relationship_visualization",
-            "dependency_tracking",
-            "import_dependency_diagram",
-            "architectural_layer_detection",
-            "coupling_analysis",
-            "git_blame_integration",
-            "code_ownership_mapping",
-        }
-        ENTERPRISE_CAPABILITIES = {
-            "force_directed_graph",
-            "interactive_city_map",
-            "code_churn_visualization",
-            "bug_hotspot_heatmap",
-            "multi_repository_maps",
-            "historical_architecture_trends",
-            "custom_map_metrics",
-            "compliance_overlay",
-        }
-        tier_applied = (tier or "community").lower()
-        max_files_applied = effective_max_files
-        max_modules_applied = effective_max_modules
-        pro_features_enabled = bool(caps_set & PRO_CAPABILITIES) or tier_applied in {"pro", "enterprise"}
-        enterprise_features_enabled = bool(caps_set & ENTERPRISE_CAPABILITIES) or tier_applied == "enterprise"
 
         modules: list[ModuleInfo] = []
         packages: dict[str, PackageInfo] = {}
@@ -18527,25 +18577,23 @@ def _get_project_map_sync(
             compliance_overlay=compliance_overlay,
             modules_in_diagram=modules_in_diagram,
             diagram_truncated=diagram_truncated,
-            # [20260111_FEATURE] Output metadata fields for tier transparency
-            tier_applied=tier_applied,
-            max_files_applied=max_files_applied,
-            max_modules_applied=max_modules_applied,
-            pro_features_enabled=pro_features_enabled,
-            enterprise_features_enabled=enterprise_features_enabled,
+            # [20250112_FIX] v3.3.0 - Include tier metadata fields
+            tier_applied=tier,
+            max_files_applied=effective_max_files,
+            max_modules_applied=effective_max_modules,
+            pro_features_enabled=tier in ("pro", "enterprise"),
+            enterprise_features_enabled=tier == "enterprise",
         )
 
     except Exception as e:
-        tier_val = (tier or "community").lower()
+        # tier is available since we resolve it before the try block
         return ProjectMapResult(
             success=False,
             project_root=str(root_path),
             error=f"Project map analysis failed: {str(e)}",
-            tier_applied=tier_val,
-            max_files_applied=None,
-            max_modules_applied=None,
-            pro_features_enabled=tier_val in {"pro", "enterprise"},
-            enterprise_features_enabled=tier_val == "enterprise",
+            tier_applied=tier,
+            pro_features_enabled=tier in ("pro", "enterprise"),
+            enterprise_features_enabled=tier == "enterprise",
         )
 
 
@@ -18778,11 +18826,17 @@ class ChainedAliasResolutionModel(BaseModel):
 class CouplingViolationModel(BaseModel):
     """Coupling metric violation (Enterprise tier)."""
 
-    metric: str = Field(description="Metric name, e.g., fan_in/fan_out/dependency_depth")
+    metric: str = Field(
+        description="Metric name, e.g., fan_in/fan_out/dependency_depth"
+    )
     value: int | float = Field(description="Observed metric value")
     limit: int | float = Field(description="Configured limit for the metric")
-    module: str | None = Field(default=None, description="Module evaluated for coupling")
-    severity: str | None = Field(default=None, description="Severity level for violation")
+    module: str | None = Field(
+        default=None, description="Module evaluated for coupling"
+    )
+    severity: str | None = Field(
+        default=None, description="Severity level for violation"
+    )
     description: str | None = Field(default=None, description="Human-readable summary")
 
 
@@ -18988,12 +19042,31 @@ def _get_cross_file_dependencies_sync(
     """
     from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
     from code_scalpel.licensing.features import get_tool_capabilities
+    import os
 
     root_path = Path(project_root) if project_root else PROJECT_ROOT
 
-    if not root_path.exists():
-        max_depth_reached = max(max_depth_reached, effective_max_depth)
+    # [20260127_FIX] Heuristic Auto-Scoping for Community Tier
+    # If project_root is not provided by user, check if default usage would cover too many files.
+    # If so, scope down to the parent directory of the target file instead of the entire project root.
+    if project_root is None and not tier == "enterprise":
+        # Check volume roughly
+        try:
+             # Fast check using git if available, or os.walk (limited)
+             # Here we assume a simple heuristic: if we are deeper than root, use parent dir.
+             target_path_obj = Path(target_file)
+             if not target_path_obj.is_absolute():
+                 target_path_obj = root_path / target_file
+             
+             # If target is inside root_path but deeper
+             if target_path_obj.exists() and len(target_path_obj.parts) > len(root_path.parts) + 1:
+                 # Re-scope root to the parent of the target file
+                 # e.g. /project/src/module/file.py -> /project/src/module
+                 root_path = target_path_obj.parent
+        except Exception:
+            pass # Fallback to default behavior on error
 
+    if not root_path.exists():
         return CrossFileDependenciesResult(
             success=False,
             error=f"Project root not found: {root_path}.",
@@ -19092,6 +19165,22 @@ def _get_cross_file_dependencies_sync(
 
         try:
             # [20251227_REFACTOR] Generous timeout safeguard (not tier-limited)
+            # [20260127_FIX] Add volume check before build to prevent timeout on large repos
+            # Community tier limit is 500 files. If scoping is wide (root_path), verify count first.
+            if tier == "community" or (tier is None and not caps):
+                file_count = 0
+                too_many = False
+                for _, _, files in os.walk(str(root_path)):
+                    file_count += len(files)
+                    if file_count > 500:
+                        too_many = True
+                        break
+                if too_many:
+                     return CrossFileDependenciesResult(
+                        success=False,
+                        error=f"Scope too large (>500 files). Community Tier is limited to 500 files per scan. Please verify a specific subdirectory using the 'project_root' parameter (Current: {root_path}).",
+                    )
+
             extractor = run_with_timeout(build_extractor, build_timeout)
         except TimeoutError:
             # [20251227_FEATURE] Context-window aware error messaging for AI agents
@@ -19303,7 +19392,9 @@ def _get_cross_file_dependencies_sync(
                 if chain_depths:
                     observed = max(chain_depths)
                     # But we enforce transitive_depth as the hard limit; if chains are longer, cap it.
-                    max_depth_reached = min(max(max_depth_reached, observed), transitive_depth)
+                    max_depth_reached = min(
+                        max(max_depth_reached, observed), transitive_depth
+                    )
 
         # [20251226_FEATURE] Enterprise architectural firewall outputs
         boundary_violations: list[dict[str, Any]] = []
@@ -19533,12 +19624,15 @@ def _get_cross_file_dependencies_sync(
 
         # Enterprise architectural rule engine outputs
         if firewall_enabled and caps_set.intersection(
-            {"architectural_firewall", "dependency_rule_engine", "layer_constraint_enforcement"}
+            {
+                "architectural_firewall",
+                "dependency_rule_engine",
+                "layer_constraint_enforcement",
+            }
         ):
             try:
                 from code_scalpel.ast_tools.architectural_rules import (
                     ArchitecturalRuleEngine,
-                    ViolationSeverity,
                 )
 
                 engine = ArchitecturalRuleEngine(root_path)
@@ -20473,7 +20567,7 @@ def _validate_paths_sync(
         if max_paths is not None and len(paths) > max_paths:
             truncated = True
             max_paths_applied = int(max_paths)
-            paths = paths[: max_paths_applied]
+            paths = paths[:max_paths_applied]
 
         resolver = PathResolver()
         accessible, inaccessible = resolver.validate_paths(paths, project_root)
@@ -20632,9 +20726,7 @@ def _validate_paths_sync(
         if "security_boundary_testing" in caps_set:
             score = 10.0
             critical_count = sum(
-                1
-                for v in traversal_vulnerabilities
-                if v.get("severity") == "critical"
+                1 for v in traversal_vulnerabilities if v.get("severity") == "critical"
             )
             high_count = sum(
                 1 for v in traversal_vulnerabilities if v.get("severity") == "high"
@@ -20885,11 +20977,10 @@ def _verify_policy_integrity_sync(
             policy_files = []
             for ext in ["*.yaml", "*.yml", "*.json"]:
                 policy_files.extend(policy_path.glob(ext))
-            
+
             # [20260103_BUGFIX] Exclude manifest file from policy file count
             policy_files = [
-                pf for pf in policy_files
-                if pf.name != "policy.manifest.json"
+                pf for pf in policy_files if pf.name != "policy.manifest.json"
             ]
 
             # [20260110_BUGFIX] Deterministic ordering to prevent flaky outputs/tests
@@ -20905,12 +20996,11 @@ def _verify_policy_integrity_sync(
 
             tier_limits = get_tool_limits("verify_policy_integrity", tier)
             max_files = tier_limits.get("max_policy_files")
-            
+
             if max_files is not None and len(policy_files) > max_files:
                 result.error = (
                     f"Policy file limit exceeded: {len(policy_files)} files found, "
-                    f"{max_files} allowed for {tier} tier. "
-                    f"Upgrade to a higher tier for more policy files."
+                    f"{max_files} allowed for {tier} tier."
                 )
                 result.success = False
                 result.error_code = "POLICY_FILE_LIMIT_EXCEEDED"
@@ -21425,7 +21515,6 @@ def run_server(
     # - CLI/env can only request a tier <= licensed tier.
     # - If Pro/Enterprise is requested without a valid license, fail closed.
     from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
-    from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
     requested_tier = (
         tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")

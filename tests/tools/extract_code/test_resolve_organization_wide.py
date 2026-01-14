@@ -74,10 +74,7 @@ class TestResolveOrganizationWideBasic:
             (repo / ".git").mkdir()
             (repo / "module.py").write_text("def helper():\n    pass\n")
 
-        code = (
-            "def process():\n"
-            "    pass\n"
-        )
+        code = "def process():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -185,9 +182,7 @@ class TestResolveOrganizationWideMultipleFiles:
 
         # Create a chain: a.py -> b.py -> c.py
         (repo / "c.py").write_text(
-            "class Logger:\n"
-            "    def log(self, msg):\n"
-            "        print(msg)\n"
+            "class Logger:\n" "    def log(self, msg):\n" "        print(msg)\n"
         )
 
         (repo / "b.py").write_text(
@@ -282,10 +277,7 @@ class TestResolveOrganizationWideEdgeCases:
         # Create Python files without git
         (tmp_path / "module.py").write_text("def helper():\n    pass\n")
 
-        code = (
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -306,10 +298,7 @@ class TestResolveOrganizationWideEdgeCases:
         repo.mkdir()
         (repo / ".git").mkdir()
 
-        code = (
-            "def existing_function():\n"
-            "    pass\n"
-        )
+        code = "def existing_function():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -330,10 +319,7 @@ class TestResolveOrganizationWideEdgeCases:
         repo.mkdir()
         (repo / ".git").mkdir()
 
-        code = (
-            "def broken_function(\n"
-            "    this is invalid syntax\n"
-        )
+        code = "def broken_function(\n" "    this is invalid syntax\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -349,10 +335,7 @@ class TestResolveOrganizationWideEdgeCases:
         """Test handling of completely empty workspace."""
         from code_scalpel.surgery.surgical_extractor import resolve_organization_wide
 
-        code = (
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -376,10 +359,7 @@ class TestResolveOrganizationWideEdgeCases:
         repo.mkdir()
         (repo / ".git").mkdir()
 
-        code = (
-            "def test():\n"
-            "    pass\n"
-        )
+        code = "def test():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -414,10 +394,7 @@ class TestResolveOrganizationWideComplexStructures:
         (api_pkg / ".git").mkdir()
         (api_pkg / "handlers.py").write_text("def handle():\n    pass\n")
 
-        code = (
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -442,10 +419,7 @@ class TestResolveOrganizationWideComplexStructures:
         for i in range(150):
             (repo / f"module_{i}.py").write_text(f"def func_{i}():\n    pass\n")
 
-        code = (
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -474,12 +448,7 @@ class TestResolveOrganizationWideComplexStructures:
         )
         (repo / "many_funcs.py").write_text(many_symbols_code)
 
-        code = (
-            "from many_funcs import func_0\n"
-            "\n"
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "from many_funcs import func_0\n" "\n" "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -503,17 +472,11 @@ class TestResolveOrganizationWideComplexStructures:
 
         # Create circular import: a.py <-> b.py
         (repo / "a.py").write_text(
-            "from b import FuncB\n"
-            "\n"
-            "class FuncA:\n"
-            "    pass\n"
+            "from b import FuncB\n" "\n" "class FuncA:\n" "    pass\n"
         )
 
         (repo / "b.py").write_text(
-            "from a import FuncA\n"
-            "\n"
-            "class FuncB:\n"
-            "    pass\n"
+            "from a import FuncA\n" "\n" "class FuncB:\n" "    pass\n"
         )
 
         code = (
@@ -550,10 +513,7 @@ class TestResolveOrganizationWideExplanations:
             (repo / ".git").mkdir()
             (repo / "module.py").write_text("def helper():\n    pass\n")
 
-        code = (
-            "def test():\n"
-            "    pass\n"
-        )
+        code = "def test():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -586,12 +546,7 @@ class TestResolveOrganizationWideUnparseable:
         # Create unparseable module
         (repo / "bad.py").write_text("this is not valid python !!!@@##")
 
-        code = (
-            "from good import helper\n"
-            "\n"
-            "def main():\n"
-            "    return helper()\n"
-        )
+        code = "from good import helper\n" "\n" "def main():\n" "    return helper()\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -616,11 +571,7 @@ class TestResolveOrganizationWideResolvedSymbols:
         (repo / ".git").mkdir()
 
         (repo / "models.py").write_text(
-            "class User:\n"
-            "    pass\n"
-            "\n"
-            "class Product:\n"
-            "    pass\n"
+            "class User:\n" "    pass\n" "\n" "class Product:\n" "    pass\n"
         )
 
         code = (
@@ -657,21 +608,13 @@ class TestResolveOrganizationWideCrossRepoImports:
         repo1 = tmp_path / "backend"
         repo1.mkdir()
         (repo1 / ".git").mkdir()
-        (repo1 / "services.py").write_text(
-            "class UserService:\n"
-            "    pass\n"
-        )
+        (repo1 / "services.py").write_text("class UserService:\n" "    pass\n")
 
         repo2 = tmp_path / "frontend"
         repo2.mkdir()
         (repo2 / ".git").mkdir()
 
-        code = (
-            "from services import UserService\n"
-            "\n"
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "from services import UserService\n" "\n" "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,

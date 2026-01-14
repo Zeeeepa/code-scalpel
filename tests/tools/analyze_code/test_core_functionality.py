@@ -6,7 +6,11 @@ Covers Python, JavaScript, TypeScript, and Java language support.
 """
 
 import pytest
-from code_scalpel.analysis.code_analyzer import CodeAnalyzer, AnalysisLanguage, AnalysisLevel
+
+from code_scalpel.analysis.code_analyzer import (
+    AnalysisLanguage,
+    CodeAnalyzer,
+)
 
 
 class TestNominal:
@@ -20,7 +24,7 @@ def greet(name):
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         assert "greet" in result.functions
         assert result.classes == []
 
@@ -43,7 +47,7 @@ class Calculator:
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         assert "Calculator" in result.classes
         assert set(result.functions) >= {"__init__", "add", "subtract"}
         assert result.metrics.cyclomatic_complexity > 0
@@ -61,7 +65,7 @@ def process(items):
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Verify basic extraction works
         assert "process" in result.functions
         assert result.metrics.cyclomatic_complexity > 0
@@ -75,7 +79,7 @@ function calculateSum(a, b) {
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.JAVASCRIPT)
         result = analyzer.analyze(code)
-        
+
         assert "calculateSum" in result.functions
         assert result.metrics.cyclomatic_complexity > 0
 
@@ -94,7 +98,7 @@ class User {
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.JAVASCRIPT)
         result = analyzer.analyze(code)
-        
+
         assert "User" in result.classes
         # [20260105_BUGFIX] Qualified method names for disambiguation
         assert "User.greet" in result.functions
@@ -114,7 +118,7 @@ function createUser(name: string, age: number): User {
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.TYPESCRIPT)
         result = analyzer.analyze(code)
-        
+
         assert "createUser" in result.functions
         assert result.metrics.cyclomatic_complexity > 0
 
@@ -133,7 +137,7 @@ public class Calculator {
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.JAVA)
         result = analyzer.analyze(code)
-        
+
         assert "Calculator" in result.classes
         # [20260105_BUGFIX] Qualified method names for disambiguation
         assert set(result.functions) >= {"Calculator.add", "Calculator.subtract"}
@@ -141,7 +145,7 @@ public class Calculator {
 
 class TestNoHallucinations:
     """Core feature: Tool does NOT invent non-existent functions/classes.
-    
+
     This is the PRIMARY purpose of analyze_code per roadmap:
     "helps prevent hallucinating non-existent methods or classes"
     """
@@ -154,7 +158,7 @@ def real_function():
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Should contain ONLY the real function, nothing invented
         assert result.functions == ["real_function"]
         assert "hallucinated_func" not in result.functions
@@ -168,7 +172,7 @@ class RealClass:
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Should contain ONLY the real class, nothing invented
         assert result.classes == ["RealClass"]
         assert "FakeClass" not in result.classes
@@ -188,7 +192,7 @@ def func_three():
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Exact set, no extras
         assert set(result.functions) == {"func_one", "func_two", "func_three"}
         assert len(result.functions) == 3
@@ -208,7 +212,7 @@ class ClassC:
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Exact set, no extras
         assert set(result.classes) == {"ClassA", "ClassB", "ClassC"}
         assert len(result.classes) == 3
@@ -237,8 +241,14 @@ def function_5():
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
-        expected_functions = {"function_1", "function_2", "function_3", "function_4", "function_5"}
+
+        expected_functions = {
+            "function_1",
+            "function_2",
+            "function_3",
+            "function_4",
+            "function_5",
+        }
         assert set(result.functions) == expected_functions
         assert len(result.functions) == 5
 
@@ -256,7 +266,7 @@ class Third:
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         expected_classes = {"First", "Second", "Third"}
         assert set(result.classes) == expected_classes
         assert len(result.classes) == 3
@@ -276,7 +286,7 @@ class MyClass:
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Should find all methods + class
         assert "MyClass" in result.classes
         assert set(result.functions) >= {"method_one", "method_two", "method_three"}
@@ -288,7 +298,7 @@ class TestInputValidation:
     def test_non_string_input_rejected(self):
         """Non-string input should be handled gracefully."""
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
-        
+
         # Should not raise, but return result with errors
         result = analyzer.analyze(12345)
         assert result is not None
@@ -297,7 +307,7 @@ class TestInputValidation:
     def test_non_list_input_rejected(self):
         """List input should be rejected."""
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
-        
+
         with pytest.raises((TypeError, AttributeError)):
             analyzer.analyze(["code"])
 
@@ -305,7 +315,7 @@ class TestInputValidation:
         """Empty code string should be handled gracefully."""
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze("")
-        
+
         # Should return valid result with empty structures
         assert isinstance(result.functions, list)
         assert isinstance(result.classes, list)
@@ -319,16 +329,16 @@ def broken_function(
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Should not raise exception, return best-effort result
         assert result is not None
-        assert hasattr(result, 'functions')
+        assert hasattr(result, "functions")
 
     def test_whitespace_only_handled(self):
         """Code with only whitespace should be handled."""
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze("   \n   \n   ")
-        
+
         assert result.functions == []
         assert result.classes == []
 
@@ -373,8 +383,8 @@ class TestComplexityScoring:
         code = "def simple(): return 1"
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
-        assert hasattr(result, 'metrics')
+
+        assert hasattr(result, "metrics")
         assert isinstance(result.metrics.cyclomatic_complexity, (int, float))
         assert result.metrics.cyclomatic_complexity >= 0
 
@@ -383,7 +393,7 @@ class TestComplexityScoring:
         code = "def simple(): return 1"
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         simple_complexity = result.metrics.cyclomatic_complexity
 
     def test_complex_code_has_higher_complexity(self):
@@ -403,6 +413,6 @@ def complex_function(x):
 """
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
         result = analyzer.analyze(code)
-        
+
         # Should have measurable complexity
         assert result.metrics.cyclomatic_complexity > 0

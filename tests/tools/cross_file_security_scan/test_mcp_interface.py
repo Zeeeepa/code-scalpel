@@ -13,7 +13,6 @@ Tests validate:
     ✅ Cross-file security scan E2E workflow
 """
 
-import asyncio
 import tempfile
 from pathlib import Path
 
@@ -37,31 +36,32 @@ class TestToolAvailability:
 
         # Tool should be importable and callable
         assert callable(cross_file_security_scan)
-        assert hasattr(cross_file_security_scan, '__name__')
+        assert hasattr(cross_file_security_scan, "__name__")
 
     @pytest.mark.asyncio
     async def test_cross_file_security_scan_callable(self):
         """[20260103_TEST] Tool is callable with proper signature."""
-        from code_scalpel.mcp.server import cross_file_security_scan
-
         # Should have expected parameters
         import inspect
+
+        from code_scalpel.mcp.server import cross_file_security_scan
 
         sig = inspect.signature(cross_file_security_scan)
         params = set(sig.parameters.keys())
 
         expected_params = {
-            'project_root',
-            'entry_points',
-            'max_depth',
-            'include_diagram',
-            'timeout_seconds',
-            'max_modules',
+            "project_root",
+            "entry_points",
+            "max_depth",
+            "include_diagram",
+            "timeout_seconds",
+            "max_modules",
         }
 
         # All expected parameters should be present
-        assert expected_params.issubset(params), \
-            f"Missing parameters: {expected_params - params}"
+        assert expected_params.issubset(
+            params
+        ), f"Missing parameters: {expected_params - params}"
 
     async def test_tool_in_server_registry(self):
         """[20260103_TEST] Tool is in MCP server registry."""
@@ -69,10 +69,10 @@ class TestToolAvailability:
             from code_scalpel.mcp.server import TOOLS
 
             # Tool should be registered
-            tool_names = {t.get('name') for t in TOOLS if isinstance(t, dict)}
-            assert 'cross_file_security_scan' in tool_names or \
-                   any('cross_file' in str(t) for t in TOOLS), \
-                   "Tool should be registered in server"
+            tool_names = {t.get("name") for t in TOOLS if isinstance(t, dict)}
+            assert "cross_file_security_scan" in tool_names or any(
+                "cross_file" in str(t) for t in TOOLS
+            ), "Tool should be registered in server"
         except (ImportError, AttributeError):
             # Registry structure may vary, skip if not available
             pytest.skip("Tool registry not available in this version")
@@ -88,12 +88,13 @@ class TestParameterValidation:
 
     async def test_project_root_required(self):
         """[20260103_TEST] project_root parameter is required."""
-        from code_scalpel.mcp.server import cross_file_security_scan
         import inspect
+
+        from code_scalpel.mcp.server import cross_file_security_scan
 
         # Check signature requires project_root
         sig = inspect.signature(cross_file_security_scan)
-        assert 'project_root' in sig.parameters
+        assert "project_root" in sig.parameters
 
     @pytest.mark.asyncio
     async def test_project_root_accepts_string(self):
@@ -111,7 +112,7 @@ class TestParameterValidation:
             )
 
             assert result is not None
-            assert hasattr(result, 'success')
+            assert hasattr(result, "success")
 
     @pytest.mark.asyncio
     async def test_max_depth_parameter(self):
@@ -172,7 +173,7 @@ class TestParameterValidation:
             assert result_with is not None
             assert result_without is not None
             # May have different diagram content
-            if hasattr(result_with, 'mermaid_diagram'):
+            if hasattr(result_with, "mermaid_diagram"):
                 # With diagram might have populated mermaid_diagram
                 pass
 
@@ -217,10 +218,10 @@ class TestResultFormat:
 
             # Should be serializable
             try:
-                if hasattr(result, 'to_dict'):
+                if hasattr(result, "to_dict"):
                     data = result.to_dict()
                     assert isinstance(data, dict)
-                elif hasattr(result, '__dict__'):
+                elif hasattr(result, "__dict__"):
                     # dataclass or similar
                     data = vars(result)
                     assert isinstance(data, dict)
@@ -241,7 +242,7 @@ class TestResultFormat:
                 max_modules=10,
             )
 
-            assert hasattr(result, 'success')
+            assert hasattr(result, "success")
             assert isinstance(result.success, (bool, type(None)))
 
     @pytest.mark.asyncio
@@ -259,10 +260,13 @@ class TestResultFormat:
             )
 
             # Should have vulnerability-related fields
-            expected_fields = ['has_vulnerabilities', 'vulnerability_count', 'vulnerabilities']
+            expected_fields = [
+                "has_vulnerabilities",
+                "vulnerability_count",
+                "vulnerabilities",
+            ]
             for field in expected_fields:
-                assert hasattr(result, field), \
-                    f"Result should have '{field}' field"
+                assert hasattr(result, field), f"Result should have '{field}' field"
 
     @pytest.mark.asyncio
     async def test_result_has_taint_flow_info(self):
@@ -279,10 +283,9 @@ class TestResultFormat:
             )
 
             # Should have taint flow fields
-            expected_fields = ['taint_flows', 'files_analyzed']
+            expected_fields = ["taint_flows", "files_analyzed"]
             for field in expected_fields:
-                assert hasattr(result, field), \
-                    f"Result should have '{field}' field"
+                assert hasattr(result, field), f"Result should have '{field}' field"
 
 
 # =============================================================================
@@ -385,7 +388,9 @@ def calculate(x, y):
             tmpdir_path = Path(tmpdir)
 
             (tmpdir_path / "a.py").write_text("def f_a(): pass")
-            (tmpdir_path / "b.py").write_text("from a import f_a\ndef f_b(): return f_a()")
+            (tmpdir_path / "b.py").write_text(
+                "from a import f_a\ndef f_b(): return f_a()"
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,
@@ -398,8 +403,10 @@ def calculate(x, y):
             assert result is not None
             assert result.success
             # Diagram should be generated (check if field exists)
-            if hasattr(result, 'mermaid_diagram'):
-                assert result.mermaid_diagram is None or isinstance(result.mermaid_diagram, str)
+            if hasattr(result, "mermaid_diagram"):
+                assert result.mermaid_diagram is None or isinstance(
+                    result.mermaid_diagram, str
+                )
 
 
 # =============================================================================
@@ -426,7 +433,7 @@ class TestErrorHandling:
         # Should handle gracefully
         assert result is not None
         # May report success=False or empty results
-        assert hasattr(result, 'success')
+        assert hasattr(result, "success")
 
     @pytest.mark.asyncio
     async def test_negative_max_depth(self):

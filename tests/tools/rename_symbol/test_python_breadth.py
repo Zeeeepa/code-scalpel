@@ -145,7 +145,9 @@ def test_dunder_rename_rejected(project: Path):
 def test_cross_file_relative_and_alias_imports(project: Path):
     pkg = project / "pkg"
     pkg.mkdir()
-    (pkg / "__init__.py").write_text("from .a import old_func\n__all__ = ['old_func']\n")
+    (pkg / "__init__.py").write_text(
+        "from .a import old_func\n__all__ = ['old_func']\n"
+    )
     a = pkg / "a.py"
     a.write_text("def old_func():\n    return 1\n")
     b = project / "b.py"
@@ -245,9 +247,7 @@ def outer():
 # [20260108_TEST] Lambda variables should not be treated as function definitions
 def test_lambda_not_renamed_as_function(project: Path):
     src = project / "lambda_case.py"
-    src.write_text(
-        "old_lambda = lambda x: x\nvalue = old_lambda(2)\n"
-    )
+    src.write_text("old_lambda = lambda x: x\nvalue = old_lambda(2)\n")
 
     p = UnifiedPatcher.from_file(str(src))
     res = p.rename_symbol("function", "old_lambda", "new_lambda")
@@ -347,4 +347,4 @@ def test_minimal_valid_input_one_line(project: Path):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-q"]) 
+    pytest.main([__file__, "-q"])

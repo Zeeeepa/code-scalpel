@@ -22,32 +22,38 @@ class TestValidatePathsMCPToolAvailability:
         # _tools is a dict with tool names as keys
         tools = mcp._tool_manager._tools
         tool_names = list(tools.keys())
-        assert "validate_paths" in tool_names, \
-            f"validate_paths not found in registered tools: {tool_names}"
+        assert (
+            "validate_paths" in tool_names
+        ), f"validate_paths not found in registered tools: {tool_names}"
 
     def test_validate_paths_tool_has_correct_metadata(self):
         """validate_paths tool should have proper metadata."""
         # Get the tool from dict
         tools = mcp._tool_manager._tools
         tool = tools.get("validate_paths")
-        
+
         assert tool is not None, "validate_paths tool not found"
         assert tool.name is not None, "Tool should have a name"
-        assert tool.name == "validate_paths", f"Tool name should be 'validate_paths', got {tool.name}"
+        assert (
+            tool.name == "validate_paths"
+        ), f"Tool name should be 'validate_paths', got {tool.name}"
         assert tool.description is not None, "Tool should have a description"
 
     def test_validate_paths_has_paths_parameter(self):
         """validate_paths tool should accept 'paths' parameter."""
         tools = mcp._tool_manager._tools
         tool = tools.get("validate_paths")
-        
+
         assert tool is not None, "validate_paths tool not found"
         # Tool should have input schema with paths parameter
         # Check if the tool function has 'paths' parameter
         import inspect
+
         sig = inspect.signature(tool.fn)
         param_names = list(sig.parameters.keys())
-        assert "paths" in param_names, f"Tool should have 'paths' parameter, found: {param_names}"
+        assert (
+            "paths" in param_names
+        ), f"Tool should have 'paths' parameter, found: {param_names}"
 
 
 class TestValidatePathsMCPInvocation:
@@ -111,7 +117,9 @@ class TestValidatePathsMCPInvocation:
         missing = tmp_path / "missing.txt"
 
         tool = mcp._tool_manager._tools.get("validate_paths")
-        result = await tool.fn(paths=[str(ok), str(missing)], project_root=str(tmp_path))
+        result = await tool.fn(
+            paths=[str(ok), str(missing)], project_root=str(tmp_path)
+        )
         assert str(ok) in result.accessible
         assert str(missing) in result.inaccessible
         assert result.success is False
@@ -196,7 +204,9 @@ class TestValidatePathsMCPTierFiltering:
     """Test response filtering based on tier."""
 
     @pytest.mark.asyncio
-    async def test_community_tier_100_paths_enforced_in_mcp(self, tmp_path, monkeypatch):
+    async def test_community_tier_100_paths_enforced_in_mcp(
+        self, tmp_path, monkeypatch
+    ):
         """Community tier should truncate to 100 paths and signal truncation."""
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")
@@ -262,7 +272,9 @@ class TestValidatePathsMCPEnterpriseTierInterface:
     """Test MCP interface for Enterprise tier."""
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_includes_security_diagnostics_fields(self, tmp_path, monkeypatch):
+    async def test_enterprise_tier_includes_security_diagnostics_fields(
+        self, tmp_path, monkeypatch
+    ):
         """Enterprise tier should include security diagnostics fields (may be empty)."""
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")

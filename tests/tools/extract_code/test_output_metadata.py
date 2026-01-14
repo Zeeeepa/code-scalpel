@@ -16,10 +16,10 @@ class TestOutputMetadataFields:
     @pytest.mark.asyncio
     async def test_python_extraction_includes_metadata(self):
         """Python extraction should include all metadata fields."""
-        code = '''
+        code = """
 def calculate_total(items):
     return sum(item.price for item in items)
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="calculate_total",
@@ -45,11 +45,11 @@ def calculate_total(items):
     @pytest.mark.asyncio
     async def test_javascript_extraction_includes_metadata(self):
         """JavaScript extraction should include language metadata."""
-        code = '''
+        code = """
 function calculateTotal(items) {
     return items.reduce((sum, item) => sum + item.price, 0);
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="calculateTotal",
@@ -66,11 +66,11 @@ function calculateTotal(items) {
     @pytest.mark.asyncio
     async def test_typescript_extraction_includes_metadata(self):
         """TypeScript extraction should include language metadata."""
-        code = '''
+        code = """
 function greet(name: string): string {
     return `Hello, ${name}!`;
 }
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="greet",
@@ -86,10 +86,10 @@ function greet(name: string): string {
     async def test_metadata_in_error_responses(self):
         """Error responses should include metadata defaults."""
         # Try to extract a non-existent function
-        code = '''
+        code = """
 def existing_function():
     pass
-'''
+"""
         result = await extract_code(
             target_type="function",
             target_name="non_existent_function",

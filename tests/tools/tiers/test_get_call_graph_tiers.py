@@ -1,14 +1,15 @@
 """
 Tests for get_call_graph tier enforcement and output metadata.
 
-[20260111_TEST] v1.0 validation - Ensure tier limits, capabilities, and metadata 
+[20260111_TEST] v1.0 validation - Ensure tier limits, capabilities, and metadata
 are properly enforced and populated.
 """
 
-import pytest
 from unittest.mock import patch
 
-from src.code_scalpel.mcp.server import get_call_graph, CallGraphResultModel
+import pytest
+
+from src.code_scalpel.mcp.server import CallGraphResultModel, get_call_graph
 
 
 class TestOutputMetadataFields:
@@ -19,13 +20,15 @@ class TestOutputMetadataFields:
         """Basic call graph should include all metadata fields."""
         # Create a simple project
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def main():
     helper()
 
 def helper():
     return 42
-""")
+"""
+        )
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
         assert result.success is True
@@ -46,7 +49,7 @@ def helper():
         """Metadata should accurately reflect applied limits."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
-        
+
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
@@ -116,7 +119,8 @@ class TestTierEnforcement:
         """Community tier should enforce max_depth=3."""
         # Create a deeply nested call chain
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def level_0():
     level_1()
 
@@ -134,8 +138,11 @@ def level_4():
 
 def level_5():
     pass
-""")
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="community"):
+"""
+        )
+        with patch(
+            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
@@ -163,7 +170,9 @@ def level_5():
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
+        with patch(
+            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
+        ):
             result = await get_call_graph(project_root=str(tmp_path), depth=100)
 
         assert result.success is True
@@ -181,7 +190,9 @@ class TestCapabilityFlags:
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
@@ -207,7 +218,9 @@ class TestCapabilityFlags:
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
+        with patch(
+            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
+        ):
             result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
@@ -222,13 +235,15 @@ class TestTruncationMetadata:
     async def test_no_truncation_when_within_limits(self, tmp_path):
         """When within limits, truncation fields should indicate no truncation."""
         main_file = tmp_path / "main.py"
-        main_file.write_text("""
+        main_file.write_text(
+            """
 def foo():
     bar()
 
 def bar():
     pass
-""")
+"""
+        )
         result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True

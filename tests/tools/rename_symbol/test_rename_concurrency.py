@@ -22,14 +22,22 @@ from code_scalpel.surgery.rename_symbol_refactor import rename_references_across
 from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
 
-def test_parallel_renames_different_symbols_isolated(tmp_path: Path, scope_filesystem: None):
+def test_parallel_renames_different_symbols_isolated(
+    tmp_path: Path, scope_filesystem: None
+):
     """[20260108_TEST] Parallel renames to different symbols don't interfere."""
     # Create project with two independent symbols
     a_py = tmp_path / "a.py"
-    a_py.write_text("def symbol_a():\n    return 1\n\ndef symbol_b():\n    return 2\n", encoding="utf-8")
+    a_py.write_text(
+        "def symbol_a():\n    return 1\n\ndef symbol_b():\n    return 2\n",
+        encoding="utf-8",
+    )
 
     b_py = tmp_path / "b.py"
-    b_py.write_text("from a import symbol_a, symbol_b\n\ndef use():\n    return symbol_a() + symbol_b()\n", encoding="utf-8")
+    b_py.write_text(
+        "from a import symbol_a, symbol_b\n\ndef use():\n    return symbol_a() + symbol_b()\n",
+        encoding="utf-8",
+    )
 
     def rename_a():
         p = UnifiedPatcher.from_file(str(a_py))
@@ -59,7 +67,7 @@ def test_parallel_renames_different_symbols_isolated(tmp_path: Path, scope_files
     # Due to race conditions, last write wins - both names won't be present
     a_text = a_py.read_text(encoding="utf-8")
     # At least one rename should have taken effect
-    assert ("renamed_a" in a_text or "renamed_b" in a_text)
+    assert "renamed_a" in a_text or "renamed_b" in a_text
     # Original names should be gone or partially replaced
     name_count = sum(1 for name in ["symbol_a", "symbol_b"] if name in a_text)
     # At most one original name remains (if other rename happened last)
@@ -171,10 +179,13 @@ def test_lock_semantics_prevent_corruption(tmp_path: Path, scope_filesystem: Non
 
     # File should not be corrupted (should parse cleanly)
     import ast
+
     ast.parse(text)  # Should not raise SyntaxError
 
 
-def test_concurrent_cross_file_renames_consistent(tmp_path: Path, scope_filesystem: None):
+def test_concurrent_cross_file_renames_consistent(
+    tmp_path: Path, scope_filesystem: None
+):
     """[20260108_TEST] Cross-file renames maintain consistency under concurrency."""
     a_py = tmp_path / "a.py"
     a_py.write_text("def func_a():\n    return 1\n", encoding="utf-8")
@@ -183,7 +194,10 @@ def test_concurrent_cross_file_renames_consistent(tmp_path: Path, scope_filesyst
     b_py.write_text("def func_b():\n    return 2\n", encoding="utf-8")
 
     c_py = tmp_path / "c.py"
-    c_py.write_text("from a import func_a\nfrom b import func_b\n\ndef use():\n    return func_a() + func_b()\n", encoding="utf-8")
+    c_py.write_text(
+        "from a import func_a\nfrom b import func_b\n\ndef use():\n    return func_a() + func_b()\n",
+        encoding="utf-8",
+    )
 
     def rename_func_a():
         return rename_references_across_project(
@@ -230,8 +244,12 @@ def test_concurrent_cross_file_renames_consistent(tmp_path: Path, scope_filesyst
     ast.parse(c_text)
 
     # Each reference in c.py should choose one consistent name per symbol
-    assert ("func_a" in c_text) != ("renamed_a" in c_text) or ("func_a" in c_text and "renamed_a" in c_text)
-    assert ("func_b" in c_text) != ("renamed_b" in c_text) or ("func_b" in c_text and "renamed_b" in c_text)
+    assert ("func_a" in c_text) != ("renamed_a" in c_text) or (
+        "func_a" in c_text and "renamed_a" in c_text
+    )
+    assert ("func_b" in c_text) != ("renamed_b" in c_text) or (
+        "func_b" in c_text and "renamed_b" in c_text
+    )
 
     # Should parse without syntax errors
     ast.parse(c_text)

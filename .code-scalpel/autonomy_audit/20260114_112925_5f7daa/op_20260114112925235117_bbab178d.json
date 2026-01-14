@@ -1,0 +1,14 @@
+{
+  "id": "op_20260114112925235117_bbab178d",
+  "timestamp": "2026-01-14T11:29:25.235153",
+  "event_type": "ERROR_ANALYSIS",
+  "operation": "analyze_syntax_error",
+  "input_hash": "cf07c68bc2d0d503bc2112df2adf1265a3defa41d59a10d9b1cc966c490b4a0a",
+  "output_hash": "e0f48773d5a31d15c487f9c40b8f6ac573ebf766f0d2fd604ae3c01103af4e60",
+  "success": true,
+  "duration_ms": 0,
+  "metadata": {
+    "analyzer": "AST-based"
+  },
+  "parent_id": "op_20260114112925226361_3c52366a"
+}

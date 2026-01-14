@@ -2,7 +2,9 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_pro_reference_categorization_and_counts(make_project, patch_tier, patch_capabilities):
+async def test_pro_reference_categorization_and_counts(
+    make_project, patch_tier, patch_capabilities
+):
     """[20260104_TEST] Pro tier should emit category_counts and typed references."""
     import code_scalpel.mcp.server as server
 

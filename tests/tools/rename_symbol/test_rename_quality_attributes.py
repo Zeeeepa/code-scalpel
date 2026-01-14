@@ -4,14 +4,11 @@ Tests for performance, reliability, security, and compatibility.
 Covers Section 4 of MCP_TOOL_COMPREHENSIVE_TEST_CHECKLIST.md
 """
 
-import asyncio
 import json
-import time
 import sys
-import platform
-from pathlib import Path
-from unittest.mock import patch
+import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 import pytest
 
@@ -41,13 +38,13 @@ class TestPerformanceMediumInput:
     def test_medium_input_completes_under_1s(self, tmp_path: Path):
         """Medium input (1000 LOC) completes in <1s."""
         src = tmp_path / "medium.py"
-        
+
         # Generate 1000 LOC with function definition and references
         code_lines = ["def old_func():\n    return 1\n"]
         for i in range(100):
             code_lines.append(f"# Comment line {i}\n")
             code_lines.append(f"result_{i} = old_func()  # Call {i}\n")
-        
+
         src.write_text("".join(code_lines))
         assert src.stat().st_size > 1000  # Verify ~1K LOC
 
@@ -66,13 +63,13 @@ class TestPerformanceLargeInput:
     def test_large_input_completes_under_10s(self, tmp_path: Path):
         """Large input (10K LOC) completes in <10s."""
         src = tmp_path / "large.py"
-        
+
         # Generate 10K LOC
         code_lines = ["def old_func():\n    return 1\n"]
         for i in range(1000):
             code_lines.append(f"# Section {i}\n")
             code_lines.append(f"result_{i} = old_func()\n")
-        
+
         src.write_text("".join(code_lines))
         assert src.stat().st_size > 10000  # Verify ~10K LOC
 
@@ -131,8 +128,7 @@ class TestStressTesting:
 
     def test_10_concurrent_renames(self, tmp_path: Path):
         """10 concurrent renames via threading work correctly."""
-        from concurrent.futures import ThreadPoolExecutor
-        
+
         files = []
         for i in range(10):
             src = tmp_path / f"module_{i}.py"
@@ -142,7 +138,9 @@ class TestStressTesting:
         def rename_one(index: int, src_path: Path):
             """Rename one file."""
             patcher = UnifiedPatcher.from_file(str(src_path))
-            return patcher.rename_symbol("function", f"old_func_{index}", f"new_func_{index}")
+            return patcher.rename_symbol(
+                "function", f"old_func_{index}", f"new_func_{index}"
+            )
 
         # Run 10 concurrent renames via ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=10) as executor:
@@ -160,13 +158,13 @@ class TestFileSizeLimit:
     def test_2mb_file_handled(self, tmp_path: Path):
         """2MB file is processed without issues."""
         src = tmp_path / "large_file.py"
-        
+
         # Create 2MB file with function definition and references
         code_lines = ["def old_func():\n    return 1\n\n"]
         # Each line is ~100 bytes
         while len("".join(code_lines)) < 2 * 1024 * 1024:  # 2MB
             code_lines.append("result = old_func()  # " + "x" * 70 + "\n")
-        
+
         src.write_text("".join(code_lines))
         assert src.stat().st_size > 2 * 1024 * 1024
 
@@ -188,13 +186,13 @@ class TestErrorRecovery:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # Invalid target_type
         result = patcher.rename_symbol("invalid_type", "old_func", "new_func")
-        
+
         # Should return error, not crash
         assert result is not None
-        assert hasattr(result, 'success')
+        assert hasattr(result, "success")
 
     def test_read_only_file_error(self, tmp_path: Path):
         """Read-only file returns clear error."""
@@ -206,10 +204,10 @@ class TestErrorRecovery:
             patcher = UnifiedPatcher.from_file(str(src))
             result = patcher.rename_symbol("function", "old_func", "new_func")
             patcher.save(backup=False)
-            
+
             # Should fail gracefully
             assert result is not None
-            assert hasattr(result, 'success')
+            assert hasattr(result, "success")
         finally:
             # Restore permissions for cleanup
             src.chmod(0o644)
@@ -217,15 +215,15 @@ class TestErrorRecovery:
     def test_invalid_utf8_error(self, tmp_path: Path):
         """Invalid UTF-8 file returns error."""
         src = tmp_path / "invalid.py"
-        
+
         # Write invalid UTF-8
-        with open(src, 'wb') as f:
+        with open(src, "wb") as f:
             f.write(b"def old_func():\n    return \xff\n")
 
         try:
             patcher = UnifiedPatcher.from_file(str(src))
             result = patcher.rename_symbol("function", "old_func", "new_func")
-            
+
             # Should handle gracefully
             assert result is not None
         except (UnicodeDecodeError, ValueError):
@@ -236,18 +234,18 @@ class TestErrorRecovery:
         """Server handles errors and continues working."""
         src1 = tmp_path / "good.py"
         src1.write_text("def old_func():\n    return 1\n")
-        
+
         src2 = tmp_path / "bad.py"
         src2.write_text("def bad_func():\n    return 1\n")
 
         # First call with invalid input
         patcher1 = UnifiedPatcher.from_file(str(src1))
         result1 = patcher1.rename_symbol("invalid_type", "old_func", "new_func")
-        
+
         # Second call should still work
         patcher2 = UnifiedPatcher.from_file(str(src2))
         result2 = patcher2.rename_symbol("function", "bad_func", "renamed_func")
-        
+
         # Second call succeeds despite first error
         assert result2.success is True
 
@@ -262,7 +260,7 @@ class TestDeterminism:
 
         patcher1 = UnifiedPatcher.from_file(str(src))
         result1 = patcher1.rename_symbol("function", "old_func", "new_func")
-        
+
         patcher2 = UnifiedPatcher.from_file(str(src))
         result2 = patcher2.rename_symbol("function", "old_func", "new_func")
 
@@ -283,7 +281,7 @@ class TestDeterminism:
         # Run rename twice on same file
         patcher1 = UnifiedPatcher.from_file(str(files[0]))
         result1 = patcher1.rename_symbol("function", "old_func", "new_func")
-        
+
         patcher2 = UnifiedPatcher.from_file(str(files[0]))
         result2 = patcher2.rename_symbol("function", "old_func", "new_func")
 
@@ -311,7 +309,9 @@ class TestSecurity:
     def test_no_code_execution(self, tmp_path: Path):
         """Malicious code in input not executed."""
         src = tmp_path / "malicious.py"
-        src.write_text("def old_func():\n    import os\n    os.system('touch /tmp/pwned')\n    return 1\n")
+        src.write_text(
+            "def old_func():\n    import os\n    os.system('touch /tmp/pwned')\n    return 1\n"
+        )
 
         # Should parse, not execute
         patcher = UnifiedPatcher.from_file(str(src))
@@ -342,7 +342,7 @@ class TestReliability:
     def test_nonexistent_file_error(self, tmp_path: Path):
         """Nonexistent file returns clear error."""
         nonexistent = tmp_path / "nonexistent.py"
-        
+
         try:
             patcher = UnifiedPatcher.from_file(str(nonexistent))
         except (FileNotFoundError, ValueError):
@@ -367,14 +367,14 @@ class TestReliability:
         """Symlinked files handled correctly."""
         src = tmp_path / "module.py"
         src.write_text("def old_func():\n    return 1\n")
-        
+
         link = tmp_path / "link.py"
         try:
             link.symlink_to(src)
-            
+
             patcher = UnifiedPatcher.from_file(str(link))
             result = patcher.rename_symbol("function", "old_func", "new_func")
-            
+
             # Should work (follows symlink)
             assert result.success is True
         except (OSError, NotImplementedError):
@@ -389,21 +389,21 @@ class TestCompatibility:
         """Tool works on Linux."""
         if sys.platform != "linux":
             pytest.skip("Linux-specific test")
-        
+
         assert sys.platform == "linux"
 
     def test_windows_compatible(self):
         """Tool works on Windows."""
         if sys.platform != "win32":
             pytest.skip("Windows-specific test")
-        
+
         assert sys.platform == "win32"
 
     def test_macos_compatible(self):
         """Tool works on macOS."""
         if sys.platform != "darwin":
             pytest.skip("macOS-specific test")
-        
+
         assert sys.platform == "darwin"
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="Requires Python 3.8+")
@@ -458,10 +458,10 @@ class TestErrorMessages:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         # Response should have context fields
-        assert hasattr(result, 'success')
-        assert hasattr(result, 'file_path')
-        assert hasattr(result, 'target_name')
-        assert hasattr(result, 'target_type')
+        assert hasattr(result, "success")
+        assert hasattr(result, "file_path")
+        assert hasattr(result, "target_name")
+        assert hasattr(result, "target_type")
 
 
 class TestWarningsAndNotifications:
@@ -476,7 +476,7 @@ class TestWarningsAndNotifications:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         # Error should be None on success
-        assert hasattr(result, 'error')
+        assert hasattr(result, "error")
         assert result.error is None or isinstance(result.error, str)
 
     def test_no_excessive_warnings(self, tmp_path: Path):

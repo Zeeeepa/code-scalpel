@@ -5,11 +5,13 @@ Polyglot Extraction Demo - Multi-language support showcase.
 [20251221_FEATURE] Demonstrates Java, JavaScript, and TypeScript extraction
 capabilities in addition to Python.
 
+[20260114_BUGFIX] Updated to use current PolyglotExtractor API (extract method only).
+
 This example shows how Code Scalpel can surgically extract code from any
 supported language using the same unified API.
 """
 
-from code_scalpel.polyglot_extractor import PolyglotExtractor
+from code_scalpel.code_parsers.extractor import Language, PolyglotExtractor
 
 
 def demo_java_extraction():
@@ -40,20 +42,19 @@ public class Calculator {
 }
 """
 
-    extractor = PolyglotExtractor(java_code, language="java")
+    extractor = PolyglotExtractor(java_code, language=Language.JAVA)
+    print(f"✓ Language: {extractor.language}")
 
-    print(f"✓ Detected language: {extractor.language}")
-    print(
-        f"✓ Found {len(extractor.list_functions())} methods: {extractor.list_functions()}"
-    )
-    print(f"✓ Found {len(extractor.list_classes())} class: {extractor.list_classes()}")
-
-    # Extract specific method
-    result = extractor.get_function("calculateTax")
-    print("\n✓ Extracted method 'calculateTax':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"  Code length: {len(result.code)} chars")
-    print("\n" + result.code)
+    # Extract the Calculator class
+    result = extractor.extract("class", "Calculator")
+    print("\n✓ Extracted class 'Calculator':")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"  Code length: {len(result.code)} chars")
+        print("\n" + result.code[:200] + "..." if len(result.code) > 200 else "\n" + result.code)
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_javascript_extraction():
@@ -96,26 +97,36 @@ class PaymentProcessor {
 }
 """
 
-    extractor = PolyglotExtractor(js_code, language="javascript")
-
-    print(f"✓ Detected language: {extractor.language}")
-    print(
-        f"✓ Found {len(extractor.list_functions())} functions: {extractor.list_functions()}"
-    )
-    print(f"✓ Found {len(extractor.list_classes())} class: {extractor.list_classes()}")
+    extractor = PolyglotExtractor(js_code, language=Language.JAVASCRIPT)
+    print(f"✓ Language: {extractor.language}")
 
     # Extract async function
-    result = extractor.get_function("fetchUserData")
+    result = extractor.extract("function", "fetchUserData")
     print("\n✓ Extracted async function 'fetchUserData':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
     print(f"  Success: {result.success}")
-    print("\n" + result.code)
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print("\n" + result.code)
+    else:
+        print(f"  Error: {result.error}")
 
-    # Extract arrow function
-    result = extractor.get_function("validateCard")
-    print("\n✓ Extracted arrow function 'validateCard':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print("\n" + result.code)
+    # Extract regular function
+    result = extractor.extract("function", "processPayment")
+    print("\n✓ Extracted function 'processPayment':")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+    else:
+        print(f"  Error: {result.error}")
+
+    # Extract class
+    result = extractor.extract("class", "PaymentProcessor")
+    print("\n✓ Extracted class 'PaymentProcessor':")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_typescript_extraction():
@@ -174,26 +185,29 @@ class PaymentService {
 }
 """
 
-    extractor = PolyglotExtractor(ts_code, language="typescript")
-
-    print(f"✓ Detected language: {extractor.language}")
-    print(
-        f"✓ Found {len(extractor.list_functions())} functions: {extractor.list_functions()}"
-    )
-    print(f"✓ Found {len(extractor.list_classes())} class: {extractor.list_classes()}")
+    extractor = PolyglotExtractor(ts_code, language=Language.TYPESCRIPT)
+    print(f"✓ Language: {extractor.language}")
 
     # Extract typed async function
-    result = extractor.get_function("processPayment")
+    result = extractor.extract("function", "processPayment")
     print("\n✓ Extracted TypeScript async function 'processPayment':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"  Code length: {len(result.code)} chars")
-    print("\n" + result.code)
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"  Code length: {len(result.code)} chars")
+        print("\n" + result.code)
+    else:
+        print(f"  Error: {result.error}")
 
     # Extract class
-    result = extractor.get_class("PaymentService")
+    result = extractor.extract("class", "PaymentService")
     print("\n✓ Extracted TypeScript class 'PaymentService':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(f"  Code length: {len(result.code)} chars")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print(f"  Code length: {len(result.code)} chars")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_python_extraction():
@@ -239,27 +253,27 @@ class PaymentProcessor:
         return True
 """
 
-    extractor = PolyglotExtractor(python_code, language="python")
-
-    print(f"✓ Detected language: {extractor.language}")
-    print(
-        f"✓ Found {len(extractor.list_functions())} functions: {extractor.list_functions()}"
-    )
-    print(f"✓ Found {len(extractor.list_classes())} class: {extractor.list_classes()}")
+    extractor = PolyglotExtractor(python_code, language=Language.PYTHON)
+    print(f"✓ Language: {extractor.language}")
 
     # Extract function
-    result = extractor.get_function("calculate_tax")
+    result = extractor.extract("function", "calculate_tax")
     print("\n✓ Extracted Python function 'calculate_tax':")
-    print(f"  Lines: {result.line_start}-{result.line_end}")
-    print(
-        f"  Docstring: {result.docstring[:50]}..."
-        if result.docstring
-        else "  Docstring: None"
-    )
-    print(
-        f"  Signature: {result.signature}" if result.signature else "  Signature: None"
-    )
-    print("\n" + result.code[:200] + "...")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+        print("\n" + result.code)
+    else:
+        print(f"  Error: {result.error}")
+
+    # Extract class
+    result = extractor.extract("class", "PaymentProcessor")
+    print("\n✓ Extracted Python class 'PaymentProcessor':")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
+    else:
+        print(f"  Error: {result.error}")
 
 
 def demo_auto_detection():
@@ -286,17 +300,16 @@ def demo_auto_detection():
     # Example 4: Detect from file extension
     print("\n✓ Language detection from file extensions:")
     extensions = {
-        "app.py": "python",
-        "utils.js": "javascript",
-        "service.ts": "typescript",
-        "Calculator.java": "java",
+        "app.py": Language.PYTHON,
+        "utils.js": Language.JAVASCRIPT,
+        "service.ts": Language.TYPESCRIPT,
+        "Calculator.java": Language.JAVA,
     }
     for filename, expected in extensions.items():
-        # Simulate file path detection
         extractor = PolyglotExtractor("# dummy", file_path=filename)
         detected = extractor.language
         status = "✓" if detected == expected else "✗"
-        print(f"  {status} {filename:20s} → {detected}")
+        print(f"  {status} {filename:20s} → {detected.value}")
 
 
 def demo_error_handling():
@@ -306,17 +319,20 @@ def demo_error_handling():
     print("=" * 70)
 
     js_code = "function hello() { return 'world'; }"
-    extractor = PolyglotExtractor(js_code, language="javascript")
+    extractor = PolyglotExtractor(js_code, language=Language.JAVASCRIPT)
 
     # Try to extract non-existent function
-    result = extractor.get_function("goodbye")
+    result = extractor.extract("function", "goodbye")
     print("✓ Attempted to extract non-existent function:")
     print(f"  Success: {result.success}")
     print(f"  Error: {result.error}")
 
-    # List available functions
-    available = extractor.list_functions()
-    print(f"\n✓ Available functions: {available}")
+    # Extract existing function
+    result = extractor.extract("function", "hello")
+    print("\n✓ Extracted existing function 'hello':")
+    print(f"  Success: {result.success}")
+    if result.success:
+        print(f"  Lines: {result.start_line}-{result.end_line}")
 
 
 def demo_unified_api():
@@ -327,20 +343,21 @@ def demo_unified_api():
 
     # Same API, different languages
     examples = [
-        ("python", "def test(): pass", "test"),
-        ("java", "public class Test { void run() {} }", "run"),
-        ("javascript", "function hello() {}", "hello"),
-        ("typescript", "const add = (a: number) => a", "add"),
+        (Language.PYTHON, "def test(): pass", "function", "test"),
+        (Language.JAVA, "public class Test { void run() {} }", "class", "Test"),
+        (Language.JAVASCRIPT, "function hello() {}", "function", "hello"),
+        (Language.TYPESCRIPT, "function add(a: number): number { return a; }", "function", "add"),
     ]
 
     print("✓ Using identical API for all languages:")
-    for lang, code, func_name in examples:
+    for lang, code, target_type, target_name in examples:
         extractor = PolyglotExtractor(code, language=lang)
-        result = extractor.get_function(func_name)
+        result = extractor.extract(target_type, target_name)
         status = "✓" if result.success else "✗"
-        print(
-            f"  {status} {lang:12s} - extracted '{func_name}' (lines {result.line_start}-{result.line_end})"
-        )
+        if result.success:
+            print(f"  {status} {lang.value:12s} - extracted {target_type} '{target_name}' (lines {result.start_line}-{result.end_line})")
+        else:
+            print(f"  {status} {lang.value:12s} - {target_type} '{target_name}': {result.error}")
 
 
 def main():
@@ -349,32 +366,36 @@ def main():
     print("╔" + "=" * 68 + "╗")
     print("║" + " " * 68 + "║")
     print("║" + " POLYGLOT EXTRACTION DEMO - Multi-Language Support ".center(68) + "║")
-    print("║" + " Code Scalpel v3.1.0 ".center(68) + "║")
+    print("║" + " Code Scalpel v3.3.0 ".center(68) + "║")
     print("║" + " " * 68 + "║")
     print("╚" + "=" * 68 + "╝")
 
-    demo_java_extraction()
-    demo_javascript_extraction()
-    demo_typescript_extraction()
-    demo_python_extraction()
-    demo_auto_detection()
-    demo_error_handling()
-    demo_unified_api()
+    try:
+        demo_java_extraction()
+        demo_javascript_extraction()
+        demo_typescript_extraction()
+        demo_python_extraction()
+        demo_auto_detection()
+        demo_error_handling()
+        demo_unified_api()
 
-    print("\n" + "=" * 70)
-    print("✓ All demos completed successfully!")
-    print("=" * 70)
-    print("\nKey Takeaways:")
-    print("  • Same API works for Python, Java, JavaScript, and TypeScript")
-    print("  • Auto-detection from file extensions or code content")
-    print("  • Surgical extraction preserves exact code structure")
-    print("  • Error handling with helpful messages")
-    print("  • Line number tracking across all languages")
-    print("\nNext Steps:")
-    print("  • Try with your own code files")
-    print("  • Integrate with your AI workflow")
-    print("  • Explore cross-file dependency analysis")
-    print()
+        print("\n" + "=" * 70)
+        print("✓ All demos completed successfully!")
+        print("=" * 70)
+        print("\nKey Takeaways:")
+        print("  • Same API works for Python, Java, JavaScript, and TypeScript")
+        print("  • Auto-detection from file extensions or code content")
+        print("  • Surgical extraction preserves exact code structure")
+        print("  • Error handling with helpful messages")
+        print("  • Line number tracking across all languages")
+        print("\nNext Steps:")
+        print("  • Try with your own code files")
+        print("  • Integrate with your AI workflow")
+        print("  • Explore cross-file dependency analysis")
+        print()
+    except Exception as e:
+        print(f"\n❌ Error during demo: {e}")
+        raise
 
 
 if __name__ == "__main__":

@@ -163,9 +163,9 @@ def process(user_input):
 
     async def test_get_symbol_references_community(self):
         """[20260109_TEST] Test get_symbol_references at community tier returns valid results."""
-        from code_scalpel.mcp import server
         import tempfile
-        import os
+
+        from code_scalpel.mcp import server
 
         # Create a minimal test project
         with tempfile.TemporaryDirectory() as tmpdir:

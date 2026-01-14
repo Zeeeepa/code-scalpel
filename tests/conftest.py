@@ -50,6 +50,7 @@ def mocker():
     finally:
         m.stopall()
 
+
 # [20251216_TEST] Silence upstream astor ast.Num deprecation noise on Python 3.13
 warnings.filterwarnings(
     "ignore",

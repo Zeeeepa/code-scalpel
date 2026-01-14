@@ -1098,7 +1098,7 @@ class Calculator:
         assert "not found" in result.error.lower()
 
     async def test_update_function_not_found(self, tmp_path, monkeypatch):
-        """Test behavior when function doesn't exist - should insert with warning."""
+        """Test behavior when function doesn't exist - should return error."""
         monkeypatch.setenv("SCALPEL_ROOT", str(tmp_path))
         from code_scalpel.mcp.server import update_symbol
 
@@ -1112,10 +1112,10 @@ class Calculator:
             new_code="def nonexistent(): pass",
         )
 
-        # [20260101_BUGFIX] Updated: new behavior inserts function with warning
-        assert result.success is True
-        assert result.warnings is not None
-        assert any("not found" in w.lower() for w in result.warnings)
+        # [20260113_FIX] Correct behavior: error when function not found
+        assert result.success is False
+        assert result.error is not None
+        assert "not found" in result.error.lower()
 
     async def test_update_invalid_syntax(self, tmp_path, monkeypatch):
         """Test error when new code has syntax error."""
@@ -1491,9 +1491,7 @@ class MyClass:
         assert result.language == "python"
         assert result.line_count > 0
         # [20260104_BUGFIX] Functions/classes are FunctionInfo/ClassInfo objects
-        function_names = [
-            f.name if hasattr(f, "name") else f for f in result.functions
-        ]
+        function_names = [f.name if hasattr(f, "name") else f for f in result.functions]
         class_names = [c.name if hasattr(c, "name") else c for c in result.classes]
         assert "helper_function" in function_names
         assert "MyClass" in class_names

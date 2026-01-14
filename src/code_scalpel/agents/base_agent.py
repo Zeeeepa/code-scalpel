@@ -38,89 +38,89 @@ class AgentContext:
         self.recent_operations: List[Dict[str, Any]] = []
         self.knowledge_base: Dict[str, Any] = {}
 
-        # [20251224_TIER1_TODO] Phase 1 - Core Context Management (COMMUNITY Tier - 25 items, 20 tests each)
+        # TODO [COMMUNITY]: Phase 1 - Core Context Management (25 items, 20 tests each)
         # Purpose: Establish robust context tracking and basic persistence
-        # 1. Add context persistence to file/database (SQLite, JSON)
-        # 2. Add context versioning and rollback support
-        # 3. Add knowledge_base serialization for learning across sessions
-        # 4. Implement context compression for large histories
-        # 5. Add context cleanup and pruning strategies
-        # 6. Create context query and search capabilities
-        # 7. Implement context indexing for fast retrieval
-        # 8. Add context statistics and analytics
-        # 9. Create context visualization tools
-        # 10. Implement context validation and integrity checks
-        # 11. Add context migration utilities
-        # 12. Create context backup and restore
-        # 13. Implement context export to multiple formats
-        # 14. Add context import from external sources
-        # 15. Create context merging and consolidation
-        # 16. Implement context diff and comparison
-        # 17. Add context tagging and categorization
-        # 18. Create context filtering and selection
-        # 19. Implement context priority management
-        # 20. Add context expiration and TTL
-        # 21. Create context access control
-        # 22. Implement context audit logging
-        # 23. Add context metrics and monitoring
-        # 24. Create context testing utilities
-        # 25. Implement context documentation generation
+        # TODO [COMMUNITY]: Add context persistence to file/database (SQLite, JSON)
+        # TODO [COMMUNITY]: Add context versioning and rollback support
+        # TODO [COMMUNITY]: Add knowledge_base serialization for learning across sessions
+        # TODO [COMMUNITY]: Implement context compression for large histories
+        # TODO [COMMUNITY]: Add context cleanup and pruning strategies
+        # TODO [COMMUNITY]: Create context query and search capabilities
+        # TODO [COMMUNITY]: Implement context indexing for fast retrieval
+        # TODO [COMMUNITY]: Add context statistics and analytics
+        # TODO [COMMUNITY]: Create context visualization tools
+        # TODO [COMMUNITY]: Implement context validation and integrity checks
+        # TODO [COMMUNITY]: Add context migration utilities
+        # TODO [COMMUNITY]: Create context backup and restore
+        # TODO [COMMUNITY]: Implement context export to multiple formats
+        # TODO [COMMUNITY]: Add context import from external sources
+        # TODO [COMMUNITY]: Create context merging and consolidation
+        # TODO [COMMUNITY]: Implement context diff and comparison
+        # TODO [COMMUNITY]: Add context tagging and categorization
+        # TODO [COMMUNITY]: Create context filtering and selection
+        # TODO [COMMUNITY]: Implement context priority management
+        # TODO [COMMUNITY]: Add context expiration and TTL
+        # TODO [COMMUNITY]: Create context access control
+        # TODO [COMMUNITY]: Implement context audit logging
+        # TODO [COMMUNITY]: Add context metrics and monitoring
+        # TODO [COMMUNITY]: Create context testing utilities
+        # TODO [COMMUNITY]: Implement context documentation generation
 
-        # [20251224_TIER2_TODO] Phase 2 - Advanced Context Features (PRO Tier - 25 items, 25 tests each)
+        # TODO [PRO]: Phase 2 - Advanced Context Features (25 items, 25 tests each)
         # Purpose: Add intelligent context management and learning capabilities
-        # 1. Implement context-aware recommendations
-        # 2. Add ML-based context relevance scoring
-        # 3. Create context summarization and abstraction
-        # 4. Implement semantic context search
-        # 5. Add context clustering and grouping
-        # 6. Create context pattern recognition
-        # 7. Implement context anomaly detection
-        # 8. Add context prediction and forecasting
-        # 9. Create context dependency tracking
-        # 10. Implement context impact analysis
-        # 11. Add cross-session context correlation
-        # 12. Create context-based debugging assistance
-        # 13. Implement context replay for testing
-        # 14. Add context simulation capabilities
-        # 15. Create context performance optimization
-        # 16. Implement distributed context management
-        # 17. Add context synchronization across agents
-        # 18. Create context federation
-        # 19. Implement context caching strategies
-        # 20. Add context prefetching
-        # 21. Create context streaming
-        # 22. Implement context batching
-        # 23. Add context compression algorithms
-        # 24. Create context encryption
-        # 25. Implement context access patterns analysis
+        # TODO [PRO]: Implement context-aware recommendations
+        # TODO [PRO]: Add ML-based context relevance scoring
+        # TODO [PRO]: Create context summarization and abstraction
+        # TODO [PRO]: Implement semantic context search
+        # TODO [PRO]: Add context clustering and grouping
+        # TODO [PRO]: Create context pattern recognition
+        # TODO [PRO]: Implement context anomaly detection
+        # TODO [PRO]: Add context prediction and forecasting
+        # TODO [PRO]: Create context dependency tracking
+        # TODO [PRO]: Implement context impact analysis
+        # TODO [PRO]: Add cross-session context correlation
+        # TODO [PRO]: Create context-based debugging assistance
+        # TODO [PRO]: Implement context replay for testing
+        # TODO [PRO]: Add context simulation capabilities
+        # TODO [PRO]: Create context performance optimization
+        # TODO [PRO]: Implement distributed context management
+        # TODO [PRO]: Add context synchronization across agents
+        # TODO [PRO]: Create context federation
+        # TODO [PRO]: Implement context caching strategies
+        # TODO [PRO]: Add context prefetching
+        # TODO [PRO]: Create context streaming
+        # TODO [PRO]: Implement context batching
+        # TODO [PRO]: Add context compression algorithms
+        # TODO [PRO]: Create context encryption
+        # TODO [PRO]: Implement context access patterns analysis
 
-        # [20251224_TIER3_TODO] Phase 3 - Enterprise Context Management (ENTERPRISE Tier - 25 items, 30 tests each)
+        # TODO [ENTERPRISE]: Phase 3 - Enterprise Context Management (25 items, 30 tests each)
         # Purpose: Enterprise-grade context governance and compliance
-        # 1. Implement multi-tenant context isolation
-        # 2. Add context compliance tracking (SOX, GDPR)
-        # 3. Create context retention policies
-        # 4. Implement context data sovereignty
-        # 5. Add context encryption at rest and in transit
-        # 6. Create context key management integration
-        # 7. Implement context tokenization
-        # 8. Add context anonymization and pseudonymization
-        # 9. Create context PII detection and redaction
-        # 10. Implement context RBAC and ABAC
-        # 11. Add context fine-grained permissions
-        # 12. Create context delegation and impersonation
-        # 13. Implement context audit trail immutability
-        # 14. Add context digital signatures
-        # 15. Create context blockchain integration
-        # 16. Implement context provenance tracking
-        # 17. Add context lineage visualization
-        # 18. Create context impact assessment
-        # 19. Implement context risk scoring
-        # 20. Add context SLA monitoring
-        # 21. Create context disaster recovery
-        # 22. Implement context high availability
-        # 23. Add context geo-replication
-        # 24. Create context failover automation
-        # 25. Implement context capacity planning
+        # TODO [ENTERPRISE]: Implement multi-tenant context isolation
+        # TODO [ENTERPRISE]: Add context compliance tracking (SOX, GDPR)
+        # TODO [ENTERPRISE]: Create context retention policies
+        # TODO [ENTERPRISE]: Implement context data sovereignty
+        # TODO [ENTERPRISE]: Add context encryption at rest and in transit
+        # TODO [ENTERPRISE]: Create context key management integration
+        # TODO [ENTERPRISE]: Implement context tokenization
+        # TODO [ENTERPRISE]: Add context anonymization and pseudonymization
+        # TODO [ENTERPRISE]: Create context PII detection and redaction
+        # TODO [ENTERPRISE]: Implement context RBAC and ABAC
+        # TODO [ENTERPRISE]: Add context fine-grained permissions
+        # TODO [ENTERPRISE]: Create context delegation and impersonation
+        # TODO [ENTERPRISE]: Implement context audit trail immutability
+        # TODO [ENTERPRISE]: Add context digital signatures
+        # TODO [ENTERPRISE]: Create context blockchain integration
+        # TODO [ENTERPRISE]: Implement context provenance tracking
+        # TODO [ENTERPRISE]: Add context lineage visualization
+        # TODO [ENTERPRISE]: Create context impact assessment
+        # TODO [ENTERPRISE]: Implement context risk scoring
+        # TODO [ENTERPRISE]: Add context SLA monitoring
+        # TODO [ENTERPRISE]: Create context disaster recovery
+        # TODO [ENTERPRISE]: Implement context high availability
+        # TODO [ENTERPRISE]: Add context geo-replication
+        # TODO [ENTERPRISE]: Create context failover automation
+        # TODO [ENTERPRISE]: Implement context capacity planning
 
     def add_operation(self, operation: str, result: Any, success: bool = True):
         """Record an operation and its result."""
@@ -287,89 +287,89 @@ class BaseCodeAnalysisAgent(ABC):
         Returns:
             Dict containing the results of each phase and overall success
         """
-        # [20251224_TIER1_TODO] Phase 1 - Core OODA Loop (COMMUNITY Tier - 25 items, 20 tests each)
+        # TODO [COMMUNITY]: Phase 1 - Core OODA Loop (25 items, 20 tests each)
         # Purpose: Implement robust OODA loop execution with safety guarantees
-        # 1. Add loop timeout and graceful cancellation
-        # 2. Add telemetry/metrics collection for agent performance
-        # 3. Add circuit breaker pattern for external tool failures
-        # 4. Implement loop state machine with clear transitions
-        # 5. Add phase result validation
-        # 6. Create phase retry logic with backoff
-        # 7. Implement phase checkpoint saving
-        # 8. Add phase rollback on failure
-        # 9. Create phase dependency tracking
-        # 10. Implement phase execution tracing
-        # 11. Add phase performance profiling
-        # 12. Create phase resource monitoring
-        # 13. Implement phase error categorization
-        # 14. Add phase logging and debugging
-        # 15. Create phase audit trail
-        # 16. Implement phase result caching
-        # 17. Add phase result validation
-        # 18. Create phase result enrichment
-        # 19. Implement phase timeout enforcement
-        # 20. Add phase cancellation handling
-        # 21. Create phase failure recovery
-        # 22. Implement phase health checks
-        # 23. Add phase monitoring and alerting
-        # 24. Create phase documentation generation
-        # 25. Implement phase testing utilities
+        # TODO [COMMUNITY]: Add loop timeout and graceful cancellation
+        # TODO [COMMUNITY]: Add telemetry/metrics collection for agent performance
+        # TODO [COMMUNITY]: Add circuit breaker pattern for external tool failures
+        # TODO [COMMUNITY]: Implement loop state machine with clear transitions
+        # TODO [COMMUNITY]: Add phase result validation
+        # TODO [COMMUNITY]: Create phase retry logic with backoff
+        # TODO [COMMUNITY]: Implement phase checkpoint saving
+        # TODO [COMMUNITY]: Add phase rollback on failure
+        # TODO [COMMUNITY]: Create phase dependency tracking
+        # TODO [COMMUNITY]: Implement phase execution tracing
+        # TODO [COMMUNITY]: Add phase performance profiling
+        # TODO [COMMUNITY]: Create phase resource monitoring
+        # TODO [COMMUNITY]: Implement phase error categorization
+        # TODO [COMMUNITY]: Add phase logging and debugging
+        # TODO [COMMUNITY]: Create phase audit trail
+        # TODO [COMMUNITY]: Implement phase result caching
+        # TODO [COMMUNITY]: Add phase result validation
+        # TODO [COMMUNITY]: Create phase result enrichment
+        # TODO [COMMUNITY]: Implement phase timeout enforcement
+        # TODO [COMMUNITY]: Add phase cancellation handling
+        # TODO [COMMUNITY]: Create phase failure recovery
+        # TODO [COMMUNITY]: Implement phase health checks
+        # TODO [COMMUNITY]: Add phase monitoring and alerting
+        # TODO [COMMUNITY]: Create phase documentation generation
+        # TODO [COMMUNITY]: Implement phase testing utilities
 
-        # [20251224_TIER2_TODO] Phase 2 - Advanced OODA Features (PRO Tier - 25 items, 25 tests each)
+        # TODO [PRO]: Phase 2 - Advanced OODA Features (25 items, 25 tests each)
         # Purpose: Add intelligent loop optimization and advanced capabilities
-        # 1. Support async phase execution with parallel processing
-        # 2. Add human-in-the-loop approval gates before Act phase
-        # 3. Implement adaptive phase timeout
-        # 4. Add phase result streaming
-        # 5. Create phase batching for efficiency
-        # 6. Implement phase prioritization
-        # 7. Add phase scheduling and queuing
-        # 8. Create phase load balancing
-        # 9. Implement phase resource allocation
-        # 10. Add phase cost optimization
-        # 11. Create phase performance tuning
-        # 12. Implement phase A/B testing
-        # 13. Add phase versioning
-        # 14. Create phase migration support
-        # 15. Implement phase composition and chaining
-        # 16. Add conditional phase execution
-        # 17. Create dynamic phase selection
-        # 18. Implement phase skip logic
-        # 19. Add phase early termination
-        # 20. Create phase speculation and prefetching
-        # 21. Implement phase memoization
-        # 22. Add phase result aggregation
-        # 23. Create multi-target OODA loop
-        # 24. Implement nested OODA loops
-        # 25. Add OODA loop composition patterns
+        # TODO [PRO]: Support async phase execution with parallel processing
+        # TODO [PRO]: Add human-in-the-loop approval gates before Act phase
+        # TODO [PRO]: Implement adaptive phase timeout
+        # TODO [PRO]: Add phase result streaming
+        # TODO [PRO]: Create phase batching for efficiency
+        # TODO [PRO]: Implement phase prioritization
+        # TODO [PRO]: Add phase scheduling and queuing
+        # TODO [PRO]: Create phase load balancing
+        # TODO [PRO]: Implement phase resource allocation
+        # TODO [PRO]: Add phase cost optimization
+        # TODO [PRO]: Create phase performance tuning
+        # TODO [PRO]: Implement phase A/B testing
+        # TODO [PRO]: Add phase versioning
+        # TODO [PRO]: Create phase migration support
+        # TODO [PRO]: Implement phase composition and chaining
+        # TODO [PRO]: Add conditional phase execution
+        # TODO [PRO]: Create dynamic phase selection
+        # TODO [PRO]: Implement phase skip logic
+        # TODO [PRO]: Add phase early termination
+        # TODO [PRO]: Create phase speculation and prefetching
+        # TODO [PRO]: Implement phase memoization
+        # TODO [PRO]: Add phase result aggregation
+        # TODO [PRO]: Create multi-target OODA loop
+        # TODO [PRO]: Implement nested OODA loops
+        # TODO [PRO]: Add OODA loop composition patterns
 
-        # [20251224_TIER3_TODO] Phase 3 - Enterprise OODA Orchestration (ENTERPRISE Tier - 25 items, 30 tests each)
+        # TODO [ENTERPRISE]: Phase 3 - Enterprise OODA Orchestration (25 items, 30 tests each)
         # Purpose: Enterprise-grade OODA orchestration and governance
-        # 1. Implement distributed OODA loop execution
-        # 2. Add OODA loop federation
-        # 3. Create OODA loop orchestration across clusters
-        # 4. Implement OODA loop high availability
-        # 5. Add OODA loop disaster recovery
-        # 6. Create OODA loop geo-distribution
-        # 7. Implement OODA loop compliance tracking
-        # 8. Add OODA loop audit requirements
-        # 9. Create OODA loop policy enforcement
-        # 10. Implement OODA loop SLA monitoring
-        # 11. Add OODA loop contract verification
-        # 12. Create OODA loop liability tracking
-        # 13. Implement OODA loop provenance
-        # 14. Add OODA loop explainability
-        # 15. Create OODA loop bias detection
-        # 16. Implement OODA loop fairness evaluation
-        # 17. Add OODA loop security hardening
-        # 18. Create OODA loop penetration testing
-        # 19. Implement OODA loop vulnerability scanning
-        # 20. Add OODA loop threat modeling
-        # 21. Create OODA loop incident response
-        # 22. Implement OODA loop forensics support
-        # 23. Add OODA loop capacity planning
-        # 24. Create OODA loop scalability testing
-        # 25. Implement OODA loop performance benchmarking
+        # TODO [ENTERPRISE]: Implement distributed OODA loop execution
+        # TODO [ENTERPRISE]: Add OODA loop federation
+        # TODO [ENTERPRISE]: Create OODA loop orchestration across clusters
+        # TODO [ENTERPRISE]: Implement OODA loop high availability
+        # TODO [ENTERPRISE]: Add OODA loop disaster recovery
+        # TODO [ENTERPRISE]: Create OODA loop geo-distribution
+        # TODO [ENTERPRISE]: Implement OODA loop compliance tracking
+        # TODO [ENTERPRISE]: Add OODA loop audit requirements
+        # TODO [ENTERPRISE]: Create OODA loop policy enforcement
+        # TODO [ENTERPRISE]: Implement OODA loop SLA monitoring
+        # TODO [ENTERPRISE]: Add OODA loop contract verification
+        # TODO [ENTERPRISE]: Create OODA loop liability tracking
+        # TODO [ENTERPRISE]: Implement OODA loop provenance
+        # TODO [ENTERPRISE]: Add OODA loop explainability
+        # TODO [ENTERPRISE]: Create OODA loop bias detection
+        # TODO [ENTERPRISE]: Implement OODA loop fairness evaluation
+        # TODO [ENTERPRISE]: Add OODA loop security hardening
+        # TODO [ENTERPRISE]: Create OODA loop penetration testing
+        # TODO [ENTERPRISE]: Implement OODA loop vulnerability scanning
+        # TODO [ENTERPRISE]: Add OODA loop threat modeling
+        # TODO [ENTERPRISE]: Create OODA loop incident response
+        # TODO [ENTERPRISE]: Implement OODA loop forensics support
+        # TODO [ENTERPRISE]: Add OODA loop capacity planning
+        # TODO [ENTERPRISE]: Create OODA loop scalability testing
+        # TODO [ENTERPRISE]: Implement OODA loop performance benchmarking
         try:
             self.logger.info(f"Starting OODA loop for target: {target}")
 

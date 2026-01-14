@@ -1,0 +1,15 @@
+{
+  "id": "op_20260114112925512119_1d6c5161",
+  "timestamp": "2026-01-14T11:29:25.512153",
+  "event_type": "SECURITY_SCAN",
+  "operation": "scan_vulnerabilities",
+  "input_hash": "4cd7d20e41cc7ce56779efbf5db09fd42ca7e2cc82fa16f5e46704cf0bcab7a6",
+  "output_hash": "900c4956a8aa002f7d1794fa83e7272a3b749e56bd7c3ed31b2e9a804409848b",
+  "success": true,
+  "duration_ms": 2300,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

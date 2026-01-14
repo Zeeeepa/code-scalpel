@@ -192,7 +192,7 @@ async def test_language_detection_from_extension(tmp_path: Path):
     """Test automatic language detection from file extensions."""
     frontend_code = "const x = 42;"
     backend_code = "x = 42"
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",

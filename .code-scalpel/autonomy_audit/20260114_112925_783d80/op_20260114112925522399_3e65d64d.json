@@ -1,0 +1,15 @@
+{
+  "id": "op_20260114112925522399_3e65d64d",
+  "timestamp": "2026-01-14T11:29:25.522433",
+  "event_type": "CODE_MODIFICATION",
+  "operation": "apply_fix",
+  "input_hash": "c5c48b289a2aee3d3e726603b1b66c1dea40e266f407af36cd1ebdfde7b57e13",
+  "output_hash": "900c4956a8aa002f7d1794fa83e7272a3b749e56bd7c3ed31b2e9a804409848b",
+  "success": true,
+  "duration_ms": 890,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

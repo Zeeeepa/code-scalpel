@@ -34,9 +34,14 @@ class TestSpec_MCP_GetFileContext:
             assert result.language == "python"
             assert result.line_count > 0
             assert result.line_count == len(content.strip().split("\n")) + 1
-            assert "func_one" in result.functions
-            assert "func_two" in result.functions
-            assert "MyClass" in result.classes
+            # [20250112_FIX] Functions may be list of FunctionInfo objects or strings
+            # depending on tier. Extract names for comparison.
+            func_names = [f.name if hasattr(f, "name") else f for f in result.functions]
+            assert "func_one" in func_names
+            assert "func_two" in func_names
+            # [20250112_FIX] Classes may be list of ClassInfo objects or strings
+            class_names = [c.name if hasattr(c, "name") else c for c in result.classes]
+            assert "MyClass" in class_names
             assert "os" in result.imports
             assert "json" in result.imports
         finally:

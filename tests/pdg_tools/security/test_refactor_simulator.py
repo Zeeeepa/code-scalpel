@@ -1183,8 +1183,7 @@ def foo(:
 
         if caplog.records:
             assert any(
-                "syntax" in r.getMessage().lower()
-                or "error" in r.getMessage().lower()
+                "syntax" in r.getMessage().lower() or "error" in r.getMessage().lower()
                 for r in caplog.records
             )
 
@@ -1205,7 +1204,9 @@ def foo(:
         assert result.is_safe is True
         # Soft threshold - log but don't fail if exceeded
         if duration >= 0.1:
-            print(f"Performance notice: small input took {duration:.3f}s (target <100ms)")
+            print(
+                f"Performance notice: small input took {duration:.3f}s (target <100ms)"
+            )
 
     def test_performance_medium_input_under_1s_pro(self):
         """Test medium input (~1000 LOC) completes within ~1s (Pro tier soft threshold)."""
@@ -1228,18 +1229,16 @@ def foo(:
         assert result.status.value in ("safe", "warning")
         # Soft threshold - log but don't fail if exceeded
         if duration >= 1.0:
-            print(
-                f"Performance notice: medium input took {duration:.3f}s (target ~1s)"
-            )
+            print(f"Performance notice: medium input took {duration:.3f}s (target ~1s)")
 
     def test_comments_and_docstrings_only_change_safe(self):
         """Adding comments/docstrings should remain safe and not misclassify."""
         from code_scalpel.generators import RefactorSimulator
 
-        original = '''
+        original = """
 def fn(x, y):
     return x + y
-'''
+"""
         new_code = '''
 def fn(x, y):
     """Add two numbers."""
@@ -1260,8 +1259,8 @@ def fn(x, y):
         """Lambdas and magic methods should parse and track without false-unsafe."""
         from code_scalpel.generators import RefactorSimulator
 
-        original = 'class Box:\n    def __init__(self, v):\n        self.v = v\n\nadder = lambda a, b: a + b\n'
-        new_code = 'class Box:\n    def __init__(self, v):\n        # no-op change\n        self.v = v\n\nadder = (lambda a, b: a + b)\n'
+        original = "class Box:\n    def __init__(self, v):\n        self.v = v\n\nadder = lambda a, b: a + b\n"
+        new_code = "class Box:\n    def __init__(self, v):\n        # no-op change\n        self.v = v\n\nadder = (lambda a, b: a + b)\n"
 
         simulator = RefactorSimulator()
         result = simulator.simulate(original_code=original, new_code=new_code)
@@ -1315,11 +1314,11 @@ Line3"""
         target = tmp_path / "should_not_exist.txt"
         original = "def noop(): return 1"
         # Malicious code that would write a file if executed
-        new_code = f'''
+        new_code = f"""
 def noop():
     open(r"{target}", "w").write("pwnd")
     return 2
-'''
+"""
 
         simulator = RefactorSimulator()
         result = simulator.simulate(original_code=original, new_code=new_code)
@@ -1327,4 +1326,3 @@ def noop():
         # No side effects expected and tool should classify as unsafe due to pattern scan
         assert not target.exists()
         assert result.status.value in ("safe", "warning", "unsafe")
-

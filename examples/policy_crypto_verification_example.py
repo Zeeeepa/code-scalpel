@@ -4,14 +4,28 @@ Example: Creating and using cryptographic policy verification.
 
 This demonstrates the administrator workflow for signing policy files
 and the agent workflow for verifying them.
+
+[20260114_BUGFIX] Uses temp directory to avoid conflicts with real .code-scalpel/ config.
 """
 
 import os
+import tempfile
 from pathlib import Path
 from code_scalpel.policy_engine.crypto_verify import (
     CryptographicPolicyVerifier,
     SecurityError,
 )
+
+# Use a temp directory for the demo to avoid permission issues
+_TEMP_DIR = None
+
+
+def get_demo_dir():
+    """Get or create temp directory for demo."""
+    global _TEMP_DIR
+    if _TEMP_DIR is None:
+        _TEMP_DIR = tempfile.mkdtemp(prefix="code_scalpel_demo_")
+    return Path(_TEMP_DIR)
 
 
 def admin_workflow():
@@ -24,8 +38,8 @@ def admin_workflow():
     print("ADMINISTRATOR WORKFLOW: Sign Policy Files")
     print("=" * 70)
 
-    # Set up policy directory
-    policy_dir = Path(".code-scalpel")
+    # Set up policy directory (in temp location for demo)
+    policy_dir = get_demo_dir() / ".code-scalpel"
     policy_dir.mkdir(exist_ok=True)
 
     # Create example policy files
@@ -120,11 +134,14 @@ def agent_workflow(manifest_source="file"):
 
     print("✓ Signing secret found in environment")
 
+    # Use demo directory
+    policy_dir = get_demo_dir() / ".code-scalpel"
+
     try:
         # Create verifier
         verifier = CryptographicPolicyVerifier(
             manifest_source=manifest_source,  # "file", "git", or "env"
-            policy_dir=".code-scalpel",
+            policy_dir=str(policy_dir),
         )
 
         print(f"✓ Loaded manifest from source: {manifest_source}")
@@ -160,7 +177,9 @@ def tamper_detection_demo():
     print("TAMPER DETECTION DEMO")
     print("=" * 70)
 
-    policy_file = Path(".code-scalpel/policy.yaml")
+    # Use demo directory
+    policy_dir = get_demo_dir() / ".code-scalpel"
+    policy_file = policy_dir / "policy.yaml"
 
     # Save original content
     original_content = policy_file.read_text()
@@ -176,7 +195,7 @@ def tamper_detection_demo():
         try:
             verifier = CryptographicPolicyVerifier(
                 manifest_source="file",
-                policy_dir=".code-scalpel",
+                policy_dir=str(policy_dir),
             )
             result = verifier.verify_all_policies()
 

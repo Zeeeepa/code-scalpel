@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Compare Community, Pro, and Enterprise tiers for Code Scalpel." />
+  <title>Pricing — Code Scalpel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo-link">
+        <span class="logo-icon">⌘</span>
+        <span class="logo-text">Code Scalpel</span>
+      </a>
+      <div class="nav-links">
+        <a href="/pages/tools.html">Tools</a>
+        <a href="/pages/pricing.html" class="active">Pricing</a>
+        <a href="/pages/security.html">Governance</a>
+        <a href="https://github.com/code-scalpel/code-scalpel" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="card">
+          <div class="card-inner">
+            <h1 style="font-size:40px;">Pricing that scales with risk and governance</h1>
+            <p class="lede">Start with Community. Move to Pro when you need higher limits and better signal. Choose Enterprise when you need governance you can prove.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="pricing">
+          <div class="card price">
+            <div class="card-inner">
+              <h3>Community</h3>
+              <p class="desc">Foundational analysis and safe operations for individuals and evaluation.</p>
+              <ul>
+                <li>Core tools with safe defaults</li>
+                <li>Tier caps to prevent runaway analysis</li>
+                <li>Great for validation and prototypes</li>
+              </ul>
+              <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn" href="/pages/tools.html">See tools</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card price">
+            <div class="badge">Most teams</div>
+            <div class="card-inner">
+              <h3>Pro</h3>
+              <p class="desc"><strong><span data-field="currency">$</span><span data-field="pro-price-annual">29.99</span></strong> <span class="small" data-field="pro-billing-note">per year — one-time annual purchase</span></p>
+              <ul>
+                <li><strong>1 license per seat</strong> (each engineer using Pro needs a seat)</li>
+                <li>Higher throughput (more files, deeper scans)</li>
+                <li>Features that reduce noise (e.g., reachability analysis in dependency scans)</li>
+                <li>Workflow accelerators (e.g., data-driven test generation)</li>
+              </ul>
+              <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn primary" data-link="pro-buy" href="https://example.com/buy/pro">Buy Pro</a>
+                <a class="btn ghost" data-link="demo-book" href="https://example.com/book/demo">Book a demo</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card price">
+            <div class="card-inner">
+              <h3>Enterprise</h3>
+              <p class="desc">For governance, compliance, and org-wide control — designed to fail closed.</p>
+              <ul>
+                <li><strong>1 license per seat</strong> (annual contract)</li>
+                <li>Compliance and audit-ready workflows</li>
+                <li>Policy integrity verification (tamper detection)</li>
+                <li>Org-scale controls and reporting</li>
+              </ul>
+              <p class="small" style="margin-top:10px;" data-field="enterprise-billing-note">per seat, annual contract (volume discounts)</p>
+              <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+                <a class="btn primary" data-link="enterprise-contact" href="mailto:sales@codescalpel.dev?subject=Code%20Scalpel%20Enterprise%20Inquiry">Contact sales</a>
+                <a class="btn" href="/pages/security.html">Security posture</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="card-inner">
+            <h2 style="margin:0 0 10px;">Licensing (per seat)</h2>
+            <p class="small">Seats are purchased per engineer who will use Code Scalpel. CI-only usage can be handled via Enterprise contracts; contact sales for details.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="card-inner">
+            <h2 style="margin:0 0 10px;">Tier comparison (high level)</h2>
+            <table class="table" aria-label="Tier comparison">
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th>Community</th>
+                  <th>Pro</th>
+                  <th>Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Primary goal</strong></td>
+                  <td>Get safe defaults and prove the workflow</td>
+                  <td>Increase signal and throughput</td>
+                  <td>Governance + auditability</td>
+                </tr>
+                <tr>
+                  <td><strong>Limits</strong></td>
+                  <td>Conservative caps</td>
+                  <td>Higher caps / broader scans</td>
+                  <td>Org scale</td>
+                </tr>
+                <tr>
+                  <td><strong>Security & compliance</strong></td>
+                  <td>Baseline patterns</td>
+                  <td>Deeper security patterns and prioritization</td>
+                  <td>Compliance modes + evidence</td>
+                </tr>
+                <tr>
+                  <td><strong>Governance</strong></td>
+                  <td>Safe-by-default</td>
+                  <td>Team workflow oriented</td>
+                  <td>Fail-closed integrity + policy enforcement</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="small" style="margin-top:10px;">Exact capability details vary by tool. See the Tools page for per-tool tier notes.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+        <div>© 2026 Code Scalpel</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+          <a class="small" href="/pages/tools.html">Tools</a>
+          <a class="small" href="/pages/security.html">Security</a>
+          <a class="small" data-link="enterprise-contact" href="mailto:sales@codescalpel.dev?subject=Code%20Scalpel%20Enterprise%20Inquiry">Contact</a>
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px;">Configure purchase links in <code>website/assets/config.js</code>.</div>
+    </div>
+  </footer>
+
+  <script src="/assets/config.js"></script>
+  <script src="/assets/site.js"></script>
+</body>
+</html>

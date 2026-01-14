@@ -143,7 +143,7 @@ extract_code(
 |------------|-----------|-----|------------|
 | **Availability** | ✅ | ✅ | ✅ |
 | Basic vulnerabilities | ✅ | ✅ | ✅ |
-| Max findings | **10** | Unlimited | Unlimited |
+| Max findings | **50** | Unlimited | Unlimited |
 | Vulnerability types | SQL, XSS, Command Injection | All types | All + custom |
 | Single-file taint | ✅ | ✅ | ✅ |
 | Advanced taint flow | ❌ | ✅ | ✅ |
@@ -158,11 +158,11 @@ extract_code(
 ```json
 {
   "tier": "community",
-  "vulnerabilities": [10 findings],
+  "vulnerabilities": [50 findings],
   "truncated": true,
-  "total_vulnerabilities": 25,
+  "total_vulnerabilities": 75,
   "upgrade_hints": [
-    "Showing 10/25 vulnerabilities.",
+    "Showing 50/75 vulnerabilities.",
     "Upgrade to PRO for unlimited findings and remediation suggestions."
   ]
 }
@@ -245,7 +245,7 @@ cross_file_security_scan(
 |------------|-----------|-----|------------|
 | **Availability** | ✅ | ✅ | ✅ |
 | Symbolic paths | ✅ | ✅ | ✅ |
-| Max paths | **3** | **10** | Unlimited |
+| Max paths | **50** | **100** | Unlimited |
 | Z3 constraint solving | ✅ basic | ✅ advanced | ✅ advanced |
 | Path prioritization | ❌ | ✅ | ✅ |
 | Branch coverage | ❌ | ✅ | ✅ |
@@ -254,10 +254,10 @@ cross_file_security_scan(
 ```json
 {
   "tier": "community",
-  "paths_explored": 3,
-  "paths": [3 paths],
+  "paths_explored": 50,
+  "paths": [50 paths],
   "upgrade_hints": [
-    "Limited to 3 paths. Upgrade to PRO for 10 paths."
+    "Limited to 50 paths. Upgrade to PRO for 100 paths."
   ]
 }
 ```
@@ -410,9 +410,16 @@ cross_file_security_scan(
 | Symbol search | ✅ | ✅ | ✅ |
 | All references | ✅ | ✅ | ✅ |
 | Line numbers | ✅ | ✅ | ✅ |
-| **Restrictions** | None | None | None |
+| Max files | **100** | Unlimited | Unlimited |
+| Max references | **100** | Unlimited | Unlimited |
 
-**Summary**: Fully available at all tiers with no restrictions.
+**Community Example**:
+```python
+get_symbol_references(
+    symbol_name="process_order",
+    project_root="/app"
+)  # Community: max 100 files, 100 references
+```
 
 ---
 
@@ -424,7 +431,7 @@ cross_file_security_scan(
 |------------|-----------|-----|------------|
 | **Availability** | ✅ | ✅ | ✅ |
 | Dependency resolution | ✅ | ✅ | ✅ |
-| Max depth | **1** | **3** | Unlimited |
+| Max depth | **1** | **5** | Unlimited |
 | Confidence decay | ✅ | ✅ | ✅ |
 | Circular detection | ✅ | ✅ | ✅ |
 | Mermaid diagram | ✅ | ✅ | ✅ |
@@ -476,7 +483,7 @@ get_cross_file_dependencies(
 |------------|-----------|-----|------------|
 | **Availability** | ✅ | ✅ | ✅ |
 | Neighborhood extraction | ✅ | ✅ | ✅ |
-| Max k-hops | **1** | **2** | Unlimited |
+| Max k-hops | **1** | **5** | Unlimited |
 | Max nodes | **50** | **100** | Unlimited |
 | Confidence filtering | ✅ | ✅ | ✅ |
 | Direction filtering | ✅ | ✅ | ✅ |
@@ -561,33 +568,33 @@ get_graph_neighborhood(
 
 ### Tools with Restrictions
 
-**10 tools** have tier-based limits:
+**11 tools** have tier-based limits:
 
-1. `security_scan` - Max findings (10 → unlimited)
-2. `symbolic_execute` - Max paths (3 → 10 → unlimited)
+1. `security_scan` - Max findings (50 → unlimited)
+2. `symbolic_execute` - Max paths (50 → 100 → unlimited)
 3. `crawl_project` - Max files (100 → 1000 → unlimited), mode (discovery → deep)
 4. `extract_code` - Cross-file depth (0 → 1 → unlimited)
 5. `generate_unit_tests` - Max tests (5 → 20 → unlimited)
 6. `get_call_graph` - Max depth (3 → 10 → unlimited)
-7. `get_graph_neighborhood` - Max k-hops (1 → 2 → unlimited)
+7. `get_graph_neighborhood` - Max k-hops (1 → 5 → unlimited)
 8. `scan_dependencies` - Max deps (50 → unlimited)
-9. `get_cross_file_dependencies` - Max depth (1 → 3 → unlimited)
-10. `cross_file_security_scan` - Max depth/modules (limited → full)
+9. `get_cross_file_dependencies` - Max depth (1 → 5 → unlimited)
+10. `get_symbol_references` - Max files/refs (100 → unlimited)
+11. `cross_file_security_scan` - Max depth/modules (limited → full)
 
 ### Tools with NO Restrictions
 
-**10 tools** are fully available at all tiers:
+**9 tools** are fully available at all tiers:
 
 1. `analyze_code`
 2. `update_symbol`
 3. `unified_sink_detect`
 4. `simulate_refactor`
 5. `get_file_context`
-6. `get_symbol_references`
-7. `get_project_map`
-8. `validate_paths`
-9. `verify_policy_integrity`
-10. `type_evaporation_scan`
+6. `get_project_map`
+7. `validate_paths`
+8. `verify_policy_integrity`
+9. `type_evaporation_scan`
 
 ---
 
@@ -596,12 +603,13 @@ get_graph_neighborhood(
 ### When to Upgrade from Community to Pro
 
 You need PRO if:
-- Security scans find more than 10 vulnerabilities (you want to see them all)
-- You need symbolic execution to explore more than 3 paths
+- Security scans find more than 50 vulnerabilities (you want to see them all)
+- You need symbolic execution to explore more than 50 paths
 - Your project has more than 100 files and you need deep analysis
-- You want cross-file dependency resolution
+- You want cross-file dependency resolution beyond 1 hop
 - You want more than 5 generated test cases
 - You need call graphs deeper than 3 hops
+- You need symbol references across more than 100 files
 
 ### When to Upgrade from Pro to Enterprise
 

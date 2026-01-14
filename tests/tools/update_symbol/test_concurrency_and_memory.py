@@ -41,7 +41,9 @@ def test_update_symbol_concurrent_updates(tmp_path):
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         results = list(pool.map(_do_update, range(10)))
 
-    assert all(results), f"Concurrent update failed for indices: {[i for i, ok in enumerate(results) if not ok]}"
+    assert all(
+        results
+    ), f"Concurrent update failed for indices: {[i for i, ok in enumerate(results) if not ok]}"
 
 
 def test_update_symbol_memory_leak_guard(tmp_path):
@@ -63,7 +65,9 @@ def test_update_symbol_memory_leak_guard(tmp_path):
 
     # Allow generous headroom; we only care that usage stays within a small envelope
     peak_mb = peak / (1024 * 1024)
-    assert peak_mb < 50, f"Peak memory too high for 50 sequential operations: {peak_mb:.2f} MB"
+    assert (
+        peak_mb < 50
+    ), f"Peak memory too high for 50 sequential operations: {peak_mb:.2f} MB"
 
 
 def _generate_lines(name: str, lines: int) -> str:
@@ -85,7 +89,8 @@ def _memory_bucket_run(tmp_path: Path, lines: int, iterations: int) -> int:
 
         patcher = SurgicalPatcher.from_file(str(target))
         result = patcher.update_function(
-            f"fn_{lines}_{idx}", _write_replacement(f"fn_{lines}_{idx}"),
+            f"fn_{lines}_{idx}",
+            _write_replacement(f"fn_{lines}_{idx}"),
         )
         if result.success:
             patcher.save(backup=False)

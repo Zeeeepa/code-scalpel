@@ -10,8 +10,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 
@@ -85,7 +83,9 @@ def is_even(n):
     for tc in result.test_cases:
         name = tc.description
         # Should not contain UUID-like patterns (8-4-4-4-12 hex)
-        assert "-" not in name or not all(c in "0123456789abcdef-" for c in name.split("-")[0])
+        assert "-" not in name or not all(
+            c in "0123456789abcdef-" for c in name.split("-")[0]
+        )
         # Should not contain timestamps (too many digits)
         assert not any(len(seg) > 8 and seg.isdigit() for seg in name.split("_"))
         # Should be descriptive
@@ -149,7 +149,7 @@ def add(a, b):
 
     # Both should succeed
     assert all(r.success for r in results)
-    
+
     # Output format should be identical
     assert results[0].pytest_code == results[1].pytest_code
     # Should be valid Python code

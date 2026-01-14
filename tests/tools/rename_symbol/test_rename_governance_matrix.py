@@ -19,7 +19,12 @@ from code_scalpel.surgery.rename_symbol_refactor import rename_references_across
 
 @pytest.mark.parametrize(
     "profile_fixture",
-    ["governance_permissive", "governance_minimal", "governance_default", "governance_restrictive"],
+    [
+        "governance_permissive",
+        "governance_minimal",
+        "governance_default",
+        "governance_restrictive",
+    ],
 )
 def test_rename_within_budget_succeeds_all_profiles(
     profile_fixture: str, request: pytest.FixtureRequest, scope_filesystem: None
@@ -145,7 +150,10 @@ def test_audit_trail_generated_per_profile(
     ["governance_minimal"],
 )
 def test_warn_mode_with_break_glass_allows_rename(
-    profile_fixture: str, request: pytest.FixtureRequest, scope_filesystem: None, monkeypatch: pytest.MonkeyPatch
+    profile_fixture: str,
+    request: pytest.FixtureRequest,
+    scope_filesystem: None,
+    monkeypatch: pytest.MonkeyPatch,
 ):
     """[20260108_TEST] Warn mode + break-glass allows rename with warning."""
     project_root: Path = request.getfixturevalue(profile_fixture)

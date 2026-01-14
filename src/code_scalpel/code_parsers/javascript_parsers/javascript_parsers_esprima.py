@@ -681,7 +681,7 @@ class JavaScriptParser(BaseParser):
                 operands[str(node.value)] += 1
         elif isinstance(node, esprima.nodes.CallExpression):
             operators["()"] += 1
-        elif isinstance(node, esprima.nodes.MemberExpression):
+        elif isinstance(node, (esprima.nodes.StaticMemberExpression, esprima.nodes.ComputedMemberExpression)):
             operators["."] += 1
         elif isinstance(node, esprima.nodes.NewExpression):
             operators["new"] += 1
@@ -763,7 +763,7 @@ class JavaScriptParser(BaseParser):
             callee_node = node.callee
             if isinstance(callee_node, esprima.nodes.Identifier):
                 callee = callee_node.name
-            elif isinstance(callee_node, esprima.nodes.MemberExpression):
+            elif isinstance(callee_node, (esprima.nodes.StaticMemberExpression, esprima.nodes.ComputedMemberExpression)):
                 is_method = True
                 if isinstance(callee_node.property, esprima.nodes.Identifier):
                     callee = callee_node.property.name
@@ -872,7 +872,7 @@ class JavaScriptParser(BaseParser):
 
             # Check for innerHTML/outerHTML assignments
             if isinstance(node, esprima.nodes.AssignmentExpression):
-                if isinstance(node.left, esprima.nodes.MemberExpression):
+                if isinstance(node.left, (esprima.nodes.StaticMemberExpression, esprima.nodes.ComputedMemberExpression)):
                     if isinstance(node.left.property, esprima.nodes.Identifier):
                         if node.left.property.name in ("innerHTML", "outerHTML"):
                             issues.append(
@@ -898,7 +898,7 @@ class JavaScriptParser(BaseParser):
 
             # Check for document.write
             if isinstance(node, esprima.nodes.CallExpression):
-                if isinstance(node.callee, esprima.nodes.MemberExpression):
+                if isinstance(node.callee, (esprima.nodes.StaticMemberExpression, esprima.nodes.ComputedMemberExpression)):
                     if isinstance(node.callee.object, esprima.nodes.Identifier):
                         if node.callee.object.name == "document":
                             if isinstance(

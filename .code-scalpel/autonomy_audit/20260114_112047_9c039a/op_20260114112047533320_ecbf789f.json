@@ -1,0 +1,15 @@
+{
+  "id": "op_20260114112047533320_ecbf789f",
+  "timestamp": "2026-01-14T11:20:47.533365",
+  "event_type": "TEST_EXECUTION",
+  "operation": "run_tests",
+  "input_hash": "c9093158be29266f43ce98259b53b845bb746c4c674263dfba346af8f67af028",
+  "output_hash": "c8674459c83cb74fd0309c0bcb423015b5364e095c933e2eda3d32f9887e5f83",
+  "success": false,
+  "duration_ms": 5600,
+  "metadata": {
+    "compliance": true,
+    "auditor": "system"
+  },
+  "parent_id": null
+}

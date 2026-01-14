@@ -4,11 +4,7 @@ Tests for documentation accuracy, logging, and release readiness.
 Covers Sections 5 & 7 of MCP_TOOL_COMPREHENSIVE_TEST_CHECKLIST.md
 """
 
-import json
 from pathlib import Path
-from importlib import import_module
-
-import pytest
 
 from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
@@ -23,7 +19,7 @@ class TestDocumentationAccuracy:
 
         # Parameters documented: file_path, target_type, target_name, new_name (default None)
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # Should accept file_path (explicit)
         result1 = patcher.rename_symbol("function", "old_func", "new_func")
         assert result1 is not None
@@ -37,11 +33,11 @@ class TestDocumentationAccuracy:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         # Documented fields: success, file_path, target_name, target_type, error
-        assert hasattr(result, 'success')
-        assert hasattr(result, 'file_path')
-        assert hasattr(result, 'target_name')
-        assert hasattr(result, 'target_type')
-        assert hasattr(result, 'error')
+        assert hasattr(result, "success")
+        assert hasattr(result, "file_path")
+        assert hasattr(result, "target_name")
+        assert hasattr(result, "target_type")
+        assert hasattr(result, "error")
 
     def test_documented_error_conditions_match(self, tmp_path: Path):
         """Error conditions documented are actually triggered."""
@@ -49,18 +45,18 @@ class TestDocumentationAccuracy:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # Documentation says "Invalid target_type" should error
         result = patcher.rename_symbol("invalid_type", "old_func", "new_func")
-        
+
         # Should return error or succeed gracefully
         assert result is not None
-        assert hasattr(result, 'error')
+        assert hasattr(result, "error")
 
     def test_tool_behavior_matches_roadmap_description(self, tmp_path: Path):
         """Tool behavior matches roadmap description."""
         # Roadmap: "rename functions, classes, methods with automatic reference updates"
-        
+
         src = tmp_path / "test.py"
         src.write_text("def old_func():\n    call = old_func()\n    return 1\n")
 
@@ -78,11 +74,11 @@ class TestDocumentationAccuracy:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # Documented signature: rename_symbol(target_type, target_name, new_name)
         # Should work with positional arguments
         result = patcher.rename_symbol("function", "old_func", "new_func")
-        
+
         assert result.success is True
 
 
@@ -119,7 +115,7 @@ class TestErrorMessages:
     def test_error_message_suggests_fix(self, tmp_path: Path):
         """Error messages suggest possible fixes when appropriate."""
         src = tmp_path / "nonexistent.py"
-        
+
         try:
             patcher = UnifiedPatcher.from_file(str(src))
         except (FileNotFoundError, ValueError) as e:
@@ -147,7 +143,7 @@ class TestRoadmapAlignment:
     def test_community_tier_features_implemented(self, tmp_path: Path):
         """All Community tier roadmap features work."""
         # Roadmap: rename functions, classes, methods (Python, JS, TS)
-        
+
         src = tmp_path / "test.py"
         src.write_text("def old_func():\n    return 1\n")
 
@@ -160,12 +156,12 @@ class TestRoadmapAlignment:
         """Pro tier features documented in roadmap."""
         # Roadmap mentions: cross-file propagation, backup/rollback
         # These are tested in other test files but we verify they exist
-        
+
         src = tmp_path / "test.py"
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # backup parameter should exist (Pro feature)
         # Since it's optional, we just verify it's in the signature
         result = patcher.rename_symbol("function", "old_func", "new_func")
@@ -175,7 +171,7 @@ class TestRoadmapAlignment:
         """Enterprise tier features documented in roadmap."""
         # Roadmap mentions: repo-wide renames, approval workflows, audit trails
         # These are tested in enterprise test files
-        
+
         src = tmp_path / "test.py"
         src.write_text("def old_func():\n    return 1\n")
 
@@ -198,7 +194,7 @@ class TestLoggingAndDebug:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         captured = capsys.readouterr()
-        
+
         # Should not spam stdout/stderr
         assert len(captured.out) < 1000  # Less than 1KB of output
         assert len(captured.err) < 1000
@@ -224,24 +220,24 @@ class TestAPIDocumentation:
         """UnifiedPatcher class is importable and documented."""
         # Should be importable
         assert UnifiedPatcher is not None
-        
+
         # Should have docstring
         assert UnifiedPatcher.__doc__ is not None
 
     def test_rename_symbol_method_exists(self):
         """rename_symbol method exists and is callable."""
-        assert hasattr(UnifiedPatcher, 'rename_symbol')
-        assert callable(getattr(UnifiedPatcher, 'rename_symbol'))
+        assert hasattr(UnifiedPatcher, "rename_symbol")
+        assert callable(getattr(UnifiedPatcher, "rename_symbol"))
 
     def test_rename_symbol_has_docstring(self):
         """rename_symbol method has docstring."""
-        method = getattr(UnifiedPatcher, 'rename_symbol')
+        method = getattr(UnifiedPatcher, "rename_symbol")
         assert method.__doc__ is not None
 
     def test_from_file_method_documented(self):
         """from_file class method is documented."""
-        assert hasattr(UnifiedPatcher, 'from_file')
-        method = getattr(UnifiedPatcher, 'from_file')
+        assert hasattr(UnifiedPatcher, "from_file")
+        method = getattr(UnifiedPatcher, "from_file")
         assert method.__doc__ is not None
 
 
@@ -254,7 +250,7 @@ class TestReleaseReadiness:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        
+
         # Core feature: rename function
         result = patcher.rename_symbol("function", "old_func", "new_func")
         assert result.success is True
@@ -268,7 +264,7 @@ class TestReleaseReadiness:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         captured = capsys.readouterr()
-        
+
         # Should not have debug prints
         assert "debug" not in captured.out.lower()
         assert "debug" not in captured.err.lower()
@@ -280,12 +276,12 @@ class TestReleaseReadiness:
 
         patcher1 = UnifiedPatcher.from_file(str(src))
         result1 = patcher1.rename_symbol("function", "old_func", "new_func")
-        
+
         patcher2 = UnifiedPatcher.from_file(str(src))
         result2 = patcher2.rename_symbol("function", "old_func", "new_func")
 
         # Response structure should be identical
-        assert type(result1) == type(result2)
+        assert type(result1) is type(result2)
         assert dir(result1) == dir(result2)
 
     def test_no_external_dependencies_in_tests(self):
@@ -325,9 +321,9 @@ class TestBreakingChanges:
         result = patcher.rename_symbol("function", "old_func", "new_func")
 
         # Core fields should always be present
-        assert hasattr(result, 'success')
-        assert hasattr(result, 'error')
-        assert hasattr(result, 'file_path')
+        assert hasattr(result, "success")
+        assert hasattr(result, "error")
+        assert hasattr(result, "file_path")
 
 
 class TestReleaseChecklist:

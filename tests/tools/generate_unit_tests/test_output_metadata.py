@@ -16,10 +16,10 @@ class TestOutputMetadataFields:
     @pytest.mark.asyncio
     async def test_basic_generation_includes_metadata(self):
         """Basic pytest generation should include all metadata fields."""
-        code = '''
+        code = """
 def calculate_total(items):
     return sum(items)
-'''
+"""
         result = await generate_unit_tests(code=code, framework="pytest")
 
         assert result.success is True
@@ -39,10 +39,10 @@ def calculate_total(items):
     @pytest.mark.asyncio
     async def test_unittest_framework_metadata(self):
         """Unittest framework should be reflected in metadata."""
-        code = '''
+        code = """
 def add(a, b):
     return a + b
-'''
+"""
         result = await generate_unit_tests(code=code, framework="unittest")
 
         assert result.success is True
@@ -52,10 +52,10 @@ def add(a, b):
     @pytest.mark.asyncio
     async def test_data_driven_flag_in_metadata(self):
         """Data-driven mode should be reflected in metadata."""
-        code = '''
+        code = """
 def is_positive(x):
     return x > 0
-'''
+"""
         result = await generate_unit_tests(
             code=code, framework="pytest", data_driven=True
         )
@@ -138,10 +138,10 @@ class TestFeatureGatingMetadata:
     @pytest.mark.asyncio
     async def test_unsupported_framework_error_has_metadata(self):
         """Unsupported framework error should include metadata."""
-        code = '''
+        code = """
 def simple():
     return 1
-'''
+"""
         # Try to use an unsupported framework name (not in allowed list)
         result = await generate_unit_tests(code=code, framework="mocha")
 

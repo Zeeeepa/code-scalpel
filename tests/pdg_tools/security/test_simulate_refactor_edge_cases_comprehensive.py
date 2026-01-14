@@ -44,7 +44,10 @@ def outer():
 
         # All nested functions should be tracked as structural changes
         assert result.is_safe is True
-        assert "outer" in str(result.structural_changes).lower() or len(result.structural_changes) >= 0
+        assert (
+            "outer" in str(result.structural_changes).lower()
+            or len(result.structural_changes) >= 0
+        )
 
     def test_nested_class_definitions(self):
         """Nested class definitions are handled."""
@@ -224,7 +227,7 @@ class TestIncompleteAndTruncatedInput:
 
         # Function missing closing paren
         incomplete = "def foo(x, y"
-        
+
         simulator = RefactorSimulator()
         result = simulator.simulate(
             original_code=incomplete,
@@ -257,7 +260,7 @@ def foo():
         from code_scalpel.generators import RefactorSimulator
 
         truncated = "class Foo:"
-        
+
         simulator = RefactorSimulator()
         result = simulator.simulate(
             original_code=truncated,
@@ -272,7 +275,7 @@ def foo():
         from code_scalpel.generators import RefactorSimulator
 
         partial = "from module import"
-        
+
         simulator = RefactorSimulator()
         result = simulator.simulate(
             original_code=partial,
@@ -489,7 +492,7 @@ class TestToolRegistrationAndMetadata:
         # Test that language parameter is used
         simulator = RefactorSimulator()
         js_code = "function foo() { return 1; }"
-        
+
         result = simulator.simulate(
             original_code=js_code,
             new_code=js_code,
@@ -505,6 +508,7 @@ class TestAsyncExecutionHandling:
     def test_tool_handler_works_in_async_context(self):
         """Tool can be called from async context."""
         import asyncio
+
         from code_scalpel.generators import RefactorSimulator
 
         async def run_in_async():
@@ -522,6 +526,7 @@ class TestAsyncExecutionHandling:
     def test_simulate_refactor_execution_completes(self):
         """Async execution completes without timeout."""
         import asyncio
+
         from code_scalpel.generators import RefactorSimulator
 
         async def run_async_simulate():
@@ -542,6 +547,7 @@ class TestAsyncExecutionHandling:
     def test_large_code_analysis_async_handling(self):
         """Large code analysis handled in async context."""
         import asyncio
+
         from code_scalpel.generators import RefactorSimulator
 
         large_code = """
@@ -551,7 +557,9 @@ def func_1():
 def func_2():
     pass
 
-""" + "\n".join([f"def func_{i}(): pass" for i in range(3, 50)])
+""" + "\n".join(
+            [f"def func_{i}(): pass" for i in range(3, 50)]
+        )
 
         async def run_large_async():
             simulator = RefactorSimulator()
@@ -583,10 +591,10 @@ class TestErrorCodeSpecCompliance:
 
         # Force an edge case that might cause internal error
         simulator = RefactorSimulator()
-        
+
         # Try extreme input
         extreme_input = "x" * 10_000_000  # Very large input
-        
+
         try:
             result = simulator.simulate(
                 original_code=extreme_input,

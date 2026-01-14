@@ -21,9 +21,7 @@ import pytest
 
 from code_scalpel.security.analyzers.cross_file_taint import (
     CrossFileTaintTracker,
-    CrossFileTaintResult,
 )
-
 
 # =============================================================================
 # FIXTURES
@@ -258,7 +256,9 @@ def execute_query(user_id):
     def test_mermaid_contains_module_info(self, temp_project):
         """[20260103_TEST] Mermaid diagram includes module information."""
         (temp_project / "module_a.py").write_text("def func_a(): pass")
-        (temp_project / "module_b.py").write_text("from module_a import func_a\ndef func_b(): return func_a()")
+        (temp_project / "module_b.py").write_text(
+            "from module_a import func_a\ndef func_b(): return func_a()"
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         tracker.analyze()
@@ -369,13 +369,18 @@ def func9(data):
         for i in range(15):
             imports.append(f"from module_{i} import func_{i}")
 
-        root_content = "\n".join(imports) + """
+        root_content = (
+            "\n".join(imports)
+            + """
 
 def handler(data):
     results = []
-    """ + "\n    ".join([f"results.append(func_{i}(data))" for i in range(15)]) + """
+    """
+            + "\n    ".join([f"results.append(func_{i}(data))" for i in range(15)])
+            + """
     return results
 """
+        )
 
         (temp_project / "root.py").write_text(root_content)
 

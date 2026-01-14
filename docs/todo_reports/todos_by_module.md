@@ -32,7 +32,7 @@
 - [ast_tools/analyzer.py#62] TODO [COMMUNITY]: Add 20+ tests for decorator and generator detection
 - *... and 229 more*
 
-### PRO Tier (453 items)
+### PRO Tier (487 items)
 
 - [ast_tools/analyzer.py#72] TODO [PRO][FEATURE]: Type hint inference from code analysis
 - [ast_tools/analyzer.py#73] TODO [PRO]: Infer return types from return statements
@@ -44,9 +44,9 @@
 - [ast_tools/analyzer.py#80] TODO [PRO]: Detect async/await patterns
 - [ast_tools/analyzer.py#81] TODO [PRO]: Track coroutine awaits and yields
 - [ast_tools/analyzer.py#82] TODO [PRO]: Analyze async context managers
-- *... and 443 more*
+- *... and 477 more*
 
-### ENTERPRISE Tier (325 items)
+### ENTERPRISE Tier (345 items)
 
 - [ast_tools/analyzer.py#96] TODO [ENTERPRISE][FEATURE]: Class inheritance analysis
 - [ast_tools/analyzer.py#97] TODO [ENTERPRISE]: Calculate inheritance depth
@@ -58,25 +58,25 @@
 - [ast_tools/analyzer.py#104] TODO [ENTERPRISE]: Detect inefficient patterns (list comprehensions vs loops)
 - [ast_tools/analyzer.py#105] TODO [ENTERPRISE]: Identify expensive operations in loops
 - [ast_tools/analyzer.py#106] TODO [ENTERPRISE]: Suggest optimization opportunities
-- *... and 315 more*
+- *... and 335 more*
 
-### UNSPECIFIED Tier (109 items)
+### UNSPECIFIED Tier (55 items)
 
-- [ast_tools/ast_refactoring.py#171] [20251224_TIER2_TODO] FEATURE: Parse and analyze file
-- [ast_tools/ast_refactoring.py#177] [20251224_TIER2_TODO] FEATURE: Detect all code smells
-- [ast_tools/ast_refactoring.py#185] [20251224_TIER2_TODO] FEATURE: Identify refactoring opportunities
-- [ast_tools/ast_refactoring.py#204] [20251224_TIER2_TODO] FEATURE: Check for god function smell
-- [ast_tools/ast_refactoring.py#211] [20251224_TIER2_TODO] FEATURE: Identify extract method candidates
-- [ast_tools/ast_refactoring.py#218] [20251224_TIER2_TODO] ENHANCEMENT: Detect common code smells in functions
-- [ast_tools/ast_refactoring.py#233] [20251224_TIER2_TODO] FEATURE: Check for god class smell
-- [ast_tools/ast_refactoring.py#240] [20251224_TIER2_TODO] FEATURE: Identify feature envy violations
-- [ast_tools/ast_refactoring.py#246] [20251224_TIER2_TODO] ENHANCEMENT: Detect data clumps
-- [ast_tools/ast_refactoring.py#263] [20251224_TIER2_TODO] FEATURE: Calculate class complexity
-- *... and 99 more*
+- [ast_tools/cross_file_extractor.py#98] TODO [FEATURE]: Add semantic similarity scoring for related symbols
+- [ast_tools/cross_file_extractor.py#99] TODO [FEATURE]: Support stub detection and filtering
+- [ast_tools/cross_file_extractor.py#100] TODO [ENHANCEMENT]: Add extraction caching with invalidation
+- [ast_tools/cross_file_extractor.py#101] TODO [ENHANCEMENT]: Support extraction for type stubs and protocol definitions
+- [ast_tools/data_flow.py#242] TODO [FEATURE]: Return def-use chains
+- [ast_tools/data_flow.py#252] TODO [FEATURE]: Return use-def chains
+- [ast_tools/data_flow.py#283] TODO [FEATURE]: Analyze definitions without uses
+- [ast_tools/data_flow.py#284] TODO [FEATURE]: Filter out deliberately unused (underscore)
+- [ast_tools/dependency_parser.py#8] TODO [SECURITY]: Use defusedxml to prevent XXE attacks (B314)
+- [ast_tools/import_resolver.py#37] TODO [FEATURE]: Top-level parse fn for parallel workers (picklable on Windows spawn)
+- *... and 45 more*
 
 ## security/ (837 TODOs)
 
-### COMMUNITY Tier (210 items)
+### COMMUNITY Tier (214 items)
 
 - [security/analyzers/cross_file_taint.py#77] - TODO [COMMUNITY]: Improve documentation and examples (current)
 - [security/analyzers/cross_file_taint.py#78] - TODO [COMMUNITY]: Create cross-file vulnerability guide
@@ -88,9 +88,9 @@
 - [security/analyzers/cross_file_taint.py#84] - TODO [COMMUNITY]: Document taint propagation rules
 - [security/analyzers/cross_file_taint.py#85] - TODO [COMMUNITY]: Add examples for different scenarios
 - [security/analyzers/cross_file_taint.py#86] - TODO [COMMUNITY]: Create debugging guide
-- *... and 200 more*
+- *... and 204 more*
 
-### PRO Tier (274 items)
+### PRO Tier (279 items)
 
 - [security/analyzers/cross_file_taint.py#102] - TODO [PRO]: Support dynamic imports (importlib)
 - [security/analyzers/cross_file_taint.py#103] - TODO [PRO]: Implement circular import handling
@@ -102,9 +102,9 @@
 - [security/analyzers/cross_file_taint.py#109] - TODO [PRO]: Implement demand-driven analysis
 - [security/analyzers/cross_file_taint.py#110] - TODO [PRO]: Add call graph visualization
 - [security/analyzers/cross_file_taint.py#111] - TODO [PRO]: Support incremental analysis
-- *... and 264 more*
+- *... and 269 more*
 
-### ENTERPRISE Tier (243 items)
+### ENTERPRISE Tier (247 items)
 
 - [security/analyzers/cross_file_taint.py#146] - TODO [ENTERPRISE]: Implement polyglot cross-file tracking
 - [security/analyzers/cross_file_taint.py#147] - TODO [ENTERPRISE]: Add distributed analysis across clusters
@@ -116,9 +116,9 @@
 - [security/analyzers/cross_file_taint.py#153] - TODO [ENTERPRISE]: Add SIEM integration
 - [security/analyzers/cross_file_taint.py#154] - TODO [ENTERPRISE]: Support compliance auditing
 - [security/analyzers/cross_file_taint.py#155] - TODO [ENTERPRISE]: Implement advanced visualization
-- *... and 233 more*
+- *... and 237 more*
 
-### UNSPECIFIED Tier (110 items)
+### UNSPECIFIED Tier (97 items)
 
 - [security/contract_breach_detector.py#14] TODO ITEMS:
 - [security/contract_breach_detector.py#17] 1. TODO: Implement basic field type mismatch detection across languages
@@ -130,7 +130,7 @@
 - [security/contract_breach_detector.py#23] 7. TODO: Document contract breach categories with examples
 - [security/contract_breach_detector.py#24] 8. TODO: Implement POJO to TypeScript interface mapping
 - [security/contract_breach_detector.py#25] 9. TODO: Add JSON schema validation against contracts
-- *... and 100 more*
+- *... and 87 more*
 
 ## symbolic_execution_tools/ (690 TODOs)
 
@@ -362,7 +362,7 @@
 
 ## agents/ (316 TODOs)
 
-### COMMUNITY Tier (78 items)
+### COMMUNITY Tier (79 items)
 
 - [agents/base_agent.py#41] TODO [COMMUNITY]: Phase 1 - Core Context Management (25 items, 20 tests each)
 - [agents/base_agent.py#43] TODO [COMMUNITY]: Add context persistence to file/database (SQLite, JSON)
@@ -374,7 +374,7 @@
 - [agents/base_agent.py#49] TODO [COMMUNITY]: Implement context indexing for fast retrieval
 - [agents/base_agent.py#50] TODO [COMMUNITY]: Add context statistics and analytics
 - [agents/base_agent.py#51] TODO [COMMUNITY]: Create context visualization tools
-- *... and 68 more*
+- *... and 69 more*
 
 ### PRO Tier (78 items)
 
@@ -404,7 +404,7 @@
 - [agents/base_agent.py#107] TODO [ENTERPRISE]: Create context PII detection and redaction
 - *... and 68 more*
 
-### UNSPECIFIED Tier (82 items)
+### UNSPECIFIED Tier (81 items)
 
 - [agents/code_review_agent.py#35] TODO [FEATURE]: Support custom quality metrics per file/module
 - [agents/code_review_agent.py#36] TODO [FEATURE]: Add style guide enforcement (PEP8, Black config, etc)
@@ -416,7 +416,7 @@
 - [agents/documentation_agent.py#37] TODO [FEATURE]: Create API documentation from docstrings
 - [agents/documentation_agent.py#38] TODO [ENHANCEMENT]: Generate usage examples from test code
 - [agents/documentation_agent.py#39] TODO [ENHANCEMENT]: Add documentation linting and validation
-- *... and 72 more*
+- *... and 71 more*
 
 ## polyglot/ (311 TODOs)
 

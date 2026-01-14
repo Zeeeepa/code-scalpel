@@ -65,37 +65,49 @@ Code Scalpel uses **three complementary policy systems**:
 > - **Zero-config mode:** MCP tools can run without `.code-scalpel/` (they fall back to defaults).
 > - **Governed mode (recommended):** Add `.code-scalpel/` to your repo to make behavior deterministic and auditable.
 
-### What belongs in `.code-scalpel/` (for tool use)
+### Root Files (`.code-scalpel/`)
 
-**Required (for governed mode)**
-- `config.json` - Governance limits (blast radius, critical paths, etc.) loaded by the governance subsystem
-- `budget.yaml` - Change budgeting limits loaded by `load_budget_config()`
-- `policy.yaml` - Policy engine rules (OPA/Rego) for allow/deny decisions
+**Core Configuration**
+- `config.json` - **Master Configuration:** Defines blast radius, critical paths, and active governance profile.
+- `governance.yaml` - **Behavior Policies:** Rules for AI agent workflows (e.g., "Always add READMEs", "No direct commits to main"). (Formerly `dev-governance.yaml`)
+- `policy.yaml` - **Security Policies:** OPA/Rego rules for code analysis (allow/deny logic).
+- `limits.toml` - **Tier Limits:** Defines tool capabilities (file sizes, depth) for Community/Pro/Enterprise tiers.
 
-**Recommended (common production setup)**
-- `limits.toml` - Tier/tool capability limits (project-level); can be overridden by `limits.local.toml` (gitignored)
-- `response_config.json` - MCP response shaping for token efficiency
-- `project-structure.yaml` - Project structure expectations used by project-structure policies
-- `dev-governance.yaml` / `dev-governance.minimal.yaml` - Agent development governance policies
-- `policies/` - Rego policy packs referenced by `policy.yaml`
-- `policy.manifest.json` - Policy manifest used for policy integrity workflows
+**Operational/Validation**
+- `budget.yaml` - **Change Budget:** Persists the current session's usage against defined limits (max lines/files changed).
+- `architecture.toml` - **Architecture:** Defines architectural constraints and custom metrics for `analyze_code`.
+- `project-structure.yaml` - **Structure Rules:** Defines expected directory layout for validation tools.
+- `policy.manifest.json` - **Integrity:** HMAC-signed manifest ensuring policy files haven't been tampered with.
 
-**Templates / examples (committed)**
-- `templates/` - Copy-ready example files (e.g., `templates/policy.yaml.example`)
+**Optimization**
+- `response_config.json` - **Token Optimization:** Configures which fields are returned by MCP tools to save tokens.
+- `response_config.schema.json` - **Schema:** JSON Schema for validating `response_config.json`.
 
-**Generated at runtime (do not commit)**
-- `audit.log`, `audit.jsonl` - Audit trails
-- `autonomy_audit/` - Autonomy audit artifacts
-- `complexity_history.json` - Local complexity tracking
-- `override_response.json` - Temporary human-override response file (created/consumed during override flow)
+**Documentation**
+- `README.md` - This file.
+- `GOVERNANCE_PROFILES.md` - Guide to selecting the right `config.json` profile (Permissive vs. Restrictive).
 
-**Licensing (do not commit)**
-- `license/` - License files and local runtime state (e.g., `license/license.jwt`, `license/license_state.json`)
-- `archive/` - License downloads / historical license artifacts
+**Runtime/Logs (Usually .gitignored)**
+- `audit.jsonl` - **Operational Log:** JSON-lines log of every tool execution and governance decision.
+- `audit.log` - **Security Log:** Cryptographically signed, tamper-evident audit trail of governance events.
+- `complexity_history.json` - **Metrics History:** Tracks complexity trends over time for the `crawl_project` tool.
 
-**Never commit (secrets/keys)**
-- `*.pem`, `*.key`, `*.jwk.json` and other private key material (example: `development-2025-01.private.pem`)
-- Any token/secret files placed under `.code-scalpel/`
+### Subdirectories
+
+**`examples/`**
+- Usage examples and reference configurations (e.g., `profiles/config.ci-cd.json`, `policies/test_policy.yaml`).
+
+**`templates/`**
+- Copy-ready templates for new projects (e.g., `limits.toml`, `policy.yaml`).
+
+**`policies/`**
+- Reusable Rego policy packs referenced by `policy.yaml` (e.g., `architecture/`, `devops/`).
+
+**`license/` & `archive/`**
+- Storage for JWT licenses and historical artifacts.
+
+**Sensitive Files (DO NOT COMMIT)**
+- `*.pem`, `*.key` - Private keys used for signing manifests (e.g., `development-2025-01.private.pem`).
 
 ### Current layout (v3.3.0)
 

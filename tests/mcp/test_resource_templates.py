@@ -140,11 +140,14 @@ class TestCodeResourceTemplate:
         from code_scalpel.mcp.server import PROJECT_ROOT, get_code_resource
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Temporarily change PROJECT_ROOT
+            # Temporarily change PROJECT_ROOT and ALLOWED_ROOTS
             original_root = PROJECT_ROOT
             from code_scalpel.mcp import server
 
+            original_allowed_roots = server.ALLOWED_ROOTS
+
             server.PROJECT_ROOT = Path(tmpdir)
+            server.ALLOWED_ROOTS = [Path(tmpdir)]  # Reset to temp dir
 
             try:
                 # Create test file
@@ -173,6 +176,7 @@ def calculate_tax(amount):
 
             finally:
                 server.PROJECT_ROOT = original_root
+                server.ALLOWED_ROOTS = original_allowed_roots
 
     @pytest.mark.asyncio
     async def test_code_resource_typescript(self):
@@ -185,7 +189,9 @@ def calculate_tax(amount):
             from code_scalpel.mcp import server
 
             original_root = server.PROJECT_ROOT
+            original_allowed_roots = server.ALLOWED_ROOTS
             server.PROJECT_ROOT = Path(tmpdir)
+            server.ALLOWED_ROOTS = [Path(tmpdir)]  # Reset to temp dir
 
             try:
                 # Create test file
@@ -215,6 +221,7 @@ export function Button({ label }: { label: string }) {
 
             finally:
                 server.PROJECT_ROOT = original_root
+                server.ALLOWED_ROOTS = original_allowed_roots
 
     @pytest.mark.asyncio
     async def test_code_resource_module_not_found(self):

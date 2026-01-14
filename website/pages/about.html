@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Code Scalpel by 3D Tech Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #f0f0f5;
+            --text-secondary: #9898a8;
+            --text-muted: #5a5a70;
+            --accent-cyan: #00d4ff;
+            --accent-violet: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --gradient-prism: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #f43f5e 100%);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-prism);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--bg-primary);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .logo-text span {
+            background: var(--gradient-prism);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent-cyan);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--gradient-prism);
+            color: var(--bg-primary);
+        }
+
+        /* Page Content */
+        .page-content {
+            position: relative;
+            z-index: 1;
+            padding: 10rem 2rem 6rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.25rem;
+        }
+
+        .page-header h1 .gradient {
+            background: var(--gradient-prism);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 4rem;
+        }
+
+        .content-section h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .content-section h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .content-section p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+        }
+
+        .content-section ul, .content-section ol {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-section li {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Mission Card */
+        .mission-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-prism);
+        }
+
+        .mission-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .mission-card p {
+            font-size: 1.15rem;
+            line-height: 1.75;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-prism);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            margin: 3rem 0;
+            padding-left: 2rem;
+            border-left: 2px solid var(--border-subtle);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0.25rem;
+            width: 16px;
+            height: 16px;
+            background: var(--gradient-prism);
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+        }
+
+        /* Contact Card */
+        .contact-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .contact-item h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-item a, .contact-item p {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .contact-item a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 1;
+            padding: 4rem 2rem 2rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-copy {
+            width: 100%;
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-content {
+                padding: 8rem 1.5rem 4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">⌘</div>
+                <div class="logo-text">Code<span>Scalpel</span></div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/pages/tools.html">Tools</a></li>
+                <li><a href="/pages/pricing.html">Pricing</a></li>
+                <li><a href="/pages/security.html">Governance</a></li>
+                <li><a href="https://github.com/tescolopio/code-scalpel">GitHub</a></li>
+            </ul>
+                <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="page-content">
+        <header class="page-header">
+            <h1>About <span class="gradient">Code Scalpel</span></h1>
+            <p>Precision code analysis tools built for the AI agent era.</p>
+        </header>
+
+        <section class="content-section">
+            <h2>Our Mission</h2>
+            <div class="mission-card">
+                <h3>Enable AI Agents to Work on Real Codebases with Surgical Precision</h3>
+                <p>Code Scalpel was born from a simple observation: AI coding assistants are incredibly powerful, but they're flying blind. They hallucinate APIs, miss hidden vulnerabilities, and waste tokens dumping entire files into context. We're building the tools that give AI agents true code understanding — not pattern matching, but real semantic analysis.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>The Problem We Solve</h2>
+            <p>The current landscape of code analysis tools was built for human developers. They output human-readable reports, require manual interpretation, and don't integrate with AI workflows. Meanwhile, AI coding assistants like Claude, Copilot, and Cursor are transforming how we write code — but they lack the precision tools they need.</p>
+            
+            <h3>Without Code Scalpel</h3>
+            <ul>
+                <li>AI agents guess at API signatures and often hallucinate non-existent methods</li>
+                <li>Security vulnerabilities hidden through variable assignments go undetected</li>
+                <li>Entire files get stuffed into context, wasting tokens and reducing accuracy</li>
+                <li>No mathematical verification of code correctness before changes</li>
+            </ul>
+
+            <h3>With Code Scalpel</h3>
+            <ul>
+                <li>Real AST parsing gives agents ground truth about code structure</li>
+                <li>Full taint tracking catches vulnerabilities that regex tools miss</li>
+                <li>Surgical extraction reduces context by 70%+ while maintaining accuracy</li>
+                <li>Z3-powered symbolic execution proves path feasibility mathematically</li>
+            </ul>
+        </section>
+
+        <section class="content-section">
+            <h2>By the Numbers</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">4,000+</div>
+                    <div class="stat-label">Passing Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">94%</div>
+                    <div class="stat-label">Code Coverage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">20</div>
+                    <div class="stat-label">MCP Tools</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">17+</div>
+                    <div class="stat-label">Vulnerability Types</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>Project Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">Q4 2024</div>
+                    <div class="timeline-title">Project Inception</div>
+                    <div class="timeline-desc">Initial development of AST tools and security scanning capabilities.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Q1 2025</div>
+                    <div class="timeline-title">MCP Server Launch</div>
+                    <div class="timeline-desc">First public release with full MCP protocol support and 15 tools.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Q1 2025</div>
+                    <div class="timeline-title">v3.0 "Autonomy"</div>
+                    <div class="timeline-desc">Unified Graph Engine, multi-language support, Policy Engine introduction.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Q1 2025</div>
+                    <div class="timeline-title">v3.2 "Guardian"</div>
+                    <div class="timeline-desc">Cryptographic policy verification, audit trails, change budgeting for enterprise.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Q2 2025</div>
+                    <div class="timeline-title">V1.0 Production Release</div>
+                    <div class="timeline-desc">Commercial launch with Pro and Enterprise tiers, Go/Rust language support.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>3D Tech Solutions LLC</h2>
+            <p>Code Scalpel is developed by 3D Tech Solutions LLC, focused on building developer tools for the AI era. We believe in open-core software — shipping all code in the open while offering commercial tiers for teams that need enterprise features.</p>
+            
+            <div class="contact-card">
+                <div class="contact-item">
+                    <h4>General Inquiries</h4>
+                    <a href="mailto:hello@codescalpel.dev">hello@codescalpel.dev</a>
+                </div>
+                <div class="contact-item">
+                    <h4>Sales & Enterprise</h4>
+                    <a href="mailto:sales@codescalpel.dev">sales@codescalpel.dev</a>
+                </div>
+                <div class="contact-item">
+                    <h4>Technical Support</h4>
+                    <a href="mailto:support@codescalpel.dev">support@codescalpel.dev</a>
+                </div>
+                <div class="contact-item">
+                    <h4>Security Issues</h4>
+                    <a href="mailto:security@codescalpel.dev">security@codescalpel.dev</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2>Open Source Commitment</h2>
+            <p>Code Scalpel is built on an open-core model. The Community tier is fully MIT-licensed, and all code — including Pro and Enterprise features — ships in the open for transparency and security auditing.</p>
+            <p>We believe that trust is built through transparency. You can inspect every line of code, understand exactly how your data is processed, and contribute back to the project. Commercial licenses fund continued development while keeping the core accessible to everyone.</p>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">⌘</div>
+                    <div class="logo-text">Code<span>Scalpel</span></div>
+                </a>
+                <p class="footer-tagline">Surgical code analysis for the AI era.</p>
+                <p class="footer-tagline">A product of 3D Tech Solutions LLC</p>
+            </div>
+            <div class="footer-links">
+                <a href="docs.html">Documentation</a>
+                <a href="https://github.com/tescolopio/code-scalpel">GitHub</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+            </div>
+        </div>
+        <p class="footer-copy">© 2025 3D Tech Solutions LLC. All rights reserved.</p>
+    </footer>
+</body>
+</html>

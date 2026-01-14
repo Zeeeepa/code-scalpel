@@ -4,9 +4,6 @@
 Provides fixtures for real license-based tier testing without MCP dependencies.
 """
 
-import pytest
-
-
 # This file prevents pytest from loading the parent conftest.py
 # which has MCP server dependencies that may not be installed.
 

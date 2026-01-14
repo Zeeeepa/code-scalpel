@@ -3,12 +3,14 @@
 
 This example demonstrates how to test proposed code changes in an isolated sandbox
 before applying them to the main codebase.
+
+[20260114_BUGFIX] Updated to use SandboxExecutorImpl (renamed from SandboxExecutor).
 """
 
 import tempfile
 from pathlib import Path
 
-from code_scalpel.autonomy import FileChange, SandboxExecutor
+from code_scalpel.autonomy import FileChange, SandboxExecutorImpl as SandboxExecutor
 
 
 def main():

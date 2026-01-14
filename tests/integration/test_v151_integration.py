@@ -666,7 +666,7 @@ def func_5():
 @pytest.fixture
 def sample_graph():
     """Create a sample graph for testing neighborhood extraction.
-    
+
     Tests for Graph Neighborhood View feature (v2.5.0).
     Graph Neighborhood extracts k-hop subgraphs around a center node,
     preventing graph explosion on large codebases.
@@ -721,9 +721,7 @@ def sample_graph():
     # Second level nodes (chains from A and B)
     for letter in ["A", "B"]:
         for level in [1, 2]:
-            parent_name = (
-                f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
-            )
+            parent_name = f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
             parent_module = (
                 f"module_{letter.lower()}"
                 if level == 1
@@ -868,9 +866,7 @@ def test_neighborhood_direction_incoming(sample_graph):
 
 def test_neighborhood_nonexistent_node(sample_graph):
     """Test error handling for nonexistent center node."""
-    result = sample_graph.get_neighborhood(
-        "python::nonexistent::function::fake", k=1
-    )
+    result = sample_graph.get_neighborhood("python::nonexistent::function::fake", k=1)
 
     assert not result.success
     # Node not found should be handled gracefully
@@ -969,9 +965,7 @@ def test_mcp_tool_invalid_parameters():
 
     assert not result.success
     assert result.error is not None
-    assert (
-        "must be at least 1" in result.error
-    )  # Updated for standardized error format
+    assert "must be at least 1" in result.error  # Updated for standardized error format
 
 
 def test_mcp_tool_invalid_direction():

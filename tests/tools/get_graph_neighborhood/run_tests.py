@@ -15,23 +15,23 @@ from pathlib import Path
 
 def run_tests():
     """Run all get_graph_neighborhood tests."""
-    
+
     test_dir = Path(__file__).parent
-    
+
     print("=" * 80)
     print("get_graph_neighborhood Test Suite")
     print("=" * 80)
     print()
-    
+
     # List test modules created
     test_modules = [
         "test_core_algorithm.py",
-        "test_direction_filtering.py", 
+        "test_direction_filtering.py",
         "test_confidence_filtering.py",
         "test_truncation_protection.py",
         "test_tier_enforcement.py",
     ]
-    
+
     print("Test Modules Created:")
     print("-" * 80)
     for module in test_modules:
@@ -45,13 +45,13 @@ def run_tests():
             print(f"  ✓ {module:<40} ({test_classes} classes, {test_methods} methods)")
         else:
             print(f"  ✗ {module:<40} (NOT FOUND)")
-    
+
     print()
     print("=" * 80)
     print("Running Tests (Phase 1 - Critical Pre-Release)")
     print("=" * 80)
     print()
-    
+
     # Run pytest on the directory
     cmd = [
         sys.executable,
@@ -62,19 +62,19 @@ def run_tests():
         "--tb=short",
         "--co",  # Collect only (show what would run)
     ]
-    
+
     print(f"Command: {' '.join(cmd)}")
     print()
-    
+
     result = subprocess.run(cmd, cwd=test_dir)
-    
+
     return result.returncode == 0
 
 
 def main():
     """Main entry point."""
     success = run_tests()
-    
+
     if success:
         print()
         print("=" * 80)
@@ -83,7 +83,9 @@ def main():
         print()
         print("Next Steps:")
         print("  1. Run full test suite: pytest tests/tools/get_graph_neighborhood/ -v")
-        print("  2. Check coverage: pytest --cov=code_scalpel.mcp.server --cov-report=html")
+        print(
+            "  2. Check coverage: pytest --cov=code_scalpel.mcp.server --cov-report=html"
+        )
         print("  3. Update assessment document with test references")
         return 0
     else:

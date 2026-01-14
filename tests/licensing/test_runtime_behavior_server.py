@@ -67,6 +67,12 @@ async def test_in_flight_operation_keeps_tier_snapshot(
     write_hs256_crl_jwt,
     set_hs256_license_env,
 ):
+    """Verify in-flight operations preserve their tier snapshot even after revocation.
+
+    [20250112_REFACTOR] Updated test to check data.tier_applied which is the
+    tier snapshot captured at operation start. Envelope metadata fields are
+    filtered by default for token efficiency - tier can be verified in data.
+    """
     jti = "license-jti-789"
 
     license_path = write_hs256_license_jwt(duration_days=7, jti=jti)
@@ -107,4 +113,8 @@ async def test_in_flight_operation_keeps_tier_snapshot(
 
     result = await task
     assert isinstance(result, dict)
-    assert result.get("tier") == "pro"
+    # [20250112_FIX] Check tier in data payload (always present) rather than
+    # envelope metadata (filtered by default for token efficiency).
+    # The tier_applied field captures the snapshot at operation start.
+    data = result.get("data", {})
+    assert data.get("tier_applied") == "pro", f"Expected tier_applied=pro, got {result}"

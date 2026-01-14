@@ -1,13 +1,13 @@
 # Code Scalpel TODO Statistics
 
-**Generated:** 2026-01-14 12:47:17
+**Generated:** 2026-01-14 12:48:41
 **Total TODOs:** 7025
 
 ## By Tier
-- COMMUNITY: 883 (12.6%)
-- PRO: 1376 (19.6%)
-- ENTERPRISE: 1186 (16.9%)
-- UNSPECIFIED: 3580 (51.0%)
+- COMMUNITY: 888 (12.6%)
+- PRO: 1415 (20.1%)
+- ENTERPRISE: 1210 (17.2%)
+- UNSPECIFIED: 3512 (50.0%)
 
 ## By Module
 - **code_parsers**: 1391 (19.8%)

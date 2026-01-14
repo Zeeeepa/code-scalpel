@@ -89,12 +89,12 @@ from __future__ import annotations
 
 import ast
 import io
+import keyword
 import os
 import re
 import shutil
 import tempfile
 import tokenize
-import keyword
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -2920,7 +2920,9 @@ class UnifiedPatcher:
         """Write modified code back to file."""
         return self._patcher.save(backup=backup)
 
-    def rename_symbol(self, target_type: str, target_name: str, new_name: str) -> PatchResult:
+    def rename_symbol(
+        self, target_type: str, target_name: str, new_name: str
+    ) -> PatchResult:
         """[20260103_BUGFIX] Forward rename operations to the concrete patcher."""
         file_path = str(getattr(self._patcher, "file_path", ""))
         language = getattr(self._patcher, "language", None)
@@ -2942,7 +2944,7 @@ class UnifiedPatcher:
 
         is_js_ts = bool(
             language in (PatchLanguage.JAVASCRIPT, PatchLanguage.TYPESCRIPT)
-            or (file_path.endswith(('.js', '.jsx', '.ts', '.tsx', '.mts', '.cts')))
+            or (file_path.endswith((".js", ".jsx", ".ts", ".tsx", ".mts", ".cts")))
         )
 
         if is_js_ts:

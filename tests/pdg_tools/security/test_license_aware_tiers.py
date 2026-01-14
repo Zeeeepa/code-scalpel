@@ -9,7 +9,7 @@ These tests validate that:
 """
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -318,12 +318,19 @@ class TestLicenseExpiration:
 
     def test_expired_license_behavior_tracked_in_globals(self):
         """License state including expiry is tracked in module-level globals."""
-        from code_scalpel.mcp.server import _LAST_VALID_LICENSE_TIER, _LAST_VALID_LICENSE_AT
+        from code_scalpel.mcp.server import (
+            _LAST_VALID_LICENSE_AT,
+            _LAST_VALID_LICENSE_TIER,
+        )
 
         # These globals may be None (no valid license since startup) or set (mid-session)
         # Just validate they exist and are of correct type if set
-        assert _LAST_VALID_LICENSE_TIER is None or isinstance(_LAST_VALID_LICENSE_TIER, str)
-        assert _LAST_VALID_LICENSE_AT is None or isinstance(_LAST_VALID_LICENSE_AT, float)
+        assert _LAST_VALID_LICENSE_TIER is None or isinstance(
+            _LAST_VALID_LICENSE_TIER, str
+        )
+        assert _LAST_VALID_LICENSE_AT is None or isinstance(
+            _LAST_VALID_LICENSE_AT, float
+        )
 
     def test_license_validation_returns_metadata(self):
         """License validation returns structured data with is_valid, is_expired flags."""
@@ -354,7 +361,6 @@ class TestLicenseExpiration:
         # Just verify that _get_current_tier returns a valid tier
         tier = _get_current_tier()
         assert tier in ("community", "pro", "enterprise")
-
 
 
 class TestTierLimitEnforcement:

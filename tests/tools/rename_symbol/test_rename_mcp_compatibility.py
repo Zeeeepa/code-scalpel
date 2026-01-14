@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -116,7 +115,9 @@ class TestToolMCPCompatibility:
         ref = tmp_path / "ref.py"
 
         target.write_text("def old_func():\n    return 1\n", encoding="utf-8")
-        ref.write_text("from target import old_func\nvalue = old_func()\n", encoding="utf-8")
+        ref.write_text(
+            "from target import old_func\nvalue = old_func()\n", encoding="utf-8"
+        )
 
         # Cross-file rename uses different response type
         result = rename_references_across_project(
@@ -208,7 +209,9 @@ class TestToolAsyncCompatibility:
 
         async def rename_one(src: Path, index: int):
             patcher = UnifiedPatcher.from_file(str(src))
-            result = patcher.rename_symbol("function", f"old_func_{index}", f"new_func_{index}")
+            result = patcher.rename_symbol(
+                "function", f"old_func_{index}", f"new_func_{index}"
+            )
             if result.success:
                 patcher.save(backup=False)
             return result
@@ -311,9 +314,7 @@ class TestToolParameterValidation:
         patcher = UnifiedPatcher.from_file(str(src))
 
         # Rename with backup support
-        result_true = patcher.rename_symbol(
-            "function", "old_func", "new_func_true"
-        )
+        result_true = patcher.rename_symbol("function", "old_func", "new_func_true")
         if result_true.success:
             patcher.save(backup=True)  # backup flag on save()
         assert result_true.success is True
@@ -323,9 +324,7 @@ class TestToolParameterValidation:
 
         # Rename without backup
         patcher2 = UnifiedPatcher.from_file(str(src))
-        result_false = patcher2.rename_symbol(
-            "function", "new_func_true", "final_func"
-        )
+        result_false = patcher2.rename_symbol("function", "new_func_true", "final_func")
         if result_false.success:
             patcher2.save(backup=False)  # backup flag on save()
         assert result_false.success is True

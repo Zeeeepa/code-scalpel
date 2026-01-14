@@ -25,7 +25,7 @@ async def test_minimal_valid_input(tmp_path: Path):
     """Minimal valid input (1 function per side) is handled."""
     frontend_code = "const x = 1;"
     backend_code = "def f(): pass"
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -37,10 +37,10 @@ async def test_minimal_valid_input(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
 
 
@@ -55,7 +55,7 @@ async def test_code_with_decorators(tmp_path: Path):
         title = 'app';
     }
     """
-    
+
     backend_code = """
     from flask import route
     
@@ -67,7 +67,7 @@ async def test_code_with_decorators(tmp_path: Path):
     def expensive_operation():
         return compute_result()
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -79,10 +79,10 @@ async def test_code_with_decorators(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
 
 
@@ -99,7 +99,7 @@ async def test_code_with_async_await(tmp_path: Path):
         return data;
     }
     """
-    
+
     backend_code = """
     async def get_user(user_id: int):
         result = await db.query(f'SELECT * FROM users WHERE id = {user_id}')
@@ -109,7 +109,7 @@ async def test_code_with_async_await(tmp_path: Path):
         user = await get_user(123)
         return user
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -121,10 +121,10 @@ async def test_code_with_async_await(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Async patterns may reveal implicit any issues
     assert isinstance(data.get("frontend_vulnerabilities", 0), (int, list))
@@ -147,7 +147,7 @@ async def test_code_with_generics(tmp_path: Path):
         return item;
     }
     """
-    
+
     backend_code = """
     from typing import TypeVar, Generic, List
     
@@ -161,7 +161,7 @@ async def test_code_with_generics(tmp_path: Path):
     def get_items() -> List[dict]:
         return [{'id': 1, 'name': 'item1'}]
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -173,10 +173,10 @@ async def test_code_with_generics(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
 
 
@@ -203,7 +203,7 @@ async def test_code_with_comments_and_docstrings(tmp_path: Path):
         return response.json();
     }
     """
-    
+
     backend_code = '''
     def get_user(user_id: int) -> dict:
         """
@@ -227,7 +227,7 @@ async def test_code_with_comments_and_docstrings(tmp_path: Path):
         
         return user
     '''
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -239,10 +239,10 @@ async def test_code_with_comments_and_docstrings(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
 
 
@@ -258,7 +258,7 @@ class  C  {
     }
 }
     """
-    
+
     backend_code = """
 def f(  ):
     pass
@@ -268,7 +268,7 @@ class X:
     self.a=1
     self.b=2
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -280,10 +280,10 @@ class X:
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
 
 
@@ -294,7 +294,7 @@ async def test_code_with_syntax_errors(tmp_path: Path):
     function incomplete() {
         return {invalid json
     """
-    
+
     backend_code = """
     def function_incomplete():
         return {
@@ -302,7 +302,7 @@ async def test_code_with_syntax_errors(tmp_path: Path):
     class InvalidClass
         invalid syntax here!!!
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -314,11 +314,11 @@ async def test_code_with_syntax_errors(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     # Should not crash - either success with parsing warnings
     # or error field present
-    assert "error" in env_json or "result" in env_json
+    assert "error" in env_json or "data" in env_json
 
 
 async def test_nested_structures(tmp_path: Path):
@@ -342,7 +342,7 @@ async def test_nested_structures(tmp_path: Path):
         fetch('/api/process', { body: JSON.stringify(val) });
     }
     """
-    
+
     backend_code = """
     class Level1:
         def __init__(self):
@@ -356,7 +356,7 @@ async def test_nested_structures(tmp_path: Path):
         val = obj.level2.level3.get('level4', {}).get('level5', {}).get('value')
         return {'result': val}
     """
-    
+
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(
             "type_evaporation_scan",
@@ -368,9 +368,9 @@ async def test_nested_structures(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=120),
         )
-    
+
     env_json = _tool_json(payload)
     data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
-    
+
     assert data.get("success") is True
     # Nested structures with `any` should be flagged

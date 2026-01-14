@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
 pytestmark = pytest.mark.asyncio
@@ -27,14 +28,18 @@ def _use_real_license(monkeypatch: pytest.MonkeyPatch, tier: str) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == tier:
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
     pytest.skip(f"Valid {tier} license not found; generate a signed test license")
 
 
-async def test_pro_sanitizer_recognition_reduces_findings(monkeypatch: pytest.MonkeyPatch):
+async def test_pro_sanitizer_recognition_reduces_findings(
+    monkeypatch: pytest.MonkeyPatch,
+):
     """Pro: Sanitizer recognition should reduce or remove XSS findings."""
     _use_real_license(monkeypatch, "pro")
 
@@ -57,11 +62,15 @@ async def test_pro_sanitizer_recognition_reduces_findings(monkeypatch: pytest.Mo
     sanitized_result = await security_scan(code=sanitized)
 
     assert unsanitized_result.success is True and sanitized_result.success is True
-    assert sanitized_result.vulnerability_count <= unsanitized_result.vulnerability_count
+    assert (
+        sanitized_result.vulnerability_count <= unsanitized_result.vulnerability_count
+    )
     assert sanitized_result.false_positive_analysis is not None
 
 
-async def test_pro_confidence_scores_present_and_bounded(monkeypatch: pytest.MonkeyPatch):
+async def test_pro_confidence_scores_present_and_bounded(
+    monkeypatch: pytest.MonkeyPatch,
+):
     """Pro: Confidence scores should be present and within [0,1]."""
     _use_real_license(monkeypatch, "pro")
 
@@ -99,4 +108,6 @@ async def test_enterprise_compliance_mapping_present(monkeypatch: pytest.MonkeyP
 
     assert result.success is True
     assert result.vulnerability_count >= 1
-    assert result.compliance_mappings is not None and len(result.compliance_mappings) >= 1
+    assert (
+        result.compliance_mappings is not None and len(result.compliance_mappings) >= 1
+    )

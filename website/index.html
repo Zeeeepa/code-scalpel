@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Code Scalpel: 22 MCP tools that give AI agents precise, governed access to codebases — parser-backed analysis, bounded edits, and audit-ready operations.">
+  <title>Code Scalpel — Precision Tools for AI Code Agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <div class="logo-icon">⌘</div>
+        <div class="logo-text">Code<span>Scalpel</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#differentiators">Why Code Scalpel</a></li>
+        <li><a href="/pages/tools.html">MCP Tools</a></li>
+        <li><a href="/pages/pricing.html">Pricing</a></li>
+        <li><a href="/pages/security.html">Governance</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost">GitHub</a>
+        <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+<!-- Hero -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-badge">
+        <span>MCP Server · 22 Tools · Python / JS / TS / Java</span>
+      </div>
+      <h1 class="hero-title">
+        Precision Tools<br>
+        <span class="gradient">Built for AI Code Agents</span>
+      </h1>
+      <p class="hero-subtitle">
+        Code Scalpel is an MCP server that gives AI agents what they actually need: parser-backed understanding instead of guesswork, bounded edits instead of file rewrites, and audit-ready operations instead of hope.
+      </p>
+      <div class="hero-actions">
+        <a href="/pages/pricing.html" class="btn btn-primary">Start Free →</a>
+        <a href="/pages/tools.html" class="btn btn-ghost">Explore Tools</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">22</div>
+          <div class="stat-label">MCP Tools</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">4</div>
+          <div class="stat-label">Languages</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Tiers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">MIT</div>
+          <div class="stat-label">Free & Open</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Differentiators -->
+  <section id="differentiators">
+    <div class="section-header">
+      <div class="section-label">Why Code Scalpel</div>
+      <h2 class="section-title">Built for AI Agents, Not Just With AI</h2>
+      <p class="section-desc">
+        Traditional security tools output human-readable reports. Code Scalpel outputs structured data optimized for LLM context windows and agent workflows.
+      </p>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-card">
+        <div class="diff-icon cyan">🎯</div>
+        <h3 class="diff-title">Parser-Backed Understanding</h3>
+        <p class="diff-desc">
+          AST and tree-sitter parsing across Python, JavaScript, TypeScript, and Java. No pattern matching, no guesswork — just facts the agent can trust.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">Regex & guessing</span>
+          <span class="vs-us">→ Real parser analysis</span>
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon violet">✂️</div>
+        <h3 class="diff-title">Bounded Writes</h3>
+        <p class="diff-desc">
+          Edits target one symbol (function/class/method) instead of whole-file rewrites. Syntax validation, automatic backups, and atomic commits.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">Whole-file rewrites</span>
+          <span class="vs-us">→ Symbol-level precision</span>
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon emerald">🔒</div>
+        <h3 class="diff-title">Deterministic Boundaries</h3>
+        <p class="diff-desc">
+          Limits enforced by the server, not requested from the model. Tier caps, file counts, and analysis depth are hard limits — not suggestions.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">"Trust the model"</span>
+          <span class="vs-us">→ Server-side gates</span>
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon amber">🔬</div>
+        <h3 class="diff-title">Full Taint Tracking</h3>
+        <p class="diff-desc">
+          Track data flow across variables, function calls, and file boundaries. Detect vulnerabilities hidden through multiple assignments that regex-based tools miss.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">Pattern matching</span>
+          <span class="vs-us">→ Complete data flow</span>
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon rose">🔌</div>
+        <h3 class="diff-title">Native MCP Integration</h3>
+        <p class="diff-desc">
+          First-class Model Context Protocol server. Works out-of-the-box with Claude, Copilot, Cursor, and any MCP-compatible AI agent.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">REST APIs & wrappers</span>
+          <span class="vs-us">→ Native MCP protocol</span>
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon cyan">🛡️</div>
+        <h3 class="diff-title">Governance You Can Prove</h3>
+        <p class="diff-desc">
+          Cryptographic policy verification, audit trails, and compliance mapping (HIPAA, SOC2, GDPR, PCI). Enterprise-grade governance for AI development.
+        </p>
+        <div class="diff-comparison">
+          <span class="vs-them">No governance</span>
+          <span class="vs-us">→ Full audit trail</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Teaser -->
+  <section id="pricing">
+    <div class="section-header">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Start Free, Scale as You Grow</h2>
+      <p class="section-desc">
+        All code ships together — tiers are enforced at runtime. Community is MIT-licensed and free forever.
+      </p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-tier">Community</div>
+        <div class="pricing-price">
+          <span class="pricing-amount">$0</span>
+          <span class="pricing-period">forever</span>
+        </div>
+        <p class="pricing-desc">All 22 tools with safe defaults and conservative limits. Great for evaluation, prototypes, and individual use.</p>
+        <div class="pricing-tools">
+          <span class="pricing-tools-count">22</span>
+          <span class="pricing-tools-label">MCP Tools</span>
+        </div>
+        <ul class="pricing-features">
+          <li>Parser-backed analysis (Py, JS, TS, Java)</li>
+          <li>Security scanning & taint analysis</li>
+          <li>Safe code modification</li>
+          <li>MIT License — Commercial use allowed</li>
+          <li>Community support</li>
+        </ul>
+        <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost pricing-cta">Get Started Free</a>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">
+          <span class="pricing-amount">$29.99</span>
+          <span class="pricing-period">per year</span>
+        </div>
+        <p class="pricing-desc">Higher throughput, deeper analysis, and features that reduce noise — built for teams running agents daily.</p>
+        <div class="pricing-tools">
+          <span class="pricing-tools-count">22</span>
+          <span class="pricing-tools-label">MCP Tools</span>
+        </div>
+        <ul class="pricing-features">
+          <li>Everything in Community</li>
+          <li>Higher limits & deeper analysis</li>
+          <li>Noise reduction features</li>
+          <li>Priority support (48h SLA)</li>
+        </ul>
+        <a href="/pages/pricing.html" class="btn btn-primary pricing-cta" data-link="pro-buy">Buy Pro</a>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-tier">Enterprise</div>
+        <div class="pricing-price">
+          <span class="pricing-amount">Custom</span>
+        </div>
+        <p class="pricing-desc">Governance you can prove: fail-closed policy integrity, compliance evidence, and organization-wide controls.</p>
+        <div class="pricing-tools">
+          <span class="pricing-tools-count">22</span>
+          <span class="pricing-tools-label">MCP Tools</span>
+        </div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>Compliance mapping (HIPAA, SOC2, GDPR, PCI)</li>
+          <li>Policy integrity verification</li>
+          <li>SSO/SAML & on-premise</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="mailto:enterprise@codescalpel.dev" class="btn btn-ghost pricing-cta" data-link="enterprise-contact">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="/" class="logo">
+          <div class="logo-icon">⌘</div>
+          <div class="logo-text">Code<span>Scalpel</span></div>
+        </a>
+        <p class="footer-tagline">Precision tools for AI code agents.</p>
+        <p class="footer-tagline">A product of 3D Tech Solutions LLC</p>
+      </div>
+      <div class="footer-links">
+        <a href="/pages/tools.html">MCP Tools</a>
+        <a href="/pages/pricing.html">Pricing</a>
+        <a href="/pages/security.html">Governance</a>
+        <a href="https://github.com/tescolopio/code-scalpel">GitHub</a>
+        <a href="mailto:support@codescalpel.dev">Support</a>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 3D Tech Solutions LLC. Code Scalpel is MIT-licensed (Community) with commercial licenses for Pro & Enterprise.</p>
+  </footer>
+
+  <script src="/assets/config.js"></script>
+  <script src="/assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — Code Scalpel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-code: #0d0d14;
+            --text-primary: #f0f0f5;
+            --text-secondary: #9898a8;
+            --text-muted: #5a5a70;
+            --accent-cyan: #00d4ff;
+            --accent-violet: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --gradient-prism: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #f43f5e 100%);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-prism);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--bg-primary);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .logo-text span {
+            background: var(--gradient-prism);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent-cyan);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--gradient-prism);
+            color: var(--bg-primary);
+        }
+
+        /* Docs Layout */
+        .docs-layout {
+            display: flex;
+            padding-top: 80px;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .docs-sidebar {
+            width: 280px;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            bottom: 0;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-subtle);
+            padding: 2rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            padding: 0 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-links {
+            list-style: none;
+        }
+
+        .sidebar-links a {
+            display: block;
+            padding: 0.6rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .sidebar-links a:hover {
+            color: var(--text-primary);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .sidebar-links a.active {
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        /* Main Content */
+        .docs-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .docs-header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .docs-badge {
+            display: inline-block;
+            padding: 0.3rem 0.75rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .docs-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .docs-desc {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+        }
+
+        /* Content Styling */
+        .docs-section {
+            margin-bottom: 3rem;
+        }
+
+        .docs-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .docs-section h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-cyan);
+        }
+
+        .docs-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.75;
+        }
+
+        .docs-section ul, .docs-section ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .docs-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--bg-code);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .code-lang {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+        }
+
+        .code-copy {
+            padding: 0.3rem 0.75rem;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .code-copy:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        pre {
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        pre code {
+            color: var(--text-secondary);
+        }
+
+        .code-comment { color: var(--text-muted); }
+        .code-keyword { color: var(--accent-violet); }
+        .code-string { color: var(--accent-emerald); }
+        .code-function { color: var(--accent-cyan); }
+        .code-variable { color: var(--accent-amber); }
+
+        /* Callouts */
+        .callout {
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .callout-info {
+            background: rgba(0, 212, 255, 0.08);
+            border-color: var(--accent-cyan);
+        }
+
+        .callout-warning {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: var(--accent-amber);
+        }
+
+        .callout-success {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: var(--accent-emerald);
+        }
+
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .callout-info .callout-title { color: var(--accent-cyan); }
+        .callout-warning .callout-title { color: var(--accent-amber); }
+        .callout-success .callout-title { color: var(--accent-emerald); }
+
+        .callout p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Step Cards */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-prism);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-primary);
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-content p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Integration Cards */
+        .integrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .integration-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .integration-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+        }
+
+        .integration-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .integration-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .integration-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Table of Contents */
+        .toc {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            width: 220px;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+        }
+
+        .toc-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .toc-links {
+            list-style: none;
+        }
+
+        .toc-links a {
+            display: block;
+            padding: 0.4rem 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .toc-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        @media (max-width: 1200px) {
+            .toc { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .docs-sidebar { display: none; }
+            .docs-content {
+                margin-left: 0;
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">⌘</div>
+                <div class="logo-text">Code<span>Scalpel</span></div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#differentiators">Why Code Scalpel</a></li>
+                <li><a href="/pages/pricing.html">Pricing</a></li>
+                <li><a href="docs.html" class="active">Docs</a></li>
+                <li><a href="/pages/tools.html">MCP Tools</a></li>
+                <li><a href="https://github.com/tescolopio/code-scalpel">GitHub</a></li>
+            </ul>
+            <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Getting Started</div>
+                <ul class="sidebar-links">
+                    <li><a href="#installation" class="active">Quick Start</a></li>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#start-server">Configuration</a></li>
+                    <li><a href="#tiers">Tier Setup</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">MCP Server</div>
+                <ul class="sidebar-links">
+                    <li><a href="#start-server">Server Basics</a></li>
+                    <li><a href="#start-server">Transport Options</a></li>
+                    <li><a href="#integrations">Health Checks</a></li>
+                    <li><a href="#integrations">Docker Deployment</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Tools Reference</div>
+                <ul class="sidebar-links">
+                    <li><a href="/pages/tools.html">analyze_code</a></li>
+                    <li><a href="/pages/tools.html">extract_code</a></li>
+                    <li><a href="/pages/tools.html">security_scan</a></li>
+                    <li><a href="/pages/tools.html">symbolic_execute</a></li>
+                    <li><a href="/pages/tools.html">crawl_project</a></li>
+                    <li><a href="/pages/tools.html">All Tools →</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Integrations</div>
+                <ul class="sidebar-links">
+                    <li><a href="#integrations">Claude Desktop</a></li>
+                    <li><a href="#integrations">VS Code / Copilot</a></li>
+                    <li><a href="#integrations">Cursor</a></li>
+                    <li><a href="#integrations">Cline</a></li>
+                    <li><a href="#integrations">LangChain</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Advanced</div>
+                <ul class="sidebar-links">
+                    <li><a href="/pages/security.html">Policy Engine</a></li>
+                    <li><a href="/pages/security.html">Audit Trails</a></li>
+                    <li><a href="/pages/security.html">Change Budgeting</a></li>
+                    <li><a href="/pages/security.html">API Reference</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="docs-content">
+            <header class="docs-header">
+                <span class="docs-badge">v3.2.8</span>
+                <h1 class="docs-title">Quick Start Guide</h1>
+                <p class="docs-desc">Get Code Scalpel running in under 5 minutes. This guide covers installation, basic configuration, and your first MCP tool call.</p>
+            </header>
+
+            <section class="docs-section" id="installation">
+                <h2>Installation</h2>
+                <p>Code Scalpel is distributed as a single MIT-licensed Python package. Install it from PyPI:</p>
+                
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">bash</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code><span class="code-comment"># Install from PyPI</span>
+pip install code-scalpel
+
+<span class="code-comment"># Or with uvx for isolated execution</span>
+uvx code-scalpel mcp</code></pre>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-title">💡 Tip</div>
+                    <p>Using <code>uvx</code> is recommended for MCP server usage as it handles dependency isolation automatically.</p>
+                </div>
+            </section>
+
+            <section class="docs-section" id="start-server">
+                <h2>Start the MCP Server</h2>
+                <p>Code Scalpel runs as an MCP server that AI agents connect to. Start it with:</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">bash</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code><span class="code-comment"># Start with stdio transport (default)</span>
+code-scalpel mcp
+
+<span class="code-comment"># Start with HTTP transport</span>
+code-scalpel mcp --transport streamable-http --port 8593
+
+<span class="code-comment"># Set tier (community, pro, enterprise)</span>
+<span class="code-keyword">export</span> <span class="code-variable">CODE_SCALPEL_TIER</span>=<span class="code-string">pro</span>
+code-scalpel mcp</code></pre>
+                </div>
+            </section>
+
+            <section class="docs-section" id="integrations">
+                <h2>Connect Your AI Agent</h2>
+                <p>Code Scalpel works with any MCP-compatible AI agent. Here are the most popular integrations:</p>
+
+                <div class="integrations-grid">
+                    <div class="integration-card">
+                        <div class="integration-icon">🤖</div>
+                        <div class="integration-name">Claude Desktop</div>
+                        <div class="integration-desc">Add to claude_desktop_config.json for native integration.</div>
+                    </div>
+                    <div class="integration-card">
+                        <div class="integration-icon">💻</div>
+                        <div class="integration-name">VS Code / Copilot</div>
+                        <div class="integration-desc">Configure in .vscode/mcp.json for Copilot access.</div>
+                    </div>
+                    <div class="integration-card">
+                        <div class="integration-icon">⚡</div>
+                        <div class="integration-name">Cursor</div>
+                        <div class="integration-desc">Native MCP support for AI-powered coding.</div>
+                    </div>
+                    <div class="integration-card">
+                        <div class="integration-icon">🔧</div>
+                        <div class="integration-name">Cline</div>
+                        <div class="integration-desc">Terminal-based AI coding assistant integration.</div>
+                    </div>
+                </div>
+
+                <h3>Claude Desktop Configuration</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">json</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code>{
+  <span class="code-string">"mcpServers"</span>: {
+    <span class="code-string">"code-scalpel"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"uvx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"code-scalpel"</span>, <span class="code-string">"mcp"</span>],
+      <span class="code-string">"env"</span>: {
+        <span class="code-string">"CODE_SCALPEL_TIER"</span>: <span class="code-string">"pro"</span>
+      }
+    }
+  }
+}</code></pre>
+                </div>
+
+                <h3>VS Code / GitHub Copilot Configuration</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">json</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code><span class="code-comment">// .vscode/mcp.json</span>
+{
+  <span class="code-string">"servers"</span>: {
+    <span class="code-string">"code-scalpel"</span>: {
+      <span class="code-string">"type"</span>: <span class="code-string">"stdio"</span>,
+      <span class="code-string">"command"</span>: <span class="code-string">"uvx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"code-scalpel"</span>, <span class="code-string">"mcp"</span>],
+      <span class="code-string">"env"</span>: {
+        <span class="code-string">"CODE_SCALPEL_TIER"</span>: <span class="code-string">"community"</span>
+      }
+    }
+  }
+}</code></pre>
+                </div>
+            </section>
+
+            <section class="docs-section" id="first-tool">
+                <h2>Your First Tool Call</h2>
+                <p>Once connected, your AI agent can call any of Code Scalpel's 22 MCP tools. Here's an example workflow:</p>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Analyze Code Structure</h4>
+                            <p>Use <code>analyze_code</code> to understand a file's structure before editing.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Extract Specific Symbols</h4>
+                            <p>Use <code>extract_code</code> to get only the function or class you need — saving tokens.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Scan for Vulnerabilities</h4>
+                            <p>Use <code>security_scan</code> to detect taint-based vulnerabilities with full path tracking.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Apply Safe Modifications</h4>
+                            <p>Use <code>update_symbol</code> to replace code safely with backup and validation.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Example: Security Scan</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">python</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code><span class="code-comment"># Vulnerable code example</span>
+user_id = request.args.get(<span class="code-string">'id'</span>)
+query = <span class="code-string">f"SELECT * FROM users WHERE id=</span>{user_id}<span class="code-string">"</span>
+cursor.execute(query)
+
+<span class="code-comment"># Code Scalpel detects:</span>
+<span class="code-comment"># [CRITICAL] SQL Injection (CWE-89) at line 3</span>
+<span class="code-comment">#   Taint Path: request.args → user_id → query → cursor.execute()</span>
+<span class="code-comment">#   Recommendation: Use parameterized queries</span></code></pre>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-title">✓ What's Different</div>
+                    <p>Traditional tools use regex patterns and miss this vulnerability because it spans 3 lines. Code Scalpel tracks the taint through variable assignments.</p>
+                </div>
+            </section>
+
+            <section class="docs-section" id="tiers">
+                <h2>Understanding Tiers</h2>
+                <p>Code Scalpel uses an open-core model. All code ships together, but features are restricted at runtime based on your configured tier.</p>
+
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">bash</span>
+                        <button class="code-copy">Copy</button>
+                    </div>
+                    <pre><code><span class="code-comment"># Community (default) - 10 tools, single-file analysis</span>
+code-scalpel mcp
+
+<span class="code-comment"># Pro - 19 tools, project-wide analysis, symbolic execution</span>
+<span class="code-keyword">export</span> <span class="code-variable">CODE_SCALPEL_TIER</span>=<span class="code-string">pro</span>
+code-scalpel mcp
+
+<span class="code-comment"># Enterprise - 22 tools, cross-file security, policy governance</span>
+<span class="code-keyword">export</span> <span class="code-variable">CODE_SCALPEL_TIER</span>=<span class="code-string">enterprise</span>
+code-scalpel mcp</code></pre>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-title">⚠️ License Requirement</div>
+                    <p>Using Pro or Enterprise tier requires a valid commercial license. <a href="/pages/pricing.html">See pricing</a> for details.</p>
+                </div>
+            </section>
+
+            <section class="docs-section" id="next-steps">
+                <h2>Next Steps</h2>
+                <ul>
+                    <li><strong><a href="/pages/tools.html">MCP Tools Reference</a></strong> — Complete documentation for all 22 tools</li>
+                    <li><strong><a href="docs.html">Integration Guides</a></strong> — Detailed setup for each AI agent</li>
+                    <li><strong><a href="/pages/security.html">Policy Engine Guide</a></strong> — Configure governance and audit trails (Pro/Enterprise)</li>
+                    <li><strong><a href="#">API Reference</a></strong> — Programmatic usage without MCP</li>
+                </ul>
+            </section>
+        </main>
+
+        <!-- Table of Contents -->
+        <aside class="toc">
+            <div class="toc-title">On This Page</div>
+            <ul class="toc-links">
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#start-server">Start the MCP Server</a></li>
+                <li><a href="#integrations">Connect Your AI Agent</a></li>
+                <li><a href="#first-tool">Your First Tool Call</a></li>
+                <li><a href="#tiers">Understanding Tiers</a></li>
+                <li><a href="#next-steps">Next Steps</a></li>
+            </ul>
+        </aside>
+    </div>
+</body>
+</html>

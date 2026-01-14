@@ -5,7 +5,6 @@ Tests handling of decorators, async functions, nested classes/functions,
 lambda expressions, and other Python language features.
 """
 
-import pytest
 from code_scalpel.mcp.server import _analyze_code_sync
 
 
@@ -18,9 +17,9 @@ class TestAsyncFunctions:
 async def fetch_data():
     return await get_data()
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert any("fetch_data" in f for f in result.functions)
 
     def test_async_method_in_class(self):
@@ -30,9 +29,9 @@ class AsyncHandler:
     async def handle_request(self):
         return await process()
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "AsyncHandler" in result.classes
         assert any("handle_request" in f for f in result.functions)
 
@@ -48,10 +47,14 @@ async def async_function():
 def another_sync():
     return 2
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
-        assert "sync_function" in result.functions and "another_sync" in result.functions and any("async_function" in f for f in result.functions)
+
+        assert (
+            "sync_function" in result.functions
+            and "another_sync" in result.functions
+            and any("async_function" in f for f in result.functions)
+        )
 
 
 class TestDecoratedFunctions:
@@ -64,9 +67,9 @@ class TestDecoratedFunctions:
 def decorated_func():
     pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "decorated_func" in result.functions
 
     def test_multiple_decorators(self):
@@ -78,9 +81,9 @@ def decorated_func():
 def multi_decorated():
     pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "multi_decorated" in result.functions
 
     def test_decorator_with_arguments(self):
@@ -90,9 +93,9 @@ def multi_decorated():
 def decorated_with_args():
     pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "decorated_with_args" in result.functions
 
     def test_class_decorators(self):
@@ -103,9 +106,9 @@ class Person:
     name: str
     age: int
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "Person" in result.classes
 
 
@@ -120,9 +123,9 @@ def outer():
         pass
     return inner
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         # Should extract both outer and inner
         assert "outer" in result.functions
         assert "inner" in result.functions
@@ -139,11 +142,16 @@ def level_one():
         return level_three
     return level_two
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         # Should find all levels
-        assert set(result.functions) >= {"level_one", "level_two", "level_three", "level_four"}
+        assert set(result.functions) >= {
+            "level_one",
+            "level_two",
+            "level_three",
+            "level_four",
+        }
 
     def test_nested_functions_in_class(self):
         """Nested functions within class methods."""
@@ -154,9 +162,9 @@ class Container:
             return 42
         return inner_function()
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "Container" in result.classes
         assert "outer_method" in result.functions
         assert "inner_function" in result.functions
@@ -172,9 +180,9 @@ class Outer:
     class Inner:
         pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         # Should find both classes
         assert "Outer" in result.classes
         assert "Inner" in result.classes
@@ -187,9 +195,9 @@ class Level1:
         class Level3:
             pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert set(result.classes) >= {"Level1", "Level2", "Level3"}
 
 
@@ -204,9 +212,9 @@ def regular_function():
 
 square = lambda x: x ** 2
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "regular_function" in result.functions
         # Lambda may or may not be in functions (depends on implementation)
         # But regular function must be there
@@ -217,9 +225,9 @@ square = lambda x: x ** 2
 class Calculator:
     add = lambda self, x, y: x + y
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "Calculator" in result.classes
 
 
@@ -239,9 +247,9 @@ class MyClass:
     def __repr__(self):
         return f"MyClass({self.value})"
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "MyClass" in result.classes
         assert set(result.functions) >= {"__init__", "__str__", "__repr__"}
 
@@ -260,9 +268,9 @@ class Circle:
     def area(self):
         return 3.14 * self.radius ** 2
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "Circle" in result.classes
         assert set(result.functions) >= {"__init__", "diameter", "area"}
 
@@ -280,9 +288,9 @@ class Counter:
     def from_string(cls, value):
         return cls()
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "Counter" in result.classes
         assert set(result.functions) >= {"static_method", "from_string"}
 
@@ -299,9 +307,9 @@ def process_list(items):
     mapping = {x: x ** 2 for x in items}
     return squared, filtered, mapping
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert "process_list" in result.functions
         assert result.complexity > 0
 
@@ -322,9 +330,9 @@ class Processor:
     def handle(self, value: Optional[str]) -> None:
         pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert set(result.functions) >= {"add", "process", "handle"}
         assert "Processor" in result.classes
 
@@ -339,9 +347,9 @@ import os
 import sys
 import json
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert len(result.imports) >= 3
 
     def test_from_imports(self):
@@ -351,9 +359,9 @@ from os import path
 from typing import List, Dict
 from collections import defaultdict, Counter
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert len(result.imports) >= 3
 
     def test_aliased_imports(self):
@@ -363,9 +371,9 @@ import numpy as np
 from typing import Dict as D
 import pandas as pd
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert len(result.imports) >= 3
 
 
@@ -378,9 +386,9 @@ class TestUnusualFormatting:
 def one_liner(): return 42
 def another(): x = 1; y = 2; return x + y
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert set(result.functions) >= {"one_liner", "another"}
 
     def test_function_with_complex_signature(self):
@@ -392,9 +400,9 @@ def function_with_defaults(a, b=10, *args, c=20, **kwargs):
 def another(*args, **kwargs):
     pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert set(result.functions) >= {"function_with_defaults", "another"}
 
     def test_class_with_inheritance(self):
@@ -409,9 +417,9 @@ class Child(Parent):
 class MultiBase(Parent, OtherBase):
     pass
 """
-        
+
         result = _analyze_code_sync(code=code)
-        
+
         assert set(result.classes) >= {"Parent", "Child", "MultiBase"}
 
 
@@ -426,9 +434,9 @@ const multiply = (x, y) => {
     return x * y;
 };
 """
-        
+
         result = _analyze_code_sync(code=code, language="javascript")
-        
+
         # Arrow function extraction depends on implementation
         assert result.functions is not None
 
@@ -445,9 +453,9 @@ class MyClass {
     }
 }
 """
-        
+
         result = _analyze_code_sync(code=code, language="javascript")
-        
+
         assert "MyClass" in result.classes or len(result.classes) >= 0
 
 
@@ -463,10 +471,12 @@ public class Outer {
     }
 }
 """
-        
+
         result = _analyze_code_sync(code=code, language="java")
-        
-        assert "Outer" in result.classes  # Java inner class extraction depends on parser
+
+        assert (
+            "Outer" in result.classes
+        )  # Java inner class extraction depends on parser
 
     def test_java_generics(self):
         """Java generics should not break extraction."""
@@ -476,8 +486,8 @@ public class Container<T> {
     public T get() {}
 }
 """
-        
+
         result = _analyze_code_sync(code=code, language="java")
-        
+
         assert "Container" in result.classes
         assert set(result.functions) >= {"add", "get"}

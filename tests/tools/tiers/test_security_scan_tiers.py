@@ -11,7 +11,13 @@ pytestmark = pytest.mark.asyncio
 
 # [20260106_TEST] Helpers for license and analyzer stubs
 class _DummyLicenseData:
-    def __init__(self, is_valid: bool, tier: str | None = None, error: str | None = None, is_expired: bool = False):
+    def __init__(
+        self,
+        is_valid: bool,
+        tier: str | None = None,
+        error: str | None = None,
+        is_expired: bool = False,
+    ):
         self.is_valid = is_valid
         self.tier = tier
         self.error_message = error
@@ -19,7 +25,9 @@ class _DummyLicenseData:
 
 
 class _DummyAnalyzerResult:
-    def __init__(self, vulnerabilities: list[dict], taint_sources: list[str] | None = None):
+    def __init__(
+        self, vulnerabilities: list[dict], taint_sources: list[str] | None = None
+    ):
         self._vulns = vulnerabilities
         self._taints = taint_sources or []
 
@@ -87,7 +95,9 @@ import hashlib
 def insecure_hash(user_input: str):
     return hashlib.sha1(user_input.encode()).hexdigest()
 
-""" + _make_repetitive_vuln_code(5)
+""" + _make_repetitive_vuln_code(
+        5
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -149,12 +159,15 @@ async def test_security_scan_community_rejects_large_file(monkeypatch):
 
 async def test_security_scan_missing_license_defaults_to_community(monkeypatch):
     """Missing/invalid license defaults to Community tier and disables Pro enrichments."""
-    from code_scalpel.mcp import server
     from code_scalpel.licensing import jwt_validator
 
     monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "0")
-    monkeypatch.setattr(jwt_validator.JWTLicenseValidator, "validate", lambda self: _DummyLicenseData(False))
+    monkeypatch.setattr(
+        jwt_validator.JWTLicenseValidator,
+        "validate",
+        lambda self: _DummyLicenseData(False),
+    )
 
     code = _make_repetitive_vuln_code(5)
 
@@ -171,10 +184,14 @@ async def test_security_scan_missing_license_defaults_to_community(monkeypatch):
 
 async def test_security_scan_revoked_license_forces_community(monkeypatch):
     """Revoked license must downgrade immediately to Community limits."""
-    from code_scalpel.mcp import server
     from code_scalpel.licensing import jwt_validator
+    from code_scalpel.mcp import server
 
-    monkeypatch.setattr(jwt_validator.JWTLicenseValidator, "validate", lambda self: _DummyLicenseData(False, error="license revoked"))
+    monkeypatch.setattr(
+        jwt_validator.JWTLicenseValidator,
+        "validate",
+        lambda self: _DummyLicenseData(False, error="license revoked"),
+    )
     monkeypatch.setattr(server, "_LAST_VALID_LICENSE_AT", None)
     monkeypatch.setattr(server, "_LAST_VALID_LICENSE_TIER", None)
 
@@ -193,15 +210,17 @@ async def test_security_scan_expired_license_within_grace_uses_last_tier(monkeyp
     """Expired license within grace should honor last known Pro tier."""
     import time
 
-    from code_scalpel.mcp import server
     from code_scalpel.licensing import jwt_validator
+    from code_scalpel.mcp import server
 
     server._LAST_VALID_LICENSE_TIER = "pro"
     server._LAST_VALID_LICENSE_AT = time.time() - 3600
     monkeypatch.setattr(
         jwt_validator.JWTLicenseValidator,
         "validate",
-        lambda self: _DummyLicenseData(False, tier="pro", error="expired", is_expired=True),
+        lambda self: _DummyLicenseData(
+            False, tier="pro", error="expired", is_expired=True
+        ),
     )
 
     code = _make_repetitive_vuln_code(60)
@@ -219,16 +238,20 @@ async def test_security_scan_expired_license_after_grace_downgrades(monkeypatch)
     """Expired license after grace should clamp to Community caps."""
     import time
 
-    from code_scalpel.mcp import server
     from code_scalpel.licensing import jwt_validator
+    from code_scalpel.mcp import server
 
     server._LAST_VALID_LICENSE_TIER = "pro"
-    server._LAST_VALID_LICENSE_AT = time.time() - (server._MID_SESSION_EXPIRY_GRACE_SECONDS + 10)
+    server._LAST_VALID_LICENSE_AT = time.time() - (
+        server._MID_SESSION_EXPIRY_GRACE_SECONDS + 10
+    )
 
     monkeypatch.setattr(
         jwt_validator.JWTLicenseValidator,
         "validate",
-        lambda self: _DummyLicenseData(False, tier="pro", error="expired", is_expired=True),
+        lambda self: _DummyLicenseData(
+            False, tier="pro", error="expired", is_expired=True
+        ),
     )
 
     code = _make_repetitive_vuln_code(70)
@@ -247,16 +270,36 @@ async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
     from code_scalpel.mcp import server
 
     vulns = [
-        {"type": "NoSQL Injection", "cwe": "CWE-943", "severity": "high", "sink_location": (1, 0), "description": "Mongo query"},
-        {"type": "LDAP Injection", "cwe": "CWE-90", "severity": "high", "sink_location": (2, 0), "description": "LDAP filter"},
-        {"type": "Hardcoded Secret", "cwe": "CWE-798", "severity": "medium", "sink_location": (3, 0), "description": "Secret"},
+        {
+            "type": "NoSQL Injection",
+            "cwe": "CWE-943",
+            "severity": "high",
+            "sink_location": (1, 0),
+            "description": "Mongo query",
+        },
+        {
+            "type": "LDAP Injection",
+            "cwe": "CWE-90",
+            "severity": "high",
+            "sink_location": (2, 0),
+            "description": "LDAP filter",
+        },
+        {
+            "type": "Hardcoded Secret",
+            "cwe": "CWE-798",
+            "severity": "medium",
+            "sink_location": (3, 0),
+            "description": "Secret",
+        },
     ]
 
     class _StubAnalyzer:
         def analyze(self, _code):
             return _DummyAnalyzerResult(vulns)
 
-    monkeypatch.setattr("code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer)
+    monkeypatch.setattr(
+        "code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer
+    )
     monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
 
     code = "db.users.find_one({'a':user}); ldap.search(filter); secret='abc'"
@@ -272,13 +315,27 @@ async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
     assert result.false_positive_analysis is not None
 
 
-async def test_security_scan_enterprise_enables_compliance_and_custom_rules(monkeypatch):
+async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
+    monkeypatch,
+):
     """Enterprise tier should populate compliance, custom rules, priority ordering, reachability, and FP tuning."""
     from code_scalpel.mcp import server
 
     vulns = [
-        {"type": "SQL Injection", "cwe": "CWE-89", "severity": "critical", "sink_location": (5, 0), "description": "SQL"},
-        {"type": "Command Injection", "cwe": "CWE-78", "severity": "high", "sink_location": (10, 0), "description": "Cmd"},
+        {
+            "type": "SQL Injection",
+            "cwe": "CWE-89",
+            "severity": "critical",
+            "sink_location": (5, 0),
+            "description": "SQL",
+        },
+        {
+            "type": "Command Injection",
+            "cwe": "CWE-78",
+            "severity": "high",
+            "sink_location": (10, 0),
+            "description": "Cmd",
+        },
     ]
 
     class _StubAnalyzer:
@@ -295,13 +352,21 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(monk
 
     class _StubPolicyEngine:
         def check_weak_crypto(self, _code):
-            return [_StubPolicyViolation("weak_crypto", 5, "medium", "MD5", "Use SHA-256")]
+            return [
+                _StubPolicyViolation("weak_crypto", 5, "medium", "MD5", "Use SHA-256")
+            ]
 
         def check_sensitive_logging(self, _code):
-            return [_StubPolicyViolation("log_pii", 12, "high", "PII logged", "Remove PII")]
+            return [
+                _StubPolicyViolation("log_pii", 12, "high", "PII logged", "Remove PII")
+            ]
 
-    monkeypatch.setattr("code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer)
-    monkeypatch.setattr("code_scalpel.security.analyzers.policy_engine.PolicyEngine", _StubPolicyEngine)
+    monkeypatch.setattr(
+        "code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer
+    )
+    monkeypatch.setattr(
+        "code_scalpel.security.analyzers.policy_engine.PolicyEngine", _StubPolicyEngine
+    )
     monkeypatch.setattr(server, "PolicyEngine", _StubPolicyEngine, raising=False)
     monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
 
@@ -317,8 +382,10 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(monk
     assert result.reachability_analysis is not None
     # custom_rule_results may be None if no custom rules are triggered
     # But other Enterprise enrichments should be present
-    assert (result.custom_rule_results is not None or 
-            result.false_positive_tuning is not None)
+    assert (
+        result.custom_rule_results is not None
+        or result.false_positive_tuning is not None
+    )
 
 
 async def test_security_scan_capability_limits_respected(monkeypatch):

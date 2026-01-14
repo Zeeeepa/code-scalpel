@@ -62,8 +62,26 @@ from .ast_tools import (
 # [20251217_FEATURE] v3.0.0 Autonomy - Error-to-Diff Engine
 from .autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint, ParsedError
 
-# REST API Server (legacy, renamed from mcp_server)
-from .integrations.rest_api_server import MCPServerConfig, create_app, run_server
+# REST API Server (legacy) - LAZY IMPORT
+# [20260112_BUGFIX] Flask is optional (code-scalpel[web]). Use lazy imports to avoid
+# crash on bare `pip install code-scalpel`. Users who need REST API should either:
+# 1. Install: pip install code-scalpel[web]
+# 2. Import directly: from code_scalpel.integrations.rest_api_server import run_server
+
+
+def __getattr__(name: str):
+    """Lazy loader for optional dependencies (Flask REST API)."""
+    if name in ("MCPServerConfig", "create_app", "run_server"):
+        try:
+            from .integrations import rest_api_server
+
+            return getattr(rest_api_server, name)
+        except ImportError as e:
+            raise ImportError(
+                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
+            ) from e
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # PDG tools
 from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg

@@ -18,12 +18,12 @@ from __future__ import annotations
 
 import ast
 import io
+import keyword
 import os
 import shutil
 import tempfile
 import time
 import tokenize
-import keyword
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -74,7 +74,9 @@ class CrossFileRenameResult:
     backup_paths: dict[str, str | None]
     warnings: list[str]
     error: str | None = None
-    audit_entry: Optional[AuditEntry] = None  # [20260108_FEATURE] Enterprise audit trail
+    audit_entry: Optional[AuditEntry] = (
+        None  # [20260108_FEATURE] Enterprise audit trail
+    )
 
 
 def iter_python_files(
@@ -395,7 +397,11 @@ def _rewrite_local_names(
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
             args = getattr(node, "args", None)
             if args:
-                for arg in getattr(args, "posonlyargs", []) + getattr(args, "args", []) + getattr(args, "kwonlyargs", []):
+                for arg in (
+                    getattr(args, "posonlyargs", [])
+                    + getattr(args, "args", [])
+                    + getattr(args, "kwonlyargs", [])
+                ):
                     if arg and getattr(arg, "arg", None):
                         params.add(arg.arg)
                 if getattr(args, "vararg", None) and getattr(args.vararg, "arg", None):
@@ -419,13 +425,22 @@ def _rewrite_local_names(
             params = _collect_params(node)
             globals_declared, nonlocals_declared = _scope_flags(node)
             # [20260108_BUGFIX] Avoid renaming when symbol is shadowed by parameters unless global/nonlocal restores outer binding
-            has_param_shadow = old_short in params and old_short not in globals_declared and old_short not in nonlocals_declared
+            has_param_shadow = (
+                old_short in params
+                and old_short not in globals_declared
+                and old_short not in nonlocals_declared
+            )
             new_shadowed = shadowed or has_param_shadow
             for child in ast.iter_child_nodes(node):
                 walk(child, new_shadowed)
             return
 
-        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id == old_short and not shadowed:
+        if (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Load)
+            and node.id == old_short
+            and not shadowed
+        ):
             if hasattr(node, "lineno") and hasattr(node, "col_offset"):
                 replacements[(node.lineno, node.col_offset)] = (old_short, new_short)
 
@@ -583,7 +598,7 @@ def rename_references_across_project(
     enable_compliance: bool = False,  # [20260108_FEATURE] Enable Enterprise compliance checking
 ) -> CrossFileRenameResult:
     """Rename references/imports across a project for Pro/Enterprise tiers.
-    
+
     Args:
         project_root: Root directory of the project
         target_file: File containing the definition
@@ -596,18 +611,18 @@ def rename_references_across_project(
         tier: License tier ("community", "pro", "enterprise")
         enable_audit: Enable audit trail logging (Enterprise only)
         enable_compliance: Enable compliance checking (Enterprise only)
-        
+
     Returns:
         CrossFileRenameResult with audit_entry if enabled
     """
     warnings: list[str] = []
     session_id = str(uuid.uuid4())
     start_time = time.time()
-    
+
     # Initialize audit trail if enabled
     audit_trail = get_audit_trail() if enable_audit else None
     audit_entry = None
-    
+
     # [20260108_FEATURE] Run compliance check if enabled
     if enable_compliance:
         compliance_result = check_rename_compliance(
@@ -615,12 +630,12 @@ def rename_references_across_project(
             target_type=target_type,
             target_name=target_name,
             new_name=new_name,
-            project_root=project_root
+            project_root=project_root,
         )
-        
+
         if not compliance_result.allowed:
             error_msg = format_compliance_error(compliance_result)
-            
+
             # Log compliance failure in audit
             if audit_trail:
                 audit_entry = audit_trail.create_entry(
@@ -634,10 +649,10 @@ def rename_references_across_project(
                     success=False,
                     error=error_msg,
                     duration_ms=(time.time() - start_time) * 1000,
-                    metadata={"compliance_violations": compliance_result.violations}
+                    metadata={"compliance_violations": compliance_result.violations},
                 )
                 audit_trail.log(audit_entry)
-            
+
             return CrossFileRenameResult(
                 success=False,
                 changed_files=[],
@@ -650,7 +665,7 @@ def rename_references_across_project(
     # [20260108_BUGFIX] Reject invalid Python identifiers early
     if not _is_valid_python_identifier(new_name):
         error_msg = f"Invalid Python identifier: {new_name}"
-        
+
         # Log audit entry for failed operation
         if audit_trail:
             audit_entry = audit_trail.create_entry(
@@ -663,10 +678,10 @@ def rename_references_across_project(
                 tier=tier,
                 success=False,
                 error=error_msg,
-                duration_ms=(time.time() - start_time) * 1000
+                duration_ms=(time.time() - start_time) * 1000,
             )
             audit_trail.log(audit_entry)
-        
+
         return CrossFileRenameResult(
             success=False,
             changed_files=[],
@@ -679,7 +694,7 @@ def rename_references_across_project(
     target_module = module_name_for_file(project_root, target_file)
     if not target_module:
         error_msg = "Could not determine target module name for cross-file rename."
-        
+
         # Log audit entry for failed operation
         if audit_trail:
             audit_entry = audit_trail.create_entry(
@@ -692,10 +707,10 @@ def rename_references_across_project(
                 tier=tier,
                 success=False,
                 error=error_msg,
-                duration_ms=(time.time() - start_time) * 1000
+                duration_ms=(time.time() - start_time) * 1000,
             )
             audit_trail.log(audit_entry)
-        
+
         return CrossFileRenameResult(
             success=False,
             changed_files=[],
@@ -776,7 +791,7 @@ def rename_references_across_project(
                 "files_updated": updated,
                 "max_files_searched": max_files_searched,
                 "max_files_updated": max_files_updated,
-            }
+            },
         )
         audit_trail.log(audit_entry)
 

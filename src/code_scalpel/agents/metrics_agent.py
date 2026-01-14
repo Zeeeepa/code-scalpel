@@ -32,11 +32,11 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "min_cohesion": 0.7,
             "max_technical_debt": 20,
         }
-        # [20251221_FEATURE] TODO: Add cyclomatic complexity tracking
-        # [20251221_FEATURE] TODO: Support coupling and cohesion metrics
-        # [20251221_FEATURE] TODO: Track technical debt across project
-        # [20251221_ENHANCEMENT] TODO: Generate trend analysis and predictions
-        # [20251221_ENHANCEMENT] TODO: Add team-level analytics and insights
+        # TODO [FEATURE]: Add cyclomatic complexity tracking
+        # TODO [FEATURE]: Support coupling and cohesion metrics
+        # TODO [FEATURE]: Track technical debt across project
+        # TODO [ENHANCEMENT]: Generate trend analysis and predictions
+        # TODO [ENHANCEMENT]: Add team-level analytics and insights
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """
@@ -189,9 +189,9 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Calculate cyclomatic and cognitive complexity metrics.
 
-        [20251221_FEATURE] TODO: Implement cyclomatic complexity calculation
-        [20251221_FEATURE] TODO: Implement cognitive complexity scoring
-        [20251221_FEATURE] TODO: Track nesting depth and branch count
+        TODO [FEATURE]: Implement cyclomatic complexity calculation
+        TODO [FEATURE]: Implement cognitive complexity scoring
+        TODO [FEATURE]: Track nesting depth and branch count
         """
         return {
             "cyclomatic_complexity": 5,
@@ -205,9 +205,9 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Calculate coupling and dependency metrics.
 
-        [20251221_FEATURE] TODO: Calculate afferent coupling (incoming dependencies)
-        [20251221_FEATURE] TODO: Calculate efferent coupling (outgoing dependencies)
-        [20251221_FEATURE] TODO: Compute dependency metrics (instability, abstractness)
+        TODO [FEATURE]: Calculate afferent coupling (incoming dependencies)
+        TODO [FEATURE]: Calculate efferent coupling (outgoing dependencies)
+        TODO [FEATURE]: Compute dependency metrics (instability, abstractness)
         """
         return {
             "afferent_coupling": 3,
@@ -219,8 +219,8 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Calculate cohesion metrics for modules and classes.
 
-        [20251221_FEATURE] TODO: Calculate LCOM (Lack of Cohesion of Methods)
-        [20251221_FEATURE] TODO: Calculate module coherence
+        TODO [FEATURE]: Calculate LCOM (Lack of Cohesion of Methods)
+        TODO [FEATURE]: Calculate module coherence
         """
         return {
             "lcom": 0.3,
@@ -231,8 +231,8 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Identify complexity hotspots.
 
-        [20251221_FEATURE] TODO: Rank functions by complexity
-        [20251221_FEATURE] TODO: Identify functions with high coupling
+        TODO [FEATURE]: Rank functions by complexity
+        TODO [FEATURE]: Identify functions with high coupling
         """
         return []
 
@@ -274,8 +274,8 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Store metrics for historical tracking.
 
-        [20251221_FEATURE] TODO: Store in metrics database
-        [20251221_FEATURE] TODO: Enable trend analysis across time
+        TODO [FEATURE]: Store in metrics database
+        TODO [FEATURE]: Enable trend analysis across time
         """
         return {"success": True, "stored": True}
 
@@ -288,8 +288,8 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         """
         Generate metrics report.
 
-        [20251221_FEATURE] TODO: Generate HTML/PDF reports
-        [20251221_FEATURE] TODO: Create visualizations (charts, graphs)
+        TODO [FEATURE]: Generate HTML/PDF reports
+        TODO [FEATURE]: Create visualizations (charts, graphs)
         """
         return {
             "success": True,

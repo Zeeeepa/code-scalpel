@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import shutil
 from pathlib import Path
 from typing import Callable
@@ -70,6 +69,7 @@ def clean_cache() -> Callable[[Path], None]:
         cache_dir = root / ".scalpel_cache"
         if cache_dir.exists():
             shutil.rmtree(cache_dir)
+
     return _clean
 
 
@@ -78,9 +78,11 @@ def small_python_extended(tmp_path: Path) -> Path:
     """Extended small Python project with entry point and test structure."""
     root = tmp_path / "small_py_ext"
     root.mkdir()
-    
+
     # Main with entry point
-    _write(root / "main.py", '''"""Main entry point."""
+    _write(
+        root / "main.py",
+        '''"""Main entry point."""
 from utils import calculate
 
 def main():
@@ -90,10 +92,13 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
-    
+''',
+    )
+
     # Utilities
-    _write(root / "utils.py", '''"""Utility functions."""
+    _write(
+        root / "utils.py",
+        '''"""Utility functions."""
 
 def calculate(a: int, b: int) -> int:
     """Calculate sum."""
@@ -106,18 +111,24 @@ def process(data: list) -> list:
         if item > 0:
             result.append(item * 2)
     return result
-''')
-    
+''',
+    )
+
     # Config
-    _write(root / "config.py", '''"""Configuration module."""
+    _write(
+        root / "config.py",
+        '''"""Configuration module."""
 
 DEBUG = True
 MAX_RETRIES = 3
 TIMEOUT = 30
-''')
-    
+''',
+    )
+
     # Tests
-    _write(root / "tests/test_utils.py", '''"""Tests for utils module."""
+    _write(
+        root / "tests/test_utils.py",
+        '''"""Tests for utils module."""
 import pytest
 from utils import calculate, process
 
@@ -128,8 +139,9 @@ def test_calculate():
 def test_process():
     """Test process with data."""
     assert process([1, 2, 3]) == [2, 4, 6]
-''')
-    
+''',
+    )
+
     return root
 
 
@@ -138,16 +150,16 @@ def large_project(tmp_path: Path) -> Path:
     """Large project with 150+ files (exceeds Community 100-file limit)."""
     root = tmp_path / "large_proj"
     root.mkdir()
-    
+
     # Create 7 modules with 20 files each = 140 files
     src = root / "src"
     src.mkdir()
-    
+
     for mod_num in range(7):
         mod_dir = src / f"module{mod_num}"
         mod_dir.mkdir()
         _write(mod_dir / "__init__.py", f'"""Module {mod_num}."""\n')
-        
+
         for file_num in range(1, 20):
             _write(
                 mod_dir / f"file{file_num}.py",
@@ -160,9 +172,9 @@ def func_{file_num}():
 class Class{file_num}:
     """Class {file_num}."""
     pass
-'''
+''',
             )
-    
+
     # Add 30 test files
     tests = root / "tests"
     tests.mkdir()
@@ -174,9 +186,9 @@ class Class{file_num}:
 def test_{test_num}():
     """Test {test_num}."""
     assert True
-'''
+''',
         )
-    
+
     return root
 
 
@@ -185,9 +197,11 @@ def project_with_gitignore(tmp_path: Path) -> Path:
     """Project with .gitignore file for pattern testing."""
     root = tmp_path / "gitignore_proj"
     root.mkdir()
-    
+
     # Create .gitignore
-    _write(root / ".gitignore", '''# Python
+    _write(
+        root / ".gitignore",
+        """# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -225,29 +239,36 @@ package-lock.json
 # OS
 .DS_Store
 .env
-''')
-    
+""",
+    )
+
     # Create source files
-    _write(root / "main.py", '''"""Main module."""
+    _write(
+        root / "main.py",
+        '''"""Main module."""
 def run():
     pass
-''')
-    
+''',
+    )
+
     # Create venv (should be ignored)
-    _write(root / "venv/lib/python3.9/site-packages/pkg.py", '''# Should be ignored
+    _write(
+        root / "venv/lib/python3.9/site-packages/pkg.py",
+        """# Should be ignored
 def pkg_func():
     pass
-''')
-    
+""",
+    )
+
     # Create __pycache__ (should be ignored)
-    _write(root / "__pycache__/module.pyc", 'compiled')
-    
+    _write(root / "__pycache__/module.pyc", "compiled")
+
     # Create node_modules (should be ignored)
-    _write(root / "node_modules/lodash/index.js", '// Should be ignored')
-    
+    _write(root / "node_modules/lodash/index.js", "// Should be ignored")
+
     # Create build dir (should be ignored)
-    _write(root / "build/lib.py", '# Build artifact')
-    
+    _write(root / "build/lib.py", "# Build artifact")
+
     return root
 
 
@@ -255,41 +276,50 @@ def pkg_func():
 def project_with_custom_config(tmp_path: Path) -> Path:
     """Project with .code-scalpel/crawl_project.json custom config."""
     import json
-    
+
     root = tmp_path / "config_proj"
     root.mkdir()
-    
+
     # Create config
     scalpel_dir = root / ".code-scalpel"
     scalpel_dir.mkdir()
-    
+
     config = {
         "include_extensions": [".py"],  # Only Python
-        "exclude_dirs": ["node_modules", "venv", ".venv", "vendor"]
+        "exclude_dirs": ["node_modules", "venv", ".venv", "vendor"],
     }
-    
+
     (scalpel_dir / "crawl_project.json").write_text(json.dumps(config, indent=2))
-    
+
     # Create source files
-    _write(root / "src/app.py", '''"""Application."""
+    _write(
+        root / "src/app.py",
+        '''"""Application."""
 def run():
     pass
-''')
-    
-    _write(root / "src/utils.py", '''"""Utilities."""
+''',
+    )
+
+    _write(
+        root / "src/utils.py",
+        '''"""Utilities."""
 def helper():
     pass
-''')
-    
+''',
+    )
+
     # This should be excluded by extension
-    _write(root / "src/service.js", '''// Service module
+    _write(
+        root / "src/service.js",
+        """// Service module
 function process() {}
-''')
-    
+""",
+    )
+
     # These should be excluded by config
-    _write(root / "node_modules/pkg/index.py", '# In node_modules')
-    _write(root / "vendor/lib/code.py", '# In vendor')
-    
+    _write(root / "node_modules/pkg/index.py", "# In node_modules")
+    _write(root / "vendor/lib/code.py", "# In vendor")
+
     return root
 
 
@@ -298,12 +328,17 @@ def flask_project(tmp_path: Path) -> Path:
     """Flask application project for framework detection."""
     root = tmp_path / "flask_proj"
     root.mkdir()
-    
-    _write(root / "requirements.txt", '''Flask==2.0.0
+
+    _write(
+        root / "requirements.txt",
+        """Flask==2.0.0
 Werkzeug==2.0.0
-''')
-    
-    _write(root / "app.py", '''"""Flask application."""
+""",
+    )
+
+    _write(
+        root / "app.py",
+        '''"""Flask application."""
 from flask import Flask, jsonify
 
 app = Flask(__name__)
@@ -325,13 +360,17 @@ def submit_data():
 
 if __name__ == "__main__":
     app.run(debug=True)
-''')
-    
-    _write(root / "config.py", '''"""Flask config."""
+''',
+    )
+
+    _write(
+        root / "config.py",
+        '''"""Flask config."""
 DEBUG = True
 SECRET_KEY = "dev-key"
-''')
-    
+''',
+    )
+
     return root
 
 
@@ -340,12 +379,17 @@ def django_project(tmp_path: Path) -> Path:
     """Django application project for framework detection."""
     root = tmp_path / "django_proj"
     root.mkdir()
-    
-    _write(root / "requirements.txt", '''Django==4.0.0
+
+    _write(
+        root / "requirements.txt",
+        """Django==4.0.0
 django-rest-framework==3.12.0
-''')
-    
-    _write(root / "manage.py", '''#!/usr/bin/env python
+""",
+    )
+
+    _write(
+        root / "manage.py",
+        """#!/usr/bin/env python
 import os
 import sys
 
@@ -353,14 +397,17 @@ if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)
-''')
-    
+""",
+    )
+
     app_dir = root / "myapp"
     app_dir.mkdir()
-    
-    _write(app_dir / "__init__.py", '')
-    
-    _write(app_dir / "urls.py", '''"""URL configuration."""
+
+    _write(app_dir / "__init__.py", "")
+
+    _write(
+        app_dir / "urls.py",
+        '''"""URL configuration."""
 from django.urls import path
 from . import views
 
@@ -368,9 +415,12 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("about/", views.about, name="about"),
 ]
-''')
-    
-    _write(app_dir / "views.py", '''"""Views."""
+''',
+    )
+
+    _write(
+        app_dir / "views.py",
+        '''"""Views."""
 from django.http import JsonResponse
 
 def home(request):
@@ -380,8 +430,9 @@ def home(request):
 def about(request):
     """About view."""
     return JsonResponse({"message": "About"})
-''')
-    
+''',
+    )
+
     return root
 
 
@@ -390,12 +441,17 @@ def fastapi_project(tmp_path: Path) -> Path:
     """FastAPI application project for framework detection."""
     root = tmp_path / "fastapi_proj"
     root.mkdir()
-    
-    _write(root / "requirements.txt", '''FastAPI==0.100.0
+
+    _write(
+        root / "requirements.txt",
+        """FastAPI==0.100.0
 uvicorn==0.23.0
-''')
-    
-    _write(root / "main.py", '''"""FastAPI application."""
+""",
+    )
+
+    _write(
+        root / "main.py",
+        '''"""FastAPI application."""
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -414,54 +470,70 @@ def read_item(item_id: int):
 def create_item(item: dict):
     """Create item endpoint."""
     return {"created": item}
-''')
-    
+''',
+    )
+
     return root
 
 
-@pytest.fixture  
+@pytest.fixture
 def nextjs_project(tmp_path: Path) -> Path:
     """Next.js application project for framework detection."""
     root = tmp_path / "nextjs_proj"
     root.mkdir()
-    
-    _write(root / "package.json", '''{
+
+    _write(
+        root / "package.json",
+        """{
   "name": "nextjs-app",
   "dependencies": {
     "next": "13.0.0",
     "react": "18.0.0"
   }
 }
-''')
-    
+""",
+    )
+
     # Pages Router
     pages = root / "pages"
     pages.mkdir()
-    _write(pages / "index.tsx", '''import React from "react";
+    _write(
+        pages / "index.tsx",
+        """import React from "react";
 
 export default function Home() {
   return <h1>Home</h1>;
 }
-''')
-    
-    _write(pages / "api/hello.ts", '''import { NextApiRequest, NextApiResponse } from "next";
+""",
+    )
+
+    _write(
+        pages / "api/hello.ts",
+        """import { NextApiRequest, NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   res.status(200).json({ message: "Hello" });
 }
-''')
-    
+""",
+    )
+
     # App Router
     app = root / "app"
     app.mkdir()
-    _write(app / "layout.tsx", '''export default function RootLayout({ children }) {
+    _write(
+        app / "layout.tsx",
+        """export default function RootLayout({ children }) {
   return <html><body>{children}</body></html>;
 }
-''')
-    
-    _write(app / "page.tsx", '''export default function Home() {
+""",
+    )
+
+    _write(
+        app / "page.tsx",
+        """export default function Home() {
   return <h1>Home</h1>;
 }
-''')
-    
+""",
+    )
+
     return root

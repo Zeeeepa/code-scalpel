@@ -1,5 +1,6 @@
 # [20260103_TEST] Sample functions for update_symbol testing
 
+
 # Basic function
 def add_numbers(a, b):
     """Add two numbers together."""
@@ -24,6 +25,7 @@ async def fetch_data(url: str):
 def parse_json(data: str):
     """Parse JSON string."""
     import json
+
     return json.loads(data)
 
 
@@ -38,27 +40,30 @@ def get_config(cls):
 # Nested function
 def outer_function(x):
     """Outer function."""
+
     def inner_function(y):
         """Inner function."""
         return x + y
+
     return inner_function
 
 
-# Lambda assignment (edge case)
-simple_multiply = lambda x, y: x * y
+# Lambda-style function (edge case) - converted to def per ruff E731
+def simple_multiply(x, y):
+    return x * y
 
 
 # Function with complex docstring
 def complex_operation(data):
     """
     Perform complex operation.
-    
+
     Args:
         data: Input data dictionary
-        
+
     Returns:
         Processed result
-        
+
     Raises:
         ValueError: If data invalid
     """
@@ -92,7 +97,4 @@ def greet(name="World", greeting="Hello"):
 # Function with *args and **kwargs
 def flexible_function(*args, **kwargs):
     """Accept any arguments."""
-    return {
-        "positional": args,
-        "keyword": kwargs
-    }
+    return {"positional": args, "keyword": kwargs}

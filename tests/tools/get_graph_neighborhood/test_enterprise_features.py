@@ -31,8 +31,6 @@ Tests graph query language, custom traversals, and advanced graph metrics.
 """
 
 import pytest
-from unittest.mock import MagicMock
-
 
 # =============================================================================
 # Test Class 1: Graph Query Language Basic
@@ -219,7 +217,7 @@ class TestQueryPathMatching:
 
     def test_query_engine_supports_path_patterns(self, query_engine_with_paths):
         """Query engine can match path patterns."""
-        from code_scalpel.graph.graph_query import PathPattern, GraphQuery
+        from code_scalpel.graph.graph_query import GraphQuery, PathPattern
 
         pattern = PathPattern(min_length=1, max_length=2, direction="outgoing")
         query = GraphQuery(path_patterns=[pattern])

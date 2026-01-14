@@ -7,16 +7,16 @@ Provides:
 - Project root fixtures
 """
 
+from unittest.mock import MagicMock
+
 import pytest
-from pathlib import Path
-from typing import Dict, List, Tuple
-from unittest.mock import MagicMock, patch
 
 try:
     from code_scalpel.mcp.server import (
-        NeighborhoodNodeModel,
         NeighborhoodEdgeModel,
+        NeighborhoodNodeModel,
     )
+
     MCP_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     # MCP server dependencies not installed - skip fixtures that need them
@@ -48,7 +48,9 @@ def _generate_test_mermaid(
     """
     # Convert to Pydantic models
     nodes = [
-        NeighborhoodNodeModel(id=node_id, depth=node_depths.get(node_id, 0), metadata={})
+        NeighborhoodNodeModel(
+            id=node_id, depth=node_depths.get(node_id, 0), metadata={}
+        )
         for node_id in node_ids
     ]
     edge_models = [
@@ -71,11 +73,13 @@ def _generate_test_mermaid(
         from_safe = edge.from_id.replace("::", "_").replace(".", "_").replace("-", "_")
         to_safe = edge.to_id.replace("::", "_").replace(".", "_").replace("-", "_")
         lines.append(f"    {from_safe} --> {to_safe}")
-    lines.extend([
-        "    classDef center fill:#f9f,stroke:#333,stroke-width:3px",
-        "    classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px",
-        "    classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px"
-    ])
+    lines.extend(
+        [
+            "    classDef center fill:#f9f,stroke:#333,stroke-width:3px",
+            "    classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px",
+            "    classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -88,7 +92,7 @@ def _generate_test_mermaid(
 def sample_call_graph():
     """
     Create a sample call graph with known topology for k-hop testing.
-    
+
     Graph structure (call relationships):
     ```
     center
@@ -102,11 +106,11 @@ def sample_call_graph():
     └─ func_D (depth 1)
        └─ func_D1 (depth 2)
     ```
-    
+
     All edges have confidence 0.9 by default.
     """
     mock_graph = MagicMock()
-    
+
     # Nodes: center at depth 0, 4 at depth 1, 7 at depth 2
     nodes_by_depth = {
         0: ["python::main::function::center"],
@@ -124,12 +128,12 @@ def sample_call_graph():
             "python::module_d1::function::func_D1",
         ],
     }
-    
+
     # Flatten for easy access
     all_nodes = []
     for nodes in nodes_by_depth.values():
         all_nodes.extend(nodes)
-    
+
     # Define edges (source -> target with confidence)
     edges = [
         # Center -> depth 1
@@ -138,52 +142,79 @@ def sample_call_graph():
         ("python::main::function::center", "python::module_c::function::func_C", 0.88),
         ("python::main::function::center", "python::module_d::function::func_D", 0.92),
         # Depth 1 -> depth 2
-        ("python::module_a::function::func_A", "python::module_a1::function::func_A1", 0.93),
-        ("python::module_a::function::func_A", "python::module_a2::function::func_A2", 0.91),
-        ("python::module_b::function::func_B", "python::module_b1::function::func_B1", 0.89),
-        ("python::module_c::function::func_C", "python::module_c1::function::func_C1", 0.87),
-        ("python::module_d::function::func_D", "python::module_d1::function::func_D1", 0.94),
+        (
+            "python::module_a::function::func_A",
+            "python::module_a1::function::func_A1",
+            0.93,
+        ),
+        (
+            "python::module_a::function::func_A",
+            "python::module_a2::function::func_A2",
+            0.91,
+        ),
+        (
+            "python::module_b::function::func_B",
+            "python::module_b1::function::func_B1",
+            0.89,
+        ),
+        (
+            "python::module_c::function::func_C",
+            "python::module_c1::function::func_C1",
+            0.87,
+        ),
+        (
+            "python::module_d::function::func_D",
+            "python::module_d1::function::func_D1",
+            0.94,
+        ),
     ]
-    
+
     # Setup mock methods
     mock_graph.nodes = all_nodes
     mock_graph.edges = edges
     mock_graph.nodes_by_depth = nodes_by_depth
-    
-    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both", 
-                            min_confidence=0.0):
+
+    def mock_get_neighborhood(
+        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
+    ):
         """Simulate neighborhood extraction with depth limiting."""
         result = MagicMock()
         result.success = True
-        
+
         # Simulate depth-based filtering
         included_nodes = [center_id]  # Always include center
-        
+
         # Add nodes up to depth k
         for depth in range(1, k + 1):
             if depth in nodes_by_depth:
                 included_nodes.extend(nodes_by_depth[depth])
-        
+
         # Filter by confidence if specified
         included_edges = [
-            (src, dst, conf) for src, dst, conf in edges
-            if src in included_nodes and dst in included_nodes and conf >= min_confidence
+            (src, dst, conf)
+            for src, dst, conf in edges
+            if src in included_nodes
+            and dst in included_nodes
+            and conf >= min_confidence
         ]
-        
+
         # Handle truncation
         if len(included_nodes) > max_nodes:
             included_nodes = included_nodes[:max_nodes]
             result.truncated = True
-            result.truncation_warning = f"Graph truncated from {len(all_nodes)} to {max_nodes} nodes"
+            result.truncation_warning = (
+                f"Graph truncated from {len(all_nodes)} to {max_nodes} nodes"
+            )
         else:
             result.truncated = False
             result.truncation_warning = None
-        
+
         result.subgraph = MagicMock()
         result.subgraph.nodes = included_nodes
         result.subgraph.edges = included_edges
         result.node_depths = {
-            node: depth for depth, nodes in nodes_by_depth.items()
+            node: depth
+            for depth, nodes in nodes_by_depth.items()
             for node in nodes
             if node in included_nodes
         }
@@ -194,11 +225,11 @@ def sample_call_graph():
             node_ids=included_nodes,
             edges=included_edges,
             node_depths=result.node_depths,
-            center_node_id=center_id
+            center_node_id=center_id,
         )
 
         return result
-    
+
     mock_graph.get_neighborhood = mock_get_neighborhood
     return mock_graph
 
@@ -207,27 +238,32 @@ def sample_call_graph():
 def simple_graph():
     """Minimal graph for basic tests (3 nodes, 2 edges)."""
     mock_graph = MagicMock()
-    
+
     nodes = [
         "python::service::function::caller",
         "python::service::function::target",
         "python::db::function::query",
     ]
-    
+
     edges = [
-        ("python::service::function::caller", "python::service::function::target", 0.95),
+        (
+            "python::service::function::caller",
+            "python::service::function::target",
+            0.95,
+        ),
         ("python::service::function::target", "python::db::function::query", 0.90),
     ]
-    
+
     mock_graph.nodes = nodes
     mock_graph.edges = edges
-    
-    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both",
-                            min_confidence=0.0):
+
+    def mock_get_neighborhood(
+        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
+    ):
         result = MagicMock()
         result.success = center_id in nodes
         result.subgraph = MagicMock()
-        
+
         if result.success:
             if center_id == "python::service::function::caller" and k >= 1:
                 result.subgraph.nodes = nodes[:2]
@@ -241,7 +277,9 @@ def simple_graph():
             result.truncated = False
 
             # Build node depths dict (center=0, all neighbors=1)
-            node_depths_dict = {node: 0 if node == center_id else 1 for node in result.subgraph.nodes}
+            node_depths_dict = {
+                node: 0 if node == center_id else 1 for node in result.subgraph.nodes
+            }
             result.node_depths = node_depths_dict
 
             # Generate Mermaid diagram
@@ -249,7 +287,7 @@ def simple_graph():
                 node_ids=result.subgraph.nodes,
                 edges=result.subgraph.edges,
                 node_depths=node_depths_dict,
-                center_node_id=center_id
+                center_node_id=center_id,
             )
         else:
             result.error = f"Node {center_id} not found"
@@ -257,7 +295,7 @@ def simple_graph():
             result.node_depths = {}
 
         return result
-    
+
     mock_graph.get_neighborhood = mock_get_neighborhood
     return mock_graph
 
@@ -339,14 +377,15 @@ def temp_project_dir(tmp_path):
     """Create a temporary project directory with sample Python files."""
     project_dir = tmp_path / "sample_project"
     project_dir.mkdir()
-    
+
     # Create a simple package structure
     src_dir = project_dir / "src"
     src_dir.mkdir()
-    
+
     # Create a main module
     main_py = src_dir / "main.py"
-    main_py.write_text("""
+    main_py.write_text(
+        """
 def center_function():
     return func_a()
 
@@ -355,18 +394,21 @@ def func_a():
 
 def func_a1():
     return "result"
-""")
-    
+"""
+    )
+
     # Create dependent modules
     utils_py = src_dir / "utils.py"
-    utils_py.write_text("""
+    utils_py.write_text(
+        """
 def func_b():
     return func_b1()
 
 def func_b1():
     return "utility"
-""")
-    
+"""
+    )
+
     return project_dir
 
 
@@ -411,6 +453,7 @@ def mock_tier_enterprise(monkeypatch):
 @pytest.fixture
 def mock_capabilities(monkeypatch):
     """Mock get_tool_capabilities to return tier-specific capabilities."""
+
     def mock_get_capabilities(tool_name, tier):
         capabilities_map = {
             "community": {
@@ -440,7 +483,7 @@ def mock_capabilities(monkeypatch):
             },
         }
         return capabilities_map.get(tier, {})
-    
+
     monkeypatch.setattr(
         "code_scalpel.mcp.server.get_tool_capabilities",
         mock_get_capabilities,

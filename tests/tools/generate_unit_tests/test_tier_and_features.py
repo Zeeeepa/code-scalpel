@@ -10,8 +10,6 @@ Validates:
 - Enterprise tier features are available
 """
 
-import pytest
-
 
 class TestCommunityTierFeatures:
     """Test Community tier feature availability."""
@@ -21,8 +19,7 @@ class TestCommunityTierFeatures:
         from code_scalpel.mcp.server import _generate_tests_sync
 
         result = _generate_tests_sync(
-            code="def add(a, b): return a + b",
-            framework="pytest"
+            code="def add(a, b): return a + b", framework="pytest"
         )
 
         assert result.success is True
@@ -62,8 +59,7 @@ class TestProTierFeatures:
         from code_scalpel.mcp.server import _generate_tests_sync
 
         result = _generate_tests_sync(
-            code="def add(a, b): return a + b",
-            framework="unittest"
+            code="def add(a, b): return a + b", framework="unittest"
         )
 
         assert result.success is True
@@ -163,8 +159,7 @@ class TestEdgeCases:
         from code_scalpel.mcp.server import _generate_tests_sync
 
         result = _generate_tests_sync(
-            code="def identity(x): return x",
-            framework="pytest"
+            code="def identity(x): return x", framework="pytest"
         )
 
         assert result.success is True

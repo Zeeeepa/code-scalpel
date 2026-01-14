@@ -426,7 +426,9 @@ def abs_value(x):
         # The MCP server would convert this to JSON-RPC error with:
         # {"jsonrpc": "2.0", "error": {"code": -32602, "message": "..."}, "id": <request_id>}
         with pytest.raises(ValueError, match="Must provide"):
-            simulator.simulate(original_code="def bar(): pass")  # Missing new_code/patch
+            simulator.simulate(
+                original_code="def bar(): pass"
+            )  # Missing new_code/patch
 
     def test_simulate_refactor_recovers_after_invalid_request(self):
         """Simulator should continue working after invalid request errors."""

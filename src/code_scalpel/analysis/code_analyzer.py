@@ -82,18 +82,20 @@ PolyglotExtractor: Any = None
 _extract_from_code: Optional[Callable[..., Any]] = None
 
 try:
-    from code_scalpel.code_parsers.factory import (
-        ParserFactory as _PF,  # type: ignore[import-not-found]
-    )
     from code_scalpel.code_parsers.base_parser import (
         Language as _PL,  # type: ignore[import-not-found]
     )
-    from code_scalpel.code_parsers.language_detection import (
-        detect_language as _dl,  # type: ignore[import-not-found]
-    )
     from code_scalpel.code_parsers.extractor import (
         PolyglotExtractor as _PE,  # type: ignore[import-not-found]
+    )
+    from code_scalpel.code_parsers.extractor import (
         extract_from_code as _efc,  # type: ignore[import-not-found]
+    )
+    from code_scalpel.code_parsers.factory import (
+        ParserFactory as _PF,  # type: ignore[import-not-found]
+    )
+    from code_scalpel.code_parsers.language_detection import (
+        detect_language as _dl,  # type: ignore[import-not-found]
     )
 
     ParserFactory = _PF
@@ -475,44 +477,49 @@ class CodeAnalyzer:
                     "go": "GO",
                     "rust": "RUST",
                 }
-                
+
                 # Get Language enum value
                 from code_scalpel.code_parsers.extractor import Language
+
                 lang_enum = Language.AUTO
                 if language.lower() in lang_map:
                     lang_enum_name = lang_map[language.lower()]
                     lang_enum = Language[lang_enum_name]
-                
+
                 # Create extractor with language detection
-                extractor = PolyglotExtractor(code, file_path=filepath, language=lang_enum)
-                
+                extractor = PolyglotExtractor(
+                    code, file_path=filepath, language=lang_enum
+                )
+
                 # For Python, also populate AST for backward compatibility
                 if language == "python":
                     result["ast"] = self._parse_to_ast(code)
                     result["parser_backend"] = "ast"
-                    
+
                     # Extract functions and classes from Python AST
                     if result["ast"]:
                         for node in ast.walk(result["ast"]):
-                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if isinstance(
+                                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                            ):
                                 result["functions"].append(node.name)
                             elif isinstance(node, ast.ClassDef):
                                 result["classes"].append(node.name)
                 else:
                     # For other languages, use PolyglotExtractor to get structure
                     result["parser_backend"] = language
-                    
+
                     # Parse the code to populate internal IR
                     extractor._parse()
-                    
+
                     # Extract functions and classes from the parsed IR
                     # [20260105_BUGFIX] Fixed to walk ir_module.body instead of non-existent functions/classes attributes
-                    if hasattr(extractor, '_ir_module') and extractor._ir_module:
+                    if hasattr(extractor, "_ir_module") and extractor._ir_module:
                         ir_module = extractor._ir_module
-                        
+
                         # Import IR node types for checking
-                        from code_scalpel.ir.nodes import IRFunctionDef, IRClassDef
-                        
+                        from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef
+
                         # Walk the IR module body to find functions and classes
                         for node in ir_module.body:
                             if isinstance(node, IRFunctionDef):
@@ -523,23 +530,28 @@ class CodeAnalyzer:
                                     result["classes"].append(node.name)
                                 # Also extract methods from class body
                                 for method in node.body:
-                                    if isinstance(method, IRFunctionDef) and method.name:
-                                        result["functions"].append(f"{node.name}.{method.name}")
-                        
+                                    if (
+                                        isinstance(method, IRFunctionDef)
+                                        and method.name
+                                    ):
+                                        result["functions"].append(
+                                            f"{node.name}.{method.name}"
+                                        )
+
                         # Store the IR module as parser_result
                         result["parser_result"] = ir_module
-                
+
                 return result
-                
+
             except Exception as e:
                 result["errors"].append(f"PolyglotExtractor error: {str(e)}")
                 self.logger.warning(f"PolyglotExtractor failed for {language}: {e}")
-        
+
         # Fallback for Python when code_parsers not available
         if language == "python":
             result["ast"] = self._parse_to_ast(code)
             result["parser_backend"] = "ast"
-            
+
             if result["ast"]:
                 for node in ast.walk(result["ast"]):
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -547,12 +559,14 @@ class CodeAnalyzer:
                     elif isinstance(node, ast.ClassDef):
                         result["classes"].append(node.name)
             return result
-        
+
         # No parser available
         result["errors"].append(f"No parser available for language: {language}")
         return result
 
-    def _extract_symbols_from_js_ast(self, ast_data: Any) -> tuple[list[str], list[str]]:
+    def _extract_symbols_from_js_ast(
+        self, ast_data: Any
+    ) -> tuple[list[str], list[str]]:
         """
         Extract function and class names from JavaScript/TypeScript AST.
 
@@ -572,7 +586,7 @@ class CodeAnalyzer:
             if isinstance(ast_data, dict):
                 self._walk_js_ast_dict(ast_data, functions, classes)
             # Handle other AST types if needed
-            elif hasattr(ast_data, 'body'):
+            elif hasattr(ast_data, "body"):
                 # Try to iterate over body
                 self._walk_js_ast_node(ast_data, functions, classes)
         except Exception as e:
@@ -580,34 +594,42 @@ class CodeAnalyzer:
 
         return functions, classes
 
-    def _walk_js_ast_dict(self, node: dict, functions: list[str], classes: list[str]) -> None:
+    def _walk_js_ast_dict(
+        self, node: dict, functions: list[str], classes: list[str]
+    ) -> None:
         """Walk a dictionary-based JavaScript AST."""
         if not isinstance(node, dict):
             return
 
-        node_type = node.get('type', '')
+        node_type = node.get("type", "")
 
         # Extract function declarations
-        if node_type == 'FunctionDeclaration':
-            if 'id' in node and node['id'] and 'name' in node['id']:
-                functions.append(node['id']['name'])
+        if node_type == "FunctionDeclaration":
+            if "id" in node and node["id"] and "name" in node["id"]:
+                functions.append(node["id"]["name"])
 
         # Extract class declarations
-        elif node_type == 'ClassDeclaration':
-            if 'id' in node and node['id'] and 'name' in node['id']:
-                classes.append(node['id']['name'])
+        elif node_type == "ClassDeclaration":
+            if "id" in node and node["id"] and "name" in node["id"]:
+                classes.append(node["id"]["name"])
 
         # Extract methods from classes
-        elif node_type == 'MethodDefinition':
-            if 'key' in node and node['key'] and 'name' in node['key']:
-                functions.append(node['key']['name'])
+        elif node_type == "MethodDefinition":
+            if "key" in node and node["key"] and "name" in node["key"]:
+                functions.append(node["key"]["name"])
 
         # Extract arrow functions assigned to variables
-        elif node_type == 'VariableDeclarator':
-            if ('init' in node and node['init'] and
-                node['init'].get('type') in ('FunctionExpression', 'ArrowFunctionExpression') and
-                'id' in node and node['id'] and 'name' in node['id']):
-                functions.append(node['id']['name'])
+        elif node_type == "VariableDeclarator":
+            if (
+                "init" in node
+                and node["init"]
+                and node["init"].get("type")
+                in ("FunctionExpression", "ArrowFunctionExpression")
+                and "id" in node
+                and node["id"]
+                and "name" in node["id"]
+            ):
+                functions.append(node["id"]["name"])
 
         # Recursively walk all dict values and lists
         for value in node.values():
@@ -618,34 +640,36 @@ class CodeAnalyzer:
                     if isinstance(item, dict):
                         self._walk_js_ast_dict(item, functions, classes)
 
-    def _walk_js_ast_node(self, node: Any, functions: list[str], classes: list[str]) -> None:
+    def _walk_js_ast_node(
+        self, node: Any, functions: list[str], classes: list[str]
+    ) -> None:
         """Walk an object-based JavaScript AST (esprima Node objects)."""
         try:
-            node_type = getattr(node, 'type', None)
+            node_type = getattr(node, "type", None)
 
-            if node_type == 'FunctionDeclaration':
-                func_id = getattr(node, 'id', None)
-                if func_id and hasattr(func_id, 'name'):
+            if node_type == "FunctionDeclaration":
+                func_id = getattr(node, "id", None)
+                if func_id and hasattr(func_id, "name"):
                     functions.append(func_id.name)
 
-            elif node_type == 'ClassDeclaration':
-                class_id = getattr(node, 'id', None)
-                if class_id and hasattr(class_id, 'name'):
+            elif node_type == "ClassDeclaration":
+                class_id = getattr(node, "id", None)
+                if class_id and hasattr(class_id, "name"):
                     classes.append(class_id.name)
 
             # Recursively walk children
             for attr_name in dir(node):
-                if attr_name.startswith('_'):
+                if attr_name.startswith("_"):
                     continue
                 attr_value = getattr(node, attr_name, None)
                 if attr_value is None:
                     continue
 
-                if hasattr(attr_value, 'type'):
+                if hasattr(attr_value, "type"):
                     self._walk_js_ast_node(attr_value, functions, classes)
                 elif isinstance(attr_value, list):
                     for item in attr_value:
-                        if hasattr(item, 'type'):
+                        if hasattr(item, "type"):
                             self._walk_js_ast_node(item, functions, classes)
         except Exception as e:
             self.logger.debug(f"Error walking JS AST node: {e}")
@@ -741,7 +765,11 @@ class CodeAnalyzer:
 
             # [20260105_BUGFIX] Calculate metrics from IR for non-Python languages
             parser_result = parse_result.get("parser_result")
-            if parser_result and hasattr(parser_result, "body") and language != "python":
+            if (
+                parser_result
+                and hasattr(parser_result, "body")
+                and language != "python"
+            ):
                 # Calculate metrics from IR nodes
                 ir_metrics = self._calculate_metrics_from_ir(parser_result, language)
                 metrics.cyclomatic_complexity = ir_metrics["cyclomatic_complexity"]
@@ -818,12 +846,12 @@ class CodeAnalyzer:
             Dictionary with computed metrics
         """
         from code_scalpel.ir.nodes import (
-            IRIf,
-            IRWhile,
-            IRFor,
-            IRTry,
-            IRFunctionDef,
             IRClassDef,
+            IRFor,
+            IRFunctionDef,
+            IRIf,
+            IRTry,
+            IRWhile,
         )
 
         metrics = {

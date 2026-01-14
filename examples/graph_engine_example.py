@@ -179,7 +179,8 @@ def example_4_cross_boundary_taint():
 
     graph = builder.build()
     # [20240613_BUGFIX] Print the graph to use the variable and demonstrate output
-    print(json.dumps(graph, indent=2))
+    # [20260114_BUGFIX] Use to_dict() for JSON serialization
+    print(json.dumps(graph.to_dict(), indent=2))
 
     # Display taint flow
     taint_flow = {
