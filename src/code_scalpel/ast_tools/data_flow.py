@@ -160,19 +160,19 @@ class DataFlowAnalyzer:
         Returns:
             DataFlow object with analysis results
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================        TODO [PRO][FEATURE]: Parse file and extract definitions/usages
-          - Load and parse Python file
-          - Walk AST for all definitions
-          - Walk AST for all usages
-          - Track line numbers and context
-          - Add 15+ tests for extraction        TODO [PRO][FEATURE]: Build def-use and use-def chains
-          - Create Definition objects for all defs
-          - Create Usage objects for all uses
-          - Link definitions to their uses
-          - Link uses to their definitions
-          - Add 20+ tests for chain building
+        TODO [PRO][FEATURE]: Parse file and extract definitions/usages
+        TODO [PRO]: Load and parse Python file
+        TODO [PRO]: Walk AST for all definitions
+        TODO [PRO]: Walk AST for all usages
+        TODO [PRO]: Track line numbers and context
+        TODO [PRO]: Add 15+ tests for extraction
+
+        TODO [PRO][FEATURE]: Build def-use and use-def chains
+        TODO [PRO]: Create Definition objects for all defs
+        TODO [PRO]: Create Usage objects for all uses
+        TODO [PRO]: Link definitions to their uses
+        TODO [PRO]: Link uses to their definitions
+        TODO [PRO]: Add 20+ tests for chain building
         """
         return DataFlow()
 
@@ -180,17 +180,17 @@ class DataFlowAnalyzer:
         """
         Perform data flow analysis on a function.
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================        TODO [PRO][FEATURE]: Extract parameters as definitions
-          - Create Definition objects for each parameter
-          - Mark as parameter type
-          - Add default values if present
-          - Add 10+ tests for parameter extraction        TODO [PRO][FEATURE]: Analyze function body
-          - Extract all statements
-          - Find definitions and uses
-          - Build chains
-          - Add 15+ tests for function analysis
+        TODO [PRO][FEATURE]: Extract parameters as definitions
+        TODO [PRO]: Create Definition objects for each parameter
+        TODO [PRO]: Mark as parameter type
+        TODO [PRO]: Add default values if present
+        TODO [PRO]: Add 10+ tests for parameter extraction
+
+        TODO [PRO][FEATURE]: Analyze function body
+        TODO [PRO]: Extract all statements
+        TODO [PRO]: Find definitions and uses
+        TODO [PRO]: Build chains
+        TODO [PRO]: Add 15+ tests for function analysis
         """
         data_flow = DataFlow()
         return data_flow
@@ -199,18 +199,18 @@ class DataFlowAnalyzer:
         """
         Get definitions that reach a specific line.
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================        TODO [PRO][FEATURE]: Compute reaching definitions fact
-          - Fixed-point iteration for data flow
-          - Mark gen/kill sets for each block
-          - Compute IN/OUT for each block
-          - Collect defs at target line
-          - Add 15+ tests for reaching defs        TODO [PRO][FEATURE]: Handle multiple definition sources
-          - Support multiple definitions of same variable
-          - Handle conditional definitions
-          - Track definition merging
-          - Add 12+ tests for multi-def
+        TODO [PRO][FEATURE]: Compute reaching definitions fact
+        TODO [PRO]: Fixed-point iteration for data flow
+        TODO [PRO]: Mark gen/kill sets for each block
+        TODO [PRO]: Compute IN/OUT for each block
+        TODO [PRO]: Collect defs at target line
+        TODO [PRO]: Add 15+ tests for reaching defs
+
+        TODO [PRO][FEATURE]: Handle multiple definition sources
+        TODO [PRO]: Support multiple definitions of same variable
+        TODO [PRO]: Handle conditional definitions
+        TODO [PRO]: Track definition merging
+        TODO [PRO]: Add 12+ tests for multi-def
         """
         return set()
 
@@ -220,18 +220,18 @@ class DataFlowAnalyzer:
 
         Variables are live if they are used on some path after this line.
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================        TODO [ENTERPRISE][FEATURE]: Backward data flow analysis
-          - Build reverse CFG
-          - Backward analysis from exits
-          - Compute liveness facts
-          - Mark live variables
-          - Add 15+ tests for backward analysis        TODO [ENTERPRISE][FEATURE]: Identify dead variables
-          - Find variables with no uses after definition
-          - Suggest variable removal
-          - Calculate removal safety
-          - Add 12+ tests for dead var detection
+        TODO [ENTERPRISE][FEATURE]: Backward data flow analysis
+        TODO [ENTERPRISE]: Build reverse CFG
+        TODO [ENTERPRISE]: Backward analysis from exits
+        TODO [ENTERPRISE]: Compute liveness facts
+        TODO [ENTERPRISE]: Mark live variables
+        TODO [ENTERPRISE]: Add 15+ tests for backward analysis
+
+        TODO [ENTERPRISE][FEATURE]: Identify dead variables
+        TODO [ENTERPRISE]: Find variables with no uses after definition
+        TODO [ENTERPRISE]: Suggest variable removal
+        TODO [ENTERPRISE]: Calculate removal safety
+        TODO [ENTERPRISE]: Add 12+ tests for dead var detection
         """
         return set()
 
@@ -262,17 +262,17 @@ class DataFlowAnalyzer:
         Returns:
             Set of (start_line, end_line) tuples for dead code blocks
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================        TODO [PRO][FEATURE]: Identify unreachable code
-          - Use CFG for reachability analysis
-          - Find blocks with no path from entry
-          - Report unreachable statements
-          - Add 15+ tests for unreachable        TODO [PRO][FEATURE]: Detect unused assignments
-          - Find definitions with no reaching uses
-          - Track assignment locations
-          - Suggest removal
-          - Add 12+ tests for unused assignments
+        TODO [PRO][FEATURE]: Identify unreachable code
+        TODO [PRO]: Use CFG for reachability analysis
+        TODO [PRO]: Find blocks with no path from entry
+        TODO [PRO]: Report unreachable statements
+        TODO [PRO]: Add 15+ tests for unreachable
+
+        TODO [PRO][FEATURE]: Detect unused assignments
+        TODO [PRO]: Find definitions with no reaching uses
+        TODO [PRO]: Track assignment locations
+        TODO [PRO]: Suggest removal
+        TODO [PRO]: Add 12+ tests for unused assignments
         """
         return set()
 
@@ -292,13 +292,11 @@ class DataFlowAnalyzer:
         Returns:
             Set of (variable, line) tuples for uninitialized usage
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================        TODO [PRO][FEATURE]: Detect uses without reaching definitions
-          - Find uses not covered by any definition
-          - Analyze control flow paths
-          - Identify conditional usage
-          - Add 15+ tests for uninitialized detection
+        TODO [PRO][FEATURE]: Detect uses without reaching definitions
+        TODO [PRO]: Find uses not covered by any definition
+        TODO [PRO]: Analyze control flow paths
+        TODO [PRO]: Identify conditional usage
+        TODO [PRO]: Add 15+ tests for uninitialized detection
         """
         return set()
 
@@ -309,22 +307,24 @@ class DataFlowAnalyzer:
         Returns:
             List of def chains from source to sink
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================        TODO [ENTERPRISE][FEATURE]: Build taint flow from sources to sinks
-          - Mark taint sources
-          - Follow taint propagation
-          - Find taint at sinks
-          - Collect taint chains
-          - Add 20+ tests for taint flow        TODO [ENTERPRISE][FEATURE]: Detect taint sanitization
-          - Identify sanitizer functions
-          - Mark taint neutralization
-          - Detect unsafe casts
-          - Add 15+ tests for sanitization        TODO [ENTERPRISE][ENHANCEMENT]: Support taint sensitivity
-          - Track taint levels (low/medium/high)
-          - Propagate sensitivity
-          - Adjust reports by sensitivity
-          - Add 12+ tests for sensitivity
+        TODO [ENTERPRISE][FEATURE]: Build taint flow from sources to sinks
+        TODO [ENTERPRISE]: Mark taint sources
+        TODO [ENTERPRISE]: Follow taint propagation
+        TODO [ENTERPRISE]: Find taint at sinks
+        TODO [ENTERPRISE]: Collect taint chains
+        TODO [ENTERPRISE]: Add 20+ tests for taint flow
+
+        TODO [ENTERPRISE][FEATURE]: Detect taint sanitization
+        TODO [ENTERPRISE]: Identify sanitizer functions
+        TODO [ENTERPRISE]: Mark taint neutralization
+        TODO [ENTERPRISE]: Detect unsafe casts
+        TODO [ENTERPRISE]: Add 15+ tests for sanitization
+
+        TODO [ENTERPRISE][ENHANCEMENT]: Support taint sensitivity
+        TODO [ENTERPRISE]: Track taint levels (low/medium/high)
+        TODO [ENTERPRISE]: Propagate sensitivity
+        TODO [ENTERPRISE]: Adjust reports by sensitivity
+        TODO [ENTERPRISE]: Add 12+ tests for sensitivity
         """
         return []
 
@@ -338,17 +338,17 @@ class DataFlowAnalyzer:
         Returns:
             Dict mapping line number to set of facts
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================        TODO [ENTERPRISE][FEATURE]: Implement fixed-point computation
-          - Iterate until fixpoint
-          - Manage gen/kill sets
-          - Compute IN/OUT for each block
-          - Add 15+ tests for fixpoint        TODO [ENTERPRISE][FEATURE]: Support multiple fact types
-          - Dispatch to appropriate analysis
-          - Cache computed facts
-          - Support on-demand computation
-          - Add 12+ tests for fact types
+        TODO [ENTERPRISE][FEATURE]: Implement fixed-point computation
+        TODO [ENTERPRISE]: Iterate until fixpoint
+        TODO [ENTERPRISE]: Manage gen/kill sets
+        TODO [ENTERPRISE]: Compute IN/OUT for each block
+        TODO [ENTERPRISE]: Add 15+ tests for fixpoint
+
+        TODO [ENTERPRISE][FEATURE]: Support multiple fact types
+        TODO [ENTERPRISE]: Dispatch to appropriate analysis
+        TODO [ENTERPRISE]: Cache computed facts
+        TODO [ENTERPRISE]: Support on-demand computation
+        TODO [ENTERPRISE]: Add 12+ tests for fact types
         """
         return {}
 
