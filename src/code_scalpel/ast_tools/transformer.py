@@ -23,87 +23,75 @@ class ASTTransformer(ast.NodeTransformer):
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Variable rename transformation
-      - Register variable rename mappings
-      - Apply renames with scope awareness
-      - Preserve variable references
-      - Handle shadowing correctly
-      - Add 15+ tests for variable renaming
-
-    [20251224_TIER1_TODO] FEATURE: Function rename transformation
-      - Register function rename mappings
-      - Update call sites
-      - Handle method references
-      - Preserve function signatures
-      - Add 12+ tests for function renaming
-
-    [20251224_TIER1_TODO] FEATURE: Basic AST visitor pattern
-      - Context tracking during traversal
-      - Node visiting with scope management
-      - Handle nested structures
-      - Add 10+ tests for traversal
-
+            TODO [COMMUNITY][FEATURE]: Variable rename transformation
+        TODO [COMMUNITY]: Register variable rename mappings
+        TODO [COMMUNITY]: Apply renames with scope awareness
+        TODO [COMMUNITY]: Preserve variable references
+        TODO [COMMUNITY]: Handle shadowing correctly
+        TODO [COMMUNITY]: Add 15+ tests for variable renaming
+            TODO [COMMUNITY][FEATURE]: Function rename transformation
+        TODO [COMMUNITY]: Register function rename mappings
+        TODO [COMMUNITY]: Update call sites
+        TODO [COMMUNITY]: Handle method references
+        TODO [COMMUNITY]: Preserve function signatures
+        TODO [COMMUNITY]: Add 12+ tests for function renaming
+            TODO [COMMUNITY][FEATURE]: Basic AST visitor pattern
+        TODO [COMMUNITY]: Context tracking during traversal
+        TODO [COMMUNITY]: Node visiting with scope management
+        TODO [COMMUNITY]: Handle nested structures
+        TODO [COMMUNITY]: Add 10+ tests for traversal
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: AST pattern matching with wildcards
-      - Match AST patterns with variable wildcards
-      - Support structural pattern matching
-      - Extract matched components
-      - Add 15+ tests for pattern matching
-
-    [20251224_TIER2_TODO] FEATURE: Transformation composition and chaining
-      - Compose multiple transformations
-      - Execute in sequence
-      - Track intermediate results
-      - Add 15+ tests for composition
-
-    [20251224_TIER2_TODO] FEATURE: Code extraction into methods
-      - Identify code blocks to extract
-      - Analyze variable usage (used/defined)
-      - Generate new function with parameters
-      - Replace code with function call
-      - Add 15+ tests for extraction
-
-    [20251224_TIER2_TODO] FEATURE: Variable inlining
-      - Find variable definitions
-      - Inline constant values
-      - Eliminate dead assignments
-      - Add 12+ tests for inlining
-
-    [20251224_TIER2_TODO] FEATURE: Decorator manipulation
-      - Add decorators to functions
-      - Remove decorators selectively
-      - Transform decorator arguments
-      - Add 12+ tests for decorators
-
+            TODO [PRO][FEATURE]: AST pattern matching with wildcards
+        TODO [PRO]: Match AST patterns with variable wildcards
+        TODO [PRO]: Support structural pattern matching
+        TODO [PRO]: Extract matched components
+        TODO [PRO]: Add 15+ tests for pattern matching
+            TODO [PRO][FEATURE]: Transformation composition and chaining
+        TODO [PRO]: Compose multiple transformations
+        TODO [PRO]: Execute in sequence
+        TODO [PRO]: Track intermediate results
+        TODO [PRO]: Add 15+ tests for composition
+            TODO [PRO][FEATURE]: Code extraction into methods
+        TODO [PRO]: Identify code blocks to extract
+        TODO [PRO]: Analyze variable usage (used/defined)
+        TODO [PRO]: Generate new function with parameters
+        TODO [PRO]: Replace code with function call
+        TODO [PRO]: Add 15+ tests for extraction
+            TODO [PRO][FEATURE]: Variable inlining
+        TODO [PRO]: Find variable definitions
+        TODO [PRO]: Inline constant values
+        TODO [PRO]: Eliminate dead assignments
+        TODO [PRO]: Add 12+ tests for inlining
+            TODO [PRO][FEATURE]: Decorator manipulation
+        TODO [PRO]: Add decorators to functions
+        TODO [PRO]: Remove decorators selectively
+        TODO [PRO]: Transform decorator arguments
+        TODO [PRO]: Add 12+ tests for decorators
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Type-aware transformations
-      - Use type hints for safe transforms
-      - Verify compatibility before applying
-      - Suggest type updates
-      - Add 15+ tests for type awareness
-
-    [20251224_TIER3_TODO] FEATURE: Transformation rollback and undo support
-      - Store transformation history
-      - Revert to previous state
-      - Diff before/after transformations
-      - Add 12+ tests for rollback
-
-    [20251224_TIER3_TODO] FEATURE: Semantic-preserving optimizations
-      - Constant folding
-      - Dead code elimination
-      - Loop unrolling (small loops)
-      - Add 15+ tests for optimizations
-
-    [20251224_TIER3_TODO] FEATURE: ML-based transformation suggestion
-      - Analyze code for refactoring opportunities
-      - Suggest safe transformations
-      - Predict transformation impact
-      - Add 12+ tests for suggestions
-    """
+            TODO [ENTERPRISE][FEATURE]: Type-aware transformations
+        TODO [ENTERPRISE]: Use type hints for safe transforms
+        TODO [ENTERPRISE]: Verify compatibility before applying
+        TODO [ENTERPRISE]: Suggest type updates
+        TODO [ENTERPRISE]: Add 15+ tests for type awareness
+            TODO [ENTERPRISE][FEATURE]: Transformation rollback and undo support
+        TODO [ENTERPRISE]: Store transformation history
+        TODO [ENTERPRISE]: Revert to previous state
+        TODO [ENTERPRISE]: Diff before/after transformations
+        TODO [ENTERPRISE]: Add 12+ tests for rollback
+            TODO [ENTERPRISE][FEATURE]: Semantic-preserving optimizations
+        TODO [ENTERPRISE]: Constant folding
+        TODO [ENTERPRISE]: Dead code elimination
+        TODO [ENTERPRISE]: Loop unrolling (small loops)
+        TODO [ENTERPRISE]: Add 15+ tests for optimizations
+            TODO [ENTERPRISE][FEATURE]: ML-based transformation suggestion
+        TODO [ENTERPRISE]: Analyze code for refactoring opportunities
+        TODO [ENTERPRISE]: Suggest safe transformations
+        TODO [ENTERPRISE]: Predict transformation impact
+        TODO [ENTERPRISE]: Add 12+ tests for suggestions    """
 
     def __init__(self):
         super().__init__()

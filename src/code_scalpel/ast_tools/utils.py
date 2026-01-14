@@ -14,95 +14,82 @@ class ASTUtils:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Extract all names from AST
-      - Walk AST for Name nodes
-      - Collect unique names
-      - Distinguish variables vs functions
-      - Add 10+ tests for name extraction
-
-    [20251224_TIER1_TODO] FEATURE: Get function information
-      - Extract function signature
-      - Get parameter names and defaults
-      - Extract decorators and type hints
-      - Add 12+ tests for function info
-
-    [20251224_TIER1_TODO] FEATURE: Find nodes matching condition
-      - Walk entire AST
-      - Apply predicate function
-      - Return matching nodes
-      - Add 10+ tests for finding nodes
-
-    [20251224_TIER1_TODO] FEATURE: Get source code for node
-      - Extract line range from AST node
-      - Pull source from line array
-      - Handle multi-line nodes
-      - Add 10+ tests for source extraction
-
+            TODO [COMMUNITY][FEATURE]: Extract all names from AST
+        TODO [COMMUNITY]: Walk AST for Name nodes
+        TODO [COMMUNITY]: Collect unique names
+        TODO [COMMUNITY]: Distinguish variables vs functions
+        TODO [COMMUNITY]: Add 10+ tests for name extraction
+            TODO [COMMUNITY][FEATURE]: Get function information
+        TODO [COMMUNITY]: Extract function signature
+        TODO [COMMUNITY]: Get parameter names and defaults
+        TODO [COMMUNITY]: Extract decorators and type hints
+        TODO [COMMUNITY]: Add 12+ tests for function info
+            TODO [COMMUNITY][FEATURE]: Find nodes matching condition
+        TODO [COMMUNITY]: Walk entire AST
+        TODO [COMMUNITY]: Apply predicate function
+        TODO [COMMUNITY]: Return matching nodes
+        TODO [COMMUNITY]: Add 10+ tests for finding nodes
+            TODO [COMMUNITY][FEATURE]: Get source code for node
+        TODO [COMMUNITY]: Extract line range from AST node
+        TODO [COMMUNITY]: Pull source from line array
+        TODO [COMMUNITY]: Handle multi-line nodes
+        TODO [COMMUNITY]: Add 10+ tests for source extraction
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Analyze variable dependencies
-      - Track assignments and uses
-      - Build dependency graph
-      - Identify chains of dependencies
-      - Add 15+ tests for dependency analysis
-
-    [20251224_TIER2_TODO] FEATURE: Constant folding and evaluation
-      - Evaluate constant expressions
-      - Simplify arithmetic operations
-      - Fold built-in function calls
-      - Add 15+ tests for folding
-
-    [20251224_TIER2_TODO] FEATURE: Dead code detection
-      - Find unreachable statements
-      - Detect unused variables
-      - Identify dead branches
-      - Add 15+ tests for dead code
-
-    [20251224_TIER2_TODO] FEATURE: Find similar nodes
-      - Compare AST structures
-      - Calculate similarity score
-      - Support pattern-based matching
-      - Add 12+ tests for similarity
-
-    [20251224_TIER2_TODO] FEATURE: Remove comments preserving line numbers
-      - Strip comment text
-      - Replace with whitespace
-      - Maintain line count
-      - Add 12+ tests for comment removal
-
+            TODO [PRO][FEATURE]: Analyze variable dependencies
+        TODO [PRO]: Track assignments and uses
+        TODO [PRO]: Build dependency graph
+        TODO [PRO]: Identify chains of dependencies
+        TODO [PRO]: Add 15+ tests for dependency analysis
+            TODO [PRO][FEATURE]: Constant folding and evaluation
+        TODO [PRO]: Evaluate constant expressions
+        TODO [PRO]: Simplify arithmetic operations
+        TODO [PRO]: Fold built-in function calls
+        TODO [PRO]: Add 15+ tests for folding
+            TODO [PRO][FEATURE]: Dead code detection
+        TODO [PRO]: Find unreachable statements
+        TODO [PRO]: Detect unused variables
+        TODO [PRO]: Identify dead branches
+        TODO [PRO]: Add 15+ tests for dead code
+            TODO [PRO][FEATURE]: Find similar nodes
+        TODO [PRO]: Compare AST structures
+        TODO [PRO]: Calculate similarity score
+        TODO [PRO]: Support pattern-based matching
+        TODO [PRO]: Add 12+ tests for similarity
+            TODO [PRO][FEATURE]: Remove comments preserving line numbers
+        TODO [PRO]: Strip comment text
+        TODO [PRO]: Replace with whitespace
+        TODO [PRO]: Maintain line count
+        TODO [PRO]: Add 12+ tests for comment removal
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Data flow analysis utilities
-      - Compute reaching definitions
-      - Calculate liveness sets
-      - Build use-def chains
-      - Add 15+ tests for data flow
+            TODO [ENTERPRISE][FEATURE]: Data flow analysis utilities
+        TODO [ENTERPRISE]: Compute reaching definitions
+        TODO [ENTERPRISE]: Calculate liveness sets
+        TODO [ENTERPRISE]: Build use-def chains
+        TODO [ENTERPRISE]: Add 15+ tests for data flow
+            TODO [ENTERPRISE][FEATURE]: Control flow graph generation
+        TODO [ENTERPRISE]: Build CFG from AST
+        TODO [ENTERPRISE]: Identify basic blocks
+        TODO [ENTERPRISE]: Handle loops and branches
+        TODO [ENTERPRISE]: Add 15+ tests for CFG
+            TODO [ENTERPRISE][FEATURE]: Advanced traversal strategies
+        TODO [ENTERPRISE]: Depth-first and breadth-first
+        TODO [ENTERPRISE]: Topological ordering
+        TODO [ENTERPRISE]: Reverse post-order
+        TODO [ENTERPRISE]: Add 12+ tests for traversal
+            TODO [ENTERPRISE][FEATURE]: Semantic code comparison
+        TODO [ENTERPRISE]: Compare semantics (not syntax)
+        TODO [ENTERPRISE]: Identify refactored code
+        TODO [ENTERPRISE]: Match equivalent structures
+        TODO [ENTERPRISE]: Add 12+ tests for semantic comparison    """
 
-    [20251224_TIER3_TODO] FEATURE: Control flow graph generation
-      - Build CFG from AST
-      - Identify basic blocks
-      - Handle loops and branches
-      - Add 15+ tests for CFG
-
-    [20251224_TIER3_TODO] FEATURE: Advanced traversal strategies
-      - Depth-first and breadth-first
-      - Topological ordering
-      - Reverse post-order
-      - Add 12+ tests for traversal
-
-    [20251224_TIER3_TODO] FEATURE: Semantic code comparison
-      - Compare semantics (not syntax)
-      - Identify refactored code
-      - Match equivalent structures
-      - Add 12+ tests for semantic comparison
-    """
-
-    # [20251221_FEATURE] TODO: Add constant folding and evaluation
-    # [20251221_FEATURE] TODO: Support dead code detection and removal
-    # [20251221_ENHANCEMENT] TODO: Add data flow analysis utilities
-    # [20251221_ENHANCEMENT] TODO: Support control flow graph generation
+    # TODO [FEATURE]: Add constant folding and evaluation
+    # TODO [FEATURE]: Support dead code detection and removal
+    # TODO [ENHANCEMENT]: Add data flow analysis utilities
+    # TODO [ENHANCEMENT]: Support control flow graph generation
 
     @staticmethod
     def get_all_names(tree: ast.AST) -> set[str]:

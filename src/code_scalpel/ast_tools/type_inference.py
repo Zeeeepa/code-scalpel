@@ -59,91 +59,78 @@ class TypeInference:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Extract existing type hints
-      - Parse type annotations from source
-      - Build type map for functions
-      - Build type map for variables
-      - Store confidence scores
-      - Add 15+ tests for hint extraction
-
-    [20251224_TIER1_TODO] FEATURE: Infer types from literal assignments
-      - Track literal values (str, int, bool, list, dict)
-      - Infer type from assignment
-      - Handle reassignments
-      - Add 12+ tests for literal inference
-
-    [20251224_TIER1_TODO] FEATURE: Track type through function calls
-      - Map return types to variables
-      - Follow simple call chains
-      - Handle built-in functions
-      - Add 12+ tests for call tracking
-
+            TODO [COMMUNITY][FEATURE]: Extract existing type hints
+        TODO [COMMUNITY]: Parse type annotations from source
+        TODO [COMMUNITY]: Build type map for functions
+        TODO [COMMUNITY]: Build type map for variables
+        TODO [COMMUNITY]: Store confidence scores
+        TODO [COMMUNITY]: Add 15+ tests for hint extraction
+            TODO [COMMUNITY][FEATURE]: Infer types from literal assignments
+        TODO [COMMUNITY]: Track literal values (str, int, bool, list, dict)
+        TODO [COMMUNITY]: Infer type from assignment
+        TODO [COMMUNITY]: Handle reassignments
+        TODO [COMMUNITY]: Add 12+ tests for literal inference
+            TODO [COMMUNITY][FEATURE]: Track type through function calls
+        TODO [COMMUNITY]: Map return types to variables
+        TODO [COMMUNITY]: Follow simple call chains
+        TODO [COMMUNITY]: Handle built-in functions
+        TODO [COMMUNITY]: Add 12+ tests for call tracking
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Infer function parameter types
-      - Analyze parameter usage
-      - Infer types from operations
-      - Handle defaults with type inference
-      - Add 15+ tests for parameter inference
-
-    [20251224_TIER2_TODO] FEATURE: Infer return types from return statements
-      - Analyze all return paths
-      - Detect union types (multiple return types)
-      - Handle implicit None returns
-      - Add 15+ tests for return type inference
-
-    [20251224_TIER2_TODO] FEATURE: Support type narrowing in conditional blocks
-      - Track type narrowing in if statements
-      - Handle isinstance checks
-      - Support type guards
-      - Add 15+ tests for type narrowing
-
-    [20251224_TIER2_TODO] FEATURE: Class attribute type inference
-      - Extract types from __init__
-      - Infer from class variables
-      - Track inherited attributes
-      - Add 12+ tests for class types
-
-    [20251224_TIER2_TODO] FEATURE: Generate type hint annotations
-      - Create modified source with hints
-      - Format according to PEP 257
-      - Support Black/Ruff formatting
-      - Add 15+ tests for generation
-
+            TODO [PRO][FEATURE]: Infer function parameter types
+        TODO [PRO]: Analyze parameter usage
+        TODO [PRO]: Infer types from operations
+        TODO [PRO]: Handle defaults with type inference
+        TODO [PRO]: Add 15+ tests for parameter inference
+            TODO [PRO][FEATURE]: Infer return types from return statements
+        TODO [PRO]: Analyze all return paths
+        TODO [PRO]: Detect union types (multiple return types)
+        TODO [PRO]: Handle implicit None returns
+        TODO [PRO]: Add 15+ tests for return type inference
+            TODO [PRO][FEATURE]: Support type narrowing in conditional blocks
+        TODO [PRO]: Track type narrowing in if statements
+        TODO [PRO]: Handle isinstance checks
+        TODO [PRO]: Support type guards
+        TODO [PRO]: Add 15+ tests for type narrowing
+            TODO [PRO][FEATURE]: Class attribute type inference
+        TODO [PRO]: Extract types from __init__
+        TODO [PRO]: Infer from class variables
+        TODO [PRO]: Track inherited attributes
+        TODO [PRO]: Add 12+ tests for class types
+            TODO [PRO][FEATURE]: Generate type hint annotations
+        TODO [PRO]: Create modified source with hints
+        TODO [PRO]: Format according to PEP 257
+        TODO [PRO]: Support Black/Ruff formatting
+        TODO [PRO]: Add 15+ tests for generation
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Integrate with type stub files (pyi)
-      - Parse and load .pyi files
-      - Merge stub types with inferred
-      - Validate against stubs
-      - Add 15+ tests for stub integration
-
-    [20251224_TIER3_TODO] FEATURE: Generic type parameter tracking
-      - Track TypeVar usage
-      - Resolve generic parameters
-      - Handle nested generics
-      - Add 15+ tests for generics
-
-    [20251224_TIER3_TODO] FEATURE: Advanced forward reference resolution
-      - Handle string-based type references
-      - Support PEP 563 (postponed annotations)
-      - Resolve circular types
-      - Add 12+ tests for forward refs
-
-    [20251224_TIER3_TODO] FEATURE: ML-based type prediction
-      - Learn from type patterns
-      - Predict types for unannotated code
-      - Confidence-based suggestions
-      - Add 15+ tests for prediction
-
-    [20251224_TIER3_TODO] FEATURE: Protocol and structural typing
-      - Infer protocols from duck typing
-      - Validate structural compatibility
-      - Generate Protocol definitions
-      - Add 12+ tests for protocols
-    """
+            TODO [ENTERPRISE][FEATURE]: Integrate with type stub files (pyi)
+        TODO [ENTERPRISE]: Parse and load .pyi files
+        TODO [ENTERPRISE]: Merge stub types with inferred
+        TODO [ENTERPRISE]: Validate against stubs
+        TODO [ENTERPRISE]: Add 15+ tests for stub integration
+            TODO [ENTERPRISE][FEATURE]: Generic type parameter tracking
+        TODO [ENTERPRISE]: Track TypeVar usage
+        TODO [ENTERPRISE]: Resolve generic parameters
+        TODO [ENTERPRISE]: Handle nested generics
+        TODO [ENTERPRISE]: Add 15+ tests for generics
+            TODO [ENTERPRISE][FEATURE]: Advanced forward reference resolution
+        TODO [ENTERPRISE]: Handle string-based type references
+        TODO [ENTERPRISE]: Support PEP 563 (postponed annotations)
+        TODO [ENTERPRISE]: Resolve circular types
+        TODO [ENTERPRISE]: Add 12+ tests for forward refs
+            TODO [ENTERPRISE][FEATURE]: ML-based type prediction
+        TODO [ENTERPRISE]: Learn from type patterns
+        TODO [ENTERPRISE]: Predict types for unannotated code
+        TODO [ENTERPRISE]: Confidence-based suggestions
+        TODO [ENTERPRISE]: Add 15+ tests for prediction
+            TODO [ENTERPRISE][FEATURE]: Protocol and structural typing
+        TODO [ENTERPRISE]: Infer protocols from duck typing
+        TODO [ENTERPRISE]: Validate structural compatibility
+        TODO [ENTERPRISE]: Generate Protocol definitions
+        TODO [ENTERPRISE]: Add 12+ tests for protocols    """
 
     def __init__(self, project_root: Optional[str] = None):
         self.project_root = project_root
@@ -161,9 +148,9 @@ class TypeInference:
         Returns:
             Dict containing inferred types for variables, functions, and classes
 
-        [20251221_FEATURE] TODO: Parse file and build type map
-        [20251221_FEATURE] TODO: Analyze assignments for variable types
-        [20251221_FEATURE] TODO: Extract function signatures and infer return types
+        TODO [FEATURE]: Parse file and build type map
+        TODO [FEATURE]: Analyze assignments for variable types
+        TODO [FEATURE]: Extract function signatures and infer return types
         """
         return {
             "variables": {},
@@ -176,9 +163,9 @@ class TypeInference:
         """
         Infer types for all variables in an AST node.
 
-        [20251221_FEATURE] TODO: Analyze assignment statements
-        [20251221_FEATURE] TODO: Track type through reassignments
-        [20251221_FEATURE] TODO: Handle union types from conditional assignments
+        TODO [FEATURE]: Analyze assignment statements
+        TODO [FEATURE]: Track type through reassignments
+        TODO [FEATURE]: Handle union types from conditional assignments
         """
         return {}
 
@@ -192,9 +179,9 @@ class TypeInference:
         Returns:
             FunctionTypeInfo with inferred types
 
-        [20251221_FEATURE] TODO: Extract existing type hints
-        [20251221_FEATURE] TODO: Infer missing type hints from usage
-        [20251221_ENHANCEMENT] TODO: Support overload resolution
+        TODO [FEATURE]: Extract existing type hints
+        TODO [FEATURE]: Infer missing type hints from usage
+        TODO [ENHANCEMENT]: Support overload resolution
         """
         func_info = FunctionTypeInfo(name=node.name)
 
@@ -207,9 +194,9 @@ class TypeInference:
         """
         Infer return type from function body.
 
-        [20251221_FEATURE] TODO: Analyze return statements
-        [20251221_FEATURE] TODO: Handle multiple return paths
-        [20251221_FEATURE] TODO: Infer Union types from different return statements
+        TODO [FEATURE]: Analyze return statements
+        TODO [FEATURE]: Handle multiple return paths
+        TODO [FEATURE]: Infer Union types from different return statements
         """
         return None
 
@@ -217,9 +204,9 @@ class TypeInference:
         """
         Infer types for class attributes and methods.
 
-        [20251221_FEATURE] TODO: Extract annotations from class body
-        [20251221_FEATURE] TODO: Infer attribute types from __init__
-        [20251221_FEATURE] TODO: Track inherited attributes
+        TODO [FEATURE]: Extract annotations from class body
+        TODO [FEATURE]: Infer attribute types from __init__
+        TODO [FEATURE]: Track inherited attributes
         """
         return {}
 
@@ -227,9 +214,9 @@ class TypeInference:
         """
         Generate type hint annotations for a file.
 
-        [20251221_FEATURE] TODO: Create modified source with type hints
-        [20251221_FEATURE] TODO: Format according to style guide (Black, Ruff)
-        [20251221_ENHANCEMENT] TODO: Handle complex types and generics
+        TODO [FEATURE]: Create modified source with type hints
+        TODO [FEATURE]: Format according to style guide (Black, Ruff)
+        TODO [ENHANCEMENT]: Handle complex types and generics
         """
         return ""
 
@@ -237,8 +224,8 @@ class TypeInference:
         """
         Resolve forward references in type hints.
 
-        [20251221_FEATURE] TODO: Handle string-based type references
-        [20251221_FEATURE] TODO: Support PEP 563 (postponed annotations)
+        TODO [FEATURE]: Handle string-based type references
+        TODO [FEATURE]: Support PEP 563 (postponed annotations)
         """
         return None
 
@@ -246,9 +233,9 @@ class TypeInference:
         """
         Validate type consistency in a file.
 
-        [20251221_FEATURE] TODO: Check for type mismatches
-        [20251221_FEATURE] TODO: Detect incompatible assignments
-        [20251221_ENHANCEMENT] TODO: Report type narrowing violations
+        TODO [FEATURE]: Check for type mismatches
+        TODO [FEATURE]: Detect incompatible assignments
+        TODO [ENHANCEMENT]: Report type narrowing violations
         """
         return []
 

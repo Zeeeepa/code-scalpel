@@ -71,105 +71,78 @@ class ControlFlowBuilder:
     """
     Builds and analyzes control flow graphs.
 
-    ====================================================================
-    TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================
-    [20251224_TIER1_TODO] BUGFIX: Improve error handling for malformed code
-      - Better error messages for invalid AST nodes
-      - Graceful handling of nested/complex structures
-      - Add 15+ tests for edge cases
+    TODO [COMMUNITY][BUGFIX]: Improve error handling for malformed code
+    TODO [COMMUNITY]: Better error messages for invalid AST nodes
+    TODO [COMMUNITY]: Graceful handling of nested/complex structures
+    TODO [COMMUNITY]: Add 15+ tests for edge cases
 
-    [20251224_TIER1_TODO] FEATURE: Basic CFG visualization
-      - Generate Graphviz DOT format
-      - Simple node/edge representation
-      - Add 10+ tests for visualization
+    TODO [COMMUNITY][FEATURE]: Basic CFG visualization
+    TODO [COMMUNITY]: Generate Graphviz DOT format
+    TODO [COMMUNITY]: Simple node/edge representation
+    TODO [COMMUNITY]: Add 10+ tests for visualization
 
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Build CFG from function/method body
-      Purpose: Enable program flow analysis and optimization
-      Steps:
-        1. Parse function AST nodes
-        2. Extract statements and build blocks
-        3. Connect blocks with control flow edges
-        4. Handle all statement types (if/for/while/try)
-        5. Add 35+ tests for CFG construction
+    TODO [PRO][FEATURE]: Build CFG from function/method body (Enable program flow analysis and optimization)
+    TODO [PRO]: Parse function AST nodes
+    TODO [PRO]: Extract statements and build blocks
+    TODO [PRO]: Connect blocks with control flow edges
+    TODO [PRO]: Handle all statement types (if/for/while/try)
+    TODO [PRO]: Add 35+ tests for CFG construction
 
-    [20251224_TIER2_TODO] FEATURE: Identify basic blocks and edges
-      Purpose: Decompose code into analyzable units
-      Steps:
-        1. Identify block boundaries (branches, joins)
-        2. Extract statements within blocks
-        3. Create edges between blocks
-        4. Label edge types (true/false/exception)
-        5. Add 30+ tests for block identification
+    TODO [PRO][FEATURE]: Identify basic blocks and edges (Decompose code into analyzable units)
+    TODO [PRO]: Identify block boundaries (branches, joins)
+    TODO [PRO]: Extract statements within blocks
+    TODO [PRO]: Create edges between blocks
+    TODO [PRO]: Label edge types (true/false/exception)
+    TODO [PRO]: Add 30+ tests for block identification
 
-    [20251224_TIER2_TODO] ENHANCEMENT: Detect and mark loop structures
-      Purpose: Enable loop optimization and analysis
-      Steps:
-        1. Identify loop headers (for/while entry)
-        2. Detect back edges (cycle detection)
-        3. Mark loop bodies and exits
-        4. Calculate loop nesting depth
-        5. Add 25+ tests for loop detection
+    TODO [PRO][ENHANCEMENT]: Detect and mark loop structures (Enable loop optimization and analysis)
+    TODO [PRO]: Identify loop headers (for/while entry)
+    TODO [PRO]: Detect back edges (cycle detection)
+    TODO [PRO]: Mark loop bodies and exits
+    TODO [PRO]: Calculate loop nesting depth
+    TODO [PRO]: Add 25+ tests for loop detection
 
-    [20251224_TIER2_TODO] FEATURE: Handle exception flow
-      Purpose: Track exception paths through code
-      Steps:
-        1. Extract try/except/finally blocks
-        2. Create edges to exception handlers
-        3. Track re-raised exceptions
-        4. Handle nested exception handlers
-        5. Add 30+ tests for exception flow
+    TODO [PRO][FEATURE]: Handle exception flow (Track exception paths through code)
+    TODO [PRO]: Extract try/except/finally blocks
+    TODO [PRO]: Create edges to exception handlers
+    TODO [PRO]: Track re-raised exceptions
+    TODO [PRO]: Handle nested exception handlers
+    TODO [PRO]: Add 30+ tests for exception flow
 
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Get all execution paths with depth control
-      Purpose: Enumerate all possible execution flows
-      Steps:
-        1. DFS from entry to exit
-        2. Collect all path sequences
-        3. Detect infeasible paths
-        4. Implement depth limiting
-        5. Add 25+ tests for path enumeration
+    TODO [ENTERPRISE][FEATURE]: Get all execution paths with depth control (Enumerate all possible execution flows)
+    TODO [ENTERPRISE]: DFS from entry to exit
+    TODO [ENTERPRISE]: Collect all path sequences
+    TODO [ENTERPRISE]: Detect infeasible paths
+    TODO [ENTERPRISE]: Implement depth limiting
+    TODO [ENTERPRISE]: Add 25+ tests for path enumeration
 
-    [20251224_TIER3_TODO] FEATURE: Dominance analysis
-      Purpose: Identify control dependencies
-      Steps:
-        1. Implement dominator tree algorithm
-        2. Compute immediate dominators
-        3. Calculate post-dominators
-        4. Identify critical edges
-        5. Add 25+ tests for dominance analysis
+    TODO [ENTERPRISE][FEATURE]: Dominance analysis (Identify control dependencies)
+    TODO [ENTERPRISE]: Implement dominator tree algorithm
+    TODO [ENTERPRISE]: Compute immediate dominators
+    TODO [ENTERPRISE]: Calculate post-dominators
+    TODO [ENTERPRISE]: Identify critical edges
+    TODO [ENTERPRISE]: Add 25+ tests for dominance analysis
 
-    [20251224_TIER3_TODO] FEATURE: Reachability computation
-      Purpose: Find which code is reachable
-      Steps:
-        1. Fixed-point iteration from entry
-        2. Mark reachable blocks
-        3. Identify unreachable code
-        4. Suggest dead code removal
-        5. Add 20+ tests for reachability
+    TODO [ENTERPRISE][FEATURE]: Reachability computation (Find which code is reachable)
+    TODO [ENTERPRISE]: Fixed-point iteration from entry
+    TODO [ENTERPRISE]: Mark reachable blocks
+    TODO [ENTERPRISE]: Identify unreachable code
+    TODO [ENTERPRISE]: Suggest dead code removal
+    TODO [ENTERPRISE]: Add 20+ tests for reachability
 
-    [20251224_TIER3_TODO] FEATURE: Loop invariant analysis
-      Purpose: Identify code motion opportunities
-      Steps:
-        1. Find statements independent of loop
-        2. Detect invariant expressions
-        3. Flag for optimization
-        4. Estimate performance impact
-        5. Add 20+ tests for invariant detection
+    TODO [ENTERPRISE][FEATURE]: Loop invariant analysis (Identify code motion opportunities)
+    TODO [ENTERPRISE]: Find statements independent of loop
+    TODO [ENTERPRISE]: Detect invariant expressions
+    TODO [ENTERPRISE]: Flag for optimization
+    TODO [ENTERPRISE]: Estimate performance impact
+    TODO [ENTERPRISE]: Add 20+ tests for invariant detection
 
-    [20251224_TIER3_TODO] ENHANCEMENT: Advanced visualization
-      Purpose: Interactive CFG exploration
-      Steps:
-        1. Color-code block types
-        2. Add hover details
-        3. Support SVG/HTML export
-        4. Highlight critical paths
-        5. Add 15+ tests for visualization
+    TODO [ENTERPRISE][ENHANCEMENT]: Advanced visualization (Interactive CFG exploration)
+    TODO [ENTERPRISE]: Color-code block types
+    TODO [ENTERPRISE]: Add hover details
+    TODO [ENTERPRISE]: Support SVG/HTML export
+    TODO [ENTERPRISE]: Highlight critical paths
+    TODO [ENTERPRISE]: Add 15+ tests for visualization
     """
 
     def __init__(self):
@@ -187,20 +160,17 @@ class ControlFlowBuilder:
         Returns:
             ControlFlowGraph or None if function not found
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-        [20251224_TIER2_TODO] FEATURE: Parse file and extract function
-          - Load and parse Python file
-          - Find function by name
-          - Extract function AST node
-          - Add 12+ tests for function extraction
+        TODO [PRO][FEATURE]: Parse file and extract function
+        TODO [PRO]: Load and parse Python file
+        TODO [PRO]: Find function by name
+        TODO [PRO]: Extract function AST node
+        TODO [PRO]: Add 12+ tests for function extraction
 
-        [20251224_TIER2_TODO] FEATURE: Build CFG from function statements
-          - Process function body
-          - Create control flow blocks
-          - Connect with edges
-          - Add 15+ tests for CFG building
+        TODO [PRO][FEATURE]: Build CFG from function statements
+        TODO [PRO]: Process function body
+        TODO [PRO]: Create control flow blocks
+        TODO [PRO]: Connect with edges
+        TODO [PRO]: Add 15+ tests for CFG building
         """
         return ControlFlowGraph()
 
@@ -208,26 +178,23 @@ class ControlFlowBuilder:
         """
         Build CFG from a FunctionDef AST node.
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-        [20251224_TIER2_TODO] FEATURE: Create entry and exit blocks
-          - Allocate entry block
-          - Allocate exit block
-          - Mark special node types
-          - Add 10+ tests
+        TODO [PRO][FEATURE]: Create entry and exit blocks
+        TODO [PRO]: Allocate entry block
+        TODO [PRO]: Allocate exit block
+        TODO [PRO]: Mark special node types
+        TODO [PRO]: Add 10+ tests
 
-        [20251224_TIER2_TODO] FEATURE: Process function body statements
-          - Iterate through statements
-          - Create blocks for each statement
-          - Add 15+ tests
+        TODO [PRO][FEATURE]: Process function body statements
+        TODO [PRO]: Iterate through statements
+        TODO [PRO]: Create blocks for each statement
+        TODO [PRO]: Add 15+ tests
 
-        [20251224_TIER2_TODO] FEATURE: Connect blocks with edges
-          - Link sequential blocks
-          - Add conditional edges (if/else)
-          - Add loop edges (back edges)
-          - Add exception edges
-          - Add 20+ tests
+        TODO [PRO][FEATURE]: Connect blocks with edges
+        TODO [PRO]: Link sequential blocks
+        TODO [PRO]: Add conditional edges (if/else)
+        TODO [PRO]: Add loop edges (back edges)
+        TODO [PRO]: Add exception edges
+        TODO [PRO]: Add 20+ tests
         """
         cfg = ControlFlowGraph()
         return cfg
@@ -236,26 +203,23 @@ class ControlFlowBuilder:
         """
         Get all execution paths from entry to exit.
 
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-        [20251224_TIER3_TODO] FEATURE: Enumerate all paths with depth limit
-          - DFS traversal from entry
-          - Collect path sequences
-          - Limit path count to prevent explosion
-          - Add 15+ tests for path enumeration
+        TODO [ENTERPRISE][FEATURE]: Enumerate all paths with depth limit
+        TODO [ENTERPRISE]: DFS traversal from entry
+        TODO [ENTERPRISE]: Collect path sequences
+        TODO [ENTERPRISE]: Limit path count to prevent explosion
+        TODO [ENTERPRISE]: Add 15+ tests for path enumeration
 
-        [20251224_TIER3_TODO] FEATURE: Detect infeasible paths
-          - Analyze path conditions
-          - Identify contradictory branches
-          - Filter impossible paths
-          - Add 12+ tests for feasibility detection
+        TODO [ENTERPRISE][FEATURE]: Detect infeasible paths
+        TODO [ENTERPRISE]: Analyze path conditions
+        TODO [ENTERPRISE]: Identify contradictory branches
+        TODO [ENTERPRISE]: Filter impossible paths
+        TODO [ENTERPRISE]: Add 12+ tests for feasibility detection
 
-        [20251224_TIER3_TODO] ENHANCEMENT: Prioritize paths by coverage
-          - Score paths by test coverage impact
-          - Identify critical paths
-          - Suggest test cases
-          - Add 10+ tests
+        TODO [ENTERPRISE][ENHANCEMENT]: Prioritize paths by coverage
+        TODO [ENTERPRISE]: Score paths by test coverage impact
+        TODO [ENTERPRISE]: Identify critical paths
+        TODO [ENTERPRISE]: Suggest test cases
+        TODO [ENTERPRISE]: Add 10+ tests
         """
         return []
 
@@ -269,24 +233,21 @@ class ControlFlowBuilder:
         ====================================================================
         TIER 2: PRO (Commercial - Medium Priority)
         ====================================================================
-        [20251224_TIER2_TODO] FEATURE: Identify strongly connected components
-          - Tarjan's algorithm for SCCs
-          - Detect cycles in CFG
-          - Mark cycle members
-          - Add 15+ tests for SCC detection
-
-        [20251224_TIER2_TODO] FEATURE: Detect loop headers and back edges
-          - Identify back edges (to ancestors)
-          - Mark loop entry points
-          - Find loop exit edges
-          - Add 15+ tests for loop detection
-
-        [20251224_TIER3_TODO] ENHANCEMENT: Classify loop types
-          - Distinguish for/while/do-while patterns
-          - Detect infinite loops
-          - Calculate loop bounds if possible
-          - Add 12+ tests for loop classification
-        """
+                TODO [PRO][FEATURE]: Identify strongly connected components
+        TODO [PRO]: Tarjan's algorithm for SCCs
+        TODO [PRO]: Detect cycles in CFG
+        TODO [PRO]: Mark cycle members
+        TODO [PRO]: Add 15+ tests for SCC detection
+                TODO [PRO][FEATURE]: Detect loop headers and back edges
+        TODO [PRO]: Identify back edges (to ancestors)
+        TODO [PRO]: Mark loop entry points
+        TODO [PRO]: Find loop exit edges
+        TODO [PRO]: Add 15+ tests for loop detection
+                TODO [ENTERPRISE][ENHANCEMENT]: Classify loop types
+        TODO [ENTERPRISE]: Distinguish for/while/do-while patterns
+        TODO [ENTERPRISE]: Detect infinite loops
+        TODO [ENTERPRISE]: Calculate loop bounds if possible
+        TODO [ENTERPRISE]: Add 12+ tests for loop classification        """
         return []
 
     def find_dominators(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -299,18 +260,16 @@ class ControlFlowBuilder:
         ====================================================================
         TIER 3: ENTERPRISE (Commercial - Lower Priority)
         ====================================================================
-        [20251224_TIER3_TODO] FEATURE: Implement dominator tree algorithm
-          - Compute dominators via fixed-point iteration
-          - Build dominator tree structure
-          - Mark dominator relationships
-          - Add 15+ tests for dominance
-
-        [20251224_TIER3_TODO] ENHANCEMENT: Compute immediate dominators
-          - Find direct dominator for each block
-          - Build idom edges
-          - Support dominance frontier queries
-          - Add 12+ tests for immediate dominance
-        """
+                TODO [ENTERPRISE][FEATURE]: Implement dominator tree algorithm
+        TODO [ENTERPRISE]: Compute dominators via fixed-point iteration
+        TODO [ENTERPRISE]: Build dominator tree structure
+        TODO [ENTERPRISE]: Mark dominator relationships
+        TODO [ENTERPRISE]: Add 15+ tests for dominance
+                TODO [ENTERPRISE][ENHANCEMENT]: Compute immediate dominators
+        TODO [ENTERPRISE]: Find direct dominator for each block
+        TODO [ENTERPRISE]: Build idom edges
+        TODO [ENTERPRISE]: Support dominance frontier queries
+        TODO [ENTERPRISE]: Add 12+ tests for immediate dominance        """
         return {}
 
     def compute_reachability(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -323,18 +282,16 @@ class ControlFlowBuilder:
         ====================================================================
         TIER 3: ENTERPRISE (Commercial - Lower Priority)
         ====================================================================
-        [20251224_TIER3_TODO] FEATURE: Fixed-point iteration for reachability
-          - BFS/DFS from entry block
-          - Mark reachable blocks
-          - Build reachability matrix
-          - Add 15+ tests for reachability
-
-        [20251224_TIER3_TODO] FEATURE: Identify unreachable code
-          - Find blocks with no path from entry
-          - Report unreachable statement locations
-          - Suggest dead code removal
-          - Add 12+ tests for dead code detection
-        """
+                TODO [ENTERPRISE][FEATURE]: Fixed-point iteration for reachability
+        TODO [ENTERPRISE]: BFS/DFS from entry block
+        TODO [ENTERPRISE]: Mark reachable blocks
+        TODO [ENTERPRISE]: Build reachability matrix
+        TODO [ENTERPRISE]: Add 15+ tests for reachability
+                TODO [ENTERPRISE][FEATURE]: Identify unreachable code
+        TODO [ENTERPRISE]: Find blocks with no path from entry
+        TODO [ENTERPRISE]: Report unreachable statement locations
+        TODO [ENTERPRISE]: Suggest dead code removal
+        TODO [ENTERPRISE]: Add 12+ tests for dead code detection        """
         return {}
 
     def analyze_loop_invariants(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -344,18 +301,16 @@ class ControlFlowBuilder:
         ====================================================================
         TIER 3: ENTERPRISE (Commercial - Lower Priority)
         ====================================================================
-        [20251224_TIER3_TODO] FEATURE: Detect statements independent of loop
-          - Analyze data dependencies
-          - Find statements with no loop data dependencies
-          - Mark invariant code
-          - Add 15+ tests for invariant detection
-
-        [20251224_TIER3_TODO] FEATURE: Flag for code motion optimization
-          - Suggest statement hoisting
-          - Calculate performance impact
-          - Verify safety of motion
-          - Add 12+ tests for motion suggestions
-        """
+                TODO [ENTERPRISE][FEATURE]: Detect statements independent of loop
+        TODO [ENTERPRISE]: Analyze data dependencies
+        TODO [ENTERPRISE]: Find statements with no loop data dependencies
+        TODO [ENTERPRISE]: Mark invariant code
+        TODO [ENTERPRISE]: Add 15+ tests for invariant detection
+                TODO [ENTERPRISE][FEATURE]: Flag for code motion optimization
+        TODO [ENTERPRISE]: Suggest statement hoisting
+        TODO [ENTERPRISE]: Calculate performance impact
+        TODO [ENTERPRISE]: Verify safety of motion
+        TODO [ENTERPRISE]: Add 12+ tests for motion suggestions        """
         return {}
 
     def visualize(self, cfg: ControlFlowGraph, output_file: str = "cfg"):
@@ -365,28 +320,25 @@ class ControlFlowBuilder:
         ====================================================================
         TIER 2: PRO (Commercial - Medium Priority)
         ====================================================================
-        [20251224_TIER2_TODO] FEATURE: Generate Graphviz DOT format
-          - Create node definitions
-          - Create edge definitions
-          - Add graph properties
-          - Output DOT syntax
-          - Add 10+ tests for DOT generation
-
-        [20251224_TIER2_TODO] FEATURE: Color-code different block types
-          - Entry block: green
-          - Exit block: red
-          - Normal blocks: blue
-          - Branch blocks: yellow
-          - Exception blocks: orange
-          - Add 8+ tests for coloring
-
-        [20251224_TIER3_TODO] ENHANCEMENT: Support interactive visualization
-          - Generate SVG with interactivity
-          - Add hover details (statements)
-          - Support HTML export
-          - Add click navigation
-          - Add 10+ tests
-        """
+                TODO [PRO][FEATURE]: Generate Graphviz DOT format
+        TODO [PRO]: Create node definitions
+        TODO [PRO]: Create edge definitions
+        TODO [PRO]: Add graph properties
+        TODO [PRO]: Output DOT syntax
+        TODO [PRO]: Add 10+ tests for DOT generation
+                TODO [PRO][FEATURE]: Color-code different block types
+        TODO [PRO]: Entry block: green
+        TODO [PRO]: Exit block: red
+        TODO [PRO]: Normal blocks: blue
+        TODO [PRO]: Branch blocks: yellow
+        TODO [PRO]: Exception blocks: orange
+        TODO [PRO]: Add 8+ tests for coloring
+                TODO [ENTERPRISE][ENHANCEMENT]: Support interactive visualization
+        TODO [ENTERPRISE]: Generate SVG with interactivity
+        TODO [ENTERPRISE]: Add hover details (statements)
+        TODO [ENTERPRISE]: Support HTML export
+        TODO [ENTERPRISE]: Add click navigation
+        TODO [ENTERPRISE]: Add 10+ tests        """
         pass
 
     def _create_block(self, block_type: BlockType) -> str:

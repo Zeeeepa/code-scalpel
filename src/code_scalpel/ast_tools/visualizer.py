@@ -34,93 +34,80 @@ class ASTVisualizer:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Generate Graphviz visualizations
-      - Create directed graph from AST
-      - Build node and edge structure
-      - Apply basic styling
-      - Add 15+ tests for visualization
-
-    [20251224_TIER1_TODO] FEATURE: Export to PNG/PDF formats
-      - Render Graphviz output
-      - Save to PNG/PDF files
-      - Handle rendering errors
-      - Add 12+ tests for export
-
-    [20251224_TIER1_TODO] FEATURE: Customize node appearance
-      - Apply colors by node type
-      - Set node shapes
-      - Add labels with information
-      - Add 12+ tests for styling
-
+            TODO [COMMUNITY][FEATURE]: Generate Graphviz visualizations
+        TODO [COMMUNITY]: Create directed graph from AST
+        TODO [COMMUNITY]: Build node and edge structure
+        TODO [COMMUNITY]: Apply basic styling
+        TODO [COMMUNITY]: Add 15+ tests for visualization
+            TODO [COMMUNITY][FEATURE]: Export to PNG/PDF formats
+        TODO [COMMUNITY]: Render Graphviz output
+        TODO [COMMUNITY]: Save to PNG/PDF files
+        TODO [COMMUNITY]: Handle rendering errors
+        TODO [COMMUNITY]: Add 12+ tests for export
+            TODO [COMMUNITY][FEATURE]: Customize node appearance
+        TODO [COMMUNITY]: Apply colors by node type
+        TODO [COMMUNITY]: Set node shapes
+        TODO [COMMUNITY]: Add labels with information
+        TODO [COMMUNITY]: Add 12+ tests for styling
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Diff visualization between ASTs
-      - Compare two ASTs
-      - Highlight added nodes
-      - Highlight removed nodes
-      - Highlight modified nodes
-      - Add 15+ tests for diff
-
-    [20251224_TIER2_TODO] FEATURE: Interactive HTML visualization
-      - Generate interactive HTML with D3.js
-      - Add hover information
-      - Support zooming and panning
-      - Add 15+ tests for interactivity
-
-    [20251224_TIER2_TODO] FEATURE: SVG export format
-      - Generate scalable SVG output
-      - Preserve vector formatting
-      - Support SVG styling
-      - Add 12+ tests for SVG
-
-    [20251224_TIER2_TODO] FEATURE: Side-by-side source and AST view
-      - Display source code and AST together
-      - Link AST nodes to source lines
-      - Sync highlighting between views
-      - Add 12+ tests for views
-
-    [20251224_TIER2_TODO] FEATURE: Enhanced node labeling
-      - Show line numbers
-      - Include source code snippets
-      - Display type information
-      - Add 12+ tests for labels
-
+            TODO [PRO][FEATURE]: Diff visualization between ASTs
+        TODO [PRO]: Compare two ASTs
+        TODO [PRO]: Highlight added nodes
+        TODO [PRO]: Highlight removed nodes
+        TODO [PRO]: Highlight modified nodes
+        TODO [PRO]: Add 15+ tests for diff
+            TODO [PRO][FEATURE]: Interactive HTML visualization
+        TODO [PRO]: Generate interactive HTML with D3.js
+        TODO [PRO]: Add hover information
+        TODO [PRO]: Support zooming and panning
+        TODO [PRO]: Add 15+ tests for interactivity
+            TODO [PRO][FEATURE]: SVG export format
+        TODO [PRO]: Generate scalable SVG output
+        TODO [PRO]: Preserve vector formatting
+        TODO [PRO]: Support SVG styling
+        TODO [PRO]: Add 12+ tests for SVG
+            TODO [PRO][FEATURE]: Side-by-side source and AST view
+        TODO [PRO]: Display source code and AST together
+        TODO [PRO]: Link AST nodes to source lines
+        TODO [PRO]: Sync highlighting between views
+        TODO [PRO]: Add 12+ tests for views
+            TODO [PRO][FEATURE]: Enhanced node labeling
+        TODO [PRO]: Show line numbers
+        TODO [PRO]: Include source code snippets
+        TODO [PRO]: Display type information
+        TODO [PRO]: Add 12+ tests for labels
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Advanced diagram customization
-      - Parameter node sizing by metrics
-      - Color gradients by metrics
-      - Subgraph clustering by module
-      - Interactive filtering
-      - Add 15+ tests for customization
-
-    [20251224_TIER3_TODO] FEATURE: Multiple export formats
-      - Export to GraphML
-      - Export to JSON
-      - Export to DOT
-      - Support custom formats
-      - Add 15+ tests for formats
-
-    [20251224_TIER3_TODO] FEATURE: Semantic visualization
-      - Highlight control flow paths
-      - Show data dependencies
-      - Indicate cyclomatic complexity
-      - Add 15+ tests for semantics
-
-    [20251224_TIER3_TODO] FEATURE: 3D visualization and exploration
-      - Generate 3D graph layouts
-      - Interactive 3D navigation
-      - Advanced filtering and search
-      - Add 12+ tests for 3D
-
-    [20251224_TIER3_TODO] FEATURE: Performance optimization visualization
-      - Identify hotspots
-      - Show call frequency
-      - Highlight bottlenecks
-      - Add 12+ tests for performance
-    """
+            TODO [ENTERPRISE][FEATURE]: Advanced diagram customization
+        TODO [ENTERPRISE]: Parameter node sizing by metrics
+        TODO [ENTERPRISE]: Color gradients by metrics
+        TODO [ENTERPRISE]: Subgraph clustering by module
+        TODO [ENTERPRISE]: Interactive filtering
+        TODO [ENTERPRISE]: Add 15+ tests for customization
+            TODO [ENTERPRISE][FEATURE]: Multiple export formats
+        TODO [ENTERPRISE]: Export to GraphML
+        TODO [ENTERPRISE]: Export to JSON
+        TODO [ENTERPRISE]: Export to DOT
+        TODO [ENTERPRISE]: Support custom formats
+        TODO [ENTERPRISE]: Add 15+ tests for formats
+            TODO [ENTERPRISE][FEATURE]: Semantic visualization
+        TODO [ENTERPRISE]: Highlight control flow paths
+        TODO [ENTERPRISE]: Show data dependencies
+        TODO [ENTERPRISE]: Indicate cyclomatic complexity
+        TODO [ENTERPRISE]: Add 15+ tests for semantics
+            TODO [ENTERPRISE][FEATURE]: 3D visualization and exploration
+        TODO [ENTERPRISE]: Generate 3D graph layouts
+        TODO [ENTERPRISE]: Interactive 3D navigation
+        TODO [ENTERPRISE]: Advanced filtering and search
+        TODO [ENTERPRISE]: Add 12+ tests for 3D
+            TODO [ENTERPRISE][FEATURE]: Performance optimization visualization
+        TODO [ENTERPRISE]: Identify hotspots
+        TODO [ENTERPRISE]: Show call frequency
+        TODO [ENTERPRISE]: Highlight bottlenecks
+        TODO [ENTERPRISE]: Add 12+ tests for performance    """
 
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()

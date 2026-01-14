@@ -98,57 +98,57 @@ class RefactoringAnalyzer:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] BUGFIX: Fix circular import in ast_refactoring module
-    [20251224_TIER1_TODO] TEST: Unit tests for dataclass definitions
-    [20251224_TIER1_TODO] TEST: Adversarial tests for edge cases
+    TODO [COMMUNITY][BUGFIX]: Fix circular import in ast_refactoring module
+    TODO [COMMUNITY][TEST]: Unit tests for dataclass definitions
+    TODO [COMMUNITY][TEST]: Adversarial tests for edge cases
 
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Detect extract method opportunities
-      - Find duplicate code blocks
-      - Identify cohesive code segments
-      - Suggest extract method refactoring
-      - Calculate effort and impact
-      - Add 30+ tests for extraction opportunities
+    TODO [PRO][FEATURE]: Detect extract method opportunities
+    TODO [PRO]: Find duplicate code blocks
+    TODO [PRO]: Identify cohesive code segments
+    TODO [PRO]: Suggest extract method refactoring
+    TODO [PRO]: Calculate effort and impact
+    TODO [PRO]: Add 30+ tests for extraction opportunities
 
-    [20251224_TIER2_TODO] FEATURE: Detect extract class opportunities
-      - Identify data clumps (attributes used together)
-      - Detect feature envy (using other class's data too much)
-      - Suggest class extraction
-      - Calculate refactoring complexity
-      - Add 25+ tests for extraction opportunities
+    TODO [PRO][FEATURE]: Detect extract class opportunities
+    TODO [PRO]: Identify data clumps (attributes used together)
+    TODO [PRO]: Detect feature envy (using other class's data too much)
+    TODO [PRO]: Suggest class extraction
+    TODO [PRO]: Calculate refactoring complexity
+    TODO [PRO]: Add 25+ tests for extraction opportunities
 
-    [20251224_TIER2_TODO] FEATURE: Detect code smells
-      - Long Parameter List detection
-      - Long Method/Function detection
-      - Duplicate code block detection
-      - Dead code (unreachable statements)
-      - Add 35+ tests for smell detection
+    TODO [PRO][FEATURE]: Detect code smells
+    TODO [PRO]: Long Parameter List detection
+    TODO [PRO]: Long Method/Function detection
+    TODO [PRO]: Duplicate code block detection
+    TODO [PRO]: Dead code (unreachable statements)
+    TODO [PRO]: Add 35+ tests for smell detection
 
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Design pattern recommendations
-      - Detect singleton candidates
-      - Identify factory pattern opportunities
-      - Suggest adapter/facade patterns
-      - Detect strategy pattern candidates
-      - Add 25+ tests for pattern suggestions
+    TODO [ENTERPRISE][FEATURE]: Design pattern recommendations
+    TODO [ENTERPRISE]: Detect singleton candidates
+    TODO [ENTERPRISE]: Identify factory pattern opportunities
+    TODO [ENTERPRISE]: Suggest adapter/facade patterns
+    TODO [ENTERPRISE]: Detect strategy pattern candidates
+    TODO [ENTERPRISE]: Add 25+ tests for pattern suggestions
 
-    [20251224_TIER3_TODO] FEATURE: Calculate refactoring priority
-      - Rank by impact/effort ratio
-      - Consider dependencies between refactorings
-      - Support custom prioritization rules
-      - Generate refactoring roadmap
-      - Add 20+ tests for prioritization
+    TODO [ENTERPRISE][FEATURE]: Calculate refactoring priority
+    TODO [ENTERPRISE]: Rank by impact/effort ratio
+    TODO [ENTERPRISE]: Consider dependencies between refactorings
+    TODO [ENTERPRISE]: Support custom prioritization rules
+    TODO [ENTERPRISE]: Generate refactoring roadmap
+    TODO [ENTERPRISE]: Add 20+ tests for prioritization
 
-    [20251224_TIER3_TODO] FEATURE: Refactoring impact analysis
-      - Estimate complexity reduction
-      - Estimate test coverage impact
-      - Track historical refactoring metrics
-      - Predict breaking changes
-      - Add 30+ tests for impact analysis
+    TODO [ENTERPRISE][FEATURE]: Refactoring impact analysis
+    TODO [ENTERPRISE]: Estimate complexity reduction
+    TODO [ENTERPRISE]: Estimate test coverage impact
+    TODO [ENTERPRISE]: Track historical refactoring metrics
+    TODO [ENTERPRISE]: Predict breaking changes
+    TODO [ENTERPRISE]: Add 30+ tests for impact analysis
     """
 
     def __init__(self):

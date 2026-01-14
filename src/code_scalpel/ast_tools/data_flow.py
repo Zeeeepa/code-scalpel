@@ -81,84 +81,70 @@ class DataFlowAnalyzer:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Basic data flow infrastructure
-      - Initialize analyzer with caching
-      - Support file and function-level analysis
-      - Add 15+ tests for basic functionality
+    TODO [COMMUNITY][FEATURE]: Basic data flow infrastructure
+    TODO [COMMUNITY]: Initialize analyzer with caching
+    TODO [COMMUNITY]: Support file and function-level analysis
+    TODO [COMMUNITY]: Add 15+ tests for basic functionality
 
-    [20251224_TIER1_TODO] TEST: Adversarial tests for edge cases
-      - Nested scopes, global variables
-      - Complex assignments, mutations
-      - Exception handlers
+    TODO [COMMUNITY][TEST]: Adversarial tests for edge cases
+    TODO [COMMUNITY]: Test nested scopes, global variables
+    TODO [COMMUNITY]: Test complex assignments, mutations
+    TODO [COMMUNITY]: Test exception handlers
 
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Build use-definition chains
-      Purpose: Track variable dependencies
-      Steps:
-        1. Extract all variable definitions
-        2. Extract all variable usages
-        3. Match definitions to uses
-        4. Create def-use pairs
-        5. Add 30+ tests for chain building
+    TODO [PRO][FEATURE]: Build use-definition chains
+    TODO [PRO]: Extract all variable definitions
+    TODO [PRO]: Extract all variable usages
+    TODO [PRO]: Match definitions to uses
+    TODO [PRO]: Create def-use pairs
+    TODO [PRO]: Add 30+ tests for chain building
 
-    [20251224_TIER2_TODO] FEATURE: Compute reaching definitions
-      Purpose: Find which definitions affect a use
-      Steps:
-        1. Fixed-point iteration
-        2. Forward data flow analysis
-        3. Mark reaching defs at each program point
-        4. Handle control flow merges
-        5. Add 30+ tests for reaching defs
+    TODO [PRO][FEATURE]: Compute reaching definitions
+    TODO [PRO]: Fixed-point iteration
+    TODO [PRO]: Forward data flow analysis
+    TODO [PRO]: Mark reaching defs at each program point
+    TODO [PRO]: Handle control flow merges
+    TODO [PRO]: Add 30+ tests for reaching defs
 
-    [20251224_TIER2_TODO] ENHANCEMENT: Support live variable analysis
-      Purpose: Identify variables that may be used later
-      Steps:
-        1. Backward data flow from exits
-        2. Mark live variables at each point
-        3. Identify dead assignments
-        4. Suggest variable removal
-        5. Add 25+ tests for liveness
+    TODO [PRO][ENHANCEMENT]: Support live variable analysis
+    TODO [PRO]: Backward data flow from exits
+    TODO [PRO]: Mark live variables at each point
+    TODO [PRO]: Identify dead assignments
+    TODO [PRO]: Suggest variable removal
+    TODO [PRO]: Add 25+ tests for liveness
 
-    [20251224_TIER2_TODO] FEATURE: Detect uninitialized variables
-      Purpose: Find uses before definitions
-      Steps:
-        1. Track definition sites
-        2. Check uses for reaching defs
-        3. Detect uninitialized paths
-        4. Report with line numbers
-        5. Add 25+ tests for detection
+    TODO [PRO][FEATURE]: Detect uninitialized variables
+    TODO [PRO]: Track definition sites
+    TODO [PRO]: Check uses for reaching defs
+    TODO [PRO]: Detect uninitialized paths
+    TODO [PRO]: Report with line numbers
+    TODO [PRO]: Add 25+ tests for detection
 
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Available expressions analysis
-      Purpose: Identify redundant computations
-      Steps:
-        1. Track expression definitions
-        2. Find where expressions are available
-        3. Detect redundant calculations
-        4. Suggest common subexpression elimination
-        5. Add 20+ tests
+    TODO [ENTERPRISE][FEATURE]: Available expressions analysis
+    TODO [ENTERPRISE]: Track expression definitions
+    TODO [ENTERPRISE]: Find where expressions are available
+    TODO [ENTERPRISE]: Detect redundant calculations
+    TODO [ENTERPRISE]: Suggest common subexpression elimination
+    TODO [ENTERPRISE]: Add 20+ tests
 
-    [20251224_TIER3_TODO] ENHANCEMENT: Implement taint analysis
-      Purpose: Track sensitive data flow
-      Steps:
-        1. Mark sources of untrusted data
-        2. Track taint propagation
-        3. Detect taint at sinks
-        4. Identify sanitization points
-        5. Add 30+ tests for taint
+    TODO [ENTERPRISE][ENHANCEMENT]: Implement taint analysis
+    TODO [ENTERPRISE]: Mark sources of untrusted data
+    TODO [ENTERPRISE]: Track taint propagation
+    TODO [ENTERPRISE]: Detect taint at sinks
+    TODO [ENTERPRISE]: Identify sanitization points
+    TODO [ENTERPRISE]: Add 30+ tests for taint
 
-    [20251224_TIER3_TODO] ENHANCEMENT: Support interprocedural analysis
-      Purpose: Track data flow across functions
-      Steps:
-        1. Build call graph
-        2. Propagate data flow through calls
-        3. Handle parameter passing
-        4. Analyze return value flow
-        5. Add 25+ tests for interprocedural
+    TODO [ENTERPRISE][ENHANCEMENT]: Support interprocedural analysis
+    TODO [ENTERPRISE]: Build call graph
+    TODO [ENTERPRISE]: Propagate data flow through calls
+    TODO [ENTERPRISE]: Handle parameter passing
+    TODO [ENTERPRISE]: Analyze return value flow
+    TODO [ENTERPRISE]: Add 25+ tests for interprocedural
     """
 
     def __init__(self):
@@ -265,7 +251,7 @@ class DataFlowAnalyzer:
         """
         Get def-use chains (all uses for each definition).
 
-        [20251221_FEATURE] TODO: Return def-use chains
+        TODO [FEATURE]: Return def-use chains
         """
         if self.data_flow is None:
             return {}
@@ -275,7 +261,7 @@ class DataFlowAnalyzer:
         """
         Get use-def chains (all definitions for each use).
 
-        [20251221_FEATURE] TODO: Return use-def chains
+        TODO [FEATURE]: Return use-def chains
         """
         if self.data_flow is None:
             return {}
@@ -309,8 +295,8 @@ class DataFlowAnalyzer:
         """
         Find variables that are defined but never used.
 
-        [20251221_FEATURE] TODO: Analyze definitions without uses
-        [20251221_FEATURE] TODO: Filter out deliberately unused (underscore)
+        TODO [FEATURE]: Analyze definitions without uses
+        TODO [FEATURE]: Filter out deliberately unused (underscore)
         """
         return set()
 

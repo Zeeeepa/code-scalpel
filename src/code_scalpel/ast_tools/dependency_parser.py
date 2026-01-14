@@ -5,7 +5,7 @@ import os
 import re
 from typing import Dict, List
 
-# [20251218_SECURITY] Use defusedxml to prevent XXE attacks (B314)
+# TODO [SECURITY]: Use defusedxml to prevent XXE attacks (B314)
 from defusedxml import ElementTree as ET
 
 try:
@@ -22,47 +22,37 @@ class DependencyParser:
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
-        # [20251224_TIER2_TODO] FEATURE: Support Gradle and SBT dependency parsing
-        #   Purpose: Enable Java/Scala project analysis
-        #   Steps:
-        #     1. Add Gradle build.gradle/build.gradle.kts parsing
-        #     2. Add SBT build.sbt parsing
-        #     3. Handle version constraints
-        #     4. Add 20+ tests for Gradle/SBT
+        # TODO [PRO] FEATURE: Support Gradle and SBT dependency parsing
+        # TODO [PRO]: Add Gradle build.gradle/build.gradle.kts parsing
+        # TODO [PRO]: Add SBT build.sbt parsing
+        # TODO [PRO]: Handle version constraints
+        # TODO [PRO]: Add 20+ tests for Gradle/SBT
 
-        # [20251224_TIER2_TODO] FEATURE: Add lock file parsing
-        #   Purpose: Capture exact dependency versions in use
-        #   Steps:
-        #     1. Parse poetry.lock (Python)
-        #     2. Parse package-lock.json (JavaScript)
-        #     3. Parse Cargo.lock (Rust)
-        #     4. Extract resolved versions
-        #     5. Add 25+ tests for lock files
+        # TODO [PRO] FEATURE: Add lock file parsing
+        # TODO [PRO]: Parse poetry.lock (Python)
+        # TODO [PRO]: Parse package-lock.json (JavaScript)
+        # TODO [PRO]: Parse Cargo.lock (Rust)
+        # TODO [PRO]: Extract resolved versions
+        # TODO [PRO]: Add 25+ tests for lock files
 
-        # [20251224_TIER2_TODO] ENHANCEMENT: Support optional and dev filtering
-        #   Purpose: Distinguish production vs development deps
-        #   Steps:
-        #     1. Mark dev/optional dependencies
-        #     2. Filter by type on query
-        #     3. Separate concerns in reports
-        #     4. Add 12+ tests for filtering
+        # TODO [PRO] ENHANCEMENT: Support optional and dev filtering
+        # TODO [PRO]: Mark dev/optional dependencies
+        # TODO [PRO]: Filter by type on query
+        # TODO [PRO]: Separate concerns in reports
+        # TODO [PRO]: Add 12+ tests for filtering
 
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-        # [20251224_TIER3_TODO] FEATURE: Add version constraint normalization
-        #   Purpose: Compare and resolve version constraints
-        #   Steps:
-        #     1. Parse PEP 440, semver, etc.
-        #     2. Normalize to common format
-        #     3. Resolve constraint intersections
-        #     4. Add 20+ tests for normalization
+        # TODO [ENTERPRISE] FEATURE: Add version constraint normalization
+        # TODO [ENTERPRISE]: Parse PEP 440, semver, etc.
+        # TODO [ENTERPRISE]: Normalize to common format
+        # TODO [ENTERPRISE]: Resolve constraint intersections
+        # TODO [ENTERPRISE]: Add 20+ tests for normalization
 
-        # [20251224_TIER3_TODO] FEATURE: Support cross-language dependency graphs
-        #   Purpose: Understand polyglot dependencies
-        #   Steps:
-        #     1. Build unified dependency graph
-        #     2. Connect across ecosystems
+        # TODO [ENTERPRISE] FEATURE: Support cross-language dependency graphs
+        # TODO [ENTERPRISE]: Build unified dependency graph
+        # TODO [ENTERPRISE]: Connect across ecosystems
         #     3. Detect version conflicts
         #     4. Suggest resolution
         #     5. Add 25+ tests for cross-language

@@ -49,8 +49,7 @@ class ExtractedSymbol:
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Add semantic similarity scoring
-      Purpose: Find related symbols for context
+            TODO [PRO][FEATURE]: Add semantic similarity scoring      Purpose: Find related symbols for context
       Steps:
         1. Compute code similarity metrics
         2. Compare function/class signatures
@@ -58,8 +57,7 @@ class ExtractedSymbol:
         4. Rank by similarity
         5. Add 15+ tests for similarity
 
-    [20251224_TIER2_TODO] FEATURE: Support stub detection and filtering
-      Purpose: Handle type stubs (.pyi) appropriately
+            TODO [PRO][FEATURE]: Support stub detection and filtering      Purpose: Handle type stubs (.pyi) appropriately
       Steps:
         1. Detect stub files
         2. Extract type information
@@ -70,8 +68,7 @@ class ExtractedSymbol:
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] ENHANCEMENT: Add extraction caching with invalidation
-      Purpose: Improve performance for repeated extractions
+            TODO [ENTERPRISE][ENHANCEMENT]: Add extraction caching with invalidation      Purpose: Improve performance for repeated extractions
       Steps:
         1. Cache extraction results
         2. Track file modification times
@@ -79,8 +76,7 @@ class ExtractedSymbol:
         4. Support manual invalidation
         5. Add 15+ tests for caching
 
-    [20251224_TIER3_TODO] ENHANCEMENT: Support protocol definitions
-      Purpose: Extract typing.Protocol as interfaces
+            TODO [ENTERPRISE][ENHANCEMENT]: Support protocol definitions      Purpose: Extract typing.Protocol as interfaces
       Steps:
         1. Detect Protocol definitions
         2. Extract method signatures
@@ -99,10 +95,10 @@ class ExtractedSymbol:
     # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
     depth: int = 0
     confidence: float = 1.0
-    # [20251221_FEATURE] TODO: Add semantic similarity scoring for related symbols
-    # [20251221_FEATURE] TODO: Support stub detection and filtering
-    # [20251221_ENHANCEMENT] TODO: Add extraction caching with invalidation
-    # [20251221_ENHANCEMENT] TODO: Support extraction for type stubs and protocol definitions
+    # TODO [FEATURE]: Add semantic similarity scoring for related symbols
+    # TODO [FEATURE]: Support stub detection and filtering
+    # TODO [ENHANCEMENT]: Add extraction caching with invalidation
+    # TODO [ENHANCEMENT]: Support extraction for type stubs and protocol definitions
 
     def __hash__(self):
         return hash((self.module, self.name))
@@ -256,37 +252,32 @@ class CrossFileExtractor:
     ====================================================================
     TIER 1: COMMUNITY (Free - High Priority)
     ====================================================================
-    [20251224_TIER1_TODO] FEATURE: Basic cross-file extraction
-      - Extract single symbol with dependencies
-      - Handle basic import resolution
-      - Add 15+ tests for basic extraction
-
-    [20251224_TIER1_TODO] TEST: Adversarial tests
-      - Circular dependencies, deep nesting
-      - Complex import patterns
-      - Large extraction results
-
+            TODO [COMMUNITY][FEATURE]: Basic cross-file extraction
+        TODO [COMMUNITY]: Extract single symbol with dependencies
+        TODO [COMMUNITY]: Handle basic import resolution
+        TODO [COMMUNITY]: Add 15+ tests for basic extraction
+            TODO [COMMUNITY][TEST]: Adversarial tests
+        TODO [COMMUNITY]: Circular dependencies, deep nesting
+        TODO [COMMUNITY]: Complex import patterns
+        TODO [COMMUNITY]: Large extraction results
     ====================================================================
     TIER 2: PRO (Commercial - Medium Priority)
     ====================================================================
-    [20251224_TIER2_TODO] FEATURE: Extract multiple symbols
-      Purpose: Batch extraction for efficiency
+            TODO [PRO][FEATURE]: Extract multiple symbols      Purpose: Batch extraction for efficiency
       Steps:
         1. Support list of targets
         2. Dedup shared dependencies
         3. Merge results
         4. Add 20+ tests for batch extraction
 
-    [20251224_TIER2_TODO] FEATURE: Confidence-based extraction
-      Purpose: Track reliability of extracted symbols
+            TODO [PRO][FEATURE]: Confidence-based extraction      Purpose: Track reliability of extracted symbols
       Steps:
         1. Calculate confidence per symbol
         2. Apply exponential decay by depth
         3. Report low-confidence symbols
         4. Add 20+ tests for confidence
 
-    [20251224_TIER2_TODO] FEATURE: Optimize extraction size
-      Purpose: Keep extraction manageable
+            TODO [PRO][FEATURE]: Optimize extraction size      Purpose: Keep extraction manageable
       Steps:
         1. Calculate extraction size
         2. Suggest depth reductions
@@ -296,16 +287,14 @@ class CrossFileExtractor:
     ====================================================================
     TIER 3: ENTERPRISE (Commercial - Lower Priority)
     ====================================================================
-    [20251224_TIER3_TODO] FEATURE: Smart dependency selection
-      Purpose: Extract only necessary symbols
+            TODO [ENTERPRISE][FEATURE]: Smart dependency selection      Purpose: Extract only necessary symbols
       Steps:
         1. Analyze symbol usage patterns
         2. Filter unused dependencies
         3. Suggest minimal extraction
         4. Add 20+ tests for selection
 
-    [20251224_TIER3_TODO] FEATURE: Extraction caching
-      Purpose: Speed up repeated extractions
+            TODO [ENTERPRISE][FEATURE]: Extraction caching      Purpose: Speed up repeated extractions
       Steps:
         1. Cache extraction results
         2. Track file changes
