@@ -46,42 +46,33 @@ class ExtractedSymbol:
         depth: Depth from original target (0 = target itself)
         confidence: Confidence score with decay applied (0.0-1.0)
 
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
-            TODO [PRO][FEATURE]: Add semantic similarity scoring      Purpose: Find related symbols for context
-      Steps:
-        1. Compute code similarity metrics
-        2. Compare function/class signatures
-        3. Score semantic relationships
-        4. Rank by similarity
-        5. Add 15+ tests for similarity
-
-            TODO [PRO][FEATURE]: Support stub detection and filtering      Purpose: Handle type stubs (.pyi) appropriately
-      Steps:
-        1. Detect stub files
-        2. Extract type information
-        3. Mark as stub in metadata
-        4. Filter stubs in results
-        5. Add 10+ tests for stub handling
-
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
-            TODO [ENTERPRISE][ENHANCEMENT]: Add extraction caching with invalidation      Purpose: Improve performance for repeated extractions
-      Steps:
-        1. Cache extraction results
-        2. Track file modification times
-        3. Invalidate on changes
-        4. Support manual invalidation
-        5. Add 15+ tests for caching
-
-            TODO [ENTERPRISE][ENHANCEMENT]: Support protocol definitions      Purpose: Extract typing.Protocol as interfaces
-      Steps:
-        1. Detect Protocol definitions
-        2. Extract method signatures
-        3. Track implementation relationships
-        4. Add 12+ tests for protocols
+    TODO [PRO][FEATURE]: Add semantic similarity scoring
+    TODO [PRO]: Find related symbols for context
+    TODO [PRO]: Compute code similarity metrics
+    TODO [PRO]: Compare function/class signatures
+    TODO [PRO]: Score semantic relationships
+    TODO [PRO]: Rank by similarity
+    TODO [PRO]: Add 15+ tests for similarity
+    TODO [PRO][FEATURE]: Support stub detection and filtering
+    TODO [PRO]: Handle type stubs (.pyi) appropriately
+    TODO [PRO]: Detect stub files
+    TODO [PRO]: Extract type information
+    TODO [PRO]: Mark as stub in metadata
+    TODO [PRO]: Filter stubs in results
+    TODO [PRO]: Add 10+ tests for stub handling
+    TODO [ENTERPRISE][ENHANCEMENT]: Add extraction caching with invalidation
+    TODO [ENTERPRISE]: Improve performance for repeated extractions
+    TODO [ENTERPRISE]: Cache extraction results
+    TODO [ENTERPRISE]: Track file modification times
+    TODO [ENTERPRISE]: Invalidate on changes
+    TODO [ENTERPRISE]: Support manual invalidation
+    TODO [ENTERPRISE]: Add 15+ tests for caching
+    TODO [ENTERPRISE][ENHANCEMENT]: Support protocol definitions
+    TODO [ENTERPRISE]: Extract typing.Protocol as interfaces
+    TODO [ENTERPRISE]: Detect Protocol definitions
+    TODO [ENTERPRISE]: Extract method signatures
+    TODO [ENTERPRISE]: Track implementation relationships
+    TODO [ENTERPRISE]: Add 12+ tests for protocols
     """
 
     name: str
@@ -249,57 +240,44 @@ class CrossFileExtractor:
 
     The default depth=2 is usually sufficient for most refactoring tasks.
 
-    ====================================================================
-    TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================
-            TODO [COMMUNITY][FEATURE]: Basic cross-file extraction
-        TODO [COMMUNITY]: Extract single symbol with dependencies
-        TODO [COMMUNITY]: Handle basic import resolution
-        TODO [COMMUNITY]: Add 15+ tests for basic extraction
-            TODO [COMMUNITY][TEST]: Adversarial tests
-        TODO [COMMUNITY]: Circular dependencies, deep nesting
-        TODO [COMMUNITY]: Complex import patterns
-        TODO [COMMUNITY]: Large extraction results
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
-            TODO [PRO][FEATURE]: Extract multiple symbols      Purpose: Batch extraction for efficiency
-      Steps:
-        1. Support list of targets
-        2. Dedup shared dependencies
-        3. Merge results
-        4. Add 20+ tests for batch extraction
-
-            TODO [PRO][FEATURE]: Confidence-based extraction      Purpose: Track reliability of extracted symbols
-      Steps:
-        1. Calculate confidence per symbol
-        2. Apply exponential decay by depth
-        3. Report low-confidence symbols
-        4. Add 20+ tests for confidence
-
-            TODO [PRO][FEATURE]: Optimize extraction size      Purpose: Keep extraction manageable
-      Steps:
-        1. Calculate extraction size
-        2. Suggest depth reductions
-        3. Trim unnecessary dependencies
-        4. Add 15+ tests for optimization
-
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
-            TODO [ENTERPRISE][FEATURE]: Smart dependency selection      Purpose: Extract only necessary symbols
-      Steps:
-        1. Analyze symbol usage patterns
-        2. Filter unused dependencies
-        3. Suggest minimal extraction
-        4. Add 20+ tests for selection
-
-            TODO [ENTERPRISE][FEATURE]: Extraction caching      Purpose: Speed up repeated extractions
-      Steps:
-        1. Cache extraction results
-        2. Track file changes
-        3. Invalidate on edits
-        4. Add 15+ tests for caching
+    TODO [COMMUNITY][FEATURE]: Basic cross-file extraction
+    TODO [COMMUNITY]: Extract single symbol with dependencies
+    TODO [COMMUNITY]: Handle basic import resolution
+    TODO [COMMUNITY]: Add 15+ tests for basic extraction
+    TODO [COMMUNITY][TEST]: Adversarial tests
+    TODO [COMMUNITY]: Circular dependencies, deep nesting
+    TODO [COMMUNITY]: Complex import patterns
+    TODO [COMMUNITY]: Large extraction results
+    TODO [PRO][FEATURE]: Extract multiple symbols
+    TODO [PRO]: Batch extraction for efficiency
+    TODO [PRO]: Support list of targets
+    TODO [PRO]: Dedup shared dependencies
+    TODO [PRO]: Merge results
+    TODO [PRO]: Add 20+ tests for batch extraction
+    TODO [PRO][FEATURE]: Confidence-based extraction
+    TODO [PRO]: Track reliability of extracted symbols
+    TODO [PRO]: Calculate confidence per symbol
+    TODO [PRO]: Apply exponential decay by depth
+    TODO [PRO]: Report low-confidence symbols
+    TODO [PRO]: Add 20+ tests for confidence
+    TODO [PRO][FEATURE]: Optimize extraction size
+    TODO [PRO]: Keep extraction manageable
+    TODO [PRO]: Calculate extraction size
+    TODO [PRO]: Suggest depth reductions
+    TODO [PRO]: Trim unnecessary dependencies
+    TODO [PRO]: Add 15+ tests for optimization
+    TODO [ENTERPRISE][FEATURE]: Smart dependency selection
+    TODO [ENTERPRISE]: Extract only necessary symbols
+    TODO [ENTERPRISE]: Analyze symbol usage patterns
+    TODO [ENTERPRISE]: Filter unused dependencies
+    TODO [ENTERPRISE]: Suggest minimal extraction
+    TODO [ENTERPRISE]: Add 20+ tests for selection
+    TODO [ENTERPRISE][FEATURE]: Extraction caching
+    TODO [ENTERPRISE]: Speed up repeated extractions
+    TODO [ENTERPRISE]: Cache extraction results
+    TODO [ENTERPRISE]: Track file changes
+    TODO [ENTERPRISE]: Invalidate on edits
+    TODO [ENTERPRISE]: Add 15+ tests for caching
     """
 
     # Default maximum depth to prevent infinite loops

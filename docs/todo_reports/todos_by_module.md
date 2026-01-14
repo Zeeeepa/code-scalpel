@@ -1,22 +1,6 @@
 # TODO Items by Module
 
-## code_parsers/ (1391 TODOs)
-
-### UNSPECIFIED Tier (1391 items)
-
-- [code_parsers/base_parser.py#5] TODO ITEMS: code_parsers/base_parser.py
-- [code_parsers/extractor.py#25] TODO ITEMS:
-- [code_parsers/extractor.py#28] 1. TODO: Improve cross-file dependency extraction accuracy
-- [code_parsers/extractor.py#29] 2. TODO: Add support for async/await pattern detection
-- [code_parsers/extractor.py#30] 3. TODO: Implement decorator extraction and analysis
-- [code_parsers/extractor.py#31] 4. TODO: Add lambda/arrow function extraction support
-- [code_parsers/extractor.py#32] 5. TODO: Create comprehensive error handling for parse failures
-- [code_parsers/extractor.py#33] 6. TODO: Implement line-accurate source code mapping
-- [code_parsers/extractor.py#34] 7. TODO: Add token estimation for extracted code
-- [code_parsers/extractor.py#35] 8. TODO: Support nested class and function extraction
-- *... and 1381 more*
-
-## ast_tools/ (1126 TODOs)
+## ast_tools/ (1394 TODOs)
 
 ### COMMUNITY Tier (239 items)
 
@@ -32,7 +16,7 @@
 - [ast_tools/analyzer.py#62] TODO [COMMUNITY]: Add 20+ tests for decorator and generator detection
 - *... and 229 more*
 
-### PRO Tier (487 items)
+### PRO Tier (655 items)
 
 - [ast_tools/analyzer.py#72] TODO [PRO][FEATURE]: Type hint inference from code analysis
 - [ast_tools/analyzer.py#73] TODO [PRO]: Infer return types from return statements
@@ -44,9 +28,9 @@
 - [ast_tools/analyzer.py#80] TODO [PRO]: Detect async/await patterns
 - [ast_tools/analyzer.py#81] TODO [PRO]: Track coroutine awaits and yields
 - [ast_tools/analyzer.py#82] TODO [PRO]: Analyze async context managers
-- *... and 477 more*
+- *... and 645 more*
 
-### ENTERPRISE Tier (345 items)
+### ENTERPRISE Tier (445 items)
 
 - [ast_tools/analyzer.py#96] TODO [ENTERPRISE][FEATURE]: Class inheritance analysis
 - [ast_tools/analyzer.py#97] TODO [ENTERPRISE]: Calculate inheritance depth
@@ -58,21 +42,37 @@
 - [ast_tools/analyzer.py#104] TODO [ENTERPRISE]: Detect inefficient patterns (list comprehensions vs loops)
 - [ast_tools/analyzer.py#105] TODO [ENTERPRISE]: Identify expensive operations in loops
 - [ast_tools/analyzer.py#106] TODO [ENTERPRISE]: Suggest optimization opportunities
-- *... and 335 more*
+- *... and 435 more*
 
 ### UNSPECIFIED Tier (55 items)
 
-- [ast_tools/cross_file_extractor.py#98] TODO [FEATURE]: Add semantic similarity scoring for related symbols
-- [ast_tools/cross_file_extractor.py#99] TODO [FEATURE]: Support stub detection and filtering
-- [ast_tools/cross_file_extractor.py#100] TODO [ENHANCEMENT]: Add extraction caching with invalidation
-- [ast_tools/cross_file_extractor.py#101] TODO [ENHANCEMENT]: Support extraction for type stubs and protocol definitions
-- [ast_tools/data_flow.py#242] TODO [FEATURE]: Return def-use chains
-- [ast_tools/data_flow.py#252] TODO [FEATURE]: Return use-def chains
-- [ast_tools/data_flow.py#283] TODO [FEATURE]: Analyze definitions without uses
-- [ast_tools/data_flow.py#284] TODO [FEATURE]: Filter out deliberately unused (underscore)
+- [ast_tools/cross_file_extractor.py#89] TODO [FEATURE]: Add semantic similarity scoring for related symbols
+- [ast_tools/cross_file_extractor.py#90] TODO [FEATURE]: Support stub detection and filtering
+- [ast_tools/cross_file_extractor.py#91] TODO [ENHANCEMENT]: Add extraction caching with invalidation
+- [ast_tools/cross_file_extractor.py#92] TODO [ENHANCEMENT]: Support extraction for type stubs and protocol definitions
+- [ast_tools/data_flow.py#233] TODO [FEATURE]: Return def-use chains
+- [ast_tools/data_flow.py#243] TODO [FEATURE]: Return use-def chains
+- [ast_tools/data_flow.py#274] TODO [FEATURE]: Analyze definitions without uses
+- [ast_tools/data_flow.py#275] TODO [FEATURE]: Filter out deliberately unused (underscore)
 - [ast_tools/dependency_parser.py#8] TODO [SECURITY]: Use defusedxml to prevent XXE attacks (B314)
 - [ast_tools/import_resolver.py#37] TODO [FEATURE]: Top-level parse fn for parallel workers (picklable on Windows spawn)
 - *... and 45 more*
+
+## code_parsers/ (1391 TODOs)
+
+### UNSPECIFIED Tier (1391 items)
+
+- [code_parsers/base_parser.py#5] TODO ITEMS: code_parsers/base_parser.py
+- [code_parsers/extractor.py#25] TODO ITEMS:
+- [code_parsers/extractor.py#28] 1. TODO: Improve cross-file dependency extraction accuracy
+- [code_parsers/extractor.py#29] 2. TODO: Add support for async/await pattern detection
+- [code_parsers/extractor.py#30] 3. TODO: Implement decorator extraction and analysis
+- [code_parsers/extractor.py#31] 4. TODO: Add lambda/arrow function extraction support
+- [code_parsers/extractor.py#32] 5. TODO: Create comprehensive error handling for parse failures
+- [code_parsers/extractor.py#33] 6. TODO: Implement line-accurate source code mapping
+- [code_parsers/extractor.py#34] 7. TODO: Add token estimation for extracted code
+- [code_parsers/extractor.py#35] 8. TODO: Support nested class and function extraction
+- *... and 1381 more*
 
 ## security/ (837 TODOs)
 
