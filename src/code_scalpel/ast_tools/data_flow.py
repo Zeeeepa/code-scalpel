@@ -78,9 +78,6 @@ class DataFlowAnalyzer:
     """
     Advanced data flow analyzer.
 
-    ====================================================================
-    TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================
     TODO [COMMUNITY][FEATURE]: Basic data flow infrastructure
     TODO [COMMUNITY]: Initialize analyzer with caching
     TODO [COMMUNITY]: Support file and function-level analysis
@@ -91,9 +88,6 @@ class DataFlowAnalyzer:
     TODO [COMMUNITY]: Test complex assignments, mutations
     TODO [COMMUNITY]: Test exception handlers
 
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
     TODO [PRO][FEATURE]: Build use-definition chains
     TODO [PRO]: Extract all variable definitions
     TODO [PRO]: Extract all variable usages
@@ -122,9 +116,6 @@ class DataFlowAnalyzer:
     TODO [PRO]: Report with line numbers
     TODO [PRO]: Add 25+ tests for detection
 
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
     TODO [ENTERPRISE][FEATURE]: Available expressions analysis
     TODO [ENTERPRISE]: Track expression definitions
     TODO [ENTERPRISE]: Find where expressions are available
