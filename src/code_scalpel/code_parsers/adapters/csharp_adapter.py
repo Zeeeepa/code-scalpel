@@ -2,130 +2,24 @@
 
 [20251224_FEATURE] Stub adapter for C# parsing support.
 
-============================================================================
-TODO ITEMS: code_parsers/adapters/csharp_adapter.py
-============================================================================
-COMMUNITY TIER - Core C# Adapter (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Implement basic C# parsing:
-    - Integrate tree-sitter-csharp or Roslyn
-    - Parse class/struct/record definitions
-    - Extract method declarations
-    - Parse properties and indexers
-    - Support namespace extraction
-    - Test count: 40 tests (basic parsing, extraction)
-
-[P1_HIGH] Add C# version detection:
-    - Detect C# version (7.0, 8.0, 9.0, 10.0, 11.0, 12.0)
-    - Support version-specific features
-    - Handle language features (nullable refs, patterns, etc.)
-    - Add compatibility warnings
-    - Test count: 25 tests (version detection)
-
-[P1_HIGH] Enhance extraction:
-    - Extract events and delegates
-    - Parse LINQ expressions
-    - Extract attributes
-    - Parse async/await patterns
-    - Support record types
-    - Test count: 30 tests (extraction completeness)
-
-[P2_MEDIUM] Add .NET framework detection:
-    - Identify .NET version (.NET Framework, .NET Core, .NET 6+)
-    - Parse using directives
-    - Extract assembly references
-    - Build dependency graph
-    - Test count: 25 tests (framework detection)
-
-[P2_MEDIUM] Implement error handling:
-    - Better syntax error messages
-    - Support partial parsing
-    - Add error recovery
-    - Provide fix suggestions
-    - Test count: 20 tests (error handling)
-
-============================================================================
-PRO TIER - Advanced C# Adapter (P1-P3)
-============================================================================
-
-[P1_HIGH] Integrate static analysis:
-    - Add Roslyn Analyzers integration
-    - Support StyleCop checks
-    - Integrate SonarQube for C#
-    - Add ReSharper inspections
-    - Test count: 40 tests (static analysis)
-
-[P1_HIGH] Add semantic analysis:
-    - Resolve type information via Roslyn
-    - Track inheritance hierarchies
-    - Analyze interface implementations
-    - Detect polymorphism patterns
-    - Test count: 45 tests (semantic analysis)
-
-[P2_MEDIUM] Implement code transformation:
-    - Support refactoring operations
-    - Add code formatting
-    - Generate modified AST
-    - Support code generation
-    - Test count: 30 tests (transformation)
-
-[P2_MEDIUM] Add framework-specific analysis:
-    - Detect ASP.NET patterns
-    - Identify Entity Framework usage
-    - Find WPF/WinForms patterns
-    - Analyze dependency injection
-    - Test count: 35 tests (framework analysis)
-
-[P3_LOW] Support advanced features:
-    - Parse pattern matching
-    - Extract init-only properties
-    - Parse top-level statements
-    - Support global using directives
-    - Test count: 30 tests (advanced features)
-
-============================================================================
-ENTERPRISE TIER - Enterprise C# Adapter (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Add security analysis:
-    - Detect SQL injection
-    - Find XSS vulnerabilities
-    - Identify insecure deserialization
-    - Analyze authentication patterns
-    - Test count: 45 tests (security scanning)
-
-[P2_MEDIUM] Implement incremental parsing:
-    - Parse only changed types
-    - Cache parsed results
-    - Support project-level analysis
-    - Add efficient AST diffing
-    - Test count: 30 tests (incremental parsing)
-
-[P3_LOW] Add enterprise compliance:
-    - Check coding standards
-    - Enforce mandatory documentation
-    - Validate license headers
-    - Generate compliance reports
-    - Test count: 30 tests (compliance)
-
-[P3_LOW] Implement performance profiling:
-    - Profile parsing time
-    - Track memory usage
-    - Identify bottlenecks
-    - Add optimization hints
-    - Test count: 20 tests (profiling)
-
-[P4_LOW] Add ML-driven analysis:
-    - Predict code quality
-    - Suggest refactorings
-    - Detect code clones
-    - Find potential bugs
-    - Test count: 30 tests (ML integration)
-
-============================================================================
-TOTAL TEST ESTIMATE: 475 tests (160 COMMUNITY + 180 PRO + 135 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Implement basic C# parsing with tree-sitter-csharp or Roslyn
+# TODO [COMMUNITY] Parse class/struct/record definitions and extract methods
+# TODO [COMMUNITY] Add C# version detection (7.0-12.0) and version-specific features
+# TODO [COMMUNITY] Extract events, delegates, LINQ expressions, and attributes
+# TODO [COMMUNITY] Add .NET framework detection (.NET Framework, Core, 6+)
+# TODO [COMMUNITY] Parse using directives and build dependency graph
+# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
+# TODO [PRO] Integrate static analysis (Roslyn Analyzers, StyleCop, SonarQube)
+# TODO [PRO] Add semantic analysis with type resolution via Roslyn
+# TODO [PRO] Track inheritance hierarchies and interface implementations
+# TODO [PRO] Implement code transformation and refactoring operations
+# TODO [PRO] Detect ASP.NET, Entity Framework, and WPF/WinForms patterns
+# TODO [PRO] Support advanced features (pattern matching, init-only properties, top-level statements)
+# TODO [ENTERPRISE] Add security analysis (SQL injection, XSS, insecure deserialization)
+# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
+# TODO [ENTERPRISE] Add enterprise compliance checking and reporting
+# TODO [ENTERPRISE] Implement performance profiling and optimization hints
+# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List

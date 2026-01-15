@@ -2,17 +2,16 @@
 """
 golint Go Parser - Go style linter (deprecated, use staticcheck).
 
-# TODO: Implement golint parser for v3.1.0 "Polyglot+" (Q1 2026)
-# This parser should:
-# - Run golint on Go source files
-# - Parse line-based output (file:line:col: message)
-# - Extract style suggestions (exported names, comments, etc.)
-# - Note: golint is deprecated, consider prioritizing staticcheck
-# - Inherit from base_parser.BaseParser
+# TODO [FEATURE/MAJOR] Implement golint parser for v3.1.0 "Polyglot+" (Q1 2026)
+# TODO [FEATURE/MAJOR] Run golint on Go source files
+# TODO [FEATURE/MAJOR] Parse line-based output (file:line:col: message)
+# TODO [FEATURE/MAJOR] Extract style suggestions (exported names, comments, etc.)
+# TODO [NOTE] golint is deprecated, consider prioritizing staticcheck
+# TODO [FEATURE/MAJOR] Inherit from base_parser.BaseParser
 #
 # Reference: https://github.com/golang/lint (archived)
 # Command: golint ./...
-# Note: Consider using staticcheck or revive as modern alternatives
+# TODO [NOTE] Consider using staticcheck or revive as modern alternatives
 """
 
 from typing import Optional

@@ -12,24 +12,24 @@ COMPLETED ITEMS: tier_detector.py (v3.0.5 - 2025-12-25)
 ============================================================================
 COMMUNITY TIER (P0-P2)
 ============================================================================
-# ✅ [P0_CRITICAL] Environment variable detection
-# ✅ [P1_HIGH] Config file detection
-# ✅ [P1_HIGH] Default tier fallback
-# ✅ [P2_MEDIUM] Tier validation and logging (comprehensive validation with audit logging)
+# [P0_CRITICAL] Environment variable detection
+# [P1_HIGH] Config file detection
+# [P1_HIGH] Default tier fallback
+# [P2_MEDIUM] Tier validation and logging (comprehensive validation with audit logging)
 
 ============================================================================
 PRO TIER (P1-P3)
 ============================================================================
-# ✅ [P1_HIGH] License key tier extraction (parses SCALPEL-{TIER}-{DATA} format)
-# ✅ [P2_MEDIUM] Multiple config file locations (3 default paths + custom)
-# ✅ [P3_LOW] Tier caching (in-memory cache with force_refresh)
+# [P1_HIGH] License key tier extraction (parses SCALPEL-{TIER}-{DATA} format)
+# [P2_MEDIUM] Multiple config file locations (3 default paths + custom)
+# [P3_LOW] Tier caching (in-memory cache with force_refresh)
 
 ============================================================================
 ENTERPRISE TIER (P2-P4)
 ============================================================================
-# ✅ [P2_MEDIUM] Organization-based tier detection (CODE_SCALPEL_ORGANIZATION env var)
-# ✅ [P3_LOW] Tier inheritance from parent orgs (hierarchical organization support)
-# ✅ [P4_LOW] Custom tier definitions (custom tier names mapping to standard tiers)
+# [P2_MEDIUM] Organization-based tier detection (CODE_SCALPEL_ORGANIZATION env var)
+# [P3_LOW] Tier inheritance from parent orgs (hierarchical organization support)
+# [P4_LOW] Custom tier definitions (custom tier names mapping to standard tiers)
 ============================================================================
 """
 

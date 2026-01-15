@@ -11,108 +11,98 @@ relationships across multiple programming languages. The graph contains:
 
 Example JSON output:
 {
-  "graph": {
-    "nodes": [
-      {"id": "java::UserController:getUser", "type": "endpoint", "route": "/api/users"},
-      {"id": "typescript::fetchUsers", "type": "client", "target": "/api/users"}
-    ],
-    "edges": [
-      {
-        "from": "typescript::fetchUsers",
-        "to": "java::UserController:getUser",
-        "confidence": 0.95,
-        "evidence": "Route string match: /api/users",
-        "type": "http_call"
-      }
-    ]
-  }
+    "graph": {
+        "nodes": [
+            {"id": "java::UserController:getUser", "type": "endpoint", "route": "/api/users"},
+            {"id": "typescript::fetchUsers", "type": "client", "target": "/api/users"}
+        ],
+        "edges": [
+            {
+                "from": "typescript::fetchUsers",
+                "to": "java::UserController:getUser",
+                "confidence": 0.95,
+                "evidence": "Route string match: /api/users",
+                "type": "http_call"
+            }
+        ]
+    }
 }
-
-TODO ITEMS: graph_engine/graph.py
-======================================================================
-COMMUNITY TIER - Core Graph Operations
-======================================================================
-1. Add CodeGraph class for graph container
-2. Add GraphNode dataclass for node representation
-3. Add GraphEdge dataclass for edge representation
-4. Add add_node(node_id, properties) for graph building
-5. Add add_edge(from_id, to_id, edge_type, confidence) for relationships
-6. Add remove_node(node_id) for deletion
-7. Add remove_edge(from_id, to_id) for deletion
-8. Add get_node(node_id) for retrieval
-9. Add get_edges(from_id=None, to_id=None) for filtering
-10. Add get_incoming_edges(node_id) for reverse dependencies
-11. Add get_outgoing_edges(node_id) for forward dependencies
-12. Add bfs_traverse(start_node_id) for breadth-first search
-13. Add dfs_traverse(start_node_id) for depth-first search
-14. Add find_all_paths(from_id, to_id) for path finding
-15. Add shortest_path(from_id, to_id) for optimal path
-16. Add get_connected_component(node_id) for clustering
-17. Add detect_cycles() for circular dependency detection
-18. Add topological_sort() for ordering
-19. Add graph_diameter() for size metrics
-20. Add node_count() and edge_count()
-21. Add get_node_degree(node_id) for connectivity
-22. Add get_centrality_measures(node_id)
-23. Add find_critical_nodes() for bottlenecks
-24. Add find_isolated_nodes() for unreachable code
-
-PRO TIER - Advanced Graph Analysis
-======================================================================
-26. Add k_hop_neighborhood(node_id, k) for local subgraphs
-27. Add extract_subgraph(node_ids) for focused analysis
-28. Add merge_graphs(graph1, graph2) for combining
-29. Add graph_diff(graph1, graph2) for change detection
-30. Add incremental_update(graph, changes)
-31. Add graph_statistics(graph) comprehensive metrics
-32. Add edge_confidence_distribution() for analysis
-33. Add find_high_confidence_paths(from_id, to_id, threshold)
-34. Add find_low_confidence_edges(threshold)
-35. Add community_detection() for clustering
-36. Add strongly_connected_components() for SCC analysis
-37. Add weakly_connected_components() for WCC analysis
-38. Add betweenness_centrality() for node importance
-39. Add closeness_centrality() for distance metrics
-40. Add pagerank_scoring() for relevance
-41. Add influence_propagation() for taint analysis
-42. Add graph_visualization_data() for rendering
-43. Add to_adjacency_matrix() for mathematical analysis
-44. Add to_adjacency_list() for traversal
-45. Add triangle_counting() for local density
-46. Add graph_clustering_coefficient()
-47. Add graph_assortativity() for structural properties
-48. Add detect_graph_patterns() for known structures
-49. Add graph_motif_detection() for recurring patterns
-50. Add graph_compression(graph) for size reduction
-
-ENTERPRISE TIER - Distributed Graph System
-======================================================================
-51. Add distributed_graph_construction() across services
-52. Add federated_graph_integration() across organizations
-53. Add graph_sharding() for horizontal scaling
-54. Add graph_replication() for high availability
-55. Add graph_backup_recovery() disaster recovery
-56. Add graph_encryption() end-to-end
-57. Add graph_audit_logging() compliance tracking
-58. Add graph_access_control() role-based permissions
-59. Add graph_multi_tenancy() tenant isolation
-60. Add graph_versioning_system()
-61. Add graph_rollback() to previous versions
-62. Add graph_change_log() audit trail
-63. Add graph_performance_profiling()
-64. Add graph_optimization() recommendations
-65. Add graph_memory_optimization()
-66. Add graph_caching_strategy()
-67. Add graph_invalidation() cache management
-68. Add graph_async_processing() non-blocking
-69. Add graph_streaming_updates() for real-time
-70. Add graph_monitoring_alerting()
-71. Add ml_graph_analysis() ML predictions
-72. Add graph_anomaly_detection()
-73. Add graph_performance_sla_monitoring()
-74. Add graph_cost_tracking() billing
-75. Add graph_commercial_licensing()
 """
+
+# TODO [COMMUNITY] Add CodeGraph class for graph container
+# TODO [COMMUNITY] Add GraphNode dataclass for node representation
+# TODO [COMMUNITY] Add GraphEdge dataclass for edge representation
+# TODO [COMMUNITY] Add add_node(node_id, properties) for graph building
+# TODO [COMMUNITY] Add add_edge(from_id, to_id, edge_type, confidence) for relationships
+# TODO [COMMUNITY] Add remove_node(node_id) for deletion
+# TODO [COMMUNITY] Add remove_edge(from_id, to_id) for deletion
+# TODO [COMMUNITY] Add get_node(node_id) for retrieval
+# TODO [COMMUNITY] Add get_edges(from_id=None, to_id=None) for filtering
+# TODO [COMMUNITY] Add get_incoming_edges(node_id) for reverse dependencies
+# TODO [COMMUNITY] Add get_outgoing_edges(node_id) for forward dependencies
+# TODO [COMMUNITY] Add bfs_traverse(start_node_id) for breadth-first search
+# TODO [COMMUNITY] Add dfs_traverse(start_node_id) for depth-first search
+# TODO [COMMUNITY] Add find_all_paths(from_id, to_id) for path finding
+# TODO [COMMUNITY] Add shortest_path(from_id, to_id) for optimal path
+# TODO [COMMUNITY] Add get_connected_component(node_id) for clustering
+# TODO [COMMUNITY] Add detect_cycles() for circular dependency detection
+# TODO [COMMUNITY] Add topological_sort() for ordering
+# TODO [COMMUNITY] Add graph_diameter() for size metrics
+# TODO [COMMUNITY] Add node_count() and edge_count()
+# TODO [COMMUNITY] Add get_node_degree(node_id) for connectivity
+# TODO [COMMUNITY] Add get_centrality_measures(node_id)
+# TODO [COMMUNITY] Add find_critical_nodes() for bottlenecks
+# TODO [COMMUNITY] Add find_isolated_nodes() for unreachable code
+# TODO [PRO] Add k_hop_neighborhood(node_id, k) for local subgraphs
+# TODO [PRO] Add extract_subgraph(node_ids) for focused analysis
+# TODO [PRO] Add merge_graphs(graph1, graph2) for combining
+# TODO [PRO] Add graph_diff(graph1, graph2) for change detection
+# TODO [PRO] Add incremental_update(graph, changes)
+# TODO [PRO] Add graph_statistics(graph) comprehensive metrics
+# TODO [PRO] Add edge_confidence_distribution() for analysis
+# TODO [PRO] Add find_high_confidence_paths(from_id, to_id, threshold)
+# TODO [PRO] Add find_low_confidence_edges(threshold)
+# TODO [PRO] Add community_detection() for clustering
+# TODO [PRO] Add strongly_connected_components() for SCC analysis
+# TODO [PRO] Add weakly_connected_components() for WCC analysis
+# TODO [PRO] Add betweenness_centrality() for node importance
+# TODO [PRO] Add closeness_centrality() for distance metrics
+# TODO [PRO] Add pagerank_scoring() for relevance
+# TODO [PRO] Add influence_propagation() for taint analysis
+# TODO [PRO] Add graph_visualization_data() for rendering
+# TODO [PRO] Add to_adjacency_matrix() for mathematical analysis
+# TODO [PRO] Add to_adjacency_list() for traversal
+# TODO [PRO] Add triangle_counting() for local density
+# TODO [PRO] Add graph_clustering_coefficient()
+# TODO [PRO] Add graph_assortativity() for structural properties
+# TODO [PRO] Add detect_graph_patterns() for known structures
+# TODO [PRO] Add graph_motif_detection() for recurring patterns
+# TODO [PRO] Add graph_compression(graph) for size reduction
+# TODO [ENTERPRISE] Add distributed_graph_construction() across services
+# TODO [ENTERPRISE] Add federated_graph_integration() across organizations
+# TODO [ENTERPRISE] Add graph_sharding() for horizontal scaling
+# TODO [ENTERPRISE] Add graph_replication() for high availability
+# TODO [ENTERPRISE] Add graph_backup_recovery() disaster recovery
+# TODO [ENTERPRISE] Add graph_encryption() end-to-end
+# TODO [ENTERPRISE] Add graph_audit_logging() compliance tracking
+# TODO [ENTERPRISE] Add graph_access_control() role-based permissions
+# TODO [ENTERPRISE] Add graph_multi_tenancy() tenant isolation
+# TODO [ENTERPRISE] Add graph_versioning_system()
+# TODO [ENTERPRISE] Add graph_rollback() to previous versions
+# TODO [ENTERPRISE] Add graph_change_log() audit trail
+# TODO [ENTERPRISE] Add graph_performance_profiling()
+# TODO [ENTERPRISE] Add graph_optimization() recommendations
+# TODO [ENTERPRISE] Add graph_memory_optimization()
+# TODO [ENTERPRISE] Add graph_caching_strategy()
+# TODO [ENTERPRISE] Add graph_invalidation() cache management
+# TODO [ENTERPRISE] Add graph_async_processing() non-blocking
+# TODO [ENTERPRISE] Add graph_streaming_updates() for real-time
+# TODO [ENTERPRISE] Add graph_monitoring_alerting()
+# TODO [ENTERPRISE] Add ml_graph_analysis() ML predictions
+# TODO [ENTERPRISE] Add graph_anomaly_detection()
+# TODO [ENTERPRISE] Add graph_performance_sla_monitoring()
+# TODO [ENTERPRISE] Add graph_cost_tracking() billing
+# TODO [ENTERPRISE] Add graph_commercial_licensing()
 
 from __future__ import annotations
 

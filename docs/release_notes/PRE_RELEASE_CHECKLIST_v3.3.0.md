@@ -30,6 +30,7 @@ ALL items included in this checklist must be completed and verified before the r
 | **Tier System Validation** | ✅ | 9 | 9 | P0 | Pipeline Logs |
 | **Security & Compliance** | ✅ | 8 | 8 | P0 | Pipeline Logs |
 | **Documentation Verification** | ⬜ | 0 | 10 | P1 | Pending |
+| **📋 TODO/Technical Debt Extraction (NEW)** | ⬜ | 0 | 5 | **P1** | Pending |
 | **Build & Package** | ✅ | 8 | 8 | P0 | Pipeline Logs |
 | **Pre-Release Final Checks** | ⬜ | 0 | 6 | P0 | Pending |
 | **MCP-First Testing Matrix** | 🔄 | 20 | 35 | P0 | Pipeline Logs |
@@ -41,8 +42,8 @@ ALL items included in this checklist must be completed and verified before the r
 | **Public Relations & Communication** | ⬜ | 0 | 15 | **P1** | Pending |
 | **Unthinkable Scenarios & Rollback** | ⬜ | 0 | 20 | **P0** | Pending |
 | **Final Release Gate** | ⬜ | 0 | 10 | **P0** | Pending |
-| **TOTAL** | ⬜ | **0** | **457** | | |
-| **MINIMUM TO PASS (89%)** | | **407** | **457** | | |
+| **TOTAL** | ⬜ | **0** | **462** | | |
+| **MINIMUM TO PASS (89%)** | | **411** | **462** | | |
 | **Progress** | | **0%** | **Pending** | | |
 
 Legend: ✅ Passed | ❌ Failed | ⬜ Not Started | 🔄 In Progress
@@ -758,6 +759,33 @@ Priority: P0 = Blocking | P1 = Critical | P2 = Important
 | `pyproject.toml` | 3.3.0 | - | ⬜ |
 | `src/code_scalpel/__init__.py` | 3.3.0 | - | ⬜ |
 | `CHANGELOG.md` header | 3.3.0 | - | ⬜ |
+
+### 8.6 TODO/Technical Debt Extraction (P1)
+
+**Status:** ⬜ Not Started
+**Evidence Files:** Pending
+**Command:** `python scripts/extract_todos.py --format all`
+
+| Metric | Count | Threshold | Status |
+|--------|------:|-----------|--------|
+| **Total Items** | - | — | ⬜ |
+| **Critical Priority** | - | ≤5,000 | ⬜ |
+| **High Priority** | - | ≤5,000 | ⬜ |
+| **FIXME Tags** | - | ≤25 | ⬜ |
+| **BUG Tags** | - | Document | ⬜ |
+
+**Generated Reports:**
+| Report | Location | Purpose |
+|--------|----------|---------|
+| Statistics | `docs/todo_reports/TODO_STATISTICS.md` | Summary by tag, priority, tier, module |
+| By Module | `docs/todo_reports/TODO_BY_MODULE.md` | Detailed breakdown by module |
+| Roadmap | `docs/todo_reports/TODO_ROADMAP.md` | Prioritized action items |
+| JSON | `docs/todo_reports/todos.json` | Machine-readable export |
+| CSV | `docs/todo_reports/todos.csv` | Spreadsheet export |
+
+**GO/NO-GO Criteria:**
+- **GO:** Critical items ≤5,000, FIXME items ≤25, all items documented
+- **NO-GO:** Critical items >5,000 OR FIXME items >25 OR extraction failed
 
 ---
 

@@ -2,95 +2,83 @@
 Configuration templates for .code-scalpel directory.
 
 [20251219_FEATURE] v3.0.2 - Auto-initialize .code-scalpel configuration
-
-TODO ITEMS: config/templates.py
-======================================================================
-COMMUNITY TIER - Core Template Management
-======================================================================
-1. Add TemplateRegistry class for managing templates
-2. Add get_template(template_name) template getter
-3. Add list_templates() template enumerator
-4. Add validate_template(template) validator
-5. Add template_exists(name) existence checker
-6. Add render_template(template, variables) renderer
-7. Add TemplateVariable dataclass for variables
-8. Add TemplateError exception class
-9. Add register_custom_template(name, content) registration
-10. Add unregister_template(name) unregistration
-11. Add template_to_file(template, filepath) file writer
-12. Add template_from_file(filepath) file reader
-13. Add merge_templates(template1, template2) merger
-14. Add validate_template_syntax() syntax checker
-15. Add explain_template_variables() documentation
-16. Add get_template_defaults() default extractor
-17. Add get_template_version(template_name) versioning
-18. Add template_compatibility_check() compatibility checker
-19. Add interpolate_variables(template, variables) interpolator
-20. Add escape_template_variables(variables) escaper
-21. Add validate_variable_types(variables) type checker
-22. Add get_template_schema(template_name) schema getter
-23. Add template_to_dict(template) serialization
-24. Add template_from_dict(data) deserialization
-25. Add list_template_dependencies() dependency finder
-
-======================================================================
-PRO TIER - Advanced Template Features
-======================================================================
-26. Add template versioning and migrations
-27. Add template inheritance and composition
-28. Add template conditional sections
-29. Add template macro expansion
-30. Add template variable scoping
-31. Add template caching for performance
-32. Add template hot reload without restart
-33. Add template diff and change tracking
-34. Add template backup and restore
-35. Add template documentation generation
-36. Add template example generation
-37. Add template validation with JSON Schema
-38. Add template custom filters/functions
-39. Add template debugging output
-40. Add template optimization recommendations
-41. Add template performance profiling
-42. Add template dry-run rendering
-43. Add template rollback capabilities
-44. Add template audit logging
-45. Add template access control (RBAC)
-46. Add template change notifications
-47. Add template encryption for sensitive data
-48. Add template secrets management
-49. Add template conditional based on environment
-50. Add template profile-specific variants
-
-======================================================================
-ENTERPRISE TIER - Distributed & Federated Templates
-======================================================================
-51. Add distributed template sync across agents
-52. Add federated template management across orgs
-53. Add multi-region template coordination
-54. Add template replication and failover
-55. Add template consensus and voting
-56. Add template distributed locking
-57. Add template event streaming
-58. Add template change notifications
-59. Add template cost tracking per org
-60. Add template quota enforcement
-61. Add template SLA monitoring
-62. Add template audit trail logging
-63. Add template compliance checking (SOC2/HIPAA/GDPR)
-64. Add template encryption for sensitive data
-65. Add template access control (RBAC)
-66. Add template encryption key management
-67. Add template multi-tenancy isolation
-68. Add template disaster recovery
-69. Add template failover mechanisms
-70. Add template data retention policies
-71. Add template billing integration
-72. Add template executive reporting
-73. Add template anomaly detection
-74. Add template circuit breaker
-75. Add template health monitoring
 """
+
+# TODO [COMMUNITY] Add TemplateRegistry class for managing templates
+# TODO [COMMUNITY] Add get_template(template_name) template getter
+# TODO [COMMUNITY] Add list_templates() template enumerator
+# TODO [COMMUNITY] Add validate_template(template) validator
+# TODO [COMMUNITY] Add template_exists(name) existence checker
+# TODO [COMMUNITY] Add render_template(template, variables) renderer
+# TODO [COMMUNITY] Add TemplateVariable dataclass for variables
+# TODO [COMMUNITY] Add TemplateError exception class
+# TODO [COMMUNITY] Add register_custom_template(name, content) registration
+# TODO [COMMUNITY] Add unregister_template(name) unregistration
+# TODO [COMMUNITY] Add template_to_file(template, filepath) file writer
+# TODO [COMMUNITY] Add template_from_file(filepath) file reader
+# TODO [COMMUNITY] Add merge_templates(template1, template2) merger
+# TODO [COMMUNITY] Add validate_template_syntax() syntax checker
+# TODO [COMMUNITY] Add explain_template_variables() documentation
+# TODO [COMMUNITY] Add get_template_defaults() default extractor
+# TODO [COMMUNITY] Add get_template_version(template_name) versioning
+# TODO [COMMUNITY] Add template_compatibility_check() compatibility checker
+# TODO [COMMUNITY] Add interpolate_variables(template, variables) interpolator
+# TODO [COMMUNITY] Add escape_template_variables(variables) escaper
+# TODO [COMMUNITY] Add validate_variable_types(variables) type checker
+# TODO [COMMUNITY] Add get_template_schema(template_name) schema getter
+# TODO [COMMUNITY] Add template_to_dict(template) serialization
+# TODO [COMMUNITY] Add template_from_dict(data) deserialization
+# TODO [COMMUNITY] Add list_template_dependencies() dependency finder
+# TODO [PRO] Add template versioning and migrations
+# TODO [PRO] Add template inheritance and composition
+# TODO [PRO] Add template conditional sections
+# TODO [PRO] Add template macro expansion
+# TODO [PRO] Add template variable scoping
+# TODO [PRO] Add template caching for performance
+# TODO [PRO] Add template hot reload without restart
+# TODO [PRO] Add template diff and change tracking
+# TODO [PRO] Add template backup and restore
+# TODO [PRO] Add template documentation generation
+# TODO [PRO] Add template example generation
+# TODO [PRO] Add template validation with JSON Schema
+# TODO [PRO] Add template custom filters/functions
+# TODO [PRO] Add template debugging output
+# TODO [PRO] Add template optimization recommendations
+# TODO [PRO] Add template performance profiling
+# TODO [PRO] Add template dry-run rendering
+# TODO [PRO] Add template rollback capabilities
+# TODO [PRO] Add template audit logging
+# TODO [PRO] Add template access control (RBAC)
+# TODO [PRO] Add template change notifications
+# TODO [PRO] Add template encryption for sensitive data
+# TODO [PRO] Add template secrets management
+# TODO [PRO] Add template conditional based on environment
+# TODO [PRO] Add template profile-specific variants
+# TODO [ENTERPRISE] Add distributed template sync across agents
+# TODO [ENTERPRISE] Add federated template management across orgs
+# TODO [ENTERPRISE] Add multi-region template coordination
+# TODO [ENTERPRISE] Add template replication and failover
+# TODO [ENTERPRISE] Add template consensus and voting
+# TODO [ENTERPRISE] Add template distributed locking
+# TODO [ENTERPRISE] Add template event streaming
+# TODO [ENTERPRISE] Add template change notifications
+# TODO [ENTERPRISE] Add template cost tracking per org
+# TODO [ENTERPRISE] Add template quota enforcement
+# TODO [ENTERPRISE] Add template SLA monitoring
+# TODO [ENTERPRISE] Add template audit trail logging
+# TODO [ENTERPRISE] Add template compliance checking (SOC2/HIPAA/GDPR)
+# TODO [ENTERPRISE] Add template encryption for sensitive data
+# TODO [ENTERPRISE] Add template access control (RBAC)
+# TODO [ENTERPRISE] Add template encryption key management
+# TODO [ENTERPRISE] Add template multi-tenancy isolation
+# TODO [ENTERPRISE] Add template disaster recovery
+# TODO [ENTERPRISE] Add template failover mechanisms
+# TODO [ENTERPRISE] Add template data retention policies
+# TODO [ENTERPRISE] Add template billing integration
+# TODO [ENTERPRISE] Add template executive reporting
+# TODO [ENTERPRISE] Add template anomaly detection
+# TODO [ENTERPRISE] Add template circuit breaker
+# TODO [ENTERPRISE] Add template health monitoring
 
 # Template for policy.yaml
 POLICY_YAML_TEMPLATE = """# Code Scalpel Policy Configuration

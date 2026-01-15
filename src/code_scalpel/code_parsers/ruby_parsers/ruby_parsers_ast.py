@@ -2,15 +2,14 @@
 """
 Ruby AST Parser - Abstract Syntax Tree Analysis
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse Ruby code to AST using ruby_parser
-2. Extract class definitions and hierarchy
-3. Extract method definitions and signatures
-4. Extract module definitions and composition
-5. Analyze inheritance and mixin relationships
-6. Detect blocks and lambda functions
-7. Analyze meta-programming patterns
-8. Generate method call graphs
+# TODO [PRO] Parse Ruby code to AST using ruby_parser
+# TODO [PRO] Extract class definitions and hierarchy
+# TODO [PRO] Extract method definitions and signatures
+# TODO [PRO] Extract module definitions and composition
+# TODO [PRO] Analyze inheritance and mixin relationships
+# TODO [PRO] Detect blocks and lambda functions
+# TODO [PRO] Analyze meta-programming patterns
+# TODO [PRO] Generate method call graphs
 """
 
 from dataclasses import dataclass
@@ -67,35 +66,35 @@ class RubyASTParser:
         self.modules: List[RubyModule] = []
 
     def parse_ruby_file(self, file_path: Path):
-        """Parse Ruby file to AST - Phase 2 TODO [20251221_TODO]"""
+        """Parse Ruby file to AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Ruby file parsing")
 
     def extract_classes(self, ast) -> List[RubyClass]:
-        """Extract class definitions from AST - Phase 2 TODO [20251221_TODO]"""
+        """Extract class definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Class extraction")
 
     def extract_methods(
         self, ast, class_context: Optional[str] = None
     ) -> List[RubyMethod]:
-        """Extract method definitions from AST - Phase 2 TODO [20251221_TODO]"""
+        """Extract method definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Method extraction")
 
     def extract_modules(self, ast) -> List[RubyModule]:
-        """Extract module definitions from AST - Phase 2 TODO [20251221_TODO]"""
+        """Extract module definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Module extraction")
 
     def analyze_inheritance(self, classes: List[RubyClass]) -> Dict:
-        """Analyze inheritance hierarchy - Phase 2 TODO [20251221_TODO]"""
+        """Analyze inheritance hierarchy - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Inheritance analysis")
 
     def detect_meta_programming(self, ast) -> List[Dict]:
-        """Detect meta-programming patterns - Phase 2 TODO [20251221_TODO]"""
+        """Detect meta-programming patterns - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Meta-programming detection")
 
     def generate_call_graph(self, ast) -> Dict:
-        """Generate method call graph - Phase 2 TODO [20251221_TODO]"""
+        """Generate method call graph - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Call graph generation")
 
     def analyze_blocks_and_lambdas(self, ast) -> List[Dict]:
-        """Analyze blocks and lambda functions - Phase 2 TODO [20251221_TODO]"""
+        """Analyze blocks and lambda functions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Block/lambda analysis")

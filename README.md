@@ -220,7 +220,7 @@ What changes across tiers:
 ### Configurable Response Output (Token Efficiency)
 Teams can now customize MCP tool responses via `.code-scalpel/response_config.json`:
 - ✅ **3 Built-in Profiles** - minimal (default), standard, debug
-- ✅ **Per-Tool Customization** - Configure each of 21 tools independently
+- ✅ **Per-Tool Customization** - Configure each of 22 tools independently
 - ✅ **Tier-Aware Filtering** - Automatically exclude tier-inappropriate fields
 - ✅ **~150-200 tokens saved per response** - Preserves context for actual code work
 - ✅ **JSON Schema Support** - IDE autocomplete and validation
@@ -928,7 +928,7 @@ See [Policy Engine Documentation](src/code_scalpel/policy_engine/README.md) for 
 - **Frontend DOM Input Detection** - XSS risk analysis for React/Vue/Angular
 
 ### Performance
-- **200x cache speedup** for unchanged files
+- **2900x cache speedup** for unchanged files
 - **5-second Z3 timeout** prevents hangs
 - Content-addressable caching with version invalidation
 
@@ -1021,7 +1021,7 @@ Evidence output:
 
 ## MCP Contract Tests (All Tools, All Transports)
 
-Code Scalpel includes a deterministic contract test that calls **all 20 MCP tools** over:
+Code Scalpel includes a deterministic contract test that calls **all 22 MCP tools** over:
 - `stdio`
 - streamable HTTP (`/mcp`)
 - SSE (`/sse`)
@@ -1091,7 +1091,7 @@ See [DEVELOPMENT_ROADMAP.md](DEVELOPMENT_ROADMAP.md) for the complete roadmap.
 ### Performance
 - **~150-200** tokens saved per MCP response (configurable output filtering)
 - **99%** token reduction via surgical extraction vs full-file retrieval
-- **200x** cache speedup for unchanged files
+- **29900x** cache speedup for unchanged files
 - **25,000+** lines of code per second (project-wide analysis)
 
 ### Technology Stack

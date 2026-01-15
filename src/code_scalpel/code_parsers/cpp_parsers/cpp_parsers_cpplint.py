@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
 CppLint Parser - Google C++ Style Guide Enforcement
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse cpplint output format
-2. Execute cpplint analysis via subprocess
-3. Load filter configuration
-4. Categorize violations by rule type
-5. Calculate style compliance score
-6. Generate JSON/HTML reports
-7. Integrate with build systems
-8. Analyze naming conventions
 """
+
+# TODO [PHASE2/PARSER] Parse cpplint output format
+# TODO [PHASE2/EXECUTION] Execute cpplint analysis via subprocess
+# TODO [PHASE2/CONFIG] Load filter configuration
+# TODO [PHASE2/ANALYSIS] Categorize violations by rule type
+# TODO [PHASE2/SCORING] Calculate style compliance score
+# TODO [PHASE2/REPORTING] Generate JSON/HTML reports
+# TODO [PHASE2/INTEGRATION] Integrate with build systems
+# TODO [PHASE2/ANALYSIS] Analyze naming conventions
 
 from dataclasses import dataclass
 from enum import Enum
@@ -69,31 +68,31 @@ class CppLintParser:
     def execute_cpplint(
         self, paths: List[Path], config: CppLintConfig = None
     ) -> List[CppLintViolation]:
-        """Execute CppLint analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute CppLint analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CppLint execution")
 
     def parse_cpplint_output(self, output: str) -> List[CppLintViolation]:
-        """Parse CppLint output format - Phase 2 TODO [20251221_TODO]"""
+        """Parse CppLint output format - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Output parsing")
 
     def load_config(self, config_file: Path) -> CppLintConfig:
-        """Load filter configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load filter configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[CppLintViolation]
     ) -> Dict[StyleViolationType, List[CppLintViolation]]:
-        """Categorize violations by type - Phase 2 TODO [20251221_TODO]"""
+        """Categorize violations by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def calculate_style_score(
         self, violations: List[CppLintViolation], total_lines: int
     ) -> float:
-        """Calculate overall style compliance score - Phase 2 TODO [20251221_TODO]"""
+        """Calculate overall style compliance score - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Style score calculation")
 
     def generate_report(
         self, violations: List[CppLintViolation], format: str = "json"
     ) -> str:
-        """Generate style report - Phase 2 TODO [20251221_TODO]"""
+        """Generate style report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

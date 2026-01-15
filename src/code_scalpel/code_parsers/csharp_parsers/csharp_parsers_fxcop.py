@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""
-FxCop Parser - Code Analysis for .NET
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse FxCop JSON/XML output
-2. Execute FxCop analysis via subprocess
-3. Load suppression configuration
-4. Categorize violations by rule
-5. Map to Microsoft guidelines
-6. Generate JSON/SARIF/HTML reports
-7. Analyze code metrics
-8. Track violations by category
-"""
+# TODO [PHASE 2] Parse FxCop JSON/XML output
+# TODO [PHASE 2] Execute FxCop analysis via subprocess
+# TODO [PHASE 2] Load suppression configuration
+# TODO [PHASE 2] Categorize violations by rule
+# TODO [PHASE 2] Map to Microsoft guidelines
+# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
+# TODO [PHASE 2] Analyze code metrics
+# TODO [PHASE 2] Track violations by category
 
 from dataclasses import dataclass
 from enum import Enum
@@ -83,25 +78,25 @@ class FxCopParser:
     def execute_fxcop(
         self, paths: List[Path], config: FxCopConfig = None
     ) -> List[FxCopViolation]:
-        """Execute FxCop analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute FxCop analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: FxCop execution")
 
     def parse_json_report(self, report_path: Path) -> List[FxCopViolation]:
-        """Parse FxCop JSON report - Phase 2 TODO [20251221_TODO]"""
+        """Parse FxCop JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> FxCopConfig:
-        """Load FxCop configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load FxCop configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[FxCopViolation]
     ) -> Dict[RuleCategory, List[FxCopViolation]]:
-        """Categorize violations by rule category - Phase 2 TODO [20251221_TODO]"""
+        """Categorize violations by rule category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def generate_report(
         self, violations: List[FxCopViolation], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

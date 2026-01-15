@@ -9,12 +9,12 @@ Reference: https://pmd.github.io/
 Command: pmd check -d src -R rulesets/java/quickstart.xml -f xml -r report.xml
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add PMD 7.x JSON output format support
-[20251221_TODO] Implement custom ruleset configuration
-[20251221_TODO] Support incremental analysis mode
-[20251221_TODO] Add Copy-Paste Detector (CPD) output parsing
-[20251221_TODO] Implement rule metadata extraction
-[20251221_TODO] Add cross-file analysis aggregation
+# TODO Add PMD 7.x JSON output format support
+# TODO Implement custom ruleset configuration
+# TODO Support incremental analysis mode
+# TODO Add Copy-Paste Detector (CPD) output parsing
+# TODO Implement rule metadata extraction
+# TODO Add cross-file analysis aggregation
 """
 
 import subprocess

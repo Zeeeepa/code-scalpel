@@ -22,45 +22,38 @@ Example:
     # Detects SQL via f-string
     code = 'query = f"SELECT * FROM {table} WHERE id={user_id}"'
     has_sql = analyzer.contains_sql_sink(code, "python")
-
-TODO ITEMS:
-
-COMMUNITY TIER (Core Functionality):
-1. TODO: Implement SQL injection detection via concatenation
-2. TODO: Add SQL detection via f-strings/template literals
-3. TODO: Implement SQL detection via string.format()
-4. TODO: Add Java StringBuilder/StringBuffer pattern detection
-5. TODO: Create AST-based code analysis
-6. TODO: Implement language-agnostic pattern detection
-7. TODO: Add semantic context understanding
-8. TODO: Create pattern matching rule engine
-9. TODO: Implement comprehensive error handling
-10. TODO: Document pattern detection algorithms
-
-PRO TIER (Enhanced Features):
-11. TODO: Add XSS injection pattern detection
-12. TODO: Implement command injection pattern detection
-13. TODO: Add LDAP injection detection
-14. TODO: Implement NoSQL injection detection
-15. TODO: Create path traversal pattern detection
-16. TODO: Add unsafe deserialization detection
-17. TODO: Implement expression injection detection
-18. TODO: Add custom pattern rule definitions
-19. TODO: Create pattern performance optimization
-20. TODO: Add pattern conflict resolution
-
-ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build ML-based semantic code understanding (AST+embeddings)
-22. TODO: Implement zero-shot pattern learning
-23. TODO: Add contextual analysis using data flow graphs
-24. TODO: Create distributed semantic analysis
-25. TODO: Implement quantum-safe pattern hashing
-26. TODO: Build federated pattern databases
-27. TODO: Add advanced threat model pattern generation
-28. TODO: Implement AI-powered vulnerability discovery
-29. TODO: Create blockchain-based pattern verification
-30. TODO: Build cross-organization pattern federation
 """
+
+# TODO [COMMUNITY]: Implement SQL injection detection via concatenation
+# TODO [COMMUNITY]: Add SQL detection via f-strings/template literals
+# TODO [COMMUNITY]: Implement SQL detection via string.format()
+# TODO [COMMUNITY]: Add Java StringBuilder/StringBuffer pattern detection
+# TODO [COMMUNITY]: Create AST-based code analysis
+# TODO [COMMUNITY]: Implement language-agnostic pattern detection
+# TODO [COMMUNITY]: Add semantic context understanding
+# TODO [COMMUNITY]: Create pattern matching rule engine
+# TODO [COMMUNITY]: Implement comprehensive error handling
+# TODO [COMMUNITY]: Document pattern detection algorithms
+# TODO [PRO]: Add XSS injection pattern detection
+# TODO [PRO]: Implement command injection pattern detection
+# TODO [PRO]: Add LDAP injection detection
+# TODO [PRO]: Implement NoSQL injection detection
+# TODO [PRO]: Create path traversal pattern detection
+# TODO [PRO]: Add unsafe deserialization detection
+# TODO [PRO]: Implement expression injection detection
+# TODO [PRO]: Add custom pattern rule definitions
+# TODO [PRO]: Create pattern performance optimization
+# TODO [PRO]: Add pattern conflict resolution
+# TODO [ENTERPRISE]: Build ML-based semantic code understanding (AST+embeddings)
+# TODO [ENTERPRISE]: Implement zero-shot pattern learning
+# TODO [ENTERPRISE]: Add contextual analysis using data flow graphs
+# TODO [ENTERPRISE]: Create distributed semantic analysis
+# TODO [ENTERPRISE]: Implement quantum-safe pattern hashing
+# TODO [ENTERPRISE]: Build federated pattern databases
+# TODO [ENTERPRISE]: Add advanced threat model pattern generation
+# TODO [ENTERPRISE]: Implement AI-powered vulnerability discovery
+# TODO [ENTERPRISE]: Create blockchain-based pattern verification
+# TODO [ENTERPRISE]: Build cross-organization pattern federation
 
 from __future__ import annotations
 

@@ -13,23 +13,23 @@ diktat provides:
 - Gradle plugin integration
 - JSON report output
 
-[20251221_TODO] Implement JSON report parsing
-[20251221_TODO] Implement YAML configuration parsing
-[20251221_TODO] Add violation extraction with rule details
-[20251221_TODO] Add source location extraction
-[20251221_TODO] Add formatter integration support
+# TODO Implement JSON report parsing
+# TODO Implement YAML configuration parsing
+# TODO Add violation extraction with rule details
+# TODO Add source location extraction
+# TODO Add formatter integration support
 
-[20251221_TODO] Add diktat CLI execution
-[20251221_TODO] Add Gradle plugin execution support
-[20251221_TODO] Add format mode support
-[20251221_TODO] Add incremental analysis
-[20251221_TODO] Add custom rule support
+# TODO Add diktat CLI execution
+# TODO Add Gradle plugin execution support
+# TODO Add format mode support
+# TODO Add incremental analysis
+# TODO Add custom rule support
 
-[20251221_TODO] Parse style rules (naming, spacing, comments)
-[20251221_TODO] Parse code smell rules (complexity, duplication)
-[20251221_TODO] Parse potential bug rules
-[20251221_TODO] Generate fix suggestions
-[20251221_TODO] Add comparison with Detekt rules
+# TODO Parse style rules (naming, spacing, comments)
+# TODO Parse code smell rules (complexity, duplication)
+# TODO Parse potential bug rules
+# TODO Generate fix suggestions
+# TODO Add comparison with Detekt rules
 """
 
 from dataclasses import dataclass, field
@@ -91,7 +91,7 @@ class DiktatParser:
 
     def parse_json_report(self, json_data: str) -> list[DiktatViolation]:
         """
-        [20251221_TODO] Parse diktat JSON report output.
+        # TODO Parse diktat JSON report output.
 
         Args:
             json_data: JSON report string
@@ -103,7 +103,7 @@ class DiktatParser:
 
     def parse_config(self, config_path: Path) -> DiktatConfig:
         """
-        [20251221_TODO] Parse diktat YAML configuration file.
+        # TODO Parse diktat YAML configuration file.
 
         Args:
             config_path: Path to diktat YAML config
@@ -117,7 +117,7 @@ class DiktatParser:
         self, project_path: Path, format_code: bool = False
     ) -> dict[str, Any]:
         """
-        [20251221_TODO] Execute diktat on Kotlin project.
+        # TODO Execute diktat on Kotlin project.
 
         Args:
             project_path: Path to Kotlin project
@@ -130,7 +130,7 @@ class DiktatParser:
 
     def generate_fix_suggestions(self) -> list[str]:
         """
-        [20251221_TODO] Generate fix suggestions for violations.
+        # TODO Generate fix suggestions for violations.
 
         Returns:
             List of fix suggestions
@@ -139,7 +139,7 @@ class DiktatParser:
 
     def compare_with_detekt(self, detekt_violations: list) -> dict[str, Any]:
         """
-        [20251221_TODO] Compare diktat violations with Detekt findings.
+        # TODO Compare diktat violations with Detekt findings.
 
         Args:
             detekt_violations: List of Detekt violations

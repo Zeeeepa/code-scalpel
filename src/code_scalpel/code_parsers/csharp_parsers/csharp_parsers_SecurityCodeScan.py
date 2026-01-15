@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""
-Security Code Scan Parser - C# Security Vulnerability Detection
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse Security Code Scan XML/JSON output
-2. Execute SCS analysis via VSIX/msbuild
-3. Load security rules configuration
-4. Categorize vulnerabilities by CWE
-5. Detect OWASP Top 10 issues
-6. Generate JSON/SARIF/HTML reports
-7. Analyze vulnerability severity
-8. Map to remediation guidance
-"""
+# TODO [PHASE 2] Parse Security Code Scan XML/JSON output
+# TODO [PHASE 2] Execute SCS analysis via VSIX/msbuild
+# TODO [PHASE 2] Load security rules configuration
+# TODO [PHASE 2] Categorize vulnerabilities by CWE
+# TODO [PHASE 2] Detect OWASP Top 10 issues
+# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
+# TODO [PHASE 2] Analyze vulnerability severity
+# TODO [PHASE 2] Map to remediation guidance
 
 from dataclasses import dataclass
 from enum import Enum
@@ -76,37 +71,37 @@ class SecurityCodeScanParser:
     def execute_security_scan(
         self, paths: List[Path], config: SecurityCodeScanConfig = None
     ) -> List[SecurityVulnerability]:
-        """Execute Security Code Scan analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute Security Code Scan analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Security Code Scan execution")
 
     def parse_xml_report(self, report_path: Path) -> List[SecurityVulnerability]:
-        """Parse SCS XML report - Phase 2 TODO [20251221_TODO]"""
+        """Parse SCS XML report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def load_config(self, config_file: Path) -> SecurityCodeScanConfig:
-        """Load SCS configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load SCS configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_vulnerabilities(
         self, vulns: List[SecurityVulnerability]
     ) -> Dict[VulnerabilityType, List[SecurityVulnerability]]:
-        """Categorize vulnerabilities by type - Phase 2 TODO [20251221_TODO]"""
+        """Categorize vulnerabilities by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
     def map_to_cwe(
         self, vulns: List[SecurityVulnerability]
     ) -> Dict[str, List[SecurityVulnerability]]:
-        """Map vulnerabilities to CWE identifiers - Phase 2 TODO [20251221_TODO]"""
+        """Map vulnerabilities to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")
 
     def map_to_owasp(
         self, vulns: List[SecurityVulnerability]
     ) -> Dict[str, List[SecurityVulnerability]]:
-        """Map vulnerabilities to OWASP Top 10 - Phase 2 TODO [20251221_TODO]"""
+        """Map vulnerabilities to OWASP Top 10 - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: OWASP mapping")
 
     def generate_report(
         self, vulns: List[SecurityVulnerability], format: str = "json"
     ) -> str:
-        """Generate security report - Phase 2 TODO [20251221_TODO]"""
+        """Generate security report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

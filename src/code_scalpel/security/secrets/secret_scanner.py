@@ -36,61 +36,45 @@ warnings.filterwarnings(
 )
 
 
-# TODO: SecretScanner Enhancement Roadmap
-# ========================================
+# SecretScanner Enhancement Roadmap
+# ==================================
 #
 # COMMUNITY (Current & Planned):
-# - TODO [COMMUNITY]: Add more secret patterns (current)
-# - TODO [COMMUNITY]: Document all detectable secret types
+# Pattern Detection:
+# - TODO [COMMUNITY]: Add more secret patterns (Azure SAS tokens, connection strings)
+# - TODO [COMMUNITY]: Document all detectable secret types with examples
+# - TODO [COMMUNITY]: Add configuration file scanning (environment files, .env)
+#
+# Documentation & Examples:
 # - TODO [COMMUNITY]: Create false positive reduction guide
-# - TODO [COMMUNITY]: Add examples for common secrets
-# - TODO [COMMUNITY]: Create remediation guide
+# - TODO [COMMUNITY]: Add basic secret detection examples
+# - TODO [COMMUNITY]: Create remediation guide with migration steps
+# - TODO [COMMUNITY]: Document placeholder detection patterns
+# - TODO [COMMUNITY]: Create custom pattern configuration example
 # - TODO [COMMUNITY]: Add API reference documentation
 # - TODO [COMMUNITY]: Create troubleshooting guide
-# - TODO [COMMUNITY]: Document entropy analysis
 # - TODO [COMMUNITY]: Create best practices guide
 #
-# COMMUNITY Examples & Tutorials:
-# - TODO [COMMUNITY]: Add basic secret detection example
-# - TODO [COMMUNITY]: Create false positive handling example
-# - TODO [COMMUNITY]: Add entropy analysis example
-# - TODO [COMMUNITY]: Document placeholder detection example
-# - TODO [COMMUNITY]: Create custom pattern example
-# - TODO [COMMUNITY]: Add configuration file example
-# - TODO [COMMUNITY]: Create remediation workflow example
-#
-# COMMUNITY Testing & Validation:
-# - TODO [COMMUNITY]: Add secret pattern tests
-# - TODO [COMMUNITY]: Create entropy calculation tests
-# - TODO [COMMUNITY]: Add false positive reduction tests
+# Testing & Validation:
+# - TODO [COMMUNITY]: Add comprehensive secret pattern tests
+# - TODO [COMMUNITY]: Create false positive reduction tests
 # - TODO [COMMUNITY]: Test edge cases in detection
 # - TODO [COMMUNITY]: Create regression test suite
 # - TODO [COMMUNITY]: Add integration tests
 #
 # PRO (Enhanced Features):
-# - TODO [PRO]: Implement entropy analysis for secrets
-# - TODO [PRO]: Add cloud provider secret detection
-# - TODO [PRO]: Support configuration file scanning
-# - TODO [PRO]: Add secret rotation validation
-# - TODO [PRO]: Implement false positive tuning
-# - TODO [PRO]: Support base64/hex secret detection
-# - TODO [PRO]: Add environment variable scanning
-# - TODO [PRO]: Implement incremental scanning
-# - TODO [PRO]: Support custom secret patterns
-# - TODO [PRO]: Add secret manager integration
-# - TODO [PRO]: Support Docker image scanning
-# - TODO [PRO]: Add YAML/JSON/TOML config scanning
-# - TODO [PRO]: Implement Shannon entropy calculation
-# - TODO [PRO]: Add password pattern detection
-# - TODO [PRO]: Support UUID secret identification
-# - TODO [PRO]: Implement weak secret detection
-# - TODO [PRO]: Add base64 secret detection
-# - TODO [PRO]: Support hex-encoded secret detection
+# Entropy & Pattern Analysis:
+# - TODO [PRO]: Implement Shannon entropy calculation for high-randomness detection
+# - TODO [PRO]: Add weak password pattern detection (lowercase+numbers, etc.)
+# - TODO [PRO]: Implement UUID-as-secret identification
+# - TODO [PRO]: Add base64-encoded secret detection
+# - TODO [PRO]: Support hex-encoded credential detection
 # - TODO [PRO]: Implement Base85 detection
-# - TODO [PRO]: Add PEM/DER key detection
-# - TODO [PRO]: Support PKCS#12 detection
-# - TODO [PRO]: Add Azure connection strings
-# - TODO [PRO]: Support GCP service account keys
+# - TODO [PRO]: Add false positive tuning with entropy thresholds
+#
+# Cloud Provider Secrets:
+# - TODO [PRO]: Add Azure connection strings and SAS tokens
+# - TODO [PRO]: Support GCP service account keys (JSON format)
 # - TODO [PRO]: Add DigitalOcean API tokens
 # - TODO [PRO]: Support Heroku API keys
 # - TODO [PRO]: Add Cloudflare API tokens
@@ -98,99 +82,62 @@ warnings.filterwarnings(
 # - TODO [PRO]: Add OpenStack credentials
 # - TODO [PRO]: Support DataDog API keys
 #
+# Advanced Detection:
+# - TODO [PRO]: Add PEM/DER private key detection
+# - TODO [PRO]: Support PKCS#12 certificate detection
+# - TODO [PRO]: Implement encrypted secrets without key management detection
+# - TODO [PRO]: Add YAML/JSON/TOML configuration file scanning
+# - TODO [PRO]: Support environment variable defaults scanning
+# - TODO [PRO]: Implement incremental scanning for large codebases
+# - TODO [PRO]: Support custom secret pattern configuration
+# - TODO [PRO]: Add Docker image layer scanning
+#
+# Secret Management Integration:
+# - TODO [PRO]: Add secret manager integration detection
+# - TODO [PRO]: Support secret rotation validation
+# - TODO [PRO]: Validate secret age in version control
+#
 # ENTERPRISE (Advanced Capabilities):
-# - TODO [ENTERPRISE]: Implement distributed secret scanning
-# - TODO [ENTERPRISE]: Add version control history scanning
-# - TODO [ENTERPRISE]: Support Docker image analysis
-# - TODO [ENTERPRISE]: Implement ML-based secret detection
-# - TODO [ENTERPRISE]: Add real-time secret detection
-# - TODO [ENTERPRISE]: Support secret compliance checking
-# - TODO [ENTERPRISE]: Implement SIEM integration
-# - TODO [ENTERPRISE]: Add secret manager auto-migration
-# - TODO [ENTERPRISE]: Support automated remediation
-# - TODO [ENTERPRISE]: Implement continuous monitoring
-# - TODO [ENTERPRISE]: Add git history scanning
-# - TODO [ENTERPRISE]: Support supply chain secret detection
+# Machine Learning & Intelligence:
 # - TODO [ENTERPRISE]: Implement ML-based secret pattern learning
 # - TODO [ENTERPRISE]: Add zero-day secret detection
 # - TODO [ENTERPRISE]: Support adaptive entropy thresholds
 # - TODO [ENTERPRISE]: Implement context-aware detection
 # - TODO [ENTERPRISE]: Add threat intelligence integration
 # - TODO [ENTERPRISE]: Support breach database correlation
-# - TODO [ENTERPRISE]: Real-time secret scanning in CI/CD
-# - TODO [ENTERPRISE]: Support vault integration (HashiCorp)
+#
+# Version Control & History:
+# - TODO [ENTERPRISE]: Add git history scanning for exposed secrets
+# - TODO [ENTERPRISE]: Support supply chain secret detection
+# - TODO [ENTERPRISE]: Detect secrets in environment files committed
+# - TODO [ENTERPRISE]: Identify secrets in Docker image layers
+#
+# Secret Lifecycle Management:
+# - TODO [ENTERPRISE]: Implement automatic secret rotation
+# - TODO [ENTERPRISE]: Add secret remediation workflow automation
+# - TODO [ENTERPRISE]: Support secret manager auto-migration
+# - TODO [ENTERPRISE]: Suggest AWS Secrets Manager migration paths
+# - TODO [ENTERPRISE]: Recommend HashiCorp Vault integration
+# - TODO [ENTERPRISE]: Propose Azure Key Vault integration
+# - TODO [ENTERPRISE]: Auto-generate secret manager integration code
+#
+# Real-Time & Continuous Monitoring:
+# - TODO [ENTERPRISE]: Add real-time secret detection in CI/CD
+# - TODO [ENTERPRISE]: Implement continuous monitoring integration
+# - TODO [ENTERPRISE]: Support distributed secret scanning
+#
+# Compliance & Reporting:
+# - TODO [ENTERPRISE]: Support secret compliance checking (SOC2, HIPAA, PCI-DSS)
+# - TODO [ENTERPRISE]: Implement compliance reporting
+# - TODO [ENTERPRISE]: Add incident response automation
+# - TODO [ENTERPRISE]: Implement SIEM integration
+# - TODO [ENTERPRISE]: Add telemetry and analytics
+# - TODO [ENTERPRISE]: Support multi-tenant scanning
+#
+# Secret Manager Integration:
+# - TODO [ENTERPRISE]: Support HashiCorp Vault integration
 # - TODO [ENTERPRISE]: Add AWS Secrets Manager integration
 # - TODO [ENTERPRISE]: Support Azure Key Vault integration
-# - TODO [ENTERPRISE]: Implement automatic secret rotation
-# - TODO [ENTERPRISE]: Add secret remediation workflow
-# - TODO [ENTERPRISE]: Support compliance reporting
-# - TODO [ENTERPRISE]: Implement incident response
-# - TODO [ENTERPRISE]: Add telemetry and analytics
-# - TODO [ENTERPRISE]: Support multi-tenant scanning\n\n# TODO: Enhanced secret detection
-#   - Detect base64-encoded secrets
-#   - Identify hex-encoded credentials
-#   - Check for encrypted secrets without key management
-#   - Detect secrets in configuration files (YAML, JSON, TOML)
-#   - Identify environment variable defaults with secrets
-
-# TODO: Cloud provider secrets
-#   - Azure connection strings and SAS tokens
-#   - GCP service account keys (JSON)
-#   - DigitalOcean API tokens
-#   - Heroku API keys
-#   - Cloudflare API tokens
-
-# TODO: Secret entropy analysis
-#   - Calculate Shannon entropy for high-randomness strings
-#   - Detect password patterns (lowercase+numbers, etc.)
-#   - Identify UUIDs used as secrets
-#   - Check for weak secrets ("password123")
-
-# TODO: Secret lifecycle management
-#   - Detect secrets in version control history
-#   - Check for secrets in environment files committed
-#   - Identify secrets in Docker images/layers
-#   - Validate secret rotation age
-
-# TODO: Integration with secret managers
-#   - Suggest AWS Secrets Manager migration
-#   - Recommend HashiCorp Vault usage
-#   - Propose Azure Key Vault integration
-#   - Auto-generate secret manager code
-
-# TODO: SecretScanner Enhancement Roadmap
-# ========================================
-#
-# COMMUNITY (Current & Planned):
-# - TODO [COMMUNITY]: Add more secret patterns (current)
-# - TODO [COMMUNITY]: Document all detectable secret types
-# - TODO [COMMUNITY]: Create false positive reduction guide
-# - TODO [COMMUNITY]: Add examples for common secrets
-# - TODO [COMMUNITY]: Create remediation guide
-#
-# PRO (Enhanced Features):
-# - TODO [PRO]: Implement entropy analysis for secrets
-# - TODO [PRO]: Add cloud provider secret detection
-# - TODO [PRO]: Support configuration file scanning
-# - TODO [PRO]: Add secret rotation validation
-# - TODO [PRO]: Implement false positive tuning
-# - TODO [PRO]: Support base64/hex secret detection
-# - TODO [PRO]: Add environment variable scanning
-# - TODO [PRO]: Implement incremental scanning
-# - TODO [PRO]: Support custom secret patterns
-# - TODO [PRO]: Add secret manager integration
-#
-# ENTERPRISE (Advanced Capabilities):
-# - TODO [ENTERPRISE]: Implement distributed secret scanning
-# - TODO [ENTERPRISE]: Add version control history scanning
-# - TODO [ENTERPRISE]: Support Docker image analysis
-# - TODO [ENTERPRISE]: Implement ML-based secret detection
-# - TODO [ENTERPRISE]: Add real-time secret detection
-# - TODO [ENTERPRISE]: Support secret compliance checking
-# - TODO [ENTERPRISE]: Implement SIEM integration
-# - TODO [ENTERPRISE]: Add secret manager auto-migration
-# - TODO [ENTERPRISE]: Support automated remediation
-# - TODO [ENTERPRISE]: Implement continuous monitoring
 
 
 class SecretScanner(ast.NodeVisitor):

@@ -9,11 +9,11 @@ Reference: https://find-sec-bugs.github.io/
 Command: spotbugs -pluginList findsecbugs-plugin.jar -xml -output results.xml classes/
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Implement CWE mapping for each vulnerability
-[20251221_TODO] Add OWASP Top 10 categorization
-[20251221_TODO] Support custom ruleset configuration
-[20251221_TODO] Implement source code snippet extraction
-[20251221_TODO] Add false positive filtering logic
+# TODO Implement CWE mapping for each vulnerability
+# TODO Add OWASP Top 10 categorization
+# TODO Support custom ruleset configuration
+# TODO Implement source code snippet extraction
+# TODO Add false positive filtering logic
 """
 
 from dataclasses import dataclass

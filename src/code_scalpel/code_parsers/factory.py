@@ -2,129 +2,67 @@
 
 [20251221_FEATURE] Factory pattern for multi-language code parsing.
 
-============================================================================
-TODO ITEMS: code_parsers/factory.py
-============================================================================
-COMMUNITY TIER - Core Factory Features (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Auto-register parsers from language subdirectories:
-    - Scan language_parsers/ directories on import
-    - Dynamically register all IParser implementations
-    - Support hot-reloading of parser modules
-    - Add parser version compatibility checking
-    - Test count: 20 tests (auto-registration, discovery, compatibility)
-
-[P1_HIGH] Implement lazy loading for parsers:
-    - Defer parser imports until first use
-    - Reduce startup time for large parser collections
-    - Add parser preloading hints for common languages
-    - Support eager loading mode for performance
-    - Test count: 15 tests (lazy loading, startup time, preloading)
-
-[P1_HIGH] Enhanced language detection:
-    - Support shebang-based language detection (#!/usr/bin/python)
-    - Add magic comment detection (# -*- coding: utf-8 -*-,  // @ts-check)
-    - Integrate with .editorconfig for per-project settings
-    - Add content-based language detection fallback
-    - Support compound extensions (.spec.ts, .test.js)
-    - Test count: 25 tests (detection accuracy, edge cases)
-
-[P2_MEDIUM] Parser capability introspection:
-    - Add get_capabilities(language) returning parser features
-    - Support querying: supports_incremental, supports_types, etc.
-    - Add parser feature matrix display
-    - Implement capability-based parser selection
-    - Test count: 15 tests (introspection, capability queries)
-
-[P2_MEDIUM] Error handling and diagnostics:
-    - Add detailed error messages for unsupported languages
-    - Suggest installing missing parser dependencies
-    - Add parser health check endpoint
-    - Implement parser fallback chains
-    - Test count: 20 tests (error handling, fallbacks, diagnostics)
-
-============================================================================
-PRO TIER - Advanced Factory Features (P1-P3)
-============================================================================
-
-[P1_HIGH] Parser backend selection:
-    - Add get_parser(language, backend="tree-sitter") for explicit backend
-    - Support multiple backends per language (AST, tree-sitter, regex)
-    - Implement smart backend selection based on use case
-    - Add backend performance profiling
-    - Test count: 25 tests (backend selection, performance)
-
-[P1_HIGH] Parser configuration management:
-    - Support parser configuration objects (strict mode, feature flags)
-    - Add per-project parser configuration files
-    - Implement configuration inheritance (global → project → file)
-    - Add configuration validation and schema
-    - Test count: 20 tests (config loading, validation, inheritance)
-
-[P2_MEDIUM] Parser benchmarking and optimization:
-    - Add parser benchmarking to select fastest available parser
-    - Implement adaptive parser selection based on file size
-    - Add parser performance metrics collection
-    - Support parser warm-up for frequently used languages
-    - Test count: 25 tests (benchmarking, optimization, metrics)
-
-[P2_MEDIUM] Multi-strategy parsing:
-    - Support running multiple parsers in parallel
-    - Aggregate results from multiple parser strategies
-    - Add consensus-based error detection
-    - Implement parser result merging
-    - Test count: 30 tests (multi-strategy, aggregation, consensus)
-
-[P3_LOW] Parser plugin system:
-    - Add register_plugin(name, parser_class, languages) API
-    - Support third-party parser registration
-    - Implement plugin dependency resolution
-    - Add plugin marketplace metadata
-    - Test count: 20 tests (plugins, registration, dependencies)
-
-============================================================================
-ENTERPRISE TIER - Enterprise Factory Features (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Multi-tenant parser isolation:
-    - Support tenant-specific parser configurations
-    - Add parser resource quotas per tenant
-    - Implement tenant-specific parser versions
-    - Add cross-tenant parser usage analytics
-    - Test count: 25 tests (multi-tenancy, isolation, quotas)
-
-[P2_MEDIUM] Distributed parser coordination:
-    - Add parser discovery in distributed systems
-    - Support remote parser invocation
-    - Implement parser load balancing
-    - Add parser failover and redundancy
-    - Test count: 30 tests (distribution, coordination, failover)
-
-[P3_LOW] Enterprise governance:
-    - Add parser usage audit logging
-    - Implement parser access control (RBAC)
-    - Support compliance-mandated parser configurations
-    - Add parser governance dashboards
-    - Test count: 20 tests (governance, audit, compliance)
-
-[P3_LOW] Advanced caching strategies:
-    - Implement distributed parser result caching
-    - Add cache invalidation strategies
-    - Support cache warming for common patterns
-    - Add cache compression and encryption
-    - Test count: 25 tests (caching, invalidation, encryption)
-
-[P4_LOW] ML-driven parser optimization:
-    - Add ML model for optimal parser selection
-    - Implement predictive parser preloading
-    - Support adaptive parser configuration
-    - Add anomaly detection for parser failures
-    - Test count: 30 tests (ML integration, optimization)
-
-============================================================================
-TOTAL TEST ESTIMATE: 370 tests (115 COMMUNITY + 120 PRO + 135 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Scan language_parsers/ directories on import
+# TODO [COMMUNITY] Dynamically register all IParser implementations
+# TODO [COMMUNITY] Support hot-reloading of parser modules
+# TODO [COMMUNITY] Add parser version compatibility checking
+# TODO [COMMUNITY] Defer parser imports until first use
+# TODO [COMMUNITY] Reduce startup time for large parser collections
+# TODO [COMMUNITY] Add parser preloading hints for common languages
+# TODO [COMMUNITY] Support eager loading mode for performance
+# TODO [COMMUNITY] Support shebang-based language detection (#!/usr/bin/python)
+# TODO [COMMUNITY] Add magic comment detection (# -*- coding: utf-8 -*-, // @ts-check)
+# TODO [COMMUNITY] Integrate with .editorconfig for per-project settings
+# TODO [COMMUNITY] Add content-based language detection fallback
+# TODO [COMMUNITY] Support compound extensions (.spec.ts, .test.js)
+# TODO [COMMUNITY] Add get_capabilities(language) returning parser features
+# TODO [COMMUNITY] Support querying supports_incremental, supports_types, etc.
+# TODO [COMMUNITY] Add parser feature matrix display
+# TODO [COMMUNITY] Implement capability-based parser selection
+# TODO [COMMUNITY] Add detailed error messages for unsupported languages
+# TODO [COMMUNITY] Suggest installing missing parser dependencies
+# TODO [COMMUNITY] Add parser health check endpoint
+# TODO [COMMUNITY] Implement parser fallback chains
+# TODO [PRO] Add get_parser(language, backend="tree-sitter") for explicit backend
+# TODO [PRO] Support multiple backends per language (AST, tree-sitter, regex)
+# TODO [PRO] Implement smart backend selection based on use case
+# TODO [PRO] Add backend performance profiling
+# TODO [PRO] Support parser configuration objects (strict mode, feature flags)
+# TODO [PRO] Add per-project parser configuration files
+# TODO [PRO] Implement configuration inheritance (global → project → file)
+# TODO [PRO] Add configuration validation and schema
+# TODO [PRO] Add parser benchmarking to select fastest available parser
+# TODO [PRO] Implement adaptive parser selection based on file size
+# TODO [PRO] Add parser performance metrics collection
+# TODO [PRO] Support parser warm-up for frequently used languages
+# TODO [PRO] Support running multiple parsers in parallel
+# TODO [PRO] Aggregate results from multiple parser strategies
+# TODO [PRO] Add consensus-based error detection
+# TODO [PRO] Implement parser result merging
+# TODO [PRO] Add register_plugin(name, parser_class, languages) API
+# TODO [PRO] Support third-party parser registration
+# TODO [PRO] Implement plugin dependency resolution
+# TODO [PRO] Add plugin marketplace metadata
+# TODO [ENTERPRISE] Support tenant-specific parser configurations
+# TODO [ENTERPRISE] Add parser resource quotas per tenant
+# TODO [ENTERPRISE] Implement tenant-specific parser versions
+# TODO [ENTERPRISE] Add cross-tenant parser usage analytics
+# TODO [ENTERPRISE] Add parser discovery in distributed systems
+# TODO [ENTERPRISE] Support remote parser invocation
+# TODO [ENTERPRISE] Implement parser load balancing
+# TODO [ENTERPRISE] Add parser failover and redundancy
+# TODO [ENTERPRISE] Add parser usage audit logging
+# TODO [ENTERPRISE] Implement parser access control (RBAC)
+# TODO [ENTERPRISE] Support compliance-mandated parser configurations
+# TODO [ENTERPRISE] Add parser governance dashboards
+# TODO [ENTERPRISE] Implement distributed parser result caching
+# TODO [ENTERPRISE] Add cache invalidation strategies
+# TODO [ENTERPRISE] Support cache warming for common patterns
+# TODO [ENTERPRISE] Add cache compression and encryption
+# TODO [ENTERPRISE] Add ML model for optimal parser selection
+# TODO [ENTERPRISE] Implement predictive parser preloading
+# TODO [ENTERPRISE] Support adaptive parser configuration
+# TODO [ENTERPRISE] Add anomaly detection for parser failures
 """
 
 from typing import Dict, Optional, Type

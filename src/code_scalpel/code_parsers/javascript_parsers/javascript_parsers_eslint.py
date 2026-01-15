@@ -8,15 +8,15 @@ Supports custom rules, plugins, and configuration parsing.
 ESLint is the most widely used JavaScript linter with extensive plugin ecosystem.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add ESLint v9 flat config support (eslint.config.js)
-[20251221_TODO] Implement rule severity mapping (error/warning/off)
-[20251221_TODO] Add custom rule documentation extraction
-[20251221_TODO] Implement incremental linting with change tracking
-[20251221_TODO] Add plugin dependency graph analysis
-[20251221_TODO] Support ESLint override configuration per file patterns
-[20251221_TODO] Add fix metadata and cost estimation
-[20251221_TODO] Implement rule conflict detection
-[20251221_TODO] Add metrics aggregation and trending
+# TODO Add ESLint v9 flat config support (eslint.config.js)
+# TODO Implement rule severity mapping (error/warning/off)
+# TODO Add custom rule documentation extraction
+# TODO Implement incremental linting with change tracking
+# TODO Add plugin dependency graph analysis
+# TODO Support ESLint override configuration per file patterns
+# TODO Add fix metadata and cost estimation
+# TODO Implement rule conflict detection
+# TODO Add metrics aggregation and trending
 
 Features:
     Output Parsing:

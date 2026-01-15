@@ -25,15 +25,15 @@ For Java 14+ records, Java 17+ sealed classes, and Java 21+ pattern matching,
 use the tree-sitter parser instead.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add additional design patterns (Strategy, Observer, Visitor, Adapter)
-[20251221_TODO] Implement method coupling metrics (CBO - Coupling Between Objects)
-[20251221_TODO] Add Afferent/Efferent coupling calculation (Ca/Ce metrics)
-[20251221_TODO] Support polyglot metrics for Spring/Guice dependency injection
-[20251221_TODO] Implement SOLID principle violation detection
-[20251221_TODO] Add cyclic dependency detection in method call graph
-[20251221_TODO] Implement data flow analysis for null pointer vulnerability detection
-[20251221_TODO] Add resource leak detection (Closeable not closed)
-[20251221_TODO] Support more design pattern variants (Abstract Factory, Template Method)
+# TODO Add additional design patterns (Strategy, Observer, Visitor, Adapter)
+# TODO Implement method coupling metrics (CBO - Coupling Between Objects)
+# TODO Add Afferent/Efferent coupling calculation (Ca/Ce metrics)
+# TODO Support polyglot metrics for Spring/Guice dependency injection
+# TODO Implement SOLID principle violation detection
+# TODO Add cyclic dependency detection in method call graph
+# TODO Implement data flow analysis for null pointer vulnerability detection
+# TODO Add resource leak detection (Closeable not closed)
+# TODO Support more design pattern variants (Abstract Factory, Template Method)
 """
 
 import math

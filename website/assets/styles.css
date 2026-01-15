@@ -36,6 +36,90 @@ body {
     overflow-x: hidden;
 }
 
+/* [20260114_REFACTOR] Shared layout primitives used across pages */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.section {
+    padding: 6rem 2rem;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.card-inner {
+    padding: 22px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+}
+
+.table thead th {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: 700;
+    text-align: left;
+}
+
+.table tbody tr:hover td {
+    background: rgba(0, 212, 255, 0.04);
+}
+
+.code-block {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.footer {
+    position: relative;
+    z-index: 1;
+    padding: 3rem 2rem 2rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
 /* Animated Background */
 .bg-grid {
     position: fixed;
@@ -177,6 +261,27 @@ nav {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+}
+
+/* [20260114_FEATURE] Shared input styling for search/filter controls */
+.input {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+}
+
+.input:focus {
+    border-color: rgba(0, 212, 255, 0.35);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08);
 }
 
 /* Hero Section */
@@ -724,6 +829,11 @@ footer {
     .footer-links {
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    .grid2,
+    .grid3 {
+        grid-template-columns: 1fr;
     }
 }
 

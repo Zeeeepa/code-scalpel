@@ -2,45 +2,39 @@
 Policy Engine Exceptions.
 
 # [20251216_FEATURE] v2.5.0 Guardian - Tamper resistance exceptions
-
-TODO ITEMS:
-
-COMMUNITY TIER (Core Functionality):
-1. TODO: PolicyEngineError - Base exception class
-2. TODO: TamperDetectedError - Tamper detection
-3. TODO: PolicyModificationError - Modification prevention
-4. TODO: OverrideTimeoutError - Override timeout
-5. TODO: InvalidOverrideCodeError - Invalid override codes
-6. TODO: PolicyParseError - Policy syntax errors
-7. TODO: OPAError - OPA CLI integration errors
-8. TODO: PolicyEvaluationError - Policy evaluation failures
-9. TODO: AuditLogError - Audit logging failures
-10. TODO: FilePermissionError - File permission issues
-
-PRO TIER (Enhanced Features):
-11. TODO: AuditLogTamperError - Append-only log integrity failures
-12. TODO: RateLimitError - Too many overrides requested
-13. TODO: PolicyExpiredError - Time-bound policies expired
-14. TODO: PolicyInheritanceError - Scope/role-based policy conflicts
-15. TODO: ConflictingPoliciesError - Multiple conflicting policies
-16. TODO: MissingPolicyError - Required policy not found
-17. TODO: KeyRotationError - Key rotation failures
-18. TODO: ComplianceError - Compliance check failures
-19. TODO: ManifestError - Policy manifest errors
-20. TODO: IntegrityError - Cryptographic integrity failures
-
-ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: DelegationError - Invalid override delegation
-22. TODO: FederatedPolicyError - Cross-organization policy errors
-23. TODO: DistributedVerificationError - Distributed verification failures
-24. TODO: BlockchainError - Blockchain-based verification failures
-25. TODO: QuantumSafeError - Quantum-safe cryptography errors
-26. TODO: ZeroKnowledgeError - Zero-knowledge proof failures
-27. TODO: HSMError - Hardware security module errors
-28. TODO: DecentralizedIdentityError - DID verification failures
-29. TODO: AnomalyDetectionError - ML-based anomaly detection errors
-30. TODO: FederatedIdentityError - Federated identity verification errors
 """
+
+# TODO [COMMUNITY]: PolicyEngineError - Base exception class
+# TODO [COMMUNITY]: TamperDetectedError - Tamper detection
+# TODO [COMMUNITY]: PolicyModificationError - Modification prevention
+# TODO [COMMUNITY]: OverrideTimeoutError - Override timeout
+# TODO [COMMUNITY]: InvalidOverrideCodeError - Invalid override codes
+# TODO [COMMUNITY]: PolicyParseError - Policy syntax errors
+# TODO [COMMUNITY]: OPAError - OPA CLI integration errors
+# TODO [COMMUNITY]: PolicyEvaluationError - Policy evaluation failures
+# TODO [COMMUNITY]: AuditLogError - Audit logging failures
+# TODO [COMMUNITY]: FilePermissionError - File permission issues
+# TODO [PRO]: AuditLogTamperError - Append-only log integrity failures
+# TODO [PRO]: RateLimitError - Too many overrides requested
+# TODO [PRO]: PolicyExpiredError - Time-bound policies expired
+# TODO [PRO]: PolicyInheritanceError - Scope/role-based policy conflicts
+# TODO [PRO]: ConflictingPoliciesError - Multiple conflicting policies
+# TODO [PRO]: MissingPolicyError - Required policy not found
+# TODO [PRO]: KeyRotationError - Key rotation failures
+# TODO [PRO]: ComplianceError - Compliance check failures
+# TODO [PRO]: ManifestError - Policy manifest errors
+# TODO [PRO]: IntegrityError - Cryptographic integrity failures
+# TODO [ENTERPRISE]: DelegationError - Invalid override delegation
+# TODO [ENTERPRISE]: FederatedPolicyError - Cross-organization policy errors
+# TODO [ENTERPRISE]: DistributedVerificationError - Distributed verification failures
+# TODO [ENTERPRISE]: BlockchainError - Blockchain-based verification failures
+# TODO [ENTERPRISE]: QuantumSafeError - Quantum-safe cryptography errors
+# TODO [ENTERPRISE]: ZeroKnowledgeError - Zero-knowledge proof failures
+# TODO [ENTERPRISE]: HSMError - Hardware security module errors
+# TODO [ENTERPRISE]: DecentralizedIdentityError - DID verification failures
+# TODO [ENTERPRISE]: AnomalyDetectionError - ML-based anomaly detection errors
+# TODO [ENTERPRISE]: FederatedIdentityError - Federated identity verification errors
+
 
 
 class PolicyEngineError(Exception):

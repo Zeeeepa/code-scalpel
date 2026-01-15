@@ -1,225 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation — Code Scalpel</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --bg-code: #0d0d14;
-            --text-primary: #f0f0f5;
-            --text-secondary: #9898a8;
-            --text-muted: #5a5a70;
-            --accent-cyan: #00d4ff;
-            --accent-violet: #8b5cf6;
-            --accent-emerald: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --gradient-prism: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #f43f5e 100%);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-glow: rgba(0, 212, 255, 0.3);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1.25rem 2rem;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-prism);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--bg-primary);
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .logo-text span {
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--accent-cyan);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--gradient-prism);
-            color: var(--bg-primary);
-        }
-
-        /* Docs Layout */
-        .docs-layout {
-            display: flex;
-            padding-top: 80px;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .docs-sidebar {
-            width: 280px;
-            position: fixed;
-            top: 80px;
-            left: 0;
-            bottom: 0;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-subtle);
-            padding: 2rem 0;
-            overflow-y: auto;
-        }
-
-        .sidebar-section {
-            margin-bottom: 2rem;
-        }
-
-        .sidebar-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            padding: 0 1.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .sidebar-links {
-            list-style: none;
-        }
-
-        .sidebar-links a {
-            display: block;
-            padding: 0.6rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.95rem;
-            border-left: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .sidebar-links a:hover {
-            color: var(--text-primary);
-            background: rgba(0, 212, 255, 0.05);
-        }
-
-        .sidebar-links a.active {
-            color: var(--accent-cyan);
-            border-left-color: var(--accent-cyan);
-            background: rgba(0, 212, 255, 0.08);
-        }
-
-        /* Main Content */
-        .docs-content {
-            flex: 1;
-            margin-left: 280px;
-            padding: 3rem 4rem;
-            max-width: 900px;
-        }
-
-        .docs-header {
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .docs-badge {
-            display: inline-block;
-            padding: 0.3rem 0.75rem;
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 100px;
-            font-size: 0.8rem;
-            color: var(--accent-cyan);
-            margin-bottom: 1rem;
-        }
-
-        .docs-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-        }
-
-        .docs-desc {
-            color: var(--text-secondary);
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Redirecting… — Code Scalpel</title>
+  <!-- [20260114_REFACTOR] Canonical docs page is /docs.html; keep this shim to avoid stale links. -->
+  <meta http-equiv="refresh" content="0; url=/docs.html" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 2rem; }
+  </style>
             font-size: 1.15rem;
         }
+  <p>Redirecting to <a href="/docs.html">/docs.html</a>…</p>
+  <script>
+    window.location.replace("/docs.html");
+  </script>
 
         /* Content Styling */
         .docs-section {
@@ -743,7 +538,7 @@ code-scalpel mcp
 <span class="code-keyword">export</span> <span class="code-variable">CODE_SCALPEL_TIER</span>=<span class="code-string">pro</span>
 code-scalpel mcp
 
-<span class="code-comment"># Enterprise - 20 tools, cross-file security, policy governance</span>
+<span class="code-comment"># Enterprise - 22 tools, cross-file security, policy governance</span>
 <span class="code-keyword">export</span> <span class="code-variable">CODE_SCALPEL_TIER</span>=<span class="code-string">enterprise</span>
 code-scalpel mcp</code></pre>
                 </div>
@@ -757,7 +552,7 @@ code-scalpel mcp</code></pre>
             <section class="docs-section" id="next-steps">
                 <h2>Next Steps</h2>
                 <ul>
-                    <li><strong><a href="#">MCP Tools Reference</a></strong> — Complete documentation for all 20 tools</li>
+                    <li><strong><a href="#">MCP Tools Reference</a></strong> — Complete documentation for all 22 tools</li>
                     <li><strong><a href="#">Integration Guides</a></strong> — Detailed setup for each AI agent</li>
                     <li><strong><a href="#">Policy Engine Guide</a></strong> — Configure governance and audit trails (Pro/Enterprise)</li>
                     <li><strong><a href="#">API Reference</a></strong> — Programmatic usage without MCP</li>

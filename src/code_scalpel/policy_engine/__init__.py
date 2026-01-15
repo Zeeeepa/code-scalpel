@@ -32,45 +32,38 @@ Example:
     decision = engine.evaluate(operation)
     if not decision.allowed:
         print(f"Policy violation: {decision.reason}")
-
-TODO ITEMS:
-
-COMMUNITY TIER (Core Functionality):
-1. TODO: Implement basic YAML policy file loading and parsing
-2. TODO: Create OPA/Rego policy evaluation engine
-3. TODO: Implement Operation and PolicyDecision data models
-4. TODO: Add policy validation on load (syntax, required fields)
-5. TODO: Implement fail-closed security model for policy errors
-6. TODO: Create basic audit logging framework
-7. TODO: Add semantic analysis for SQL injection detection
-8. TODO: Implement TOTP-based override verification
-9. TODO: Create comprehensive error handling and exceptions
-10. TODO: Document policy syntax and examples with tutorials
-
-PRO TIER (Enhanced Features):
-11. TODO: Add policy hot-reload without restart capability
-12. TODO: Implement JSONSchema-based alternative policy format
-13. TODO: Add policy versioning and evolution tracking
-14. TODO: Create policy inheritance system (parent/child policies)
-15. TODO: Implement custom severity levels for organizations
-16. TODO: Add policy tagging and categorization system
-17. TODO: Create policy conflict detection and resolution
-18. TODO: Implement rate limiting for policy violations
-19. TODO: Add audit log rotation with retention policies
-20. TODO: Create policy testing framework for validation
-
-ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build ML-based semantic code understanding using AST embeddings
-22. TODO: Implement distributed policy evaluation across regions
-23. TODO: Add X.509 certificate chain support for policy signing
-24. TODO: Create blockchain-style audit log linking (hash chains)
-25. TODO: Implement policy encryption at rest with key rotation
-26. TODO: Build federated policy governance across organizations
-27. TODO: Add quantum-safe cryptographic signatures
-28. TODO: Implement zero-knowledge proof policy verification
-29. TODO: Create AI-powered policy generation from compliance specs
-30. TODO: Build advanced threat modeling integration with policies
 """
+
+# TODO [COMMUNITY]: Implement basic YAML policy file loading and parsing
+# TODO [COMMUNITY]: Create OPA/Rego policy evaluation engine
+# TODO [COMMUNITY]: Implement Operation and PolicyDecision data models
+# TODO [COMMUNITY]: Add policy validation on load (syntax, required fields)
+# TODO [COMMUNITY]: Implement fail-closed security model for policy errors
+# TODO [COMMUNITY]: Create basic audit logging framework
+# TODO [COMMUNITY]: Add semantic analysis for SQL injection detection
+# TODO [COMMUNITY]: Implement TOTP-based override verification
+# TODO [COMMUNITY]: Create comprehensive error handling and exceptions
+# TODO [COMMUNITY]: Document policy syntax and examples with tutorials
+# TODO [PRO]: Add policy hot-reload without restart capability
+# TODO [PRO]: Implement JSONSchema-based alternative policy format
+# TODO [PRO]: Add policy versioning and evolution tracking
+# TODO [PRO]: Create policy inheritance system (parent/child policies)
+# TODO [PRO]: Implement custom severity levels for organizations
+# TODO [PRO]: Add policy tagging and categorization system
+# TODO [PRO]: Create policy conflict detection and resolution
+# TODO [PRO]: Implement rate limiting for policy violations
+# TODO [PRO]: Add audit log rotation with retention policies
+# TODO [PRO]: Create policy testing framework for validation
+# TODO [ENTERPRISE]: Build ML-based semantic code understanding using AST embeddings
+# TODO [ENTERPRISE]: Implement distributed policy evaluation across regions
+# TODO [ENTERPRISE]: Add X.509 certificate chain support for policy signing
+# TODO [ENTERPRISE]: Create blockchain-style audit log linking (hash chains)
+# TODO [ENTERPRISE]: Implement policy encryption at rest with key rotation
+# TODO [ENTERPRISE]: Build federated policy governance across organizations
+# TODO [ENTERPRISE]: Add quantum-safe cryptographic signatures
+# TODO [ENTERPRISE]: Implement zero-knowledge proof policy verification
+# TODO [ENTERPRISE]: Create AI-powered policy generation from compliance specs
+# TODO [ENTERPRISE]: Build advanced threat modeling integration with policies
 
 from __future__ import annotations
 

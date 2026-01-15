@@ -48,109 +48,12 @@ else:
     TSNode = Any
     TSParser = Any
 
-# TODO: Enhanced type boundary analysis
-#   - Detect Zod/Yup validation at boundaries
-#   - Check for io-ts runtime type validation
-#   - Validate JSON Schema at API endpoints
-#   - Detect class-validator decorators (NestJS)
-#   - Check for Ajv schema validation
-
-# TODO: Cross-framework type safety
-#   - tRPC type safety verification
-#   - GraphQL Code Generator validation
-#   - OpenAPI type generation checks
-#   - Prisma type safety analysis
-
-# TODO: Serialization safety
-#   - Detect JSON.parse without validation
-#   - Check for unsafe Object.assign on types
-#   - Validate structuredClone type preservation
-#   - Detect prototype pollution via types
-
-# TODO: Type narrowing detection
-#   - Validate type guards are used (is, typeof, instanceof)
-#   - Detect discriminated union exhaustiveness
-#   - Check for null/undefined guards
-#   - Validate branded types at boundaries
-
-# TODO: TypeEvaporationDetector Enhancement Roadmap
-# =================================================
-#
-# COMMUNITY (Current & Planned):
-# - TODO [COMMUNITY]: Add comprehensive TypeScript examples (current)
-# - TODO [COMMUNITY]: Document type evaporation patterns
-# - TODO [COMMUNITY]: Create detection rule guide
-# - TODO [COMMUNITY]: Add best practices for type safety
-# - TODO [COMMUNITY]: Document vulnerability severity levels
-# - TODO [COMMUNITY]: Create remediation patterns
-# - TODO [COMMUNITY]: Add DOM input security guide
-# - TODO [COMMUNITY]: Document serialization boundaries
-# - TODO [COMMUNITY]: Create unsafe assertion guide
-#
-# COMMUNITY Examples & Tutorials:
-# - TODO [COMMUNITY]: Create unsafe type assertion example
-# - TODO [COMMUNITY]: Add DOM input vulnerability example
-# - TODO [COMMUNITY]: Show fetch boundary example
-# - TODO [COMMUNITY]: Create type union validation example
-# - TODO [COMMUNITY]: Add cross-file trust example
-# - TODO [COMMUNITY]: Show remediation patterns
-# - TODO [COMMUNITY]: Create end-to-end validation example
-#
-# COMMUNITY Testing & Validation:
-# - TODO [COMMUNITY]: Add type assertion detection tests
-# - TODO [COMMUNITY]: Test DOM input detection
-# - TODO [COMMUNITY]: Verify fetch boundary analysis
-# - TODO [COMMUNITY]: Test union type validation
-# - TODO [COMMUNITY]: Add regression test suite
-#
-# PRO (Enhanced Features):
-# - TODO [PRO]: Support Zod/Yup validation detection
-# - TODO [PRO]: Implement io-ts runtime type checking
-# - TODO [PRO]: Add JSON Schema validation detection
-# - TODO [PRO]: Support tRPC type safety verification
-# - TODO [PRO]: Implement GraphQL Code Generator validation
-# - TODO [PRO]: Add Prisma ORM type safety analysis
-# - TODO [PRO]: Support class-validator decorators (NestJS)
-# - TODO [PRO]: Implement dataflow-aware type tracking
-# - TODO [PRO]: Add incremental type analysis
-# - TODO [PRO]: Support custom type conversion patterns
-# - TODO [PRO]: Add type guard detection
-# - TODO [PRO]: Implement discriminated union tracking
-# - TODO [PRO]: Support branded type validation
-# - TODO [PRO]: Add type narrowing analysis
-# - TODO [PRO]: Implement flow-sensitive type checking
-#
-# PRO Framework Integration:
-# - TODO [PRO]: Add Express.js type safety
-# - TODO [PRO]: Support Fastify type integration
-# - TODO [PRO]: Implement Hono type checking
-# - TODO [PRO]: Add Next.js API route validation
-# - TODO [PRO]: Support Remix loader/action types
-# - TODO [PRO]: Implement SvelteKit server safety
-# - TODO [PRO]: Add type checking for REST clients
-# - TODO [PRO]: Support WebSocket type safety
-#
-# ENTERPRISE (Advanced Capabilities):
-# - TODO [ENTERPRISE]: Support all JavaScript frameworks
-# - TODO [ENTERPRISE]: Implement distributed type analysis
-# - TODO [ENTERPRISE]: Add ML-based type safety prediction
-# - TODO [ENTERPRISE]: Support polyglot type evaporation (JS + backend)
-# - TODO [ENTERPRISE]: Implement type policy DSL
-# - TODO [ENTERPRISE]: Add compliance checking (framework-specific)
-# - TODO [ENTERPRISE]: Support continuous type safety monitoring
-# - TODO [ENTERPRISE]: Implement IDE integration for live checks
-# - TODO [ENTERPRISE]: Add enterprise SIEM integration
-# - TODO [ENTERPRISE]: Support automated type safety violations remediation
-# - TODO [ENTERPRISE]: Implement symbolic type checking
-# - TODO [ENTERPRISE]: Add probabilistic type inference
-# - TODO [ENTERPRISE]: Support type theorem proving
-# - TODO [ENTERPRISE]: Implement runtime type enforcement
-# - TODO [ENTERPRISE]: Add type safety dashboards
-# - TODO [ENTERPRISE]: Support cross-language type bridges
-# - TODO [ENTERPRISE]: Implement type evolution tracking
-# - TODO [ENTERPRISE]: Add type safety metrics
-# - TODO [ENTERPRISE]: Support automated type fixes
-# - TODO [ENTERPRISE]: Implement type safety auditing
+    # TODO [COMMUNITY]: Add comprehensive TypeScript examples, documentation, and guides for type evaporation patterns, detection rules, best practices, severity levels, remediation patterns, DOM input security, serialization boundaries, and unsafe assertions
+    # TODO [COMMUNITY]: Create unsafe type assertion, DOM input vulnerability, fetch boundary, type union validation, cross-file trust examples, and remediation patterns with end-to-end validation
+    # TODO [COMMUNITY]: Add type assertion detection, DOM input detection, fetch boundary analysis, union type validation tests, and regression test suite
+    # TODO [PRO]: Support Zod/Yup/io-ts validation detection, JSON Schema validation, dataflow-aware type tracking, type guard detection, discriminated union tracking, branded type validation, and type narrowing analysis
+    # TODO [PRO]: Add Express.js, Fastify, Hono, Next.js API routes, Remix, SvelteKit, REST clients, and WebSocket type safety support
+    # TODO [ENTERPRISE]: Support all JavaScript frameworks, distributed type analysis, ML-based type safety prediction, polyglot type evaporation analysis, type policy DSL, compliance checking, continuous monitoring, IDE integration, SIEM integration, automated remediation, symbolic type checking, probabilistic inference, type theorem proving, runtime enforcement, dashboards, cross-language bridges, type evolution tracking, metrics, and type safety auditing
 
 # Try to import tree-sitter for TypeScript parsing
 try:

@@ -26,43 +26,38 @@ class BaseNormalizer(ABC):
         >>> ir.source_language
         'python'
 
-    TODO ITEMS:
+    # TODO COMMUNITY TIER: Implement basic statement normalization (assignments, calls, returns)
+    # TODO COMMUNITY TIER: Support function and class definition parsing
+    # TODO COMMUNITY TIER: Handle control flow statements (if/else, loops, try/catch)
+    # TODO COMMUNITY TIER: Normalize binary/unary operations and comparisons
+    # TODO COMMUNITY TIER: Support variable declarations and parameter lists
+    # TODO COMMUNITY TIER: Create SourceLocation tracking for all nodes
+    # TODO COMMUNITY TIER: Implement error reporting with line/column information
+    # TODO COMMUNITY TIER: Add basic expression parsing (literals, names, subscripts)
+    # TODO COMMUNITY TIER: Support list/dict/set literals
+    # TODO COMMUNITY TIER: Create comprehensive test suite for basic normalization
 
-    COMMUNITY TIER (Basic AST/CST Normalization):
-    1. TODO: Implement basic statement normalization (assignments, calls, returns)
-    2. TODO: Support function and class definition parsing
-    3. TODO: Handle control flow statements (if/else, loops, try/catch)
-    4. TODO: Normalize binary/unary operations and comparisons
-    5. TODO: Support variable declarations and parameter lists
-    6. TODO: Create SourceLocation tracking for all nodes
-    7. TODO: Implement error reporting with line/column information
-    8. TODO: Add basic expression parsing (literals, names, subscripts)
-    9. TODO: Support list/dict/set literals
-    10. TODO: Create comprehensive test suite for basic normalization
+    # TODO PRO TIER: Add metadata schema for type annotations and generics
+    # TODO PRO TIER: Preserve access modifiers (public/private/protected)
+    # TODO PRO TIER: Extract and normalize documentation/docstrings
+    # TODO PRO TIER: Support decorator metadata across all languages
+    # TODO PRO TIER: Implement IR validation framework with schema checking
+    # TODO PRO TIER: Add consistency checks across polyglot projects
+    # TODO PRO TIER: Support generic type parameters and constraints
+    # TODO PRO TIER: Normalize async/await and generator functions
+    # TODO PRO TIER: Add language-specific semantic metadata
+    # TODO PRO TIER: Create advanced error recovery with suggestions
 
-    PRO TIER (Advanced Language Features):
-    11. TODO: Add metadata schema for type annotations and generics
-    12. TODO: Preserve access modifiers (public/private/protected)
-    13. TODO: Extract and normalize documentation/docstrings
-    14. TODO: Support decorator metadata across all languages
-    15. TODO: Implement IR validation framework with schema checking
-    16. TODO: Add consistency checks across polyglot projects
-    17. TODO: Support generic type parameters and constraints
-    18. TODO: Normalize async/await and generator functions
-    19. TODO: Add language-specific semantic metadata
-    20. TODO: Create advanced error recovery with suggestions
-
-    ENTERPRISE TIER (Polyglot & Advanced Analysis):
-    21. TODO: Implement IR validation with warning on type mismatches
-    22. TODO: Add caching interface for normalized subtrees
-    23. TODO: Implement memoization of common patterns
-    24. TODO: Support cross-language type resolution
-    25. TODO: Add distributed normalization for large projects
-    26. TODO: Implement ML-based pattern recognition for optimization
-    27. TODO: Support encrypted metadata preservation
-    28. TODO: Add AI-driven semantic enrichment
-    29. TODO: Implement quantum-safe hash signatures for IR
-    30. TODO: Create multi-language consistency analyzer
+    # TODO ENTERPRISE TIER: Implement IR validation with warning on type mismatches
+    # TODO ENTERPRISE TIER: Add caching interface for normalized subtrees
+    # TODO ENTERPRISE TIER: Implement memoization of common patterns
+    # TODO ENTERPRISE TIER: Support cross-language type resolution
+    # TODO ENTERPRISE TIER: Add distributed normalization for large projects
+    # TODO ENTERPRISE TIER: Implement ML-based pattern recognition for optimization
+    # TODO ENTERPRISE TIER: Support encrypted metadata preservation
+    # TODO ENTERPRISE TIER: Add AI-driven semantic enrichment
+    # TODO ENTERPRISE TIER: Implement quantum-safe hash signatures for IR
+    # TODO ENTERPRISE TIER: Create multi-language consistency analyzer
     """
 
     @property

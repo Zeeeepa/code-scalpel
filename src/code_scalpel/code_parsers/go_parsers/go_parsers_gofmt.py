@@ -2,13 +2,12 @@
 """
 gofmt Go Parser - Go code formatting verification.
 
-# TODO: Implement gofmt parser for v3.1.0 "Polyglot+" (Q1 2026)
-# This parser should:
-# - Run gofmt -d to detect formatting differences
-# - Parse diff output to identify unformatted code
-# - Support gofmt -s for simplified code suggestions
-# - Report files that need formatting
-# - Inherit from base_parser.BaseParser
+# TODO [FEATURE/1] Implement gofmt parser for v3.1.0 "Polyglot+" (Q1 2026)
+# TODO [FEATURE/2] Run gofmt -d to detect formatting differences
+# TODO [FEATURE/3] Parse diff output to identify unformatted code
+# TODO [FEATURE/4] Support gofmt -s for simplified code suggestions
+# TODO [FEATURE/5] Report files that need formatting
+# TODO [FEATURE/6] Inherit from base_parser.BaseParser
 #
 # Reference: https://pkg.go.dev/cmd/gofmt
 # Command: gofmt -d . (shows diff of formatting changes needed)

@@ -12,23 +12,23 @@ Compose Linter features:
 - Parameter stability analysis
 - Performance metrics
 
-[20251221_TODO] Parse Compose compiler warnings
-[20251221_TODO] Extract recomposition metrics
-[20251221_TODO] Implement stability analysis report parsing
-[20251221_TODO] Add composable function tracking
-[20251221_TODO] Parse compiler plugin output
+# TODO Parse Compose compiler warnings
+# TODO Extract recomposition metrics
+# TODO Implement stability analysis report parsing
+# TODO Add composable function tracking
+# TODO Parse compiler plugin output
 
-[20251221_TODO] Execute Gradle compose compiler task
-[20251221_TODO] Parse build logs for warnings
-[20251221_TODO] Add metric extraction from reports
-[20251221_TODO] Implement caching of analysis results
-[20251221_TODO] Support custom compiler plugin options
+# TODO Execute Gradle compose compiler task
+# TODO Parse build logs for warnings
+# TODO Add metric extraction from reports
+# TODO Implement caching of analysis results
+# TODO Support custom compiler plugin options
 
-[20251221_TODO] Generate Compose performance reports
-[20251221_TODO] Track recomposition hotspots
-[20251221_TODO] Add visualization of composition tree
-[20251221_TODO] Generate best practices recommendations
-[20251221_TODO] Add historical trend analysis
+# TODO Generate Compose performance reports
+# TODO Track recomposition hotspots
+# TODO Add visualization of composition tree
+# TODO Generate best practices recommendations
+# TODO Add historical trend analysis
 """
 
 from dataclasses import dataclass
@@ -90,7 +90,7 @@ class ComposeLinterParser:
 
     def parse_compiler_output(self, output: str) -> list[ComposeIssue]:
         """
-        [20251221_TODO] Parse Compose compiler output and extract issues.
+        # TODO Parse Compose compiler output and extract issues.
 
         Args:
             output: Compiler output string
@@ -102,7 +102,7 @@ class ComposeLinterParser:
 
     def parse_stability_analysis(self, report_data: dict) -> dict[str, Any]:
         """
-        [20251221_TODO] Parse parameter stability analysis report.
+        # TODO Parse parameter stability analysis report.
 
         Args:
             report_data: Report data dictionary
@@ -114,7 +114,7 @@ class ComposeLinterParser:
 
     def analyze_recompositions(self, trace_data: str) -> ComposeMetrics:
         """
-        [20251221_TODO] Analyze recomposition patterns and generate metrics.
+        # TODO Analyze recomposition patterns and generate metrics.
 
         Args:
             trace_data: Recomposition trace data
@@ -126,7 +126,7 @@ class ComposeLinterParser:
 
     def generate_performance_report(self) -> str:
         """
-        [20251221_TODO] Generate Compose performance optimization report.
+        # TODO Generate Compose performance optimization report.
 
         Returns:
             Formatted report string
@@ -135,7 +135,7 @@ class ComposeLinterParser:
 
     def execute_compiler_analysis(self, project_path: Path) -> dict[str, Any]:
         """
-        [20251221_TODO] Execute Compose compiler analysis on project.
+        # TODO Execute Compose compiler analysis on project.
 
         Args:
             project_path: Path to Kotlin/Compose project

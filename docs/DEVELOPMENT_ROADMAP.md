@@ -279,7 +279,7 @@ Code Scalpel solves these by giving AI agents MCP tools that:
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| MCP Tools | 20 tools (analyze, extract, security, test gen, context, cross-file, policy, graph) | Released v3.1.0 |
+| MCP Tools | 22 tools (analyze, extract, security, test gen, context, cross-file, policy, graph) | Released v3.1.0 |
 | MCP Protocol | Progress Tokens, Roots Capability, Health Endpoint | Released v2.0.0 |
 | Test Suite | 4,133+ tests passing (100% pass rate) | Stable |
 | Test Infrastructure | 6 pytest fixtures for isolation, 85% boilerplate reduction | Stable |

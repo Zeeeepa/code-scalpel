@@ -15,23 +15,20 @@ PHPStan Features:
     - Multiple output formats (JSON, JSON-inline, table, checkstyle, etc.)
 
 Phase 2 Enhancement Areas:
-    HIGH PRIORITY:
-        - JSON report parsing [20251221_TODO]
-        - JSON-inline format parsing [20251221_TODO]
-        - CLI execution via subprocess [20251221_TODO]
-        - Configuration file loading (phpstan.neon) [20251221_TODO]
-        - Custom rules loading [20251221_TODO]
+    # TODO HIGH PRIORITY: JSON report parsing
+    # TODO HIGH PRIORITY: JSON-inline format parsing
+    # TODO HIGH PRIORITY: CLI execution via subprocess
+    # TODO HIGH PRIORITY: Configuration file loading (phpstan.neon)
+    # TODO HIGH PRIORITY: Custom rules loading
 
-    MEDIUM PRIORITY:
-        - Error categorization and extraction [20251221_TODO]
-        - Type coverage reports [20251221_TODO]
-        - Dead code detection [20251221_TODO]
-        - Error filtering and severity levels [20251221_TODO]
+    # TODO MEDIUM PRIORITY: Error categorization and extraction
+    # TODO MEDIUM PRIORITY: Type coverage reports
+    # TODO MEDIUM PRIORITY: Dead code detection
+    # TODO MEDIUM PRIORITY: Error filtering and severity levels
 
-    LOW PRIORITY:
-        - Type annotation recommendations [20251221_TODO]
-        - IDE integration hints [20251221_TODO]
-        - Comparison with other type checkers [20251221_TODO]
+    # TODO LOW PRIORITY: Type annotation recommendations
+    # TODO LOW PRIORITY: IDE integration hints
+    # TODO LOW PRIORITY: Comparison with other type checkers
 """
 
 from dataclasses import dataclass, field
@@ -98,25 +95,25 @@ class PHPStanParser:
         self.config: Optional[PHPStanConfig] = None
 
     def parse_json_report(self, json_data: str) -> list[PHPStanError]:
-        """Parse PHPStan JSON report format. [20251221_TODO]"""
+        """Parse PHPStan JSON report format. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan JSON parsing")
 
     def parse_json_inline(self, json_data: str) -> list[PHPStanError]:
-        """Parse PHPStan JSON-inline format with context. [20251221_TODO]"""
+        """Parse PHPStan JSON-inline format with context. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan JSON-inline parsing")
 
     def load_config(self, config_path: Path) -> PHPStanConfig:
-        """Load and parse phpstan.neon configuration. [20251221_TODO]"""
+        """Load and parse phpstan.neon configuration. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan config parsing")
 
     def execute_phpstan(self, paths: list[str]) -> dict[str, Any]:
-        """Execute PHPStan analysis on paths. [20251221_TODO]"""
+        """Execute PHPStan analysis on paths. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan execution")
 
     def generate_type_coverage(self) -> dict[str, Any]:
-        """Generate type coverage report. [20251221_TODO]"""
+        """Generate type coverage report. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan type coverage")
 
     def generate_report(self) -> str:
-        """Generate comprehensive PHPStan report. [20251221_TODO]"""
+        """Generate comprehensive PHPStan report. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan report generation")

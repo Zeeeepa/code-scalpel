@@ -81,75 +81,11 @@ class OSVClient:
 
     Supports querying individual packages or batches of packages for
     known security vulnerabilities with CVE/GHSA identifiers.
-
-    ====================================================================
-    TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================        TODO [COMMUNITY][FEATURE]: Basic single package vulnerability query
-      - Query OSV API for individual package
-      - Parse vulnerability response
-      - Extract CVE/GHSA identifiers
-      - Return Vulnerability objects
-      - Add 15+ tests for single package queries        TODO [COMMUNITY][FEATURE]: Batch vulnerability checking
-      - Query multiple packages in single request
-      - Build batch payload
-      - Parse results mapping
-      - Handle large batches (100+ packages)
-      - Add 15+ tests for batch queries        TODO [COMMUNITY][FEATURE]: Severity classification
-      - Parse CVSS scores from OSV response
-      - Convert numeric scores to severity levels
-      - Handle multiple severity formats
-      - Add 12+ tests for severity parsing        TODO [COMMUNITY][FEATURE]: Error handling and retries
-      - Implement exponential backoff retry logic
-      - Handle network timeouts
-      - Graceful fallback on API failure
-      - Add 15+ tests for error handling
-
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================        TODO [PRO][FEATURE]: In-memory vulnerability caching
-      - LRU cache for package queries
-      - TTL-based cache invalidation
-      - Cache statistics and metrics
-      - Add 15+ tests for caching        TODO [PRO][FEATURE]: Ecosystem-specific vulnerability scoring
-      - Custom scoring for PyPI vulnerabilities
-      - npm-specific vulnerability assessment
-      - Maven/Java-specific scoring
-      - Framework-aware risk calculation
-      - Add 15+ tests for ecosystem scoring        TODO [PRO][FEATURE]: Advisory enrichment with CVSS and exploit data
-      - Parse CVSS v3 and v4 scores
-      - Extract exploit availability flags
-      - Include CWE identifiers
-      - Track advisory publication dates
-      - Add 15+ tests for enrichment        TODO [PRO][FEATURE]: Batch vulnerability deduplication
-      - Detect duplicate vulnerabilities across packages
-      - Aggregate impact across dependencies
-      - Identify critical vulnerabilities
-      - Add 12+ tests for deduplication        TODO [PRO][FEATURE]: Local vulnerability database fallback
-      - Cache vulnerability database locally
-      - Periodic sync with OSV
-      - Offline query capability
-      - Add 15+ tests for local cache
-
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================        TODO [ENTERPRISE][FEATURE]: ML-based vulnerability risk prediction
-      - Predict exploitability from CVE description
-      - Estimate patch time based on ecosystem
-      - Prioritize vulnerabilities by impact
-      - Add 15+ tests for predictions        TODO [ENTERPRISE][FEATURE]: Vulnerability trend analysis
-      - Track vulnerability discovery trends
-      - Identify ecosystem-specific patterns
-      - Predict future vulnerabilities
-      - Add 12+ tests for trend analysis        TODO [ENTERPRISE][FEATURE]: Integration with dependency lock files
-      - Parse poetry.lock, package-lock.json, Cargo.lock
-      - Match OSV vulnerabilities to lock file entries
-      - Generate security reports
-      - Add 15+ tests for lock file parsing        TODO [ENTERPRISE][FEATURE]: Vulnerability remediation recommendations
-      - Identify safe upgrade paths
-      - Suggest dependency updates
-      - Check compatibility with current code
-      - Add 15+ tests for remediation
     """
+
+    # TODO [COMMUNITY] Basic single package vulnerability query, batch vulnerability checking, severity classification, and error handling with retries
+    # TODO [PRO] In-memory vulnerability caching, ecosystem-specific vulnerability scoring, advisory enrichment with CVSS data, batch vulnerability deduplication, and local database fallback
+    # TODO [ENTERPRISE] ML-based vulnerability risk prediction, vulnerability trend analysis, integration with dependency lock files, and vulnerability remediation recommendations
 
     # [20251213_FEATURE] Ecosystem mapping for different package managers
     ECOSYSTEM_MAP = {

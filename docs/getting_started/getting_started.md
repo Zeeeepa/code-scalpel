@@ -7,7 +7,7 @@ Welcome to Code Scalpel v3.0.0 "Autonomy"! This guide covers installation, confi
 Code Scalpel is an **MCP server toolkit** for AI agents (Claude, GitHub Copilot, Cursor) to perform surgical code operations. Instead of stuffing entire files into context, Code Scalpel extracts *exactly* what's needed—saving 99% of tokens while improving accuracy.
 
 **Key Capabilities:**
-- **20 MCP Tools** for AI agents via Model Context Protocol
+- **22 MCP Tools** for AI agents via Model Context Protocol
 - **4 Languages** - Python, TypeScript, JavaScript, Java (all full support)
 - **Security Analysis** - 17+ vulnerability types including SQLi, NoSQL, DOM XSS
 - **Symbolic Execution** - Z3-powered path exploration and test generation

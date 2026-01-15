@@ -94,7 +94,7 @@ REST API wrapper for MCP tools:
 - `MCPServerConfig` - Server configuration
 - `create_app()` - Flask app factory
 - `run_server()` - Server launcher
-- Exposes all 20 MCP tools as HTTP endpoints
+- Exposes all 22 MCP tools as HTTP endpoints
 
 **Endpoints:**
 - `POST /analyze_code` - Analyze code structure

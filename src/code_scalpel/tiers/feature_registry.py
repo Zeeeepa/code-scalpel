@@ -4,31 +4,17 @@ Feature Registry - Central registry of features and their tier requirements.
 [20251225_FEATURE] Created as part of Project Reorganization Issue #5.
 
 Provides a central registry mapping features to their minimum required tiers.
-
-TODO ITEMS: feature_registry.py
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [P0_CRITICAL] Feature→tier mapping
-# [P1_HIGH] Feature discovery and listing
-# [P1_HIGH] Runtime feature checks
-# [P2_MEDIUM] Feature metadata
-
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [P1_HIGH] Dynamic feature registration
-# [P2_MEDIUM] Feature groups/bundles
-# [P3_LOW] Feature dependencies
-
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [P2_MEDIUM] Custom feature definitions
-# [P3_LOW] Feature override rules
-# [P4_LOW] Remote feature configuration
-============================================================================
 """
+# TODO [COMMUNITY_P0] Feature→tier mapping
+# TODO [COMMUNITY_P1] Feature discovery and listing
+# TODO [COMMUNITY_P1] Runtime feature checks
+# TODO [COMMUNITY_P2] Feature metadata
+# TODO [PRO_P1] Dynamic feature registration
+# TODO [PRO_P2] Feature groups/bundles
+# TODO [PRO_P3] Feature dependencies
+# TODO [ENTERPRISE_P2] Custom feature definitions
+# TODO [ENTERPRISE_P3] Feature override rules
+# TODO [ENTERPRISE_P4] Remote feature configuration
 
 from __future__ import annotations
 

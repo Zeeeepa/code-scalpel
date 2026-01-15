@@ -59,36 +59,6 @@ class VulnerabilityDict(TypedDict):
     recommendation: str
     cwe_link: str
 
-
-# TODO: Enhanced taint source tracking
-#   - Add WebSocket message sources
-#   - Support Server-Sent Events (SSE) as sources
-#   - Track Redis/Memcached cache as sources
-#   - Add message queue sources (RabbitMQ, SQS)
-#   - Support GraphQL subscription sources
-
-# TODO: Context-aware taint propagation
-#   - Implement taint decay (authentication reduces taint level)
-#   - Add context-sensitive sanitizer effectiveness
-#   - Support domain-specific taint policies
-#   - Implement taint elevation on privilege escalation
-
-# TODO: Sanitizer improvements
-#   - Machine learning-based sanitizer detection
-#   - Context-aware sanitizer validation
-#   - Incomplete sanitizer detection (e.g., only escaping quotes)
-#   - Custom sanitizer effectiveness scoring
-
-# TODO: Advanced flow analysis
-#   - Object-sensitive taint tracking (track fields separately)
-#   - Path-sensitive analysis (different paths, different taints)
-#   - Context-sensitive interprocedural analysis
-#   - Support async/await taint propagation
-
-# TODO: TaintTracker Enhancement Roadmap
-# =======================================
-#
-# COMMUNITY (Current & Planned):
 # - TODO [COMMUNITY]: Improve documentation of taint sources and sinks (current)
 # - TODO [COMMUNITY]: Add more built-in sanitizer patterns
 # - TODO [COMMUNITY]: Create sanitizer registry guide
@@ -99,8 +69,6 @@ class VulnerabilityDict(TypedDict):
 # - TODO [COMMUNITY]: Add sanitizer effectiveness guide
 # - TODO [COMMUNITY]: Create vulnerability explanation guide
 # - TODO [COMMUNITY]: Document taint propagation rules
-#
-# COMMUNITY Examples & Tutorials:
 # - TODO [COMMUNITY]: Create SQL injection example
 # - TODO [COMMUNITY]: Add XSS vulnerability example
 # - TODO [COMMUNITY]: Show path traversal example
@@ -108,15 +76,11 @@ class VulnerabilityDict(TypedDict):
 # - TODO [COMMUNITY]: Add source/sink matching example
 # - TODO [COMMUNITY]: Show taint flow visualization
 # - TODO [COMMUNITY]: Create false positive handling guide
-#
-# COMMUNITY Testing & Validation:
 # - TODO [COMMUNITY]: Add sanitizer detection tests
 # - TODO [COMMUNITY]: Test source/sink matching
 # - TODO [COMMUNITY]: Verify taint propagation
 # - TODO [COMMUNITY]: Test all vulnerability types
 # - TODO [COMMUNITY]: Add regression test suite
-#
-# PRO (Enhanced Features):
 # - TODO [PRO]: Implement probabilistic taint tracking
 # - TODO [PRO]: Add object field tracking (track x.field separately)
 # - TODO [PRO]: Support array element tracking with symbolic indices
@@ -132,8 +96,6 @@ class VulnerabilityDict(TypedDict):
 # - TODO [PRO]: Support implicit information flows
 # - TODO [PRO]: Add taint inference heuristics
 # - TODO [PRO]: Implement incremental taint analysis
-#
-# PRO Analysis & Reporting:
 # - TODO [PRO]: Implement vulnerability evidence collection
 # - TODO [PRO]: Add taint flow explanation
 # - TODO [PRO]: Support JSON taint graph export
@@ -141,8 +103,6 @@ class VulnerabilityDict(TypedDict):
 # - TODO [PRO]: Add contextual vulnerability explanations
 # - TODO [PRO]: Support evidence-based reporting
 # - TODO [PRO]: Implement false positive scoring
-#
-# ENTERPRISE (Advanced Capabilities):
 # - TODO [ENTERPRISE]: Implement polyglot taint tracking
 # - TODO [ENTERPRISE]: Add distributed taint analysis
 # - TODO [ENTERPRISE]: Support inter-language taint flow
@@ -271,6 +231,7 @@ class TaintInfo:
         source_location: (line, column) in source code
         propagation_path: List of variable names taint flowed through
         sanitizers_applied: Set of sanitization functions applied
+        sanitizer_history: List of sanitizers applied in order
         cleared_sinks: Sinks that are safe due to sanitization
     """
 
@@ -279,6 +240,7 @@ class TaintInfo:
     source_location: Optional[Tuple[int, int]] = None
     propagation_path: List[str] = field(default_factory=list)
     sanitizers_applied: Set[str] = field(default_factory=set)
+    sanitizer_history: List[str] = field(default_factory=list)
     cleared_sinks: Set[SecuritySink] = field(default_factory=set)
 
     def propagate(self, through_var: str) -> TaintInfo:
@@ -297,6 +259,7 @@ class TaintInfo:
             source_location=self.source_location,
             propagation_path=self.propagation_path + [through_var],
             sanitizers_applied=self.sanitizers_applied.copy(),
+            sanitizer_history=self.sanitizer_history.copy(),
             cleared_sinks=self.cleared_sinks.copy(),
         )
 
@@ -311,6 +274,7 @@ class TaintInfo:
             New TaintInfo with sanitizer recorded, level lowered, and sinks cleared
         """
         new_sanitizers = self.sanitizers_applied | {sanitizer}
+        new_history = self.sanitizer_history + [sanitizer]
 
         # Get which sinks this sanitizer clears
         sanitizer_info = SANITIZER_REGISTRY.get(sanitizer)
@@ -342,6 +306,7 @@ class TaintInfo:
             source_location=self.source_location,
             propagation_path=self.propagation_path.copy(),
             sanitizers_applied=new_sanitizers,
+            sanitizer_history=new_history,
             cleared_sinks=new_cleared,
         )
 
@@ -414,11 +379,13 @@ class SanitizerInfo:
     Attributes:
         name: Full function name (e.g., "html.escape")
         clears_sinks: Which sink types this sanitizer protects against
-        full_clear: If True, clears ALL taint (e.g., int(), float())
+        confidence: Confidence score of the sanitizer (0.0-1.0)
     """
 
     name: str
     clears_sinks: Set[SecuritySink] = field(default_factory=set)
+    full_clear: bool = False
+    confidence: float = 1.0tySink] = field(default_factory=set)
     full_clear: bool = False
 
 

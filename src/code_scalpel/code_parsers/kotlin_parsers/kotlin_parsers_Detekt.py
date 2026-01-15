@@ -14,62 +14,62 @@ Detekt provides:
 
 TODO: HIGH PRIORITY - Core Implementation
 ==========================================
-[20251221_TODO] Implement XML report parsing (detekt default format)
-[20251221_TODO] Implement SARIF report parsing for IDE integration
-[20251221_TODO] Implement plain text output parsing
-[20251221_TODO] Add finding extraction with severity levels
-[20251221_TODO] Add rule ID and message extraction
-[20251221_TODO] Add source location extraction (file, line, column)
-[20251221_TODO] Add code snippet context extraction
+# TODO Implement XML report parsing (detekt default format)
+# TODO Implement SARIF report parsing for IDE integration
+# TODO Implement plain text output parsing
+# TODO Add finding extraction with severity levels
+# TODO Add rule ID and message extraction
+# TODO Add source location extraction (file, line, column)
+# TODO Add code snippet context extraction
 
 TODO: HIGH PRIORITY - Execution
 ================================
-[20251221_TODO] Add Detekt CLI execution via subprocess
-[20251221_TODO] Add Gradle task execution support
-[20251221_TODO] Add incremental analysis support
-[20251221_TODO] Add parallel execution support
-[20251221_TODO] Add custom config file support (detekt.yml)
+# TODO Add Detekt CLI execution via subprocess
+# TODO Add Gradle task execution support
+# TODO Add incremental analysis support
+# TODO Add parallel execution support
+# TODO Add custom config file support (detekt.yml)
 
 TODO: HIGH PRIORITY - Configuration
 ====================================
-[20251221_TODO] Implement detekt.yml parsing
-[20251221_TODO] Add rule set configuration extraction
-[20251221_TODO] Add threshold configuration (complexity, lines, etc.)
-[20251221_TODO] Add exclude pattern parsing
-[20251221_TODO] Add baseline file parsing and generation
+# TODO Implement detekt.yml parsing
+# TODO Add rule set configuration extraction
+# TODO Add threshold configuration (complexity, lines, etc.)
+# TODO Add exclude pattern parsing
+# TODO Add baseline file parsing and generation
 
 TODO: MEDIUM PRIORITY - Rule Sets
 ==================================
-[20251221_TODO] Parse complexity rules (LongMethod, LargeClass, ComplexCondition)
-[20251221_TODO] Parse style rules (MagicNumber, MaxLineLength, WildcardImport)
-[20251221_TODO] Parse potential-bugs rules (EqualsWithHashCodeExist, UnusedPrivateMember)
-[20251221_TODO] Parse performance rules (SpreadOperator, UnnecessaryTemporaryInstantiation)
-[20251221_TODO] Parse exceptions rules (TooGenericExceptionCaught, SwallowedException)
-[20251221_TODO] Parse empty-blocks rules (EmptyFunctionBlock, EmptyCatchBlock)
-[20251221_TODO] Parse naming rules (ClassNaming, FunctionNaming, VariableNaming)
-[20251221_TODO] Parse coroutines rules (GlobalCoroutineUsage, SuspendFunWithFlowReturnType)
+# TODO Parse complexity rules (LongMethod, LargeClass, ComplexCondition)
+# TODO Parse style rules (MagicNumber, MaxLineLength, WildcardImport)
+# TODO Parse potential-bugs rules (EqualsWithHashCodeExist, UnusedPrivateMember)
+# TODO Parse performance rules (SpreadOperator, UnnecessaryTemporaryInstantiation)
+# TODO Parse exceptions rules (TooGenericExceptionCaught, SwallowedException)
+# TODO Parse empty-blocks rules (EmptyFunctionBlock, EmptyCatchBlock)
+# TODO Parse naming rules (ClassNaming, FunctionNaming, VariableNaming)
+# TODO Parse coroutines rules (GlobalCoroutineUsage, SuspendFunWithFlowReturnType)
 
 TODO: MEDIUM PRIORITY - Metrics
 ================================
-[20251221_TODO] Extract complexity metrics (cyclomatic, cognitive)
-[20251221_TODO] Extract LOC metrics (logical lines, source lines)
-[20251221_TODO] Extract class metrics (WMC, DIT, NOC)
-[20251221_TODO] Add trend analysis (compare runs over time)
+# TODO Extract complexity metrics (cyclomatic, cognitive)
+# TODO Extract LOC metrics (logical lines, source lines)
+# TODO Extract class metrics (WMC, DIT, NOC)
+# TODO Add trend analysis (compare runs over time)
 
 TODO: MEDIUM PRIORITY - Suppression
 ====================================
-[20251221_TODO] Parse @Suppress annotations
-[20251221_TODO] Parse baseline suppressions
-[20251221_TODO] Generate suppression reports
-[20251221_TODO] Track suppression debt
+# TODO Parse @Suppress annotations
+# TODO Parse baseline suppressions
+# TODO Generate suppression reports
+# TODO Track suppression debt
 
 TODO: LOW PRIORITY - Advanced Features
 =======================================
-[20251221_TODO] Add custom rule loading
-[20251221_TODO] Add rule documentation URL extraction
-[20251221_TODO] Add auto-fix suggestions where available
-[20251221_TODO] Add severity mapping customization
-[20251221_TODO] Add integration with GitHub Actions annotations
+# TODO Add custom rule loading
+# TODO Add rule documentation URL extraction
+# TODO Add auto-fix suggestions where available
+# TODO Add severity mapping customization
+# TODO Add integration with GitHub Actions annotations
 """
 
 import shutil

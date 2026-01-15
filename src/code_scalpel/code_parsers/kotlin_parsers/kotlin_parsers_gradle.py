@@ -13,23 +13,23 @@ Gradle Build Parser features:
 - Plugin detection and inventory
 - Task graph analysis
 
-[20251221_TODO] Implement build.gradle.kts parsing
-[20251221_TODO] Parse Gradle Kotlin DSL syntax
-[20251221_TODO] Extract dependencies with versions
-[20251221_TODO] Identify build plugins and their versions
-[20251221_TODO] Parse Android-specific configurations
+# TODO Implement build.gradle.kts parsing
+# TODO Parse Gradle Kotlin DSL syntax
+# TODO Extract dependencies with versions
+# TODO Identify build plugins and their versions
+# TODO Parse Android-specific configurations
 
-[20251221_TODO] Execute Gradle info task for metadata
-[20251221_TODO] Parse Gradle dependency report
-[20251221_TODO] Extract task graph information
-[20251221_TODO] Analyze build performance metrics
-[20251221_TODO] Detect dependency conflicts and issues
+# TODO Execute Gradle info task for metadata
+# TODO Parse Gradle dependency report
+# TODO Extract task graph information
+# TODO Analyze build performance metrics
+# TODO Detect dependency conflicts and issues
 
-[20251221_TODO] Generate dependency tree visualization
-[20251221_TODO] Implement vulnerability scanning for dependencies
-[20251221_TODO] Track dependency updates and upgrades
-[20251221_TODO] Analyze build optimization opportunities
-[20251221_TODO] Generate build health report
+# TODO Generate dependency tree visualization
+# TODO Implement vulnerability scanning for dependencies
+# TODO Track dependency updates and upgrades
+# TODO Analyze build optimization opportunities
+# TODO Generate build health report
 """
 
 from dataclasses import dataclass
@@ -102,7 +102,7 @@ class GradleBuildParser:
 
     def parse_build_gradle_kts(self, build_file: Path) -> dict[str, Any]:
         """
-        [20251221_TODO] Parse Gradle Kotlin DSL build.gradle.kts file.
+        # TODO Parse Gradle Kotlin DSL build.gradle.kts file.
 
         Args:
             build_file: Path to build.gradle.kts
@@ -114,7 +114,7 @@ class GradleBuildParser:
 
     def extract_dependencies(self) -> list[Dependency]:
         """
-        [20251221_TODO] Extract all project dependencies with versions.
+        # TODO Extract all project dependencies with versions.
 
         Returns:
             List of Dependency objects
@@ -123,7 +123,7 @@ class GradleBuildParser:
 
     def identify_plugins(self) -> list[GradlePlugin]:
         """
-        [20251221_TODO] Identify all applied Gradle plugins.
+        # TODO Identify all applied Gradle plugins.
 
         Returns:
             List of GradlePlugin objects
@@ -132,7 +132,7 @@ class GradleBuildParser:
 
     def parse_dependency_report(self, report_output: str) -> dict[str, Any]:
         """
-        [20251221_TODO] Parse Gradle dependency report output.
+        # TODO Parse Gradle dependency report output.
 
         Args:
             report_output: Gradle dependency report
@@ -144,7 +144,7 @@ class GradleBuildParser:
 
     def analyze_build_performance(self, gradle_profiler_data: dict) -> dict[str, Any]:
         """
-        [20251221_TODO] Analyze build performance metrics.
+        # TODO Analyze build performance metrics.
 
         Args:
             gradle_profiler_data: Gradle profiler output
@@ -156,7 +156,7 @@ class GradleBuildParser:
 
     def detect_dependency_vulnerabilities(self) -> list[dict[str, Any]]:
         """
-        [20251221_TODO] Detect vulnerable dependencies.
+        # TODO Detect vulnerable dependencies.
 
         Returns:
             List of vulnerability findings
@@ -165,7 +165,7 @@ class GradleBuildParser:
 
     def generate_build_report(self) -> str:
         """
-        [20251221_TODO] Generate comprehensive build health report.
+        # TODO Generate comprehensive build health report.
 
         Returns:
             Formatted build report

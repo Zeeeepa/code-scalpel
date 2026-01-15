@@ -24,8 +24,8 @@ For AI agent integrations:
 
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
 __version__ = "3.3.0"
-__author__ = "Tim Escolopio"
-__email__ = "3dtsus@gmail.com"
+__author__ = "Timmothy Escolopio"
+__email__ = "time@3dtechsolutions.us"
 
 # [20251228_BUGFIX] Prefer reorganized modules to avoid importing deprecated
 # shims (keeps backward-compatible top-level symbols without warning noise).

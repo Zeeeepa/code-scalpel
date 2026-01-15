@@ -99,37 +99,6 @@ class DetectedSink:
         return self.pattern.rsplit(".", 1)[-1]
 
 
-# TODO: Add emerging vulnerability types
-#   - Supply chain injection (npm install scripts, setup.py)
-#   - Container escape (Docker socket access, privileged containers)
-#   - Secrets in logs (logging tainted passwords/tokens)
-#   - Timing attacks (crypto comparison timing)
-#   - Memory disclosure (buffer overflows in unsafe code)
-
-# TODO: Framework-specific sinks
-#   - Django ORM unsafe queries
-#   - Rails Active Record SQL injection vectors
-#   - Spring @RequestMapping SSRF risks
-#   - Flask Jinja2 SSTI patterns
-#   - Express.js middleware injection
-
-# TODO: Cloud-native security sinks
-#   - AWS SDK credential exposure
-#   - Kubernetes API server access
-#   - Terraform state file secrets
-#   - Docker build secrets in layers
-#   - Cloud function environment variable leaks
-
-# TODO: AI/ML specific vulnerabilities
-#   - Model poisoning (training data injection)
-#   - Prompt injection in LLM calls
-#   - Pickle deserialization in ML models
-#   - Adversarial input detection
-
-# TODO: UnifiedSinkDetector Enhancement Roadmap
-# ==============================================
-#
-# COMMUNITY (Current & Planned):
 # - TODO [COMMUNITY]: Add more framework-specific sinks (current)
 # - TODO [COMMUNITY]: Document all supported sink types
 # - TODO [COMMUNITY]: Create sink detection rule guide
@@ -139,24 +108,17 @@ class DetectedSink:
 # - TODO [COMMUNITY]: Add OWASP mapping guide
 # - TODO [COMMUNITY]: Document sink categories
 # - TODO [COMMUNITY]: Create best practices guide
-#
-# COMMUNITY Examples & Tutorials:
 # - TODO [COMMUNITY]: Create SQL injection sink example
 # - TODO [COMMUNITY]: Add XSS sink detection example
 # - TODO [COMMUNITY]: Show command injection sink
 # - TODO [COMMUNITY]: Create path traversal example
 # - TODO [COMMUNITY]: Add SSRF sink example
 # - TODO [COMMUNITY]: Show deserialization sink
-# - TODO [COMMUNITY]: Create LDAP injection example
-#
-# COMMUNITY Testing & Validation:
 # - TODO [COMMUNITY]: Add sink detection tests
 # - TODO [COMMUNITY]: Test confidence scoring
 # - TODO [COMMUNITY]: Verify CWE mappings
 # - TODO [COMMUNITY]: Test all languages
 # - TODO [COMMUNITY]: Add regression suite
-#
-# PRO (Enhanced Features):
 # - TODO [PRO]: Add emerging vulnerability types
 # - TODO [PRO]: Implement framework-specific detection
 # - TODO [PRO]: Add cloud-native security sinks
@@ -172,8 +134,6 @@ class DetectedSink:
 # - TODO [PRO]: Support parametrization detection
 # - TODO [PRO]: Implement sanitizer verification
 # - TODO [PRO]: Add sink aliasing support
-#
-# PRO Framework & Language Support:
 # - TODO [PRO]: Add Django ORM sinks
 # - TODO [PRO]: Support Spring Framework sinks
 # - TODO [PRO]: Add Rails ActiveRecord sinks
@@ -182,8 +142,6 @@ class DetectedSink:
 # - TODO [PRO]: Support Node.js framework sinks
 # - TODO [PRO]: Add PHP framework detection
 # - TODO [PRO]: Support Ruby framework sinks
-#
-# ENTERPRISE (Advanced Capabilities):
 # - TODO [ENTERPRISE]: Implement distributed sink detection
 # - TODO [ENTERPRISE]: Add AI/ML specific vulnerability detection
 # - TODO [ENTERPRISE]: Support supply chain vulnerability tracking

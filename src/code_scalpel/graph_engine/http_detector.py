@@ -17,93 +17,78 @@ Example:
     >>> links = detector.detect_links()
     >>> for link in links:
     ...     print(f"{link.client_id} -> {link.endpoint_id}: {link.confidence}")
-
-TODO ITEMS: graph_engine/http_detector.py
-======================================================================
-COMMUNITY TIER - Core HTTP Detection
-======================================================================
-1. Add HTTPLinkDetector class initialization
-2. Add add_client_call(node_id, method, url_pattern)
-3. Add add_endpoint(node_id, method, route_pattern)
-4. Add detect_links() main detection algorithm
-5. Add detect_exact_match() for identical routes
-6. Add detect_pattern_match() for regex matching
-7. Add match_routes(client_route, endpoint_route) comparison
-8. Add parse_route_string() to extract components
-9. Add get_route_parameters(route) extractor
-10. Add normalize_route_path(path) for consistency
-11. Add extract_path_from_url(url) utility
-12. Add extract_method_from_call(call_node) HTTP method extraction
-13. Add extract_url_from_call(call_node) URL extraction
-14. Add extract_method_from_endpoint(endpoint_node)
-15. Add extract_route_from_endpoint(endpoint_node)
-16. Add HTTPLink dataclass for results
-17. Add HTTPMethod enum (GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS)
-18. Add parse_axios_call() JavaScript/TypeScript detection
-19. Add parse_fetch_call() native fetch detection
-20. Add parse_requests_call() Python requests detection
-21. Add parse_flask_route() Flask endpoint detection
-22. Add parse_django_route() Django endpoint detection
-23. Add parse_fastapi_route() FastAPI endpoint detection
-24. Add parse_spring_mapping() Spring endpoint detection
-25. Add get_all_detected_links() result enumeration
-
-PRO TIER - Advanced HTTP Detection
-======================================================================
-26. Add detect_dynamic_routes() parameterized routes
-27. Add detect_path_parameters() {id}, :id, {uuid} patterns
-28. Add detect_query_parameters() query string matching
-29. Add detect_base_url_mismatch() different bases same path
-30. Add detect_api_versioning() /v1/, /v2/ patterns
-31. Add detect_subdomain_routing() different hosts
-32. Add detect_header_routing() custom header requirements
-33. Add detect_authentication_requirements() auth detection
-34. Add detect_cors_policy() CORS configuration
-35. Add detect_content_type() request/response types
-36. Add detect_request_body_schema() payload structure
-37. Add detect_response_schema() output structure
-38. Add detect_error_responses() error handling
-39. Add detect_redirect_chains() HTTP redirects
-40. Add detect_reverse_proxy_routes() proxy patterns
-41. Add detect_load_balancing() multiple endpoints
-42. Add detect_rate_limiting() throttling patterns
-43. Add detect_webhook_callbacks() callback endpoints
-44. Add detect_websocket_connections() WebSocket endpoints
-45. Add detect_graphql_endpoints() GraphQL detection
-46. Add detect_grpc_services() gRPC endpoint detection
-47. Add link_confidence_scoring() confidence calculation
-48. Add link_evidence_collection() reasoning
-49. Add suggest_manual_review() low confidence links
-50. Add link_statistics_report() coverage analysis
-
-ENTERPRISE TIER - Distributed HTTP Detection
-======================================================================
-51. Add distributed http_detection() across services
-52. Add federated_endpoint_discovery() across orgs
-53. Add multi_region_route_mapping() geographic routing
-54. Add service_mesh_integration() Istio/Linkerd
-55. Add api_gateway_detection() API gateway routing
-56. Add load_balancer_detection() load balancing
-57. Add cdn_detection() content delivery
-58. Add ssl_tls_certificate_validation()
-59. Add encryption_detection() HTTPS enforcement
-60. Add certificate_pinning_detection()
-61. Add http_signature_verification()
-62. Add rate_limiting_detection() throttle config
-63. Add circuit_breaker_detection() resilience
-64. Add retry_policy_detection()
-65. Add timeout_configuration_detection()
-66. Add http_cache_detection()
-67. Add compression_detection()
-68. Add http2_spdy_detection()
-69. Add grpc_web_fallback_detection()
-70. Add api_versioning_strategy_detection()
-71. Add deprecation_detection() EOL endpoints
-72. Add monitoring_alerting_integration()
-73. Add tracing_integration() distributed tracing
-74. Add performance_profiling_http_calls()
-75. Add http_compliance_checking() standards
 """
+
+# TODO [COMMUNITY] Add detect_exact_match() for identical routes
+# TODO [COMMUNITY] Add detect_pattern_match() for regex matching
+# TODO [COMMUNITY] Add parse_route_string() to extract components
+# TODO [COMMUNITY] Add get_route_parameters(route) extractor
+# TODO [COMMUNITY] Add normalize_route_path(path) for consistency
+# TODO [COMMUNITY] Add extract_path_from_url(url) utility
+# TODO [COMMUNITY] Add extract_method_from_call(call_node) HTTP method extraction
+# TODO [COMMUNITY] Add extract_url_from_call(call_node) URL extraction
+# TODO [COMMUNITY] Add extract_method_from_endpoint(endpoint_node)
+# TODO [COMMUNITY] Add extract_route_from_endpoint(endpoint_node)
+# TODO [COMMUNITY] Add parse_axios_call() JavaScript/TypeScript detection
+# TODO [COMMUNITY] Add parse_fetch_call() native fetch detection
+# TODO [COMMUNITY] Add parse_requests_call() Python requests detection
+# TODO [COMMUNITY] Add parse_flask_route() Flask endpoint detection
+# TODO [COMMUNITY] Add parse_django_route() Django endpoint detection
+# TODO [COMMUNITY] Add parse_fastapi_route() FastAPI endpoint detection
+# TODO [COMMUNITY] Add parse_spring_mapping() Spring endpoint detection
+# TODO [COMMUNITY] Add get_all_detected_links() result enumeration
+
+# TODO [PRO] Add detect_dynamic_routes() parameterized routes
+# TODO [PRO] Add detect_path_parameters() {id}, :id, {uuid} patterns
+# TODO [PRO] Add detect_query_parameters() query string matching
+# TODO [PRO] Add detect_base_url_mismatch() different bases same path
+# TODO [PRO] Add detect_api_versioning() /v1/, /v2/ patterns
+# TODO [PRO] Add detect_subdomain_routing() different hosts
+# TODO [PRO] Add detect_header_routing() custom header requirements
+# TODO [PRO] Add detect_authentication_requirements() auth detection
+# TODO [PRO] Add detect_cors_policy() CORS configuration
+# TODO [PRO] Add detect_content_type() request/response types
+# TODO [PRO] Add detect_request_body_schema() payload structure
+# TODO [PRO] Add detect_response_schema() output structure
+# TODO [PRO] Add detect_error_responses() error handling
+# TODO [PRO] Add detect_redirect_chains() HTTP redirects
+# TODO [PRO] Add detect_reverse_proxy_routes() proxy patterns
+# TODO [PRO] Add detect_load_balancing() multiple endpoints
+# TODO [PRO] Add detect_rate_limiting() throttling patterns
+# TODO [PRO] Add detect_webhook_callbacks() callback endpoints
+# TODO [PRO] Add detect_websocket_connections() WebSocket endpoints
+# TODO [PRO] Add detect_graphql_endpoints() GraphQL detection
+# TODO [PRO] Add detect_grpc_services() gRPC endpoint detection
+# TODO [PRO] Add link_confidence_scoring() confidence calculation
+# TODO [PRO] Add link_evidence_collection() reasoning
+# TODO [PRO] Add suggest_manual_review() low confidence links
+# TODO [PRO] Add link_statistics_report() coverage analysis
+
+# TODO [ENTERPRISE] Add distributed http_detection() across services
+# TODO [ENTERPRISE] Add federated_endpoint_discovery() across orgs
+# TODO [ENTERPRISE] Add multi_region_route_mapping() geographic routing
+# TODO [ENTERPRISE] Add service_mesh_integration() Istio/Linkerd
+# TODO [ENTERPRISE] Add api_gateway_detection() API gateway routing
+# TODO [ENTERPRISE] Add load_balancer_detection() load balancing
+# TODO [ENTERPRISE] Add cdn_detection() content delivery
+# TODO [ENTERPRISE] Add ssl_tls_certificate_validation()
+# TODO [ENTERPRISE] Add encryption_detection() HTTPS enforcement
+# TODO [ENTERPRISE] Add certificate_pinning_detection()
+# TODO [ENTERPRISE] Add http_signature_verification()
+# TODO [ENTERPRISE] Add rate_limiting_detection() throttle config
+# TODO [ENTERPRISE] Add circuit_breaker_detection() resilience
+# TODO [ENTERPRISE] Add retry_policy_detection()
+# TODO [ENTERPRISE] Add timeout_configuration_detection()
+# TODO [ENTERPRISE] Add http_cache_detection()
+# TODO [ENTERPRISE] Add compression_detection()
+# TODO [ENTERPRISE] Add http2_spdy_detection()
+# TODO [ENTERPRISE] Add grpc_web_fallback_detection()
+# TODO [ENTERPRISE] Add api_versioning_strategy_detection()
+# TODO [ENTERPRISE] Add deprecation_detection() EOL endpoints
+# TODO [ENTERPRISE] Add monitoring_alerting_integration()
+# TODO [ENTERPRISE] Add tracing_integration() distributed tracing
+# TODO [ENTERPRISE] Add performance_profiling_http_calls()
+# TODO [ENTERPRISE] Add http_compliance_checking() standards
 
 from __future__ import annotations
 

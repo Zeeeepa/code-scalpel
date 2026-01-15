@@ -2,15 +2,14 @@
 """
 Bundler Parser - Ruby Dependency Management Analysis
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse Gemfile for dependency declarations
-2. Parse Gemfile.lock for resolved versions
-3. Extract gem names and version constraints
-4. Extract locked gem versions
-5. Scan gems for known vulnerabilities
-6. Detect outdated gem versions
-7. Analyze transitive dependency relationships
-8. Generate dependency analysis reports
+# TODO [ENTERPRISE] Parse Gemfile for dependency declarations
+# TODO [ENTERPRISE] Parse Gemfile.lock for resolved versions
+# TODO [ENTERPRISE] Extract gem names and version constraints
+# TODO [ENTERPRISE] Extract locked gem versions
+# TODO [ENTERPRISE] Scan gems for known vulnerabilities
+# TODO [ENTERPRISE] Detect outdated gem versions
+# TODO [ENTERPRISE] Analyze transitive dependency relationships
+# TODO [ENTERPRISE] Generate dependency analysis reports
 """
 
 from dataclasses import dataclass
@@ -55,33 +54,33 @@ class BundlerParser:
         self.config = BundleConfig(Path("Gemfile"), Path("Gemfile.lock"))
 
     def parse_gemfile(self, gemfile_path: Path) -> List[Gem]:
-        """Parse Gemfile for dependencies - Phase 2 TODO [20251221_TODO]"""
+        """Parse Gemfile for dependencies - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gemfile parsing")
 
     def parse_gemfile_lock(self, lockfile_path: Path) -> List[Gem]:
-        """Parse Gemfile.lock for locked versions - Phase 2 TODO [20251221_TODO]"""
+        """Parse Gemfile.lock for locked versions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gemfile.lock parsing")
 
     def extract_gems(self, gemfile_content: str) -> List[Gem]:
-        """Extract gem declarations from Gemfile - Phase 2 TODO [20251221_TODO]"""
+        """Extract gem declarations from Gemfile - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gem extraction")
 
     def extract_locked_versions(self, lockfile_content: str) -> Dict[str, str]:
-        """Extract locked gem versions from Gemfile.lock - Phase 2 TODO [20251221_TODO]"""
+        """Extract locked gem versions from Gemfile.lock - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Version extraction")
 
     def scan_for_vulnerabilities(self, gems: List[Gem]) -> List[Gem]:
-        """Scan gems for known vulnerabilities - Phase 2 TODO [20251221_TODO]"""
+        """Scan gems for known vulnerabilities - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Vulnerability scanning")
 
     def detect_outdated_gems(self, gems: List[Gem]) -> List[Gem]:
-        """Detect outdated gem versions - Phase 2 TODO [20251221_TODO]"""
+        """Detect outdated gem versions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Outdated gem detection")
 
     def analyze_transitive_dependencies(self, gems: List[Gem]) -> Dict:
-        """Analyze transitive dependency relationships - Phase 2 TODO [20251221_TODO]"""
+        """Analyze transitive dependency relationships - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Transitive dependency analysis")
 
     def generate_dependency_report(self, gems: List[Gem]) -> str:
-        """Generate dependency analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate dependency analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

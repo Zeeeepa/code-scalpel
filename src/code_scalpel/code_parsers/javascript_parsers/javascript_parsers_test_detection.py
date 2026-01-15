@@ -2,13 +2,13 @@
 """
 Test Detection JavaScript Parser - Test file and coverage analysis.
 
-[20251221_TODO] Implement test file pattern detection
-[20251221_TODO] Add test framework identification (Jest, Mocha, Vitest)
-[20251221_TODO] Support test coverage metrics parsing
-[20251221_TODO] Implement test organization analysis
-[20251221_TODO] Add async test detection
-[20251221_TODO] Support test suite structure extraction
-[20251221_TODO] Implement test performance analysis
+# TODO Implement test file pattern detection
+# TODO Add test framework identification (Jest, Mocha, Vitest)
+# TODO Support test coverage metrics parsing
+# TODO Implement test organization analysis
+# TODO Add async test detection
+# TODO Support test suite structure extraction
+# TODO Implement test performance analysis
 
 Reference: https://jestjs.io/docs/getting-started
 """
@@ -43,7 +43,7 @@ class TestDetectionParser:
     def parse(self) -> dict:
         """Parse test file and extract test metrics.
 
-        [20251221_TODO] Implement full test analysis logic
+        # TODO Implement full test analysis logic
 
         Returns:
             Dictionary with test metrics and structure

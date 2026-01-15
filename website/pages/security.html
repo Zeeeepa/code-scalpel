@@ -3,83 +3,144 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="How Code Scalpel enables safe, auditable AI code operations — from zero-execution analysis to fail-closed Enterprise governance." />
-  <title>Governance — Code Scalpel</title>
+  <meta name="description" content="Code Scalpel governance: complete audit trails, cryptographic policy verification, fail-closed enforcement, and compliance evidence generation for AI code operations." />
+  <title>Governance &amp; Audit - Code Scalpel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
+  <!-- [20260114_REFACTOR] Normalize shared nav/buttons; rely on shared CSS primitives. -->
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
   <nav>
     <div class="nav-container">
-      <a href="/" class="logo-link">
-        <span class="logo-icon">⌘</span>
-        <span class="logo-text">Code Scalpel</span>
+      <a href="/" class="logo">
+        <div class="logo-icon">⌘</div>
+        <div class="logo-text">Code<span>Scalpel</span></div>
       </a>
-      <div class="nav-links">
-        <a href="/pages/tools.html">Tools</a>
-        <a href="/pages/pricing.html">Pricing</a>
-        <a href="/pages/security.html" class="active">Governance</a>
-        <a href="https://github.com/code-scalpel/code-scalpel" target="_blank">GitHub</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/tools.html">MCP Tools</a></li>
+        <li><a href="/pages/integrations.html">Integrations</a></li>
+        <li><a href="/pages/pricing.html">Pricing</a></li>
+        <li><a href="/pages/security.html" class="active">Governance</a></li>
+        <li><a href="/pages/about.html">About</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost">GitHub</a>
+        <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
       </div>
     </div>
   </nav>
 
   <main>
-    <section class="hero">
-      <div class="container">
-        <div class="card">
-          <div class="card-inner">
-<h1 style="font-size:40px;">Governance for AI code operations</h1>
-            <p class="lede">AI agents are becoming operators — code-changing actors, not just suggestion engines. That's powerful, but it changes the risk profile. Code Scalpel is built from the ground up to make agent operations safe, bounded, and auditable.</p>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;">
-              <a class="btn primary" data-link="enterprise-contact" href="mailto:sales@codescalpel.dev?subject=Code%20Scalpel%20Enterprise%20Inquiry">Talk to sales</a>
-              <a class="btn" href="/pages/tools.html">See tools</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="section">
       <div class="container">
+        <!-- [20260114_REFACTOR] Subpages use lightweight page headers (no hero section). -->
+        <h1 style="margin:0 0 8px;">Governance &amp; Audit</h1>
+        <p class="small" style="margin:0 0 18px; max-width: 880px;">Governed AI code operations: server-enforced boundaries, complete audit trails, and (Enterprise) cryptographic policy verification with compliance evidence generation.</p>
         <div class="grid2">
           <div class="card"><div class="card-inner">
-            <h2 style="margin:0 0 10px;">Core principles</h2>
+            <h2 style="margin:0 0 10px;">&#x1F512; Core governance principles</h2>
             <ul style="margin:0; padding-left:18px; color: var(--muted); line-height: 1.7;">
-              <li><strong>No execution by default:</strong> analysis tools parse code; they don’t run it.</li>
-              <li><strong>Bounded writes:</strong> edits target one symbol (function/class/method) instead of whole-file rewrites.</li>
-              <li><strong>Pre-flight checks:</strong> safety gates can validate changes before writing.</li>
-              <li><strong>Tier transparency:</strong> limits and behavior are explicit by tier.</li>
+              <li><strong>Server-enforced boundaries:</strong> Limits are hard gates, not model suggestions.</li>
+              <li><strong>Complete audit trails:</strong> Every operation logged with who, what, when, why.</li>
+              <li><strong>Bounded writes:</strong> Edits target one symbol instead of whole-file rewrites.</li>
+              <li><strong>No execution by default:</strong> Analysis tools parse code; they don't run it.</li>
             </ul>
           </div></div>
 
           <div class="card"><div class="card-inner">
-            <h2 style="margin:0 0 10px;">Enterprise governance</h2>
+            <h2 style="margin:0 0 10px;">&#x1F6E1; Enterprise governance</h2>
             <ul style="margin:0; padding-left:18px; color: var(--muted); line-height: 1.7;">
-<li><strong>Fail-closed policy integrity:</strong> cryptographic verification detects tampered policy files.</li>
-              <li><strong>Compliance modes:</strong> <code>code_policy_check</code> maps findings to HIPAA, SOC2, GDPR, PCI-DSS.</li>
-              <li><strong>Audit artifacts:</strong> generate evidence for reviews and compliance reports.</li>
+              <li><strong>Cryptographic policy integrity:</strong> Signed policies with tamper detection.</li>
+              <li><strong>Fail-closed enforcement:</strong> Verification failure = operation denied.</li>
+              <li><strong>Compliance evidence:</strong> Generate artifacts for HIPAA, SOC2, GDPR, PCI-DSS.</li>
+              <li><strong>Organization-wide controls:</strong> Centralized policy management and reporting.</li>
             </ul>
           </div></div>
+        </div>
+
+        <div class="card" id="audit-trail" style="margin-top:14px;">
+          <div class="card-inner">
+            <h2 style="margin:0 0 10px;">&#x1F4CB; Audit trail capabilities</h2>
+            <p>Every Code Scalpel operation generates a complete audit record:</p>
+            <ul style="margin:10px 0 0 0; padding-left:18px; color: var(--muted); line-height: 1.7;">
+              <li><strong>Operation identity:</strong> Tool name, parameters, tier, timestamp</li>
+              <li><strong>Actor identity:</strong> User/agent, license key, session ID</li>
+              <li><strong>Scope:</strong> Files accessed, symbols modified, boundaries enforced</li>
+              <li><strong>Outcome:</strong> Success/failure, validation results, policy decisions</li>
+              <li><strong>Evidence:</strong> Before/after snapshots, compliance mappings, CWE references</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="card-inner">
+            <h2 style="margin:0 0 10px;">&#x2696; Compliance evidence generation</h2>
+            <p>Enterprise tier generates audit-ready artifacts your compliance team will accept:</p>
+            <table class="table" style="margin-top:10px;" aria-label="Compliance frameworks">
+              <thead>
+                <tr>
+                  <th>Framework</th>
+                  <th>Evidence Type</th>
+                  <th>Controls Mapped</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>SOC2</strong></td>
+                  <td>Change logs, access controls, integrity verification</td>
+                  <td>CC6, CC7, CC8</td>
+                </tr>
+                <tr>
+                  <td><strong>HIPAA</strong></td>
+                  <td>PHI access logs, modification trails, policy enforcement</td>
+                  <td>&sect;164.312</td>
+                </tr>
+                <tr>
+                  <td><strong>GDPR</strong></td>
+                  <td>Data flow tracking, processing logs, consent verification</td>
+                  <td>Art. 30, 32</td>
+                </tr>
+                <tr>
+                  <td><strong>PCI-DSS</strong></td>
+                  <td>Change management, access logs, vulnerability scans</td>
+                  <td>Req. 6, 10, 11</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="card-inner">
+            <h2 style="margin:0 0 10px;">&#x1F510; Cryptographic policy verification</h2>
+            <p>Enterprise policies are cryptographically signed. The <code>verify_policy_integrity</code> tool detects tampering before any governed operation executes:</p>
+            <ul style="margin:10px 0 0 0; padding-left:18px; color: var(--muted); line-height: 1.7;">
+              <li><strong>Signature verification:</strong> Policy files signed with Ed25519</li>
+              <li><strong>Tamper detection:</strong> Any modification invalidates the signature</li>
+              <li><strong>Fail-closed:</strong> Invalid signature = operation denied (no exceptions)</li>
+              <li><strong>Audit trail:</strong> Every verification attempt logged</li>
+            </ul>
+          </div>
         </div>
 
         <div class="card" style="margin-top:14px;">
           <div class="card-inner">
             <h2 style="margin:0 0 10px;">The thesis: you can't govern operators with suggestions</h2>
-            <p>Traditional security advice (prompt the model to be careful, review outputs, test after deployment) doesn't scale when agents operate autonomously. You need <strong>structural controls</strong> — limits enforced by the server, not requested from the model.</p>
+            <p>Traditional security advice (prompt the model to be careful, review outputs, test after deployment) doesn't scale when agents operate autonomously. You need <strong>structural controls</strong> - limits enforced by the server, not requested from the model.</p>
           </div>
         </div>
 
         <div class="card" style="margin-top:14px;">
           <div class="card-inner">
             <h2 style="margin:0 0 10px;">Need a security review packet?</h2>
-            <p class="small">We can provide detailed documentation for SOC2, HIPAA, and PCI questionnaires. Contact sales to schedule a security review.</p>
+            <p class="small">We provide detailed documentation for SOC2, HIPAA, and PCI questionnaires. Contact sales to schedule a security review or request our compliance evidence package.</p>
             <div style="margin-top:14px;">
-              <a class="btn primary" data-link="enterprise-contact" href="mailto:sales@codescalpel.dev?subject=Security%20Review%20Request">Request security review</a>
+              <a class="btn btn-primary" data-link="enterprise-contact" href="mailto:sales@codescalpel.dev?subject=Security%20Review%20Request">Request security review</a>
             </div>
           </div>
         </div>
@@ -90,7 +151,7 @@
   <footer class="footer">
     <div class="container">
       <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
-        <div>© 2026 Code Scalpel</div>
+        <div>&copy; 2026 Code Scalpel</div>
         <div style="display:flex; gap:14px; flex-wrap:wrap;">
           <a class="small" href="/pages/tools.html">Tools</a>
           <a class="small" href="/pages/pricing.html">Pricing</a>

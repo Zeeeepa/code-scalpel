@@ -10,128 +10,66 @@ Unified Language Detection - Central language detection for code-scalpel.
 This module should be the single source of truth for language detection
 across all code-scalpel modules.
 
-============================================================================
-TODO ITEMS: code_parsers/language_detection.py
-============================================================================
-COMMUNITY TIER - Core Detection Features (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Enhance extension detection:
-    - Add compound extension support (.d.ts, .test.js, .spec.ts)
-    - Support case-insensitive matching
-    - Add language version detection from extensions (.py3, .jsx)
-    - Handle edge cases (no extension, multiple dots)
-    - Test count: 20 tests (extension detection, edge cases)
-
-[P1_HIGH] Improve shebang detection:
-    - Support env shebangs (#!/usr/bin/env python3)
-    - Detect language versions from shebangs
-    - Handle malformed shebangs gracefully
-    - Add shebang normalization
-    - Test count: 15 tests (shebang parsing, normalization)
-
-[P1_HIGH] Enhance content heuristics:
-    - Add more language-specific patterns
-    - Improve scoring algorithm for ambiguous cases
-    - Support framework detection (React, Vue, Django)
-    - Add confidence scoring with thresholds
-    - Test count: 30 tests (heuristics accuracy, scoring)
-
-[P2_MEDIUM] Add language metadata:
-    - Store language features (static/dynamic, compiled/interpreted)
-    - Add language family information (C-like, ML-like)
-    - Include typical file naming conventions
-    - Support language ecosystem detection
-    - Test count: 15 tests (metadata accuracy)
-
-[P2_MEDIUM] Improve confidence scoring:
-    - Implement probabilistic language detection
-    - Add confidence threshold configuration
-    - Support multi-language detection (polyglot files)
-    - Provide confidence breakdown by signal type
-    - Test count: 25 tests (confidence calculation, thresholds)
-
-============================================================================
-PRO TIER - Advanced Detection Features (P1-P3)
-============================================================================
-
-[P1_HIGH] Add magic comment detection:
-    - Python: # -*- coding: utf-8 -*-
-    - JavaScript: // @ts-check, /* @flow */
-    - PHP: <?php
-    - Support custom magic comments
-    - Test count: 20 tests (magic comments, custom patterns)
-
-[P1_HIGH] Implement .editorconfig integration:
-    - Parse .editorconfig files
-    - Apply per-project language rules
-    - Support configuration inheritance
-    - Handle language overrides
-    - Test count: 25 tests (editorconfig parsing, integration)
-
-[P2_MEDIUM] Add framework and library detection:
-    - Detect React/Vue/Angular from imports
-    - Identify Django/Flask/FastAPI from patterns
-    - Recognize Spring/Hibernate in Java
-    - Support framework-specific analysis
-    - Test count: 30 tests (framework detection, patterns)
-
-[P2_MEDIUM] Implement caching for detection:
-    - Cache detection results by file hash
-    - Support invalidation strategies
-    - Add LRU cache for frequently accessed files
-    - Persist cache across sessions
-    - Test count: 20 tests (caching, invalidation)
-
-[P3_LOW] Add language dialect detection:
-    - JavaScript vs TypeScript vs Flow
-    - Python 2 vs Python 3
-    - C vs C++
-    - Java versions (8, 11, 17, 21)
-    - Test count: 25 tests (dialect detection, versions)
-
-============================================================================
-ENTERPRISE TIER - Enterprise Detection Features (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Implement multi-file detection:
-    - Analyze project structure for language hints
-    - Detect build system files (package.json, pom.xml)
-    - Identify configuration files
-    - Support monorepo language detection
-    - Test count: 30 tests (project analysis, monorepos)
-
-[P2_MEDIUM] Add telemetry and analytics:
-    - Track detection accuracy metrics
-    - Log detection failures for improvement
-    - Collect language usage statistics
-    - Generate detection quality reports
-    - Test count: 20 tests (telemetry, analytics)
-
-[P3_LOW] Implement policy-based detection:
-    - Support organization-specific detection rules
-    - Add allowlist/blocklist for languages
-    - Enforce language usage policies
-    - Generate compliance reports
-    - Test count: 25 tests (policies, compliance)
-
-[P3_LOW] Add distributed detection:
-    - Support distributed language detection
-    - Aggregate detection results from workers
-    - Coordinate detection across large codebases
-    - Add progress tracking
-    - Test count: 25 tests (distribution, coordination)
-
-[P4_LOW] Implement ML-based detection:
-    - Train ML model on code patterns
-    - Use deep learning for ambiguous cases
-    - Adaptive detection based on project history
-    - Anomaly detection for unusual languages
-    - Test count: 35 tests (ML integration, model accuracy)
-
-============================================================================
-TOTAL TEST ESTIMATE: 385 tests (125 COMMUNITY + 120 PRO + 140 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Add compound extension support (.d.ts, .test.js, .spec.ts)
+# TODO [COMMUNITY] Support case-insensitive matching
+# TODO [COMMUNITY] Add language version detection from extensions (.py3, .jsx)
+# TODO [COMMUNITY] Handle edge cases (no extension, multiple dots)
+# TODO [COMMUNITY] Support env shebangs (#!/usr/bin/env python3)
+# TODO [COMMUNITY] Detect language versions from shebangs
+# TODO [COMMUNITY] Handle malformed shebangs gracefully
+# TODO [COMMUNITY] Add shebang normalization
+# TODO [COMMUNITY] Add more language-specific patterns
+# TODO [COMMUNITY] Improve scoring algorithm for ambiguous cases
+# TODO [COMMUNITY] Support framework detection (React, Vue, Django)
+# TODO [COMMUNITY] Add confidence scoring with thresholds
+# TODO [COMMUNITY] Store language features (static/dynamic, compiled/interpreted)
+# TODO [COMMUNITY] Add language family information (C-like, ML-like)
+# TODO [COMMUNITY] Include typical file naming conventions
+# TODO [COMMUNITY] Support language ecosystem detection
+# TODO [COMMUNITY] Implement probabilistic language detection
+# TODO [COMMUNITY] Add confidence threshold configuration
+# TODO [COMMUNITY] Support multi-language detection (polyglot files)
+# TODO [COMMUNITY] Provide confidence breakdown by signal type
+# TODO [PRO] Python: # -*- coding: utf-8 -*-
+# TODO [PRO] JavaScript: // @ts-check, /* @flow */
+# TODO [PRO] PHP: <?php
+# TODO [PRO] Support custom magic comments
+# TODO [PRO] Parse .editorconfig files
+# TODO [PRO] Apply per-project language rules
+# TODO [PRO] Support configuration inheritance
+# TODO [PRO] Handle language overrides
+# TODO [PRO] Detect React/Vue/Angular from imports
+# TODO [PRO] Identify Django/Flask/FastAPI from patterns
+# TODO [PRO] Recognize Spring/Hibernate in Java
+# TODO [PRO] Support framework-specific analysis
+# TODO [PRO] Cache detection results by file hash
+# TODO [PRO] Support invalidation strategies
+# TODO [PRO] Add LRU cache for frequently accessed files
+# TODO [PRO] Persist cache across sessions
+# TODO [PRO] JavaScript vs TypeScript vs Flow
+# TODO [PRO] Python 2 vs Python 3
+# TODO [PRO] C vs C++
+# TODO [PRO] Java versions (8, 11, 17, 21)
+# TODO [ENTERPRISE] Analyze project structure for language hints
+# TODO [ENTERPRISE] Detect build system files (package.json, pom.xml)
+# TODO [ENTERPRISE] Identify configuration files
+# TODO [ENTERPRISE] Support monorepo language detection
+# TODO [ENTERPRISE] Track detection accuracy metrics
+# TODO [ENTERPRISE] Log detection failures for improvement
+# TODO [ENTERPRISE] Collect language usage statistics
+# TODO [ENTERPRISE] Generate detection quality reports
+# TODO [ENTERPRISE] Support organization-specific detection rules
+# TODO [ENTERPRISE] Add allowlist/blocklist for languages
+# TODO [ENTERPRISE] Enforce language usage policies
+# TODO [ENTERPRISE] Generate compliance reports
+# TODO [ENTERPRISE] Support distributed language detection
+# TODO [ENTERPRISE] Aggregate detection results from workers
+# TODO [ENTERPRISE] Coordinate detection across large codebases
+# TODO [ENTERPRISE] Add progress tracking
+# TODO [ENTERPRISE] Train ML model on code patterns
+# TODO [ENTERPRISE] Use deep learning for ambiguous cases
+# TODO [ENTERPRISE] Adaptive detection based on project history
+# TODO [ENTERPRISE] Anomaly detection for unusual languages
 """
 
 import re

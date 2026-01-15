@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
 Cppcheck Parser - Static Analysis for C/C++ Code
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse cppcheck XML output
-2. Execute cppcheck analysis via subprocess
-3. Load configuration from suppression files
-4. Categorize issues by severity and type
-5. Detect memory management issues
-6. Generate JSON/SARIF/HTML reports
-7. Analyze error patterns
-8. Track issue frequency and severity
 """
+
+# TODO [PHASE2/P1] Parse cppcheck XML output
+# TODO [PHASE2/P1] Execute cppcheck analysis via subprocess
+# TODO [PHASE2/P1] Load configuration from suppression files
+# TODO [PHASE2/P2] Categorize issues by severity and type
+# TODO [PHASE2/P2] Detect memory management issues
+# TODO [PHASE2/P2] Generate JSON/SARIF/HTML reports
+# TODO [PHASE2/P3] Analyze error patterns
+# TODO [PHASE2/P3] Track issue frequency and severity
 
 from dataclasses import dataclass
 from enum import Enum
@@ -84,35 +83,35 @@ class CppcheckParser:
     def execute_cppcheck(
         self, paths: List[Path], config: CppcheckConfig = None
     ) -> List[CppcheckIssue]:
-        """Execute Cppcheck analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute Cppcheck analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Cppcheck execution")
 
     def parse_xml_report(self, report_path: Path) -> List[CppcheckIssue]:
-        """Parse Cppcheck XML report - Phase 2 TODO [20251221_TODO]"""
+        """Parse Cppcheck XML report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def load_config(self, config_file: Path) -> CppcheckConfig:
-        """Load cppcheck configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load cppcheck configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_issues(
         self, issues: List[CppcheckIssue]
     ) -> Dict[IssueCategory, List[CppcheckIssue]]:
-        """Categorize issues by category - Phase 2 TODO [20251221_TODO]"""
+        """Categorize issues by category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Issue categorization")
 
     def detect_memory_issues(self, issues: List[CppcheckIssue]) -> List[CppcheckIssue]:
-        """Filter for memory-related issues - Phase 2 TODO [20251221_TODO]"""
+        """Filter for memory-related issues - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Memory issue detection")
 
     def calculate_quality_metrics(self, issues: List[CppcheckIssue]) -> Dict[str, Any]:
-        """Calculate code quality metrics - Phase 2 TODO [20251221_TODO]"""
+        """Calculate code quality metrics - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def generate_report(self, issues: List[CppcheckIssue], format: str = "json") -> str:
-        """Generate analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def map_to_cwe(self, issues: List[CppcheckIssue]) -> Dict[str, List[CppcheckIssue]]:
-        """Map issues to CWE identifiers - Phase 2 TODO [20251221_TODO]"""
+        """Map issues to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")

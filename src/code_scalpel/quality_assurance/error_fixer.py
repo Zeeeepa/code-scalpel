@@ -17,51 +17,44 @@ Usage (command-line):
     python error_fixer.py --path src/ --dry-run
     python error_fixer.py --path src/ --fix
 
-TODO: ErrorFixer Enhancement Roadmap
-====================================
 
-COMMUNITY (Current & Planned):
-- TODO [COMMUNITY]: Add syntax validation after each fix (current)
-- TODO [COMMUNITY]: Support fix preview with diff output
-- TODO [COMMUNITY]: Add import sorting fixes (isort-style)
-- TODO [COMMUNITY]: Add unused import removal
-- TODO [COMMUNITY]: Add docstring formatting fixes
-- TODO [COMMUNITY]: Add indentation normalization (tabs vs spaces)
-- TODO [COMMUNITY]: Add safe variable renaming (scope-aware)
-- TODO [COMMUNITY]: Add string quote normalization (single vs double)
-
-PRO (Enhanced Features):
-- TODO [PRO]: Use code_parsers.ParserFactory for language-aware fixing
-- TODO [PRO]: Support code_parsers error codes in fix mapping
-- TODO [PRO]: Use code_parsers language detection for multi-language projects
-- TODO [PRO]: Integrate code_parsers.RuffParser for auto-fix suggestions
-- TODO [PRO]: Add missing type hint insertion (from mypy suggestions)
-- TODO [PRO]: Add line length fixes (auto-wrap)
-- TODO [PRO]: Add f-string conversion for Python 3.6+
-- TODO [PRO]: Add walrus operator suggestions for Python 3.8+
-- TODO [PRO]: Implement fix rollback on validation failure
-- TODO [PRO]: Add semantic preservation checks
-- TODO [PRO]: Add --safe mode that skips risky fixes
-- TODO [PRO]: Implement fix conflict detection
-- TODO [PRO]: Implement fix priority ordering
-- TODO [PRO]: Add --max-fixes limit per file
-- TODO [PRO]: Add progress reporting for large projects
-
-ENTERPRISE (Advanced Capabilities):
-- TODO [ENTERPRISE]: Leverage code_parsers.ParseResult for structured error info
-- TODO [ENTERPRISE]: Add JavaScript/TypeScript fixes (prettier integration)
-- TODO [ENTERPRISE]: Add Java fixes (google-java-format integration)
-- TODO [ENTERPRISE]: Add Go fixes (gofmt integration)
-- TODO [ENTERPRISE]: Add generic brace style normalization
-- TODO [ENTERPRISE]: Add semicolon insertion/removal for JS
-- TODO [ENTERPRISE]: Add type annotation modernization (list vs List)
-- TODO [ENTERPRISE]: Add parallel file processing
-- TODO [ENTERPRISE]: Support fix profiles (minimal, standard, aggressive)
-- TODO [ENTERPRISE]: Add git pre-commit hook integration
-- TODO [ENTERPRISE]: Add CI/CD pipeline integration (GitHub Actions)
-- TODO [ENTERPRISE]: Add IDE extension support (VS Code quick fixes)
-- TODO [ENTERPRISE]: Generate fix suggestions for code review
-- TODO [ENTERPRISE]: Add MCP tool for AI-assisted fixing
+# TODO [COMMUNITY]: Add syntax validation after each fix (current)
+# TODO [COMMUNITY]: Support fix preview with diff output
+# TODO [COMMUNITY]: Add import sorting fixes (isort-style)
+# TODO [COMMUNITY]: Add unused import removal
+# TODO [COMMUNITY]: Add docstring formatting fixes
+# TODO [COMMUNITY]: Add indentation normalization (tabs vs spaces)
+# TODO [COMMUNITY]: Add safe variable renaming (scope-aware)
+# TODO [COMMUNITY]: Add string quote normalization (single vs double)
+# TODO [PRO]: Use code_parsers.ParserFactory for language-aware fixing
+# TODO [PRO]: Support code_parsers error codes in fix mapping
+# TODO [PRO]: Use code_parsers language detection for multi-language projects
+# TODO [PRO]: Integrate code_parsers.RuffParser for auto-fix suggestions
+# TODO [PRO]: Add missing type hint insertion (from mypy suggestions)
+# TODO [PRO]: Add line length fixes (auto-wrap)
+# TODO [PRO]: Add f-string conversion for Python 3.6+
+# TODO [PRO]: Add walrus operator suggestions for Python 3.8+
+# TODO [PRO]: Implement fix rollback on validation failure
+# TODO [PRO]: Add semantic preservation checks
+# TODO [PRO]: Add --safe mode that skips risky fixes
+# TODO [PRO]: Implement fix conflict detection
+# TODO [PRO]: Implement fix priority ordering
+# TODO [PRO]: Add --max-fixes limit per file
+# TODO [PRO]: Add progress reporting for large projects
+# TODO [ENTERPRISE]: Leverage code_parsers.ParseResult for structured error info
+# TODO [ENTERPRISE]: Add JavaScript/TypeScript fixes (prettier integration)
+# TODO [ENTERPRISE]: Add Java fixes (google-java-format integration)
+# TODO [ENTERPRISE]: Add Go fixes (gofmt integration)
+# TODO [ENTERPRISE]: Add generic brace style normalization
+# TODO [ENTERPRISE]: Add semicolon insertion/removal for JS
+# TODO [ENTERPRISE]: Add type annotation modernization (list vs List)
+# TODO [ENTERPRISE]: Add parallel file processing
+# TODO [ENTERPRISE]: Support fix profiles (minimal, standard, aggressive)
+# TODO [ENTERPRISE]: Add git pre-commit hook integration
+# TODO [ENTERPRISE]: Add CI/CD pipeline integration (GitHub Actions)
+# TODO [ENTERPRISE]: Add IDE extension support (VS Code quick fixes)
+# TODO [ENTERPRISE]: Generate fix suggestions for code review
+# TODO [ENTERPRISE]: Add MCP tool for AI-assisted fixing
 """
 
 from __future__ import annotations

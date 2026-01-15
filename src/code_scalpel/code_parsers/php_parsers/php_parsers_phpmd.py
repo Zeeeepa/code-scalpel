@@ -12,29 +12,29 @@ PHPMD provides:
 - Multiple output formats (XML, HTML, text, JSON)
 - Custom ruleset creation support
 
-[20251221_TODO] Implement PHPMD XML report parsing
-[20251221_TODO] Implement JSON report parsing
-[20251221_TODO] Parse HTML output format
-[20251221_TODO] Extract violation details (file, line, priority, rule)
-[20251221_TODO] Parse rule categorization and priorities
+# TODO Implement PHPMD XML report parsing
+# TODO Implement JSON report parsing
+# TODO Parse HTML output format
+# TODO Extract violation details (file, line, priority, rule)
+# TODO Parse rule categorization and priorities
 
-[20251221_TODO] Add PHPMD CLI execution via subprocess
-[20251221_TODO] Support ruleset configuration
-[20251221_TODO] Load ruleset XML files
-[20251221_TODO] Implement custom rule support
-[20251221_TODO] Add baseline support for known issues
+# TODO Add PHPMD CLI execution via subprocess
+# TODO Support ruleset configuration
+# TODO Load ruleset XML files
+# TODO Implement custom rule support
+# TODO Add baseline support for known issues
 
-[20251221_TODO] Parse code smell rules (naming, unused, complexity)
-[20251221_TODO] Extract metrics (ATFD, WMC, LOCM, etc.)
-[20251221_TODO] Detect controversial patterns
-[20251221_TODO] Analyze naming conventions
-[20251221_TODO] Parse priority levels (1-5)
+# TODO Parse code smell rules (naming, unused, complexity)
+# TODO Extract metrics (ATFD, WMC, LOCM, etc.)
+# TODO Detect controversial patterns
+# TODO Analyze naming conventions
+# TODO Parse priority levels (1-5)
 
-[20251221_TODO] Generate complexity reports
-[20251221_TODO] Track violation metrics
-[20251221_TODO] Implement severity filtering
-[20251221_TODO] Add trend analysis
-[20251221_TODO] Create comparison with PHPCS/PHPStan
+# TODO Generate complexity reports
+# TODO Track violation metrics
+# TODO Implement severity filtering
+# TODO Add trend analysis
+# TODO Create comparison with PHPCS/PHPStan
 """
 
 from dataclasses import dataclass, field
@@ -94,7 +94,7 @@ class PHPMDParser:
 
     def parse_xml_report(self, xml_file: Path) -> list[PHPMDViolation]:
         """
-        [20251221_TODO] Parse PHPMD XML report format.
+        # TODO Parse PHPMD XML report format.
 
         Args:
             xml_file: Path to PHPMD XML report
@@ -106,7 +106,7 @@ class PHPMDParser:
 
     def parse_json_report(self, json_data: str) -> list[PHPMDViolation]:
         """
-        [20251221_TODO] Parse PHPMD JSON report format.
+        # TODO Parse PHPMD JSON report format.
 
         Args:
             json_data: JSON report from PHPMD
@@ -118,7 +118,7 @@ class PHPMDParser:
 
     def execute_phpmd(self, target_path: Path) -> dict[str, Any]:
         """
-        [20251221_TODO] Execute PHPMD analysis on target path.
+        # TODO Execute PHPMD analysis on target path.
 
         Args:
             target_path: Path to PHP files or directory
@@ -130,7 +130,7 @@ class PHPMDParser:
 
     def generate_report(self) -> str:
         """
-        [20251221_TODO] Generate comprehensive PHPMD report.
+        # TODO Generate comprehensive PHPMD report.
 
         Returns:
             Formatted report string

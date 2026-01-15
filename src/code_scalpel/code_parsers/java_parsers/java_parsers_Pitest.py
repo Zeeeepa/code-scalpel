@@ -2,12 +2,12 @@
 """
 Pitest Java Parser - Mutation testing analysis tool.
 
-[20251221_TODO] Implement Pitest XML report parsing
-[20251221_TODO] Add mutation detection metrics
-[20251221_TODO] Support mutation status classification
-[20251221_TODO] Implement killed/survived mutation tracking
-[20251221_TODO] Add test quality assessment
-[20251221_TODO] Support custom mutation operator configuration
+# TODO Implement Pitest XML report parsing
+# TODO Add mutation detection metrics
+# TODO Support mutation status classification
+# TODO Implement killed/survived mutation tracking
+# TODO Add test quality assessment
+# TODO Support custom mutation operator configuration
 
 Reference: http://pitest.org/
 Command: mvn org.pitest:pitest-maven:mutationCoverage
@@ -42,7 +42,7 @@ class PitestParser:
     def parse(self) -> dict:
         """Parse Pitest mutation testing reports.
 
-        [20251221_TODO] Implement full report parsing logic
+        # TODO Implement full report parsing logic
 
         Returns:
             Dictionary with mutation test results

@@ -8,138 +8,6 @@ Security guarantees:
 - No filesystem access outside sandbox
 - Resource limits (CPU, memory, time)
 - Process isolation via containers or chroot
-
-[20251224_TODO] Phase 1 - Core Sandbox Execution (COMMUNITY Tier - 25 items):
-- [ ] Implement temporary directory creation and cleanup
-- [ ] Create process-level isolation
-- [ ] Implement file copy and restoration
-- [ ] Add test execution framework
-- [ ] Create lint execution
-- [ ] Implement build execution
-- [ ] Add output capture (stdout/stderr)
-- [ ] Create test result parsing
-- [ ] Implement error detection
-- [ ] Add resource limit enforcement
-- [ ] Create timeout mechanisms
-- [ ] Implement signal handling
-- [ ] Add test framework detection
-- [ ] Create pytest integration
-- [ ] Add unittest integration
-- [ ] Implement jest integration
-- [ ] Create test filtering
-- [ ] Add parallel test execution
-- [ ] Implement logging
-- [ ] Create result aggregation
-- [ ] Add performance tracking
-- [ ] Implement rollback mechanisms
-- [ ] Create comprehensive error handling
-- [ ] Add side effect monitoring
-- [ ] Implement filesystem change tracking
-
-[20251224_TODO] Phase 2 - Advanced Sandbox Features (PRO Tier - 25 items):
-- [ ] Implement Docker container isolation
-- [ ] Create container management
-- [ ] Add image caching
-- [ ] Implement container networking
-- [ ] Create volume management
-- [ ] Add environment variable isolation
-- [ ] Implement credential injection
-- [ ] Create build artifact caching
-- [ ] Add incremental testing
-- [ ] Implement dependency caching
-- [ ] Create cache warming
-- [ ] Add performance optimization
-- [ ] Implement cost calculation
-- [ ] Create resource profiling
-- [ ] Add memory limit tracking
-- [ ] Implement CPU limit tracking
-- [ ] Create disk usage tracking
-- [ ] Add network monitoring
-- [ ] Implement process monitoring
-- [ ] Create advanced filtering
-- [ ] Add custom test runners
-- [ ] Implement framework-specific analysis
-- [ ] Create intelligent scheduling
-- [ ] Add failure prediction
-- [ ] Implement adaptive resource allocation
-
-[20251224_TODO] Phase 3 - Enterprise Isolation (ENTERPRISE Tier - 25 items):
-- [ ] Implement Kubernetes pod isolation
-- [ ] Create multi-region execution
-- [ ] Add cross-region replication
-- [ ] Implement secure enclave support
-- [ ] Create hardware-based isolation
-- [ ] Add encryption for sandbox operations
-- [ ] Implement audit trail integration
-- [ ] Create compliance enforcement
-- [ ] Add regulatory requirement checking
-- [ ] Implement role-based access
-- [ ] Create PII protection
-- [ ] Add data residency enforcement
-- [ ] Implement disaster recovery
-- [ ] Create high availability
-- [ ] Add disaster recovery planning
-- [ ] Implement backup strategies
-- [ ] Create restoration procedures
-- [ ] Add failover mechanisms
-- [ ] Implement replica management
-- [ ] Create multi-region deployment
-- [ ] Add geo-redundancy
-- [ ] Implement cross-region failover
-- [ ] Create circuit breaking
-- [ ] Add graceful degradation
-- [ ] Implement fallback execution
-- [ ] Create alternative strategies
-- [ ] Add mode switching
-- [ ] Implement adaptive isolation
-- [ ] Create dynamic resource allocation
-- [ ] Add predictive scaling
-- [ ] Implement auto-scaling
-- [ ] Create load prediction
-- [ ] Add demand forecasting
-- [ ] Implement capacity planning
-- [ ] Create cost estimation
-- [ ] Add budget enforcement
-- [ ] Implement quota tracking
-- [ ] Create usage accounting
-
-[20251224_TODO] Phase 3 - Enterprise Sandbox (ENTERPRISE Tier - 25 items):
-- [ ] Implement organization-wide policies
-- [ ] Create federated sandbox execution
-- [ ] Add cross-org resource sharing
-- [ ] Implement compliance checking
-- [ ] Create audit trail integration
-- [ ] Add encryption at rest
-- [ ] Implement encryption in transit
-- [ ] Create role-based access control
-- [ ] Add approval workflows
-- [ ] Implement change advisory board
-- [ ] Create SLA tracking
-- [ ] Add incident management
-- [ ] Implement regulatory compliance
-- [ ] Create compliance automation
-- [ ] Add compliance reporting
-- [ ] Implement cost allocation
-- [ ] Create billing integration
-- [ ] Add usage tracking
-- [ ] Implement chargeback models
-- [ ] Create advanced analytics
-- [ ] Add predictive modeling
-- [ ] Implement machine learning insights
-- [ ] Create anomaly detection
-- [ ] Add fraud detection
-- [ ] Implement advanced security
-- [ ] Add geographic distribution
-- [ ] Implement advanced security scanning
-- [ ] Create threat detection
-- [ ] Add anomaly detection
-- [ ] Implement cost tracking and billing
-- [ ] Create usage reporting
-- [ ] Add SLA enforcement
-- [ ] Implement advanced monitoring
-- [ ] Create executive dashboards
-- [ ] Add centralized management
-- [ ] Implement multi-tenant isolation
 """
 
 import os
@@ -163,7 +31,7 @@ except ImportError:
 
 @dataclass
 class LintResult:
-    """[20251217_FEATURE] Individual lint result."""
+    """Individual lint result."""
 
     file: str
     line: Optional[int]
@@ -174,7 +42,7 @@ class LintResult:
 
 @dataclass
 class ExecutionTestResult:
-    """[20251217_FEATURE] Individual test result from sandbox execution."""
+    """Individual test result from sandbox execution."""
 
     name: str
     passed: bool
@@ -189,7 +57,7 @@ TestResult = ExecutionTestResult
 
 @dataclass
 class FileChange:
-    """[20251217_FEATURE] Represents a file change to apply."""
+    """Represents a file change to apply."""
 
     relative_path: str
     operation: str  # "create", "modify", "delete"
@@ -208,6 +76,19 @@ class SandboxResult:
     execution_time_ms: int = 0
     stdout: str = ""
     stderr: str = ""
+
+
+# TODO [20251221] Phase 1 Enhancement: Add configuration validation
+# TODO [20251221] Phase 1 Enhancement: Support custom environment variables
+# TODO [20251221] Phase 1 Enhancement: Add pre-execution hooks
+# TODO [20251221] Phase 1 Enhancement: Implement result caching layer
+# TODO [20251221] Phase 1 Enhancement: Add timeout handling for hanging processes
+
+# TODO [20251221] Phase 2 Feature: Parallel execution coordination
+# TODO [20251221] Phase 2 Feature: Result streaming support
+# TODO [20251221] Phase 2 Feature: Performance profiling integration
+# TODO [20251221] Phase 2 Feature: Network isolation verification
+# TODO [20251221] Phase 2 Feature: Filesystem access logging
 
 
 class SandboxExecutor:
@@ -244,20 +125,6 @@ class SandboxExecutor:
         self.max_memory_mb = max_memory_mb
         self.max_cpu_seconds = max_cpu_seconds
         self.max_disk_mb = max_disk_mb
-
-        # [20251221_TODO] Phase 1 Enhancements:
-        # - [ ] Add configuration validation
-        # - [ ] Support custom environment variables
-        # - [ ] Add pre-execution hooks
-        # - [ ] Implement result caching layer
-        # - [ ] Add timeout handling for hanging processes
-        #
-        # [20251221_TODO] Phase 2 Features:
-        # - [ ] Parallel execution coordination
-        # - [ ] Result streaming support
-        # - [ ] Performance profiling integration
-        # - [ ] Network isolation verification
-        # - [ ] Filesystem access logging
 
         # [20251217_FEATURE] Initialize Docker client if container isolation requested
         if isolation_level == "container":
@@ -424,15 +291,12 @@ class SandboxExecutor:
             execution_time = int((time.time() - start_time) * 1000)
 
             # Parse results from container output
+            output = container if isinstance(container, bytes) else b""
             return SandboxResult(
                 success=True,
                 build_success=True,
                 execution_time_ms=execution_time,
-                stdout=(
-                    container.decode()
-                    if isinstance(container, bytes)
-                    else str(container)
-                ),
+                stdout=output.decode("utf-8", errors="replace") if output else "",
                 stderr="",
             )
 

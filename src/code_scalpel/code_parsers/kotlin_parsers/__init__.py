@@ -100,44 +100,44 @@ TODO: Add kapt annotation processor detection
 
 TODO: HIGH PRIORITY - Module Registry & Aggregation
 ====================================================
-[20251221_TODO] Implement KotlinParserRegistry with unified interface
-[20251221_TODO] Add parser factory pattern for lazy initialization
-[20251221_TODO] Create aggregation metrics across multiple parsers
-[20251221_TODO] Add configuration management for all Kotlin parsers
+# TODO Implement KotlinParserRegistry with unified interface
+# TODO Add parser factory pattern for lazy initialization
+# TODO Create aggregation metrics across multiple parsers
+# TODO Add configuration management for all Kotlin parsers
 
 TODO: MEDIUM PRIORITY - Integration & Performance
 ==================================================
-[20251221_TODO] Implement async/concurrent parser execution
-[20251221_TODO] Add caching layer for repeated analyses
-[20251221_TODO] Implement incremental analysis support
-[20251221_TODO] Add result aggregation and deduplication
-[20251221_TODO] Create unified JSON/SARIF output format
-[20251221_TODO] Add progress reporting for long-running analyses
-[20251221_TODO] Implement parser health checks and diagnostics
+# TODO Implement async/concurrent parser execution
+# TODO Add caching layer for repeated analyses
+# TODO Implement incremental analysis support
+# TODO Add result aggregation and deduplication
+# TODO Create unified JSON/SARIF output format
+# TODO Add progress reporting for long-running analyses
+# TODO Implement parser health checks and diagnostics
 
 TODO: MEDIUM PRIORITY - New Tool Integrations
 ==============================================
-[20251221_TODO] Add Konsist library integration (architecture rules)
-[20251221_TODO] Add diktat integration (alternative linter)
-[20251221_TODO] Add compose linter integration
-[20251221_TODO] Add JUnit test analyzer for Kotlin tests
-[20251221_TODO] Add benchmarking tool support
+# TODO Add Konsist library integration (architecture rules)
+# TODO Add diktat integration (alternative linter)
+# TODO Add compose linter integration
+# TODO Add JUnit test analyzer for Kotlin tests
+# TODO Add benchmarking tool support
 
 TODO: MEDIUM PRIORITY - Output & Reporting
 ============================================================
-[20251221_TODO] Generate HTML report templates
-[20251221_TODO] Implement trend analysis (historical metrics)
-[20251221_TODO] Add severity-based filtering and sorting
-[20251221_TODO] Create detailed violation categories
-[20251221_TODO] Implement diff/comparison reports
+# TODO Generate HTML report templates
+# TODO Implement trend analysis (historical metrics)
+# TODO Add severity-based filtering and sorting
+# TODO Create detailed violation categories
+# TODO Implement diff/comparison reports
 
 TODO: LOW PRIORITY - Advanced Features
 =======================================
-[20251221_TODO] Add IDE plugin integration stubs
-[20251221_TODO] Create Maven Central dependency scanning
-[20251221_TODO] Add Gradle dependency vulnerability checking
-[20251221_TODO] Implement license compliance checking
-[20251221_TODO] Add automated metric export (CSV, JSON)
+# TODO Add IDE plugin integration stubs
+# TODO Create Maven Central dependency scanning
+# TODO Add Gradle dependency vulnerability checking
+# TODO Implement license compliance checking
+# TODO Add automated metric export (CSV, JSON)
 """
 
 from typing import TYPE_CHECKING

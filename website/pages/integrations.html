@@ -1,518 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="Integrate Code Scalpel with MCP-compatible AI agents and frameworks. Keep governance and audit trails consistent across Claude, VS Code, Cursor, and CI." />
     <title>Integrations — Code Scalpel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --bg-code: #0d0d14;
-            --text-primary: #f0f0f5;
-            --text-secondary: #9898a8;
-            --text-muted: #5a5a70;
-            --accent-cyan: #00d4ff;
-            --accent-violet: #8b5cf6;
-            --accent-emerald: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --gradient-prism: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #f43f5e 100%);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-glow: rgba(0, 212, 255, 0.3);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1.25rem 2rem;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-prism);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--bg-primary);
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .logo-text span {
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--accent-cyan);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--gradient-prism);
-            color: var(--bg-primary);
-        }
-
-        /* Hero */
-        .page-hero {
-            position: relative;
-            z-index: 1;
-            padding: 10rem 2rem 5rem;
-            text-align: center;
-        }
-
-        .page-hero h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 1.25rem;
-        }
-
-        .page-hero h1 .gradient {
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-hero p {
-            color: var(--text-secondary);
-            font-size: 1.25rem;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* Integration Cards Grid */
-        .integrations-section {
-            position: relative;
-            z-index: 1;
-            padding: 4rem 2rem 8rem;
-        }
-
-        .integrations-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .integration-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.4s;
-        }
-
-        .integration-card:hover {
-            border-color: var(--border-glow);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.1);
-        }
-
-        .integration-header {
-            padding: 2rem;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-        }
-
-        .integration-logo {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            flex-shrink: 0;
-        }
-
-        .integration-logo.claude {
-            background: linear-gradient(135deg, #d97757 0%, #cc785c 100%);
-        }
-
-        .integration-logo.copilot {
-            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
-        }
-
-        .integration-logo.cursor {
-            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
-        }
-
-        .integration-logo.cline {
-            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
-        }
-
-        .integration-logo.langchain {
-            background: linear-gradient(135deg, #1a5f4a 0%, #2d8c6f 100%);
-        }
-
-        .integration-logo.autogen {
-            background: linear-gradient(135deg, #0078d4 0%, #50a3f5 100%);
-        }
-
-        .integration-info h3 {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .integration-info p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .integration-body {
-            padding: 2rem;
-        }
-
-        .integration-features {
-            list-style: none;
-            margin-bottom: 1.5rem;
-        }
-
-        .integration-features li {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .integration-features li::before {
-            content: '✓';
-            color: var(--accent-emerald);
-            font-weight: 700;
-        }
-
-        .code-block {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 1rem;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .code-lang {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            color: var(--accent-cyan);
-        }
-
-        .code-copy {
-            padding: 0.25rem 0.6rem;
-            background: transparent;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .code-copy:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-
-        pre {
-            padding: 1rem;
-            overflow-x: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            line-height: 1.5;
-        }
-
-        pre code {
-            color: var(--text-secondary);
-        }
-
-        .code-string { color: var(--accent-emerald); }
-        .code-comment { color: var(--text-muted); }
-
-        .integration-cta {
-            display: block;
-            width: 100%;
-            padding: 0.9rem;
-            background: transparent;
-            border: 1px solid var(--border-subtle);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .integration-cta:hover {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 212, 255, 0.08);
-            color: var(--accent-cyan);
-        }
-
-        /* Framework Section */
-        .frameworks-section {
-            position: relative;
-            z-index: 1;
-            padding: 6rem 2rem;
-            background: var(--bg-secondary);
-        }
-
-        .section-header {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto 4rem;
-        }
-
-        .section-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-bottom: 1rem;
-        }
-
-        .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 1rem;
-        }
-
-        .section-desc {
-            color: var(--text-secondary);
-            font-size: 1.15rem;
-        }
-
-        .frameworks-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .framework-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s;
-        }
-
-        .framework-card:hover {
-            border-color: var(--border-glow);
-        }
-
-        .framework-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .framework-name {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .framework-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .framework-status {
-            display: inline-block;
-            padding: 0.3rem 0.75rem;
-            border-radius: 100px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .framework-status.stable {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-emerald);
-        }
-
-        .framework-status.coming {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--accent-amber);
-        }
-
-        /* Footer */
-        footer {
-            position: relative;
-            z-index: 1;
-            padding: 4rem 2rem 2rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .footer-tagline {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-cyan);
-        }
-
-        .footer-copy {
-            width: 100%;
-            text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 768px) {
-            .integrations-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-container {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .footer-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
+    <!-- [20260114_REFACTOR] Align page with shared site template; emphasize auditability/compliance across integrations. -->
     <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
 
-    <!-- Navigation -->
     <nav>
         <div class="nav-container">
             <a href="/" class="logo">
@@ -520,104 +22,150 @@
                 <div class="logo-text">Code<span>Scalpel</span></div>
             </a>
             <ul class="nav-links">
-                <li><a href="/pages/tools.html">Tools</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/pages/tools.html">MCP Tools</a></li>
+                <li><a href="/pages/integrations.html" class="active">Integrations</a></li>
                 <li><a href="/pages/pricing.html">Pricing</a></li>
                 <li><a href="/pages/security.html">Governance</a></li>
-                <li><a href="/pages/integrations.html" class="active">Integrations</a></li>
-                <li><a href="https://github.com/tescolopio/code-scalpel">GitHub</a></li>
+                <li><a href="/pages/about.html">About</a></li>
             </ul>
-            <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+            <div class="nav-cta">
+                <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost">GitHub</a>
+                <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+            </div>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="page-hero">
-        <h1>Works With Your <span class="gradient">Favorite AI Tools</span></h1>
-        <p>Code Scalpel integrates seamlessly with any MCP-compatible AI agent. Set up in under 2 minutes.</p>
-    </section>
+    <main>
+        <section class="section" id="clients">
+            <div class="container">
+                <!-- [20260114_REFACTOR] Subpages use lightweight page headers (no hero section). -->
+                <h1 style="margin:0 0 8px;">Integrations</h1>
+                <p class="small" style="margin:0 0 18px; max-width: 880px;">Plug into MCP-compatible agents and workflows without changing your security posture. The same boundaries, the same audit trail, the same policy verification — no matter which client is driving.</p>
+                <h2>Popular MCP Clients</h2>
+                <p class="small" style="margin-top:12px; max-width: 760px;">
+                    These examples are intentionally short. Your compliance story doesn’t depend on the client UI — it depends on the governed MCP server boundary.
+                </p>
 
-    <!-- Integration Cards -->
-    <section class="integrations-section">
-        <div class="integrations-grid">
-            <!-- Claude Desktop -->
-            <div class="integration-card">
-                <div class="integration-header">
-                    <div class="integration-logo claude">🤖</div>
-                    <div class="integration-info">
-                        <h3>Claude Desktop</h3>
-                        <p>Anthropic's desktop app</p>
-                    </div>
-                </div>
-                <div class="integration-body">
-                    <ul class="integration-features">
-                        <li>Native MCP support</li>
-                        <li>Automatic tool discovery</li>
-                        <li>Works on macOS, Windows, Linux</li>
-                    </ul>
-                    <div class="code-block">
-                        <div class="code-header">
-                            <span class="code-lang">claude_desktop_config.json</span>
-                            <button class="code-copy">Copy</button>
-                        </div>
-                        <pre><code>{
-  <span class="code-string">"mcpServers"</span>: {
-    <span class="code-string">"code-scalpel"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"uvx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"code-scalpel"</span>, <span class="code-string">"mcp"</span>]
+                <div class="grid3" style="margin-top:24px;">
+                    <div class="card"><div class="card-inner">
+                        <h3 style="margin:0 0 8px;">Claude Desktop</h3>
+                        <p class="small" style="margin:0 0 14px;">Native MCP support. Great for interactive analysis + governed refactors.</p>
+                        <div class="code-block"><pre><code>{
+    "mcpServers": {
+        "code-scalpel": {
+            "command": "uvx",
+            "args": ["code-scalpel", "mcp"]
+        }
     }
-  }
-}</code></pre>
-                    </div>
-                    <a href="docs.html#claude" class="integration-cta">View Full Guide →</a>
+}</code></pre></div>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <a class="btn btn-ghost" href="/docs.html#claude">Claude guide</a>
+                            <a class="btn" href="/pages/security.html">Governance model</a>
+                        </div>
+                    </div></div>
+
+                    <div class="card"><div class="card-inner">
+                        <h3 style="margin:0 0 8px;">VS Code / Copilot</h3>
+                        <p class="small" style="margin:0 0 14px;">IDE-driven workflows with consistent audit logging across engineers.</p>
+                        <div class="code-block"><pre><code>{
+    "servers": {
+        "code-scalpel": {
+            "type": "stdio",
+            "command": "uvx",
+            "args": ["code-scalpel", "mcp"]
+        }
+    }
+}</code></pre></div>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <a class="btn btn-ghost" href="/docs.html#vscode">VS Code guide</a>
+                            <a class="btn" href="/pages/pricing.html">Tier controls</a>
+                        </div>
+                    </div></div>
+
+                    <div class="card"><div class="card-inner">
+                        <h3 style="margin:0 0 8px;">Cursor</h3>
+                        <p class="small" style="margin:0 0 14px;">AI-first editor; use the same MCP server to keep enforcement centralized.</p>
+                        <div class="code-block"><pre><code>{
+    "mcpServers": {
+        "code-scalpel": {
+            "command": "uvx",
+            "args": ["code-scalpel", "mcp"]
+        }
+    }
+}</code></pre></div>
+                        <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                            <a class="btn btn-ghost" href="/docs.html#cursor">Cursor guide</a>
+                            <a class="btn" href="/pages/tools.html">Tool catalog</a>
+                        </div>
+                    </div></div>
+                </div>
+
+                <div class="card" style="margin-top:18px;"><div class="card-inner">
+                    <h3 style="margin:0 0 8px;">Why this matters for compliance</h3>
+                    <p class="small" style="margin:0;">From an auditor’s perspective, the UI doesn’t matter. The evidence does. In Code Scalpel, governance is enforced at the MCP boundary and logged consistently — regardless of which client initiated the operation.</p>
+                    <ul style="margin:12px 0 0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+                        <li><strong>Same boundaries:</strong> Limits are enforced server-side, not “requested” from the model.</li>
+                        <li><strong>Same audit trail:</strong> Tool name, parameters, scope, and outcome are recorded.</li>
+                        <li><strong>Same integrity story:</strong> Policy verification can fail-closed to block operations.</li>
+                    </ul>
+                </div></div>
+            </div>
+        </section>
+
+        <section class="section" style="background:rgba(139,92,246,0.03);">
+            <div class="container">
+                <h2>Frameworks &amp; Automation</h2>
+                <p class="small" style="margin-top:12px; max-width: 760px;">Use Code Scalpel as a governed “toolbox” for agent frameworks and CI automation. The goal is repeatable, reviewable change — not heroics.</p>
+
+                <div class="grid2" style="margin-top:24px;">
+                    <div class="card"><div class="card-inner">
+                        <h3 style="margin:0 0 8px;">Agent Frameworks</h3>
+                        <p class="small" style="margin:0 0 12px;">LangChain, AutoGen, CrewAI, and other orchestrators can call the MCP server like any other tool layer.</p>
+                        <ul style="margin:0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+                            <li>Centralize governance once; reuse everywhere</li>
+                            <li>Keep audit trails consistent across orchestrations</li>
+                            <li>Prevent “prompt drift” from changing security posture</li>
+                        </ul>
+                    </div></div>
+
+                    <div class="card"><div class="card-inner">
+                        <h3 style="margin:0 0 8px;">CI / Pre-merge Gates</h3>
+                        <p class="small" style="margin:0 0 12px;">Use tools like security scanning and policy checks as deterministic gates in your pipeline.</p>
+                        <ul style="margin:0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+                            <li>Export audit records as evidence artifacts</li>
+                            <li>Fail-closed checks for policy integrity</li>
+                            <li>Produce consistent reports for SOC2 change management</li>
+                        </ul>
+                    </div></div>
+                </div>
+
+                <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <a class="btn btn-primary" href="/pages/security.html">See governance &amp; audit</a>
+                    <a class="btn btn-ghost" href="/docs.html">Read docs</a>
                 </div>
             </div>
+        </section>
+    </main>
 
-            <!-- VS Code / Copilot -->
-            <div class="integration-card">
-                <div class="integration-header">
-                    <div class="integration-logo copilot">🐙</div>
-                    <div class="integration-info">
-                        <h3>VS Code / GitHub Copilot</h3>
-                        <p>IDE-integrated AI coding</p>
-                    </div>
-                </div>
-                <div class="integration-body">
-                    <ul class="integration-features">
-                        <li>MCP extension support</li>
-                        <li>Project-scoped configuration</li>
-                        <li>Works with Copilot Chat</li>
-                    </ul>
-                    <div class="code-block">
-                        <div class="code-header">
-                            <span class="code-lang">.vscode/mcp.json</span>
-                            <button class="code-copy">Copy</button>
-                        </div>
-                        <pre><code>{
-  <span class="code-string">"servers"</span>: {
-    <span class="code-string">"code-scalpel"</span>: {
-      <span class="code-string">"type"</span>: <span class="code-string">"stdio"</span>,
-      <span class="code-string">"command"</span>: <span class="code-string">"uvx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"code-scalpel"</span>, <span class="code-string">"mcp"</span>]
-    }
-  }
-}</code></pre>
-                    </div>
-                    <a href="docs.html#vscode" class="integration-cta">View Full Guide →</a>
+    <footer class="footer">
+        <div class="container">
+            <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+                <div>&copy; 2026 Code Scalpel</div>
+                <div style="display:flex; gap:14px; flex-wrap:wrap;">
+                    <a class="small" href="/pages/tools.html">Tools</a>
+                    <a class="small" href="/pages/pricing.html">Pricing</a>
+                    <a class="small" href="/docs.html">Docs</a>
+                    <a class="small" href="/pages/about.html">About</a>
                 </div>
             </div>
+        </div>
+    </footer>
 
-            <!-- Cursor -->
-            <div class="integration-card">
-                <div class="integration-header">
-                    <div class="integration-logo cursor">⚡</div>
-                    <div class="integration-info">
-                        <h3>Cursor</h3>
-                        <p>AI-first code editor</p>
-                    </div>
-                </div>
-                <div class="integration-body">
-                    <ul class="integration-features">
-                        <li>Native MCP integration</li>
+    <script src="/assets/config.js"></script>
+    <script src="/assets/site.js"></script>
+</body>
+</html>
                         <li>Context-aware suggestions</li>
                         <li>Surgical code extraction</li>
                     </ul>
@@ -798,7 +346,8 @@ tools = scalpel.get_tool_description()</code></pre>
                 <p class="footer-tagline">Surgical code analysis for the AI era.</p>
             </div>
             <div class="footer-links">
-                <a href="docs.html">Documentation</a>
+                <!-- [20260114_BUGFIX] Canonical docs entrypoint is /docs.html -->
+                <a href="/docs.html">Documentation</a>
                 <a href="https://github.com/tescolopio/code-scalpel">GitHub</a>
                 <a href="https://discord.gg/codescalpel">Discord</a>
                 <a href="mailto:support@codescalpel.dev">Support</a>

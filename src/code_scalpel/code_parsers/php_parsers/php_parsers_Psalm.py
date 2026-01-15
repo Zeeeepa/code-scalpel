@@ -15,24 +15,21 @@ Psalm Features:
     - Multiple output formats (JSON, JSON-pretty, XML, emacs, etc.)
 
 Phase 2 Enhancement Areas:
-    HIGH PRIORITY:
-        - JSON report parsing [20251221_TODO]
-        - JSON-pretty format parsing [20251221_TODO]
-        - XML output support [20251221_TODO]
-        - CLI execution via subprocess [20251221_TODO]
-        - Configuration file loading (psalm.xml) [20251221_TODO]
+    # TODO HIGH PRIORITY: JSON report parsing
+    # TODO HIGH PRIORITY: JSON-pretty format parsing
+    # TODO HIGH PRIORITY: XML output support
+    # TODO HIGH PRIORITY: CLI execution via subprocess
+    # TODO HIGH PRIORITY: Configuration file loading (psalm.xml)
 
-    MEDIUM PRIORITY:
-        - Taint analysis results parsing [20251221_TODO]
-        - Security vulnerability detection [20251221_TODO]
-        - Error categorization and severity [20251221_TODO]
-        - Type coverage metrics [20251221_TODO]
+    # TODO MEDIUM PRIORITY: Taint analysis results parsing
+    # TODO MEDIUM PRIORITY: Security vulnerability detection
+    # TODO MEDIUM PRIORITY: Error categorization and severity
+    # TODO MEDIUM PRIORITY: Type coverage metrics
 
-    LOW PRIORITY:
-        - Type hint suggestions [20251221_TODO]
-        - Psalm annotation generation [20251221_TODO]
-        - IDE integration [20251221_TODO]
-        - Comparison with PHPStan [20251221_TODO]
+    # TODO LOW PRIORITY: Type hint suggestions
+    # TODO LOW PRIORITY: Psalm annotation generation
+    # TODO LOW PRIORITY: IDE integration
+    # TODO LOW PRIORITY: Comparison with PHPStan
 """
 
 from dataclasses import dataclass, field
@@ -95,25 +92,25 @@ class PsalmParser:
         self.config: Optional[PsalmConfig] = None
 
     def parse_json_report(self, json_data: str) -> list[PsalmError]:
-        """Parse Psalm JSON report format. [20251221_TODO]"""
+        """Parse Psalm JSON report format. # TODO"""
         raise NotImplementedError("Phase 2: Psalm JSON parsing")
 
     def parse_json_pretty(self, json_data: str) -> list[PsalmError]:
-        """Parse Psalm JSON-pretty format. [20251221_TODO]"""
+        """Parse Psalm JSON-pretty format. # TODO"""
         raise NotImplementedError("Phase 2: Psalm JSON-pretty parsing")
 
     def load_config(self, config_path: Path) -> PsalmConfig:
-        """Load and parse psalm.xml configuration. [20251221_TODO]"""
+        """Load and parse psalm.xml configuration. # TODO"""
         raise NotImplementedError("Phase 2: Psalm config parsing")
 
     def execute_psalm(self, paths: list[str]) -> dict[str, Any]:
-        """Execute Psalm analysis on paths. [20251221_TODO]"""
+        """Execute Psalm analysis on paths. # TODO"""
         raise NotImplementedError("Phase 2: Psalm execution")
 
     def analyze_taint(self) -> list[dict[str, Any]]:
-        """Analyze taint flow for security vulnerabilities. [20251221_TODO]"""
+        """Analyze taint flow for security vulnerabilities. # TODO"""
         raise NotImplementedError("Phase 2: Psalm taint analysis")
 
     def generate_report(self) -> str:
-        """Generate comprehensive Psalm report. [20251221_TODO]"""
+        """Generate comprehensive Psalm report. # TODO"""
         raise NotImplementedError("Phase 2: Psalm report generation")

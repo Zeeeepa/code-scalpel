@@ -25,36 +25,27 @@ Modules:
     normalizers: Language-specific normalizers (PythonNormalizer, etc.)
     semantics: Language-specific behavior (PythonSemantics, JavaScriptSemantics)
 
-[20251220_TODO] Add export for additional IR nodes:
-    - IRImport, IRExport, IRSwitch, IRTry, IRRaise (polyglot support)
-    - IRYield, IRYieldFrom (generator support)
-    - IRTernary (conditional expressions)
-    - IRDestructure (destructuring patterns) when implemented
-
-[20251220_TODO] Export additional normalizers:
-    - JavaNormalizer, TypeScriptNormalizer
-    - TypeScriptTSXNormalizer for JSX/TSX support
-    - Add conditional imports for optional dependencies
-
-[20251220_TODO] Add IR utility functions:
-    - ir_visitor(node, visitor) - Generic visitor pattern
-    - ir_clone(node) - Deep copy IR subtree
-    - ir_hash(node) - Compute IR node hash for caching
-    - ir_compare(node1, node2) - Structural equality
-    - ir_find(node, predicate) - Search IR tree
-
-[20251220_TODO] Add IR transformation utilities:
-    - ir_replace(node, old, new) - Replace subtrees
-    - ir_map(node, transform) - Functional map over IR
-    - ir_fold(node, combiner, initial) - Fold over IR
-    - ir_collect(node, collector) - Gather matching nodes
-
-[20251220_TODO] Add IR validation and analysis helpers:
-    - validate_ir(ir_module) - Type and structure validation
-    - find_all_calls(ir_module) -> List[IRCall]
-    - find_all_assignments(ir_module) -> List[IRAssign]
-    - find_all_definitions(ir_module) -> List[IRFunctionDef | IRClassDef]
-    - get_variable_scope(ir_node) - Scope analysis helper
+# TODO [CORE/Infrastructure] Add export for additional IR nodes: IRImport, IRExport, IRSwitch, IRTry, IRRaise (polyglot support)
+# TODO [CORE/Infrastructure] Add export for generator IR nodes: IRYield, IRYieldFrom
+# TODO [CORE/Infrastructure] Add export for conditional expressions: IRTernary
+# TODO [CORE/Infrastructure] Add export for destructuring patterns: IRDestructure
+# TODO [CORE/Infrastructure] Export JavaNormalizer and TypeScriptNormalizer
+# TODO [CORE/Infrastructure] Export TypeScriptTSXNormalizer for JSX/TSX support
+# TODO [CORE/Infrastructure] Add conditional imports for optional dependencies
+# TODO [CORE/Utilities] Add ir_visitor(node, visitor) - Generic visitor pattern
+# TODO [CORE/Utilities] Add ir_clone(node) - Deep copy IR subtree
+# TODO [CORE/Utilities] Add ir_hash(node) - Compute IR node hash for caching
+# TODO [CORE/Utilities] Add ir_compare(node1, node2) - Structural equality
+# TODO [CORE/Utilities] Add ir_find(node, predicate) - Search IR tree
+# TODO [CORE/Transformation] Add ir_replace(node, old, new) - Replace subtrees
+# TODO [CORE/Transformation] Add ir_map(node, transform) - Functional map over IR
+# TODO [CORE/Transformation] Add ir_fold(node, combiner, initial) - Fold over IR
+# TODO [CORE/Transformation] Add ir_collect(node, collector) - Gather matching nodes
+# TODO [CORE/Analysis] Add validate_ir(ir_module) - Type and structure validation
+# TODO [CORE/Analysis] Add find_all_calls(ir_module) -> List[IRCall]
+# TODO [CORE/Analysis] Add find_all_assignments(ir_module) -> List[IRAssign]
+# TODO [CORE/Analysis] Add find_all_definitions(ir_module) -> List[IRFunctionDef | IRClassDef]
+# TODO [CORE/Analysis] Add get_variable_scope(ir_node) - Scope analysis helper
 """
 
 from .nodes import IRAttribute  # Base; Statements; Expressions
@@ -91,91 +82,82 @@ from .normalizers import BaseNormalizer, PythonNormalizer
 from .operators import BinaryOperator, BoolOperator, CompareOperator, UnaryOperator
 from .semantics import JavaScriptSemantics, LanguageSemantics, PythonSemantics
 
-# TODO ITEMS: IR Module (__init__.py)
-# ======================================================================
-# COMMUNITY TIER - Core IR Infrastructure
-# ======================================================================
-# 1. Add utility function ir_visitor(node, visitor_func) for generic IR tree traversal
-# 2. Add utility function ir_clone(node) for deep copying IR subtrees
-# 3. Add utility function ir_find(node, predicate) to search IR tree by predicate
-# 4. Add get_all_functions(ir_module) helper to extract all function defs
-# 5. Add get_all_classes(ir_module) helper to extract all class defs
-# 6. Add get_all_assignments(ir_module) helper to find all variable assignments
-# 7. Add walk_tree(node, order='pre') generator for pre/post-order traversal
-# 8. Add validate_ir(ir_module) function for IR structure validation
-# 9. Document proper import patterns in module docstring with examples
-# 10. Add example showing normalizer factory usage patterns
-# 11. Add ir_collect(node, collector_func) to gather matching nodes
-# 12. Add ir_collect_by_type(node, ir_node_type) to find nodes by type
-# 13. Add get_all_calls(ir_module) helper to extract all call expressions
-# 14. Add get_all_imports(ir_module) helper to list all imports
-# 15. Add count_nodes(ir_module) to compute total node count
-# 16. Add ir_depth(node) to calculate max tree depth
-# 17. Add ir_width(node) to calculate node breadth
-# 18. Add find_all_paths(node, target) to trace data flow paths
-# 19. Add extract_subtree(node, path) to extract subtrees by path
-# 20. Add ir_statistics(ir_module) to compute module-level statistics
-# 21. Add pretty_print(ir_node, indent=0) for debugging output
-# 22. Add ir_to_dict(node) for serialization to dict format
-# 23. Add ir_summary(ir_module) for high-level module overview
-# 24. Add normalize_ir(ir_node) to ensure consistent structure
-# 25. Add ir_equivalence(node1, node2) for structural comparison
+# TODO [CORE/Utilities] Add utility function ir_visitor(node, visitor_func) for generic IR tree traversal
+# TODO [CORE/Utilities] Add utility function ir_clone(node) for deep copying IR subtrees
+# TODO [CORE/Utilities] Add utility function ir_find(node, predicate) to search IR tree by predicate
+# TODO [CORE/Utilities] Add get_all_functions(ir_module) helper to extract all function defs
+# TODO [CORE/Utilities] Add get_all_classes(ir_module) helper to extract all class defs
+# TODO [CORE/Utilities] Add get_all_assignments(ir_module) helper to find all variable assignments
+# TODO [CORE/Utilities] Add walk_tree(node, order='pre') generator for pre/post-order traversal
+# TODO [CORE/Analysis] Add validate_ir(ir_module) function for IR structure validation
+# TODO [CORE/Documentation] Document proper import patterns in module docstring with examples
+# TODO [CORE/Documentation] Add example showing normalizer factory usage patterns
+# TODO [CORE/Utilities] Add ir_collect(node, collector_func) to gather matching nodes
+# TODO [CORE/Utilities] Add ir_collect_by_type(node, ir_node_type) to find nodes by type
+# TODO [CORE/Analysis] Add get_all_calls(ir_module) helper to extract all call expressions
+# TODO [CORE/Analysis] Add get_all_imports(ir_module) helper to list all imports
+# TODO [CORE/Analysis] Add count_nodes(ir_module) to compute total node count
+# TODO [CORE/Analysis] Add ir_depth(node) to calculate max tree depth
+# TODO [CORE/Analysis] Add ir_width(node) to calculate node breadth
+# TODO [CORE/Analysis] Add find_all_paths(node, target) to trace data flow paths
+# TODO [CORE/Utilities] Add extract_subtree(node, path) to extract subtrees by path
+# TODO [CORE/Analysis] Add ir_statistics(ir_module) to compute module-level statistics
+# TODO [CORE/Utilities] Add pretty_print(ir_node, indent=0) for debugging output
+# TODO [CORE/Utilities] Add ir_to_dict(node) for serialization to dict format
+# TODO [CORE/Analysis] Add ir_summary(ir_module) for high-level module overview
+# TODO [CORE/Utilities] Add normalize_ir(ir_node) to ensure consistent structure
+# TODO [CORE/Analysis] Add ir_equivalence(node1, node2) for structural comparison
+# TODO [PRO/Caching] Add ir_hash(node) function for content-based caching
+# TODO [PRO/Caching] Add ir_hash_subtree(node) to cache subtrees independently
+# TODO [PRO/Analysis] Add ir_compare(node1, node2, strict=False) for structural equality checking
+# TODO [PRO/Metadata] Add ir_metadata(node, key, value) to attach analysis-specific data
+# TODO [PRO/Metadata] Add get_metadata(node, key) to retrieve stored metadata
+# TODO [PRO/Analysis] Add scope_analyzer(ir_module) to build variable scope information
+# TODO [PRO/Analysis] Add type_inference_context(ir_node) for type analysis state
+# TODO [PRO/Performance] Add memoized_traversal(node, cache_dict) for performance-sensitive analysis
+# TODO [PRO/Analysis] Add ir_diff(node1, node2) to compute differences between IR versions
+# TODO [PRO/Analysis] Add diff_summary(diff_result) for human-readable diff output
+# TODO [PRO/Transformation] Add incremental_update(old_ir, changes) for partial IR regeneration
+# TODO [PRO/Caching] Add IR caching layer for repeated normalizations (LRU cache)
+# TODO [PRO/Caching] Add cache_stats() to monitor cache performance
+# TODO [PRO/Caching] Add clear_ir_cache() to reset analysis cache
+# TODO [PRO/Analysis] Add ir_fingerprint(node) for deduplication
+# TODO [PRO/Analysis] Add detect_duplicates(ir_module) to find identical subtrees
+# TODO [PRO/Analysis] Add ir_optimization_hints(node) for compiler-like suggestions
+# TODO [PRO/Analysis] Add find_dead_code(ir_module) to identify unused definitions
+# TODO [PRO/Analysis] Add control_flow_graph(ir_function) to extract CFG
+# TODO [PRO/Analysis] Add data_flow_graph(ir_module) to extract data dependencies
+# TODO [PRO/Metrics] Add complexity_metrics(ir_node) for cyclomatic/cognitive complexity
+# TODO [PRO/Analysis] Add ir_compression(node) to find reusable substructures
+# TODO [PRO/Analysis] Add pattern_match(node, pattern_template) for AST pattern matching
+# TODO [PRO/Analysis] Add find_similar_structures(ir_module, threshold=0.8) for code clone detection
+# TODO [PRO/Analysis] Add ir_validate_semantics(ir_node, target_language) for semantic checking
+# TODO [ENTERPRISE/Serialization] Add distributed IR serialization (protobuf format)
+# TODO [ENTERPRISE/Serialization] Add distributed IR serialization (MessagePack format)
+# TODO [ENTERPRISE/Serialization] Add distributed IR serialization (JSON with schema validation)
+# TODO [ENTERPRISE/Analysis] Add cross_language_ir_equivalence(ir1, ir2, lang1, lang2) detector
+# TODO [ENTERPRISE/Analysis] Add polyglot_ir_composition(ir_python, ir_java) for multi-language analysis
+# TODO [ENTERPRISE/Versioning] Add ir_versioning() system for backward compatibility
+# TODO [ENTERPRISE/Versioning] Add check_ir_compatibility(ir_node, target_version) for version checking
+# TODO [ENTERPRISE/Analysis] Add federated_analysis(ir_modules_dict) across multiple IR modules
+# TODO [ENTERPRISE/Caching] Add distributed_ir_cache(cache_backend) for shared caching
+# TODO [ENTERPRISE/ML] Add ml_based_ir_optimization(ir_node, model) for ML suggestions
+# TODO [ENTERPRISE/ML] Add ir_compression_ml(node, compression_ratio=0.8) using ML
+# TODO [ENTERPRISE/Performance] Add async_normalizer_support() for large codebases
+# TODO [ENTERPRISE/Performance] Add streaming_ir_processor(stream_source) for memory efficiency
+# TODO [ENTERPRISE/Extensibility] Add ir_plugin_system() for custom node type registration
+# TODO [ENTERPRISE/Extensibility] Add register_custom_node(node_class, validator) for extensibility
+# TODO [ENTERPRISE/Monitoring] Add audit_logging_all_ir_ops() comprehensive logging
+# TODO [ENTERPRISE/Monitoring] Add ir_telemetry_collection() for monitoring
+# TODO [ENTERPRISE/Monitoring] Add ir_performance_profiling() detailed performance metrics
+# TODO [ENTERPRISE/Monitoring] Add ir_change_tracking() to monitor transformations
+# TODO [ENTERPRISE/Distributed] Add distributed_ir_synchronization() for multi-agent analysis
+# TODO [ENTERPRISE/ML] Add federated_learning_on_ir(ir_collection, model) integration
+# TODO [ENTERPRISE/Security] Add ir_encryption() for secure analysis
+# TODO [ENTERPRISE/Security] Add ir_signature_verification() for tamper detection
+# TODO [ENTERPRISE/Analysis] Add cross_language_semantic_inference(ir_list) polyglot semantics
+# TODO [ENTERPRISE/Performance] Add ir_optimization_autotuning() for performance tuning
 
-# PRO TIER - IR Analysis and Caching
-# ======================================================================
-# 26. Add ir_hash(node) function for content-based caching
-# 27. Add ir_hash_subtree(node) to cache subtrees independently
-# 28. Add ir_compare(node1, node2, strict=False) for structural equality checking
-# 29. Add ir_metadata(node, key, value) to attach analysis-specific data
-# 30. Add get_metadata(node, key) to retrieve stored metadata
-# 31. Add scope_analyzer(ir_module) to build variable scope information
-# 32. Add type_inference_context(ir_node) for type analysis state
-# 33. Add memoized_traversal(node, cache_dict) for performance-sensitive analysis
-# 34. Add ir_diff(node1, node2) to compute differences between IR versions
-# 35. Add diff_summary(diff_result) for human-readable diff output
-# 36. Add incremental_update(old_ir, changes) for partial IR regeneration
-# 37. Add IR caching layer for repeated normalizations (LRU cache)
-# 38. Add cache_stats() to monitor cache performance
-# 39. Add clear_ir_cache() to reset analysis cache
-# 40. Add ir_fingerprint(node) for deduplication
-# 41. Add detect_duplicates(ir_module) to find identical subtrees
-# 42. Add ir_optimization_hints(node) for compiler-like suggestions
-# 43. Add find_dead_code(ir_module) to identify unused definitions
-# 44. Add control_flow_graph(ir_function) to extract CFG
-# 45. Add data_flow_graph(ir_module) to extract data dependencies
-# 46. Add complexity_metrics(ir_node) for cyclomatic/cognitive complexity
-# 47. Add ir_compression(node) to find reusable substructures
-# 48. Add pattern_match(node, pattern_template) for AST pattern matching
-# 49. Add find_similar_structures(ir_module, threshold=0.8) for code clone detection
-# 50. Add ir_validate_semantics(ir_node, target_language) for semantic checking
-
-# ENTERPRISE TIER - Distributed IR and Advanced Features
-# ======================================================================
-# 51. Add distributed IR serialization (protobuf format)
-# 52. Add distributed IR serialization (MessagePack format)
-# 53. Add distributed IR serialization (JSON with schema validation)
-# 54. Add cross_language_ir_equivalence(ir1, ir2, lang1, lang2) detector
-# 55. Add polyglot_ir_composition(ir_python, ir_java) for multi-language analysis
-# 56. Add ir_versioning() system for backward compatibility
-# 57. Add check_ir_compatibility(ir_node, target_version) for version checking
-# 58. Add federated_analysis(ir_modules_dict) across multiple IR modules
-# 59. Add distributed_ir_cache(cache_backend) for shared caching
-# 60. Add ml_based_ir_optimization(ir_node, model) for ML suggestions
-# 61. Add ir_compression_ml(node, compression_ratio=0.8) using ML
-# 62. Add async_normalizer_support() for large codebases
-# 63. Add streaming_ir_processor(stream_source) for memory efficiency
-# 64. Add ir_plugin_system() for custom node type registration
-# 65. Add register_custom_node(node_class, validator) for extensibility
-# 66. Add audit_logging_all_ir_ops() comprehensive logging
-# 67. Add ir_telemetry_collection() for monitoring
-# 68. Add ir_performance_profiling() detailed performance metrics
-# 69. Add ir_change_tracking() to monitor transformations
-# 70. Add distributed_ir_synchronization() for multi-agent analysis
-# 71. Add federated_learning_on_ir(ir_collection, model) integration
-# 72. Add ir_encryption() for secure analysis
-# 73. Add ir_signature_verification() for tamper detection
-# 74. Add cross_language_semantic_inference(ir_list) polyglot semantics
-# 75. Add ir_optimization_autotuning() for performance tuning
 
 __all__ = [
     # Nodes

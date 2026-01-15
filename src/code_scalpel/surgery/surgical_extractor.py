@@ -28,15 +28,15 @@ Usage:
 Enhancement Roadmap
 ===================
 
-✅ COMPLETED (v3.1.0 - December 2025):
-- ✅ Accurate token counting with tiktoken (GPT-4, GPT-3.5, Claude)
-- ✅ Enhanced metadata extraction (docstring, signature, decorators, async/generator detection)
-- ✅ LLM-ready prompt formatting (to_prompt(), summarize())
-- ✅ Token budget management (trim_to_budget())
-- ✅ Decorator extraction (get_decorator(), list_decorators())
-- ✅ Caller discovery for impact analysis (find_callers())
-- ✅ LRU caching for extraction performance (2.8x speedup)
-- ✅ Source file tracking in extraction results
+COMPLETED (v3.1.0 - December 2025):
+- Accurate token counting with tiktoken (GPT-4, GPT-3.5, Claude)
+- Enhanced metadata extraction (docstring, signature, decorators, async/generator detection)
+- LLM-ready prompt formatting (to_prompt(), summarize())
+- Token budget management (trim_to_budget())
+- Decorator extraction (get_decorator(), list_decorators())
+- Caller discovery for impact analysis (find_callers())
+- LRU caching for extraction performance (2.8x speedup)
+- Source file tracking in extraction results
 
 COMMUNITY (Current & Planned):
 - TODO [COMMUNITY]: Implement transitive dependency graph with cycle detection (current)
@@ -2162,16 +2162,18 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
             defaults.append(default_ast)
 
         # Create new function with promoted parameters
-        new_func = ast.FunctionDef(
-            name=func_node.name,
-            args=ast.arguments(
+        import sys
+        
+        func_kwargs = {
+            "name": func_node.name,
+            "args": ast.arguments(
                 posonlyargs=[],
                 args=new_params,
                 kwonlyargs=[],
                 kw_defaults=[],
                 defaults=defaults,
             ),
-            body=[
+            "body": [
                 stmt
                 for stmt in func_node.body
                 if not (
@@ -2183,11 +2185,19 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
                     )
                 )
             ],
-            decorator_list=func_node.decorator_list,
-            returns=func_node.returns,
-            lineno=0,
-            col_offset=0,
-        )
+            "decorator_list": func_node.decorator_list,
+            "returns": func_node.returns,
+            "type_comment": None,
+        }
+        
+        # type_params only available in Python 3.12+
+        if sys.version_info >= (3, 12):
+            func_kwargs["type_params"] = []  # type: ignore[assignment]
+        
+        new_func = ast.FunctionDef(**func_kwargs)  # type: ignore[arg-type]
+        
+        # Fix missing location information
+        ast.fix_missing_locations(new_func)
 
         # Ensure body is not empty
         if not new_func.body or (

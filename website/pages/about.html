@@ -1,592 +1,164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About — Code Scalpel by 3D Tech Solutions</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --text-primary: #f0f0f5;
-            --text-secondary: #9898a8;
-            --text-muted: #5a5a70;
-            --accent-cyan: #00d4ff;
-            --accent-violet: #8b5cf6;
-            --accent-emerald: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --gradient-prism: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #f43f5e 100%);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-glow: rgba(0, 212, 255, 0.3);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .bg-glow {
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 70% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1.25rem 2rem;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-prism);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--bg-primary);
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .logo-text span {
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2.5rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: var(--accent-cyan);
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--gradient-prism);
-            color: var(--bg-primary);
-        }
-
-        /* Page Content */
-        .page-content {
-            position: relative;
-            z-index: 1;
-            padding: 10rem 2rem 6rem;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .page-header h1 {
-            font-size: clamp(2.5rem, 5vw, 3.5rem);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 1.25rem;
-        }
-
-        .page-header h1 .gradient {
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-header p {
-            color: var(--text-secondary);
-            font-size: 1.25rem;
-        }
-
-        /* Content Sections */
-        .content-section {
-            margin-bottom: 4rem;
-        }
-
-        .content-section h2 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .content-section h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 2rem 0 1rem;
-            color: var(--accent-cyan);
-        }
-
-        .content-section p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 1.25rem;
-        }
-
-        .content-section ul, .content-section ol {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 1.25rem;
-            padding-left: 1.5rem;
-        }
-
-        .content-section li {
-            margin-bottom: 0.75rem;
-        }
-
-        /* Mission Card */
-        .mission-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 3rem;
-            margin: 3rem 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mission-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-prism);
-        }
-
-        .mission-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        .mission-card p {
-            font-size: 1.15rem;
-            line-height: 1.75;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 3rem 0;
-        }
-
-        .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: var(--gradient-prism);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Timeline */
-        .timeline {
-            margin: 3rem 0;
-            padding-left: 2rem;
-            border-left: 2px solid var(--border-subtle);
-        }
-
-        .timeline-item {
-            position: relative;
-            padding-bottom: 2.5rem;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2.5rem;
-            top: 0.25rem;
-            width: 16px;
-            height: 16px;
-            background: var(--gradient-prism);
-            border-radius: 50%;
-        }
-
-        .timeline-date {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            color: var(--accent-cyan);
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-desc {
-            color: var(--text-secondary);
-        }
-
-        /* Contact Card */
-        .contact-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 20px;
-            padding: 3rem;
-            margin: 3rem 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-        }
-
-        .contact-item h4 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .contact-item a, .contact-item p {
-            color: var(--text-primary);
-            text-decoration: none;
-            font-size: 1.1rem;
-        }
-
-        .contact-item a:hover {
-            color: var(--accent-cyan);
-        }
-
-        /* Footer */
-        footer {
-            position: relative;
-            z-index: 1;
-            padding: 4rem 2rem 2rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .footer-brand {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .footer-tagline {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-cyan);
-        }
-
-        .footer-copy {
-            width: 100%;
-            text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        @media (max-width: 768px) {
-            .page-content {
-                padding: 8rem 1.5rem 4rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .footer-container {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="About Code Scalpel: deterministic precision for AI code changes, plus governance, audit trails, and compliance evidence for enterprise adoption." />
+  <title>About — Code Scalpel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
-    <div class="bg-grid"></div>
-    <div class="bg-glow"></div>
+  <!-- [20260114_REFACTOR] Align page with shared site template; surface governance/auditability alongside precision. -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <a href="/" class="logo">
-                <div class="logo-icon">⌘</div>
-                <div class="logo-text">Code<span>Scalpel</span></div>
-            </a>
-            <ul class="nav-links">
-                <li><a href="/pages/tools.html">Tools</a></li>
-                <li><a href="/pages/pricing.html">Pricing</a></li>
-                <li><a href="/pages/security.html">Governance</a></li>
-                <li><a href="https://github.com/tescolopio/code-scalpel">GitHub</a></li>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <div class="logo-icon">⌘</div>
+        <div class="logo-text">Code<span>Scalpel</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pages/tools.html">MCP Tools</a></li>
+        <li><a href="/pages/integrations.html">Integrations</a></li>
+        <li><a href="/pages/pricing.html">Pricing</a></li>
+        <li><a href="/pages/security.html">Governance</a></li>
+        <li><a href="/pages/about.html" class="active">About</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost">GitHub</a>
+        <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <!-- [20260114_REFACTOR] Subpages use lightweight page headers (no hero section). -->
+        <h1 style="margin:0 0 8px;">About Code Scalpel</h1>
+        <p class="small" style="margin:0 0 18px; max-width: 880px;">Make AI-driven code change reliable and governable: deterministic analysis instead of guesswork, bounded writes instead of sweeping edits, and audit trails that stand up to security review.</p>
+        <div class="grid2">
+          <div class="card"><div class="card-inner">
+            <h2 style="margin:0 0 10px;">Mission</h2>
+            <p class="small" style="margin:0;">Enable AI agents to work on real codebases with surgical precision — and the governance controls enterprises require.</p>
+            <div class="card" style="margin-top:14px; border-radius:12px;"><div class="card-inner">
+              <p style="margin:0; color: var(--text-secondary); line-height:1.7;">AI coding tools are moving from “assistants” to “operators.” Operators require controls: hard boundaries, tamper-evident policies, and logs that prove what happened.</p>
+            </div></div>
+          </div></div>
+
+          <div class="card"><div class="card-inner">
+            <h2 style="margin:0 0 10px;">What makes it different</h2>
+            <ul style="margin:0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+              <li><strong>Deterministic structure:</strong> AST/graph-backed extraction and updates (no line guessing).</li>
+              <li><strong>Security by data flow:</strong> PDG taint analysis catches what regex misses.</li>
+              <li><strong>Math for edge cases:</strong> Z3 symbolic execution explores paths humans don’t think to test.</li>
+              <li><strong>Governance by default:</strong> audit logs + optional fail-closed policy verification.</li>
             </ul>
-                <a href="/pages/pricing.html" class="btn btn-primary">Get Started</a>
+          </div></div>
         </div>
-    </nav>
 
-    <!-- Page Content -->
-    <main class="page-content">
-        <header class="page-header">
-            <h1>About <span class="gradient">Code Scalpel</span></h1>
-            <p>Precision code analysis tools built for the AI agent era.</p>
-        </header>
+        <div class="card" style="margin-top:18px;"><div class="card-inner">
+          <h2 style="margin:0 0 10px;">The problem we solve</h2>
+          <p class="small" style="margin:0 0 12px;">Most tools were built for humans reading reports. AI agents need tools that return facts, not prose — and controls that prevent unsafe changes.</p>
+          <div class="grid2" style="margin-top:14px;">
+            <div class="card"><div class="card-inner">
+              <h3 style="margin:0 0 8px;">Without Code Scalpel</h3>
+              <ul style="margin:0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+                <li>Hallucinated APIs and missing dependencies</li>
+                <li>Security issues hidden across assignments/import boundaries</li>
+                <li>Overfeeding context (lower accuracy, higher cost)</li>
+                <li>No audit trail you can defend to security/compliance</li>
+              </ul>
+            </div></div>
+            <div class="card"><div class="card-inner">
+              <h3 style="margin:0 0 8px;">With Code Scalpel</h3>
+              <ul style="margin:0; padding-left:18px; color: var(--text-secondary); line-height: 1.7;">
+                <li>Parser-backed ground truth about code structure</li>
+                <li>Taint tracking for precise vulnerability detection</li>
+                <li>Surgical extraction to reduce context and errors</li>
+                <li>Governed operations with audit logs + optional compliance evidence</li>
+              </ul>
+            </div></div>
+          </div>
+        </div></div>
+      </div>
+    </section>
 
-        <section class="content-section">
-            <h2>Our Mission</h2>
-            <div class="mission-card">
-                <h3>Enable AI Agents to Work on Real Codebases with Surgical Precision</h3>
-                <p>Code Scalpel was born from a simple observation: AI coding assistants are incredibly powerful, but they're flying blind. They hallucinate APIs, miss hidden vulnerabilities, and waste tokens dumping entire files into context. We're building the tools that give AI agents true code understanding — not pattern matching, but real semantic analysis.</p>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <h2>The Problem We Solve</h2>
-            <p>The current landscape of code analysis tools was built for human developers. They output human-readable reports, require manual interpretation, and don't integrate with AI workflows. Meanwhile, AI coding assistants like Claude, Copilot, and Cursor are transforming how we write code — but they lack the precision tools they need.</p>
-            
-            <h3>Without Code Scalpel</h3>
-            <ul>
-                <li>AI agents guess at API signatures and often hallucinate non-existent methods</li>
-                <li>Security vulnerabilities hidden through variable assignments go undetected</li>
-                <li>Entire files get stuffed into context, wasting tokens and reducing accuracy</li>
-                <li>No mathematical verification of code correctness before changes</li>
-            </ul>
-
-            <h3>With Code Scalpel</h3>
-            <ul>
-                <li>Real AST parsing gives agents ground truth about code structure</li>
-                <li>Full taint tracking catches vulnerabilities that regex tools miss</li>
-                <li>Surgical extraction reduces context by 70%+ while maintaining accuracy</li>
-                <li>Z3-powered symbolic execution proves path feasibility mathematically</li>
-            </ul>
-        </section>
-
-        <section class="content-section">
-            <h2>By the Numbers</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">4,000+</div>
-                    <div class="stat-label">Passing Tests</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">94%</div>
-                    <div class="stat-label">Code Coverage</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">20</div>
-                    <div class="stat-label">MCP Tools</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">17+</div>
-                    <div class="stat-label">Vulnerability Types</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <h2>Project Timeline</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-date">Q4 2024</div>
-                    <div class="timeline-title">Project Inception</div>
-                    <div class="timeline-desc">Initial development of AST tools and security scanning capabilities.</div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">Q1 2025</div>
-                    <div class="timeline-title">MCP Server Launch</div>
-                    <div class="timeline-desc">First public release with full MCP protocol support and 15 tools.</div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">Q1 2025</div>
-                    <div class="timeline-title">v3.0 "Autonomy"</div>
-                    <div class="timeline-desc">Unified Graph Engine, multi-language support, Policy Engine introduction.</div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">Q1 2025</div>
-                    <div class="timeline-title">v3.2 "Guardian"</div>
-                    <div class="timeline-desc">Cryptographic policy verification, audit trails, change budgeting for enterprise.</div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">Q2 2025</div>
-                    <div class="timeline-title">V1.0 Production Release</div>
-                    <div class="timeline-desc">Commercial launch with Pro and Enterprise tiers, Go/Rust language support.</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <h2>3D Tech Solutions LLC</h2>
-            <p>Code Scalpel is developed by 3D Tech Solutions LLC, focused on building developer tools for the AI era. We believe in open-core software — shipping all code in the open while offering commercial tiers for teams that need enterprise features.</p>
-            
-            <div class="contact-card">
-                <div class="contact-item">
-                    <h4>General Inquiries</h4>
-                    <a href="mailto:hello@codescalpel.dev">hello@codescalpel.dev</a>
-                </div>
-                <div class="contact-item">
-                    <h4>Sales & Enterprise</h4>
-                    <a href="mailto:sales@codescalpel.dev">sales@codescalpel.dev</a>
-                </div>
-                <div class="contact-item">
-                    <h4>Technical Support</h4>
-                    <a href="mailto:support@codescalpel.dev">support@codescalpel.dev</a>
-                </div>
-                <div class="contact-item">
-                    <h4>Security Issues</h4>
-                    <a href="mailto:security@codescalpel.dev">security@codescalpel.dev</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="content-section">
-            <h2>Open Source Commitment</h2>
-            <p>Code Scalpel is built on an open-core model. The Community tier is fully MIT-licensed, and all code — including Pro and Enterprise features — ships in the open for transparency and security auditing.</p>
-            <p>We believe that trust is built through transparency. You can inspect every line of code, understand exactly how your data is processed, and contribute back to the project. Commercial licenses fund continued development while keeping the core accessible to everyone.</p>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-brand">
-                <a href="index.html" class="logo">
-                    <div class="logo-icon">⌘</div>
-                    <div class="logo-text">Code<span>Scalpel</span></div>
-                </a>
-                <p class="footer-tagline">Surgical code analysis for the AI era.</p>
-                <p class="footer-tagline">A product of 3D Tech Solutions LLC</p>
-            </div>
-            <div class="footer-links">
-                <a href="docs.html">Documentation</a>
-                <a href="https://github.com/tescolopio/code-scalpel">GitHub</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="terms.html">Terms</a>
-            </div>
+    <section class="section" style="background:rgba(139,92,246,0.03);">
+      <div class="container">
+        <h2>By the numbers</h2>
+        <div class="grid2" style="margin-top:18px;">
+          <div class="card"><div class="card-inner">
+            <div class="stat-value" style="font-size:2.2rem;">4,000+</div>
+            <div class="small">Passing tests</div>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <div class="stat-value" style="font-size:2.2rem;">94%+</div>
+            <div class="small">Coverage (project-reported)</div>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <div class="stat-value" style="font-size:2.2rem;">22</div>
+            <div class="small">MCP tools</div>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <div class="stat-value" style="font-size:2.2rem;">Audit-ready</div>
+            <div class="small">Logs + policy verification</div>
+          </div></div>
         </div>
-        <p class="footer-copy">© 2025 3D Tech Solutions LLC. All rights reserved.</p>
-    </footer>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <h2>Contact</h2>
+        <div class="grid2" style="margin-top:18px;">
+          <div class="card"><div class="card-inner">
+            <h3 style="margin:0 0 8px;">General</h3>
+            <p class="small" style="margin:0;"><a href="mailto:hello@codescalpel.dev">hello@codescalpel.dev</a></p>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <h3 style="margin:0 0 8px;">Sales &amp; Enterprise</h3>
+            <p class="small" style="margin:0;"><a href="mailto:sales@codescalpel.dev">sales@codescalpel.dev</a></p>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <h3 style="margin:0 0 8px;">Support</h3>
+            <p class="small" style="margin:0;"><a href="mailto:support@codescalpel.dev">support@codescalpel.dev</a></p>
+          </div></div>
+          <div class="card"><div class="card-inner">
+            <h3 style="margin:0 0 8px;">Security</h3>
+            <p class="small" style="margin:0;"><a href="mailto:security@codescalpel.dev">security@codescalpel.dev</a></p>
+          </div></div>
+        </div>
+
+        <div class="card" style="margin-top:18px;"><div class="card-inner">
+          <h2 style="margin:0 0 10px;">Open-core and auditability</h2>
+          <p class="small" style="margin:0;">Code Scalpel is open-core. The Community tier is MIT-licensed, and the code ships in the open for transparency and security auditing. Commercial licenses fund advanced governance capabilities for teams with higher risk profiles.</p>
+        </div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
+        <div>&copy; 2026 Code Scalpel</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+          <a class="small" href="/pages/tools.html">Tools</a>
+          <a class="small" href="/pages/integrations.html">Integrations</a>
+          <a class="small" href="/pages/pricing.html">Pricing</a>
+          <a class="small" href="/pages/security.html">Governance</a>
+          <a class="small" href="/docs.html">Docs</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/config.js"></script>
+  <script src="/assets/site.js"></script>
 </body>
 </html>

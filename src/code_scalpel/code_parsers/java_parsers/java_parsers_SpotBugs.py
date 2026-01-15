@@ -9,11 +9,11 @@ Reference: https://spotbugs.github.io/
 Command: spotbugs -textui -xml -output results.xml classes/
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add BugInstance priority calculation from rank/abbrev
-[20251221_TODO] Implement bug detector plugin support
-[20251221_TODO] Support custom detector configuration
-[20251221_TODO] Add Filter/BugCode metadata extraction
-[20251221_TODO] Implement trend analysis (track bugs over releases)
+# TODO Add BugInstance priority calculation from rank/abbrev
+# TODO Implement bug detector plugin support
+# TODO Support custom detector configuration
+# TODO Add Filter/BugCode metadata extraction
+# TODO Implement trend analysis (track bugs over releases)
 """
 
 import subprocess

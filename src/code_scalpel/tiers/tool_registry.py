@@ -4,30 +4,17 @@ Tool Registry - Central registry of MCP tools and their tier requirements.
 [20251225_FEATURE] Created as part of Project Reorganization Issue #5.
 
 Maps MCP tools to their tier requirements and provides runtime gating.
-
-TODO ITEMS: tool_registry.py
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [P0_CRITICAL] Tool→tier mapping for all 20 MCP tools
-# [P1_HIGH] get_available_tools() filtering
-# [P2_MEDIUM] Tool metadata (parameters, descriptions)
-
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [P1_HIGH] Dynamic tool registration
-# [P2_MEDIUM] Tool aliases and versioning
-# [P3_LOW] Tool parameter validation
-
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [P2_MEDIUM] Custom tool definitions
-# [P3_LOW] Tool execution policies
-# [P4_LOW] Remote tool configuration
-============================================================================
 """
+
+# TODO [COMMUNITY] Implement tool→tier mapping for all 20 MCP tools
+# TODO [COMMUNITY] Implement get_available_tools() filtering by tier
+# TODO [COMMUNITY] Add tool metadata (parameters, descriptions)
+# TODO [PRO] Implement dynamic tool registration
+# TODO [PRO] Add tool aliases and versioning support
+# TODO [PRO] Implement tool parameter validation
+# TODO [ENTERPRISE] Support custom tool definitions
+# TODO [ENTERPRISE] Implement tool execution policies
+# TODO [ENTERPRISE] Add remote tool configuration
 
 from __future__ import annotations
 

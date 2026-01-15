@@ -22,9 +22,10 @@ from typing import Optional
 try:
     from code_scalpel.governance.unified_governance import (
         GovernanceDecision,
-        Operation,
         UnifiedGovernance,
     )
+    
+    Operation = None  # type: ignore
 
     GOVERNANCE_AVAILABLE = True
 except ImportError:
@@ -40,7 +41,7 @@ class ComplianceCheckResult:
 
     allowed: bool
     reason: Optional[str] = None
-    violations: list[dict] = None
+    violations: Optional[list[dict]] = None
 
     def __post_init__(self):
         if self.violations is None:
@@ -80,9 +81,22 @@ def check_rename_compliance(
         if governance_dir is None and project_root:
             governance_dir = str(project_root / ".code-scalpel")
 
+        if UnifiedGovernance is None:
+            return ComplianceCheckResult(
+                allowed=False,
+                reason="UnifiedGovernance is not available",
+                violations=[],
+            )
         gov = UnifiedGovernance(governance_dir or ".code-scalpel")
 
         # Create operation for governance evaluation
+        if Operation is None:
+            return ComplianceCheckResult(
+                allowed=False,
+                reason="Governance operation not available",
+                violations=[],
+            )
+
         operation = Operation(
             type="rename_symbol",
             code=f"# Rename {target_type} {target_name} -> {new_name}",

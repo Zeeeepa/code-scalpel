@@ -20,131 +20,30 @@ Usage:
     # Use via factory
     parser = ParserFactory.get_parser(Language.JAVASCRIPT)
     result = parser.parse(code)
-
-============================================================================
-TODO ITEMS: code_parsers/adapters/__init__.py
-============================================================================
-COMMUNITY TIER - Core Adapter Infrastructure (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Complete adapter implementation:
-    - Create CppParserAdapter (C/C++ support)
-    - Create GoParserAdapter (Go support)
-    - Create RubyParserAdapter (Ruby support)
-    - Create PhpParserAdapter (PHP support)
-    - Create SwiftParserAdapter (Swift support)
-    - Test count: 50 tests (1 adapter × 10 tests each)
-
-[P1_HIGH] Standardize adapter interface:
-    - Add get_capabilities() to all adapters
-    - Implement consistent error handling
-    - Add parser version tracking
-    - Support configuration passing to underlying parsers
-    - Test count: 30 tests (interface consistency)
-
-[P1_HIGH] Add adapter auto-registration:
-    - Auto-discover adapters in this directory
-    - Register with ParserFactory on import
-    - Support conditional registration (skip if parser unavailable)
-    - Add registration metadata (version, capabilities)
-    - Test count: 20 tests (auto-registration, discovery)
-
-[P2_MEDIUM] Improve error handling:
-    - Standardize error conversion across adapters
-    - Add detailed error context extraction
-    - Support error recovery strategies
-    - Add error aggregation from multiple sources
-    - Test count: 25 tests (error handling, conversion)
-
-[P2_MEDIUM] Add adapter testing utilities:
-    - Create common adapter test base class
-    - Add adapter conformance tests
-    - Implement integration tests for all adapters
-    - Add performance benchmarking
-    - Test count: 30 tests (utilities, conformance)
-
-============================================================================
-PRO TIER - Advanced Adapter Features (P1-P3)
-============================================================================
-
-[P1_HIGH] Implement multi-backend support:
-    - Allow multiple parsers per language (tree-sitter, native, etc.)
-    - Add backend selection strategy
-    - Support fallback chains
-    - Add performance profiling per backend
-    - Test count: 35 tests (multi-backend, fallback)
-
-[P1_HIGH] Add semantic analysis adapters:
-    - Wrap type checkers (mypy, Flow, tsc)
-    - Add symbol resolution adapters
-    - Support cross-file analysis
-    - Implement incremental analysis
-    - Test count: 40 tests (semantic analysis, resolution)
-
-[P2_MEDIUM] Implement adapter caching:
-    - Cache parse results per adapter
-    - Add invalidation strategies
-    - Support distributed caching
-    - Add cache metrics collection
-    - Test count: 25 tests (caching, invalidation)
-
-[P2_MEDIUM] Add linter adapters:
-    - Create unified linter adapter interface
-    - Wrap pylint, eslint, checkstyle, etc.
-    - Aggregate results from multiple linters
-    - Support linter configuration
-    - Test count: 35 tests (linter integration, aggregation)
-
-[P3_LOW] Implement transformation adapters:
-    - Add code formatting adapters (Black, Prettier)
-    - Support refactoring tool adapters
-    - Add code generation adapters
-    - Implement AST transformation pipelines
-    - Test count: 30 tests (transformation, formatting)
-
-============================================================================
-ENTERPRISE TIER - Enterprise Adapter Features (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Add distributed adapter coordination:
-    - Support remote parser invocation
-    - Implement adapter load balancing
-    - Add adapter health monitoring
-    - Support adapter failover
-    - Test count: 35 tests (distribution, coordination)
-
-[P2_MEDIUM] Implement enterprise compliance:
-    - Add audit logging to all adapters
-    - Support compliance policy enforcement
-    - Generate compliance reports
-    - Add usage tracking per adapter
-    - Test count: 30 tests (compliance, audit)
-
-[P3_LOW] Add multi-tenant adapter isolation:
-    - Support tenant-specific adapters
-    - Implement resource quotas per tenant
-    - Add tenant-specific parser versions
-    - Generate tenant usage analytics
-    - Test count: 30 tests (multi-tenancy, isolation)
-
-[P3_LOW] Implement adapter telemetry:
-    - Add OpenTelemetry integration
-    - Track adapter performance metrics
-    - Support custom metric exporters
-    - Generate adapter health dashboards
-    - Test count: 25 tests (telemetry, monitoring)
-
-[P4_LOW] Add ML-driven adapter selection:
-    - Use ML to select optimal adapter
-    - Predict adapter performance
-    - Adaptive adapter configuration
-    - Anomaly detection for adapter failures
-    - Test count: 30 tests (ML integration, prediction)
-
-============================================================================
-TOTAL TEST ESTIMATE: 465 tests (175 COMMUNITY + 165 PRO + 125 ENTERPRISE)
-============================================================================
 """
+
+# TODO [COMMUNITY/P0] Complete adapter implementation: Create CppParserAdapter (C/C++ support)
+# TODO [COMMUNITY/P0] Complete adapter implementation: Create GoParserAdapter (Go support)
+# TODO [COMMUNITY/P0] Complete adapter implementation: Create RubyParserAdapter (Ruby support)
+# TODO [COMMUNITY/P0] Complete adapter implementation: Create PhpParserAdapter (PHP support)
+# TODO [COMMUNITY/P0] Complete adapter implementation: Create SwiftParserAdapter (Swift support)
+# TODO [COMMUNITY/P1] Standardize adapter interface: Add get_capabilities() to all adapters
+# TODO [COMMUNITY/P1] Standardize adapter interface: Implement consistent error handling
+# TODO [COMMUNITY/P1] Standardize adapter interface: Add parser version tracking
+# TODO [COMMUNITY/P1] Add adapter auto-registration: Auto-discover adapters in this directory
+# TODO [COMMUNITY/P1] Add adapter auto-registration: Register with ParserFactory on import
+# TODO [COMMUNITY/P2] Improve error handling: Standardize error conversion across adapters
+# TODO [COMMUNITY/P2] Add adapter testing utilities: Create common adapter test base class
+# TODO [PRO/P1] Implement multi-backend support: Allow multiple parsers per language
+# TODO [PRO/P1] Add semantic analysis adapters: Wrap type checkers (mypy, Flow, tsc)
+# TODO [PRO/P2] Implement adapter caching: Cache parse results per adapter
+# TODO [PRO/P2] Add linter adapters: Create unified linter adapter interface
+# TODO [PRO/P3] Implement transformation adapters: Add code formatting adapters (Black, Prettier)
+# TODO [ENTERPRISE/P2] Add distributed adapter coordination: Support remote parser invocation
+# TODO [ENTERPRISE/P2] Implement enterprise compliance: Add audit logging to all adapters
+# TODO [ENTERPRISE/P3] Add multi-tenant adapter isolation: Support tenant-specific adapters
+# TODO [ENTERPRISE/P3] Implement adapter telemetry: Add OpenTelemetry integration
+# TODO [ENTERPRISE/P4] Add ML-driven adapter selection: Use ML to select optimal adapter
 
 from .java_adapter import JavaParserAdapter  # type: ignore[import-not-found]
 from .javascript_adapter import JavaScriptParserAdapter, TypeScriptParserAdapter

@@ -2,13 +2,12 @@
 """
 go vet Parser - Go static analysis for suspicious constructs.
 
-# TODO: Implement go vet parser for v3.1.0 "Polyglot+" (Q1 2026)
-# This parser should:
-# - Run go vet on Go packages
-# - Parse output for common mistakes (printf args, struct tags, etc.)
-# - Support individual analyzer flags (-printf, -shadow, etc.)
-# - Extract file, line, and diagnostic message
-# - Inherit from base_parser.BaseParser
+# TODO [FEATURE/MAJOR] Implement go vet parser for v3.1.0 "Polyglot+" (Q1 2026)
+# TODO [FEATURE/MAJOR] Run go vet on Go packages
+# TODO [FEATURE/MAJOR] Parse output for common mistakes (printf args, struct tags, etc.)
+# TODO [FEATURE/MAJOR] Support individual analyzer flags (-printf, -shadow, etc.)
+# TODO [FEATURE/MAJOR] Extract file, line, and diagnostic message
+# TODO [FEATURE/MAJOR] Inherit from base_parser.BaseParser
 #
 # Reference: https://pkg.go.dev/cmd/vet
 # Command: go vet ./...

@@ -31,10 +31,6 @@ Usage:
     extractor = UnifiedExtractor.from_file("Utils.java")
     result = extractor.extract("method", "Calculator.add")
 
-TODO: Module Enhancement Roadmap
-================================
-
-COMMUNITY (Current & Planned):
 - TODO [COMMUNITY]: Add extract_module() for entire module/namespace (current)
 - TODO [COMMUNITY]: Add extract_test() to extract test functions/methods
 - TODO [COMMUNITY]: Add extract_with_tests() to include related tests
@@ -63,7 +59,6 @@ PRO (Enhanced Features):
 - TODO [PRO]: Flask route extraction
 - TODO [PRO]: Express.js route extraction
 
-ENTERPRISE (Advanced Capabilities):
 - TODO [ENTERPRISE]: Implement C++ extraction (classes, functions, templates)
 - TODO [ENTERPRISE]: Implement Swift extraction (structs, protocols, extensions)
 - TODO [ENTERPRISE]: Implement PHP extraction (classes, traits, interfaces)

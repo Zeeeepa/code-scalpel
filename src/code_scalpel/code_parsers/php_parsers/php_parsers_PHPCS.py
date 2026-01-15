@@ -16,22 +16,19 @@ PHPCS Features:
     - Custom sniff creation support
 
 Phase 2 Enhancement Areas:
-    HIGH PRIORITY:
-        - JSON report parsing [20251221_TODO]
-        - XML report parsing [20251221_TODO]
-        - CLI execution via subprocess [20251221_TODO]
-        - Configuration loading (.phpcs.xml) [20251221_TODO]
-        - Auto-fix mode (phpcbf) [20251221_TODO]
+    # TODO HIGH PRIORITY: JSON report parsing
+    # TODO HIGH PRIORITY: XML report parsing
+    # TODO HIGH PRIORITY: CLI execution via subprocess
+    # TODO HIGH PRIORITY: Configuration loading (.phpcs.xml)
+    # TODO HIGH PRIORITY: Auto-fix mode (phpcbf)
 
-    MEDIUM PRIORITY:
-        - Ruleset parsing (PSR-1, PSR-2, PSR-12) [20251221_TODO]
-        - Complexity metrics extraction [20251221_TODO]
-        - Sniff coverage reports [20251221_TODO]
-        - Violation categorization [20251221_TODO]
+    # TODO MEDIUM PRIORITY: Ruleset parsing (PSR-1, PSR-2, PSR-12)
+    # TODO MEDIUM PRIORITY: Complexity metrics extraction
+    # TODO MEDIUM PRIORITY: Sniff coverage reports
+    # TODO MEDIUM PRIORITY: Violation categorization
 
-    LOW PRIORITY:
-        - Custom sniff templates [20251221_TODO]
-        - Comparison with other linters [20251221_TODO]
+    # TODO LOW PRIORITY: Custom sniff templates
+    # TODO LOW PRIORITY: Comparison with other linters
 """
 
 from dataclasses import dataclass, field
@@ -93,25 +90,25 @@ class PHPCSParser:
         self.fixed_count: int = 0
 
     def parse_json_report(self, json_data: str) -> list[PHPCSViolation]:
-        """Parse PHPCS JSON report output. [20251221_TODO]"""
+        """Parse PHPCS JSON report output. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS JSON report parsing")
 
     def parse_xml_report(self, xml_file: Path) -> list[PHPCSViolation]:
-        """Parse PHPCS XML report format. [20251221_TODO]"""
+        """Parse PHPCS XML report format. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS XML report parsing")
 
     def load_config(self, config_path: Path) -> PHPCSConfig:
-        """Load and parse .phpcs.xml configuration. [20251221_TODO]"""
+        """Load and parse .phpcs.xml configuration. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS configuration parsing")
 
     def execute_phpcs(self, target_path: Path) -> dict[str, Any]:
-        """Execute PHPCS analysis on target path. [20251221_TODO]"""
+        """Execute PHPCS analysis on target path. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS execution")
 
     def auto_fix(self, target_path: Path) -> dict[str, Any]:
-        """Run phpcbf to automatically fix violations. [20251221_TODO]"""
+        """Run phpcbf to automatically fix violations. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS auto-fix")
 
     def generate_report(self) -> str:
-        """Generate comprehensive PHPCS report. [20251221_TODO]"""
+        """Generate comprehensive PHPCS report. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS report generation")

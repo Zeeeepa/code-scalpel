@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Code Scalpel: 22 MCP tools that give AI agents precise, governed access to codebases — parser-backed analysis, bounded edits, and audit-ready operations.">
-  <title>Code Scalpel — Precision Tools for AI Code Agents</title>
+  <meta name="description" content="Code Scalpel: Governed AI code operations with complete audit trails. 22 MCP tools that enforce boundaries, log every action, and generate compliance evidence.">
+  <title>Code Scalpel — Governed AI Code Operations</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,8 +23,10 @@
       <ul class="nav-links">
         <li><a href="#differentiators">Why Code Scalpel</a></li>
         <li><a href="/pages/tools.html">MCP Tools</a></li>
+        <li><a href="/pages/integrations.html">Integrations</a></li>
         <li><a href="/pages/pricing.html">Pricing</a></li>
         <li><a href="/pages/security.html">Governance</a></li>
+        <li><a href="/pages/about.html">About</a></li>
       </ul>
       <div class="nav-cta">
         <a href="https://github.com/tescolopio/code-scalpel" class="btn btn-ghost">GitHub</a>
@@ -37,14 +39,14 @@
   <section class="hero">
     <div class="hero-container">
       <div class="hero-badge">
-        <span>MCP Server · 22 Tools · Python / JS / TS / Java</span>
+        <span>Governance-First · Audit-Ready · Compliance Evidence</span>
       </div>
       <h1 class="hero-title">
-        Precision Tools<br>
-        <span class="gradient">Built for AI Code Agents</span>
+        Governed AI Operations<br>
+        <span class="gradient">With Complete Audit Trails</span>
       </h1>
       <p class="hero-subtitle">
-        Code Scalpel is an MCP server that gives AI agents what they actually need: parser-backed understanding instead of guesswork, bounded edits instead of file rewrites, and audit-ready operations instead of hope.
+        Code Scalpel is a governance layer for AI code agents: server-enforced boundaries (not model suggestions), cryptographic policy verification, and audit logs that prove exactly what happened.
       </p>
       <div class="hero-actions">
         <a href="/pages/pricing.html" class="btn btn-primary">Start Free →</a>
@@ -52,20 +54,20 @@
       </div>
       <div class="hero-stats">
         <div class="stat">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Auditable</div>
+        </div>
+        <div class="stat">
           <div class="stat-value">22</div>
-          <div class="stat-label">MCP Tools</div>
+          <div class="stat-label">Governed Tools</div>
         </div>
         <div class="stat">
           <div class="stat-value">4</div>
-          <div class="stat-label">Languages</div>
+          <div class="stat-label">Compliance Modes</div>
         </div>
         <div class="stat">
-          <div class="stat-value">3</div>
-          <div class="stat-label">Tiers</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">MIT</div>
-          <div class="stat-label">Free & Open</div>
+          <div class="stat-value">Fail-Closed</div>
+          <div class="stat-label">By Design</div>
         </div>
       </div>
     </div>
@@ -75,39 +77,39 @@
   <section id="differentiators">
     <div class="section-header">
       <div class="section-label">Why Code Scalpel</div>
-      <h2 class="section-title">Built for AI Agents, Not Just With AI</h2>
+      <h2 class="section-title">Governance You Can Prove</h2>
       <p class="section-desc">
-        Traditional security tools output human-readable reports. Code Scalpel outputs structured data optimized for LLM context windows and agent workflows.
+        AI agents are becoming code-changing operators. That changes the risk profile. Code Scalpel provides structural controls — limits enforced by the server, not requested from the model — with audit trails that prove what happened.
       </p>
     </div>
     <div class="diff-grid">
       <div class="diff-card">
-        <div class="diff-icon cyan">🎯</div>
-        <h3 class="diff-title">Parser-Backed Understanding</h3>
+        <div class="diff-icon cyan">📋</div>
+        <h3 class="diff-title">Complete Audit Trails</h3>
         <p class="diff-desc">
-          AST and tree-sitter parsing across Python, JavaScript, TypeScript, and Java. No pattern matching, no guesswork — just facts the agent can trust.
+          Every operation logged with who, what, when, and why. Generate compliance reports, review agent actions, and prove exactly what happened in your codebase.
         </p>
         <div class="diff-comparison">
-          <span class="vs-them">Regex & guessing</span>
-          <span class="vs-us">→ Real parser analysis</span>
+          <span class="vs-them">No audit trail</span>
+          <span class="vs-us">→ Every action logged</span>
         </div>
       </div>
       <div class="diff-card">
-        <div class="diff-icon violet">✂️</div>
-        <h3 class="diff-title">Bounded Writes</h3>
+        <div class="diff-icon violet">🔐</div>
+        <h3 class="diff-title">Cryptographic Policy Integrity</h3>
         <p class="diff-desc">
-          Edits target one symbol (function/class/method) instead of whole-file rewrites. Syntax validation, automatic backups, and atomic commits.
+          Governance policies are cryptographically signed. Tampering is detected. If verification fails, operations fail closed — no exceptions, no workarounds.
         </p>
         <div class="diff-comparison">
-          <span class="vs-them">Whole-file rewrites</span>
-          <span class="vs-us">→ Symbol-level precision</span>
+          <span class="vs-them">YAML you hope nobody edits</span>
+          <span class="vs-us">→ Tamper-evident policies</span>
         </div>
       </div>
       <div class="diff-card">
-        <div class="diff-icon emerald">🔒</div>
-        <h3 class="diff-title">Deterministic Boundaries</h3>
+        <div class="diff-icon emerald">🚫</div>
+        <h3 class="diff-title">Server-Enforced Boundaries</h3>
         <p class="diff-desc">
-          Limits enforced by the server, not requested from the model. Tier caps, file counts, and analysis depth are hard limits — not suggestions.
+          Limits enforced by the server, not requested from the model. Tier caps, file counts, and analysis depth are hard limits — not suggestions the agent can ignore.
         </p>
         <div class="diff-comparison">
           <span class="vs-them">"Trust the model"</span>
@@ -115,36 +117,36 @@
         </div>
       </div>
       <div class="diff-card">
-        <div class="diff-icon amber">🔬</div>
-        <h3 class="diff-title">Full Taint Tracking</h3>
+        <div class="diff-icon amber">📊</div>
+        <h3 class="diff-title">Compliance Evidence Generation</h3>
         <p class="diff-desc">
-          Track data flow across variables, function calls, and file boundaries. Detect vulnerabilities hidden through multiple assignments that regex-based tools miss.
+          Generate audit-ready artifacts for HIPAA, SOC2, GDPR, and PCI-DSS. Map findings to CWEs and compliance controls. Evidence your auditors will accept.
         </p>
         <div class="diff-comparison">
-          <span class="vs-them">Pattern matching</span>
-          <span class="vs-us">→ Complete data flow</span>
+          <span class="vs-them">Manual compliance docs</span>
+          <span class="vs-us">→ Auto-generated evidence</span>
         </div>
       </div>
       <div class="diff-card">
-        <div class="diff-icon rose">🔌</div>
-        <h3 class="diff-title">Native MCP Integration</h3>
+        <div class="diff-icon rose">⛔</div>
+        <h3 class="diff-title">Fail-Closed by Design</h3>
         <p class="diff-desc">
-          First-class Model Context Protocol server. Works out-of-the-box with Claude, Copilot, Cursor, and any MCP-compatible AI agent.
+          When something goes wrong — policy verification fails, limits exceeded, unauthorized operation — the system denies the action. No silent failures, no hope.
         </p>
         <div class="diff-comparison">
-          <span class="vs-them">REST APIs & wrappers</span>
-          <span class="vs-us">→ Native MCP protocol</span>
+          <span class="vs-them">Best-effort logging</span>
+          <span class="vs-us">→ Fail-closed enforcement</span>
         </div>
       </div>
       <div class="diff-card">
-        <div class="diff-icon cyan">🛡️</div>
-        <h3 class="diff-title">Governance You Can Prove</h3>
+        <div class="diff-icon cyan">🎯</div>
+        <h3 class="diff-title">Parser-Backed Precision</h3>
         <p class="diff-desc">
-          Cryptographic policy verification, audit trails, and compliance mapping (HIPAA, SOC2, GDPR, PCI). Enterprise-grade governance for AI development.
+          AST and tree-sitter parsing across Python, JavaScript, TypeScript, and Java. Bounded edits (symbol-level, not file rewrites) with syntax validation.
         </p>
         <div class="diff-comparison">
-          <span class="vs-them">No governance</span>
-          <span class="vs-us">→ Full audit trail</span>
+          <span class="vs-them">Whole-file rewrites</span>
+          <span class="vs-us">→ Surgical precision</span>
         </div>
       </div>
     </div>
@@ -153,10 +155,12 @@
   <!-- Pricing Teaser -->
   <section id="pricing">
     <div class="section-header">
-      <div class="section-label">Pricing</div>
-      <h2 class="section-title">Start Free, Scale as You Grow</h2>
+      <div class="section-label">Governance Tiers</div>
+      <h2 class="section-title">Governance That Scales With Risk</h2>
       <p class="section-desc">
-        All code ships together — tiers are enforced at runtime. Community is MIT-licensed and free forever.
+        Start with safe defaults. Add throughput when your team needs it. Enable full governance and compliance evidence when auditors come knocking.
+        <!-- [20260114_REFACTOR] Avoid repeating tool counts per tier; tiers differ by governance and limits. -->
+        All tiers include the full tool suite (22 MCP tools). <a href="/pages/tools.html">See tools</a>.
       </p>
     </div>
     <div class="pricing-grid">
@@ -166,15 +170,11 @@
           <span class="pricing-amount">$0</span>
           <span class="pricing-period">forever</span>
         </div>
-        <p class="pricing-desc">All 22 tools with safe defaults and conservative limits. Great for evaluation, prototypes, and individual use.</p>
-        <div class="pricing-tools">
-          <span class="pricing-tools-count">22</span>
-          <span class="pricing-tools-label">MCP Tools</span>
-        </div>
+        <p class="pricing-desc">Safe defaults and conservative limits. Audit logging included. Great for evaluation and proving the workflow.</p>
         <ul class="pricing-features">
-          <li>Parser-backed analysis (Py, JS, TS, Java)</li>
-          <li>Security scanning & taint analysis</li>
-          <li>Safe code modification</li>
+          <li>All operations logged</li>
+          <li>Server-enforced tier limits</li>
+          <li>Safe-by-default boundaries</li>
           <li>MIT License — Commercial use allowed</li>
           <li>Community support</li>
         </ul>
@@ -187,15 +187,11 @@
           <span class="pricing-amount">$29.99</span>
           <span class="pricing-period">per year</span>
         </div>
-        <p class="pricing-desc">Higher throughput, deeper analysis, and features that reduce noise — built for teams running agents daily.</p>
-        <div class="pricing-tools">
-          <span class="pricing-tools-count">22</span>
-          <span class="pricing-tools-label">MCP Tools</span>
-        </div>
+        <p class="pricing-desc">Higher throughput with team-oriented governance. Richer audit metadata and workflow controls.</p>
         <ul class="pricing-features">
           <li>Everything in Community</li>
-          <li>Higher limits & deeper analysis</li>
-          <li>Noise reduction features</li>
+          <li>Enhanced audit metadata</li>
+          <li>Team workflow controls</li>
           <li>Priority support (48h SLA)</li>
         </ul>
         <a href="/pages/pricing.html" class="btn btn-primary pricing-cta" data-link="pro-buy">Buy Pro</a>
@@ -206,17 +202,13 @@
         <div class="pricing-price">
           <span class="pricing-amount">Custom</span>
         </div>
-        <p class="pricing-desc">Governance you can prove: fail-closed policy integrity, compliance evidence, and organization-wide controls.</p>
-        <div class="pricing-tools">
-          <span class="pricing-tools-count">22</span>
-          <span class="pricing-tools-label">MCP Tools</span>
-        </div>
+        <p class="pricing-desc">Full governance suite: fail-closed policy integrity, compliance evidence generation, and organization-wide audit controls.</p>
         <ul class="pricing-features">
           <li>Everything in Pro</li>
-          <li>Compliance mapping (HIPAA, SOC2, GDPR, PCI)</li>
-          <li>Policy integrity verification</li>
-          <li>SSO/SAML & on-premise</li>
-          <li>Dedicated support</li>
+          <li>Cryptographic policy verification</li>
+          <li>Compliance evidence (HIPAA, SOC2, GDPR, PCI)</li>
+          <li>Organization-wide audit controls</li>
+          <li>SSO/SAML & on-premise deployment</li>
         </ul>
         <a href="mailto:enterprise@codescalpel.dev" class="btn btn-ghost pricing-cta" data-link="enterprise-contact">Contact Sales</a>
       </div>
@@ -231,7 +223,7 @@
           <div class="logo-icon">⌘</div>
           <div class="logo-text">Code<span>Scalpel</span></div>
         </a>
-        <p class="footer-tagline">Precision tools for AI code agents.</p>
+        <p class="footer-tagline">Governed AI code operations with complete audit trails.</p>
         <p class="footer-tagline">A product of 3D Tech Solutions LLC</p>
       </div>
       <div class="footer-links">

@@ -6,51 +6,42 @@ from typing import Optional
 
 import networkx as nx
 
-# [20251221_TODO] Add support for non-local scope analysis:
+# # TODO Add support for non-local scope analysis:
 #     - Properly handle nonlocal and global declarations
 #     - Track variable scope chains across nested functions
 #     - Detect scope-related bugs (shadowing, unintended globals)
 #     - Support closure variable capture tracking
 
-"""
-TODO ITEMS:
-
-COMMUNITY TIER (Core PDG Building):
-1. TODO: Implement AST node visitation for all Python statements
-2. TODO: Build control flow graph from if/while/for statements
-3. TODO: Track variable definitions and uses
-4. TODO: Create data dependency edges (def-use chains)
-5. TODO: Implement basic call graph construction
-6. TODO: Add return statement tracking
-7. TODO: Create scope hierarchy for nested functions/classes
-8. TODO: Track import statements and module dependencies
-9. TODO: Implement exception handling node tracking
-10. TODO: Add comprehensive error handling for malformed input
-
-PRO TIER (Advanced Dependency Analysis):
-11. TODO: Support interprocedural control flow (function calls)
-12. TODO: Implement parameter passing and return value tracking
-13. TODO: Add closure variable capture in nested functions
-14. TODO: Track nonlocal/global variable declarations
-15. TODO: Support exception flow through call chains
-16. TODO: Implement context-sensitive scope tracking
-17. TODO: Add alias detection for variable references
-18. TODO: Support class attribute and method tracking
-19. TODO: Implement decorator handling and analysis
-20. TODO: Add generator/yield statement tracking
-
-ENTERPRISE TIER (Distributed & Polyglot):
-21. TODO: Extend builder to support JavaScript/TypeScript
-22. TODO: Add Java language support via tree-sitter
-23. TODO: Implement C/C++ PDG building for systems analysis
-24. TODO: Support distributed PDG building (sharded by module)
-25. TODO: Add incremental PDG updates for code changes
-26. TODO: Implement inter-module dependency tracking
-27. TODO: Support async/await dependency tracking
-28. TODO: Add WebAssembly code analysis support
-29. TODO: Implement quantum-safe dependency hashing
-30. TODO: Create federated PDG for cross-repository analysis
-"""
+# TODO [COMMUNITY] Implement AST node visitation for all Python statements
+# TODO [COMMUNITY] Build control flow graph from if/while/for statements
+# TODO [COMMUNITY] Track variable definitions and uses
+# TODO [COMMUNITY] Create data dependency edges (def-use chains)
+# TODO [COMMUNITY] Implement basic call graph construction
+# TODO [COMMUNITY] Add return statement tracking
+# TODO [COMMUNITY] Create scope hierarchy for nested functions/classes
+# TODO [COMMUNITY] Track import statements and module dependencies
+# TODO [COMMUNITY] Implement exception handling node tracking
+# TODO [COMMUNITY] Add comprehensive error handling for malformed input
+# TODO [PRO] Support interprocedural control flow (function calls)
+# TODO [PRO] Implement parameter passing and return value tracking
+# TODO [PRO] Add closure variable capture in nested functions
+# TODO [PRO] Track nonlocal/global variable declarations
+# TODO [PRO] Support exception flow through call chains
+# TODO [PRO] Implement context-sensitive scope tracking
+# TODO [PRO] Add alias detection for variable references
+# TODO [PRO] Support class attribute and method tracking
+# TODO [PRO] Implement decorator handling and analysis
+# TODO [PRO] Add generator/yield statement tracking
+# TODO [ENTERPRISE] Extend builder to support JavaScript/TypeScript
+# TODO [ENTERPRISE] Add Java language support via tree-sitter
+# TODO [ENTERPRISE] Implement C/C++ PDG building for systems analysis
+# TODO [ENTERPRISE] Support distributed PDG building (sharded by module)
+# TODO [ENTERPRISE] Add incremental PDG updates for code changes
+# TODO [ENTERPRISE] Implement inter-module dependency tracking
+# TODO [ENTERPRISE] Support async/await dependency tracking
+# TODO [ENTERPRISE] Add WebAssembly code analysis support
+# TODO [ENTERPRISE] Implement quantum-safe dependency hashing
+# TODO [ENTERPRISE] Create federated PDG for cross-repository analysis
 
 
 class NodeType(Enum):
@@ -99,19 +90,19 @@ class PDGBuilder(ast.NodeVisitor):
         self.current_function: Optional[str] = None
         self.node_counter = defaultdict(int)
 
-        # [20251221_TODO] Add interprocedural parameter tracking:
+        # # TODO Add interprocedural parameter tracking:
         #     - Track parameter passing and type flow through call sites
         #     - Compute parameter-to-argument mappings
         #     - Support return value tracking across calls
         #     - Enable context-sensitive analysis for indirect calls
 
-        # [20251221_TODO] Add exception path tracking:
+        # # TODO Add exception path tracking:
         #     - Model exception flow through try/except/finally blocks
         #     - Track exception propagation to callers
         #     - Detect uncaught exception paths
         #     - Support custom exception hierarchies
 
-        # [20251221_TODO] Add memory/reference semantics:
+        # # TODO Add memory/reference semantics:
         #     - Track aliasing relationships between variables
         #     - Model object identity vs. value equality
         #     - Support pointer analysis for reference types

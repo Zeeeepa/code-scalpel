@@ -1,39 +1,30 @@
 #!/usr/bin/env python3
-"""
-C# Parsers Module - Comprehensive C# code analysis.
+# TODO [HIGH PRIORITY] Create CSharpParserRegistry class with factory pattern
+# TODO [HIGH PRIORITY] Implement lazy-loading for parser modules
+# TODO [HIGH PRIORITY] Add aggregation metrics across multiple parsers
+# TODO [HIGH PRIORITY] Implement result deduplication and filtering
+# TODO [HIGH PRIORITY] Create unified JSON/SARIF output format
 
-[20251221_TODO] HIGH PRIORITY REGISTRY TODOS:
-1. Create CSharpParserRegistry class with factory pattern
-2. Implement lazy-loading for parser modules
-3. Add aggregation metrics across multiple parsers
-4. Implement result deduplication and filtering
-5. Create unified JSON/SARIF output format
+# TODO [MEDIUM PRIORITY] ReSharper integration and result parsing
+# TODO [MEDIUM PRIORITY] Roslyn Analyzers integration
+# TODO [MEDIUM PRIORITY] StyleCop integration for style enforcement
+# TODO [MEDIUM PRIORITY] SonarQube C# integration
+# TODO [MEDIUM PRIORITY] FxCop/Code Analysis integration
+# TODO [MEDIUM PRIORITY] Security Code Scan parser
+# TODO [MEDIUM PRIORITY] Roslynator parser (500+ analyzers)
+# TODO [MEDIUM PRIORITY] AsyncFixer parser
+# TODO [MEDIUM PRIORITY] Meziantou.Analyzer parser
+# TODO [MEDIUM PRIORITY] JSON report generation
+# TODO [MEDIUM PRIORITY] SARIF format conversion
+# TODO [MEDIUM PRIORITY] HTML report generation
 
-[20251221_TODO] MEDIUM PRIORITY FEATURES:
-6. ReSharper integration and result parsing
-7. Roslyn Analyzers integration
-8. StyleCop integration for style enforcement
-9. SonarQube C# integration
-10. FxCop/Code Analysis integration
-11. Security Code Scan parser
-12. Roslynator parser (500+ analyzers)
-13. AsyncFixer parser
-14. Meziantou.Analyzer parser
-15. JSON report generation
-16. SARIF format conversion
-17. HTML report generation
-
-[20251221_TODO] .NET ECOSYSTEM ANALYSIS:
-18. .NET version compatibility checking
-19. NuGet vulnerability scanning
-20. Package dependency analysis
-21. Assembly metadata analysis
-22. IL verification
-23. Code metrics calculation
-24. Test coverage integration
-
-This module provides a comprehensive interface for C# code analysis.
-"""
+# TODO [.NET ECOSYSTEM ANALYSIS] .NET version compatibility checking
+# TODO [.NET ECOSYSTEM ANALYSIS] NuGet vulnerability scanning
+# TODO [.NET ECOSYSTEM ANALYSIS] Package dependency analysis
+# TODO [.NET ECOSYSTEM ANALYSIS] Assembly metadata analysis
+# TODO [.NET ECOSYSTEM ANALYSIS] IL verification
+# TODO [.NET ECOSYSTEM ANALYSIS] Code metrics calculation
+# TODO [.NET ECOSYSTEM ANALYSIS] Test coverage integration
 
 __all__ = [
     "CSharpParserRegistry",
@@ -51,15 +42,15 @@ class CSharpParserRegistry:
 
     def __init__(self):
         """Initialize the C# parser registry."""
-        raise NotImplementedError("Phase 2: Registry initialization [20251221_TODO]")
+        raise NotImplementedError("Phase 2: Registry initialization # TODO")
 
     def get_parser(self, tool_name: str):
         """Get parser instance by tool name."""
-        raise NotImplementedError("Phase 2: Parser factory method [20251221_TODO]")
+        raise NotImplementedError("Phase 2: Parser factory method # TODO")
 
     def analyze(self, path, tools=None):
         """Run all specified parsers on given path."""
-        raise NotImplementedError("Phase 2: Aggregated analysis [20251221_TODO]")
+        raise NotImplementedError("Phase 2: Aggregated analysis # TODO")
 
 
 # [20251222_BUGFIX] Provide placeholder parser symbols until implementations land.

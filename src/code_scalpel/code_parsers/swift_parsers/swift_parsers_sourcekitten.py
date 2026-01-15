@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-"""
-SourceKitten Parser - Swift AST and Semantic Analysis
+"""SourceKitten Parser - Swift AST and Semantic Analysis"""
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse SourceKitten JSON output
-2. Execute SourceKitten analysis
-3. Extract AST structures
-4. Analyze code complexity
-5. Generate documentation
-6. Extract code metrics
-"""
+# TODO [PRO] Parse SourceKitten JSON output
+# TODO [PRO] Execute SourceKitten analysis
+# TODO [PRO] Extract AST structures
+# TODO [PRO] Analyze code complexity
+# TODO [ENTERPRISE] Generate documentation
+# TODO [ENTERPRISE] Extract code metrics
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,25 +50,25 @@ class SourceKittenParser:
         self.complexity_metrics: List[SwiftComplexity] = []
 
     def parse_sourcekitten_output(self, output_path: Path) -> List[SwiftSymbol]:
-        """Parse SourceKitten JSON output - Phase 2 TODO [20251221_TODO]"""
+        """Parse SourceKitten JSON output - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def execute_sourcekitten(self, paths: List[Path]) -> List[SwiftSymbol]:
-        """Execute SourceKitten analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute SourceKitten analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: SourceKitten execution")
 
     def extract_symbols(self, output: Dict[str, Any]) -> List[SwiftSymbol]:
-        """Extract symbols from SourceKitten output - Phase 2 TODO [20251221_TODO]"""
+        """Extract symbols from SourceKitten output - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Symbol extraction")
 
     def analyze_complexity(self, symbols: List[SwiftSymbol]) -> List[SwiftComplexity]:
-        """Analyze code complexity - Phase 2 TODO [20251221_TODO]"""
+        """Analyze code complexity - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Complexity analysis")
 
     def extract_documentation(self, symbols: List[SwiftSymbol]) -> Dict[str, str]:
-        """Extract documentation from symbols - Phase 2 TODO [20251221_TODO]"""
+        """Extract documentation from symbols - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Documentation extraction")
 
     def generate_ast_report(self, symbols: List[SwiftSymbol]) -> str:
-        """Generate AST analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate AST analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

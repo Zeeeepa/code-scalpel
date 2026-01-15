@@ -5,31 +5,20 @@ Tier Decorators - Function decorators for tier-gated features.
 
 Provides the @requires_tier decorator for enforcing tier requirements
 at runtime on functions and methods.
-
-TODO ITEMS: decorators.py
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [P0_CRITICAL] @requires_tier decorator
-# [P1_HIGH] Graceful error messages
-# [P1_HIGH] Async function support
-# [P2_MEDIUM] Class method support
-
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [P1_HIGH] @requires_feature decorator
-# [P2_MEDIUM] Stacked decorators
-# [P3_LOW] Decorator metadata preservation
-
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [P2_MEDIUM] @audit_tier_access decorator
-# [P3_LOW] Dynamic tier checking callback
-# [P4_LOW] Custom error handlers
-============================================================================
 """
+
+# TODO [COMMUNITY] Implement @requires_tier decorator
+# TODO [COMMUNITY] Add graceful error messages
+# TODO [COMMUNITY] Support async function handling
+# TODO [COMMUNITY] Add class method support
+
+# TODO [PRO] Implement @requires_feature decorator
+# TODO [PRO] Support stacked decorators
+# TODO [PRO] Preserve decorator metadata
+
+# TODO [ENTERPRISE] Implement @audit_tier_access decorator
+# TODO [ENTERPRISE] Add dynamic tier checking callback
+# TODO [ENTERPRISE] Support custom error handlers
 
 from __future__ import annotations
 

@@ -2,13 +2,13 @@
 """
 NPM Audit JavaScript Parser - Vulnerability scanning for npm dependencies.
 
-[20251221_TODO] Implement npm audit JSON output parsing
-[20251221_TODO] Add CVE extraction and severity mapping
-[20251221_TODO] Support remediation recommendations extraction
-[20251221_TODO] Implement vulnerability aggregation and deduplication
-[20251221_TODO] Add dependency graph analysis for transitive vulnerabilities
-[20251221_TODO] Support audit suppression configuration
-[20251221_TODO] Implement metrics tracking (vulnerabilities by severity)
+# TODO Implement npm audit JSON output parsing
+# TODO Add CVE extraction and severity mapping
+# TODO Support remediation recommendations extraction
+# TODO Implement vulnerability aggregation and deduplication
+# TODO Add dependency graph analysis for transitive vulnerabilities
+# TODO Support audit suppression configuration
+# TODO Implement metrics tracking (vulnerabilities by severity)
 
 Reference: https://docs.npmjs.com/cli/v10/commands/npm-audit
 Command: npm audit --json
@@ -46,7 +46,7 @@ class NPMAuditParser:
     def parse(self) -> dict:
         """Parse npm audit vulnerability report.
 
-        [20251221_TODO] Implement full audit report parsing logic
+        # TODO Implement full audit report parsing logic
 
         Returns:
             Dictionary with vulnerability findings

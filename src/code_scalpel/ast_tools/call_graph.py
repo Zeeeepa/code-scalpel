@@ -70,143 +70,54 @@ class CallGraphResult:
 class CallGraphBuilder:
     """
     Builds a static call graph for a Python project.
-
-    ====================================================================
-    TIER 1: COMMUNITY (Free - High Priority)
-    ====================================================================
-            TODO [COMMUNITY][FEATURE]: Basic call graph building
-        TODO [COMMUNITY]: Parse Python files and extract function definitions
-        TODO [COMMUNITY]: Track function calls within each function
-        TODO [COMMUNITY]: Build adjacency list representation
-        TODO [COMMUNITY]: Handle basic import resolution
-        TODO [COMMUNITY]: Add 25+ tests for core functionality
-            TODO [COMMUNITY][FEATURE]: Entry point detection
-        TODO [COMMUNITY]: Detect main() functions
-        TODO [COMMUNITY]: Detect CLI decorators (click.command, etc.)
-        TODO [COMMUNITY]: Identify __name__ == "__main__" blocks
-        TODO [COMMUNITY]: Mark entry points in graph
-        TODO [COMMUNITY]: Add 15+ tests for entry point detection
-            TODO [COMMUNITY][FEATURE]: Basic visualization
-        TODO [COMMUNITY]: Generate simple text representation
-        TODO [COMMUNITY]: Output to stdout
-        TODO [COMMUNITY]: Show call relationships
-        TODO [COMMUNITY]: Add 10+ tests for visualization
-            TODO [COMMUNITY][FEATURE]: Circular import detection
-        TODO [COMMUNITY]: Find import cycles in project
-        TODO [COMMUNITY]: Report cycle paths
-        TODO [COMMUNITY]: Handle complex import graphs
-        TODO [COMMUNITY]: Add 20+ tests for cycle detection
-            TODO [COMMUNITY][TEST]: Adversarial tests
-        TODO [COMMUNITY]: Empty files, single function projects
-        TODO [COMMUNITY]: Deeply nested calls, recursive functions
-        TODO [COMMUNITY]: Large projects, complex imports
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================
-            TODO [PRO][FEATURE]: Dynamic call detection      Purpose: Track reflection and dynamic imports
-      Steps:
-        1. Detect getattr() calls
-        2. Track __getattribute__ overrides
-        3. Detect importlib.import_module() patterns
-        4. Detect __import__() usage
-        5. Mark as potential calls with confidence
-        6. Add 30+ tests for dynamic detection
-
-            TODO [PRO][FEATURE]: Call frequency and confidence scoring      Purpose: Quantify call reliability
-      Steps:
-        1. Count call occurrences per pair
-        2. Track conditional calls (if/try blocks)
-        3. Score probability of execution
-        4. Report confidence levels
-        5. Add 25+ tests for scoring
-
-            TODO [PRO][FEATURE]: Support async/await call graph      Purpose: Handle modern async patterns
-      Steps:
-        1. Detect AsyncFunctionDef definitions
-        2. Track await expressions
-        3. Handle async context managers
-        4. Detect asyncio.create_task() patterns
-        5. Build async call graph
-        6. Add 25+ tests for async support
-
-            TODO [PRO][FEATURE]: Framework-specific call patterns      Purpose: Understand framework conventions
-      Steps:
-        1. Django URL routing (url() patterns)
-        2. FastAPI route decorators (app.get, app.post)
-        3. Flask route registration
-        4. Middleware chains
-        5. Callback registration patterns
-        6. Add 30+ tests for framework patterns
-
-            TODO [PRO][ENHANCEMENT]: Mermaid diagram generation      Purpose: Better visualization capabilities
-      Steps:
-        1. Generate Mermaid syntax
-        2. Support multiple diagram styles
-        3. Color-code node types
-        4. Add legend and statistics
-        5. Export to HTML
-        6. Add 15+ tests for diagram generation
-
-            TODO [PRO][FEATURE]: Cross-file call tracking      Purpose: Understand module boundaries
-      Steps:
-        1. Track calls across files
-        2. Mark external module calls
-        3. Resolve imported function calls
-        4. Detect library calls
-        5. Add 25+ tests for cross-file
-
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================
-            TODO [ENTERPRISE][FEATURE]: Advanced dynamic resolution      Purpose: Sophisticated call inference
-      Steps:
-        1. Use type hints for call inference
-        2. Support Protocol/ABC matching
-        3. Dataflow-based resolution
-        4. Symbol table analysis
-        5. Add 35+ tests for resolution
-
-            TODO [ENTERPRISE][FEATURE]: Machine learning call prediction      Purpose: Predict likely calls in dynamic code
-      Steps:
-        1. Train on known call patterns
-        2. Predict probable calls
-        3. Confidence scoring
-        4. Learn from user feedback
-        5. Add 30+ tests for ML prediction
-
-            TODO [ENTERPRISE][FEATURE]: Distributed call graph analysis      Purpose: Analyze large monorepos efficiently
-      Steps:
-        1. Parallel file parsing
-        2. Incremental updates
-        3. Caching between runs
-        4. Distributed computation
-        5. Add 25+ tests for distribution
-
-            TODO [ENTERPRISE][ENHANCEMENT]: IDE integration      Purpose: Real-time call graph in editor
-      Steps:
-        1. LSP integration
-        2. Real-time updates
-        3. Quick peek implementation
-        4. Go to definition
-        5. Add 20+ tests for IDE features
-
-            TODO [ENTERPRISE][FEATURE]: Advanced visualization      Purpose: Interactive call graph exploration
-      Steps:
-        1. Web-based visualization
-        2. Force-directed layout
-        3. Zoom and pan
-        4. Filter by node type
-        5. Search and highlighting
-        6. Add 25+ tests for UI
-
-            TODO [ENTERPRISE][FEATURE]: Performance analysis      Purpose: Identify bottleneck functions
-      Steps:
-        1. Integrate with profiling data
-        2. Show call counts from traces
-        3. Identify hot paths
-        4. Suggest optimizations
-        5. Add 20+ tests for performance
     """
+    # TODO [COMMUNITY][FEATURE]: Basic call graph building
+    # TODO [COMMUNITY]: Parse Python files and extract function definitions
+    # TODO [COMMUNITY]: Track function calls within each function
+    # TODO [COMMUNITY]: Build adjacency list representation
+    # TODO [COMMUNITY]: Handle basic import resolution
+    # TODO [COMMUNITY]: Add 25+ tests for core functionality
+    # TODO [COMMUNITY][FEATURE]: Entry point detection
+    # TODO [COMMUNITY]: Detect main() functions
+    # TODO [COMMUNITY]: Detect CLI decorators (click.command, etc.)
+    # TODO [COMMUNITY]: Identify __name__ == "__main__" blocks
+    # TODO [COMMUNITY]: Mark entry points in graph
+    # TODO [COMMUNITY]: Add 15+ tests for entry point detection
+    # TODO [COMMUNITY][FEATURE]: Basic visualization
+    # TODO [COMMUNITY]: Generate simple text representation
+    # TODO [COMMUNITY]: Output to stdout
+    # TODO [COMMUNITY]: Show call relationships
+    # TODO [COMMUNITY]: Add 10+ tests for visualization
+    # TODO [COMMUNITY][FEATURE]: Circular import detection
+    # TODO [COMMUNITY]: Find import cycles in project
+    # TODO [COMMUNITY]: Report cycle paths
+    # TODO [COMMUNITY]: Handle complex import graphs
+    # TODO [COMMUNITY]: Add 20+ tests for cycle detection
+    # TODO [COMMUNITY][TEST]: Adversarial tests
+    # TODO [COMMUNITY]: Empty files, single function projects
+    # TODO [COMMUNITY]: Deeply nested calls, recursive functions
+    # TODO [COMMUNITY]: Large projects, complex imports
+    # ====================================================================
+    # TIER 2: PRO (Commercial - Medium Priority)
+    # ====================================================================
+    
+    # TODO [PRO][FEATURE]: Dynamic call detection
+    # TODO [PRO][FEATURE]: Call frequency and confidence scoring
+    # TODO [PRO][FEATURE]: Support async/await call graph
+    # TODO [PRO][FEATURE]: Framework-specific call patterns
+    # TODO [PRO][ENHANCEMENT]: Mermaid diagram generation
+    # TODO [PRO][FEATURE]: Cross-file call tracking
+    
+    # ====================================================================
+    # TIER 3: ENTERPRISE (Commercial - Lower Priority)
+    # ====================================================================
+    
+    # TODO [ENTERPRISE][FEATURE]: Advanced dynamic resolution
+    # TODO [ENTERPRISE][FEATURE]: Machine learning call prediction
+    # TODO [ENTERPRISE][FEATURE]: Distributed call graph analysis
+    # TODO [ENTERPRISE][ENHANCEMENT]: IDE integration
+    # TODO [ENTERPRISE][FEATURE]: Advanced visualization
+    # TODO [ENTERPRISE][FEATURE]: Performance analysis
 
     def __init__(self, root_path: Path):
         self.root_path = root_path
@@ -230,16 +141,13 @@ class CallGraphBuilder:
         """Build the call graph.
 
         Returns an adjacency list: {"module:caller": ["module:callee", ...]}
+        """
+        # TODO [COMMUNITY][FEATURE]: Two-pass graph construction
+        # TODO [COMMUNITY]: First pass: collect definitions and imports
+        # TODO [COMMUNITY]: Second pass: analyze calls and resolve them
+        # TODO [COMMUNITY]: Error handling for malformed code
+        # TODO [COMMUNITY]: Add 15+ tests for build process        
 
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Two-pass graph construction
-        TODO [COMMUNITY]: First pass: collect definitions and imports
-        TODO [COMMUNITY]: Second pass: analyze calls and resolve them
-        TODO [COMMUNITY]: Error handling for malformed code
-        TODO [COMMUNITY]: Add 15+ tests for build process        """
-        # 1. First pass: Collect definitions and imports
         for file_path in self._iter_source_files():
             rel_path = str(file_path.relative_to(self.root_path))
             suffix = file_path.suffix.lower()
@@ -285,7 +193,6 @@ class CallGraphBuilder:
         return graph
 
     def _iter_source_files(self):
-        """Iterate over supported source files (.py/.js/.ts) in project."""
         skip_dirs = {
             ".git",
             ".venv",
@@ -753,43 +660,37 @@ class CallGraphBuilder:
 
         Yields:
             Path: Absolute path to each Python file
-
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Recursively walk directory tree
-        TODO [COMMUNITY]: Use os.walk() for directory traversal
-        TODO [COMMUNITY]: Start from project root
-        TODO [COMMUNITY]: Yield files in consistent order
-        TODO [COMMUNITY]: Add 10+ tests for directory walking
-                TODO [COMMUNITY][FEATURE]: Filter Python files by extension
-        TODO [COMMUNITY]: Check for .py file extension
-        TODO [COMMUNITY]: Skip non-Python files
-        TODO [COMMUNITY]: Handle special cases (__init__.py, setup.py)
-        TODO [COMMUNITY]: Add 8+ tests for file filtering
-                TODO [COMMUNITY][FEATURE]: Skip ignored directories
-        TODO [COMMUNITY]: Skip .git, .venv, venv, __pycache__
-        TODO [COMMUNITY]: Skip node_modules, dist, build
-        TODO [COMMUNITY]: Skip hidden directories (.*)
-        TODO [COMMUNITY]: Add 10+ tests for directory skipping
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Respect .gitignore patterns
-        TODO [PRO]: Parse .gitignore file
-        TODO [PRO]: Apply glob patterns
-        TODO [PRO]: Support negation patterns
-        TODO [PRO]: Add 12+ tests for gitignore
-                TODO [PRO][FEATURE]: Handle symbolic links
-        TODO [PRO]: Detect symlinks to avoid loops
-        TODO [PRO]: Option to follow symlinks
-        TODO [PRO]: Track visited inodes
-        TODO [PRO]: Add 10+ tests for symlinks
-                TODO [PRO][FEATURE]: Performance optimization
-        TODO [PRO]: Cache directory structure
-        TODO [PRO]: Lazy evaluation of files
-        TODO [PRO]: Parallel file discovery
-        TODO [PRO]: Add 10+ tests for performance        """
+        """
+        # TODO [COMMUNITY][FEATURE]: Recursively walk directory tree
+        # TODO [COMMUNITY]: Use os.walk() for directory traversal
+        # TODO [COMMUNITY]: Start from project root
+        # TODO [COMMUNITY]: Yield files in consistent order
+        # TODO [COMMUNITY]: Add 10+ tests for directory walking
+        # TODO [COMMUNITY][FEATURE]: Filter Python files by extension
+        # TODO [COMMUNITY]: Check for .py file extension
+        # TODO [COMMUNITY]: Skip non-Python files
+        # TODO [COMMUNITY]: Handle special cases (__init__.py, setup.py)
+        # TODO [COMMUNITY]: Add 8+ tests for file filtering
+        # TODO [COMMUNITY][FEATURE]: Skip ignored directories
+        # TODO [COMMUNITY]: Skip .git, .venv, venv, __pycache__
+        # TODO [COMMUNITY]: Skip node_modules, dist, build
+        # TODO [COMMUNITY]: Skip hidden directories (.*)
+        # TODO [COMMUNITY]: Add 10+ tests for directory skipping
+        # TODO [PRO][FEATURE]: Respect .gitignore patterns
+        # TODO [PRO]: Parse .gitignore file
+        # TODO [PRO]: Apply glob patterns
+        # TODO [PRO]: Support negation patterns
+        # TODO [PRO]: Add 12+ tests for gitignore
+        # TODO [PRO][FEATURE]: Handle symbolic links
+        # TODO [PRO]: Detect symlinks to avoid loops
+        # TODO [PRO]: Option to follow symlinks
+        # TODO [PRO]: Track visited inodes
+        # TODO [PRO]: Add 10+ tests for symlinks
+        # TODO [PRO][FEATURE]: Performance optimization
+        # TODO [PRO]: Cache directory structure
+        # TODO [PRO]: Lazy evaluation of files
+        # TODO [PRO]: Parallel file discovery
+        # TODO [PRO]: Add 10+ tests for performance
         skip_dirs = {
             ".git",
             ".venv",
@@ -812,43 +713,37 @@ class CallGraphBuilder:
         Args:
             tree: AST of the file
             rel_path: Relative path of the file
-
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Extract function definitions
-        TODO [COMMUNITY]: Walk AST for FunctionDef and AsyncFunctionDef nodes
-        TODO [COMMUNITY]: Store function names in definitions set
-        TODO [COMMUNITY]: Handle nested functions
-        TODO [COMMUNITY]: Add 10+ tests for function extraction
-                TODO [COMMUNITY][FEATURE]: Extract class definitions
-        TODO [COMMUNITY]: Walk AST for ClassDef nodes
-        TODO [COMMUNITY]: Store class names in definitions set
-        TODO [COMMUNITY]: Extract methods from classes
-        TODO [COMMUNITY]: Add 10+ tests for class extraction
-                TODO [COMMUNITY][FEATURE]: Collect import statements
-        TODO [COMMUNITY]: Extract import and from...import statements
-        TODO [COMMUNITY]: Map aliases to full module names
-        TODO [COMMUNITY]: Handle wildcard imports (from x import *)
-        TODO [COMMUNITY]: Add 15+ tests for import collection
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Track relative imports
-        TODO [PRO]: Resolve relative import dots (.., ...)
-        TODO [PRO]: Convert relative to absolute paths
-        TODO [PRO]: Handle package context
-        TODO [PRO]: Add 10+ tests for relative imports
-                TODO [PRO][FEATURE]: Extract decorator information
-        TODO [PRO]: Track decorators on functions and classes
-        TODO [PRO]: Store decorator metadata
-        TODO [PRO]: Identify special decorators
-        TODO [PRO]: Add 10+ tests for decorators
-                TODO [PRO][FEATURE]: Type hint analysis
-        TODO [PRO]: Extract type annotations
-        TODO [PRO]: Store parameter types
-        TODO [PRO]: Track return types
-        TODO [PRO]: Add 10+ tests for type hints        """
+        """
+        # TODO [COMMUNITY][FEATURE]: Extract function definitions
+        # TODO [COMMUNITY]: Walk AST for FunctionDef and AsyncFunctionDef nodes
+        # TODO [COMMUNITY]: Store function names in definitions set
+        # TODO [COMMUNITY]: Handle nested functions
+        # TODO [COMMUNITY]: Add 10+ tests for function extraction
+        # TODO [COMMUNITY][FEATURE]: Extract class definitions
+        # TODO [COMMUNITY]: Walk AST for ClassDef nodes
+        # TODO [COMMUNITY]: Store class names in definitions set
+        # TODO [COMMUNITY]: Extract methods from classes
+        # TODO [COMMUNITY]: Add 10+ tests for class extraction
+        # TODO [COMMUNITY][FEATURE]: Collect import statements
+        # TODO [COMMUNITY]: Extract import and from...import statements
+        # TODO [COMMUNITY]: Map aliases to full module names
+        # TODO [COMMUNITY]: Handle wildcard imports (from x import *)
+        # TODO [COMMUNITY]: Add 15+ tests for import collection
+        # TODO [PRO][FEATURE]: Track relative imports
+        # TODO [PRO]: Resolve relative import dots (.., ...)
+        # TODO [PRO]: Convert relative to absolute paths
+        # TODO [PRO]: Handle package context
+        # TODO [PRO]: Add 10+ tests for relative imports
+        # TODO [PRO][FEATURE]: Extract decorator information
+        # TODO [PRO]: Track decorators on functions and classes
+        # TODO [PRO]: Store decorator metadata
+        # TODO [PRO]: Identify special decorators
+        # TODO [PRO]: Add 10+ tests for decorators
+        # TODO [PRO][FEATURE]: Type hint analysis
+        # TODO [PRO]: Extract type annotations
+        # TODO [PRO]: Store parameter types
+        # TODO [PRO]: Track return types
+        # TODO [PRO]: Add 10+ tests for type hints
         self.definitions[rel_path] = set()
         self.imports[rel_path] = {}
 
@@ -891,44 +786,38 @@ class CallGraphBuilder:
 
         Returns:
             Dictionary mapping function keys to list of called function names
-
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Extract function calls by name
-        TODO [COMMUNITY]: Walk AST for Call nodes
-        TODO [COMMUNITY]: Extract function names from ast.Name calls
-        TODO [COMMUNITY]: Track current function scope
-        TODO [COMMUNITY]: Store calls per function
-        TODO [COMMUNITY]: Add 15+ tests for call extraction
-                TODO [COMMUNITY][FEATURE]: Handle attribute method calls
-        TODO [COMMUNITY]: Extract calls like obj.method()
-        TODO [COMMUNITY]: Parse attribute chains
-        TODO [COMMUNITY]: Simplify attribute names
-        TODO [COMMUNITY]: Add 12+ tests for method calls
-                TODO [COMMUNITY][FEATURE]: Resolve local calls
-        TODO [COMMUNITY]: Map called names to definitions
-        TODO [COMMUNITY]: Handle local vs imported functions
-        TODO [COMMUNITY]: Create qualified function names
-        TODO [COMMUNITY]: Add 12+ tests for resolution
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Track call line numbers
-        TODO [PRO]: Store AST node line information
-        TODO [PRO]: Create call edges with location data
-        TODO [PRO]: Support call statistics
-        TODO [PRO]: Add 10+ tests for line tracking
-                TODO [PRO][FEATURE]: Detect dynamic calls
-        TODO [PRO]: Find getattr() calls
-        TODO [PRO]: Detect __call__ invocations
-        TODO [PRO]: Handle indirect calls
-        TODO [PRO]: Add 15+ tests for dynamic detection
-                TODO [PRO][FEATURE]: Cross-file call resolution
-        TODO [PRO]: Resolve imported function calls
-        TODO [PRO]: Handle relative imports
-        TODO [PRO]: Build cross-file call graphs
-        TODO [PRO]: Add 15+ tests for cross-file        """
+        """
+        # TODO [COMMUNITY][FEATURE]: Extract function calls by name
+        # TODO [COMMUNITY]: Walk AST for Call nodes
+        # TODO [COMMUNITY]: Extract function names from ast.Name calls
+        # TODO [COMMUNITY]: Track current function scope
+        # TODO [COMMUNITY]: Store calls per function
+        # TODO [COMMUNITY]: Add 15+ tests for call extraction
+        # TODO [COMMUNITY][FEATURE]: Handle attribute method calls
+        # TODO [COMMUNITY]: Extract calls like obj.method()
+        # TODO [COMMUNITY]: Parse attribute chains
+        # TODO [COMMUNITY]: Simplify attribute names
+        # TODO [COMMUNITY]: Add 12+ tests for method calls
+        # TODO [COMMUNITY][FEATURE]: Resolve local calls
+        # TODO [COMMUNITY]: Map called names to definitions
+        # TODO [COMMUNITY]: Handle local vs imported functions
+        # TODO [COMMUNITY]: Create qualified function names
+        # TODO [COMMUNITY]: Add 12+ tests for resolution
+        # TODO [PRO][FEATURE]: Track call line numbers
+        # TODO [PRO]: Store AST node line information
+        # TODO [PRO]: Create call edges with location data
+        # TODO [PRO]: Support call statistics
+        # TODO [PRO]: Add 10+ tests for line tracking
+        # TODO [PRO][FEATURE]: Detect dynamic calls
+        # TODO [PRO]: Find getattr() calls
+        # TODO [PRO]: Detect __call__ invocations
+        # TODO [PRO]: Handle indirect calls
+        # TODO [PRO]: Add 15+ tests for dynamic detection
+        # TODO [PRO][FEATURE]: Cross-file call resolution
+        # TODO [PRO]: Resolve imported function calls
+        # TODO [PRO]: Handle relative imports
+        # TODO [PRO]: Build cross-file call graphs
+        # TODO [PRO]: Add 15+ tests for cross-file
         file_graph = {}
 
         class CallVisitor(ast.NodeVisitor):
@@ -1092,32 +981,29 @@ class CallGraphBuilder:
 
         Returns:
             CallGraphResult with nodes, edges, and Mermaid diagram
-
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Collect node information with line numbers
-        TODO [PRO]: Parse files and extract function locations
-        TODO [PRO]: Track line numbers and end lines
-        TODO [PRO]: Build node metadata
-        TODO [PRO]: Add 15+ tests for node collection
-                TODO [PRO][FEATURE]: Filter to reachable nodes
-        TODO [PRO]: BFS/DFS from entry point
-        TODO [PRO]: Apply depth limit
-        TODO [PRO]: Mark reachable subset
-        TODO [PRO]: Handle cycles gracefully
-        TODO [PRO]: Add 15+ tests for reachability
-                TODO [PRO][FEATURE]: Build edges list
-        TODO [PRO]: Create edge objects
-        TODO [PRO]: Track call line numbers
-        TODO [PRO]: Filter by reachability
-        TODO [PRO]: Add 12+ tests for edge building
-                TODO [PRO][FEATURE]: Generate Mermaid diagram
-        TODO [PRO]: Create Mermaid syntax
-        TODO [PRO]: Apply node styling
-        TODO [PRO]: Show call relationships
-        TODO [PRO]: Export format
-        TODO [PRO]: Add 15+ tests for Mermaid        """
+        """
+        # TODO [PRO][FEATURE]: Collect node information with line numbers
+        # TODO [PRO]: Parse files and extract function locations
+        # TODO [PRO]: Track line numbers and end lines
+        # TODO [PRO]: Build node metadata
+        # TODO [PRO]: Add 15+ tests for node collection
+        # TODO [PRO][FEATURE]: Filter to reachable nodes
+        # TODO [PRO]: BFS/DFS from entry point
+        # TODO [PRO]: Apply depth limit
+        # TODO [PRO]: Mark reachable subset
+        # TODO [PRO]: Handle cycles gracefully
+        # TODO [PRO]: Add 15+ tests for reachability
+        # TODO [PRO][FEATURE]: Build edges list
+        # TODO [PRO]: Create edge objects
+        # TODO [PRO]: Track call line numbers
+        # TODO [PRO]: Filter by reachability
+        # TODO [PRO]: Add 12+ tests for edge building
+        # TODO [PRO][FEATURE]: Generate Mermaid diagram
+        # TODO [PRO]: Create Mermaid syntax
+        # TODO [PRO]: Apply node styling
+        # TODO [PRO]: Show call relationships
+        # TODO [PRO]: Export format
+        # TODO [PRO]: Add 15+ tests for Mermaid
         # [20251225_FEATURE] Pro+ may enable improved method/polymorphism resolution
         base_graph = self.build(advanced_resolution=advanced_resolution)
 
@@ -1418,31 +1304,25 @@ class CallGraphBuilder:
         - Function named "main"
         - Function decorated with CLI decorators (click.command, etc.)
         - Function called in if __name__ == "__main__" block
-
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Detect 'main' function by name
-        TODO [COMMUNITY]: Check if node.name == 'main'
-        TODO [COMMUNITY]: Add 5+ tests for main detection
-                TODO [COMMUNITY][FEATURE]: Check for common decorator patterns
-        TODO [COMMUNITY]: Detect @click.command()
-        TODO [COMMUNITY]: Detect @app.route()
-        TODO [COMMUNITY]: Detect @cli.command()
-        TODO [COMMUNITY]: Add 10+ tests for decorator detection
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Detect framework-specific entry patterns
-        TODO [PRO]: FastAPI: @app.on_event("startup")
-        TODO [PRO]: Django: management command detection
-        TODO [PRO]: Flask: @app.before_request, @app.after_request
-        TODO [PRO]: Add 15+ tests for framework patterns
-                TODO [PRO][FEATURE]: Confidence scoring for entry points
-        TODO [PRO]: High confidence: main() or __name__ == '__main__'
-        TODO [PRO]: Medium confidence: common decorators
-        TODO [PRO]: Low confidence: CLI-like decorators
-        TODO [PRO]: Add 10+ tests for confidence calculation        """
+        """
+        # TODO [COMMUNITY][FEATURE]: Detect 'main' function by name
+        # TODO [COMMUNITY]: Check if node.name == 'main'
+        # TODO [COMMUNITY]: Add 5+ tests for main detection
+        # TODO [COMMUNITY][FEATURE]: Check for common decorator patterns
+        # TODO [COMMUNITY]: Detect @click.command()
+        # TODO [COMMUNITY]: Detect @app.route()
+        # TODO [COMMUNITY]: Detect @cli.command()
+        # TODO [COMMUNITY]: Add 10+ tests for decorator detection
+        # TODO [PRO][FEATURE]: Detect framework-specific entry patterns
+        # TODO [PRO]: FastAPI: @app.on_event("startup")
+        # TODO [PRO]: Django: management command detection
+        # TODO [PRO]: Flask: @app.before_request, @app.after_request
+        # TODO [PRO]: Add 15+ tests for framework patterns
+        # TODO [PRO][FEATURE]: Confidence scoring for entry points
+        # TODO [PRO]: High confidence: main() or __name__ == '__main__'
+        # TODO [PRO]: Medium confidence: common decorators
+        # TODO [PRO]: Low confidence: CLI-like decorators
+        # TODO [PRO]: Add 10+ tests for confidence calculation
         if func_node.name == "main":
             return True
 
@@ -1520,28 +1400,22 @@ class CallGraphBuilder:
 
         Returns:
             Set of reachable node keys
-
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: BFS traversal with depth limiting
-        TODO [PRO]: Initialize queue with entry point and depth 0
-        TODO [PRO]: Process nodes in breadth-first order
-        TODO [PRO]: Stop when depth exceeds max_depth
-        TODO [PRO]: Handle missing entry points gracefully
-        TODO [PRO]: Add 15+ tests for BFS traversal
-                TODO [PRO][FEATURE]: Cycle detection in reachability
-        TODO [PRO]: Track visited nodes to prevent infinite loops
-        TODO [PRO]: Store path information for cycle reporting
-        TODO [PRO]: Add 12+ tests for cycle handling
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Advanced depth analysis
-        TODO [ENTERPRISE]: Calculate depth for each reachable node
-        TODO [ENTERPRISE]: Identify deepest call paths
-        TODO [ENTERPRISE]: Compute call levels and stratification
-        TODO [ENTERPRISE]: Add 10+ tests for depth analysis        """
+        """
+        # TODO [PRO][FEATURE]: BFS traversal with depth limiting
+        # TODO [PRO]: Initialize queue with entry point and depth 0
+        # TODO [PRO]: Process nodes in breadth-first order
+        # TODO [PRO]: Stop when depth exceeds max_depth
+        # TODO [PRO]: Handle missing entry points gracefully
+        # TODO [PRO]: Add 15+ tests for BFS traversal
+        # TODO [PRO][FEATURE]: Cycle detection in reachability
+        # TODO [PRO]: Track visited nodes to prevent infinite loops
+        # TODO [PRO]: Store path information for cycle reporting
+        # TODO [PRO]: Add 12+ tests for cycle handling
+        # TODO [ENTERPRISE][FEATURE]: Advanced depth analysis
+        # TODO [ENTERPRISE]: Calculate depth for each reachable node
+        # TODO [ENTERPRISE]: Identify deepest call paths
+        # TODO [ENTERPRISE]: Compute call levels and stratification
+        # TODO [ENTERPRISE]: Add 10+ tests for depth analysis
         # Normalize entry point (might be just "main" or "file:main")
         if ":" not in entry_point:
             # Find the full key
@@ -1587,37 +1461,33 @@ class CallGraphBuilder:
 
         Returns:
             Mermaid diagram syntax
+        """
+        
+        # TODO [PRO][FEATURE]: Basic Mermaid diagram generation
+        # TODO [PRO]: Create graph TD structure
+        # TODO [PRO]: Map nodes to node IDs
+        # TODO [PRO]: Add node labels with line numbers
+        # TODO [PRO]: Create edges between nodes
+        # TODO [PRO]: Add 15+ tests for diagram generation
+        # TODO [PRO][FEATURE]: Node styling based on type
+        # TODO [PRO]: Stadium shape for entry points
+        # TODO [PRO]: Round shape for external functions
+        # TODO [PRO]: Rectangle for internal functions
+        # TODO [PRO]: Color coding for call frequency
+        # TODO [PRO]: Add 10+ tests for styling
 
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Basic Mermaid diagram generation
-        TODO [PRO]: Create graph TD structure
-        TODO [PRO]: Map nodes to node IDs
-        TODO [PRO]: Add node labels with line numbers
-        TODO [PRO]: Create edges between nodes
-        TODO [PRO]: Add 15+ tests for diagram generation
-                TODO [PRO][FEATURE]: Node styling based on type
-        TODO [PRO]: Stadium shape for entry points
-        TODO [PRO]: Round shape for external functions
-        TODO [PRO]: Rectangle for internal functions
-        TODO [PRO]: Color coding for call frequency
-        TODO [PRO]: Add 10+ tests for styling
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Advanced diagram customization
-        TODO [ENTERPRISE]: Parameter sizing based on call count
-        TODO [ENTERPRISE]: Color gradients for importance
-        TODO [ENTERPRISE]: Subgraph clustering for modules
-        TODO [ENTERPRISE]: Interactive highlighting
-        TODO [ENTERPRISE]: Add 15+ tests for customization
-                TODO [ENTERPRISE][FEATURE]: Export to multiple formats
-        TODO [ENTERPRISE]: SVG export
-        TODO [ENTERPRISE]: PNG rasterization
-        TODO [ENTERPRISE]: HTML interactive viewer
-        TODO [ENTERPRISE]: GraphML format for other tools
-        TODO [ENTERPRISE]: Add 12+ tests for export formats        """
+        # TODO [ENTERPRISE][FEATURE]: Advanced diagram customization
+        # TODO [ENTERPRISE]: Parameter sizing based on call count
+        # TODO [ENTERPRISE]: Color gradients for importance
+        # TODO [ENTERPRISE]: Subgraph clustering for modules
+        # TODO [ENTERPRISE]: Interactive highlighting
+        # TODO [ENTERPRISE]: Add 15+ tests for customization
+        # TODO [ENTERPRISE][FEATURE]: Export to multiple formats
+        # TODO [ENTERPRISE]: SVG export
+        # TODO [ENTERPRISE]: PNG rasterization
+        # TODO [ENTERPRISE]: HTML interactive viewer
+        # TODO [ENTERPRISE]: GraphML format for other tools
+        # TODO [ENTERPRISE]: Add 12+ tests for export formats        
         lines = ["graph TD"]
 
         # Create node ID mapping (Mermaid doesn't like special chars)
@@ -1671,52 +1541,45 @@ class CallGraphBuilder:
         Returns:
             List of cycles, where each cycle is a list of module paths
             e.g., [["a.py", "b.py", "a.py"], ["c.py", "d.py", "e.py", "c.py"]]
+        """
+        # TODO [COMMUNITY][FEATURE]: Build import graph from AST
+        # TODO [COMMUNITY]: Iterate over all Python files
+        # TODO [COMMUNITY]: Extract import statements (import, from...import)
+        # TODO [COMMUNITY]: Build module adjacency list
+        # TODO [COMMUNITY]: Handle relative imports correctly
+        # TODO [COMMUNITY]: Add 15+ tests for graph building
+        # TODO [COMMUNITY][FEATURE]: Cycle detection using DFS
+        # TODO [COMMUNITY]: Implement 3-color DFS (WHITE, GRAY, BLACK)
+        # TODO [COMMUNITY]: Detect cycles when finding GRAY node
+        # TODO [COMMUNITY]: Extract cycle path from stack
+        # TODO [COMMUNITY]: Handle missing/external modules
+        # TODO [COMMUNITY]: Add 15+ tests for DFS algorithm
 
-        ====================================================================
-        TIER 1: COMMUNITY (Free - High Priority)
-        ====================================================================
-                TODO [COMMUNITY][FEATURE]: Build import graph from AST
-        TODO [COMMUNITY]: Iterate over all Python files
-        TODO [COMMUNITY]: Extract import statements (import, from...import)
-        TODO [COMMUNITY]: Build module adjacency list
-        TODO [COMMUNITY]: Handle relative imports correctly
-        TODO [COMMUNITY]: Add 15+ tests for graph building
-                TODO [COMMUNITY][FEATURE]: Cycle detection using DFS
-        TODO [COMMUNITY]: Implement 3-color DFS (WHITE, GRAY, BLACK)
-        TODO [COMMUNITY]: Detect cycles when finding GRAY node
-        TODO [COMMUNITY]: Extract cycle path from stack
-        TODO [COMMUNITY]: Handle missing/external modules
-        TODO [COMMUNITY]: Add 15+ tests for DFS algorithm
-        ====================================================================
-        TIER 2: PRO (Commercial - Medium Priority)
-        ====================================================================
-                TODO [PRO][FEATURE]: Detailed cycle information
-        TODO [PRO]: Track cycle depth and impact
-        TODO [PRO]: Identify common paths in cycles
-        TODO [PRO]: Suggest import order fixes
-        TODO [PRO]: Calculate cycle metrics
-        TODO [PRO]: Add 12+ tests for cycle analysis
-                TODO [PRO][FEATURE]: Dynamic import resolution
-        TODO [PRO]: Handle importlib usage
-        TODO [PRO]: Detect runtime imports
-        TODO [PRO]: Support conditional imports
-        TODO [PRO]: Track circular import avoidance
-        TODO [PRO]: Add 10+ tests for dynamic imports
-        ====================================================================
-        TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        ====================================================================
-                TODO [ENTERPRISE][FEATURE]: Visualization of circular imports
-        TODO [ENTERPRISE]: Generate dependency diagrams
-        TODO [ENTERPRISE]: Highlight cycle paths
-        TODO [ENTERPRISE]: Show import count per module
-        TODO [ENTERPRISE]: Interactive cycle explorer
-        TODO [ENTERPRISE]: Add 12+ tests for visualization
-                TODO [ENTERPRISE][FEATURE]: Automated refactoring suggestions
-        TODO [ENTERPRISE]: Suggest module reorganization
-        TODO [ENTERPRISE]: Identify mediator modules
-        TODO [ENTERPRISE]: Propose breaking points
-        TODO [ENTERPRISE]: Generate refactoring plan
-        TODO [ENTERPRISE]: Add 15+ tests for suggestions        """
+        # TODO [PRO][FEATURE]: Detailed cycle information
+        # TODO [PRO]: Track cycle depth and impact
+        # TODO [PRO]: Identify common paths in cycles
+        # TODO [PRO]: Suggest import order fixes
+        # TODO [PRO]: Calculate cycle metrics
+        # TODO [PRO]: Add 12+ tests for cycle analysis
+        # TODO [PRO][FEATURE]: Dynamic import resolution
+        # TODO [PRO]: Handle importlib usage
+        # TODO [PRO]: Detect runtime imports
+        # TODO [PRO]: Support conditional imports
+        # TODO [PRO]: Track circular import avoidance
+        # TODO [PRO]: Add 10+ tests for dynamic imports
+
+        # TODO [ENTERPRISE][FEATURE]: Visualization of circular imports
+        # TODO [ENTERPRISE]: Generate dependency diagrams
+        # TODO [ENTERPRISE]: Highlight cycle paths
+        # TODO [ENTERPRISE]: Show import count per module
+        # TODO [ENTERPRISE]: Interactive cycle explorer
+        # TODO [ENTERPRISE]: Add 12+ tests for visualization
+        # TODO [ENTERPRISE][FEATURE]: Automated refactoring suggestions
+        # TODO [ENTERPRISE]: Suggest module reorganization
+        # TODO [ENTERPRISE]: Identify mediator modules
+        # TODO [ENTERPRISE]: Propose breaking points
+        # TODO [ENTERPRISE]: Generate refactoring plan
+        # TODO [ENTERPRISE]: Add 15+ tests for suggestions       
         # Build import graph: module -> modules it imports
         import_graph: Dict[str, Set[str]] = {}
 

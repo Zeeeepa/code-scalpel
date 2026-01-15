@@ -45,7 +45,7 @@ Code Scalpel is a precision toolkit for AI-driven code analysis. Unlike general-
 | **Symbolic Execution** | Explore execution paths with Z3 | Stable (100% coverage) |
 | **Security Analysis** | Taint-based vulnerability detection | Stable (100% coverage) |
 | **Graph Engine** | Unified cross-language dependency graph | Stable (v3.0.0) |
-| **MCP Server** | Model Context Protocol integration (20 tools) | Stable |
+| **MCP Server** | Model Context Protocol integration (22 tools) | Stable |
 
 ### Supported Languages
 

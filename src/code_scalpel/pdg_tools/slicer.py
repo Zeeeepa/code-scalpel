@@ -5,51 +5,44 @@ from typing import Optional, Union
 
 import networkx as nx
 
-# [20251221_TODO] Add multi-dimensional slicing:
+# # TODO Add multi-dimensional slicing:
 #     - Support simultaneous slicing by multiple criteria
 #     - Implement context-specific slices (class/function scope)
 #     - Add value-dependent slices (track specific constant values)
 #     - Support nondeterministic slicing for concurrent code
 
-"""
-TODO ITEMS:
+# TODO [COMMUNITY/Basic] Implement backward program slicing algorithm
+# TODO [COMMUNITY/Basic] Create forward program slicing
+# TODO [COMMUNITY/Basic] Add data dependency slicing
+# TODO [COMMUNITY/Basic] Implement control dependency slicing
+# TODO [COMMUNITY/Basic] Create thin slicing (minimal executable slice)
+# TODO [COMMUNITY/Basic] Add slice caching for performance
+# TODO [COMMUNITY/Basic] Implement slice size optimization
+# TODO [COMMUNITY/Basic] Create slice visualization
+# TODO [COMMUNITY/Basic] Add slice complexity metrics
+# TODO [COMMUNITY/Basic] Document slicing algorithms and usage
 
-COMMUNITY TIER (Basic Slicing):
-1. TODO: Implement backward program slicing algorithm
-2. TODO: Create forward program slicing
-3. TODO: Add data dependency slicing
-4. TODO: Implement control dependency slicing
-5. TODO: Create thin slicing (minimal executable slice)
-6. TODO: Add slice caching for performance
-7. TODO: Implement slice size optimization
-8. TODO: Create slice visualization
-9. TODO: Add slice complexity metrics
-10. TODO: Document slicing algorithms and usage
+# TODO [PRO/Advanced] Implement multi-criteria slicing (multiple variables/lines)
+# TODO [PRO/Advanced] Add context-specific slicing (within function/class scope)
+# TODO [PRO/Advanced] Create value-dependent slicing (track specific values)
+# TODO [PRO/Advanced] Implement interprocedural slicing (across functions)
+# TODO [PRO/Advanced] Add amnestic slicing (limited history)
+# TODO [PRO/Advanced] Support union and intersection of slices
+# TODO [PRO/Advanced] Implement dynamic slicing based on runtime traces
+# TODO [PRO/Advanced] Add slice refinement and iterative slicing
+# TODO [PRO/Advanced] Create approximate slicing for large programs
+# TODO [PRO/Advanced] Implement slicing for security policy enforcement
 
-PRO TIER (Advanced Slicing):
-11. TODO: Implement multi-criteria slicing (multiple variables/lines)
-12. TODO: Add context-specific slicing (within function/class scope)
-13. TODO: Create value-dependent slicing (track specific values)
-14. TODO: Implement interprocedural slicing (across functions)
-15. TODO: Add amnestic slicing (limited history)
-16. TODO: Support union and intersection of slices
-17. TODO: Implement dynamic slicing based on runtime traces
-18. TODO: Add slice refinement and iterative slicing
-19. TODO: Create approximate slicing for large programs
-20. TODO: Implement slicing for security policy enforcement
-
-ENTERPRISE TIER (Distributed & Polyglot):
-21. TODO: Implement distributed slicing over sharded PDGs
-22. TODO: Add slicing for polyglot code (JS, Java, C++)
-23. TODO: Create parallel slicing algorithm for multi-core systems
-24. TODO: Implement stream-based slicing for infinite traces
-25. TODO: Add slicing for concurrent/async code
-26. TODO: Support slicing in federated PDG analysis
-27. TODO: Implement AI-guided slicing (heuristic-based)
-28. TODO: Add quantum-safe slice verification
-29. TODO: Create blockchain-based slice provenance
-30. TODO: Implement zero-copy slicing for memory efficiency
-"""
+# TODO [ENTERPRISE/Distributed] Implement distributed slicing over sharded PDGs
+# TODO [ENTERPRISE/Distributed] Add slicing for polyglot code (JS, Java, C++)
+# TODO [ENTERPRISE/Distributed] Create parallel slicing algorithm for multi-core systems
+# TODO [ENTERPRISE/Distributed] Implement stream-based slicing for infinite traces
+# TODO [ENTERPRISE/Distributed] Add slicing for concurrent/async code
+# TODO [ENTERPRISE/Distributed] Support slicing in federated PDG analysis
+# TODO [ENTERPRISE/Distributed] Implement AI-guided slicing (heuristic-based)
+# TODO [ENTERPRISE/Distributed] Add quantum-safe slice verification
+# TODO [ENTERPRISE/Distributed] Create blockchain-based slice provenance
+# TODO [ENTERPRISE/Distributed] Implement zero-copy slicing for memory efficiency
 
 
 class SliceType(Enum):
@@ -96,19 +89,19 @@ class ProgramSlicer:
         self.cache = {}
         self._initialize_indices()
 
-        # [20251221_TODO] Add amnestic slicing:
+        # # TODO Add amnestic slicing:
         #     - Implement memory-bounded slicing for large graphs
         #     - Support incremental slice computation with snapshots
         #     - Add slice compression/summarization
         #     - Implement lightweight slices for streaming analysis
 
-        # [20251221_TODO] Add assertion-guided slicing:
+        # # TODO Add assertion-guided slicing:
         #     - Slice based on specific program assertions
         #     - Support property-based slicing for formal verification
         #     - Track assertion satisfaction along slice paths
         #     - Generate minimal failing slices for bug reproduction
 
-        # [20251221_TODO] Add interactive slice refinement:
+        # # TODO Add interactive slice refinement:
         #     - Support user feedback on slice results
         #     - Enable iterative slice refinement
         #     - Track slice quality metrics and feedback

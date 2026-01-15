@@ -13,45 +13,38 @@ Available Normalizers:
 Base Classes:
     - BaseNormalizer: Abstract interface for all normalizers
     - TreeSitterVisitor: Base class for tree-sitter based normalizers
-
-TODO ITEMS:
-
-COMMUNITY TIER (Basic Normalizer Integration):
-1. TODO: Export all language-specific normalizers
-2. TODO: Create normalizer factory function
-3. TODO: Support auto-detection of source language
-4. TODO: Implement error handling for missing dependencies
-5. TODO: Document normalizer usage patterns
-6. TODO: Create basic normalizer tests
-7. TODO: Support version tracking for normalizers
-8. TODO: Implement fallback for unsupported languages
-9. TODO: Create normalizer performance benchmarks
-10. TODO: Document IR compatibility across languages
-
-PRO TIER (Advanced Normalizer Features):
-11. TODO: Implement normalizer caching layer
-12. TODO: Support incremental normalization
-13. TODO: Add normalizer composition for dialects
-14. TODO: Implement custom normalizer registration
-15. TODO: Support normalizer plugins
-16. TODO: Add performance profiling per normalizer
-17. TODO: Implement distributed normalization
-18. TODO: Support streaming normalization for large files
-19. TODO: Add metadata preservation layer
-20. TODO: Implement normalizer validation framework
-
-ENTERPRISE TIER (Advanced Analysis & Optimization):
-21. TODO: Implement ML-based normalizer selection
-22. TODO: Support polyglot project-wide normalization
-23. TODO: Add cross-language type inference
-24. TODO: Implement adaptive normalization strategies
-25. TODO: Support federated normalizer services
-26. TODO: Add encrypted IR generation
-27. TODO: Implement AI-driven normalization optimization
-28. TODO: Support quantum-safe normalizer signing
-29. TODO: Create ML-based dialect detection
-30. TODO: Implement predictive caching for normalization
 """
+
+# TODO [COMMUNITY] Export all language-specific normalizers
+# TODO [COMMUNITY] Create normalizer factory function
+# TODO [COMMUNITY] Support auto-detection of source language
+# TODO [COMMUNITY] Implement error handling for missing dependencies
+# TODO [COMMUNITY] Document normalizer usage patterns
+# TODO [COMMUNITY] Create basic normalizer tests
+# TODO [COMMUNITY] Support version tracking for normalizers
+# TODO [COMMUNITY] Implement fallback for unsupported languages
+# TODO [COMMUNITY] Create normalizer performance benchmarks
+# TODO [COMMUNITY] Document IR compatibility across languages
+# TODO [PRO] Implement normalizer caching layer
+# TODO [PRO] Support incremental normalization
+# TODO [PRO] Add normalizer composition for dialects
+# TODO [PRO] Implement custom normalizer registration
+# TODO [PRO] Support normalizer plugins
+# TODO [PRO] Add performance profiling per normalizer
+# TODO [PRO] Implement distributed normalization
+# TODO [PRO] Support streaming normalization for large files
+# TODO [PRO] Add metadata preservation layer
+# TODO [PRO] Implement normalizer validation framework
+# TODO [ENTERPRISE] Implement ML-based normalizer selection
+# TODO [ENTERPRISE] Support polyglot project-wide normalization
+# TODO [ENTERPRISE] Add cross-language type inference
+# TODO [ENTERPRISE] Implement adaptive normalization strategies
+# TODO [ENTERPRISE] Support federated normalizer services
+# TODO [ENTERPRISE] Add encrypted IR generation
+# TODO [ENTERPRISE] Implement AI-driven normalization optimization
+# TODO [ENTERPRISE] Support quantum-safe normalizer signing
+# TODO [ENTERPRISE] Create ML-based dialect detection
+# TODO [ENTERPRISE] Implement predictive caching for normalization
 
 from .base import BaseNormalizer
 from .java_normalizer import JavaNormalizer  # [20251215_FEATURE] Export Java normalizer

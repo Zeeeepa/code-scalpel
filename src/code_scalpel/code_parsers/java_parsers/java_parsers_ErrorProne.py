@@ -10,11 +10,11 @@ Command: javac -XDcompilePolicy=simple -processorpath error_prone.jar \
          '-Xplugin:ErrorProne' src/*.java
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Implement custom checker plugin support
-[20251221_TODO] Add severity classification for checks
-[20251221_TODO] Support suppression annotation detection
-[20251221_TODO] Add custom configuration parsing
-[20251221_TODO] Implement refactoring suggestion extraction
+# TODO Implement custom checker plugin support
+# TODO Add severity classification for checks
+# TODO Support suppression annotation detection
+# TODO Add custom configuration parsing
+# TODO Implement refactoring suggestion extraction
 """
 
 import re

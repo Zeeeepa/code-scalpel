@@ -30,41 +30,38 @@ This module provides:
 
 TODO ITEMS:
 
-COMMUNITY TIER (Core Functionality):
-1. TODO: Improve language detection accuracy for ambiguous file extensions
-2. TODO: Add support for Go programming language extraction
-3. TODO: Add support for Rust programming language extraction
-4. TODO: Implement caching for repeated language detection operations
-5. TODO: Add comprehensive error handling for malformed source code
-6. TODO: Document polyglot extraction API with examples for each language
-7. TODO: Implement fallback detection using file content heuristics
-8. TODO: Add validation for language enum values
-9. TODO: Create comprehensive test suite for all supported languages
-10. TODO: Performance optimize language detection for large codebases
+# TODO COMMUNITY TIER Improve language detection accuracy for ambiguous file extensions
+# TODO COMMUNITY TIER Add support for Go programming language extraction
+# TODO COMMUNITY TIER Add support for Rust programming language extraction
+# TODO COMMUNITY TIER Implement caching for repeated language detection operations
+# TODO COMMUNITY TIER Add comprehensive error handling for malformed source code
+# TODO COMMUNITY TIER Document polyglot extraction API with examples for each language
+# TODO COMMUNITY TIER Implement fallback detection using file content heuristics
+# TODO COMMUNITY TIER Add validation for language enum values
+# TODO COMMUNITY TIER Create comprehensive test suite for all supported languages
+# TODO COMMUNITY TIER Performance optimize language detection for large codebases
 
-PRO TIER (Enhanced Features):
-11. TODO: Add C++ language support for polyglot extraction
-12. TODO: Implement Rust-specific extraction patterns
-13. TODO: Add Go-specific extraction patterns
-14. TODO: Integrate taint tracking across language boundaries
-15. TODO: Add cross-language type inference system
-16. TODO: Implement semantic analysis for language bridges
-17. TODO: Add cross-language import resolution
-18. TODO: Create language-specific security pattern libraries
-19. TODO: Add support for custom DSLs and configuration languages
-20. TODO: Implement language feature capability detection
-21. TODO: Add cross-language refactoring utilities
+# TODO PRO TIER Add C++ language support for polyglot extraction
+# TODO PRO TIER Implement Rust-specific extraction patterns
+# TODO PRO TIER Add Go-specific extraction patterns
+# TODO PRO TIER Integrate taint tracking across language boundaries
+# TODO PRO TIER Add cross-language type inference system
+# TODO PRO TIER Implement semantic analysis for language bridges
+# TODO PRO TIER Add cross-language import resolution
+# TODO PRO TIER Create language-specific security pattern libraries
+# TODO PRO TIER Add support for custom DSLs and configuration languages
+# TODO PRO TIER Implement language feature capability detection
+# TODO PRO TIER Add cross-language refactoring utilities
 
-ENTERPRISE TIER (Advanced Capabilities):
-22. TODO: Build ML-based language detection using AST features
-23. TODO: Implement distributed extraction for large multi-language projects
-24. TODO: Add support for proprietary/custom programming languages
-25. TODO: Create language interoperability analysis system
-26. TODO: Add bytecode decompilation for compiled languages
-27. TODO: Implement quantum-safe code extraction patterns
-28. TODO: Add advanced concurrency pattern detection across languages
-29. TODO: Create enterprise audit trails for language migrations
-30. TODO: Implement federated extraction for multi-organization codebases
+# TODO ENTERPRISE TIER Build ML-based language detection using AST features
+# TODO ENTERPRISE TIER Implement distributed extraction for large multi-language projects
+# TODO ENTERPRISE TIER Add support for proprietary/custom programming languages
+# TODO ENTERPRISE TIER Create language interoperability analysis system
+# TODO ENTERPRISE TIER Add bytecode decompilation for compiled languages
+# TODO ENTERPRISE TIER Implement quantum-safe code extraction patterns
+# TODO ENTERPRISE TIER Add advanced concurrency pattern detection across languages
+# TODO ENTERPRISE TIER Create enterprise audit trails for language migrations
+# TODO ENTERPRISE TIER Implement federated extraction for multi-organization codebases
 """
 
 import warnings

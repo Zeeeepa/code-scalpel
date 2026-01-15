@@ -26,77 +26,37 @@ Usage:
     if is_feature_enabled("security_scan"):
         # Feature is available
         pass
-
-TODO ITEMS: tiers/__init__.py
-============================================================================
-COMMUNITY TIER - Core Feature Gating (P0-P2)
-============================================================================
-
-# [P0_CRITICAL] Decorator implementation:
-#     - @requires_tier decorator
-#     - Runtime tier checking
-#     - Graceful error messages
-#     - Test count: 20 tests (decorator)
-
-# [P1_HIGH] Feature registry:
-#     - Central feature→tier mapping
-#     - Dynamic feature registration
-#     - Feature discovery
-#     - Test count: 25 tests (registry)
-
-# [P2_MEDIUM] MCP tool integration:
-#     - Tool→tier mapping
-#     - Tool availability filtering
-#     - Tool metadata enrichment
-#     - Test count: 20 tests (MCP integration)
-
-============================================================================
-PRO TIER - Advanced Feature Gating (P1-P3)
-============================================================================
-
-# [P1_HIGH] Feature bundles:
-#     - Group related features
-#     - Bundle-level gating
-#     - Bundle metadata
-#     - Test count: 20 tests (bundles)
-
-# [P2_MEDIUM] Feature flags:
-#     - Beta feature flags
-#     - A/B testing support
-#     - Feature rollout control
-#     - Test count: 15 tests (flags)
-
-# [P3_LOW] Usage analytics:
-#     - Feature usage tracking
-#     - Tier adoption metrics
-#     - Test count: 10 tests (analytics)
-
-============================================================================
-ENTERPRISE TIER - Advanced Gating Features (P2-P4)
-============================================================================
-
-# [P2_MEDIUM] Custom tiers:
-#     - Define custom tier levels
-#     - Feature override rules
-#     - Organization-specific features
-#     - Test count: 20 tests (custom)
-
-# [P3_LOW] Policy-based gating:
-#     - Governance policy integration
-#     - Audit logging
-#     - Compliance enforcement
-#     - Test count: 15 tests (policy)
-
-# [P4_LOW] Dynamic feature control:
-#     - Remote feature enablement
-#     - Real-time tier updates
-#     - Feature kill switches
-#     - Test count: 10 tests (dynamic)
-
-============================================================================
-TOTAL ESTIMATED TESTS: 155 tests
-============================================================================
 """
+
+# TODO [COMMUNITY_P0_CRITICAL] Implement @requires_tier decorator with runtime tier checking
+# TODO [COMMUNITY_P0_CRITICAL] Add graceful error messages for tier requirement failures
+# TODO [COMMUNITY_P0_CRITICAL] Create decorator tests (20 tests)
+# TODO [COMMUNITY_P1_HIGH] Build central feature→tier mapping registry
+# TODO [COMMUNITY_P1_HIGH] Implement dynamic feature registration
+# TODO [COMMUNITY_P1_HIGH] Add feature discovery functionality
+# TODO [COMMUNITY_P1_HIGH] Create registry tests (25 tests)
+# TODO [COMMUNITY_P2_MEDIUM] Map tools to tier requirements
+# TODO [COMMUNITY_P2_MEDIUM] Implement tool availability filtering
+# TODO [COMMUNITY_P2_MEDIUM] Add tool metadata enrichment
+# TODO [COMMUNITY_P2_MEDIUM] Create MCP integration tests (20 tests)
+# TODO [PRO_P1_HIGH] Implement feature bundles for grouping related features
+# TODO [PRO_P1_HIGH] Add bundle-level gating logic
+# TODO [PRO_P1_HIGH] Create bundle tests (20 tests)
+# TODO [PRO_P2_MEDIUM] Implement beta feature flags system
+# TODO [PRO_P2_MEDIUM] Add A/B testing support
+# TODO [PRO_P2_MEDIUM] Create feature flag tests (15 tests)
+# TODO [PRO_P3_LOW] Implement feature usage tracking
+# TODO [PRO_P3_LOW] Add tier adoption metrics
+# TODO [PRO_P3_LOW] Create analytics tests (10 tests)
+# TODO [ENTERPRISE_P2_MEDIUM] Implement custom tier definitions
+# TODO [ENTERPRISE_P2_MEDIUM] Add feature override rules
+# TODO [ENTERPRISE_P2_MEDIUM] Create custom tier tests (20 tests)
+# TODO [ENTERPRISE_P3_LOW] Implement policy-based gating
+# TODO [ENTERPRISE_P3_LOW] Add audit logging for governance
+# TODO [ENTERPRISE_P3_LOW] Create policy tests (15 tests)
+# TODO [ENTERPRISE_P4_LOW] Implement remote feature enablement
+# TODO [ENTERPRISE_P4_LOW] Add real-time tier updates
+# TODO [ENTERPRISE_P4_LOW] Create dynamic control tests (10 tests)
 
 from enum import Enum
 

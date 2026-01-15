@@ -43,146 +43,113 @@ class CrossFileTaintSource(Enum):
 
 
 # TODO: Enhanced cross-file analysis
-#   - Support circular imports and complex module graphs
-#   - Track taint through decorators and metaclasses
-#   - Analyze taint in class hierarchies (inheritance)
-#   - Support dynamic imports (importlib)
-#   - Handle namespace packages
-
+# TODO: Support circular imports and complex module graphs
+# TODO: Track taint through decorators and metaclasses
+# TODO: Analyze taint in class hierarchies (inheritance)
+# TODO: Support dynamic imports (importlib)
+# TODO: Handle namespace packages
 # TODO: Cross-language taint tracking
-#   - Track taint from Python to JavaScript (Pyodide, Transcrypt)
-#   - Support Python ↔ C/C++ via ctypes/cffi
-#   - Analyze Python ↔ Java via Jython
-#   - Track Python ↔ Rust via PyO3
-#   - Support polyglot microservices (REST/gRPC boundaries)
-
+# TODO: Track taint from Python to JavaScript (Pyodide, Transcrypt)
+# TODO: Support Python ↔ C/C++ via ctypes/cffi
+# TODO: Analyze Python ↔ Java via Jython
+# TODO: Track Python ↔ Rust via PyO3
+# TODO: Support polyglot microservices (REST/gRPC boundaries)
 # TODO: Framework-aware cross-file tracking
-#   - Django request → view → template chains
-#   - Flask route → blueprint → helper chains
-#   - FastAPI dependency injection taint
-#   - Celery task parameter taint
-#   - SQLAlchemy model field taint
-
+# TODO: Django request → view → template chains
+# TODO: Flask route → blueprint → helper chains
+# TODO: FastAPI dependency injection taint
+# TODO: Celery task parameter taint
+# TODO: SQLAlchemy model field taint
 # TODO: Performance optimizations
-#   - Implement demand-driven analysis (only analyze reachable paths)
-#   - Add call graph pruning (remove impossible paths)
-#   - Cache cross-file analysis results
-#   - Parallelize multi-file analysis
-
-# TODO: CrossFileTaint Enhancement Roadmap
-# =========================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-# - TODO [COMMUNITY]: Improve documentation and examples (current)
-# - TODO [COMMUNITY]: Create cross-file vulnerability guide
-# - TODO [COMMUNITY]: Document module resolution strategy
-# - TODO [COMMUNITY]: Add troubleshooting for import issues
-# - TODO [COMMUNITY]: Create performance tuning guide
-# - TODO [COMMUNITY]: Add API reference documentation
-# - TODO [COMMUNITY]: Create quick-start guide
-# - TODO [COMMUNITY]: Document taint propagation rules
-# - TODO [COMMUNITY]: Add examples for different scenarios
-# - TODO [COMMUNITY]: Create debugging guide
-#
-# Examples & Use Cases:
-# - TODO [COMMUNITY]: Add basic cross-file taint example
-# - TODO [COMMUNITY]: Create multi-module vulnerability example
-# - TODO [COMMUNITY]: Add import-based taint example
-# - TODO [COMMUNITY]: Document framework-specific examples
-#
-# Testing:
-# - TODO [COMMUNITY]: Add integration tests for cross-file analysis
-# - TODO [COMMUNITY]: Create test cases for module resolution
-# - TODO [COMMUNITY]: Add import scenario tests
-# - TODO [COMMUNITY]: Document test execution
-#
-# PRO (Enhanced Features):
-# Core Capabilities:
-# - TODO [PRO]: Support dynamic imports (importlib)
-# - TODO [PRO]: Implement circular import handling
-# - TODO [PRO]: Add namespace package support
-# - TODO [PRO]: Support decorator and metaclass taint
-# - TODO [PRO]: Implement class hierarchy analysis
-# - TODO [PRO]: Add framework-specific tracking (Django, Flask)
-# - TODO [PRO]: Support async/await taint propagation
-# - TODO [PRO]: Implement demand-driven analysis
-# - TODO [PRO]: Add call graph visualization
-# - TODO [PRO]: Support incremental analysis
-#
-# Analysis Enhancements:
-# - TODO [PRO]: Implement parameter-based taint tracking
-# - TODO [PRO]: Add return value taint tracking
-# - TODO [PRO]: Support attribute-based taint
-# - TODO [PRO]: Implement global variable taint
-# - TODO [PRO]: Add module-level taint analysis
-# - TODO [PRO]: Support exception-based taint
-# - TODO [PRO]: Implement side effect tracking
-#
-# Framework Support:
-# - TODO [PRO]: Add Django request taint tracking
-# - TODO [PRO]: Implement Flask route taint
-# - TODO [PRO]: Add FastAPI dependency tracking
-# - TODO [PRO]: Support SQLAlchemy ORM taint
-# - TODO [PRO]: Implement Celery task taint
-# - TODO [PRO]: Add context manager taint
-#
-# Performance & Optimization:
-# - TODO [PRO]: Implement demand-driven analysis
-# - TODO [PRO]: Add call graph pruning
-# - TODO [PRO]: Support result caching
-# - TODO [PRO]: Implement incremental analysis
-# - TODO [PRO]: Add parallel multi-file analysis
-#
-# Visualization & Debugging:
-# - TODO [PRO]: Add taint flow visualization
-# - TODO [PRO]: Implement module graph visualization
-# - TODO [PRO]: Add call chain visualization
-# - TODO [PRO]: Support interactive debugging
-# - TODO [PRO]: Implement taint path tracing
-#
-# ENTERPRISE (Advanced Capabilities):
-# Polyglot & Cross-Language:
-# - TODO [ENTERPRISE]: Implement polyglot cross-file tracking
-# - TODO [ENTERPRISE]: Add distributed analysis across clusters
-# - TODO [ENTERPRISE]: Support REST/gRPC API boundary tracking
-# - TODO [ENTERPRISE]: Implement ML-based module importance
-# - TODO [ENTERPRISE]: Add monorepo support
-# - TODO [ENTERPRISE]: Support microservice vulnerability tracking
-# - TODO [ENTERPRISE]: Implement continuous analysis mode
-# - TODO [ENTERPRISE]: Add SIEM integration
-# - TODO [ENTERPRISE]: Support compliance auditing
-# - TODO [ENTERPRISE]: Implement advanced visualization
-#
-# Advanced Features:
-# - TODO [ENTERPRISE]: Implement cross-language taint tracking (Python↔JS, Python↔Java)
-# - TODO [ENTERPRISE]: Support Python↔C/C++ via ctypes/cffi
-# - TODO [ENTERPRISE]: Add Pyodide/Transcrypt support
-# - TODO [ENTERPRISE]: Support PyO3 Rust integration
-# - TODO [ENTERPRISE]: Implement gRPC boundary taint
-# - TODO [ENTERPRISE]: Add REST API taint tracking
-# - TODO [ENTERPRISE]: Support database boundary analysis
-# - TODO [ENTERPRISE]: Implement message queue tracking (RabbitMQ, Kafka)
-#
-# Intelligence & Automation:
-# - TODO [ENTERPRISE]: Add ML-based false positive filtering
-# - TODO [ENTERPRISE]: Implement vulnerability prediction
-# - TODO [ENTERPRISE]: Support exploit chain detection
-# - TODO [ENTERPRISE]: Add supply chain vulnerability detection
-# - TODO [ENTERPRISE]: Implement behavioral anomaly detection
-# - TODO [ENTERPRISE]: Support automated remediation
-# - TODO [ENTERPRISE]: Add risk scoring engine
-# - TODO [ENTERPRISE]: Implement vulnerability triage
-#
-# Integration & Monitoring:
-# - TODO [ENTERPRISE]: Add continuous vulnerability monitoring
-# - TODO [ENTERPRISE]: Support policy enforcement
-# - TODO [ENTERPRISE]: Implement audit trail logging
-# - TODO [ENTERPRISE]: Add multi-tenant support
-# - TODO [ENTERPRISE]: Support custom vulnerability databases
-# - TODO [ENTERPRISE]: Implement automated patching
-# - TODO [ENTERPRISE]: Add incident response workflows
-# - TODO [ENTERPRISE]: Support vulnerability management
+# TODO: Implement demand-driven analysis (only analyze reachable paths)
+# TODO: Add call graph pruning (remove impossible paths)
+# TODO: Cache cross-file analysis results
+# TODO: Parallelize multi-file analysis
+# TODO [COMMUNITY]: Improve documentation and examples (current)
+# TODO [COMMUNITY]: Create cross-file vulnerability guide
+# TODO [COMMUNITY]: Document module resolution strategy
+# TODO [COMMUNITY]: Add troubleshooting for import issues
+# TODO [COMMUNITY]: Create performance tuning guide
+# TODO [COMMUNITY]: Add API reference documentation
+# TODO [COMMUNITY]: Create quick-start guide
+# TODO [COMMUNITY]: Document taint propagation rules
+# TODO [COMMUNITY]: Add examples for different scenarios
+# TODO [COMMUNITY]: Create debugging guide
+# TODO [COMMUNITY]: Add basic cross-file taint example
+# TODO [COMMUNITY]: Create multi-module vulnerability example
+# TODO [COMMUNITY]: Add import-based taint example
+# TODO [COMMUNITY]: Document framework-specific examples
+# TODO [COMMUNITY]: Add integration tests for cross-file analysis
+# TODO [COMMUNITY]: Create test cases for module resolution
+# TODO [COMMUNITY]: Add import scenario tests
+# TODO [COMMUNITY]: Document test execution
+# TODO [PRO]: Support dynamic imports (importlib)
+# TODO [PRO]: Implement circular import handling
+# TODO [PRO]: Add namespace package support
+# TODO [PRO]: Support decorator and metaclass taint
+# TODO [PRO]: Implement class hierarchy analysis
+# TODO [PRO]: Add framework-specific tracking (Django, Flask)
+# TODO [PRO]: Support async/await taint propagation
+# TODO [PRO]: Implement demand-driven analysis
+# TODO [PRO]: Add call graph visualization
+# TODO [PRO]: Support incremental analysis
+# TODO [PRO]: Implement parameter-based taint tracking
+# TODO [PRO]: Add return value taint tracking
+# TODO [PRO]: Support attribute-based taint
+# TODO [PRO]: Implement global variable taint
+# TODO [PRO]: Add module-level taint analysis
+# TODO [PRO]: Support exception-based taint
+# TODO [PRO]: Implement side effect tracking
+# TODO [PRO]: Add Django request taint tracking
+# TODO [PRO]: Implement Flask route taint
+# TODO [PRO]: Add FastAPI dependency tracking
+# TODO [PRO]: Support SQLAlchemy ORM taint
+# TODO [PRO]: Implement Celery task taint
+# TODO [PRO]: Add context manager taint
+# TODO [PRO]: Implement demand-driven analysis
+# TODO [PRO]: Add call graph pruning
+# TODO [PRO]: Support result caching
+# TODO [PRO]: Implement incremental analysis
+# TODO [PRO]: Add parallel multi-file analysis
+# TODO [PRO]: Add taint flow visualization
+# TODO [PRO]: Implement module graph visualization
+# TODO [PRO]: Add call chain visualization
+# TODO [PRO]: Support interactive debugging
+# TODO [PRO]: Implement taint path tracing
+# TODO [ENTERPRISE]: Implement polyglot cross-file tracking
+# TODO [ENTERPRISE]: Add distributed analysis across clusters
+# TODO [ENTERPRISE]: Support REST/gRPC API boundary tracking
+# TODO [ENTERPRISE]: Implement ML-based module importance
+# TODO [ENTERPRISE]: Add monorepo support
+# TODO [ENTERPRISE]: Support microservice vulnerability tracking
+# TODO [ENTERPRISE]: Implement continuous analysis mode
+# TODO [ENTERPRISE]: Add SIEM integration
+# TODO [ENTERPRISE]: Support compliance auditing
+# TODO [ENTERPRISE]: Implement advanced visualization
+# TODO [ENTERPRISE]: Implement cross-language taint tracking (Python↔JS, Python↔Java)
+# TODO [ENTERPRISE]: Support Python↔C/C++ via ctypes/cffi
+# TODO [ENTERPRISE]: Add Pyodide/Transcrypt support
+# TODO [ENTERPRISE]: Support PyO3 Rust integration
+# TODO [ENTERPRISE]: Implement gRPC boundary taint
+# TODO [ENTERPRISE]: Add REST API taint tracking
+# TODO [ENTERPRISE]: Support database boundary analysis
+# TODO [ENTERPRISE]: Implement message queue tracking (RabbitMQ, Kafka)
+# TODO [ENTERPRISE]: Add ML-based false positive filtering
+# TODO [ENTERPRISE]: Implement vulnerability prediction
+# TODO [ENTERPRISE]: Support exploit chain detection
+# TODO [ENTERPRISE]: Add supply chain vulnerability detection
+# TODO [ENTERPRISE]: Implement behavioral anomaly detection
+# TODO [ENTERPRISE]: Support automated remediation
+# TODO [ENTERPRISE]: Add risk scoring engine
+# TODO [ENTERPRISE]: Implement vulnerability triage
+# TODO [ENTERPRISE]: Add continuous vulnerability monitoring
+# TODO [ENTERPRISE]: Support policy enforcement
+# TODO [ENTERPRISE]: Implement audit trail logging
+# TODO [ENTERPRISE]: Add multi-tenant support
+# TODO [ENTERPRISE]: Support custom vulnerability databases
+# TODO [ENTERPRISE]: Implement automated patching
+# TODO [ENTERPRISE]: Add incident response workflows
+# TODO [ENTERPRISE]: Support vulnerability management
 
 
 class CrossFileSink(Enum):

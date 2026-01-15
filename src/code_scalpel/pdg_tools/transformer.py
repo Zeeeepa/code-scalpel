@@ -7,57 +7,48 @@ from typing import Any, Optional
 
 import networkx as nx
 
-# [20251221_TODO] Add correctness-preserving transformation verification:
+# # TODO Add correctness-preserving transformation verification:
 #     - Implement semantic equivalence checking
 #     - Use symbolic execution to verify transformations preserve behavior
 #     - Generate test cases for transformation validation
 #     - Support regression testing for transformed code
 
-# [20251221_TODO] Add transformation conflict detection:
+# # TODO Add transformation conflict detection:
 #     - Detect conflicts when multiple transformations affect same nodes
 #     - Support transformation composition and ordering
 #     - Generate safe transformation sequences
 #     - Implement conflict resolution strategies
 
-"""
-TODO ITEMS:
-
-COMMUNITY TIER (Basic Transformations):
-1. TODO: Implement PDG node removal transformation
-2. TODO: Add node insertion transformation
-3. TODO: Create node replacement transformation
-4. TODO: Implement node merging (combine similar nodes)
-5. TODO: Add basic optimization transformations
-6. TODO: Create transformation validation framework
-7. TODO: Implement transformation rollback capability
-8. TODO: Add transformation history tracking
-9. TODO: Create transformation metrics collection
-10. TODO: Document transformation algorithms
-
-PRO TIER (Advanced Transformations):
-11. TODO: Implement semantic equivalence verification
-12. TODO: Add symbolic execution for behavior preservation
-13. TODO: Create test case generation for transformations
-14. TODO: Implement conflict detection for simultaneous transforms
-15. TODO: Add safe transformation composition and ordering
-16. TODO: Support refactoring transformations (extract method, inline)
-17. TODO: Implement optimization transformations (dead code, simplification)
-18. TODO: Add loop unrolling and code specialization
-19. TODO: Create transformation impact analysis
-20. TODO: Implement incremental transformation for code changes
-
-ENTERPRISE TIER (Large-Scale & Intelligent):
-21. TODO: Implement distributed transformations over sharded PDGs
-22. TODO: Add AI-guided optimal transformation sequences
-23. TODO: Create polyglot transformations (JS, Java, C++)
-24. TODO: Support parallel transformation execution
-25. TODO: Implement automated parallelization transformations
-26. TODO: Add vectorization and SIMD code generation
-27. TODO: Support federated transformations across repos
-28. TODO: Implement blockchain-based transformation verification
-29. TODO: Create quantum circuit transformation compilation
-30. TODO: Add machine learning for optimal transformation selection
-"""
+# TODO [COMMUNITY] Implement PDG node removal transformation
+# TODO [COMMUNITY] Add node insertion transformation
+# TODO [COMMUNITY] Create node replacement transformation
+# TODO [COMMUNITY] Implement node merging (combine similar nodes)
+# TODO [COMMUNITY] Add basic optimization transformations
+# TODO [COMMUNITY] Create transformation validation framework
+# TODO [COMMUNITY] Implement transformation rollback capability
+# TODO [COMMUNITY] Add transformation history tracking
+# TODO [COMMUNITY] Create transformation metrics collection
+# TODO [COMMUNITY] Document transformation algorithms
+# TODO [PRO] Implement semantic equivalence verification
+# TODO [PRO] Add symbolic execution for behavior preservation
+# TODO [PRO] Create test case generation for transformations
+# TODO [PRO] Implement conflict detection for simultaneous transforms
+# TODO [PRO] Add safe transformation composition and ordering
+# TODO [PRO] Support refactoring transformations (extract method, inline)
+# TODO [PRO] Implement optimization transformations (dead code, simplification)
+# TODO [PRO] Add loop unrolling and code specialization
+# TODO [PRO] Create transformation impact analysis
+# TODO [PRO] Implement incremental transformation for code changes
+# TODO [ENTERPRISE] Implement distributed transformations over sharded PDGs
+# TODO [ENTERPRISE] Add AI-guided optimal transformation sequences
+# TODO [ENTERPRISE] Create polyglot transformations (JS, Java, C++)
+# TODO [ENTERPRISE] Support parallel transformation execution
+# TODO [ENTERPRISE] Implement automated parallelization transformations
+# TODO [ENTERPRISE] Add vectorization and SIMD code generation
+# TODO [ENTERPRISE] Support federated transformations across repos
+# TODO [ENTERPRISE] Implement blockchain-based transformation verification
+# TODO [ENTERPRISE] Create quantum circuit transformation compilation
+# TODO [ENTERPRISE] Add machine learning for optimal transformation selection
 
 
 class TransformationType(Enum):
@@ -92,19 +83,19 @@ class PDGTransformer:
         self.history: list[tuple[TransformationType, TransformationResult]] = []
         self.node_counter = defaultdict(int)
 
-        # [20251221_TODO] Add transformation recommendation engine:
+        # # TODO Add transformation recommendation engine:
         #     - Suggest transformations based on code patterns
         #     - Rank transformations by impact and safety
         #     - Support interactive transformation selection
         #     - Learn from developer acceptance/rejection patterns
 
-        # [20251221_TODO] Add parallel safe transformation:
+        # # TODO Add parallel safe transformation:
         #     - Detect independently applicable transformations
         #     - Support parallel transformation application
         #     - Ensure no race conditions in transformation order
         #     - Aggregate results from parallel transformations
 
-        # [20251221_TODO] Add rollback/undo capabilities:
+        # # TODO Add rollback/undo capabilities:
         #     - Support full undo of transformation sequences
         #     - Implement selective transformation rollback
         #     - Track transformation dependencies for partial undo

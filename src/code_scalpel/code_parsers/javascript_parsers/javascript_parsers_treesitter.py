@@ -6,14 +6,14 @@ Tree-sitter provides incremental parsing with excellent performance for large fi
 This parser supports JavaScript, TypeScript, JSX, and TSX.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add ES2024+ feature detection via tree-sitter
-[20251221_TODO] Implement control flow graph (CFG) construction
-[20251221_TODO] Add JSX attribute analysis (children, props, spreading)
-[20251221_TODO] Support TypeScript-specific node extraction
-[20251221_TODO] Implement incremental analysis with syntax error recovery
-[20251221_TODO] Add source map integration for mapped locations
-[20251221_TODO] Support watch mode for continuous parsing
-[20251221_TODO] Add metrics caching with invalidation
+# TODO Add ES2024+ feature detection via tree-sitter
+# TODO Implement control flow graph (CFG) construction
+# TODO Add JSX attribute analysis (children, props, spreading)
+# TODO Support TypeScript-specific node extraction
+# TODO Implement incremental analysis with syntax error recovery
+# TODO Add source map integration for mapped locations
+# TODO Support watch mode for continuous parsing
+# TODO Add metrics caching with invalidation
 
 Features:
     Parsing:

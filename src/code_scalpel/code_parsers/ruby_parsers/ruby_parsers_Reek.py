@@ -2,15 +2,14 @@
 """
 Reek Parser - Ruby Code Smell Detection
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse JSON output from reek --format=json
-2. Parse XML output from reek
-3. Execute Reek via subprocess/bundler
-4. Load configuration from .reek.yml files
-5. Categorize smells by type and severity
-6. Detect duplicated code smells
-7. Detect long method smells
-8. Generate JSON/XML/HTML reports
+# TODO [PRO] Parse JSON output from reek --format=json
+# TODO [PRO] Parse XML output from reek
+# TODO [PRO] Execute Reek via subprocess/bundler
+# TODO [PRO] Load configuration from .reek.yml files
+# TODO [PRO] Categorize smells by type and severity
+# TODO [PRO] Detect duplicated code smells
+# TODO [PRO] Detect long method smells
+# TODO [PRO] Generate JSON/XML/HTML reports
 """
 
 from dataclasses import dataclass
@@ -68,35 +67,35 @@ class ReekParser:
         self.smells: List[ReekSmell] = []
 
     def parse_json_report(self, report_path: Path) -> List[ReekSmell]:
-        """Parse Reek JSON report - Phase 2 TODO [20251221_TODO]"""
+        """Parse Reek JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def parse_xml_report(self, report_path: Path) -> List[ReekSmell]:
-        """Parse Reek XML report - Phase 2 TODO [20251221_TODO]"""
+        """Parse Reek XML report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def execute_reek(
         self, paths: List[Path], config: ReekConfig = None
     ) -> List[ReekSmell]:
-        """Execute Reek analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute Reek analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Reek execution")
 
     def load_config(self, config_file: Path) -> ReekConfig:
-        """Load Reek configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load Reek configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_smells(self, smells: List[ReekSmell]) -> Dict[str, List[ReekSmell]]:
-        """Categorize smells by type - Phase 2 TODO [20251221_TODO]"""
+        """Categorize smells by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Smell categorization")
 
     def detect_duplicated_code(self, smells: List[ReekSmell]) -> List[ReekSmell]:
-        """Filter for duplicated code smells - Phase 2 TODO [20251221_TODO]"""
+        """Filter for duplicated code smells - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Duplicated code detection")
 
     def detect_long_methods(self, smells: List[ReekSmell]) -> List[ReekSmell]:
-        """Filter for long method smells - Phase 2 TODO [20251221_TODO]"""
+        """Filter for long method smells - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Long method detection")
 
     def generate_report(self, smells: List[ReekSmell], format: str = "json") -> str:
-        """Generate smell analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate smell analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

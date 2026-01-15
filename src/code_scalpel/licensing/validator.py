@@ -10,27 +10,27 @@ COMPLETED ITEMS: validator.py (v3.0.5 - 2025-12-25)
 ============================================================================
 COMMUNITY TIER (P0-P2)
 ============================================================================
-# ✅ [P0_CRITICAL] Basic validation interface
-# ✅ [P1_HIGH] COMMUNITY tier always valid
-# ✅ [P2_MEDIUM] Validation result caching (5-minute TTL)
+# [P0_CRITICAL] Basic validation interface
+# [P1_HIGH] COMMUNITY tier always valid
+# [P2_MEDIUM] Validation result caching (5-minute TTL)
 
 ============================================================================
 PRO TIER (P1-P3)
 ============================================================================
-# ✅ [P1_HIGH] License key format validation
-# ✅ [P1_HIGH] License signature verification (HMAC-SHA256)
-# ✅ [P2_MEDIUM] Offline validation support
-# ✅ [P2_MEDIUM] Online validation fallback (with timeout)
-# ✅ [P3_LOW] License expiration checking (Unix timestamp parsing)
+# [P1_HIGH] License key format validation
+# [P1_HIGH] License signature verification (HMAC-SHA256)
+# [P2_MEDIUM] Offline validation support
+# [P2_MEDIUM] Online validation fallback (with timeout)
+# [P3_LOW] License expiration checking (Unix timestamp parsing)
 
 ============================================================================
 ENTERPRISE TIER (P2-P4)
 ============================================================================
-# ✅ [P2_MEDIUM] Organization binding (SHA-256 hash verification)
-# ✅ [P2_MEDIUM] Seat limit enforcement (usage tracking)
-# ✅ [P3_LOW] Hardware fingerprinting (machine ID + system info)
-# ✅ [P3_LOW] License server integration (HTTP POST with JSON)
-# ✅ [P4_LOW] Custom validation rules (embedded in license key)
+# [P2_MEDIUM] Organization binding (SHA-256 hash verification)
+# [P2_MEDIUM] Seat limit enforcement (usage tracking)
+# [P3_LOW] Hardware fingerprinting (machine ID + system info)
+# [P3_LOW] License server integration (HTTP POST with JSON)
+# [P4_LOW] Custom validation rules (embedded in license key)
 ============================================================================
 """
 

@@ -13,101 +13,88 @@ T = TypeVar("T")
 
 
 class IncrementalAnalyzer(Generic[T]):
-    """[20251214_FEATURE] Dependency-aware incremental analysis.
-
-    TODO ITEMS: cache/incremental_analyzer.py
-    ======================================================================
-    COMMUNITY TIER - Core Incremental Analysis
-    ======================================================================
-    1. Add IncrementalAnalyzer.record_dependency() tracking
-    2. Add IncrementalAnalyzer.get_dependents() lookup
-    3. Add IncrementalAnalyzer.update_file() with recomputation
-    4. Add IncrementalAnalyzer.clear() reset method
-    5. Add dependency graph data structure
-    6. Add bidirectional dependency tracking
-    7. Add dependency weight/priority support
-    8. Add topological sorting for update order
-    9. Add dependency cycle detection
-    10. Add affected file computation
-    11. Add partial invalidation support
-    12. Add batch dependency updates
-    13. Add dependency statistics tracking
-    14. Add dependency visualization support
-    15. Add invalidation chain tracking
-    16. Add dependency validation
-    17. Add dependency consistency checking
-    18. Add dependency persistence (disk)
-    19. Add dependency recovery on errors
-    20. Add dependency recomputation queuing
-    21. Add dependency prioritization
-    22. Add dependency aging/TTL
-    23. Add dependency bloom filters (fast neg checks)
-    24. Add dependency error handling
-    25. Add dependency reporting
-
-    ======================================================================
-    PRO TIER - Advanced Incremental Analysis
-    ======================================================================
-    26. Add persist dependency graph to disk across restarts
-    27. Add cycle detection in dependency graph
-    28. Add support for bidirectional dependencies (call graphs)
-    29. Add partial invalidation for unchanged parts
-    30. Add dependency weight tracking for prioritization
-    31. Add reverse graph for faster lookups
-    32. Add dependency graph compression
-    33. Add incremental dependency updates
-    34. Add smart dependency invalidation
-    35. Add dependency change detection
-    36. Add incremental analysis scheduling
-    37. Add dependency graph caching
-    38. Add dependency affinity tracking
-    39. Add dependency load balancing
-    40. Add dependency conflict resolution
-    41. Add dependency optimization passes
-    42. Add dependency latency profiling
-    43. Add dependency memory optimization
-    44. Add dependency parallelization support
-    45. Add dependency streaming updates
-    46. Add dependency batch processing
-    47. Add dependency snapshot support
-    48. Add dependency recovery mechanisms
-    49. Add dependency metrics collection
-    50. Add dependency debugging tools
-
-    ======================================================================
-    ENTERPRISE TIER - Distributed & Federated Analysis
-    ======================================================================
-    51. Add distributed incremental analysis across agents
-    52. Add federated analysis across organizations
-    53. Add multi-region dependency replication
-    54. Add distributed dependency consensus
-    55. Add distributed dependency locking
-    56. Add dependency change event streaming
-    57. Add dependency change notifications
-    58. Add dependency cost tracking per org
-    59. Add dependency quota enforcement
-    60. Add dependency SLA monitoring
-    61. Add dependency audit trail logging
-    62. Add dependency access control (RBAC)
-    63. Add dependency multi-tenancy isolation
-    64. Add dependency disaster recovery
-    65. Add dependency cross-region failover
-    66. Add dependency data retention policies
-    67. Add dependency billing integration
-    68. Add dependency executive reporting
-    69. Add dependency anomaly detection
-    70. Add dependency circuit breaker
-    71. Add dependency health monitoring
-    72. Add dependency chaos engineering tests
-    73. Add dependency capacity planning
-    74. Add dependency AI-based optimization
-    75. Add dependency predictive invalidation
-    """
+    """[20251214_FEATURE] Dependency-aware incremental analysis."""
+    
+    # TODO [COMMUNITY] Add IncrementalAnalyzer.record_dependency() tracking
+    # TODO [COMMUNITY] Add IncrementalAnalyzer.get_dependents() lookup
+    # TODO [COMMUNITY] Add IncrementalAnalyzer.update_file() with recomputation
+    # TODO [COMMUNITY] Add IncrementalAnalyzer.clear() reset method
+    # TODO [COMMUNITY] Add dependency graph data structure
+    # TODO [COMMUNITY] Add bidirectional dependency tracking
+    # TODO [COMMUNITY] Add dependency weight/priority support
+    # TODO [COMMUNITY] Add topological sorting for update order
+    # TODO [COMMUNITY] Add dependency cycle detection
+    # TODO [COMMUNITY] Add affected file computation
+    # TODO [COMMUNITY] Add partial invalidation support
+    # TODO [COMMUNITY] Add batch dependency updates
+    # TODO [COMMUNITY] Add dependency statistics tracking
+    # TODO [COMMUNITY] Add dependency visualization support
+    # TODO [COMMUNITY] Add invalidation chain tracking
+    # TODO [COMMUNITY] Add dependency validation
+    # TODO [COMMUNITY] Add dependency consistency checking
+    # TODO [COMMUNITY] Add dependency persistence (disk)
+    # TODO [COMMUNITY] Add dependency recovery on errors
+    # TODO [COMMUNITY] Add dependency recomputation queuing
+    # TODO [COMMUNITY] Add dependency prioritization
+    # TODO [COMMUNITY] Add dependency aging/TTL
+    # TODO [COMMUNITY] Add dependency bloom filters (fast neg checks)
+    # TODO [COMMUNITY] Add dependency error handling
+    # TODO [COMMUNITY] Add dependency reporting
+    # TODO [PRO] Add persist dependency graph to disk across restarts
+    # TODO [PRO] Add cycle detection in dependency graph
+    # TODO [PRO] Add support for bidirectional dependencies (call graphs)
+    # TODO [PRO] Add partial invalidation for unchanged parts
+    # TODO [PRO] Add dependency weight tracking for prioritization
+    # TODO [PRO] Add reverse graph for faster lookups
+    # TODO [PRO] Add dependency graph compression
+    # TODO [PRO] Add incremental dependency updates
+    # TODO [PRO] Add smart dependency invalidation
+    # TODO [PRO] Add dependency change detection
+    # TODO [PRO] Add incremental analysis scheduling
+    # TODO [PRO] Add dependency graph caching
+    # TODO [PRO] Add dependency affinity tracking
+    # TODO [PRO] Add dependency load balancing
+    # TODO [PRO] Add dependency conflict resolution
+    # TODO [PRO] Add dependency optimization passes
+    # TODO [PRO] Add dependency latency profiling
+    # TODO [PRO] Add dependency memory optimization
+    # TODO [PRO] Add dependency parallelization support
+    # TODO [PRO] Add dependency streaming updates
+    # TODO [PRO] Add dependency batch processing
+    # TODO [PRO] Add dependency snapshot support
+    # TODO [PRO] Add dependency recovery mechanisms
+    # TODO [PRO] Add dependency metrics collection
+    # TODO [PRO] Add dependency debugging tools
+    # TODO [ENTERPRISE] Add distributed incremental analysis across agents
+    # TODO [ENTERPRISE] Add federated analysis across organizations
+    # TODO [ENTERPRISE] Add multi-region dependency replication
+    # TODO [ENTERPRISE] Add distributed dependency consensus
+    # TODO [ENTERPRISE] Add distributed dependency locking
+    # TODO [ENTERPRISE] Add dependency change event streaming
+    # TODO [ENTERPRISE] Add dependency change notifications
+    # TODO [ENTERPRISE] Add dependency cost tracking per org
+    # TODO [ENTERPRISE] Add dependency quota enforcement
+    # TODO [ENTERPRISE] Add dependency SLA monitoring
+    # TODO [ENTERPRISE] Add dependency audit trail logging
+    # TODO [ENTERPRISE] Add dependency access control (RBAC)
+    # TODO [ENTERPRISE] Add dependency multi-tenancy isolation
+    # TODO [ENTERPRISE] Add dependency disaster recovery
+    # TODO [ENTERPRISE] Add dependency cross-region failover
+    # TODO [ENTERPRISE] Add dependency data retention policies
+    # TODO [ENTERPRISE] Add dependency billing integration
+    # TODO [ENTERPRISE] Add dependency executive reporting
+    # TODO [ENTERPRISE] Add dependency anomaly detection
+    # TODO [ENTERPRISE] Add dependency circuit breaker
+    # TODO [ENTERPRISE] Add dependency health monitoring
+    # TODO [ENTERPRISE] Add dependency chaos engineering tests
+    # TODO [ENTERPRISE] Add dependency capacity planning
+    # TODO [ENTERPRISE] Add dependency AI-based optimization
+    # TODO [ENTERPRISE] Add dependency predictive invalidation
 
     def __init__(self, cache: AnalysisCache[T]) -> None:
         self.cache = cache
         self.dependency_graph: Dict[str, Set[str]] = {}
-        # [20251221_TODO] Phase 2: Add reverse graph for faster lookups
+        # # TODO Phase 2: Add reverse graph for faster lookups
 
     def record_dependency(self, source: Path | str, depends_on: Path | str) -> None:
         source_key = str(Path(source).resolve())
@@ -122,10 +109,10 @@ class IncrementalAnalyzer(Generic[T]):
     ) -> Set[str]:
         """Update a file and return affected dependents.
 
-        [20251221_TODO] Phase 2: Add batch update support for multiple files
-        [20251221_TODO] Phase 2: Implement depth limit to prevent cascading invalidation
-        [20251221_TODO] Phase 2: Return invalidation chain for debugging
-        [20251221_TODO] Phase 2: Add metrics for invalidation size/depth
+        # TODO Phase 2: Add batch update support for multiple files
+        # TODO Phase 2: Implement depth limit to prevent cascading invalidation
+        # TODO Phase 2: Return invalidation chain for debugging
+        # TODO Phase 2: Add metrics for invalidation size/depth
         """
         path = Path(file_path).resolve()
         key = str(path)

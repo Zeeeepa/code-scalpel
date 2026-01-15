@@ -2,130 +2,24 @@
 
 [20251224_FEATURE] Stub adapter for Swift parsing support.
 
-============================================================================
-TODO ITEMS: code_parsers/adapters/swift_adapter.py
-============================================================================
-COMMUNITY TIER - Core Swift Adapter (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Implement basic Swift parsing:
-    - Integrate tree-sitter-swift or SourceKit
-    - Parse class/struct/enum definitions
-    - Extract function/method declarations
-    - Parse protocol declarations
-    - Support extension extraction
-    - Test count: 40 tests (basic parsing, extraction)
-
-[P1_HIGH] Add Swift version detection:
-    - Detect Swift version (5.5, 5.6, 5.7, 5.8, 5.9)
-    - Support version-specific features
-    - Handle syntax changes
-    - Add compatibility warnings
-    - Test count: 25 tests (version detection)
-
-[P1_HIGH] Enhance extraction:
-    - Extract closures
-    - Parse property wrappers
-    - Extract computed properties
-    - Parse subscripts
-    - Support opaque return types
-    - Test count: 30 tests (extraction completeness)
-
-[P2_MEDIUM] Add module analysis:
-    - Parse import statements
-    - Build module dependency graph
-    - Detect SPM usage
-    - Find unused imports
-    - Test count: 25 tests (module analysis)
-
-[P2_MEDIUM] Implement error handling:
-    - Better syntax error messages
-    - Support partial parsing
-    - Add error recovery
-    - Provide fix suggestions
-    - Test count: 20 tests (error handling)
-
-============================================================================
-PRO TIER - Advanced Swift Adapter (P1-P3)
-============================================================================
-
-[P1_HIGH] Integrate static analysis:
-    - Add SwiftLint integration
-    - Support Tailor checks
-    - Integrate SonarQube for Swift
-    - Add Swift Package Manager checks
-    - Test count: 40 tests (static analysis)
-
-[P1_HIGH] Add semantic analysis:
-    - Resolve type information via SourceKit
-    - Track protocol conformance
-    - Analyze inheritance chains
-    - Detect optional chaining patterns
-    - Test count: 45 tests (semantic analysis)
-
-[P2_MEDIUM] Implement code transformation:
-    - Support refactoring operations
-    - Add code formatting (swift-format)
-    - Generate modified AST
-    - Support code generation
-    - Test count: 30 tests (transformation)
-
-[P2_MEDIUM] Add framework-specific analysis:
-    - Detect SwiftUI usage
-    - Identify UIKit patterns
-    - Find Combine usage
-    - Analyze async/await patterns
-    - Test count: 35 tests (framework analysis)
-
-[P3_LOW] Support modern Swift features:
-    - Parse actors (Swift 5.5+)
-    - Extract async/await
-    - Parse result builders
-    - Support global actors
-    - Test count: 30 tests (modern features)
-
-============================================================================
-ENTERPRISE TIER - Enterprise Swift Adapter (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Add security analysis:
-    - Detect insecure data storage
-    - Find weak crypto usage
-    - Identify authentication issues
-    - Analyze network security
-    - Test count: 45 tests (security scanning)
-
-[P2_MEDIUM] Implement incremental parsing:
-    - Parse only changed files
-    - Cache parsed results
-    - Support workspace-level analysis
-    - Add efficient AST diffing
-    - Test count: 30 tests (incremental parsing)
-
-[P3_LOW] Add enterprise compliance:
-    - Check coding standards
-    - Enforce mandatory documentation
-    - Validate license headers
-    - Generate compliance reports
-    - Test count: 30 tests (compliance)
-
-[P3_LOW] Implement performance profiling:
-    - Profile parsing time
-    - Track memory usage
-    - Identify bottlenecks
-    - Add optimization hints
-    - Test count: 20 tests (profiling)
-
-[P4_LOW] Add ML-driven analysis:
-    - Predict code quality
-    - Suggest refactorings
-    - Detect code clones
-    - Find potential bugs
-    - Test count: 30 tests (ML integration)
-
-============================================================================
-TOTAL TEST ESTIMATE: 475 tests (160 COMMUNITY + 180 PRO + 135 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Implement basic Swift parsing with tree-sitter-swift or SourceKit
+# TODO [COMMUNITY] Parse class/struct/enum/protocol definitions and extract methods
+# TODO [COMMUNITY] Add Swift version detection (5.5-5.9) and version-specific features
+# TODO [COMMUNITY] Extract closures, property wrappers, and computed properties
+# TODO [COMMUNITY] Add module analysis with SPM dependency graph
+# TODO [COMMUNITY] Detect unused imports and parse import statements
+# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
+# TODO [PRO] Integrate static analysis (SwiftLint, Tailor, SonarQube, SPM checks)
+# TODO [PRO] Add semantic analysis with type resolution via SourceKit
+# TODO [PRO] Track protocol conformance and optional chaining patterns
+# TODO [PRO] Implement code transformation with swift-format and refactoring
+# TODO [PRO] Detect SwiftUI, UIKit, Combine, and async/await patterns
+# TODO [PRO] Support modern Swift features (actors, result builders, global actors)
+# TODO [ENTERPRISE] Add security analysis (insecure storage, weak crypto, auth issues)
+# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
+# TODO [ENTERPRISE] Add enterprise compliance checking and reporting
+# TODO [ENTERPRISE] Implement performance profiling and optimization hints
+# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List
@@ -140,11 +34,11 @@ class SwiftParserAdapter(IParser):
     [20251224_STUB] Placeholder for Swift parser integration.
 
     To implement:
-        1. Choose backend (tree-sitter-swift or SourceKit)
+        1. Choose backend and integrate parser
         2. Implement parse() method
         3. Add Swift-specific extraction methods
         4. Support Swift version detection
-        5. Add async/await pattern detection
+        5. Add framework pattern detection
     """
 
     def __init__(self):
@@ -163,5 +57,5 @@ class SwiftParserAdapter(IParser):
         raise NotImplementedError("Swift function extraction not yet implemented")
 
     def get_classes(self, ast_tree: Any) -> List[str]:
-        """Get class/struct names from Swift AST (stub)."""
+        """Get class names from Swift AST (stub)."""
         raise NotImplementedError("Swift class extraction not yet implemented")

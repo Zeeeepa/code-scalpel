@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""
-Golangci-Lint Parser - Comprehensive Go Linter Aggregation
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse golangci-lint JSON output
-2. Execute golangci-lint analysis via subprocess
-3. Load configuration from .golangci.yml
-4. Aggregate 100+ linter results
-5. Categorize issues by linter and type
-6. Generate JSON/SARIF/HTML reports
-7. Analyze issue patterns
-8. Performance metrics calculation
-"""
+# TODO [PHASE 2] Parse golangci-lint JSON output
+# TODO [PHASE 2] Execute golangci-lint analysis via subprocess
+# TODO [PHASE 2] Load configuration from .golangci.yml
+# TODO [PHASE 2] Aggregate 100+ linter results
+# TODO [PHASE 2] Categorize issues by linter and type
+# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
+# TODO [PHASE 2] Analyze issue patterns
+# TODO [PHASE 2] Performance metrics calculation
 
 from dataclasses import dataclass
 from enum import Enum
@@ -89,23 +84,23 @@ class GolangciLintParser:
     def execute_golangci_lint(
         self, paths: List[Path], config: GolangciLintConfig = None
     ) -> List[LintIssue]:
-        """Execute golangci-lint analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute golangci-lint analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Golangci-lint execution")
 
     def parse_json_report(self, report_path: Path) -> List[LintIssue]:
-        """Parse golangci-lint JSON report - Phase 2 TODO [20251221_TODO]"""
+        """Parse golangci-lint JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GolangciLintConfig:
-        """Load .golangci.yml configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load .golangci.yml configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_by_linter(
         self, issues: List[LintIssue]
     ) -> Dict[LinterType, List[LintIssue]]:
-        """Categorize issues by linter - Phase 2 TODO [20251221_TODO]"""
+        """Categorize issues by linter - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Issue categorization by linter")
 
     def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:
-        """Generate analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

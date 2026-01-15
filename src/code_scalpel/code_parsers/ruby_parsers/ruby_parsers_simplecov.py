@@ -2,14 +2,13 @@
 """
 SimpleCov Parser - Ruby Code Coverage Analysis
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse SimpleCov .resultset.json file
-2. Parse raw coverage data structures
-3. Calculate overall coverage metrics
-4. Identify uncovered lines in files
-5. Analyze coverage trends over time
-6. Generate coverage analysis reports
-7. Identify coverage hotspots
+# TODO [ENTERPRISE] Parse SimpleCov .resultset.json file
+# TODO [ENTERPRISE] Parse raw coverage data structures
+# TODO [ENTERPRISE] Calculate overall coverage metrics
+# TODO [ENTERPRISE] Identify uncovered lines in files
+# TODO [ENTERPRISE] Analyze coverage trends over time
+# TODO [ENTERPRISE] Generate coverage analysis reports
+# TODO [ENTERPRISE] Identify coverage hotspots
 """
 
 from dataclasses import dataclass
@@ -55,31 +54,31 @@ class SimpleCovParser:
         self.metrics: Optional[CoverageMetrics] = None
 
     def parse_resultset_json(self, resultset_path: Path) -> CoverageMetrics:
-        """Parse SimpleCov .resultset.json file - Phase 2 TODO [20251221_TODO]"""
+        """Parse SimpleCov .resultset.json file - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def parse_coverage_data(self, coverage_data: Dict) -> List[FileCoverage]:
-        """Parse raw coverage data structure - Phase 2 TODO [20251221_TODO]"""
+        """Parse raw coverage data structure - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Coverage data parsing")
 
     def calculate_coverage_metrics(self, files: List[FileCoverage]) -> CoverageMetrics:
-        """Calculate overall coverage metrics - Phase 2 TODO [20251221_TODO]"""
+        """Calculate overall coverage metrics - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def identify_uncovered_lines(self, file_coverage: FileCoverage) -> List[int]:
-        """Identify uncovered lines in a file - Phase 2 TODO [20251221_TODO]"""
+        """Identify uncovered lines in a file - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Uncovered line identification")
 
     def analyze_coverage_trends(self, historical_data: List[CoverageMetrics]) -> Dict:
-        """Analyze coverage trends over time - Phase 2 TODO [20251221_TODO]"""
+        """Analyze coverage trends over time - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Trend analysis")
 
     def generate_coverage_report(self, metrics: CoverageMetrics) -> str:
-        """Generate coverage analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate coverage analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def identify_coverage_hotspots(
         self, files: List[FileCoverage]
     ) -> List[FileCoverage]:
-        """Identify files with lowest coverage - Phase 2 TODO [20251221_TODO]"""
+        """Identify files with lowest coverage - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Hotspot identification")

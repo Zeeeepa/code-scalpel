@@ -7,57 +7,48 @@ from typing import Optional
 import networkx as nx
 from graphviz import Digraph
 
-# [20251221_TODO] Add interactive visualization framework:
+# # TODO Add interactive visualization framework:
 #     - Build web UI for PDG exploration (React/Vue)
 #     - Implement zoom, pan, and search capabilities
 #     - Add real-time updates for dynamic PDGs
 #     - Support code preview and jump-to-source
 
-# [20251221_TODO] Add visualization analytics:
+# # TODO Add visualization analytics:
 #     - Track user interaction patterns on visualizations
 #     - Identify frequently accessed graph regions
 #     - Suggest interesting subgraphs based on history
 #     - Generate heatmaps of high-risk code areas
 
-"""
-TODO ITEMS:
-
-COMMUNITY TIER (Basic Visualization):
-1. TODO: Implement Graphviz DOT file generation
-2. TODO: Add PNG/SVG export for visualization
-3. TODO: Create basic node coloring by type
-4. TODO: Implement edge styling by dependency type
-5. TODO: Add legend and node/edge labels
-6. TODO: Create layout customization (hierarchical, circular)
-7. TODO: Implement PDF export for reports
-8. TODO: Add graph clustering visualization
-9. TODO: Create basic filtering UI
-10. TODO: Document visualization formats and options
-
-PRO TIER (Advanced Visualization):
-11. TODO: Build interactive web UI (React/Vue/D3.js)
-12. TODO: Implement zoom and pan capabilities
-13. TODO: Add search and highlight features
-14. TODO: Create code preview on node hover
-15. TODO: Implement jump-to-source functionality
-16. TODO: Add real-time visualization updates
-17. TODO: Create custom node styling and coloring
-18. TODO: Implement focus+context navigation
-19. TODO: Add graph layout algorithms (force-directed, hierarchical)
-20. TODO: Support multiple PDG visualization formats
-
-ENTERPRISE TIER (Scalability & Intelligence):
-21. TODO: Implement distributed graph visualization
-22. TODO: Add streaming visualization for large PDGs
-23. TODO: Create progressive rendering for real-time updates
-24. TODO: Implement collaborative visualization for teams
-25. TODO: Add visualization analytics and heatmaps
-26. TODO: Support augmented reality PDG visualization
-27. TODO: Create AI-powered graph layout optimization
-28. TODO: Implement 3D visualization for complex dependencies
-29. TODO: Add quantum circuit visualization
-30. TODO: Create blockchain-based visualization provenance
-"""
+# TODO [COMMUNITY_TIER] Implement Graphviz DOT file generation
+# TODO [COMMUNITY_TIER] Add PNG/SVG export for visualization
+# TODO [COMMUNITY_TIER] Create basic node coloring by type
+# TODO [COMMUNITY_TIER] Implement edge styling by dependency type
+# TODO [COMMUNITY_TIER] Add legend and node/edge labels
+# TODO [COMMUNITY_TIER] Create layout customization (hierarchical, circular)
+# TODO [COMMUNITY_TIER] Implement PDF export for reports
+# TODO [COMMUNITY_TIER] Add graph clustering visualization
+# TODO [COMMUNITY_TIER] Create basic filtering UI
+# TODO [COMMUNITY_TIER] Document visualization formats and options
+# TODO [PRO_TIER] Build interactive web UI (React/Vue/D3.js)
+# TODO [PRO_TIER] Implement zoom and pan capabilities
+# TODO [PRO_TIER] Add search and highlight features
+# TODO [PRO_TIER] Create code preview on node hover
+# TODO [PRO_TIER] Implement jump-to-source functionality
+# TODO [PRO_TIER] Add real-time visualization updates
+# TODO [PRO_TIER] Create custom node styling and coloring
+# TODO [PRO_TIER] Implement focus+context navigation
+# TODO [PRO_TIER] Add graph layout algorithms (force-directed, hierarchical)
+# TODO [PRO_TIER] Support multiple PDG visualization formats
+# TODO [ENTERPRISE_TIER] Implement distributed graph visualization
+# TODO [ENTERPRISE_TIER] Add streaming visualization for large PDGs
+# TODO [ENTERPRISE_TIER] Create progressive rendering for real-time updates
+# TODO [ENTERPRISE_TIER] Implement collaborative visualization for teams
+# TODO [ENTERPRISE_TIER] Add visualization analytics and heatmaps
+# TODO [ENTERPRISE_TIER] Support augmented reality PDG visualization
+# TODO [ENTERPRISE_TIER] Create AI-powered graph layout optimization
+# TODO [ENTERPRISE_TIER] Implement 3D visualization for complex dependencies
+# TODO [ENTERPRISE_TIER] Add quantum circuit visualization
+# TODO [ENTERPRISE_TIER] Create blockchain-based visualization provenance
 
 
 class VisualizationFormat(Enum):
@@ -94,19 +85,19 @@ class PDGVisualizer:
         self.config = config or VisualizationConfig()
         self._init_default_styles()
 
-        # [20251221_TODO] Add adaptive visualization:
+        # # TODO Add adaptive visualization:
         #     - Detect graph complexity and auto-adjust layout
         #     - Hide/collapse low-importance subgraphs
         #     - Focus visualization on user-specified regions
         #     - Support progressive rendering for large graphs
 
-        # [20251221_TODO] Add annotation capabilities:
+        # # TODO Add annotation capabilities:
         #     - Allow user annotations on PDG nodes/edges
         #     - Support collaborative annotations
         #     - Track annotation history and changes
         #     - Export annotations with PDG snapshots
 
-        # [20251221_TODO] Add comparison visualization:
+        # # TODO Add comparison visualization:
         #     - Side-by-side visualization of multiple PDGs
         #     - Highlight differences between PDGs
         #     - Support diff mode for before/after transformations

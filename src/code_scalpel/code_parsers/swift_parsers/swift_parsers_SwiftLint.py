@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-"""
-SwiftLint Parser - Swift Code Style and Linting Analysis
+"""SwiftLint Parser - Swift Code Style and Linting Analysis"""
 
-PHASE 2 IMPLEMENTATION TODOS [20251221_TODO]:
-1. Parse JSON output from swiftlint --format=json
-2. Execute SwiftLint via subprocess/SPM
-3. Load configuration from .swiftlint.yml files
-4. Categorize violations by rule category
-5. Apply auto-fixes via swiftlint --fix
-6. Generate JSON/SARIF/HTML reports
-7. Calculate metrics and severity scores
-8. Detect iOS/macOS specific violations
-9. Analyze code complexity metrics
-"""
+# TODO [PRO] Parse JSON output from swiftlint --format=json
+# TODO [PRO] Execute SwiftLint via subprocess/SPM
+# TODO [PRO] Load configuration from .swiftlint.yml files
+# TODO [PRO] Categorize violations by rule category
+# TODO [PRO] Apply auto-fixes via swiftlint --fix
+# TODO [ENTERPRISE] Generate JSON/SARIF/HTML reports
+# TODO [ENTERPRISE] Calculate metrics and severity scores
+# TODO [ENTERPRISE] Detect iOS/macOS specific violations
+# TODO [ENTERPRISE] Analyze code complexity metrics
 
 from dataclasses import dataclass
 from enum import Enum
@@ -69,43 +66,43 @@ class SwiftLintParser:
         self.violations: List[SwiftLintViolation] = []
 
     def parse_json_report(self, report_path: Path) -> List[SwiftLintViolation]:
-        """Parse SwiftLint JSON report - Phase 2 TODO [20251221_TODO]"""
+        """Parse SwiftLint JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def execute_swiftlint(
         self, paths: List[Path], config: SwiftLintConfig = None
     ) -> List[SwiftLintViolation]:
-        """Execute SwiftLint analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute SwiftLint analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: SwiftLint execution")
 
     def load_config(self, config_file: Path) -> SwiftLintConfig:
-        """Load SwiftLint configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load SwiftLint configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[SwiftLintViolation]
     ) -> Dict[str, List[SwiftLintViolation]]:
-        """Categorize violations by rule category - Phase 2 TODO [20251221_TODO]"""
+        """Categorize violations by rule category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def apply_autocorrect(
         self, paths: List[Path], config: SwiftLintConfig = None
     ) -> Dict[str, int]:
-        """Apply SwiftLint auto-fixes - Phase 2 TODO [20251221_TODO]"""
+        """Apply SwiftLint auto-fixes - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Auto-correction")
 
     def generate_report(
         self, violations: List[SwiftLintViolation], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO [20251221_TODO]"""
+        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[SwiftLintViolation]) -> Dict[str, Any]:
-        """Calculate metrics from violations - Phase 2 TODO [20251221_TODO]"""
+        """Calculate metrics from violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def detect_ios_specific_issues(
         self, violations: List[SwiftLintViolation]
     ) -> List[SwiftLintViolation]:
-        """Filter for iOS/macOS specific violations - Phase 2 TODO [20251221_TODO]"""
+        """Filter for iOS/macOS specific violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Platform-specific analysis")

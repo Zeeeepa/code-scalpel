@@ -2,13 +2,13 @@
 """
 JSDoc JavaScript Parser - JSDoc comment analysis and coverage.
 
-[20251221_TODO] Implement JSDoc comment parsing
-[20251221_TODO] Add parameter and return type extraction
-[20251221_TODO] Support custom JSDoc tags (e.g., @deprecated, @beta)
-[20251221_TODO] Implement JSDoc coverage metrics
-[20251221_TODO] Add JSDoc validation (required tags, type consistency)
-[20251221_TODO] Support @example code block extraction
-[20251221_TODO] Implement cross-reference resolution
+# TODO Implement JSDoc comment parsing
+# TODO Add parameter and return type extraction
+# TODO Support custom JSDoc tags (e.g., @deprecated, @beta)
+# TODO Implement JSDoc coverage metrics
+# TODO Add JSDoc validation (required tags, type consistency)
+# TODO Support @example code block extraction
+# TODO Implement cross-reference resolution
 
 Reference: https://jsdoc.app/
 """
@@ -43,7 +43,7 @@ class JSDocParser:
     def parse(self) -> dict:
         """Parse JSDoc comments from source code.
 
-        [20251221_TODO] Implement full JSDoc parsing logic
+        # TODO Implement full JSDoc parsing logic
 
         Returns:
             Dictionary with JSDoc comments and coverage metrics

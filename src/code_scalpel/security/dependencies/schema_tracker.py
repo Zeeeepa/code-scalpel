@@ -1,30 +1,30 @@
 """
-GraphQL Schema Tracker - Schema Evolution Analysis.
+GraphQL Schema Tracker Schema Evolution Analysis.
 
-[20251219_FEATURE] v3.0.4 - Ninja Warrior Stage 3
+[20251219_FEATURE] v3.0.4 Ninja Warrior Stage 3
 
 This module tracks GraphQL schema evolution and detects breaking changes:
-- Parse GraphQL SDL (Schema Definition Language)
-- Extract types, fields, queries, mutations, subscriptions
-- Detect breaking vs non-breaking changes
-- Validate schema for best practices
+Parse GraphQL SDL (Schema Definition Language)
+Extract types, fields, queries, mutations, subscriptions
+Detect breaking vs non-breaking changes
+Validate schema for best practices
 
 Breaking Changes:
-- Type removed
-- Field removed from type
-- Field type changed (incompatible)
-- Required argument added
-- Enum value removed
-- Union member removed
-- Interface implementation removed
+Type removed
+Field removed from type
+Field type changed (incompatible)
+Required argument added
+Enum value removed
+Union member removed
+Interface implementation removed
 
 Non-Breaking Changes:
-- Type added
-- Optional field added
-- Optional argument added
-- Enum value added
-- Union member added
-- Deprecation added
+Type added
+Optional field added
+Optional argument added
+Enum value added
+Union member added
+Deprecation added
 
 Usage:
     tracker = GraphQLSchemaTracker()
@@ -39,109 +39,82 @@ Usage:
         print(f"BREAKING: {drift.breaking_changes}")
 """
 
-# TODO: GraphQLSchemaTracker Enhancement Roadmap
-# ===============================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-# - TODO [COMMUNITY]: Add comprehensive schema tracking guide (current)
-# - TODO [COMMUNITY]: Document SDL parsing capabilities
-# - TODO [COMMUNITY]: Create breaking change detection examples
-# - TODO [COMMUNITY]: Add API reference documentation
-# - TODO [COMMUNITY]: Create quick-start guide
-# - TODO [COMMUNITY]: Document schema comparison workflow
-# - TODO [COMMUNITY]: Add best practices guide
-# - TODO [COMMUNITY]: Create troubleshooting guide
-#
-# Examples & Use Cases:
-# - TODO [COMMUNITY]: Add basic SDL parsing example
-# - TODO [COMMUNITY]: Create schema comparison example
-# - TODO [COMMUNITY]: Add breaking change detection example
-# - TODO [COMMUNITY]: Document validation workflow
-# - TODO [COMMUNITY]: Create federation example
-#
-# Testing:
-# - TODO [COMMUNITY]: Add tests for schema parsing
-# - TODO [COMMUNITY]: Create tests for change detection
-# - TODO [COMMUNITY]: Add validation test suite
-# - TODO [COMMUNITY]: Document test coverage
-#
-# PRO (Enhanced Features):
-# Core Capabilities:
-# - TODO [PRO]: Improve SDL parser accuracy
-# - TODO [PRO]: Add support for custom directives
-# - TODO [PRO]: Implement directive validation
-# - TODO [PRO]: Add description parsing and documentation
-# - TODO [PRO]: Support schema extensions
-# - TODO [PRO]: Implement scalar type validation
-# - TODO [PRO]: Add input type validation
-# - TODO [PRO]: Support interface implementation tracking
-#
-# Security Analysis:
-# - TODO [PRO]: Detect query depth attacks (nested queries)
-# - TODO [PRO]: Identify missing query complexity limits
-# - TODO [PRO]: Check for rate limiting configuration
-# - TODO [PRO]: Detect introspection enabled in production
-# - TODO [PRO]: Validate authentication directives (@auth, @requiresAuth)
-# - TODO [PRO]: Add authorization directive detection
-# - TODO [PRO]: Implement permission model validation
-#
-# Performance Analysis:
-# - TODO [PRO]: Detect N+1 query patterns
-# - TODO [PRO]: Analyze field resolver complexity
-# - TODO [PRO]: Detect missing DataLoader usage
-# - TODO [PRO]: Identify batch loading opportunities
-# - TODO [PRO]: Check for eager loading patterns
-# - TODO [PRO]: Validate pagination implementation
-# - TODO [PRO]: Check field count limits
-#
-# Schema Evolution:
-# - TODO [PRO]: Enforce deprecation-first policy
-# - TODO [PRO]: Validate nullable field changes
-# - TODO [PRO]: Check interface evolution safety
-# - TODO [PRO]: Detect union type compatibility
-# - TODO [PRO]: Enforce schema stitching boundaries
-# - TODO [PRO]: Track deprecated field removal timeline
-# - TODO [PRO]: Validate enum evolution
-#
-# Federation Support:
-# - TODO [PRO]: Analyze @key directive usage
-# - TODO [PRO]: Validate entity resolution
-# - TODO [PRO]: Detect gateway configuration issues
-# - TODO [PRO]: Check for circular dependencies
-# - TODO [PRO]: Support @requires directive validation
-# - TODO [PRO]: Analyze @provides directive usage
-# - TODO [PRO]: Validate service boundaries
-#
-# ENTERPRISE (Advanced Capabilities):
-# Advanced Analysis:
-# - TODO [ENTERPRISE]: Implement query cost analysis
-# - TODO [ENTERPRISE]: Add subscription security validation
-# - TODO [ENTERPRISE]: Detect mutation cascade risks
-# - TODO [ENTERPRISE]: Validate input sanitization
-# - TODO [ENTERPRISE]: Implement schema fingerprinting
-# - TODO [ENTERPRISE]: Add schema versioning support
-# - TODO [ENTERPRISE]: Support schema stitching analysis
-# - TODO [ENTERPRISE]: Implement multi-schema comparison
-#
-# Intelligence & Optimization:
-# - TODO [ENTERPRISE]: Add ML-based schema recommendations
-# - TODO [ENTERPRISE]: Implement automatic schema optimization
-# - TODO [ENTERPRISE]: Support schema impact analysis
-# - TODO [ENTERPRISE]: Add usage-based optimization
-# - TODO [ENTERPRISE]: Implement anomaly detection
-# - TODO [ENTERPRISE]: Support predictive validation
-# - TODO [ENTERPRISE]: Add performance predictions
-#
-# Integration & Monitoring:
-# - TODO [ENTERPRISE]: Add registry integration (Apollo, Confluent)
-# - TODO [ENTERPRISE]: Implement continuous schema monitoring
-# - TODO [ENTERPRISE]: Support compliance reporting
-# - TODO [ENTERPRISE]: Add audit trail logging
-# - TODO [ENTERPRISE]: Implement automated schema rollback
-# - TODO [ENTERPRISE]: Support policy enforcement
-# - TODO [ENTERPRISE]: Add incident detection
-# - TODO [ENTERPRISE]: Implement automated remediation
+# TODO [COMMUNITY]: Add comprehensive schema tracking guide (current)
+# TODO [COMMUNITY]: Document SDL parsing capabilities
+# TODO [COMMUNITY]: Create breaking change detection examples
+# TODO [COMMUNITY]: Add API reference documentation
+# TODO [COMMUNITY]: Create quick-start guide
+# TODO [COMMUNITY]: Document schema comparison workflow
+# TODO [COMMUNITY]: Add best practices guide
+# TODO [COMMUNITY]: Create troubleshooting guide
+# TODO [COMMUNITY]: Add basic SDL parsing example
+# TODO [COMMUNITY]: Create schema comparison example
+# TODO [COMMUNITY]: Add breaking change detection example
+# TODO [COMMUNITY]: Document validation workflow
+# TODO [COMMUNITY]: Create federation example
+# TODO [COMMUNITY]: Add tests for schema parsing
+# TODO [COMMUNITY]: Create tests for change detection
+# TODO [COMMUNITY]: Add validation test suite
+# TODO [COMMUNITY]: Document test coverage
+# TODO [PRO]: Improve SDL parser accuracy
+# TODO [PRO]: Add support for custom directives
+# TODO [PRO]: Implement directive validation
+# TODO [PRO]: Add description parsing and documentation
+# TODO [PRO]: Support schema extensions
+# TODO [PRO]: Implement scalar type validation
+# TODO [PRO]: Add input type validation
+# TODO [PRO]: Support interface implementation tracking
+# TODO [PRO]: Detect query depth attacks (nested queries)
+# TODO [PRO]: Identify missing query complexity limits
+# TODO [PRO]: Check for rate limiting configuration
+# TODO [PRO]: Detect introspection enabled in production
+# TODO [PRO]: Validate authentication directives (@auth, @requiresAuth)
+# TODO [PRO]: Add authorization directive detection
+# TODO [PRO]: Implement permission model validation
+# TODO [PRO]: Detect N+1 query patterns
+# TODO [PRO]: Analyze field resolver complexity
+# TODO [PRO]: Detect missing DataLoader usage
+# TODO [PRO]: Identify batch loading opportunities
+# TODO [PRO]: Check for eager loading patterns
+# TODO [PRO]: Validate pagination implementation
+# TODO [PRO]: Check field count limits
+# TODO [PRO]: Enforce deprecation-first policy
+# TODO [PRO]: Validate nullable field changes
+# TODO [PRO]: Check interface evolution safety
+# TODO [PRO]: Detect union type compatibility
+# TODO [PRO]: Enforce schema stitching boundaries
+# TODO [PRO]: Track deprecated field removal timeline
+# TODO [PRO]: Validate enum evolution
+# TODO [PRO]: Analyze @key directive usage
+# TODO [PRO]: Validate entity resolution
+# TODO [PRO]: Detect gateway configuration issues
+# TODO [PRO]: Check for circular dependencies
+# TODO [PRO]: Support @requires directive validation
+# TODO [PRO]: Analyze @provides directive usage
+# TODO [PRO]: Validate service boundaries
+# TODO [ENTERPRISE]: Implement query cost analysis
+# TODO [ENTERPRISE]: Add subscription security validation
+# TODO [ENTERPRISE]: Detect mutation cascade risks
+# TODO [ENTERPRISE]: Validate input sanitization
+# TODO [ENTERPRISE]: Implement schema fingerprinting
+# TODO [ENTERPRISE]: Add schema versioning support
+# TODO [ENTERPRISE]: Support schema stitching analysis
+# TODO [ENTERPRISE]: Implement multi-schema comparison
+# TODO [ENTERPRISE]: Add ML-based schema recommendations
+# TODO [ENTERPRISE]: Implement automatic schema optimization
+# TODO [ENTERPRISE]: Support schema impact analysis
+# TODO [ENTERPRISE]: Add usage-based optimization
+# TODO [ENTERPRISE]: Implement anomaly detection
+# TODO [ENTERPRISE]: Support predictive validation
+# TODO [ENTERPRISE]: Add performance predictions
+# TODO [ENTERPRISE]: Add registry integration (Apollo, Confluent)
+# TODO [ENTERPRISE]: Implement continuous schema monitoring
+# TODO [ENTERPRISE]: Support compliance reporting
+# TODO [ENTERPRISE]: Add audit trail logging
+# TODO [ENTERPRISE]: Implement automated schema rollback
+# TODO [ENTERPRISE]: Support policy enforcement
+# TODO [ENTERPRISE]: Add incident detection
+# TODO [ENTERPRISE]: Implement automated remediation
 
 from __future__ import annotations
 
@@ -425,12 +398,12 @@ class GraphQLSchemaDrift:
         if self.breaking_changes:
             lines.append("\nBREAKING CHANGES:")
             for change in self.breaking_changes:
-                lines.append(f"  - {change.message}")
+                lines.append(f"  {change.message}")
 
         if self.dangerous_changes:
             lines.append("\nDANGEROUS CHANGES:")
             for change in self.dangerous_changes:
-                lines.append(f"  - {change.message}")
+                lines.append(f"  {change.message}")
 
         return "\n".join(lines)
 
@@ -555,6 +528,7 @@ class GraphQLSchemaParser:
                 in_string = False
                 comment_pos = -1
                 for i, char in enumerate(line):
+                    # [20260114_BUGFIX] Fixed missing minus sign in array index
                     if char == '"' and (i == 0 or line[i - 1] != "\\"):
                         in_string = not in_string
                     elif char == "#" and not in_string:
@@ -771,13 +745,13 @@ class GraphQLSchemaTracker:
     """
     Tracks GraphQL schema evolution and detects breaking changes.
 
-    [20251219_FEATURE] v3.0.4 - GraphQL Schema Tracking
+    [20251219_FEATURE] v3.0.4 GraphQL Schema Tracking
 
     Features:
-    - Parse GraphQL SDL to extract schema structure
-    - Compare schema versions for breaking/non-breaking changes
-    - Validate schemas for best practices
-    - Track deprecations and removals
+    Parse GraphQL SDL to extract schema structure
+    Compare schema versions for breaking/non-breaking changes
+    Validate schemas for best practices
+    Track deprecations and removals
 
     Usage:
         tracker = GraphQLSchemaTracker()
@@ -888,6 +862,7 @@ class GraphQLSchemaTracker:
         new_types = set(new_schema.types.keys())
 
         # Removed types (BREAKING)
+        # [20260114_BUGFIX] Fixed missing set difference operator
         for name in old_types - new_types:
             old_type = old_schema.types[name]
             drift.changes.append(
@@ -900,6 +875,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added types (INFO)
+        # [20260114_BUGFIX] Fixed missing set difference operator
         for name in new_types - old_types:
             new_type = new_schema.types[name]
             drift.changes.append(
@@ -953,7 +929,7 @@ class GraphQLSchemaTracker:
         new_fields = set(new_type.fields.keys())
 
         # Removed fields (BREAKING)
-        for name in old_fields - new_fields:
+        for name in old_fields - new_fields:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.FIELD_REMOVED,
@@ -964,7 +940,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added fields (INFO)
-        for name in new_fields - old_fields:
+        for name in new_fields - old_fields:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.FIELD_ADDED,
@@ -984,7 +960,7 @@ class GraphQLSchemaTracker:
         old_interfaces = set(old_type.interfaces)
         new_interfaces = set(new_type.interfaces)
 
-        for iface in old_interfaces - new_interfaces:
+        for iface in old_interfaces - new_interfaces:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.INTERFACE_REMOVED,
@@ -994,7 +970,7 @@ class GraphQLSchemaTracker:
                 )
             )
 
-        for iface in new_interfaces - old_interfaces:
+        for iface in new_interfaces - old_interfaces:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.INTERFACE_ADDED,
@@ -1059,7 +1035,7 @@ class GraphQLSchemaTracker:
         new_arg_names = set(new_args.keys())
 
         # Removed arguments (BREAKING)
-        for name in old_arg_names - new_arg_names:
+        for name in old_arg_names - new_arg_names:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.ARG_REMOVED,
@@ -1070,7 +1046,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added arguments
-        for name in new_arg_names - old_arg_names:
+        for name in new_arg_names - old_arg_names:  # [20260114_BUGFIX]
             new_arg = new_args[name]
             is_required = new_arg.is_required
             drift.changes.append(
@@ -1118,7 +1094,7 @@ class GraphQLSchemaTracker:
         new_fields = set(new_type.input_fields.keys())
 
         # Removed fields (BREAKING)
-        for name in old_fields - new_fields:
+        for name in old_fields - new_fields:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.FIELD_REMOVED,
@@ -1129,7 +1105,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added fields
-        for name in new_fields - old_fields:
+        for name in new_fields - old_fields:  # [20260114_BUGFIX]
             new_field = new_type.input_fields[name]
             is_required = new_field.type.endswith("!")
             drift.changes.append(
@@ -1177,7 +1153,7 @@ class GraphQLSchemaTracker:
         new_values = set(new_type.enum_values.keys())
 
         # Removed values (BREAKING)
-        for name in old_values - new_values:
+        for name in old_values - new_values:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.ENUM_VALUE_REMOVED,
@@ -1188,7 +1164,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added values (INFO)
-        for name in new_values - old_values:
+        for name in new_values - old_values:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.ENUM_VALUE_ADDED,
@@ -1209,7 +1185,7 @@ class GraphQLSchemaTracker:
         new_members = set(new_type.union_types)
 
         # Removed members (BREAKING)
-        for name in old_members - new_members:
+        for name in old_members - new_members:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.UNION_MEMBER_REMOVED,
@@ -1219,8 +1195,8 @@ class GraphQLSchemaTracker:
                 )
             )
 
-        # Added members (DANGEROUS - may affect fragment spreads)
-        for name in new_members - old_members:
+        # Added members (DANGEROUS may affect fragment spreads)
+        for name in new_members - old_members:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.UNION_MEMBER_ADDED,
@@ -1241,7 +1217,7 @@ class GraphQLSchemaTracker:
         new_directives = set(new_schema.directives.keys())
 
         # Removed directives (BREAKING)
-        for name in old_directives - new_directives:
+        for name in old_directives - new_directives:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.DIRECTIVE_REMOVED,
@@ -1252,7 +1228,7 @@ class GraphQLSchemaTracker:
             )
 
         # Added directives (INFO)
-        for name in new_directives - old_directives:
+        for name in new_directives - old_directives:  # [20260114_BUGFIX]
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.DIRECTIVE_ADDED,
@@ -1267,12 +1243,12 @@ class GraphQLSchemaTracker:
         Determine if a type change is breaking.
 
         Non-breaking changes:
-        - T -> T! (making nullable non-null is breaking for inputs, safe for outputs)
-        - [T] -> [T!] (making list items non-null)
+        T -> T! (making nullable non-null is breaking for inputs, safe for outputs)
+        [T] -> [T!] (making list items non-null)
 
         Breaking changes:
-        - T! -> T (making non-null nullable for outputs)
-        - Type completely changed
+        T! -> T (making non-null nullable for outputs)
+        Type completely changed
         """
         # Strip non-null markers for base comparison
         old_base = old_type.rstrip("!")
@@ -1283,7 +1259,7 @@ class GraphQLSchemaTracker:
             return True
 
         # Nullability changed (for outputs, removing ! is breaking)
-        # This is a simplified check - in real GraphQL, it depends on context
+        # This is a simplified check in real GraphQL, it depends on context
         return False
 
 

@@ -52,7 +52,7 @@ This is the main source directory for Code Scalpel, an MCP server toolkit for AI
 - **graph_engine/** - Dependency graph construction
 
 ### Integrations
-- **mcp/** - MCP server with 20 tools
+- **mcp/** - MCP server with 22 tools
 - **integrations/** - REST API, AutoGen, CrewAI integrations
 - **agents/** - AI agent implementations
 - **autonomy/** - Error-to-diff autonomous fixing engine
@@ -105,7 +105,7 @@ run_server(port=8080)
 ## Key Features (v3.0.5)
 
 ✅ **Cache Consolidation** - Unified cache implementation (eliminated 277 LOC redundancy)  
-✅ **20 MCP Tools** - Full toolkit for AI agents  
+✅ **22 MCP Tools** - Full toolkit for AI agents  
 ✅ **Multi-Language** - Python, Java, JavaScript, TypeScript support  
 ✅ **Security Analysis** - OWASP Top 10 vulnerability detection  
 ✅ **Symbolic Execution** - Path exploration with Z3 solver  

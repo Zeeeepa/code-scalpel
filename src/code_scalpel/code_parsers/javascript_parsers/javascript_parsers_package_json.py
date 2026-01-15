@@ -2,13 +2,13 @@
 """
 Package.json JavaScript Parser - npm package configuration analysis.
 
-[20251221_TODO] Implement package.json parsing
-[20251221_TODO] Add script analysis and dependency extraction
-[20251221_TODO] Support workspaces and monorepo detection
-[20251221_TODO] Implement version constraint analysis
-[20251221_TODO] Add peer dependency conflict detection
-[20251221_TODO] Support devDependencies categorization
-[20251221_TODO] Implement license compliance checking
+# TODO Implement package.json parsing
+# TODO Add script analysis and dependency extraction
+# TODO Support workspaces and monorepo detection
+# TODO Implement version constraint analysis
+# TODO Add peer dependency conflict detection
+# TODO Support devDependencies categorization
+# TODO Implement license compliance checking
 
 Reference: https://docs.npmjs.com/cli/v10/configuring-npm/package-json
 """
@@ -45,7 +45,7 @@ class PackageJsonParser:
     def parse(self) -> dict:
         """Parse package.json configuration.
 
-        [20251221_TODO] Implement full parsing logic
+        # TODO Implement full parsing logic
 
         Returns:
             Dictionary with package configuration and analysis

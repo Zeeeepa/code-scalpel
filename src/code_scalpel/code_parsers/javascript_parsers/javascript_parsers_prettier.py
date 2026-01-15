@@ -6,13 +6,13 @@ Parses Prettier output and configuration for automated code formatting verificat
 Prettier is an opinionated code formatter with support for many languages.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add Prettier plugin compatibility detection
-[20251221_TODO] Implement formatting rule conflict detection with ESLint
-[20251221_TODO] Add diff generation for formatting changes
-[20251221_TODO] Support incremental formatting with change delta
-[20251221_TODO] Implement custom parser support detection
-[20251221_TODO] Add configuration override precedence analysis
-[20251221_TODO] Support Prettier version compatibility checking
+# TODO Add Prettier plugin compatibility detection
+# TODO Implement formatting rule conflict detection with ESLint
+# TODO Add diff generation for formatting changes
+# TODO Support incremental formatting with change delta
+# TODO Implement custom parser support detection
+# TODO Add configuration override precedence analysis
+# TODO Support Prettier version compatibility checking
 
 Features:
     Configuration:

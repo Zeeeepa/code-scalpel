@@ -6,16 +6,16 @@ Dedicated TypeScript analysis with type system awareness, leveraging the
 TypeScript compiler API through subprocess execution.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add TypeScript version detection (3.x through 5.x)
-[20251221_TODO] Implement type inference results parsing
-[20251221_TODO] Add unused type/interface detection
-[20251221_TODO] Support TypeScript strict mode compliance checking
-[20251221_TODO] Implement type compatibility matrix (type assignability)
-[20251221_TODO] Add decorator metadata extraction
-[20251221_TODO] Support conditional type analysis
-[20251221_TODO] Implement type coverage metrics
-[20251221_TODO] Add tsconfig.json optimization suggestions
-[20251221_TODO] Support project references (.compositional TypeScript projects)
+# TODO Add TypeScript version detection (3.x through 5.x)
+# TODO Implement type inference results parsing
+# TODO Add unused type/interface detection
+# TODO Support TypeScript strict mode compliance checking
+# TODO Implement type compatibility matrix (type assignability)
+# TODO Add decorator metadata extraction
+# TODO Support conditional type analysis
+# TODO Implement type coverage metrics
+# TODO Add tsconfig.json optimization suggestions
+# TODO Support project references (.compositional TypeScript projects)
 
 Features:
     Type Extraction:

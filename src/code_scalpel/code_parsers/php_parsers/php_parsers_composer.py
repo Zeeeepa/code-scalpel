@@ -13,29 +13,29 @@ Composer provides:
 - Autoload configuration
 - Script management
 
-[20251221_TODO] Parse composer.json files
-[20251221_TODO] Extract dependency information with versions
-[20251221_TODO] Parse require-dev dependencies
-[20251221_TODO] Extract autoload configuration
-[20251221_TODO] Parse script definitions
+# TODO Parse composer.json files
+# TODO Extract dependency information with versions
+# TODO Parse require-dev dependencies
+# TODO Extract autoload configuration
+# TODO Parse script definitions
 
-[20251221_TODO] Parse composer.lock files
-[20251221_TODO] Extract installed package versions
-[20251221_TODO] Track package hash information
-[20251221_TODO] Analyze dependency resolution
-[20251221_TODO] Detect version conflicts
+# TODO Parse composer.lock files
+# TODO Extract installed package versions
+# TODO Track package hash information
+# TODO Analyze dependency resolution
+# TODO Detect version conflicts
 
-[20251221_TODO] Scan dependencies for vulnerabilities
-[20251221_TODO] Integration with vulnerability databases
-[20251221_TODO] Track outdated packages
-[20251221_TODO] Analyze security advisories
-[20251221_TODO] Generate dependency update recommendations
+# TODO Scan dependencies for vulnerabilities
+# TODO Integration with vulnerability databases
+# TODO Track outdated packages
+# TODO Analyze security advisories
+# TODO Generate dependency update recommendations
 
-[20251221_TODO] Build dependency tree visualization
-[20251221_TODO] Detect circular dependencies
-[20251221_TODO] Analyze package versions
-[20251221_TODO] Track transitive dependencies
-[20251221_TODO] Generate dependency reports
+# TODO Build dependency tree visualization
+# TODO Detect circular dependencies
+# TODO Analyze package versions
+# TODO Track transitive dependencies
+# TODO Generate dependency reports
 """
 
 from dataclasses import dataclass, field
@@ -77,7 +77,7 @@ class ComposerParser:
 
     def parse_composer_json(self, json_file: Path) -> ComposerConfig:
         """
-        [20251221_TODO] Parse composer.json file.
+        # TODO Parse composer.json file.
 
         Args:
             json_file: Path to composer.json
@@ -89,7 +89,7 @@ class ComposerParser:
 
     def parse_composer_lock(self, lock_file: Path) -> list[ComposerPackage]:
         """
-        [20251221_TODO] Parse composer.lock file.
+        # TODO Parse composer.lock file.
 
         Args:
             lock_file: Path to composer.lock
@@ -101,7 +101,7 @@ class ComposerParser:
 
     def scan_vulnerabilities(self) -> list[dict[str, Any]]:
         """
-        [20251221_TODO] Scan dependencies for known vulnerabilities.
+        # TODO Scan dependencies for known vulnerabilities.
 
         Returns:
             List of vulnerability findings
@@ -110,7 +110,7 @@ class ComposerParser:
 
     def detect_outdated(self) -> list[ComposerPackage]:
         """
-        [20251221_TODO] Detect outdated packages.
+        # TODO Detect outdated packages.
 
         Returns:
             List of outdated packages with newer versions
@@ -119,7 +119,7 @@ class ComposerParser:
 
     def generate_report(self) -> str:
         """
-        [20251221_TODO] Generate comprehensive Composer report.
+        # TODO Generate comprehensive Composer report.
 
         Returns:
             Formatted report string

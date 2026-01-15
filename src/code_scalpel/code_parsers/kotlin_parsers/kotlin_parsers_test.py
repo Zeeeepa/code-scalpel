@@ -13,23 +13,23 @@ Kotlin Test Parser features:
 - Test coverage analysis
 - Parameterized test detection
 
-[20251221_TODO] Parse JUnit XML test reports
-[20251221_TODO] Implement Kotest result parsing
-[20251221_TODO] Add Spek specification parsing
-[20251221_TODO] Extract test execution metrics
-[20251221_TODO] Parse test annotations and metadata
+# TODO Parse JUnit XML test reports
+# TODO Implement Kotest result parsing
+# TODO Add Spek specification parsing
+# TODO Extract test execution metrics
+# TODO Parse test annotations and metadata
 
-[20251221_TODO] Implement code coverage parsing (JaCoCo, Kover)
-[20251221_TODO] Generate coverage reports
-[20251221_TODO] Track coverage trends
-[20251221_TODO] Identify uncovered code paths
-[20251221_TODO] Add coverage thresholds and gates
+# TODO Implement code coverage parsing (JaCoCo, Kover)
+# TODO Generate coverage reports
+# TODO Track coverage trends
+# TODO Identify uncovered code paths
+# TODO Add coverage thresholds and gates
 
-[20251221_TODO] Detect test patterns (AAA, BDD)
-[20251221_TODO] Analyze test naming conventions
-[20251221_TODO] Generate test quality metrics
-[20251221_TODO] Identify flaky tests
-[20251221_TODO] Add test dependency analysis
+# TODO Detect test patterns (AAA, BDD)
+# TODO Analyze test naming conventions
+# TODO Generate test quality metrics
+# TODO Identify flaky tests
+# TODO Add test dependency analysis
 """
 
 from dataclasses import dataclass, field
@@ -105,7 +105,7 @@ class KotlinTestParser:
 
     def parse_junit_report(self, xml_file: Path) -> list[TestSuite]:
         """
-        [20251221_TODO] Parse JUnit XML test report format.
+        # TODO Parse JUnit XML test report format.
 
         Args:
             xml_file: Path to JUnit XML report
@@ -117,7 +117,7 @@ class KotlinTestParser:
 
     def parse_kotest_results(self, report_data: dict) -> list[TestSuite]:
         """
-        [20251221_TODO] Parse Kotest framework results.
+        # TODO Parse Kotest framework results.
 
         Args:
             report_data: Kotest report data
@@ -129,7 +129,7 @@ class KotlinTestParser:
 
     def parse_coverage_report(self, coverage_file: Path) -> CoverageMetrics:
         """
-        [20251221_TODO] Parse code coverage reports (JaCoCo, Kover).
+        # TODO Parse code coverage reports (JaCoCo, Kover).
 
         Args:
             coverage_file: Path to coverage report
@@ -141,7 +141,7 @@ class KotlinTestParser:
 
     def analyze_test_quality(self) -> dict[str, Any]:
         """
-        [20251221_TODO] Analyze test code quality and patterns.
+        # TODO Analyze test code quality and patterns.
 
         Returns:
             Quality metrics and analysis results
@@ -150,7 +150,7 @@ class KotlinTestParser:
 
     def detect_flaky_tests(self, historical_data: list) -> list[TestCase]:
         """
-        [20251221_TODO] Identify flaky tests from historical data.
+        # TODO Identify flaky tests from historical data.
 
         Args:
             historical_data: Historical test execution data
@@ -162,7 +162,7 @@ class KotlinTestParser:
 
     def generate_test_report(self) -> str:
         """
-        [20251221_TODO] Generate comprehensive test execution report.
+        # TODO Generate comprehensive test execution report.
 
         Returns:
             Formatted test report

@@ -175,6 +175,14 @@ def main():
     run_command("black --check --diff src/ tests/", "Black Formatting Check", allow_fail=True)
     run_command("ruff check src/ tests/", "Ruff Linting", allow_fail=True)
     
+    # [20260114_FEATURE] Added syntax validation to catch missing operators
+    print(f"\n{YELLOW}--- Stage 1.5: Syntax Validation ---{RESET}")
+    run_command(
+        "python -m compileall -q src/",
+        "Python Syntax Check (all source files)",
+        allow_fail=False  # Syntax errors are blocking
+    )
+    
     # 3. Type Checking
     print(f"\n{YELLOW}--- Stage 2: Type Safety ---{RESET}")
     run_command("pyright -p pyrightconfig.json", "Pyright Type Check", allow_fail=True)

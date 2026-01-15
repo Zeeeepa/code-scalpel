@@ -14,29 +14,29 @@ Exakat provides:
 - Architecture analysis
 - Multiple output formats (JSON, CSV, HTML)
 
-[20251221_TODO] Parse Exakat JSON analysis results
-[20251221_TODO] Parse CSV report format
-[20251221_TODO] Parse HTML report data
-[20251221_TODO] Extract analysis categories
-[20251221_TODO] Parse severity levels and classification
+# TODO Parse Exakat JSON analysis results
+# TODO Parse CSV report format
+# TODO Parse HTML report data
+# TODO Extract analysis categories
+# TODO Parse severity levels and classification
 
-[20251221_TODO] Add Exakat CLI execution
-[20251221_TODO] Support configuration file parsing
-[20251221_TODO] Implement incremental analysis
-[20251221_TODO] Add custom ruleset support
-[20251221_TODO] Support result comparison between runs
+# TODO Add Exakat CLI execution
+# TODO Support configuration file parsing
+# TODO Implement incremental analysis
+# TODO Add custom ruleset support
+# TODO Support result comparison between runs
 
-[20251221_TODO] Parse security issues
-[20251221_TODO] Extract performance problems
-[20251221_TODO] Analyze code standards violations
-[20251221_TODO] Detect dead code patterns
-[20251221_TODO] Analyze architecture rules
+# TODO Parse security issues
+# TODO Extract performance problems
+# TODO Analyze code standards violations
+# TODO Detect dead code patterns
+# TODO Analyze architecture rules
 
-[20251221_TODO] Generate category reports
-[20251221_TODO] Track issue trends
-[20251221_TODO] Create remediation suggestions
-[20251221_TODO] Compare with other tools
-[20251221_TODO] Generate compliance reports
+# TODO Generate category reports
+# TODO Track issue trends
+# TODO Create remediation suggestions
+# TODO Compare with other tools
+# TODO Generate compliance reports
 """
 
 from dataclasses import dataclass
@@ -78,7 +78,7 @@ class ExakatParser:
 
     def parse_json_report(self, json_data: str) -> list[ExakatIssue]:
         """
-        [20251221_TODO] Parse Exakat JSON analysis report.
+        # TODO Parse Exakat JSON analysis report.
 
         Args:
             json_data: JSON report from Exakat
@@ -90,7 +90,7 @@ class ExakatParser:
 
     def parse_csv_report(self, csv_file: Path) -> list[ExakatIssue]:
         """
-        [20251221_TODO] Parse Exakat CSV report format.
+        # TODO Parse Exakat CSV report format.
 
         Args:
             csv_file: Path to Exakat CSV report
@@ -102,7 +102,7 @@ class ExakatParser:
 
     def execute_exakat(self, project_path: Path) -> dict[str, Any]:
         """
-        [20251221_TODO] Execute Exakat analysis on project.
+        # TODO Execute Exakat analysis on project.
 
         Args:
             project_path: Path to PHP project
@@ -114,7 +114,7 @@ class ExakatParser:
 
     def generate_report(self) -> str:
         """
-        [20251221_TODO] Generate comprehensive Exakat report.
+        # TODO Generate comprehensive Exakat report.
 
         Returns:
             Formatted report string

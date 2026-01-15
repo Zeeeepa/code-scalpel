@@ -1,129 +1,67 @@
 """Python Parser - Native Python AST parsing implementation.
 
-============================================================================
-TODO ITEMS: code_parsers/python_parser.py
-============================================================================
-COMMUNITY TIER - Core Python Parsing (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Enhance AST extraction:
-    - Extract all imports (standard, third-party, local)
-    - Extract docstrings for all definitions
-    - Extract decorators with arguments
-    - Extract type hints (PEP 484, 585, 604)
-    - Extract async/await patterns
-    - Test count: 25 tests (extraction completeness)
-
-[P1_HIGH] Improve error handling:
-    - Provide detailed syntax error messages with context
-    - Add error recovery for partial parsing
-    - Support multiple error collection (don't stop at first error)
-    - Add suggestions for common syntax mistakes
-    - Test count: 20 tests (error handling, recovery)
-
-[P1_HIGH] Add Python version compatibility:
-    - Detect Python version from syntax (3.8, 3.9, 3.10, 3.11, 3.12)
-    - Support version-specific syntax (match/case, walrus, etc.)
-    - Add version compatibility warnings
-    - Test with different Python runtime versions
-    - Test count: 30 tests (version detection, compatibility)
-
-[P2_MEDIUM] Enhance complexity metrics:
-    - Calculate Halstead complexity
-    - Add cognitive complexity calculation
-    - Calculate maintainability index
-    - Add nesting depth metrics
-    - Track code smells (long functions, deep nesting)
-    - Test count: 20 tests (metrics accuracy)
-
-[P2_MEDIUM] Add scope analysis:
-    - Track variable scopes (global, nonlocal, local)
-    - Detect variable shadowing
-    - Find unused variables
-    - Identify closure variables
-    - Test count: 25 tests (scope tracking)
-
-============================================================================
-PRO TIER - Advanced Python Parsing (P1-P3)
-============================================================================
-
-[P1_HIGH] Integrate static type checking:
-    - Add mypy integration for type analysis
-    - Parse type stub files (.pyi)
-    - Infer types for untyped code
-    - Validate type annotations
-    - Test count: 30 tests (type checking integration)
-
-[P1_HIGH] Add semantic analysis:
-    - Resolve symbol definitions across modules
-    - Build import dependency graph
-    - Track attribute access chains
-    - Resolve dynamic imports
-    - Test count: 35 tests (semantic analysis, resolution)
-
-[P2_MEDIUM] Implement code transformation:
-    - Add AST-to-source code generation
-    - Support code formatting (Black-compatible)
-    - Add refactoring operations (rename, extract)
-    - Generate modified AST from edits
-    - Test count: 30 tests (transformation, generation)
-
-[P2_MEDIUM] Add linter integration:
-    - Integrate Ruff for fast linting
-    - Add pylint integration
-    - Support flake8 checks
-    - Aggregate results from multiple linters
-    - Test count: 25 tests (linter integration)
-
-[P3_LOW] Support Python-specific patterns:
-    - Detect common design patterns (singleton, factory)
-    - Identify context managers and their usage
-    - Track generator/iterator patterns
-    - Find pytest fixtures and test patterns
-    - Test count: 30 tests (pattern detection)
-
-============================================================================
-ENTERPRISE TIER - Enterprise Python Features (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Add security analysis:
-    - Integrate Bandit for security scanning
-    - Detect SQL injection vulnerabilities
-    - Find hardcoded secrets and credentials
-    - Identify unsafe eval/exec usage
-    - Test count: 35 tests (security scanning)
-
-[P2_MEDIUM] Implement incremental parsing:
-    - Parse only changed functions/classes
-    - Cache parsed AST with invalidation
-    - Support streaming parse for large files
-    - Add efficient AST diffing
-    - Test count: 30 tests (incremental parsing, caching)
-
-[P3_LOW] Add enterprise compliance:
-    - Check code against enterprise style guides
-    - Enforce mandatory docstring policies
-    - Validate license headers
-    - Generate compliance reports
-    - Test count: 25 tests (compliance, policies)
-
-[P3_LOW] Implement performance profiling:
-    - Profile parsing time by code section
-    - Track memory usage during parsing
-    - Identify parsing bottlenecks
-    - Add performance optimization hints
-    - Test count: 20 tests (profiling, optimization)
-
-[P4_LOW] Add ML-driven analysis:
-    - Predict code quality from AST patterns
-    - Suggest refactorings using ML models
-    - Detect code clones via AST similarity
-    - Identify potential bugs via anomaly detection
-    - Test count: 30 tests (ML integration, predictions)
-
-============================================================================
-TOTAL TEST ESTIMATE: 435 tests (145 COMMUNITY + 150 PRO + 140 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Extract all imports (standard, third-party, local)
+# TODO [COMMUNITY] Extract docstrings for all definitions
+# TODO [COMMUNITY] Extract decorators with arguments
+# TODO [COMMUNITY] Extract type hints (PEP 484, 585, 604)
+# TODO [COMMUNITY] Extract async/await patterns
+# TODO [COMMUNITY] Provide detailed syntax error messages with context
+# TODO [COMMUNITY] Add error recovery for partial parsing
+# TODO [COMMUNITY] Support multiple error collection (don't stop at first error)
+# TODO [COMMUNITY] Add suggestions for common syntax mistakes
+# TODO [COMMUNITY] Detect Python version from syntax (3.8, 3.9, 3.10, 3.11, 3.12)
+# TODO [COMMUNITY] Support version-specific syntax (match/case, walrus, etc.)
+# TODO [COMMUNITY] Add version compatibility warnings
+# TODO [COMMUNITY] Test with different Python runtime versions
+# TODO [COMMUNITY] Calculate Halstead complexity
+# TODO [COMMUNITY] Add cognitive complexity calculation
+# TODO [COMMUNITY] Calculate maintainability index
+# TODO [COMMUNITY] Add nesting depth metrics
+# TODO [COMMUNITY] Track code smells (long functions, deep nesting)
+# TODO [COMMUNITY] Track variable scopes (global, nonlocal, local)
+# TODO [COMMUNITY] Detect variable shadowing
+# TODO [COMMUNITY] Find unused variables
+# TODO [COMMUNITY] Identify closure variables
+# TODO [PRO] Add mypy integration for type analysis
+# TODO [PRO] Parse type stub files (.pyi)
+# TODO [PRO] Infer types for untyped code
+# TODO [PRO] Validate type annotations
+# TODO [PRO] Resolve symbol definitions across modules
+# TODO [PRO] Build import dependency graph
+# TODO [PRO] Track attribute access chains
+# TODO [PRO] Resolve dynamic imports
+# TODO [PRO] Add AST-to-source code generation
+# TODO [PRO] Support code formatting (Black-compatible)
+# TODO [PRO] Add refactoring operations (rename, extract)
+# TODO [PRO] Generate modified AST from edits
+# TODO [PRO] Integrate Ruff for fast linting
+# TODO [PRO] Add pylint integration
+# TODO [PRO] Support flake8 checks
+# TODO [PRO] Aggregate results from multiple linters
+# TODO [PRO] Detect common design patterns (singleton, factory)
+# TODO [PRO] Identify context managers and their usage
+# TODO [PRO] Track generator/iterator patterns
+# TODO [PRO] Find pytest fixtures and test patterns
+# TODO [ENTERPRISE] Integrate Bandit for security scanning
+# TODO [ENTERPRISE] Detect SQL injection vulnerabilities
+# TODO [ENTERPRISE] Find hardcoded secrets and credentials
+# TODO [ENTERPRISE] Identify unsafe eval/exec usage
+# TODO [ENTERPRISE] Parse only changed functions/classes
+# TODO [ENTERPRISE] Cache parsed AST with invalidation
+# TODO [ENTERPRISE] Support streaming parse for large files
+# TODO [ENTERPRISE] Add efficient AST diffing
+# TODO [ENTERPRISE] Check code against enterprise style guides
+# TODO [ENTERPRISE] Enforce mandatory docstring policies
+# TODO [ENTERPRISE] Validate license headers
+# TODO [ENTERPRISE] Generate compliance reports
+# TODO [ENTERPRISE] Profile parsing time by code section
+# TODO [ENTERPRISE] Track memory usage during parsing
+# TODO [ENTERPRISE] Identify parsing bottlenecks
+# TODO [ENTERPRISE] Add performance optimization hints
+# TODO [ENTERPRISE] Predict code quality from AST patterns
+# TODO [ENTERPRISE] Suggest refactorings using ML models
+# TODO [ENTERPRISE] Detect code clones via AST similarity
+# TODO [ENTERPRISE] Identify potential bugs via anomaly detection
 """
 
 import ast

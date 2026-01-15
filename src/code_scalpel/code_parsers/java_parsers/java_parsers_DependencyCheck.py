@@ -2,12 +2,12 @@
 """
 Dependency-Check Java Parser - CVE and vulnerability scanning.
 
-[20251221_TODO] Implement OWASP Dependency-Check report parsing
-[20251221_TODO] Add CVE extraction and severity mapping
-[20251221_TODO] Support multiple report formats (XML, JSON, HTML)
-[20251221_TODO] Implement vulnerability aggregation
-[20251221_TODO] Add suppression rule support
-[20251221_TODO] Support supply chain risk assessment
+# TODO Implement OWASP Dependency-Check report parsing
+# TODO Add CVE extraction and severity mapping
+# TODO Support multiple report formats (XML, JSON, HTML)
+# TODO Implement vulnerability aggregation
+# TODO Add suppression rule support
+# TODO Support supply chain risk assessment
 
 Reference: https://owasp.org/www-project-dependency-check/
 Command: dependency-check.sh --project myapp --scan . --format JSON
@@ -43,7 +43,7 @@ class DependencyCheckParser:
     def parse(self) -> dict:
         """Parse Dependency-Check vulnerability report.
 
-        [20251221_TODO] Implement full report parsing logic
+        # TODO Implement full report parsing logic
 
         Returns:
             Dictionary with CVE findings

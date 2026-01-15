@@ -2,12 +2,12 @@
 """
 JaCoCo Java Parser - Code coverage analysis tool.
 
-[20251221_TODO] Implement JaCoCo XML report parsing
-[20251221_TODO] Add line/branch coverage metrics extraction
-[20251221_TODO] Support multiple report formats (XML, CSV, HTML)
-[20251221_TODO] Implement coverage trend tracking
-[20251221_TODO] Add class/method coverage analysis
-[20251221_TODO] Support exclusion pattern configuration
+# TODO Implement JaCoCo XML report parsing
+# TODO Add line/branch coverage metrics extraction
+# TODO Support multiple report formats (XML, CSV, HTML)
+# TODO Implement coverage trend tracking
+# TODO Add class/method coverage analysis
+# TODO Support exclusion pattern configuration
 
 Reference: https://www.jacoco.org/
 Command: java -javaagent:jacocoagent.jar=destfile=coverage.exec App
@@ -43,7 +43,7 @@ class JaCoCoParser:
     def parse(self) -> dict:
         """Parse JaCoCo XML report.
 
-        [20251221_TODO] Implement full XML parsing logic
+        # TODO Implement full XML parsing logic
 
         Returns:
             Dictionary with coverage metrics

@@ -2,12 +2,12 @@
 """
 Semgrep Java Parser - Custom pattern matching and static analysis.
 
-[20251221_TODO] Implement Semgrep JSON output parsing
-[20251221_TODO] Add custom rule definition support
-[20251221_TODO] Support pattern language compilation
-[20251221_TODO] Implement taint tracking analysis
-[20251221_TODO] Add dataflow analysis results extraction
-[20251221_TODO] Support incremental scanning
+# TODO Implement Semgrep JSON output parsing
+# TODO Add custom rule definition support
+# TODO Support pattern language compilation
+# TODO Implement taint tracking analysis
+# TODO Add dataflow analysis results extraction
+# TODO Support incremental scanning
 
 Reference: https://semgrep.dev/
 Command: semgrep --json --config=rules.yaml src/ > results.json
@@ -43,7 +43,7 @@ class SemgrepParser:
     def parse(self) -> dict:
         """Parse Semgrep JSON report.
 
-        [20251221_TODO] Implement full JSON parsing logic
+        # TODO Implement full JSON parsing logic
 
         Returns:
             Dictionary with analysis findings

@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
-"""
-Gosec Parser - Go Security Vulnerability Detection
-
-[20251221_TODO] PHASE 2 IMPLEMENTATION TODOS:
-1. Parse gosec JSON/XML output
-2. Execute gosec analysis via subprocess
-3. Load suppression configuration
-4. Categorize vulnerabilities by CWE
-5. Detect OWASP Top 10 issues
-6. Generate JSON/SARIF/HTML reports
-7. Analyze vulnerability severity
-8. Map to remediation guidance
-"""
+# TODO [PHASE 2] Parse gosec JSON/XML output
+# TODO [PHASE 2] Execute gosec analysis via subprocess
+# TODO [PHASE 2] Load suppression configuration
+# TODO [PHASE 2] Categorize vulnerabilities by CWE
+# TODO [PHASE 2] Detect OWASP Top 10 issues
+# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
+# TODO [PHASE 2] Analyze vulnerability severity
+# TODO [PHASE 2] Map to remediation guidance
 
 from dataclasses import dataclass
 from enum import Enum
@@ -76,33 +71,33 @@ class GosecParser:
     def execute_gosec(
         self, paths: List[Path], config: GosecConfig = None
     ) -> List[SecurityIssue]:
-        """Execute gosec analysis - Phase 2 TODO [20251221_TODO]"""
+        """Execute gosec analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gosec execution")
 
     def parse_json_report(self, report_path: Path) -> List[SecurityIssue]:
-        """Parse gosec JSON report - Phase 2 TODO [20251221_TODO]"""
+        """Parse gosec JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GosecConfig:
-        """Load gosec configuration - Phase 2 TODO [20251221_TODO]"""
+        """Load gosec configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_vulnerabilities(
         self, issues: List[SecurityIssue]
     ) -> Dict[VulnerabilityType, List[SecurityIssue]]:
-        """Categorize vulnerabilities by type - Phase 2 TODO [20251221_TODO]"""
+        """Categorize vulnerabilities by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
     def filter_by_severity(
         self, issues: List[SecurityIssue], min_severity: str
     ) -> List[SecurityIssue]:
-        """Filter issues by minimum severity - Phase 2 TODO [20251221_TODO]"""
+        """Filter issues by minimum severity - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Severity filtering")
 
     def map_to_cwe(self, issues: List[SecurityIssue]) -> Dict[str, List[SecurityIssue]]:
-        """Map vulnerabilities to CWE identifiers - Phase 2 TODO [20251221_TODO]"""
+        """Map vulnerabilities to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")
 
     def generate_report(self, issues: List[SecurityIssue], format: str = "json") -> str:
-        """Generate security report - Phase 2 TODO [20251221_TODO]"""
+        """Generate security report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

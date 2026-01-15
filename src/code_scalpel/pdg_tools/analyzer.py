@@ -6,57 +6,50 @@ from typing import Any, Optional
 
 import networkx as nx
 
-# [20251221_TODO] Add taint analysis improvements:
+# # TODO Add taint analysis improvements:
 #     - Support custom taint sources (config files, environment variables)
 #     - Implement context-sensitive taint tracking
 #     - Add taint sanitization pattern recognition
 #     - Support data structure field-sensitive taints
 
-# [20251221_TODO] Add advanced alias analysis:
+# # TODO Add advanced alias analysis:
 #     - Implement flow-sensitive alias tracking
 #     - Support pointer analysis for complex reference patterns
 #     - Detect must-alias and may-alias relationships
 #     - Track alias propagation through function parameters
 
-"""
-TODO ITEMS:
+# TODO [COMMUNITY_TIER] Implement data flow anomaly detection (undefined/unused vars)
+# TODO [COMMUNITY_TIER] Create undefined variable analysis on PDG
+# TODO [COMMUNITY_TIER] Add unused variable detection
+# TODO [COMMUNITY_TIER] Implement variable overwrite detection
+# TODO [COMMUNITY_TIER] Create basic dependency path finding
+# TODO [COMMUNITY_TIER] Add reachability analysis for code statements
+# TODO [COMMUNITY_TIER] Implement backward data flow tracing
+# TODO [COMMUNITY_TIER] Create anomaly severity classification
+# TODO [COMMUNITY_TIER] Add comprehensive error reporting
+# TODO [COMMUNITY_TIER] Document analysis algorithms and techniques
 
-COMMUNITY TIER (Basic Analysis):
-1. TODO: Implement data flow anomaly detection (undefined/unused vars)
-2. TODO: Create undefined variable analysis on PDG
-3. TODO: Add unused variable detection
-4. TODO: Implement variable overwrite detection
-5. TODO: Create basic dependency path finding
-6. TODO: Add reachability analysis for code statements
-7. TODO: Implement backward data flow tracing
-8. TODO: Create anomaly severity classification
-9. TODO: Add comprehensive error reporting
-10. TODO: Document analysis algorithms and techniques
+# TODO [PRO_TIER] Implement taint analysis with custom sources/sinks
+# TODO [PRO_TIER] Add SQL injection pattern detection on PDG
+# TODO [PRO_TIER] Implement XSS vulnerability detection
+# TODO [PRO_TIER] Add command injection detection
+# TODO [PRO_TIER] Create sanitizer pattern recognition
+# TODO [PRO_TIER] Implement context-sensitive data flow analysis
+# TODO [PRO_TIER] Add must-alias vs may-alias relationship detection
+# TODO [PRO_TIER] Support field-sensitive taint tracking
+# TODO [PRO_TIER] Implement security vulnerability ranking
+# TODO [PRO_TIER] Create detailed vulnerability reporting with evidence
 
-PRO TIER (Advanced Vulnerability Detection):
-11. TODO: Implement taint analysis with custom sources/sinks
-12. TODO: Add SQL injection pattern detection on PDG
-13. TODO: Implement XSS vulnerability detection
-14. TODO: Add command injection detection
-15. TODO: Create sanitizer pattern recognition
-16. TODO: Implement context-sensitive data flow analysis
-17. TODO: Add must-alias vs may-alias relationship detection
-18. TODO: Support field-sensitive taint tracking
-19. TODO: Implement security vulnerability ranking
-20. TODO: Create detailed vulnerability reporting with evidence
-
-ENTERPRISE TIER (Scalable Analysis & Intelligence):
-21. TODO: Implement distributed PDG analysis over sharded graphs
-22. TODO: Add machine learning-based anomaly detection
-23. TODO: Create semantic vulnerability pattern learning
-24. TODO: Implement federated taint analysis across repos
-25. TODO: Add symbolic execution integration for verification
-26. TODO: Support polyglot vulnerability detection (JS, Java)
-27. TODO: Implement zero-day vulnerability prediction
-28. TODO: Add compliance rule checking on PDG (GDPR, HIPAA)
-29. TODO: Create blockchain-based vulnerability proof chains
-30. TODO: Implement AI-powered security recommendation engine
-"""
+# TODO [ENTERPRISE_TIER] Implement distributed PDG analysis over sharded graphs
+# TODO [ENTERPRISE_TIER] Add machine learning-based anomaly detection
+# TODO [ENTERPRISE_TIER] Create semantic vulnerability pattern learning
+# TODO [ENTERPRISE_TIER] Implement federated taint analysis across repos
+# TODO [ENTERPRISE_TIER] Add symbolic execution integration for verification
+# TODO [ENTERPRISE_TIER] Support polyglot vulnerability detection (JS, Java)
+# TODO [ENTERPRISE_TIER] Implement zero-day vulnerability prediction
+# TODO [ENTERPRISE_TIER] Add compliance rule checking on PDG (GDPR, HIPAA)
+# TODO [ENTERPRISE_TIER] Create blockchain-based vulnerability proof chains
+# TODO [ENTERPRISE_TIER] Implement AI-powered security recommendation engine
 
 
 class DependencyType(Enum):
@@ -99,19 +92,19 @@ class PDGAnalyzer:
         self.pdg = pdg
         self.cached_results = {}
 
-        # [20251221_TODO] Add incremental analysis capabilities:
+        # # TODO Add incremental analysis capabilities:
         #     - Support differential analysis for PDG changes
         #     - Cache intermediate analysis results
         #     - Reuse previous analysis on code updates
         #     - Track analysis invalidation triggers
 
-        # [20251221_TODO] Add result aggregation and summarization:
+        # # TODO Add result aggregation and summarization:
         #     - Aggregate findings across modules/packages
         #     - Generate executive summaries of issues
         #     - Support result filtering and prioritization
         #     - Implement result suppression/baselines for known issues
 
-        # [20251221_TODO] Add blame/attribution tracking:
+        # # TODO Add blame/attribution tracking:
         #     - Link findings to specific developers/commits
         #     - Track when issues were introduced/fixed
         #     - Generate responsibility reports

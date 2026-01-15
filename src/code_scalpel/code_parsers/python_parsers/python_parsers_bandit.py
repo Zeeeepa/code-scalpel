@@ -16,265 +16,36 @@ Bandit Features:
     - Severity and confidence scoring
     - SARIF output for IDE integration
     - Baseline support for legacy code
-
-============================================================================
-TODO ITEMS: python_parsers_bandit.py
-============================================================================
-COMMUNITY TIER - Core Security Analysis (P0-P2) [COMPLETED]
-============================================================================
-
-[P0_CRITICAL] Basic Security Scanning (COMPLETED ✓):
-    - ✓ JSON output parsing
-    - ✓ CWE mapping
-    - ✓ Severity/confidence extraction
-    - ✓ OWASP Top 10 mapping
-    - Test count: 80 tests (COMPLETED)
-
-[P1_HIGH] Security Reporting:
-    - Security trend analysis
-    - Vulnerability age tracking
-    - False positive management
-    - Security baseline integration
-    - Test count: 35 tests
-
-[P2_MEDIUM] Custom Security Rules:
-    - Custom Bandit plugin development
-    - Organization-specific security patterns
-    - Domain-specific vulnerability detection
-    - Test count: 40 tests
-
-============================================================================
-PRO TIER - Advanced Security Features (P1-P3)
-============================================================================
-
-[P1_HIGH] Taint Analysis Integration:
-    - Data flow taint tracking
-    - Source-to-sink path analysis
-    - Sanitizer detection
-    - Test count: 60 tests
-
-[P1_HIGH] Framework-Specific Security:
-    - Django security patterns
-    - Flask security analysis
-    - FastAPI security checks
-    - Test count: 50 tests
-
-[P2_MEDIUM] Advanced Vulnerability Detection:
-    - Race condition detection
-    - Time-of-check-time-of-use (TOCTOU)
-    - Authentication/authorization flaws
-    - Test count: 55 tests
-
-[P3_LOW] Security Metrics:
-    - Security debt calculation
-    - Vulnerability density metrics
-    - Security fix priority scoring
-    - Test count: 30 tests
-
-============================================================================
-ENTERPRISE TIER - Enterprise Security (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Compliance Integration:
-    - PCI-DSS compliance checking
-    - HIPAA security requirements
-    - SOC 2 security controls
-    - Test count: 50 tests
-
-[P2_MEDIUM] Security Audit Trail:
-    - Security scan history
-    - Vulnerability remediation tracking
-    - Security policy enforcement
-    - Test count: 40 tests
-
-[P3_LOW] Advanced Security Reporting:
-    - Executive security dashboards
-    - Risk scoring algorithms
-    - Security SLA tracking
-    - Test count: 35 tests
-
-============================================================================
-TOTAL TEST ESTIMATE: 475 tests (155 COMMUNITY + 195 PRO + 125 ENTERPRISE)
-============================================================================
-
-==============================================================================
-COMPLETED [P2-BANDIT-001]: BanditParser for security analysis
-==============================================================================
-Priority: HIGH
-Status: ✓ COMPLETED
-
-Implemented Features:
-    - [✓] Parse JSON output format (bandit -f json)
-    - [✓] Map issues to CWE identifiers
-    - [✓] Extract severity levels (LOW/MEDIUM/HIGH)
-    - [✓] Extract confidence levels (LOW/MEDIUM/HIGH)
-    - [✓] Track code snippets for context
-    - [✓] Handle stdin input for unsaved files (analyze_code method)
-    - [✓] Support baseline file filtering (config support)
-
-Output Format (JSON):
-    ```json
-    {
-        "errors": [],
-        "generated_at": "2024-01-01T00:00:00Z",
-        "metrics": {
-            "example.py": {
-                "SEVERITY.HIGH": 1,
-                "SEVERITY.LOW": 0,
-                "SEVERITY.MEDIUM": 2,
-                "SEVERITY.UNDEFINED": 0,
-                "CONFIDENCE.HIGH": 2,
-                "CONFIDENCE.LOW": 0,
-                "CONFIDENCE.MEDIUM": 1,
-                "CONFIDENCE.UNDEFINED": 0,
-                "loc": 100,
-                "nosec": 1
-            }
-        },
-        "results": [
-            {
-                "code": "12 password = 'secret123'\n",
-                "col_offset": 0,
-                "end_col_offset": 24,
-                "filename": "example.py",
-                "issue_confidence": "MEDIUM",
-                "issue_cwe": {"id": 259, "link": "https://cwe.mitre.org/data/definitions/259.html"},
-                "issue_severity": "LOW",
-                "issue_text": "Possible hardcoded password: 'secret123'",
-                "line_number": 12,
-                "line_range": [12],
-                "more_info": "https://bandit.readthedocs.io/...",
-                "test_id": "B105",
-                "test_name": "hardcoded_password_string"
-            }
-        ]
-    }
-    ```
-
-Test Cases:
-    - Parse JSON with security issues
-    - Handle clean code (no issues)
-    - Parse CWE information
-    - Verify severity/confidence extraction
-    - Handle baseline exclusions
-
-==============================================================================
-COMPLETED [P2-BANDIT-002]: CWE mapping
-==============================================================================
-Priority: HIGH
-Status: ✓ COMPLETED
-Depends On: P2-BANDIT-001
-
-Implemented Features:
-    - [✓] Map Bandit test IDs to CWE IDs (CWE_DATABASE exists)
-    - [✓] Include CWE descriptions (in CWE_DATABASE)
-    - [✓] Link to MITRE CWE database (CWEInfo.link field)
-    - [✓] get_test_info() method with test descriptions
-    - [✓] TEST_INFO database with full test metadata
-    - [✓] Track fix suggestions per CWE (CWE_FIX_SUGGESTIONS database)
-    - [✓] Support OWASP Top 10 mapping (OWASP_TOP_10_MAPPING, get_owasp_category)
-
-Common CWE Mappings:
-    ```python
-    CWE_MAPPINGS = {
-        "B101": {"id": 703, "name": "Improper Check or Handling of Exceptional Conditions"},
-        "B102": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B103": {"id": 732, "name": "Incorrect Permission Assignment for Critical Resource"},
-        "B104": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B105": {"id": 259, "name": "Use of Hard-coded Password"},
-        "B106": {"id": 259, "name": "Use of Hard-coded Password"},
-        "B107": {"id": 259, "name": "Use of Hard-coded Password"},
-        "B108": {"id": 377, "name": "Insecure Temporary File"},
-        "B110": {"id": 703, "name": "Improper Check or Handling of Exceptional Conditions"},
-        "B112": {"id": 703, "name": "Improper Check or Handling of Exceptional Conditions"},
-        "B201": {"id": 94, "name": "Improper Control of Generation of Code"},
-        "B301": {"id": 502, "name": "Deserialization of Untrusted Data"},
-        "B302": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B303": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B304": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B305": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B306": {"id": 377, "name": "Insecure Temporary File"},
-        "B307": {"id": 676, "name": "Use of Potentially Dangerous Function"},
-        "B308": {"id": 79, "name": "Improper Neutralization of Input During Web Page Generation"},
-        "B309": {"id": 295, "name": "Improper Certificate Validation"},
-        "B310": {"id": 676, "name": "Use of Potentially Dangerous Function"},
-        "B311": {"id": 330, "name": "Use of Insufficiently Random Values"},
-        "B312": {"id": 295, "name": "Improper Certificate Validation"},
-        "B313": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B314": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B315": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B316": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B317": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B318": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B319": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B320": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B321": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B322": {"id": 676, "name": "Use of Potentially Dangerous Function"},
-        "B323": {"id": 295, "name": "Improper Certificate Validation"},
-        "B324": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B401": {"id": 295, "name": "Improper Certificate Validation"},
-        "B402": {"id": 295, "name": "Improper Certificate Validation"},
-        "B403": {"id": 502, "name": "Deserialization of Untrusted Data"},
-        "B404": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B405": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B406": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B407": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B408": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B409": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B410": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B411": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B412": {"id": 330, "name": "Use of Insufficiently Random Values"},
-        "B413": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B501": {"id": 295, "name": "Improper Certificate Validation"},
-        "B502": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B503": {"id": 327, "name": "Use of a Broken or Risky Cryptographic Algorithm"},
-        "B504": {"id": 295, "name": "Improper Certificate Validation"},
-        "B505": {"id": 326, "name": "Inadequate Encryption Strength"},
-        "B506": {"id": 676, "name": "Use of Potentially Dangerous Function"},
-        "B507": {"id": 295, "name": "Improper Certificate Validation"},
-        "B601": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B602": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B603": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B604": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B605": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B606": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B607": {"id": 78, "name": "Improper Neutralization of Special Elements used in an OS Command"},
-        "B608": {"id": 89, "name": "Improper Neutralization of Special Elements used in an SQL Command"},
-        "B609": {"id": 611, "name": "Improper Restriction of XML External Entity Reference"},
-        "B610": {"id": 94, "name": "Improper Control of Generation of Code"},
-        "B611": {"id": 94, "name": "Improper Control of Generation of Code"},
-        "B701": {"id": 94, "name": "Improper Control of Generation of Code"},
-        "B702": {"id": 79, "name": "Improper Neutralization of Input During Web Page Generation"},
-        "B703": {"id": 94, "name": "Improper Control of Generation of Code"},
-    }
-    ```
-
-==============================================================================
-COMPLETED [P2-BANDIT-003]: SARIF output support
-==============================================================================
-Priority: MEDIUM
-Status: ✓ COMPLETED
-
-Implemented Features:
-    - [✓] Parse SARIF format output
-    - [✓] Convert BanditReport to SARIF format
-    - [✓] Include code location information
-    - [✓] Support IDE integration via SARIF schema
-    - [✓] Handle SARIF schema validation (validate_sarif method)
-
-==============================================================================
-COMPLETED [P3-BANDIT-004]: Baseline support
-==============================================================================
-Priority: LOW
-Status: ✓ COMPLETED
-
-Implemented Features:
-    - [✓] Read baseline.json file
-    - [✓] Filter issues present in baseline
-    - [✓] Track new issues vs baseline
-    - [✓] Generate baseline from current results (create_baseline method)
-    - [✓] load_baseline() and filter_with_baseline() methods
 """
+
+# TODO [COMMUNITY/P1_HIGH] Security trend analysis
+# TODO [COMMUNITY/P1_HIGH] Vulnerability age tracking
+# TODO [COMMUNITY/P1_HIGH] False positive management
+# TODO [COMMUNITY/P1_HIGH] Security baseline integration
+# TODO [COMMUNITY/P2_MEDIUM] Custom Bandit plugin development
+# TODO [COMMUNITY/P2_MEDIUM] Organization-specific security patterns
+# TODO [COMMUNITY/P2_MEDIUM] Domain-specific vulnerability detection
+# TODO [PRO/P1_HIGH] Data flow taint tracking
+# TODO [PRO/P1_HIGH] Source-to-sink path analysis
+# TODO [PRO/P1_HIGH] Sanitizer detection
+# TODO [PRO/P1_HIGH] Django security patterns
+# TODO [PRO/P1_HIGH] Flask security analysis
+# TODO [PRO/P1_HIGH] FastAPI security checks
+# TODO [PRO/P2_MEDIUM] Race condition detection
+# TODO [PRO/P2_MEDIUM] Time-of-check-time-of-use (TOCTOU) detection
+# TODO [PRO/P2_MEDIUM] Authentication/authorization flaws detection
+# TODO [PRO/P3_LOW] Security debt calculation
+# TODO [PRO/P3_LOW] Vulnerability density metrics
+# TODO [PRO/P3_LOW] Security fix priority scoring
+# TODO [ENTERPRISE/P2_MEDIUM] PCI-DSS compliance checking
+# TODO [ENTERPRISE/P2_MEDIUM] HIPAA security requirements
+# TODO [ENTERPRISE/P2_MEDIUM] SOC 2 security controls
+# TODO [ENTERPRISE/P2_MEDIUM] Security scan history
+# TODO [ENTERPRISE/P2_MEDIUM] Vulnerability remediation tracking
+# TODO [ENTERPRISE/P2_MEDIUM] Security policy enforcement
+# TODO [ENTERPRISE/P3_LOW] Executive security dashboards
+# TODO [ENTERPRISE/P3_LOW] Risk scoring algorithms
+# TODO [ENTERPRISE/P3_LOW] Security SLA tracking
 
 from __future__ import annotations
 

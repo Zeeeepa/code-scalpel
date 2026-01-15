@@ -28,7 +28,36 @@ Supports:
     - Add schema versioning for backwards compatibility
 
 TODO ITEMS:
-
+    # TODO [COMMUNITY] Implement basic MCP server with stdio transport
+    # TODO [COMMUNITY] Expose core analysis tools (analyze_code, extract_code) as MCP tools
+    # TODO [COMMUNITY] Create MCP request/response envelope with tier metadata
+    # TODO [COMMUNITY] Implement error handling with machine-parseable error codes
+    # TODO [COMMUNITY] Add tool discovery and capability advertisement
+    # TODO [COMMUNITY] Create comprehensive MCP logging framework
+    # TODO [COMMUNITY] Implement request tracing and correlation IDs
+    # TODO [COMMUNITY] Add basic rate limiting for community tier
+    # TODO [COMMUNITY] Create MCP server unit tests and integration tests
+    # TODO [COMMUNITY] Document MCP protocol compliance and tool specifications
+    # TODO [PRO] Add HTTP transport with TLS support
+    # TODO [PRO] Implement per-client quota tracking (requests/hour)
+    # TODO [PRO] Add tier-based feature gating at MCP boundary
+    # TODO [PRO] Implement custom MCP prompt templates export
+    # TODO [PRO] Add analytics queries for usage patterns
+    # TODO [PRO] Support batch tool invocations
+    # TODO [PRO] Implement response streaming for large outputs
+    # TODO [PRO] Add performance monitoring and SLA tracking
+    # TODO [PRO] Create advanced logging with structured analytics
+    # TODO [PRO] Implement request filtering and query optimization
+    # TODO [ENTERPRISE] Implement distributed MCP with load balancing
+    # TODO [ENTERPRISE] Add multi-protocol support (gRPC, WebSocket)
+    # TODO [ENTERPRISE] Implement federated MCP across multiple servers
+    # TODO [ENTERPRISE] Add OpenTelemetry distributed tracing
+    # TODO [ENTERPRISE] Support custom authentication/authorization plugins
+    # TODO [ENTERPRISE] Implement MCP caching layer with invalidation
+    # TODO [ENTERPRISE] Add audit logging for compliance (SOC2, HIPAA)
+    # TODO [ENTERPRISE] Implement health checks and failover
+    # TODO [ENTERPRISE] Add blockchain-based request signature verification
+    # TODO [ENTERPRISE] Create AI-powered MCP request optimization engine
 COMMUNITY TIER (Core MCP Integration):
 1. TODO: Implement basic MCP server with stdio transport
 2. TODO: Expose core analysis tools (analyze_code, extract_code) as MCP tools

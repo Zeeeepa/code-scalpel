@@ -15,45 +15,38 @@ Usage:
 
     # HTTP transport for network access
     python -m code_scalpel.mcp.server --transport streamable-http --port 8080
-
-TODO ITEMS:
-
-COMMUNITY TIER (Core Server Features):
-1. TODO: Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
-2. TODO: Add stdin/stdout MCP transport implementation
-3. TODO: Implement FastMCP server with tool registration
-4. TODO: Add request/response envelope wrapping
-5. TODO: Implement error handling with error codes
-6. TODO: Add tool timeout enforcement
-7. TODO: Implement maximum payload size limits
-8. TODO: Create tool initialization and health checks
-9. TODO: Add comprehensive server logging
-10. TODO: Document server setup and deployment
-
-PRO TIER (Advanced Server Capabilities):
-11. TODO: Implement HTTP transport with TLS
-12. TODO: Add client authentication (API key, JWT)
-13. TODO: Implement tier-aware tool filtering
-14. TODO: Add tool-level performance profiling
-15. TODO: Implement response compression for large outputs
-16. TODO: Add request queuing and concurrency limits
-17. TODO: Implement custom tool metrics collection
-18. TODO: Add batch tool invocation support
-19. TODO: Create advanced analytics and monitoring
-20. TODO: Implement tool versioning and backward compatibility
-
-ENTERPRISE TIER (Scalability & Security):
-21. TODO: Implement distributed server with load balancing
-22. TODO: Add multi-protocol MCP (gRPC, WebSocket)
-23. TODO: Implement federated MCP across servers
-24. TODO: Add OpenTelemetry instrumentation
-25. TODO: Implement RBAC and fine-grained permissions
-26. TODO: Add audit logging for compliance
-27. TODO: Implement request signing and verification
-28. TODO: Add health checks and failover
-29. TODO: Support custom authentication providers
-30. TODO: Implement AI-powered request optimization
 """
+
+# TODO [COMMUNITY/CORE] Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
+# TODO [COMMUNITY/CORE] Add stdin/stdout MCP transport implementation
+# TODO [COMMUNITY/CORE] Implement FastMCP server with tool registration
+# TODO [COMMUNITY/CORE] Add request/response envelope wrapping
+# TODO [COMMUNITY/CORE] Implement error handling with error codes
+# TODO [COMMUNITY/CORE] Add tool timeout enforcement
+# TODO [COMMUNITY/CORE] Implement maximum payload size limits
+# TODO [COMMUNITY/CORE] Create tool initialization and health checks
+# TODO [COMMUNITY/CORE] Add comprehensive server logging
+# TODO [COMMUNITY/CORE] Document server setup and deployment
+# TODO [PRO/ADVANCED] Implement HTTP transport with TLS
+# TODO [PRO/ADVANCED] Add client authentication (API key, JWT)
+# TODO [PRO/ADVANCED] Implement tier-aware tool filtering
+# TODO [PRO/ADVANCED] Add tool-level performance profiling
+# TODO [PRO/ADVANCED] Implement response compression for large outputs
+# TODO [PRO/ADVANCED] Add request queuing and concurrency limits
+# TODO [PRO/ADVANCED] Implement custom tool metrics collection
+# TODO [PRO/ADVANCED] Add batch tool invocation support
+# TODO [PRO/ADVANCED] Create advanced analytics and monitoring
+# TODO [PRO/ADVANCED] Implement tool versioning and backward compatibility
+# TODO [ENTERPRISE/SCALABILITY] Implement distributed server with load balancing
+# TODO [ENTERPRISE/SCALABILITY] Add multi-protocol MCP (gRPC, WebSocket)
+# TODO [ENTERPRISE/SCALABILITY] Implement federated MCP across servers
+# TODO [ENTERPRISE/SCALABILITY] Add OpenTelemetry instrumentation
+# TODO [ENTERPRISE/SECURITY] Implement RBAC and fine-grained permissions
+# TODO [ENTERPRISE/SECURITY] Add audit logging for compliance
+# TODO [ENTERPRISE/SECURITY] Implement request signing and verification
+# TODO [ENTERPRISE/SECURITY] Add health checks and failover
+# TODO [ENTERPRISE/SECURITY] Support custom authentication providers
+# TODO [ENTERPRISE/OPTIMIZATION] Implement AI-powered request optimization
 
 from __future__ import annotations
 
@@ -68,6 +61,7 @@ import re
 import sys
 import time
 from collections.abc import Callable
+from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Set, cast
 
@@ -80,7 +74,7 @@ if TYPE_CHECKING:
 
 from typing import TypedDict
 
-from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.fastmcp import Context
 from pydantic import BaseModel, Field
 
 
@@ -107,6 +101,15 @@ from code_scalpel.mcp.response_config import filter_tool_response, get_response_
 # [20251226_BUGFIX] Repaired corrupted unified sink import stub.
 from code_scalpel.security.analyzers import UnifiedSinkDetector
 from code_scalpel.security.analyzers.policy_engine import PolicyEngine
+
+# Central MCP instance (moved to protocol module)
+mcp = import_module("code_scalpel.mcp.protocol").mcp
+
+# Register prompt handlers (side effects)
+from code_scalpel.mcp import prompts as _prompts  # noqa: F401
+
+# Register resource handlers (side effects)
+from code_scalpel.mcp import resources as _resources  # noqa: F401
 
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
@@ -542,14 +545,18 @@ def _evaluate_change_budget_for_write_tool(
                         not patch_result.success
                         and "not found" in (patch_result.error or "").lower()
                     ):
-                        patch_result = patcher.insert_function(str(new_code))
+                        insert_fn = getattr(patcher, "insert_function", None)
+                        if callable(insert_fn):
+                            patch_result = insert_fn(str(new_code))
                 elif target_type == "class":
                     patch_result = patcher.update_class(target_name, str(new_code))
                     if (
                         not patch_result.success
                         and "not found" in (patch_result.error or "").lower()
                     ):
-                        patch_result = patcher.insert_class(str(new_code))
+                        insert_cls = getattr(patcher, "insert_class", None)
+                        if callable(insert_cls):
+                            patch_result = insert_cls(str(new_code))
                 elif target_type == "method":
                     if "." not in target_name:
                         return True, {
@@ -565,7 +572,9 @@ def _evaluate_change_budget_for_write_tool(
                         and "not found" in (patch_result.error or "").lower()
                         and "class" not in (patch_result.error or "").lower()
                     ):
-                        patch_result = patcher.insert_method(class_name, str(new_code))
+                        insert_method = getattr(patcher, "insert_method", None)
+                        if callable(insert_method):
+                            patch_result = insert_method(class_name, str(new_code))
                 else:
                     return True, {
                         "skipped": True,
@@ -967,14 +976,15 @@ def _maybe_enforce_governance_before_tool(
                 warnings,
             )
 
+        from code_scalpel.policy_engine import PolicyEngine as OpaPolicyEngine
+        from code_scalpel.policy_engine.policy_engine import (
+            Operation as PolicyOperation,
+        )
+        from code_scalpel.policy_engine.policy_engine import (
+            PolicyError as OpaPolicyError,
+        )
+
         try:
-            from code_scalpel.policy_engine import PolicyEngine as OpaPolicyEngine
-            from code_scalpel.policy_engine.policy_engine import (
-                Operation as PolicyOperation,
-            )
-            from code_scalpel.policy_engine.policy_engine import (
-                PolicyError,
-            )
 
             file_path = str(arguments.get("file_path") or "")
             # Provide the most relevant code view we have pre-mutation.
@@ -1002,7 +1012,7 @@ def _maybe_enforce_governance_before_tool(
                 },
             )
             decision = engine.evaluate(op)
-        except PolicyError as exc:
+        except OpaPolicyError as exc:
             _emit_governance_audit_event(
                 policy_dir,
                 {
@@ -2607,58 +2617,6 @@ class SymbolReferencesResult(BaseModel):
         description="Ratio of references with CODEOWNERS attribution (Enterprise)",
     )
     error: str | None = Field(default=None, description="Error message if failed")
-
-
-# ============================================================================
-# MCP SERVER
-# ============================================================================
-
-mcp = FastMCP(
-    name="Code Scalpel",
-    instructions=f"""Code Scalpel v{__version__} - AI-powered code analysis tools:
-
-**TOKEN-EFFICIENT EXTRACTION (READ):**
-- extract_code: Surgically extract functions/classes/methods by FILE PATH.
-  The SERVER reads the file - YOU pay ~50 tokens instead of ~10,000.
-  Supports Python, JavaScript, TypeScript, Java, JSX, TSX (React components).
-  Example: extract_code(file_path="/src/utils.py", target_type="function", target_name="calculate_tax")
-  React: extract_code(file_path="/components/Button.tsx", target_type="function", target_name="Button", language="tsx")
-
-**JSX/TSX EXTRACTION (v2.0.2):**
-- Extract React components with full metadata
-- Detects Server Components (Next.js async components)
-- Detects Server Actions ('use server' directive)
-- Normalizes JSX for consistent analysis
-- Returns component_type: "functional" or "class"
-
-**RESOURCE TEMPLATES (v2.0.2):**
-Access code via URIs without knowing file paths:
-- code:///python/utils/calculate_tax
-- code:///typescript/components/UserCard
-- code:///java/services.AuthService/authenticate
-
-**SURGICAL MODIFICATION (WRITE):**
-- update_symbol: Replace a function/class/method in a file with new code.
-  YOU provide only the new symbol - the SERVER handles safe replacement.
-  Example: update_symbol(file_path="/src/utils.py", target_type="function",
-           target_name="calculate_tax", new_code="def calculate_tax(amount): ...")
-  Creates backup, validates syntax, preserves surrounding code.
-
-**ANALYSIS TOOLS:**
-- analyze_code: Parse Python/Java code, extract structure (functions, classes, imports)
-- security_scan: Detect vulnerabilities using taint analysis (SQL injection, XSS, etc.)
-- symbolic_execute: Explore execution paths using symbolic execution
-- generate_unit_tests: Generate pytest/unittest tests from symbolic execution paths
-- simulate_refactor: Verify a code change is safe before applying it
-- crawl_project: Crawl entire project directory, analyze all Python files
-
-**WORKFLOW OPTIMIZATION:**
-1. Use extract_code(file_path=...) to get ONLY the symbol you need
-2. Modify the extracted code
-3. Use update_symbol(file_path=..., new_code=...) to apply the change safely
-
-Code is PARSED only, never executed.""",
-)
 
 
 # Wrap tool registration to make ALL tools return ToolResponseEnvelope in their signature.
@@ -9710,7 +9668,7 @@ def _crawl_project_sync(
         from code_scalpel.analysis.project_crawler import ProjectCrawler
 
         # [20251229_FEATURE] Enterprise: Incremental indexing with cache
-        cache_file = None
+        cache_file: Path | None = None
         cached_results = {}
         cache_hits = 0
         incremental_mode = capabilities and "incremental_indexing" in capabilities
@@ -9721,13 +9679,13 @@ def _crawl_project_sync(
             cache_file = cache_dir / "crawl_cache.json"
 
             # Ensure cache file exists even on first run
-            if not cache_file.exists():
+            if cache_file is not None and not cache_file.exists():
                 try:
                     cache_file.touch()
                 except Exception:
                     cache_file = None
 
-            if cache_file.exists():
+            if cache_file is not None and cache_file.exists():
                 try:
                     with open(cache_file, "r", encoding="utf-8") as f:
                         cached_results = json.load(f)
@@ -10384,6 +10342,7 @@ async def _extract_polyglot(
         )
 
     try:
+        import subprocess
         # Create extractor from file or code
         if file_path is not None:
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
@@ -11214,10 +11173,11 @@ async def _perform_atomic_git_refactor(
     Returns:
         Dictionary with branch_name, tests_passed, and revert status
     """
+    import subprocess
+
     result = {"branch_name": None, "tests_passed": None, "reverted": False}
 
     try:
-        import subprocess
         from datetime import datetime
         from pathlib import Path
 
@@ -13041,1298 +13001,6 @@ async def crawl_project(
 
 
 # ============================================================================
-# RESOURCES
-# ============================================================================
-
-
-@mcp.resource("scalpel://project/call-graph")
-def get_project_call_graph() -> str:
-    """
-    Get the project-wide call graph.
-
-    Returns a JSON adjacency list:
-    {
-        "file.py:caller_function": ["target_function", "other_file.py:target_function"]
-    }
-
-    Use this to trace function calls across files and understand dependencies.
-    """
-    import json
-
-    from code_scalpel.ast_tools.call_graph import CallGraphBuilder
-
-    builder = CallGraphBuilder(PROJECT_ROOT)
-    graph = builder.build()
-    return json.dumps(graph, indent=2)
-
-
-@mcp.resource("scalpel://project/dependencies")
-def get_project_dependencies() -> str:
-    """
-    Returns a list of project dependencies detected in configuration files.
-    Use this to verify if libraries used in generated code actually exist in the project.
-    """
-    import json
-
-    from code_scalpel.ast_tools.dependency_parser import DependencyParser
-
-    parser = DependencyParser(str(PROJECT_ROOT))
-    deps = parser.get_dependencies()
-    return json.dumps(deps, indent=2)
-
-
-@mcp.resource("scalpel://project/structure")
-def get_project_structure() -> str:
-    """
-    Get the project directory structure as a JSON tree.
-
-    Use this resource to understand the file layout of the project.
-    It respects .gitignore if possible (simple implementation for now).
-    """
-
-    def build_tree(path: Path) -> TreeNodeDict:
-        tree: TreeNodeDict = {"name": path.name, "type": "directory", "children": []}
-        try:
-            # Sort directories first, then files
-            items = sorted(path.iterdir(), key=lambda p: (not p.is_dir(), p.name))
-            for item in items:
-                # Skip hidden files/dirs and common ignore patterns
-                if item.name.startswith(".") or item.name in [
-                    "__pycache__",
-                    "venv",
-                    "node_modules",
-                    "dist",
-                    "build",
-                ]:
-                    continue
-
-                if item.is_dir():
-                    tree["children"].append(build_tree(item))
-                else:
-                    tree["children"].append({"name": item.name, "type": "file"})
-        except PermissionError:
-            pass
-        return tree
-
-    import json
-
-    return json.dumps(build_tree(PROJECT_ROOT), indent=2)
-
-
-@mcp.resource("scalpel://version")
-def get_version() -> str:
-    """Get Code Scalpel version information."""
-    return f"""Code Scalpel v{__version__}
-
-A precision toolkit for AI-driven code analysis.
-
-Features:
-- AST Analysis: Parse and analyze code structure
-- Security Scanning: Taint-based vulnerability detection
-- Symbolic Execution: Path exploration with Z3 solver
-
-Supported Languages:
-- Python (full support)
-- JavaScript/TypeScript (planned v0.4.0)
-"""
-
-
-@mcp.resource("scalpel://health")
-def get_health() -> str:
-    """
-    Health check endpoint for Docker and orchestration systems.
-
-    [20251215_FEATURE] v2.0.0 - Added health endpoint for Docker health checks.
-
-    Returns immediately with server status. Use this instead of SSE endpoint
-    for health checks as SSE connections stay open indefinitely.
-
-    Returns:
-        JSON string with health status
-    """
-    import json
-
-    return json.dumps(
-        {
-            "status": "healthy",
-            "version": __version__,
-            "project_root": str(PROJECT_ROOT),
-        }
-    )
-
-
-@mcp.resource("scalpel://capabilities")
-def get_capabilities() -> str:
-    """Get information about Code Scalpel's capabilities."""
-    return """# Code Scalpel Capabilities
-
-## Tools
-
-### analyze_code
-Parses Python code and extracts:
-- Function definitions (sync and async)
-- Class definitions
-- Import statements
-- Cyclomatic complexity
-- Lines of code
-
-### security_scan
-Detects vulnerabilities:
-- SQL Injection (CWE-89)
-- Cross-Site Scripting (CWE-79)
-- Command Injection (CWE-78)
-- Path Traversal (CWE-22)
-- Code Injection (CWE-94)
-
-Uses taint analysis to track data flow from sources to sinks.
-
-### symbolic_execute
-Explores execution paths:
-- Treats function arguments as symbolic
-- Uses Z3 SMT solver for constraint solving
-- Identifies reachable/unreachable paths
-- Reports path conditions
-
-## Security Notes
-- Code is PARSED, never executed
-- Maximum code size: 100KB
-- No filesystem access from analyzed code
-- No network access from analyzed code
-"""
-
-
-# ============================================================================
-# RESOURCE TEMPLATES - Dynamic URI-based Context
-# [20251215_FEATURE] v2.0.0 - MCP Resource Templates for dynamic content access
-# ============================================================================
-
-
-@mcp.resource("scalpel://file/{path}")
-def get_file_resource(path: str) -> str:
-    """
-    Read file contents by path (Resource Template).
-
-    [20251215_FEATURE] v2.0.0 - Dynamic file access via URI template.
-
-    This resource template allows clients to construct URIs dynamically
-    to access any file within the allowed roots.
-
-    Example URIs:
-    - scalpel://file/src/main.py
-    - scalpel://file/tests/test_utils.py
-
-    Security: Path must be within allowed roots (PROJECT_ROOT or client-specified roots).
-
-    Args:
-        path: Relative or absolute path to the file
-
-    Returns:
-        File contents as text
-    """
-    from code_scalpel.mcp.path_resolver import resolve_path
-
-    try:
-        resolved = resolve_path(path, str(PROJECT_ROOT))
-        file_path = Path(resolved)
-
-        # Security check
-        _validate_path_security(file_path)
-
-        return file_path.read_text(encoding="utf-8")
-    except FileNotFoundError as e:
-        return f"Error: {e}"
-    except PermissionError as e:
-        return f"Error: {e}"
-    except Exception as e:
-        return f"Error reading file: {e}"
-
-
-@mcp.resource("scalpel://analysis/{path}")
-def get_analysis_resource(path: str) -> str:
-    """
-    Get code analysis for a file by path (Resource Template).
-
-    [20251215_FEATURE] v2.0.0 - Dynamic analysis access via URI template.
-
-    Returns a JSON analysis including:
-    - Functions and classes
-    - Imports
-    - Complexity metrics
-    - Security warnings (if any)
-
-    Example URIs:
-    - scalpel://analysis/src/utils.py
-    - scalpel://analysis/app/models.py
-
-    Args:
-        path: Path to the Python file to analyze
-
-    Returns:
-        JSON string with analysis results
-    """
-    import json
-
-    from code_scalpel.mcp.path_resolver import resolve_path
-
-    try:
-        resolved = resolve_path(path, str(PROJECT_ROOT))
-        file_path = Path(resolved)
-
-        # Security check
-        _validate_path_security(file_path)
-
-        code = file_path.read_text(encoding="utf-8")
-
-        # Run analysis
-        result = _analyze_code_sync(code, "python")
-
-        # Run quick security check
-        security = _security_scan_sync(code)
-
-        return json.dumps(
-            {
-                "file": str(file_path),
-                "analysis": result.model_dump(),
-                "security_summary": {
-                    "has_vulnerabilities": security.has_vulnerabilities,
-                    "vulnerability_count": security.vulnerability_count,
-                    "risk_level": security.risk_level,
-                },
-            },
-            indent=2,
-        )
-    except FileNotFoundError as e:
-        return json.dumps({"error": str(e)})
-    except PermissionError as e:
-        return json.dumps({"error": str(e)})
-    except Exception as e:
-        return json.dumps({"error": f"Analysis failed: {e}"})
-
-
-# [20251215_BUGFIX] Provide synchronous extraction helper for URI templates using SurgicalExtractor.
-def _extract_code_sync(
-    target_type: str,
-    target_name: str,
-    file_path: str | None,
-    code: str | None = None,
-    include_context: bool = True,
-    include_token_estimate: bool = True,
-) -> ContextualExtractionResult:
-    # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
-
-    if not file_path and not code:
-        return _extraction_error(
-            target_name, "Must provide either 'file_path' or 'code' argument"
-        )
-
-    extractor = (
-        SurgicalExtractor.from_file(file_path)
-        if file_path is not None
-        else SurgicalExtractor(code or "")
-    )
-
-    context = None
-    if target_type == "class":
-        target = extractor.get_class(target_name)
-        if include_context:
-            context = extractor.get_class_with_context(target_name)
-    elif target_type == "method":
-        if "." not in target_name:
-            return _extraction_error(
-                target_name, "Method targets must use Class.method format"
-            )
-        class_name, method_name = target_name.split(".", 1)
-        target = extractor.get_method(class_name, method_name)
-        if include_context:
-            # [20251220_FEATURE] Use get_method_with_context for token-efficient extraction
-            # Falls back to class context if method-level context unavailable
-            if hasattr(extractor, "get_method_with_context"):
-                context = extractor.get_method_with_context(class_name, method_name)
-            else:
-                context = extractor.get_class_with_context(class_name)
-    else:
-        target = extractor.get_function(target_name)
-        if include_context:
-            context = extractor.get_function_with_context(target_name)
-
-    if not target.success:
-        return _extraction_error(target_name, target.error or "Extraction failed")
-
-    context_code = context.context_code if context else ""
-    context_items = context.context_items if context else (target.dependencies or [])
-    full_code = context.full_code if context else target.code
-    total_lines = (
-        context.total_lines
-        if context
-        else (
-            target.line_end - target.line_start + 1
-            if target.line_end and target.line_start
-            else max(1, full_code.count("\n") + 1)
-        )
-    )
-    token_estimate = context.token_estimate if context and include_token_estimate else 0
-
-    # [20260111_FEATURE] Get tier for metadata (sync helper uses default tier)
-    tier = _get_current_tier()
-    from code_scalpel.licensing.config_loader import get_tool_limits
-
-    limits = get_tool_limits("extract_code", tier)
-    max_depth_limit = limits.get("max_depth")
-
-    return ContextualExtractionResult(
-        success=True,
-        server_version=__version__,
-        target_name=target_name,
-        target_code=target.code,
-        context_code=context_code,
-        full_code=full_code,
-        context_items=context_items,
-        total_lines=total_lines,
-        line_start=target.line_start,
-        line_end=target.line_end,
-        token_estimate=token_estimate,
-        error=None,
-        # [20260111_FEATURE] Output metadata for transparency
-        tier_applied=tier,
-        language_detected="python",  # _extract_code_sync is Python-only
-        cross_file_deps_enabled=include_context,
-        max_depth_applied=max_depth_limit,
-    )
-
-
-@mcp.resource("scalpel://symbol/{file_path}/{symbol_name}")
-def get_symbol_resource(file_path: str, symbol_name: str) -> str:
-    """
-    Extract a specific symbol (function/class) from a file (Resource Template).
-
-    [20251215_FEATURE] v2.0.0 - Surgical symbol extraction via URI template.
-
-    This is more efficient than reading the entire file when you only
-    need a specific function or class definition.
-
-    Example URIs:
-    - scalpel://symbol/src/utils.py/calculate_tax
-    - scalpel://symbol/app/models.py/User
-    - scalpel://symbol/services/auth.py/AuthService.validate
-
-    Args:
-        file_path: Path to the file
-        symbol_name: Name of the function, class, or method (use Class.method for methods)
-
-    Returns:
-        JSON with extracted code and metadata
-    """
-    import json
-
-    from code_scalpel.mcp.path_resolver import resolve_path
-
-    try:
-        resolved = resolve_path(file_path, str(PROJECT_ROOT))
-        path = Path(resolved)
-
-        # Security check
-        _validate_path_security(path)
-
-        # Determine target type
-        if "." in symbol_name:
-            target_type = "method"
-        else:
-            # Try to detect from code
-            code = path.read_text(encoding="utf-8")
-            tree = ast.parse(code)
-
-            target_type = "function"
-            for node in ast.walk(tree):
-                if isinstance(node, ast.ClassDef) and node.name == symbol_name:
-                    target_type = "class"
-                    break
-
-        # Use extraction logic
-        result = _extract_code_sync(
-            target_type=target_type,
-            target_name=symbol_name,
-            file_path=str(path),
-            include_context=True,
-            include_token_estimate=True,
-        )
-
-        return json.dumps(result.model_dump(), indent=2)
-    except FileNotFoundError as e:
-        return json.dumps({"error": str(e)})
-    except PermissionError as e:
-        return json.dumps({"error": str(e)})
-    except Exception as e:
-        return json.dumps({"error": f"Extraction failed: {e}"})
-
-
-@mcp.resource("scalpel://security/{path}")
-def get_security_resource(path: str) -> str:
-    """
-    Get security scan results for a file (Resource Template).
-
-    [20251215_FEATURE] v2.0.0 - Security analysis via URI template.
-
-    Returns detailed vulnerability information including:
-    - Vulnerability type and CWE
-    - Line numbers
-    - Severity levels
-    - Taint flow information
-
-    Example URIs:
-    - scalpel://security/src/api.py
-    - scalpel://security/app/views.py
-
-    Args:
-        path: Path to the Python file to scan
-
-    Returns:
-        JSON string with security scan results
-    """
-    import json
-
-    from code_scalpel.mcp.path_resolver import resolve_path
-
-    try:
-        resolved = resolve_path(path, str(PROJECT_ROOT))
-        file_path = Path(resolved)
-
-        # Security check
-        _validate_path_security(file_path)
-
-        # Run security scan
-        result = _security_scan_sync(file_path=str(file_path))
-
-        return json.dumps(result.model_dump(), indent=2)
-    except FileNotFoundError as e:
-        return json.dumps({"error": str(e)})
-    except PermissionError as e:
-        return json.dumps({"error": str(e)})
-    except Exception as e:
-        return json.dumps({"error": f"Security scan failed: {e}"})
-
-
-@mcp.resource("code:///{language}/{module}/{symbol}")
-async def get_code_resource(language: str, module: str, symbol: str) -> str:
-    """
-    Access code elements via parameterized URI (Resource Template).
-
-    [20251216_FEATURE] v2.0.2 - Universal code access via code:/// URIs.
-
-    This resource template allows AI agents to access code elements by
-    specifying language, module, and symbol without knowing exact file paths.
-
-    URI Format:
-        code:///{language}/{module}/{symbol}
-
-    Examples:
-        - code:///python/utils/calculate_tax
-        - code:///typescript/components/UserCard
-        - code:///javascript/services/auth/authenticate
-        - code:///java/services.AuthService/validateToken
-
-    Args:
-        language: Programming language ("python", "javascript", "typescript", "java")
-        module: Module name (e.g., "utils", "components/Button", "services.auth")
-        symbol: Symbol name (function, class, or method with Class.method notation)
-
-    Returns:
-        JSON with extracted code, metadata, and JSX/TSX information
-    """
-    import json
-
-    from code_scalpel.mcp.module_resolver import get_mime_type, resolve_module_path
-
-    try:
-        # Resolve module to file path
-        file_path = resolve_module_path(language, module, PROJECT_ROOT)
-
-        if file_path is None:
-            return json.dumps(
-                {
-                    "error": f"Module '{module}' not found for language '{language}'",
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                }
-            )
-
-        # Security check
-        _validate_path_security(file_path)
-
-        # [20251216_BUGFIX] Fallback type detection for uppercase function names
-        # React components are often functions starting with uppercase (e.g., function Button)
-        # Try class first for uppercase names, fall back to function if not found
-        if "." in symbol:
-            target_types_to_try = ["method"]
-        elif symbol and symbol[0].isupper():
-            # Uppercase: could be class OR function (React components)
-            target_types_to_try = ["class", "function"]
-        else:
-            target_types_to_try = ["function"]
-
-        # Extract the symbol using extract_code with fallback
-        result = None
-        last_error = None
-        for target_type in target_types_to_try:
-            result = await extract_code(
-                target_type=target_type,
-                target_name=symbol,
-                file_path=str(file_path),
-                language=language,
-                include_context=True,
-                include_token_estimate=True,
-            )
-            if result.success:
-                break
-            last_error = result.error
-
-        if result is None or not result.success:
-            return json.dumps(
-                {
-                    "error": last_error or "Extraction failed",
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                }
-            )
-
-        # Return full result with metadata
-        return json.dumps(
-            {
-                "uri": f"code:///{language}/{module}/{symbol}",
-                "mimeType": get_mime_type(language),
-                "code": result.full_code,
-                "metadata": {
-                    "file_path": str(file_path),
-                    "language": language,
-                    "module": module,
-                    "symbol": symbol,
-                    "line_start": result.line_start,
-                    "line_end": result.line_end,
-                    "token_estimate": result.token_estimate,
-                    # JSX/TSX metadata
-                    "jsx_normalized": result.jsx_normalized,
-                    "is_server_component": result.is_server_component,
-                    "is_server_action": result.is_server_action,
-                    "component_type": result.component_type,
-                },
-            },
-            indent=2,
-        )
-
-    except PermissionError as e:
-        return json.dumps(
-            {
-                "error": str(e),
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            }
-        )
-    except Exception as e:
-        return json.dumps(
-            {
-                "error": f"Resource access failed: {str(e)}",
-                "language": language,
-                "module": module,
-                "symbol": symbol,
-            }
-        )
-
-
-# ============================================================================
-# PROMPTS
-# ============================================================================
-
-
-@mcp.prompt(title="Code Review")
-def code_review_prompt(code: str) -> str:
-    """Generate a comprehensive code review prompt."""
-    return f"""Please analyze the following Python code and provide:
-
-1. **Structure Analysis**: Identify functions, classes, and imports
-2. **Security Review**: Check for potential vulnerabilities
-3. **Quality Assessment**: Evaluate code quality and suggest improvements
-4. **Edge Cases**: Identify potential edge cases and error conditions
-
-Use the available Code Scalpel tools to gather detailed analysis:
-- analyze_code: For structure and complexity
-- security_scan: For vulnerability detection
-- symbolic_execute: For path analysis
-
-Code to review:
-```python
-{code}
-```
-
-Provide actionable recommendations for improvement."""
-
-
-@mcp.prompt(title="Security Audit")
-def security_audit_prompt(code: str) -> str:
-    """Generate a security-focused audit prompt."""
-    return f"""Perform a security audit of the following Python code.
-
-Focus on:
-1. **Input Validation**: Are all inputs properly validated?
-2. **Injection Risks**: SQL, command, code injection vulnerabilities
-3. **Authentication/Authorization**: Proper access controls
-4. **Data Exposure**: Sensitive data handling
-5. **Dependencies**: Known vulnerable patterns
-
-Use security_scan tool to detect vulnerabilities automatically.
-
-Code to audit:
-```python
-{code}
-```
-
-Provide a risk assessment and remediation steps for each finding."""
-
-
-# ============================================================================
-# WORKFLOW PROMPTS - Orchestrated Multi-Tool Workflows
-# [20251215_FEATURE] v2.0.0 - Advanced workflow prompts combining tools + resources
-# ============================================================================
-
-
-@mcp.prompt(title="Refactor Function")
-def refactor_function_prompt(
-    file_path: str, function_name: str, refactor_goal: str
-) -> str:
-    """
-    Safe refactoring workflow with validation.
-
-    [20251215_FEATURE] v2.0.0 - Orchestrated refactor workflow.
-
-    This prompt guides through a safe refactoring process:
-    1. Extract the target function
-    2. Analyze its structure and dependencies
-    3. Simulate the refactor to verify safety
-    4. Apply the change with backup
-
-    Args:
-        file_path: Path to the file containing the function
-        function_name: Name of the function to refactor
-        refactor_goal: Description of what the refactoring should achieve
-    """
-    return f"""# Safe Refactoring Workflow
-
-## Target
-- **File**: `{file_path}`
-- **Function**: `{function_name}`
-- **Goal**: {refactor_goal}
-
-## Workflow Steps
-
-### Step 1: Extract Current Implementation
-First, use `extract_code` to get the current function:
-```
-extract_code(
-    file_path="{file_path}",
-    target_type="function",
-    target_name="{function_name}",
-    include_context=True,
-    include_cross_file_deps=True
-)
-```
-
-### Step 2: Analyze Dependencies
-Check what depends on this function using `get_symbol_references`:
-```
-get_symbol_references(
-    symbol_name="{function_name}",
-    project_root="<project_root>"
-)
-```
-
-### Step 3: Create Refactored Version
-Based on the goal "{refactor_goal}", create the new implementation.
-Ensure it maintains the same function signature if there are external callers.
-
-### Step 4: Validate Safety
-Before applying, use `simulate_refactor` to verify the change is safe:
-```
-simulate_refactor(
-    original_code=<extracted_code>,
-    new_code=<your_refactored_code>,
-    strict_mode=True
-)
-```
-
-### Step 5: Apply the Change
-If simulation passes, use `update_symbol` to apply:
-```
-update_symbol(
-    file_path="{file_path}",
-    target_type="function",
-    target_name="{function_name}",
-    new_code=<your_refactored_code>,
-    create_backup=True
-)
-```
-
-## Safety Notes
-- Always check the simulation result before applying
-- A backup file (.bak) will be created
-- If anything goes wrong, restore from backup
-
-Please proceed with Step 1 to begin the refactoring process."""
-
-
-@mcp.prompt(title="Debug Vulnerability")
-def debug_vulnerability_prompt(file_path: str, vulnerability_type: str = "any") -> str:
-    """
-    Security vulnerability investigation and remediation workflow.
-
-    [20251215_FEATURE] v2.0.0 - Security debugging workflow.
-
-    This prompt guides through investigating and fixing security issues:
-    1. Scan for vulnerabilities
-    2. Trace taint flow across files
-    3. Identify the root cause
-    4. Generate and validate fixes
-
-    Args:
-        file_path: Path to the file to investigate
-        vulnerability_type: Type of vulnerability (sql_injection, xss, command_injection, etc.) or "any"
-    """
-    vuln_filter = (
-        f"Focus specifically on **{vulnerability_type}** vulnerabilities."
-        if vulnerability_type != "any"
-        else "Check for all vulnerability types."
-    )
-
-    return f"""# Security Vulnerability Investigation
-
-## Target
-- **File**: `{file_path}`
-- **Focus**: {vuln_filter}
-
-## Investigation Workflow
-
-### Step 1: Initial Security Scan
-Run a security scan on the target file:
-```
-security_scan(file_path="{file_path}")
-```
-
-### Step 2: Cross-File Taint Analysis
-If vulnerabilities are found, trace the taint flow across files:
-```
-cross_file_security_scan(
-    project_root="<project_root>",
-    entry_points=["{file_path}:<function_name>"],
-    include_diagram=True
-)
-```
-
-### Step 3: Understand the Data Flow
-For each vulnerability found:
-1. Identify the **taint source** (user input, request data, etc.)
-2. Trace the flow through function calls
-3. Find the **sink** where the vulnerability occurs
-
-### Step 4: Extract Vulnerable Code
-Use `extract_code` to get the vulnerable function(s):
-```
-extract_code(
-    file_path="{file_path}",
-    target_type="function",
-    target_name="<vulnerable_function>",
-    include_cross_file_deps=True
-)
-```
-
-### Step 5: Generate Fix
-Create a fixed version that:
-- Adds proper input validation/sanitization
-- Uses parameterized queries for SQL
-- Escapes output for XSS
-- Validates file paths for traversal
-
-### Step 6: Validate Fix
-Use `simulate_refactor` to ensure the fix:
-- Doesn't introduce new vulnerabilities
-- Preserves the function's behavior
-```
-simulate_refactor(
-    original_code=<vulnerable_code>,
-    new_code=<fixed_code>,
-    strict_mode=True
-)
-```
-
-### Step 7: Apply Fix
-If validation passes, apply with `update_symbol`.
-
-## Common Fixes by Vulnerability Type
-- **SQL Injection**: Use parameterized queries, ORM methods
-- **XSS**: HTML escape output, use template auto-escaping
-- **Command Injection**: Use subprocess with list args, avoid shell=True
-- **Path Traversal**: Use pathlib, validate against allowed directories
-
-Please proceed with Step 1 to begin the investigation."""
-
-
-@mcp.prompt(title="Analyze Codebase")
-def analyze_codebase_prompt(project_description: str = "Python project") -> str:
-    """
-    Comprehensive codebase analysis workflow.
-
-    [20251215_FEATURE] v2.0.0 - Full project analysis workflow.
-
-    This prompt guides through a complete project analysis:
-    1. Crawl and map the project structure
-    2. Build call graphs
-    3. Identify complexity hotspots
-    4. Run security audit
-    5. Generate improvement recommendations
-
-    Args:
-        project_description: Brief description of what the project does
-    """
-    return f"""# Comprehensive Codebase Analysis
-
-## Project
-{project_description}
-
-## Analysis Workflow
-
-### Step 1: Project Structure Overview
-Start by understanding the project layout:
-```
-# Read the project structure resource
-# URI: scalpel://project/structure
-```
-
-Then crawl for detailed metrics:
-```
-crawl_project(
-    complexity_threshold=10,
-    include_report=True
-)
-```
-
-### Step 2: Dependency Analysis
-Check project dependencies for vulnerabilities:
-```
-scan_dependencies(scan_vulnerabilities=True)
-```
-
-Also check internal dependencies:
-```
-# Read the dependencies resource
-# URI: scalpel://project/dependencies
-```
-
-### Step 3: Call Graph Analysis
-Understand how code flows through the project:
-```
-# Read the call graph resource
-# URI: scalpel://project/call-graph
-```
-
-Or use the tool for specific functions:
-```
-get_call_graph(
-    target_function="<main_entry_point>",
-    include_diagram=True
-)
-```
-
-### Step 4: Identify Hotspots
-From the crawl results, identify:
-1. **High Complexity Functions** (complexity > 10)
-2. **Large Files** (> 500 lines)
-3. **Deeply Nested Code**
-
-For each hotspot, get detailed analysis:
-```
-# URI: scalpel://analysis/<file_path>
-```
-
-### Step 5: Security Assessment
-Run cross-file security scan:
-```
-cross_file_security_scan(
-    include_diagram=True,
-    max_depth=5
-)
-```
-
-### Step 6: Generate Report
-Compile findings into:
-
-1. **Architecture Overview**
-   - Key modules and their responsibilities
-   - Data flow patterns
-   - External dependencies
-
-2. **Quality Metrics**
-   - Total lines of code
-   - Average complexity
-   - Test coverage (if detectable)
-
-3. **Security Posture**
-   - Vulnerabilities found
-   - Risk level assessment
-   - Remediation priorities
-
-4. **Recommendations**
-   - Refactoring candidates
-   - Security fixes needed
-   - Code quality improvements
-
-Please proceed with Step 1 to begin the analysis."""
-
-
-@mcp.prompt(title="Extract and Test")
-def extract_and_test_prompt(file_path: str, function_name: str) -> str:
-    """
-    Extract a function and generate comprehensive tests.
-
-    [20251215_FEATURE] v2.0.0 - Test generation workflow.
-
-    This prompt guides through:
-    1. Extracting a function with its dependencies
-    2. Analyzing its execution paths
-    3. Generating test cases that cover all paths
-    4. Creating a test file
-
-    Args:
-        file_path: Path to the file containing the function
-        function_name: Name of the function to test
-    """
-    return f"""# Extract and Generate Tests Workflow
-
-## Target
-- **File**: `{file_path}`
-- **Function**: `{function_name}`
-
-## Workflow Steps
-
-### Step 1: Extract the Function
-Get the function with all dependencies:
-```
-extract_code(
-    file_path="{file_path}",
-    target_type="function",
-    target_name="{function_name}",
-    include_context=True,
-    include_cross_file_deps=True
-)
-```
-
-### Step 2: Analyze Execution Paths
-Run symbolic execution to discover all paths:
-```
-symbolic_execute(
-    code=<extracted_code>,
-    max_paths=20
-)
-```
-
-### Step 3: Generate Test Cases
-Create tests covering each path:
-```
-generate_unit_tests(
-    code=<extracted_code>,
-    function_name="{function_name}",
-    framework="pytest"
-)
-```
-
-### Step 4: Review Generated Tests
-The generated tests will include:
-- **Happy path tests**: Normal expected inputs
-- **Edge case tests**: Boundary conditions
-- **Error path tests**: Invalid inputs, exceptions
-
-For each test case, verify:
-1. The input values make sense for the path
-2. The expected behavior is correct
-3. Assertions are meaningful
-
-### Step 5: Enhance Tests
-Consider adding:
-- **Property-based tests** for functions with numeric inputs
-- **Mock tests** for external dependencies
-- **Integration tests** if the function calls other modules
-
-### Step 6: Create Test File
-Save the tests to `tests/test_{function_name}.py`:
-```python
-# tests/test_{function_name}.py
-import pytest
-from {file_path.replace('/', '.').replace('.py', '')} import {function_name}
-
-<generated_test_code>
-```
-
-### Step 7: Verify Tests Pass
-Run the tests to ensure they work:
-```bash
-pytest tests/test_{function_name}.py -v
-```
-
-## Coverage Goals
-- Aim for 100% branch coverage
-- Each path from symbolic execution should have a test
-- Edge cases should be explicitly tested
-
-Please proceed with Step 1 to begin extracting the function."""
-
-
-# ============================================================================
-# v2.2.0 WORKFLOW PROMPTS - Guided Multi-Step Workflows
-# [20251216_FEATURE] Feature 10: Workflow Prompts for common AI agent tasks
-# ============================================================================
-
-
-@mcp.prompt(title="Security Audit Workflow")
-def security_audit_workflow_prompt(project_path: str) -> str:
-    """
-    [20251216_FEATURE] Guide an AI agent through a comprehensive security audit.
-
-    This is a complete workflow prompt that guides through:
-    1. Project structure analysis
-    2. Vulnerability scanning
-    3. Dependency checking
-    4. Report generation
-
-    Args:
-        project_path: Path to the project root
-    """
-    return f"""## Security Audit Workflow for {project_path}
-
-Follow these steps to perform a comprehensive security audit:
-
-### Step 1: Project Analysis
-Use `crawl_project` to understand the codebase structure:
-```
-crawl_project(
-    project_root="{project_path}"
-)
-```
-
-This will identify:
-- All Python/JavaScript/TypeScript files
-- Entry points and main modules
-- Overall project structure
-
-### Step 2: Vulnerability Scan
-Use `security_scan` on each Python/JavaScript/TypeScript file discovered.
-For each file with potential security issues:
-```
-security_scan(
-    code=<file_contents>,
-    filename=<file_path>
-)
-```
-
-For multi-file taint analysis, use:
-```
-cross_file_security_scan(
-    project_root="{project_path}",
-    entry_point=<main_file>
-)
-```
-
-### Step 3: Dependency Check
-Use `scan_dependencies` to check for known CVEs:
-```
-scan_dependencies(
-    project_path="{project_path}"
-)
-```
-
-This checks:
-- Python: requirements.txt, Pipfile, poetry.lock
-- JavaScript/TypeScript: package.json, package-lock.json
-- Known vulnerabilities from OSV database
-
-### Step 4: Report Generation
-Compile findings into a prioritized report with:
-
-**CRITICAL** (Immediate action required):
-- SQL Injection vulnerabilities
-- Command Injection vulnerabilities
-- Hardcoded secrets/credentials
-- Known CVEs with exploit availability
-
-**HIGH** (Address within 1 week):
-- XSS vulnerabilities
-- Path Traversal issues
-- Insecure deserialization
-- Authentication bypasses
-
-**MEDIUM** (Address within 1 month):
-- Information disclosure
-- Weak cryptography
-- Missing input validation
-
-**LOW** (Nice to fix):
-- Code quality issues
-- Minor security improvements
-- Best practice recommendations
-
-For each finding, include:
-- **Location**: File path and line number
-- **Severity**: CRITICAL/HIGH/MEDIUM/LOW
-- **Description**: What the vulnerability is
-- **Impact**: What could go wrong
-- **Remediation**: How to fix it
-- **Code Example**: Show the vulnerable code and fixed version
-
-Begin by running `crawl_project("{project_path}")` to start the audit.
-"""
-
-
-@mcp.prompt(title="Safe Refactor Workflow")
-def safe_refactor_workflow_prompt(file_path: str, symbol_name: str) -> str:
-    """
-    [20251216_FEATURE] Guide an AI agent through a safe refactoring operation.
-
-    This workflow ensures refactoring is done safely with validation:
-    1. Extract current implementation
-    2. Find all usages
-    3. Plan changes
-    4. Simulate refactor
-    5. Apply changes (only if safe)
-
-    Args:
-        file_path: Path to the file containing the symbol
-        symbol_name: Name of the function/class to refactor
-    """
-    return f"""## Safe Refactor Workflow for {symbol_name} in {file_path}
-
-### Step 1: Extract Current Implementation
-Use `extract_code` to get the current implementation:
-```
-extract_code(
-    file_path="{file_path}",
-    target_name="{symbol_name}",
-    include_context=True
-)
-```
-
-Review the extracted code to understand:
-- Current function signature
-- Dependencies (imports, other functions)
-- Complexity and structure
-- Existing patterns
-
-### Step 2: Find All Usages
-Use `get_symbol_references` to find all call sites:
-```
-get_symbol_references(
-    symbol_name="{symbol_name}",
-    project_root="<project_root>"
-)
-```
-
-Document all locations where {symbol_name} is:
-- Called/invoked
-- Imported
-- Referenced in type annotations
-- Used in tests
-
-### Step 3: Plan Changes
-List all changes needed across files:
-
-**Primary Changes** (in {file_path}):
-- [ ] Function signature modifications
-- [ ] Logic improvements
-- [ ] Error handling updates
-- [ ] Documentation updates
-
-**Secondary Changes** (in dependent files):
-- [ ] Update imports if renaming
-- [ ] Update call sites if signature changes
-- [ ] Update type annotations if types change
-- [ ] Update tests to match new behavior
-
-**Risk Assessment**:
-- Breaking changes: YES/NO
-- Number of dependent files: <count>
-- Test coverage: <percentage>
-
-### Step 4: Simulate Refactor
-Use `simulate_refactor` to verify changes are safe:
-```
-simulate_refactor(
-    original_code=<current_implementation>,
-    new_code=<your_refactored_code>,
-    strict_mode=True
-)
-```
-
-The simulation will check:
-- Function signature compatibility
-- Return type consistency
-- Exception handling preservation
-- Side effect changes
-
-**DO NOT PROCEED** if simulation fails or shows warnings.
-
-### Step 5: Apply Changes
-Only if simulation passes with no warnings:
-
-For the primary file:
-```
-update_symbol(
-    file_path="{file_path}",
-    target_type="function",  # or "class"
-    target_name="{symbol_name}",
-    new_code=<your_refactored_code>,
-    create_backup=True
-)
-```
-
-For dependent files (if needed):
-- Update each file manually or with update_symbol
-- Update imports using extract_code + update_symbol
-- Verify each change with simulation
-
-### Step 6: Verify
-After applying changes:
-
-1. **Run Tests**:
-   - Unit tests for {symbol_name}
-   - Integration tests for dependent code
-   - Full test suite if breaking changes
-
-2. **Check Linters**:
-   - Run static analysis tools
-   - Check type checking (mypy, TypeScript)
-   - Verify code formatting
-
-3. **Review Changes**:
-   - Use git diff to review all changes
-   - Verify backup files were created
-   - Check that all usages were updated
-
-### Rollback Plan
-If anything goes wrong:
-1. Restore from .bak backup files
-2. Run tests to verify rollback
-3. Investigate what went wrong before retrying
-
-### Safety Checklist
-- [ ] Step 1: Current code extracted
-- [ ] Step 2: All usages found
-- [ ] Step 3: Changes planned and reviewed
-- [ ] Step 4: Simulation passed
-- [ ] Step 5: Changes applied with backups
-- [ ] Step 6: Tests passing
-
-Begin by running `extract_code(file_path="{file_path}", target_name="{symbol_name}")` to extract the current implementation.
-"""
-
-
-# ============================================================================
 # v1.4.0 MCP TOOLS - Enhanced AI Context
 # ============================================================================
 
@@ -14472,8 +13140,8 @@ def _get_file_context_sync(
                 enterprise_features_enabled=enterprise_features_enabled,
                 language=detected_lang,
                 line_count=line_count,
-                functions=analysis.functions,
-                classes=analysis.classes,
+                functions=cast(list[FunctionInfo | str], analysis.functions),
+                classes=cast(list[ClassInfo | str], analysis.classes),
                 imports=analysis.imports[:20],
                 exports=[],
                 complexity_score=analysis.complexity,
@@ -14715,8 +13383,8 @@ def _get_file_context_sync(
             enterprise_features_enabled=enterprise_features_enabled,
             language="python",
             line_count=line_count,
-            functions=functions,
-            classes=classes,
+            functions=cast(list[FunctionInfo | str], functions),
+            classes=cast(list[ClassInfo | str], classes),
             imports=imports[:20],
             exports=exports,
             complexity_score=complexity,
@@ -15356,8 +14024,8 @@ def _get_symbol_references_sync(
                 symbol_name=symbol_name,
                 error=f"Project root not found: {root}.",
                 tier_applied=tier,
-                pro_features_enabled=tier in ("pro", "enterprise"),
-                enterprise_features_enabled=tier == "enterprise",
+                pro_features_enabled=enabled_pro,
+                enterprise_features_enabled=enabled_enterprise,
             )
 
         references: list[SymbolReference] = []
@@ -15935,6 +14603,7 @@ def _get_symbol_references_sync(
         impact_mermaid = None
         codeowners_coverage = None
 
+        unique_files = 0
         if enable_codeowners or enable_impact_analysis:
             unique_files = len({r.file for r in references})
             blast_radius = unique_files
@@ -16575,9 +15244,35 @@ def _get_call_graph_sync(
             adj_list: dict[str, list[str]] = {}
             for e in edges:
                 adj_list.setdefault(e.caller, []).append(e.callee)
-            paths = builder.find_paths(
-                paths_from, paths_to, max_depth=depth, graph=adj_list
-            )
+            find_paths = getattr(builder, "find_paths", None)
+            if callable(find_paths):
+                found_paths = find_paths(
+                    paths_from, paths_to, max_depth=depth, graph=adj_list
+                )
+                paths = (
+                    cast(list[list[str]], found_paths)
+                    if isinstance(found_paths, list)
+                    else []
+                )
+            else:
+                # Fallback: simple DFS path search within max depth
+                def _dfs_paths(start: str, goal: str, max_depth: int) -> list[list[str]]:
+                    results: list[list[str]] = []
+                    stack: list[tuple[str, list[str]]] = [(start, [start])]
+                    while stack:
+                        node, path = stack.pop()
+                        if len(path) - 1 > max_depth:
+                            continue
+                        if node == goal:
+                            results.append(path)
+                            continue
+                        for nxt in adj_list.get(node, []):
+                            if nxt in path:
+                                continue
+                            stack.append((nxt, path + [nxt]))
+                    return results
+
+                paths = _dfs_paths(paths_from, paths_to, depth)
 
         # [20260110_FEATURE] v3.3.0 - Focus mode: filter to subgraph around focus_functions
         actual_focus_functions: list[str] | None = None
@@ -17557,6 +16252,8 @@ class ProjectMapResult(BaseModel):
 
     # [20251226_BUGFIX] Provide tier-gated attributes via properties when model schema differs
     def _get_extra_value(self, name: str):  # type: ignore[override]
+        import subprocess
+
         try:
             extra = object.__getattribute__(self, "__pydantic_extra__")
             if extra:
@@ -17694,6 +16391,7 @@ def _get_project_map_sync(
     max_files_limit: int | None = None,
     max_modules_limit: int | None = None,
 ) -> ProjectMapResult:
+    import subprocess
     """Synchronous implementation of get_project_map.
 
     The function is tier-aware; limits and capabilities are computed in the async wrapper
@@ -19203,9 +17901,9 @@ def _get_cross_file_dependencies_sync(
                 confidence_decay_factor=confidence_decay_factor,
             )
 
+        # [20251227_REFACTOR] Extraction timeout is 50% of build timeout
+        extraction_timeout = build_timeout // 2
         try:
-            # [20251227_REFACTOR] Extraction timeout is 50% of build timeout
-            extraction_timeout = build_timeout // 2
             extraction_result = run_with_timeout(
                 extract_dependencies, extraction_timeout
             )
@@ -21540,7 +20238,7 @@ def run_server(
     global CURRENT_TIER
     CURRENT_TIER = tier
 
-    # [20251227_BUGFIX] All 21 tools available at all tiers - no filtering
+    # [20251227_BUGFIX] All 22 tools available at all tiers - no filtering
     # Feature restrictions (file size, language support, etc.) enforced within tools via limits.toml
     _apply_tier_tool_filter(tier)
 
@@ -21639,7 +20337,7 @@ def run_server(
 def _apply_tier_tool_filter(tier: str) -> None:
     """[20251226_BUGFIX] ALL tools available at ALL tiers.
 
-    Tier system provides ALL 21 tools at every tier (Community, Pro, Enterprise).
+    Tier system provides ALL 22 tools at every tier (Community, Pro, Enterprise).
     Feature restrictions (file size limits, language support, depth limits, etc.)
     are enforced within each tool's implementation via the limits.toml configuration.
 

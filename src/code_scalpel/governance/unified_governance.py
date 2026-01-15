@@ -208,29 +208,26 @@ class UnifiedGovernance:
     - Any budget validation error → DENY
     - Missing configuration → DENY
 
-    [20251221_TODO] Add policy role hierarchy:
-        - Support role-based policy customization
-        - Implement developer < reviewer < architect roles
-        - Add role-based budget adjustments
-        - Support team-specific policy overrides
-
-    [20251221_TODO] Add policy composition:
-        - Support combining multiple policy files
-        - Implement constraint aggregation
-        - Add policy conflict detection/resolution
-        - Support AND/OR policy composition
-
-    [20251221_TODO] Add metrics and compliance:
-        - Track violations per developer/team/project
-        - Generate compliance reports
-        - Implement trend analysis
-        - Support SLA monitoring
-
-    [20251221_TODO] Add constraint relaxation:
-        - Support temporary policy exemptions
-        - Implement approval workflows for exemptions
-        - Track exemption reasons for audit
-        - Support gradual constraint loosening
+    # TODO [20251221]: Add policy role hierarchy
+    # TODO [20251221]: Support role-based policy customization
+    # TODO [20251221]: Implement developer < reviewer < architect roles
+    # TODO [20251221]: Add role-based budget adjustments
+    # TODO [20251221]: Support team-specific policy overrides
+    # TODO [20251221]: Add policy composition
+    # TODO [20251221]: Support combining multiple policy files
+    # TODO [20251221]: Implement constraint aggregation
+    # TODO [20251221]: Add policy conflict detection/resolution
+    # TODO [20251221]: Support AND/OR policy composition
+    # TODO [20251221]: Add metrics and compliance
+    # TODO [20251221]: Track violations per developer/team/project
+    # TODO [20251221]: Generate compliance reports
+    # TODO [20251221]: Implement trend analysis
+    # TODO [20251221]: Support SLA monitoring
+    # TODO [20251221]: Add constraint relaxation
+    # TODO [20251221]: Support temporary policy exemptions
+    # TODO [20251221]: Implement approval workflows for exemptions
+    # TODO [20251221]: Track exemption reasons for audit
+    # TODO [20251221]: Support gradual constraint loosening
     """
 
     def __init__(self, config_dir: str = ".code-scalpel"):

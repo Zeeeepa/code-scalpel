@@ -6,15 +6,15 @@ Implements advanced code quality checks, anti-pattern detection, and
 code smell identification for JavaScript/TypeScript code.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Add cognitive complexity calculation (simplified McCabe)
-[20251221_TODO] Implement data flow analysis for null/undefined detection
-[20251221_TODO] Add class design pattern detection (Singleton, Factory, Observer, etc.)
-[20251221_TODO] Support incremental analysis with change delta tracking
-[20251221_TODO] Implement type-aware smell detection (with TypeScript)
-[20251221_TODO] Add metrics trend analysis and historical comparison
-[20251221_TODO] Implement custom rule plugin system
-[20251221_TODO] Add configuration file parsing (.smartconfig.json)
-[20251221_TODO] Support suppression directives and annotations
+# TODO Add cognitive complexity calculation (simplified McCabe)
+# TODO Implement data flow analysis for null/undefined detection
+# TODO Add class design pattern detection (Singleton, Factory, Observer, etc.)
+# TODO Support incremental analysis with change delta tracking
+# TODO Implement type-aware smell detection (with TypeScript)
+# TODO Add metrics trend analysis and historical comparison
+# TODO Implement custom rule plugin system
+# TODO Add configuration file parsing (.smartconfig.json)
+# TODO Support suppression directives and annotations
 
 Features:
     Code Smell Detection:

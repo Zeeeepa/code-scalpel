@@ -2,130 +2,23 @@
 
 [20251224_FEATURE] Stub adapter for PHP parsing support.
 
-============================================================================
-TODO ITEMS: code_parsers/adapters/php_adapter.py
-============================================================================
-COMMUNITY TIER - Core PHP Adapter (P0-P2)
-============================================================================
-
-[P0_CRITICAL] Implement basic PHP parsing:
-    - Integrate tree-sitter-php or php-parser
-    - Parse class/interface/trait definitions
-    - Extract function/method declarations
-    - Parse namespace declarations
-    - Support property extraction
-    - Test count: 40 tests (basic parsing, extraction)
-
-[P1_HIGH] Add PHP version detection:
-    - Detect PHP version (7.4, 8.0, 8.1, 8.2, 8.3)
-    - Support version-specific features
-    - Handle syntax changes
-    - Add compatibility warnings
-    - Test count: 25 tests (version detection)
-
-[P1_HIGH] Enhance extraction:
-    - Extract magic methods
-    - Parse anonymous functions/closures
-    - Extract static methods
-    - Parse constructor property promotion
-    - Support attributes (PHP 8+)
-    - Test count: 30 tests (extraction completeness)
-
-[P2_MEDIUM] Add dependency analysis:
-    - Parse use statements
-    - Build namespace dependency graph
-    - Detect Composer usage
-    - Find unused imports
-    - Test count: 25 tests (dependency analysis)
-
-[P2_MEDIUM] Implement error handling:
-    - Better syntax error messages
-    - Support partial parsing
-    - Add error recovery
-    - Provide fix suggestions
-    - Test count: 20 tests (error handling)
-
-============================================================================
-PRO TIER - Advanced PHP Adapter (P1-P3)
-============================================================================
-
-[P1_HIGH] Integrate static analysis:
-    - Add PHPStan integration
-    - Support Psalm checks
-    - Integrate PHP_CodeSniffer
-    - Add PHPMD metrics
-    - Test count: 40 tests (static analysis)
-
-[P1_HIGH] Add semantic analysis:
-    - Resolve type information
-    - Track inheritance hierarchies
-    - Analyze interface implementations
-    - Detect polymorphism patterns
-    - Test count: 45 tests (semantic analysis)
-
-[P2_MEDIUM] Implement code transformation:
-    - Support refactoring operations
-    - Add code formatting (PHP-CS-Fixer)
-    - Generate modified AST
-    - Support code generation
-    - Test count: 30 tests (transformation)
-
-[P2_MEDIUM] Add framework-specific analysis:
-    - Detect Laravel patterns
-    - Identify Symfony usage
-    - Find WordPress hooks
-    - Analyze Drupal modules
-    - Test count: 35 tests (framework analysis)
-
-[P3_LOW] Support modern PHP features:
-    - Parse enums (PHP 8.1+)
-    - Extract readonly properties
-    - Parse match expressions
-    - Support named arguments
-    - Test count: 30 tests (modern features)
-
-============================================================================
-ENTERPRISE TIER - Enterprise PHP Adapter (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Add security analysis:
-    - Detect SQL injection
-    - Find XSS vulnerabilities
-    - Identify command injection
-    - Analyze authentication patterns
-    - Test count: 45 tests (security scanning)
-
-[P2_MEDIUM] Implement incremental parsing:
-    - Parse only changed files
-    - Cache parsed results
-    - Support project-level analysis
-    - Add efficient AST diffing
-    - Test count: 30 tests (incremental parsing)
-
-[P3_LOW] Add enterprise compliance:
-    - Check coding standards (PSR-1, PSR-12)
-    - Enforce mandatory documentation
-    - Validate license headers
-    - Generate compliance reports
-    - Test count: 30 tests (compliance)
-
-[P3_LOW] Implement performance profiling:
-    - Profile parsing time
-    - Track memory usage
-    - Identify bottlenecks
-    - Add optimization hints
-    - Test count: 20 tests (profiling)
-
-[P4_LOW] Add ML-driven analysis:
-    - Predict code quality
-    - Suggest refactorings
-    - Detect code clones
-    - Find potential bugs
-    - Test count: 30 tests (ML integration)
-
-============================================================================
-TOTAL TEST ESTIMATE: 475 tests (160 COMMUNITY + 180 PRO + 135 ENTERPRISE)
-============================================================================
+# TODO [COMMUNITY] Implement basic PHP parsing with tree-sitter-php or php-parser
+# TODO [COMMUNITY] Parse class/interface/trait definitions and extract methods
+# TODO [COMMUNITY] Add PHP version detection (7.4-8.3) and version-specific features
+# TODO [COMMUNITY] Extract magic methods, closures, and constructor property promotion
+# TODO [COMMUNITY] Add dependency analysis with namespace dependency graph and Composer
+# TODO [COMMUNITY] Detect unused imports and parse use statements
+# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
+# TODO [PRO] Integrate static analysis (PHPStan, Psalm, PHP_CodeSniffer, PHPMD)
+# TODO [PRO] Add semantic analysis with type resolution and inheritance tracking
+# TODO [PRO] Implement code transformation with PHP-CS-Fixer and refactoring
+# TODO [PRO] Detect Laravel, Symfony, WordPress, and Drupal framework patterns
+# TODO [PRO] Support modern PHP features (enums, readonly properties, match expressions)
+# TODO [ENTERPRISE] Add security analysis (SQL injection, XSS, command injection)
+# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
+# TODO [ENTERPRISE] Add enterprise compliance checking (PSR-1, PSR-12) and reporting
+# TODO [ENTERPRISE] Implement performance profiling and optimization hints
+# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List
@@ -133,14 +26,14 @@ from typing import Any, List
 from ..interface import IParser, ParseResult
 
 
-class PhpParserAdapter(IParser):
+class PHPParserAdapter(IParser):
     """
     Adapter for PHP parsing (STUB - Not Yet Implemented).
 
     [20251224_STUB] Placeholder for PHP parser integration.
 
     To implement:
-        1. Choose backend (tree-sitter-php or php-parser library)
+        1. Choose backend and integrate parser
         2. Implement parse() method
         3. Add PHP-specific extraction methods
         4. Support PHP version detection
@@ -150,7 +43,7 @@ class PhpParserAdapter(IParser):
     def __init__(self):
         """Initialize the PHP parser adapter (stub)."""
         raise NotImplementedError(
-            "PhpParserAdapter not yet implemented. "
+            "PHPParserAdapter not yet implemented. "
             "See TODO items in this file for implementation roadmap."
         )
 

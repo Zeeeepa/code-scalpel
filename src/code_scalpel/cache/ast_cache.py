@@ -5,95 +5,83 @@ Incremental AST Cache.
 
 This module extends the base AnalysisCache to provide AST-specific caching
 with dependency tracking and cascading invalidation.
-
-TODO ITEMS: cache/ast_cache.py
-======================================================================
-COMMUNITY TIER - Core AST Caching
-======================================================================
-1. Add IncrementalASTCache.get_or_parse() method
-2. Add IncrementalASTCache.invalidate() dependency invalidation
-3. Add IncrementalASTCache.get_cached() cache lookup
-4. Add IncrementalASTCache.clear() full cache clear
-5. Add CacheMetadata validation and serialization
-6. Add file_hash computation (SHA256)
-7. Add dependency graph tracking and updates
-8. Add cascading invalidation for affected files
-9. Add cache persistence (save/load metadata)
-10. Add language-specific AST handling (Python first)
-11. Add AST serialization with pickle
-12. Add deserialization with corruption recovery
-13. Add cache statistics (hit/miss, size)
-14. Add cache directory initialization
-15. Add cache disk storage management
-16. Add memory cache layer (in-process)
-17. Add duplicate AST detection
-18. Add cache entry expiry tracking
-19. Add cache metadata export
-20. Add cache diagnostic reporting
-21. Add cache integrity checking
-22. Add cache consistency verification
-23. Add incremental file hash computation
-24. Add dependency graph visualization
-25. Add cache performance metrics
-
-======================================================================
-PRO TIER - Advanced AST Caching
-======================================================================
-26. Add support for polymorphic AST types (TypeScript, Java, Go, etc)
-27. Add incremental parsing (re-parse only changed functions)
-28. Add AST diff tracking (track what changed between versions)
-29. Add memory pooling for AST nodes (reduce GC pressure)
-30. Add generational collection (keep hot files in memory)
-31. Add adaptive AST caching based on file size
-32. Add AST compression for storage optimization
-33. Add AST validation with schema checking
-34. Add AST normalization across languages
-35. Add AST delta compression (store diffs not full ASTs)
-36. Add AST versioning and migrations
-37. Add AST preload for hot files
-38. Add AST memory usage profiling
-39. Add AST serialization format optimization
-40. Add concurrent AST cache access
-41. Add AST cache partitioning by language
-42. Add AST cache statistics export
-43. Add AST performance benchmarking
-44. Add AST cache warming on startup
-45. Add AST-specific invalidation strategies
-46. Add AST cache coherence detection
-47. Add AST cache replication support
-48. Add AST cache debugging tools
-49. Add AST cache visualization dashboard
-50. Add AST parse progress tracking
-
-======================================================================
-ENTERPRISE TIER - Distributed & Federated AST Caching
-======================================================================
-51. Add distributed AST cache across agents
-52. Add federated AST management across organizations
-53. Add multi-region AST replication with failover
-54. Add AST cache consensus and voting
-55. Add distributed AST locking (Zookeeper, etcd)
-56. Add AST change event streaming
-57. Add AST cache change notifications
-58. Add AST cache cost tracking per org
-59. Add AST cache quota enforcement
-60. Add AST cache SLA monitoring
-61. Add AST cache audit trail logging
-62. Add AST cache encryption for sensitive code
-63. Add AST cache access control (RBAC)
-64. Add AST cache multi-tenancy isolation
-65. Add AST cache disaster recovery
-66. Add AST cache cross-region failover
-67. Add AST cache data retention policies
-68. Add AST cache billing integration
-69. Add AST cache executive reporting
-70. Add AST cache anomaly detection
-71. Add AST cache circuit breaker
-72. Add AST cache health monitoring
-73. Add AST cache performance optimization ML model
-74. Add AST cache capacity planning
-75. Add AST cache AI-powered invalidation prediction
 """
+
+# TODO [COMMUNITY] Add IncrementalASTCache.get_or_parse() method
+# TODO [COMMUNITY] Add IncrementalASTCache.invalidate() dependency invalidation
+# TODO [COMMUNITY] Add IncrementalASTCache.get_cached() cache lookup
+# TODO [COMMUNITY] Add IncrementalASTCache.clear() full cache clear
+# TODO [COMMUNITY] Add CacheMetadata validation and serialization
+# TODO [COMMUNITY] Add file_hash computation (SHA256)
+# TODO [COMMUNITY] Add dependency graph tracking and updates
+# TODO [COMMUNITY] Add cascading invalidation for affected files
+# TODO [COMMUNITY] Add cache persistence (save/load metadata)
+# TODO [COMMUNITY] Add language-specific AST handling (Python first)
+# TODO [COMMUNITY] Add AST serialization with pickle
+# TODO [COMMUNITY] Add deserialization with corruption recovery
+# TODO [COMMUNITY] Add cache statistics (hit/miss, size)
+# TODO [COMMUNITY] Add cache directory initialization
+# TODO [COMMUNITY] Add cache disk storage management
+# TODO [COMMUNITY] Add memory cache layer (in-process)
+# TODO [COMMUNITY] Add duplicate AST detection
+# TODO [COMMUNITY] Add cache entry expiry tracking
+# TODO [COMMUNITY] Add cache metadata export
+# TODO [COMMUNITY] Add cache diagnostic reporting
+# TODO [COMMUNITY] Add cache integrity checking
+# TODO [COMMUNITY] Add cache consistency verification
+# TODO [COMMUNITY] Add incremental file hash computation
+# TODO [COMMUNITY] Add dependency graph visualization
+# TODO [COMMUNITY] Add cache performance metrics
+# TODO [PRO] Add support for polymorphic AST types (TypeScript, Java, Go, etc)
+# TODO [PRO] Add incremental parsing (re-parse only changed functions)
+# TODO [PRO] Add AST diff tracking (track what changed between versions)
+# TODO [PRO] Add memory pooling for AST nodes (reduce GC pressure)
+# TODO [PRO] Add generational collection (keep hot files in memory)
+# TODO [PRO] Add adaptive AST caching based on file size
+# TODO [PRO] Add AST compression for storage optimization
+# TODO [PRO] Add AST validation with schema checking
+# TODO [PRO] Add AST normalization across languages
+# TODO [PRO] Add AST delta compression (store diffs not full ASTs)
+# TODO [PRO] Add AST versioning and migrations
+# TODO [PRO] Add AST preload for hot files
+# TODO [PRO] Add AST memory usage profiling
+# TODO [PRO] Add AST serialization format optimization
+# TODO [PRO] Add concurrent AST cache access
+# TODO [PRO] Add AST cache partitioning by language
+# TODO [PRO] Add AST cache statistics export
+# TODO [PRO] Add AST performance benchmarking
+# TODO [PRO] Add AST cache warming on startup
+# TODO [PRO] Add AST-specific invalidation strategies
+# TODO [PRO] Add AST cache coherence detection
+# TODO [PRO] Add AST cache replication support
+# TODO [PRO] Add AST cache debugging tools
+# TODO [PRO] Add AST cache visualization dashboard
+# TODO [PRO] Add AST parse progress tracking
+# TODO [ENTERPRISE] Add distributed AST cache across agents
+# TODO [ENTERPRISE] Add federated AST management across organizations
+# TODO [ENTERPRISE] Add multi-region AST replication with failover
+# TODO [ENTERPRISE] Add AST cache consensus and voting
+# TODO [ENTERPRISE] Add distributed AST locking (Zookeeper, etcd)
+# TODO [ENTERPRISE] Add AST change event streaming
+# TODO [ENTERPRISE] Add AST cache change notifications
+# TODO [ENTERPRISE] Add AST cache cost tracking per org
+# TODO [ENTERPRISE] Add AST cache quota enforcement
+# TODO [ENTERPRISE] Add AST cache SLA monitoring
+# TODO [ENTERPRISE] Add AST cache audit trail logging
+# TODO [ENTERPRISE] Add AST cache encryption for sensitive code
+# TODO [ENTERPRISE] Add AST cache access control (RBAC)
+# TODO [ENTERPRISE] Add AST cache multi-tenancy isolation
+# TODO [ENTERPRISE] Add AST cache disaster recovery
+# TODO [ENTERPRISE] Add AST cache cross-region failover
+# TODO [ENTERPRISE] Add AST cache data retention policies
+# TODO [ENTERPRISE] Add AST cache billing integration
+# TODO [ENTERPRISE] Add AST cache executive reporting
+# TODO [ENTERPRISE] Add AST cache anomaly detection
+# TODO [ENTERPRISE] Add AST cache circuit breaker
+# TODO [ENTERPRISE] Add AST cache health monitoring
+# TODO [ENTERPRISE] Add AST cache performance optimization ML model
+# TODO [ENTERPRISE] Add AST cache capacity planning
+# TODO [ENTERPRISE] Add AST cache AI-powered invalidation prediction
 
 from __future__ import annotations
 
@@ -139,11 +127,11 @@ class IncrementalASTCache:
         >>> ast = cache.get_or_parse("file.py", "python")
         >>> cache.invalidate("file.py")  # Returns affected files
 
-    [20251221_TODO] Phase 2: Support polymorphic AST types (TypeScript, Java, etc)
-    [20251221_TODO] Phase 2: Implement incremental parsing (re-parse only changed functions)
-    [20251221_TODO] Phase 2: Add AST diff tracking (track what changed between versions)
-    [20251221_TODO] Phase 2: Implement memory pooling for AST nodes (reduce GC pressure)
-    [20251221_TODO] Phase 2: Add generational collection (keep hot files in memory)
+    # TODO Phase 2: Support polymorphic AST types (TypeScript, Java, etc)
+    # TODO Phase 2: Implement incremental parsing (re-parse only changed functions)
+    # TODO Phase 2: Add AST diff tracking (track what changed between versions)
+    # TODO Phase 2: Implement memory pooling for AST nodes (reduce GC pressure)
+    # TODO Phase 2: Add generational collection (keep hot files in memory)
     """
 
     def __init__(self, cache_dir: str | Path = ".scalpel_ast_cache"):
@@ -154,7 +142,7 @@ class IncrementalASTCache:
             cache_dir: Directory to store cache files
 
         [20251216_FEATURE] Cache initialization with dependency tracking
-        [20251221_TODO] Phase 2: Add max_ast_memory_mb parameter for generational GC
+        # TODO Phase 2: Add max_ast_memory_mb parameter for generational GC
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True, parents=True)
@@ -163,8 +151,8 @@ class IncrementalASTCache:
         self.file_hashes: dict[str, str] = {}  # file -> hash
         self.ast_cache: dict[str, Any] = {}  # file -> AST
         self.dependency_graph: dict[str, Set[str]] = {}  # file -> dependencies
-        # [20251221_TODO] Phase 2: Add reverse dependency graph for faster lookups
-        # [20251221_TODO] Phase 2: Add LRU tracking for memory management
+        # # TODO Phase 2: Add reverse dependency graph for faster lookups
+        # # TODO Phase 2: Add LRU tracking for memory management
 
         # Load metadata from disk
         self._load_metadata()
@@ -276,9 +264,9 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Cache-first AST retrieval
-        [20251221_TODO] Phase 2: Add parse_fn timeout to prevent hanging
-        [20251221_TODO] Phase 2: Support incremental parsing (re-parse only changed functions)
-        [20251221_TODO] Phase 2: Add progress callback for large file parsing
+        # TODO Phase 2: Add parse_fn timeout to prevent hanging
+        # TODO Phase 2: Support incremental parsing (re-parse only changed functions)
+        # TODO Phase 2: Add progress callback for large file parsing
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -329,9 +317,9 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Default parsing logic
-        [20251221_TODO] Phase 2: Add parser for TypeScript/JavaScript
-        [20251221_TODO] Phase 2: Add parser for Java
-        [20251221_TODO] Phase 2: Add parser for Go
+        # TODO Phase 2: Add parser for TypeScript/JavaScript
+        # TODO Phase 2: Add parser for Java
+        # TODO Phase 2: Add parser for Go
         """
         if language == "python":
             import ast
@@ -387,9 +375,9 @@ class IncrementalASTCache:
             Set of file paths affected by the change
 
         [20251216_FEATURE] Cascading invalidation with dependency tracking
-        [20251221_TODO] Phase 2: Add depth limit to prevent cascading invalidation explosions
-        [20251221_TODO] Phase 2: Return invalidation chain for debugging
-        [20251221_TODO] Phase 2: Add metrics for invalidation size/depth
+        # TODO Phase 2: Add depth limit to prevent cascading invalidation explosions
+        # TODO Phase 2: Return invalidation chain for debugging
+        # TODO Phase 2: Add metrics for invalidation size/depth
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -449,9 +437,9 @@ class IncrementalASTCache:
             depends_on: Dependency file path
 
         [20251216_FEATURE] Track dependency graph for cascading invalidation
-        [20251221_TODO] Phase 2: Add cycle detection (prevent circular dependencies)
-        [20251221_TODO] Phase 2: Add dependency weight tracking (prioritize high-impact changes)
-        [20251221_TODO] Phase 2: Support reverse dependency queries (what depends on me?)
+        # TODO Phase 2: Add cycle detection (prevent circular dependencies)
+        # TODO Phase 2: Add dependency weight tracking (prioritize high-impact changes)
+        # TODO Phase 2: Support reverse dependency queries (what depends on me?)
         """
         source_path = str(Path(source).resolve())
         dep_path = str(Path(depends_on).resolve())
@@ -470,9 +458,9 @@ class IncrementalASTCache:
             Dictionary with cache stats
 
         [20251216_FEATURE] Cache observability
-        [20251221_TODO] Phase 2: Add hit/miss ratios
-        [20251221_TODO] Phase 2: Add memory usage estimates
-        [20251221_TODO] Phase 2: Add cache age statistics
+        # TODO Phase 2: Add hit/miss ratios
+        # TODO Phase 2: Add memory usage estimates
+        # TODO Phase 2: Add cache age statistics
         """
         total_files = len(self.file_hashes)
         memory_cached = len(self.ast_cache)
@@ -495,9 +483,9 @@ class IncrementalASTCache:
         Clear all cache data.
 
         [20251216_FEATURE] Cache reset capability
-        [20251221_TODO] Phase 2: Add selective clearing (by language, by age)
-        [20251221_TODO] Phase 2: Add backup before clearing for recovery
-        [20251221_TODO] Phase 2: Add metrics collection on clear
+        # TODO Phase 2: Add selective clearing (by language, by age)
+        # TODO Phase 2: Add backup before clearing for recovery
+        # TODO Phase 2: Add metrics collection on clear
         """
         self.file_hashes.clear()
         self.ast_cache.clear()

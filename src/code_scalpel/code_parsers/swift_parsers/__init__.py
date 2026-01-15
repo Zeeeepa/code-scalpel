@@ -1,33 +1,27 @@
 #!/usr/bin/env python3
-"""
-Swift Parsers Module - Unified Interface and Registry
-
-HIGH PRIORITY MODULE REGISTRY TODOS [20251221_TODO]:
-1. Create SwiftParserRegistry class with factory pattern
-2. Implement lazy-loading for parser modules
-3. Add aggregation metrics across multiple parsers
-4. Implement result deduplication and filtering
-5. Create unified JSON/SARIF output format
-
-MEDIUM PRIORITY FEATURES [20251221_TODO]:
-6. SwiftLint integration and configuration
-7. Tailor integration and metric categorization
-8. SwiftFormat integration for auto-formatting
-9. SourceKitten AST analysis
-10. Periphery dead code detection
-11. Swift Package Manager dependency analysis
-12. JSON report generation
-13. SARIF format conversion
-14. HTML report generation
-
-SWIFT FRAMEWORK DETECTION [20251221_TODO]:
-15. iOS/macOS app detection
-16. SPM (Swift Package Manager) detection
-17. Vapor framework detection
-18. Perfect framework detection
+"""Swift Parsers Module - Unified Interface and Registry
 
 This module provides a comprehensive interface for Swift code analysis.
 """
+
+# TODO [COMMUNITY] Create SwiftParserRegistry class with factory pattern
+# TODO [COMMUNITY] Implement lazy-loading for parser modules
+# TODO [PRO] Add aggregation metrics across multiple parsers
+# TODO [PRO] Implement result deduplication and filtering
+# TODO [PRO] Create unified JSON/SARIF output format
+# TODO [PRO] SwiftLint integration and configuration
+# TODO [PRO] Tailor integration and metric categorization
+# TODO [PRO] SwiftFormat integration for auto-formatting
+# TODO [PRO] SourceKitten AST analysis
+# TODO [ENTERPRISE] Periphery dead code detection
+# TODO [ENTERPRISE] Swift Package Manager dependency analysis
+# TODO [ENTERPRISE] JSON report generation
+# TODO [ENTERPRISE] SARIF format conversion
+# TODO [ENTERPRISE] HTML report generation
+# TODO [PRO] iOS/macOS app detection
+# TODO [PRO] SPM (Swift Package Manager) detection
+# TODO [ENTERPRISE] Vapor framework detection
+# TODO [ENTERPRISE] Perfect framework detection
 
 __all__ = [
     "SwiftParserRegistry",

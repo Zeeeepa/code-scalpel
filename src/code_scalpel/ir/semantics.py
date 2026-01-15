@@ -2,151 +2,83 @@
 Language Semantics - Behavioral Dispatch for Cross-Language Analysis.
 
 This module separates STRUCTURE (IR nodes) from BEHAVIOR (language semantics).
-
-TODO ITEMS: semantics.py
-======================================================================
-COMMUNITY TIER - Core Language Semantics
-======================================================================
-1. Add bitwise_and(), bitwise_or(), bitwise_xor() operations
-2. Add bitwise_not(), left_shift(), right_shift() operations
-3. Add TypeScriptSemantics class for type-specific behavior
-4. Add JavaSemantics class for Java-specific behavior
-5. Add property_access() for object property retrieval
-6. Add array_index_access() for array element retrieval
-7. Add object_keys() helper to list object properties
-8. Add array_length() helper for sequence length
-9. Add is_truthy() helper for truthiness evaluation
-10. Document semantic method calling convention
-11. Add string_concatenation() with type coercion rules
-12. Add numeric_coercion() for implicit type conversion
-13. Add boolean_coercion() for truthiness rules
-14. Add unary_negation() with language-specific behavior
-15. Add unary_logical_not() with language-specific truthiness
-16. Add unary_bitwise_not() for bitwise inversion
-17. Add modulo_operation() with language-specific sign handling
-18. Add integer_division() with floor vs truncation rules
-19. Add exponentiation() with language-specific behavior
-20. Add matrix_multiply() for Python @ operator
-21. Add string_index_access() for character retrieval
-22. Add slice_operation() for array/string slicing
-23. Add range_creation() for range objects
-24. Add set_operations() (union, intersection, difference)
-25. Add dict_merge_operations() for combining objects
-
-PRO TIER - Advanced Semantic Features
-======================================================================
-26. Add nullish_coalesce() for ?? operator semantics
-27. Add optional_chain() for optional chaining (?.) semantics
-28. Add Promise semantics for JavaScript async operations
-29. Add async_await() handling for async/await patterns
-30. Add prototype_chain() for JavaScript object inheritance
-31. Add type_coercion() for implicit type conversions
-32. Add loose_equality() for == vs === distinction
-33. Add deep_equal() for recursive equality checking
-34. Add nan_handling() for IEEE 754 special cases
-35. Add error_propagation() for exception semantics
-36. Add try_catch_semantics() for exception handling
-37. Add finally_block_semantics() guaranteed execution
-38. Add throw_statement_semantics() exception throwing
-39. Add custom_error_types() for user-defined exceptions
-40. Add error_stack_trace_tracking() for debugging
-41. Add error_message_interpolation() for error formatting
-42. Add walrus_assignment_semantics() for := operator
-43. Add scope_isolation_rules() for variable scoping
-44. Add closure_capture_rules() for capturing outer scope
-45. Add this_binding_rules() for context binding
-46. Add super_method_calling() for inheritance
-47. Add method_resolution_order() for MRO
-48. Add static_vs_instance_methods() distinction
-49. Add property_getter_setter_semantics()
-50. Add lazy_evaluation_semantics() for deferred execution
-
-ENTERPRISE TIER - Distributed and ML Semantics
-======================================================================
-51. Add distributed semantic evaluation across network
-52. Add constraint propagation through operations
-53. Add ML-based semantic inference
-54. Add polyglot operation composition
-55. Add semantic caching and memoization
-56. Add symbolic execution integration
-57. Add type narrowing guidance for conditionals
-58. Add generic type parameter handling
-59. Add variance tracking for type systems
-60. Add semantic versioning for language evolution
-61. Add async_stream_semantics() for reactive programming
-62. Add concurrent_operation_semantics() for parallelism
-63. Add transaction_semantics() for ACID properties
-64. Add lock_semantics() for concurrency control
-65. Add race_condition_detection() for thread safety
-66. Add deadlock_detection() for synchronization issues
-67. Add memory_safety_semantics() for pointer operations
-68. Add bounds_checking() for array access safety
-69. Add null_pointer_checking() for null safety
-70. Add overflow_checking() for numeric safety
-71. Add unicode_semantics() for string handling
-72. Add regex_matching_semantics() for pattern matching
-73. Add json_parsing_semantics() for JSON operations
-74. Add xml_semantics() for XML operations
-75. Add serialization_deserialization_semantics() for data interchange
-
-The Problem:
-    IRBinaryOp(op=ADD) looks the same for Python and JavaScript.
-    But "5" + 3 behaves differently:
-        - Python: TypeError (cannot concatenate str and int)
-        - JavaScript: "53" (implicit coercion)
-
-The Solution:
-    The interpreter walks the IR (structure) but delegates operations
-    to a LanguageSemantics instance (behavior).
-
-Example:
-    >>> semantics = JavaScriptSemantics()
-    >>> semantics.binary_add("5", 3)
-    "53"
-
-    >>> semantics = PythonSemantics()
-    >>> semantics.binary_add("5", 3)
-    TypeError: can only concatenate str (not "int") to str
-
-[20251220_TODO] Add bitwise operation semantics:
-    - bitwise_and, bitwise_or, bitwise_xor
-    - bitwise_not, left_shift, right_shift
-    - JavaScript: All numbers are 32-bit integers in bitwise ops
-    - Python: Arbitrary precision integers
-
-[20251220_TODO] Add object/array operation semantics:
-    - property_access(obj, key) -> value or undefined
-    - property_set(obj, key, value) -> new_obj
-    - array_index_access(arr, idx) -> element
-    - array_length(arr) -> int
-    - object_keys(obj) -> List[str]
-
-[20251220_TODO] Add null/undefined/None handling:
-    - is_nullish(value) - JS: null, undefined; Python: None
-    - nullish_coalesce(left, right) - ?? operator
-    - optional_chain(obj, path) - obj?.prop?.method?.()
-    - Error propagation in optional chaining
-
-[20251220_TODO] Add Promise/async semantics (JavaScript):
-    - promise_resolve(value) -> Promise
-    - promise_reject(error) -> Promise
-    - async_await(promise) -> awaited_value or throw
-    - Promise.then() chaining behavior
-    - Promise.catch() error handling
-
-[20251220_TODO] Add string operation semantics:
-    - string_concat(left, right) -> string
-    - string_slice(str, start, end) -> string
-    - string_index(str, idx) -> char or undefined
-    - string_length(str) -> int
-    - regex_match(str, pattern) -> match_result
-
-[20251220_TODO] Add type-specific equality semantics:
-    - is_nan(value) - special IEEE 754 handling
-    - deep_equal(left, right) - recursive structure comparison
-    - loose_equal handling (== vs ===) with type coercion rules
-    - Object identity vs equality
 """
+
+# TODO [COMMUNITY/1] Add bitwise_and(), bitwise_or(), bitwise_xor() operations
+# TODO [COMMUNITY/2] Add bitwise_not(), left_shift(), right_shift() operations
+# TODO [COMMUNITY/3] Add TypeScriptSemantics class for type-specific behavior
+# TODO [COMMUNITY/4] Add JavaSemantics class for Java-specific behavior
+# TODO [COMMUNITY/5] Add property_access() for object property retrieval
+# TODO [COMMUNITY/6] Add array_index_access() for array element retrieval
+# TODO [COMMUNITY/7] Add object_keys() helper to list object properties
+# TODO [COMMUNITY/8] Add array_length() helper for sequence length
+# TODO [COMMUNITY/9] Add is_truthy() helper for truthiness evaluation
+# TODO [COMMUNITY/10] Document semantic method calling convention
+# TODO [COMMUNITY/11] Add string_concatenation() with type coercion rules
+# TODO [COMMUNITY/12] Add numeric_coercion() for implicit type conversion
+# TODO [COMMUNITY/13] Add boolean_coercion() for truthiness rules
+# TODO [COMMUNITY/14] Add unary_negation() with language-specific behavior
+# TODO [COMMUNITY/15] Add unary_logical_not() with language-specific truthiness
+# TODO [COMMUNITY/16] Add unary_bitwise_not() for bitwise inversion
+# TODO [COMMUNITY/17] Add modulo_operation() with language-specific sign handling
+# TODO [COMMUNITY/18] Add integer_division() with floor vs truncation rules
+# TODO [COMMUNITY/19] Add exponentiation() with language-specific behavior
+# TODO [COMMUNITY/20] Add matrix_multiply() for Python @ operator
+# TODO [COMMUNITY/21] Add string_index_access() for character retrieval
+# TODO [COMMUNITY/22] Add slice_operation() for array/string slicing
+# TODO [COMMUNITY/23] Add range_creation() for range objects
+# TODO [COMMUNITY/24] Add set_operations() (union, intersection, difference)
+# TODO [COMMUNITY/25] Add dict_merge_operations() for combining objects
+# TODO [PRO/26] Add nullish_coalesce() for ?? operator semantics
+# TODO [PRO/27] Add optional_chain() for optional chaining (?.) semantics
+# TODO [PRO/28] Add Promise semantics for JavaScript async operations
+# TODO [PRO/29] Add async_await() handling for async/await patterns
+# TODO [PRO/30] Add prototype_chain() for JavaScript object inheritance
+# TODO [PRO/31] Add type_coercion() for implicit type conversions
+# TODO [PRO/32] Add loose_equality() for == vs === distinction
+# TODO [PRO/33] Add deep_equal() for recursive equality checking
+# TODO [PRO/34] Add nan_handling() for IEEE 754 special cases
+# TODO [PRO/35] Add error_propagation() for exception semantics
+# TODO [PRO/36] Add try_catch_semantics() for exception handling
+# TODO [PRO/37] Add finally_block_semantics() guaranteed execution
+# TODO [PRO/38] Add throw_statement_semantics() exception throwing
+# TODO [PRO/39] Add custom_error_types() for user-defined exceptions
+# TODO [PRO/40] Add error_stack_trace_tracking() for debugging
+# TODO [PRO/41] Add error_message_interpolation() for error formatting
+# TODO [PRO/42] Add walrus_assignment_semantics() for := operator
+# TODO [PRO/43] Add scope_isolation_rules() for variable scoping
+# TODO [PRO/44] Add closure_capture_rules() for capturing outer scope
+# TODO [PRO/45] Add this_binding_rules() for context binding
+# TODO [PRO/46] Add super_method_calling() for inheritance
+# TODO [PRO/47] Add method_resolution_order() for MRO
+# TODO [PRO/48] Add static_vs_instance_methods() distinction
+# TODO [PRO/49] Add property_getter_setter_semantics()
+# TODO [PRO/50] Add lazy_evaluation_semantics() for deferred execution
+# TODO [ENTERPRISE/51] Add distributed semantic evaluation across network
+# TODO [ENTERPRISE/52] Add constraint propagation through operations
+# TODO [ENTERPRISE/53] Add ML-based semantic inference
+# TODO [ENTERPRISE/54] Add polyglot operation composition
+# TODO [ENTERPRISE/55] Add semantic caching and memoization
+# TODO [ENTERPRISE/56] Add symbolic execution integration
+# TODO [ENTERPRISE/57] Add type narrowing guidance for conditionals
+# TODO [ENTERPRISE/58] Add generic type parameter handling
+# TODO [ENTERPRISE/59] Add variance tracking for type systems
+# TODO [ENTERPRISE/60] Add semantic versioning for language evolution
+# TODO [ENTERPRISE/61] Add async_stream_semantics() for reactive programming
+# TODO [ENTERPRISE/62] Add concurrent_operation_semantics() for parallelism
+# TODO [ENTERPRISE/63] Add transaction_semantics() for ACID properties
+# TODO [ENTERPRISE/64] Add lock_semantics() for concurrency control
+# TODO [ENTERPRISE/65] Add race_condition_detection() for thread safety
+# TODO [ENTERPRISE/66] Add deadlock_detection() for synchronization issues
+# TODO [ENTERPRISE/67] Add memory_safety_semantics() for pointer operations
+# TODO [ENTERPRISE/68] Add bounds_checking() for array access safety
+# TODO [ENTERPRISE/69] Add null_pointer_checking() for null safety
+# TODO [ENTERPRISE/70] Add overflow_checking() for numeric safety
+# TODO [ENTERPRISE/71] Add unicode_semantics() for string handling
+# TODO [ENTERPRISE/72] Add regex_matching_semantics() for pattern matching
+# TODO [ENTERPRISE/73] Add json_parsing_semantics() for JSON operations
+# TODO [ENTERPRISE/74] Add xml_semantics() for XML operations
+# TODO [ENTERPRISE/75] Add serialization_deserialization_semantics() for data interchange
 
 from abc import ABC, abstractmethod
 from typing import Any

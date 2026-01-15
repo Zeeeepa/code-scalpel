@@ -62,26 +62,23 @@ Features:
 
 Phase 2 Enhancement TODOs (Module Level):
 
-High Priority:
-[20251221_TODO] Implement JavaScriptAnalyzer aggregation interface (multi-parser orchestration)
-[20251221_TODO] Add severity/confidence mapping across all tools
-[20251221_TODO] Implement parser result caching with content-hash keys
-[20251221_TODO] Add async execution support for parallel analysis
+# TODO/HIGH Implement JavaScriptAnalyzer aggregation interface (multi-parser orchestration)
+# TODO/HIGH Add severity/confidence mapping across all tools
+# TODO/HIGH Implement parser result caching with content-hash keys
+# TODO/HIGH Add async execution support for parallel analysis
 
-Medium Priority:
-[20251221_TODO] Implement Webpack/bundle analyzer integration
-[20251221_TODO] Add JSDoc coverage analysis tool
-[20251221_TODO] Create test pattern detection parser
-[20251221_TODO] Implement package.json analyzer (dependencies, scripts)
-[20251221_TODO] Add npm audit integration for vulnerability scanning
-[20251221_TODO] Create Webpack bundler analyzer parser
+# TODO/MEDIUM Implement Webpack/bundle analyzer integration
+# TODO/MEDIUM Add JSDoc coverage analysis tool
+# TODO/MEDIUM Create test pattern detection parser
+# TODO/MEDIUM Implement package.json analyzer (dependencies, scripts)
+# TODO/MEDIUM Add npm audit integration for vulnerability scanning
+# TODO/MEDIUM Create Webpack bundler analyzer parser
 
-Low Priority:
-[20251221_TODO] Implement closure and scope chain analysis
-[20251221_TODO] Add incremental analysis across all parsers
-[20251221_TODO] Implement trending and historical analysis
-[20251221_TODO] Add custom rule plugin system
-[20251221_TODO] Support configuration conflict resolution
+# TODO/LOW Implement closure and scope chain analysis
+# TODO/LOW Add incremental analysis across all parsers
+# TODO/LOW Implement trending and historical analysis
+# TODO/LOW Add custom rule plugin system
+# TODO/LOW Support configuration conflict resolution
 
 Future Enhancements:
     - Closure and scope chain analysis

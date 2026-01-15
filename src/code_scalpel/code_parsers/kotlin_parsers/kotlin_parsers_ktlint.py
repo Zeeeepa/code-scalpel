@@ -14,62 +14,62 @@ ktlint provides:
 
 TODO: HIGH PRIORITY - Core Implementation
 ==========================================
-[20251221_TODO] Implement JSON report parsing (ktlint --reporter=json)
-[20251221_TODO] Implement plain text output parsing
-[20251221_TODO] Implement SARIF report parsing
-[20251221_TODO] Add violation extraction with rule IDs
-[20251221_TODO] Add source location extraction (file, line, column)
-[20251221_TODO] Add error message and detail extraction
+# TODO Implement JSON report parsing (ktlint --reporter=json)
+# TODO Implement plain text output parsing
+# TODO Implement SARIF report parsing
+# TODO Add violation extraction with rule IDs
+# TODO Add source location extraction (file, line, column)
+# TODO Add error message and detail extraction
 
 TODO: HIGH PRIORITY - Execution
 ================================
-[20251221_TODO] Add ktlint CLI execution via subprocess
-[20251221_TODO] Add Gradle task execution support (ktlintCheck, ktlintFormat)
-[20251221_TODO] Add format mode execution (--format flag)
-[20251221_TODO] Add stdin support for code snippets
-[20251221_TODO] Add incremental checking support
+# TODO Add ktlint CLI execution via subprocess
+# TODO Add Gradle task execution support (ktlintCheck, ktlintFormat)
+# TODO Add format mode execution (--format flag)
+# TODO Add stdin support for code snippets
+# TODO Add incremental checking support
 
 TODO: HIGH PRIORITY - Configuration
 ====================================
-[20251221_TODO] Implement .editorconfig parsing for ktlint rules
-[20251221_TODO] Add custom ruleset configuration
-[20251221_TODO] Add disabled_rules parsing
-[20251221_TODO] Add ktlint_* editorconfig property extraction
-[20251221_TODO] Add baseline file parsing (.ktlint-baseline.xml)
+# TODO Implement .editorconfig parsing for ktlint rules
+# TODO Add custom ruleset configuration
+# TODO Add disabled_rules parsing
+# TODO Add ktlint_* editorconfig property extraction
+# TODO Add baseline file parsing (.ktlint-baseline.xml)
 
 TODO: MEDIUM PRIORITY - Standard Rules
 =======================================
-[20251221_TODO] Parse indentation rules (indent_size, indent_style)
-[20251221_TODO] Parse import rules (no-wildcard-imports, no-unused-imports)
-[20251221_TODO] Parse spacing rules (no-consecutive-blank-lines, no-trailing-spaces)
-[20251221_TODO] Parse naming rules (package-name, class-naming)
-[20251221_TODO] Parse wrapping rules (argument-list-wrapping, parameter-list-wrapping)
-[20251221_TODO] Parse comment rules (comment-spacing)
-[20251221_TODO] Parse string rules (no-multi-spaces, string-template)
+# TODO Parse indentation rules (indent_size, indent_style)
+# TODO Parse import rules (no-wildcard-imports, no-unused-imports)
+# TODO Parse spacing rules (no-consecutive-blank-lines, no-trailing-spaces)
+# TODO Parse naming rules (package-name, class-naming)
+# TODO Parse wrapping rules (argument-list-wrapping, parameter-list-wrapping)
+# TODO Parse comment rules (comment-spacing)
+# TODO Parse string rules (no-multi-spaces, string-template)
 
 TODO: MEDIUM PRIORITY - Experimental Rules
 ===========================================
-[20251221_TODO] Track experimental rule status
-[20251221_TODO] Add opt-in experimental rule support
-[20251221_TODO] Parse function-signature rule
-[20251221_TODO] Parse type-parameter-list-spacing rule
-[20251221_TODO] Parse annotation rules
+# TODO Track experimental rule status
+# TODO Add opt-in experimental rule support
+# TODO Parse function-signature rule
+# TODO Parse type-parameter-list-spacing rule
+# TODO Parse annotation rules
 
 TODO: MEDIUM PRIORITY - Formatter
 ==================================
-[20251221_TODO] Add format diff generation (before/after)
-[20251221_TODO] Add dry-run format checking
-[20251221_TODO] Track auto-fixable violations
-[20251221_TODO] Generate format statistics
+# TODO Add format diff generation (before/after)
+# TODO Add dry-run format checking
+# TODO Track auto-fixable violations
+# TODO Generate format statistics
 
 TODO: LOW PRIORITY - Advanced Features
 =======================================
-[20251221_TODO] Add custom rule loading (.kt ruleset files)
-[20251221_TODO] Add rule documentation URL extraction
-[20251221_TODO] Add Git pre-commit hook generation
-[20251221_TODO] Add CI/CD integration helpers
-[20251221_TODO] Add comparison with Detekt formatting rules
-[20251221_TODO] Add migration helpers from other formatters
+# TODO Add custom rule loading (.kt ruleset files)
+# TODO Add rule documentation URL extraction
+# TODO Add Git pre-commit hook generation
+# TODO Add CI/CD integration helpers
+# TODO Add comparison with Detekt formatting rules
+# TODO Add migration helpers from other formatters
 """
 
 import shutil

@@ -9,11 +9,11 @@ Reference: https://www.jarchitect.com/
 Note: JArchitect is a commercial tool with GUI-based analysis.
 
 Phase 2 Enhancement TODOs:
-[20251221_TODO] Implement rule violation severity calculation
-[20251221_TODO] Add namespace dependency analysis
-[20251221_TODO] Support custom rule configuration
-[20251221_TODO] Implement CQLinq query support
-[20251221_TODO] Add anti-pattern detection
+# TODO Implement rule violation severity calculation
+# TODO Add namespace dependency analysis
+# TODO Support custom rule configuration
+# TODO Implement CQLinq query support
+# TODO Add anti-pattern detection
 """
 
 from dataclasses import dataclass, field

@@ -71,10 +71,6 @@ from .taint_tracker import (
 # Auto-load custom sanitizers from pyproject.toml on module import
 _config_loaded = False
 
-# TODO: SecurityAnalyzer Enhancement Roadmap
-# ===========================================
-#
-# COMMUNITY (Current & Planned):
 # - TODO [COMMUNITY]: Add detection of hardcoded secrets (current)
 # - TODO [COMMUNITY]: Improve vulnerability reporting clarity
 # - TODO [COMMUNITY]: Add remediation suggestions for each vuln type
@@ -84,23 +80,17 @@ _config_loaded = False
 # - TODO [COMMUNITY]: Create examples for each vuln type
 # - TODO [COMMUNITY]: Add API reference documentation
 # - TODO [COMMUNITY]: Create troubleshooting guide
-#
-# COMMUNITY Examples & Tutorials:
 # - TODO [COMMUNITY]: Add SQL injection detection example
 # - TODO [COMMUNITY]: Create XSS vulnerability example
 # - TODO [COMMUNITY]: Add path traversal example
 # - TODO [COMMUNITY]: Document command injection patterns
 # - TODO [COMMUNITY]: Create custom profile example
 # - TODO [COMMUNITY]: Add false positive handling example
-#
-# COMMUNITY Testing & Validation:
 # - TODO [COMMUNITY]: Add detection accuracy tests
 # - TODO [COMMUNITY]: Create false positive rate tests
 # - TODO [COMMUNITY]: Add regression test suite
 # - TODO [COMMUNITY]: Test all vulnerability types
 # - TODO [COMMUNITY]: Create end-to-end test cases
-#
-# PRO (Enhanced Features):
 # - TODO [PRO]: Implement context-aware vulnerability scoring
 # - TODO [PRO]: Add likelihood estimation for vulnerabilities
 # - TODO [PRO]: Support custom analysis profiles
@@ -116,8 +106,6 @@ _config_loaded = False
 # - TODO [PRO]: Implement sanitizer effectiveness scoring
 # - TODO [PRO]: Add vulnerability chaining detection
 # - TODO [PRO]: Support incremental file analysis
-#
-# PRO Analysis & Reporting:
 # - TODO [PRO]: Implement risk scoring based on CVSS
 # - TODO [PRO]: Add evidence-based reporting
 # - TODO [PRO]: Support JSON/XML output formats
@@ -125,16 +113,12 @@ _config_loaded = False
 # - TODO [PRO]: Add detailed vulnerability explanations
 # - TODO [PRO]: Support batch analysis reporting
 # - TODO [PRO]: Implement CSV export functionality
-#
-# PRO Framework Integration:
 # - TODO [PRO]: Add Django-specific security analysis
 # - TODO [PRO]: Support Flask security patterns
 # - TODO [PRO]: Add FastAPI security checks
 # - TODO [PRO]: Support SQLAlchemy ORM analysis
 # - TODO [PRO]: Add Jinja2 SSTI detection
 # - TODO [PRO]: Support web2py analysis
-#
-# ENTERPRISE (Advanced Capabilities):
 # - TODO [ENTERPRISE]: Implement ML-based vulnerability prediction
 # - TODO [ENTERPRISE]: Add distributed analysis across clusters
 # - TODO [ENTERPRISE]: Support custom vulnerability patterns
