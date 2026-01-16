@@ -128,25 +128,21 @@ class TestBaseCodeAnalysisAgent:
             base_module.get_symbol_references = original_get_symbol_references
 
     @pytest.mark.asyncio
-    async def test_analyze_security_success(self, agent):
+    async def test_analyze_security_success(self, agent, monkeypatch):
         """Test successful security analysis."""
-        import code_scalpel.agents.base_agent as base_module
+        from code_scalpel.mcp.tools import security as security_module
 
-        original_security_scan = base_module.security_scan
-        base_module.security_scan = AsyncMock(
-            return_value=MagicMock(
-                model_dump=MagicMock(
-                    return_value={"success": True, "vulnerabilities": []}
-                )
+        mock_result = MagicMock(
+            model_dump=MagicMock(
+                return_value={"success": True, "vulnerabilities": []}
             )
         )
+        mock_security_scan = AsyncMock(return_value=mock_result)
+        monkeypatch.setattr(security_module, "security_scan", mock_security_scan)
 
-        try:
-            result = await agent.analyze_code_security("test code")
-            assert result["success"] is True
-            assert "vulnerabilities" in result
-        finally:
-            base_module.security_scan = original_security_scan
+        result = await agent.analyze_code_security("test code")
+        assert result["success"] is True
+        assert "vulnerabilities" in result
 
     @pytest.mark.asyncio
     async def test_extract_function_success(self, agent):

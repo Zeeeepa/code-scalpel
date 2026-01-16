@@ -4,6 +4,7 @@ These tests intentionally validate only behavior that is actually implemented an
 stable (limits + non-marketing messaging).
 
 [20251230_TEST] Replace oversized, speculative tier tests with small smoke tests.
+[20260116_TEST] Fixed imports to match refactored module structure.
 """
 
 from __future__ import annotations
@@ -15,11 +16,11 @@ import code_scalpel.licensing.tier_detector
 import code_scalpel.licensing.features
 import code_scalpel.mcp.path_resolver
 import code_scalpel.mcp.helpers.symbolic_helpers
-from code_scalpel.mcp.tools import referencing
-from code_scalpel.mcp.tools import execution
+from code_scalpel.mcp.tools import context as referencing
+from code_scalpel.mcp.tools import symbolic as execution
 from code_scalpel.mcp.tools import extraction
 from code_scalpel.mcp.tools import security
-from code_scalpel.mcp.models.execution import SymbolicResult
+from code_scalpel.mcp.models.core import SymbolicResult
 
 
 @pytest.mark.asyncio

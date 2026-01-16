@@ -50,7 +50,8 @@ async def test_tool_wrappers_record_success(monkeypatch):
     monkeypatch.setattr(
         "code_scalpel.agents.base_agent.get_symbol_references", fake_tool
     )
-    monkeypatch.setattr("code_scalpel.agents.base_agent.security_scan", fake_tool)
+    # [20260116_TEST] security_scan is lazy-imported; patch at source module
+    monkeypatch.setattr("code_scalpel.mcp.tools.security.security_scan", fake_tool)
     monkeypatch.setattr("code_scalpel.agents.base_agent.extract_code", fake_tool)
     monkeypatch.setattr("code_scalpel.agents.base_agent.simulate_refactor", fake_tool)
     monkeypatch.setattr("code_scalpel.agents.base_agent.update_symbol", fake_tool)

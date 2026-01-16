@@ -966,9 +966,15 @@ def unrelated():
 class TestUpdateSymbolTool:
     """Tests for the update_symbol surgical modification tool."""
 
+    @pytest.fixture(autouse=True)
+    def _set_project_root(self, tmp_path, monkeypatch):
+        """[20260116_TEST] Set PROJECT_ROOT to tmp_path for path validation."""
+        from pathlib import Path
+        from code_scalpel.mcp.helpers import extraction_helpers
+        monkeypatch.setattr(extraction_helpers, "PROJECT_ROOT", tmp_path)
+
     async def test_update_function_in_file(self, tmp_path, monkeypatch):
         """Test updating a function in a file."""
-        monkeypatch.setenv("SCALPEL_ROOT", str(tmp_path))
         from code_scalpel.mcp.server import update_symbol
 
         file_content = '''
@@ -1272,11 +1278,14 @@ class TestCrossFileDependenciesMCP:
     """Test extract_code with include_cross_file_deps=True."""
 
     @pytest.fixture(autouse=True)
-    def _enable_pro_license(self, hs256_license_state_paths, set_hs256_license_env):
-        """[20251228_TEST] Cross-file deps is Pro+; enable a valid HS256 test license."""
-
-        license_path = hs256_license_state_paths["valid"]
-        set_hs256_license_env(license_path=str(license_path))
+    def _enable_pro_tier(self, monkeypatch):
+        """[20260116_TEST] Cross-file deps is Pro+; set tier via env var."""
+        # tier_detector.get_current_tier() reads CODE_SCALPEL_TIER
+        monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
+        # Also clear any cached tier result
+        from code_scalpel.licensing import tier_detector
+        detector = tier_detector.TierDetector()
+        detector._cached_result = None
 
     @pytest.fixture
     def multi_file_project(self, tmp_path):

@@ -61,7 +61,8 @@ async def test_wrapper_methods_capture_errors(monkeypatch):
         raise RuntimeError("fail")
 
     monkeypatch.setattr("code_scalpel.agents.base_agent.get_symbol_references", boom)
-    monkeypatch.setattr("code_scalpel.agents.base_agent.security_scan", boom)
+    # [20260116_TEST] security_scan is lazy-imported; patch at source module
+    monkeypatch.setattr("code_scalpel.mcp.tools.security.security_scan", boom)
     monkeypatch.setattr("code_scalpel.agents.base_agent.extract_code", boom)
     monkeypatch.setattr("code_scalpel.agents.base_agent.simulate_refactor", boom)
     monkeypatch.setattr("code_scalpel.agents.base_agent.update_symbol", boom)
