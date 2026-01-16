@@ -79,17 +79,19 @@ async def test_in_flight_operation_keeps_tier_snapshot(
     set_hs256_license_env(license_path=str(license_path))
 
     from code_scalpel.mcp import server
+    from code_scalpel.mcp.helpers import policy_helpers
 
     tool = server.mcp._tool_manager.get_tool("code_policy_check")
 
     # Make the sync worker slow so we can flip env mid-run.
-    original = server._code_policy_check_sync
+    # [20260116_BUGFIX] _code_policy_check_sync was refactored to helpers/policy_helpers.py
+    original = policy_helpers._code_policy_check_sync
 
     def _slow_sync(*args, **kwargs):
         time.sleep(0.2)
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(server, "_code_policy_check_sync", _slow_sync)
+    monkeypatch.setattr(policy_helpers, "_code_policy_check_sync", _slow_sync)
 
     task = asyncio.create_task(
         tool.run(

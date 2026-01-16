@@ -15,26 +15,107 @@ from pydantic import BaseModel
 from code_scalpel import __version__
 from code_scalpel.mcp.contract import ToolResponseEnvelope
 
+# [20260116_FEATURE] Import license validator for tier determination
+from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
+
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
 # Can be overridden via CODE_SCALPEL_TIER environment variable.
 CURRENT_TIER = "community"
 
+# [20260116_FEATURE] Runtime license grace for long-lived server processes.
+# If a license expires mid-session, keep the last known valid tier for 24h.
+_LAST_VALID_LICENSE_TIER: str | None = None
+_LAST_VALID_LICENSE_AT: float | None = None
+_MID_SESSION_EXPIRY_GRACE_SECONDS = 24 * 60 * 60
+
+
+def _normalize_tier(value: str | None) -> str:
+    """Normalize tier string to canonical form."""
+    if not value:
+        return "community"
+    v = value.strip().lower()
+    if v == "free":
+        return "community"
+    if v == "all":
+        return "enterprise"
+    return v
+
+
+def _requested_tier_from_env() -> str | None:
+    """Get requested tier from environment variables (for testing/downgrade)."""
+    import os
+    requested = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    if requested is None:
+        return None
+    requested = _normalize_tier(requested)
+    if requested not in {"community", "pro", "enterprise"}:
+        return None
+    return requested
+
 
 def _get_current_tier() -> str:
-    """Get the current tier from environment or global."""
-    import os
+    """Get the current tier from license validation with env var override.
 
-    env_tier = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
-    if env_tier:
-        tier = env_tier.strip().lower()
-        if tier == "free":
+    [20260116_FEATURE] Updated to do full license validation, not just env var check.
+
+    The tier system works as follows:
+    1. License file determines the MAXIMUM tier you're entitled to
+    2. Environment variable can REQUEST a tier (for testing/downgrade)
+    3. The effective tier is the MINIMUM of licensed and requested
+
+    Returns:
+        str: One of 'community', 'pro', or 'enterprise'
+    """
+    import os
+    import time as time_module
+
+    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
+
+    requested = _requested_tier_from_env()
+    disable_license_discovery = (
+        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    )
+    force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
+
+    # [TESTING/OFFLINE] If license discovery is disabled and explicit test override
+    # is set, honor the requested tier (used for tier-gated contract tests only).
+    if disable_license_discovery and force_tier_override and requested:
+        return requested
+
+    # When discovery is disabled and no explicit license path is provided, clamp to
+    # Community to avoid silently elevating tier just via env vars.
+    if disable_license_discovery and not force_tier_override:
+        if not os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
             return "community"
-        if tier == "all":
-            return "enterprise"
-        if tier in {"community", "pro", "enterprise"}:
-            return tier
-    return CURRENT_TIER
+
+    validator = JWTLicenseValidator()
+    license_data = validator.validate()
+    licensed = "community"
+
+    if license_data.is_valid:
+        licensed = _normalize_tier(license_data.tier)
+        _LAST_VALID_LICENSE_TIER = licensed
+        _LAST_VALID_LICENSE_AT = time_module.time()
+    else:
+        # Revocation is immediate: no grace.
+        err = (license_data.error_message or "").lower()
+        if "revoked" in err:
+            licensed = "community"
+        # Expiration mid-session: allow 24h grace based on last known valid tier.
+        elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
+            now = time_module.time()
+            if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
+                if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
+                    licensed = _LAST_VALID_LICENSE_TIER
+
+    # If no tier requested via env var, use the licensed tier
+    if requested is None:
+        return licensed
+
+    # Allow downgrade only: effective tier = min(requested, licensed)
+    rank = {"community": 0, "pro": 1, "enterprise": 2}
+    return requested if rank[requested] <= rank[licensed] else licensed
 
 
 def set_current_tier(tier: str) -> None:

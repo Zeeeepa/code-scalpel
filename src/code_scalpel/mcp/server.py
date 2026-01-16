@@ -90,6 +90,21 @@ from code_scalpel.mcp.protocol import mcp, set_current_tier
 
 from code_scalpel.mcp.models.core import ClassInfo as CoreClassInfo
 
+# [20260116_FEATURE] License-gated tier system restored from archive
+from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
+
+# Current tier for response envelope metadata.
+# Initialized to "community" (free tier) by default.
+# The actual tier is determined by license validation at runtime.
+CURRENT_TIER = "community"
+
+# [20251228_FEATURE] Runtime license grace for long-lived server processes.
+# If a license expires mid-session, keep the last known valid tier for 24h.
+# This does NOT change startup behavior: expired licenses remain invalid at startup.
+_LAST_VALID_LICENSE_TIER: str | None = None
+_LAST_VALID_LICENSE_AT: float | None = None
+_MID_SESSION_EXPIRY_GRACE_SECONDS = 24 * 60 * 60
+
 
 # [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport corruption
 # When using stdio transport, stdout must contain ONLY valid JSON-RPC messages.
@@ -108,8 +123,18 @@ def _configure_logging(transport: str = "stdio"):
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
 
-    # Set level based on environment
-    level = logging.DEBUG if os.environ.get("SCALPEL_DEBUG") else logging.WARNING
+    # [20260116_BUGFIX] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT, WARNING)
+    # Restores original behavior from archive/server.py
+    env_level = os.environ.get("SCALPEL_MCP_INFO", "WARNING").upper()
+    if env_level == "DEBUG":
+        level = logging.DEBUG
+    elif env_level == "INFO":
+        level = logging.INFO
+    elif env_level == "ALERT":
+        level = logging.CRITICAL
+    else:
+        level = logging.WARNING
+
     handler.setLevel(level)
     root_logger.setLevel(level)
     root_logger.addHandler(handler)
@@ -117,6 +142,110 @@ def _configure_logging(transport: str = "stdio"):
 
 # Setup logging (default to stderr)
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# [20260116_FEATURE] License-Gated Tier System
+# Restored from archive/server.py - Proper license validation with downgrade capability
+# =============================================================================
+
+
+def _normalize_tier(value: str | None) -> str:
+    """Normalize tier string to canonical form."""
+    if not value:
+        return "community"
+    v = value.strip().lower()
+    if v == "free":
+        return "community"
+    if v == "all":
+        return "enterprise"
+    return v
+
+
+def _requested_tier_from_env() -> str | None:
+    """Get requested tier from environment variables (for testing/downgrade)."""
+    requested = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    if requested is None:
+        return None
+    requested = _normalize_tier(requested)
+    if requested not in {"community", "pro", "enterprise"}:
+        return None
+    return requested
+
+
+def _get_current_tier() -> str:
+    """Get the current tier from license validation with env var override.
+
+    The tier system works as follows:
+    1. License file determines the MAXIMUM tier you're entitled to
+    2. Environment variable can REQUEST a tier (for testing/downgrade)
+    3. The effective tier is the MINIMUM of licensed and requested
+
+    This allows Enterprise license holders to test Pro/Community behavior
+    by setting CODE_SCALPEL_TIER=pro or CODE_SCALPEL_TIER=community.
+
+    Environment Variables:
+        CODE_SCALPEL_TIER: Request a specific tier (downgrade only)
+        SCALPEL_TIER: Legacy alias for CODE_SCALPEL_TIER
+        CODE_SCALPEL_LICENSE_PATH: Path to JWT license file
+        CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY: Set to "1" to disable auto-discovery
+        CODE_SCALPEL_TEST_FORCE_TIER: Set to "1" to force tier for testing
+
+    Returns:
+        str: One of 'community', 'pro', or 'enterprise'
+    """
+    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
+
+    requested = _requested_tier_from_env()
+    disable_license_discovery = (
+        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    )
+    force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
+
+    # [TESTING/OFFLINE] If license discovery is disabled and explicit test override
+    # is set, honor the requested tier (used for tier-gated contract tests only).
+    if disable_license_discovery and force_tier_override and requested:
+        return requested
+
+    # When discovery is disabled and no explicit license path is provided, clamp to
+    # Community to avoid silently elevating tier just via env vars.
+    if disable_license_discovery and not force_tier_override:
+        if not os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
+            return "community"
+
+    validator = JWTLicenseValidator()
+    license_data = validator.validate()
+    licensed = "community"
+
+    if license_data.is_valid:
+        licensed = _normalize_tier(license_data.tier)
+        _LAST_VALID_LICENSE_TIER = licensed
+        _LAST_VALID_LICENSE_AT = __import__("time").time()
+    else:
+        # Revocation is immediate: no grace.
+        err = (license_data.error_message or "").lower()
+        if "revoked" in err:
+            licensed = "community"
+        # Expiration mid-session: allow 24h grace based on last known valid tier.
+        elif getattr(license_data, "is_expired", False) and _LAST_VALID_LICENSE_AT:
+            now = __import__("time").time()
+            if now - _LAST_VALID_LICENSE_AT <= _MID_SESSION_EXPIRY_GRACE_SECONDS:
+                if _LAST_VALID_LICENSE_TIER in {"pro", "enterprise"}:
+                    licensed = _LAST_VALID_LICENSE_TIER
+
+    # If no tier requested via env var, use the licensed tier
+    if requested is None:
+        return licensed
+
+    # Allow downgrade only: effective tier = min(requested, licensed)
+    rank = {"community": 0, "pro": 1, "enterprise": 2}
+    return requested if rank[requested] <= rank[licensed] else licensed
+
+
+# =============================================================================
+# End License-Gated Tier System
+# =============================================================================
+
 
 # Maximum code size to prevent resource exhaustion
 MAX_CODE_SIZE = 100_000
@@ -5287,20 +5416,32 @@ def run_server(
 
     register_tools()
 
-    # Tier selection: default is the full toolset to preserve current behavior.
-    # Override via CODE_SCALPEL_TIER/SCALPEL_TIER.
+    # [20260116_FEATURE] License-gated tier system
+    # The tier is determined by:
+    # 1. CLI argument (--tier) if provided
+    # 2. Otherwise, _get_current_tier() validates license and applies env var override
+    #
+    # This allows Enterprise license holders to test Pro/Community behavior:
+    #   CODE_SCALPEL_TIER=community code-scalpel mcp  # Force community tier
+    #   CODE_SCALPEL_TIER=pro code-scalpel mcp       # Force pro tier (if licensed)
     if tier is None:
-        tier = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
-    tier = (tier or "enterprise").strip().lower()
-    if tier == "free":
-        tier = "community"
-    if tier == "all":
-        tier = "enterprise"
-    if tier not in {"community", "pro", "enterprise"}:
-        raise ValueError(
-            "Invalid tier. Expected one of: community, pro, enterprise "
-            "(or set CODE_SCALPEL_TIER/SCALPEL_TIER)"
-        )
+        tier = _get_current_tier()
+    else:
+        # CLI argument provided - still validate against license
+        tier = _normalize_tier(tier)
+        if tier not in {"community", "pro", "enterprise"}:
+            raise ValueError(
+                "Invalid tier. Expected one of: community, pro, enterprise"
+            )
+        # If CLI requests higher tier than licensed, clamp to licensed
+        licensed_tier = _get_current_tier()
+        rank = {"community": 0, "pro": 1, "enterprise": 2}
+        if rank[tier] > rank[licensed_tier]:
+            print(
+                f"Warning: Requested tier '{tier}' exceeds license. Using '{licensed_tier}'.",
+                file=sys.stderr,
+            )
+            tier = licensed_tier
 
     # Expose tier to the response envelope wrapper (both local and protocol).
     global CURRENT_TIER
@@ -5675,8 +5816,9 @@ from code_scalpel.mcp.prompts import (  # noqa: E402
     explain_and_document,
 )
 
-# Re-export tier functions from protocol.py for backward compatibility
-from code_scalpel.mcp.protocol import _get_current_tier  # noqa: E402
+# [20260116_BUGFIX] Removed re-export of _get_current_tier from protocol.py
+# server.py has its own _get_current_tier() that does full license validation.
+# The protocol.py version only checks env vars - do NOT import it here.
 
 # Re-export Pydantic models for backward compatibility
 from code_scalpel.mcp.models.graph import CallGraphResultModel  # noqa: E402

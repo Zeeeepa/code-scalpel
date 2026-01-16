@@ -3,20 +3,14 @@ from __future__ import annotations
 from typing import Any, cast
 
 from code_scalpel.licensing.features import get_tool_capabilities
-from code_scalpel.licensing.tier_detector import get_current_tier
 from code_scalpel.mcp.models.policy import (
     CodePolicyCheckResult,
     PathValidationResult,
     PolicyVerificationResult,
 )
 
-
-def _get_current_tier() -> str:
-    """Return the current licensing tier, defaulting to community on failure."""
-    try:
-        return get_current_tier()
-    except Exception:
-        return "community"
+# [20260116_BUGFIX] Import _get_current_tier from protocol for consistent license validation
+from code_scalpel.mcp.protocol import _get_current_tier
 
 
 def _validate_paths_sync(
