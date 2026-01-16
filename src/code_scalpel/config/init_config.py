@@ -110,6 +110,8 @@ from .templates import (
     DOCKER_SECURITY_REGO_TEMPLATE,
     ENV_EXAMPLE_TEMPLATE,
     GITIGNORE_TEMPLATE,
+    HOOKS_README_TEMPLATE,
+    IDE_EXTENSION_CONFIG_TEMPLATE,
     LAYERED_ARCHITECTURE_REGO_TEMPLATE,
     POLICIES_README_TEMPLATE,
     POLICY_YAML_TEMPLATE,
@@ -361,6 +363,19 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
 """
     )
     files_created.append("license/README.md")
+
+    # ========================================================================
+    # [20260116_FEATURE] v3.4.0 - Claude Code Hooks Configuration
+    # ========================================================================
+    # Create IDE extension configuration
+    ide_config_file = config_dir / "ide-extension.json"
+    ide_config_file.write_text(IDE_EXTENSION_CONFIG_TEMPLATE)
+    files_created.append("ide-extension.json")
+
+    # Create hooks README
+    hooks_readme_file = config_dir / "HOOKS_README.md"
+    hooks_readme_file.write_text(HOOKS_README_TEMPLATE)
+    files_created.append("HOOKS_README.md")
 
     # ========================================================================
     # [20241225_FEATURE] v3.3.0 - Policy Integrity Manifest

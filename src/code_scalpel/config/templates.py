@@ -916,3 +916,176 @@ has_readme(dir) if {
     file.path == concat("/", [dir, "README.md"])
 }
 """
+
+# [20260116_FEATURE] v3.4.0 - Claude Code hooks configuration templates
+
+# Claude settings.json template with governance hooks
+CLAUDE_SETTINGS_TEMPLATE = """{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "name": "code-scalpel-governance",
+        "match": {
+          "tools": ["Edit", "Write", "Bash", "MultiEdit"]
+        },
+        "command": "code-scalpel hook pre-tool-use",
+        "timeout": 10000,
+        "onFailure": "block"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "name": "code-scalpel-audit",
+        "match": {
+          "tools": ["Edit", "Write", "Bash", "MultiEdit"]
+        },
+        "command": "code-scalpel hook post-tool-use",
+        "timeout": 5000,
+        "onFailure": "warn"
+      }
+    ]
+  }
+}
+"""
+
+# Enterprise managed settings template
+CLAUDE_MANAGED_SETTINGS_TEMPLATE = """{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "name": "enterprise-governance",
+        "match": {
+          "tools": ["Edit", "Write", "Bash", "MultiEdit"]
+        },
+        "command": "code-scalpel hook pre-tool-use",
+        "timeout": 10000,
+        "onFailure": "block"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "name": "enterprise-audit",
+        "match": {
+          "tools": ["Edit", "Write", "Bash", "MultiEdit"]
+        },
+        "command": "code-scalpel hook post-tool-use",
+        "timeout": 5000,
+        "onFailure": "warn"
+      }
+    ]
+  },
+  "allowManagedHooksOnly": true
+}
+"""
+
+# IDE extension configuration template
+IDE_EXTENSION_CONFIG_TEMPLATE = """{
+  "enforcement": {
+    "enabled": true,
+    "mode": "warn",
+    "override": {
+      "allowed": true,
+      "requireJustification": true,
+      "requireApproval": false,
+      "notifyChannel": null
+    }
+  },
+  "policies": {
+    "syntaxValidation": true,
+    "securityScan": true,
+    "changeBudget": true,
+    "customPolicies": true
+  },
+  "exclusions": {
+    "paths": [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/__pycache__/**"
+    ],
+    "operators": []
+  },
+  "audit": {
+    "logAllSaves": true,
+    "logReadOnly": false,
+    "destination": ".code-scalpel/audit.jsonl"
+  }
+}
+"""
+
+# Hooks README template
+HOOKS_README_TEMPLATE = """# Code Scalpel Claude Code Hooks
+
+This directory contains configuration for Claude Code governance hooks that enforce
+Code Scalpel policies on all file operations.
+
+## Quick Start
+
+```bash
+# Install Claude Code hooks
+code-scalpel install-hooks
+
+# Install git hooks
+code-scalpel install-git-hooks
+```
+
+## How It Works
+
+### Layer 1: Claude Code Hooks
+
+Claude Code hooks intercept tool usage before and after execution:
+
+- **PreToolUse**: Validates file operations against governance policies
+- **PostToolUse**: Logs all operations to the audit trail
+
+Configuration in `.claude/settings.json`:
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "name": "code-scalpel-governance",
+      "match": {"tools": ["Edit", "Write", "Bash", "MultiEdit"]},
+      "command": "code-scalpel hook pre-tool-use",
+      "onFailure": "block"
+    }]
+  }
+}
+```
+
+### Layer 2: Git Hooks
+
+Git hooks provide commit-time enforcement:
+
+- **pre-commit**: Verifies audit coverage for all staged changes
+- **commit-msg**: Logs commits to audit trail
+
+### Enforcement Modes
+
+| Mode | Behavior |
+|------|----------|
+| `audit-only` | Log all operations without blocking |
+| `warn` | Warn on violations, allow operations |
+| `block` | Block operations that violate policy |
+
+## Commands
+
+```bash
+# Claude Code hooks
+code-scalpel install-hooks      # Install hooks to .claude/settings.json
+code-scalpel install-hooks --user  # Install to user-level settings
+code-scalpel uninstall-hooks    # Remove hooks
+
+# Git hooks
+code-scalpel install-git-hooks  # Install git pre-commit/commit-msg hooks
+code-scalpel verify-audit-coverage <file>  # Check audit coverage
+
+# Manual hook invocation (used by hooks internally)
+code-scalpel hook pre-tool-use  # Run governance validation
+code-scalpel hook post-tool-use # Run audit logging
+```
+
+## Documentation
+
+See `docs/architecture/IDE_ENFORCEMENT_GOVERNANCE.md` for full documentation.
+"""
