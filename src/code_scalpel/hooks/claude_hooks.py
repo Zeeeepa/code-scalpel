@@ -134,7 +134,7 @@ FILE_MODIFICATION_PATTERNS = [
     r"\bawk\s+.*>",  # awk redirection
     r"\bperl\s+-i",  # perl in-place
     # File operations
-    r"\brm\s+(?!-r\s+node_modules)",  # file deletion (allow node_modules cleanup)
+    r"\brm\s+(?!-rf?\s+node_modules)",  # [20260116_BUGFIX] file deletion (allow node_modules cleanup: -r and -rf)
     r"\bmv\s+",  # file move
     r"\bcp\s+",  # file copy
     r"\btouch\s+",  # file creation
@@ -360,22 +360,45 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
             try:
                 from code_scalpel.governance import GovernanceContext, Operation
 
+                # [20260116_BUGFIX] Use correct Operation fields (no 'files' parameter)
                 operation = Operation(
                     type="code_edit",
-                    files=[{"path": file_path, "content": new_content}],
+                    code=new_content or "",
+                    language="",
+                    file_path=file_path or "",
+                    metadata={},
                 )
+                # [20260116_BUGFIX] Pass operator and session_id via metadata to match GovernanceContext signature
                 gov_context = GovernanceContext(
-                    operator="claude-code",
-                    session_id=context.session_id,
+                    metadata={
+                        "operator": "claude-code",
+                        "session_id": context.session_id,
+                    }
                 )
                 result = engine.evaluate(operation, gov_context)
 
                 if not result.allowed:
+                    # [20260116_BUGFIX] Derive blocked policy name from governance violations instead of non-existent `violated_policy`
+                    policy_name: Optional[str] = None
+                    try:
+                        violations = getattr(result, "policy_violations", None) or getattr(
+                            result, "violations", None
+                        )
+                        if violations:
+                            first_violation = violations[0]
+                            rule = getattr(first_violation, "rule_name", None) or getattr(
+                                first_violation, "rule", None
+                            )
+                            if rule is not None:
+                                policy_name = getattr(rule, "name", rule)
+                    except Exception:
+                        policy_name = None
+
                     return HookResponse(
                         status=HookStatus.BLOCKED,
                         reason=result.reason
                         or "Operation blocked by governance policy",
-                        policy=result.violated_policy if hasattr(result, "violated_policy") else None,
+                        policy=policy_name,
                         suggestion="Use Code Scalpel MCP tools for governance-compliant modifications",
                     )
             except Exception:

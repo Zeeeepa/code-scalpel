@@ -23,9 +23,9 @@ Usage:
 
 import hashlib
 import json
-import os
+
 import subprocess
-import sys
+# [20260116_REFACTOR] Removed unused 'sys' import flagged by static analysis
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -252,9 +252,10 @@ def git_hook_pre_commit() -> int:
         for file_path in uncovered_files:
             print(f"  - {file_path}")
         print("")
+        # [20260116_BUGFIX] Updated remediation guidance to avoid referencing non-existent CLI command.
         print("To fix this:")
-        print("  1. Make changes through Code Scalpel MCP tools, OR")
-        print("  2. Use 'code-scalpel audit-retroactive <file>' to create audit entry, OR")
+        print("  1. Make changes through Code Scalpel MCP tools so an audit entry is created, OR")
+        print("  2. Add an audit entry for these changes according to your governance workflow, OR")
         print("  3. Use 'git commit --no-verify' with justification (logged)")
         print("")
 
@@ -327,7 +328,11 @@ def _log_blocked_commit(uncovered_files: List[str]) -> None:
             severity="HIGH",
         )
     except Exception:
-        pass
+        # [20260116_BUGFIX] Do not block commit if audit logging fails, but emit a warning.
+        print(
+            "Code Scalpel git hook: failed to log blocked commit to audit trail.",
+            file=sys.stderr,
+        )
 
 
 def install_git_hooks(repo_path: Optional[str] = None, force: bool = False) -> Tuple[bool, str]:

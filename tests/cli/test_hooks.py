@@ -13,11 +13,10 @@ These tests verify the functionality of:
 
 import json
 import tempfile
-from datetime import datetime
+# [20260116_TEST] Removed unused datetime import flagged by static analysis
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from code_scalpel.hooks.claude_hooks import (
     HookContext,

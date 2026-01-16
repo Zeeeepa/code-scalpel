@@ -14,8 +14,8 @@ Usage:
     code-scalpel install-hooks --settings-path /path/to/.claude/settings.json
 """
 
+# [20260116_REFACTOR] Removed unused os import flagged by static analysis
 import json
-import os
 import platform
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
