@@ -1,43 +1,35 @@
-"""Session counters and audit helpers for MCP server."""
+"""Session counters and audit helpers for MCP server.
+
+[20260116_BUGFIX] This file is now a thin re-export layer.
+The Single Source of Truth is: code_scalpel.mcp.helpers.session
+
+All state is managed in helpers/session.py to avoid split-brain bugs.
+"""
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any
+# Re-export everything from the SSOT
+from code_scalpel.mcp.helpers.session import (
+    # Module-level state (same objects, not copies!)
+    _SESSION_UPDATE_COUNTS,
+    _SESSION_AUDIT_TRAIL,
+    # Public functions
+    get_session_update_count,
+    increment_session_update_count,
+    add_audit_entry,
+    get_audit_trail,
+    _get_audit_trail,
+    # SessionManager class
+    SessionManager,
+)
 
-
-_SESSION_UPDATE_COUNTS: dict[str, int] = {}
-_SESSION_AUDIT_TRAIL: list[dict[str, Any]] = []
-
-
-def get_session_update_count(tool_name: str) -> int:
-    return _SESSION_UPDATE_COUNTS.get(tool_name, 0)
-
-
-def increment_session_update_count(tool_name: str) -> int:
-    current = _SESSION_UPDATE_COUNTS.get(tool_name, 0)
-    _SESSION_UPDATE_COUNTS[tool_name] = current + 1
-    return current + 1
-
-
-def add_audit_entry(
-    *,
-    tool_name: str,
-    file_path: str,
-    target_name: str,
-    operation: str,
-    success: bool,
-    tier: str,
-    metadata: dict[str, Any] | None = None,
-) -> None:
-    entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "tool": tool_name,
-        "file_path": file_path,
-        "target_name": target_name,
-        "operation": operation,
-        "success": success,
-        "tier": tier,
-        "metadata": metadata or {},
-    }
-    _SESSION_AUDIT_TRAIL.append(entry)
+__all__ = [
+    "_SESSION_UPDATE_COUNTS",
+    "_SESSION_AUDIT_TRAIL",
+    "get_session_update_count",
+    "increment_session_update_count",
+    "add_audit_entry",
+    "get_audit_trail",
+    "_get_audit_trail",
+    "SessionManager",
+]
