@@ -5665,10 +5665,14 @@ from code_scalpel.mcp.resources import (  # noqa: E402
     get_code_resource,
 )
 
-# Prompt re-exports from prompts.py
+# Prompt re-exports from prompts.py (Intent-Driven UX)
 from code_scalpel.mcp.prompts import (  # noqa: E402
-    safe_refactor_workflow_prompt,
-    security_audit_workflow_prompt,
+    audit_security_deep,
+    refactor_safely,
+    modernize_legacy,
+    map_architecture,
+    verify_supply_chain,
+    explain_and_document,
 )
 
 # Re-export tier functions from protocol.py for backward compatibility
