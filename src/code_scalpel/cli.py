@@ -998,6 +998,132 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
         help="Signer identity for manifest",
     )
 
+    # [20260116_FEATURE] v3.4.0 - Claude Code hooks commands
+    # Hook command (for Claude Code PreToolUse/PostToolUse)
+    hook_parser = subparsers.add_parser(
+        "hook", help="Claude Code hook commands (reads context from stdin)"
+    )
+    hook_subparsers = hook_parser.add_subparsers(dest="hook_command")
+
+    hook_subparsers.add_parser(
+        "pre-tool-use",
+        help="Run pre-tool-use governance validation (reads JSON from stdin)",
+    )
+    hook_subparsers.add_parser(
+        "post-tool-use",
+        help="Run post-tool-use audit logging (reads JSON from stdin)",
+    )
+
+    # Verify audit coverage command
+    verify_audit_parser = subparsers.add_parser(
+        "verify-audit-coverage",
+        help="Verify audit coverage for a file",
+    )
+    verify_audit_parser.add_argument(
+        "file",
+        help="File to verify audit coverage for",
+    )
+    verify_audit_parser.add_argument(
+        "--within",
+        type=int,
+        default=3600,
+        help="Time window in seconds to look for audit entries (default: 3600)",
+    )
+
+    # Install Claude Code hooks command
+    install_hooks_parser = subparsers.add_parser(
+        "install-hooks",
+        help="Install Claude Code governance hooks",
+    )
+    install_hooks_parser.add_argument(
+        "--user",
+        action="store_true",
+        help="Install to user-level settings (~/.claude/settings.json)",
+    )
+    install_hooks_parser.add_argument(
+        "--enterprise",
+        action="store_true",
+        help="Install enterprise managed settings (requires admin)",
+    )
+    install_hooks_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing hooks with same name",
+    )
+    install_hooks_parser.add_argument(
+        "--path",
+        default=None,
+        help="Project path for project-local settings (default: current directory)",
+    )
+
+    # Uninstall Claude Code hooks command
+    uninstall_hooks_parser = subparsers.add_parser(
+        "uninstall-hooks",
+        help="Uninstall Claude Code governance hooks",
+    )
+    uninstall_hooks_parser.add_argument(
+        "--user",
+        action="store_true",
+        help="Remove from user-level settings",
+    )
+    uninstall_hooks_parser.add_argument(
+        "--enterprise",
+        action="store_true",
+        help="Remove from enterprise managed settings",
+    )
+    uninstall_hooks_parser.add_argument(
+        "--path",
+        default=None,
+        help="Project path for project-local settings",
+    )
+
+    # Install git hooks command
+    install_git_hooks_parser = subparsers.add_parser(
+        "install-git-hooks",
+        help="Install git hooks for commit-time audit verification",
+    )
+    install_git_hooks_parser.add_argument(
+        "--path",
+        default=None,
+        help="Path to git repository (default: current directory)",
+    )
+    install_git_hooks_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing hooks",
+    )
+
+    # Git hook command (called by git hooks)
+    git_hook_parser = subparsers.add_parser(
+        "git-hook", help="Git hook commands (called by git)"
+    )
+    git_hook_subparsers = git_hook_parser.add_subparsers(dest="git_hook_command")
+
+    git_hook_subparsers.add_parser(
+        "pre-commit",
+        help="Run pre-commit audit verification",
+    )
+    commit_msg_parser = git_hook_subparsers.add_parser(
+        "commit-msg",
+        help="Run commit-msg hook",
+    )
+    commit_msg_parser.add_argument(
+        "msg_file",
+        nargs="?",
+        help="Path to commit message file",
+    )
+
+    # Log blocked commit command (used by pre-commit hook)
+    log_blocked_parser = subparsers.add_parser(
+        "log-blocked-commit",
+        help="Log a blocked commit attempt to audit trail",
+    )
+    log_blocked_parser.add_argument(
+        "files",
+        nargs="+",
+        help="Files that were blocked",
+    )
+
     args = parser.parse_args()
 
     if args.command == "analyze":
@@ -1097,6 +1223,71 @@ For more information, visit: https://github.com/tescolopio/code-scalpel
     elif args.command == "version":
         print(f"Code Scalpel v{__version__}")
         print(f"Python {sys.version}")
+        return 0
+
+    # [20260116_FEATURE] v3.4.0 - Claude Code hooks command handlers
+    elif args.command == "hook":
+        from code_scalpel.hooks.claude_hooks import (
+            post_tool_use_cli,
+            pre_tool_use_cli,
+        )
+
+        if args.hook_command == "pre-tool-use":
+            return pre_tool_use_cli()
+        elif args.hook_command == "post-tool-use":
+            return post_tool_use_cli()
+        else:
+            hook_parser.print_help()
+            return 1
+
+    elif args.command == "verify-audit-coverage":
+        from code_scalpel.hooks.git_hooks import verify_audit_coverage_cli
+
+        return verify_audit_coverage_cli(args.file)
+
+    elif args.command == "install-hooks":
+        from code_scalpel.hooks.installer import install_claude_hooks_cli
+
+        return install_claude_hooks_cli(
+            project_path=args.path,
+            user_level=args.user,
+            enterprise=args.enterprise,
+            force=args.force,
+        )
+
+    elif args.command == "uninstall-hooks":
+        from code_scalpel.hooks.installer import uninstall_claude_hooks_cli
+
+        return uninstall_claude_hooks_cli(
+            project_path=args.path,
+            user_level=args.user,
+            enterprise=args.enterprise,
+        )
+
+    elif args.command == "install-git-hooks":
+        from code_scalpel.hooks.git_hooks import install_git_hooks_cli
+
+        return install_git_hooks_cli(force=args.force)
+
+    elif args.command == "git-hook":
+        from code_scalpel.hooks.git_hooks import (
+            git_hook_commit_msg_cli,
+            git_hook_pre_commit_cli,
+        )
+
+        if args.git_hook_command == "pre-commit":
+            return git_hook_pre_commit_cli()
+        elif args.git_hook_command == "commit-msg":
+            msg_file = getattr(args, "msg_file", None)
+            return git_hook_commit_msg_cli(msg_file)
+        else:
+            git_hook_parser.print_help()
+            return 1
+
+    elif args.command == "log-blocked-commit":
+        from code_scalpel.hooks.git_hooks import _log_blocked_commit
+
+        _log_blocked_commit(args.files)
         return 0
 
     else:
