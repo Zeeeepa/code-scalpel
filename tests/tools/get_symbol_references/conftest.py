@@ -42,7 +42,7 @@ def _clear_license_caches():
 
     # Reset server tier state
     try:
-        import code_scalpel.mcp.server as server
+        import code_scalpel.mcp.tools.context as server
         server._LAST_VALID_LICENSE_AT = None
         server._LAST_VALID_LICENSE_TIER = "community"
         if hasattr(server, "_GOVERNANCE_VERIFY_CACHE"):
@@ -152,12 +152,12 @@ def patch_capabilities(
     """[20260104_TEST] Override tool capabilities for deterministic tests."""
 
     def _set(mapping: dict[str, Any]) -> None:
-        import code_scalpel.mcp.server as server
+        import code_scalpel.mcp.helpers.context_helpers as context_helpers
 
         def _caps(tool: str, tier: str) -> dict[str, Any]:
             return mapping
 
-        monkeypatch.setattr(server, "get_tool_capabilities", _caps)
+        monkeypatch.setattr(context_helpers, "get_tool_capabilities", _caps)
 
     return _set
 
@@ -167,12 +167,17 @@ def patch_license_validator(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], 
     """[20260104_TEST] Stub JWTLicenseValidator.validate() for license scenarios."""
 
     def _set(fake_result: Any) -> None:
-        import code_scalpel.mcp.server as server
+        import code_scalpel.licensing.jwt_validator as jwt_validator
 
         class _FakeValidator:
             def validate(self) -> Any:  # type: ignore[override]
                 return fake_result
 
-        monkeypatch.setattr(server, "JWTLicenseValidator", _FakeValidator)
+            def get_current_tier(self) -> str:
+                if getattr(fake_result, "is_valid", False):
+                    return getattr(fake_result, "tier", "community")
+                return "community"
+
+        monkeypatch.setattr(jwt_validator, "JWTLicenseValidator", _FakeValidator)
 
     return _set

@@ -1,7 +1,5 @@
 # TODO COMMUNITY TIER Implement basic field type mismatch detection across languages, Add REST endpoint change detection (path, method, status codes), Create interface contract matching algorithm, Implement version comparison for API contracts, Add breach severity calculation with heuristics, Create comprehensive logging for contract analysis, Document contract breach categories with examples, Implement POJO to TypeScript interface mapping, Add JSON schema validation against contracts, Create CLI integration for contract breach reporting
-
 # TODO PRO TIER Add GraphQL schema contract detection, Implement OpenAPI/Swagger contract analysis, Add gRPC proto contract validation, Create custom breach type plugin system, Implement real-time contract monitoring, Add contract evolution tracking over time, Create intelligent breach fix suggestions, Implement field aliasing detection (@JsonProperty, etc.), Add response transformation breach detection, Create contract diff visualization tools, Implement preview mode for potential breaches
-
 # TODO ENTERPRISE TIER Build ML-based breach prediction system, Implement distributed contract analysis for large projects, Create cross-organization contract federation system, Add blockchain-based contract audit trails, Implement AI-powered fix generation for breaches, Build enterprise contract governance system, Add compliance checking against contract standards, Implement quantum-safe contract hashing, Create federated contract registry across orgs
 
 from __future__ import annotations

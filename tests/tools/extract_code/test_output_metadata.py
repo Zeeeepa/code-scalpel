@@ -7,7 +7,8 @@ for transparency about tier, language, and feature availability.
 
 import pytest
 
-from src.code_scalpel.mcp.server import ContextualExtractionResult, extract_code
+from code_scalpel.mcp.models.core import ContextualExtractionResult
+from code_scalpel.mcp.tools.extraction import extract_code
 
 
 class TestOutputMetadataFields:

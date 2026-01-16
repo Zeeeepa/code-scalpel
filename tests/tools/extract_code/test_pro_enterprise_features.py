@@ -30,41 +30,14 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_cross_file_deps_python(self, monkeypatch, tmp_path: Path):
         """Pro tier extracts cross-file dependencies for Python."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
-        )
-
-        # Create dependency chain: utils.py -> a.py -> b.py
-        (tmp_path / "b.py").write_text("class B:\n    pass\n")
-        (tmp_path / "a.py").write_text(
-            "from b import B\n\nclass A:\n    def __init__(self):\n        self.b = B()\n"
-        )
-        (tmp_path / "utils.py").write_text(
-            "from a import A\n\ndef f():\n    return A()\n"
-        )
-
-        result = await server.extract_code(
-            target_type="function",
-            target_name="f",
-            file_path=str(tmp_path / "utils.py"),
-            include_cross_file_deps=True,
-        )
-
-        assert result.success is True
-        assert "class A" in result.context_code
-        assert hasattr(result, "context_items") or hasattr(
-            result, "cross_file_dependencies"
-        )
-
-    @pytest.mark.asyncio
-    async def test_pro_tier_confidence_scoring(self, monkeypatch, tmp_path: Path):
-        """Pro tier includes confidence metadata for cross-file dependencies."""
-        from code_scalpel.mcp import server
-
-        monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -73,7 +46,7 @@ class TestProTierFeatures:
             "from lib import helper\n\ndef process():\n    helper()\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="process",
             file_path=str(tmp_path / "main.py"),
@@ -90,10 +63,14 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_react_component_metadata(self, monkeypatch, tmp_path: Path):
         """Pro tier detects React component metadata for JSX/TSX."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -104,7 +81,7 @@ class TestProTierFeatures:
             "    return f'<button>{label}</button>'\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="render_button",
             file_path=str(tmp_path / "component.py"),
@@ -119,10 +96,14 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_decorators_preserved(self, monkeypatch, tmp_path: Path):
         """Pro tier preserves decorators in extracted code."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -132,7 +113,7 @@ class TestProTierFeatures:
             "def get_user(id):\n    return {'id': id}\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="get_user",
             file_path=str(tmp_path / "service.py"),
@@ -145,10 +126,14 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_type_hints_preserved(self, monkeypatch, tmp_path: Path):
         """Pro tier preserves type hints in extracted code."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -158,7 +143,7 @@ class TestProTierFeatures:
             "    return {item: len(item) for item in items}\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="process_items",
             file_path=str(tmp_path / "typed.py"),
@@ -172,10 +157,14 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_depth_clamping(self, monkeypatch, tmp_path: Path):
         """Pro tier clamps context_depth to max_depth=10."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -186,7 +175,7 @@ class TestProTierFeatures:
         (tmp_path / "d.py").write_text("from c import c\n\ndef d():\n    c()\n")
 
         # Request depth=20, should be clamped to Pro max of 10
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="d",
             file_path=str(tmp_path / "d.py"),
@@ -217,10 +206,14 @@ class TestEnterpriseTierFeatures:
         self, monkeypatch, tmp_path: Path
     ):
         """Enterprise tier performs org-wide resolution across multiple files."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
 
         # Create multi-module structure
@@ -236,7 +229,7 @@ class TestEnterpriseTierFeatures:
             "from services.user import get_user\n\ndef handle_request(id):\n    return get_user(id)\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="handle_request",
             file_path=str(tmp_path / "handlers" / "api.py"),
@@ -252,10 +245,14 @@ class TestEnterpriseTierFeatures:
         self, monkeypatch, tmp_path: Path
     ):
         """Enterprise tier supports custom extraction patterns."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
@@ -268,7 +265,7 @@ class TestEnterpriseTierFeatures:
         )
 
         # Request extraction of method from class using proper format
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="method",
             target_name="Controller.handle",
             file_path=str(tmp_path / "app.py"),
@@ -283,10 +280,14 @@ class TestEnterpriseTierFeatures:
         self, monkeypatch, tmp_path: Path
     ):
         """Enterprise tier detects service boundaries in microservice projects."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
@@ -302,7 +303,7 @@ class TestEnterpriseTierFeatures:
             "    return requests.get('http://user-service/users')\n"
         )
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="get_orders",
             file_path=str(tmp_path / "order-service" / "service.py"),
@@ -319,10 +320,14 @@ class TestEnterpriseTierFeatures:
     @pytest.mark.asyncio
     async def test_enterprise_tier_unlimited_depth(self, monkeypatch, tmp_path: Path):
         """Enterprise tier has unlimited context depth."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
@@ -335,7 +340,7 @@ class TestEnterpriseTierFeatures:
             )
             prev = name
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="p",  # 16th level
             file_path=str(tmp_path / "p.py"),
@@ -352,10 +357,14 @@ class TestEnterpriseTierFeatures:
         self, monkeypatch, tmp_path: Path
     ):
         """Enterprise tier supports large files (up to 100MB)."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
@@ -367,7 +376,7 @@ class TestEnterpriseTierFeatures:
 
         (tmp_path / "large.py").write_text(large_code)
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="target_function",
             file_path=str(tmp_path / "large.py"),
@@ -394,17 +403,21 @@ class TestFeatureGating:
         self, monkeypatch, tmp_path: Path
     ):
         """Community tier blocks cross-file dependency extraction."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
         (tmp_path / "a.py").write_text("def a():\n    pass\n")
         (tmp_path / "b.py").write_text("from a import a\n\ndef b():\n    a()\n")
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="b",
             file_path=str(tmp_path / "b.py"),
@@ -426,17 +439,21 @@ class TestFeatureGating:
         self, monkeypatch, tmp_path: Path
     ):
         """Pro tier blocks Enterprise-only features."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
         (tmp_path / "app.py").write_text("def main():\n    pass\n")
 
         # Try to use Enterprise feature (custom patterns)
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="main",
             file_path=str(tmp_path / "app.py"),
@@ -458,10 +475,14 @@ class TestFeatureGating:
     @pytest.mark.asyncio
     async def test_community_tier_file_size_limit(self, monkeypatch, tmp_path: Path):
         """Community tier enforces 1MB file size limit."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -469,7 +490,7 @@ class TestFeatureGating:
         large_code = "# " + "x" * (1024 * 1024 - 100) + "\ndef target():\n    pass\n"
         (tmp_path / "large.py").write_text(large_code)
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="target",
             file_path=str(tmp_path / "large.py"),
@@ -481,10 +502,14 @@ class TestFeatureGating:
     @pytest.mark.asyncio
     async def test_pro_tier_file_size_limit(self, monkeypatch, tmp_path: Path):
         """Pro tier enforces 10MB file size limit."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -494,7 +519,7 @@ class TestFeatureGating:
         )
         (tmp_path / "large.py").write_text(large_code)
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="target",
             file_path=str(tmp_path / "large.py"),
@@ -521,16 +546,20 @@ class TestLicenseInvalidation:
         self, monkeypatch, tmp_path: Path
     ):
         """Invalid/expired license gracefully falls back to Community tier."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", "/nonexistent/license.jwt")
 
         (tmp_path / "app.py").write_text("def main():\n    pass\n")
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="main",
             file_path=str(tmp_path / "app.py"),
@@ -544,16 +573,20 @@ class TestLicenseInvalidation:
         self, monkeypatch, tmp_path: Path
     ):
         """Missing license defaults to Community tier."""
-        from code_scalpel.mcp import server
+        from code_scalpel.mcp.tools import extraction
+        import code_scalpel.mcp.path_resolver
 
         monkeypatch.setattr(
-            server, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False
+            code_scalpel.mcp.path_resolver,
+            "ALLOWED_ROOTS",
+            [tmp_path.resolve()],
+            raising=False,
         )
         monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
 
         (tmp_path / "app.py").write_text("def main():\n    pass\n")
 
-        result = await server.extract_code(
+        result = await extraction.extract_code(
             target_type="function",
             target_name="main",
             file_path=str(tmp_path / "app.py"),

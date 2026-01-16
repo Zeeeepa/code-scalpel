@@ -6,7 +6,7 @@ Tests for MCP unified sink detection tool.
 
 import pytest
 
-from code_scalpel.mcp.server import unified_sink_detect
+from code_scalpel.mcp.tools.security import unified_sink_detect
 
 
 @pytest.mark.asyncio
@@ -22,7 +22,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
 """
 
         result = await unified_sink_detect(
-            code=code, language="python", min_confidence=0.8
+            code=code, language="python", confidence_threshold=0.8
         )
 
         assert result.success
@@ -30,10 +30,10 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         assert result.sink_count > 0
         assert len(result.sinks) > 0
 
-        # Should detect cursor.execute
+        # Should detect cursor.execute (Taint boosted to 0.95)
         sql_sinks = [s for s in result.sinks if s.pattern == "cursor.execute"]
         assert len(sql_sinks) > 0
-        assert sql_sinks[0].confidence == 1.0
+        assert sql_sinks[0].confidence == 0.95
         assert sql_sinks[0].sink_type == "SQL_QUERY"
 
     async def test_typescript_xss_detection(self):
@@ -41,7 +41,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         code = "element.innerHTML = userInput;"
 
         result = await unified_sink_detect(
-            code=code, language="typescript", min_confidence=0.8
+            code=code, language="typescript", confidence_threshold=0.8
         )
 
         assert result.success
@@ -58,7 +58,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_input)
         code = "eval(userCode);"
 
         result = await unified_sink_detect(
-            code=code, language="javascript", min_confidence=0.8
+            code=code, language="javascript", confidence_threshold=0.8
         )
 
         assert result.success
@@ -75,27 +75,30 @@ cursor.execute(query)
 open(filename)
 """
 
-        # High confidence filter
-        result_high = await unified_sink_detect(
-            code=code, language="python", min_confidence=1.0
+        # High confidence filter (0.7 default)
+        # BOTH are now 0.5 (Base confidence for Python) because they are untainted.
+        result_std = await unified_sink_detect(
+            code=code, language="python", confidence_threshold=0.7
         )
-        assert result_high.success
-        # cursor.execute has 1.0, open has 0.8
-        assert all(s.confidence == 1.0 for s in result_high.sinks)
+        assert result_std.success
+        assert result_std.sink_count == 0
 
-        # Lower confidence filter
+        # Lower confidence filter (0.4)
+        # Should catch both
         result_low = await unified_sink_detect(
-            code=code, language="python", min_confidence=0.5
+            code=code, language="python", confidence_threshold=0.4
         )
         assert result_low.success
-        assert result_low.sink_count >= result_high.sink_count
+        patterns_low = [s.pattern for s in result_low.sinks]
+        assert "cursor.execute" in patterns_low
+        assert "open" in patterns_low
 
     async def test_owasp_category_mapping(self):
         """Test OWASP category mapping in results."""
         code = "cursor.execute(query)"
 
         result = await unified_sink_detect(
-            code=code, language="python", min_confidence=0.8
+            code=code, language="python", confidence_threshold=0.4
         )
 
         assert result.success
@@ -110,7 +113,7 @@ open(filename)
         code = "cursor.execute(query)"
 
         result = await unified_sink_detect(
-            code=code, language="python", min_confidence=0.8
+            code=code, language="python", confidence_threshold=0.8
         )
 
         assert result.success
@@ -124,7 +127,7 @@ open(filename)
         code = "some code"
 
         result = await unified_sink_detect(
-            code=code, language="rust", min_confidence=0.8
+            code=code, language="rust", confidence_threshold=0.8
         )
 
         assert not result.success
@@ -136,7 +139,7 @@ open(filename)
         code = "cursor.execute(query)"
 
         result = await unified_sink_detect(
-            code=code, language="python", min_confidence=1.5
+            code=code, language="python", confidence_threshold=1.5
         )
 
         assert not result.success
@@ -151,7 +154,7 @@ def add(a, b):
 """
 
         result = await unified_sink_detect(
-            code=code, language="python", min_confidence=0.8
+            code=code, language="python", confidence_threshold=0.8
         )
 
         assert result.success

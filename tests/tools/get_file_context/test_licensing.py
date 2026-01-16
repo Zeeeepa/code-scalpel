@@ -31,7 +31,7 @@ class TestCommunityTierLimits:
         test_file = Path(tmpdir) / "large.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -57,7 +57,7 @@ class TestCommunityTierLimits:
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,
@@ -90,7 +90,7 @@ class TestProTierLimits:
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,
@@ -117,7 +117,7 @@ class TestProTierLimits:
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             # Community tier
             community_result = _get_file_context_sync(
@@ -169,7 +169,7 @@ class TestEnterpriseTierLimits:
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,
@@ -198,7 +198,7 @@ class TestTierFeatureGating:
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -216,7 +216,7 @@ class TestTierFeatureGating:
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -235,7 +235,7 @@ class TestTierFeatureGating:
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Community tier
         community = _get_file_context_sync(
@@ -270,7 +270,7 @@ class TestInvalidLicenseFallback:
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # No license/capabilities specified should default to Community
         result = _get_file_context_sync(
@@ -300,7 +300,7 @@ def bad_function(a, b, c, d, e):
         test_file = Path(tmpdir) / "smelly.py"
         test_file.write_text(smelly_code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Without capability
         without = _get_file_context_sync(
@@ -326,7 +326,7 @@ def bad_function(a, b, c, d, e):
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # With wrong capability
         result = _get_file_context_sync(
@@ -356,7 +356,7 @@ def world():
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -374,7 +374,7 @@ def world():
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),

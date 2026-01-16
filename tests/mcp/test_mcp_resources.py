@@ -21,7 +21,9 @@ from unittest.mock import patch
 
 # Import the server module to access resource functions
 import code_scalpel.mcp.server as server_module
-from code_scalpel.mcp.server import (
+
+# [20260116_REFACTOR] Resource functions moved to resources.py
+from code_scalpel.mcp.resources import (
     get_capabilities,
     get_project_call_graph,
     get_project_dependencies,

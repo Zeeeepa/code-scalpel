@@ -385,8 +385,7 @@ class SanitizerInfo:
     name: str
     clears_sinks: Set[SecuritySink] = field(default_factory=set)
     full_clear: bool = False
-    confidence: float = 1.0tySink] = field(default_factory=set)
-    full_clear: bool = False
+    confidence: float = 1.0
 
 
 # Built-in sanitizer registry

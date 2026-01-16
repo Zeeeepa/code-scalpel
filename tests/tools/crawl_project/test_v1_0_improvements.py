@@ -28,7 +28,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_tier_applied_field_present(self, temp_project):
         """Verify tier_applied field is populated in output."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -40,7 +40,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_crawl_mode_field_present(self, temp_project):
         """Verify crawl_mode field is populated in output."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -52,7 +52,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_files_limit_applied_field_present(self, temp_project):
         """Verify files_limit_applied field is populated in output."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -63,7 +63,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_community_tier_discovery_mode(self, temp_project, community_env):
         """Community tier should use discovery crawl mode."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -74,7 +74,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_pro_tier_deep_mode(self, temp_project, pro_env):
         """Pro tier should use deep crawl mode."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -85,7 +85,7 @@ class TestOutputMetadata:
     @pytest.mark.asyncio
     async def test_enterprise_tier_deep_mode(self, temp_project, enterprise_env):
         """Enterprise tier should use deep crawl mode."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_project))
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         self, temp_flask_project, community_env
     ):
         """Discovery mode should detect entrypoints."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_flask_project))
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         self, temp_flask_project, community_env
     ):
         """Discovery mode should provide framework hints."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_flask_project))
 
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     @pytest.mark.asyncio
     async def test_deep_mode_provides_complexity(self, temp_flask_project, pro_env):
         """Deep mode should provide function/class details."""
-        from code_scalpel.mcp.server import crawl_project
+        from code_scalpel.mcp.tools.context import crawl_project
 
         result = await crawl_project(root_path=str(temp_flask_project))
 

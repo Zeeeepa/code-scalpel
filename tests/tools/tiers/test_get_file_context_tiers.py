@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-from code_scalpel.mcp.server import _get_file_context_sync
+from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
 
 class TestOutputMetadataFieldsCommunity:

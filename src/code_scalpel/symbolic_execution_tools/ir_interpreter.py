@@ -822,6 +822,10 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         Returns:
             List of states after execution
         """
+        # [20260114_FEATURE] Track line coverage for path-sensitive pruning
+        if stmt.loc:
+            state.visit_line(stmt.loc.line)
+
         if isinstance(stmt, IRAssign):
             return self._execute_assign(stmt, state)
         elif isinstance(stmt, IRAugAssign):

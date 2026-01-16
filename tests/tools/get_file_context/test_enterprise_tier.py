@@ -53,7 +53,7 @@ team: platform-engineering
         test_file = project_dir / "test.py"
         test_file.write_text("def hello(): pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -72,7 +72,7 @@ team: platform-engineering
         test_file = project_dir / "test.py"
         test_file.write_text("def hello(): pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -101,7 +101,7 @@ def store_patient_data(patient_id, health_info):
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,
@@ -130,7 +130,7 @@ def process_payment(card_number, amount):
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,
@@ -150,7 +150,7 @@ def process_payment(card_number, amount):
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text("def simple_math(a, b): return a + b")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -182,7 +182,7 @@ tests/ @qa-team
         test_file = project_dir / "test.py"
         test_file.write_text("def hello(): pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -198,7 +198,7 @@ tests/ @qa-team
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text("def hello(): pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -237,7 +237,7 @@ except:
         test_file = Path(tmpdir) / "smelly.py"
         test_file.write_text(smelly_code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -258,7 +258,7 @@ def add(a: int, b: int) -> int:
         test_file = Path(tmpdir) / "good.py"
         test_file.write_text(good_code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -277,7 +277,7 @@ class TestEnterpriseHistoricalMetrics:
         test_file = Path(tmpdir) / "test.py"
         test_file.write_text("def hello(): pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -303,7 +303,7 @@ def contact_user():
         test_file = Path(tmpdir) / "contact.py"
         test_file.write_text(code_with_email)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -325,7 +325,7 @@ def call_customer():
         test_file = Path(tmpdir) / "call.py"
         test_file.write_text(code_with_phone)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -352,7 +352,7 @@ def connect_to_aws():
         test_file = Path(tmpdir) / "aws.py"
         test_file.write_text(code_with_aws_key)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -374,7 +374,7 @@ def connect_to_stripe():
         test_file = Path(tmpdir) / "stripe.py"
         test_file.write_text(code_with_api_key)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -396,7 +396,7 @@ def login():
         test_file = Path(tmpdir) / "login.py"
         test_file.write_text(code_with_password)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -425,7 +425,7 @@ def bad(x, y, z, a, b):
         test_file = Path(tmpdir) / "bad.py"
         test_file.write_text(smelly_code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -441,7 +441,7 @@ def bad(x, y, z, a, b):
         test_file = Path(tmpdir) / "hello.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -457,7 +457,7 @@ def bad(x, y, z, a, b):
         test_file = Path(tmpdir) / "hello.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(test_file),
@@ -482,7 +482,7 @@ class TestEnterpriseUnlimitedContext:
             temp_path = f.name
 
         try:
-            from code_scalpel.mcp.server import _get_file_context_sync
+            from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
             result = _get_file_context_sync(
                 temp_path,

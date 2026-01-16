@@ -4,7 +4,8 @@ import textwrap
 
 import pytest
 
-from code_scalpel.mcp.server import FileContextResult, get_file_context
+from code_scalpel.mcp.models.core import FileContextResult
+from code_scalpel.mcp.tools.context import get_file_context
 
 # [20251225_TEST] Ensure async wrapper respects tier capabilities
 

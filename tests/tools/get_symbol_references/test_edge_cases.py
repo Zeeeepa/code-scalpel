@@ -6,7 +6,7 @@ async def test_decorator_and_annotation_references(
     make_project, patch_tier, patch_capabilities
 ):
     """[20260104_TEST] Decorators and annotations should be reported when categorization is enabled."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -48,7 +48,7 @@ def target():
 @pytest.mark.asyncio
 async def test_import_alias_references(make_project, patch_tier, patch_capabilities):
     """[20260109_TEST] Import aliases (import X as Y) should be found when searching for original symbol."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -94,7 +94,7 @@ async def test_from_import_alias_references(
     make_project, patch_tier, patch_capabilities
 ):
     """[20260109_TEST] From-import aliases (from X import Y as Z) should find both definitions and usages."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -134,7 +134,7 @@ def target():
 @pytest.mark.asyncio
 async def test_star_import_references(make_project, patch_tier, patch_capabilities):
     """[20260109_TEST] Star imports (from X import *) should find all references including via star import."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -176,7 +176,7 @@ def helper():
 @pytest.mark.asyncio
 async def test_multiple_star_imports(make_project, patch_tier, patch_capabilities):
     """[20260109_TEST] Multiple star imports should all be tracked."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {

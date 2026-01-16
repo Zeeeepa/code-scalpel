@@ -19,14 +19,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 # Import MCP tools for agent use
-from code_scalpel.mcp.server import (
-    extract_code,
-    get_file_context,
-    get_symbol_references,
-    security_scan,
-    simulate_refactor,
-    update_symbol,
-)
+from code_scalpel.mcp.tools.context import get_file_context, get_symbol_references
+from code_scalpel.mcp.tools.extraction import extract_code, update_symbol
+from code_scalpel.mcp.tools.symbolic import simulate_refactor
 
 
 class AgentContext:
@@ -209,6 +204,8 @@ class BaseCodeAnalysisAgent(ABC):
     async def analyze_code_security(self, code: str) -> Dict[str, Any]:
         """Analyze code for security issues using security_scan tool."""
         try:
+            from code_scalpel.mcp.tools.security import security_scan
+
             result = await security_scan(code)
             self.context.add_operation("analyze_security", result, True)
             return result.model_dump()

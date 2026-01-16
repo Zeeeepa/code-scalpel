@@ -173,68 +173,68 @@ UNIFIED_SINKS: Dict[str, Dict[str, List[SinkDefinition]]] = {
     "sql_injection": {
         "python": [
             SinkDefinition(
-                "cursor.execute", 1.0, SecuritySink.SQL_QUERY, "Raw SQL execution"
+                "cursor.execute", 0.5, SecuritySink.SQL_QUERY, "Raw SQL execution"
             ),
             SinkDefinition(
                 "connection.execute",
-                1.0,
+                0.5,
                 SecuritySink.SQL_QUERY,
                 "Direct connection execute",
             ),
             SinkDefinition(
                 "session.execute",
-                0.95,
+                0.5,
                 SecuritySink.SQL_QUERY,
                 "SQLAlchemy session execute",
             ),
             SinkDefinition(
                 "engine.execute",
-                0.95,
+                0.5,
                 SecuritySink.SQL_QUERY,
                 "SQLAlchemy engine execute",
             ),
             SinkDefinition(
-                "db.execute", 1.0, SecuritySink.SQL_QUERY, "Generic database execute"
+                "db.execute", 0.5, SecuritySink.SQL_QUERY, "Generic database execute"
             ),
             SinkDefinition(
-                "cursor.executemany", 1.0, SecuritySink.SQL_QUERY, "Batch SQL execution"
+                "cursor.executemany", 0.5, SecuritySink.SQL_QUERY, "Batch SQL execution"
             ),
-            SinkDefinition("RawSQL", 1.0, SecuritySink.SQL_QUERY, "Django raw SQL"),
+            SinkDefinition("RawSQL", 0.5, SecuritySink.SQL_QUERY, "Django raw SQL"),
             SinkDefinition(
-                "QuerySet.extra", 0.9, SecuritySink.SQL_QUERY, "Django QuerySet extra"
+                "QuerySet.extra", 0.5, SecuritySink.SQL_QUERY, "Django QuerySet extra"
             ),
             SinkDefinition(
-                "sqlalchemy.text", 0.85, SecuritySink.SQL_QUERY, "SQLAlchemy text query"
+                "sqlalchemy.text", 0.5, SecuritySink.SQL_QUERY, "SQLAlchemy text query"
             ),
         ],
         "java": [
             SinkDefinition(
                 "Statement.executeQuery",
-                1.0,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "JDBC Statement query",
             ),
             SinkDefinition(
                 "Statement.executeUpdate",
-                1.0,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "JDBC Statement update",
             ),
             SinkDefinition(
                 "Statement.execute",
-                1.0,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "JDBC Statement execute",
             ),
             SinkDefinition(
                 "PreparedStatement.executeQuery",
-                0.5,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "PreparedStatement (safer if used correctly)",
             ),
             SinkDefinition(
                 "entityManager.createQuery",
-                0.8,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "JPA JPQL query",
             ),
@@ -246,41 +246,41 @@ UNIFIED_SINKS: Dict[str, Dict[str, List[SinkDefinition]]] = {
             ),
             SinkDefinition(
                 "jdbcTemplate.query",
-                0.7,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "Spring JdbcTemplate query",
             ),
             SinkDefinition(
                 "jdbcTemplate.update",
-                0.7,
+                0.9,
                 SecuritySink.SQL_QUERY,
                 "Spring JdbcTemplate update",
             ),
         ],
         "typescript": [
             SinkDefinition(
-                "connection.query", 1.0, SecuritySink.SQL_QUERY, "Direct SQL query"
+                "connection.query", 0.5, SecuritySink.SQL_QUERY, "Direct SQL query"
             ),
             SinkDefinition(
-                "pool.query", 1.0, SecuritySink.SQL_QUERY, "Connection pool query"
+                "pool.query", 0.5, SecuritySink.SQL_QUERY, "Connection pool query"
             ),
-            SinkDefinition("knex.raw", 1.0, SecuritySink.SQL_QUERY, "Knex raw SQL"),
+            SinkDefinition("knex.raw", 0.5, SecuritySink.SQL_QUERY, "Knex raw SQL"),
             SinkDefinition(
-                "knex.whereRaw", 0.95, SecuritySink.SQL_QUERY, "Knex raw where clause"
-            ),
-            SinkDefinition(
-                "sequelize.query", 0.9, SecuritySink.SQL_QUERY, "Sequelize raw query"
+                "knex.whereRaw", 0.5, SecuritySink.SQL_QUERY, "Knex raw where clause"
             ),
             SinkDefinition(
-                "prisma.$queryRaw", 0.9, SecuritySink.SQL_QUERY, "Prisma raw query"
+                "sequelize.query", 0.5, SecuritySink.SQL_QUERY, "Sequelize raw query"
             ),
             SinkDefinition(
-                "typeorm.query", 0.9, SecuritySink.SQL_QUERY, "TypeORM raw query"
+                "prisma.$queryRaw", 0.5, SecuritySink.SQL_QUERY, "Prisma raw query"
+            ),
+            SinkDefinition(
+                "typeorm.query", 0.5, SecuritySink.SQL_QUERY, "TypeORM raw query"
             ),
         ],
         "javascript": [
             SinkDefinition(
-                "db.query", 0.9, SecuritySink.SQL_QUERY, "Generic database query"
+                "db.query", 0.5, SecuritySink.SQL_QUERY, "Generic database query"
             ),
             SinkDefinition(
                 "sequelize.query", 0.8, SecuritySink.SQL_QUERY, "Sequelize query"
@@ -1041,11 +1041,28 @@ class UnifiedSinkDetector:
     def _detect_python_sinks(
         self, code: str, min_confidence: float
     ) -> List[DetectedSink]:
-        """Detect sinks in Python code using AST."""
+        """Detect sinks in Python code using AST and Taint Tracking."""
         try:
             tree = ast.parse(code)
         except SyntaxError:
             return []
+
+        # [20260115_FEATURE] 1.3 Confidence Calibration & Taint Integration
+        # Run full security analysis to identify high-confidence vulnerabilities
+        from .security_analyzer import SecurityAnalyzer
+        
+        verified_locs = set()
+        try:
+            analyzer = SecurityAnalyzer()
+            result = analyzer.analyze(code)
+            
+            # Map valid vulnerability locations (Match + Taint + No Sanitizer)
+            for vuln in result.vulnerabilities:
+                if vuln.sink_location:
+                    verified_locs.add(vuln.sink_location)
+        except Exception:
+            # Fallback to pure AST matching if analysis fails
+            pass
 
         detected = []
 
@@ -1054,8 +1071,9 @@ class UnifiedSinkDetector:
                 continue
 
             for sink_def in lang_sinks["python"]:
-                if sink_def.confidence < min_confidence:
-                    continue
+                # [20260115_FEATURE] Re-calibrate confidence
+                # Pure AST pattern match = 0.5 (Base)
+                base_confidence = 0.5
 
                 # Find matches in AST
                 matches = self._find_ast_matches(tree, sink_def.pattern)
@@ -1063,11 +1081,23 @@ class UnifiedSinkDetector:
                 for match in matches:
                     line_no = getattr(match, "lineno", None) or 0
                     col_offset = getattr(match, "col_offset", None) or 0
+                    
+                    # Determine confidence score
+                    current_confidence = base_confidence
+                    
+                    if (line_no, col_offset) in verified_locs:
+                        # Match + taint + NO sanitizer = 0.95 confidence
+                        current_confidence = 0.95
+                    
+                    # Filter by requested threshold
+                    if current_confidence < min_confidence:
+                        continue
+
                     detected.append(
                         DetectedSink(
                             pattern=sink_def.pattern,
                             sink_type=sink_def.sink_type,
-                            confidence=sink_def.confidence,
+                            confidence=current_confidence,
                             line=line_no,
                             column=col_offset,
                             code_snippet=(

@@ -11,7 +11,7 @@ pytestmark = pytest.mark.asyncio
 async def test_community_enforces_limit_and_discovery_mode(
     large_python_project: Path, community_env: None
 ) -> None:
-    from code_scalpel.mcp.server import crawl_project
+    from code_scalpel.mcp.tools.context import crawl_project
 
     result = await crawl_project(
         root_path=str(large_python_project), include_report=False
@@ -32,7 +32,7 @@ async def test_community_enforces_limit_and_discovery_mode(
 async def test_community_blocks_enterprise_pattern_feature(
     small_python_project: Path, community_env: None
 ) -> None:
-    from code_scalpel.mcp.server import crawl_project
+    from code_scalpel.mcp.tools.context import crawl_project
 
     result = await crawl_project(
         root_path=str(small_python_project),
@@ -54,7 +54,7 @@ async def test_enterprise_creates_incremental_cache(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from code_scalpel.licensing import get_tool_capabilities
-    from code_scalpel.mcp.server import crawl_project
+    from code_scalpel.mcp.tools.context import crawl_project
 
     caps = get_tool_capabilities("crawl_project", "enterprise")
     advertised_caps = set(caps.get("capabilities", set()))
@@ -85,7 +85,7 @@ async def test_enterprise_creates_incremental_cache(
 async def test_invalid_tier_env_falls_back_to_community_limits(
     large_python_project: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from code_scalpel.mcp.server import crawl_project
+    from code_scalpel.mcp.tools.context import crawl_project
 
     monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")

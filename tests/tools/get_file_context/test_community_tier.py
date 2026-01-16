@@ -26,7 +26,7 @@ class TestCommunityTierBasicExtraction:
         good_code_path = temp_python_project / "good_code.py"
 
         # Import the tool function
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Call with Community tier capabilities (empty list)
         result = _get_file_context_sync(
@@ -43,7 +43,7 @@ class TestCommunityTierBasicExtraction:
         """Community tier should extract class definitions."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -59,7 +59,7 @@ class TestCommunityTierBasicExtraction:
         """Community tier should extract import statements."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -77,7 +77,7 @@ class TestCommunityTierLineLimits:
         """Community tier should limit context to 500 lines."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -99,7 +99,7 @@ class TestCommunityTierSecurityIssues:
         """Community tier should detect bare except clauses."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -114,7 +114,7 @@ class TestCommunityTierSecurityIssues:
         """Community tier should return has_security_issues boolean."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -133,7 +133,7 @@ class TestCommunityTierNoProFeatures:
         """Community tier should NOT include code_smells (Pro feature)."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -149,7 +149,7 @@ class TestCommunityTierNoProFeatures:
         """Community tier should NOT include doc_coverage (Pro feature)."""
         undocumented_path = temp_python_project / "undocumented.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(undocumented_path),
@@ -165,7 +165,7 @@ class TestCommunityTierNoProFeatures:
         """Community tier should NOT include maintainability_index (Pro feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -185,7 +185,7 @@ class TestCommunityTierNoEnterpriseFeatures:
         """Community tier should NOT include custom_metadata (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -201,7 +201,7 @@ class TestCommunityTierNoEnterpriseFeatures:
         """Community tier should NOT include compliance_flags (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -217,7 +217,7 @@ class TestCommunityTierNoEnterpriseFeatures:
         """Community tier should NOT include owners (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -233,7 +233,7 @@ class TestCommunityTierNoEnterpriseFeatures:
         """Community tier should NOT include technical_debt_score (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -251,7 +251,7 @@ class TestCommunityTierErrorHandling:
 
     def test_handles_file_not_found(self):
         """Community tier should handle missing files gracefully."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             "/nonexistent/path/file.py",
@@ -266,7 +266,7 @@ class TestCommunityTierErrorHandling:
         bad_file = tmpdir.join("bad.py")
         bad_file.write("def broken(: pass")
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Should not crash on syntax error
         result = _get_file_context_sync(

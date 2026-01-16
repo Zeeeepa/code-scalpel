@@ -22,7 +22,7 @@ class TestPythonExtraction:
 
     def test_python_function_extraction(self, temp_python_project):
         """Python should extract functions correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         good_code_path = temp_python_project / "good_code.py"
         result = _get_file_context_sync(str(good_code_path), capabilities=[])
@@ -33,7 +33,7 @@ class TestPythonExtraction:
 
     def test_python_class_extraction(self, temp_python_project):
         """Python should extract classes correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         good_code_path = temp_python_project / "good_code.py"
         result = _get_file_context_sync(str(good_code_path), capabilities=[])
@@ -44,7 +44,7 @@ class TestPythonExtraction:
 
     def test_python_import_extraction(self, temp_python_project):
         """Python should extract imports correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         good_code_path = temp_python_project / "good_code.py"
         result = _get_file_context_sync(str(good_code_path), capabilities=[])
@@ -54,7 +54,7 @@ class TestPythonExtraction:
 
     def test_python_complexity_calculation(self, temp_python_project):
         """Python should calculate complexity correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         good_code_path = temp_python_project / "good_code.py"
         result = _get_file_context_sync(str(good_code_path), capabilities=[])
@@ -68,7 +68,7 @@ class TestJavaScriptExtraction:
 
     def test_javascript_function_extraction(self, temp_javascript_project):
         """JavaScript should extract functions correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         js_path = temp_javascript_project / "processor.js"
         result = _get_file_context_sync(str(js_path), capabilities=[])
@@ -81,7 +81,7 @@ class TestJavaScriptExtraction:
 
     def test_javascript_class_extraction(self, temp_javascript_project):
         """JavaScript should extract classes correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         js_path = temp_javascript_project / "processor.js"
         result = _get_file_context_sync(str(js_path), capabilities=[])
@@ -94,7 +94,7 @@ class TestJavaScriptExtraction:
 
     def test_javascript_import_export_detection(self, temp_javascript_project):
         """JavaScript should detect imports and exports."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         js_path = temp_javascript_project / "processor.js"
         result = _get_file_context_sync(str(js_path), capabilities=[])
@@ -108,7 +108,7 @@ class TestTypeScriptExtraction:
 
     def test_typescript_function_extraction(self, temp_typescript_project):
         """TypeScript should extract functions correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         ts_path = temp_typescript_project / "user.ts"
         result = _get_file_context_sync(str(ts_path), capabilities=[])
@@ -118,7 +118,7 @@ class TestTypeScriptExtraction:
 
     def test_typescript_interface_detection(self, temp_typescript_project):
         """TypeScript should detect interfaces (types)."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         ts_path = temp_typescript_project / "user.ts"
         result = _get_file_context_sync(str(ts_path), capabilities=[])
@@ -128,7 +128,7 @@ class TestTypeScriptExtraction:
 
     def test_typescript_type_annotations(self, temp_typescript_project):
         """TypeScript should handle type annotations."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         ts_path = temp_typescript_project / "user.ts"
         result = _get_file_context_sync(str(ts_path), capabilities=[])
@@ -142,7 +142,7 @@ class TestJavaExtraction:
 
     def test_java_class_extraction(self, temp_java_project):
         """Java should extract classes correctly."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         java_path = temp_java_project / "DataProcessor.java"
         result = _get_file_context_sync(str(java_path), capabilities=[])
@@ -152,7 +152,7 @@ class TestJavaExtraction:
 
     def test_java_method_extraction(self, temp_java_project):
         """Java should extract methods (functions)."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         java_path = temp_java_project / "DataProcessor.java"
         result = _get_file_context_sync(str(java_path), capabilities=[])
@@ -162,7 +162,7 @@ class TestJavaExtraction:
 
     def test_java_import_detection(self, temp_java_project):
         """Java should detect imports."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         java_path = temp_java_project / "DataProcessor.java"
         result = _get_file_context_sync(str(java_path), capabilities=[])
@@ -172,7 +172,7 @@ class TestJavaExtraction:
 
     def test_java_package_detection(self, temp_java_project):
         """Java should detect package declarations."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         java_path = temp_java_project / "DataProcessor.java"
         result = _get_file_context_sync(str(java_path), capabilities=[])
@@ -192,7 +192,7 @@ class TestLanguageFeatureParity:
         temp_java_project,
     ):
         """All supported languages should extract functions."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
         py_result = _get_file_context_sync(
@@ -226,7 +226,7 @@ class TestLanguageFeatureParity:
         temp_java_project,
     ):
         """All supported languages should extract classes."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
         py_result = _get_file_context_sync(
@@ -260,7 +260,7 @@ class TestLanguageFeatureParity:
         temp_java_project,
     ):
         """All supported languages should detect imports."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
         py_result = _get_file_context_sync(
@@ -294,7 +294,7 @@ class TestLanguageFeatureParity:
         temp_java_project,
     ):
         """All supported languages should calculate complexity."""
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
         py_result = _get_file_context_sync(
@@ -330,7 +330,7 @@ class TestLanguageSyntaxHandling:
         test_file = Path(tmpdir) / "typed.py"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(str(test_file), capabilities=[])
         # Should handle type hints gracefully
@@ -342,7 +342,7 @@ class TestLanguageSyntaxHandling:
         test_file = Path(tmpdir) / "arrow.js"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(str(test_file), capabilities=[])
         # Should handle arrow functions gracefully
@@ -359,7 +359,7 @@ class TestLanguageSyntaxHandling:
         test_file = Path(tmpdir) / "generic.ts"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(str(test_file), capabilities=[])
         # Should handle generics gracefully
@@ -376,7 +376,7 @@ class TestLanguageSyntaxHandling:
         test_file = Path(tmpdir) / "annotated.java"
         test_file.write_text(code)
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(str(test_file), capabilities=[])
         # Should handle annotations gracefully

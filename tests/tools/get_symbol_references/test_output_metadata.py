@@ -13,7 +13,7 @@ async def test_community_tier_output_metadata(
     make_project, patch_tier, patch_capabilities
 ):
     """[20260111_TEST] Community tier should populate output metadata with limits."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -56,7 +56,7 @@ def target():
 @pytest.mark.asyncio
 async def test_pro_tier_output_metadata(make_project, patch_tier, patch_capabilities):
     """[20260111_TEST] Pro tier should show unlimited and list enabled features."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {
@@ -107,7 +107,7 @@ async def test_enterprise_tier_output_metadata(
     make_project, patch_tier, patch_capabilities
 ):
     """[20260111_TEST] Enterprise tier should show all features enabled."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     project = make_project(
         {

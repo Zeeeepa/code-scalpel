@@ -184,6 +184,8 @@ class PathResult:
     constraints: List[z3.BoolRef]
     variables: Dict[str, Any]  # Python native values (marshaled from Z3)
     model: Optional[Dict[str, Any]] = None  # Concrete satisfying assignment
+    # [20260114_FEATURE] Line coverage for path-sensitive pruning
+    visited_lines: List[int] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to cache-serializable dictionary.
@@ -196,6 +198,7 @@ class PathResult:
             "constraints": [str(c) for c in self.constraints],
             "variables": self.variables,
             "model": self.model,
+            "visited_lines": self.visited_lines,
         }
 
     @classmethod
@@ -210,6 +213,7 @@ class PathResult:
             constraints=[],  # Z3 objects cannot be reconstructed from strings
             variables=data["variables"],
             model=data.get("model"),
+            visited_lines=data.get("visited_lines", []),
         )
 
 
@@ -408,10 +412,16 @@ class SymbolicAnalyzer:
         except SyntaxError as e:
             raise ValueError(f"Invalid {language} syntax: {e}")
 
-        # Step 2.5: Check if top-level contains function definition
-        # If so, extract and execute function body with symbolic parameters
-        if ir_module.body and isinstance(ir_module.body[0], IRFunctionDef):
-            func_def = ir_module.body[0]
+        # Step 2.5: Check for function definition to execute
+        # [20260114_FIX] Scan for FunctionDef even if preceded by imports
+        func_def = None
+        for node in ir_module.body:
+             if isinstance(node, IRFunctionDef):
+                 func_def = node
+                 break
+        
+        # If found, extract and execute function body with symbolic parameters
+        if func_def:
             logger.debug(f"Detected function definition: {func_def.name}")
 
             # Create symbolic parameters for function arguments
@@ -516,6 +526,7 @@ class SymbolicAnalyzer:
                 constraints=constraints,
                 variables=variables,
                 model=solver_result.model,
+                visited_lines=list(state.visited_lines),
             )
         elif solver_result.status == SolverStatus.UNSAT:
             return PathResult(
@@ -523,6 +534,7 @@ class SymbolicAnalyzer:
                 status=PathStatus.INFEASIBLE,
                 constraints=constraints,
                 variables={},
+                visited_lines=list(state.visited_lines),
             )
         else:
             # UNKNOWN or TIMEOUT
@@ -531,6 +543,7 @@ class SymbolicAnalyzer:
                 status=PathStatus.UNKNOWN,
                 constraints=constraints,
                 variables={},
+                visited_lines=list(state.visited_lines),
             )
 
     def declare_symbolic(self, name: str, sort: z3.SortRef) -> z3.ExprRef:

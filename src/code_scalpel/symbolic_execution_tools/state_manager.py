@@ -107,7 +107,7 @@ need to be copied.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Set, cast
 
 from z3 import (
     And,
@@ -197,6 +197,7 @@ class SymbolicState:
         """
         self._variables: Dict[str, ExprRef] = {}
         self._constraints: List[BoolRef] = []
+        self._visited_lines: Set[int] = set()
         self._depth: int = depth
 
     # =========================================================================
@@ -365,6 +366,30 @@ class SymbolicState:
         return result == sat
 
     # =========================================================================
+    # Line Coverage Tracking
+    # =========================================================================
+
+    def visit_line(self, lineno: int) -> None:
+        """
+        Record that a line was executed in this path.
+
+        Args:
+            lineno: Source code line number
+        """
+        if lineno > 0:
+            self._visited_lines.add(lineno)
+
+    @property
+    def visited_lines(self) -> Set[int]:
+        """
+        Get the set of lines visited in this path.
+
+        Returns:
+            Set of line numbers
+        """
+        return self._visited_lines
+
+    # =========================================================================
     # Fork - THE CRITICAL METHOD
     # =========================================================================
 
@@ -402,6 +427,9 @@ class SymbolicState:
         # list.copy() (or list[:]) creates a shallow copy of the list
         # The Z3 BoolRef values are immutable, so shallow copy is sufficient
         forked._constraints = self._constraints.copy()
+
+        # [20260114_FEATURE] Track visited lines for path-sensitive prune
+        forked._visited_lines = self._visited_lines.copy()
 
         return forked
 

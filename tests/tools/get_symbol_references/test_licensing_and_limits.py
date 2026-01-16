@@ -6,7 +6,7 @@ async def test_invalid_license_falls_back_to_community(
     make_project, patch_capabilities, patch_license_validator, monkeypatch
 ):
     """[20260104_TEST] Invalid license should clamp tier to community limits."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     class _InvalidLicense:
         is_valid = False
@@ -58,7 +58,7 @@ async def test_expired_license_falls_back_to_community(
     make_project, patch_capabilities, patch_license_validator, monkeypatch
 ):
     """[20260109_TEST] Expired license should clamp tier to community limits."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     class _ExpiredLicense:
         is_valid = False
@@ -107,7 +107,7 @@ async def test_invalid_signature_falls_back_to_community(
     make_project, patch_capabilities, patch_license_validator, monkeypatch
 ):
     """[20260109_TEST] Invalid license signature should clamp tier to community limits."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     class _InvalidSignature:
         is_valid = False
@@ -155,7 +155,7 @@ async def test_malformed_jwt_falls_back_to_community(
     make_project, patch_capabilities, patch_license_validator, monkeypatch
 ):
     """[20260109_TEST] Malformed JWT should clamp tier to community limits."""
-    import code_scalpel.mcp.server as server
+    import code_scalpel.mcp.tools.context as server
 
     class _MalformedJWT:
         is_valid = False

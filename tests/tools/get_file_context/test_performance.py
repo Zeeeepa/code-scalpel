@@ -334,7 +334,7 @@ def project_root():
 @pytest.fixture
 def community_server():
     """Community server instance for performance testing."""
-    from code_scalpel.mcp.server import _get_file_context_sync
+    from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
     class CommunityServerWrapper:
         """Wrapper for _get_file_context_sync with Community tier."""

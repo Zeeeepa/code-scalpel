@@ -25,7 +25,7 @@ class TestProTierCodeSmellDetection:
         """Pro tier should detect code smells when capability enabled."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -42,7 +42,7 @@ class TestProTierCodeSmellDetection:
         """Pro tier should detect functions that are too long."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -58,7 +58,7 @@ class TestProTierCodeSmellDetection:
         """Pro tier should detect god classes (too many methods)."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -74,7 +74,7 @@ class TestProTierCodeSmellDetection:
         """Pro tier should find few/no code smells in well-written code."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -94,7 +94,7 @@ class TestProTierDocumentationCoverage:
         """Pro tier should calculate documentation coverage."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -109,7 +109,7 @@ class TestProTierDocumentationCoverage:
         """Doc coverage should be between 0.0 and 100.0."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -126,7 +126,7 @@ class TestProTierDocumentationCoverage:
         """Well-documented code should have high coverage."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -143,7 +143,7 @@ class TestProTierDocumentationCoverage:
         """Undocumented code should have low coverage."""
         undocumented_path = temp_python_project / "undocumented.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(undocumented_path),
@@ -164,7 +164,7 @@ class TestProTierMaintainabilityIndex:
         """Pro tier should calculate maintainability index."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -179,7 +179,7 @@ class TestProTierMaintainabilityIndex:
         """Maintainability index should be 0-100."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -196,7 +196,7 @@ class TestProTierMaintainabilityIndex:
         """Well-written code should have higher maintainability."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -213,7 +213,7 @@ class TestProTierMaintainabilityIndex:
         """Code with smells should have lower maintainability."""
         smelly_code_path = temp_python_project / "smelly_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(smelly_code_path),
@@ -232,7 +232,7 @@ class TestProTierLineLimits:
         """Pro tier should allow up to 2000 lines (vs 500 for Community)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -251,7 +251,7 @@ class TestProTierNoEnterpriseFeatures:
         """Pro tier should NOT include custom_metadata (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -267,7 +267,7 @@ class TestProTierNoEnterpriseFeatures:
         """Pro tier should NOT include compliance_flags (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -283,7 +283,7 @@ class TestProTierNoEnterpriseFeatures:
         """Pro tier should NOT include owners (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -299,7 +299,7 @@ class TestProTierNoEnterpriseFeatures:
         """Pro tier should NOT include technical_debt_score (Enterprise feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -319,7 +319,7 @@ class TestProTierIncludesAllCommunityFeatures:
         """Pro tier should include function extraction (Community feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
@@ -333,7 +333,7 @@ class TestProTierIncludesAllCommunityFeatures:
         """Pro tier should include class extraction (Community feature)."""
         good_code_path = temp_python_project / "good_code.py"
 
-        from code_scalpel.mcp.server import _get_file_context_sync
+        from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         result = _get_file_context_sync(
             str(good_code_path),
