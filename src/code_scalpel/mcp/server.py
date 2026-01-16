@@ -3373,44 +3373,9 @@ def _extract_code_sync(
 
 
 # ============================================================================
-# PROMPTS
+# PROMPTS - All prompts migrated to prompts.py
+# [20260116_REFACTOR] See code_scalpel.mcp.prompts for all @mcp.prompt handlers
 # ============================================================================
-
-
-# [20260116_REFACTOR] @mcp.prompt() code_review_prompt moved to prompts/*.py
-
-
-# [20260116_REFACTOR] @mcp.prompt() security_audit_prompt moved to prompts/*.py
-
-
-# ============================================================================
-# WORKFLOW PROMPTS - Orchestrated Multi-Tool Workflows
-# [20251215_FEATURE] v2.0.0 - Advanced workflow prompts combining tools + resources
-# ============================================================================
-
-
-# [20260116_REFACTOR] @mcp.prompt() refactor_function_prompt moved to prompts/*.py
-
-
-# [20260116_REFACTOR] @mcp.prompt() debug_vulnerability_prompt moved to prompts/*.py
-
-
-# [20260116_REFACTOR] @mcp.prompt() analyze_codebase_prompt moved to prompts/*.py
-
-
-# [20260116_REFACTOR] @mcp.prompt() extract_and_test_prompt moved to prompts/*.py
-
-
-# ============================================================================
-# v2.2.0 WORKFLOW PROMPTS - Guided Multi-Step Workflows
-# [20251216_FEATURE] Feature 10: Workflow Prompts for common AI agent tasks
-# ============================================================================
-
-
-# [20260116_REFACTOR] @mcp.prompt() security_audit_workflow_prompt moved to prompts/*.py
-
-
-# [20260116_REFACTOR] @mcp.prompt() safe_refactor_workflow_prompt moved to prompts/*.py
 
 
 # ============================================================================
