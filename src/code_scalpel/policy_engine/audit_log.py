@@ -7,36 +7,6 @@ This module provides cryptographically-signed, append-only audit logging
 to ensure all security events are recorded and verifiable.
 """
 
-# TODO [COMMUNITY]: Implement append-only audit log file format
-# TODO [COMMUNITY]: Add HMAC-SHA256 signature generation for log entries
-# TODO [COMMUNITY]: Implement tamper detection (hash verification)
-# TODO [COMMUNITY]: Create event severity classification system
-# TODO [COMMUNITY]: Add JSON serialization for audit events
-# TODO [COMMUNITY]: Implement log entry timestamps with timezone support
-# TODO [COMMUNITY]: Create basic event filtering and querying
-# TODO [COMMUNITY]: Add log file permission management
-# TODO [COMMUNITY]: Implement comprehensive error handling for I/O failures
-# TODO [COMMUNITY]: Document audit log format and examples
-# TODO [PRO]: Add log rotation with retention policy enforcement
-# TODO [PRO]: Implement log compression (gzip) with integrity preservation
-# TODO [PRO]: Create audit report generation (HTML, PDF formats)
-# TODO [PRO]: Add event type categorization and filtering
-# TODO [PRO]: Implement custom audit event types for organizations
-# TODO [PRO]: Create log indexing for fast searching
-# TODO [PRO]: Add batch event recording for performance
-# TODO [PRO]: Implement log streaming for real-time monitoring
-# TODO [PRO]: Create compliance report generation (SOC2, ISO 27001)
-# TODO [PRO]: Add log integrity verification tool
-# TODO [ENTERPRISE]: Build blockchain-style audit log linking (each entry signs previous)
-# TODO [ENTERPRISE]: Implement distributed log replication for high availability
-# TODO [ENTERPRISE]: Add encryption at rest with key rotation support
-# TODO [ENTERPRISE]: Create quantum-safe audit log hashing
-# TODO [ENTERPRISE]: Implement federated audit logs across organizations
-# TODO [ENTERPRISE]: Add zero-knowledge proof verification for audit trails
-# TODO [ENTERPRISE]: Build immutable cloud storage integration (S3, Azure)
-# TODO [ENTERPRISE]: Implement advanced machine learning for anomaly detection in logs
-# TODO [ENTERPRISE]: Create audit log aggregation across distributed systems
-# TODO [ENTERPRISE]: Add compliance automation for continuous verification
 
 import hashlib
 import hmac
@@ -63,12 +33,6 @@ class AuditLog:
     - Tamper detection
     """
 
-    # TODO [COMMUNITY]: HMAC-signed append-only logs (current)
-    # TODO [PRO]: Add log rotation with retention policies
-    # TODO [PRO]: Add log compression with integrity preservation
-    # TODO [ENTERPRISE]: Blockchain-style log linking (each entry signs previous)
-    # TODO [ENTERPRISE]: Distributed log replication for high availability
-    # TODO [ENTERPRISE]: Log encryption at rest with key rotation support
 
     def __init__(self, log_path: Optional[str] = None):
         """
@@ -112,10 +76,6 @@ class AuditLog:
         # [20251222_BUGFIX] Respect provided timestamp for time-range filtering in reports/tests.
         event_timestamp = timestamp or datetime.now()
 
-        # TODO [PRO]: Add correlation_id for linking related events across logs
-        # TODO [ENTERPRISE]: Add user_context field (user_id, role, session_id)
-        # TODO [ENTERPRISE]: Add geo_location tracking for suspicious activity detection
-        # TODO [ENTERPRISE]: Add structured logging in JSON with schema validation
 
         event = {
             "timestamp": event_timestamp.isoformat(),

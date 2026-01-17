@@ -60,10 +60,6 @@ class PolicyManifest:
     created_at: str
     signed_by: str = "unknown"  # [20241225_BUGFIX] v3.3.0 - Make optional with default
 
-    # TODO [PRO]: Add algorithm field (HMAC-SHA256, HMAC-SHA512, RSA, etc)
-    # TODO [ENTERPRISE]: Add X.509 certificate chain for public-key verification
-    # TODO [ENTERPRISE]: Add revocation_url for checking certificate revocation
-    # TODO [ENTERPRISE]: Add timestamp_server_url for notary/timestamping support
 
 
 @dataclass
@@ -87,9 +83,6 @@ class VerificationResult:
     files_failed: List[str] = field(default_factory=list)
     error: Optional[str] = None
 
-    # TODO [PRO]: Add verification_timestamp field
-    # TODO [ENTERPRISE]: Add chain_of_custody field tracking all signature verifications
-    # TODO [ENTERPRISE]: Add remediation_suggestions for recovery after tampering
 
 
 class CryptographicPolicyVerifier:
@@ -123,12 +116,6 @@ class CryptographicPolicyVerifier:
             # Fail closed - deny all operations
     """
 
-    # TODO [COMMUNITY]: HMAC-SHA256 manifest verification (current)
-    # TODO [PRO]: Add support for RSA-4096 digital signatures
-    # TODO [PRO]: Add manifest versioning with upgrade path
-    # TODO [ENTERPRISE]: Add threshold cryptography (m-of-n signatures required)
-    # TODO [ENTERPRISE]: Add distributed verification across multiple trust anchors
-    # TODO [ENTERPRISE]: Add hardware security module (HSM) integration
 
     def __init__(
         self,

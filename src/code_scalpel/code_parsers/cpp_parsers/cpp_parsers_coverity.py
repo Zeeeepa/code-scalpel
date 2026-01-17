@@ -3,14 +3,6 @@
 Coverity Parser - Deep Security and Quality Analysis
 """
 
-# TODO [PHASE2/HIGH] Parse Coverity API responses
-# TODO [PHASE2/HIGH] Execute Coverity analysis via API
-# TODO [PHASE2/HIGH] Load Coverity configuration
-# TODO [PHASE2/MEDIUM] Categorize defects by impact and type
-# TODO [PHASE2/MEDIUM] Analyze security vulnerabilities
-# TODO [PHASE2/MEDIUM] Generate Coverity-compatible reports
-# TODO [PHASE2/MEDIUM] Integrate with CI/CD pipelines
-# TODO [PHASE2/LOW] Track defect trends over time
 
 from dataclasses import dataclass
 from enum import Enum

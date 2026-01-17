@@ -28,35 +28,6 @@ Usage:
         pass
 """
 
-# TODO [COMMUNITY_P0_CRITICAL] Implement @requires_tier decorator with runtime tier checking
-# TODO [COMMUNITY_P0_CRITICAL] Add graceful error messages for tier requirement failures
-# TODO [COMMUNITY_P0_CRITICAL] Create decorator tests (20 tests)
-# TODO [COMMUNITY_P1_HIGH] Build central feature→tier mapping registry
-# TODO [COMMUNITY_P1_HIGH] Implement dynamic feature registration
-# TODO [COMMUNITY_P1_HIGH] Add feature discovery functionality
-# TODO [COMMUNITY_P1_HIGH] Create registry tests (25 tests)
-# TODO [COMMUNITY_P2_MEDIUM] Map tools to tier requirements
-# TODO [COMMUNITY_P2_MEDIUM] Implement tool availability filtering
-# TODO [COMMUNITY_P2_MEDIUM] Add tool metadata enrichment
-# TODO [COMMUNITY_P2_MEDIUM] Create MCP integration tests (20 tests)
-# TODO [PRO_P1_HIGH] Implement feature bundles for grouping related features
-# TODO [PRO_P1_HIGH] Add bundle-level gating logic
-# TODO [PRO_P1_HIGH] Create bundle tests (20 tests)
-# TODO [PRO_P2_MEDIUM] Implement beta feature flags system
-# TODO [PRO_P2_MEDIUM] Add A/B testing support
-# TODO [PRO_P2_MEDIUM] Create feature flag tests (15 tests)
-# TODO [PRO_P3_LOW] Implement feature usage tracking
-# TODO [PRO_P3_LOW] Add tier adoption metrics
-# TODO [PRO_P3_LOW] Create analytics tests (10 tests)
-# TODO [ENTERPRISE_P2_MEDIUM] Implement custom tier definitions
-# TODO [ENTERPRISE_P2_MEDIUM] Add feature override rules
-# TODO [ENTERPRISE_P2_MEDIUM] Create custom tier tests (20 tests)
-# TODO [ENTERPRISE_P3_LOW] Implement policy-based gating
-# TODO [ENTERPRISE_P3_LOW] Add audit logging for governance
-# TODO [ENTERPRISE_P3_LOW] Create policy tests (15 tests)
-# TODO [ENTERPRISE_P4_LOW] Implement remote feature enablement
-# TODO [ENTERPRISE_P4_LOW] Add real-time tier updates
-# TODO [ENTERPRISE_P4_LOW] Create dynamic control tests (10 tests)
 
 from enum import Enum
 

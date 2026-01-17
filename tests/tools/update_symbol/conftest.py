@@ -707,12 +707,12 @@ def assert_result_has_enterprise_fields():
 # [20260103_TEST] Performance Testing Infrastructure
 # =============================================================================
 
-import time
+import time  # noqa: E402
 
 # import psutil  # [20260103_TEST] Not needed for Phase 1 simplified tests
-from contextlib import contextmanager
-from dataclasses import dataclass, field
-from typing import List
+from contextlib import contextmanager  # noqa: E402
+from dataclasses import dataclass, field  # noqa: E402
+from typing import List  # noqa: E402
 
 # Simple memory tracking fallback when psutil is not available
 try:

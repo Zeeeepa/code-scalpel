@@ -19,36 +19,6 @@ from graphviz import Digraph
 #     - Suggest interesting subgraphs based on history
 #     - Generate heatmaps of high-risk code areas
 
-# TODO [COMMUNITY_TIER] Implement Graphviz DOT file generation
-# TODO [COMMUNITY_TIER] Add PNG/SVG export for visualization
-# TODO [COMMUNITY_TIER] Create basic node coloring by type
-# TODO [COMMUNITY_TIER] Implement edge styling by dependency type
-# TODO [COMMUNITY_TIER] Add legend and node/edge labels
-# TODO [COMMUNITY_TIER] Create layout customization (hierarchical, circular)
-# TODO [COMMUNITY_TIER] Implement PDF export for reports
-# TODO [COMMUNITY_TIER] Add graph clustering visualization
-# TODO [COMMUNITY_TIER] Create basic filtering UI
-# TODO [COMMUNITY_TIER] Document visualization formats and options
-# TODO [PRO_TIER] Build interactive web UI (React/Vue/D3.js)
-# TODO [PRO_TIER] Implement zoom and pan capabilities
-# TODO [PRO_TIER] Add search and highlight features
-# TODO [PRO_TIER] Create code preview on node hover
-# TODO [PRO_TIER] Implement jump-to-source functionality
-# TODO [PRO_TIER] Add real-time visualization updates
-# TODO [PRO_TIER] Create custom node styling and coloring
-# TODO [PRO_TIER] Implement focus+context navigation
-# TODO [PRO_TIER] Add graph layout algorithms (force-directed, hierarchical)
-# TODO [PRO_TIER] Support multiple PDG visualization formats
-# TODO [ENTERPRISE_TIER] Implement distributed graph visualization
-# TODO [ENTERPRISE_TIER] Add streaming visualization for large PDGs
-# TODO [ENTERPRISE_TIER] Create progressive rendering for real-time updates
-# TODO [ENTERPRISE_TIER] Implement collaborative visualization for teams
-# TODO [ENTERPRISE_TIER] Add visualization analytics and heatmaps
-# TODO [ENTERPRISE_TIER] Support augmented reality PDG visualization
-# TODO [ENTERPRISE_TIER] Create AI-powered graph layout optimization
-# TODO [ENTERPRISE_TIER] Implement 3D visualization for complex dependencies
-# TODO [ENTERPRISE_TIER] Add quantum circuit visualization
-# TODO [ENTERPRISE_TIER] Create blockchain-based visualization provenance
 
 
 class VisualizationFormat(Enum):

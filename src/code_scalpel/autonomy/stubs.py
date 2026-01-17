@@ -64,17 +64,7 @@ class SandboxResult:
     tests: List["ExecutionTestResult"] = field(default_factory=list)
 
 
-# TODO [20251221] Phase 1 Enhancement: Implement Docker container execution
-# TODO [20251221] Phase 1 Enhancement: Add resource limit enforcement (CPU, memory, disk)
-# TODO [20251221] Phase 1 Enhancement: Implement side effect detection
-# TODO [20251221] Phase 1 Enhancement: Add test result parsing and categorization
-# TODO [20251221] Phase 1 Enhancement: Support multiple test frameworks (pytest, unittest, jest, etc.)
 
-# TODO [20251221] Phase 2 Feature: Result caching for repeated executions
-# TODO [20251221] Phase 2 Feature: Incremental test execution (only changed tests)
-# TODO [20251221] Phase 2 Feature: Parallel test execution
-# TODO [20251221] Phase 2 Feature: Integration with error-to-diff system
-# TODO [20251221] Phase 2 Feature: Performance profiling hooks
 
 
 class SandboxExecutor:
@@ -114,17 +104,7 @@ class SandboxExecutor:
         )
 
 
-# TODO [20251221] Phase 1 Enhancement: Multi-language error parsing (Python, JS, TS, Java)
-# TODO [20251221] Phase 1 Enhancement: Pattern-based fix generation
-# TODO [20251221] Phase 1 Enhancement: Confidence scoring for fixes
-# TODO [20251221] Phase 1 Enhancement: Alternative fix suggestions
-# TODO [20251221] Phase 1 Enhancement: Diff format generation (unified diff)
 
-# TODO [20251221] Phase 2 Feature: ML-based fix ranking
-# TODO [20251221] Phase 2 Feature: Context-aware suggestions
-# TODO [20251221] Phase 2 Feature: Learning from applied fixes
-# TODO [20251221] Phase 2 Feature: Framework-specific error handling
-# TODO [20251221] Phase 2 Feature: Semantic code analysis for better suggestions
 
 
 class ErrorToDiffEngine:

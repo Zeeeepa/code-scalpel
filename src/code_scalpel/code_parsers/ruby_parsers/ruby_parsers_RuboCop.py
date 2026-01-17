@@ -2,14 +2,6 @@
 """
 RuboCop Parser - Ruby Code Style and Linting Analysis
 
-# TODO [PRO] Parse JSON output from rubocop --format=json
-# TODO [PRO] Execute RuboCop via subprocess/bundler
-# TODO [PRO] Load configuration from .rubocop.yml files
-# TODO [PRO] Categorize violations by cop category
-# TODO [PRO] Apply auto-corrections via rubocop --auto-correct
-# TODO [PRO] Generate JSON/SARIF/HTML reports
-# TODO [PRO] Calculate complexity and trend metrics
-# TODO [PRO] Detect Rails-specific cop violations
 """
 
 from dataclasses import dataclass

@@ -11,21 +11,6 @@ This module provides:
 - File pattern matching for allowed/forbidden paths
 - Clear violation reporting with actionable messages
 
-# TODO [20251221]: Add dynamic budget adjustment
-# TODO [20251221]: Support runtime budget modification based on context
-# TODO [20251221]: Implement budget exhaustion warnings with time remaining
-# TODO [20251221]: Add budget carryover/accumulation policies
-# TODO [20251221]: Support per-operation budget allocation from shared pool
-# TODO [20251221]: Add constraint relaxation mechanisms
-# TODO [20251221]: Support temporary exemptions for specific files/operations
-# TODO [20251221]: Implement gradual constraint loosening (e.g., for refactoring)
-# TODO [20251221]: Add approval workflows for constraint overrides
-# TODO [20251221]: Track override reasons for audit purposes
-# TODO [20251221]: Add cross-operation impact analysis
-# TODO [20251221]: Track dependencies between operations
-# TODO [20251221]: Detect indirect impacts of changes
-# TODO [20251221]: Warn about cascade effects
-# TODO [20251221]: Support batch operation constraint aggregation
 """
 
 import ast
@@ -50,11 +35,6 @@ class FileChange:
 
     [20251216_FEATURE] Tracks added/removed lines for budget calculation.
 
-    # TODO [20251221]: Add semantic change tracking
-    # TODO [20251221]: Track type of changes (refactor, feature, bugfix, optimization)
-    # TODO [20251221]: Measure impact on module boundaries and interfaces
-    # TODO [20251221]: Detect structural changes vs. content-only changes
-    # TODO [20251221]: Support risk scoring based on change type
     """
 
     file_path: str
@@ -76,11 +56,6 @@ class Operation:
 
     [20251216_FEATURE] Contains all changes for budget validation.
 
-    # TODO [20251221]: Add operation context and metadata
-    # TODO [20251221]: Track operation purpose (refactor, feature, bugfix)
-    # TODO [20251221]: Support operation cancellation/rollback
-    # TODO [20251221]: Add operation dependency tracking
-    # TODO [20251221]: Store operation cost history for analytics
     """
 
     changes: List[FileChange] = field(default_factory=list)
@@ -105,11 +80,6 @@ class BudgetViolation:
     [20251216_FEATURE] Provides detailed violation information for clear
     error reporting.
 
-    # TODO [20251221]: Add violation context and remediation
-    # TODO [20251221]: Track which constraint types frequently conflict
-    # TODO [20251221]: Suggest alternative approaches to achieve same goal
-    # TODO [20251221]: Provide impact estimates of constraint adjustments
-    # TODO [20251221]: Support violation prioritization and filtering
     """
 
     rule: str
@@ -136,11 +106,6 @@ class BudgetDecision:
 
     [20251216_FEATURE] Contains validation result and all violations.
 
-    # TODO [20251221]: Add decision explanation and reasoning
-    # TODO [20251221]: Explain decision in natural language
-    # TODO [20251221]: Provide confidence score for decision
-    # TODO [20251221]: Track decision uncertainty/edge cases
-    # TODO [20251221]: Support decision appeal/override workflows
     """
 
     allowed: bool
@@ -195,21 +160,6 @@ class ChangeBudget:
     [20251216_FEATURE] P0 implementation of blast radius control.
     Enforces limits on files, lines, complexity, and file patterns.
 
-    # TODO [20251221]: Add constraint composition and analysis
-    # TODO [20251221]: Support constraint algebra (AND, OR, NOT operations)
-    # TODO [20251221]: Detect contradictory constraints
-    # TODO [20251221]: Implement constraint satisfiability checking
-    # TODO [20251221]: Support constraint relaxation algorithms
-    # TODO [20251221]: Add predictive budget management
-    # TODO [20251221]: Estimate remaining budget for operations
-    # TODO [20251221]: Forecast budget exhaustion based on patterns
-    # TODO [20251221]: Recommend pacing/batching strategies
-    # TODO [20251221]: Support budget forecasting for large refactorings
-    # TODO [20251221]: Add metrics collection and reporting
-    # TODO [20251221]: Track budget violations per developer/team
-    # TODO [20251221]: Generate budget utilization reports
-    # TODO [20251221]: Identify patterns in constraint violations
-    # TODO [20251221]: Support trend analysis over time
     """
 
     def __init__(self, config: Dict[str, Any]):
@@ -243,11 +193,6 @@ class ChangeBudget:
         [20251216_FEATURE] P0 core validation logic implementing all
         constraint checks with clear violation reporting.
 
-        # TODO [20251221]: Add constraint explanation
-        # TODO [20251221]: Explain why each constraint exists
-        # TODO [20251221]: Provide context for constraint violations
-        # TODO [20251221]: Suggest alternatives for constrained approaches
-        # TODO [20251221]: Support constraint customization guidance
 
         Args:
             operation: The operation to validate
@@ -351,11 +296,6 @@ class ChangeBudget:
         [20251216_FEATURE] Uses AST analysis to measure complexity before
         and after changes.
 
-        # TODO [20251221]: Add advanced complexity metrics
-        # TODO [20251221]: Support cognitive complexity (more nuanced than cyclomatic)
-        # TODO [20251221]: Track nested complexity depth
-        # TODO [20251221]: Measure control flow graph diameter
-        # TODO [20251221]: Support weighted complexity per node type
 
         Args:
             operation: Operation to analyze
@@ -391,11 +331,6 @@ class ChangeBudget:
         [20251216_FEATURE] AST-based complexity measurement for Python code.
         Counts decision points: if, for, while, except, bool operators.
 
-        # TODO [20251221]: Add polyglot complexity measurement
-        # TODO [20251221]: Support complexity for JavaScript/TypeScript code
-        # TODO [20251221]: Support complexity for Java code
-        # TODO [20251221]: Implement language-specific complexity metrics
-        # TODO [20251221]: Support configurable complexity weighting
 
         Args:
             code: Python source code
@@ -427,11 +362,6 @@ class ChangeBudget:
 
         [20251216_FEATURE] P0 file pattern validation using glob matching.
 
-        # TODO [20251221]: Add pattern matching optimization
-        # TODO [20251221]: Compile patterns to regex for faster matching
-        # TODO [20251221]: Cache pattern matching results
-        # TODO [20251221]: Support negative patterns (exclude patterns)
-        # TODO [20251221]: Add pattern priority/ordering
 
         Args:
             file_path: Path to check
@@ -458,11 +388,6 @@ class ChangeBudget:
 
         [20251216_FEATURE] P0 forbidden path validation for system/generated files.
 
-        # TODO [20251221]: Add sophisticated path analysis
-        # TODO [20251221]: Support regex patterns for forbidden paths
-        # TODO [20251221]: Add path whitelist for exceptions
-        # TODO [20251221]: Detect generated files (auto-generated, compiled, minified)
-        # TODO [20251221]: Support critical file detection
 
         Args:
             file_path: Path to check
@@ -490,16 +415,6 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
 
     [20251216_FEATURE] Configuration loader for .code-scalpel/budget.yaml.
 
-    # TODO [20251221]: Add configuration validation and schema
-    # TODO [20251221]: Define JSON schema for budget configuration
-    # TODO [20251221]: Validate config on load
-    # TODO [20251221]: Support config format versioning
-    # TODO [20251221]: Add config migrations for version updates
-    # TODO [20251221]: Add configuration management
-    # TODO [20251221]: Support environment variable overrides
-    # TODO [20251221]: Implement config inheritance from parent directories
-    # TODO [20251221]: Support per-team/per-project config layering
-    # TODO [20251221]: Add config hot-reload capability
 
     Args:
         config_path: Path to budget.yaml file (optional)

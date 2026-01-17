@@ -3,15 +3,6 @@
 Clang-Tidy Parser - C++ Modernization and Best Practices
 """
 
-# TODO [PARSER/P2] Parse clang-tidy JSON output
-# TODO [EXECUTION/P2] Execute clang-tidy analysis via subprocess
-# TODO [CONFIG/P2] Load configuration from .clang-tidy files
-# TODO [CATEGORIZATION/P2] Categorize checks by category
-# TODO [FIXES/P2] Apply auto-fixes via clang-tidy --fix
-# TODO [REPORTING/P2] Generate JSON/SARIF/HTML reports
-# TODO [MODERNIZATION/P2] Analyze modernization suggestions
-# TODO [COMPATIBILITY/P2] Detect C++ standard version compatibility issues
-# TODO [PERFORMANCE/P2] Analyze performance anti-patterns
 
 from dataclasses import dataclass
 from enum import Enum

@@ -2,14 +2,6 @@
 """
 Ruby AST Parser - Abstract Syntax Tree Analysis
 
-# TODO [PRO] Parse Ruby code to AST using ruby_parser
-# TODO [PRO] Extract class definitions and hierarchy
-# TODO [PRO] Extract method definitions and signatures
-# TODO [PRO] Extract module definitions and composition
-# TODO [PRO] Analyze inheritance and mixin relationships
-# TODO [PRO] Detect blocks and lambda functions
-# TODO [PRO] Analyze meta-programming patterns
-# TODO [PRO] Generate method call graphs
 """
 
 from dataclasses import dataclass

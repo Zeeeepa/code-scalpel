@@ -309,7 +309,6 @@ class InterrogateConfig:
     @classmethod
     def from_pyproject(cls, pyproject_path: str | Path) -> "InterrogateConfig":
         """Load configuration from pyproject.toml."""
-        # TODO: Implement
         return cls()
 
 
@@ -334,7 +333,6 @@ class InterrogateReport:
     def is_coverage_acceptable(self) -> bool:
         """Check if coverage meets minimum threshold."""
         # Note: Would need min_coverage from config
-        return True  # TODO: Implement with config
 
     @property
     def summary(self) -> str:
@@ -375,7 +373,6 @@ class InterrogateParser:
             config: InterrogateConfig instance or None to use defaults
         """
         self.config = config or InterrogateConfig()
-        # TODO: Initialize interrogate library
 
     def analyze_file(self, file_path: str | Path) -> InterrogateReport:
         """
@@ -389,10 +386,6 @@ class InterrogateParser:
 
         TODO: Implement
         """
-        # TODO: Run interrogate on file
-        # TODO: Parse JSON output
-        # TODO: Build report
-        # TODO: Return InterrogateReport
         raise NotImplementedError(
             "InterrogateParser.analyze_file() not yet implemented"
         )
@@ -410,10 +403,6 @@ class InterrogateParser:
 
         TODO: Implement
         """
-        # TODO: Run interrogate on code
-        # TODO: Parse results
-        # TODO: Build report
-        # TODO: Return InterrogateReport
         raise NotImplementedError(
             "InterrogateParser.analyze_code() not yet implemented"
         )

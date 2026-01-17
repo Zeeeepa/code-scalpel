@@ -13,23 +13,8 @@ diktat provides:
 - Gradle plugin integration
 - JSON report output
 
-# TODO Implement JSON report parsing
-# TODO Implement YAML configuration parsing
-# TODO Add violation extraction with rule details
-# TODO Add source location extraction
-# TODO Add formatter integration support
 
-# TODO Add diktat CLI execution
-# TODO Add Gradle plugin execution support
-# TODO Add format mode support
-# TODO Add incremental analysis
-# TODO Add custom rule support
 
-# TODO Parse style rules (naming, spacing, comments)
-# TODO Parse code smell rules (complexity, duplication)
-# TODO Parse potential bug rules
-# TODO Generate fix suggestions
-# TODO Add comparison with Detekt rules
 """
 
 from dataclasses import dataclass, field
@@ -91,7 +76,6 @@ class DiktatParser:
 
     def parse_json_report(self, json_data: str) -> list[DiktatViolation]:
         """
-        # TODO Parse diktat JSON report output.
 
         Args:
             json_data: JSON report string
@@ -103,7 +87,6 @@ class DiktatParser:
 
     def parse_config(self, config_path: Path) -> DiktatConfig:
         """
-        # TODO Parse diktat YAML configuration file.
 
         Args:
             config_path: Path to diktat YAML config
@@ -117,7 +100,6 @@ class DiktatParser:
         self, project_path: Path, format_code: bool = False
     ) -> dict[str, Any]:
         """
-        # TODO Execute diktat on Kotlin project.
 
         Args:
             project_path: Path to Kotlin project
@@ -130,7 +112,6 @@ class DiktatParser:
 
     def generate_fix_suggestions(self) -> list[str]:
         """
-        # TODO Generate fix suggestions for violations.
 
         Returns:
             List of fix suggestions
@@ -139,7 +120,6 @@ class DiktatParser:
 
     def compare_with_detekt(self, detekt_violations: list) -> dict[str, Any]:
         """
-        # TODO Compare diktat violations with Detekt findings.
 
         Args:
             detekt_violations: List of Detekt violations

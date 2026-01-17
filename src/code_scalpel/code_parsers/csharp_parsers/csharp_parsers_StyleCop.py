@@ -2,12 +2,6 @@
 """
 StyleCop C# Parser - C# coding style enforcement.
 
-# TODO [FEATURE] Implement StyleCop parser for v3.1.0 "Polyglot+" (Q1 2026)
-# TODO [TASK] Run StyleCop.Analyzers via dotnet build
-# TODO [TASK] Parse SA (StyleCop Analyzers) rule violations
-# TODO [TASK] Extract style violations with file, line, and rule ID
-# TODO [FEATURE] Support stylecop.json configuration
-# TODO [INHERITANCE] Inherit from base_parser.BaseParser
 #
 # Reference: https://github.com/DotNetAnalyzers/StyleCopAnalyzers
 # Rules: SA0001-SA1649 for documentation, spacing, ordering, naming, etc.

@@ -14,62 +14,24 @@ Detekt provides:
 
 TODO: HIGH PRIORITY - Core Implementation
 ==========================================
-# TODO Implement XML report parsing (detekt default format)
-# TODO Implement SARIF report parsing for IDE integration
-# TODO Implement plain text output parsing
-# TODO Add finding extraction with severity levels
-# TODO Add rule ID and message extraction
-# TODO Add source location extraction (file, line, column)
-# TODO Add code snippet context extraction
 
 TODO: HIGH PRIORITY - Execution
 ================================
-# TODO Add Detekt CLI execution via subprocess
-# TODO Add Gradle task execution support
-# TODO Add incremental analysis support
-# TODO Add parallel execution support
-# TODO Add custom config file support (detekt.yml)
 
 TODO: HIGH PRIORITY - Configuration
 ====================================
-# TODO Implement detekt.yml parsing
-# TODO Add rule set configuration extraction
-# TODO Add threshold configuration (complexity, lines, etc.)
-# TODO Add exclude pattern parsing
-# TODO Add baseline file parsing and generation
 
 TODO: MEDIUM PRIORITY - Rule Sets
 ==================================
-# TODO Parse complexity rules (LongMethod, LargeClass, ComplexCondition)
-# TODO Parse style rules (MagicNumber, MaxLineLength, WildcardImport)
-# TODO Parse potential-bugs rules (EqualsWithHashCodeExist, UnusedPrivateMember)
-# TODO Parse performance rules (SpreadOperator, UnnecessaryTemporaryInstantiation)
-# TODO Parse exceptions rules (TooGenericExceptionCaught, SwallowedException)
-# TODO Parse empty-blocks rules (EmptyFunctionBlock, EmptyCatchBlock)
-# TODO Parse naming rules (ClassNaming, FunctionNaming, VariableNaming)
-# TODO Parse coroutines rules (GlobalCoroutineUsage, SuspendFunWithFlowReturnType)
 
 TODO: MEDIUM PRIORITY - Metrics
 ================================
-# TODO Extract complexity metrics (cyclomatic, cognitive)
-# TODO Extract LOC metrics (logical lines, source lines)
-# TODO Extract class metrics (WMC, DIT, NOC)
-# TODO Add trend analysis (compare runs over time)
 
 TODO: MEDIUM PRIORITY - Suppression
 ====================================
-# TODO Parse @Suppress annotations
-# TODO Parse baseline suppressions
-# TODO Generate suppression reports
-# TODO Track suppression debt
 
 TODO: LOW PRIORITY - Advanced Features
 =======================================
-# TODO Add custom rule loading
-# TODO Add rule documentation URL extraction
-# TODO Add auto-fix suggestions where available
-# TODO Add severity mapping customization
-# TODO Add integration with GitHub Actions annotations
 """
 
 import shutil

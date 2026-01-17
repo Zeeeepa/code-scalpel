@@ -9,11 +9,6 @@ Reference: https://docs.sonarsource.com/sonarqube/latest/
 Command: sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=src
 
 Phase 2 Enhancement TODOs:
-# TODO Implement metrics trend analysis
-# TODO Add quality gates evaluation
-# TODO Support smell/bug/vulnerability categorization
-# TODO Implement security hotspots mapping
-# TODO Add custom quality profile support
 """
 
 import base64

@@ -2,13 +2,6 @@
 """
 SimpleCov Parser - Ruby Code Coverage Analysis
 
-# TODO [ENTERPRISE] Parse SimpleCov .resultset.json file
-# TODO [ENTERPRISE] Parse raw coverage data structures
-# TODO [ENTERPRISE] Calculate overall coverage metrics
-# TODO [ENTERPRISE] Identify uncovered lines in files
-# TODO [ENTERPRISE] Analyze coverage trends over time
-# TODO [ENTERPRISE] Generate coverage analysis reports
-# TODO [ENTERPRISE] Identify coverage hotspots
 """
 
 from dataclasses import dataclass

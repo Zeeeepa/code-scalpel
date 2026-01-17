@@ -16,19 +16,8 @@ PHPCS Features:
     - Custom sniff creation support
 
 Phase 2 Enhancement Areas:
-    # TODO HIGH PRIORITY: JSON report parsing
-    # TODO HIGH PRIORITY: XML report parsing
-    # TODO HIGH PRIORITY: CLI execution via subprocess
-    # TODO HIGH PRIORITY: Configuration loading (.phpcs.xml)
-    # TODO HIGH PRIORITY: Auto-fix mode (phpcbf)
 
-    # TODO MEDIUM PRIORITY: Ruleset parsing (PSR-1, PSR-2, PSR-12)
-    # TODO MEDIUM PRIORITY: Complexity metrics extraction
-    # TODO MEDIUM PRIORITY: Sniff coverage reports
-    # TODO MEDIUM PRIORITY: Violation categorization
 
-    # TODO LOW PRIORITY: Custom sniff templates
-    # TODO LOW PRIORITY: Comparison with other linters
 """
 
 from dataclasses import dataclass, field

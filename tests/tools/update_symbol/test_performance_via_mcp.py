@@ -67,7 +67,8 @@ def test_small_function_perf():
 
             patcher = SurgicalPatcher.from_file(str(test_file))
             start = time.perf_counter()
-            result = patcher.update_function(
+            # [20260117_TEST] Result not directly asserted in perf test
+            _result = patcher.update_function(
                 "process_data",
                 get_small_function_replacement("process_data"),
             )
@@ -105,7 +106,8 @@ def test_medium_function_perf():
             try:
                 patcher = SurgicalPatcher.from_file(str(test_file))
                 start = time.perf_counter()
-                result = patcher.update_function(
+                # [20260117_TEST] Result not directly asserted in perf test
+                _result = patcher.update_function(
                     "process_batch",
                     get_medium_function_replacement("process_batch"),
                 )
@@ -147,7 +149,8 @@ def test_large_function_perf():
 
             patcher = SurgicalPatcher.from_file(str(test_file))
             start = time.perf_counter()
-            result = patcher.update_function(
+            # [20260117_TEST] Result not directly asserted in perf test
+            _result = patcher.update_function(
                 "process_large",
                 get_large_function_replacement("process_large"),
             )
@@ -183,7 +186,8 @@ def test_very_large_class_perf():
 
             patcher = SurgicalPatcher.from_file(str(test_file))
             start = time.perf_counter()
-            result = patcher.update_class(
+            # [20260117_TEST] Result not directly asserted in perf test
+            _result = patcher.update_class(
                 "DataProcessor",
                 get_very_large_class_replacement("DataProcessor"),
             )
@@ -242,7 +246,8 @@ def test_file_not_found_perf():
     for i in range(10):
         start = time.perf_counter()
         try:
-            patcher = SurgicalPatcher.from_file("/nonexistent/file.py")
+            # [20260117_TEST] Trigger FileNotFoundError without assigning to a variable
+            SurgicalPatcher.from_file("/nonexistent/file.py")
         except FileNotFoundError:
             pass
         duration_ms = (time.perf_counter() - start) * 1000

@@ -35,6 +35,20 @@ ARTIFACTS_DIR = os.path.join(PROJECT_ROOT, "release_artifacts", "local_build")
 LOG_FILE = os.path.join(ARTIFACTS_DIR, "pipeline.log")
 VENV_DIR = os.path.join(PROJECT_ROOT, ".venv")
 
+# [20260117_FEATURE] Track ephemeral resources for post-run cleanup
+PIPELINE_CREATED_VENV = False
+BACKUP_EXTENSIONS = {".bak"}
+BACKUP_EXCLUDE_DIRS = {
+    ".git",
+    "dist_protected",
+    "build_protected",
+    "release_artifacts",
+    "htmlcov",
+    ".venv",
+}
+
+PIPELINE_DRY_RUN_CLEANUP = False
+
 # Colors
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -188,6 +202,7 @@ def ensure_environment():
     For conda: assumes environment is already activated.
     For venv: creates if needed.
     """
+    global PIPELINE_CREATED_VENV
     if ENV_TYPE == "conda":
         print(f"{CYAN}Using conda environment (already activated){RESET}")
         return
@@ -200,6 +215,7 @@ def ensure_environment():
     if not os.path.exists(VENV_DIR):
         print(f"{YELLOW}Creating virtual environment at {VENV_DIR}...{RESET}")
         subprocess.check_call([sys.executable, "-m", "venv", VENV_DIR])
+        PIPELINE_CREATED_VENV = True
     else:
         print(f"{BLUE}Using existing virtual environment at {VENV_DIR}{RESET}")
 
@@ -233,6 +249,43 @@ def set_license_tier(tier):
         log(f"Installed {tier} license from {src}", "SUCCESS")
     else:
         log(f"License file not found: {src}", "ERROR")
+
+
+# [20260117_FEATURE] Optional cleanup helpers for ephemeral resources
+def cleanup_virtualenv(dry_run: bool = False) -> None:
+    """Remove the venv created by this pipeline run, if any."""
+    if PIPELINE_CREATED_VENV and os.path.exists(VENV_DIR):
+        if dry_run or PIPELINE_DRY_RUN_CLEANUP:
+            log(f"[DRY-RUN] Would remove pipeline-created virtualenv at {VENV_DIR}", "INFO")
+            return
+        try:
+            shutil.rmtree(VENV_DIR)
+            log(f"Removed pipeline-created virtualenv at {VENV_DIR}", "SUCCESS")
+        except Exception as exc:
+            log(f"Failed to remove virtualenv at {VENV_DIR}: {exc}", "ERROR")
+
+
+def cleanup_backup_files(dry_run: bool = False) -> tuple[int, list[str]]:
+    """Remove backup files (e.g., *.bak) after validation."""
+    removed = []
+    for root, dirs, files in os.walk(PROJECT_ROOT):
+        dirs[:] = [d for d in dirs if d not in BACKUP_EXCLUDE_DIRS]
+        for name in files:
+            if any(name.endswith(ext) for ext in BACKUP_EXTENSIONS):
+                path = os.path.join(root, name)
+                if dry_run or PIPELINE_DRY_RUN_CLEANUP:
+                    log(f"[DRY-RUN] Would remove backup {path}", "INFO")
+                    continue
+                try:
+                    os.remove(path)
+                    removed.append(path)
+                except Exception as exc:
+                    log(f"Failed to remove backup {path}: {exc}", "ERROR")
+    if removed:
+        log(f"Removed {len(removed)} backup file(s)", "SUCCESS")
+    else:
+        log("No backup files removed (none found)", "INFO")
+    return len(removed), removed
 
 
 # =============================================================================
@@ -594,6 +647,21 @@ Examples:
     parser.add_argument("--no-fail-fast", action="store_true", help="Continue on failures")
     parser.add_argument("--env", choices=["conda", "venv", "auto"], default="auto", 
                         help="Environment type (default: auto-detect)")
+    parser.add_argument(
+        "--cleanup-venv",
+        action="store_true",
+        help="Remove the virtualenv created by this pipeline run (if any)",
+    )
+    parser.add_argument(
+        "--cleanup-backups",
+        action="store_true",
+        help="Remove backup files (e.g., *.bak) after successful completion",
+    )
+    parser.add_argument(
+        "--cleanup-dry-run",
+        action="store_true",
+        help="Dry-run cleanup: only log intended deletions (venv/backups)",
+    )
     args = parser.parse_args()
     
     start_total = time.time()
@@ -601,6 +669,8 @@ Examples:
     # Detect environment (conda vs venv vs system)
     ENV_TYPE, PYTHON_EXE, PIP_EXE, BIN_DIR = detect_environment()
     
+    global PIPELINE_DRY_RUN_CLEANUP
+
     setup_artifacts()
     ensure_environment()
     
@@ -629,6 +699,13 @@ Examples:
     stage_build()
     stage_metrics()
     generate_summary()
+
+    # [20260117_FEATURE] Optional cleanup after successful run
+    PIPELINE_DRY_RUN_CLEANUP = args.cleanup_dry_run
+    if args.cleanup_backups:
+        cleanup_backup_files(dry_run=args.cleanup_dry_run)
+    if args.cleanup_venv:
+        cleanup_virtualenv(dry_run=args.cleanup_dry_run)
 
     # Final Report
     duration_total = time.time() - start_total

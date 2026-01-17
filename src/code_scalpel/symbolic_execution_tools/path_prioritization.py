@@ -16,7 +16,6 @@ Use cases:
 - Security testing: Discover crash vulnerabilities
 - Test generation: Create tests for edge cases
 
-# TODO: PathPrioritizer Enhancement Roadmap
 # ==========================================
 #
 # COMMUNITY (Current & Planned):
@@ -353,7 +352,6 @@ class PathPrioritizer:
         Note:
             Current implementation is a placeholder for future adaptive strategies.
         """
-        # TODO: Implement adaptive strategy switching
         pass
 
     def get_error_patterns(self) -> Dict[int, ErrorPattern]:

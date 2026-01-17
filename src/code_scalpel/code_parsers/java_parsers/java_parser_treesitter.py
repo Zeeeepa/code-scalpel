@@ -24,15 +24,6 @@ Implemented Features:
 - Sealed class support (Java 17+)
 
 Phase 2 Enhancement TODOs:
-# TODO: Add support for Java 21+ pattern matching in switch statements
-# TODO: Implement virtual thread detection (Java 21+)
-# TODO: Add type parameter bound extraction (extends T, super T)
-# TODO: Implement local class and anonymous class full extraction
-# TODO: Add method body complexity metrics (branch count, loop depth)
-# TODO: Support permit list on sealed interfaces
-# TODO: Add record compact constructor detection
-# TODO: Implement incremental parsing for file change detection
-# TODO: Add source location mapping for error reporting
 """
 
 import hashlib

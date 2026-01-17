@@ -5,7 +5,6 @@ import os
 import re
 from typing import Dict, List
 
-# TODO [SECURITY]: Use defusedxml to prevent XXE attacks (B314)
 from defusedxml import ElementTree as ET
 
 try:
@@ -22,37 +21,13 @@ class DependencyParser:
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
-        # TODO [PRO] FEATURE: Support Gradle and SBT dependency parsing
-        # TODO [PRO]: Add Gradle build.gradle/build.gradle.kts parsing
-        # TODO [PRO]: Add SBT build.sbt parsing
-        # TODO [PRO]: Handle version constraints
-        # TODO [PRO]: Add 20+ tests for Gradle/SBT
 
-        # TODO [PRO] FEATURE: Add lock file parsing
-        # TODO [PRO]: Parse poetry.lock (Python)
-        # TODO [PRO]: Parse package-lock.json (JavaScript)
-        # TODO [PRO]: Parse Cargo.lock (Rust)
-        # TODO [PRO]: Extract resolved versions
-        # TODO [PRO]: Add 25+ tests for lock files
 
-        # TODO [PRO] ENHANCEMENT: Support optional and dev filtering
-        # TODO [PRO]: Mark dev/optional dependencies
-        # TODO [PRO]: Filter by type on query
-        # TODO [PRO]: Separate concerns in reports
-        # TODO [PRO]: Add 12+ tests for filtering
 
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-        # TODO [ENTERPRISE] FEATURE: Add version constraint normalization
-        # TODO [ENTERPRISE]: Parse PEP 440, semver, etc.
-        # TODO [ENTERPRISE]: Normalize to common format
-        # TODO [ENTERPRISE]: Resolve constraint intersections
-        # TODO [ENTERPRISE]: Add 20+ tests for normalization
 
-        # TODO [ENTERPRISE] FEATURE: Support cross-language dependency graphs
-        # TODO [ENTERPRISE]: Build unified dependency graph
-        # TODO [ENTERPRISE]: Connect across ecosystems
         #     3. Detect version conflicts
         #     4. Suggest resolution
         #     5. Add 25+ tests for cross-language

@@ -13,29 +13,9 @@ Composer provides:
 - Autoload configuration
 - Script management
 
-# TODO Parse composer.json files
-# TODO Extract dependency information with versions
-# TODO Parse require-dev dependencies
-# TODO Extract autoload configuration
-# TODO Parse script definitions
 
-# TODO Parse composer.lock files
-# TODO Extract installed package versions
-# TODO Track package hash information
-# TODO Analyze dependency resolution
-# TODO Detect version conflicts
 
-# TODO Scan dependencies for vulnerabilities
-# TODO Integration with vulnerability databases
-# TODO Track outdated packages
-# TODO Analyze security advisories
-# TODO Generate dependency update recommendations
 
-# TODO Build dependency tree visualization
-# TODO Detect circular dependencies
-# TODO Analyze package versions
-# TODO Track transitive dependencies
-# TODO Generate dependency reports
 """
 
 from dataclasses import dataclass, field
@@ -77,7 +57,6 @@ class ComposerParser:
 
     def parse_composer_json(self, json_file: Path) -> ComposerConfig:
         """
-        # TODO Parse composer.json file.
 
         Args:
             json_file: Path to composer.json
@@ -89,7 +68,6 @@ class ComposerParser:
 
     def parse_composer_lock(self, lock_file: Path) -> list[ComposerPackage]:
         """
-        # TODO Parse composer.lock file.
 
         Args:
             lock_file: Path to composer.lock
@@ -101,7 +79,6 @@ class ComposerParser:
 
     def scan_vulnerabilities(self) -> list[dict[str, Any]]:
         """
-        # TODO Scan dependencies for known vulnerabilities.
 
         Returns:
             List of vulnerability findings
@@ -110,7 +87,6 @@ class ComposerParser:
 
     def detect_outdated(self) -> list[ComposerPackage]:
         """
-        # TODO Detect outdated packages.
 
         Returns:
             List of outdated packages with newer versions
@@ -119,7 +95,6 @@ class ComposerParser:
 
     def generate_report(self) -> str:
         """
-        # TODO Generate comprehensive Composer report.
 
         Returns:
             Formatted report string

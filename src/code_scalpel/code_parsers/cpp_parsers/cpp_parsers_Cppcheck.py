@@ -3,14 +3,6 @@
 Cppcheck Parser - Static Analysis for C/C++ Code
 """
 
-# TODO [PHASE2/P1] Parse cppcheck XML output
-# TODO [PHASE2/P1] Execute cppcheck analysis via subprocess
-# TODO [PHASE2/P1] Load configuration from suppression files
-# TODO [PHASE2/P2] Categorize issues by severity and type
-# TODO [PHASE2/P2] Detect memory management issues
-# TODO [PHASE2/P2] Generate JSON/SARIF/HTML reports
-# TODO [PHASE2/P3] Analyze error patterns
-# TODO [PHASE2/P3] Track issue frequency and severity
 
 from dataclasses import dataclass
 from enum import Enum

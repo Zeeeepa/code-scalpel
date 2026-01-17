@@ -9,11 +9,6 @@ Reference: https://checkstyle.org/
 Command: java -jar checkstyle.jar -c /config.xml -f xml src/
 
 Phase 2 Enhancement TODOs:
-# TODO Add custom Checkstyle configuration parsing
-# TODO Implement severity level mapping to Code Scalpel standards
-# TODO Support incremental analysis mode
-# TODO Add filter configuration support (suppress warnings)
-# TODO Parse module/package-level Checkstyle annotations
 """
 
 import subprocess

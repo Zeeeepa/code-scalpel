@@ -42,10 +42,6 @@ OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
 DEFAULT_TIMEOUT = 10  # seconds
 MAX_RETRIES = 3
 RETRY_DELAY = 1  # seconds
-# TODO [FEATURE]: Add local vulnerability database caching
-# TODO [FEATURE]: Support ecosystem-specific vulnerability scoring
-# TODO [ENHANCEMENT]: Add advisory enrichment with CVSS and exploit data
-# TODO [ENHANCEMENT]: Support batch vulnerability checks with deduplication
 
 
 @dataclass
@@ -83,9 +79,6 @@ class OSVClient:
     known security vulnerabilities with CVE/GHSA identifiers.
     """
 
-    # TODO [COMMUNITY] Basic single package vulnerability query, batch vulnerability checking, severity classification, and error handling with retries
-    # TODO [PRO] In-memory vulnerability caching, ecosystem-specific vulnerability scoring, advisory enrichment with CVSS data, batch vulnerability deduplication, and local database fallback
-    # TODO [ENTERPRISE] ML-based vulnerability risk prediction, vulnerability trend analysis, integration with dependency lock files, and vulnerability remediation recommendations
 
     # [20251213_FEATURE] Ecosystem mapping for different package managers
     ECOSYSTEM_MAP = {

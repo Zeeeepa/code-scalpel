@@ -32,11 +32,6 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "max_uncovered_functions": 5,
             "min_test_per_function": 1,
         }
-        # TODO [FEATURE]: Support symbolic execution-based test generation
-        # TODO [FEATURE]: Add mutation testing for test quality verification
-        # TODO [FEATURE]: Generate integration test scenarios from call graphs
-        # TODO [ENHANCEMENT]: Support property-based testing with hypothesis
-        # TODO [ENHANCEMENT]: Add test maintenance and flakiness detection
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """

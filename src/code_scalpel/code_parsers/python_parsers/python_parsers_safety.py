@@ -319,7 +319,6 @@ class SafetyConfig:
     @classmethod
     def from_policy_file(cls, policy_path: str | Path) -> "SafetyConfig":
         """Load configuration from .safety-policy.json."""
-        # TODO: Implement
         return cls()
 
 
@@ -380,7 +379,6 @@ class SafetyParser:
             config: SafetyConfig instance or None to use defaults
         """
         self.config = config or SafetyConfig()
-        # TODO: Initialize safety library or API connection
 
     def analyze_requirements_file(self, requirements_path: str | Path) -> SafetyReport:
         """
@@ -394,10 +392,6 @@ class SafetyParser:
 
         TODO: Implement
         """
-        # TODO: Parse requirements.txt
-        # TODO: Run safety check
-        # TODO: Parse results
-        # TODO: Return SafetyReport
         raise NotImplementedError(
             "SafetyParser.analyze_requirements_file() not yet implemented"
         )
@@ -414,10 +408,6 @@ class SafetyParser:
 
         TODO: Implement
         """
-        # TODO: Parse lock file
-        # TODO: Run safety check
-        # TODO: Parse results
-        # TODO: Return SafetyReport
         raise NotImplementedError(
             "SafetyParser.analyze_lock_file() not yet implemented"
         )
@@ -435,9 +425,6 @@ class SafetyParser:
 
         TODO: Implement
         """
-        # TODO: Query safety database
-        # TODO: Build Vulnerability objects
-        # TODO: Return list
         raise NotImplementedError("SafetyParser.check_package() not yet implemented")
 
     def get_remediation(self, vulnerability: Vulnerability) -> str:
@@ -452,6 +439,4 @@ class SafetyParser:
 
         TODO: Implement
         """
-        # TODO: Extract remediation from advisory
-        # TODO: Format for display
         raise NotImplementedError("SafetyParser.get_remediation() not yet implemented")

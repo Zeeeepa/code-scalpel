@@ -86,10 +86,6 @@ class ASTUtils:
         TODO [ENTERPRISE]: Match equivalent structures
         TODO [ENTERPRISE]: Add 12+ tests for semantic comparison    """
 
-    # TODO [FEATURE]: Add constant folding and evaluation
-    # TODO [FEATURE]: Support dead code detection and removal
-    # TODO [ENHANCEMENT]: Add data flow analysis utilities
-    # TODO [ENHANCEMENT]: Support control flow graph generation
 
     @staticmethod
     def get_all_names(tree: ast.AST) -> set[str]:

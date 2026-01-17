@@ -78,17 +78,7 @@ class SandboxResult:
     stderr: str = ""
 
 
-# TODO [20251221] Phase 1 Enhancement: Add configuration validation
-# TODO [20251221] Phase 1 Enhancement: Support custom environment variables
-# TODO [20251221] Phase 1 Enhancement: Add pre-execution hooks
-# TODO [20251221] Phase 1 Enhancement: Implement result caching layer
-# TODO [20251221] Phase 1 Enhancement: Add timeout handling for hanging processes
 
-# TODO [20251221] Phase 2 Feature: Parallel execution coordination
-# TODO [20251221] Phase 2 Feature: Result streaming support
-# TODO [20251221] Phase 2 Feature: Performance profiling integration
-# TODO [20251221] Phase 2 Feature: Network isolation verification
-# TODO [20251221] Phase 2 Feature: Filesystem access logging
 
 
 class SandboxExecutor:

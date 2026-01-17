@@ -2,12 +2,6 @@
 """
 ReSharper C# Parser - JetBrains code analysis integration.
 
-# TODO [FEATURE] Implement ReSharper parser for v3.1.0 "Polyglot+" (Q1 2026)
-# TODO [INTERFACE] Interface with ReSharper Command Line Tools (InspectCode)
-# TODO [PARSING] Parse XML output from InspectCode
-# TODO [EXTRACTION] Extract code issues, suggestions, and refactoring opportunities
-# TODO [SEVERITY] Support severity levels: ERROR, WARNING, SUGGESTION, HINT
-# TODO [INHERITANCE] Inherit from base_parser.BaseParser
 #
 # Reference: https://www.jetbrains.com/help/resharper/InspectCode.html
 # Command: inspectcode.exe Solution.sln -o=results.xml

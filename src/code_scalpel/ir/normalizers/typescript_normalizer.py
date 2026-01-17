@@ -183,7 +183,6 @@ class TypeScriptNormalizer(JavaScriptNormalizer):
             self._set_language(
                 IRClassDef(
                     name=name,
-                    bases=[],  # TODO: Handle extends clause
                     body=body,
                     loc=self._make_loc(node),
                 )

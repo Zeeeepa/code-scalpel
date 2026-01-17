@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 """Tailor Parser - Swift Code Metrics Analysis"""
 
-# TODO [PRO] Parse JSON output from tailor --format=json
-# TODO [PRO] Execute Tailor analysis via subprocess
-# TODO [PRO] Load configuration from .tailor.yml files
-# TODO [PRO] Categorize metrics by severity and type
-# TODO [ENTERPRISE] Calculate code complexity metrics
-# TODO [ENTERPRISE] Generate JSON/SARIF/HTML reports
-# TODO [ENTERPRISE] Analyze cyclomatic complexity
-# TODO [ENTERPRISE] Detect code style violations
-# TODO [ENTERPRISE] Trend analysis and metrics tracking
 
 from dataclasses import dataclass
 from enum import Enum

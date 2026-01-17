@@ -45,7 +45,6 @@ from ..schema.drift_detector import (
     SchemaDriftResult,
 )
 
-# TODO: GrpcContractAnalyzer Enhancement Roadmap
 # ===============================================
 #
 # COMMUNITY (Current & Planned):

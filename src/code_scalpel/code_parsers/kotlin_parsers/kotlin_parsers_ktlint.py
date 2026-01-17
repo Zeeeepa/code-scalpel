@@ -14,62 +14,24 @@ ktlint provides:
 
 TODO: HIGH PRIORITY - Core Implementation
 ==========================================
-# TODO Implement JSON report parsing (ktlint --reporter=json)
-# TODO Implement plain text output parsing
-# TODO Implement SARIF report parsing
-# TODO Add violation extraction with rule IDs
-# TODO Add source location extraction (file, line, column)
-# TODO Add error message and detail extraction
 
 TODO: HIGH PRIORITY - Execution
 ================================
-# TODO Add ktlint CLI execution via subprocess
-# TODO Add Gradle task execution support (ktlintCheck, ktlintFormat)
-# TODO Add format mode execution (--format flag)
-# TODO Add stdin support for code snippets
-# TODO Add incremental checking support
 
 TODO: HIGH PRIORITY - Configuration
 ====================================
-# TODO Implement .editorconfig parsing for ktlint rules
-# TODO Add custom ruleset configuration
-# TODO Add disabled_rules parsing
-# TODO Add ktlint_* editorconfig property extraction
-# TODO Add baseline file parsing (.ktlint-baseline.xml)
 
 TODO: MEDIUM PRIORITY - Standard Rules
 =======================================
-# TODO Parse indentation rules (indent_size, indent_style)
-# TODO Parse import rules (no-wildcard-imports, no-unused-imports)
-# TODO Parse spacing rules (no-consecutive-blank-lines, no-trailing-spaces)
-# TODO Parse naming rules (package-name, class-naming)
-# TODO Parse wrapping rules (argument-list-wrapping, parameter-list-wrapping)
-# TODO Parse comment rules (comment-spacing)
-# TODO Parse string rules (no-multi-spaces, string-template)
 
 TODO: MEDIUM PRIORITY - Experimental Rules
 ===========================================
-# TODO Track experimental rule status
-# TODO Add opt-in experimental rule support
-# TODO Parse function-signature rule
-# TODO Parse type-parameter-list-spacing rule
-# TODO Parse annotation rules
 
 TODO: MEDIUM PRIORITY - Formatter
 ==================================
-# TODO Add format diff generation (before/after)
-# TODO Add dry-run format checking
-# TODO Track auto-fixable violations
-# TODO Generate format statistics
 
 TODO: LOW PRIORITY - Advanced Features
 =======================================
-# TODO Add custom rule loading (.kt ruleset files)
-# TODO Add rule documentation URL extraction
-# TODO Add Git pre-commit hook generation
-# TODO Add CI/CD integration helpers
-# TODO Add comparison with Detekt formatting rules
-# TODO Add migration helpers from other formatters
 """
 
 import shutil

@@ -46,7 +46,6 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-# TODO: SchemaDriftDetector Enhancement Roadmap
 # =============================================
 #
 # COMMUNITY (Current & Planned):
@@ -133,19 +132,16 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 #   - CloudEvents schema validation
 #   - JSON-LD context changes
 
-# TODO: Automated migration generation
 #   - Generate database migration scripts from schema drift
 #   - Create API client update patches
 #   - Auto-generate deprecation warnings
 #   - Build backward-compatible adapters
 
-# TODO: Impact analysis
 #   - Estimate number of affected clients
 #   - Calculate deployment risk score
 #   - Identify dependent services
 #   - Suggest rollout strategy (canary, blue-green)
 
-# TODO: Compatibility testing
 #   - Generate test cases for breaking changes
 #   - Validate old clients against new schema
 #   - Check schema registry compatibility levels

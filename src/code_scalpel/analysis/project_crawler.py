@@ -167,7 +167,6 @@ class FunctionInfo:
     is_method: bool = False
     class_name: str | None = None
 
-    # TODO: Add computed properties:
     # - is_complex: bool - Returns True if complexity > threshold
     # - size_lines: int - Number of lines (requires end_lineno)
     # - documentation_ratio: float - Docstring lines vs code lines
@@ -206,7 +205,6 @@ class ClassInfo:
     methods: list[FunctionInfo] = field(default_factory=list)
     bases: list[str] = field(default_factory=list)
 
-    # TODO: Add computed properties:
     # - total_complexity: int - Sum of all method complexities
     # - average_method_complexity: float - Mean complexity per method
     # - is_god_class: bool - Too many methods/attributes indicator
@@ -249,7 +247,6 @@ class FileAnalysisResult:
     complexity_warnings: list[FunctionInfo] = field(default_factory=list)
     error: str | None = None
 
-    # TODO: Add computed properties:
     # - code_to_comment_ratio: float - Code lines / comment lines
     # - documentation_coverage: float - % of functions with docstrings
     # - average_function_length: float - Mean lines per function
@@ -288,7 +285,6 @@ class CrawlResult:
     files_analyzed: list[FileAnalysisResult] = field(default_factory=list)
     files_with_errors: list[FileAnalysisResult] = field(default_factory=list)
 
-    # TODO: Add methods:
     # - get_files_by_complexity(min_score: int) -> list[FileAnalysisResult]
     # - get_files_by_size(min_loc: int) -> list[FileAnalysisResult]
     # - get_hotspots(top_n: int) -> list[tuple[str, FunctionInfo]]
@@ -367,7 +363,6 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
         self.imports: list[str] = []
         self.complexity_warnings: list[FunctionInfo] = []
         self._current_class: ClassInfo | None = None
-        # TODO: Add tracking for:
         # self._nesting_depth: int = 0
         # self._max_nesting_depth: int = 0
         # self.global_variables: list[str] = []
@@ -469,7 +464,6 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
             elif isinstance(child, ast.comprehension):
                 # List/dict/set comprehensions with if clauses
                 score += len(child.ifs)
-            # TODO: Add these cases:
             # elif isinstance(child, ast.Match):  # Python 3.10+
             #     score += len(child.cases)
             # elif isinstance(child, ast.IfExp):  # Ternary expressions

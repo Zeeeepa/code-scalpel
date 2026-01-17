@@ -2,13 +2,6 @@
 """
 Webpack JavaScript Parser - Bundle analyzer and code splitting detection.
 
-# TODO Implement webpack stats JSON parsing
-# TODO Add bundle size analysis (gzip/uncompressed)
-# TODO Support code splitting detection and analysis
-# TODO Implement module dependency graph construction
-# TODO Add vendor bundle identification
-# TODO Support lazy-loaded chunk detection
-# TODO Implement build performance metrics
 
 Reference: https://webpack.js.org/guides/code-splitting/
 Command: webpack build --profile --json=stats.json
@@ -44,7 +37,6 @@ class WebpackParser:
     def parse(self) -> dict:
         """Parse webpack bundle statistics.
 
-        # TODO Implement full stats parsing logic
 
         Returns:
             Dictionary with bundle metrics and module graph

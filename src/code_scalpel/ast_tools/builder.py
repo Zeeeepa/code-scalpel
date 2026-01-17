@@ -22,66 +22,20 @@ class ASTBuilder:
         # ====================================================================
         # TIER 1: COMMUNITY (Free - High Priority)
         # ====================================================================
-        # TODO [COMMUNITY][FEATURE]: Comment preservation in preprocessing
-        # TODO [COMMUNITY]: Enhance _remove_comments to preserve docstrings
-        # TODO [COMMUNITY]: Track comment locations with line numbers
-        # TODO [COMMUNITY]: Reattach comments to AST nodes
-        # TODO [COMMUNITY]: Add 20+ tests for comment preservation
 
-        # TODO [COMMUNITY][FEATURE]: Better syntax error recovery
-        # TODO [COMMUNITY]: Suggest fixes for common syntax errors
-        # TODO [COMMUNITY]: Recover and continue parsing
-        # TODO [COMMUNITY]: Collect all errors in one pass
-        # TODO [COMMUNITY]: Add 25+ tests for error recovery
 
-        # TODO [COMMUNITY][TEST]: Edge cases
-        # TODO [COMMUNITY]: Test incomplete code, mixed line endings
-        # TODO [COMMUNITY]: Test very large files, deeply nested structures
 
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
-        # TODO [PRO][FEATURE]: Add incremental parsing for large codebases
-        # TODO [PRO]: Parse only modified files
-        # TODO [PRO]: Reuse AST from unchanged files
-        # TODO [PRO]: Track file modification times
-        # TODO [PRO]: Implement dependency-aware incremental parsing
-        # TODO [PRO]: Add 30+ tests for incremental parsing
 
-        # TODO [PRO][FEATURE]: Support caching with TTL and invalidation
-        # TODO [PRO]: Implement TTL (time-to-live) for cache entries
-        # TODO [PRO]: Support cache invalidation by dependency
-        # TODO [PRO]: Track cache key dependencies
-        # TODO [PRO]: Add cache warming strategies
-        # TODO [PRO]: Add 25+ tests for cache expiration
 
-        # TODO [PRO][ENHANCEMENT]: Add preprocessing for type stubs
-        # TODO [PRO]: Handle .pyi file parsing
-        # TODO [PRO]: Extract type signatures from stubs
-        # TODO [PRO]: Merge type information with source
-        # TODO [PRO]: Support typing_extensions compatibility
-        # TODO [PRO]: Add 20+ tests for stub handling
 
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-        # TODO [ENTERPRISE][ENHANCEMENT]: Support parallel AST building
-        # TODO [ENTERPRISE]: Implement thread-pool based parsing
-        # TODO [ENTERPRISE]: Handle thread-safe cache access
-        # TODO [ENTERPRISE]: Support process-based parsing for isolation
-        # TODO [ENTERPRISE]: Add performance benchmarks
-        # TODO [ENTERPRISE]: Add 30+ tests for parallel parsing
 
-        # TODO [ENTERPRISE][FEATURE]: Custom preprocessing pipeline
-        # TODO [ENTERPRISE]: Support pipeline configuration
-        # TODO [ENTERPRISE]: Enable preprocessing hook ordering
-        # TODO [ENTERPRISE]: Add conditional preprocessing
-        # TODO [ENTERPRISE]: Support reversible preprocessing
-        # TODO [ENTERPRISE]: Add 25+ tests for preprocessing pipeline
 
-        # TODO [ENTERPRISE][FEATURE]: AST validation with custom rules
-        # TODO [ENTERPRISE]: Support custom validation rule registration
-        # TODO [ENTERPRISE]: Generate detailed validation reports
         #     3. Suggest fixes for validation failures
         #     4. Support configurable rule sets
         #     5. Add 35+ tests for validation rules

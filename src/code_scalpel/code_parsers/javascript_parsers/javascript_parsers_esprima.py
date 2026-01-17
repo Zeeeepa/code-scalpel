@@ -6,16 +6,6 @@ cognitive complexity calculation, security vulnerability detection,
 and code quality metrics.
 
 Phase 2 Enhancement TODOs:
-# TODO Upgrade to latest Esprima with ES2024 support
-# TODO Add control flow graph (CFG) construction
-# TODO Implement def-use chain analysis
-# TODO Add async/await analysis with deadlock detection
-# TODO Implement JSDoc coverage and validation
-# TODO Add scope chain depth analysis
-# TODO Support closure and lexical binding analysis
-# TODO Add hoisting order and temporal dead zone detection
-# TODO Implement prototype pollution vulnerability detection
-# TODO Add SQL/NoSQL injection detection
 
 Features:
     AST Parsing:

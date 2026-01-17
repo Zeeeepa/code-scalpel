@@ -13,23 +13,8 @@ Gradle Build Parser features:
 - Plugin detection and inventory
 - Task graph analysis
 
-# TODO Implement build.gradle.kts parsing
-# TODO Parse Gradle Kotlin DSL syntax
-# TODO Extract dependencies with versions
-# TODO Identify build plugins and their versions
-# TODO Parse Android-specific configurations
 
-# TODO Execute Gradle info task for metadata
-# TODO Parse Gradle dependency report
-# TODO Extract task graph information
-# TODO Analyze build performance metrics
-# TODO Detect dependency conflicts and issues
 
-# TODO Generate dependency tree visualization
-# TODO Implement vulnerability scanning for dependencies
-# TODO Track dependency updates and upgrades
-# TODO Analyze build optimization opportunities
-# TODO Generate build health report
 """
 
 from dataclasses import dataclass
@@ -102,7 +87,6 @@ class GradleBuildParser:
 
     def parse_build_gradle_kts(self, build_file: Path) -> dict[str, Any]:
         """
-        # TODO Parse Gradle Kotlin DSL build.gradle.kts file.
 
         Args:
             build_file: Path to build.gradle.kts
@@ -114,7 +98,6 @@ class GradleBuildParser:
 
     def extract_dependencies(self) -> list[Dependency]:
         """
-        # TODO Extract all project dependencies with versions.
 
         Returns:
             List of Dependency objects
@@ -123,7 +106,6 @@ class GradleBuildParser:
 
     def identify_plugins(self) -> list[GradlePlugin]:
         """
-        # TODO Identify all applied Gradle plugins.
 
         Returns:
             List of GradlePlugin objects
@@ -132,7 +114,6 @@ class GradleBuildParser:
 
     def parse_dependency_report(self, report_output: str) -> dict[str, Any]:
         """
-        # TODO Parse Gradle dependency report output.
 
         Args:
             report_output: Gradle dependency report
@@ -144,7 +125,6 @@ class GradleBuildParser:
 
     def analyze_build_performance(self, gradle_profiler_data: dict) -> dict[str, Any]:
         """
-        # TODO Analyze build performance metrics.
 
         Args:
             gradle_profiler_data: Gradle profiler output
@@ -156,7 +136,6 @@ class GradleBuildParser:
 
     def detect_dependency_vulnerabilities(self) -> list[dict[str, Any]]:
         """
-        # TODO Detect vulnerable dependencies.
 
         Returns:
             List of vulnerability findings
@@ -165,7 +144,6 @@ class GradleBuildParser:
 
     def generate_build_report(self) -> str:
         """
-        # TODO Generate comprehensive build health report.
 
         Returns:
             Formatted build report

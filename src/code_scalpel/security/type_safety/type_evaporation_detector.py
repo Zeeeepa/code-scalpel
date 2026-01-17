@@ -48,12 +48,6 @@ else:
     TSNode = Any
     TSParser = Any
 
-    # TODO [COMMUNITY]: Add comprehensive TypeScript examples, documentation, and guides for type evaporation patterns, detection rules, best practices, severity levels, remediation patterns, DOM input security, serialization boundaries, and unsafe assertions
-    # TODO [COMMUNITY]: Create unsafe type assertion, DOM input vulnerability, fetch boundary, type union validation, cross-file trust examples, and remediation patterns with end-to-end validation
-    # TODO [COMMUNITY]: Add type assertion detection, DOM input detection, fetch boundary analysis, union type validation tests, and regression test suite
-    # TODO [PRO]: Support Zod/Yup/io-ts validation detection, JSON Schema validation, dataflow-aware type tracking, type guard detection, discriminated union tracking, branded type validation, and type narrowing analysis
-    # TODO [PRO]: Add Express.js, Fastify, Hono, Next.js API routes, Remix, SvelteKit, REST clients, and WebSocket type safety support
-    # TODO [ENTERPRISE]: Support all JavaScript frameworks, distributed type analysis, ML-based type safety prediction, polyglot type evaporation analysis, type policy DSL, compliance checking, continuous monitoring, IDE integration, SIEM integration, automated remediation, symbolic type checking, probabilistic inference, type theorem proving, runtime enforcement, dashboards, cross-language bridges, type evolution tracking, metrics, and type safety auditing
 
 # Try to import tree-sitter for TypeScript parsing
 try:

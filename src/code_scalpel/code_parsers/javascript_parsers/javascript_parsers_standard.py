@@ -7,12 +7,6 @@ StandardJS is a popular zero-configuration linter/formatter following
 a consistent style guide (2 spaces, single quotes, no semicolons).
 
 Phase 2 Enhancement TODOs:
-# TODO Add StandardJS version detection and compatibility
-# TODO Implement rule override detection (.eslintrc support)
-# TODO Add fix cost estimation
-# TODO Support incremental linting
-# TODO Implement metrics aggregation (violations by rule)
-# TODO Add pre-commit hook detection
 
 Features:
     Output Parsing:

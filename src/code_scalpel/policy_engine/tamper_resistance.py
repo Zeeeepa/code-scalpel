@@ -7,36 +7,6 @@ This module provides tamper-resistant policy enforcement to prevent agents
 from circumventing policy controls.
 """
 
-# TODO [COMMUNITY]: Implement policy file integrity verification (SHA-256)
-# TODO [COMMUNITY]: Add read-only file permissions enforcement
-# TODO [COMMUNITY]: Implement policy modification prevention
-# TODO [COMMUNITY]: Create TOTP-based human override system
-# TODO [COMMUNITY]: Add comprehensive audit logging integration
-# TODO [COMMUNITY]: Implement override code generation
-# TODO [COMMUNITY]: Create override timeout enforcement
-# TODO [COMMUNITY]: Add override justification tracking
-# TODO [COMMUNITY]: Implement file permission monitoring
-# TODO [COMMUNITY]: Document tamper resistance architecture
-# TODO [PRO]: Add SELinux/AppArmor policy file protection
-# TODO [PRO]: Implement file system watcher for unauthorized modifications
-# TODO [PRO]: Create email notification for override requests
-# TODO [PRO]: Add multi-factor authentication for overrides
-# TODO [PRO]: Implement override approval workflows
-# TODO [PRO]: Create role-based override permissions
-# TODO [PRO]: Add geographic location verification for overrides
-# TODO [PRO]: Implement device fingerprinting for overrides
-# TODO [PRO]: Create policy change notifications
-# TODO [PRO]: Add encrypted storage for override secrets
-# TODO [ENTERPRISE]: Build seccomp sandbox for agent process isolation
-# TODO [ENTERPRISE]: Implement containerized policy engine with immutable images
-# TODO [ENTERPRISE]: Add TPM-backed attestation for policy integrity
-# TODO [ENTERPRISE]: Create hardware security module (HSM) integration
-# TODO [ENTERPRISE]: Implement quantum-safe cryptographic protection
-# TODO [ENTERPRISE]: Build federated tamper resistance across orgs
-# TODO [ENTERPRISE]: Add blockchain-based tamper proof audit trail
-# TODO [ENTERPRISE]: Implement zero-knowledge proof integrity verification
-# TODO [ENTERPRISE]: Create AI-powered anomaly detection for tampering
-# TODO [ENTERPRISE]: Build distributed consensus for policy verification
 
 import hashlib
 import hmac
@@ -67,12 +37,6 @@ class TamperResistance:
     - Comprehensive audit logging
     """
 
-    # TODO [COMMUNITY]: Basic file locking and hash verification
-    # TODO [PRO]: Add SELinux/AppArmor policy file protection
-    # TODO [PRO]: Add file system watcher for unauthorized modification attempts
-    # TODO [ENTERPRISE]: Add seccomp sandbox for agent process isolation
-    # TODO [ENTERPRISE]: Add containerized policy engine with immutable images
-    # TODO [ENTERPRISE]: Add TPM-backed attestation for policy integrity
 
     def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """
@@ -96,9 +60,6 @@ class TamperResistance:
 
         # [20251216_FEATURE] v2.5.0 Guardian P0 - File locking
         """
-        # TODO [PRO]: Add file encryption with read-only key
-        # TODO [ENTERPRISE]: Add immutable file flag (chattr +i on Linux)
-        # TODO [ENTERPRISE]: Add kernel module for file access control
 
         # Use policy_path parent as base directory for relative paths
         policy_dir = self.policy_path.parent
@@ -122,9 +83,6 @@ class TamperResistance:
 
                 Returns:
                     True if policy is intact, raises error if tampered
-        # TODO [PRO]: Add rollback capability to last known-good version
-                # TODO [ENTERPRISE]: Add incremental hash verification (Merkle tree)
-                # TODO [ENTERPRISE]: Add cryptographic chain of custody verification
 
 
                 Raises:

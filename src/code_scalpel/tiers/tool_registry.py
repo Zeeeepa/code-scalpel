@@ -6,15 +6,6 @@ Tool Registry - Central registry of MCP tools and their tier requirements.
 Maps MCP tools to their tier requirements and provides runtime gating.
 """
 
-# TODO [COMMUNITY] Implement tool→tier mapping for all 20 MCP tools
-# TODO [COMMUNITY] Implement get_available_tools() filtering by tier
-# TODO [COMMUNITY] Add tool metadata (parameters, descriptions)
-# TODO [PRO] Implement dynamic tool registration
-# TODO [PRO] Add tool aliases and versioning support
-# TODO [PRO] Implement tool parameter validation
-# TODO [ENTERPRISE] Support custom tool definitions
-# TODO [ENTERPRISE] Implement tool execution policies
-# TODO [ENTERPRISE] Add remote tool configuration
 
 from __future__ import annotations
 

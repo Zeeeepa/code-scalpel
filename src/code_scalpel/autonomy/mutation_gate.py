@@ -100,18 +100,7 @@ class Mutation:
     description: str
 
 
-# TODO [20251221] Phase 1 Enhancement: Implement additional mutation types (logic inversions, boundary mutations)
-# TODO [20251221] Phase 1 Enhancement: Add mutation impact visualization
-# TODO [20251221] Phase 1 Enhancement: Support custom mutation rules
-# TODO [20251221] Phase 1 Enhancement: Implement mutation caching
-# TODO [20251221] Phase 1 Enhancement: Add mutation filtering (skip trivial mutations)
 
-# TODO [20251221] Phase 2 Feature: ML-based mutation relevance scoring
-# TODO [20251221] Phase 2 Feature: Adaptive mutation generation
-# TODO [20251221] Phase 2 Feature: Integration with test coverage analysis
-# TODO [20251221] Phase 2 Feature: Generate weak test detection report
-# TODO [20251221] Phase 2 Feature: Suggest test improvements
-# TODO [20251221] Phase 2 Feature: Support mutation score trending
 
 
 class MutationTestGate:

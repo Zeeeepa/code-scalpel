@@ -327,7 +327,6 @@ class RadonConfig:
     @classmethod
     def from_pyproject(cls, pyproject_path: str | Path) -> "RadonConfig":
         """Load configuration from pyproject.toml."""
-        # TODO: Implement
         return cls()
 
 
@@ -406,7 +405,6 @@ class RadonParser:
             config: RadonConfig instance or None to use defaults
         """
         self.config = config or RadonConfig()
-        # TODO: Initialize radon library
 
     def analyze_file(self, file_path: str | Path) -> RadonReport:
         """
@@ -420,10 +418,6 @@ class RadonParser:
 
         TODO: Implement
         """
-        # TODO: Run radon on file
-        # TODO: Parse JSON output
-        # TODO: Build metrics objects
-        # TODO: Return RadonReport
         raise NotImplementedError("RadonParser.analyze_file() not yet implemented")
 
     def analyze_code(self, code: str, filename: str = "<string>") -> RadonReport:
@@ -439,10 +433,6 @@ class RadonParser:
 
         TODO: Implement
         """
-        # TODO: Run radon on code
-        # TODO: Parse JSON output
-        # TODO: Build metrics objects
-        # TODO: Return RadonReport
         raise NotImplementedError("RadonParser.analyze_code() not yet implemented")
 
     def get_grade(self, complexity: int) -> str:

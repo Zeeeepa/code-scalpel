@@ -15,21 +15,8 @@ Psalm Features:
     - Multiple output formats (JSON, JSON-pretty, XML, emacs, etc.)
 
 Phase 2 Enhancement Areas:
-    # TODO HIGH PRIORITY: JSON report parsing
-    # TODO HIGH PRIORITY: JSON-pretty format parsing
-    # TODO HIGH PRIORITY: XML output support
-    # TODO HIGH PRIORITY: CLI execution via subprocess
-    # TODO HIGH PRIORITY: Configuration file loading (psalm.xml)
 
-    # TODO MEDIUM PRIORITY: Taint analysis results parsing
-    # TODO MEDIUM PRIORITY: Security vulnerability detection
-    # TODO MEDIUM PRIORITY: Error categorization and severity
-    # TODO MEDIUM PRIORITY: Type coverage metrics
 
-    # TODO LOW PRIORITY: Type hint suggestions
-    # TODO LOW PRIORITY: Psalm annotation generation
-    # TODO LOW PRIORITY: IDE integration
-    # TODO LOW PRIORITY: Comparison with PHPStan
 """
 
 from dataclasses import dataclass, field

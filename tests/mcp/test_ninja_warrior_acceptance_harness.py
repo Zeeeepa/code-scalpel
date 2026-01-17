@@ -17,9 +17,16 @@ import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.sse import sse_client
 from mcp.client.stdio import stdio_client
-from mcp.client.streamable_http import streamable_http_client
+
+try:
+    from mcp.client.streamable_http import streamable_http_client
+except Exception:  # pragma: no cover - optional dependency may be absent
+    streamable_http_client = None
 
 pytestmark = [pytest.mark.asyncio, pytest.mark.ninja_warrior]
+if streamable_http_client is None:
+    # [20260117_TEST] Skip when streamable HTTP client is unavailable
+    pytestmark.append(pytest.mark.skip("streamable-http client not available"))
 
 
 def _repo_root() -> Path:
@@ -56,7 +63,6 @@ def _git_info(repo_path: Path) -> dict | None:
     branch = _run_git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=repo_path)
     status = _run_git(["status", "--porcelain"], cwd=repo_path)
     dirty = bool(status)
-
     return {
         "path": str(repo_path),
         "sha": sha,

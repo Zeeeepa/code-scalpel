@@ -32,11 +32,6 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "min_readme_sections": 5,
             "max_lines_per_function_undocumented": 20,
         }
-        # TODO [FEATURE]: Support Google/NumPy/Sphinx docstring styles
-        # TODO [FEATURE]: Generate type hints from code analysis
-        # TODO [FEATURE]: Create API documentation from docstrings
-        # TODO [ENHANCEMENT]: Generate usage examples from test code
-        # TODO [ENHANCEMENT]: Add documentation linting and validation
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """

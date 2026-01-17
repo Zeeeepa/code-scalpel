@@ -2,14 +2,6 @@
 """
 Bundler Parser - Ruby Dependency Management Analysis
 
-# TODO [ENTERPRISE] Parse Gemfile for dependency declarations
-# TODO [ENTERPRISE] Parse Gemfile.lock for resolved versions
-# TODO [ENTERPRISE] Extract gem names and version constraints
-# TODO [ENTERPRISE] Extract locked gem versions
-# TODO [ENTERPRISE] Scan gems for known vulnerabilities
-# TODO [ENTERPRISE] Detect outdated gem versions
-# TODO [ENTERPRISE] Analyze transitive dependency relationships
-# TODO [ENTERPRISE] Generate dependency analysis reports
 """
 
 from dataclasses import dataclass

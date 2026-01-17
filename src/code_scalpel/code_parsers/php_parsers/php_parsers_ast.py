@@ -12,29 +12,9 @@ PHP-Parser provides:
 - Error recovery
 - Visitor pattern support
 
-# TODO Implement PHP code parsing to AST
-# TODO Extract class definitions and methods
-# TODO Parse function signatures with type hints
-# TODO Extract namespace and use statements
-# TODO Analyze type declarations (properties, parameters, returns)
 
-# TODO Implement AST visitor pattern
-# TODO Add symbol extraction (classes, functions, constants)
-# TODO Build call graph from AST
-# TODO Analyze inheritance hierarchies
-# TODO Extract interface implementations
 
-# TODO Detect PHP version compatibility issues
-# TODO Analyze deprecation usage
-# TODO Parse attributes (PHP 8.0+)
-# TODO Detect named arguments usage
-# TODO Analyze union/intersection types
 
-# TODO Generate code metrics (lines, complexity, depth)
-# TODO Track method coupling and cohesion
-# TODO Analyze code structure and organization
-# TODO Detect code duplicates via AST
-# TODO Create structural reports
 """
 
 from dataclasses import dataclass, field
@@ -80,7 +60,6 @@ class PHPParserAST:
 
     def parse_file(self, php_file: Path) -> dict[str, Any]:
         """
-        # TODO Parse PHP file into AST.
 
         Args:
             php_file: Path to PHP file
@@ -92,7 +71,6 @@ class PHPParserAST:
 
     def extract_classes(self, php_code: str) -> list[PHPClass]:
         """
-        # TODO Extract class definitions from PHP code.
 
         Args:
             php_code: PHP source code
@@ -104,7 +82,6 @@ class PHPParserAST:
 
     def extract_functions(self, php_code: str) -> list[PHPFunction]:
         """
-        # TODO Extract function definitions from PHP code.
 
         Args:
             php_code: PHP source code
@@ -116,7 +93,6 @@ class PHPParserAST:
 
     def build_call_graph(self) -> dict[str, list[str]]:
         """
-        # TODO Build call graph from AST.
 
         Returns:
             Dictionary mapping function/method names to their calls
@@ -125,7 +101,6 @@ class PHPParserAST:
 
     def analyze_structure(self) -> dict[str, Any]:
         """
-        # TODO Analyze code structure and metrics.
 
         Returns:
             Structure analysis results

@@ -32,11 +32,6 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
             "max_complexity_score": 10,
             "min_test_coverage": 80,
         }
-        # TODO [FEATURE]: Support custom quality metrics per file/module
-        # TODO [FEATURE]: Add style guide enforcement (PEP8, Black config, etc)
-        # TODO [ENHANCEMENT]: Integrate with common linters (ruff, pylint, flake8)
-        # TODO [ENHANCEMENT]: Add IDE-style inline hints for quick fixes
-        # TODO [ENHANCEMENT]: Support code smell detection patterns
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """Observe the target file and gather comprehensive information."""

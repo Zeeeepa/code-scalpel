@@ -12,7 +12,6 @@ Scope:
 
 This is a flow-insensitive analysis: we track the LAST assignment to each variable.
 
-# TODO: TypeInferenceEngine Enhancement Roadmap
 # ==============================================
 #
 # COMMUNITY (Current & Planned):

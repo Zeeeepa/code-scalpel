@@ -12,36 +12,6 @@ import networkx as nx
 #     - Detect scope-related bugs (shadowing, unintended globals)
 #     - Support closure variable capture tracking
 
-# TODO [COMMUNITY] Implement AST node visitation for all Python statements
-# TODO [COMMUNITY] Build control flow graph from if/while/for statements
-# TODO [COMMUNITY] Track variable definitions and uses
-# TODO [COMMUNITY] Create data dependency edges (def-use chains)
-# TODO [COMMUNITY] Implement basic call graph construction
-# TODO [COMMUNITY] Add return statement tracking
-# TODO [COMMUNITY] Create scope hierarchy for nested functions/classes
-# TODO [COMMUNITY] Track import statements and module dependencies
-# TODO [COMMUNITY] Implement exception handling node tracking
-# TODO [COMMUNITY] Add comprehensive error handling for malformed input
-# TODO [PRO] Support interprocedural control flow (function calls)
-# TODO [PRO] Implement parameter passing and return value tracking
-# TODO [PRO] Add closure variable capture in nested functions
-# TODO [PRO] Track nonlocal/global variable declarations
-# TODO [PRO] Support exception flow through call chains
-# TODO [PRO] Implement context-sensitive scope tracking
-# TODO [PRO] Add alias detection for variable references
-# TODO [PRO] Support class attribute and method tracking
-# TODO [PRO] Implement decorator handling and analysis
-# TODO [PRO] Add generator/yield statement tracking
-# TODO [ENTERPRISE] Extend builder to support JavaScript/TypeScript
-# TODO [ENTERPRISE] Add Java language support via tree-sitter
-# TODO [ENTERPRISE] Implement C/C++ PDG building for systems analysis
-# TODO [ENTERPRISE] Support distributed PDG building (sharded by module)
-# TODO [ENTERPRISE] Add incremental PDG updates for code changes
-# TODO [ENTERPRISE] Implement inter-module dependency tracking
-# TODO [ENTERPRISE] Support async/await dependency tracking
-# TODO [ENTERPRISE] Add WebAssembly code analysis support
-# TODO [ENTERPRISE] Implement quantum-safe dependency hashing
-# TODO [ENTERPRISE] Create federated PDG for cross-repository analysis
 
 
 class NodeType(Enum):

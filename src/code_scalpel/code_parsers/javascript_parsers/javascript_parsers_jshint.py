@@ -6,13 +6,6 @@ Parses JSHint output for detecting errors and potential problems in JavaScript c
 JSHint is a community-driven tool that detects errors and potential problems.
 
 Phase 2 Enhancement TODOs:
-# TODO Add option override detection (overrides per file/section)
-# TODO Implement error code categorization and grouping
-# TODO Support metrics reporting (functions, vars, indentation)
-# TODO Add custom JSHint rules detection
-# TODO Implement option conflict detection
-# TODO Add scope analysis for undefined variables
-# TODO Support incremental linting with cache
 
 Features:
     Output Parsing:

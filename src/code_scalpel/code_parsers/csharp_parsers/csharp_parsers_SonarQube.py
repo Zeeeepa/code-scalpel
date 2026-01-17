@@ -2,12 +2,6 @@
 """
 SonarQube C# Parser - SonarQube/SonarCloud analysis integration.
 
-# TODO [FEATURE] Implement SonarQube C# parser for v3.1.0 "Polyglot+" (Q1 2026)
-# TODO [FEATURE] Interface with SonarScanner for .NET
-# TODO [FEATURE] Query SonarQube API for analysis results
-# TODO [FEATURE] Extract bugs, vulnerabilities, code smells, and security hotspots
-# TODO [FEATURE] Support severity levels: BLOCKER, CRITICAL, MAJOR, MINOR, INFO
-# TODO [FEATURE] Inherit from base_parser.BaseParser
 #
 # Reference: https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner-for-dotnet/
 # Command: dotnet sonarscanner begin /k:"project-key" && dotnet build && dotnet sonarscanner end

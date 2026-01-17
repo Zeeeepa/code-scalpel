@@ -494,7 +494,6 @@ class UnifiedExtractionResult:
 
         return "\n".join(parts)
 
-    # TODO: Add computed properties:
     # - has_documentation: bool - Whether docstring exists
     # - is_complex: bool - Whether complexity exceeds threshold
 

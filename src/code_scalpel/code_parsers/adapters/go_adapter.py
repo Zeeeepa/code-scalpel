@@ -2,23 +2,6 @@
 
 [20251224_FEATURE] Stub adapter for Go parsing support.
 
-# TODO [COMMUNITY] Implement basic Go parsing with tree-sitter-go or go/parser
-# TODO [COMMUNITY] Parse package declarations and extract functions, structs, interfaces
-# TODO [COMMUNITY] Add Go version detection (1.18-1.22) with generics support
-# TODO [COMMUNITY] Extract goroutine patterns, channel operations, and defer statements
-# TODO [COMMUNITY] Add import analysis with module dependency graph
-# TODO [COMMUNITY] Detect unused imports and indirect dependencies
-# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
-# TODO [PRO] Integrate static analysis (go vet, staticcheck, golangci-lint, gosec)
-# TODO [PRO] Add semantic analysis with type resolution and interface tracking
-# TODO [PRO] Implement code transformation with gofmt and refactoring operations
-# TODO [PRO] Add concurrency analysis (race conditions, goroutine leaks, channel usage)
-# TODO [PRO] Support advanced features (generics, type parameters, type constraints)
-# TODO [ENTERPRISE] Add security analysis (SQL injection, command injection, path traversal)
-# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
-# TODO [ENTERPRISE] Add enterprise compliance checking and reporting
-# TODO [ENTERPRISE] Implement performance profiling and optimization hints
-# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 from typing import Any, List
 from ..interface import IParser, ParseResult

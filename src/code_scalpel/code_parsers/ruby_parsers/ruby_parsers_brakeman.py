@@ -2,14 +2,6 @@
 """
 Brakeman Parser - Ruby Security Vulnerability Scanning
 
-# TODO [ENTERPRISE] Parse JSON output from brakeman
-# TODO [ENTERPRISE] Execute Brakeman security scanning
-# TODO [ENTERPRISE] Load Brakeman configuration
-# TODO [ENTERPRISE] Categorize vulnerabilities by type
-# TODO [ENTERPRISE] Detect SQL injection vulnerabilities
-# TODO [ENTERPRISE] Detect mass assignment vulnerabilities
-# TODO [ENTERPRISE] Detect XSS vulnerabilities
-# TODO [ENTERPRISE] Generate security reports
 """
 
 from dataclasses import dataclass

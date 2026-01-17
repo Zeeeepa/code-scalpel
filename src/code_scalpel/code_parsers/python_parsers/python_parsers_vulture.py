@@ -239,13 +239,11 @@ class VultureConfig:
     @classmethod
     def from_pyproject(cls, pyproject_path: str | Path) -> "VultureConfig":
         """Load configuration from pyproject.toml."""
-        # TODO: Implement
         return cls()
 
     @classmethod
     def from_file(cls, config_path: str | Path) -> "VultureConfig":
         """Load configuration from setup.cfg or .vulture.ini."""
-        # TODO: Implement
         return cls()
 
 
@@ -307,7 +305,6 @@ class VultureParser:
             config: VultureConfig instance or None to use defaults
         """
         self.config = config or VultureConfig()
-        # TODO: Initialize vulture library
 
     def analyze_file(self, file_path: str | Path) -> VultureReport:
         """
@@ -321,10 +318,6 @@ class VultureParser:
 
         TODO: Implement
         """
-        # TODO: Run vulture on file
-        # TODO: Parse results
-        # TODO: Filter by min_confidence
-        # TODO: Return VultureReport
         raise NotImplementedError("VultureParser.analyze_file() not yet implemented")
 
     def analyze_code(self, code: str, filename: str = "<string>") -> VultureReport:
@@ -340,10 +333,6 @@ class VultureParser:
 
         TODO: Implement
         """
-        # TODO: Run vulture on code
-        # TODO: Parse results
-        # TODO: Filter by min_confidence
-        # TODO: Return VultureReport
         raise NotImplementedError("VultureParser.analyze_code() not yet implemented")
 
     def load_config(self, config_path: str | Path) -> None:
@@ -355,8 +344,6 @@ class VultureParser:
 
         TODO: Implement
         """
-        # TODO: Parse config file
-        # TODO: Update self.config
         raise NotImplementedError("VultureParser.load_config() not yet implemented")
 
     def filter_by_confidence(
@@ -376,7 +363,6 @@ class VultureParser:
 
         TODO: Implement
         """
-        # TODO: Filter all lists by confidence
         raise NotImplementedError(
             "VultureParser.filter_by_confidence() not yet implemented"
         )

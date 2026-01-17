@@ -24,36 +24,6 @@ Example:
     has_sql = analyzer.contains_sql_sink(code, "python")
 """
 
-# TODO [COMMUNITY]: Implement SQL injection detection via concatenation
-# TODO [COMMUNITY]: Add SQL detection via f-strings/template literals
-# TODO [COMMUNITY]: Implement SQL detection via string.format()
-# TODO [COMMUNITY]: Add Java StringBuilder/StringBuffer pattern detection
-# TODO [COMMUNITY]: Create AST-based code analysis
-# TODO [COMMUNITY]: Implement language-agnostic pattern detection
-# TODO [COMMUNITY]: Add semantic context understanding
-# TODO [COMMUNITY]: Create pattern matching rule engine
-# TODO [COMMUNITY]: Implement comprehensive error handling
-# TODO [COMMUNITY]: Document pattern detection algorithms
-# TODO [PRO]: Add XSS injection pattern detection
-# TODO [PRO]: Implement command injection pattern detection
-# TODO [PRO]: Add LDAP injection detection
-# TODO [PRO]: Implement NoSQL injection detection
-# TODO [PRO]: Create path traversal pattern detection
-# TODO [PRO]: Add unsafe deserialization detection
-# TODO [PRO]: Implement expression injection detection
-# TODO [PRO]: Add custom pattern rule definitions
-# TODO [PRO]: Create pattern performance optimization
-# TODO [PRO]: Add pattern conflict resolution
-# TODO [ENTERPRISE]: Build ML-based semantic code understanding (AST+embeddings)
-# TODO [ENTERPRISE]: Implement zero-shot pattern learning
-# TODO [ENTERPRISE]: Add contextual analysis using data flow graphs
-# TODO [ENTERPRISE]: Create distributed semantic analysis
-# TODO [ENTERPRISE]: Implement quantum-safe pattern hashing
-# TODO [ENTERPRISE]: Build federated pattern databases
-# TODO [ENTERPRISE]: Add advanced threat model pattern generation
-# TODO [ENTERPRISE]: Implement AI-powered vulnerability discovery
-# TODO [ENTERPRISE]: Create blockchain-based pattern verification
-# TODO [ENTERPRISE]: Build cross-organization pattern federation
 
 from __future__ import annotations
 
@@ -71,12 +41,6 @@ class SemanticAnalyzer:
     semantic meaning of code, detecting vulnerabilities even when syntax varies.
     """
 
-    # TODO [COMMUNITY]: SQL injection detection (current)
-    # TODO [PRO]: Add XSS injection pattern detection
-    # TODO [PRO]: Add command injection pattern detection
-    # TODO [ENTERPRISE]: ML-based semantic code understanding (AST+embeddings)
-    # TODO [ENTERPRISE]: Zero-shot pattern learning from vulnerability examples
-    # TODO [ENTERPRISE]: Contextual analysis using data flow graphs
 
     # SQL keywords that indicate database operations
     SQL_KEYWORDS = {
@@ -114,10 +78,6 @@ class SemanticAnalyzer:
         Returns:
             True if SQL operation detected
         """
-        # TODO [PRO]: Add confidence scoring for detection accuracy
-        # TODO [ENTERPRISE]: Add context-aware sanitizer detection (htmlescape, sql.quote, etc)
-        # TODO [ENTERPRISE]: Add parametrized query detection to whitelist safe patterns
-        # TODO [ENTERPRISE]: Add ORM framework detection (SQLAlchemy, Sequelize, etc)
 
         if language.lower() in ["python"]:
             return self._detect_python_sql(code)
@@ -142,9 +102,6 @@ class SemanticAnalyzer:
         - % formatting with SQL keywords
 
         Args:
-        # TODO [PRO]: Add NoSQL injection detection (MongoDB, etc)
-        # TODO [ENTERPRISE]: Add Python version-specific analysis (async, walrus, etc)
-        # TODO [ENTERPRISE]: Add library-aware detection (psycopg2, pymongo, sqlalchemy)
 
             code: Python source code
 

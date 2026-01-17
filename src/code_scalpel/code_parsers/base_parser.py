@@ -1,69 +1,6 @@
 # src/code_parser/base_parser.py
 """Base Parser - Abstract base class and shared utilities for all parsers.
 
-# TODO [COMMUNITY] Add TypeScript, Go, Rust, Ruby, PHP, Swift, Kotlin to Language enum
-# TODO [COMMUNITY] Add language aliases (js→javascript, ts→typescript)
-# TODO [COMMUNITY] Add language metadata (extensions, shebangs, features)
-# TODO [COMMUNITY] Support language detection from content
-# TODO [COMMUNITY] Add source_map to ParseResult
-# TODO [COMMUNITY] Add file_path to ParseResult
-# TODO [COMMUNITY] Add parse_time_ms to ParseResult
-# TODO [COMMUNITY] Add metadata dict to ParseResult
-# TODO [COMMUNITY] Make ParseResult serializable (JSON, pickle)
-# TODO [COMMUNITY] Add macro expansion for C/C++
-# TODO [COMMUNITY] Add JSX/TSX transformation for JavaScript
-# TODO [COMMUNITY] Add template preprocessing for template languages
-# TODO [COMMUNITY] Support multiple preprocessor passes
-# TODO [COMMUNITY] Add preprocessor plugin system
-# TODO [COMMUNITY] Support multi-language comment syntax
-# TODO [COMMUNITY] Preserve docstrings/JSDoc/JavaDoc
-# TODO [COMMUNITY] Handle edge cases (comments in strings, regex)
-# TODO [COMMUNITY] Support comment extraction for documentation
-# TODO [COMMUNITY] Generate detailed token streams
-# TODO [COMMUNITY] Include token positions and types
-# TODO [COMMUNITY] Support token-based analysis
-# TODO [COMMUNITY] Add token filtering utilities
-# TODO [PRO] Add parse_incremental(code, changes) method
-# TODO [PRO] Support efficient re-parsing of modified sections
-# TODO [PRO] Implement AST caching with invalidation
-# TODO [PRO] Add change impact analysis
-# TODO [PRO] Calculate Halstead complexity
-# TODO [PRO] Add cognitive complexity calculation
-# TODO [PRO] Calculate maintainability index
-# TODO [PRO] Add code smell detection
-# TODO [PRO] Generate comprehensive quality reports
-# TODO [PRO] Add error recovery strategies
-# TODO [PRO] Support partial parsing on errors
-# TODO [PRO] Provide fix suggestions for common errors
-# TODO [PRO] Add error context extraction
-# TODO [PRO] Support per-language configuration
-# TODO [PRO] Add configuration validation
-# TODO [PRO] Implement configuration inheritance
-# TODO [PRO] Support environment-specific configs
-# TODO [PRO] Generate source maps for transformations
-# TODO [PRO] Support source map chains
-# TODO [PRO] Add source position utilities
-# TODO [PRO] Enable debugging transformed code
-# TODO [ENTERPRISE] Support parsing work distribution
-# TODO [ENTERPRISE] Implement result aggregation
-# TODO [ENTERPRISE] Add progress tracking for large codebases
-# TODO [ENTERPRISE] Support parallel parsing coordination
-# TODO [ENTERPRISE] Add comprehensive metrics collection
-# TODO [ENTERPRISE] Support OpenTelemetry integration
-# TODO [ENTERPRISE] Add performance profiling hooks
-# TODO [ENTERPRISE] Generate parsing analytics
-# TODO [ENTERPRISE] Implement parsing audit logging
-# TODO [ENTERPRISE] Add compliance policy enforcement
-# TODO [ENTERPRISE] Support regulatory requirements (HIPAA, SOC2)
-# TODO [ENTERPRISE] Generate compliance reports
-# TODO [ENTERPRISE] Add memory usage tracking
-# TODO [ENTERPRISE] Implement parsing timeouts
-# TODO [ENTERPRISE] Support resource quotas per tenant
-# TODO [ENTERPRISE] Add graceful degradation on resource limits
-# TODO [ENTERPRISE] Predict optimal preprocessing strategies
-# TODO [ENTERPRISE] Adapt parsing strategies based on patterns
-# TODO [ENTERPRISE] Detect anomalous code structures
-# TODO [ENTERPRISE] Optimize parsing performance via ML
 """
 
 import ast  # Import the ast module

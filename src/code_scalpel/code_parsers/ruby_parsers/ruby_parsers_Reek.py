@@ -2,14 +2,6 @@
 """
 Reek Parser - Ruby Code Smell Detection
 
-# TODO [PRO] Parse JSON output from reek --format=json
-# TODO [PRO] Parse XML output from reek
-# TODO [PRO] Execute Reek via subprocess/bundler
-# TODO [PRO] Load configuration from .reek.yml files
-# TODO [PRO] Categorize smells by type and severity
-# TODO [PRO] Detect duplicated code smells
-# TODO [PRO] Detect long method smells
-# TODO [PRO] Generate JSON/XML/HTML reports
 """
 
 from dataclasses import dataclass

@@ -77,11 +77,6 @@ class AnalysisCache(Generic[T]):
     - Memory cache avoids repeat parsing within a process.
     - Disk cache persists across runs; corruption triggers re-parse and rewrite.
 
-    # TODO Phase 2: Implement LRU eviction policy for unbounded memory growth
-    # TODO Phase 2: Add cache compression for large objects (reduce disk usage)
-    # TODO Phase 2: Support automatic cleanup of stale entries (>30 days)
-    # TODO Phase 2: Add file locking for multi-process concurrent writes
-    # TODO Phase 2: Implement cache versioning based on tool version
     """
 
     def __init__(self, cache_dir: Path | str = ".code_scalpel_cache") -> None:
@@ -198,9 +193,6 @@ class AnalysisCache(Generic[T]):
     def _hash_file_mmap(self, path: Path) -> str:
         """[20251214_PERF] Hash large file using memory-mapped I/O.
 
-        # TODO Phase 2: Add streaming hash option for files >100MB
-        # TODO Phase 2: Support parallel hashing across multiple cores
-        # TODO Phase 2: Add cache for file hash results (avoid re-hashing)
         """
         hasher = hashlib.sha256()
         with path.open("rb") as f:

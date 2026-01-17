@@ -86,10 +86,6 @@ class ExtractedSymbol:
     # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
     depth: int = 0
     confidence: float = 1.0
-    # TODO [FEATURE]: Add semantic similarity scoring for related symbols
-    # TODO [FEATURE]: Support stub detection and filtering
-    # TODO [ENHANCEMENT]: Add extraction caching with invalidation
-    # TODO [ENHANCEMENT]: Support extraction for type stubs and protocol definitions
 
     def __hash__(self):
         return hash((self.module, self.name))

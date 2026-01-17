@@ -49,70 +49,20 @@ class ASTAnalyzer:
         # ====================================================================
         # TIER 1: COMMUNITY (Free - High Priority)
         # ====================================================================
-        # TODO [COMMUNITY][FEATURE]: Enhanced caching with LRU eviction
-        # TODO [COMMUNITY]: Implement bounded cache size with LRU eviction
-        # TODO [COMMUNITY]: Add cache hit/miss statistics
-        # TODO [COMMUNITY]: Support cache invalidation by file path
-        # TODO [COMMUNITY]: Add 15+ tests for cache behavior
 
-        # TODO [COMMUNITY][FEATURE]: Improve function metrics accuracy
-        # TODO [COMMUNITY]: Track decorator information (staticmethod, classmethod, property)
-        # TODO [COMMUNITY]: Detect generator functions and coroutines
-        # TODO [COMMUNITY]: Support type hints in complexity calculation
-        # TODO [COMMUNITY]: Add 20+ tests for decorator and generator detection
 
-        # TODO [COMMUNITY][TEST]: Adversarial tests for code analysis
-        # TODO [COMMUNITY]: Test empty functions, deeply nested code
-        # TODO [COMMUNITY]: Test Unicode identifiers, edge case naming
-        # TODO [COMMUNITY]: Test large classes with minimal functions
 
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
-        # TODO [PRO][FEATURE]: Type hint inference from code analysis
-        # TODO [PRO]: Infer return types from return statements
-        # TODO [PRO]: Infer parameter types from usage patterns
-        # TODO [PRO]: Support PEP 484 annotations
-        # TODO [PRO]: Generate type hints for untyped code
-        # TODO [PRO]: Add 30+ tests for type inference accuracy
 
-        # TODO [PRO][FEATURE]: Support async function metrics and analysis
-        # TODO [PRO]: Detect async/await patterns
-        # TODO [PRO]: Track coroutine awaits and yields
-        # TODO [PRO]: Analyze async context managers
-        # TODO [PRO]: Calculate async complexity metrics
-        # TODO [PRO]: Add 25+ tests for async detection
 
-        # TODO [PRO][ENHANCEMENT]: Data flow analysis for variable usage
-        # TODO [PRO]: Build def-use chains for all variables
-        # TODO [PRO]: Detect uninitialized variable uses
-        # TODO [PRO]: Identify dead assignments
-        # TODO [PRO]: Track variable scope and visibility
-        # TODO [PRO]: Add 35+ tests for def-use analysis
 
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-        # TODO [ENTERPRISE][FEATURE]: Class inheritance analysis
-        # TODO [ENTERPRISE]: Calculate inheritance depth
-        # TODO [ENTERPRISE]: Detect diamond inheritance patterns
-        # TODO [ENTERPRISE]: Analyze method override patterns
-        # TODO [ENTERPRISE]: Calculate class cohesion metrics
-        # TODO [ENTERPRISE]: Add 25+ tests for inheritance analysis
 
-        # TODO [ENTERPRISE][FEATURE]: Performance optimization analysis
-        # TODO [ENTERPRISE]: Detect inefficient patterns (list comprehensions vs loops)
-        # TODO [ENTERPRISE]: Identify expensive operations in loops
-        # TODO [ENTERPRISE]: Suggest optimization opportunities
-        # TODO [ENTERPRISE]: Calculate complexity vs performance impact
-        # TODO [ENTERPRISE]: Add 30+ tests for pattern detection
 
-        # TODO [ENTERPRISE][ENHANCEMENT]: Security-focused analysis
-        # TODO [ENTERPRISE]: Add more vulnerability types beyond SQL injection
-        # TODO [ENTERPRISE]: Implement taint tracking for sensitive operations
-        # TODO [ENTERPRISE]: Detect hardcoded secrets and credentials
-        # TODO [ENTERPRISE]: Cross-file vulnerability tracking
-        # TODO [ENTERPRISE]: Add 40+ tests for security patterns
 
     def parse_to_ast(self, code: str) -> ast.AST:
         """Parse Python code into an AST with caching."""

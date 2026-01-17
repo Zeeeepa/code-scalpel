@@ -2,12 +2,6 @@
 """
 Maven Java Parser - Build tool and dependency management integration.
 
-# TODO Implement POM.xml parsing
-# TODO Add dependency tree analysis
-# TODO Support plugin discovery and configuration
-# TODO Implement version conflict detection
-# TODO Add build profile extraction
-# TODO Support custom plugin integration
 
 Reference: https://maven.apache.org/
 Command: mvn dependency:tree -DoutputFile=dependencies.txt
@@ -42,7 +36,6 @@ class MavenParser:
     def parse(self) -> dict:
         """Parse Maven POM configuration.
 
-        # TODO Implement full POM parsing logic
 
         Returns:
             Dictionary with POM configuration and dependencies

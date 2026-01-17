@@ -19,36 +19,6 @@ import networkx as nx
 #     - Generate human-readable PDG diffs
 #     - Support merging PDG changes from different branches
 
-# TODO [COMMUNITY] Implement PDG to JSON serialization
-# TODO [COMMUNITY] Add JSON deserialization to reconstruct PDG
-# TODO [COMMUNITY] Create GraphML export format
-# TODO [COMMUNITY] Implement GML export for compatibility
-# TODO [COMMUNITY] Add DOT format export for Graphviz
-# TODO [COMMUNITY] Create basic node and edge info accessors
-# TODO [COMMUNITY] Implement PDG statistics (size, complexity metrics)
-# TODO [COMMUNITY] Add dependency type filtering utilities
-# TODO [COMMUNITY] Create scope traversal helpers
-# TODO [COMMUNITY] Document utility functions and formats
-# TODO [PRO] Implement PDG comparison and structural diffing
-# TODO [PRO] Add semantic diff detection (behavior changes)
-# TODO [PRO] Create human-readable diff reports
-# TODO [PRO] Implement PDG merging from different branches
-# TODO [PRO] Add binary PDG serialization format
-# TODO [PRO] Create compressed PDG storage
-# TODO [PRO] Implement incremental PDG serialization
-# TODO [PRO] Add PDG hashing and fingerprinting
-# TODO [PRO] Support version-based PDG compatibility
-# TODO [PRO] Create performance optimization utilities
-# TODO [ENTERPRISE] Implement distributed PDG serialization
-# TODO [ENTERPRISE] Add stream-based serialization for large graphs
-# TODO [ENTERPRISE] Create polyglot utility support (JS, Java, C++)
-# TODO [ENTERPRISE] Implement federated PDG comparison
-# TODO [ENTERPRISE] Add machine learning-based diff prediction
-# TODO [ENTERPRISE] Support quantum-safe PDG hashing
-# TODO [ENTERPRISE] Implement blockchain-based PDG integrity verification
-# TODO [ENTERPRISE] Add zero-knowledge proofs for PDG properties
-# TODO [ENTERPRISE] Create AI-powered PDG optimization suggestions
-# TODO [ENTERPRISE] Implement distributed caching for PDG computations
 
 
 @dataclass

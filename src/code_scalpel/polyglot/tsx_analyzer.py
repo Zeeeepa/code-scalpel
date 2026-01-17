@@ -7,36 +7,6 @@ This module provides utilities for detecting React components, Server Components
 and Server Actions in TypeScript/JavaScript code.
 """
 
-# TODO [COMMUNITY] Improve JSX detection regex for edge cases
-# TODO [COMMUNITY] Add support for Vue.js component detection
-# TODO [COMMUNITY] Implement Angular component detection
-# TODO [COMMUNITY] Add Svelte component detection support
-# TODO [COMMUNITY] Create fragment detection improvements
-# TODO [COMMUNITY] Implement prop type extraction from JSX
-# TODO [COMMUNITY] Add event handler detection and analysis
-# TODO [COMMUNITY] Support styled-components detection
-# TODO [COMMUNITY] Create comprehensive test cases for JSX patterns
-# TODO [COMMUNITY] Add documentation with JSX examples
-# TODO [PRO] Add hooks dependency tracking (useEffect, useMemo)
-# TODO [PRO] Implement custom hook detection and extraction
-# TODO [PRO] Create context provider detection
-# TODO [PRO] Add component composition analysis
-# TODO [PRO] Implement lazy loading detection
-# TODO [PRO] Create performance anti-pattern detection
-# TODO [PRO] Add accessibility (a11y) issue detection
-# TODO [PRO] Support Storybook story detection
-# TODO [PRO] Implement TypeScript prop inference
-# TODO [PRO] Create component tree visualization
-# TODO [ENTERPRISE] Build ML-based component similarity detection
-# TODO [ENTERPRISE] Implement distributed component analysis
-# TODO [ENTERPRISE] Add AI-powered refactoring suggestions for components
-# TODO [ENTERPRISE] Create blockchain-based component audit trails
-# TODO [ENTERPRISE] Implement quantum-safe component hashing
-# TODO [ENTERPRISE] Build enterprise component governance system
-# TODO [ENTERPRISE] Add advanced concurrency pattern detection in components
-# TODO [ENTERPRISE] Create federated component registry
-# TODO [ENTERPRISE] Implement compliance checking for component patterns
-# TODO [ENTERPRISE] Add advanced security analysis for component interactions
 
 from __future__ import annotations
 

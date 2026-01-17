@@ -16,7 +16,11 @@ import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.sse import sse_client
 from mcp.client.stdio import stdio_client
-from mcp.client.streamable_http import streamable_http_client
+
+try:
+    from mcp.client.streamable_http import streamable_http_client
+except Exception:  # pragma: no cover - optional dependency may be absent
+    streamable_http_client = None
 
 if os.environ.get("CODE_SCALPEL_RUN_MCP_CONTRACT", "0") != "1":
     pytestmark = [
@@ -236,12 +240,20 @@ class ContractEvidenceRecorder:
 
 
 def _enabled_transports() -> list[str]:
+    # [20260210_BUGFIX] Skip streamable-http when client dependency is unavailable
     forced = os.environ.get("MCP_CONTRACT_TRANSPORT")
     if forced:
         if forced not in ("stdio", "streamable-http", "sse"):
             raise RuntimeError(f"Invalid MCP_CONTRACT_TRANSPORT: {forced}")
+        # If streamable-http is forced but client is missing, skip
+        if forced == "streamable-http" and streamable_http_client is None:
+            pytest.skip("streamable-http client not available")
         return [forced]
-    return ["stdio", "streamable-http", "sse"]
+
+    transports = ["stdio", "streamable-http", "sse"]
+    if streamable_http_client is None:
+        transports.remove("streamable-http")
+    return transports
 
 
 def _can_bind(host: str, port: int) -> bool:

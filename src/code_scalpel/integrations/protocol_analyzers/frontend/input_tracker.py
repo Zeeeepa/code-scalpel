@@ -51,7 +51,6 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-# TODO: Add support for additional frameworks
 #   - Solid.js (reactive framework)
 #   - Qwik (resumable framework)
 #   - Lit (web components)
@@ -59,32 +58,27 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 #   - Preact (React alternative)
 #   - Ember.js (MVC framework)
 
-# TODO: Enhanced DOM XSS detection
 #   - Track innerHTML/outerHTML with tainted data
 #   - Detect dangerouslySetInnerHTML in React
 #   - Identify v-html in Vue (unsafe)
 #   - Track document.write with user input
 #   - Detect eval() with DOM data
 
-# TODO: Client-side routing vulnerabilities
 #   - Open redirect via router.push(userInput)
 #   - History manipulation attacks
 #   - Route parameter injection
 #   - Hash fragment injection
 
-# TODO: Storage security
 #   - XSS via localStorage.setItem + getItem
 #   - Session fixation via sessionStorage
 #   - Cookie injection and theft
 #   - IndexedDB taint tracking
 
-# TODO: Web API security
 #   - PostMessage origin validation
 #   - WebSocket message taint
 #   - Service Worker message handling
 #   - Broadcast Channel API taint
 
-# TODO: FrontendInputTracker Enhancement Roadmap
 # ===============================================
 #
 # COMMUNITY (Current & Planned):

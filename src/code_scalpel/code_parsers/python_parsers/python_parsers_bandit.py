@@ -18,34 +18,6 @@ Bandit Features:
     - Baseline support for legacy code
 """
 
-# TODO [COMMUNITY/P1_HIGH] Security trend analysis
-# TODO [COMMUNITY/P1_HIGH] Vulnerability age tracking
-# TODO [COMMUNITY/P1_HIGH] False positive management
-# TODO [COMMUNITY/P1_HIGH] Security baseline integration
-# TODO [COMMUNITY/P2_MEDIUM] Custom Bandit plugin development
-# TODO [COMMUNITY/P2_MEDIUM] Organization-specific security patterns
-# TODO [COMMUNITY/P2_MEDIUM] Domain-specific vulnerability detection
-# TODO [PRO/P1_HIGH] Data flow taint tracking
-# TODO [PRO/P1_HIGH] Source-to-sink path analysis
-# TODO [PRO/P1_HIGH] Sanitizer detection
-# TODO [PRO/P1_HIGH] Django security patterns
-# TODO [PRO/P1_HIGH] Flask security analysis
-# TODO [PRO/P1_HIGH] FastAPI security checks
-# TODO [PRO/P2_MEDIUM] Race condition detection
-# TODO [PRO/P2_MEDIUM] Time-of-check-time-of-use (TOCTOU) detection
-# TODO [PRO/P2_MEDIUM] Authentication/authorization flaws detection
-# TODO [PRO/P3_LOW] Security debt calculation
-# TODO [PRO/P3_LOW] Vulnerability density metrics
-# TODO [PRO/P3_LOW] Security fix priority scoring
-# TODO [ENTERPRISE/P2_MEDIUM] PCI-DSS compliance checking
-# TODO [ENTERPRISE/P2_MEDIUM] HIPAA security requirements
-# TODO [ENTERPRISE/P2_MEDIUM] SOC 2 security controls
-# TODO [ENTERPRISE/P2_MEDIUM] Security scan history
-# TODO [ENTERPRISE/P2_MEDIUM] Vulnerability remediation tracking
-# TODO [ENTERPRISE/P2_MEDIUM] Security policy enforcement
-# TODO [ENTERPRISE/P3_LOW] Executive security dashboards
-# TODO [ENTERPRISE/P3_LOW] Risk scoring algorithms
-# TODO [ENTERPRISE/P3_LOW] Security SLA tracking
 
 from __future__ import annotations
 

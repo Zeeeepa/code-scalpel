@@ -5,16 +5,6 @@ Feature Registry - Central registry of features and their tier requirements.
 
 Provides a central registry mapping features to their minimum required tiers.
 """
-# TODO [COMMUNITY_P0] Feature→tier mapping
-# TODO [COMMUNITY_P1] Feature discovery and listing
-# TODO [COMMUNITY_P1] Runtime feature checks
-# TODO [COMMUNITY_P2] Feature metadata
-# TODO [PRO_P1] Dynamic feature registration
-# TODO [PRO_P2] Feature groups/bundles
-# TODO [PRO_P3] Feature dependencies
-# TODO [ENTERPRISE_P2] Custom feature definitions
-# TODO [ENTERPRISE_P3] Feature override rules
-# TODO [ENTERPRISE_P4] Remote feature configuration
 
 from __future__ import annotations
 

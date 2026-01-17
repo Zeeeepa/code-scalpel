@@ -9,36 +9,6 @@ The intent is to enforce the contract at the MCP tool boundary so individual
 tool implementations can remain focused on their domain logic.
 """
 
-# TODO [COMMUNITY] Implement ToolResponseEnvelope with all required fields
-# TODO [COMMUNITY] Define error codes enum (invalid_argument, not_found, etc.)
-# TODO [COMMUNITY] Create error contract with machine-parseable codes
-# TODO [COMMUNITY] Implement envelope wrapping for all tool responses
-# TODO [COMMUNITY] Add tier metadata to responses
-# TODO [COMMUNITY] Validate response schema on serialization
-# TODO [COMMUNITY] Implement request correlation IDs
-# TODO [COMMUNITY] Add tool version tracking in envelope
-# TODO [COMMUNITY] Create contract validation tests
-# TODO [COMMUNITY] Document contract specification
-# TODO [PRO] Implement conditional response fields based on tier
-# TODO [PRO] Add upgrade hint generation for tier-restricted features
-# TODO [PRO] Implement response streaming with envelope markers
-# TODO [PRO] Add structured error details (non-sensitive)
-# TODO [PRO] Support custom error codes per tool
-# TODO [PRO] Implement contract versioning and migration
-# TODO [PRO] Add response compression hints
-# TODO [PRO] Create envelope validation middleware
-# TODO [PRO] Implement response filtering based on capabilities
-# TODO [PRO] Add trace context propagation
-# TODO [ENTERPRISE] Implement multi-version contract support
-# TODO [ENTERPRISE] Add compliance metadata (GDPR, HIPAA, SOC2)
-# TODO [ENTERPRISE] Implement digital signatures for responses
-# TODO [ENTERPRISE] Add encryption support for sensitive data
-# TODO [ENTERPRISE] Implement audit trail in contract
-# TODO [ENTERPRISE] Support blockchain-based response hashing
-# TODO [ENTERPRISE] Add federated contract validation
-# TODO [ENTERPRISE] Implement zero-knowledge proofs for contract compliance
-# TODO [ENTERPRISE] Add quantum-safe signature schemes
-# TODO [ENTERPRISE] Create AI-powered contract optimization
 
 from __future__ import annotations
 

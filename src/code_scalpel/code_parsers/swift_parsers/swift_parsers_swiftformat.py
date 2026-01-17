@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 """SwiftFormat Parser - Swift Code Formatting and Style Normalization"""
 
-# TODO [PRO] Parse SwiftFormat configuration
-# TODO [PRO] Execute SwiftFormat analysis
-# TODO [PRO] Auto-format Swift code
-# TODO [PRO] Generate formatting reports
-# TODO [PRO] Detect formatting violations
-# TODO [ENTERPRISE] Calculate code style metrics
 
 from dataclasses import dataclass
 from pathlib import Path

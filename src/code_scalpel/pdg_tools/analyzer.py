@@ -18,38 +18,8 @@ import networkx as nx
 #     - Detect must-alias and may-alias relationships
 #     - Track alias propagation through function parameters
 
-# TODO [COMMUNITY_TIER] Implement data flow anomaly detection (undefined/unused vars)
-# TODO [COMMUNITY_TIER] Create undefined variable analysis on PDG
-# TODO [COMMUNITY_TIER] Add unused variable detection
-# TODO [COMMUNITY_TIER] Implement variable overwrite detection
-# TODO [COMMUNITY_TIER] Create basic dependency path finding
-# TODO [COMMUNITY_TIER] Add reachability analysis for code statements
-# TODO [COMMUNITY_TIER] Implement backward data flow tracing
-# TODO [COMMUNITY_TIER] Create anomaly severity classification
-# TODO [COMMUNITY_TIER] Add comprehensive error reporting
-# TODO [COMMUNITY_TIER] Document analysis algorithms and techniques
 
-# TODO [PRO_TIER] Implement taint analysis with custom sources/sinks
-# TODO [PRO_TIER] Add SQL injection pattern detection on PDG
-# TODO [PRO_TIER] Implement XSS vulnerability detection
-# TODO [PRO_TIER] Add command injection detection
-# TODO [PRO_TIER] Create sanitizer pattern recognition
-# TODO [PRO_TIER] Implement context-sensitive data flow analysis
-# TODO [PRO_TIER] Add must-alias vs may-alias relationship detection
-# TODO [PRO_TIER] Support field-sensitive taint tracking
-# TODO [PRO_TIER] Implement security vulnerability ranking
-# TODO [PRO_TIER] Create detailed vulnerability reporting with evidence
 
-# TODO [ENTERPRISE_TIER] Implement distributed PDG analysis over sharded graphs
-# TODO [ENTERPRISE_TIER] Add machine learning-based anomaly detection
-# TODO [ENTERPRISE_TIER] Create semantic vulnerability pattern learning
-# TODO [ENTERPRISE_TIER] Implement federated taint analysis across repos
-# TODO [ENTERPRISE_TIER] Add symbolic execution integration for verification
-# TODO [ENTERPRISE_TIER] Support polyglot vulnerability detection (JS, Java)
-# TODO [ENTERPRISE_TIER] Implement zero-day vulnerability prediction
-# TODO [ENTERPRISE_TIER] Add compliance rule checking on PDG (GDPR, HIPAA)
-# TODO [ENTERPRISE_TIER] Create blockchain-based vulnerability proof chains
-# TODO [ENTERPRISE_TIER] Implement AI-powered security recommendation engine
 
 
 class DependencyType(Enum):

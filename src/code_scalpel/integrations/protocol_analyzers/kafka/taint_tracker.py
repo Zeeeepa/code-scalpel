@@ -46,7 +46,6 @@ Usage:
     bridge = tracker.create_taint_bridge(producer_result, consumer_result)
 """
 
-# TODO: KafkaTaintTracker Enhancement Roadmap
 # =============================================
 #
 # COMMUNITY (Current & Planned):

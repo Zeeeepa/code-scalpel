@@ -23,7 +23,6 @@ Z3 objects (ExprRef, BoolRef, Sort) are IMMUTABLE (C++ bindings).
 They can be safely shared. Only the Python containers (dict, list)
 need to be copied.
 
-# TODO: StateManager Enhancement Roadmap
 # =======================================
 #
 # COMMUNITY (Current & Planned):

@@ -2,12 +2,6 @@
 """
 staticcheck Go Parser - Advanced Go static analysis.
 
-# TODO [FEATURE] Implement staticcheck parser for v3.1.0 "Polyglot+" (Q1 2026)
-# TODO [TASK] Run staticcheck on Go packages
-# TODO [TASK] Parse output (supports text, JSON, SARIF formats)
-# TODO [FEATURE] Extract SA (staticcheck), S (simple), ST (stylecheck) diagnostics
-# TODO [FEATURE] Support severity levels and check categories
-# TODO [INHERITANCE] Inherit from base_parser.BaseParser
 #
 # Reference: https://staticcheck.io/
 # Command: staticcheck -f json ./...

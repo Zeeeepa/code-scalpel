@@ -2,12 +2,6 @@
 """
 Gradle Java Parser - Build tool and dependency management integration.
 
-# TODO Implement build.gradle parsing
-# TODO Add dependency resolution analysis
-# TODO Support plugin ecosystem discovery
-# TODO Implement task dependency graph extraction
-# TODO Add configuration variant support
-# TODO Support custom plugin integration
 
 Reference: https://gradle.org/
 Command: gradle dependencies --configuration compileClasspath
@@ -42,7 +36,6 @@ class GradleParser:
     def parse(self) -> dict:
         """Parse Gradle build configuration.
 
-        # TODO Implement full build.gradle parsing logic
 
         Returns:
             Dictionary with build configuration and dependencies

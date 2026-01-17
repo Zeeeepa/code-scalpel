@@ -13,22 +13,8 @@ Konsist provides:
 - Custom DSL for rule definition
 - Integration with testing frameworks
 
-# TODO Implement Konsist report parsing
-# TODO Add architecture rule extraction
-# TODO Add violation detection for structural rules
-# TODO Add source location extraction for violations
-# TODO Add Gradle task execution support
 
-# TODO Parse architecture definitions from .kt files
-# TODO Add package structure analysis
-# TODO Add dependency rule validation
-# TODO Add naming pattern enforcement parsing
-# TODO Add custom rule DSL extraction
 
-# TODO Generate architecture violation reports
-# TODO Add visualization of architecture rules
-# TODO Add comparison with previous runs
-# TODO Add documentation generation from rules
 """
 
 from dataclasses import dataclass
@@ -88,7 +74,6 @@ class KonsistParser:
 
     def parse_violations(self, violations: list[dict]) -> list[KonsistViolation]:
         """
-        # TODO Parse Konsist test violations from execution results.
 
         Args:
             violations: List of violation dictionaries
@@ -100,7 +85,6 @@ class KonsistParser:
 
     def parse_rules(self, rule_definitions: list[dict]) -> list[KonsistRule]:
         """
-        # TODO Extract Konsist architecture rules from DSL.
 
         Args:
             rule_definitions: List of rule definition dictionaries
@@ -112,7 +96,6 @@ class KonsistParser:
 
     def validate_architecture(self, project_path: Path) -> dict[str, Any]:
         """
-        # TODO Run Konsist tests and validate project architecture.
 
         Args:
             project_path: Path to Kotlin project
@@ -124,7 +107,6 @@ class KonsistParser:
 
     def generate_report(self) -> str:
         """
-        # TODO Generate architecture validation report.
 
         Returns:
             Formatted report string

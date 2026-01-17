@@ -30,38 +30,8 @@ This module provides:
 
 TODO ITEMS:
 
-# TODO COMMUNITY TIER Improve language detection accuracy for ambiguous file extensions
-# TODO COMMUNITY TIER Add support for Go programming language extraction
-# TODO COMMUNITY TIER Add support for Rust programming language extraction
-# TODO COMMUNITY TIER Implement caching for repeated language detection operations
-# TODO COMMUNITY TIER Add comprehensive error handling for malformed source code
-# TODO COMMUNITY TIER Document polyglot extraction API with examples for each language
-# TODO COMMUNITY TIER Implement fallback detection using file content heuristics
-# TODO COMMUNITY TIER Add validation for language enum values
-# TODO COMMUNITY TIER Create comprehensive test suite for all supported languages
-# TODO COMMUNITY TIER Performance optimize language detection for large codebases
 
-# TODO PRO TIER Add C++ language support for polyglot extraction
-# TODO PRO TIER Implement Rust-specific extraction patterns
-# TODO PRO TIER Add Go-specific extraction patterns
-# TODO PRO TIER Integrate taint tracking across language boundaries
-# TODO PRO TIER Add cross-language type inference system
-# TODO PRO TIER Implement semantic analysis for language bridges
-# TODO PRO TIER Add cross-language import resolution
-# TODO PRO TIER Create language-specific security pattern libraries
-# TODO PRO TIER Add support for custom DSLs and configuration languages
-# TODO PRO TIER Implement language feature capability detection
-# TODO PRO TIER Add cross-language refactoring utilities
 
-# TODO ENTERPRISE TIER Build ML-based language detection using AST features
-# TODO ENTERPRISE TIER Implement distributed extraction for large multi-language projects
-# TODO ENTERPRISE TIER Add support for proprietary/custom programming languages
-# TODO ENTERPRISE TIER Create language interoperability analysis system
-# TODO ENTERPRISE TIER Add bytecode decompilation for compiled languages
-# TODO ENTERPRISE TIER Implement quantum-safe code extraction patterns
-# TODO ENTERPRISE TIER Add advanced concurrency pattern detection across languages
-# TODO ENTERPRISE TIER Create enterprise audit trails for language migrations
-# TODO ENTERPRISE TIER Implement federated extraction for multi-organization codebases
 """
 
 import warnings

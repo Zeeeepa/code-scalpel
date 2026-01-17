@@ -12,36 +12,6 @@ Security Model: FAIL CLOSED
 - Missing OPA CLI → DENY ALL
 """
 
-# TODO [COMMUNITY]: Implement YAML policy file loading and parsing
-# TODO [COMMUNITY]: Add OPA CLI integration and Rego evaluation
-# TODO [COMMUNITY]: Create Operation and PolicyDecision data structures
-# TODO [COMMUNITY]: Implement policy validation on load
-# TODO [COMMUNITY]: Add fail-closed error handling
-# TODO [COMMUNITY]: Implement policy caching for performance
-# TODO [COMMUNITY]: Create policy context and variable binding
-# TODO [COMMUNITY]: Add comprehensive logging for policy evaluations
-# TODO [COMMUNITY]: Implement policy result interpretation
-# TODO [COMMUNITY]: Document policy language and examples
-# TODO [PRO]: Add JSONSchema-based alternative policy format
-# TODO [PRO]: Implement hot-reload without restart capability
-# TODO [PRO]: Create policy versioning and evolution tracking
-# TODO [PRO]: Add policy inheritance system (parent/child)
-# TODO [PRO]: Implement custom severity levels per organization
-# TODO [PRO]: Create policy tagging and categorization
-# TODO [PRO]: Add policy conflict detection and resolution
-# TODO [PRO]: Implement dynamic policy modification hooks
-# TODO [PRO]: Create policy testing framework for validation
-# TODO [PRO]: Add policy performance profiling tools
-# TODO [ENTERPRISE]: Build ML-based semantic code understanding
-# TODO [ENTERPRISE]: Implement distributed policy evaluation
-# TODO [ENTERPRISE]: Add WebAssembly compilation for policy DSL
-# TODO [ENTERPRISE]: Create federated policy governance
-# TODO [ENTERPRISE]: Implement quantum-safe policy signing
-# TODO [ENTERPRISE]: Build blockchain-based policy records
-# TODO [ENTERPRISE]: Add zero-knowledge proof policy verification
-# TODO [ENTERPRISE]: Implement advanced threat modeling integration
-# TODO [ENTERPRISE]: Create AI-powered policy generation
-# TODO [ENTERPRISE]: Build cross-organization policy federation
 
 from __future__ import annotations
 
@@ -72,11 +42,6 @@ class PolicyError(Exception):
     pass
 
 
-# TODO [COMMUNITY]: Support YAML policies with OPA/Rego (current)
-# TODO [PRO]: Add JSONSchema-based policy definitions as alternative to YAML
-# TODO [ENTERPRISE]: Support for policy DSL compilation to WebAssembly for performance
-# TODO [PRO/ENTERPRISE]: Dynamic policy reloading without restart
-# TODO [ENTERPRISE]: Hot-pluggable policy backend (OPA, YAML, JSON, custom)
 
 
 class PolicySeverity(Enum):
@@ -89,9 +54,6 @@ class PolicySeverity(Enum):
     INFO = "INFO"
 
 
-# TODO [PRO]: Add custom severity levels for organizations
-# TODO [ENTERPRISE]: Severity scoring based on context (time, user role, resource criticality)
-# TODO [ENTERPRISE]: Dynamic severity calculation based on policy history and patterns
 
 
 class PolicyAction(Enum):
@@ -102,11 +64,6 @@ class PolicyAction(Enum):
     AUDIT = "AUDIT"  # Allow and log for review
 
 
-# TODO [PRO]: Add QUARANTINE action (isolate code for manual review)
-# TODO [PRO]: Add RATE_LIMIT action (throttle similar operations)
-# TODO [ENTERPRISE]: Add ESCALATE action (notify security team automatically)
-# TODO [ENTERPRISE]: Add SNAPSHOT action (preserve state before violation)
-# TODO [ENTERPRISE]: Custom webhook actions for policy enforcement integration
 
 
 @dataclass
@@ -124,11 +81,6 @@ class Policy:
         action: What to do on violation (DENY, WARN, AUDIT)
     """
 
-    # TODO [PRO]: Add tags field for policy categorization and filtering
-    # TODO [PRO]: Add version field for policy evolution tracking
-    # TODO [ENTERPRISE]: Add effective_date/expiration_date for time-bound policies
-    # TODO [ENTERPRISE]: Add scope field (global, per-project, per-user, per-role)
-    # TODO [ENTERPRISE]: Add metadata field for custom policy context
 
     name: str
     description: str
@@ -932,7 +884,6 @@ class PolicyEngine:
 
         # In production, this should write to a secure audit log
         # For now, we'll log to a local file as a placeholder
-        # TODO: Implement secure audit logging
         # [20251216_FEATURE] Minimal file-based audit logging for override requests
         try:
             with open("policy_override_audit.log", "a", encoding="utf-8") as f:

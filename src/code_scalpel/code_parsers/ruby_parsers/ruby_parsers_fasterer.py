@@ -2,13 +2,6 @@
 """
 Fasterer Parser - Ruby Performance Anti-Pattern Detection
 
-# TODO [ENTERPRISE] Parse JSON output from fasterer
-# TODO [ENTERPRISE] Execute Fasterer performance scanning
-# TODO [ENTERPRISE] Categorize performance issues by type
-# TODO [ENTERPRISE] Detect N+1 query patterns
-# TODO [ENTERPRISE] Detect inefficient operations
-# TODO [ENTERPRISE] Calculate performance impact metrics
-# TODO [ENTERPRISE] Generate optimization reports
 """
 
 from dataclasses import dataclass

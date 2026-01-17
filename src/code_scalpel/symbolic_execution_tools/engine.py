@@ -33,31 +33,26 @@ logger = logging.getLogger(__name__)
 # It handles Int/Bool/String but not Float/List/Dict
 # Loop unrolling is bounded to prevent explosion
 
-# TODO: Add support for complex data types
 #   - List/Array symbolic execution with index tracking
 #   - Dictionary/Map symbolic execution with key constraints
 #   - Tuple unpacking and multiple assignment
 #   - Set operations with symbolic membership
 
-# TODO: Improve path exploration strategies
 #   - Implement concolic execution (concrete + symbolic)
 #   - Add heuristic-based path prioritization
 #   - Implement depth-first vs breadth-first strategies
 #   - Add coverage-guided exploration
 
-# TODO: Performance optimizations
 #   - Implement path memoization to avoid re-exploring
 #   - Add incremental constraint solving
 #   - Implement constraint caching and simplification
 #   - Parallelize path exploration with worker pools
 
-# TODO: Enhanced loop handling
 #   - Implement widening for unbounded loops
 #   - Add loop invariant detection
 #   - Support dynamic unrolling based on complexity
 #   - Detect and warn on infinite loops
 
-# TODO: Engine Enhancement Roadmap
 # =================================
 #
 # COMMUNITY (Current & Planned):

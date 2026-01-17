@@ -34,7 +34,6 @@ from code_scalpel.cache import AnalysisCache, IncrementalAnalyzer, ParallelParse
 logger = logging.getLogger(__name__)
 
 
-# TODO [FEATURE]: Top-level parse fn for parallel workers (picklable on Windows spawn)
 def _parse_for_imports(file_path: Path) -> Tuple[str, ast.Module]:
     with file_path.open("r", encoding="utf-8") as f:
         source = f.read()
@@ -42,7 +41,6 @@ def _parse_for_imports(file_path: Path) -> Tuple[str, ast.Module]:
     return source, tree
 
 
-# TODO [FEATURE]: Import types for classification including dynamic/framework imports
 class ImportType:
     """Classification of import statement types."""
 
@@ -54,7 +52,6 @@ class ImportType:
     DYNAMIC = "dynamic"  # importlib.import_module()
     DUNDER = "dunder"  # __import__()
     LAZY = "lazy"  # Detected but not yet resolved
-    FRAMEWORK = "framework"  # TODO [FEATURE]: Framework-discovered imports (e.g., Django INSTALLED_APPS, Flask blueprints)
 
 
 @dataclass
@@ -81,9 +78,7 @@ class ImportInfo:
     level: int = 0
     line: int = 0
     file: str = ""
-    is_reexport: bool = False  # TODO [PRO]: Re-export tracking
     original_module: Optional[str] = (
-        None  # TODO [PRO]: Original source for re-exports
     )
 
     @property
@@ -132,10 +127,6 @@ class DynamicImportVisitor(ast.NodeVisitor):
       - Add 15+ tests for cycle reporting
     """
 
-    # TODO [FEATURE]: Support lazy import detection and resolution
-    # TODO [FEATURE]: Add framework-specific import resolution (Django, FastAPI)
-    # TODO [ENHANCEMENT]: Support type stub analysis for unresolved imports
-    # TODO [ENHANCEMENT]: Add import cycle detection with detailed paths
 
     def __init__(self, resolver, module_name: str, file_path: str):
         self.resolver = resolver
@@ -338,7 +329,6 @@ class ImportResolver:
         """
         self.project_root = Path(project_root).resolve()
 
-        # TODO [FEATURE]: Reusable parse cache + parallel parser and incremental graph
         self._parse_cache: AnalysisCache[Tuple[str, ast.Module]] = AnalysisCache()
         self._parallel_parser: ParallelParser[Tuple[str, ast.Module]] = ParallelParser(
             cache=self._parse_cache
@@ -549,10 +539,8 @@ class ImportResolver:
             # Extract imports
             self._extract_imports(tree, module_name, rel_path)
 
-            # TODO [FEATURE]: Extract dynamic imports
             self._extract_dynamic_imports(tree, module_name, rel_path)
 
-            # TODO [FEATURE]: Extract framework-derived imports (e.g., Django INSTALLED_APPS)
             self._extract_framework_imports(tree, module_name, rel_path)
 
             # Extract definitions (functions, classes)
@@ -658,7 +646,6 @@ class ImportResolver:
         visitor = DynamicImportVisitor(self, module_name, file_path)
         visitor.visit(tree)
 
-    # TODO [FEATURE]: Django/Flask framework import extraction
     def _extract_framework_imports(
         self, tree: ast.Module, module_name: str, file_path: str
     ) -> None:
@@ -675,13 +662,11 @@ class ImportResolver:
                                 module_name, app, getattr(node, "lineno", 0), file_path
                             )
 
-                # TODO [FEATURE]: Flask Blueprint detection: bp = Blueprint("name", __name__)
                 if self._is_blueprint_ctor(node):
                     for target in node.targets:
                         if isinstance(target, ast.Name):
                             blueprint_vars.add(target.id)
 
-            # TODO [FEATURE]: Flask app.register_blueprint(bp)
             if isinstance(node, ast.Call) and self._is_register_blueprint_call(node):
                 arg = node.args[0] if node.args else None
                 target = None
@@ -708,7 +693,6 @@ class ImportResolver:
         """Check if this is __import__()."""
         return isinstance(node.func, ast.Name) and node.func.id == "__import__"
 
-    # TODO [FEATURE]: Flask Blueprint constructor detection
     def _is_blueprint_ctor(self, node: ast.Assign) -> bool:
         """Check if assignment value is a Flask Blueprint(...) call."""
         if not isinstance(node, ast.Assign):
@@ -724,7 +708,6 @@ class ImportResolver:
             return True
         return False
 
-    # TODO [FEATURE]: Flask register_blueprint detection
     def _is_register_blueprint_call(self, node: ast.Call) -> bool:
         """Check if this is app.register_blueprint(...)"""
         if isinstance(node.func, ast.Attribute):
@@ -1158,7 +1141,6 @@ class ImportResolver:
             module: list(symbols.values()) for module, symbols in self.symbols.items()
         }
 
-    # TODO [PRO]: Wildcard import __all__ expansion
     def expand_wildcard_import(self, module_name: str) -> List[str]:
         """
         Expand a wildcard import (`from module import *`) to its actual symbols.
@@ -1367,7 +1349,6 @@ class ImportResolver:
         return "\n".join(lines)
 
     # ========================================================================
-    # TODO [PRO]: Re-export and Chained Alias Resolution
     # ========================================================================
 
     def detect_reexports(self, module_name: str) -> Dict[str, str]:

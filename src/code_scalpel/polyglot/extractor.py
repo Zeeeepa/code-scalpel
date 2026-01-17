@@ -21,38 +21,8 @@ Supported Languages:
 
 TODO ITEMS:
 
-# TODO [COMMUNITY TIER] Improve cross-file dependency extraction accuracy
-# TODO [COMMUNITY TIER] Add support for async/await pattern detection
-# TODO [COMMUNITY TIER] Implement decorator extraction and analysis
-# TODO [COMMUNITY TIER] Add lambda/arrow function extraction support
-# TODO [COMMUNITY TIER] Create comprehensive error handling for parse failures
-# TODO [COMMUNITY TIER] Implement line-accurate source code mapping
-# TODO [COMMUNITY TIER] Add token estimation for extracted code
-# TODO [COMMUNITY TIER] Support nested class and function extraction
-# TODO [COMMUNITY TIER] Create extraction result validation
-# TODO [COMMUNITY TIER] Implement cache invalidation strategy
 
-# TODO [PRO TIER] Add Go language extraction support
-# TODO [PRO TIER] Implement Rust language extraction support
-# TODO [PRO TIER] Add C++ language extraction support
-# TODO [PRO TIER] Create framework-specific extractors (React, Vue, Angular)
-# TODO [PRO TIER] Implement semantic code normalization
-# TODO [PRO TIER] Add cross-language type resolution
-# TODO [PRO TIER] Create intelligent method signature extraction
-# TODO [PRO TIER] Implement bytecode decompilation for compiled languages
-# TODO [PRO TIER] Add custom extraction rule plugins
-# TODO [PRO TIER] Support advanced pattern matching for extraction
 
-# TODO [ENTERPRISE TIER] Build ML-based code similarity detection
-# TODO [ENTERPRISE TIER] Implement distributed extraction for large codebases
-# TODO [ENTERPRISE TIER] Add support for proprietary/custom languages
-# TODO [ENTERPRISE TIER] Create AI-powered code refactoring suggestions
-# TODO [ENTERPRISE TIER] Implement blockchain-based extraction audit trails
-# TODO [ENTERPRISE TIER] Add quantum-safe extraction hashing
-# TODO [ENTERPRISE TIER] Build enterprise code extraction governance
-# TODO [ENTERPRISE TIER] Implement federated extraction across organizations
-# TODO [ENTERPRISE TIER] Add advanced concurrency pattern detection
-# TODO [ENTERPRISE TIER] Create quantum algorithm extraction support
 """
 
 from dataclasses import dataclass, field
@@ -508,7 +478,6 @@ class PolyglotExtractor:
                 target_name=target_name,
                 start_line=start_line,
                 end_line=end_line,
-                dependencies=[],  # TODO: Extract dependencies from IR
                 file_path=self.file_path,
                 token_estimate=len(code) // 4,
                 jsx_normalized=jsx_normalized,

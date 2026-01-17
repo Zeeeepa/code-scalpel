@@ -88,6 +88,9 @@ from code_scalpel import __version__
 # [20260116_REFACTOR] Import shared mcp instance from protocol
 from code_scalpel.mcp.protocol import mcp, set_current_tier
 
+# [20260117_SECURITY] Authoritative startup tier selection via authorization helper
+from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
+
 from code_scalpel.mcp.models.core import ClassInfo as CoreClassInfo
 
 # [20260116_FEATURE] License-gated tier system restored from archive
@@ -384,7 +387,6 @@ def _maybe_auto_init_config_dir(
         "target": selected_target,
         "message": result.get("message"),
     }
-
 
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
@@ -5515,32 +5517,31 @@ def run_server(
 
     register_tools()
 
-    # [20260116_FEATURE] License-gated tier system
-    # The tier is determined by:
-    # 1. CLI argument (--tier) if provided
-    # 2. Otherwise, _get_current_tier() validates license and applies env var override
-    #
-    # This allows Enterprise license holders to test Pro/Community behavior:
-    #   CODE_SCALPEL_TIER=community code-scalpel mcp  # Force community tier
-    #   CODE_SCALPEL_TIER=pro code-scalpel mcp       # Force pro tier (if licensed)
-    if tier is None:
-        tier = _get_current_tier()
-    else:
-        # CLI argument provided - still validate against license
-        tier = _normalize_tier(tier)
-        if tier not in {"community", "pro", "enterprise"}:
-            raise ValueError(
-                "Invalid tier. Expected one of: community, pro, enterprise"
-            )
-        # If CLI requests higher tier than licensed, clamp to licensed
-        licensed_tier = _get_current_tier()
-        rank = {"community": 0, "pro": 1, "enterprise": 2}
-        if rank[tier] > rank[licensed_tier]:
-            print(
-                f"Warning: Requested tier '{tier}' exceeds license. Using '{licensed_tier}'.",
-                file=sys.stderr,
-            )
-            tier = licensed_tier
+    # [20260117_SECURITY] Authoritative startup tier selection
+    # Uses the centralized authorization helper so remote verifier decisions
+    # remain authoritative and paid tiers fail closed without a valid license.
+    # CLI/env can request a tier, but it will be clamped by the license.
+    validator = JWTLicenseValidator()
+    requested_tier = tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get(
+        "SCALPEL_TIER"
+    )
+    effective_tier, startup_warning = compute_effective_tier_for_startup(
+        requested_tier=requested_tier,
+        validator=validator,
+    )
+
+    # Record last known valid tier/time when verifier allows it so mid-session
+    # expiry grace continues to work.
+    global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
+    if effective_tier in {"pro", "enterprise"}:
+        _LAST_VALID_LICENSE_TIER = effective_tier
+        _LAST_VALID_LICENSE_AT = __import__("time").time()
+
+    # Emit startup warnings (e.g., revoked -> community) to stderr for stdio safety.
+    if startup_warning:
+        print(startup_warning, file=sys.stderr)
+
+    tier = effective_tier
 
     # Expose tier to the response envelope wrapper (both local and protocol).
     global CURRENT_TIER

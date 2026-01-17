@@ -12,23 +12,8 @@ Compose Linter features:
 - Parameter stability analysis
 - Performance metrics
 
-# TODO Parse Compose compiler warnings
-# TODO Extract recomposition metrics
-# TODO Implement stability analysis report parsing
-# TODO Add composable function tracking
-# TODO Parse compiler plugin output
 
-# TODO Execute Gradle compose compiler task
-# TODO Parse build logs for warnings
-# TODO Add metric extraction from reports
-# TODO Implement caching of analysis results
-# TODO Support custom compiler plugin options
 
-# TODO Generate Compose performance reports
-# TODO Track recomposition hotspots
-# TODO Add visualization of composition tree
-# TODO Generate best practices recommendations
-# TODO Add historical trend analysis
 """
 
 from dataclasses import dataclass
@@ -90,7 +75,6 @@ class ComposeLinterParser:
 
     def parse_compiler_output(self, output: str) -> list[ComposeIssue]:
         """
-        # TODO Parse Compose compiler output and extract issues.
 
         Args:
             output: Compiler output string
@@ -102,7 +86,6 @@ class ComposeLinterParser:
 
     def parse_stability_analysis(self, report_data: dict) -> dict[str, Any]:
         """
-        # TODO Parse parameter stability analysis report.
 
         Args:
             report_data: Report data dictionary
@@ -114,7 +97,6 @@ class ComposeLinterParser:
 
     def analyze_recompositions(self, trace_data: str) -> ComposeMetrics:
         """
-        # TODO Analyze recomposition patterns and generate metrics.
 
         Args:
             trace_data: Recomposition trace data
@@ -126,7 +108,6 @@ class ComposeLinterParser:
 
     def generate_performance_report(self) -> str:
         """
-        # TODO Generate Compose performance optimization report.
 
         Returns:
             Formatted report string
@@ -135,7 +116,6 @@ class ComposeLinterParser:
 
     def execute_compiler_analysis(self, project_path: Path) -> dict[str, Any]:
         """
-        # TODO Execute Compose compiler analysis on project.
 
         Args:
             project_path: Path to Kotlin/Compose project

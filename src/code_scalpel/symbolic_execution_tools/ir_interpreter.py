@@ -35,7 +35,6 @@ Usage:
     interp = IRSymbolicInterpreter()
     result = interp.execute(ir)
 
-# TODO: IRInterpreter Enhancement Roadmap
 # ========================================
 #
 # COMMUNITY (Current & Planned):

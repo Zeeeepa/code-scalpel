@@ -7,13 +7,6 @@ ECMAScript features, JSX, TypeScript, and Flow. This parser leverages Babel
 for comprehensive JavaScript analysis.
 
 Phase 2 Enhancement TODOs:
-# TODO Add ES2024 feature detection (Records, Temporal API, Set operations)
-# TODO Implement decorator metadata extraction (class, method, field)
-# TODO Add source map integration for line mapping
-# TODO Implement plugin dependency graph analysis
-# TODO Add JSX pragma and jsxImportSource detection
-# TODO Support Babel config inheritance (.babelrc extends)
-# TODO Add transformation result caching
 
 Features:
     Syntax Detection:

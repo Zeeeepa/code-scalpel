@@ -8,15 +8,6 @@ Supports custom rules, plugins, and configuration parsing.
 ESLint is the most widely used JavaScript linter with extensive plugin ecosystem.
 
 Phase 2 Enhancement TODOs:
-# TODO Add ESLint v9 flat config support (eslint.config.js)
-# TODO Implement rule severity mapping (error/warning/off)
-# TODO Add custom rule documentation extraction
-# TODO Implement incremental linting with change tracking
-# TODO Add plugin dependency graph analysis
-# TODO Support ESLint override configuration per file patterns
-# TODO Add fix metadata and cost estimation
-# TODO Implement rule conflict detection
-# TODO Add metrics aggregation and trending
 
 Features:
     Output Parsing:
@@ -303,7 +294,6 @@ class ESLintParser:
                 config_data = json.load(f)
         elif path.suffix in (".js", ".cjs", ".mjs"):
             # For JS configs, we'd need to execute them - simplified here
-            # TODO: Add proper JS config parsing via Node.js
             raise NotImplementedError(
                 "JavaScript ESLint configs require Node.js execution"
             )

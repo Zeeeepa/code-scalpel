@@ -16,12 +16,6 @@ Node Categories:
     - Special: IRParameter, SourceLocation
 """
 
-# TODO [COMMUNITY] Add destructuring/pattern matching support: IRDestructurePattern, ObjectPattern, ArrayPattern, RestElement, AssignmentPattern
-# TODO [COMMUNITY] Extend location tracking: add byte_offset, end_byte_offset, source_text, and column in characters
-# TODO [COMMUNITY] Add JSX/TSX-specific node metadata: component_type, spread attributes, expression containers, fragment detection
-# TODO [COMMUNITY] Add generator and async iteration support: IRYield, IRYieldFrom, async_iter flag, is_async_generator
-# TODO [COMMUNITY] Add node visitor pattern support: generic visitor interface, pre/post-order traversal, path tracking
-# TODO [PRO] Add type narrowing and guard nodes: IRTypeGuard, control flow narrowing, assertion support (TypeScript asserts)
 
 from __future__ import annotations
 
@@ -35,81 +29,6 @@ from .operators import (
     CompareOperator,
     UnaryOperator,
 )
-# TODO [COMMUNITY] Add IRTupleNode for tuple literals (Python, JavaScript)
-# TODO [COMMUNITY] Add IRSetNode for set literals (Python)
-# TODO [COMMUNITY] Add IRWithNode for context managers (Python with statement)
-# TODO [COMMUNITY] Add IRYieldNode for yield expressions (generators)
-# TODO [COMMUNITY] Add IRAssertNode for assert statements
-# TODO [COMMUNITY] Add IRLambdaNode for lambda/arrow function expressions
-# TODO [COMMUNITY] Add IRSliceNode for slice expressions (Python)
-# TODO [COMMUNITY] Extend IRCall to support **kwargs and *args spread
-# TODO [COMMUNITY] Add parent_node tracking for bottom-up traversal
-# TODO [COMMUNITY] Document node creation best practices
-# TODO [COMMUNITY] Add IRDictComprehensionNode for dict comprehensions
-# TODO [COMMUNITY] Add IRListComprehensionNode for list comprehensions
-# TODO [COMMUNITY] Add IRSetComprehensionNode for set comprehensions
-# TODO [COMMUNITY] Add IRGeneratorExpression for generator expressions
-# TODO [COMMUNITY] Add IRFormatString node for f-strings (Python)
-# TODO [COMMUNITY] Add IRRegexPattern node for regex literals
-# TODO [COMMUNITY] Add IRAnnotatedType node for type hints
-# TODO [COMMUNITY] Add IRDecoratorNode for decorator tracking
-# TODO [COMMUNITY] Add IRTypeVarNode for generic type variables
-# TODO [COMMUNITY] Add IRConstraintNode for type constraints
-# TODO [COMMUNITY] Add IRErrorNode for malformed/unparseable code
-# TODO [COMMUNITY] Add IRComprehensionIter for comprehension iteration tracking
-# TODO [COMMUNITY] Add IRConditionalExpr for ternary/conditional expressions
-# TODO [COMMUNITY] Add IRMatrixMultiply for @ operator (Python)
-# TODO [COMMUNITY] Add IRWalrusAssign for := assignment expression
-# TODO [PRO] Add type_annotation field to all expression nodes
-# TODO [PRO] Add control_flow_context for tracking exception handlers
-# TODO [PRO] Add dataflow_constraints for symbolic execution
-# TODO [PRO] Add IRDestructureNode for destructuring patterns (JS/TS)
-# TODO [PRO] Add IRSpreadElement for spread operator (...) patterns
-# TODO [PRO] Add IRTemplateNode for template literals (JS/TS)
-# TODO [PRO] Add alias_tracking for variable aliases and references
-# TODO [PRO] Add scope_level to distinguish local/global/closure scopes
-# TODO [PRO] Add IROptionalChainNode for optional chaining (?.) support
-# TODO [PRO] Add IRNullCoalescingNode for ?? operator support
-# TODO [PRO] Add IRAsyncNode for async/await expressions
-# TODO [PRO] Add IRAwaitNode for await expressions
-# TODO [PRO] Add IRAsyncIterNode for async iteration
-# TODO [PRO] Add IRPromiseNode for Promise-like structures
-# TODO [PRO] Add IRTypeGuardNode for TypeScript type guards
-# TODO [PRO] Add IRAssertionNode for assertion expressions
-# TODO [PRO] Add IRGenericNode for generic type parameters
-# TODO [PRO] Add IRMappedTypeNode for mapped types (TypeScript)
-# TODO [PRO] Add IRConditionalTypeNode for conditional types (TypeScript)
-# TODO [PRO] Add IRInferNode for infer keyword (TypeScript)
-# TODO [PRO] Add IRModuleNode for module metadata
-# TODO [PRO] Add IRNamespaceNode for namespace support
-# TODO [PRO] Add IREnumNode for enum definitions
-# TODO [PRO] Add IRInterfaceNode for interface definitions
-# TODO [PRO] Add IRMixinNode for mixin/trait support
-# TODO [ENTERPRISE] Add distributed IR serialization support (protobuf)
-# TODO [ENTERPRISE] Add distributed IR serialization support (FlatBuffers)
-# TODO [ENTERPRISE] Add distributed IR serialization support (Avro)
-# TODO [ENTERPRISE] Add IR versioning for compatibility checking
-# TODO [ENTERPRISE] Add cross-language node equivalence detection
-# TODO [ENTERPRISE] Add ML-based node classification hints
-# TODO [ENTERPRISE] Add hardware-accelerated node comparison (GPU)
-# TODO [ENTERPRISE] Add async/await context tracking for all nodes
-# TODO [ENTERPRISE] Add React/JSX component metadata tracking
-# TODO [ENTERPRISE] Add Vue.js/Angular component support
-# TODO [ENTERPRISE] Add dependency injection container support in IR
-# TODO [ENTERPRISE] Add distributed analysis checkpoint storage
-# TODO [ENTERPRISE] Add anomaly detection on node patterns
-# TODO [ENTERPRISE] Add node mutation tracking for immutability analysis
-# TODO [ENTERPRISE] Add side_effect_tracking for pure function detection
-# TODO [ENTERPRISE] Add performance_hints on computationally expensive patterns
-# TODO [ENTERPRISE] Add security_vulnerability_hints for code inspection
-# TODO [ENTERPRISE] Add accessibility_hints for web components
-# TODO [ENTERPRISE] Add i18n_tracking for internationalization patterns
-# TODO [ENTERPRISE] Add performance_regression_detection() for optimization analysis
-# TODO [ENTERPRISE] Add ml_feature_extraction_from_nodes() for ML pipelines
-# TODO [ENTERPRISE] Add graph_representation_generation() for visualization
-# TODO [ENTERPRISE] Add node_similarity_clustering() for code deduplication
-# TODO [ENTERPRISE] Add polyglot_equivalence_detection() for cross-language analysis
-# TODO [ENTERPRISE] Add distributed_node_caching() for federated analysis
 
 
 @dataclass

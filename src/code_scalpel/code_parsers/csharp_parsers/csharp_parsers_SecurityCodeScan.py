@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# TODO [PHASE 2] Parse Security Code Scan XML/JSON output
-# TODO [PHASE 2] Execute SCS analysis via VSIX/msbuild
-# TODO [PHASE 2] Load security rules configuration
-# TODO [PHASE 2] Categorize vulnerabilities by CWE
-# TODO [PHASE 2] Detect OWASP Top 10 issues
-# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
-# TODO [PHASE 2] Analyze vulnerability severity
-# TODO [PHASE 2] Map to remediation guidance
 
 from dataclasses import dataclass
 from enum import Enum

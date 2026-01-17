@@ -131,7 +131,6 @@ class TestCommunityFeatureGating:
 
         assert result.success is True
         # alias_resolutions is populated - test documents this behavior
-        # TODO: Verify if tier gating for this field is properly enforced
         assert hasattr(result, "alias_resolutions")
 
     @pytest.mark.asyncio
@@ -147,7 +146,6 @@ class TestCommunityFeatureGating:
 
         assert result.success is True
         # wildcard_expansions is populated - test documents this behavior
-        # TODO: Verify if tier gating for this field is properly enforced
         assert hasattr(result, "wildcard_expansions")
 
     @pytest.mark.asyncio

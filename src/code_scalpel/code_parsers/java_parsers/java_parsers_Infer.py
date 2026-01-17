@@ -9,11 +9,6 @@ Reference: https://fbinfer.com/
 Command: infer run -- javac *.java
 
 Phase 2 Enhancement TODOs:
-# TODO Implement trace analysis for null pointer bugs
-# TODO Add cost/resource leak detection metrics
-# TODO Support memory safety violations extraction
-# TODO Implement precondition analysis
-# TODO Add issue grouping by root cause
 """
 
 import json

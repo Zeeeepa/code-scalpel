@@ -14,29 +14,9 @@ Exakat provides:
 - Architecture analysis
 - Multiple output formats (JSON, CSV, HTML)
 
-# TODO Parse Exakat JSON analysis results
-# TODO Parse CSV report format
-# TODO Parse HTML report data
-# TODO Extract analysis categories
-# TODO Parse severity levels and classification
 
-# TODO Add Exakat CLI execution
-# TODO Support configuration file parsing
-# TODO Implement incremental analysis
-# TODO Add custom ruleset support
-# TODO Support result comparison between runs
 
-# TODO Parse security issues
-# TODO Extract performance problems
-# TODO Analyze code standards violations
-# TODO Detect dead code patterns
-# TODO Analyze architecture rules
 
-# TODO Generate category reports
-# TODO Track issue trends
-# TODO Create remediation suggestions
-# TODO Compare with other tools
-# TODO Generate compliance reports
 """
 
 from dataclasses import dataclass
@@ -78,7 +58,6 @@ class ExakatParser:
 
     def parse_json_report(self, json_data: str) -> list[ExakatIssue]:
         """
-        # TODO Parse Exakat JSON analysis report.
 
         Args:
             json_data: JSON report from Exakat
@@ -90,7 +69,6 @@ class ExakatParser:
 
     def parse_csv_report(self, csv_file: Path) -> list[ExakatIssue]:
         """
-        # TODO Parse Exakat CSV report format.
 
         Args:
             csv_file: Path to Exakat CSV report
@@ -102,7 +80,6 @@ class ExakatParser:
 
     def execute_exakat(self, project_path: Path) -> dict[str, Any]:
         """
-        # TODO Execute Exakat analysis on project.
 
         Args:
             project_path: Path to PHP project
@@ -114,7 +91,6 @@ class ExakatParser:
 
     def generate_report(self) -> str:
         """
-        # TODO Generate comprehensive Exakat report.
 
         Returns:
             Formatted report string

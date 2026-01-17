@@ -171,7 +171,8 @@ class TestUpdateSymbolProRollback:
     async def test_rollback_procedure(self, temp_python_file, mocker):
         """Pro tier can rollback to previous version."""
         # Setup: backup exists
-        backup_content = temp_python_file.read_text()
+        # [20260117_TEST] Capture backup content for context; unused in assertion
+        _backup_content = temp_python_file.read_text()
 
         # Rollback operation (simulated)
         rollback_result = {

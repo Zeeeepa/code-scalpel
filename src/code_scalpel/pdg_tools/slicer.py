@@ -11,38 +11,8 @@ import networkx as nx
 #     - Add value-dependent slices (track specific constant values)
 #     - Support nondeterministic slicing for concurrent code
 
-# TODO [COMMUNITY/Basic] Implement backward program slicing algorithm
-# TODO [COMMUNITY/Basic] Create forward program slicing
-# TODO [COMMUNITY/Basic] Add data dependency slicing
-# TODO [COMMUNITY/Basic] Implement control dependency slicing
-# TODO [COMMUNITY/Basic] Create thin slicing (minimal executable slice)
-# TODO [COMMUNITY/Basic] Add slice caching for performance
-# TODO [COMMUNITY/Basic] Implement slice size optimization
-# TODO [COMMUNITY/Basic] Create slice visualization
-# TODO [COMMUNITY/Basic] Add slice complexity metrics
-# TODO [COMMUNITY/Basic] Document slicing algorithms and usage
 
-# TODO [PRO/Advanced] Implement multi-criteria slicing (multiple variables/lines)
-# TODO [PRO/Advanced] Add context-specific slicing (within function/class scope)
-# TODO [PRO/Advanced] Create value-dependent slicing (track specific values)
-# TODO [PRO/Advanced] Implement interprocedural slicing (across functions)
-# TODO [PRO/Advanced] Add amnestic slicing (limited history)
-# TODO [PRO/Advanced] Support union and intersection of slices
-# TODO [PRO/Advanced] Implement dynamic slicing based on runtime traces
-# TODO [PRO/Advanced] Add slice refinement and iterative slicing
-# TODO [PRO/Advanced] Create approximate slicing for large programs
-# TODO [PRO/Advanced] Implement slicing for security policy enforcement
 
-# TODO [ENTERPRISE/Distributed] Implement distributed slicing over sharded PDGs
-# TODO [ENTERPRISE/Distributed] Add slicing for polyglot code (JS, Java, C++)
-# TODO [ENTERPRISE/Distributed] Create parallel slicing algorithm for multi-core systems
-# TODO [ENTERPRISE/Distributed] Implement stream-based slicing for infinite traces
-# TODO [ENTERPRISE/Distributed] Add slicing for concurrent/async code
-# TODO [ENTERPRISE/Distributed] Support slicing in federated PDG analysis
-# TODO [ENTERPRISE/Distributed] Implement AI-guided slicing (heuristic-based)
-# TODO [ENTERPRISE/Distributed] Add quantum-safe slice verification
-# TODO [ENTERPRISE/Distributed] Create blockchain-based slice provenance
-# TODO [ENTERPRISE/Distributed] Implement zero-copy slicing for memory efficiency
 
 
 class SliceType(Enum):

@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-# TODO [PHASE 2] Parse FxCop JSON/XML output
-# TODO [PHASE 2] Execute FxCop analysis via subprocess
-# TODO [PHASE 2] Load suppression configuration
-# TODO [PHASE 2] Categorize violations by rule
-# TODO [PHASE 2] Map to Microsoft guidelines
-# TODO [PHASE 2] Generate JSON/SARIF/HTML reports
-# TODO [PHASE 2] Analyze code metrics
-# TODO [PHASE 2] Track violations by category
 
 from dataclasses import dataclass
 from enum import Enum

@@ -2,24 +2,6 @@
 
 [20251224_FEATURE] Stub adapter for C# parsing support.
 
-# TODO [COMMUNITY] Implement basic C# parsing with tree-sitter-csharp or Roslyn
-# TODO [COMMUNITY] Parse class/struct/record definitions and extract methods
-# TODO [COMMUNITY] Add C# version detection (7.0-12.0) and version-specific features
-# TODO [COMMUNITY] Extract events, delegates, LINQ expressions, and attributes
-# TODO [COMMUNITY] Add .NET framework detection (.NET Framework, Core, 6+)
-# TODO [COMMUNITY] Parse using directives and build dependency graph
-# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
-# TODO [PRO] Integrate static analysis (Roslyn Analyzers, StyleCop, SonarQube)
-# TODO [PRO] Add semantic analysis with type resolution via Roslyn
-# TODO [PRO] Track inheritance hierarchies and interface implementations
-# TODO [PRO] Implement code transformation and refactoring operations
-# TODO [PRO] Detect ASP.NET, Entity Framework, and WPF/WinForms patterns
-# TODO [PRO] Support advanced features (pattern matching, init-only properties, top-level statements)
-# TODO [ENTERPRISE] Add security analysis (SQL injection, XSS, insecure deserialization)
-# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
-# TODO [ENTERPRISE] Add enterprise compliance checking and reporting
-# TODO [ENTERPRISE] Implement performance profiling and optimization hints
-# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List

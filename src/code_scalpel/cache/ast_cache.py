@@ -7,81 +7,6 @@ This module extends the base AnalysisCache to provide AST-specific caching
 with dependency tracking and cascading invalidation.
 """
 
-# TODO [COMMUNITY] Add IncrementalASTCache.get_or_parse() method
-# TODO [COMMUNITY] Add IncrementalASTCache.invalidate() dependency invalidation
-# TODO [COMMUNITY] Add IncrementalASTCache.get_cached() cache lookup
-# TODO [COMMUNITY] Add IncrementalASTCache.clear() full cache clear
-# TODO [COMMUNITY] Add CacheMetadata validation and serialization
-# TODO [COMMUNITY] Add file_hash computation (SHA256)
-# TODO [COMMUNITY] Add dependency graph tracking and updates
-# TODO [COMMUNITY] Add cascading invalidation for affected files
-# TODO [COMMUNITY] Add cache persistence (save/load metadata)
-# TODO [COMMUNITY] Add language-specific AST handling (Python first)
-# TODO [COMMUNITY] Add AST serialization with pickle
-# TODO [COMMUNITY] Add deserialization with corruption recovery
-# TODO [COMMUNITY] Add cache statistics (hit/miss, size)
-# TODO [COMMUNITY] Add cache directory initialization
-# TODO [COMMUNITY] Add cache disk storage management
-# TODO [COMMUNITY] Add memory cache layer (in-process)
-# TODO [COMMUNITY] Add duplicate AST detection
-# TODO [COMMUNITY] Add cache entry expiry tracking
-# TODO [COMMUNITY] Add cache metadata export
-# TODO [COMMUNITY] Add cache diagnostic reporting
-# TODO [COMMUNITY] Add cache integrity checking
-# TODO [COMMUNITY] Add cache consistency verification
-# TODO [COMMUNITY] Add incremental file hash computation
-# TODO [COMMUNITY] Add dependency graph visualization
-# TODO [COMMUNITY] Add cache performance metrics
-# TODO [PRO] Add support for polymorphic AST types (TypeScript, Java, Go, etc)
-# TODO [PRO] Add incremental parsing (re-parse only changed functions)
-# TODO [PRO] Add AST diff tracking (track what changed between versions)
-# TODO [PRO] Add memory pooling for AST nodes (reduce GC pressure)
-# TODO [PRO] Add generational collection (keep hot files in memory)
-# TODO [PRO] Add adaptive AST caching based on file size
-# TODO [PRO] Add AST compression for storage optimization
-# TODO [PRO] Add AST validation with schema checking
-# TODO [PRO] Add AST normalization across languages
-# TODO [PRO] Add AST delta compression (store diffs not full ASTs)
-# TODO [PRO] Add AST versioning and migrations
-# TODO [PRO] Add AST preload for hot files
-# TODO [PRO] Add AST memory usage profiling
-# TODO [PRO] Add AST serialization format optimization
-# TODO [PRO] Add concurrent AST cache access
-# TODO [PRO] Add AST cache partitioning by language
-# TODO [PRO] Add AST cache statistics export
-# TODO [PRO] Add AST performance benchmarking
-# TODO [PRO] Add AST cache warming on startup
-# TODO [PRO] Add AST-specific invalidation strategies
-# TODO [PRO] Add AST cache coherence detection
-# TODO [PRO] Add AST cache replication support
-# TODO [PRO] Add AST cache debugging tools
-# TODO [PRO] Add AST cache visualization dashboard
-# TODO [PRO] Add AST parse progress tracking
-# TODO [ENTERPRISE] Add distributed AST cache across agents
-# TODO [ENTERPRISE] Add federated AST management across organizations
-# TODO [ENTERPRISE] Add multi-region AST replication with failover
-# TODO [ENTERPRISE] Add AST cache consensus and voting
-# TODO [ENTERPRISE] Add distributed AST locking (Zookeeper, etcd)
-# TODO [ENTERPRISE] Add AST change event streaming
-# TODO [ENTERPRISE] Add AST cache change notifications
-# TODO [ENTERPRISE] Add AST cache cost tracking per org
-# TODO [ENTERPRISE] Add AST cache quota enforcement
-# TODO [ENTERPRISE] Add AST cache SLA monitoring
-# TODO [ENTERPRISE] Add AST cache audit trail logging
-# TODO [ENTERPRISE] Add AST cache encryption for sensitive code
-# TODO [ENTERPRISE] Add AST cache access control (RBAC)
-# TODO [ENTERPRISE] Add AST cache multi-tenancy isolation
-# TODO [ENTERPRISE] Add AST cache disaster recovery
-# TODO [ENTERPRISE] Add AST cache cross-region failover
-# TODO [ENTERPRISE] Add AST cache data retention policies
-# TODO [ENTERPRISE] Add AST cache billing integration
-# TODO [ENTERPRISE] Add AST cache executive reporting
-# TODO [ENTERPRISE] Add AST cache anomaly detection
-# TODO [ENTERPRISE] Add AST cache circuit breaker
-# TODO [ENTERPRISE] Add AST cache health monitoring
-# TODO [ENTERPRISE] Add AST cache performance optimization ML model
-# TODO [ENTERPRISE] Add AST cache capacity planning
-# TODO [ENTERPRISE] Add AST cache AI-powered invalidation prediction
 
 from __future__ import annotations
 
@@ -127,11 +52,6 @@ class IncrementalASTCache:
         >>> ast = cache.get_or_parse("file.py", "python")
         >>> cache.invalidate("file.py")  # Returns affected files
 
-    # TODO Phase 2: Support polymorphic AST types (TypeScript, Java, etc)
-    # TODO Phase 2: Implement incremental parsing (re-parse only changed functions)
-    # TODO Phase 2: Add AST diff tracking (track what changed between versions)
-    # TODO Phase 2: Implement memory pooling for AST nodes (reduce GC pressure)
-    # TODO Phase 2: Add generational collection (keep hot files in memory)
     """
 
     def __init__(self, cache_dir: str | Path = ".scalpel_ast_cache"):
@@ -142,7 +62,6 @@ class IncrementalASTCache:
             cache_dir: Directory to store cache files
 
         [20251216_FEATURE] Cache initialization with dependency tracking
-        # TODO Phase 2: Add max_ast_memory_mb parameter for generational GC
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True, parents=True)
@@ -264,9 +183,6 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Cache-first AST retrieval
-        # TODO Phase 2: Add parse_fn timeout to prevent hanging
-        # TODO Phase 2: Support incremental parsing (re-parse only changed functions)
-        # TODO Phase 2: Add progress callback for large file parsing
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -317,9 +233,6 @@ class IncrementalASTCache:
             Parsed AST
 
         [20251216_FEATURE] Default parsing logic
-        # TODO Phase 2: Add parser for TypeScript/JavaScript
-        # TODO Phase 2: Add parser for Java
-        # TODO Phase 2: Add parser for Go
         """
         if language == "python":
             import ast
@@ -375,9 +288,6 @@ class IncrementalASTCache:
             Set of file paths affected by the change
 
         [20251216_FEATURE] Cascading invalidation with dependency tracking
-        # TODO Phase 2: Add depth limit to prevent cascading invalidation explosions
-        # TODO Phase 2: Return invalidation chain for debugging
-        # TODO Phase 2: Add metrics for invalidation size/depth
         """
         path = Path(file_path).resolve()
         path_str = str(path)
@@ -437,9 +347,6 @@ class IncrementalASTCache:
             depends_on: Dependency file path
 
         [20251216_FEATURE] Track dependency graph for cascading invalidation
-        # TODO Phase 2: Add cycle detection (prevent circular dependencies)
-        # TODO Phase 2: Add dependency weight tracking (prioritize high-impact changes)
-        # TODO Phase 2: Support reverse dependency queries (what depends on me?)
         """
         source_path = str(Path(source).resolve())
         dep_path = str(Path(depends_on).resolve())
@@ -458,9 +365,6 @@ class IncrementalASTCache:
             Dictionary with cache stats
 
         [20251216_FEATURE] Cache observability
-        # TODO Phase 2: Add hit/miss ratios
-        # TODO Phase 2: Add memory usage estimates
-        # TODO Phase 2: Add cache age statistics
         """
         total_files = len(self.file_hashes)
         memory_cached = len(self.ast_cache)
@@ -483,9 +387,6 @@ class IncrementalASTCache:
         Clear all cache data.
 
         [20251216_FEATURE] Cache reset capability
-        # TODO Phase 2: Add selective clearing (by language, by age)
-        # TODO Phase 2: Add backup before clearing for recovery
-        # TODO Phase 2: Add metrics collection on clear
         """
         self.file_hashes.clear()
         self.ast_cache.clear()

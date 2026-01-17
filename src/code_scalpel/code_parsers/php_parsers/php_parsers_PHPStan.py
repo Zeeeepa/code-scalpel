@@ -15,20 +15,8 @@ PHPStan Features:
     - Multiple output formats (JSON, JSON-inline, table, checkstyle, etc.)
 
 Phase 2 Enhancement Areas:
-    # TODO HIGH PRIORITY: JSON report parsing
-    # TODO HIGH PRIORITY: JSON-inline format parsing
-    # TODO HIGH PRIORITY: CLI execution via subprocess
-    # TODO HIGH PRIORITY: Configuration file loading (phpstan.neon)
-    # TODO HIGH PRIORITY: Custom rules loading
 
-    # TODO MEDIUM PRIORITY: Error categorization and extraction
-    # TODO MEDIUM PRIORITY: Type coverage reports
-    # TODO MEDIUM PRIORITY: Dead code detection
-    # TODO MEDIUM PRIORITY: Error filtering and severity levels
 
-    # TODO LOW PRIORITY: Type annotation recommendations
-    # TODO LOW PRIORITY: IDE integration hints
-    # TODO LOW PRIORITY: Comparison with other type checkers
 """
 
 from dataclasses import dataclass, field

@@ -99,7 +99,6 @@ export class UserProfile extends React.Component {
         assert result.success is True
         assert "UserProfile" in result.target_code
         assert result.jsx_normalized is True
-        # TODO: Class component detection requires IR base class capture
         # assert result.component_type == "class"
 
 

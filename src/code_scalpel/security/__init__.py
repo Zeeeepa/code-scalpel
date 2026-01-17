@@ -24,9 +24,6 @@ Usage:
     from code_scalpel.security.type_safety import TypeEvaporationDetector
 """
 
-# TODO [COMMUNITY] Re-export core analyzers, organize module, and track version
-# TODO [PRO] Implement full analyzer exports and convenience functions
-# TODO [ENTERPRISE] Implement all submodule exports and ML predictor integration
 
 # [20251225_FEATURE] Re-export from analyzers (core security)
 from .analyzers import (

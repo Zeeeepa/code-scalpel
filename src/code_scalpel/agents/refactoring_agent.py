@@ -32,11 +32,6 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "max_method_length": 20,
             "max_nesting_depth": 3,
         }
-        # TODO [FEATURE]: Support extract method refactoring with parameter analysis
-        # TODO [FEATURE]: Add extract class detection and execution
-        # TODO [FEATURE]: Support move method/field across classes
-        # TODO [ENHANCEMENT]: Add design pattern refactoring templates
-        # TODO [ENHANCEMENT]: Support inline method/variable refactoring with usage updates
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """

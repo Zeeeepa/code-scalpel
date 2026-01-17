@@ -737,7 +737,6 @@ class JavaScriptNormalizer(BaseNormalizer):
 
         # Traditional for loops don't map cleanly to IR for-each
         # We'll use IRWhile as the best approximation
-        # TODO: Add IRForLoop to IR for C-style for loops
 
         # For now, return as IRWhile with init prepended
         while_node = IRWhile(

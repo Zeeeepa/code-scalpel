@@ -39,7 +39,6 @@ Usage:
         print(f"BREAKING: {drift.breaking_changes}")
 """
 
-# TODO: GraphQLSchemaTracker Enhancement Roadmap
 # ===============================================
 #
 # COMMUNITY (Current & Planned):

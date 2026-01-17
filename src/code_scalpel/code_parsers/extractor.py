@@ -515,7 +515,6 @@ class PolyglotExtractor:
                 target_name=target_name,
                 start_line=start_line,
                 end_line=end_line,
-                dependencies=[],  # TODO: Extract dependencies from IR
                 file_path=self.file_path,
                 token_estimate=len(code) // 4,
                 jsx_normalized=jsx_normalized,

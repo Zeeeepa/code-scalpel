@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 """SwiftLint Parser - Swift Code Style and Linting Analysis"""
 
-# TODO [PRO] Parse JSON output from swiftlint --format=json
-# TODO [PRO] Execute SwiftLint via subprocess/SPM
-# TODO [PRO] Load configuration from .swiftlint.yml files
-# TODO [PRO] Categorize violations by rule category
-# TODO [PRO] Apply auto-fixes via swiftlint --fix
-# TODO [ENTERPRISE] Generate JSON/SARIF/HTML reports
-# TODO [ENTERPRISE] Calculate metrics and severity scores
-# TODO [ENTERPRISE] Detect iOS/macOS specific violations
-# TODO [ENTERPRISE] Analyze code complexity metrics
 
 from dataclasses import dataclass
 from enum import Enum

@@ -227,7 +227,6 @@ class PatchResult:
         """Change in line count."""
         return self.lines_after - self.lines_before
 
-    # TODO: Add methods:
     # - to_diff() -> str - Generate unified diff
     # - undo() -> PatchResult - Reverse this patch
     # - to_json() -> dict - Serialize for logging

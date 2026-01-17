@@ -171,13 +171,11 @@ class IsortConfig:
     @classmethod
     def from_pyproject(cls, pyproject_path: str | Path) -> "IsortConfig":
         """Load configuration from pyproject.toml."""
-        # TODO: Implement
         return cls()
 
     @classmethod
     def from_file(cls, config_path: str | Path) -> "IsortConfig":
         """Load configuration from .isort.cfg or setup.cfg."""
-        # TODO: Implement
         return cls()
 
 
@@ -224,7 +222,6 @@ class IsortParser:
             config: IsortConfig instance or None to use defaults
         """
         self.config = config or IsortConfig()
-        # TODO: Initialize isort library
 
     def analyze_file(self, file_path: str | Path) -> IsortReport:
         """
@@ -238,10 +235,6 @@ class IsortParser:
 
         TODO: Implement
         """
-        # TODO: Read file
-        # TODO: Run isort check
-        # TODO: Parse results
-        # TODO: Return IsortReport
         raise NotImplementedError("IsortParser.analyze_file() not yet implemented")
 
     def analyze_code(self, code: str, filename: str = "<string>") -> IsortReport:
@@ -257,9 +250,6 @@ class IsortParser:
 
         TODO: Implement
         """
-        # TODO: Run isort check on code
-        # TODO: Parse results
-        # TODO: Return IsortReport
         raise NotImplementedError("IsortParser.analyze_code() not yet implemented")
 
     def get_fixed_code(self, code: str) -> str:
@@ -274,7 +264,6 @@ class IsortParser:
 
         TODO: Implement
         """
-        # TODO: Use isort.api.sort_code_string()
         raise NotImplementedError("IsortParser.get_fixed_code() not yet implemented")
 
     def load_config(self, config_path: str | Path) -> None:
@@ -286,6 +275,4 @@ class IsortParser:
 
         TODO: Implement
         """
-        # TODO: Parse config file
-        # TODO: Update self.config
         raise NotImplementedError("IsortParser.load_config() not yet implemented")

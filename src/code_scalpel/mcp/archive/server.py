@@ -17,36 +17,6 @@ Usage:
     python -m code_scalpel.mcp.server --transport streamable-http --port 8080
 """
 
-# TODO [COMMUNITY/CORE] Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
-# TODO [COMMUNITY/CORE] Add stdin/stdout MCP transport implementation
-# TODO [COMMUNITY/CORE] Implement FastMCP server with tool registration
-# TODO [COMMUNITY/CORE] Add request/response envelope wrapping
-# TODO [COMMUNITY/CORE] Implement error handling with error codes
-# TODO [COMMUNITY/CORE] Add tool timeout enforcement
-# TODO [COMMUNITY/CORE] Implement maximum payload size limits
-# TODO [COMMUNITY/CORE] Create tool initialization and health checks
-# TODO [COMMUNITY/CORE] Add comprehensive server logging
-# TODO [COMMUNITY/CORE] Document server setup and deployment
-# TODO [PRO/ADVANCED] Implement HTTP transport with TLS
-# TODO [PRO/ADVANCED] Add client authentication (API key, JWT)
-# TODO [PRO/ADVANCED] Implement tier-aware tool filtering
-# TODO [PRO/ADVANCED] Add tool-level performance profiling
-# TODO [PRO/ADVANCED] Implement response compression for large outputs
-# TODO [PRO/ADVANCED] Add request queuing and concurrency limits
-# TODO [PRO/ADVANCED] Implement custom tool metrics collection
-# TODO [PRO/ADVANCED] Add batch tool invocation support
-# TODO [PRO/ADVANCED] Create advanced analytics and monitoring
-# TODO [PRO/ADVANCED] Implement tool versioning and backward compatibility
-# TODO [ENTERPRISE/SCALABILITY] Implement distributed server with load balancing
-# TODO [ENTERPRISE/SCALABILITY] Add multi-protocol MCP (gRPC, WebSocket)
-# TODO [ENTERPRISE/SCALABILITY] Implement federated MCP across servers
-# TODO [ENTERPRISE/SCALABILITY] Add OpenTelemetry instrumentation
-# TODO [ENTERPRISE/SECURITY] Implement RBAC and fine-grained permissions
-# TODO [ENTERPRISE/SECURITY] Add audit logging for compliance
-# TODO [ENTERPRISE/SECURITY] Implement request signing and verification
-# TODO [ENTERPRISE/SECURITY] Add health checks and failover
-# TODO [ENTERPRISE/SECURITY] Support custom authentication providers
-# TODO [ENTERPRISE/OPTIMIZATION] Implement AI-powered request optimization
 
 from __future__ import annotations
 

@@ -19,76 +19,8 @@ Example:
     ...     print(f"{link.client_id} -> {link.endpoint_id}: {link.confidence}")
 """
 
-# TODO [COMMUNITY] Add detect_exact_match() for identical routes
-# TODO [COMMUNITY] Add detect_pattern_match() for regex matching
-# TODO [COMMUNITY] Add parse_route_string() to extract components
-# TODO [COMMUNITY] Add get_route_parameters(route) extractor
-# TODO [COMMUNITY] Add normalize_route_path(path) for consistency
-# TODO [COMMUNITY] Add extract_path_from_url(url) utility
-# TODO [COMMUNITY] Add extract_method_from_call(call_node) HTTP method extraction
-# TODO [COMMUNITY] Add extract_url_from_call(call_node) URL extraction
-# TODO [COMMUNITY] Add extract_method_from_endpoint(endpoint_node)
-# TODO [COMMUNITY] Add extract_route_from_endpoint(endpoint_node)
-# TODO [COMMUNITY] Add parse_axios_call() JavaScript/TypeScript detection
-# TODO [COMMUNITY] Add parse_fetch_call() native fetch detection
-# TODO [COMMUNITY] Add parse_requests_call() Python requests detection
-# TODO [COMMUNITY] Add parse_flask_route() Flask endpoint detection
-# TODO [COMMUNITY] Add parse_django_route() Django endpoint detection
-# TODO [COMMUNITY] Add parse_fastapi_route() FastAPI endpoint detection
-# TODO [COMMUNITY] Add parse_spring_mapping() Spring endpoint detection
-# TODO [COMMUNITY] Add get_all_detected_links() result enumeration
 
-# TODO [PRO] Add detect_dynamic_routes() parameterized routes
-# TODO [PRO] Add detect_path_parameters() {id}, :id, {uuid} patterns
-# TODO [PRO] Add detect_query_parameters() query string matching
-# TODO [PRO] Add detect_base_url_mismatch() different bases same path
-# TODO [PRO] Add detect_api_versioning() /v1/, /v2/ patterns
-# TODO [PRO] Add detect_subdomain_routing() different hosts
-# TODO [PRO] Add detect_header_routing() custom header requirements
-# TODO [PRO] Add detect_authentication_requirements() auth detection
-# TODO [PRO] Add detect_cors_policy() CORS configuration
-# TODO [PRO] Add detect_content_type() request/response types
-# TODO [PRO] Add detect_request_body_schema() payload structure
-# TODO [PRO] Add detect_response_schema() output structure
-# TODO [PRO] Add detect_error_responses() error handling
-# TODO [PRO] Add detect_redirect_chains() HTTP redirects
-# TODO [PRO] Add detect_reverse_proxy_routes() proxy patterns
-# TODO [PRO] Add detect_load_balancing() multiple endpoints
-# TODO [PRO] Add detect_rate_limiting() throttling patterns
-# TODO [PRO] Add detect_webhook_callbacks() callback endpoints
-# TODO [PRO] Add detect_websocket_connections() WebSocket endpoints
-# TODO [PRO] Add detect_graphql_endpoints() GraphQL detection
-# TODO [PRO] Add detect_grpc_services() gRPC endpoint detection
-# TODO [PRO] Add link_confidence_scoring() confidence calculation
-# TODO [PRO] Add link_evidence_collection() reasoning
-# TODO [PRO] Add suggest_manual_review() low confidence links
-# TODO [PRO] Add link_statistics_report() coverage analysis
 
-# TODO [ENTERPRISE] Add distributed http_detection() across services
-# TODO [ENTERPRISE] Add federated_endpoint_discovery() across orgs
-# TODO [ENTERPRISE] Add multi_region_route_mapping() geographic routing
-# TODO [ENTERPRISE] Add service_mesh_integration() Istio/Linkerd
-# TODO [ENTERPRISE] Add api_gateway_detection() API gateway routing
-# TODO [ENTERPRISE] Add load_balancer_detection() load balancing
-# TODO [ENTERPRISE] Add cdn_detection() content delivery
-# TODO [ENTERPRISE] Add ssl_tls_certificate_validation()
-# TODO [ENTERPRISE] Add encryption_detection() HTTPS enforcement
-# TODO [ENTERPRISE] Add certificate_pinning_detection()
-# TODO [ENTERPRISE] Add http_signature_verification()
-# TODO [ENTERPRISE] Add rate_limiting_detection() throttle config
-# TODO [ENTERPRISE] Add circuit_breaker_detection() resilience
-# TODO [ENTERPRISE] Add retry_policy_detection()
-# TODO [ENTERPRISE] Add timeout_configuration_detection()
-# TODO [ENTERPRISE] Add http_cache_detection()
-# TODO [ENTERPRISE] Add compression_detection()
-# TODO [ENTERPRISE] Add http2_spdy_detection()
-# TODO [ENTERPRISE] Add grpc_web_fallback_detection()
-# TODO [ENTERPRISE] Add api_versioning_strategy_detection()
-# TODO [ENTERPRISE] Add deprecation_detection() EOL endpoints
-# TODO [ENTERPRISE] Add monitoring_alerting_integration()
-# TODO [ENTERPRISE] Add tracing_integration() distributed tracing
-# TODO [ENTERPRISE] Add performance_profiling_http_calls()
-# TODO [ENTERPRISE] Add http_compliance_checking() standards
 
 from __future__ import annotations
 

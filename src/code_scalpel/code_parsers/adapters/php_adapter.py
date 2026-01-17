@@ -2,23 +2,6 @@
 
 [20251224_FEATURE] Stub adapter for PHP parsing support.
 
-# TODO [COMMUNITY] Implement basic PHP parsing with tree-sitter-php or php-parser
-# TODO [COMMUNITY] Parse class/interface/trait definitions and extract methods
-# TODO [COMMUNITY] Add PHP version detection (7.4-8.3) and version-specific features
-# TODO [COMMUNITY] Extract magic methods, closures, and constructor property promotion
-# TODO [COMMUNITY] Add dependency analysis with namespace dependency graph and Composer
-# TODO [COMMUNITY] Detect unused imports and parse use statements
-# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
-# TODO [PRO] Integrate static analysis (PHPStan, Psalm, PHP_CodeSniffer, PHPMD)
-# TODO [PRO] Add semantic analysis with type resolution and inheritance tracking
-# TODO [PRO] Implement code transformation with PHP-CS-Fixer and refactoring
-# TODO [PRO] Detect Laravel, Symfony, WordPress, and Drupal framework patterns
-# TODO [PRO] Support modern PHP features (enums, readonly properties, match expressions)
-# TODO [ENTERPRISE] Add security analysis (SQL injection, XSS, command injection)
-# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
-# TODO [ENTERPRISE] Add enterprise compliance checking (PSR-1, PSR-12) and reporting
-# TODO [ENTERPRISE] Implement performance profiling and optimization hints
-# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List

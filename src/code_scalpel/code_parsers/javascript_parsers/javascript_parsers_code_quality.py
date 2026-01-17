@@ -6,15 +6,6 @@ Implements advanced code quality checks, anti-pattern detection, and
 code smell identification for JavaScript/TypeScript code.
 
 Phase 2 Enhancement TODOs:
-# TODO Add cognitive complexity calculation (simplified McCabe)
-# TODO Implement data flow analysis for null/undefined detection
-# TODO Add class design pattern detection (Singleton, Factory, Observer, etc.)
-# TODO Support incremental analysis with change delta tracking
-# TODO Implement type-aware smell detection (with TypeScript)
-# TODO Add metrics trend analysis and historical comparison
-# TODO Implement custom rule plugin system
-# TODO Add configuration file parsing (.smartconfig.json)
-# TODO Support suppression directives and annotations
 
 Features:
     Code Smell Detection:
@@ -299,7 +290,6 @@ class CodeQualityAnalyzer:
                 )
             )
 
-        # Extract TODO comments
         result.todo_comments = self._extract_todo_comments(code, lines)
         for todo in result.todo_comments:
             smell_type = {

@@ -29,11 +29,6 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "min_cache_hit_ratio": 0.8,
             "max_nested_loops": 3,
         }
-        # TODO [FEATURE]: Add profiling data integration for real performance metrics
-        # TODO [FEATURE]: Support algorithmic complexity analysis (O(n), O(n²), etc)
-        # TODO [FEATURE]: Add memory profiling and optimization suggestions
-        # TODO [ENHANCEMENT]: Integrate with benchmarking tools for before/after comparison
-        # TODO [ENHANCEMENT]: Add parallelization opportunity detection
         self.optimization_patterns = {
             "algorithmic": ["O(n^2) to O(n log n)", "Linear search to binary search"],
             "memory": ["Reduce object creation", "Use generators", "Memory pooling"],

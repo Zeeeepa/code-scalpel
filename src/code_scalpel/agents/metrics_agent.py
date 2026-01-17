@@ -32,11 +32,6 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "min_cohesion": 0.7,
             "max_technical_debt": 20,
         }
-        # TODO [FEATURE]: Add cyclomatic complexity tracking
-        # TODO [FEATURE]: Support coupling and cohesion metrics
-        # TODO [FEATURE]: Track technical debt across project
-        # TODO [ENHANCEMENT]: Generate trend analysis and predictions
-        # TODO [ENHANCEMENT]: Add team-level analytics and insights
 
     async def observe(self, target: str) -> Dict[str, Any]:
         """

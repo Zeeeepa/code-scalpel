@@ -15,7 +15,6 @@ The new code_parser/ module provides:
     - Type-safe Language enum and ParseResult dataclass
     - Factory pattern with language auto-detection
 
-# TODO Remove this deprecated module after migration:
     - Update imports in tests to use code_scalpel.code_parser
     - Delete src/code_scalpel/parsers/ directory
     - Verify no external code depends on this module

@@ -12,29 +12,9 @@ PHPMD provides:
 - Multiple output formats (XML, HTML, text, JSON)
 - Custom ruleset creation support
 
-# TODO Implement PHPMD XML report parsing
-# TODO Implement JSON report parsing
-# TODO Parse HTML output format
-# TODO Extract violation details (file, line, priority, rule)
-# TODO Parse rule categorization and priorities
 
-# TODO Add PHPMD CLI execution via subprocess
-# TODO Support ruleset configuration
-# TODO Load ruleset XML files
-# TODO Implement custom rule support
-# TODO Add baseline support for known issues
 
-# TODO Parse code smell rules (naming, unused, complexity)
-# TODO Extract metrics (ATFD, WMC, LOCM, etc.)
-# TODO Detect controversial patterns
-# TODO Analyze naming conventions
-# TODO Parse priority levels (1-5)
 
-# TODO Generate complexity reports
-# TODO Track violation metrics
-# TODO Implement severity filtering
-# TODO Add trend analysis
-# TODO Create comparison with PHPCS/PHPStan
 """
 
 from dataclasses import dataclass, field
@@ -94,7 +74,6 @@ class PHPMDParser:
 
     def parse_xml_report(self, xml_file: Path) -> list[PHPMDViolation]:
         """
-        # TODO Parse PHPMD XML report format.
 
         Args:
             xml_file: Path to PHPMD XML report
@@ -106,7 +85,6 @@ class PHPMDParser:
 
     def parse_json_report(self, json_data: str) -> list[PHPMDViolation]:
         """
-        # TODO Parse PHPMD JSON report format.
 
         Args:
             json_data: JSON report from PHPMD
@@ -118,7 +96,6 @@ class PHPMDParser:
 
     def execute_phpmd(self, target_path: Path) -> dict[str, Any]:
         """
-        # TODO Execute PHPMD analysis on target path.
 
         Args:
             target_path: Path to PHP files or directory
@@ -130,7 +107,6 @@ class PHPMDParser:
 
     def generate_report(self) -> str:
         """
-        # TODO Generate comprehensive PHPMD report.
 
         Returns:
             Formatted report string

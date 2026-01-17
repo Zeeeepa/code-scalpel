@@ -4,24 +4,6 @@
 This module provides a comprehensive interface for Swift code analysis.
 """
 
-# TODO [COMMUNITY] Create SwiftParserRegistry class with factory pattern
-# TODO [COMMUNITY] Implement lazy-loading for parser modules
-# TODO [PRO] Add aggregation metrics across multiple parsers
-# TODO [PRO] Implement result deduplication and filtering
-# TODO [PRO] Create unified JSON/SARIF output format
-# TODO [PRO] SwiftLint integration and configuration
-# TODO [PRO] Tailor integration and metric categorization
-# TODO [PRO] SwiftFormat integration for auto-formatting
-# TODO [PRO] SourceKitten AST analysis
-# TODO [ENTERPRISE] Periphery dead code detection
-# TODO [ENTERPRISE] Swift Package Manager dependency analysis
-# TODO [ENTERPRISE] JSON report generation
-# TODO [ENTERPRISE] SARIF format conversion
-# TODO [ENTERPRISE] HTML report generation
-# TODO [PRO] iOS/macOS app detection
-# TODO [PRO] SPM (Swift Package Manager) detection
-# TODO [ENTERPRISE] Vapor framework detection
-# TODO [ENTERPRISE] Perfect framework detection
 
 __all__ = [
     "SwiftParserRegistry",

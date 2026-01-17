@@ -104,18 +104,7 @@ class FixLoopResult:
     total_duration_ms: int
 
 
-# TODO [20251221] Phase 1 Enhancement: Implement error pattern learning
-# TODO [20251221] Phase 1 Enhancement: Add similar error detection (avoid redundant fixes)
-# TODO [20251221] Phase 1 Enhancement: Support custom escalation strategies
-# TODO [20251221] Phase 1 Enhancement: Add fix quality metrics
-# TODO [20251221] Phase 1 Enhancement: Implement result caching
 
-# TODO [20251221] Phase 2 Feature: ML-based fix quality prediction
-# TODO [20251221] Phase 2 Feature: Intelligent retry strategies
-# TODO [20251221] Phase 2 Feature: Parallel fix attempt exploration
-# TODO [20251221] Phase 2 Feature: Integration with mutation gate
-# TODO [20251221] Phase 2 Feature: Feedback loop for learning
-# TODO [20251221] Phase 2 Feature: Support for user-guided fixes
 
 
 class FixLoop:

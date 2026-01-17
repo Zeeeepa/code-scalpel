@@ -2,24 +2,6 @@
 
 [20251224_FEATURE] Stub adapter for Swift parsing support.
 
-# TODO [COMMUNITY] Implement basic Swift parsing with tree-sitter-swift or SourceKit
-# TODO [COMMUNITY] Parse class/struct/enum/protocol definitions and extract methods
-# TODO [COMMUNITY] Add Swift version detection (5.5-5.9) and version-specific features
-# TODO [COMMUNITY] Extract closures, property wrappers, and computed properties
-# TODO [COMMUNITY] Add module analysis with SPM dependency graph
-# TODO [COMMUNITY] Detect unused imports and parse import statements
-# TODO [COMMUNITY] Implement better error handling with recovery and fix suggestions
-# TODO [PRO] Integrate static analysis (SwiftLint, Tailor, SonarQube, SPM checks)
-# TODO [PRO] Add semantic analysis with type resolution via SourceKit
-# TODO [PRO] Track protocol conformance and optional chaining patterns
-# TODO [PRO] Implement code transformation with swift-format and refactoring
-# TODO [PRO] Detect SwiftUI, UIKit, Combine, and async/await patterns
-# TODO [PRO] Support modern Swift features (actors, result builders, global actors)
-# TODO [ENTERPRISE] Add security analysis (insecure storage, weak crypto, auth issues)
-# TODO [ENTERPRISE] Implement incremental parsing with caching and efficient AST diffing
-# TODO [ENTERPRISE] Add enterprise compliance checking and reporting
-# TODO [ENTERPRISE] Implement performance profiling and optimization hints
-# TODO [ENTERPRISE] Add ML-driven analysis for code quality prediction
 """
 
 from typing import Any, List

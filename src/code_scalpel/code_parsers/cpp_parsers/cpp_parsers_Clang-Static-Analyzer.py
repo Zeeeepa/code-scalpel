@@ -3,14 +3,6 @@
 Clang Static Analyzer Parser - Deep C/C++ Bug Detection
 """
 
-# TODO [PHASE2/CORE] Parse Clang Static Analyzer plist output
-# TODO [PHASE2/CORE] Execute scan-build analysis via subprocess
-# TODO [PHASE2/CONFIG] Load configuration from .clang-analyzer files
-# TODO [PHASE2/ANALYSIS] Categorize findings by type and severity
-# TODO [PHASE2/ANALYSIS] Extract evidence chains and bug paths
-# TODO [PHASE2/REPORTING] Generate JSON/SARIF/HTML reports
-# TODO [PHASE2/ANALYSIS] Analyze symbolic execution results
-# TODO [PHASE2/DETECTION] Detect memory leaks and use-after-free
 
 import os
 import subprocess

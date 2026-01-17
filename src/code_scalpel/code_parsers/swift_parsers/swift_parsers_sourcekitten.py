@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 """SourceKitten Parser - Swift AST and Semantic Analysis"""
 
-# TODO [PRO] Parse SourceKitten JSON output
-# TODO [PRO] Execute SourceKitten analysis
-# TODO [PRO] Extract AST structures
-# TODO [PRO] Analyze code complexity
-# TODO [ENTERPRISE] Generate documentation
-# TODO [ENTERPRISE] Extract code metrics
 
 from dataclasses import dataclass
 from pathlib import Path
