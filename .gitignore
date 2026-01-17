@@ -230,3 +230,4 @@ smoke_test*.py
 /test_mcp_*.py
 verify_*.py
 stress_test*.sh
+src/code_scalpel/mcp/archive/server.py

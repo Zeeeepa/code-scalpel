@@ -257,7 +257,6 @@ _GOVERNANCE_FEATURE_POLICY_EVALUATION = "policy_evaluation"
 
 def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> None:
     """Emit a structured audit event.
-
     Events are appended to `.code-scalpel/audit.jsonl`.
 
     [20251231_FEATURE] Audit logging for governance preflight decisions.
@@ -265,7 +264,6 @@ def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> Non
     # Default: on when governance is active; can be disabled.
     if not _parse_bool_env("SCALPEL_GOVERNANCE_AUDIT", default=True):
         return
-
     try:
         audit_path = policy_dir / "audit.jsonl"
         payload = dict(event)
