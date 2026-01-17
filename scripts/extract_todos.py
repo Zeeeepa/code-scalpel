@@ -173,12 +173,13 @@ class TodoExtractor:
     def _tag_in_comment(self, line: str, tag: str) -> bool:
         """
         [20260117_BUGFIX] Check if a TODO tag appears in a comment, not in code/strings.
+        [20260117_BUGFIX] Case-sensitive: only match uppercase tags (TODO, not "todo" or "Note:")
         """
-        line_upper = line.upper()
-        tag_upper = tag.upper()
+        # Case-sensitive matching: tag must appear in UPPERCASE (e.g., TODO, NOTE, FIXME)
+        # This prevents matching regular English words like "Note:", "note", "todo list"
         
-        # Quick check - if tag not in line at all, skip
-        if tag_upper not in line_upper:
+        # Quick check - if tag not in line at all (case-sensitive), skip
+        if tag not in line:
             return False
         
         # Check for Python comment
@@ -198,21 +199,22 @@ class TodoExtractor:
                     break
             
             if hash_pos >= 0:
-                comment_part = line[hash_pos:].upper()
-                if tag_upper in comment_part:
+                comment_part = line[hash_pos:]
+                # Case-sensitive check for uppercase tag
+                if tag in comment_part:
                     return True
         
         # Check for // comment (C/Java/JS/TS)
         if '//' in line:
             slash_pos = line.find('//')
-            comment_part = line[slash_pos:].upper()
-            if tag_upper in comment_part:
+            comment_part = line[slash_pos:]
+            if tag in comment_part:
                 return True
         
         # Check for /* */ or * line comments
         stripped = line.strip()
         if stripped.startswith('/*') or stripped.startswith('*') or stripped.startswith('//'):
-            if tag_upper in line_upper:
+            if tag in line:
                 return True
         
         return False
