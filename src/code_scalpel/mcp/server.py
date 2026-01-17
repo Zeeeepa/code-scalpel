@@ -123,9 +123,9 @@ def _configure_logging(transport: str = "stdio"):
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
 
-    # [20260116_BUGFIX] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT, WARNING)
+    # [20260116_BUGFIX] Use SCALPEL_MCP_OUTPUT with string levels (DEBUG, INFO, ALERT, WARNING)
     # Restores original behavior from archive/server.py
-    env_level = os.environ.get("SCALPEL_INFO", "WARNING").upper()
+    env_level = os.environ.get("SCALPEL_MCP_OUTPUT", "WARNING").upper()
     if env_level == "DEBUG":
         level = logging.DEBUG
     elif env_level == "INFO":

@@ -1,107 +1,156 @@
 """
 Code Scalpel MCP Server - Model Context Protocol integration.
 
-This module provides a fully MCP-compliant server that exposes Code Scalpel's
-analysis capabilities through the official MCP protocol.
+[20260116_REFACTOR] This is the canonical public API for the MCP module.
+All tests and external code should import from here, not from server.py.
 
-Supports:
-- stdio transport (preferred for local integration)
-- Streamable HTTP transport (for network deployment)
-
-[20251216_FEATURE] v2.2.0 - Structured MCP Logging
-- Tool invocation tracking with timing
-- Success/failure metrics
-- Analytics queries for usage patterns
-[20251220_TODO] Add MCP prompt templates export:
-    - Export prompt templates as resources (code_review_prompt, security_audit_prompt, etc.)
-    - Implement prompt registry with versioning
-    - Support custom prompt injection from client
-
-[20251220_TODO] Add sampling/rate limiting:
-    - Implement request rate limiting by client ID
-    - Add quota tracking (requests per hour/day)
-    - Support tiered rate limits (free/pro/enterprise)
-
-[20251220_TODO] Add request/response validation schemas:
-    - Validate all MCP request payloads against JSON Schema
-    - Implement strict type checking for response models
-    - Add schema versioning for backwards compatibility
-
-TODO ITEMS:
-    # TODO [COMMUNITY] Implement basic MCP server with stdio transport
-    # TODO [COMMUNITY] Expose core analysis tools (analyze_code, extract_code) as MCP tools
-    # TODO [COMMUNITY] Create MCP request/response envelope with tier metadata
-    # TODO [COMMUNITY] Implement error handling with machine-parseable error codes
-    # TODO [COMMUNITY] Add tool discovery and capability advertisement
-    # TODO [COMMUNITY] Create comprehensive MCP logging framework
-    # TODO [COMMUNITY] Implement request tracing and correlation IDs
-    # TODO [COMMUNITY] Add basic rate limiting for community tier
-    # TODO [COMMUNITY] Create MCP server unit tests and integration tests
-    # TODO [COMMUNITY] Document MCP protocol compliance and tool specifications
-    # TODO [PRO] Add HTTP transport with TLS support
-    # TODO [PRO] Implement per-client quota tracking (requests/hour)
-    # TODO [PRO] Add tier-based feature gating at MCP boundary
-    # TODO [PRO] Implement custom MCP prompt templates export
-    # TODO [PRO] Add analytics queries for usage patterns
-    # TODO [PRO] Support batch tool invocations
-    # TODO [PRO] Implement response streaming for large outputs
-    # TODO [PRO] Add performance monitoring and SLA tracking
-    # TODO [PRO] Create advanced logging with structured analytics
-    # TODO [PRO] Implement request filtering and query optimization
-    # TODO [ENTERPRISE] Implement distributed MCP with load balancing
-    # TODO [ENTERPRISE] Add multi-protocol support (gRPC, WebSocket)
-    # TODO [ENTERPRISE] Implement federated MCP across multiple servers
-    # TODO [ENTERPRISE] Add OpenTelemetry distributed tracing
-    # TODO [ENTERPRISE] Support custom authentication/authorization plugins
-    # TODO [ENTERPRISE] Implement MCP caching layer with invalidation
-    # TODO [ENTERPRISE] Add audit logging for compliance (SOC2, HIPAA)
-    # TODO [ENTERPRISE] Implement health checks and failover
-    # TODO [ENTERPRISE] Add blockchain-based request signature verification
-    # TODO [ENTERPRISE] Create AI-powered MCP request optimization engine
-COMMUNITY TIER (Core MCP Integration):
-1. TODO: Implement basic MCP server with stdio transport
-2. TODO: Expose core analysis tools (analyze_code, extract_code) as MCP tools
-3. TODO: Create MCP request/response envelope with tier metadata
-4. TODO: Implement error handling with machine-parseable error codes
-5. TODO: Add tool discovery and capability advertisement
-6. TODO: Create comprehensive MCP logging framework
-7. TODO: Implement request tracing and correlation IDs
-8. TODO: Add basic rate limiting for community tier
-9. TODO: Create MCP server unit tests and integration tests
-10. TODO: Document MCP protocol compliance and tool specifications
-
-PRO TIER (Enhanced MCP Features):
-11. TODO: Add HTTP transport with TLS support
-12. TODO: Implement per-client quota tracking (requests/hour)
-13. TODO: Add tier-based feature gating at MCP boundary
-14. TODO: Implement custom MCP prompt templates export
-15. TODO: Add analytics queries for usage patterns
-16. TODO: Support batch tool invocations
-17. TODO: Implement response streaming for large outputs
-18. TODO: Add performance monitoring and SLA tracking
-19. TODO: Create advanced logging with structured analytics
-20. TODO: Implement request filtering and query optimization
-
-ENTERPRISE TIER (Distributed & Scale):
-21. TODO: Implement distributed MCP with load balancing
-22. TODO: Add multi-protocol support (gRPC, WebSocket)
-23. TODO: Implement federated MCP across multiple servers
-24. TODO: Add OpenTelemetry distributed tracing
-25. TODO: Support custom authentication/authorization plugins
-26. TODO: Implement MCP caching layer with invalidation
-27. TODO: Add audit logging for compliance (SOC2, HIPAA)
-28. TODO: Implement health checks and failover
-29. TODO: Add blockchain-based request signature verification
-30. TODO: Create AI-powered MCP request optimization engine"""
+Usage:
+    from code_scalpel.mcp import mcp, analyze_code, extract_code
+    from code_scalpel.mcp import AnalysisResult, SecurityResult
+"""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-# [20251228_BUGFIX] Avoid stdlib `logging` shadowing when server is run as a script.
-from .mcp_logging import ToolInvocation  # noqa: E402
-from .mcp_logging import (
+# =============================================================================
+# [20260116_REFACTOR] Canonical Public API
+# Import everything from their proper locations and re-export
+# =============================================================================
+
+# Protocol and MCP instance
+from code_scalpel.mcp.protocol import mcp, _get_current_tier, set_current_tier
+
+# =============================================================================
+# MODELS - Pydantic result models
+# =============================================================================
+from code_scalpel.mcp.models.core import (
+    AnalysisResult,
+    ClassInfo,
+    ContextualExtractionResult,
+    CrawlClassInfo,
+    CrawlFileResult,
+    CrawlFunctionInfo,
+    CrawlSummary,
+    ExecutionPath,
+    FileContextResult,
+    FunctionInfo,
+    GeneratedTestCase,
+    PathCondition,
+    PatchResultModel,
+    ProjectCrawlResult,
+    RefactorSecurityIssue,
+    RefactorSimulationResult,
+    SurgicalExtractionResult,
+    SymbolicResult,
+    SymbolReference,
+    SymbolReferencesResult,
+    TestGenerationResult,
+    UnifiedSinkResult,
+)
+
+from code_scalpel.mcp.models.security import (
+    DependencyInfo,
+    DependencyScanResult,
+    DependencyScanResultModel,
+    DependencyVulnerability,
+    SecurityResult,
+    TypeEvaporationResultModel,
+    VulnerabilityFindingModel,
+    VulnerabilityInfo,
+)
+
+from code_scalpel.mcp.models.graph import (
+    CallEdgeModel,
+    CallGraphResultModel,
+    CallNodeModel,
+    CrossFileDependenciesResult,
+    CrossFileSecurityResult,
+    CrossFileVulnerabilityModel,
+    ExtractedSymbolModel,
+    GraphNeighborhoodResult,
+    ImportNodeModel,
+    ModuleInfo,
+    NeighborhoodEdgeModel,
+    NeighborhoodNodeModel,
+    PackageInfo,
+    ProjectMapResult,
+    SymbolDefinitionModel,
+    TaintFlowModel,
+)
+
+from code_scalpel.mcp.models.policy import (
+    CodePolicyCheckResult,
+    PathValidationResult,
+    PolicyVerificationResult,
+)
+
+# =============================================================================
+# TOOLS - Async MCP tool functions
+# =============================================================================
+from code_scalpel.mcp.tools.analyze import analyze_code
+from code_scalpel.mcp.tools.security import (
+    scan_dependencies,
+    security_scan,
+    type_evaporation_scan,
+    unified_sink_detect,
+)
+from code_scalpel.mcp.tools.extraction import (
+    extract_code,
+    rename_symbol,
+    update_symbol,
+)
+from code_scalpel.mcp.tools.symbolic import (
+    generate_unit_tests,
+    simulate_refactor,
+    symbolic_execute,
+)
+from code_scalpel.mcp.tools.context import (
+    crawl_project,
+    get_file_context,
+    get_symbol_references,
+)
+from code_scalpel.mcp.tools.graph import (
+    cross_file_security_scan,
+    get_call_graph,
+    get_cross_file_dependencies,
+    get_graph_neighborhood,
+    get_project_map,
+)
+from code_scalpel.mcp.tools.policy import (
+    code_policy_check,
+    validate_paths,
+    verify_policy_integrity,
+)
+
+# =============================================================================
+# RESOURCES - MCP resource handlers
+# =============================================================================
+from code_scalpel.mcp.resources import (
+    get_code_resource,
+    get_project_call_graph,
+    get_project_dependencies,
+    get_project_structure,
+)
+
+# =============================================================================
+# PROMPTS - Intent-driven workflow prompts
+# =============================================================================
+from code_scalpel.mcp.prompts import (
+    deep_security_audit,
+    explain_and_document,
+    map_architecture,
+    modernize_legacy,
+    safe_refactor,
+    verify_supply_chain,
+)
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+from code_scalpel.mcp.mcp_logging import (
     MCPAnalytics,
+    ToolInvocation,
     get_analytics,
     log_tool_error,
     log_tool_invocation,
@@ -109,50 +158,167 @@ from .mcp_logging import (
     mcp_logger,
 )
 
+# =============================================================================
+# SYNC HELPERS - For testing (internal use, prefixed with _)
+# These remain in server.py but are re-exported for test compatibility
+# =============================================================================
+
 if TYPE_CHECKING:
-    # Make `mcp` visible to type checkers without eagerly importing at runtime.
-    from .server import mcp as mcp
-else:
-    mcp: Any
+    # Make sync helpers visible to type checkers
+    pass
 
 
 def _load_server():
-    # Import lazily to avoid runpy warnings when executing the module as a script
-    # (python -m code_scalpel.mcp.server).
-    from . import server as _server
-
+    """Lazy import server module to avoid circular imports."""
+    from code_scalpel.mcp import server as _server
     return _server
 
 
-def get_mcp():
-    """Return the FastMCP server instance (lazy import)."""
+def __getattr__(name: str) -> Any:
+    """Lazy load sync helpers and constants from server.py."""
+    # Sync helper functions (internal, for testing)
+    _server_attrs = {
+        "_analyze_code_sync",
+        "_count_complexity",
+        "_crawl_project_sync",
+        "_generate_tests_sync",
+        "_get_call_graph_sync",
+        "_get_cross_file_dependencies_sync",
+        "_get_file_context_sync",
+        "_get_project_map_sync",
+        "_get_symbol_references_sync",
+        "_security_scan_sync",
+        "_simulate_refactor_sync",
+        "_symbolic_execute_sync",
+        "_validate_code",
+        "_validate_paths_sync",
+        "_verify_policy_integrity_sync",
+        # Constants
+        "MAX_CODE_SIZE",
+        "PROJECT_ROOT",
+        "ALLOWED_ROOTS",
+        # Deprecated prompts (redirect to new names)
+        "security_audit_workflow_prompt",
+        "safe_refactor_workflow_prompt",
+    }
+    if name in _server_attrs:
+        server = _load_server()
+        return getattr(server, name)
 
-    return _load_server().mcp
+    raise AttributeError(f"module 'code_scalpel.mcp' has no attribute {name!r}")
+
+
+def get_mcp():
+    """Return the FastMCP server instance."""
+    return mcp
 
 
 def run_server(*args, **kwargs):
-    """Run the MCP server (lazy import)."""
-
+    """Run the MCP server."""
     return _load_server().run_server(*args, **kwargs)
 
 
-def __getattr__(name: str):
-    # Backwards compatibility: older code imported `mcp` from this package.
-    if name == "mcp":
-        return get_mcp()
-    raise AttributeError(name)
-
-
 __all__ = [
-    "get_mcp",
+    # Protocol
     "mcp",
+    "get_mcp",
     "run_server",
-    # [20251216_FEATURE] v2.2.0 - Logging exports
+    "_get_current_tier",
+    "set_current_tier",
+    # Models - Core
+    "AnalysisResult",
+    "ClassInfo",
+    "ContextualExtractionResult",
+    "CrawlClassInfo",
+    "CrawlFileResult",
+    "CrawlFunctionInfo",
+    "CrawlSummary",
+    "ExecutionPath",
+    "FileContextResult",
+    "FunctionInfo",
+    "GeneratedTestCase",
+    "PathCondition",
+    "PatchResultModel",
+    "ProjectCrawlResult",
+    "RefactorSecurityIssue",
+    "RefactorSimulationResult",
+    "SurgicalExtractionResult",
+    "SymbolicResult",
+    "SymbolReference",
+    "SymbolReferencesResult",
+    "TestGenerationResult",
+    "UnifiedSinkResult",
+    # Models - Security
+    "DependencyInfo",
+    "DependencyScanResult",
+    "DependencyScanResultModel",
+    "DependencyVulnerability",
+    "SecurityResult",
+    "TypeEvaporationResultModel",
+    "VulnerabilityFindingModel",
+    "VulnerabilityInfo",
+    # Models - Graph
+    "CallEdgeModel",
+    "CallGraphResultModel",
+    "CallNodeModel",
+    "CrossFileDependenciesResult",
+    "CrossFileSecurityResult",
+    "CrossFileVulnerabilityModel",
+    "ExtractedSymbolModel",
+    "GraphNeighborhoodResult",
+    "ImportNodeModel",
+    "ModuleInfo",
+    "NeighborhoodEdgeModel",
+    "NeighborhoodNodeModel",
+    "PackageInfo",
+    "ProjectMapResult",
+    "SymbolDefinitionModel",
+    "TaintFlowModel",
+    # Models - Policy
+    "CodePolicyCheckResult",
+    "PathValidationResult",
+    "PolicyVerificationResult",
+    # Tools
+    "analyze_code",
+    "code_policy_check",
+    "crawl_project",
+    "cross_file_security_scan",
+    "extract_code",
+    "generate_unit_tests",
+    "get_call_graph",
+    "get_cross_file_dependencies",
+    "get_file_context",
+    "get_graph_neighborhood",
+    "get_project_map",
+    "get_symbol_references",
+    "rename_symbol",
+    "scan_dependencies",
+    "security_scan",
+    "simulate_refactor",
+    "symbolic_execute",
+    "type_evaporation_scan",
+    "unified_sink_detect",
+    "update_symbol",
+    "validate_paths",
+    "verify_policy_integrity",
+    # Resources
+    "get_code_resource",
+    "get_project_call_graph",
+    "get_project_dependencies",
+    "get_project_structure",
+    # Prompts
+    "deep_security_audit",
+    "explain_and_document",
+    "map_architecture",
+    "modernize_legacy",
+    "safe_refactor",
+    "verify_supply_chain",
+    # Logging
     "MCPAnalytics",
     "ToolInvocation",
+    "get_analytics",
+    "log_tool_error",
     "log_tool_invocation",
     "log_tool_success",
-    "log_tool_error",
-    "get_analytics",
     "mcp_logger",
 ]
