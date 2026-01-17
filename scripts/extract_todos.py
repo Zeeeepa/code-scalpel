@@ -59,21 +59,36 @@ class TodoItem:
 class TodoExtractor:
     """Extract and analyze TODO items from Code Scalpel codebase"""
     
-    # File extensions to scan
-    CODE_EXTENSIONS = {
+    # [20260117_REFACTOR] Separated source code extensions from documentation
+    # File extensions to scan - SOURCE CODE ONLY (default)
+    SOURCE_CODE_EXTENSIONS = {
         ".py", ".ts", ".tsx", ".js", ".jsx", ".java", ".go", ".rs",
         ".c", ".cpp", ".h", ".hpp", ".cs", ".rb", ".php", ".swift",
-        ".kt", ".scala", ".html", ".css", ".scss", ".sass", ".less",
-        ".vue", ".svelte", ".sql", ".sh", ".bash", ".zsh", ".yaml",
-        ".yml", ".toml", ".md", ".rst",
+        ".kt", ".scala", ".sql", ".sh", ".bash", ".zsh",
     }
+    
+    # Documentation extensions (opt-in via --include-docs)
+    DOC_EXTENSIONS = {
+        ".md", ".rst", ".txt", ".html", ".css", ".scss", ".sass", ".less",
+        ".vue", ".svelte", ".yaml", ".yml", ".toml",
+    }
+    
+    # Combined for backward compat
+    CODE_EXTENSIONS = SOURCE_CODE_EXTENSIONS | DOC_EXTENSIONS
     
     # Directories to skip
     SKIP_DIRS = {
         "__pycache__", "node_modules", ".git", ".venv", "venv",
         "dist", "build", ".tox", ".mypy_cache", ".pytest_cache",
         "htmlcov", ".eggs", ".scalpel_cache", ".code-scalpel",
-        "dist_protected", "build_protected",
+        "dist_protected", "build_protected", "release_artifacts",
+        "docs", "examples", "website", "typings", "certs",
+    }
+    
+    # [20260117_FEATURE] Directories to skip when scanning source only
+    SKIP_DIRS_SOURCE_ONLY = SKIP_DIRS | {
+        "docs", "examples", "website", "benchmarks", "compliance_reports",
+        "evidence", "local_pipeline", "scripts", "configs",
     }
     
     # Tags to extract
@@ -82,19 +97,24 @@ class TodoExtractor:
     # Pattern for date tags like [20260114_FEATURE]
     DATE_TAG_PATTERN = re.compile(r'\[(\d{8}_\w+)\]')
 
-    def __init__(self, root_dir: str = ".", src_only: bool = False):
+    def __init__(self, root_dir: str = ".", src_only: bool = False, source_code_only: bool = True):
         self.root_dir = Path(root_dir).resolve()
         self.src_dir = self.root_dir / "src" / "code_scalpel"
         self.src_only = src_only
+        self.source_code_only = source_code_only  # [20260117_FEATURE] Filter to source code
         self.todos: List[TodoItem] = []
         self.stats = defaultdict(int)
     
     def _should_skip_dir(self, dir_name: str) -> bool:
         """Check if directory should be skipped."""
-        return dir_name in self.SKIP_DIRS or dir_name.startswith(".")
+        skip_set = self.SKIP_DIRS_SOURCE_ONLY if self.source_code_only else self.SKIP_DIRS
+        return dir_name in skip_set or dir_name.startswith(".")
     
     def _should_scan_file(self, file_path: Path) -> bool:
         """Check if file should be scanned."""
+        # [20260117_REFACTOR] Only scan source code by default
+        if self.source_code_only:
+            return file_path.suffix.lower() in self.SOURCE_CODE_EXTENSIONS
         return file_path.suffix.lower() in self.CODE_EXTENSIONS
 
     def extract_todos(self) -> List[TodoItem]:
@@ -538,6 +558,11 @@ def main():
         help='Scan only src/code_scalpel (default: scan entire repo)'
     )
     parser.add_argument(
+        '--include-docs',
+        action='store_true',
+        help='Include documentation files (.md, .rst, etc.) - default: source code only'
+    )
+    parser.add_argument(
         '--roadmap',
         action='store_true',
         help='Generate comprehensive roadmap document'
@@ -549,9 +574,12 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Extract TODOs
-    extractor = TodoExtractor(src_only=args.src_only)
-    print("Extracting TODO/FIXME/HACK items...")
+    # [20260117_REFACTOR] source_code_only is True by default, --include-docs disables it
+    extractor = TodoExtractor(
+        src_only=args.src_only, 
+        source_code_only=not args.include_docs
+    )
+    print(f"Extracting TODO/FIXME/HACK items (source_code_only={not args.include_docs})...")
     extractor.extract_todos()
     print(f"Found {len(extractor.todos)} items")
 
