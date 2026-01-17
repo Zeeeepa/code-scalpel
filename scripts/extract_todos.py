@@ -91,8 +91,9 @@ class TodoExtractor:
         "evidence", "local_pipeline", "scripts", "configs",
     }
     
-    # Tags to extract
-    TODO_TAGS = {"TODO", "FIXME", "HACK", "XXX", "NOTE", "BUG", "OPTIMIZE", "REVIEW"}
+    # [20260117_BUGFIX] Only extract explicit TODO tags - not FIXME, HACK, NOTE, BUG, etc.
+    # User only uses TODO for work tracking
+    TODO_TAGS = {"TODO"}
     
     # Pattern for date tags like [20260114_FEATURE]
     DATE_TAG_PATTERN = re.compile(r'\[(\d{8}_\w+)\]')
@@ -170,13 +171,14 @@ class TodoExtractor:
         
         return False
 
+
     def _tag_in_comment(self, line: str, tag: str) -> bool:
         """
         [20260117_BUGFIX] Check if a TODO tag appears in a comment, not in code/strings.
-        [20260117_BUGFIX] Case-sensitive: only match uppercase tags (TODO, not "todo" or "Note:")
+        [20260117_BUGFIX] Case-sensitive: only match uppercase tags (TODO, not "todo")
+        [20260117_BUGFIX] TODO must be at/near start of comment to be actual work item
         """
-        # Case-sensitive matching: tag must appear in UPPERCASE (e.g., TODO, NOTE, FIXME)
-        # This prevents matching regular English words like "Note:", "note", "todo list"
+        import re
         
         # Quick check - if tag not in line at all (case-sensitive), skip
         if tag not in line:
@@ -200,21 +202,25 @@ class TodoExtractor:
             
             if hash_pos >= 0:
                 comment_part = line[hash_pos:]
-                # Case-sensitive check for uppercase tag
-                if tag in comment_part:
+                # Extract words in comment (after #)
+                # Pattern: TODO must be 1st/2nd word in comment, followed by : or space or (
+                pattern = re.compile(rf'^#\s*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()')
+                if pattern.search(comment_part):
                     return True
         
         # Check for // comment (C/Java/JS/TS)
         if '//' in line:
             slash_pos = line.find('//')
             comment_part = line[slash_pos:]
-            if tag in comment_part:
+            pattern = re.compile(rf'^//\s*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()')
+            if pattern.search(comment_part):
                 return True
         
         # Check for /* */ or * line comments
         stripped = line.strip()
         if stripped.startswith('/*') or stripped.startswith('*') or stripped.startswith('//'):
-            if tag in line:
+            pattern = re.compile(rf'^[\*\s]*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()')
+            if pattern.search(stripped):
                 return True
         
         return False
