@@ -287,6 +287,105 @@ PROJECT_ROOT = Path.cwd()
 # Client-specified allowed directories. If empty, PROJECT_ROOT is used.
 ALLOWED_ROOTS: list[Path] = []
 
+
+# =============================================================================
+# [20251230_FEATURE] Auto-init support for MCP startup
+# =============================================================================
+
+
+def _env_truthy(value: str | None) -> bool:
+    """Check if an environment variable value is truthy."""
+    return (value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _scalpel_home_dir() -> Path:
+    """Return the user-level Code Scalpel home directory.
+
+    [20251230_FEATURE] Support non-IDE MCP deployments (Claude Desktop, ChatGPT)
+    where there may be no project checkout / no dedicated working directory.
+
+    Precedence:
+    1) SCALPEL_HOME (explicit)
+    2) $XDG_CONFIG_HOME/code-scalpel
+    3) ~/.config/code-scalpel
+    """
+    env_home = os.environ.get("SCALPEL_HOME")
+    if env_home:
+        return Path(env_home).expanduser()
+
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    if xdg:
+        return Path(xdg).expanduser() / "code-scalpel"
+
+    return Path.home() / ".config" / "code-scalpel"
+
+
+def _maybe_auto_init_config_dir(
+    *,
+    project_root: Path,
+    tier: str,
+    enabled: bool | None = None,
+    mode: str | None = None,
+    target: str | None = None,
+) -> dict[str, Any] | None:
+    """Optionally create `.code-scalpel/` at startup.
+
+    [20251230_FEATURE] Support "invisible" onboarding: MCP startup can generate
+    the `.code-scalpel/` directory so users do not need to run `code-scalpel init`.
+
+    This is intentionally opt-in because it writes files.
+
+    Environment:
+    - SCALPEL_AUTO_INIT=1 enables auto-init
+    - SCALPEL_AUTO_INIT_MODE=full|templates_only selects init behavior
+    - SCALPEL_AUTO_INIT_TARGET=project|user selects where to create `.code-scalpel/`
+    """
+    if enabled is None:
+        enabled = _env_truthy(os.environ.get("SCALPEL_AUTO_INIT"))
+    if not enabled:
+        return None
+
+    selected_target = (
+        (target or os.environ.get("SCALPEL_AUTO_INIT_TARGET") or "project")
+        .strip()
+        .lower()
+    )
+    if selected_target not in {"project", "user"}:
+        selected_target = "project"
+
+    init_root = project_root if selected_target == "project" else _scalpel_home_dir()
+
+    config_dir = init_root / ".code-scalpel"
+    if config_dir.exists():
+        return {
+            "created": False,
+            "skipped": True,
+            "path": str(config_dir),
+            "target": selected_target,
+        }
+
+    selected_mode = (
+        (mode or os.environ.get("SCALPEL_AUTO_INIT_MODE") or "").strip().lower()
+    )
+    if not selected_mode:
+        # Default: don't create secrets unless Pro/Enterprise.
+        selected_mode = "full" if tier in {"pro", "enterprise"} else "templates_only"
+    if selected_mode not in {"full", "templates_only"}:
+        selected_mode = "templates_only"
+
+    from code_scalpel.config.init_config import init_config_dir
+
+    result = init_config_dir(str(init_root), mode=selected_mode)
+    return {
+        "created": bool(result.get("success")),
+        "skipped": False,
+        "mode": selected_mode,
+        "path": str(config_dir),
+        "target": selected_target,
+        "message": result.get("message"),
+    }
+
+
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 
