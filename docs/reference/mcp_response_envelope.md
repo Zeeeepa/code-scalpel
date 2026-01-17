@@ -54,7 +54,7 @@ Customize which fields are included via `.code-scalpel/response_config.json`:
 }
 ```
 
-**Debug Mode**: Set `SCALPEL_MCP_INFO=DEBUG` to include all metadata for troubleshooting.
+**Debug Mode**: Set `SCALPEL_MCP_OUTPUT=DEBUG` to include all metadata for troubleshooting.
 
 **Learn more**: [Configurable Response Output Guide](../guides/configurable_response_output.md)
 
@@ -91,7 +91,7 @@ When a requested feature is not available in the current tier, include one or mo
 }
 ```
 
-### Successful response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
+### Successful response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
 
 ```json
 {
@@ -121,7 +121,7 @@ When a requested feature is not available in the current tier, include one or mo
 }
 ```
 
-### Error response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
+### Error response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
 
 ```json
 {

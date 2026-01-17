@@ -9,7 +9,7 @@
 ## Test Setup (MCP-first)
 - Install a **valid Pro (or higher) license** and point `CODE_SCALPEL_LICENSE_PATH` at it.
 - Set `CODE_SCALPEL_TIER=pro`.
-- Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 
 > If you see `Invalid license signature - token may be tampered`, you are NOT running Pro.
 > In that case, the server will clamp to Community behavior and this document cannot be validated.

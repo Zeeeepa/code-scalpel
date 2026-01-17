@@ -1565,9 +1565,9 @@ These items should be addressed soon.
 
 - **L392** [NOTE] | Type | Status | Notes |
 - **L518** [BUG] Debug mode (includes all metadata)
-- **L519** [BUG] SCALPEL_MCP_INFO=DEBUG code-scalpel mcp
+- **L519** [BUG] SCALPEL_MCP_OUTPUT=DEBUG code-scalpel mcp
 - **L544** [BUG] - `debug`: Full output including all metadata
-- **L610** [BUG] *Debug Mode Response (SCALPEL_MCP_INFO=DEBUG):**
+- **L610** [BUG] *Debug Mode Response (SCALPEL_MCP_OUTPUT=DEBUG):**
 
 ### [docs/CUSTOMER_COMMUNICATION_v4.md](docs/CUSTOMER_COMMUNICATION_v4.md)
 
@@ -2668,7 +2668,7 @@ These items should be addressed soon.
 
 ### [docs/analysis/tool_validation/COMMUNITY_TIER_TOOL_TESTING.md](docs/analysis/tool_validation/COMMUNITY_TIER_TOOL_TESTING.md)
 
-- **L12** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L12** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L41** [NOTE] - Notes: Confirmed via MCP-first probe: `list_tools()` returned 22 tools (includ...
 - **L62** [NOTE] - Notes: Returned `functions=["f"]`, `complexity=2` on a small snippet.
 - **L77** [NOTE] - Notes: Detected SQL Injection (`CWE-89`) in a small f-string SQL snippet.
@@ -2706,7 +2706,7 @@ These items should be addressed soon.
 
 ### [docs/analysis/tool_validation/ENTERPRISE_TIER_TOOL_TESTING.md](docs/analysis/tool_validation/ENTERPRISE_TIER_TOOL_TESTING.md)
 
-- **L16** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L16** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L110** [BUG] - Limits: `max_test_cases=unlimited`; `test_frameworks=all`; `data_driven_tests=...
 - **L201** [NOTE] - Notes: Crypto verification requires `SCALPEL_MANIFEST_SECRET` when validating ...
 - **L270** [BUG] - Capabilities: `text_tree_generation`, `basic_mermaid_diagram`, `folder_structu...
@@ -2812,7 +2812,7 @@ These items should be addressed soon.
 
 ### [docs/analysis/tool_validation/PRO_TIER_TOOL_TESTING.md](docs/analysis/tool_validation/PRO_TIER_TOOL_TESTING.md)
 
-- **L12** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L12** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L103** [BUG] - Capabilities (adds vs Community): `data_driven_tests`, `bug_reproduction` (if ...
 
 ### [docs/analysis/tool_validation/RENAME_SYMBOL_VERIFICATION.md](docs/analysis/tool_validation/RENAME_SYMBOL_VERIFICATION.md)
@@ -3399,11 +3399,11 @@ These items should be addressed soon.
 - **L32** [BUG] ## Debug
 - **L53** [BUG] "debug": { ... }
 - **L126** [BUG] # Debug Mode Override
-- **L128** [BUG] Set `SCALPEL_MCP_INFO=DEBUG` to force debug profile:
-- **L130** [BUG] export SCALPEL_MCP_INFO=DEBUG
+- **L128** [BUG] Set `SCALPEL_MCP_OUTPUT=DEBUG` to force debug profile:
+- **L130** [BUG] export SCALPEL_MCP_OUTPUT=DEBUG
 - **L165** [BUG] ## Debug Profile
 - **L187** [BUG] - **Minimal vs Debug**: ~150-200 tokens per response
-- **L196** [BUG] 4. **Debug When Needed**: Use `SCALPEL_MCP_INFO=DEBUG` for troubleshooting
+- **L196** [BUG] 4. **Debug When Needed**: Use `SCALPEL_MCP_OUTPUT=DEBUG` for troubleshooting
 
 ### [docs/guides/developer_tier_controls.md](docs/guides/developer_tier_controls.md)
 
@@ -3855,10 +3855,10 @@ These items should be addressed soon.
 - **L14** [BUG] - **Token efficiency**: Omit redundant metadata by default, include only when ne...
 - **L35** [BUG] - `duration_ms` (number|null): end-to-end runtime in milliseconds (omitted by de...
 - **L47** [BUG] "profile": "minimal"  // or "standard", "debug"
-- **L57** [BUG] *Debug Mode**: Set `SCALPEL_MCP_INFO=DEBUG` to include all metadata for troubles...
+- **L57** [BUG] *Debug Mode**: Set `SCALPEL_MCP_OUTPUT=DEBUG` to include all metadata for troubles...
 - **L69** [NOTE] Notes:
-- **L94** [BUG] ## Successful response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
-- **L124** [BUG] ## Error response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
+- **L94** [BUG] ## Successful response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
+- **L124** [BUG] ## Error response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
 
 ### [docs/reference/mcp_tools_current.md](docs/reference/mcp_tools_current.md)
 
@@ -7025,9 +7025,9 @@ These items should be addressed soon.
 - **L51** [HACK] - **[HACK]** | Hacker News | 🔴 **No** | **TBD** | No Show HN prepared |
 - **L53** [BUG] - **[BUG]** | Bug fixes | **5-10** | CI catches most issues early |
 - **L55** [BUG] - **[BUG]** Debug mode (includes all metadata)
-- **L57** [BUG] - **[BUG]** SCALPEL_MCP_INFO=DEBUG code-scalpel mcp
+- **L57** [BUG] - **[BUG]** SCALPEL_MCP_OUTPUT=DEBUG code-scalpel mcp
 - **L59** [BUG] - **[BUG]** - `debug`: Full output including all metadata
-- **L61** [BUG] - **[BUG]** *Debug Mode Response (SCALPEL_MCP_INFO=DEBUG):**
+- **L61** [BUG] - **[BUG]** *Debug Mode Response (SCALPEL_MCP_OUTPUT=DEBUG):**
 - **L63** [BUG] - **[BUG]** - [COMPLETE] Graph Dataclass Fix - UniversalGraph construction bug r...
 - **L65** [XXX] - **[XXX]** code = 'GITHUB_TOKEN = "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"'
 - **L67** [NOTE] - **[NOTE]** [x] Performance Metrics (included in Release Notes)
@@ -9866,9 +9866,9 @@ These items should be addressed soon.
 - **L1562** [BUG] - **L177** [BUG] 1. **Troubleshooting guide** (common errors, debugging)
 - **L1566** [NOTE] - **L392** [NOTE] | Type | Status | Notes |
 - **L1567** [BUG] - **L518** [BUG] Debug mode (includes all metadata)
-- **L1568** [BUG] - **L519** [BUG] SCALPEL_MCP_INFO=DEBUG code-scalpel mcp
+- **L1568** [BUG] - **L519** [BUG] SCALPEL_MCP_OUTPUT=DEBUG code-scalpel mcp
 - **L1569** [BUG] - **L544** [BUG] - `debug`: Full output including all metadata
-- **L1570** [BUG] - **L610** [BUG] *Debug Mode Response (SCALPEL_MCP_INFO=DEBUG):**
+- **L1570** [BUG] - **L610** [BUG] *Debug Mode Response (SCALPEL_MCP_OUTPUT=DEBUG):**
 - **L1574** [REVIEW] - **L36** [REVIEW] - Review firewall/allowlist requirements for new artifact hos...
 - **L1575** [NOTE] - **L65** [NOTE] - **Q: Where are release notes and migration guide?**
 - **L1576** [NOTE] - **L66** [NOTE] A: Full migration guide at https://docs.code-scalpel.io/v4-migr...
@@ -10901,7 +10901,7 @@ These items should be addressed soon.
 - **L2659** [BUG] - **L157** [BUG] 2. **Staleness Risk:** Bugs if invalidation fails
 - **L2663** [NOTE] - **L30** [NOTE] *Note**: The term "methods" in description could be clarified -...
 - **L2667** [BUG] - **L69** [BUG] - Covers: hardcoded passwords, SQL injection, shell injection, s...
-- **L2671** [BUG] - **L12** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L2671** [BUG] - **L12** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L2672** [NOTE] - **L41** [NOTE] - Notes: Confirmed via MCP-first probe: `list_tools()` returned...
 - **L2673** [NOTE] - **L62** [NOTE] - Notes: Returned `functions=["f"]`, `complexity=2` on a small ...
 - **L2674** [NOTE] - **L77** [NOTE] - Notes: Detected SQL Injection (`CWE-89`) in a small f-string ...
@@ -10930,7 +10930,7 @@ These items should be addressed soon.
 - **L2700** [OPTIMIZE] - **L273** [OPTIMIZE] - ✅ 100k+ files: Optimized with batching infrastructure
 - **L2701** [NOTE] - **L302** [NOTE] - **Note**: All Enterprise capabilities are now fully implemen...
 - **L2705** [NOTE] - **L31** [NOTE] | Capability | Code Location | Status | Notes |
-- **L2709** [BUG] - **L16** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L2709** [BUG] - **L16** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L2710** [BUG] - **L110** [BUG] - Limits: `max_test_cases=unlimited`; `test_frameworks=all`; `d...
 - **L2711** [NOTE] - **L201** [NOTE] - Notes: Crypto verification requires `SCALPEL_MANIFEST_SECRET...
 - **L2712** [BUG] - **L270** [BUG] - Capabilities: `text_tree_generation`, `basic_mermaid_diagram`...
@@ -10997,7 +10997,7 @@ These items should be addressed soon.
 - **L2809** [NOTE] - **L29** [NOTE] | Capability | Code Location | Status | Notes |
 - **L2810** [NOTE] - **L106** [NOTE] | Capability | Code Location | Status | Notes |
 - **L2811** [NOTE] - **L216** [NOTE] | Capability | Code Location | Status | Notes |
-- **L2815** [BUG] - **L12** [BUG] - Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- **L2815** [BUG] - **L12** [BUG] - Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 - **L2816** [BUG] - **L103** [BUG] - Capabilities (adds vs Community): `data_driven_tests`, `bug_r...
 - **L2820** [REVIEW] - **L76** [REVIEW] - ✅ Optional dry-run/preview output (rename plan) so callers ...
 - **L2821** [NOTE] - **L114** [NOTE] # 6) Notes / Guardrails
@@ -11383,11 +11383,11 @@ These items should be addressed soon.
 - **L3399** [BUG] - **L32** [BUG] ## Debug
 - **L3400** [BUG] - **L53** [BUG] "debug": { ... }
 - **L3401** [BUG] - **L126** [BUG] # Debug Mode Override
-- **L3402** [BUG] - **L128** [BUG] Set `SCALPEL_MCP_INFO=DEBUG` to force debug profile:
-- **L3403** [BUG] - **L130** [BUG] export SCALPEL_MCP_INFO=DEBUG
+- **L3402** [BUG] - **L128** [BUG] Set `SCALPEL_MCP_OUTPUT=DEBUG` to force debug profile:
+- **L3403** [BUG] - **L130** [BUG] export SCALPEL_MCP_OUTPUT=DEBUG
 - **L3404** [BUG] - **L165** [BUG] ## Debug Profile
 - **L3405** [BUG] - **L187** [BUG] - **Minimal vs Debug**: ~150-200 tokens per response
-- **L3406** [BUG] - **L196** [BUG] 4. **Debug When Needed**: Use `SCALPEL_MCP_INFO=DEBUG` for trou...
+- **L3406** [BUG] - **L196** [BUG] 4. **Debug When Needed**: Use `SCALPEL_MCP_OUTPUT=DEBUG` for trou...
 - **L3410** [BUG] - **L294** [BUG] # Debugging Tier Issues
 - **L3414** [NOTE] - **L7** [NOTE] | Enhancement | Effort | Impact | Notes |
 - **L3415** [NOTE] - **L24** [NOTE] | Enhancement | Effort | Impact | Notes |
@@ -11734,10 +11734,10 @@ These items should be addressed soon.
 - **L3855** [BUG] - **L14** [BUG] - **Token efficiency**: Omit redundant metadata by default, incl...
 - **L3856** [BUG] - **L35** [BUG] - `duration_ms` (number|null): end-to-end runtime in millisecond...
 - **L3857** [BUG] - **L47** [BUG] "profile": "minimal"  // or "standard", "debug"
-- **L3858** [BUG] - **L57** [BUG] *Debug Mode**: Set `SCALPEL_MCP_INFO=DEBUG` to include all metad...
+- **L3858** [BUG] - **L57** [BUG] *Debug Mode**: Set `SCALPEL_MCP_OUTPUT=DEBUG` to include all metad...
 - **L3859** [NOTE] - **L69** [NOTE] Notes:
-- **L3860** [BUG] - **L94** [BUG] ## Successful response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
-- **L3861** [BUG] - **L124** [BUG] ## Error response (Debug Mode - SCALPEL_MCP_INFO=DEBUG)
+- **L3860** [BUG] - **L94** [BUG] ## Successful response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
+- **L3861** [BUG] - **L124** [BUG] ## Error response (Debug Mode - SCALPEL_MCP_OUTPUT=DEBUG)
 - **L3865** [BUG] - **L39** [BUG] [20251219_BUGFIX] v3.0.4 - Now auto-detects language from code c...
 - **L3866** [REVIEW] - **L227** [REVIEW] - Architecture review: Understand how untrusted data flows t...
 - **L3867** [BUG] - **L679** [BUG] - Debugging: Trace data flow across file boundaries
@@ -21343,7 +21343,7 @@ These items should be addressed soon.
 - **L15092** [BUG] - **L504** [BUG] [20260103_BUGFIX] Use UnifiedPatcher for automatic language det...
 - **L15093** [BUG] - **L739** [BUG] The integrity tool must remain callable for debugging.
 - **L15094** [BUG] - **L1104** [BUG] [20251215_BUGFIX] Configure logging to stderr only to prevent ...
-- **L15095** [BUG] - **L1121** [BUG] [20251229_CONFIG] Use SCALPEL_MCP_INFO with string levels (DEB...
+- **L15095** [BUG] - **L1121** [BUG] [20251229_CONFIG] Use SCALPEL_MCP_OUTPUT with string levels (DEB...
 - **L15096** [BUG] - **L1123** [BUG] if env_level == "DEBUG":
 - **L15097** [BUG] - **L1124** [BUG] level = logging.DEBUG
 - **L15098** [TODO] - **L1149** [TODO] [20251220_TODO] Add configurable confidence thresholds:
@@ -21381,7 +21381,7 @@ These items should be addressed soon.
 - **L15130** [BUG] - **L2778** [BUG] [20251228_BUGFIX] Contract payload consistency: ensure `succes...
 - **L15131** [BUG] - **L2898** [BUG] [20251228_BUGFIX] Avoid leaking stack traces/details to client...
 - **L15132** [BUG] - **L2901** [BUG] Default to a generic message; allow opt-in detail in debug mod...
-- **L15133** [BUG] - **L2903** [BUG] if os.environ.get("SCALPEL_MCP_INFO", "").upper() == "DEBUG":
+- **L15133** [BUG] - **L2903** [BUG] if os.environ.get("SCALPEL_MCP_OUTPUT", "").upper() == "DEBUG":
 - **L15134** [BUG] - **L3301** [BUG] [20251220_BUGFIX] v3.0.5 - Consolidated tree-sitter imports.
 - **L15135** [BUG] - **L3801** [BUG] [20251219_BUGFIX] v3.0.4 - Auto-detect language from content i...
 - **L15136** [BUG] - **L3802** [BUG] [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present.
@@ -24948,7 +24948,7 @@ These items should be addressed soon.
 - **L19051** [BUG] - **L17** [BUG] [20260102_BUGFIX] Use system temp dir helper to avoid hardcoded ...
 - **L19055** [BUG] - **L18** [BUG] [20260102_BUGFIX] Use system temp dir helper to avoid hardcoded ...
 - **L19059** [BUG] - **L11** [BUG] from code_scalpel.security.analyzers.taint_tracker import (  # [...
-- **L19063** [BUG] - **L197** [BUG] os.environ["SCALPEL_MCP_INFO"] = "DEBUG"
+- **L19063** [BUG] - **L197** [BUG] os.environ["SCALPEL_MCP_OUTPUT"] = "DEBUG"
 - **L19067** [BUG] - **L11** [BUG] from code_scalpel.security.analyzers.taint_tracker import (  # [...
 - **L19068** [TODO] - **L246** [TODO] builder.add_preprocessing_hook(lambda code: code.replace("# TO...
 - **L19069** [TODO] - **L247** [TODO] result = builder.build_ast("x = 1  # TODO: improve")
@@ -33467,7 +33467,7 @@ These items should be addressed soon.
 - **L504** [BUG] [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection
 - **L739** [BUG] The integrity tool must remain callable for debugging.
 - **L1104** [BUG] [20251215_BUGFIX] Configure logging to stderr only to prevent stdio transport co...
-- **L1121** [BUG] [20251229_CONFIG] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT)
+- **L1121** [BUG] [20251229_CONFIG] Use SCALPEL_MCP_OUTPUT with string levels (DEBUG, INFO, ALERT)
 - **L1123** [BUG] if env_level == "DEBUG":
 - **L1124** [BUG] level = logging.DEBUG
 - **L1149** [TODO] [20251220_TODO] Add configurable confidence thresholds:
@@ -33505,7 +33505,7 @@ These items should be addressed soon.
 - **L2778** [BUG] [20251228_BUGFIX] Contract payload consistency: ensure `success` is present.
 - **L2898** [BUG] [20251228_BUGFIX] Avoid leaking stack traces/details to clients.
 - **L2901** [BUG] Default to a generic message; allow opt-in detail in debug mode.
-- **L2903** [BUG] if os.environ.get("SCALPEL_MCP_INFO", "").upper() == "DEBUG":
+- **L2903** [BUG] if os.environ.get("SCALPEL_MCP_OUTPUT", "").upper() == "DEBUG":
 - **L3301** [BUG] [20251220_BUGFIX] v3.0.5 - Consolidated tree-sitter imports.
 - **L3801** [BUG] [20251219_BUGFIX] v3.0.4 - Auto-detect language from content if not specified.
 - **L3802** [BUG] [20251219_BUGFIX] v3.0.4 - Strip UTF-8 BOM if present.
@@ -37435,7 +37435,7 @@ These items should be addressed soon.
 
 ### [tests/coverage/test_coverage_final_boost.py](tests/coverage/test_coverage_final_boost.py)
 
-- **L197** [BUG] os.environ["SCALPEL_MCP_INFO"] = "DEBUG"
+- **L197** [BUG] os.environ["SCALPEL_MCP_OUTPUT"] = "DEBUG"
 
 ### [tests/coverage/test_coverage_final_push.py](tests/coverage/test_coverage_final_push.py)
 

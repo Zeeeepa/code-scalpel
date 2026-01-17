@@ -6,14 +6,8 @@ All tools, resources, and prompts should import `mcp` from this module.
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any
-
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel
-
 from code_scalpel import __version__
-from code_scalpel.mcp.contract import ToolResponseEnvelope
 
 # [20260116_FEATURE] Import license validator for tier determination
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
@@ -124,6 +118,7 @@ def set_current_tier(tier: str) -> None:
     CURRENT_TIER = tier
 
 
+# [20260116_BUGFIX] Restore standard JSON-RPC errors and structured output.
 mcp = FastMCP(
     name="Code Scalpel",
     instructions=f"""Code Scalpel v{__version__} - AI-powered code analysis tools:
@@ -171,105 +166,8 @@ Access code via URIs without knowing file paths:
 Code is PARSED only, never executed.""",
 )
 
-
-# ============================================================================
-# TOOL RESPONSE ENVELOPE WRAPPER
-# [20260116_REFACTOR] Moved from server.py to apply to all tool registrations
-# ============================================================================
-
-_original_add_tool = mcp._tool_manager.add_tool
-
-
-def _add_tool_with_envelope_output(
-    fn: Callable[..., Any], **add_tool_kwargs: Any
-) -> Any:
-    """Register a tool normally, then wrap its run() method to return ToolResponseEnvelope."""
-    # Force structured_output=False so FastMCP doesn't validate output against schema
-    # We'll return ToolResponseEnvelope as unstructured JSON
-    add_tool_kwargs["structured_output"] = False
-
-    # Register the tool - let FastMCP build input schema from the original function
-    tool = _original_add_tool(fn, **add_tool_kwargs)
-
-    # Save the original run method
-    original_run = tool.run
-
-    async def _enveloped_run(
-        arguments: dict[str, Any], context: Any = None, convert_result: bool = False
-    ) -> dict[str, Any]:
-        """Wrapped run() that returns ToolResponseEnvelope as a dict."""
-        import time as time_module
-        import uuid as uuid_module
-
-        started = time_module.perf_counter()
-        request_id = uuid_module.uuid4().hex
-        tier = _get_current_tier()
-
-        try:
-            # Call the original run method with convert_result=False to get raw tool output
-            # We'll wrap it in an envelope, so FastMCP's conversion happens at envelope level
-            result = await original_run(
-                arguments, context=context, convert_result=False
-            )
-
-            duration_ms = int((time_module.perf_counter() - started) * 1000)
-
-            # Check for failure indicators in the result
-            success = None
-            err_msg = None
-            if isinstance(result, BaseModel):
-                success = getattr(result, "success", None)
-                err_msg = getattr(result, "error", None)
-            elif isinstance(result, dict):
-                success = result.get("success")
-                err_msg = result.get("error")
-
-            error_obj = None
-            if success is False and err_msg:
-                from code_scalpel.mcp.contract import (
-                    ToolError,
-                    _classify_failure_message,
-                )
-
-                code = _classify_failure_message(err_msg) or "internal_error"
-                error_obj = ToolError(error=err_msg, error_code=code)
-
-            return ToolResponseEnvelope(
-                tier=tier,
-                tool_version=__version__,
-                tool_id=tool.name,
-                request_id=request_id,
-                capabilities=["envelope-v1"],
-                duration_ms=duration_ms,
-                error=error_obj,
-                upgrade_hints=[],
-                data=result,
-            ).model_dump(mode="json")
-
-        except BaseException as exc:
-            duration_ms = int((time_module.perf_counter() - started) * 1000)
-            from code_scalpel.mcp.contract import ToolError, _classify_exception
-
-            code = _classify_exception(exc)
-            return ToolResponseEnvelope(
-                tier=tier,
-                tool_version=__version__,
-                tool_id=tool.name,
-                request_id=request_id,
-                capabilities=["envelope-v1"],
-                duration_ms=duration_ms,
-                error=ToolError(error=str(exc) or "Tool error", error_code=code),
-                upgrade_hints=[],
-                data=None,
-            ).model_dump(mode="json")
-
-    # Replace the tool's run method (Tool is a Pydantic model, use object.__setattr__)
-    object.__setattr__(tool, "run", _enveloped_run)
-
-    return tool
-
-
-mcp._tool_manager.add_tool = _add_tool_with_envelope_output  # type: ignore[method-assign]
+# [20260116_BUGFIX] Ensure prompt registry is populated on protocol import.
+import code_scalpel.mcp.prompts  # noqa: F401
 
 
 __all__ = ["mcp", "set_current_tier", "_get_current_tier"]

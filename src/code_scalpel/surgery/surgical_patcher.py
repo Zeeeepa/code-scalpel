@@ -100,6 +100,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from code_scalpel.utilities.source_sanitizer import sanitize_python_source
+
 __all__ = [
     # Core Python patcher
     "SurgicalPatcher",
@@ -495,7 +497,12 @@ class SurgicalPatcher:
         try:
             self._tree = ast.parse(self.current_code)
         except SyntaxError as e:
-            raise ValueError(f"Invalid Python code: {e}")
+            # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
+            sanitized, changed = sanitize_python_source(self.current_code)
+            if not changed:
+                raise ValueError(f"Invalid Python code: {e}")
+            self.current_code = sanitized
+            self._tree = ast.parse(self.current_code)
 
         self._index_symbols()
         self._parsed = True

@@ -13,7 +13,7 @@
 ## Test Setup (MCP-first)
 - Install a **valid Enterprise license** and point `CODE_SCALPEL_LICENSE_PATH` at it.
 - Set `CODE_SCALPEL_TIER=enterprise`.
-- Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 
 ### Validation Command (recorded)
 ```bash

@@ -1128,8 +1128,8 @@ def _configure_logging(transport: str = "stdio"):
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
 
-    # [20251229_CONFIG] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT)
-    env_level = os.environ.get("SCALPEL_MCP_INFO", "WARNING").upper()
+    # [20251229_CONFIG] Use SCALPEL_MCP_OUTPUT with string levels (DEBUG, INFO, ALERT)
+    env_level = os.environ.get("SCALPEL_MCP_OUTPUT", "WARNING").upper()
     if env_level == "DEBUG":
         level = logging.DEBUG
     elif env_level == "INFO":
@@ -2858,7 +2858,7 @@ def _add_tool_with_envelope_output(
             if code == "internal_error":
                 # Default to a generic message; allow opt-in detail in debug mode.
                 safe_message = "Tool error"
-                if os.environ.get("SCALPEL_MCP_INFO", "").upper() == "DEBUG":
+                if os.environ.get("SCALPEL_MCP_OUTPUT", "").upper() == "DEBUG":
                     safe_message = str(exc) or safe_message
             else:
                 safe_message = str(exc) or "Tool error"

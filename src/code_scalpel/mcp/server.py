@@ -125,7 +125,7 @@ def _configure_logging(transport: str = "stdio"):
 
     # [20260116_BUGFIX] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT, WARNING)
     # Restores original behavior from archive/server.py
-    env_level = os.environ.get("SCALPEL_MCP_INFO", "WARNING").upper()
+    env_level = os.environ.get("SCALPEL_INFO", "WARNING").upper()
     if env_level == "DEBUG":
         level = logging.DEBUG
     elif env_level == "INFO":
@@ -5808,8 +5808,8 @@ from code_scalpel.mcp.resources import (  # noqa: E402
 
 # Prompt re-exports from prompts.py (Intent-Driven UX)
 from code_scalpel.mcp.prompts import (  # noqa: E402
-    audit_security_deep,
-    refactor_safely,
+    deep_security_audit,
+    safe_refactor,
     modernize_legacy,
     map_architecture,
     verify_supply_chain,

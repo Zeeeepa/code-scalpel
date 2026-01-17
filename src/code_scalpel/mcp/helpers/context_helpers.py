@@ -9,8 +9,11 @@ import re
 from pathlib import Path
 from typing import Any, cast
 
+from mcp.server.fastmcp import Context
+
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 from code_scalpel.licensing import get_current_tier
+from code_scalpel.utilities.source_sanitizer import sanitize_python_source
 from importlib import import_module
 
 _analyze_code_sync = import_module(
@@ -45,6 +48,78 @@ __all__ = [
     "_get_symbol_references_sync",
     "get_symbol_references",
 ]
+
+
+# [20260116_SECURITY] Redact secrets/PII before any analysis.
+_ENV_VALUE_PATTERN = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*\s*=\s*)(.+)\s*$")
+_EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+_AWS_KEY_PATTERN = re.compile(r"\b(AKIA|ASIA)[0-9A-Z]{16}\b")
+_SECRET_QUOTED_PATTERN = re.compile(
+    r"(?i)(\b(?:api[_-]?key|secret|token|password|passwd|access[_-]?key)\b)(\s*[:=]\s*)(['\"])(.*?)\3"
+)
+_SECRET_UNQUOTED_PATTERN = re.compile(
+    r"(?i)(\b(?:api[_-]?key|secret|token|password|passwd|access[_-]?key)\b)(\s*[:=]\s*)([^\s#]+)"
+)
+
+
+def _is_env_file(path: Path) -> bool:
+    """Check whether a file is an environment file that should be redacted."""
+    name = path.name.lower()
+    return name == ".env" or name.startswith(".env.")
+
+
+def _redact_sensitive_content(
+    path: Path, content: str
+) -> tuple[str, bool, bool, list[str]]:
+    """Redact secrets/PII before analysis.
+
+    Returns:
+        Tuple of (redacted_content, pii_redacted, secrets_masked, summary)
+    """
+    redacted = content
+    pii_redacted = False
+    secrets_masked = False
+    summary: list[str] = []
+
+    if _is_env_file(path):
+        masked_lines: list[str] = []
+        for line in redacted.splitlines():
+            match = _ENV_VALUE_PATTERN.match(line)
+            if match:
+                masked_lines.append(f"{match.group(1)}***REDACTED***")
+                secrets_masked = True
+            else:
+                masked_lines.append(line)
+        redacted = "\n".join(masked_lines)
+        if secrets_masked:
+            summary.append("Masked env values")
+
+    redacted, aws_count = _AWS_KEY_PATTERN.subn("AKIA****************", redacted)
+    if aws_count:
+        secrets_masked = True
+        summary.append("Masked AWS access key")
+
+    def _mask_quoted(match: re.Match[str]) -> str:
+        return f"{match.group(1)}{match.group(2)}{match.group(3)}***REDACTED***{match.group(3)}"
+
+    redacted, quoted_count = _SECRET_QUOTED_PATTERN.subn(_mask_quoted, redacted)
+    if quoted_count:
+        secrets_masked = True
+        summary.append("Masked secret assignment")
+
+    redacted, unquoted_count = _SECRET_UNQUOTED_PATTERN.subn(
+        lambda m: f"{m.group(1)}{m.group(2)}***REDACTED***", redacted
+    )
+    if unquoted_count:
+        secrets_masked = True
+        summary.append("Masked secret assignment")
+
+    redacted, email_count = _EMAIL_PATTERN.subn("[REDACTED_EMAIL]", redacted)
+    if email_count:
+        pii_redacted = True
+        summary.append("Redacted email")
+
+    return redacted, pii_redacted, secrets_masked, summary
 
 
 def _crawl_project_discovery(
@@ -315,6 +390,7 @@ def _crawl_project_sync(
     max_files: int | None = None,
     max_depth: int | None = None,
     respect_gitignore: bool = True,
+    ctx: Context | None = None,
 ) -> ProjectCrawlResult:
     """Synchronous implementation of crawl_project."""
     try:
@@ -399,6 +475,15 @@ def _crawl_project_sync(
         if incremental_mode:
             filtered_files = []
             for file_result in result.files_analyzed:
+                # [20260116_BUGFIX] Cooperative cancellation for long-running crawls.
+                if ctx:
+                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                        raise asyncio.CancelledError("Crawl cancelled by user")
+                    if (
+                        hasattr(ctx, "request_context")
+                        and ctx.request_context.lifecycle_context.is_cancelled
+                    ):
+                        raise asyncio.CancelledError("Crawl cancelled by user")
                 file_path = str(file_result.path)
                 try:
                     mtime = Path(file_result.path).stat().st_mtime
@@ -467,8 +552,30 @@ def _crawl_project_sync(
             complexity_warnings=len(result.all_complexity_warnings),
         )
 
-        files = [to_file_result(f, result.root_path) for f in result.files_analyzed]
-        errors = [to_file_result(f, result.root_path) for f in result.files_with_errors]
+        files = []
+        for f in result.files_analyzed:
+            # [20260116_BUGFIX] Cooperative cancellation during result materialization.
+            if ctx:
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                    raise asyncio.CancelledError("Crawl cancelled by user")
+                if (
+                    hasattr(ctx, "request_context")
+                    and ctx.request_context.lifecycle_context.is_cancelled
+                ):
+                    raise asyncio.CancelledError("Crawl cancelled by user")
+            files.append(to_file_result(f, result.root_path))
+
+        errors = []
+        for f in result.files_with_errors:
+            if ctx:
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                    raise asyncio.CancelledError("Crawl cancelled by user")
+                if (
+                    hasattr(ctx, "request_context")
+                    and ctx.request_context.lifecycle_context.is_cancelled
+                ):
+                    raise asyncio.CancelledError("Crawl cancelled by user")
+            errors.append(to_file_result(f, result.root_path))
 
         # Language breakdown (best-effort by file extension)
         lang_counts: dict[str, int] = {}
@@ -1023,6 +1130,7 @@ async def crawl_project(
             max_files,
             max_depth,
             respect_gitignore,
+            ctx,
         )
 
     # [20260106_FEATURE] v1.0 pre-release - Add output transparency metadata
@@ -1202,6 +1310,9 @@ def _get_file_context_sync(
             )
 
         code = path.read_text(encoding="utf-8")
+        code, pii_redacted, secrets_masked, redaction_summary = (
+            _redact_sensitive_content(path, code)
+        )
         lines = code.splitlines()
         line_count = len(lines)
 
@@ -1262,6 +1373,9 @@ def _get_file_context_sync(
                 total_imports=total_imports,
                 semantic_summary=semantic_summary,
                 expanded_context=expanded_context,
+                pii_redacted=pii_redacted,
+                secrets_masked=secrets_masked,
+                redaction_summary=redaction_summary,
                 access_controlled="rbac_aware_retrieval" in cap_set
                 or "file_access_control" in cap_set,
                 error=analysis.error,
@@ -1271,16 +1385,21 @@ def _get_file_context_sync(
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
-            return FileContextResult(
-                success=False,
-                file_path=str(path),
-                line_count=line_count,
-                tier_applied=tier,
-                max_context_lines_applied=max_context_lines,
-                pro_features_enabled=pro_features_enabled,
-                enterprise_features_enabled=enterprise_features_enabled,
-                error=f"Syntax error at line {e.lineno}: {e.msg}.",
-            )
+            # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
+            sanitized, changed = sanitize_python_source(code)
+            if not changed:
+                return FileContextResult(
+                    success=False,
+                    file_path=str(path),
+                    line_count=line_count,
+                    tier_applied=tier,
+                    max_context_lines_applied=max_context_lines,
+                    pro_features_enabled=pro_features_enabled,
+                    enterprise_features_enabled=enterprise_features_enabled,
+                    error=f"Syntax error at line {e.lineno}: {e.msg}.",
+                )
+            code = sanitized
+            tree = ast.parse(code)
 
         # [20260104_BUGFIX] Return structured symbol info for tiered file context tests.
         functions: list[FunctionInfo] = []
@@ -1417,29 +1536,8 @@ def _get_file_context_sync(
             if not expanded_context:
                 expanded_context = None
 
-        pii_redacted = False
-        secrets_masked = False
-        redaction_summary: list[str] = []
-        if {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set:
-            pii_patterns = {
-                "email": re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-            }
-            secret_patterns = {
-                "aws_access_key": re.compile(r"AKIA[0-9A-Z]{16}"),
-                "password_assignment": re.compile(r"(?i)password\s*=\s*['\"]"),
-            }
-
-            if "pii_redaction" in cap_set:
-                for label, pattern in pii_patterns.items():
-                    if pattern.search(code):
-                        pii_redacted = True
-                        redaction_summary.append(f"Redacted {label}")
-
-            if "secret_masking" in cap_set or "api_key_detection" in cap_set:
-                for label, pattern in secret_patterns.items():
-                    if pattern.search(code):
-                        secrets_masked = True
-                        redaction_summary.append(f"Masked {label}")
+        if not redaction_summary and {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set:
+            redaction_summary = []
 
         access_controlled = (
             "rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set

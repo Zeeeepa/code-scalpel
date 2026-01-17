@@ -69,7 +69,7 @@ The server currently registers **20 MCP tools**.
 ## 5. Operational Architecture
 
 ### Config Layering
-- Currently relies on CLI args (`--root`, `--transport`) and some env vars (`SCALPEL_MCP_INFO`).
+- Currently relies on CLI args (`--root`, `--transport`) and some env vars (`SCALPEL_MCP_OUTPUT`).
 - *Recommendation:* Standardize on `config.yaml` or `.env` for Enterprise settings (SSO, license keys).
 
 ## 6. Data Model & Evidence Architecture

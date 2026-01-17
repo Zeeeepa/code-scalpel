@@ -4,6 +4,8 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
+from code_scalpel.utilities.source_sanitizer import sanitize_python_source
+
 logger = logging.getLogger("code_scalpel.mcp.ast")
 
 # [20251216_PERF] v2.5.0 - Simple in-memory AST cache
@@ -44,8 +46,15 @@ def parse_file_cached(file_path: Path) -> Optional[ast.Module]:
 
     try:
         code = file_path.read_text(encoding="utf-8")
-        tree = ast.parse(code)
+        try:
+            tree = ast.parse(code)
+        except SyntaxError:
+            # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
+            sanitized, changed = sanitize_python_source(code)
+            if not changed:
+                return None
+            tree = ast.parse(sanitized)
         cache_ast(file_path, tree)
-        return tree # type: ignore
+        return tree  # type: ignore
     except (OSError, SyntaxError):
         return None

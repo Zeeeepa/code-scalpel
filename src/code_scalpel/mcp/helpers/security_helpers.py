@@ -1231,6 +1231,7 @@ def _scan_dependencies_sync(
     timeout: float = 30.0,
     tier: str | None = None,
     capabilities: dict | None = None,
+    ctx: Context | None = None,
 ) -> DependencyScanResult:
     """
     Synchronous implementation of dependency vulnerability scanning.
@@ -1293,6 +1294,19 @@ def _scan_dependencies_sync(
             ]
 
             for filename, parser in dep_files:
+                # [20260116_BUGFIX] Cooperative cancellation for dependency scanning.
+                if ctx:
+                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                        raise asyncio.CancelledError(
+                            "Dependency scan cancelled by user"
+                        )
+                    if (
+                        hasattr(ctx, "request_context")
+                        and ctx.request_context.lifecycle_context.is_cancelled
+                    ):
+                        raise asyncio.CancelledError(
+                            "Dependency scan cancelled by user"
+                        )
                 file_path = resolved_path / filename
                 if file_path.exists():
                     try:
@@ -1331,6 +1345,19 @@ def _scan_dependencies_sync(
                 errors.append(f"OSV query failed: {str(e)}")
 
         for dep in all_deps:
+            # [20260116_BUGFIX] Cooperative cancellation during dependency analysis.
+            if ctx:
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                    raise asyncio.CancelledError(
+                        "Dependency scan cancelled by user"
+                    )
+                if (
+                    hasattr(ctx, "request_context")
+                    and ctx.request_context.lifecycle_context.is_cancelled
+                ):
+                    raise asyncio.CancelledError(
+                        "Dependency scan cancelled by user"
+                    )
             dep_vulns: list[DependencyVulnerability] = []
             dep_key = f"{dep.name}@{dep.version}"
 

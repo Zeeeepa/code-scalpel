@@ -192,15 +192,15 @@ class TestMCPLoggingCoverage:
 
         from code_scalpel.mcp import logging as mcp_logging
 
-        original = os.environ.get("SCALPEL_MCP_INFO")
+        original = os.environ.get("SCALPEL_MCP_OUTPUT")
         try:
-            os.environ["SCALPEL_MCP_INFO"] = "DEBUG"
+            os.environ["SCALPEL_MCP_OUTPUT"] = "DEBUG"
             assert mcp_logging is not None
         finally:
             if original:
-                os.environ["SCALPEL_MCP_INFO"] = original
-            elif "SCALPEL_MCP_INFO" in os.environ:
-                del os.environ["SCALPEL_MCP_INFO"]
+                os.environ["SCALPEL_MCP_OUTPUT"] = original
+            elif "SCALPEL_MCP_OUTPUT" in os.environ:
+                del os.environ["SCALPEL_MCP_OUTPUT"]
 
 
 class TestTaintTrackerCoverage:

@@ -125,9 +125,9 @@ Automatically exclude tier-inappropriate fields:
 
 ## Debug Mode Override
 
-Set `SCALPEL_MCP_INFO=DEBUG` to force debug profile:
+Set `SCALPEL_MCP_OUTPUT=DEBUG` to force debug profile:
 ```bash
-export SCALPEL_MCP_INFO=DEBUG
+export SCALPEL_MCP_OUTPUT=DEBUG
 # All metadata will be included regardless of configuration
 ```
 
@@ -193,7 +193,7 @@ export SCALPEL_MCP_INFO=DEBUG
 1. **Start Minimal**: Use minimal profile, add fields only if needed
 2. **Per-Tool Tuning**: Configure each tool based on actual usage patterns
 3. **Tier Awareness**: Exclude tier-inappropriate fields automatically
-4. **Debug When Needed**: Use `SCALPEL_MCP_INFO=DEBUG` for troubleshooting
+4. **Debug When Needed**: Use `SCALPEL_MCP_OUTPUT=DEBUG` for troubleshooting
 5. **Version Control**: Commit `.code-scalpel/response_config.json` to share team settings
 
 ## Schema Validation

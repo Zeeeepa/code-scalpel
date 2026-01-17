@@ -516,7 +516,7 @@ python -m code_scalpel.mcp.server --transport streamable-http --port 8593
 code-scalpel mcp --port 8593
 
 # Debug mode (includes all metadata)
-SCALPEL_MCP_INFO=DEBUG code-scalpel mcp
+SCALPEL_MCP_OUTPUT=DEBUG code-scalpel mcp
 ```
 
 ### Response Configuration
@@ -607,7 +607,7 @@ Response:
 }
 ```
 
-**Debug Mode Response (SCALPEL_MCP_INFO=DEBUG):**
+**Debug Mode Response (SCALPEL_MCP_OUTPUT=DEBUG):**
 ```json
 {
   "tier": "community",

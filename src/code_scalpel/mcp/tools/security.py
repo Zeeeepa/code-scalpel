@@ -121,6 +121,7 @@ async def scan_dependencies(
         timeout=timeout,
         tier=tier,
         capabilities=caps,
+        ctx=ctx,
     )
 
     if ctx:

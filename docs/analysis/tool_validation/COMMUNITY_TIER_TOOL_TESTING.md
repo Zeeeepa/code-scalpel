@@ -9,7 +9,7 @@
 ## Test Setup (MCP-first)
 - Run MCP server with **no paid license** present.
 - Set `CODE_SCALPEL_TIER=community` (or omit; should default to Community).
-- Recommended logging: `SCALPEL_MCP_INFO=DEBUG`
+- Recommended logging: `SCALPEL_MCP_OUTPUT=DEBUG`
 
 ### Canonical Tool Registry (must be stable)
 Expected `list_tools()` returns exactly these 22 tool names:
