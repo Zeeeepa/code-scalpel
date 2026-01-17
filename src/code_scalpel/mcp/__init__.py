@@ -171,6 +171,7 @@ if TYPE_CHECKING:
 def _load_server():
     """Lazy import server module to avoid circular imports."""
     from code_scalpel.mcp import server as _server
+
     return _server
 
 

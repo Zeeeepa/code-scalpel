@@ -5725,21 +5725,15 @@ if __name__ == "__main__":
 # BACKWARD-COMPATIBLE RE-EXPORTS
 # [20260116_REFACTOR] Re-export tool, resource, and prompt functions for backward compatibility
 # Tools, resources, and prompts have been moved to dedicated modules but are
-# re-exported here so existing code continues to work.
+# re-exported here so existing code (e.g., tests) continues to work.
+#
+# [20260117_DEPRECATE] These re-exports are DEPRECATED. New code should import from:
+#     from code_scalpel.mcp import <symbol>
+# This section will be removed in a future major release.
 # ============================================================================
 
-# Tool re-exports from tools/*.py
-
-# Resource re-exports from resources.py
-
-# Prompt re-exports from prompts.py
-
-# Also re-export helper sync functions that tests may use
-
-# Re-export tier functions from protocol.py for backward compatibility
-
 # Re-export session variables for backward compatibility
-from code_scalpel.mcp.session import (  # noqa: E402
+from code_scalpel.mcp.session import (  # noqa: E402, F401
     _SESSION_AUDIT_TRAIL,
     _SESSION_UPDATE_COUNTS,
     get_session_update_count as _get_session_update_count,
@@ -5748,90 +5742,91 @@ from code_scalpel.mcp.session import (  # noqa: E402
 )
 
 # Re-export enterprise tier functions from extraction_helpers for backward compatibility
-from code_scalpel.mcp.helpers.extraction_helpers import (  # noqa: E402
+from code_scalpel.mcp.helpers.extraction_helpers import (  # noqa: E402, F401
     _check_code_review_approval,
     _check_compliance,
     _run_pre_update_hook,
     _run_post_update_hook,
 )
 
-# Re-export with underscore aliases for backward compatibility
 
+# Re-export with underscore aliases for backward compatibility
 def _get_audit_trail() -> list:
     """Return the session audit trail."""
     return _SESSION_AUDIT_TRAIL.copy()
 
 
 # Tool re-exports from tools/*.py - all 22 tools
-from code_scalpel.mcp.tools.analyze import analyze_code  # noqa: E402
-from code_scalpel.mcp.tools.security import (  # noqa: E402
-    security_scan,
+from code_scalpel.mcp.tools.analyze import analyze_code  # noqa: E402, F401
+from code_scalpel.mcp.tools.security import (  # noqa: E402, F401
     scan_dependencies,
+    security_scan,
     type_evaporation_scan,
     unified_sink_detect,
 )
-from code_scalpel.mcp.tools.extraction import (  # noqa: E402
+from code_scalpel.mcp.tools.extraction import (  # noqa: E402, F401
     extract_code,
     rename_symbol,
     update_symbol,
 )
-from code_scalpel.mcp.tools.symbolic import (  # noqa: E402
-    symbolic_execute,
+from code_scalpel.mcp.tools.symbolic import (  # noqa: E402, F401
     generate_unit_tests,
     simulate_refactor,
+    symbolic_execute,
 )
-from code_scalpel.mcp.tools.context import (  # noqa: E402
+from code_scalpel.mcp.tools.context import (  # noqa: E402, F401
     crawl_project,
     get_file_context,
     get_symbol_references,
 )
-from code_scalpel.mcp.tools.graph import (  # noqa: E402
+from code_scalpel.mcp.tools.graph import (  # noqa: E402, F401
+    cross_file_security_scan,
     get_call_graph,
+    get_cross_file_dependencies,
     get_graph_neighborhood,
     get_project_map,
-    get_cross_file_dependencies,
-    cross_file_security_scan,
 )
-from code_scalpel.mcp.tools.policy import (  # noqa: E402
+from code_scalpel.mcp.tools.policy import (  # noqa: E402, F401
+    code_policy_check,
     validate_paths,
     verify_policy_integrity,
-    code_policy_check,
 )
 
 # Resource re-exports from resources.py
-from code_scalpel.mcp.resources import (  # noqa: E402
+from code_scalpel.mcp.resources import (  # noqa: E402, F401
+    get_code_resource,
     get_project_call_graph,
     get_project_dependencies,
     get_project_structure,
-    get_code_resource,
 )
 
 # Prompt re-exports from prompts.py (Intent-Driven UX)
-from code_scalpel.mcp.prompts import (  # noqa: E402
+from code_scalpel.mcp.prompts import (  # noqa: E402, F401
     deep_security_audit,
-    safe_refactor,
-    modernize_legacy,
-    map_architecture,
-    verify_supply_chain,
     explain_and_document,
+    map_architecture,
+    modernize_legacy,
+    safe_refactor,
+    verify_supply_chain,
 )
 
 # [20260116_BUGFIX] Removed re-export of _get_current_tier from protocol.py
 # server.py has its own _get_current_tier() that does full license validation.
 # The protocol.py version only checks env vars - do NOT import it here.
 
-# Re-export Pydantic models for backward compatibility
-from code_scalpel.mcp.models.graph import CallGraphResultModel  # noqa: E402
-from code_scalpel.mcp.models.graph import GraphNeighborhoodResult  # noqa: E402
-from code_scalpel.mcp.models.graph import CrossFileSecurityResult  # noqa: E402
+# [20260117_REFACTOR] Removed model re-exports that shadow local definitions
+# CallGraphResultModel, GraphNeighborhoodResult, CrossFileSecurityResult are
+# already defined in server.py - do NOT re-import from models/graph.py
 
 # Re-export licensing features for backward compatibility
-from code_scalpel.licensing.features import get_tool_capabilities  # noqa: E402
+from code_scalpel.licensing.features import (  # noqa: E402, F401
+    get_tool_capabilities,
+)
 
 # Re-export additional extraction helpers for backward compatibility
-from code_scalpel.mcp.helpers.extraction_helpers import (  # noqa: E402
+from code_scalpel.mcp.helpers.extraction_helpers import (  # noqa: E402, F401
     _update_cross_file_references,
-    PROJECT_ROOT as _EXTRACTION_PROJECT_ROOT,  # Also in server.py at line 155
+    PROJECT_ROOT as _EXTRACTION_PROJECT_ROOT,
 )
 
 # Note: SymbolReferencesResult, ALLOWED_ROOTS, PROJECT_ROOT, _get_symbol_references_sync are already in server.py
