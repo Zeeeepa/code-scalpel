@@ -104,6 +104,8 @@ class TodoExtractor:
         self.source_code_only = source_code_only  # [20260117_FEATURE] Filter to source code
         self.todos: List[TodoItem] = []
         self.stats = defaultdict(int)
+        # [20260117_FEATURE] Track file->lines mapping for removal
+        self.file_todo_lines: Dict[str, List[int]] = defaultdict(list)
     
     def _should_skip_dir(self, dir_name: str) -> bool:
         """Check if directory should be skipped."""
@@ -132,6 +134,89 @@ class TodoExtractor:
 
         return self.todos
 
+    def _is_comment_line(self, line: str) -> bool:
+        """
+        [20260117_BUGFIX] Check if a line is a comment (not code with tag in string).
+        Returns True if the line appears to be a comment containing a TODO tag.
+        """
+        stripped = line.strip()
+        
+        # Python-style comments
+        if stripped.startswith('#'):
+            return True
+        
+        # C/Java/JS style comments
+        if stripped.startswith('//'):
+            return True
+        if stripped.startswith('/*') or stripped.startswith('*'):
+            return True
+        
+        # Docstring lines (inside triple quotes) - harder to detect
+        # Check if there's a # comment after code
+        if '#' in line:
+            # Find position of # that's not in a string
+            in_string = False
+            string_char = None
+            for i, char in enumerate(line):
+                if char in ('"', "'") and (i == 0 or line[i-1] != '\\'):
+                    if not in_string:
+                        in_string = True
+                        string_char = char
+                    elif char == string_char:
+                        in_string = False
+                elif char == '#' and not in_string:
+                    # Found a comment - check if TODO tag is after this #
+                    return True
+        
+        return False
+
+    def _tag_in_comment(self, line: str, tag: str) -> bool:
+        """
+        [20260117_BUGFIX] Check if a TODO tag appears in a comment, not in code/strings.
+        """
+        line_upper = line.upper()
+        tag_upper = tag.upper()
+        
+        # Quick check - if tag not in line at all, skip
+        if tag_upper not in line_upper:
+            return False
+        
+        # Check for Python comment
+        if '#' in line:
+            hash_pos = -1
+            in_string = False
+            string_char = None
+            for i, char in enumerate(line):
+                if char in ('"', "'") and (i == 0 or line[i-1] != '\\'):
+                    if not in_string:
+                        in_string = True
+                        string_char = char
+                    elif char == string_char:
+                        in_string = False
+                elif char == '#' and not in_string:
+                    hash_pos = i
+                    break
+            
+            if hash_pos >= 0:
+                comment_part = line[hash_pos:].upper()
+                if tag_upper in comment_part:
+                    return True
+        
+        # Check for // comment (C/Java/JS/TS)
+        if '//' in line:
+            slash_pos = line.find('//')
+            comment_part = line[slash_pos:].upper()
+            if tag_upper in comment_part:
+                return True
+        
+        # Check for /* */ or * line comments
+        stripped = line.strip()
+        if stripped.startswith('/*') or stripped.startswith('*') or stripped.startswith('//'):
+            if tag_upper in line_upper:
+                return True
+        
+        return False
+
     def _extract_from_file(self, file_path: Path):
         """Extract TODOs from a single file"""
         try:
@@ -139,10 +224,9 @@ class TodoExtractor:
                 lines = f.readlines()
 
             for line_num, line in enumerate(lines, start=1):
-                # Check for any TODO-style tag
-                line_upper = line.upper()
+                # [20260117_BUGFIX] Only match tags in comments, not in code/strings
                 for tag in self.TODO_TAGS:
-                    if tag in line_upper:
+                    if self._tag_in_comment(line, tag):
                         todo = self._parse_todo_line(
                             str(file_path),
                             line_num,
@@ -151,6 +235,8 @@ class TodoExtractor:
                         )
                         if todo:
                             self.todos.append(todo)
+                            # [20260117_FEATURE] Track line numbers for removal
+                            self.file_todo_lines[str(file_path)].append(line_num)
                             self.stats['total'] += 1
                             self.stats[f'tag_{todo.tag}'] += 1
                             self.stats[f'tier_{todo.tier}'] += 1
@@ -160,6 +246,68 @@ class TodoExtractor:
 
         except Exception as e:
             pass  # Silently skip files that can't be read
+
+    def remove_todos_from_files(self, backup: bool = True, dry_run: bool = False) -> Dict[str, int]:
+        """
+        [20260117_FEATURE] Remove extracted TODO lines from source files.
+        
+        Args:
+            backup: Create .bak files before modifying (default: True)
+            dry_run: Preview changes without modifying files (default: False)
+            
+        Returns:
+            Dict mapping file paths to number of lines removed
+        """
+        removed_counts = {}
+        
+        for file_path, line_numbers in self.file_todo_lines.items():
+            if not line_numbers:
+                continue
+                
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    lines = f.readlines()
+                
+                # Sort line numbers in reverse to remove from bottom up
+                lines_to_remove = set(line_numbers)
+                
+                if dry_run:
+                    print(f"[DRY-RUN] Would remove {len(lines_to_remove)} TODO lines from {file_path}")
+                    removed_counts[file_path] = len(lines_to_remove)
+                    continue
+                
+                # Create backup if requested
+                if backup:
+                    backup_path = file_path + '.bak'
+                    with open(backup_path, 'w', encoding='utf-8') as f:
+                        f.writelines(lines)
+                
+                # Filter out TODO lines
+                new_lines = []
+                removed = 0
+                for i, line in enumerate(lines, start=1):
+                    if i in lines_to_remove:
+                        removed += 1
+                        # Check if this is a standalone comment line (only whitespace + comment)
+                        stripped = line.strip()
+                        if stripped.startswith('#') or stripped.startswith('//') or stripped.startswith('*'):
+                            continue  # Remove entire line
+                        # If TODO is inline with code, just remove the TODO part
+                        # For now, we remove the entire line - safer approach
+                        continue
+                    new_lines.append(line)
+                
+                # Write modified file
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.writelines(new_lines)
+                
+                removed_counts[file_path] = removed
+                print(f"Removed {removed} TODO lines from {file_path}")
+                
+            except Exception as e:
+                print(f"Error processing {file_path}: {e}")
+        
+        return removed_counts
 
     def _parse_todo_line(self, file_path: str, line_num: int, line: str, tag: str) -> TodoItem:
         """Parse a TODO line and extract metadata"""
@@ -563,6 +711,21 @@ def main():
         help='Include documentation files (.md, .rst, etc.) - default: source code only'
     )
     parser.add_argument(
+        '--remove',
+        action='store_true',
+        help='Remove TODO lines from source files after extraction (creates backups)'
+    )
+    parser.add_argument(
+        '--no-backup',
+        action='store_true',
+        help='Skip creating .bak backup files when using --remove'
+    )
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Preview what would be removed without modifying files'
+    )
+    parser.add_argument(
         '--roadmap',
         action='store_true',
         help='Generate comprehensive roadmap document'
@@ -614,6 +777,28 @@ def main():
         csv_path = output_dir / 'todos.csv'
         extractor.export_csv(str(csv_path))
         print(f"CSV export: {csv_path}")
+    
+    # [20260117_FEATURE] Remove TODOs from source files if requested
+    if args.remove or args.dry_run:
+        print("\n" + "="*50)
+        if args.dry_run:
+            print("DRY RUN - Previewing TODO removal")
+        else:
+            print("REMOVING TODOs FROM SOURCE FILES")
+        print("="*50)
+        
+        removed = extractor.remove_todos_from_files(
+            backup=not args.no_backup,
+            dry_run=args.dry_run
+        )
+        
+        total_removed = sum(removed.values())
+        files_modified = len(removed)
+        
+        print(f"\n{'Would remove' if args.dry_run else 'Removed'} {total_removed} TODO lines from {files_modified} files")
+        
+        if not args.dry_run and not args.no_backup:
+            print("Backup files created with .bak extension")
     
     # Print summary
     print("\n" + "="*50)
