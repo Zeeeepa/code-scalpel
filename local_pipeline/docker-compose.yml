@@ -1,3 +1,7 @@
+# [20260117_REFACTOR] Updated ports to avoid conflicts with common Docker services
+# Configurable via environment variables:
+#   JENKINS_HTTP_PORT (default: 8088)
+#   JENKINS_AGENT_PORT (default: 50001)
 version: '3.8'
 
 services:
@@ -6,8 +10,10 @@ services:
     privileged: true
     user: root
     ports:
-      - "8080:8080"
-      - "50000:50000"
+      # HTTP port: 8088 (avoids conflict with common services on 8080)
+      - "${JENKINS_HTTP_PORT:-8088}:8080"
+      # Agent port: 50001 (avoids conflict with default Jenkins on 50000)
+      - "${JENKINS_AGENT_PORT:-50001}:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
       # Mount the project root so Jenkins can access files without git clone if desired
