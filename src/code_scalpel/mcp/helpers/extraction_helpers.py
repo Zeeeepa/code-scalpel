@@ -49,6 +49,12 @@ def _get_project_root() -> Path:
     import sys
     
     try:
+        # [20260118_BUGFIX] Check local PROJECT_ROOT first (respects test mocking)
+        global PROJECT_ROOT
+        if PROJECT_ROOT != Path.cwd():
+            # Local PROJECT_ROOT has been explicitly set (likely by test fixture)
+            return PROJECT_ROOT
+        
         # Check if server is imported as __main__
         if "__main__" in sys.modules:
             main_module = sys.modules["__main__"]

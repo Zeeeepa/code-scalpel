@@ -12,10 +12,6 @@ This module provides a unified interface for:
 - Dead code detection
 - Refactoring via PDG-guided transformations
 """
-
-# =============================================================================
-# =============================================================================
-
 import ast
 import logging
 import time

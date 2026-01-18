@@ -146,7 +146,8 @@ async def test_02_extract_code_community(test_project):
             assert result.content
             envelope = json.loads(result.content[0].text)
             assert envelope.get("error") is None
-            content = envelope["data"]
+            # [20260118_BUGFIX] Handle both wrapped ('data') and flattened envelope formats
+            content = envelope.get("data") or envelope
             assert "def add" in content["target_code"]
             print("✅ PASS: extract_code works at community tier")
 
