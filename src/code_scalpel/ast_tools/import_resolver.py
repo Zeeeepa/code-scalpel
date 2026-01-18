@@ -52,6 +52,7 @@ class ImportType:
     DYNAMIC = "dynamic"  # importlib.import_module()
     DUNDER = "dunder"  # __import__()
     LAZY = "lazy"  # Detected but not yet resolved
+    FRAMEWORK = "framework"  # Framework-derived imports (Django INSTALLED_APPS, Flask blueprints)
 
 
 @dataclass
