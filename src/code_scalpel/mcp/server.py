@@ -5563,6 +5563,22 @@ def run_server(
             )
             PROJECT_ROOT = Path.cwd()
 
+    # [20260117_FEATURE] v1.0.0 - Auto-initialize .code-scalpel/ on first run
+    # Creates essential config files if the directory doesn't exist.
+    # Uses "templates_only" mode (no secrets) by default for safety.
+    init_result = _maybe_auto_init_config_dir(
+        project_root=PROJECT_ROOT,
+        tier=tier,
+        enabled=True,  # Always enabled for v1.0 - creates config on first run
+        mode="templates_only",  # Safe default - no secrets written
+        target="project",
+    )
+    if init_result and init_result.get("created"):
+        print(
+            f"Created .code-scalpel/ configuration at {init_result['path']}",
+            file=sys.stderr,
+        )
+
     # [20251215_BUGFIX] Print to stderr for stdio transport
     output = sys.stderr if transport == "stdio" else sys.stdout
     print(f"Code Scalpel MCP Server v{__version__}", file=output)

@@ -22,10 +22,9 @@ For AI agent integrations:
 # [20251228_FEATURE] Public sync wrappers for key MCP tools.
 # These are convenience APIs used by tier/tooling validation tests.
 
-# [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
-__version__ = "3.3.0"
-__author__ = "Timmothy Escolopio"
-__email__ = "time@3dtechsolutions.us"
+__version__ = "1.0.0"
+__author__ = "3D Tech Solutions"
+__email__ = "support@3dtechsolutions.us"
 
 # [20251228_BUGFIX] Prefer reorganized modules to avoid importing deprecated
 # shims (keeps backward-compatible top-level symbols without warning noise).

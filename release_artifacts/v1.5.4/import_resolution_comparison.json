@@ -1,7 +1,0 @@
-{
-  "baseline": "v1.5.3 static import resolution",
-  "dynamic_imports_added": true,
-  "regressions": "none observed in targeted tests",
-  "lazy_marker": "?",
-  "notes": "Static import paths preserved; new edges only for dynamic/framework imports"
-}
