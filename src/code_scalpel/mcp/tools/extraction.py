@@ -73,6 +73,14 @@ async def rename_symbol(
     create_backup: bool = True,
 ) -> PatchResultModel:
     """Rename a function, class, or method in a file."""
+    if _rename_symbol is None:
+        return PatchResultModel(
+            success=False,
+            file_path=file_path,
+            target_name=target_name,
+            target_type=target_type,
+            error="rename_symbol helper not loaded",
+        )
     return await _rename_symbol(
         file_path=file_path,
         target_type=target_type,
@@ -93,6 +101,14 @@ async def update_symbol(
     create_backup: bool = True,
 ) -> PatchResultModel:
     """Update a function, class, or method in a file."""
+    if _update_symbol is None:
+        return PatchResultModel(
+            success=False,
+            file_path=file_path,
+            target_name=target_name,
+            target_type=target_type,
+            error="update_symbol helper not loaded",
+        )
     return await _update_symbol(
         file_path=file_path,
         target_type=target_type,
