@@ -12,6 +12,9 @@ from code_scalpel import __version__
 # [20260116_FEATURE] Import license validator for tier determination
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
+# [20260116_BUGFIX] Ensure prompt registry is populated on protocol import.
+import code_scalpel.mcp.prompts  # noqa: F401
+
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
 # Can be overridden via CODE_SCALPEL_TIER environment variable.
@@ -166,9 +169,5 @@ Access code via URIs without knowing file paths:
 
 Code is PARSED only, never executed.""",
 )
-
-# [20260116_BUGFIX] Ensure prompt registry is populated on protocol import.
-import code_scalpel.mcp.prompts  # noqa: F401
-
 
 __all__ = ["mcp", "set_current_tier", "_get_current_tier"]

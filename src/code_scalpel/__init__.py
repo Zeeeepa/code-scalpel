@@ -67,21 +67,6 @@ from .autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint, Pars
 # 1. Install: pip install code-scalpel[web]
 # 2. Import directly: from code_scalpel.integrations.rest_api_server import run_server
 
-
-def __getattr__(name: str):
-    """Lazy loader for optional dependencies (Flask REST API)."""
-    if name in ("MCPServerConfig", "create_app", "run_server"):
-        try:
-            from .integrations import rest_api_server
-
-            return getattr(rest_api_server, name)
-        except ImportError as e:
-            raise ImportError(
-                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
-            ) from e
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
 # PDG tools
 from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg
 
@@ -292,3 +277,17 @@ def simulate_refactor(
         patch=patch,
         strict_mode=strict_mode,
     )
+
+
+def __getattr__(name: str):
+    """Lazy loader for optional dependencies (Flask REST API)."""
+    if name in ("MCPServerConfig", "create_app", "run_server"):
+        try:
+            from .integrations import rest_api_server
+
+            return getattr(rest_api_server, name)
+        except ImportError as e:
+            raise ImportError(
+                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
+            ) from e
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

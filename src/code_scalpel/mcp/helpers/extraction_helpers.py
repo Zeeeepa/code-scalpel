@@ -13,6 +13,13 @@ from mcp.server.fastmcp import Context
 from code_scalpel.mcp.models.core import ContextualExtractionResult, PatchResultModel
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 from code_scalpel.mcp.path_resolver import resolve_path
+from code_scalpel.licensing.tier_detector import get_current_tier
+from code_scalpel.mcp.helpers.session import (
+    get_session_update_count,
+    increment_session_update_count,
+    add_audit_entry,
+)
+from code_scalpel.mcp.helpers.security_helpers import validate_path_security
 
 # Surgical / Extraction imports
 # Note: Some imports might be inside functions to avoid circular deps or lazy load,
@@ -21,14 +28,6 @@ from code_scalpel.mcp.path_resolver import resolve_path
 # from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
 
 logger = logging.getLogger("code_scalpel.mcp.extraction")
-
-from code_scalpel.licensing.tier_detector import get_current_tier
-from code_scalpel.mcp.helpers.session import (
-    get_session_update_count,
-    increment_session_update_count,
-    add_audit_entry,
-)
-from code_scalpel.mcp.helpers.security_helpers import validate_path_security
 
 # Define PROJECT_ROOT locally if not imported
 # In a real app this should come from a Context/Config singleton
