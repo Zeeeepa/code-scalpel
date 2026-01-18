@@ -1302,6 +1302,7 @@ def _scan_dependencies_sync(
                         )
                     if (
                         hasattr(ctx, "request_context")
+                        and hasattr(ctx.request_context, "lifecycle_context")
                         and ctx.request_context.lifecycle_context.is_cancelled
                     ):
                         raise asyncio.CancelledError(
@@ -1351,6 +1352,7 @@ def _scan_dependencies_sync(
                     raise asyncio.CancelledError("Dependency scan cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
+                    and hasattr(ctx.request_context, "lifecycle_context")
                     and ctx.request_context.lifecycle_context.is_cancelled
                 ):
                     raise asyncio.CancelledError("Dependency scan cancelled by user")

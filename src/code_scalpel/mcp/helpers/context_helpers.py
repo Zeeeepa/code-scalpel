@@ -481,6 +481,7 @@ def _crawl_project_sync(
                         raise asyncio.CancelledError("Crawl cancelled by user")
                     if (
                         hasattr(ctx, "request_context")
+                        and hasattr(ctx.request_context, "lifecycle_context")
                         and ctx.request_context.lifecycle_context.is_cancelled
                     ):
                         raise asyncio.CancelledError("Crawl cancelled by user")
@@ -560,6 +561,7 @@ def _crawl_project_sync(
                     raise asyncio.CancelledError("Crawl cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
+                    and hasattr(ctx.request_context, "lifecycle_context")
                     and ctx.request_context.lifecycle_context.is_cancelled
                 ):
                     raise asyncio.CancelledError("Crawl cancelled by user")
@@ -572,6 +574,7 @@ def _crawl_project_sync(
                     raise asyncio.CancelledError("Crawl cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
+                    and hasattr(ctx.request_context, "lifecycle_context")
                     and ctx.request_context.lifecycle_context.is_cancelled
                 ):
                     raise asyncio.CancelledError("Crawl cancelled by user")

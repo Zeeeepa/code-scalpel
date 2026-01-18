@@ -100,6 +100,10 @@ async def test_response_schema_validation_community(tmp_path: Path):
         # Response fields are at top level, not wrapped in "data"
         data = env_json.get("data") or env_json
 
+        # DEBUG
+        print(f"DEBUG: data={data}")
+        print(f"DEBUG: success={data.get('success')}, error={data.get('error')}")
+
         # Required fields
         assert "success" in data
         assert isinstance(data["success"], bool)
@@ -148,7 +152,8 @@ async def test_community_enforces_max_50_dependencies(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        # [20260118_FIX] Minimal response profile flattens the envelope
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
         assert data.get("total_dependencies") == 50
