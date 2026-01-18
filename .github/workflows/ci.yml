@@ -46,8 +46,7 @@ jobs:
 
     - name: Run smoke tests
       run: |
-        pytest tests/core/test_code_analyzer.py -k "test_basic" -q --tb=short -x 2>/dev/null || \
-        pytest tests/ -k "analyze_code" -q --tb=short --maxfail=1 | head -20
+        pytest tests/core/test_code_analyzer.py -q --tb=short -x
     
     - name: Smoke gate summary
       if: failure()
