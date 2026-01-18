@@ -5,7 +5,6 @@ Flow Parser - Facebook Flow static type checker integration.
 Flow is a static type checker for JavaScript developed by Facebook/Meta.
 This parser integrates with Flow for type checking and type extraction.
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Type Extraction:

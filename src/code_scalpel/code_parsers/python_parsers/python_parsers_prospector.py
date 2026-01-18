@@ -49,7 +49,6 @@ Strictness Levels:
     - veryhigh: Maximum checking
 
 ==============================================================================
-TODO [P5-PROSPECTOR-002]: Profile management
 ==============================================================================
 Priority: LOW
 Status: ✅ COMPLETED
@@ -77,7 +76,6 @@ Built-in Profiles:
     - strictness_*: Preset strictness levels
 
 ==============================================================================
-TODO [P5-PROSPECTOR-003]: Cross-tool message deduplication
 ==============================================================================
 Priority: LOW
 Status: ✅ COMPLETED

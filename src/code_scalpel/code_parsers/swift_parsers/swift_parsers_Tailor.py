@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tailor Parser - Swift Code Metrics Analysis"""
 
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -56,39 +55,31 @@ class TailorParser:
         self.metrics: List[TailorMetric] = []
 
     def parse_json_report(self, report_path: Path) -> List[TailorMetric]:
-        """Parse Tailor JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def execute_tailor(
         self, paths: List[Path], config: Optional[TailorConfig] = None
     ) -> List[TailorMetric]:
-        """Execute Tailor analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Tailor execution")
 
     def load_config(self, config_file: Path) -> TailorConfig:
-        """Load Tailor configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_metrics(
         self, metrics: List[TailorMetric]
     ) -> Dict[str, List[TailorMetric]]:
-        """Categorize metrics by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metric categorization")
 
     def detect_complexity_issues(
         self, metrics: List[TailorMetric]
     ) -> List[TailorMetric]:
-        """Filter for complexity issues - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Complexity detection")
 
     def calculate_code_metrics(self, metrics: List[TailorMetric]) -> Dict[str, Any]:
-        """Calculate code metrics from violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def generate_report(self, metrics: List[TailorMetric], format: str = "json") -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def analyze_metric_trends(self, historical_data: List[Dict]) -> Dict[str, Any]:
-        """Analyze metric trends over time - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Trend analysis")

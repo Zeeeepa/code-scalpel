@@ -165,7 +165,7 @@ response = requests.get('/api/data', headers={{'Authorization': f'Bearer {{api_k
         )
 
     env_json = _tool_json(payload)
-    data = _assert_envelope(env_json, tool_name="type_evaporation_scan")
+    _assert_envelope(env_json, tool_name="type_evaporation_scan")
 
     # Secret should not leak in response
     response_str = str(payload)

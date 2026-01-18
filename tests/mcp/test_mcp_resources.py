@@ -43,15 +43,13 @@ class TestProjectCallGraphResource:
         """Verify resource returns valid JSON."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
-            Path(tmpdir, "main.py").write_text(
-                """
+            Path(tmpdir, "main.py").write_text("""
 def caller():
     helper()
 
 def helper():
     print("helping")
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
                 result = get_project_call_graph()
 
@@ -62,8 +60,7 @@ def helper():
     def test_call_graph_structure(self):
         """Verify call graph has correct structure."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "example.py").write_text(
-                """
+            Path(tmpdir, "example.py").write_text("""
 def main():
     process()
     validate()
@@ -73,8 +70,7 @@ def process():
 
 def validate():
     pass
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
                 result = get_project_call_graph()
                 data = json.loads(result)
@@ -113,12 +109,10 @@ class TestProjectDependenciesResource:
     def test_parses_requirements_txt(self):
         """Verify requirements.txt is parsed."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                """
+            Path(tmpdir, "requirements.txt").write_text("""
 requests>=2.28.0
 flask>=2.0.0
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
                 result = get_project_dependencies()
                 data = json.loads(result)
@@ -131,15 +125,13 @@ flask>=2.0.0
     def test_parses_pyproject_toml(self):
         """Verify pyproject.toml is parsed."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text(
-                """
+            Path(tmpdir, "pyproject.toml").write_text("""
 [project]
 dependencies = [
     "pydantic>=2.0.0",
     "click>=8.0.0",
 ]
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
                 result = get_project_dependencies()
                 data = json.loads(result)
@@ -370,39 +362,31 @@ class TestResourceIntegration:
             src = Path(tmpdir, "src")
             src.mkdir()
             Path(src, "__init__.py").touch()
-            Path(src, "core.py").write_text(
-                """
+            Path(src, "core.py").write_text("""
 from .utils import helper
 
 def main():
     helper()
-"""
-            )
-            Path(src, "utils.py").write_text(
-                """
+""")
+            Path(src, "utils.py").write_text("""
 def helper():
     pass
-"""
-            )
+""")
 
             # Create tests directory
             tests = Path(tmpdir, "tests")
             tests.mkdir()
-            Path(tests, "test_core.py").write_text(
-                """
+            Path(tests, "test_core.py").write_text("""
 def test_main():
     pass
-"""
-            )
+""")
 
             # Create config files
-            Path(tmpdir, "pyproject.toml").write_text(
-                """
+            Path(tmpdir, "pyproject.toml").write_text("""
 [project]
 name = "test-project"
 dependencies = ["click>=8.0"]
-"""
-            )
+""")
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
                 # All resources should work

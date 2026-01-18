@@ -20,14 +20,12 @@ class LanguageSemantics(ABC):
     All methods accept Z3 symbolic values and return Z3 symbolic values.
     This allows symbolic execution across languages.
 
-    [20251220_TODO] Add semantic operation categories:
         - Bitwise operations (and, or, xor, not, shift)
         - Object/array operations (access, set, keys, length)
         - String operations (concat, slice, index, match)
         - Type checking and guards
         - Error handling and exception semantics
 
-    [20251220_TODO] Add constraint tracking:\n        - Track value ranges and type constraints
         - Propagate type information through operations
         - Enable type narrowing in conditionals
         - Support optional chaining constraints

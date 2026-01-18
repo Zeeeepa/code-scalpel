@@ -76,14 +76,12 @@ class IRNode:
 
     Analysis engines use source_language to select the right LanguageSemantics.
 
-    [20251220_TODO] Add node utility methods:
         - parent_node tracking for traversal
         - children() method for generic iteration
         - clone_with_updates() for immutable-style updates
         - hash() and equality for caching/deduplication
         - accept(visitor) for visitor pattern
 
-    [20251220_TODO] Add constraint/type information:
         - value_constraints for range/type constraints
         - possible_types for union types
         - is_null_coalescing for nullish tracking
@@ -453,12 +451,10 @@ class IRBinaryOp(IRExpr):
         op: Binary operator
         right: Right operand
 
-    [20251220_TODO] Add operator precedence and associativity metadata:
         - Store precedence level for pretty-printing
         - Store associativity (left/right) for nested operations
         - Enable parenthesis elision in code generation
 
-    [20251220_TODO] Add semantic information for overflow/underflow:
         - Flag operations that may overflow in target language
         - Track integer division vs float division
         - Mark potential NaN or Infinity results (JS)
@@ -552,7 +548,6 @@ class IRCall(IRExpr):
     """
     Function/method call.
 
-    [20251220_TODO] Complete IRCall implementation:
         - func: The function being called
         - args: Positional arguments
         - keywords: Keyword arguments (name, value) tuples

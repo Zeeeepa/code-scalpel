@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """SwiftFormat Parser - Swift Code Formatting and Style Normalization"""
 
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -31,23 +30,18 @@ class SwiftFormatParser:
         self.issues: List[FormattingIssue] = []
 
     def parse_format_config(self, config_path: Path) -> Dict:
-        """Parse SwiftFormat configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config parsing")
 
     def execute_swiftformat(self, paths: List[Path]) -> List[FormattingIssue]:
-        """Execute SwiftFormat analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: SwiftFormat execution")
 
     def apply_formatting(self, paths: List[Path]) -> Dict[str, int]:
-        """Apply SwiftFormat fixes - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Format application")
 
     def detect_formatting_violations(
         self, issues: List[FormattingIssue]
     ) -> List[FormattingIssue]:
-        """Detect formatting violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation detection")
 
     def generate_format_report(self, issues: List[FormattingIssue]) -> str:
-        """Generate formatting report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

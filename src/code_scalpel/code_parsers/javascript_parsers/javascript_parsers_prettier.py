@@ -5,7 +5,6 @@ Prettier Parser - JavaScript/TypeScript code formatting.
 Parses Prettier output and configuration for automated code formatting verification.
 Prettier is an opinionated code formatter with support for many languages.
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Configuration:

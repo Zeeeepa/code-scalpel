@@ -289,13 +289,11 @@ class TestLargeInputs:
         # Generate code with many potential vulnerabilities
         vulnerable_funcs = []
         for i in range(50):
-            vulnerable_funcs.append(  # noqa: S608 -- intentional vulnerability in test data
-                f"""
+            vulnerable_funcs.append(f"""
 def vulnerable_{i}(user_input):
     query = f"SELECT * FROM table WHERE id={{user_input}}"
     cursor.execute(query)
-"""
-            )
+""")  # noqa: S608 -- intentional vulnerability in test data
         code = "\n".join(vulnerable_funcs)
 
         result = await security_scan(code=code)

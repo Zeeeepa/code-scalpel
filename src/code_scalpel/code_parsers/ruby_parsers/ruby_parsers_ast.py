@@ -58,35 +58,27 @@ class RubyASTParser:
         self.modules: List[RubyModule] = []
 
     def parse_ruby_file(self, file_path: Path):
-        """Parse Ruby file to AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Ruby file parsing")
 
     def extract_classes(self, ast) -> List[RubyClass]:
-        """Extract class definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Class extraction")
 
     def extract_methods(
         self, ast, class_context: Optional[str] = None
     ) -> List[RubyMethod]:
-        """Extract method definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Method extraction")
 
     def extract_modules(self, ast) -> List[RubyModule]:
-        """Extract module definitions from AST - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Module extraction")
 
     def analyze_inheritance(self, classes: List[RubyClass]) -> Dict:
-        """Analyze inheritance hierarchy - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Inheritance analysis")
 
     def detect_meta_programming(self, ast) -> List[Dict]:
-        """Detect meta-programming patterns - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Meta-programming detection")
 
     def generate_call_graph(self, ast) -> Dict:
-        """Generate method call graph - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Call graph generation")
 
     def analyze_blocks_and_lambdas(self, ast) -> List[Dict]:
-        """Analyze blocks and lambda functions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Block/lambda analysis")

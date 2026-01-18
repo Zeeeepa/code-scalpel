@@ -28,7 +28,6 @@ This module provides:
 - Language detection from file extensions
 - Unified IR-based analysis
 
-TODO ITEMS:
 
 
 

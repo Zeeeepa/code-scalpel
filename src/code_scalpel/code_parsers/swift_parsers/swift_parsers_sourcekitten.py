@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """SourceKitten Parser - Swift AST and Semantic Analysis"""
 
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -44,25 +43,19 @@ class SourceKittenParser:
         self.complexity_metrics: List[SwiftComplexity] = []
 
     def parse_sourcekitten_output(self, output_path: Path) -> List[SwiftSymbol]:
-        """Parse SourceKitten JSON output - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def execute_sourcekitten(self, paths: List[Path]) -> List[SwiftSymbol]:
-        """Execute SourceKitten analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: SourceKitten execution")
 
     def extract_symbols(self, output: Dict[str, Any]) -> List[SwiftSymbol]:
-        """Extract symbols from SourceKitten output - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Symbol extraction")
 
     def analyze_complexity(self, symbols: List[SwiftSymbol]) -> List[SwiftComplexity]:
-        """Analyze code complexity - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Complexity analysis")
 
     def extract_documentation(self, symbols: List[SwiftSymbol]) -> Dict[str, str]:
-        """Extract documentation from symbols - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Documentation extraction")
 
     def generate_ast_report(self, symbols: List[SwiftSymbol]) -> str:
-        """Generate AST analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

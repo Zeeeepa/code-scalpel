@@ -5,7 +5,6 @@ Tree-sitter JavaScript Parser - Fast native JavaScript/TypeScript parsing.
 Tree-sitter provides incremental parsing with excellent performance for large files.
 This parser supports JavaScript, TypeScript, JSX, and TSX.
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Parsing:

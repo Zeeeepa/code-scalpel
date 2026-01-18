@@ -60,43 +60,35 @@ class RuboCopParser:
         self.violations: List[RuboCopViolation] = []
 
     def parse_json_report(self, report_path: Path) -> List[RuboCopViolation]:
-        """Parse RuboCop JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def execute_rubocop(
         self, paths: List[Path], config: RuboCopConfig = None
     ) -> List[RuboCopViolation]:
-        """Execute RuboCop analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: RuboCop execution")
 
     def load_config(self, config_file: Path) -> RuboCopConfig:
-        """Load RuboCop configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[RuboCopViolation]
     ) -> Dict[str, List[RuboCopViolation]]:
-        """Categorize violations by cop category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def apply_autocorrect(
         self, paths: List[Path], config: RuboCopConfig = None
     ) -> Dict[str, int]:
-        """Apply RuboCop auto-corrections - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Auto-correction")
 
     def generate_report(
         self, violations: List[RuboCopViolation], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[RuboCopViolation]) -> Dict[str, Any]:
-        """Calculate metrics from violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def detect_rails_specific_issues(
         self, violations: List[RuboCopViolation]
     ) -> List[RuboCopViolation]:
-        """Filter for Rails-specific violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Rails-specific analysis")

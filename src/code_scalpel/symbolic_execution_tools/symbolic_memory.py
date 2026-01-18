@@ -38,12 +38,10 @@ class SymbolicMemory:
     """
     Symbolic memory model (stub).
 
-    TODO: Full implementation with Z3 array theory
     """
 
     def __init__(self):
         """
-        TODO: Initialize memory model
         - Setup Z3 array theory
         - Initialize heap allocator
         - Create constraint tracking
@@ -56,7 +54,6 @@ class SymbolicMemory:
         self, name: str, length: Union[int, z3.ArithRef], element_type: type = int
     ) -> SymbolicArray:
         """
-        TODO: Create symbolic array
         - Initialize Z3 Array(Int, element_type)
         - Add length constraint
         - Track in memory model
@@ -65,7 +62,6 @@ class SymbolicMemory:
 
     def load(self, array: SymbolicArray, index: Union[int, z3.ArithRef]) -> Any:
         """
-        TODO: Load value from symbolic array at symbolic index
         - Generate bounds check constraint (0 <= index < length)
         - Return symbolic value from Z3 array
         - Handle out-of-bounds error path
@@ -76,7 +72,6 @@ class SymbolicMemory:
         self, array: SymbolicArray, index: Union[int, z3.ArithRef], value: Any
     ) -> None:
         """
-        TODO: Store value to symbolic array at symbolic index
         - Generate bounds check constraint
         - Update Z3 array representation
         - Track write for later loads
@@ -87,7 +82,6 @@ class SymbolicMemory:
         self, name: str, key_type: type = str, value_type: type = int
     ) -> SymbolicDict:
         """
-        TODO: Create symbolic dictionary
         - Initialize Z3 representation
         - Track key-value constraints
         """

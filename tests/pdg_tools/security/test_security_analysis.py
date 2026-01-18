@@ -647,12 +647,10 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [tool.code-scalpel.sanitizers]
 "my_utils.clean_sql" = ["SQL_QUERY"]
-"""
-        )
+""")
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -672,12 +670,10 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [tool.code-scalpel.sanitizers]
 "my_utils.super_clean" = ["ALL"]
-"""
-        )
+""")
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -696,14 +692,12 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [tool.code-scalpel.sanitizers]
 "utils.clean_sql" = ["SQL_QUERY"]
 "utils.clean_html" = ["HTML_OUTPUT"]
 "utils.clean_all" = ["ALL"]
-"""
-        )
+""")
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -723,12 +717,10 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [tool.code-scalpel.sanitizers]
 "utils.paranoid_clean" = ["SQL_QUERY", "HTML_OUTPUT"]
-"""
-        )
+""")
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -747,12 +739,10 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [tool.code-scalpel.sanitizers]
 "utils.mixed" = ["SQL_QUERY", "INVALID_SINK"]
-"""
-        )
+""")
 
         try:
             count = load_sanitizers_from_config(str(config_file))

@@ -311,7 +311,7 @@ class TestLoggingLevelControl:
                 )
 
         # Count DEBUG logs
-        debug_logs = [r for r in caplog.records if r.levelno == logging.DEBUG]
+        [r for r in caplog.records if r.levelno == logging.DEBUG]
         # At WARNING level, should have no DEBUG logs
         # (This validates that logging level filtering works)
 
@@ -379,7 +379,7 @@ class TestLoggingConsistency:
                 )
 
         # All calls should produce error responses
-        error_records = [r for r in caplog.records if r.levelno >= logging.ERROR]
+        [r for r in caplog.records if r.levelno >= logging.ERROR]
         # Error logging should be consistent
 
     async def test_different_inputs_produce_different_logs(self, caplog):

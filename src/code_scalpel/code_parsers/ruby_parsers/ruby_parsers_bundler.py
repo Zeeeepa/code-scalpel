@@ -46,33 +46,25 @@ class BundlerParser:
         self.config = BundleConfig(Path("Gemfile"), Path("Gemfile.lock"))
 
     def parse_gemfile(self, gemfile_path: Path) -> List[Gem]:
-        """Parse Gemfile for dependencies - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gemfile parsing")
 
     def parse_gemfile_lock(self, lockfile_path: Path) -> List[Gem]:
-        """Parse Gemfile.lock for locked versions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gemfile.lock parsing")
 
     def extract_gems(self, gemfile_content: str) -> List[Gem]:
-        """Extract gem declarations from Gemfile - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gem extraction")
 
     def extract_locked_versions(self, lockfile_content: str) -> Dict[str, str]:
-        """Extract locked gem versions from Gemfile.lock - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Version extraction")
 
     def scan_for_vulnerabilities(self, gems: List[Gem]) -> List[Gem]:
-        """Scan gems for known vulnerabilities - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Vulnerability scanning")
 
     def detect_outdated_gems(self, gems: List[Gem]) -> List[Gem]:
-        """Detect outdated gem versions - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Outdated gem detection")
 
     def analyze_transitive_dependencies(self, gems: List[Gem]) -> Dict:
-        """Analyze transitive dependency relationships - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Transitive dependency analysis")
 
     def generate_dependency_report(self, gems: List[Gem]) -> str:
-        """Generate dependency analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

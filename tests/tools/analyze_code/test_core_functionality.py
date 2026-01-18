@@ -392,9 +392,7 @@ class TestComplexityScoring:
         """Simple code should have lower complexity."""
         code = "def simple(): return 1"
         analyzer = CodeAnalyzer(language=AnalysisLanguage.PYTHON)
-        result = analyzer.analyze(code)
-
-        simple_complexity = result.metrics.cyclomatic_complexity
+        analyzer.analyze(code)
 
     def test_complex_code_has_higher_complexity(self):
         """Complex code with many branches should have higher complexity."""

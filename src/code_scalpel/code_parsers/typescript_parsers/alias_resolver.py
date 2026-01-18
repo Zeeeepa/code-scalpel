@@ -6,43 +6,12 @@ Bundler/Module Alias Resolver.
 This module provides tools to resolve module aliases used in TypeScript/JavaScript projects,
 enabling accurate import resolution for security analysis and extraction.
 
-TODO ITEMS:
 
 COMMUNITY TIER (Core Functionality):
-1. TODO: Add support for .npmrc alias resolution
-2. TODO: Implement barrel export resolution for wildcard imports
-3. TODO: Add error handling for circular alias definitions
-4. TODO: Create alias validation to detect conflicts
-5. TODO: Support monorepo workspace alias resolution
-6. TODO: Add caching for resolved paths to improve performance
-7. TODO: Document alias resolution priority order
-8. TODO: Implement path normalization across platforms
-9. TODO: Add logging for alias resolution debugging
-10. TODO: Create comprehensive test suite for all config formats
 
 PRO TIER (Enhanced Features):
-11. TODO: Add support for npm workspaces and pnpm resolution
-12. TODO: Implement Yarn PnP (Plug'n'Play) alias resolution
-13. TODO: Add custom resolver plugin system for framework-specific aliases
-14. TODO: Implement TypeScript project references (composite projects)
-15. TODO: Add NextJS path aliases (@/ patterns) with special handling
-16. TODO: Support NuxtJS auto-import alias resolution
-17. TODO: Add Webpack module federation alias support
-18. TODO: Implement smart fallback for unresolved aliases
-19. TODO: Add cross-workspace alias validation
-20. TODO: Create IDE-compatible alias resolution for editor integration
 
 ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build multi-version alias compatibility system
-22. TODO: Implement distributed alias resolution for large codebases
-23. TODO: Add Machine Learning-based alias pattern recognition
-24. TODO: Create alias migration analysis tools
-25. TODO: Implement enterprise monorepo alias governance system
-26. TODO: Add license-aware alias resolution for audit compliance
-27. TODO: Build federated alias resolution across organizations
-28. TODO: Add blockchain-based alias audit trails
-29. TODO: Implement AI-powered alias refactoring suggestions
-30. TODO: Create quantum-safe alias hashing systems
 """
 
 from __future__ import annotations

@@ -4,7 +4,6 @@
 Configuration module for Code Scalpel.
 """
 
-
 # [20251225_DEPRECATE] Governance config moved to code_scalpel.governance
 # For backward compatibility, import from new location
 from code_scalpel.governance import (

@@ -11,7 +11,6 @@ Implementation Status: NOT IMPLEMENTED
 Priority: P2 - HIGH
 
 ============================================================================
-TODO ITEMS: python_parsers_radon.py
 ============================================================================
 COMMUNITY TIER - Core Complexity Metrics (P0-P2) [NOT IMPLEMENTED]
 ============================================================================
@@ -133,7 +132,6 @@ Complexity Grades:
     - E: 31-40 (Extremely Complex, Very High Risk)
     - F: >40 (Unmaintainable, Extreme Risk)
 
-Output Format (TODO):
     Radon produces JSON with metrics per function/class:
     ```json
     {
@@ -379,7 +377,6 @@ class RadonParser:
         - Function and class metrics
         - Configuration support
 
-    TODO:
         - Implement analyze_file() method
         - Implement analyze_code() method
         - Add JSON parsing
@@ -416,7 +413,6 @@ class RadonParser:
         Returns:
             RadonReport with complexity metrics
 
-        TODO: Implement
         """
         raise NotImplementedError("RadonParser.analyze_file() not yet implemented")
 
@@ -431,7 +427,6 @@ class RadonParser:
         Returns:
             RadonReport with complexity metrics
 
-        TODO: Implement
         """
         raise NotImplementedError("RadonParser.analyze_code() not yet implemented")
 

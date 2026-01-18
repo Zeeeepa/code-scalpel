@@ -23,7 +23,6 @@ Implemented Features:
 - Record class support (Java 14+)
 - Sealed class support (Java 17+)
 
-Phase 2 Enhancement TODOs:
 """
 
 import hashlib

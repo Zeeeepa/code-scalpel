@@ -3,7 +3,6 @@ JavaScript/TypeScript Parser Adapter - IParser interface for JS/TS parsers.
 
 [20251221_FEATURE] Bridges JavaScriptParser to the IParser interface.
 ============================================================================
-TODO ITEMS: code_parsers/adapters/javascript_adapter.py
 ============================================================================
 COMMUNITY TIER - Core JS/TS Adapter (P0-P2)
 ============================================================================

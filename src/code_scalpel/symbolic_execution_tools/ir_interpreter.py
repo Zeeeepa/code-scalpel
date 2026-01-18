@@ -39,98 +39,26 @@ Usage:
 #
 # COMMUNITY (Current & Planned):
 # Documentation & Learning:
-# - TODO [COMMUNITY]: Improve documentation with examples (current)
-# - TODO [COMMUNITY]: Document IR node types supported
-# - TODO [COMMUNITY]: Create language semantics guide
-# - TODO [COMMUNITY]: Add debugging helpers
-# - TODO [COMMUNITY]: Document limitations and constraints
-# - TODO [COMMUNITY]: Create API reference documentation
-# - TODO [COMMUNITY]: Add architecture guide
-# - TODO [COMMUNITY]: Document semantic protocol
-# - TODO [COMMUNITY]: Create troubleshooting guide
 #
 # Examples & Tutorials:
-# - TODO [COMMUNITY]: Add basic IR interpretation example
-# - TODO [COMMUNITY]: Create language semantics example
-# - TODO [COMMUNITY]: Document state management
-# - TODO [COMMUNITY]: Add path exploration example
-# - TODO [COMMUNITY]: Create constraint generation example
 #
 # Testing:
-# - TODO [COMMUNITY]: Add tests for all IR node types
-# - TODO [COMMUNITY]: Create semantic tests per language
-# - TODO [COMMUNITY]: Add path exploration tests
-# - TODO [COMMUNITY]: Document test coverage
 #
 # PRO (Enhanced Features):
 # Core Language Support:
-# - TODO [PRO]: Add support for class definitions
-# - TODO [PRO]: Implement exception handling (try/except)
-# - TODO [PRO]: Support async/await semantics
-# - TODO [PRO]: Add decorator support
-# - TODO [PRO]: Implement with statement handling
-# - TODO [PRO]: Support context managers
-# - TODO [PRO]: Add lambda expression evaluation
-# - TODO [PRO]: Implement comprehension evaluation
-# - TODO [PRO]: Support import statement handling
-# - TODO [PRO]: Add custom language semantics
 #
 # Type System:
-# - TODO [PRO]: Implement generic type support
-# - TODO [PRO]: Add type inference improvements
-# - TODO [PRO]: Support union type handling
-# - TODO [PRO]: Implement intersection types
-# - TODO [PRO]: Add type narrowing in conditionals
-# - TODO [PRO]: Support parametric polymorphism
-# - TODO [PRO]: Implement type constraint solving
 #
 # Semantics Improvements:
-# - TODO [PRO]: Add JavaScript semantics completeness
-# - TODO [PRO]: Implement Java semantics
-# - TODO [PRO]: Add TypeScript specific semantics
-# - TODO [PRO]: Support Go semantics
-# - TODO [PRO]: Implement Rust semantics
-# - TODO [PRO]: Add custom language registration
-# - TODO [PRO]: Support semantic versioning
 #
 # Analysis Capabilities:
-# - TODO [PRO]: Add interprocedural analysis
-# - TODO [PRO]: Implement call graph construction
-# - TODO [PRO]: Support data flow analysis
-# - TODO [PRO]: Add control flow analysis
-# - TODO [PRO]: Implement reachability analysis
-# - TODO [PRO]: Support aliasing analysis
 #
 # ENTERPRISE (Advanced Capabilities):
 # Polyglot & Distribution:
-# - TODO [ENTERPRISE]: Implement polyglot interpretation
-# - TODO [ENTERPRISE]: Add distributed interpretation
-# - TODO [ENTERPRISE]: Support all IR node types
-# - TODO [ENTERPRISE]: Implement adaptive loop unrolling
-# - TODO [ENTERPRISE]: Add type checking integration
-# - TODO [ENTERPRISE]: Support custom type semantics
-# - TODO [ENTERPRISE]: Implement symbolic pointer support
-# - TODO [ENTERPRISE]: Add advanced path exploration
-# - TODO [ENTERPRISE]: Support incremental interpretation
-# - TODO [ENTERPRISE]: Implement continuous optimization
 #
 # Advanced Features:
-# - TODO [ENTERPRISE]: Add ML-based semantic predictions
-# - TODO [ENTERPRISE]: Implement semantic learning
-# - TODO [ENTERPRISE]: Support behavior-driven analysis
-# - TODO [ENTERPRISE]: Add anomaly detection
-# - TODO [ENTERPRISE]: Implement cross-language translation
-# - TODO [ENTERPRISE]: Support bytecode interpretation
-# - TODO [ENTERPRISE]: Add JIT compilation support
 #
 # Integration & Monitoring:
-# - TODO [ENTERPRISE]: Add IDE integration
-# - TODO [ENTERPRISE]: Support continuous analysis
-# - TODO [ENTERPRISE]: Implement performance monitoring
-# - TODO [ENTERPRISE]: Add profiling integration
-# - TODO [ENTERPRISE]: Support telemetry collection
-# - TODO [ENTERPRISE]: Implement analytics dashboard
-# - TODO [ENTERPRISE]: Add debugging support
 """
 
 from __future__ import annotations

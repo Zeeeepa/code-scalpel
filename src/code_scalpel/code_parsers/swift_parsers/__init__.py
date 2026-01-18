@@ -4,7 +4,6 @@
 This module provides a comprehensive interface for Swift code analysis.
 """
 
-
 __all__ = [
     "SwiftParserRegistry",
     "SwiftLintParser",

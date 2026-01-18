@@ -24,7 +24,6 @@ Note: javalang library has limited support for newer Java features.
 For Java 14+ records, Java 17+ sealed classes, and Java 21+ pattern matching,
 use the tree-sitter parser instead.
 
-Phase 2 Enhancement TODOs:
 """
 
 import math

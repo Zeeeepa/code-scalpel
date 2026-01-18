@@ -4,7 +4,6 @@ CrewAIScalpel - Integration wrapper for CrewAI with Code Scalpel analysis capabi
 This module provides the CrewAIScalpel class that wraps Code Scalpel's
 AST analysis capabilities for use with CrewAI agents and tools.
 
-TODO ITEMS: integrations/crewai.py
 ======================================================================
 COMMUNITY TIER - Core CrewAI Integration
 ======================================================================

@@ -8,7 +8,6 @@ Find Security Bugs is a SpotBugs plugin for security audits.
 Reference: https://find-sec-bugs.github.io/
 Command: spotbugs -pluginList findsecbugs-plugin.jar -xml -output results.xml classes/
 
-Phase 2 Enhancement TODOs:
 """
 
 from dataclasses import dataclass

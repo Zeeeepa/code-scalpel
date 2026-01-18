@@ -18,7 +18,6 @@ mypy Features:
     - Plugin system for framework support
 
 ============================================================================
-TODO ITEMS: python_parsers_mypy.py
 ============================================================================
 COMMUNITY TIER - Core Type Checking (P0-P2) [MOSTLY COMPLETE]
 ============================================================================

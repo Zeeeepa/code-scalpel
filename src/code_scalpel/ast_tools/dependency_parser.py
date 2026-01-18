@@ -18,17 +18,6 @@ class DependencyParser:
 
     def __init__(self, root_path: str):
         self.root_path = root_path
-        # ====================================================================
-        # TIER 2: PRO (Commercial - Medium Priority)
-        # ====================================================================
-
-        # ====================================================================
-        # TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        # ====================================================================
-
-        #     3. Detect version conflicts
-        #     4. Suggest resolution
-        #     5. Add 25+ tests for cross-language
 
     def get_dependencies(self) -> Dict[str, List[Dict[str, str]]]:
         """Returns dependencies grouped by ecosystem."""

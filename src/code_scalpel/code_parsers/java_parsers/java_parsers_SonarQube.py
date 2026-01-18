@@ -8,7 +8,6 @@ SonarQube provides continuous inspection of code quality.
 Reference: https://docs.sonarsource.com/sonarqube/latest/
 Command: sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=src
 
-Phase 2 Enhancement TODOs:
 """
 
 import base64

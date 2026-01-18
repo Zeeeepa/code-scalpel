@@ -161,7 +161,7 @@ class TestDetectServiceBoundariesIsolationScore:
                 service.internal_dependencies
             )
             if total_count > 0:
-                iso_score = 1.0 - (external_count / total_count)
+                1.0 - (external_count / total_count)
                 # Due to implementation details, score might vary
                 # but service was suggested so it met threshold
 

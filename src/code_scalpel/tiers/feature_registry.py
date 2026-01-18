@@ -86,10 +86,9 @@ DEFAULT_FEATURES: Dict[str, Feature] = {
         description="Validate path accessibility",
         category="utilities",
     ),
-    # PRO features - Now available at COMMUNITY with parameter restrictions
     "security_scan": Feature(
         name="security_scan",
-        tier="community",  # Available everywhere, features gated
+        tier="community",
         description="Taint-based vulnerability detection",
         category="security",
     ),
@@ -135,10 +134,9 @@ DEFAULT_FEATURES: Dict[str, Feature] = {
         description="Extract graph neighborhood",
         category="analysis",
     ),
-    # ENTERPRISE features - Now available at COMMUNITY with parameter restrictions
     "cross_file_security_scan": Feature(
         name="cross_file_security_scan",
-        tier="community",  # Available everywhere, features gated
+        tier="community",
         description="Cross-module taint tracking",
         category="security",
     ),

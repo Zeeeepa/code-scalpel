@@ -6,43 +6,12 @@ TypeScript Decorator Analyzer.
 This module provides tools to extract decorator information from TypeScript code
 and identify security-sensitive decorators (e.g., HTTP endpoints, database operations).
 
-TODO ITEMS:
 
 COMMUNITY TIER (Core Functionality):
-1. TODO: Improve decorator extraction accuracy for complex patterns
-2. TODO: Add support for chained decorators
-3. TODO: Implement decorator argument parsing
-4. TODO: Create parameter decorator detection
-5. TODO: Add accessor decorator support
-6. TODO: Implement error handling for malformed decorators
-7. TODO: Create comprehensive decorator pattern library
-8. TODO: Add caching for decorator analysis results
-9. TODO: Document decorator security patterns
-10. TODO: Create test suite for all decorator types
 
 PRO TIER (Enhanced Features):
-11. TODO: Add NestJS-specific decorator support
-12. TODO: Implement TypeORM decorator analysis
-13. TODO: Add Angular decorator pattern detection
-14. TODO: Create custom decorator plugin system
-15. TODO: Implement decorator metadata extraction
-16. TODO: Add reflection support for runtime decorators
-17. TODO: Create decorator composition analysis
-18. TODO: Implement mixin decorator detection
-19. TODO: Add performance decorator detection
-20. TODO: Create security decorator validation
 
 ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build ML-based decorator security risk detection
-22. TODO: Implement distributed decorator analysis
-23. TODO: Add AI-powered decorator refactoring suggestions
-24. TODO: Create blockchain-based decorator audit trails
-25. TODO: Implement quantum-safe decorator hashing
-26. TODO: Build enterprise decorator governance system
-27. TODO: Add compliance checking for decorator patterns
-28. TODO: Implement federated decorator registry
-29. TODO: Create advanced security threat modeling for decorators
-30. TODO: Add quantum-safe reflection support
 """
 
 from __future__ import annotations

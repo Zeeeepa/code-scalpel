@@ -78,7 +78,7 @@ class ImportInfo:
     level: int = 0
     line: int = 0
     file: str = ""
-    original_module: Optional[str] = ()
+    original_module: Optional[str] = None
 
     @property
     def effective_name(self) -> str:
@@ -99,32 +99,7 @@ class ImportInfo:
 
 
 class DynamicImportVisitor(ast.NodeVisitor):
-    """Visitor to extract dynamic imports and track local string variables.
-
-    ====================================================================
-    TIER 2: PRO (Commercial - Medium Priority)
-    ====================================================================        TODO [PRO][FEATURE]: Support lazy import detection and resolution
-      - Detect importlib.import_module() patterns
-      - Track lazy import declarations
-      - Support deferred resolution
-      - Add 20+ tests for lazy imports        TODO [PRO][FEATURE]: Add framework-specific import resolution
-      - Django INSTALLED_APPS module resolution
-      - FastAPI app inclusion patterns
-      - Flask Blueprint registration
-      - Add 25+ tests for framework patterns
-
-    ====================================================================
-    TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    ====================================================================        TODO [ENTERPRISE][ENHANCEMENT]: Support type stub analysis
-      - Parse .pyi files for unresolved imports
-      - Extract type information from stubs
-      - Support typing_extensions
-      - Add 15+ tests for stub handling        TODO [ENTERPRISE][ENHANCEMENT]: Add import cycle detection with paths
-      - Report full cycle paths to user
-      - Suggest cycle breaking strategies
-      - Calculate impact of breaking each edge
-      - Add 15+ tests for cycle reporting
-    """
+    """Visitor to extract dynamic imports and track local string variables."""
 
     def __init__(self, resolver, module_name: str, file_path: str):
         self.resolver = resolver
@@ -1345,9 +1320,6 @@ class ImportResolver:
                     )
 
         return "\n".join(lines)
-
-    # ========================================================================
-    # ========================================================================
 
     def detect_reexports(self, module_name: str) -> Dict[str, str]:
         """

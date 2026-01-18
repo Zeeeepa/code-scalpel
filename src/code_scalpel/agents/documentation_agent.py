@@ -174,25 +174,16 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
     def _analyze_docstring_coverage(
         self, file_info: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """
-        Analyze docstring coverage and identify gaps.
-
-        TODO [FEATURE]: Parse existing docstrings and validate completeness
-        TODO [FEATURE]: Identify missing parameter documentation
-        TODO [FEATURE]: Detect return type documentation gaps
-        """
+        """Analyze docstring coverage and identify gaps."""
         gaps = []
         # Implementation placeholder
         return gaps
 
     def _analyze_type_hints(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Analyze type hint coverage.
-
-        TODO [FEATURE]: Detect functions without type hints
-        TODO [FEATURE]: Infer types from code analysis
-        TODO [FEATURE]: Detect incomplete type hints (missing return types)
-        """
+        """Analyze type hint coverage."""
+        gaps = []
+        # Implementation placeholder
+        return gaps
         gaps = []
         # Implementation placeholder
         return gaps
@@ -202,11 +193,8 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
     ) -> List[Dict[str, Any]]:
         """
         Identify API documentation needs.
-
-        TODO [FEATURE]: Identify public API functions/classes
-        TODO [FEATURE]: Generate API reference structure
-        TODO [FEATURE]: Create usage example documentation
         """
+
         docs = []
         # Implementation placeholder
         return docs
@@ -225,11 +213,8 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
     async def _generate_documentation(self, doc_plan: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate documentation for a target.
-
-        TODO [FEATURE]: Use LLM for natural language generation
-        TODO [FEATURE]: Extract examples from test code
-        TODO [ENHANCEMENT]: Support markdown/RST/HTML output formats
         """
+
         return {
             "success": True,
             "target": doc_plan.get("target"),

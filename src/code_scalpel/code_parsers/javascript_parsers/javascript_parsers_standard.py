@@ -6,7 +6,6 @@ Parses StandardJS output for style violations and automatic fixing.
 StandardJS is a popular zero-configuration linter/formatter following
 a consistent style guide (2 spaces, single quotes, no semicolons).
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Output Parsing:

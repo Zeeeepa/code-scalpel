@@ -1,5 +1,6 @@
 # [20260106_TEST] Tier coverage for security_scan
 """Tier enforcement and fallback tests for security_scan MCP tool."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -95,9 +96,7 @@ import hashlib
 def insecure_hash(user_input: str):
     return hashlib.sha1(user_input.encode()).hexdigest()
 
-""" + _make_repetitive_vuln_code(
-        5
-    )
+""" + _make_repetitive_vuln_code(5)
 
     from code_scalpel.mcp.server import security_scan
 

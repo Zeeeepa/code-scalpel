@@ -3,7 +3,6 @@
 Clang-Tidy Parser - C++ Modernization and Best Practices
 """
 
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -67,41 +66,33 @@ class ClangTidyParser:
     def execute_clang_tidy(
         self, paths: List[Path], config: ClangTidyConfig = None
     ) -> List[ClangTidyCheck]:
-        """Execute Clang-Tidy analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Clang-Tidy execution")
 
     def parse_json_report(self, report_path: Path) -> List[ClangTidyCheck]:
-        """Parse Clang-Tidy JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> ClangTidyConfig:
-        """Load .clang-tidy configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_checks(
         self, checks: List[ClangTidyCheck]
     ) -> Dict[CheckCategory, List[ClangTidyCheck]]:
-        """Categorize checks by category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Check categorization")
 
     def detect_modernization_opportunities(
         self, checks: List[ClangTidyCheck]
     ) -> List[ClangTidyCheck]:
-        """Filter for modernization checks - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Modernization detection")
 
     def apply_fixes(self, checks: List[ClangTidyCheck]) -> Dict[str, int]:
-        """Apply clang-tidy fixes - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Auto-fix application")
 
     def generate_report(
         self, checks: List[ClangTidyCheck], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def analyze_cpp_standard_compatibility(
         self, checks: List[ClangTidyCheck], target_std: str
     ) -> List[ClangTidyCheck]:
-        """Analyze C++ standard compatibility - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Standard compatibility analysis")

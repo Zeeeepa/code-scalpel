@@ -15,7 +15,6 @@ from typing import Any, Callable
 
 import pytest
 
-
 # Path to test licenses
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 TEST_LICENSES_DIR = PROJECT_ROOT / "tests" / "licenses"

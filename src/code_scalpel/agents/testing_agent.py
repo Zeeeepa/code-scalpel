@@ -174,25 +174,13 @@ class TestingAgent(BaseCodeAnalysisAgent):
         }
 
     def _analyze_coverage(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Analyze code coverage and identify gaps.
-
-        TODO [FEATURE]: Parse coverage reports (.coverage file)
-        TODO [FEATURE]: Identify uncovered lines and branches
-        TODO [FEATURE]: Calculate coverage impact per function
-        """
+        """Analyze code coverage and identify gaps."""
         gaps = []
         # Implementation placeholder
         return gaps
 
     def _identify_edge_cases(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Identify edge cases and error paths.
-
-        TODO [FEATURE]: Use symbolic execution for path discovery
-        TODO [FEATURE]: Identify null/empty/boundary cases
-        TODO [FEATURE]: Detect error handling paths
-        """
+        """Identify edge cases and error paths."""
         cases = []
         # Implementation placeholder
         return cases
@@ -200,12 +188,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
     def _identify_integration_tests(
         self, symbol_analysis: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """
-        Identify opportunities for integration testing.
-
-        TODO [FEATURE]: Analyze call graphs for integration scenarios
-        TODO [FEATURE]: Detect module boundary testing needs
-        """
+        """Identify opportunities for integration testing."""
         tests = []
         # Implementation placeholder
         return tests
@@ -219,13 +202,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
         )
 
     async def _generate_test(self, test_plan: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generate a test case.
-
-        TODO [FEATURE]: Use generate_unit_tests for symbolic execution
-        TODO [FEATURE]: Format test with pytest/unittest framework
-        TODO [ENHANCEMENT]: Support test parameterization
-        """
+        """Generate a test case."""
         return {
             "success": True,
             "target_function": test_plan.get("target_function"),

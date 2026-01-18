@@ -259,7 +259,7 @@ class TestRepositoryWideRename:
         def track_progress(completed, total):
             progress_updates.append((completed, total))
 
-        result = renamer.rename_across_repository(
+        renamer.rename_across_repository(
             target_type="function",
             old_name="func0",
             new_name="new_func0",

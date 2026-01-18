@@ -122,7 +122,6 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
             "paths": {"type": "array", "required": True},
         },
     ),
-    # PRO tools (8 tools) - Now available at COMMUNITY with restrictions
     "security_scan": MCPTool(
         name="security_scan",
         tier="community",  # Available at all tiers, features gated
@@ -203,7 +202,6 @@ DEFAULT_TOOLS: Dict[str, MCPTool] = {
             "hops": {"type": "integer", "required": False},
         },
     ),
-    # ENTERPRISE tools (3 tools) - Now available at COMMUNITY with restrictions
     "cross_file_security_scan": MCPTool(
         name="cross_file_security_scan",
         tier="community",  # Available at all tiers, features gated

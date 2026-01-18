@@ -90,7 +90,7 @@ def test_read_only_file_clear_error(tmp_path: Path):
 
     try:
         p = UnifiedPatcher.from_file(str(src))
-        result = p.rename_symbol("function", "old_name", "new_name")
+        p.rename_symbol("function", "old_name", "new_name")
 
         try:
             p.save(backup=False)

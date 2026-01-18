@@ -6,43 +6,12 @@ TSX/JSX Analyzer - React component detection and metadata extraction.
 This module provides utilities for detecting React components, Server Components,
 and Server Actions in TypeScript/JavaScript code.
 
-TODO ITEMS:
 
 COMMUNITY TIER (Core Functionality):
-1. TODO: Improve JSX detection regex for edge cases
-2. TODO: Add support for Vue.js component detection
-3. TODO: Implement Angular component detection
-4. TODO: Add Svelte component detection support
-5. TODO: Create fragment detection improvements
-6. TODO: Implement prop type extraction from JSX
-7. TODO: Add event handler detection and analysis
-8. TODO: Support styled-components detection
-9. TODO: Create comprehensive test cases for JSX patterns
-10. TODO: Add documentation with JSX examples
 
 PRO TIER (Enhanced Features):
-11. TODO: Add hooks dependency tracking (useEffect, useMemo)
-12. TODO: Implement custom hook detection and extraction
-13. TODO: Create context provider detection
-14. TODO: Add component composition analysis
-15. TODO: Implement lazy loading detection
-16. TODO: Create performance anti-pattern detection
-17. TODO: Add accessibility (a11y) issue detection
-18. TODO: Support Storybook story detection
-19. TODO: Implement TypeScript prop inference
-20. TODO: Create component tree visualization
 
 ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build ML-based component similarity detection
-22. TODO: Implement distributed component analysis
-23. TODO: Add AI-powered refactoring suggestions for components
-24. TODO: Create blockchain-based component audit trails
-25. TODO: Implement quantum-safe component hashing
-26. TODO: Build enterprise component governance system
-27. TODO: Add advanced concurrency pattern detection in components
-28. TODO: Create federated component registry
-29. TODO: Implement compliance checking for component patterns
-30. TODO: Add advanced security analysis for component interactions
 """
 
 from __future__ import annotations

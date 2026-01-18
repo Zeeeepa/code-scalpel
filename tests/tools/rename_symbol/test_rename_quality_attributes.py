@@ -240,7 +240,7 @@ class TestErrorRecovery:
 
         # First call with invalid input
         patcher1 = UnifiedPatcher.from_file(str(src1))
-        result1 = patcher1.rename_symbol("invalid_type", "old_func", "new_func")
+        patcher1.rename_symbol("invalid_type", "old_func", "new_func")
 
         # Second call should still work
         patcher2 = UnifiedPatcher.from_file(str(src2))
@@ -344,7 +344,7 @@ class TestReliability:
         nonexistent = tmp_path / "nonexistent.py"
 
         try:
-            patcher = UnifiedPatcher.from_file(str(nonexistent))
+            UnifiedPatcher.from_file(str(nonexistent))
         except (FileNotFoundError, ValueError):
             # Expected error
             pass

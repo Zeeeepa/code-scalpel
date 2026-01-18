@@ -5,7 +5,6 @@ JavaScript Code Quality Analyzer - Comprehensive code quality and pattern detect
 Implements advanced code quality checks, anti-pattern detection, and
 code smell identification for JavaScript/TypeScript code.
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Code Smell Detection:
@@ -24,7 +23,6 @@ Features:
         - Duplicate code similarity hashing
 
     Comment Extraction:
-        - TODO/FIXME/HACK comment parsing
         - Author and priority extraction
 
     Framework Detection:
@@ -145,7 +143,6 @@ class CodeSmell:
 
 @dataclass
 class TodoComment:
-    """Represents a TODO/FIXME/HACK comment."""
 
     comment_type: str  # "TODO", "FIXME", "HACK", "XXX", "NOTE"
     message: str
@@ -781,7 +778,6 @@ class CodeQualityAnalyzer:
         return smells
 
     def _extract_todo_comments(self, code: str, lines: list[str]) -> list[TodoComment]:
-        """Extract TODO/FIXME/HACK comments."""
         todos: list[TodoComment] = []
 
         # Pattern: TODO/FIXME/HACK with optional (author) or priority

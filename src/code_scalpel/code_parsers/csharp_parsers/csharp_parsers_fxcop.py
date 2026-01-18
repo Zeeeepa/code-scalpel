@@ -70,25 +70,20 @@ class FxCopParser:
     def execute_fxcop(
         self, paths: List[Path], config: FxCopConfig = None
     ) -> List[FxCopViolation]:
-        """Execute FxCop analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: FxCop execution")
 
     def parse_json_report(self, report_path: Path) -> List[FxCopViolation]:
-        """Parse FxCop JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> FxCopConfig:
-        """Load FxCop configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[FxCopViolation]
     ) -> Dict[RuleCategory, List[FxCopViolation]]:
-        """Categorize violations by rule category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def generate_report(
         self, violations: List[FxCopViolation], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

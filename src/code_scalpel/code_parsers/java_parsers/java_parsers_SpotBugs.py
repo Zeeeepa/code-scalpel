@@ -8,7 +8,6 @@ SpotBugs is the successor to FindBugs.
 Reference: https://spotbugs.github.io/
 Command: spotbugs -textui -xml -output results.xml classes/
 
-Phase 2 Enhancement TODOs:
 """
 
 import subprocess

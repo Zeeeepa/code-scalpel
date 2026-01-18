@@ -3,7 +3,6 @@ Java Parser Adapter - IParser interface for Java parser.
 
 [20251221_FEATURE] Bridges TreeSitterJavaParser to the IParser interface.
 ============================================================================
-TODO ITEMS: code_parsers/adapters/java_adapter.py
 ============================================================================
 COMMUNITY TIER - Core Java Adapter (P0-P2)
 ============================================================================

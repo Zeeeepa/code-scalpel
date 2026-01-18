@@ -119,7 +119,6 @@ async def _extract_polyglot(
     try:
         # Create extractor from file or code
         if file_path is not None:
-            server = _get_server()
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
             extractor = UnifiedExtractor.from_file(resolved_path, language)
         else:
@@ -181,7 +180,7 @@ async def _extract_polyglot(
 
 def _create_extractor(
     file_path: str | None, code: str | None, target_name: str
-) -> tuple["SurgicalExtractor | None", ContextualExtractionResult | None]:
+) -> tuple[Any, ContextualExtractionResult | None]:
     """
     Create a SurgicalExtractor from file_path or code.
 
@@ -199,7 +198,6 @@ def _create_extractor(
     if file_path is not None:
         try:
             # [20251214_FEATURE] Use PathResolver for intelligent path resolution
-            server = _get_server()
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
             return SurgicalExtractor.from_file(resolved_path), None
         except FileNotFoundError as e:
@@ -218,7 +216,7 @@ def _create_extractor(
             )
 
 
-def _extract_method(extractor: "SurgicalExtractor", target_name: str):
+def _extract_method(extractor: Any, target_name: str):
     """Extract a method, handling the ClassName.method_name parsing."""
     if "." not in target_name:
         return None, _extraction_error(
@@ -229,7 +227,7 @@ def _extract_method(extractor: "SurgicalExtractor", target_name: str):
 
 
 def _perform_extraction(
-    extractor: "SurgicalExtractor",
+    extractor: Any,
     target_type: str,
     target_name: str,
     include_context: bool,
@@ -419,7 +417,6 @@ async def _extract_code_impl(
             include_cross_file_deps=True
         )
     """
-    server = _get_server()
     # [20251215_FEATURE] v2.0.0 - Roots capability support
     # Fetch allowed roots from client for security boundary enforcement
     if ctx and file_path:
@@ -820,7 +817,6 @@ async def rename_symbol(
     Returns:
         PatchResultModel with success status.
     """
-    server = _get_server()
     from code_scalpel.licensing.config_loader import (
         get_cached_limits,
         get_tool_limits,
@@ -990,7 +986,6 @@ async def update_symbol(
             - Original indentation preserved
     """
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    server = _get_server()
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).

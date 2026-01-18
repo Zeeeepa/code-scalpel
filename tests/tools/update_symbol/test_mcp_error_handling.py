@@ -65,11 +65,9 @@ async def test_update_symbol_fault_injection_returns_internal_error(
 
     # Force an unexpected exception inside the envelope (post tool execution)
     sample_file = tmp_path / "sample.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     def boom(*_args, **_kwargs):
         raise RuntimeError("boom")
@@ -109,11 +107,9 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "timeout_sample.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     args = {
         "file_path": str(sample_file),
@@ -147,11 +143,9 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
 
     async def invoke(i: int) -> dict[str, object]:
         sample_file = tmp_path / f"async_{i}.py"
-        sample_file.write_text(
-            """def foo():
+        sample_file.write_text("""def foo():
     return 0
-"""
-        )
+""")
         args = {
             "file_path": str(sample_file),
             "target_type": "function",
@@ -189,11 +183,9 @@ async def test_update_symbol_memory_error_returns_structured_envelope(
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "oom_sample.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     # Inject MemoryError in the patcher
     def mock_from_file(*args, **kwargs):
@@ -233,11 +225,9 @@ async def test_update_symbol_redacts_pii_from_error_details(
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "pii_sample.py"
-    sample_file.write_text(
-        """def foo():
+    sample_file.write_text("""def foo():
     return 0
-"""
-    )
+""")
 
     secret_string = "sk_live_51AbC123XyZ456SECRET789"
     args = {

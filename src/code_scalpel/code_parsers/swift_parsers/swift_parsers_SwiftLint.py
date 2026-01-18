@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """SwiftLint Parser - Swift Code Style and Linting Analysis"""
 
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -57,43 +56,35 @@ class SwiftLintParser:
         self.violations: List[SwiftLintViolation] = []
 
     def parse_json_report(self, report_path: Path) -> List[SwiftLintViolation]:
-        """Parse SwiftLint JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def execute_swiftlint(
         self, paths: List[Path], config: SwiftLintConfig = None
     ) -> List[SwiftLintViolation]:
-        """Execute SwiftLint analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: SwiftLint execution")
 
     def load_config(self, config_file: Path) -> SwiftLintConfig:
-        """Load SwiftLint configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_violations(
         self, violations: List[SwiftLintViolation]
     ) -> Dict[str, List[SwiftLintViolation]]:
-        """Categorize violations by rule category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Violation categorization")
 
     def apply_autocorrect(
         self, paths: List[Path], config: SwiftLintConfig = None
     ) -> Dict[str, int]:
-        """Apply SwiftLint auto-fixes - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Auto-correction")
 
     def generate_report(
         self, violations: List[SwiftLintViolation], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[SwiftLintViolation]) -> Dict[str, Any]:
-        """Calculate metrics from violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def detect_ios_specific_issues(
         self, violations: List[SwiftLintViolation]
     ) -> List[SwiftLintViolation]:
-        """Filter for iOS/macOS specific violations - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Platform-specific analysis")

@@ -39,45 +39,10 @@ COMPLETED (v3.1.0 - December 2025):
 - Source file tracking in extraction results
 
 COMMUNITY (Current & Planned):
-- TODO [COMMUNITY]: Implement transitive dependency graph with cycle detection (current)
-- TODO [COMMUNITY]: Support wildcard import expansion (from x import *)
-- TODO [COMMUNITY]: Track type annotation dependencies (TYPE_CHECKING imports)
-- TODO [COMMUNITY]: Add stub file (.pyi) integration for type info
-- TODO [COMMUNITY]: Add relevance scoring for dependencies (core vs peripheral)
-- TODO [COMMUNITY]: Implement progressive disclosure (minimal -> full context)
-- TODO [COMMUNITY]: Detect design patterns (Factory, Singleton, etc.)
-- TODO [COMMUNITY]: Extract class hierarchies and interfaces
 
 PRO (Enhanced Features):
-- TODO [PRO]: Add JavaScript/TypeScript extraction using tree-sitter
-- TODO [PRO]: Add Java extraction with method signature parsing
-- TODO [PRO]: Add Go extraction with interface detection
-- TODO [PRO]: Create unified extraction API across languages
-- TODO [PRO]: Add import alias resolution (from x import y as z)
-- TODO [PRO]: Resolve re-exports through __all__ and __init__.py
-- TODO [PRO]: Build project-wide symbol index for instant lookups
-- TODO [PRO]: Support monorepo navigation with multiple package roots
-- TODO [PRO]: Add virtual environment / site-packages resolution
-- TODO [PRO]: Implement lazy loading for large dependency chains
-- TODO [PRO]: Add semantic similarity for related code discovery
-- TODO [PRO]: Support "extract for task" with task-specific context
-- TODO [PRO]: Implement context summarization for large dependencies
-- TODO [PRO]: Identify test fixtures and their dependencies
-- TODO [PRO]: Add minification mode (remove docstrings, comments)
-- TODO [PRO]: Implement code folding for nested structures
 
 ENTERPRISE (Advanced Capabilities):
-- TODO [ENTERPRISE]: Add Rust extraction with trait/impl blocks
-- TODO [ENTERPRISE]: Support JSX/TSX component extraction
-- TODO [ENTERPRISE]: Track symbol origins through re-exports
-- TODO [ENTERPRISE]: Support extraction profiles (minimal, standard, verbose)
-- TODO [ENTERPRISE]: Add syntax highlighting hints in output
-- TODO [ENTERPRISE]: Support structured output (JSON with code + metadata)
-- TODO [ENTERPRISE]: Add LSP integration for go-to-definition
-- TODO [ENTERPRISE]: Support VS Code extension API
-- TODO [ENTERPRISE]: Implement file watcher for live index updates
-- TODO [ENTERPRISE]: Add inline extraction annotations
-- TODO [ENTERPRISE]: Support extraction from git diff/blame
 """
 
 from __future__ import annotations
@@ -145,15 +110,6 @@ class CrossFileSymbol:
     """
     A symbol resolved from an external file.
 
-    TODO: Add the following fields for richer cross-file tracking:
-    - TODO: absolute_path: str - Full resolved path to source file
-    - TODO: package_name: str | None - Package the symbol belongs to
-    - TODO: is_re_export: bool - Whether symbol is re-exported from __init__
-    - TODO: original_module: str | None - Original module if re-exported
-    - TODO: version: str | None - Package version if detectable
-    - TODO: is_stdlib: bool - Whether from Python standard library
-    - TODO: is_third_party: bool - Whether from installed package
-    - TODO: stub_available: bool - Whether .pyi stub exists
     """
 
     name: str
@@ -171,14 +127,6 @@ class CrossFileResolution:
     """
     Result of cross-file dependency resolution.
 
-    TODO: Add the following for comprehensive cross-file analysis:
-    - TODO: resolution_graph: dict - Full dependency graph traversed
-    - TODO: files_accessed: list[str] - All files that were read
-    - TODO: cache_hits: int - Number of cached AST lookups
-    - TODO: resolution_time_ms: float - Time taken to resolve
-    - TODO: max_depth_reached: int - Deepest dependency level found
-    - TODO: circular_imports: list[tuple] - Any circular import chains
-    - TODO: type_only_imports: list[str] - TYPE_CHECKING imports found
     """
 
     success: bool
@@ -538,47 +486,17 @@ class SurgicalExtractor:
         >>> result = extractor.get_function("calculate_tax")
         >>> # Agent receives only the function (~200 tokens)
 
-    TODO: SurgicalExtractor Enhancement Roadmap:
     ============================================
 
     Extraction Capabilities:
-    - TODO: Add get_decorator() to extract decorator definitions
-    - TODO: Add get_constant() to extract module-level constants
-    - TODO: Add get_type_alias() to extract type definitions
-    - TODO: Add get_protocol() specialized for Protocol classes
-    - TODO: Add get_dataclass() with field extraction
-    - TODO: Add get_enum() with member extraction
-    - TODO: Support extracting inner/nested classes directly
-    - TODO: Add get_property() for @property decorated methods
 
     Search & Discovery:
-    - TODO: Add find_by_pattern() for regex-based symbol search
-    - TODO: Add find_callers() to find functions that call a target
-    - TODO: Add find_implementations() for interface/ABC implementations
-    - TODO: Add find_overrides() for method override detection
-    - TODO: Add find_tests() to locate test functions for a symbol
-    - TODO: Add semantic search using embeddings
 
     Context Management:
-    - TODO: Implement token budget enforcement in extraction
-    - TODO: Add context prioritization (closer deps first)
-    - TODO: Support extraction "profiles" (minimal, standard, full)
-    - TODO: Add context caching for repeated extractions
-    - TODO: Implement lazy dependency resolution
 
     Performance:
-    - TODO: Add AST caching with LRU eviction
-    - TODO: Implement parallel file parsing for cross-file resolution
-    - TODO: Add incremental parsing for file changes
-    - TODO: Support memory-mapped file reading for large files
-    - TODO: Add extraction result caching
 
     Output Formats:
-    - TODO: Add to_markdown() for documentation-style output
-    - TODO: Add to_json() for structured extraction data
-    - TODO: Add to_prompt() for LLM-ready formatting
-    - TODO: Support custom output templates
-    - TODO: Add diff format for comparing extractions
     """
 
     def __init__(self, code: str, file_path: str | None = None):
@@ -1741,13 +1659,6 @@ class SurgicalExtractor:
         """
         Convert an AST node back to source code.
 
-        TODO: Code Reconstruction Improvements:
-        - TODO: Preserve original formatting when possible
-        - TODO: Add option to normalize/reformat output
-        - TODO: Handle decorated functions/classes properly
-        - TODO: Preserve comments adjacent to extracted code
-        - TODO: Support partial extraction (specific lines within function)
-        - TODO: Add syntax validation of reconstructed code
         """
         try:
             return ast.unparse(node)
@@ -1765,17 +1676,6 @@ class SurgicalExtractor:
 
         Returns names of functions, classes, and variables used.
 
-        TODO: Dependency Detection Improvements:
-        - TODO: Distinguish direct vs transitive dependencies
-        - TODO: Track dependency usage count (importance weighting)
-        - TODO: Detect optional dependencies (inside try/except)
-        - TODO: Identify type-only dependencies (in annotations)
-        - TODO: Track attribute access chains (a.b.c)
-        - TODO: Detect dynamic dependencies (getattr, importlib)
-        - TODO: Support walrus operator bindings (:=)
-        - TODO: Track dependencies in f-strings
-        - TODO: Detect class inheritance dependencies
-        - TODO: Handle __all__ for module-level dependency tracking
         """
         deps = set()
         defined_in_scope = set()
@@ -1899,16 +1799,6 @@ class SurgicalExtractor:
         """
         Find which imports are needed for this node.
 
-        TODO: Import Detection Improvements:
-        - TODO: Detect unused imports in extracted code
-        - TODO: Resolve import aliases back to original names
-        - TODO: Handle conditional imports (if TYPE_CHECKING)
-        - TODO: Support lazy imports (inside functions)
-        - TODO: Detect re-exports and trace to origin
-        - TODO: Handle star imports with __all__ resolution
-        - TODO: Track import order for circular dependency detection
-        - TODO: Support namespace packages
-        - TODO: Detect deprecated imports
         """
         # Get all names used in the node
         names_used = set()
@@ -2434,11 +2324,9 @@ CMD ["uvicorn", "service:app", "--host", "{host}", "--port", "{port}"]
         docstring = func_result.docstring or f"Execute {function_name} function"
         param_specs = []
         for param in params:
-            param_specs.append(
-                f"""          {param}:
+            param_specs.append(f"""          {param}:
             type: {param_types[param]}
-            description: Parameter {param}"""
-            )
+            description: Parameter {param}""")
 
         param_spec_str = (
             "\n".join(param_specs) if param_specs else "          # No parameters"

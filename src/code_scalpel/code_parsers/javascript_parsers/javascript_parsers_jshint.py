@@ -5,7 +5,6 @@ JSHint Parser - JavaScript error detection and code quality.
 Parses JSHint output for detecting errors and potential problems in JavaScript code.
 JSHint is a community-driven tool that detects errors and potential problems.
 
-Phase 2 Enhancement TODOs:
 
 Features:
     Output Parsing:

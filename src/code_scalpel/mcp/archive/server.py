@@ -1495,7 +1495,6 @@ def _is_path_allowed(path: Path) -> bool:
     Returns:
         True if path is within allowed roots, False otherwise
 
-    [20251220_TODO] Add path traversal detection:
         - Detect symlink escape attempts
         - Validate path components don't contain suspicious patterns
         - Support denied path patterns (blacklist certain directories)
@@ -1545,7 +1544,6 @@ def _validate_path_security(path: Path) -> Path:
     Raises:
         PermissionError: If path is outside allowed roots
 
-    [20251220_TODO] Add audit logging for path access:
         - Log all path validations with caller identity
         - Track denied access attempts
         - Generate security alerts for suspicious patterns

@@ -102,7 +102,6 @@ def test_missing_certificate_fields_gap_analysis(
     GAP ANALYSIS: Check if 'certificate_chain_valid' and 'crl_status' exist.
 
     The user requested verification of these fields.
-    Code reading suggests they are TODOs.
     This test proves their existence or absence.
     """
     from code_scalpel.mcp.server import _verify_policy_integrity_sync

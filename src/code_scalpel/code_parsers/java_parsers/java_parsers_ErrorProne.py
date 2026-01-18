@@ -9,7 +9,6 @@ Reference: https://errorprone.info/
 Command: javac -XDcompilePolicy=simple -processorpath error_prone.jar \
          '-Xplugin:ErrorProne' src/*.java
 
-Phase 2 Enhancement TODOs:
 """
 
 import re

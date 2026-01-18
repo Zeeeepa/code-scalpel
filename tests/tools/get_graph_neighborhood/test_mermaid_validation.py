@@ -203,7 +203,7 @@ class TestMermaidEdgeRepresentation:
             label_pattern = r"-->\|[^\|]+\|"
             # This is optional - edges may or may not have labels
             # Just verify syntax doesn't break if labels exist
-            matches = re.findall(label_pattern, mermaid)
+            re.findall(label_pattern, mermaid)
             # No assertion - just checking it doesn't crash
 
 
@@ -226,9 +226,7 @@ class TestMermaidTruncationIndicators:
                 "note",  # Mermaid note syntax
                 "limit",  # Limit reached
             ]
-            has_indicator = any(
-                indicator in mermaid.lower() for indicator in truncation_indicators
-            )
+            any(indicator in mermaid.lower() for indicator in truncation_indicators)
             # Optional feature - not required but good practice
             # assert has_indicator, "Truncated diagrams should indicate truncation"
 
@@ -257,8 +255,8 @@ class TestMermaidDepthInformation:
             mermaid = str(result.mermaid)
             # Optional: depth may be in labels, comments, or grouping (subgraph)
             # Look for subgraph syntax: subgraph title ... end
-            has_subgraph = "subgraph" in mermaid.lower()
-            has_depth_label = re.search(r"depth|distance|hop", mermaid, re.IGNORECASE)
+            "subgraph" in mermaid.lower()
+            re.search(r"depth|distance|hop", mermaid, re.IGNORECASE)
             # This is completely optional
             # Just verify it doesn't break if present
 
@@ -408,8 +406,7 @@ class TestMermaidTierExpectations:
 
     @staticmethod
     def _expected_community_mermaid() -> str:
-        return dedent(
-            """
+        return dedent("""
             graph TD
                 python_main_function_center["center"]:::center
                 python_module_a_function_func_A["func_A"]:::depth1
@@ -423,13 +420,11 @@ class TestMermaidTierExpectations:
                 classDef center fill:#f9f,stroke:#333,stroke-width:3px
                 classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px
                 classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px
-            """
-        ).strip()
+            """).strip()
 
     @staticmethod
     def _expected_full_mermaid() -> str:
-        return dedent(
-            """
+        return dedent("""
             graph TD
                 python_main_function_center["center"]:::center
                 python_module_a_function_func_A["func_A"]:::depth1
@@ -453,8 +448,7 @@ class TestMermaidTierExpectations:
                 classDef center fill:#f9f,stroke:#333,stroke-width:3px
                 classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px
                 classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px
-            """
-        ).strip()
+            """).strip()
 
     def test_community_mermaid_expected(self, sample_call_graph):
         """Community tier (k=1) should render depth-1 neighborhood only."""

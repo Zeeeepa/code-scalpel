@@ -3,7 +3,6 @@
 Cppcheck Parser - Static Analysis for C/C++ Code
 """
 
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -75,35 +74,27 @@ class CppcheckParser:
     def execute_cppcheck(
         self, paths: List[Path], config: CppcheckConfig = None
     ) -> List[CppcheckIssue]:
-        """Execute Cppcheck analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Cppcheck execution")
 
     def parse_xml_report(self, report_path: Path) -> List[CppcheckIssue]:
-        """Parse Cppcheck XML report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def load_config(self, config_file: Path) -> CppcheckConfig:
-        """Load cppcheck configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_issues(
         self, issues: List[CppcheckIssue]
     ) -> Dict[IssueCategory, List[CppcheckIssue]]:
-        """Categorize issues by category - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Issue categorization")
 
     def detect_memory_issues(self, issues: List[CppcheckIssue]) -> List[CppcheckIssue]:
-        """Filter for memory-related issues - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Memory issue detection")
 
     def calculate_quality_metrics(self, issues: List[CppcheckIssue]) -> Dict[str, Any]:
-        """Calculate code quality metrics - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def generate_report(self, issues: List[CppcheckIssue], format: str = "json") -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def map_to_cwe(self, issues: List[CppcheckIssue]) -> Dict[str, List[CppcheckIssue]]:
-        """Map issues to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")

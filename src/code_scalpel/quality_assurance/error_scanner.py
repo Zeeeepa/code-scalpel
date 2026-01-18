@@ -28,55 +28,13 @@ Usage:
 Command-line:
     python -m code_scalpel.error_scanner --path src/ --format json
 
-TODO: ErrorScanner Enhancement Roadmap
 ======================================
 
 COMMUNITY (Current & Planned):
-- TODO [COMMUNITY]: Integrate code_parsers.PythonASTParser for syntax checking (current)
-- TODO [COMMUNITY]: Add code smell detection (cognitive complexity, etc.)
-- TODO [COMMUNITY]: Add documentation coverage checking
-- TODO [COMMUNITY]: Add error suppression via inline comments
-- TODO [COMMUNITY]: Support baseline files (ignore pre-existing errors)
-- TODO [COMMUNITY]: Add error grouping by category/rule
-- TODO [COMMUNITY]: Add progress callbacks for UI integration
 
 PRO (Enhanced Features):
-- TODO [PRO]: Use code_parsers.ParserFactory for unified multi-language scanning
-- TODO [PRO]: Use code_parsers.Language enum for file type detection
-- TODO [PRO]: Use code_parsers.RuffParser as primary fast linter
-- TODO [PRO]: Support code_parsers tool configuration (enable/disable specific tools)
-- TODO [PRO]: Add security vulnerability scanning (bandit integration)
-- TODO [PRO]: Add type error detection (mypy/pyright integration)
-- TODO [PRO]: Implement git-aware scanning (only scan changed files)
-- TODO [PRO]: Add file hash-based caching to skip unchanged files
-- TODO [PRO]: Add JUnit XML output for CI integration
-- TODO [PRO]: Add CodeClimate output format
-- TODO [PRO]: Add .code-scalpel/scanner.yaml configuration file
-- TODO [PRO]: Support per-directory configuration overrides
-- TODO [PRO]: Support custom error severity mappings
-- TODO [PRO]: Implement parallel file scanning with worker pool
-- TODO [PRO]: Add streaming results for large projects
 
 ENTERPRISE (Advanced Capabilities):
-- TODO [ENTERPRISE]: Replace individual tool calls with code_parsers unified interface
-- TODO [ENTERPRISE]: Add JavaScript/TypeScript scanning via code_parsers.javascript_parsers
-- TODO [ENTERPRISE]: Add Java scanning via code_parsers.java_parsers
-- TODO [ENTERPRISE]: Add Go scanning via code_parsers.go_parsers
-- TODO [ENTERPRISE]: Add C/C++ scanning via code_parsers.cpp_parsers
-- TODO [ENTERPRISE]: Support mixed-language projects with unified results
-- TODO [ENTERPRISE]: Add language-specific severity mappings
-- TODO [ENTERPRISE]: Add dependency vulnerability scanning (safety, pip-audit)
-- TODO [ENTERPRISE]: Add license compliance checking
-- TODO [ENTERPRISE]: Support incremental scan results merging
-- TODO [ENTERPRISE]: Add --since flag for date-based scanning
-- TODO [ENTERPRISE]: Implement scan result persistence for CI/CD
-- TODO [ENTERPRISE]: Add SARIF output format for GitHub code scanning
-- TODO [ENTERPRISE]: Generate trend reports (errors over time)
-- TODO [ENTERPRISE]: Add error hotspot visualization (most error-prone files)
-- TODO [ENTERPRISE]: Support custom report templates
-- TODO [ENTERPRISE]: Implement memory-efficient scanning for huge codebases
-- TODO [ENTERPRISE]: Support distributed scanning across machines
-- TODO [ENTERPRISE]: Add scan timeout per file to prevent hangs
 """
 
 from __future__ import annotations

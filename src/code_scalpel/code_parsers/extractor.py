@@ -22,43 +22,12 @@ Supported Languages:
     - TypeScript: Full support via tree-sitter-typescript (planned)
     - Java: Full support via tree-sitter-java
 
-TODO ITEMS:
 
 COMMUNITY TIER (Core Functionality):
-1. TODO: Improve cross-file dependency extraction accuracy
-2. TODO: Add support for async/await pattern detection
-3. TODO: Implement decorator extraction and analysis
-4. TODO: Add lambda/arrow function extraction support
-5. TODO: Create comprehensive error handling for parse failures
-6. TODO: Implement line-accurate source code mapping
-7. TODO: Add token estimation for extracted code
-8. TODO: Support nested class and function extraction
-9. TODO: Create extraction result validation
-10. TODO: Implement cache invalidation strategy
 
 PRO TIER (Enhanced Features):
-11. TODO: Add Go language extraction support
-12. TODO: Implement Rust language extraction support
-13. TODO: Add C++ language extraction support
-14. TODO: Create framework-specific extractors (React, Vue, Angular)
-15. TODO: Implement semantic code normalization
-16. TODO: Add cross-language type resolution
-17. TODO: Create intelligent method signature extraction
-18. TODO: Implement bytecode decompilation for compiled languages
-19. TODO: Add custom extraction rule plugins
-20. TODO: Support advanced pattern matching for extraction
 
 ENTERPRISE TIER (Advanced Capabilities):
-21. TODO: Build ML-based code similarity detection
-22. TODO: Implement distributed extraction for large codebases
-23. TODO: Add support for proprietary/custom languages
-24. TODO: Create AI-powered code refactoring suggestions
-25. TODO: Implement blockchain-based extraction audit trails
-26. TODO: Add quantum-safe extraction hashing
-27. TODO: Build enterprise code extraction governance
-28. TODO: Implement federated extraction across organizations
-29. TODO: Add advanced concurrency pattern detection
-30. TODO: Create quantum algorithm extraction support
 """
 
 from dataclasses import dataclass, field

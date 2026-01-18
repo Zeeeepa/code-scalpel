@@ -3,7 +3,6 @@
 Coverity Parser - Deep Security and Quality Analysis
 """
 
-
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -71,39 +70,31 @@ class CoverityParser:
     def execute_coverity(
         self, paths: List[Path], config: CoverityConfig = None
     ) -> List[CoverityDefect]:
-        """Execute Coverity analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Coverity execution")
 
     def parse_coverity_json(self, json_data: Dict[str, Any]) -> List[CoverityDefect]:
-        """Parse Coverity JSON output - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def load_config(self, config_file: Path) -> CoverityConfig:
-        """Load Coverity configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_defects(
         self, defects: List[CoverityDefect]
     ) -> Dict[DefectType, List[CoverityDefect]]:
-        """Categorize defects by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Defect categorization")
 
     def analyze_security_risks(self, defects: List[CoverityDefect]) -> Dict[str, Any]:
-        """Analyze security vulnerabilities - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Security analysis")
 
     def map_to_cwe(
         self, defects: List[CoverityDefect]
     ) -> Dict[str, List[CoverityDefect]]:
-        """Map defects to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")
 
     def generate_report(
         self, defects: List[CoverityDefect], format: str = "json"
     ) -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def track_defect_trends(self, historical_data: List[Dict]) -> Dict[str, Any]:
-        """Analyze defect trends over time - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Trend analysis")

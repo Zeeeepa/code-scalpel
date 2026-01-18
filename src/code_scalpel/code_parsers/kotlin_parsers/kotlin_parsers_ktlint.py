@@ -12,25 +12,18 @@ ktlint provides:
 - EditorConfig integration
 - Baseline support
 
-TODO: HIGH PRIORITY - Core Implementation
 ==========================================
 
-TODO: HIGH PRIORITY - Execution
 ================================
 
-TODO: HIGH PRIORITY - Configuration
 ====================================
 
-TODO: MEDIUM PRIORITY - Standard Rules
 =======================================
 
-TODO: MEDIUM PRIORITY - Experimental Rules
 ===========================================
 
-TODO: MEDIUM PRIORITY - Formatter
 ==================================
 
-TODO: LOW PRIORITY - Advanced Features
 =======================================
 """
 
@@ -189,9 +182,6 @@ class KtlintParser:
         # Format a file
         formatted = parser.format_file('src/main/kotlin/App.kt')
 
-    TODO: Implement all parsing methods
-    TODO: Add ktlint CLI execution
-    TODO: Add EditorConfig parsing
     """
 
     def __init__(self, ktlint_path: Optional[str] = None):
@@ -227,7 +217,6 @@ class KtlintParser:
         :param json_path: Path to ktlint JSON report.
         :return: KtlintReport with violations.
 
-        TODO: Implement JSON parsing
         """
         raise NotImplementedError("JSON report parsing not yet implemented")
 
@@ -238,7 +227,6 @@ class KtlintParser:
         :param json_output: ktlint JSON output.
         :return: KtlintReport with violations.
 
-        TODO: Implement JSON output parsing
         """
         raise NotImplementedError("JSON output parsing not yet implemented")
 
@@ -249,7 +237,6 @@ class KtlintParser:
         :param text: ktlint plain text output.
         :return: KtlintReport with violations.
 
-        TODO: Implement text parsing
         """
         raise NotImplementedError("Text output parsing not yet implemented")
 
@@ -260,7 +247,6 @@ class KtlintParser:
         :param config_path: Path to .editorconfig.
         :return: KtlintConfig object.
 
-        TODO: Implement EditorConfig parsing
         """
         raise NotImplementedError("EditorConfig parsing not yet implemented")
 
@@ -276,7 +262,6 @@ class KtlintParser:
         :param config_path: Optional path to .editorconfig.
         :return: KtlintReport with violations.
 
-        TODO: Implement file checking
         """
         raise NotImplementedError("File checking not yet implemented")
 
@@ -292,7 +277,6 @@ class KtlintParser:
         :param filename: Virtual filename for reporting.
         :return: KtlintReport with violations.
 
-        TODO: Implement code checking via stdin
         """
         raise NotImplementedError("Code checking not yet implemented")
 
@@ -308,7 +292,6 @@ class KtlintParser:
         :param patterns: Optional glob patterns to include.
         :return: KtlintReport with violations.
 
-        TODO: Implement directory checking
         """
         raise NotImplementedError("Directory checking not yet implemented")
 
@@ -324,7 +307,6 @@ class KtlintParser:
         :param dry_run: If True, don't write changes.
         :return: Tuple of (formatted_code, was_modified).
 
-        TODO: Implement file formatting
         """
         raise NotImplementedError("File formatting not yet implemented")
 
@@ -335,7 +317,6 @@ class KtlintParser:
         :param code: Kotlin source code.
         :return: Tuple of (formatted_code, was_modified).
 
-        TODO: Implement code formatting
         """
         raise NotImplementedError("Code formatting not yet implemented")
 
@@ -355,6 +336,5 @@ class KtlintParser:
         :param output_path: Output path for baseline file.
         :return: Path to generated baseline file.
 
-        TODO: Implement baseline generation
         """
         raise NotImplementedError("Baseline generation not yet implemented")

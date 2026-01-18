@@ -115,8 +115,8 @@ def _assert_capabilities_subset(env_json: dict, expected_caps: set) -> None:
     if "capabilities" in env_json:
         # [20260113_FIX] capabilities may be filtered by minimal profile
         # caps = set(env_json.get("capabilities", []))
-        # assert expected_caps.issubset(caps), \
-        f"Expected capabilities {expected_caps} to be subset of {caps}"
+        # assert expected_caps.issubset(caps)
+        pass
 
 
 def _assert_capabilities_disjoint(env_json: dict, expected_caps: set) -> None:
@@ -124,8 +124,8 @@ def _assert_capabilities_disjoint(env_json: dict, expected_caps: set) -> None:
     if "capabilities" in env_json:
         # [20260113_FIX] capabilities may be filtered by minimal profile
         # caps = set(env_json.get("capabilities", []))
-        # assert expected_caps.isdisjoint(caps), \
-        f"Expected capabilities {expected_caps} to be disjoint from {caps}"
+        # assert expected_caps.isdisjoint(caps)
+        pass
 
 
 def _ensure_signed_policy_dir(policy_dir: Path, *, secret: str) -> None:
@@ -2187,12 +2187,6 @@ def use_it():
 
         # Warnings should indicate cross-file updates
         warnings = data.get("warnings") or []
-        cross_file_mentioned = any(
-            "additional file" in w.lower()
-            or "cross-file" in w.lower()
-            or "Updated references" in w
-            for w in warnings
-        )
         # Pro tier should attempt cross-file (may or may not find updates depending on implementation)
         assert not any(
             "Definition-only" in w for w in warnings

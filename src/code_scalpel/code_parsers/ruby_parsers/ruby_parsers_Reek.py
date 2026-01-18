@@ -59,35 +59,27 @@ class ReekParser:
         self.smells: List[ReekSmell] = []
 
     def parse_json_report(self, report_path: Path) -> List[ReekSmell]:
-        """Parse Reek JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def parse_xml_report(self, report_path: Path) -> List[ReekSmell]:
-        """Parse Reek XML report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def execute_reek(
         self, paths: List[Path], config: ReekConfig = None
     ) -> List[ReekSmell]:
-        """Execute Reek analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Reek execution")
 
     def load_config(self, config_file: Path) -> ReekConfig:
-        """Load Reek configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_smells(self, smells: List[ReekSmell]) -> Dict[str, List[ReekSmell]]:
-        """Categorize smells by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Smell categorization")
 
     def detect_duplicated_code(self, smells: List[ReekSmell]) -> List[ReekSmell]:
-        """Filter for duplicated code smells - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Duplicated code detection")
 
     def detect_long_methods(self, smells: List[ReekSmell]) -> List[ReekSmell]:
-        """Filter for long method smells - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Long method detection")
 
     def generate_report(self, smells: List[ReekSmell], format: str = "json") -> str:
-        """Generate smell analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

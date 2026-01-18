@@ -47,31 +47,24 @@ class SimpleCovParser:
         self.metrics: Optional[CoverageMetrics] = None
 
     def parse_resultset_json(self, resultset_path: Path) -> CoverageMetrics:
-        """Parse SimpleCov .resultset.json file - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def parse_coverage_data(self, coverage_data: Dict) -> List[FileCoverage]:
-        """Parse raw coverage data structure - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Coverage data parsing")
 
     def calculate_coverage_metrics(self, files: List[FileCoverage]) -> CoverageMetrics:
-        """Calculate overall coverage metrics - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Metrics calculation")
 
     def identify_uncovered_lines(self, file_coverage: FileCoverage) -> List[int]:
-        """Identify uncovered lines in a file - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Uncovered line identification")
 
     def analyze_coverage_trends(self, historical_data: List[CoverageMetrics]) -> Dict:
-        """Analyze coverage trends over time - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Trend analysis")
 
     def generate_coverage_report(self, metrics: CoverageMetrics) -> str:
-        """Generate coverage analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")
 
     def identify_coverage_hotspots(
         self, files: List[FileCoverage]
     ) -> List[FileCoverage]:
-        """Identify files with lowest coverage - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Hotspot identification")

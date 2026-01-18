@@ -21,43 +21,12 @@ Security:
     - Maximum code size enforced
     - HTTP transport binds to 127.0.0.1 by default
 
-TODO ITEMS:
 
 COMMUNITY TIER (Core Server Features):
-1. TODO: Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
-2. TODO: Add stdin/stdout MCP transport implementation
-3. TODO: Implement FastMCP server with tool registration
-4. TODO: Add request/response envelope wrapping
-5. TODO: Implement error handling with error codes
-6. TODO: Add tool timeout enforcement
-7. TODO: Implement maximum payload size limits
-8. TODO: Create tool initialization and health checks
-9. TODO: Add comprehensive server logging
-10. TODO: Document server setup and deployment
 
 PRO TIER (Advanced Server Capabilities):
-11. TODO: Implement HTTP transport with TLS
-12. TODO: Add client authentication (API key, JWT)
-13. TODO: Implement tier-aware tool filtering
-14. TODO: Add tool-level performance profiling
-15. TODO: Implement response compression for large outputs
-16. TODO: Add request queuing and concurrency limits
-17. TODO: Implement custom tool metrics collection
-18. TODO: Add batch tool invocation support
-19. TODO: Create advanced analytics and monitoring
-20. TODO: Implement tool versioning and backward compatibility
 
 ENTERPRISE TIER (Scalability & Security):
-21. TODO: Implement distributed server with load balancing
-22. TODO: Add multi-protocol MCP (gRPC, WebSocket)
-23. TODO: Implement federated MCP across servers
-24. TODO: Add OpenTelemetry instrumentation
-25. TODO: Implement RBAC and fine-grained permissions
-26. TODO: Add audit logging for compliance
-27. TODO: Implement request signing and verification
-28. TODO: Add health checks and failover
-29. TODO: Support custom authentication providers
-30. TODO: Implement AI-powered request optimization
 """
 
 from __future__ import annotations
@@ -554,7 +523,6 @@ def _is_path_allowed(path: Path) -> bool:
     Returns:
         True if path is within allowed roots, False otherwise
 
-    [20251220_TODO] Add path traversal detection:
         - Detect symlink escape attempts
         - Validate path components don't contain suspicious patterns
         - Support denied path patterns (blacklist certain directories)
@@ -590,7 +558,6 @@ def _validate_path_security(path: Path) -> Path:
     Raises:
         PermissionError: If path is outside allowed roots
 
-    [20251220_TODO] Add audit logging for path access:
         - Log all path validations with caller identity
         - Track denied access attempts
         - Generate security alerts for suspicious patterns

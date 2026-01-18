@@ -8,7 +8,6 @@ PMD finds common programming flaws like unused variables, empty blocks, etc.
 Reference: https://pmd.github.io/
 Command: pmd check -d src -R rulesets/java/quickstart.xml -f xml -r report.xml
 
-Phase 2 Enhancement TODOs:
 """
 
 import subprocess

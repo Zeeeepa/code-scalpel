@@ -225,7 +225,7 @@ class TestAuditTrailIntegration:
         """Rename operation creates audit log when enabled."""
         with tempfile.TemporaryDirectory() as audit_dir:
             # Configure global audit trail
-            audit = configure_audit_trail(log_dir=audit_dir, enabled=True)
+            configure_audit_trail(log_dir=audit_dir, enabled=True)
 
             main_py = temp_project / "main.py"
 
@@ -289,7 +289,7 @@ class TestAuditTrailIntegration:
     def test_failed_rename_logged(self, temp_project):
         """Failed rename operations are logged in audit trail."""
         with tempfile.TemporaryDirectory() as audit_dir:
-            audit = configure_audit_trail(log_dir=audit_dir, enabled=True)
+            configure_audit_trail(log_dir=audit_dir, enabled=True)
 
             main_py = temp_project / "main.py"
 
@@ -325,7 +325,7 @@ class TestAuditTrailIntegration:
     def test_audit_includes_performance_metrics(self, temp_project):
         """Audit log includes performance metrics."""
         with tempfile.TemporaryDirectory() as audit_dir:
-            audit = configure_audit_trail(log_dir=audit_dir, enabled=True)
+            configure_audit_trail(log_dir=audit_dir, enabled=True)
 
             main_py = temp_project / "main.py"
 

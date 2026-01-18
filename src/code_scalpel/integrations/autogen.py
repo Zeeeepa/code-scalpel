@@ -4,7 +4,6 @@ AutogenScalpel - Integration wrapper for Autogen with Code Scalpel analysis capa
 This module provides the AutogenScalpel class that wraps Code Scalpel's
 AST analysis capabilities for use with Autogen agents.
 
-TODO ITEMS: integrations/autogen.py
 ======================================================================
 COMMUNITY TIER - Core AutoGen Integration
 ======================================================================

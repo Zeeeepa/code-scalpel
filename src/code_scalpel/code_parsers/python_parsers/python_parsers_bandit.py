@@ -18,7 +18,6 @@ Bandit Features:
     - Baseline support for legacy code
 """
 
-
 from __future__ import annotations
 
 import json

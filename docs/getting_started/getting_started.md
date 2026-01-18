@@ -1,6 +1,6 @@
 # Getting Started with Code Scalpel
 
-Welcome to Code Scalpel v3.0.0 "Autonomy"! This guide covers installation, configuration, and your first analysis.
+Welcome to Code Scalpel v1.0.0 "Autonomy"! This guide covers installation, configuration, and your first analysis.
 
 ## What is Code Scalpel?
 
@@ -380,7 +380,7 @@ curl -v http://localhost:8594/health
 
 - **GitHub Issues:** [Report bugs](https://github.com/tescolopio/code-scalpel/issues)
 - **GitHub Discussions:** [Ask questions](https://github.com/tescolopio/code-scalpel/discussions)
-- **Release Notes:** [v3.0.0 Changes](release_notes/RELEASE_NOTES_v3.0.0.md)
+- **Release Notes:** [v1.0.0 Changes](release_notes/RELEASE_NOTES_v1.0.0.md)
 
 ---
 

@@ -440,7 +440,7 @@ class TestToolCapabilityGating:
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         # Tool should validate against tier limits
-        sig = inspect.signature(get_graph_neighborhood)
+        inspect.signature(get_graph_neighborhood)
         # Should have validation that respects tier
         source = inspect.getsource(get_graph_neighborhood)
         assert "_get_current_tier" in source or "tier" in source.lower()

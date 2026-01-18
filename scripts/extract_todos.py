@@ -301,13 +301,19 @@ class TodoExtractor:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
 
+            in_docstring = False
+
             for line_num, line in enumerate(lines, start=1):
-                # [20260117_BUGFIX] Only match tags in comments, not in code/strings
+                # Track whether this line is within a docstring/triple-quoted block
+                triple_matches = re.findall(r"(?<!\\)(\"\"\"|''')", line)
+                line_in_docstring = in_docstring or bool(triple_matches)
+
                 for tag in self.TODO_TAGS:
-                    if self._tag_in_comment(line, tag):
-                        todo = self._parse_todo_line(
-                            str(file_path), line_num, line, tag
-                        )
+                    # Match TODOs in docstrings as well as comment markers
+                    if (line_in_docstring and tag in line) or self._tag_in_comment(
+                        line, tag
+                    ):
+                        todo = self._parse_todo_line(str(file_path), line_num, line, tag)
                         if todo:
                             self.todos.append(todo)
                             # [20260117_FEATURE] Track line numbers for removal
@@ -318,6 +324,11 @@ class TodoExtractor:
                             self.stats[f"module_{todo.module}"] += 1
                             self.stats[f"priority_{todo.priority}"] += 1
                         break  # Only count once per line
+
+                # Update docstring state after processing the line so single-line
+                # docstrings still count as docstring context for this iteration.
+                for _ in triple_matches:
+                    in_docstring = not in_docstring
 
         except Exception:
             pass  # Silently skip files that can't be read

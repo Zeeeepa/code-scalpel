@@ -79,25 +79,19 @@ class PHPCSParser:
         self.fixed_count: int = 0
 
     def parse_json_report(self, json_data: str) -> list[PHPCSViolation]:
-        """Parse PHPCS JSON report output. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS JSON report parsing")
 
     def parse_xml_report(self, xml_file: Path) -> list[PHPCSViolation]:
-        """Parse PHPCS XML report format. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS XML report parsing")
 
     def load_config(self, config_path: Path) -> PHPCSConfig:
-        """Load and parse .phpcs.xml configuration. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS configuration parsing")
 
     def execute_phpcs(self, target_path: Path) -> dict[str, Any]:
-        """Execute PHPCS analysis on target path. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS execution")
 
     def auto_fix(self, target_path: Path) -> dict[str, Any]:
-        """Run phpcbf to automatically fix violations. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS auto-fix")
 
     def generate_report(self) -> str:
-        """Generate comprehensive PHPCS report. # TODO"""
         raise NotImplementedError("Phase 2: PHPCS report generation")

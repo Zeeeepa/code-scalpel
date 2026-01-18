@@ -21,32 +21,6 @@ Migration Guide:
     from code_scalpel.analysis.code_analyzer import CodeAnalyzer
     from code_scalpel.analysis.project_crawler import ProjectCrawler
     from code_scalpel.analysis.core import CodeAnalysisToolkit
-
-TODO ITEMS: analysis/__init__.py
-============================================================================
-COMMUNITY TIER - Core Analysis Features (P0-P2)
-============================================================================
-
-
-
-
-============================================================================
-PRO TIER - Advanced Analysis Features (P1-P3)
-============================================================================
-
-
-
-
-============================================================================
-ENTERPRISE TIER - Enterprise Analysis Features (P2-P4)
-============================================================================
-
-
-
-
-============================================================================
-TOTAL ESTIMATED TESTS: 220 tests
-============================================================================
 """
 
 # [20251224_REFACTOR] Import from submodules

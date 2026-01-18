@@ -39,7 +39,6 @@ class ConcolicEngine:
     """
     Concolic execution engine (stub).
 
-    TODO: Full implementation
     """
 
     def __init__(self):
@@ -51,7 +50,6 @@ class ConcolicEngine:
         """
         Execute code concolically.
 
-        TODO: Implement concolic execution loop:
         1. Run concretely with current inputs
         2. Collect path constraints
         3. Negate constraints to explore new paths

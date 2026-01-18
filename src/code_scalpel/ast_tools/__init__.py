@@ -130,18 +130,6 @@ __all__ = [
     "ExtractionResult",
     # v1.5.3 - OSV Client
     "osv_client",
-    # v3.0.0+ - Advanced analysis
-    "TypeInference",
-    "TypeInfo",
-    "FunctionTypeInfo",
-    "ControlFlowBuilder",
-    "ControlFlowGraph",
-    "BasicBlock",
-    "DataFlowAnalyzer",
-    "DataFlow",
-    "Definition",
-    "Usage",
+    # v3.0.0+ - Advanced analysis (Placeholder, not fully implemented)
     "RefactoringAnalyzer",
-    "RefactoringOpportunity",
-    "CodeSmell",
 ]

@@ -171,12 +171,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         }
 
     def _analyze_structure(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Analyze file structure for extraction opportunities.
-
-        TODO [FEATURE]: Implement extract method detection
-        TODO [FEATURE]: Implement extract class detection
-        """
+        """Analyze file structure for extraction opportunities."""
         opportunities = []
         # Implementation placeholder
         return opportunities
@@ -184,13 +179,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
     def _detect_pattern_violations(
         self, file_info: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """
-        Detect design pattern violations and anti-patterns.
-
-        TODO [FEATURE]: Detect God Object pattern
-        TODO [FEATURE]: Detect Feature Envy pattern
-        TODO [FEATURE]: Detect Data Clump pattern
-        """
+        """Detect design pattern violations and anti-patterns."""
         violations = []
         # Implementation placeholder
         return violations
@@ -198,12 +187,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
     def _identify_modularization(
         self, file_info: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """
-        Identify opportunities for better modularization.
-
-        TODO [FEATURE]: Detect tightly coupled components
-        TODO [FEATURE]: Suggest module/package splits
-        """
+        """Identify opportunities for better modularization."""
         opportunities = []
         # Implementation placeholder
         return opportunities
@@ -227,12 +211,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         ]
 
     async def _execute_refactoring(self, refactoring: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute a specific refactoring safely.
-
-        TODO [FEATURE]: Use simulate_code_change before applying
-        TODO [FEATURE]: Apply safe change with apply_safe_change
-        """
+        """Execute a specific refactoring safely."""
         return {
             "success": True,
             "refactoring_type": refactoring.get("type"),

@@ -8,7 +8,6 @@ Infer finds null pointer exceptions, resource leaks, and more.
 Reference: https://fbinfer.com/
 Command: infer run -- javac *.java
 
-Phase 2 Enhancement TODOs:
 """
 
 import json

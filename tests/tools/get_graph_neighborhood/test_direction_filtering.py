@@ -42,7 +42,7 @@ class TestDirectionOutgoing:
 
     def test_outgoing_excludes_callers(self, sample_call_graph):
         """Outgoing should exclude functions that call the center."""
-        result = sample_call_graph.get_neighborhood(
+        sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, direction="outgoing"
         )
 
@@ -96,7 +96,7 @@ class TestDirectionIncoming:
 
     def test_incoming_excludes_callees(self, sample_call_graph):
         """Incoming should exclude functions called by center."""
-        result = sample_call_graph.get_neighborhood(
+        sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, direction="incoming"
         )
 

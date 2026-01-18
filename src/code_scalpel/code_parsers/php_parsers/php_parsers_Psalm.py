@@ -79,25 +79,19 @@ class PsalmParser:
         self.config: Optional[PsalmConfig] = None
 
     def parse_json_report(self, json_data: str) -> list[PsalmError]:
-        """Parse Psalm JSON report format. # TODO"""
         raise NotImplementedError("Phase 2: Psalm JSON parsing")
 
     def parse_json_pretty(self, json_data: str) -> list[PsalmError]:
-        """Parse Psalm JSON-pretty format. # TODO"""
         raise NotImplementedError("Phase 2: Psalm JSON-pretty parsing")
 
     def load_config(self, config_path: Path) -> PsalmConfig:
-        """Load and parse psalm.xml configuration. # TODO"""
         raise NotImplementedError("Phase 2: Psalm config parsing")
 
     def execute_psalm(self, paths: list[str]) -> dict[str, Any]:
-        """Execute Psalm analysis on paths. # TODO"""
         raise NotImplementedError("Phase 2: Psalm execution")
 
     def analyze_taint(self) -> list[dict[str, Any]]:
-        """Analyze taint flow for security vulnerabilities. # TODO"""
         raise NotImplementedError("Phase 2: Psalm taint analysis")
 
     def generate_report(self) -> str:
-        """Generate comprehensive Psalm report. # TODO"""
         raise NotImplementedError("Phase 2: Psalm report generation")

@@ -53,43 +53,12 @@ TSNode = TypeVar("TSNode")
 class VisitorContext:
     """Context for tree-sitter visitor traversal.
 
-    TODO ITEMS:
 
     COMMUNITY TIER (Basic Tree-Sitter Visiting):
-    1. TODO: Implement basic node type dispatching
-    2. TODO: Support named field access for all node types
-    3. TODO: Handle positional child access with bounds checking
-    4. TODO: Implement noise token filtering (keywords, delimiters)
-    5. TODO: Support source location tracking
-    6. TODO: Handle anonymous node extraction
-    7. TODO: Implement error node skipping
-    8. TODO: Support syntax error recovery
-    9. TODO: Create visitor method registry
-    10. TODO: Implement generic_visit fallback handler
 
     PRO TIER (Advanced Tree-Sitter Features):
-    11. TODO: Add parent node tracking for context
-    12. TODO: Support scope tracking through traversal
-    13. TODO: Implement selective tree pruning
-    14. TODO: Handle tree rewriting and transformation
-    15. TODO: Support parallel tree visiting
-    16. TODO: Add incremental parsing support
-    17. TODO: Implement tree diffing and change detection
-    18. TODO: Support custom traversal ordering
-    19. TODO: Add performance profiling hooks
-    20. TODO: Implement error aggregation and reporting
 
     ENTERPRISE TIER (Advanced Analysis & Optimization):
-    21. TODO: Implement ML-based node classification
-    22. TODO: Support distributed tree visiting
-    23. TODO: Add semantic caching layer
-    24. TODO: Implement AI-driven pattern detection
-    25. TODO: Support cross-language tree comparison
-    26. TODO: Add performance-aware visiting strategies
-    27. TODO: Implement quantum-safe tree hashing
-    28. TODO: Support encrypted tree serialization
-    29. TODO: Add predictive pre-fetching for large trees
-    30. TODO: Create adaptive visiting based on ML predictions
     """
 
     """
@@ -136,12 +105,10 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         - "arrow_function" -> visit_arrow_function
         - "if_statement" -> visit_if_statement
 
-    [20251220_TODO] Add error recovery strategies:
         - Graceful handling of unsupported constructs (skip vs. fail)
         - Better error messages with node context and suggestions
         - Diagnostic mode to report all unsupported patterns
 
-    [20251220_TODO] Enhance diagnostics:
         - Track parent node chain for error context
         - Report column numbers and visual error markers
         - Aggregate warnings and errors for batch reporting

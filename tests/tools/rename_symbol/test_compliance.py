@@ -164,7 +164,7 @@ class TestComplianceIntegration:
     def test_compliance_failure_logged_in_audit(self, temp_project):
         """Compliance failures are recorded in audit trail."""
         with tempfile.TemporaryDirectory() as audit_dir:
-            audit = configure_audit_trail(log_dir=audit_dir, enabled=True)
+            configure_audit_trail(log_dir=audit_dir, enabled=True)
 
             main_py = temp_project / "main.py"
 

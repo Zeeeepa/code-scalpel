@@ -334,6 +334,8 @@ def _log_blocked_commit(uncovered_files: List[str]) -> None:
         )
     except Exception:
         # [20260116_BUGFIX] Do not block commit if audit logging fails, but emit a warning.
+        import sys
+
         print(
             "Code Scalpel git hook: failed to log blocked commit to audit trail.",
             file=sys.stderr,

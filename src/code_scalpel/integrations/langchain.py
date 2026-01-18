@@ -1,7 +1,6 @@
 """
 LangChain integration for Code Scalpel.
 
-TODO ITEMS: integrations/langchain.py
 ======================================================================
 COMMUNITY TIER - Core LangChain Integration
 ======================================================================

@@ -1293,8 +1293,7 @@ class TestCrossFileDependenciesMCP:
         """Create a multi-file project for cross-file tests."""
         # models.py
         models_py = tmp_path / "models.py"
-        models_py.write_text(
-            '''"""Models module."""
+        models_py.write_text('''"""Models module."""
 
 class TaxRate:
     """Tax rate configuration."""
@@ -1309,13 +1308,11 @@ class TaxRate:
 def get_default_rate() -> float:
     """Get the default tax rate."""
     return 0.1
-'''
-        )
+''')
 
         # utils.py
         utils_py = tmp_path / "utils.py"
-        utils_py.write_text(
-            '''"""Utilities module."""
+        utils_py.write_text('''"""Utilities module."""
 
 from models import TaxRate, get_default_rate
 
@@ -1329,8 +1326,7 @@ def calculate_tax(amount: float) -> float:
 def simple_function():
     """No external dependencies."""
     return 42
-'''
-        )
+''')
 
         return tmp_path
 
@@ -1476,8 +1472,7 @@ class TestGetFileContext:
 
         # Create a test file
         test_file = tmp_path / "test_module.py"
-        test_file.write_text(
-            '''
+        test_file.write_text('''
 """A test module."""
 
 import os
@@ -1492,8 +1487,7 @@ class MyClass:
     
     def method(self):
         return "hello"
-'''
-        )
+''')
 
         result = await get_file_context(str(test_file))
 
@@ -1513,12 +1507,10 @@ class MyClass:
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "vulnerable.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def dangerous_eval(user_input):
     return eval(user_input)  # Security issue!
-"""
-        )
+""")
 
         result = await get_file_context(str(test_file))
 
@@ -1553,8 +1545,7 @@ def dangerous_eval(user_input):
         from code_scalpel.mcp.server import get_file_context
 
         test_file = tmp_path / "exports.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 __all__ = ["public_func", "PublicClass"]
 
 def public_func():
@@ -1565,8 +1556,7 @@ def _private_func():
 
 class PublicClass:
     pass
-"""
-        )
+""")
 
         result = await get_file_context(str(test_file))
 
@@ -1584,34 +1574,28 @@ class TestGetSymbolReferences:
 
         # Create multiple files that reference a function
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text(
-            '''
+        utils_file.write_text('''
 def helper_function():
     """The helper function definition."""
     return 42
-'''
-        )
+''')
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from utils import helper_function
 
 def main():
     result = helper_function()
     return result
-"""
-        )
+""")
 
         test_file = tmp_path / "test_utils.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 from utils import helper_function
 
 def test_helper():
     assert helper_function() == 42
-"""
-        )
+""")
 
         result = await get_symbol_references("helper_function", str(tmp_path))
 
@@ -1625,23 +1609,19 @@ def test_helper():
         from code_scalpel.mcp.server import get_symbol_references
 
         models_file = tmp_path / "models.py"
-        models_file.write_text(
-            """
+        models_file.write_text("""
 class User:
     def __init__(self, name):
         self.name = name
-"""
-        )
+""")
 
         service_file = tmp_path / "service.py"
-        service_file.write_text(
-            """
+        service_file.write_text("""
 from models import User
 
 def create_user(name):
     return User(name)
-"""
-        )
+""")
 
         result = await get_symbol_references("User", str(tmp_path))
 
@@ -1675,14 +1655,12 @@ def create_user(name):
         from code_scalpel.mcp.server import get_symbol_references
 
         test_file = tmp_path / "code.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def target_function():
     return "result"
 
 result = target_function()
-"""
-        )
+""")
 
         result = await get_symbol_references("target_function", str(tmp_path))
 
@@ -1707,25 +1685,21 @@ class TestGetCrossFileDependencies:
 
         # Create utils.py with a helper function
         utils_file = tmp_path / "utils.py"
-        utils_file.write_text(
-            """
+        utils_file.write_text("""
 def format_string(s):
     \"\"\"Format a string.\"\"\"
     return s.strip().upper()
-"""
-        )
+""")
 
         # Create main.py that uses the helper
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from utils import format_string
 
 def process_data(data):
     \"\"\"Process data using utility function.\"\"\"
     return format_string(data)
-"""
-        )
+""")
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1747,22 +1721,18 @@ def process_data(data):
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         helper_file = tmp_path / "helper.py"
-        helper_file.write_text(
-            """
+        helper_file.write_text("""
 def helper():
     return "help"
-"""
-        )
+""")
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 from helper import helper
 
 def main():
     return helper()
-"""
-        )
+""")
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1781,12 +1751,10 @@ def main():
         from code_scalpel.mcp.server import get_cross_file_dependencies
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def target_func():
     return 42
-"""
-        )
+""")
 
         result = await get_cross_file_dependencies(
             target_file="main.py",
@@ -1807,22 +1775,18 @@ def target_func():
 
         # Create files with imports
         a_file = tmp_path / "a.py"
-        a_file.write_text(
-            """
+        a_file.write_text("""
 def func_a():
     return 1
-"""
-        )
+""")
 
         b_file = tmp_path / "b.py"
-        b_file.write_text(
-            """
+        b_file.write_text("""
 from a import func_a
 
 def func_b():
     return func_a() + 1
-"""
-        )
+""")
 
         result = await get_cross_file_dependencies(
             target_file="b.py",
@@ -1872,24 +1836,20 @@ def func_b():
 
         # Create circular import situation
         a_file = tmp_path / "a.py"
-        a_file.write_text(
-            """
+        a_file.write_text("""
 from b import func_b
 
 def func_a():
     return func_b()
-"""
-        )
+""")
 
         b_file = tmp_path / "b.py"
-        b_file.write_text(
-            """
+        b_file.write_text("""
 from a import func_a
 
 def func_b():
     return func_a()
-"""
-        )
+""")
 
         result = await get_cross_file_dependencies(
             target_file="a.py",
@@ -1907,32 +1867,26 @@ def func_b():
 
         # Create a chain of dependencies
         c_file = tmp_path / "c.py"
-        c_file.write_text(
-            """
+        c_file.write_text("""
 def func_c():
     return "c"
-"""
-        )
+""")
 
         b_file = tmp_path / "b.py"
-        b_file.write_text(
-            """
+        b_file.write_text("""
 from c import func_c
 
 def func_b():
     return func_c()
-"""
-        )
+""")
 
         a_file = tmp_path / "a.py"
-        a_file.write_text(
-            """
+        a_file.write_text("""
 from b import func_b
 
 def func_a():
     return func_b()
-"""
-        )
+""")
 
         # With max_depth=1, should only get immediate dependencies
         result = await get_cross_file_dependencies(
@@ -1958,12 +1912,10 @@ class TestCrossFileSecurityScan:
         from code_scalpel.mcp.server import cross_file_security_scan
 
         safe_file = tmp_path / "safe.py"
-        safe_file.write_text(
-            """
+        safe_file.write_text("""
 def safe_function(x):
     return x * 2
-"""
-        )
+""")
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -1978,21 +1930,18 @@ def safe_function(x):
 
         # Create routes.py with user input
         routes_file = tmp_path / "routes.py"
-        routes_file.write_text(
-            """
+        routes_file.write_text("""
 from flask import request
 from db import execute_query
 
 def search():
     query = request.args.get('q')
     return execute_query(query)
-"""
-        )
+""")
 
         # Create db.py with SQL execution
         db_file = tmp_path / "db.py"
-        db_file.write_text(
-            """
+        db_file.write_text("""
 import sqlite3
 
 def execute_query(query):
@@ -2000,8 +1949,7 @@ def execute_query(query):
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM users WHERE name = '{query}'")
     return cursor.fetchall()
-"""
-        )
+""")
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -2013,24 +1961,20 @@ def execute_query(query):
         from code_scalpel.mcp.server import cross_file_security_scan
 
         input_file = tmp_path / "input.py"
-        input_file.write_text(
-            """
+        input_file.write_text("""
 def get_user_input():
     return input("Enter data: ")
-"""
-        )
+""")
 
         process_file = tmp_path / "process.py"
-        process_file.write_text(
-            """
+        process_file.write_text("""
 from input import get_user_input
 import os
 
 def process():
     data = get_user_input()
     os.system(data)
-"""
-        )
+""")
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 
@@ -2041,12 +1985,10 @@ def process():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def test_func():
     return 42
-"""
-        )
+""")
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path), include_diagram=True
@@ -2070,15 +2012,13 @@ def test_func():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def main():
     return "main"
 
 def other():
     return "other"
-"""
-        )
+""")
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path),
@@ -2092,12 +2032,10 @@ def other():
         from code_scalpel.mcp.server import cross_file_security_scan
 
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 def test():
     pass
-"""
-        )
+""")
 
         result = await cross_file_security_scan(
             project_root=str(tmp_path),
@@ -2112,12 +2050,10 @@ def test():
 
         # Create safe code
         safe_file = tmp_path / "safe.py"
-        safe_file.write_text(
-            """
+        safe_file.write_text("""
 def safe_func():
     return 42
-"""
-        )
+""")
 
         result = await cross_file_security_scan(project_root=str(tmp_path))
 

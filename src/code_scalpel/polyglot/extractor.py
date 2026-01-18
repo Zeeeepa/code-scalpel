@@ -19,7 +19,6 @@ Supported Languages:
     - TypeScript: Full support via tree-sitter-typescript (planned)
     - Java: Full support via tree-sitter-java
 
-TODO ITEMS:
 
 
 

@@ -8,7 +8,6 @@ JArchitect analyzes code structure, dependencies, and quality.
 Reference: https://www.jarchitect.com/
 Note: JArchitect is a commercial tool with GUI-based analysis.
 
-Phase 2 Enhancement TODOs:
 """
 
 from dataclasses import dataclass, field

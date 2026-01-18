@@ -8,7 +8,6 @@ Checkstyle enforces coding standards for Java code.
 Reference: https://checkstyle.org/
 Command: java -jar checkstyle.jar -c /config.xml -f xml src/
 
-Phase 2 Enhancement TODOs:
 """
 
 import subprocess

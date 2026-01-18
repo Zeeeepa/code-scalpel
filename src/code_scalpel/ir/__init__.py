@@ -61,7 +61,6 @@ from .normalizers import BaseNormalizer, PythonNormalizer
 from .operators import BinaryOperator, BoolOperator, CompareOperator, UnaryOperator
 from .semantics import JavaScriptSemantics, LanguageSemantics, PythonSemantics
 
-
 __all__ = [
     # Nodes
     "IRNode",

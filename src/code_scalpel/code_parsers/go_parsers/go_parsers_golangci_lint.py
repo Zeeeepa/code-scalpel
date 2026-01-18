@@ -76,23 +76,18 @@ class GolangciLintParser:
     def execute_golangci_lint(
         self, paths: List[Path], config: GolangciLintConfig = None
     ) -> List[LintIssue]:
-        """Execute golangci-lint analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Golangci-lint execution")
 
     def parse_json_report(self, report_path: Path) -> List[LintIssue]:
-        """Parse golangci-lint JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GolangciLintConfig:
-        """Load .golangci.yml configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_by_linter(
         self, issues: List[LintIssue]
     ) -> Dict[LinterType, List[LintIssue]]:
-        """Categorize issues by linter - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Issue categorization by linter")
 
     def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:
-        """Generate analysis report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

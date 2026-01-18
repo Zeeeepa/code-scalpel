@@ -1,5 +1,6 @@
 # [20251218_TEST] Additional coverage for final 17 elements
 """Target remaining uncovered lines to cross 95% threshold."""
+
 import tempfile
 from pathlib import Path
 

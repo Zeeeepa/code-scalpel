@@ -35,33 +35,26 @@ class FastererParser:
         self.issues: List[PerformanceIssue] = []
 
     def parse_json_report(self, report_path: Path) -> List[PerformanceIssue]:
-        """Parse Fasterer JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def execute_fasterer(self, paths: List[Path]) -> List[PerformanceIssue]:
-        """Execute Fasterer performance scanning - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Fasterer execution")
 
     def categorize_issues(self, issues: List[PerformanceIssue]) -> Dict:
-        """Categorize performance issues by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Issue categorization")
 
     def detect_n_plus_one_queries(
         self, issues: List[PerformanceIssue]
     ) -> List[PerformanceIssue]:
-        """Filter N+1 query pattern issues - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: N+1 query detection")
 
     def detect_inefficient_operations(
         self, issues: List[PerformanceIssue]
     ) -> List[PerformanceIssue]:
-        """Filter inefficient operation issues - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Inefficient operation detection")
 
     def calculate_performance_metrics(self, issues: List[PerformanceIssue]) -> Dict:
-        """Calculate performance impact metrics - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Performance metrics")
 
     def generate_optimization_report(self, issues: List[PerformanceIssue]) -> str:
-        """Generate performance optimization report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

@@ -42,43 +42,31 @@ Planned Features:
         - Doctrine ORM detection
         - Custom framework patterns
 
-TODO: HIGH PRIORITY - Core Parsers
 ===================================
 
-TODO: HIGH PRIORITY - AST Analysis
 ===================================
 
-TODO: MEDIUM PRIORITY - PHP-Specific Features
 ==============================================
 
 # [20260102_REFACTOR] Lazy exports via __getattr__; imported parsers appear unused locally.
 # ruff: noqa: F401
 
-TODO: MEDIUM PRIORITY - Security Analysis
 ==========================================
 
-TODO: MEDIUM PRIORITY - Framework Detection
 ============================================
 
-TODO: LOW PRIORITY - Advanced Analysis
 =======================================
 
-TODO: LOW PRIORITY - Tooling Integration
 =========================================
 
-TODO: HIGH PRIORITY - Module Registry & Aggregation
 ====================================================
 
-TODO: MEDIUM PRIORITY - Integration & Performance
 ==================================================
 
-TODO: MEDIUM PRIORITY - New Tool Integrations
 ==============================================
 
-TODO: MEDIUM PRIORITY - Output & Reporting
 ============================================================
 
-TODO: LOW PRIORITY - Advanced Features
 =======================================
 """
 

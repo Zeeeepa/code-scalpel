@@ -44,20 +44,17 @@ def temp_project():
 def simple_vuln_project(temp_project):
     """Create a project with a simple SQL injection vulnerability."""
     # routes.py - web routes that handle user input
-    (temp_project / "routes.py").write_text(
-        """
+    (temp_project / "routes.py").write_text("""
 from flask import request
 from db import execute_query
 
 def get_user():
     user_id = request.args.get('id')
     return execute_query(user_id)
-"""
-    )
+""")
 
     # db.py - database operations
-    (temp_project / "db.py").write_text(
-        """
+    (temp_project / "db.py").write_text("""
 import sqlite3
 
 def execute_query(user_id):
@@ -65,8 +62,7 @@ def execute_query(user_id):
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
     return cursor.fetchone()
-"""
-    )
+""")
 
     return temp_project
 
@@ -74,19 +70,16 @@ def execute_query(user_id):
 @pytest.fixture
 def safe_project(temp_project):
     """Create a project with parameterized queries (safe)."""
-    (temp_project / "routes.py").write_text(
-        """
+    (temp_project / "routes.py").write_text("""
 from flask import request
 from db import get_user_safe
 
 def get_user():
     user_id = request.args.get('id')
     return get_user_safe(user_id)
-"""
-    )
+""")
 
-    (temp_project / "db.py").write_text(
-        """
+    (temp_project / "db.py").write_text("""
 import sqlite3
 
 def get_user_safe(user_id):
@@ -95,8 +88,7 @@ def get_user_safe(user_id):
     # Safe: parameterized query
     cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
     return cursor.fetchone()
-"""
-    )
+""")
 
     return temp_project
 
@@ -104,25 +96,21 @@ def get_user_safe(user_id):
 @pytest.fixture
 def command_injection_project(temp_project):
     """Create a project with command injection vulnerability."""
-    (temp_project / "api.py").write_text(
-        """
+    (temp_project / "api.py").write_text("""
 from flask import request
 from utils import run_command
 
 def process():
     filename = request.args.get('file')
     return run_command(filename)
-"""
-    )
+""")
 
-    (temp_project / "utils.py").write_text(
-        """
+    (temp_project / "utils.py").write_text("""
 import os
 
 def run_command(filename):
     os.system(f"cat {filename}")
-"""
-    )
+""")
 
     return temp_project
 
@@ -130,37 +118,31 @@ def run_command(filename):
 @pytest.fixture
 def multi_hop_project(temp_project):
     """Create a project with multi-hop taint flow."""
-    (temp_project / "app.py").write_text(
-        """
+    (temp_project / "app.py").write_text("""
 from flask import request
 from services import process_data
 
 def handler():
     data = request.args.get('data')
     return process_data(data)
-"""
-    )
+""")
 
-    (temp_project / "services.py").write_text(
-        """
+    (temp_project / "services.py").write_text("""
 from utils import transform
 
 def process_data(data):
     transformed = transform(data)
     return transformed
-"""
-    )
+""")
 
-    (temp_project / "utils.py").write_text(
-        """
+    (temp_project / "utils.py").write_text("""
 import os
 
 def transform(data):
     # This is dangerous - command injection
     os.system(f"echo {data}")
     return data.upper()
-"""
-    )
+""")
 
     return temp_project
 
@@ -168,24 +150,20 @@ def transform(data):
 @pytest.fixture
 def path_traversal_project(temp_project):
     """Create a project with path traversal vulnerability."""
-    (temp_project / "views.py").write_text(
-        """
+    (temp_project / "views.py").write_text("""
 from flask import request
 from files import read_file
 
 def download():
     path = request.args.get('path')
     return read_file(path)
-"""
-    )
+""")
 
-    (temp_project / "files.py").write_text(
-        """
+    (temp_project / "files.py").write_text("""
 def read_file(path):
     with open(path, 'r') as f:
         return f.read()
-"""
-    )
+""")
 
     return temp_project
 
@@ -424,15 +402,13 @@ class TestEdgeCases:
 
     def test_no_dangerous_code(self, temp_project):
         """Test project with no dangerous patterns."""
-        (temp_project / "safe.py").write_text(
-            """
+        (temp_project / "safe.py").write_text("""
 def add(a, b):
     return a + b
 
 def multiply(x, y):
     return x * y
-"""
-        )
+""")
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -534,8 +510,7 @@ class TestIntegration:
     def test_flask_app_analysis(self, temp_project):
         """Test analysis of Flask-like application."""
         # Create a mini Flask app structure
-        (temp_project / "app.py").write_text(
-            """
+        (temp_project / "app.py").write_text("""
 from flask import Flask, request
 from views import handle_request
 
@@ -544,27 +519,22 @@ app = Flask(__name__)
 @app.route('/api')
 def api():
     return handle_request()
-"""
-        )
+""")
 
-        (temp_project / "views.py").write_text(
-            """
+        (temp_project / "views.py").write_text("""
 from flask import request
 from models import get_data
 
 def handle_request():
     query = request.args.get('q')
     return get_data(query)
-"""
-        )
+""")
 
-        (temp_project / "models.py").write_text(
-            """
+        (temp_project / "models.py").write_text("""
 def get_data(query):
     # Potentially dangerous if query is not sanitized
     return f"Results for: {query}"
-"""
-        )
+""")
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -579,34 +549,28 @@ def get_data(query):
         pkg.mkdir()
         (pkg / "__init__.py").write_text("")
 
-        (pkg / "base.py").write_text(
-            """
+        (pkg / "base.py").write_text("""
 import os
 
 def exec_cmd(cmd):
     os.system(cmd)
-"""
-        )
+""")
 
-        (pkg / "service.py").write_text(
-            """
+        (pkg / "service.py").write_text("""
 from .base import exec_cmd
 
 def process(data):
     exec_cmd(f"echo {data}")
-"""
-        )
+""")
 
-        (temp_project / "main.py").write_text(
-            """
+        (temp_project / "main.py").write_text("""
 from flask import request
 from pkg.service import process
 
 def handler():
     data = request.args.get('input')
     process(data)
-"""
-        )
+""")
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()

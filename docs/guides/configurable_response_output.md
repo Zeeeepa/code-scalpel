@@ -1,6 +1,6 @@
 # Configurable Response Output
 
-**[20251226_FEATURE] v3.3.0 - Token-Efficient Responses**
+**[20251226_FEATURE] v1.0.0 - Token-Efficient Responses**
 
 ## Overview
 

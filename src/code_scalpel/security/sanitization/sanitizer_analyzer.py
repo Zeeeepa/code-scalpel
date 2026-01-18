@@ -63,12 +63,10 @@ class SanitizerAnalyzer:
     """
     Sanitizer effectiveness analyzer (stub).
 
-    TODO: Full implementation with bypass database
     """
 
     def __init__(self):
         """
-        TODO: Initialize with bypass technique database
         - Load known XSS bypasses
         - Load SQL injection bypasses
         - Load path traversal bypasses
@@ -80,7 +78,6 @@ class SanitizerAnalyzer:
         self, sanitizer_code: str, sink_type: str, context: Optional[str] = None
     ) -> SanitizerEffectiveness:
         """
-        TODO: Check if sanitizer is effective for the sink type
         - Parse sanitizer code
         - Classify sanitizer type
         - Test against bypass techniques
@@ -91,7 +88,6 @@ class SanitizerAnalyzer:
 
     def generate_bypasses(self, sanitizer_code: str) -> List[str]:
         """
-        TODO: Generate payloads that might bypass the sanitizer
         - Use symbolic execution
         - Use fuzzing techniques
         - Use known bypass patterns
@@ -100,7 +96,6 @@ class SanitizerAnalyzer:
 
     def suggest_fix(self, ineffective_sanitizer: str, sink_type: str) -> str:
         """
-        TODO: Suggest better sanitization approach
         - Recommend parameterized queries for SQL
         - Suggest proper escaping library
         - Provide code example

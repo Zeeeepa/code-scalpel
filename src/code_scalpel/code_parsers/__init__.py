@@ -19,8 +19,8 @@ using different analysis tools.
     - code_parser/ is the current production-grade implementation
     - parsers/ is no longer used in production (only in legacy tests)
 
-    See consolidation plan in TODOs below.
 """
+
 from .base_parser import BaseParser, Language, ParseResult, PreprocessorConfig
 
 # [20251224_FEATURE] Import from polyglot extractor (migrated from polyglot/)

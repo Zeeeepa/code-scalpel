@@ -31,55 +31,9 @@ Usage:
     extractor = UnifiedExtractor.from_file("Utils.java")
     result = extractor.extract("method", "Calculator.add")
 
-- TODO [COMMUNITY]: Add extract_module() for entire module/namespace (current)
-- TODO [COMMUNITY]: Add extract_test() to extract test functions/methods
-- TODO [COMMUNITY]: Add extract_with_tests() to include related tests
-- TODO [COMMUNITY]: Add extract_enum() for enum definitions
-- TODO [COMMUNITY]: Add extract_type_alias() for type definitions
-- TODO [COMMUNITY]: Add extract_constant() for const/static values
-- TODO [COMMUNITY]: Add to_markdown() for documentation output
-- TODO [COMMUNITY]: Add to_json() for structured data
 
 PRO (Enhanced Features):
-- TODO [PRO]: Implement Go extraction via code_parser
-- TODO [PRO]: Implement C# extraction via code_parser
-- TODO [PRO]: Implement Kotlin extraction with coroutine support
-- TODO [PRO]: Implement Ruby extraction (methods, classes, modules)
-- TODO [PRO]: Add extract_interface() for interface/protocol extraction
-- TODO [PRO]: Unified dependency graph across languages
-- TODO [PRO]: Cross-language call tracking (e.g., Python calling C extension)
-- TODO [PRO]: Unified import/include resolution
-- TODO [PRO]: Language-agnostic complexity metrics
-- TODO [PRO]: Polyglot project navigation
-- TODO [PRO]: Mixed-language context extraction
-- TODO [PRO]: Implement token budgeting across all languages
-- TODO [PRO]: Add relevance-based context prioritization
-- TODO [PRO]: Support incremental context expansion
-- TODO [PRO]: Django model/view extraction
-- TODO [PRO]: Flask route extraction
-- TODO [PRO]: Express.js route extraction
 
-- TODO [ENTERPRISE]: Implement C++ extraction (classes, functions, templates)
-- TODO [ENTERPRISE]: Implement Swift extraction (structs, protocols, extensions)
-- TODO [ENTERPRISE]: Implement PHP extraction (classes, traits, interfaces)
-- TODO [ENTERPRISE]: Add Rust extraction (fn, impl, trait, mod)
-- TODO [ENTERPRISE]: Add semantic similarity for related code
-- TODO [ENTERPRISE]: Implement context summarization for large deps
-- TODO [ENTERPRISE]: Add "extract for task" with task-specific filtering
-- TODO [ENTERPRISE]: Spring Boot controller extraction
-- TODO [ENTERPRISE]: FastAPI endpoint extraction
-- TODO [ENTERPRISE]: GraphQL resolver extraction
-- TODO [ENTERPRISE]: React component extraction with hooks
-- TODO [ENTERPRISE]: Add to_prompt() for LLM-ready formatting
-- TODO [ENTERPRISE]: Support custom output templates
-- TODO [ENTERPRISE]: Add SARIF output for IDE integration
-- TODO [ENTERPRISE]: Generate extraction reports
-- TODO [ENTERPRISE]: Implement multi-file parallel extraction
-- TODO [ENTERPRISE]: Add AST caching per language
-- TODO [ENTERPRISE]: Support incremental re-extraction
-- TODO [ENTERPRISE]: Add extraction result caching
-- TODO [ENTERPRISE]: Implement lazy loading for large projects
-- TODO [ENTERPRISE]: Add memory-efficient streaming mode
 """
 
 from __future__ import annotations
@@ -95,17 +49,6 @@ class Language(Enum):
     """
     Supported programming languages.
 
-    TODO: Language Support Expansion:
-    - TODO: Add RUST = "rust" with ownership-aware extraction
-    - TODO: Add SCALA = "scala" with trait support
-    - TODO: Add DART = "dart" for Flutter projects
-    - TODO: Add LUA = "lua" for game scripting
-    - TODO: Add R = "r" for data science
-    - TODO: Add JULIA = "julia" for scientific computing
-    - TODO: Add HASKELL = "haskell" for functional codebases
-    - TODO: Add ELIXIR = "elixir" for Erlang/OTP projects
-    - TODO: Add CLOJURE = "clojure" for Lisp-family
-    - TODO: Add ZIG = "zig" for systems programming
     """
 
     AUTO = "auto"
@@ -302,20 +245,6 @@ class UnifiedExtractionResult:
 
     [20251221_FEATURE] Unified result format for all languages.
 
-    TODO: Add the following fields for richer extraction metadata:
-    - TODO: docstring: str | None - Extracted documentation
-    - TODO: signature: str | None - Function/method signature
-    - TODO: decorators: list[str] - Applied decorators/annotations
-    - TODO: visibility: str - public/private/protected
-    - TODO: is_async: bool - Whether async function
-    - TODO: is_static: bool - Whether static method
-    - TODO: return_type: str | None - Return type annotation
-    - TODO: parameters: list[dict] - Parameter names and types
-    - TODO: complexity_score: int - Cyclomatic complexity
-    - TODO: parent_namespace: str | None - Containing module/class
-    - TODO: source_hash: str - Hash of extracted code
-    - TODO: extraction_time_ms: float - Time to extract
-    - TODO: warnings: list[str] - Non-fatal issues
     """
 
     success: bool
@@ -606,49 +535,19 @@ class UnifiedExtractor:
         >>> result = extractor.extract("function", "calculate_tax")
         >>> print(result.code)
 
-    TODO: UnifiedExtractor Enhancement Roadmap:
     ============================================
 
     Core Extraction:
-    - TODO: Add extract_multiple() for batch extraction
-    - TODO: Add extract_by_line() to extract symbol at line number
-    - TODO: Add extract_by_regex() for pattern-based extraction
-    - TODO: Add extract_changed() to extract modified symbols (git diff)
-    - TODO: Add extract_public_api() to get all exported symbols
-    - TODO: Support extraction with custom filters
 
     Context & Dependencies:
-    - TODO: Add get_dependencies() without full extraction
-    - TODO: Add get_dependents() to find code that uses a symbol
-    - TODO: Add resolve_cross_file() for multi-file dependencies
-    - TODO: Support transitive dependency resolution
-    - TODO: Add dependency graph visualization
 
     Search & Discovery:
-    - TODO: Add list_symbols() to enumerate all extractable symbols
-    - TODO: Add find_by_type() to find all functions/classes/etc.
-    - TODO: Add find_by_annotation() to find decorated/annotated code
-    - TODO: Add semantic_search() using embeddings
-    - TODO: Support fuzzy symbol name matching
 
     Multi-File Operations:
-    - TODO: Add from_directory() for project-wide extraction
-    - TODO: Add from_glob() for pattern-based file selection
-    - TODO: Support extraction from git repositories
-    - TODO: Add incremental extraction with caching
 
     Output Formatting:
-    - TODO: Add to_markdown() method
-    - TODO: Add to_json() method
-    - TODO: Add to_prompt() for LLM-ready output
-    - TODO: Support syntax highlighting in output
-    - TODO: Add extraction report generation
 
     Performance:
-    - TODO: Implement lazy parsing (parse on first extract)
-    - TODO: Add parallel extraction for multiple symbols
-    - TODO: Cache parsed ASTs across extractions
-    - TODO: Support streaming extraction for large files
     """
 
     def __init__(
@@ -1393,13 +1292,6 @@ class UnifiedExtractor:
         [20251221_FEATURE] Delegates to surgical_extractor for rich Python support
         including cross-file dependency resolution.
 
-        TODO: Python Extraction Improvements:
-        - TODO: Add support for extracting decorators separately
-        - TODO: Add support for extracting type stubs (.pyi)
-        - TODO: Add dataclass field extraction
-        - TODO: Support extracting from Jupyter notebooks
-        - TODO: Add async function context awareness
-        - TODO: Support Protocol and ABC extraction
         """
         from code_scalpel.surgical_extractor import ExtractionResult, SurgicalExtractor
 
@@ -1502,14 +1394,6 @@ class UnifiedExtractor:
 
         [20251221_FEATURE] Delegates to polyglot for JSX/React/IR support.
 
-        TODO: Polyglot Extraction Improvements:
-        - TODO: Add React hooks extraction
-        - TODO: Add Vue component extraction
-        - TODO: Add Angular component/service extraction
-        - TODO: Support extracting styled-components
-        - TODO: Add GraphQL query/mutation extraction
-        - TODO: Support extracting from .vue SFC files
-        - TODO: Add context extraction for JS/TS
         """
         # [20251228_BUGFIX] Avoid deprecated code_scalpel.polyglot re-export.
         # Prefer the consolidated implementation in code_parsers/.
@@ -1578,16 +1462,6 @@ class UnifiedExtractor:
         [20251221_FEATURE] Placeholder for future language support.
         Will use code_parser once extraction methods are added.
 
-        TODO: Code Parser Integration:
-        - TODO: Implement Go function/method extraction
-        - TODO: Implement C# class/method extraction
-        - TODO: Implement C++ function/class extraction with templates
-        - TODO: Implement Kotlin function/class extraction
-        - TODO: Implement Ruby method/class extraction
-        - TODO: Implement Swift struct/class/protocol extraction
-        - TODO: Implement PHP class/trait extraction
-        - TODO: Add tree-sitter fallback for unsupported languages
-        - TODO: Support custom parser plugins
         """
         return UnifiedExtractionResult(
             success=False,

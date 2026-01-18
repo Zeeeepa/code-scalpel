@@ -6,6 +6,7 @@ Usage:
     python tests/fixtures/generate_fixture.py --clone django
     python tests/fixtures/generate_fixture.py --stdlib
 """
+
 from __future__ import annotations
 
 import argparse

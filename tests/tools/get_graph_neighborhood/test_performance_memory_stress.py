@@ -126,7 +126,7 @@ class TestPerformanceTimings:
 
                 # Baseline: no filtering
                 start_baseline = time.perf_counter()
-                result_baseline = await get_graph_neighborhood(
+                await get_graph_neighborhood(
                     center_node_id="python::main::function::a",
                     k=1,
                     min_confidence=0.0,
@@ -136,7 +136,7 @@ class TestPerformanceTimings:
 
                 # With filtering
                 start_filtered = time.perf_counter()
-                result_filtered = await get_graph_neighborhood(
+                await get_graph_neighborhood(
                     center_node_id="python::main::function::a",
                     k=1,
                     min_confidence=0.9,
@@ -181,7 +181,7 @@ class TestMemoryUsage:
                     "limits": {"max_k": 1, "max_nodes": 20},
                 }
 
-                result = await get_graph_neighborhood(
+                await get_graph_neighborhood(
                     center_node_id="python::main::function::foo",
                     k=1,
                     max_nodes=20,
@@ -232,7 +232,7 @@ class TestMemoryUsage:
                     "limits": {"max_k": None, "max_nodes": None},
                 }
 
-                result = await get_graph_neighborhood(
+                await get_graph_neighborhood(
                     center_node_id="python::large::function::func_99",
                     k=5,
                     max_nodes=200,
@@ -351,7 +351,7 @@ class TestMemoryLeaks:
                     "limits": {"max_k": 1, "max_nodes": 20},
                 }
                 for _ in range(50):
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::foo",
                         k=1,
                         max_nodes=20,

@@ -1,107 +1,116 @@
-# Code Scalpel
+# Code Scalpel: Surgical Code Operations for AI Agents
 
-[![PyPI version](https://badge.fury.io/py/code-scalpel.svg)](https://pypi.org/project/code-scalpel/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+**Coming January 2026 | v1.0 Public Release Preview**
 
-**MCP Server for AI-Powered Code Analysis v1.0** — Surgical code operations through AST parsing, taint analysis, and symbolic execution.
+Code Scalpel is the bridge between **Generative AI** and **Reliable Software Engineering**.
 
-Code Scalpel enables AI assistants (Claude, GitHub Copilot, Cursor) to understand and modify code with mathematical precision, eliminating hallucinations through deterministic analysis.
+It is an **MCP (Model Context Protocol) server** designed to be the primary toolset for AI agents (like Claude, GitHub Copilot, and Cursor) to perceive, analyze, and modify codebases with surgical precision.
 
-## Key Features
+## The Problem: Why Agents Struggle with Code
+Today's AI agents treat code as **text**. They read file contents, guess line numbers, and generate diffs. This leads to:
+*   **Hallucination**: "Replace line 50" fails when the file changed.
+*   **Context Window Exhaustion**: Reading 10 files to find one definition.
+*   **Security Blindness**: Generating SQL injection vulnerabilities because they lack taint analysis.
+*   **Regression**: Making changes that break existing behavior without verification.
 
-- **🔬 Surgical Extraction** — Extract functions, classes, and dependencies with 99% token reduction vs. full files
-- **🛡️ Security Scanning** — Taint-based vulnerability detection (SQL injection, XSS, command injection)
-- **🧪 Test Generation** — Symbolic execution (Z3) generates tests covering all execution paths
-- **📊 Code Analysis** — AST parsing, call graphs, cross-file dependencies, complexity metrics
-- **✏️ Safe Modifications** — AST-validated edits with backup creation and syntax verification
+## The Solution: Tools, Not Text
+Code Scalpel treats code as a **Graph** (AST + PDG). It gives agents deterministic tools to interact with the codebase:
+*   **Don't read the file** → `extract_function("process_payment")`
+*   **Don't guess the line** → `update_symbol("process_payment", new_code)`
+*   **Don't guess dependencies** → `get_cross_file_dependencies("Order")`
+*   **Don't assume safety** → `security_scan(code)`
 
-## Quick Start
+## Key Capabilities at Launch (v1.0) | Jan 2026
 
-### Installation
+Code Scalpel launches with **22 specialized tools** divided into five surgical disciplines. All tools are available in the open-source Community Edition.
 
-```bash
-pip install code-scalpel
-```
+### 1. Surgical Extraction & Analysis (6 Tools)
+Stop grepping. Start understanding.
+*   **`extract_code`**: Surgically extract functions/classes by name, including necessary imports.
+*   **`analyze_code`**: Parse structure, complexity, imports, and definitions.
+*   **`get_project_map`**: Instant high-level cognitive map of the project structure.
+*   **`get_call_graph`**: Trace execution flow and relationships across files.
+*   **`get_symbol_references`**: Find all usages of a symbol across the project.
+*   **`get_file_context`**: Get surrounding context and metadata for any code location.
 
-### MCP Configuration (Claude Desktop / VS Code)
+### 2. Taint-Based Security (6 Tools)
+Real security analysis, not just regex matching.
+*   **`security_scan`**: Trace data flow from user input to dangerous sinks (12+ CWEs).
+*   **`unified_sink_detect`**: Polyglot detection of dangerous functions (sinks).
+*   **`cross_file_security_scan`**: Track dirty data even when it passes through multiple modules.
+*   **`scan_dependencies`**: Check package dependencies for known vulnerabilities (CVEs).
+*   **`type_evaporation_scan`**: Detect TypeScript type system vulnerabilities at I/O boundaries.
+*   **`get_graph_neighborhood`**: Extract k-hop security context around specific nodes.
 
-Add to your MCP settings:
+### 3. Safe Modification (4 Tools)
+*   **`update_symbol`**: Atomic replacement of code blocks with safety checks.
+*   **`rename_symbol`**: Project-wide refactoring that updates all references consistently.
+*   **`simulate_refactor`**: "Dry run" tool that verifies changes before application (safety/build).
+*   **`validate_paths`**: Pre-flight path validation for file operations (Docker-aware).
 
-```json
-{
-  "mcpServers": {
-    "code-scalpel": {
-      "command": "python",
-      "args": ["-m", "code_scalpel.mcp"],
-      "env": {
-        "SCALPEL_ROOT": "/path/to/your/project"
-      }
-    }
-  }
-}
-```
+### 4. Verification & Testing (4 Tools)
+Trust, but verify.
+*   **`symbolic_execute`**: Uses the Z3 theorem prover to mentally explore code paths.
+*   **`generate_unit_tests`**: Auto-creates mathematical proof-of-correctness tests from execution paths.
+*   **`crawl_project`**: Project-wide analysis of code structure and metrics.
+*   **`verify_policy_integrity`**: Cryptographically verify policy files haven't been tampered with.
 
-### Quick Example
+### 5. Advanced Analysis (2 Tools)
+*   **`get_cross_file_dependencies`**: Analyze complex dependency chains across files.
+*   **`code_policy_check`**: Evaluate code against organizational compliance standards.
 
-```python
-# Extract a function surgically (200 tokens vs 15,000 for full file)
-result = extract_code(
-    file_path="/project/utils.py",
-    target_type="function",
-    target_name="calculate_tax"
-)
+## How We're Different
 
-# Scan for security vulnerabilities
-vulns = security_scan(file_path="/project/handlers.py")
+### Code Scalpel vs Python `scalpel` Library
 
-# Generate tests covering all paths
-tests = generate_unit_tests(file_path="/project/calculator.py")
-```
+Code Scalpel is NOT a fork or wrapper of the `scalpel` Python library. It's a completely independent, production-grade MCP server:
 
-## Available Tools (22 Total)
+| Feature | Code Scalpel | Python `scalpel` |
+|---------|--------------|------------------|
+| **Interface** | MCP server (primary) | CLI tool only |
+| **AI Agent Ready** | Yes (designed for agents) | CLI-only |
+| **Tools** | 22 specialized tools | Limited utilities |
+| **Security Scanning** | Taint analysis (12 CWEs) | Basic pattern matching |
+| **Symbolic Execution** | Z3-powered (all paths) | Not supported |
+| **Test Generation** | Auto-generate from paths | Not supported |
+| **Refactor Verification** | Behavior preservation check | Manual verification |
+| **Cross-file Analysis** | Full dependency tracking | Limited scope |
+| **Licensing** | Community (MIT) + Pro/Enterprise | N/A |
 
-| Category | Tools |
-|----------|-------|
-| **Extraction** | `extract_code`, `get_file_context`, `analyze_code` |
-| **Navigation** | `get_call_graph`, `get_cross_file_dependencies`, `get_symbol_references`, `get_project_map` |
-| **Security** | `security_scan`, `cross_file_security_scan`, `unified_sink_detect`, `type_evaporation_scan` |
-| **Testing** | `generate_unit_tests`, `symbolic_execute`, `simulate_refactor` |
-| **Modification** | `update_symbol`, `rename_symbol` |
-| **Project** | `crawl_project`, `scan_dependencies`, `get_graph_neighborhood`, `code_policy_check` |
-| **Utilities** | `validate_paths`, `verify_policy_integrity` |
+### Code Scalpel vs Other Code Analysis Tools
 
-## Tier System
+| Feature | Code Scalpel | AST Explorer | Semgrep | Pylint |
+|---------|--------------|--------------|---------|--------|
+| **Primary Use** | MCP server for AI agents | Code visualization | Security patterns | Style linting |
+| **Tool Count** | 22 specialized tools | Query only | ~1000 rules | Limited |
+| **Code Extraction** | ✅ By symbol name, safe | ⚠️ Manual AST inspection | ❌ Not primary | ❌ Not supported |
+| **Security Scan** | ✅ Full taint analysis (12 CWEs) | ❌ No | ⚠️ Pattern-based | ⚠️ Basic only |
+| **Symbolic Execution** | ✅ Z3-powered | ❌ No | ❌ No | ❌ No |
+| **Test Generation** | ✅ Auto-generate from paths | ❌ No | ❌ No | ❌ No |
+| **Safe Refactoring** | ✅ Behavior verification | ❌ Manual | ❌ Not supported | ❌ Not supported |
+| **Cross-file Deps** | ✅ Full tracking | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
+| **MCP Server** | ✅ Primary interface | ❌ No | ❌ No | ❌ No |
+| **LLM-Friendly** | ✅ Designed for agents | ⚠️ Limited | ⚠️ Limited | ⚠️ Limited |
+| **Polyglot** | ✅ Python, JS, TS, Java | ✅ Multi-language | ✅ Multi-language | ⚠️ Python-only |
 
-Code Scalpel operates on a three-tier model:
+### Code Scalpel vs IDE Extensions
 
-| Tier | Access | Key Features |
-|------|--------|--------------|
-| **Community** | Free | All 22 tools with baseline limits |
-| **Pro** | License | Unlimited findings, cross-file analysis, advanced features |
-| **Enterprise** | License | Compliance reporting, custom policies, audit trails |
+| Feature | Code Scalpel | VS Code Pylance | JetBrains IDEs | Copilot |
+|---------|--------------|-----------------|----------------|---------|
+| **Interface** | MCP server | IDE plugin | IDE plugin | Chat-only |
+| **Surgical Extraction** | ✅ By name, safe, cross-file | ⚠️ Partial (line-based) | ⚠️ Partial (line-based) | ❌ Not precise |
+| **Security Analysis** | ✅ 22 tools, taint-based | ⚠️ Limited | ⚠️ Limited | ⚠️ Generalist |
+| **Test Generation** | ✅ Symbolic execution | ❌ No | ❌ No | ⚠️ Quality varies |
+| **Behavior Verification** | ✅ Before refactoring | ❌ No | ⚠️ Limited | ⚠️ Manual only |
+| **Independent of IDE** | ✅ Works anywhere | ❌ IDE-bound | ❌ IDE-bound | ❌ Web-bound |
+| **Offline Capable** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
+| **Reproducible** | ✅ Deterministic | ✅ Deterministic | ✅ Deterministic | ⚠️ Variable |
 
-## Documentation
+## Release Information
+**Launch Date**: January 2026
+**Version**: v1.0.0
+**License**: MIT (Community)
 
-- [Getting Started Guide](docs/getting_started/)
-- [Tool Reference](docs/reference/)
-- [Architecture](docs/architecture/)
-- [Security](SECURITY.md)
+Code Scalpel is built for the new era of **Agentic Engineering**. It is not just a linter; it is the sensory and actuator system for the next generation of AI developers.
 
-## Docker
-
-```bash
-docker run -v $(pwd):/workspace ghcr.io/3d-tech-solutions/code-scalpel:latest
-```
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-**Built for AI agents that need to understand code, not guess at it.**
+*(Installation and usage documentation will be available upon release)*

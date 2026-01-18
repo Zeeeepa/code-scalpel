@@ -1,7 +1,6 @@
 """
 Claude API integration for Code Scalpel.
 
-TODO ITEMS: integrations/claude.py
 ======================================================================
 COMMUNITY TIER - Core Claude Integration
 ======================================================================

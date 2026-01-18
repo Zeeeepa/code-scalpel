@@ -1148,7 +1148,7 @@ async def test_pro_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features
-        pro_features = data.get("pro_features_enabled")
+        data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Pro tier"
@@ -1231,7 +1231,7 @@ async def test_enterprise_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features (Enterprise includes all Pro features)
-        pro_features = data.get("pro_features_enabled")
+        data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Enterprise tier"

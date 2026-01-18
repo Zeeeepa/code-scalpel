@@ -253,7 +253,7 @@ class TestJSONRPCProtocolViolations:
             TypeError, match="got an unexpected keyword argument|missing.*required"
         ):
             # This should raise TypeError in function signature validation
-            result = await get_graph_neighborhood(
+            await get_graph_neighborhood(
                 center_node_id="python::test::function::foo",
                 unknown_param="should_be_ignored",  # Extra param
                 project_root="/nonexistent",

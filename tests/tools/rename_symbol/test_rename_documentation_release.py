@@ -117,7 +117,7 @@ class TestErrorMessages:
         src = tmp_path / "nonexistent.py"
 
         try:
-            patcher = UnifiedPatcher.from_file(str(src))
+            UnifiedPatcher.from_file(str(src))
         except (FileNotFoundError, ValueError) as e:
             # Error message should be helpful
             assert str(e) is not None
@@ -191,7 +191,7 @@ class TestLoggingAndDebug:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        result = patcher.rename_symbol("function", "old_func", "new_func")
+        patcher.rename_symbol("function", "old_func", "new_func")
 
         captured = capsys.readouterr()
 
@@ -261,7 +261,7 @@ class TestReleaseReadiness:
         src.write_text("def old_func():\n    return 1\n")
 
         patcher = UnifiedPatcher.from_file(str(src))
-        result = patcher.rename_symbol("function", "old_func", "new_func")
+        patcher.rename_symbol("function", "old_func", "new_func")
 
         captured = capsys.readouterr()
 

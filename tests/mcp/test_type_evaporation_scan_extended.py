@@ -365,7 +365,7 @@ async def test_tier_transition_pro_to_enterprise_fields_appear(
         )
 
     env_json_pro = _tool_json(payload_pro)
-    data_pro = _assert_envelope(env_json_pro, tool_name="type_evaporation_scan")
+    _assert_envelope(env_json_pro, tool_name="type_evaporation_scan")
 
     # Test Enterprise tier
     env_ent = _license_env(
@@ -703,7 +703,7 @@ async def test_mcp_protocol_tool_id_in_envelope(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
+    _tool_json(payload)
 
     # Tool ID must be present and match
     # assert "tool_id" in env_json
@@ -724,7 +724,7 @@ async def test_mcp_protocol_tier_field_present(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
+    _tool_json(payload)
 
     # Tier field must be present
     # assert "tier" in env_json
@@ -745,7 +745,7 @@ async def test_mcp_protocol_duration_present(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
+    _tool_json(payload)
 
     # Duration must be present and positive integer
     # assert "duration_ms" in env_json

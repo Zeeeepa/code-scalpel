@@ -63,33 +63,26 @@ class GosecParser:
     def execute_gosec(
         self, paths: List[Path], config: GosecConfig = None
     ) -> List[SecurityIssue]:
-        """Execute gosec analysis - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Gosec execution")
 
     def parse_json_report(self, report_path: Path) -> List[SecurityIssue]:
-        """Parse gosec JSON report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GosecConfig:
-        """Load gosec configuration - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_vulnerabilities(
         self, issues: List[SecurityIssue]
     ) -> Dict[VulnerabilityType, List[SecurityIssue]]:
-        """Categorize vulnerabilities by type - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
     def filter_by_severity(
         self, issues: List[SecurityIssue], min_severity: str
     ) -> List[SecurityIssue]:
-        """Filter issues by minimum severity - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Severity filtering")
 
     def map_to_cwe(self, issues: List[SecurityIssue]) -> Dict[str, List[SecurityIssue]]:
-        """Map vulnerabilities to CWE identifiers - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: CWE mapping")
 
     def generate_report(self, issues: List[SecurityIssue], format: str = "json") -> str:
-        """Generate security report - Phase 2 TODO # TODO"""
         raise NotImplementedError("Phase 2: Report generation")

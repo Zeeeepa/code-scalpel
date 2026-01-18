@@ -20,15 +20,13 @@ class TestOutputMetadataFields:
         """Basic call graph should include all metadata fields."""
         # Create a simple project
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def main():
     helper()
 
 def helper():
     return 42
-"""
-        )
+""")
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
         assert result.success is True
@@ -119,8 +117,7 @@ class TestTierEnforcement:
         """Community tier should enforce max_depth=3."""
         # Create a deeply nested call chain
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def level_0():
     level_1()
 
@@ -138,8 +135,7 @@ def level_4():
 
 def level_5():
     pass
-"""
-        )
+""")
         with patch(
             "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
         ):
@@ -235,15 +231,13 @@ class TestTruncationMetadata:
     async def test_no_truncation_when_within_limits(self, tmp_path):
         """When within limits, truncation fields should indicate no truncation."""
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def foo():
     bar()
 
 def bar():
     pass
-"""
-        )
+""")
         result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True

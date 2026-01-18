@@ -4,7 +4,6 @@ REST API Server - Legacy HTTP API for Code Scalpel.
 NOTE: This is NOT an MCP-compliant server. It uses a custom REST API.
 For true MCP protocol support, use: code_scalpel.mcp.server
 
-TODO ITEMS: integrations/rest_api_server.py
 ======================================================================
 COMMUNITY TIER - Core REST API Infrastructure
 ======================================================================

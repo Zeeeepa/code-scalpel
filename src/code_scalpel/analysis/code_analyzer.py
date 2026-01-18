@@ -1,9 +1,9 @@
 """
 CodeAnalyzer - Stable analysis pipeline for code-scalpel.
 
-# [20251224_REFACTOR] Moved from code_scalpel/code_analyzer.py to
-# code_scalpel/analysis/code_analyzer.py as part of Issue #3
-# in PROJECT_REORG_REFACTOR.md Phase 1.
+[20251224_REFACTOR] Moved from code_scalpel/code_analyzer.py to
+code_scalpel/analysis/code_analyzer.py as part of Issue #3
+in PROJECT_REORG_REFACTOR.md Phase 1.
 
 This module provides a unified interface for:
 - AST analysis and parsing
@@ -11,56 +11,10 @@ This module provides a unified interface for:
 - Symbolic execution for path analysis
 - Dead code detection
 - Refactoring via PDG-guided transformations
-
-TODO: CodeAnalyzer Enhancement Roadmap
-======================================
-
-COMMUNITY (Current & Planned):
-- TODO [COMMUNITY]: Leverage code_parsers.RuffParser for fast linting integration (current)
-- TODO [COMMUNITY]: Implement language-agnostic AnalysisResult with unified metrics
-- TODO [COMMUNITY]: Add Halstead complexity metrics
-- TODO [COMMUNITY]: Implement maintainability index calculation
-- TODO [COMMUNITY]: Implement extract_function() refactoring
-- TODO [COMMUNITY]: Implement extract_variable() refactoring
-- TODO [COMMUNITY]: Implement inline_variable() refactoring
-- TODO [COMMUNITY]: Add automatic import management during refactoring
-
-PRO (Enhanced Features):
-- TODO [PRO]: Use code_parsers.ParserFactory instead of direct ast.parse()
-- TODO [PRO]: Support code_parsers.ParseResult for unified error handling
-- TODO [PRO]: Integrate code_parsers language detection for multi-language files
-- TODO [PRO]: Use code_parsers.PythonASTParser for enhanced Python parsing
-- TODO [PRO]: Add parser_backend parameter to __init__ for parser selection
-- TODO [PRO]: Extend analyze() to support JavaScript/TypeScript via code_parsers
-- TODO [PRO]: Add Java analysis using code_parsers.java_parsers
-- TODO [PRO]: Create language-specific analyzers that inherit from CodeAnalyzer
-- TODO [PRO]: Add cross-file dead code detection (unused exports)
-- TODO [PRO]: Implement test coverage integration for dead code validation
-- TODO [PRO]: Add code churn metrics (requires git integration)
-- TODO [PRO]: Calculate test-to-code ratio
-- TODO [PRO]: Add dependency depth metrics
-- TODO [PRO]: Add rename_symbol() with scope awareness
-- TODO [PRO]: Implement persistent analysis cache (SQLite or file-based)
-- TODO [PRO]: Add incremental analysis (only re-analyze changed functions)
-- TODO [PRO]: Integrate taint analysis from symbolic_execution_tools
-
-ENTERPRISE (Advanced Capabilities):
-- TODO [ENTERPRISE]: Support mixed-language projects (JS + Python)
-- TODO [ENTERPRISE]: Add dead code detection for TypeScript (unused types/interfaces)
-- TODO [ENTERPRISE]: Support conditional dead code (platform-specific, debug-only)
-- TODO [ENTERPRISE]: Add confidence scores based on multiple analysis passes
-- TODO [ENTERPRISE]: Integrate with PDG for data-flow based dead code detection
-- TODO [ENTERPRISE]: Implement cognitive complexity (beyond cyclomatic)
-- TODO [ENTERPRISE]: Implement move_to_module() refactoring
-- TODO [ENTERPRISE]: Implement parallel analysis for multi-file projects
-- TODO [ENTERPRISE]: Add analysis result serialization for external tools
-- TODO [ENTERPRISE]: Implement analysis result diffing for change detection
-- TODO [ENTERPRISE]: Add SAST rule engine for custom security patterns
-- TODO [ENTERPRISE]: Implement dependency vulnerability scanning
-- TODO [ENTERPRISE]: Add secrets detection (API keys, passwords)
-- TODO [ENTERPRISE]: Generate SARIF output for security findings
-- TODO [ENTERPRISE]: Multi-framework analysis support (Django, Flask, FastAPI)
 """
+
+# =============================================================================
+# =============================================================================
 
 import ast
 import logging
@@ -910,8 +864,10 @@ class CodeAnalyzer:
                         cognitive += child_cogn
                 if hasattr(node, "handlers") and node.handlers:
                     for handler in node.handlers:
-                        if hasattr(handler, "body") and handler.body:
-                            for child in handler.body:
+                        # [20260118_BUGFIX] handlers may be IR nodes or tuples
+                        handler_body = getattr(handler, "body", None)
+                        if handler_body:
+                            for child in handler_body:
                                 child_cyclo, child_cogn = walk_ir(child, nesting + 1)
                                 cyclomatic += child_cyclo
                                 cognitive += child_cogn

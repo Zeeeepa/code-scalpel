@@ -337,7 +337,6 @@ class ImportCountCollector(MetricCollector):
 
 
 class TodoCountCollector(MetricCollector):
-    """Counts TODO/FIXME comments."""
 
     @property
     def name(self) -> str:

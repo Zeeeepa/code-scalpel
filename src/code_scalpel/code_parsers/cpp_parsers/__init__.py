@@ -5,7 +5,6 @@ C++ Parsers Module - Unified Interface and Registry
 This module provides a comprehensive interface for C++ code analysis.
 """
 
-
 __all__ = [
     "CppParserRegistry",
     "ClangStaticAnalyzerParser",

@@ -83,25 +83,19 @@ class PHPStanParser:
         self.config: Optional[PHPStanConfig] = None
 
     def parse_json_report(self, json_data: str) -> list[PHPStanError]:
-        """Parse PHPStan JSON report format. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan JSON parsing")
 
     def parse_json_inline(self, json_data: str) -> list[PHPStanError]:
-        """Parse PHPStan JSON-inline format with context. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan JSON-inline parsing")
 
     def load_config(self, config_path: Path) -> PHPStanConfig:
-        """Load and parse phpstan.neon configuration. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan config parsing")
 
     def execute_phpstan(self, paths: list[str]) -> dict[str, Any]:
-        """Execute PHPStan analysis on paths. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan execution")
 
     def generate_type_coverage(self) -> dict[str, Any]:
-        """Generate type coverage report. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan type coverage")
 
     def generate_report(self) -> str:
-        """Generate comprehensive PHPStan report. # TODO"""
         raise NotImplementedError("Phase 2: PHPStan report generation")

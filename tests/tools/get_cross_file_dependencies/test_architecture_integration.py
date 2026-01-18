@@ -24,9 +24,12 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     try:
-        import tomli as tomllib
+        import tomllib  # Standard library in Python 3.11+
+
+        tomllib = tomllib
     except ImportError:
-        # Fallback: skip tests if tomli not available
+        # Fallback: skip tests if tomllib not available
+        tomllib = None  # type: ignore
         pytest.skip("tomli package required for Python 3.10", allow_module_level=True)
 
 

@@ -104,7 +104,7 @@ def calculate_tax(amount, rate=0.1):
         new_code = "x = 2"
 
         simulator = RefactorSimulator()
-        result = simulator.simulate(original_code=original, new_code=new_code)
+        simulator.simulate(original_code=original, new_code=new_code)
 
         # The result itself doesn't carry tier info (that's envelope responsibility)
         # But _get_current_tier should reflect the active license

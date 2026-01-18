@@ -34,55 +34,13 @@ Safety Features:
     - Preserves surrounding code exactly
     - Atomic write (temp file + rename)
 
-TODO: Module Enhancement Roadmap
 ================================
 
 COMMUNITY (Current & Planned):
-- TODO [COMMUNITY]: Add semantic validation (not just syntax) (current)
-- TODO [COMMUNITY]: Verify imports are satisfied after patch
-- TODO [COMMUNITY]: Add type checking integration (mypy/pyright)
-- TODO [COMMUNITY]: Validate docstring format preservation
-- TODO [COMMUNITY]: Generate unified diff output for patches
-- TODO [COMMUNITY]: Support patch preview mode (dry-run)
-- TODO [COMMUNITY]: Add conflict resolution UI hooks
 
 PRO (Enhanced Features):
-- TODO [PRO]: Add insert_function() to add new functions at specific locations
-- TODO [PRO]: Add insert_method() to add methods to existing classes
-- TODO [PRO]: Add delete_function() / delete_class() / delete_method()
-- TODO [PRO]: Add rename_symbol() with automatic reference updates
-- TODO [PRO]: Add move_function() to relocate between files
-- TODO [PRO]: Support inserting imports when adding new code
-- TODO [PRO]: Add reorder_methods() to reorganize class structure
-- TODO [PRO]: Add batch_update() for multiple patches in one operation
-- TODO [PRO]: Support transaction-style commit/rollback for multi-patch
-- TODO [PRO]: Add update_signature() to change function parameters
-- TODO [PRO]: Implement extract_method() refactoring operation
-- TODO [PRO]: Add inline_function() to replace calls with body
-- TODO [PRO]: Support partial updates (docstring-only, decorator-only)
-- TODO [PRO]: Add pre-patch hooks for custom validation
-- TODO [PRO]: Implement change impact analysis
-- TODO [PRO]: Track patch history for undo/redo
-- TODO [PRO]: Add git integration for automatic commits
-- TODO [PRO]: Support patch files (.patch format)
 
 ENTERPRISE (Advanced Capabilities):
-- TODO [ENTERPRISE]: Check for breaking changes in public API
-- TODO [ENTERPRISE]: Generate IDE-compatible change descriptions
-- TODO [ENTERPRISE]: Support collaborative editing locks
-- TODO [ENTERPRISE]: Update all callers when signature changes
-- TODO [ENTERPRISE]: Rename across multiple files
-- TODO [ENTERPRISE]: Move class/function between modules with import updates
-- TODO [ENTERPRISE]: Support refactoring within monorepos
-- TODO [ENTERPRISE]: Add project-wide find-and-replace with AST awareness
-- TODO [ENTERPRISE]: Add JavaScript/TypeScript patching
-- TODO [ENTERPRISE]: Add Java method replacement
-- TODO [ENTERPRISE]: Add Go function patching
-- TODO [ENTERPRISE]: Create unified patching API across languages
-- TODO [ENTERPRISE]: Support mixed-language projects
-- TODO [ENTERPRISE]: Add LSP integration for editor support
-- TODO [ENTERPRISE]: Support VS Code extension commands
-- TODO [ENTERPRISE]: Generate change logs from patches
 """
 
 from __future__ import annotations
@@ -199,18 +157,6 @@ class PatchResult:
     """
     Result of a surgical patch operation.
 
-    TODO: Add the following fields for richer patch tracking:
-    - TODO: diff: str | None - Unified diff of the change
-    - TODO: old_code: str - Original code that was replaced
-    - TODO: new_code: str - New code that was inserted
-    - TODO: timestamp: datetime - When the patch was applied
-    - TODO: checksum_before: str - Hash of file before patch
-    - TODO: checksum_after: str - Hash of file after patch
-    - TODO: affected_lines: tuple[int, int] - Line range modified
-    - TODO: warnings: list[str] - Non-fatal issues detected
-    - TODO: validation_passed: bool - Whether semantic checks passed
-    - TODO: rollback_info: dict - Data needed to undo this patch
-    - TODO: dependencies_changed: list[str] - Imports/deps affected
     """
 
     success: bool
@@ -238,15 +184,6 @@ class _SymbolLocation:
     """
     Internal: Location of a symbol in source code.
 
-    TODO: Add the following fields for better symbol tracking:
-    - TODO: decorators: list[str] - Decorator names applied
-    - TODO: docstring: str | None - Symbol's docstring
-    - TODO: visibility: str - 'public', 'protected', 'private'
-    - TODO: is_async: bool - Whether async function/method
-    - TODO: signature: str - Function/method signature string
-    - TODO: dependencies: list[str] - Symbols this depends on
-    - TODO: dependents: list[str] - Symbols that depend on this
-    - TODO: hash: str - Content hash for change detection
     """
 
     name: str
@@ -396,50 +333,19 @@ class SurgicalPatcher:
         >>> if result.success:
         ...     patcher.save()
 
-    TODO: SurgicalPatcher Enhancement Roadmap:
     ==========================================
 
     Core Patching:
-    - TODO: Add update_decorator() to modify/add/remove decorators
-    - TODO: Add update_docstring() for docstring-only changes
-    - TODO: Add update_signature() for parameter changes
-    - TODO: Add update_body() to change only function body
-    - TODO: Support updating type annotations separately
-    - TODO: Add merge_function() to combine two functions
 
     Insertion Operations:
-    - TODO: Add insert_before() / insert_after() for positioning
-    - TODO: Add insert_import() with deduplication
-    - TODO: Add insert_class_attribute() for class-level variables
-    - TODO: Support inserting at specific line numbers
-    - TODO: Add append_to_class() for adding members
 
     Deletion Operations:
-    - TODO: Add remove_function() / remove_class() / remove_method()
-    - TODO: Add remove_decorator() from existing code
-    - TODO: Add remove_import() with unused detection
-    - TODO: Support conditional deletion (if matches pattern)
 
     Multi-File Operations:
-    - TODO: Add clone_to_file() to copy symbols between files
-    - TODO: Add move_to_file() with import updates
-    - TODO: Support batch operations across file sets
-    - TODO: Add project-wide rename with reference updates
 
     Safety Features:
-    - TODO: Add dry_run mode for preview
-    - TODO: Implement undo stack for reversibility
-    - TODO: Add conflict detection for concurrent edits
-    - TODO: Support file locking during operations
-    - TODO: Add pre/post patch hooks for custom validation
-    - TODO: Implement change journaling for recovery
 
     Output & Reporting:
-    - TODO: Generate unified diff output
-    - TODO: Add HTML diff visualization
-    - TODO: Support patch file export (.patch format)
-    - TODO: Add change summary generation
-    - TODO: Integrate with code review tools
     """
 
     def __init__(self, code: str, file_path: str | None = None):
@@ -510,13 +416,6 @@ class SurgicalPatcher:
         """
         Build an index of all functions, classes, and methods.
 
-        TODO: Symbol Indexing Improvements:
-        - TODO: Index module-level constants and variables
-        - TODO: Index type aliases and Protocol definitions
-        - TODO: Track symbol visibility (public/private)
-        - TODO: Build dependency graph between symbols
-        - TODO: Index decorators as separate entities
-        - TODO: Support incremental re-indexing after changes
         """
         self._symbols.clear()
 
@@ -577,11 +476,6 @@ class SurgicalPatcher:
         """
         Get the end line of an AST node, handling decorators.
 
-        TODO: End Line Detection Improvements:
-        - TODO: Handle multi-line strings at end of functions
-        - TODO: Account for trailing comments
-        - TODO: Support nodes without end_lineno (older Python)
-        - TODO: Handle edge cases with decorators spanning lines
         """
         end_lineno = getattr(node, "end_lineno", None)
         if end_lineno is not None:
@@ -603,10 +497,6 @@ class SurgicalPatcher:
         """
         Get the starting line including decorators.
 
-        TODO: Decorator Handling Improvements:
-        - TODO: Handle multi-line decorator arguments
-        - TODO: Support decorator factories with complex args
-        - TODO: Preserve decorator comments
         """
         decorator_list = getattr(node, "decorator_list", None)
         if decorator_list:
@@ -618,15 +508,6 @@ class SurgicalPatcher:
         """
         Validate that replacement code is syntactically correct.
 
-        TODO: Validation Enhancements:
-        - TODO: Check that function name matches target (optional strict mode)
-        - TODO: Validate type annotations are well-formed
-        - TODO: Check docstring format (Google, NumPy, Sphinx)
-        - TODO: Verify async/sync consistency with original
-        - TODO: Check decorator compatibility
-        - TODO: Validate against project's linting rules
-        - TODO: Ensure imports used in code are available
-        - TODO: Check for breaking signature changes
         """
         try:
             tree = ast.parse(new_code)
@@ -659,14 +540,6 @@ class SurgicalPatcher:
         Returns:
             Tuple of (new_code, lines_removed, lines_added)
 
-        TODO: Patch Application Improvements:
-        - TODO: Preserve blank lines before/after symbol
-        - TODO: Handle trailing comments on same line as symbol end
-        - TODO: Support preserving specific comments (# noqa, etc.)
-        - TODO: Add option to normalize indentation style
-        - TODO: Handle mixed tabs/spaces gracefully
-        - TODO: Support patching within string literals (rare edge case)
-        - TODO: Add conflict markers for failed patches
         """
         lines = self.current_code.splitlines(keepends=True)
 
@@ -1291,15 +1164,6 @@ class SurgicalPatcher:
             ValueError: If no file_path was provided
             IOError: If file cannot be written
 
-        TODO: Save Operation Improvements:
-        - TODO: Add versioned backups (.bak.1, .bak.2, etc.)
-        - TODO: Support backup to separate directory
-        - TODO: Add option to create git commit on save
-        - TODO: Implement file locking during save
-        - TODO: Add checksum verification after write
-        - TODO: Support dry-run mode (return diff without saving)
-        - TODO: Add hooks for pre-save and post-save actions
-        - TODO: Support saving to different path (save-as)
         """
         if not self.file_path:
             raise ValueError("Cannot save: no file_path specified")

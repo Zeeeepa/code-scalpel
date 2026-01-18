@@ -54,14 +54,6 @@ class TestSymbolicPruning:
 
     def test_prune_by_type_safety(self):
         """Test pruning when variable is proven to be safe type (int)."""
-        code = """
-import os
-
-def vulnerable():
-    # 'data' is tainted source in many configs, but here it's an int
-    data = 42
-    os.system(data) 
-"""
         # Note: Depending on taint configuration, direct assignment `data = 42` might not even be marked tainted.
         # But if we assume loose taint tracking where any arg to os.system is suspect if we can't track origin...
         # Actually, TaintTracker usually tracks from Source.

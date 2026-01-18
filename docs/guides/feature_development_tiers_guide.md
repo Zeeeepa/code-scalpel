@@ -907,7 +907,7 @@ async def your_tool(...) -> Result:
 | `unified_sink_detect` | ✅ | ✅ | ✅ | |
 | `scan_dependencies` | ✅ | ✅ | ✅ | |
 | `validate_paths` | ✅ | ✅ | ✅ | |
-| `code_policy_check` | ✅ | ✅ | ✅ | NEW in v3.4.0 |
+| `code_policy_check` | ✅ | ✅ | ✅ | NEW in v1.0.0 |
 | `crawl_project` | ❌ | ✅ | ✅ | |
 | `get_call_graph` | ❌ | ✅ | ✅ | |
 | `get_graph_neighborhood` | ❌ | ✅ | ✅ | |

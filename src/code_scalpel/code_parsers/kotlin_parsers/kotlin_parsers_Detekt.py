@@ -12,25 +12,18 @@ Detekt provides:
 - Baseline support for legacy code
 - Multiple output formats (XML, HTML, SARIF, plain text)
 
-TODO: HIGH PRIORITY - Core Implementation
 ==========================================
 
-TODO: HIGH PRIORITY - Execution
 ================================
 
-TODO: HIGH PRIORITY - Configuration
 ====================================
 
-TODO: MEDIUM PRIORITY - Rule Sets
 ==================================
 
-TODO: MEDIUM PRIORITY - Metrics
 ================================
 
-TODO: MEDIUM PRIORITY - Suppression
 ====================================
 
-TODO: LOW PRIORITY - Advanced Features
 =======================================
 """
 
@@ -182,9 +175,6 @@ class DetektParser:
         # Get findings by severity
         errors = [f for f in report.findings if f.is_error]
 
-    TODO: Implement all parsing methods
-    TODO: Add Detekt CLI execution
-    TODO: Add configuration parsing
     """
 
     def __init__(self, detekt_path: Optional[str] = None):
@@ -215,7 +205,6 @@ class DetektParser:
         :param xml_path: Path to Detekt XML report file.
         :return: DetektReport with findings.
 
-        TODO: Implement XML parsing
         """
         raise NotImplementedError("XML report parsing not yet implemented")
 
@@ -226,7 +215,6 @@ class DetektParser:
         :param sarif_path: Path to Detekt SARIF report file.
         :return: DetektReport with findings.
 
-        TODO: Implement SARIF parsing
         """
         raise NotImplementedError("SARIF report parsing not yet implemented")
 
@@ -237,7 +225,6 @@ class DetektParser:
         :param text: Detekt plain text output.
         :return: DetektReport with findings.
 
-        TODO: Implement text parsing
         """
         raise NotImplementedError("Text report parsing not yet implemented")
 
@@ -248,7 +235,6 @@ class DetektParser:
         :param config_path: Path to detekt.yml.
         :return: DetektConfig object.
 
-        TODO: Implement YAML config parsing
         """
         raise NotImplementedError("Config parsing not yet implemented")
 
@@ -264,7 +250,6 @@ class DetektParser:
         :param config_path: Optional path to detekt.yml.
         :return: DetektReport with findings.
 
-        TODO: Implement Detekt execution
         """
         raise NotImplementedError("Project analysis not yet implemented")
 
@@ -275,7 +260,6 @@ class DetektParser:
         :param file_path: Path to Kotlin file.
         :return: DetektReport with findings.
 
-        TODO: Implement single file analysis
         """
         raise NotImplementedError("File analysis not yet implemented")
 
@@ -291,6 +275,5 @@ class DetektParser:
         :param output_path: Output path for baseline file.
         :return: Path to generated baseline file.
 
-        TODO: Implement baseline generation
         """
         raise NotImplementedError("Baseline generation not yet implemented")

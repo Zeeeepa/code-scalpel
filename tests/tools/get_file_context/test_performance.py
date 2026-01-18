@@ -273,7 +273,7 @@ class TestStressTests:
         file_path = Path(project_root) / XLARGE_FILE
 
         # First call might hit limit (20K lines > 500 Community limit)
-        result1 = community_server.get_file_context(str(file_path))
+        community_server.get_file_context(str(file_path))
         # Could fail or succeed depending on tier enforcement
 
         # Next call should work regardless

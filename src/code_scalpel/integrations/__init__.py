@@ -10,7 +10,6 @@ For MCP (Model Context Protocol) integration, use:
 For the legacy REST API server (not MCP-compliant), use:
     from code_scalpel.integrations.rest_api_server import create_app
 
-TODO ITEMS: integrations/__init__.py
 ======================================================================
 COMMUNITY TIER - Core Integration Infrastructure
 ======================================================================

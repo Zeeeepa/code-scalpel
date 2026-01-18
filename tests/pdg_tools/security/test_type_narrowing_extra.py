@@ -12,16 +12,14 @@ from code_scalpel.polyglot.typescript.type_narrowing import (
 
 
 def test_regex_fallback_tracks_negated_predicates_and_truthy_guards() -> None:
-    code = dedent(
-        """
+    code = dedent("""
         if (!isValid(value)) {
           doThing(value);
         }
         if (typeof value === 'number') {
           return value + 1;
         }
-        """
-    )
+        """)
 
     narrowing = TypeNarrowing()
     result = narrowing.analyze(code)

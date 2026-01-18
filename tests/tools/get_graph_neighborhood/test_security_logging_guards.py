@@ -71,7 +71,7 @@ class TestSecretRedaction:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::test",
                         project_root=sensitive_path,
                     )
@@ -222,7 +222,7 @@ class TestNetworkCallPrevention:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::foo",
                         k=1,
                         max_nodes=20,
@@ -250,7 +250,7 @@ class TestNetworkCallPrevention:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::foo",
                         k=1,
                         max_nodes=20,
@@ -278,7 +278,7 @@ class TestNetworkCallPrevention:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::foo",
                         k=1,
                         max_nodes=20,
@@ -327,7 +327,7 @@ class TestFileWritePrevention:
                             "limits": {"max_k": 1, "max_nodes": 20},
                         }
 
-                        result = await get_graph_neighborhood(
+                        await get_graph_neighborhood(
                             center_node_id="python::main::function::foo",
                             k=1,
                             max_nodes=20,
@@ -366,7 +366,7 @@ class TestFileWritePrevention:
                             "limits": {"max_k": 1, "max_nodes": 20},
                         }
 
-                        result = await get_graph_neighborhood(
+                        await get_graph_neighborhood(
                             center_node_id="python::main::function::foo",
                             k=1,
                             max_nodes=20,
@@ -401,7 +401,7 @@ class TestFileWritePrevention:
                                 "limits": {"max_k": 1, "max_nodes": 20},
                             }
 
-                            result = await get_graph_neighborhood(
+                            await get_graph_neighborhood(
                                 center_node_id="python::main::function::foo",
                                 k=1,
                                 max_nodes=20,
@@ -442,7 +442,7 @@ class TestLoggingSecurity:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id=f"python::module_{fake_api_key}::function::test",
                         project_root=str(project_dir),
                     )
@@ -468,7 +468,7 @@ class TestLoggingSecurity:
                         "limits": {"max_k": 1, "max_nodes": 20},
                     }
 
-                    result = await get_graph_neighborhood(
+                    await get_graph_neighborhood(
                         center_node_id="python::main::function::test",
                         project_root=sensitive_path,
                     )
