@@ -114,9 +114,7 @@ async def test_in_flight_operation_keeps_tier_snapshot(
     monkeypatch.setenv("CODE_SCALPEL_LICENSE_CRL_PATH", str(crl_path))
 
     result = await task
-    assert isinstance(result, dict)
-    # [20250112_FIX] Check tier in data payload (always present) rather than
-    # envelope metadata (filtered by default for token efficiency).
+    # [20250112_FIX] Check tier in data payload. Result is now a CodePolicyCheckResult dataclass.
     # The tier_applied field captures the snapshot at operation start.
-    data = result.get("data", {})
-    assert data.get("tier_applied") == "pro", f"Expected tier_applied=pro, got {result}"
+    assert hasattr(result, "tier_applied"), f"Expected dataclass with tier_applied, got {type(result)}"
+    assert result.tier_applied == "pro", f"Expected tier_applied=pro, got {result.tier_applied}"

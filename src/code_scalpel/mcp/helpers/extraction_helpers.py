@@ -44,6 +44,25 @@ def _get_server():
     return _server
 
 
+def _get_project_root() -> Path:
+    """Get the current PROJECT_ROOT from server, fallback to local if not set."""
+    import sys
+    
+    try:
+        # Check if server is imported as __main__
+        if "__main__" in sys.modules:
+            main_module = sys.modules["__main__"]
+            if hasattr(main_module, 'PROJECT_ROOT'):
+                return main_module.PROJECT_ROOT
+        
+        # Fall back to importing the server module directly
+        import code_scalpel.mcp.server as server_module
+        return server_module.PROJECT_ROOT
+    except (ImportError, AttributeError):
+        # If we can't access the server's PROJECT_ROOT, use our local fallback
+        return PROJECT_ROOT
+
+
 def _get_cache():
     try:
         from code_scalpel.cache import get_cache
@@ -119,7 +138,7 @@ async def _extract_polyglot(
     try:
         # Create extractor from file or code
         if file_path is not None:
-            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            resolved_path = resolve_path(file_path, str(_get_project_root()))
             extractor = UnifiedExtractor.from_file(resolved_path, language)
         else:
             # code is guaranteed to be str here (checked earlier in function)
@@ -198,7 +217,7 @@ def _create_extractor(
     if file_path is not None:
         try:
             # [20251214_FEATURE] Use PathResolver for intelligent path resolution
-            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            resolved_path = resolve_path(file_path, str(_get_project_root()))
             return SurgicalExtractor.from_file(resolved_path), None
         except FileNotFoundError as e:
             # PathResolver provides helpful error messages
@@ -563,7 +582,7 @@ async def _extract_code_impl(
             if file_path is not None:
                 from code_scalpel.mcp.path_resolver import resolve_path
 
-                resolved = resolve_path(file_path, str(PROJECT_ROOT))
+                resolved = resolve_path(file_path, str(_get_project_root()))
                 return Path(resolved).read_text(encoding="utf-8")
             return code or ""
 
@@ -828,9 +847,9 @@ async def rename_symbol(
     warnings: list[str] = []
 
     try:
-        resolved = resolve_path(file_path, str(PROJECT_ROOT))
+        resolved = resolve_path(file_path, str(_get_project_root()))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, PROJECT_ROOT)
+        validate_path_security(resolved_path, _get_project_root())
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection
@@ -878,7 +897,7 @@ async def rename_symbol(
                 )
 
                 xres = rename_references_across_project(
-                    project_root=Path(PROJECT_ROOT),
+                    project_root=Path(_get_project_root()),
                     target_file=Path(file_path),
                     target_type=target_type,
                     target_name=target_name,
@@ -1132,9 +1151,9 @@ async def update_symbol(
 
     # Load the file
     try:
-        resolved = resolve_path(file_path, str(PROJECT_ROOT))
+        resolved = resolve_path(file_path, str(_get_project_root()))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, PROJECT_ROOT)
+        validate_path_security(resolved_path, _get_project_root())
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection

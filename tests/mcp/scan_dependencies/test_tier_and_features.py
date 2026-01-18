@@ -96,7 +96,9 @@ async def test_response_schema_validation_community(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        # [20260118_FIX] Minimal response profile flattens the envelope
+        # Response fields are at top level, not wrapped in "data"
+        data = env_json.get("data") or env_json
 
         # Required fields
         assert "success" in data
@@ -1148,7 +1150,7 @@ async def test_pro_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features
-        data.get("pro_features_enabled")
+        pro_features = data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Pro tier"
@@ -1231,7 +1233,7 @@ async def test_enterprise_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features (Enterprise includes all Pro features)
-        data.get("pro_features_enabled")
+        pro_features = data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Enterprise tier"
