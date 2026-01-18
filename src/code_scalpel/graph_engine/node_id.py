@@ -21,7 +21,6 @@ The universal ID enables the graph engine to:
 - Detect HTTP links between frontend and backend
 """
 
-
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -15,7 +15,6 @@ Base Classes:
     - TreeSitterVisitor: Base class for tree-sitter based normalizers
 """
 
-
 from .base import BaseNormalizer
 from .java_normalizer import JavaNormalizer  # [20251215_FEATURE] Export Java normalizer
 from .python_normalizer import PythonNormalizer

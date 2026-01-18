@@ -20,7 +20,6 @@ import networkx as nx
 #     - Support merging PDG changes from different branches
 
 
-
 @dataclass
 class NodeInfo:
     """Information about a PDG node."""

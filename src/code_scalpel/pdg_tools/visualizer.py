@@ -20,7 +20,6 @@ from graphviz import Digraph
 #     - Generate heatmaps of high-risk code areas
 
 
-
 class VisualizationFormat(Enum):
     """Supported visualization output formats."""
 

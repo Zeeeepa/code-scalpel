@@ -7,7 +7,6 @@ This module extends the base AnalysisCache to provide AST-specific caching
 with dependency tracking and cascading invalidation.
 """
 
-
 from __future__ import annotations
 
 import hashlib

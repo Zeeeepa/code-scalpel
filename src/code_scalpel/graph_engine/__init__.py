@@ -21,7 +21,6 @@ Example:
     >>> print(graph.to_json())
 """
 
-
 from .confidence import CONFIDENCE_RULES, ConfidenceEngine, ConfidenceLevel, EdgeType
 from .graph import (
     GraphBuilder,

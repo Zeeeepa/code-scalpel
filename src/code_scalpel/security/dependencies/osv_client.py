@@ -79,7 +79,6 @@ class OSVClient:
     known security vulnerabilities with CVE/GHSA identifiers.
     """
 
-
     # [20251213_FEATURE] Ecosystem mapping for different package managers
     ECOSYSTEM_MAP = {
         "pypi": "PyPI",

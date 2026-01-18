@@ -84,8 +84,7 @@ class ASTUtils:
         TODO [ENTERPRISE]: Compare semantics (not syntax)
         TODO [ENTERPRISE]: Identify refactored code
         TODO [ENTERPRISE]: Match equivalent structures
-        TODO [ENTERPRISE]: Add 12+ tests for semantic comparison    """
-
+        TODO [ENTERPRISE]: Add 12+ tests for semantic comparison"""
 
     @staticmethod
     def get_all_names(tree: ast.AST) -> set[str]:

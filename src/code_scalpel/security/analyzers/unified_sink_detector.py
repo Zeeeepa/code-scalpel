@@ -1050,12 +1050,12 @@ class UnifiedSinkDetector:
         # [20260115_FEATURE] 1.3 Confidence Calibration & Taint Integration
         # Run full security analysis to identify high-confidence vulnerabilities
         from .security_analyzer import SecurityAnalyzer
-        
+
         verified_locs = set()
         try:
             analyzer = SecurityAnalyzer()
             result = analyzer.analyze(code)
-            
+
             # Map valid vulnerability locations (Match + Taint + No Sanitizer)
             for vuln in result.vulnerabilities:
                 if vuln.sink_location:
@@ -1081,14 +1081,14 @@ class UnifiedSinkDetector:
                 for match in matches:
                     line_no = getattr(match, "lineno", None) or 0
                     col_offset = getattr(match, "col_offset", None) or 0
-                    
+
                     # Determine confidence score
                     current_confidence = base_confidence
-                    
+
                     if (line_no, col_offset) in verified_locs:
                         # Match + taint + NO sanitizer = 0.95 confidence
                         current_confidence = 0.95
-                    
+
                     # Filter by requested threshold
                     if current_confidence < min_confidence:
                         continue

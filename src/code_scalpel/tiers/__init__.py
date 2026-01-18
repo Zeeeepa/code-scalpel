@@ -28,7 +28,6 @@ Usage:
         pass
 """
 
-
 from enum import Enum
 
 

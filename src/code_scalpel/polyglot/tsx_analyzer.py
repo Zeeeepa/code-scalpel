@@ -7,7 +7,6 @@ This module provides utilities for detecting React components, Server Components
 and Server Actions in TypeScript/JavaScript code.
 """
 
-
 from __future__ import annotations
 
 import re

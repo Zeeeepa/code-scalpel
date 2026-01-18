@@ -9,7 +9,6 @@ The intent is to enforce the contract at the MCP tool boundary so individual
 tool implementations can remain focused on their domain logic.
 """
 
-
 from __future__ import annotations
 
 import inspect

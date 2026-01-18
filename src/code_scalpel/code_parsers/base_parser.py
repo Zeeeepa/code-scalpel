@@ -1,7 +1,5 @@
 # src/code_parser/base_parser.py
-"""Base Parser - Abstract base class and shared utilities for all parsers.
-
-"""
+"""Base Parser - Abstract base class and shared utilities for all parsers."""
 
 import ast  # Import the ast module
 from abc import ABC, abstractmethod

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 
-
 from .java_parser_treesitter import (
     JavaAnnotation,
     JavaClass,

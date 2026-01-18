@@ -100,9 +100,6 @@ class Mutation:
     description: str
 
 
-
-
-
 class MutationTestGate:
     """
     Verify fixes are genuine by ensuring tests would fail if bug reintroduced.

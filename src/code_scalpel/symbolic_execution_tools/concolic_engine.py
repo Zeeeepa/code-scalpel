@@ -19,7 +19,6 @@ Example:
     >>> # Explores paths using concrete values as guidance
 """
 
-
 from dataclasses import dataclass
 from typing import Any, Dict, List
 

@@ -21,7 +21,6 @@ Example:
     >>> print(score)  # 0.8 (high confidence)
 """
 
-
 from __future__ import annotations
 
 from dataclasses import dataclass

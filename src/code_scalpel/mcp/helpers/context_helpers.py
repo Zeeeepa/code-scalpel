@@ -1536,7 +1536,10 @@ def _get_file_context_sync(
             if not expanded_context:
                 expanded_context = None
 
-        if not redaction_summary and {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set:
+        if (
+            not redaction_summary
+            and {"pii_redaction", "secret_masking", "api_key_detection"} & cap_set
+        ):
             redaction_summary = []
 
         access_controlled = (
@@ -2627,8 +2630,7 @@ def _get_symbol_references_sync(
                                             if owners:
                                                 for owner in owners:
                                                     owner_counts[owner] = (
-                                                        owner_counts.get(owner, 0)
-                                                        + 1
+                                                        owner_counts.get(owner, 0) + 1
                                                     )
                                             references.append(
                                                 SymbolReference(

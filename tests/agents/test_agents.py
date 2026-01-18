@@ -133,9 +133,7 @@ class TestBaseCodeAnalysisAgent:
         from code_scalpel.mcp.tools import security as security_module
 
         mock_result = MagicMock(
-            model_dump=MagicMock(
-                return_value={"success": True, "vulnerabilities": []}
-            )
+            model_dump=MagicMock(return_value={"success": True, "vulnerabilities": []})
         )
         mock_security_scan = AsyncMock(return_value=mock_result)
         monkeypatch.setattr(security_module, "security_scan", mock_security_scan)

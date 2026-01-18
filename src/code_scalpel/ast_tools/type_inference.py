@@ -130,7 +130,7 @@ class TypeInference:
         TODO [ENTERPRISE]: Infer protocols from duck typing
         TODO [ENTERPRISE]: Validate structural compatibility
         TODO [ENTERPRISE]: Generate Protocol definitions
-        TODO [ENTERPRISE]: Add 12+ tests for protocols    """
+        TODO [ENTERPRISE]: Add 12+ tests for protocols"""
 
     def __init__(self, project_root: Optional[str] = None):
         self.project_root = project_root

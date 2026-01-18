@@ -2163,7 +2163,7 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
 
         # Create new function with promoted parameters
         import sys
-        
+
         func_kwargs = {
             "name": func_node.name,
             "args": ast.arguments(
@@ -2189,13 +2189,13 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
             "returns": func_node.returns,
             "type_comment": None,
         }
-        
+
         # type_params only available in Python 3.12+
         if sys.version_info >= (3, 12):
             func_kwargs["type_params"] = []  # type: ignore[assignment]
-        
+
         new_func = ast.FunctionDef(**func_kwargs)  # type: ignore[arg-type]
-        
+
         # Fix missing location information
         ast.fix_missing_locations(new_func)
 

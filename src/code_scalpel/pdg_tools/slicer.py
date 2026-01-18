@@ -12,9 +12,6 @@ import networkx as nx
 #     - Support nondeterministic slicing for concurrent code
 
 
-
-
-
 class SliceType(Enum):
     """Types of program slices."""
 

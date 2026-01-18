@@ -179,7 +179,9 @@ def no_types(x, y):
     }
 
 
-async def _call(session: ClientSession, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+async def _call(
+    session: ClientSession, tool: str, args: dict[str, Any]
+) -> dict[str, Any]:
     res = await session.call_tool(tool, args)
     return res.model_dump()
 
@@ -219,16 +221,22 @@ async def main() -> int:
     env.setdefault("SCALPEL_MANIFEST_SECRET", "enterprise-test-secret")
 
     if not env.get("CODE_SCALPEL_LICENSE_PATH"):
-        print("FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Enterprise tier")
+        print(
+            "FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Enterprise tier"
+        )
         return 1
 
-    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(repo_root)
+    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(
+        repo_root
+    )
     if server_cmd.endswith("code-scalpel"):
         server_args = ["mcp", "--root", str(project_root)]
     else:
         server_args = ["-m", "code_scalpel.mcp.server", "--root", str(project_root)]
 
-    params = StdioServerParameters(command=server_cmd, args=server_args, env=env, cwd=run_dir)
+    params = StdioServerParameters(
+        command=server_cmd, args=server_args, env=env, cwd=run_dir
+    )
 
     checks: list[ToolCheck] = []
 
@@ -253,17 +261,22 @@ async def main() -> int:
             else:
                 checks.append(ToolCheck("list_tools", True, "22 tools"))
 
-            py_snippet = "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            py_snippet = (
+                "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            )
 
             smoke: list[tuple[str, dict[str, Any]]] = [
                 ("analyze_code", {"code": py_snippet, "language": "python"}),
                 (
                     "security_scan",
                     {
-                        "code": "def f(user_id):\n    q=f\"SELECT * FROM t WHERE id={user_id}\"\n    cursor.execute(q)\n",
+                        "code": 'def f(user_id):\n    q=f"SELECT * FROM t WHERE id={user_id}"\n    cursor.execute(q)\n',
                     },
                 ),
-                ("unified_sink_detect", {"code": "eval(user_input)", "language": "python"}),
+                (
+                    "unified_sink_detect",
+                    {"code": "eval(user_input)", "language": "python"},
+                ),
                 ("symbolic_execute", {"code": py_snippet, "language": "python"}),
                 (
                     "generate_unit_tests",
@@ -284,8 +297,14 @@ async def main() -> int:
                         "target_name": "add",
                     },
                 ),
-                ("get_file_context", {"file_path": str(paths["a"].relative_to(project_root))}),
-                ("get_symbol_references", {"symbol_name": "add", "project_root": str(project_root)}),
+                (
+                    "get_file_context",
+                    {"file_path": str(paths["a"].relative_to(project_root))},
+                ),
+                (
+                    "get_symbol_references",
+                    {"symbol_name": "add", "project_root": str(project_root)},
+                ),
                 (
                     "get_cross_file_dependencies",
                     {
@@ -297,8 +316,14 @@ async def main() -> int:
                         "include_diagram": False,
                     },
                 ),
-                ("get_project_map", {"project_root": str(project_root), "include_complexity": True}),
-                ("crawl_project", {"root_path": str(project_root), "include_report": False}),
+                (
+                    "get_project_map",
+                    {"project_root": str(project_root), "include_complexity": True},
+                ),
+                (
+                    "crawl_project",
+                    {"root_path": str(project_root), "include_report": False},
+                ),
                 ("get_call_graph", {"project_root": str(project_root), "depth": 5}),
                 (
                     "get_graph_neighborhood",
@@ -326,8 +351,14 @@ async def main() -> int:
                         "include_dev": True,
                     },
                 ),
-                ("verify_policy_integrity", {"policy_dir": str(paths["policy_dir"]), "manifest_source": "file"}),
-                ("validate_paths", {"paths": [str(paths["a"])], "project_root": str(project_root)}),
+                (
+                    "verify_policy_integrity",
+                    {"policy_dir": str(paths["policy_dir"]), "manifest_source": "file"},
+                ),
+                (
+                    "validate_paths",
+                    {"paths": [str(paths["a"])], "project_root": str(project_root)},
+                ),
                 (
                     "type_evaporation_scan",
                     {
@@ -425,7 +456,12 @@ async def main() -> int:
                 reports = data.get("compliance_reports")
                 score = float(data.get("compliance_score") or 0.0)
 
-                ok = (data.get("tier") == "enterprise") and bool(pdf) and bool(reports) and score > 0.0
+                ok = (
+                    (data.get("tier") == "enterprise")
+                    and bool(pdf)
+                    and bool(reports)
+                    and score > 0.0
+                )
                 checks.append(
                     ToolCheck(
                         "enterprise_code_policy_compliance_pdf",
@@ -434,7 +470,9 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_code_policy_compliance_pdf", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_code_policy_compliance_pdf", False, str(e))
+                )
 
             # Enterprise feature: graph query language must be supported
             try:
@@ -463,7 +501,9 @@ async def main() -> int:
                     )
                 )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_graph_query_language", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_graph_query_language", False, str(e))
+                )
 
             # Enterprise feature: verify_policy_integrity should validate signature + emit audit log entry
             try:
@@ -490,7 +530,9 @@ async def main() -> int:
                 )
             except Exception as e:
                 checks.append(
-                    ToolCheck("enterprise_verify_policy_integrity_crypto", False, str(e))
+                    ToolCheck(
+                        "enterprise_verify_policy_integrity_crypto", False, str(e)
+                    )
                 )
 
     width = max(len(c.name) for c in checks) if checks else 10

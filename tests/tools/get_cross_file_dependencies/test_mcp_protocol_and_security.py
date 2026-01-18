@@ -64,7 +64,9 @@ async def _invoke_tool(
             error_info = {"error_code": "internal_error", "error": error_msg}
     else:
         # Raw result is the data itself
-        data_payload = raw_result if isinstance(raw_result, dict) else {"result": raw_result}
+        data_payload = (
+            raw_result if isinstance(raw_result, dict) else {"result": raw_result}
+        )
         warnings = []
         # Check if data indicates failure
         if isinstance(data_payload, dict) and data_payload.get("success") is False:

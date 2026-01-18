@@ -30,7 +30,11 @@ def _ensure_repo_src_on_path() -> None:
 
 _ensure_repo_src_on_path()
 
-from code_scalpel.mcp.server import analyze_code, extract_code, security_scan  # noqa: E402
+from code_scalpel.mcp.server import (
+    analyze_code,
+    extract_code,
+    security_scan,
+)  # noqa: E402
 
 
 def test_python_extraction():

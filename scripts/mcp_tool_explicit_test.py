@@ -241,7 +241,7 @@ async def _run_once(
                     await session.call_tool(
                         "security_scan",
                         {
-                            "code": "def f(user_id):\n    query = f\"SELECT * FROM users WHERE id = {user_id}\"\n    cursor.execute(query)\n",
+                            "code": 'def f(user_id):\n    query = f"SELECT * FROM users WHERE id = {user_id}"\n    cursor.execute(query)\n',
                         },
                     )
                 ).model_dump()

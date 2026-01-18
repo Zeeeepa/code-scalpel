@@ -13,7 +13,6 @@ import networkx as nx
 #     - Support closure variable capture tracking
 
 
-
 class NodeType(Enum):
     """Types of nodes in the PDG."""
 

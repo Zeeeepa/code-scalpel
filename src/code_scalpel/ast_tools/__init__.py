@@ -99,8 +99,7 @@ except ImportError:
 # TIER 3: ENTERPRISE (Commercial - Lower Priority)
 # ============================================================================
 
-RefactoringAnalyzer = (
-)
+RefactoringAnalyzer = ()
 
 
 __all__ = [

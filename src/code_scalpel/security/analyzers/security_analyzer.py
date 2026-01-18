@@ -384,11 +384,11 @@ class SecurityAnalyzer:
             from ...symbolic_execution_tools.type_inference import InferredType
 
             # Run symbolic analysis
-            # We recreate the analyzer each time because it's stateful, 
+            # We recreate the analyzer each time because it's stateful,
             # but it uses caching so repeated calls for same code are cheap.
             analyzer = SymbolicAnalyzer(enable_cache=True)
             result = analyzer.analyze(code)
-            
+
             # --- Pruning Strategy 1: Type Safety ---
             # If the tainted variable is constrained to be a safe type (Int, Bool, Float),
             # it cannot contain injection payloads.
@@ -398,31 +398,35 @@ class SecurityAnalyzer:
                 # But Vulnerability object doesn't currently store the sink variable name explicitly.
                 # Assuming the taint path start is the source is reasonable.
                 # Better: check if ANY variable in the taint path is inferred as safe type?
-                # No, if source is Int but cast to Str, it might be unsafe? 
+                # No, if source is Int but cast to Str, it might be unsafe?
                 # Actually, if source is Int, it's usually safe unless explicitly unsafe cast.
                 # Let's check the source var.
                 var_name = vuln.taint_path[0]
                 if var_name in result.all_variables:
                     inferred = result.all_variables[var_name]
-                    if inferred in (InferredType.INT, InferredType.BOOL, InferredType.FLOAT):
+                    if inferred in (
+                        InferredType.INT,
+                        InferredType.BOOL,
+                        InferredType.FLOAT,
+                    ):
                         logger.debug(f"Pruned vuln: {var_name} is proven {inferred}")
                         return False
 
             # --- Pruning Strategy 2: Reachability ---
-            
-            # If we have 0 feasible paths, it might mean the code is completely dead 
+
+            # If we have 0 feasible paths, it might mean the code is completely dead
             # or analysis failed to find inputs. We should be conservative.
             feasible_paths = result.get_feasible_paths()
-            
+
             if not feasible_paths:
                 # Conservative fallback: if engine finds nothing, don't prune
                 return True
-                
+
             # Check reachability in any feasible path
             for path in feasible_paths:
                 if sink_line in path.visited_lines:
                     return True
-                    
+
             # If we checked all feasible paths and none visited the line
             logger.debug(f"Pruned vuln: line {sink_line} is unreachable")
             return False
@@ -472,8 +476,10 @@ class SecurityAnalyzer:
             if self._verify_vulnerability(vuln, code):
                 verified_vulns.append(vuln)
             else:
-                 logger.info(f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution")
-        
+                logger.info(
+                    f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution"
+                )
+
         taint_vulns = verified_vulns
 
         secret_vulns = self._secret_scanner.scan(tree)

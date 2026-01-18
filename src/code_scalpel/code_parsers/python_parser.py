@@ -1,6 +1,4 @@
-"""Python Parser - Native Python AST parsing implementation.
-
-"""
+"""Python Parser - Native Python AST parsing implementation."""
 
 import ast
 from typing import Any, List

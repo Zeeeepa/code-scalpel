@@ -949,4 +949,3 @@ class SymbolReferencesResult(BaseModel):
         description="Ratio of references with CODEOWNERS attribution (Enterprise)",
     )
     error: str | None = Field(default=None, description="Error message if failed")
-

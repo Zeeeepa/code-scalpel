@@ -44,7 +44,9 @@ def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> Non
         audit_path = policy_dir / "audit.jsonl"
         payload = dict(event)
         payload.setdefault("ts", time.time())
-        payload.setdefault("iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+        payload.setdefault(
+            "iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        )
         with audit_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             f.write("\n")

@@ -23,18 +23,13 @@ class ASTBuilder:
         # TIER 1: COMMUNITY (Free - High Priority)
         # ====================================================================
 
-
-
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
 
-
-
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-
 
         #     3. Suggest fixes for validation failures
         #     4. Support configurable rule sets

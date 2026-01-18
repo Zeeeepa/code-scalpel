@@ -78,8 +78,7 @@ class ImportInfo:
     level: int = 0
     line: int = 0
     file: str = ""
-    original_module: Optional[str] = (
-    )
+    original_module: Optional[str] = ()
 
     @property
     def effective_name(self) -> str:
@@ -126,7 +125,6 @@ class DynamicImportVisitor(ast.NodeVisitor):
       - Calculate impact of breaking each edge
       - Add 15+ tests for cycle reporting
     """
-
 
     def __init__(self, resolver, module_name: str, file_path: str):
         self.resolver = resolver

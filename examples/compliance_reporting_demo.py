@@ -178,7 +178,9 @@ def main():
     # [20260114_BUGFIX] PolicyEngine loads policies from YAML file, not programmatically.
     # Using default path (will use empty policy if .code-scalpel/policy.yaml doesn't exist)
     policy_engine = PolicyEngine()
-    print(f"✓ Policy engine initialized (policies loaded: {len(policy_engine.policies)})")
+    print(
+        f"✓ Policy engine initialized (policies loaded: {len(policy_engine.policies)})"
+    )
 
     # Generate reports
     generate_reports(audit_log, policy_engine)

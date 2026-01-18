@@ -37,7 +37,9 @@ x = target()
 """
         )
 
-    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
+    )
     monkeypatch.setattr(
         code_scalpel.licensing.features,
         "get_tool_capabilities",
@@ -87,8 +89,12 @@ async def test_symbolic_execute_community_truncates_paths(monkeypatch):
             constraints=[],
         )
 
-    monkeypatch.setattr(code_scalpel.mcp.helpers.symbolic_helpers, "_symbolic_execute_sync", _fake_sync)
-    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        code_scalpel.mcp.helpers.symbolic_helpers, "_symbolic_execute_sync", _fake_sync
+    )
+    monkeypatch.setattr(
+        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
+    )
     monkeypatch.setattr(
         code_scalpel.licensing.features,
         "get_tool_capabilities",
@@ -112,7 +118,12 @@ async def test_update_symbol_community_forces_backup(monkeypatch, tmp_path: Path
     """Community tier forces backups when configured as required."""
 
     # Allow operating on tmp_path for this unit test.
-    monkeypatch.setattr(code_scalpel.mcp.path_resolver, "ALLOWED_ROOTS", [tmp_path.resolve()], raising=False)
+    monkeypatch.setattr(
+        code_scalpel.mcp.path_resolver,
+        "ALLOWED_ROOTS",
+        [tmp_path.resolve()],
+        raising=False,
+    )
 
     test_file = tmp_path / "mod.py"
     test_file.write_text(
@@ -121,7 +132,9 @@ async def test_update_symbol_community_forces_backup(monkeypatch, tmp_path: Path
 """
     )
 
-    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
+    )
     monkeypatch.setattr(
         code_scalpel.licensing.features,
         "get_tool_capabilities",
@@ -172,7 +185,9 @@ if role == 'admin':
     grant_admin_access()
 """
 
-    monkeypatch.setattr(code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community")
+    monkeypatch.setattr(
+        code_scalpel.licensing.tier_detector, "get_current_tier", lambda: "community"
+    )
     monkeypatch.setattr(
         code_scalpel.licensing.features,
         "get_tool_capabilities",

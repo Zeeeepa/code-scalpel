@@ -7,9 +7,6 @@ This module provides resolution of module names to file paths across different
 programming languages, enabling parameterized URI access to code symbols.
 """
 
-
-
-
 from pathlib import Path
 from typing import Optional
 

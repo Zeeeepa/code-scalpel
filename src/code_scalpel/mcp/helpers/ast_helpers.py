@@ -1,4 +1,5 @@
 """AST Utilities and Caching."""
+
 import ast
 import logging
 from pathlib import Path
@@ -12,6 +13,7 @@ logger = logging.getLogger("code_scalpel.mcp.ast")
 # Key: file_path (str)
 # Value: (mtime, ast_tree)
 _AST_CACHE: Dict[str, Tuple[float, ast.AST]] = {}
+
 
 def get_cached_ast(file_path: Path) -> Optional[ast.Module]:
     """Retrieve cached AST if fresh, otherwise return None."""
@@ -29,6 +31,7 @@ def get_cached_ast(file_path: Path) -> Optional[ast.Module]:
     except OSError:
         return None
 
+
 def cache_ast(file_path: Path, tree: ast.AST) -> None:
     """Cache an AST tree for path."""
     try:
@@ -36,6 +39,7 @@ def cache_ast(file_path: Path, tree: ast.AST) -> None:
         _AST_CACHE[key] = (file_path.stat().st_mtime, tree)
     except OSError:
         pass
+
 
 def parse_file_cached(file_path: Path) -> Optional[ast.Module]:
     """Parse a Python file with caching."""

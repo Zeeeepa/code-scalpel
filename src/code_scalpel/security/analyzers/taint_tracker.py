@@ -59,6 +59,7 @@ class VulnerabilityDict(TypedDict):
     recommendation: str
     cwe_link: str
 
+
 # - TODO [COMMUNITY]: Improve documentation of taint sources and sinks (current)
 # - TODO [COMMUNITY]: Add more built-in sanitizer patterns
 # - TODO [COMMUNITY]: Create sanitizer registry guide

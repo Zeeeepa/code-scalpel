@@ -101,7 +101,7 @@ class ASTValidator:
         TODO [ENTERPRISE]: Learn code patterns
         TODO [ENTERPRISE]: Detect deviations
         TODO [ENTERPRISE]: Suggest corrections
-        TODO [ENTERPRISE]: Add 12+ tests for anomalies    """
+        TODO [ENTERPRISE]: Add 12+ tests for anomalies"""
 
     def __init__(self, config: Optional[dict] = None):
         self.config = {

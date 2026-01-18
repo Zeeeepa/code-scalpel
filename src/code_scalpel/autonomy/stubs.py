@@ -64,9 +64,6 @@ class SandboxResult:
     tests: List["ExecutionTestResult"] = field(default_factory=list)
 
 
-
-
-
 class SandboxExecutor:
     """
     Stub for sandbox execution environment.
@@ -102,9 +99,6 @@ class SandboxExecutor:
             stderr="Not implemented",
             execution_time_ms=0,
         )
-
-
-
 
 
 class ErrorToDiffEngine:

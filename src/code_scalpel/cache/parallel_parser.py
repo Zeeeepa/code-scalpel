@@ -34,7 +34,6 @@ def _batch_parse_worker(
 class ParallelParser(Generic[T]):
     """[20251214_FEATURE] Parallel file parsing with cache reuse."""
 
-
     # [20251214_PERF] Default batch size to amortize pickle overhead
     DEFAULT_BATCH_SIZE = 100
 
@@ -51,9 +50,7 @@ class ParallelParser(Generic[T]):
     def parse_files(
         self, files: Sequence[Path | str], parse_fn: Callable[[Path], T]
     ) -> Tuple[Dict[str, T], List[str]]:
-        """Parse multiple files in parallel with caching.
-
-        """
+        """Parse multiple files in parallel with caching."""
         results: Dict[str, T] = {}
         errors: List[str] = []
         to_parse: List[str] = []

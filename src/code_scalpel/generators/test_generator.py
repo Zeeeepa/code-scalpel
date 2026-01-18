@@ -12,7 +12,6 @@ Example:
     # Generated pytest tests with concrete inputs for each path
 """
 
-
 import ast
 import re
 from dataclasses import dataclass

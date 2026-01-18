@@ -135,7 +135,9 @@ def add(a, b):
     }
 
 
-async def _call(session: ClientSession, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+async def _call(
+    session: ClientSession, tool: str, args: dict[str, Any]
+) -> dict[str, Any]:
     res = await session.call_tool(tool, args)
     return res.model_dump()
 
@@ -166,7 +168,9 @@ async def main() -> int:
     # IMPORTANT: Use the same command VS Code uses (see .vscode/mcp.json):
     #   .venv/bin/code-scalpel mcp --root <workspaceFolder>
     # This avoids interpreter/site-packages mismatches that can prevent the server from starting.
-    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(repo_root)
+    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(
+        repo_root
+    )
     server_args: list[str]
     if server_cmd.endswith("code-scalpel"):
         server_args = ["mcp", "--root", str(project_root)]
@@ -174,7 +178,9 @@ async def main() -> int:
         # Fallback: invoke the module directly
         server_args = ["-m", "code_scalpel.mcp.server", "--root", str(project_root)]
 
-    params = StdioServerParameters(command=server_cmd, args=server_args, env=env, cwd=run_dir)
+    params = StdioServerParameters(
+        command=server_cmd, args=server_args, env=env, cwd=run_dir
+    )
 
     checks: list[ToolCheck] = []
 
@@ -200,12 +206,18 @@ async def main() -> int:
                 checks.append(ToolCheck(name="list_tools", ok=True, notes="22 tools"))
 
             # Shared inputs
-            py_snippet = "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            py_snippet = (
+                "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            )
 
             # 1) analyze_code
             try:
-                payload = await _call(session, "analyze_code", {"code": py_snippet, "language": "python"})
-                checks.append(ToolCheck("analyze_code", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session, "analyze_code", {"code": py_snippet, "language": "python"}
+                )
+                checks.append(
+                    ToolCheck("analyze_code", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("analyze_code", False, str(e)))
 
@@ -214,29 +226,49 @@ async def main() -> int:
                 payload = await _call(
                     session,
                     "security_scan",
-                    {"code": "def f(user_id):\n    q=f\"SELECT * FROM t WHERE id={user_id}\"\n    cursor.execute(q)\n"},
+                    {
+                        "code": 'def f(user_id):\n    q=f"SELECT * FROM t WHERE id={user_id}"\n    cursor.execute(q)\n'
+                    },
                 )
-                checks.append(ToolCheck("security_scan", _payload_success(payload), "ok"))
+                checks.append(
+                    ToolCheck("security_scan", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("security_scan", False, str(e)))
 
             # 3) unified_sink_detect
             try:
-                payload = await _call(session, "unified_sink_detect", {"code": "eval(user_input)", "language": "python"})
-                checks.append(ToolCheck("unified_sink_detect", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "unified_sink_detect",
+                    {"code": "eval(user_input)", "language": "python"},
+                )
+                checks.append(
+                    ToolCheck("unified_sink_detect", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("unified_sink_detect", False, str(e)))
 
             # 4) symbolic_execute
             try:
-                payload = await _call(session, "symbolic_execute", {"code": py_snippet, "language": "python"})
-                checks.append(ToolCheck("symbolic_execute", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "symbolic_execute",
+                    {"code": py_snippet, "language": "python"},
+                )
+                checks.append(
+                    ToolCheck("symbolic_execute", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("symbolic_execute", False, str(e)))
 
             # 5) generate_unit_tests
             try:
-                payload = await _call(session, "generate_unit_tests", {"code": "def add(a,b):\n    return a+b\n", "framework": "pytest"})
+                payload = await _call(
+                    session,
+                    "generate_unit_tests",
+                    {"code": "def add(a,b):\n    return a+b\n", "framework": "pytest"},
+                )
                 # Ensure the returned MCP payload itself is JSON serializable.
                 json.dumps(payload)
                 checks.append(ToolCheck("generate_unit_tests", True, "ok"))
@@ -245,16 +277,35 @@ async def main() -> int:
 
             # 6) simulate_refactor
             try:
-                payload = await _call(session, "simulate_refactor", {"original_code": "def add(a,b): return a+b\n", "new_code": "def add(a,b): return eval('a+b')\n"})
-                checks.append(ToolCheck("simulate_refactor", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "simulate_refactor",
+                    {
+                        "original_code": "def add(a,b): return a+b\n",
+                        "new_code": "def add(a,b): return eval('a+b')\n",
+                    },
+                )
+                checks.append(
+                    ToolCheck("simulate_refactor", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("simulate_refactor", False, str(e)))
 
             # 7) extract_code (file-path mode)
             try:
                 rel_a = str(paths["a"].relative_to(project_root))
-                payload = await _call(session, "extract_code", {"file_path": rel_a, "target_type": "function", "target_name": "add"})
-                checks.append(ToolCheck("extract_code", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "extract_code",
+                    {
+                        "file_path": rel_a,
+                        "target_type": "function",
+                        "target_name": "add",
+                    },
+                )
+                checks.append(
+                    ToolCheck("extract_code", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("extract_code", False, str(e)))
 
@@ -262,14 +313,22 @@ async def main() -> int:
             try:
                 rel_a = str(paths["a"].relative_to(project_root))
                 payload = await _call(session, "get_file_context", {"file_path": rel_a})
-                checks.append(ToolCheck("get_file_context", _payload_success(payload), "ok"))
+                checks.append(
+                    ToolCheck("get_file_context", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_file_context", False, str(e)))
 
             # 9) get_symbol_references
             try:
-                payload = await _call(session, "get_symbol_references", {"symbol_name": "add", "project_root": str(project_root)})
-                checks.append(ToolCheck("get_symbol_references", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "get_symbol_references",
+                    {"symbol_name": "add", "project_root": str(project_root)},
+                )
+                checks.append(
+                    ToolCheck("get_symbol_references", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_symbol_references", False, str(e)))
 
@@ -279,30 +338,56 @@ async def main() -> int:
                 payload = await _call(
                     session,
                     "get_cross_file_dependencies",
-                    {"target_file": rel_a, "target_symbol": "PolicyEngine", "project_root": str(project_root), "max_depth": 1, "include_code": False},
+                    {
+                        "target_file": rel_a,
+                        "target_symbol": "PolicyEngine",
+                        "project_root": str(project_root),
+                        "max_depth": 1,
+                        "include_code": False,
+                    },
                 )
-                checks.append(ToolCheck("get_cross_file_dependencies", _payload_success(payload), "ok"))
+                checks.append(
+                    ToolCheck(
+                        "get_cross_file_dependencies", _payload_success(payload), "ok"
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_cross_file_dependencies", False, str(e)))
 
             # 11) get_project_map
             try:
-                payload = await _call(session, "get_project_map", {"project_root": str(project_root)})
-                checks.append(ToolCheck("get_project_map", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session, "get_project_map", {"project_root": str(project_root)}
+                )
+                checks.append(
+                    ToolCheck("get_project_map", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_project_map", False, str(e)))
 
             # 12) crawl_project
             try:
-                payload = await _call(session, "crawl_project", {"root_path": str(project_root), "include_report": True})
-                checks.append(ToolCheck("crawl_project", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "crawl_project",
+                    {"root_path": str(project_root), "include_report": True},
+                )
+                checks.append(
+                    ToolCheck("crawl_project", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("crawl_project", False, str(e)))
 
             # 13) get_call_graph
             try:
-                payload = await _call(session, "get_call_graph", {"project_root": str(project_root), "depth": 3})
-                checks.append(ToolCheck("get_call_graph", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "get_call_graph",
+                    {"project_root": str(project_root), "depth": 3},
+                )
+                checks.append(
+                    ToolCheck("get_call_graph", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_call_graph", False, str(e)))
 
@@ -310,36 +395,84 @@ async def main() -> int:
             try:
                 # Use a stable, generic node id. Tool should either return empty/truncated graph
                 # or a clear error; we treat successful call as pass.
-                payload = await _call(session, "get_graph_neighborhood", {"center_node_id": "python::pkg::function::add", "k": 1, "max_nodes": 20, "project_root": str(project_root)})
-                checks.append(ToolCheck("get_graph_neighborhood", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "get_graph_neighborhood",
+                    {
+                        "center_node_id": "python::pkg::function::add",
+                        "k": 1,
+                        "max_nodes": 20,
+                        "project_root": str(project_root),
+                    },
+                )
+                checks.append(
+                    ToolCheck("get_graph_neighborhood", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("get_graph_neighborhood", False, str(e)))
 
             # 15) cross_file_security_scan
             try:
-                payload = await _call(session, "cross_file_security_scan", {"project_root": str(project_root), "max_depth": 3, "timeout_seconds": 30, "max_modules": 50})
-                checks.append(ToolCheck("cross_file_security_scan", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "cross_file_security_scan",
+                    {
+                        "project_root": str(project_root),
+                        "max_depth": 3,
+                        "timeout_seconds": 30,
+                        "max_modules": 50,
+                    },
+                )
+                checks.append(
+                    ToolCheck(
+                        "cross_file_security_scan", _payload_success(payload), "ok"
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("cross_file_security_scan", False, str(e)))
 
             # 16) scan_dependencies (disable vulnerability lookup)
             try:
-                payload = await _call(session, "scan_dependencies", {"path": str(project_root), "scan_vulnerabilities": False, "include_dev": True})
-                checks.append(ToolCheck("scan_dependencies", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "scan_dependencies",
+                    {
+                        "path": str(project_root),
+                        "scan_vulnerabilities": False,
+                        "include_dev": True,
+                    },
+                )
+                checks.append(
+                    ToolCheck("scan_dependencies", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("scan_dependencies", False, str(e)))
 
             # 17) verify_policy_integrity
             try:
-                payload = await _call(session, "verify_policy_integrity", {"policy_dir": str(paths["policy_dir"]), "manifest_source": "file"})
-                checks.append(ToolCheck("verify_policy_integrity", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "verify_policy_integrity",
+                    {"policy_dir": str(paths["policy_dir"]), "manifest_source": "file"},
+                )
+                checks.append(
+                    ToolCheck(
+                        "verify_policy_integrity", _payload_success(payload), "ok"
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("verify_policy_integrity", False, str(e)))
 
             # 18) validate_paths
             try:
-                payload = await _call(session, "validate_paths", {"paths": [str(paths["a"])], "project_root": str(project_root)})
-                checks.append(ToolCheck("validate_paths", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "validate_paths",
+                    {"paths": [str(paths["a"])], "project_root": str(project_root)},
+                )
+                checks.append(
+                    ToolCheck("validate_paths", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("validate_paths", False, str(e)))
 
@@ -347,30 +480,62 @@ async def main() -> int:
             try:
                 rel_a = str(paths["a"].relative_to(project_root))
                 new_code = "def add(a, b):\n    return a + b + 0\n"
-                payload = await _call(session, "update_symbol", {"file_path": rel_a, "target_type": "function", "target_name": "add", "new_code": new_code, "create_backup": True})
-                checks.append(ToolCheck("update_symbol", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session,
+                    "update_symbol",
+                    {
+                        "file_path": rel_a,
+                        "target_type": "function",
+                        "target_name": "add",
+                        "new_code": new_code,
+                        "create_backup": True,
+                    },
+                )
+                checks.append(
+                    ToolCheck("update_symbol", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("update_symbol", False, str(e)))
 
             # 20) rename_symbol (expected blocked in Community)
             try:
                 rel_a = str(paths["a"].relative_to(project_root))
-                payload = await _call(session, "rename_symbol", {"file_path": rel_a, "target_type": "function", "target_name": "add", "new_name": "add2", "create_backup": True})
+                payload = await _call(
+                    session,
+                    "rename_symbol",
+                    {
+                        "file_path": rel_a,
+                        "target_type": "function",
+                        "target_name": "add",
+                        "new_name": "add2",
+                        "create_backup": True,
+                    },
+                )
                 # If it unexpectedly succeeds, treat as failure for Community gating.
                 ok = True
                 # Best effort: look for error string in payload
                 payload_text = json.dumps(payload)
-                if "success\": true" in payload_text.lower():
+                if 'success": true' in payload_text.lower():
                     ok = False
-                checks.append(ToolCheck("rename_symbol", ok, "blocked as expected" if ok else "unexpected success"))
+                checks.append(
+                    ToolCheck(
+                        "rename_symbol",
+                        ok,
+                        "blocked as expected" if ok else "unexpected success",
+                    )
+                )
             except Exception as e:
                 # Tool call itself should not crash; it should return a structured error.
                 checks.append(ToolCheck("rename_symbol", False, f"call failed: {e}"))
 
             # 21) code_policy_check
             try:
-                payload = await _call(session, "code_policy_check", {"paths": [str(project_root)]})
-                checks.append(ToolCheck("code_policy_check", _payload_success(payload), "ok"))
+                payload = await _call(
+                    session, "code_policy_check", {"paths": [str(project_root)]}
+                )
+                checks.append(
+                    ToolCheck("code_policy_check", _payload_success(payload), "ok")
+                )
             except Exception as e:
                 checks.append(ToolCheck("code_policy_check", False, str(e)))
 

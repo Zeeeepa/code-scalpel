@@ -64,117 +64,115 @@ tools = {
     "scan_dependencies": {
         "purpose": "Scans project dependencies (Python, JS, Java) for known vulnerabilities using the OSV database and calculates supply chain risk.",
         "tier_limits": "Max 50 dependencies for Community Tier",
-        "testing_focus": "Verify that 'reachability_analysis' (Pro feature) is accessible to both Pro and Enterprise tiers, but strictly blocked for Community users. Ensure the 'max_dependencies' limit applies only to Community."
+        "testing_focus": "Verify that 'reachability_analysis' (Pro feature) is accessible to both Pro and Enterprise tiers, but strictly blocked for Community users. Ensure the 'max_dependencies' limit applies only to Community.",
     },
     "verify_policy_integrity": {
         "purpose": "Cryptographically verifies that policy files have not been tampered with using digital signatures and hash validation.",
         "tier_limits": "Max 50 policy files for Community Tier",
-        "testing_focus": "Verify 'Tamper Detection' works for all tiers. Check that 'certificate_chain_valid' and 'crl_status' are available to Pro and Enterprise users, but gated for Community."
+        "testing_focus": "Verify 'Tamper Detection' works for all tiers. Check that 'certificate_chain_valid' and 'crl_status' are available to Pro and Enterprise users, but gated for Community.",
     },
     "security_scan": {
         "purpose": "Detects security vulnerabilities using taint-based analysis (Python) and sink detection (JS/TS/Java).",
         "tier_limits": "Max 50 findings / 500KB file size for Community Tier",
-        "testing_focus": "Verify Polyglot Gaps: Confirm Python has full taint analysis. Ensure 'sanitizer_recognition' (Pro feature) is active for Pro and Enterprise tiers, but disabled for Community."
+        "testing_focus": "Verify Polyglot Gaps: Confirm Python has full taint analysis. Ensure 'sanitizer_recognition' (Pro feature) is active for Pro and Enterprise tiers, but disabled for Community.",
     },
     "rename_symbol": {
         "purpose": "Safely renames functions, classes, or methods in a file while ensuring consistent changes throughout the codebase.",
         "tier_limits": "Single-file rename only for Community Tier (No cross-file)",
-        "testing_focus": "CRITICAL: Verify v1.0 is PYTHON-ONLY. Ensure 'Cross-file rename' logic is accessible to Pro/Enterprise users (limited only by file count in Pro), but strictly blocked for Community users."
+        "testing_focus": "CRITICAL: Verify v1.0 is PYTHON-ONLY. Ensure 'Cross-file rename' logic is accessible to Pro/Enterprise users (limited only by file count in Pro), but strictly blocked for Community users.",
     },
     "symbolic_execute": {
         "purpose": "Explores execution paths using Z3 constraint solving to find edge cases, bugs, and unreachable code.",
         "tier_limits": "Max 50 paths / 10 loop depth for Community Tier",
-        "testing_focus": "Verify strict enforcement of 'max_depth=10' for Community. Confirm 'smart_path_prioritization' is enabled for Pro and Enterprise users, but disabled for Community."
+        "testing_focus": "Verify strict enforcement of 'max_depth=10' for Community. Confirm 'smart_path_prioritization' is enabled for Pro and Enterprise users, but disabled for Community.",
     },
     "unified_sink_detect": {
         "purpose": "Detects dangerous sinks (eval, execute, innerHTML) across Python, JS, TS, and Java with confidence scoring.",
         "tier_limits": "Max 50 sinks detected for Community Tier",
-        "testing_focus": "Verify 'confidence_scoring' works for all tiers. Ensure 'framework_specific_sinks' (Pro feature) are detected for Pro/Enterprise users, but ignored/blocked for Community."
+        "testing_focus": "Verify 'confidence_scoring' works for all tiers. Ensure 'framework_specific_sinks' (Pro feature) are detected for Pro/Enterprise users, but ignored/blocked for Community.",
     },
     "type_evaporation_scan": {
         "purpose": "Detects 'Type Evaporation' where TypeScript types are lost at runtime boundaries (JSON.stringify, API calls) leading to type confusion.",
         "tier_limits": "Frontend-only analysis / Max 50 files for Community Tier",
-        "testing_focus": "Verify 'cross_file_issues' (Pro feature) works for Pro and Enterprise tiers. Ensure Community Tier is strictly limited to frontend-only analysis."
+        "testing_focus": "Verify 'cross_file_issues' (Pro feature) works for Pro and Enterprise tiers. Ensure Community Tier is strictly limited to frontend-only analysis.",
     },
     "simulate_refactor": {
         "purpose": "Simulates code changes to detect security issues, structural breaks, and semantic changes before applying them.",
         "tier_limits": "Basic syntax/security checks only for Community Tier",
-        "testing_focus": "Verify 'security_issues' detection works for all tiers. Check that 'behavior_equivalent' and 'performance_impact' (Pro features) are computed for Pro/Enterprise users only."
+        "testing_focus": "Verify 'security_issues' detection works for all tiers. Check that 'behavior_equivalent' and 'performance_impact' (Pro features) are computed for Pro/Enterprise users only.",
     },
     "validate_paths": {
         "purpose": "Validates file paths and permissions, specifically checking for Docker volume mount issues and container accessibility.",
         "tier_limits": "Max 100 paths for Community Tier",
-        "testing_focus": "Verify 'docker_detected' logic works for all tiers. Ensure 'permission_details' (Pro feature) are returned for Pro/Enterprise users, but omitted for Community."
+        "testing_focus": "Verify 'docker_detected' logic works for all tiers. Ensure 'permission_details' (Pro feature) are returned for Pro/Enterprise users, but omitted for Community.",
     },
     "update_symbol": {
         "purpose": "Surgically replaces function/class bodies while preserving surrounding code, formatting, and creating backups.",
         "tier_limits": "Max 10 updates per session for Community Tier",
-        "testing_focus": "Verify 'backup_path' is created for all tiers. Test 'atomic multi-file updates' (Pro feature) to ensure they work for Pro/Enterprise but fail/warn for Community."
+        "testing_focus": "Verify 'backup_path' is created for all tiers. Test 'atomic multi-file updates' (Pro feature) to ensure they work for Pro/Enterprise but fail/warn for Community.",
     },
-
     # --- Batch 2 Tools ---
     "crawl_project": {
         "purpose": "Recursively indexes project files while respecting .gitignore rules and detecting binary files.",
         "tier_limits": "Max 100 files indexed for Community Tier",
-        "testing_focus": "Verify '.gitignore' compliance for all tiers. Check that Pro/Enterprise users can index beyond the 100-file Community limit."
+        "testing_focus": "Verify '.gitignore' compliance for all tiers. Check that Pro/Enterprise users can index beyond the 100-file Community limit.",
     },
     "cross_file_security_scan": {
         "purpose": "Detects complex security vulnerabilities and taint flows that propagate across file boundaries (imports/exports).",
         "tier_limits": "Max 50 files scanned for Community Tier",
-        "testing_focus": "Verify taint propagation works. Ensure Pro/Enterprise tiers can scan unlimited files (or higher limits), while Community is capped at 50."
+        "testing_focus": "Verify taint propagation works. Ensure Pro/Enterprise tiers can scan unlimited files (or higher limits), while Community is capped at 50.",
     },
     "extract_code": {
         "purpose": "Parses and extracts specific code blocks (classes, functions) or line ranges while preserving context and comments.",
         "tier_limits": "Max 50 extractions per session for Community Tier",
-        "testing_focus": "Verify AST parsing accuracy. Ensure Pro/Enterprise users are not hit by the 'Max 50' session limit."
+        "testing_focus": "Verify AST parsing accuracy. Ensure Pro/Enterprise users are not hit by the 'Max 50' session limit.",
     },
     "generate_unit_tests": {
         "purpose": "Autonomously generates comprehensive unit test suites (pytest/jest) with mocking for specified code.",
         "tier_limits": "Max 10 test suites per session for Community Tier",
-        "testing_focus": "Verify 'runnability' of tests. Ensure Pro/Enterprise users can generate unlimited suites, while Community is strictly capped at 10."
+        "testing_focus": "Verify 'runnability' of tests. Ensure Pro/Enterprise users can generate unlimited suites, while Community is strictly capped at 10.",
     },
     "get_call_graph": {
         "purpose": "Generates a static call graph to visualize function invocation flows and dependencies.",
         "tier_limits": "Max 50 graph nodes for Community Tier",
-        "testing_focus": "Verify graph accuracy. Ensure Pro/Enterprise users receive full graphs, while Community graphs are truncated at 50 nodes."
+        "testing_focus": "Verify graph accuracy. Ensure Pro/Enterprise users receive full graphs, while Community graphs are truncated at 50 nodes.",
     },
     "get_cross_file_dependencies": {
         "purpose": "Maps import/export relationships between files to build a project-wide dependency graph.",
         "tier_limits": "Max 50 files analyzed for Community Tier",
-        "testing_focus": "Verify relative import resolution. Ensure Pro/Enterprise users can map the entire project, while Community is limited to 50 files."
+        "testing_focus": "Verify relative import resolution. Ensure Pro/Enterprise users can map the entire project, while Community is limited to 50 files.",
     },
     "get_file_context": {
         "purpose": "Retrieves file content and metadata (token count, AST summary) optimized for LLM context windows.",
         "tier_limits": "Max 100KB file size for Community Tier",
-        "testing_focus": "Verify the 100KB limit triggers an error/truncation for Community. Ensure Pro/Enterprise users can retrieve larger files (up to their respective limits)."
+        "testing_focus": "Verify the 100KB limit triggers an error/truncation for Community. Ensure Pro/Enterprise users can retrieve larger files (up to their respective limits).",
     },
     "get_graph_neighborhood": {
         "purpose": "Retrieves the immediate dependency neighborhood (upstream/downstream) for a specific symbol or file.",
         "tier_limits": "Max 1 hop distance for Community Tier",
-        "testing_focus": "Verify the '1 hop' limit enforcement for Community. Ensure Pro/Enterprise users can query with deeper hop distances."
+        "testing_focus": "Verify the '1 hop' limit enforcement for Community. Ensure Pro/Enterprise users can query with deeper hop distances.",
     },
     "get_project_map": {
         "purpose": "Generates a high-level topographical map of the project structure, identifying key components and entry points.",
         "tier_limits": "Max 50 files summarized for Community Tier",
-        "testing_focus": "Verify 'key_component_identification'. Ensure Pro/Enterprise maps cover the full project, whereas Community maps are partial (50 files)."
+        "testing_focus": "Verify 'key_component_identification'. Ensure Pro/Enterprise maps cover the full project, whereas Community maps are partial (50 files).",
     },
     "get_symbol_references": {
         "purpose": "Locates all semantic references to a specific symbol across the codebase, distinguishing between definitions and usages.",
         "tier_limits": "Max 50 references for Community Tier",
-        "testing_focus": "Verify scope awareness. Ensure Pro/Enterprise users get all references, while Community results are truncated at 50."
+        "testing_focus": "Verify scope awareness. Ensure Pro/Enterprise users get all references, while Community results are truncated at 50.",
     },
-
     # --- Batch 3 Tools ---
     "analyze_code": {
         "purpose": "Performs static code analysis to calculate complexity metrics (Cyclomatic, Halstead) and maintainability indices.",
         "tier_limits": "Max file size 1MB for Community Tier (10MB Pro, 100MB Enterprise)",
-        "testing_focus": "Verify the 1MB limit blocks analysis for Community. Ensure Pro/Enterprise users can analyze larger files."
+        "testing_focus": "Verify the 1MB limit blocks analysis for Community. Ensure Pro/Enterprise users can analyze larger files.",
     },
     "code_policy_check": {
         "purpose": "Enforces coding standards and policy compliance (formatting, docstrings, forbidden patterns) based on configuration.",
         "tier_limits": "Max 10 rules per scan for Community Tier",
-        "testing_focus": "Verify the 'Max 10 rules' limit for Community. Test 'custom_regex_rules' (Pro feature) to ensure they are available to Pro/Enterprise users, but gated for Community."
-    }
+        "testing_focus": "Verify the 'Max 10 rules' limit for Community. Test 'custom_regex_rules' (Pro feature) to ensure they are available to Pro/Enterprise users, but gated for Community.",
+    },
 }
 
 # --------------------------------------------------------------------------------
@@ -184,18 +182,20 @@ tools = {
 script_dir = os.path.dirname(os.path.abspath(__file__))
 output_filename = os.path.join(script_dir, "Code_Scalpel_Prompts.md")
 
-with open(output_filename, "w", encoding='utf-8') as f:
+with open(output_filename, "w", encoding="utf-8") as f:
     f.write("# Code Scalpel Agent Prompts\n")
     f.write("> **Auto-Generated from Roadmap v1.0 Data**\n\n")
-    
+
     for name, data in tools.items():
         f.write(f"--- \n\n### Prompt for: {name}\n")
-        f.write(TEMPLATE.format(
-            tool_name=name, 
-            tool_purpose=data["purpose"],
-            tier_limits=data["tier_limits"],
-            testing_focus=data["testing_focus"]
-        ))
+        f.write(
+            TEMPLATE.format(
+                tool_name=name,
+                tool_purpose=data["purpose"],
+                tier_limits=data["tier_limits"],
+                testing_focus=data["testing_focus"],
+            )
+        )
         f.write("\n\n")
 
 print(f"Successfully generated prompts for {len(tools)} tools at:\n{output_filename}")

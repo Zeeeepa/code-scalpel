@@ -7,9 +7,6 @@ Provides the @requires_tier decorator for enforcing tier requirements
 at runtime on functions and methods.
 """
 
-
-
-
 from __future__ import annotations
 
 import functools

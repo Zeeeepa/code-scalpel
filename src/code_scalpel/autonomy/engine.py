@@ -11,9 +11,6 @@ Coordinates all autonomy components with governance configuration:
 v3.0.0 "Autonomy" Release - Config-driven governance integration.
 """
 
-
-
-
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -111,9 +108,6 @@ class BlastRadiusCalculator:
             f"Critical path changes within limits ({total_lines}/{max_lines} lines)",
             max_lines,
         )
-
-
-
 
 
 class AutonomyEngine:

@@ -24,7 +24,6 @@ Example:
     has_sql = analyzer.contains_sql_sink(code, "python")
 """
 
-
 from __future__ import annotations
 
 import ast
@@ -40,7 +39,6 @@ class SemanticAnalyzer:
     This analyzer goes beyond simple pattern matching to understand the
     semantic meaning of code, detecting vulnerabilities even when syntax varies.
     """
-
 
     # SQL keywords that indicate database operations
     SQL_KEYWORDS = {

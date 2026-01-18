@@ -6,7 +6,6 @@ Tool Registry - Central registry of MCP tools and their tier requirements.
 Maps MCP tools to their tier requirements and provides runtime gating.
 """
 
-
 from __future__ import annotations
 
 import logging

@@ -107,7 +107,7 @@ class ASTVisualizer:
         TODO [ENTERPRISE]: Identify hotspots
         TODO [ENTERPRISE]: Show call frequency
         TODO [ENTERPRISE]: Highlight bottlenecks
-        TODO [ENTERPRISE]: Add 12+ tests for performance    """
+        TODO [ENTERPRISE]: Add 12+ tests for performance"""
 
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()

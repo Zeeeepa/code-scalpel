@@ -15,7 +15,7 @@ from code_scalpel.licensing.features import get_tool_capabilities, has_capabilit
 from code_scalpel.mcp.path_resolver import resolve_path
 
 # Surgical / Extraction imports
-# Note: Some imports might be inside functions to avoid circular deps or lazy load, 
+# Note: Some imports might be inside functions to avoid circular deps or lazy load,
 # but we can try top-level here if safe.
 # from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
 # from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
@@ -24,9 +24,9 @@ logger = logging.getLogger("code_scalpel.mcp.extraction")
 
 from code_scalpel.licensing.tier_detector import get_current_tier
 from code_scalpel.mcp.helpers.session import (
-    get_session_update_count, 
-    increment_session_update_count, 
-    add_audit_entry
+    get_session_update_count,
+    increment_session_update_count,
+    add_audit_entry,
 )
 from code_scalpel.mcp.helpers.security_helpers import validate_path_security
 
@@ -44,16 +44,20 @@ def _get_server():
 
     return _server
 
+
 def _get_cache():
     try:
         from code_scalpel.cache import get_cache
+
         return get_cache()
     except ImportError:
         return None
 
+
 # PLACEHOLDER_FOR_EXTRACTION_ERRORS
 
 # PLACEHOLDER_FUNCTIONS
+
 
 def _extraction_error(
     target_name: str,
@@ -77,6 +81,7 @@ def _extraction_error(
         cross_file_deps_enabled=False,
         max_depth_applied=None,
     )
+
 
 async def _extract_polyglot(
     target_type: str,
@@ -174,6 +179,7 @@ async def _extract_polyglot(
     except Exception as e:
         return _extraction_error(target_name, f"Extraction failed: {str(e)}")
 
+
 def _create_extractor(
     file_path: str | None, code: str | None, target_name: str
 ) -> tuple["SurgicalExtractor | None", ContextualExtractionResult | None]:
@@ -212,6 +218,7 @@ def _create_extractor(
                 target_name, f"Syntax error in code: {str(e)}"
             )
 
+
 def _extract_method(extractor: "SurgicalExtractor", target_name: str):
     """Extract a method, handling the ClassName.method_name parsing."""
     if "." not in target_name:
@@ -220,6 +227,7 @@ def _extract_method(extractor: "SurgicalExtractor", target_name: str):
         )
     class_name, method_name = target_name.rsplit(".", 1)
     return extractor.get_method(class_name, method_name), None
+
 
 def _perform_extraction(
     extractor: "SurgicalExtractor",
@@ -288,6 +296,7 @@ def _perform_extraction(
         ),
     )
 
+
 def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
     """Process cross-file resolution results into context_code and context_items."""
     if cross_file_result is None or not cross_file_result.external_symbols:
@@ -311,6 +320,7 @@ def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
 
     return context_code, external_names
 
+
 def _build_full_code(
     imports_needed: list[str], context_code: str, target_code: str
 ) -> str:
@@ -322,6 +332,7 @@ def _build_full_code(
         parts.append(context_code)
     parts.append(target_code)
     return "\n\n".join(parts)
+
 
 async def _extract_code_impl(
     target_type: str,
@@ -787,6 +798,7 @@ async def _extract_code_impl(
     except Exception as e:
         return _extraction_error(target_name, f"Extraction failed: {str(e)}")
 
+
 async def rename_symbol(
     file_path: str,
     target_type: str,
@@ -917,6 +929,7 @@ async def rename_symbol(
             error=result.error,
             warnings=warnings,
         )
+
 
 async def update_symbol(
     file_path: str,
@@ -1534,6 +1547,7 @@ async def update_symbol(
             error=f"Patch failed: {str(e)}",
         )
 
+
 async def _perform_atomic_git_refactor(
     file_path: str, target_name: str, new_code: str
 ) -> dict[str, Any]:
@@ -1653,6 +1667,7 @@ async def _perform_atomic_git_refactor(
         result["error"] = str(e)
         return result
 
+
 async def _update_cross_file_references(
     modified_file: str, target_type: str, target_name: str, new_code: str
 ) -> dict[str, Any]:
@@ -1762,6 +1777,7 @@ async def _update_cross_file_references(
         result["errors"].append(f"Cross-file update failed: {str(e)}")
         return result
 
+
 async def _check_code_review_approval(
     file_path: str,
     target_name: str,
@@ -1816,6 +1832,7 @@ async def _check_code_review_approval(
             break
 
     return result
+
 
 async def _check_compliance(
     file_path: str,
@@ -1876,6 +1893,7 @@ async def _check_compliance(
             result["warnings"].append(f"Compliance warning: {message}")
 
     return result
+
 
 async def _run_pre_update_hook(
     file_path: str,
@@ -1940,6 +1958,7 @@ async def _run_pre_update_hook(
         hooks_dir = hooks_dir.parent
 
     return result
+
 
 async def _run_post_update_hook(
     file_path: str,

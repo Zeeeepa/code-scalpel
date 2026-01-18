@@ -24,7 +24,6 @@ Usage:
     from code_scalpel.security.type_safety import TypeEvaporationDetector
 """
 
-
 # [20251225_FEATURE] Re-export from analyzers (core security)
 from .analyzers import (
     CrossFileTaintTracker,

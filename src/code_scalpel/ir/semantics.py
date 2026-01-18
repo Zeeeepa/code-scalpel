@@ -4,7 +4,6 @@ Language Semantics - Behavioral Dispatch for Cross-Language Analysis.
 This module separates STRUCTURE (IR nodes) from BEHAVIOR (language semantics).
 """
 
-
 from abc import ABC, abstractmethod
 from typing import Any
 

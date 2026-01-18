@@ -455,9 +455,7 @@ class AnalysisCache(Generic[T]):
             return hashlib.sha256(str(path).encode()).hexdigest()
 
     def _hash_file_mmap(self, path: Path) -> str:
-        """Hash large file using memory-mapped I/O.
-
-        """
+        """Hash large file using memory-mapped I/O."""
         hasher = hashlib.sha256()
         with path.open("rb") as f:
             with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:

@@ -293,9 +293,7 @@ def _extract_content(tool_name: str, tool_input: Dict[str, Any]) -> Optional[str
     return None
 
 
-def _extract_modified_files(
-    tool_name: str, tool_input: Dict[str, Any]
-) -> List[str]:
+def _extract_modified_files(tool_name: str, tool_input: Dict[str, Any]) -> List[str]:
     """Extract list of files modified by a tool.
 
     Args:
@@ -381,14 +379,14 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
                     # [20260116_BUGFIX] Derive blocked policy name from governance violations instead of non-existent `violated_policy`
                     policy_name: Optional[str] = None
                     try:
-                        violations = getattr(result, "policy_violations", None) or getattr(
-                            result, "violations", None
-                        )
+                        violations = getattr(
+                            result, "policy_violations", None
+                        ) or getattr(result, "violations", None)
                         if violations:
                             first_violation = violations[0]
-                            rule = getattr(first_violation, "rule_name", None) or getattr(
-                                first_violation, "rule", None
-                            )
+                            rule = getattr(
+                                first_violation, "rule_name", None
+                            ) or getattr(first_violation, "rule", None)
                             if rule is not None:
                                 policy_name = getattr(rule, "name", rule)
                     except Exception:
@@ -477,7 +475,9 @@ def post_tool_use(context: Optional[HookContext] = None) -> HookResponse:
             content_hash = _compute_content_hash(content)
 
     # Sanitize input for logging (remove large content)
-    sanitized_input = {k: v for k, v in tool_input.items() if k not in ("content", "new_string")}
+    sanitized_input = {
+        k: v for k, v in tool_input.items() if k not in ("content", "new_string")
+    }
     if "content" in tool_input:
         sanitized_input["content_length"] = len(tool_input["content"])
     if "new_string" in tool_input:

@@ -969,8 +969,8 @@ class TestUpdateSymbolTool:
     @pytest.fixture(autouse=True)
     def _set_project_root(self, tmp_path, monkeypatch):
         """[20260116_TEST] Set PROJECT_ROOT to tmp_path for path validation."""
-        from pathlib import Path
         from code_scalpel.mcp.helpers import extraction_helpers
+
         monkeypatch.setattr(extraction_helpers, "PROJECT_ROOT", tmp_path)
 
     async def test_update_function_in_file(self, tmp_path, monkeypatch):
@@ -1284,6 +1284,7 @@ class TestCrossFileDependenciesMCP:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
         # Also clear any cached tier result
         from code_scalpel.licensing import tier_detector
+
         detector = tier_detector.TierDetector()
         detector._cached_result = None
 

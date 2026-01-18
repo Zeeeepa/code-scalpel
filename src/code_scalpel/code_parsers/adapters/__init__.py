@@ -22,7 +22,6 @@ Usage:
     result = parser.parse(code)
 """
 
-
 from .java_adapter import JavaParserAdapter  # type: ignore[import-not-found]
 from .javascript_adapter import JavaScriptParserAdapter, TypeScriptParserAdapter
 

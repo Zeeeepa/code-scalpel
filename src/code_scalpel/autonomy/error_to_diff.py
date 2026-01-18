@@ -7,9 +7,6 @@ code diffs that agents can apply.
 [20251217_FEATURE] v3.0.0 Autonomy - Error-to-Diff Engine
 """
 
-
-
-
 import ast
 import difflib
 import re
@@ -64,9 +61,6 @@ class ErrorAnalysis:
     column: Optional[int]
     fixes: list[FixHint]
     requires_human_review: bool
-
-
-
 
 
 class ErrorToDiffEngine:

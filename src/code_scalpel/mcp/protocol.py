@@ -39,6 +39,7 @@ def _normalize_tier(value: str | None) -> str:
 def _requested_tier_from_env() -> str | None:
     """Get requested tier from environment variables (for testing/downgrade)."""
     import os
+
     requested = os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
     if requested is None:
         return None

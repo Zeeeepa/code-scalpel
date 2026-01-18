@@ -71,15 +71,14 @@ class CallGraphBuilder:
     """
     Builds a static call graph for a Python project.
     """
+
     # ====================================================================
     # TIER 2: PRO (Commercial - Medium Priority)
     # ====================================================================
-    
-    
+
     # ====================================================================
     # TIER 3: ENTERPRISE (Commercial - Lower Priority)
     # ====================================================================
-    
 
     def __init__(self, root_path: Path):
         self.root_path = root_path
@@ -574,7 +573,13 @@ class CallGraphBuilder:
             callee = getattr(call_node, "callee", None)
             if isinstance(callee, esprima.nodes.Identifier):
                 return callee.name
-            if isinstance(callee, (esprima.nodes.StaticMemberExpression, esprima.nodes.ComputedMemberExpression)):
+            if isinstance(
+                callee,
+                (
+                    esprima.nodes.StaticMemberExpression,
+                    esprima.nodes.ComputedMemberExpression,
+                ),
+            ):
                 obj = getattr(callee, "object", None)
                 prop = getattr(callee, "property", None)
                 if isinstance(obj, esprima.nodes.Identifier) and isinstance(
@@ -1273,7 +1278,6 @@ class CallGraphBuilder:
         Returns:
             Mermaid diagram syntax
         """
-        
 
         lines = ["graph TD"]
 
@@ -1329,7 +1333,6 @@ class CallGraphBuilder:
             List of cycles, where each cycle is a list of module paths
             e.g., [["a.py", "b.py", "a.py"], ["c.py", "d.py", "e.py", "c.py"]]
         """
-
 
         # Build import graph: module -> modules it imports
         import_graph: Dict[str, Set[str]] = {}

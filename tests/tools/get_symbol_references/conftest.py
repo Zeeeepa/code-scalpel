@@ -9,6 +9,7 @@ License files in tests/licenses/:
 - pro: code_scalpel_license_pro_20260101_190345.jwt
 - enterprise: code_scalpel_license_enterprise_20260101_190754.jwt
 """
+
 from pathlib import Path
 from typing import Any, Callable
 
@@ -19,7 +20,9 @@ import pytest
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 TEST_LICENSES_DIR = PROJECT_ROOT / "tests" / "licenses"
 PRO_LICENSE = TEST_LICENSES_DIR / "code_scalpel_license_pro_20260101_190345.jwt"
-ENTERPRISE_LICENSE = TEST_LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+ENTERPRISE_LICENSE = (
+    TEST_LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+)
 # Non-existent path to force Community tier (no valid license found)
 NO_LICENSE = PROJECT_ROOT / "tests" / "licenses" / "nonexistent_license.jwt"
 
@@ -29,6 +32,7 @@ def _clear_license_caches():
     # Clear JWT validation cache
     try:
         from code_scalpel.licensing import jwt_validator
+
         jwt_validator._LICENSE_VALIDATION_CACHE = None
     except (ImportError, AttributeError):
         pass
@@ -36,6 +40,7 @@ def _clear_license_caches():
     # Clear config loader cache
     try:
         from code_scalpel.licensing.config_loader import clear_cache
+
         clear_cache()
     except (ImportError, AttributeError):
         pass
@@ -43,6 +48,7 @@ def _clear_license_caches():
     # Reset server tier state
     try:
         import code_scalpel.mcp.tools.context as server
+
         server._LAST_VALID_LICENSE_AT = None
         server._LAST_VALID_LICENSE_TIER = "community"
         if hasattr(server, "_GOVERNANCE_VERIFY_CACHE"):
@@ -54,7 +60,7 @@ def _clear_license_caches():
 @pytest.fixture(autouse=True)
 def reset_license_state():
     """[20260113_FIX] Clear license caches before and after each test.
-    
+
     This ensures tests don't pollute each other with cached license state.
     """
     _clear_license_caches()
@@ -86,7 +92,7 @@ def make_project(tmp_path: Path) -> Callable[[dict[str, str]], Path]:
 @pytest.fixture
 def community_license(monkeypatch: pytest.MonkeyPatch):
     """[20260113_TEST] Set up Community tier by pointing to non-existent license.
-    
+
     Community tier is the default when no valid license is found.
     We explicitly disable discovery and point to a non-existent file.
     """
@@ -121,13 +127,14 @@ def enterprise_license(monkeypatch: pytest.MonkeyPatch):
 @pytest.fixture
 def patch_tier(monkeypatch: pytest.MonkeyPatch) -> Callable[[str], None]:
     """[20260113_DEPRECATED] Legacy fixture - prefer community_license/pro_license/enterprise_license.
-    
+
     Sets up tier using actual license files instead of env var hacks.
     """
+
     def _set(tier: str) -> None:
         # CRITICAL: Clear caches BEFORE setting env vars
         _clear_license_caches()
-        
+
         if tier == "community":
             monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
             monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(NO_LICENSE))
@@ -138,10 +145,10 @@ def patch_tier(monkeypatch: pytest.MonkeyPatch) -> Callable[[str], None]:
             monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(ENTERPRISE_LICENSE))
             monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
         monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
-        
+
         # Clear caches AGAIN after setting env vars to force fresh tier detection
         _clear_license_caches()
-    
+
     return _set
 
 

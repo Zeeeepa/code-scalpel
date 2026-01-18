@@ -306,7 +306,9 @@ def _get_call_graph_sync(
                 )
             else:
                 # Fallback: simple DFS path search within max depth
-                def _dfs_paths(start: str, goal: str, max_depth: int) -> list[list[str]]:
+                def _dfs_paths(
+                    start: str, goal: str, max_depth: int
+                ) -> list[list[str]]:
                     results: list[list[str]] = []
                     stack: list[tuple[str, list[str]]] = [(start, [start])]
                     while stack:
@@ -1893,19 +1895,22 @@ def _get_cross_file_dependencies_sync(
     if project_root is None and not tier == "enterprise":
         # Check volume roughly
         try:
-             # Fast check using git if available, or os.walk (limited)
-             # Here we assume a simple heuristic: if we are deeper than root, use parent dir.
-             target_path_obj = Path(target_file)
-             if not target_path_obj.is_absolute():
-                 target_path_obj = root_path / target_file
-             
-             # If target is inside root_path but deeper
-             if target_path_obj.exists() and len(target_path_obj.parts) > len(root_path.parts) + 1:
-                 # Re-scope root to the parent of the target file
-                 # e.g. /project/src/module/file.py -> /project/src/module
-                 root_path = target_path_obj.parent
+            # Fast check using git if available, or os.walk (limited)
+            # Here we assume a simple heuristic: if we are deeper than root, use parent dir.
+            target_path_obj = Path(target_file)
+            if not target_path_obj.is_absolute():
+                target_path_obj = root_path / target_file
+
+            # If target is inside root_path but deeper
+            if (
+                target_path_obj.exists()
+                and len(target_path_obj.parts) > len(root_path.parts) + 1
+            ):
+                # Re-scope root to the parent of the target file
+                # e.g. /project/src/module/file.py -> /project/src/module
+                root_path = target_path_obj.parent
         except Exception:
-            pass # Fallback to default behavior on error
+            pass  # Fallback to default behavior on error
 
     if not root_path.exists():
         return CrossFileDependenciesResult(
@@ -2017,7 +2022,7 @@ def _get_cross_file_dependencies_sync(
                         too_many = True
                         break
                 if too_many:
-                     return CrossFileDependenciesResult(
+                    return CrossFileDependenciesResult(
                         success=False,
                         error=f"Scope too large (>500 files). Community Tier is limited to 500 files per scan. Please verify a specific subdirectory using the 'project_root' parameter (Current: {root_path}).",
                     )

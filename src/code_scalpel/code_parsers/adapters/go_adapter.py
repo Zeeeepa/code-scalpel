@@ -3,6 +3,7 @@
 [20251224_FEATURE] Stub adapter for Go parsing support.
 
 """
+
 from typing import Any, List
 from ..interface import IParser, ParseResult
 

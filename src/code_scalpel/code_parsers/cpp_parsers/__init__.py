@@ -6,9 +6,6 @@ This module provides a comprehensive interface for C++ code analysis.
 """
 
 
-
-
-
 __all__ = [
     "CppParserRegistry",
     "ClangStaticAnalyzerParser",

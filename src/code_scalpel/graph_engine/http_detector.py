@@ -19,9 +19,6 @@ Example:
     ...     print(f"{link.client_id} -> {link.endpoint_id}: {link.confidence}")
 """
 
-
-
-
 from __future__ import annotations
 
 import re

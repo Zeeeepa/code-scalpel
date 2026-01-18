@@ -34,7 +34,6 @@ Example:
         print(f"Policy violation: {decision.reason}")
 """
 
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -77,7 +76,6 @@ from .crypto_verify import (
     VerificationResult,
     verify_policy_integrity_crypto,
 )
-
 
 
 def __getattr__(name: str):

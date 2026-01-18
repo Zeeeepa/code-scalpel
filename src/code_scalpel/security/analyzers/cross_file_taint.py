@@ -42,8 +42,6 @@ class CrossFileTaintSource(Enum):
     MODULE_LEVEL = auto()  # Top-level code in imported module
 
 
-
-
 class CrossFileSink(Enum):
     """Dangerous sinks for cross-file taint."""
 

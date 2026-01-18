@@ -1348,16 +1348,12 @@ def _scan_dependencies_sync(
             # [20260116_BUGFIX] Cooperative cancellation during dependency analysis.
             if ctx:
                 if hasattr(ctx, "should_cancel") and ctx.should_cancel():
-                    raise asyncio.CancelledError(
-                        "Dependency scan cancelled by user"
-                    )
+                    raise asyncio.CancelledError("Dependency scan cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
                     and ctx.request_context.lifecycle_context.is_cancelled
                 ):
-                    raise asyncio.CancelledError(
-                        "Dependency scan cancelled by user"
-                    )
+                    raise asyncio.CancelledError("Dependency scan cancelled by user")
             dep_vulns: list[DependencyVulnerability] = []
             dep_key = f"{dep.name}@{dep.version}"
 

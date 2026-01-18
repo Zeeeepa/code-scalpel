@@ -109,6 +109,7 @@ async def test_tool_wrappers_success(monkeypatch):
     monkeypatch.setattr(base_agent, "get_symbol_references", success_tool)
     # [20260116_TEST] security_scan is lazy-imported; patch at the source module
     from code_scalpel.mcp.tools import security as security_module
+
     monkeypatch.setattr(security_module, "security_scan", success_tool)
     monkeypatch.setattr(base_agent, "extract_code", success_tool)
     monkeypatch.setattr(base_agent, "simulate_refactor", success_tool)

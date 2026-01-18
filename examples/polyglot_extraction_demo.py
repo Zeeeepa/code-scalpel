@@ -52,7 +52,11 @@ public class Calculator {
     if result.success:
         print(f"  Lines: {result.start_line}-{result.end_line}")
         print(f"  Code length: {len(result.code)} chars")
-        print("\n" + result.code[:200] + "..." if len(result.code) > 200 else "\n" + result.code)
+        print(
+            "\n" + result.code[:200] + "..."
+            if len(result.code) > 200
+            else "\n" + result.code
+        )
     else:
         print(f"  Error: {result.error}")
 
@@ -346,7 +350,12 @@ def demo_unified_api():
         (Language.PYTHON, "def test(): pass", "function", "test"),
         (Language.JAVA, "public class Test { void run() {} }", "class", "Test"),
         (Language.JAVASCRIPT, "function hello() {}", "function", "hello"),
-        (Language.TYPESCRIPT, "function add(a: number): number { return a; }", "function", "add"),
+        (
+            Language.TYPESCRIPT,
+            "function add(a: number): number { return a; }",
+            "function",
+            "add",
+        ),
     ]
 
     print("✓ Using identical API for all languages:")
@@ -355,9 +364,13 @@ def demo_unified_api():
         result = extractor.extract(target_type, target_name)
         status = "✓" if result.success else "✗"
         if result.success:
-            print(f"  {status} {lang.value:12s} - extracted {target_type} '{target_name}' (lines {result.start_line}-{result.end_line})")
+            print(
+                f"  {status} {lang.value:12s} - extracted {target_type} '{target_name}' (lines {result.start_line}-{result.end_line})"
+            )
         else:
-            print(f"  {status} {lang.value:12s} - {target_type} '{target_name}': {result.error}")
+            print(
+                f"  {status} {lang.value:12s} - {target_type} '{target_name}': {result.error}"
+            )
 
 
 def main():

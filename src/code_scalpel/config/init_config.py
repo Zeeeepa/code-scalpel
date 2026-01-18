@@ -35,9 +35,6 @@ from .templates import (
 )
 
 
-
-
-
 def generate_secret_key() -> str:
     """
     Generate a cryptographically secure random secret key for HMAC.

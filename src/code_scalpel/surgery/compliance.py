@@ -24,7 +24,7 @@ try:
         GovernanceDecision,
         UnifiedGovernance,
     )
-    
+
     Operation = None  # type: ignore
 
     GOVERNANCE_AVAILABLE = True

@@ -104,9 +104,6 @@ class FixLoopResult:
     total_duration_ms: int
 
 
-
-
-
 class FixLoop:
     """
     Supervised fix loop with termination guarantees.

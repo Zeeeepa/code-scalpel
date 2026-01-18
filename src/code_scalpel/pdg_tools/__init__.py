@@ -8,13 +8,6 @@ for security, optimization, and refactoring.
 """
 
 
-
-
-
-
-
-
-
 from .analyzer import (
     DataFlowAnomaly,
     DependencyType,

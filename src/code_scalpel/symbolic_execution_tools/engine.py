@@ -411,10 +411,10 @@ class SymbolicAnalyzer:
         # [20260114_FIX] Scan for FunctionDef even if preceded by imports
         func_def = None
         for node in ir_module.body:
-             if isinstance(node, IRFunctionDef):
-                 func_def = node
-                 break
-        
+            if isinstance(node, IRFunctionDef):
+                func_def = node
+                break
+
         # If found, extract and execute function body with symbolic parameters
         if func_def:
             logger.debug(f"Detected function definition: {func_def.name}")

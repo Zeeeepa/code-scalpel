@@ -4,7 +4,6 @@ Configuration templates for .code-scalpel directory.
 [20251219_FEATURE] v3.0.2 - Auto-initialize .code-scalpel configuration
 """
 
-
 # Template for policy.yaml
 POLICY_YAML_TEMPLATE = """# Code Scalpel Policy Configuration
 # Learn more: https://github.com/tescolopio/code-scalpel/blob/main/docs/policy_engine_guide.md

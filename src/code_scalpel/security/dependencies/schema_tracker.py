@@ -39,7 +39,6 @@ Usage:
         print(f"BREAKING: {drift.breaking_changes}")
 """
 
-
 from __future__ import annotations
 
 import re

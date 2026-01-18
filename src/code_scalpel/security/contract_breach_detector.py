@@ -12,7 +12,6 @@ This module detects contract breaches across language boundaries, such as:
 - Response format changes breaking client expectations
 """
 
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

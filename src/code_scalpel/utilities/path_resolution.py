@@ -5,7 +5,6 @@ Handles conversion of relative/absolute paths, workspace detection,
 and common project structure patterns.
 """
 
-
 from __future__ import annotations
 
 import os
@@ -19,7 +18,6 @@ class PathResolutionError(Exception):
     """Raised when a file path cannot be resolved."""
 
     pass
-
 
 
 def resolve_file_path(
@@ -151,21 +149,21 @@ def get_workspace_root(start_path: Optional[str] = None) -> Optional[str]:
 
 def normalize_path(path: str) -> str:
     """
-        Normalize a path to use forward slashes on all platforms.
+    Normalize a path to use forward slashes on all platforms.
 
-        Args:
-            path: Path to normalize
+    Args:
+        path: Path to normalize
 
-        Returns:
-            Normalized path with forward slashes
+    Returns:
+        Normalized path with forward slashes
 
-        Examples:
-            >>> normalize_path("C:\\\\Users\\\\file.py")
-            "C:/Users/file.py"
+    Examples:
+        >>> normalize_path("C:\\\\Users\\\\file.py")
+        "C:/Users/file.py"
 
 
-            >>> normalize_path("/home/user/file.py")
-            "/home/user/file.py"
+        >>> normalize_path("/home/user/file.py")
+        "/home/user/file.py"
     """
     return str(Path(path)).replace("\\", "/")
 

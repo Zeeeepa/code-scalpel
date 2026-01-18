@@ -77,7 +77,9 @@ def _default_server_command(repo_root: Path) -> str:
     return sys.executable
 
 
-def _make_pro_test_project(base_dir: Path, bulk_files: int = 140) -> tuple[Path, dict[str, Path]]:
+def _make_pro_test_project(
+    base_dir: Path, bulk_files: int = 140
+) -> tuple[Path, dict[str, Path]]:
     root = base_dir / "proj"
     pkg = root / "pkg"
     bulk = root / "bulk"
@@ -155,7 +157,9 @@ async def missing_await():
     }
 
 
-async def _call(session: ClientSession, tool: str, args: dict[str, Any]) -> dict[str, Any]:
+async def _call(
+    session: ClientSession, tool: str, args: dict[str, Any]
+) -> dict[str, Any]:
     res = await session.call_tool(tool, args)
     return res.model_dump()
 
@@ -199,13 +203,17 @@ async def main() -> int:
         print("FAIL: CODE_SCALPEL_LICENSE_PATH is not set; cannot validate Pro tier")
         return 1
 
-    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(repo_root)
+    server_cmd = os.environ.get("CODE_SCALPEL_MCP_COMMAND") or _default_server_command(
+        repo_root
+    )
     if server_cmd.endswith("code-scalpel"):
         server_args = ["mcp", "--root", str(project_root)]
     else:
         server_args = ["-m", "code_scalpel.mcp.server", "--root", str(project_root)]
 
-    params = StdioServerParameters(command=server_cmd, args=server_args, env=env, cwd=run_dir)
+    params = StdioServerParameters(
+        command=server_cmd, args=server_args, env=env, cwd=run_dir
+    )
 
     checks: list[ToolCheck] = []
 
@@ -220,11 +228,19 @@ async def main() -> int:
             if tool_names != expected:
                 missing = sorted(set(expected) - set(tool_names))
                 extra = sorted(set(tool_names) - set(expected))
-                checks.append(ToolCheck("list_tools", False, f"Mismatch. missing={missing} extra={extra}"))
+                checks.append(
+                    ToolCheck(
+                        "list_tools",
+                        False,
+                        f"Mismatch. missing={missing} extra={extra}",
+                    )
+                )
             else:
                 checks.append(ToolCheck("list_tools", True, "22 tools"))
 
-            py_snippet = "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            py_snippet = (
+                "def f(x):\n    if x > 0:\n        return x + 1\n    return 0\n"
+            )
 
             # --- Smoke calls for all tools (basic correctness) ---
             smoke: list[tuple[str, dict[str, Any]]] = [
@@ -232,13 +248,25 @@ async def main() -> int:
                 (
                     "security_scan",
                     {
-                        "code": "def f(user_id):\n    q=f\"SELECT * FROM t WHERE id={user_id}\"\n    cursor.execute(q)\n",
+                        "code": 'def f(user_id):\n    q=f"SELECT * FROM t WHERE id={user_id}"\n    cursor.execute(q)\n',
                     },
                 ),
-                ("unified_sink_detect", {"code": "eval(user_input)", "language": "python"}),
+                (
+                    "unified_sink_detect",
+                    {"code": "eval(user_input)", "language": "python"},
+                ),
                 ("symbolic_execute", {"code": py_snippet, "language": "python"}),
-                ("generate_unit_tests", {"code": "def add(a,b):\n    return a+b\n", "framework": "pytest"}),
-                ("simulate_refactor", {"original_code": "def add(a,b): return a+b\n", "new_code": "def add(a,b): return eval('a+b')\n"}),
+                (
+                    "generate_unit_tests",
+                    {"code": "def add(a,b):\n    return a+b\n", "framework": "pytest"},
+                ),
+                (
+                    "simulate_refactor",
+                    {
+                        "original_code": "def add(a,b): return a+b\n",
+                        "new_code": "def add(a,b): return eval('a+b')\n",
+                    },
+                ),
                 (
                     "extract_code",
                     {
@@ -341,7 +369,13 @@ async def main() -> int:
                 try:
                     payload = await _call(session, tool, args)
                     ok = _mcp_call_ok(payload)
-                    checks.append(ToolCheck(tool, ok, "ok" if ok else json.dumps(_structured_data(payload))[:200]))
+                    checks.append(
+                        ToolCheck(
+                            tool,
+                            ok,
+                            "ok" if ok else json.dumps(_structured_data(payload))[:200],
+                        )
+                    )
                 except Exception as e:
                     checks.append(ToolCheck(tool, False, str(e)))
 
@@ -364,7 +398,13 @@ async def main() -> int:
                 if ok:
                     content = paths["a"].read_text(encoding="utf-8")
                     ok = "def add2" in content
-                checks.append(ToolCheck("rename_symbol", ok, "ok" if ok else (data.get("error") or "unexpected result")))
+                checks.append(
+                    ToolCheck(
+                        "rename_symbol",
+                        ok,
+                        "ok" if ok else (data.get("error") or "unexpected result"),
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("rename_symbol", False, f"call failed: {e}"))
 
@@ -388,13 +428,21 @@ async def main() -> int:
                 if ok:
                     content = paths["a"].read_text(encoding="utf-8")
                     ok = "return a + b + 0" in content
-                checks.append(ToolCheck("update_symbol", ok, "ok" if ok else (data.get("error") or "unexpected result")))
+                checks.append(
+                    ToolCheck(
+                        "update_symbol",
+                        ok,
+                        "ok" if ok else (data.get("error") or "unexpected result"),
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("update_symbol", False, f"call failed: {e}"))
 
             # --- Pro limit: code_policy_check should exceed Community max_files ---
             try:
-                payload = await _call(session, "code_policy_check", {"paths": [str(project_root)]})
+                payload = await _call(
+                    session, "code_policy_check", {"paths": [str(project_root)]}
+                )
                 data = _structured_data(payload)
                 # NOTE: code_policy_check may report `success=False` when violations exist.
                 # For tier validation we only care that the tool executed and analyzed >100 files.
@@ -431,9 +479,17 @@ async def main() -> int:
                 ok = ok and (data.get("compliance_reports") in (None, {}, []))
                 ok = ok and (float(data.get("compliance_score") or 0.0) == 0.0)
                 ok = ok and (data.get("pdf_report") in (None, ""))
-                checks.append(ToolCheck("enterprise_denied_code_policy_check", ok, "ok" if ok else json.dumps(data)[:240]))
+                checks.append(
+                    ToolCheck(
+                        "enterprise_denied_code_policy_check",
+                        ok,
+                        "ok" if ok else json.dumps(data)[:240],
+                    )
+                )
             except Exception as e:
-                checks.append(ToolCheck("enterprise_denied_code_policy_check", False, str(e)))
+                checks.append(
+                    ToolCheck("enterprise_denied_code_policy_check", False, str(e))
+                )
 
             # --- Enterprise feature denial: graph query flags must remain false in Pro ---
             try:
@@ -451,10 +507,16 @@ async def main() -> int:
                 data = _structured_data(payload)
                 # Query language is Enterprise-only. In Pro we accept either a hard failure
                 # or a successful response that explicitly reports unsupported query features.
-                ok = (data.get("query_supported") is False)
+                ok = data.get("query_supported") is False
                 ok = ok and (data.get("traversal_rules_available") is False)
                 ok = ok and (data.get("path_constraints_supported") is False)
-                checks.append(ToolCheck("enterprise_denied_graph_query", ok, "ok" if ok else json.dumps(data)[:240]))
+                checks.append(
+                    ToolCheck(
+                        "enterprise_denied_graph_query",
+                        ok,
+                        "ok" if ok else json.dumps(data)[:240],
+                    )
+                )
             except Exception as e:
                 checks.append(ToolCheck("enterprise_denied_graph_query", False, str(e)))
 

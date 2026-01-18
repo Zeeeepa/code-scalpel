@@ -6,6 +6,7 @@ All session state MUST be imported from this module to avoid split-brain bugs.
 This module supports both the new API (tool_name, file_path, etc.) and the legacy
 API (operation, details, outcome, user_id) for backward compatibility.
 """
+
 from __future__ import annotations
 
 import logging
@@ -28,13 +29,14 @@ _SESSION_AUDIT_TRAIL: List[Dict[str, Any]] = []
 # =============================================================================
 class SessionManager:
     """Manages session state and audit logs.
-    
+
     This is a singleton that wraps the module-level state variables.
     Using the singleton or the module-level functions is equivalent -
     they all operate on the same _SESSION_* variables.
     """
+
     _instance: Optional["SessionManager"] = None
-    
+
     def __init__(self) -> None:
         # SessionManager does NOT have its own state!
         # It uses the module-level _SESSION_* variables.
@@ -69,12 +71,15 @@ class SessionManager:
         if "timestamp" not in entry:
             entry["timestamp"] = datetime.now(timezone.utc).isoformat()
         _SESSION_AUDIT_TRAIL.append(entry)
-        logger.info(f"AUDIT [{entry.get('tool', entry.get('operation', 'unknown'))}] {entry.get('success', entry.get('outcome', '-'))}")
+        logger.info(
+            f"AUDIT [{entry.get('tool', entry.get('operation', 'unknown'))}] {entry.get('success', entry.get('outcome', '-'))}"
+        )
 
 
 # =============================================================================
 # PUBLIC API FUNCTIONS
 # =============================================================================
+
 
 def get_session_update_count(tool_name: str) -> int:
     """Get the current update count for a tool."""
@@ -104,9 +109,9 @@ def add_audit_entry(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Add an audit trail entry.
-    
+
     Supports both APIs:
-    
+
     New API (preferred):
         add_audit_entry(
             tool_name="extract_code",
@@ -116,7 +121,7 @@ def add_audit_entry(
             success=True,
             tier="community"
         )
-    
+
     Legacy API (backward compatibility):
         add_audit_entry(
             "extraction",
@@ -128,35 +133,41 @@ def add_audit_entry(
     entry: Dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-    
+
     # New API: tool_name was provided as keyword arg
     if tool_name:
-        entry.update({
-            "tool": tool_name,
-            "file_path": file_path,
-            "target_name": target_name,
-            "operation": operation or "unknown",
-            "success": success,
-            "tier": tier,
-            "metadata": metadata or {},
-        })
+        entry.update(
+            {
+                "tool": tool_name,
+                "file_path": file_path,
+                "target_name": target_name,
+                "operation": operation or "unknown",
+                "success": success,
+                "tier": tier,
+                "metadata": metadata or {},
+            }
+        )
     # Legacy API: operation was provided as positional arg
     elif operation:
-        entry.update({
-            "operation": operation,
-            "details": details or {},
-            "outcome": outcome or ("success" if success else "failure"),
-            "user_id": user_id,
-            "success": outcome == "success" if outcome else success,
-        })
+        entry.update(
+            {
+                "operation": operation,
+                "details": details or {},
+                "outcome": outcome or ("success" if success else "failure"),
+                "user_id": user_id,
+                "success": outcome == "success" if outcome else success,
+            }
+        )
     else:
         # Minimal entry (shouldn't happen, but be defensive)
-        entry.update({
-            "operation": "unknown",
-            "success": success,
-            "metadata": metadata or details or {},
-        })
-    
+        entry.update(
+            {
+                "operation": "unknown",
+                "success": success,
+                "metadata": metadata or details or {},
+            }
+        )
+
     _SESSION_AUDIT_TRAIL.append(entry)
     log_key = entry.get("tool", entry.get("operation", "unknown"))
     log_outcome = entry.get("success", entry.get("outcome", "-"))

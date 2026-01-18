@@ -12,7 +12,6 @@ Security Model: FAIL CLOSED
 - Missing OPA CLI → DENY ALL
 """
 
-
 from __future__ import annotations
 
 import hashlib
@@ -42,8 +41,6 @@ class PolicyError(Exception):
     pass
 
 
-
-
 class PolicySeverity(Enum):
     """Severity levels for policy violations."""
 
@@ -54,16 +51,12 @@ class PolicySeverity(Enum):
     INFO = "INFO"
 
 
-
-
 class PolicyAction(Enum):
     """Actions to take when policy is violated."""
 
     DENY = "DENY"  # Block the operation
     WARN = "WARN"  # Allow but log warning
     AUDIT = "AUDIT"  # Allow and log for review
-
-
 
 
 @dataclass
@@ -80,7 +73,6 @@ class Policy:
         severity: Impact level (CRITICAL, HIGH, MEDIUM, LOW)
         action: What to do on violation (DENY, WARN, AUDIT)
     """
-
 
     name: str
     description: str

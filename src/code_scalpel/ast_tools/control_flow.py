@@ -244,7 +244,7 @@ class ControlFlowBuilder:
         TODO [ENTERPRISE]: Distinguish for/while/do-while patterns
         TODO [ENTERPRISE]: Detect infinite loops
         TODO [ENTERPRISE]: Calculate loop bounds if possible
-        TODO [ENTERPRISE]: Add 12+ tests for loop classification        """
+        TODO [ENTERPRISE]: Add 12+ tests for loop classification"""
         return []
 
     def find_dominators(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -263,7 +263,7 @@ class ControlFlowBuilder:
         TODO [ENTERPRISE]: Find direct dominator for each block
         TODO [ENTERPRISE]: Build idom edges
         TODO [ENTERPRISE]: Support dominance frontier queries
-        TODO [ENTERPRISE]: Add 12+ tests for immediate dominance        """
+        TODO [ENTERPRISE]: Add 12+ tests for immediate dominance"""
         return {}
 
     def compute_reachability(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -282,7 +282,7 @@ class ControlFlowBuilder:
         TODO [ENTERPRISE]: Find blocks with no path from entry
         TODO [ENTERPRISE]: Report unreachable statement locations
         TODO [ENTERPRISE]: Suggest dead code removal
-        TODO [ENTERPRISE]: Add 12+ tests for dead code detection        """
+        TODO [ENTERPRISE]: Add 12+ tests for dead code detection"""
         return {}
 
     def analyze_loop_invariants(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
@@ -298,7 +298,7 @@ class ControlFlowBuilder:
         TODO [ENTERPRISE]: Suggest statement hoisting
         TODO [ENTERPRISE]: Calculate performance impact
         TODO [ENTERPRISE]: Verify safety of motion
-        TODO [ENTERPRISE]: Add 12+ tests for motion suggestions        """
+        TODO [ENTERPRISE]: Add 12+ tests for motion suggestions"""
         return {}
 
     def visualize(self, cfg: ControlFlowGraph, output_file: str = "cfg"):
@@ -323,7 +323,7 @@ class ControlFlowBuilder:
         TODO [ENTERPRISE]: Add hover details (statements)
         TODO [ENTERPRISE]: Support HTML export
         TODO [ENTERPRISE]: Add click navigation
-        TODO [ENTERPRISE]: Add 10+ tests        """
+        TODO [ENTERPRISE]: Add 10+ tests"""
         pass
 
     def _create_block(self, block_type: BlockType) -> str:

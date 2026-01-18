@@ -1,7 +1,6 @@
 """Type stubs for esprima - ECMAScript parsing infrastructure."""
 
 from typing import Any, Dict, List, Optional
-from esprima.nodes import Program
 
 def parseScript(
     code: str,
@@ -14,7 +13,7 @@ def parseScript(
     range: bool = False,
     loc: bool = False,
     tokens: bool = False,
-) -> Program: ...
+) -> Any: ...
 def parseModule(
     code: str,
     options: Optional[Dict[str, Any]] = None,
@@ -26,12 +25,12 @@ def parseModule(
     range: bool = False,
     loc: bool = False,
     tokens: bool = False,
-) -> Program: ...
+) -> Any: ...
 def parse(
     code: str,
     options: Optional[Dict[str, Any]] = None,
     delegate: Optional[Any] = None,
-) -> Program: ...
+) -> Any: ...
 def tokenize(
     code: str,
     options: Optional[Dict[str, Any]] = None,

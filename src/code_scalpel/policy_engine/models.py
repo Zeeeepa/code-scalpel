@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -11,5 +10,3 @@ class HumanResponse:
     justification: str
     human_id: str
     timestamp: datetime = field(default_factory=datetime.now)
-
-

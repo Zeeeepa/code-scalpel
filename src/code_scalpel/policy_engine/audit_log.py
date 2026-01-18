@@ -7,7 +7,6 @@ This module provides cryptographically-signed, append-only audit logging
 to ensure all security events are recorded and verifiable.
 """
 
-
 import hashlib
 import hmac
 import json
@@ -32,7 +31,6 @@ class AuditLog:
     - Integrity verification
     - Tamper detection
     """
-
 
     def __init__(self, log_path: Optional[str] = None):
         """
@@ -75,7 +73,6 @@ class AuditLog:
         """
         # [20251222_BUGFIX] Respect provided timestamp for time-range filtering in reports/tests.
         event_timestamp = timestamp or datetime.now()
-
 
         event = {
             "timestamp": event_timestamp.isoformat(),

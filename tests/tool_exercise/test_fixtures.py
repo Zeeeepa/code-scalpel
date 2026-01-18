@@ -124,7 +124,7 @@ API_KEY = "sk-1234567890abcdef"  # Hardcoded Secret!
 '''
 
 # JavaScript code for polyglot testing
-JAVASCRIPT_CODE = '''
+JAVASCRIPT_CODE = """
 import { useState, useEffect } from 'react';
 
 export function useUserData(userId) {
@@ -173,10 +173,10 @@ export class UserService {
         return response.json();
     }
 }
-'''
+"""
 
 # TypeScript code with type evaporation issues
-TYPESCRIPT_CODE_FRONTEND = '''
+TYPESCRIPT_CODE_FRONTEND = """
 interface User {
     id: number;
     name: string;
@@ -202,9 +202,9 @@ export async function getUserEmail(userId: number): Promise<string> {
     const user = await fetchUser(userId);
     return user.email;  // Could be undefined at runtime!
 }
-'''
+"""
 
-TYPESCRIPT_CODE_BACKEND = '''
+TYPESCRIPT_CODE_BACKEND = """
 from pydantic import BaseModel
 from fastapi import FastAPI
 
@@ -224,10 +224,10 @@ def get_user(user_id: int) -> UserResponse:
         email="john@example.com",
         created_at="2025-01-01T00:00:00Z"
     )
-'''
+"""
 
 # Java code for polyglot testing
-JAVA_CODE = '''
+JAVA_CODE = """
 package com.example.service;
 
 import java.util.List;
@@ -275,7 +275,7 @@ class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 }
-'''
+"""
 
 # Code with symbolic execution targets
 SYMBOLIC_EXECUTION_CODE = '''
@@ -374,21 +374,21 @@ def unused_function():
 
 # Test cases dictionary for easy access
 TEST_FIXTURES = {
-    'python_basic': PYTHON_CODE_BASIC,
-    'python_complex': PYTHON_CODE_COMPLEX,
-    'python_vulnerable': PYTHON_CODE_VULNERABLE,
-    'javascript': JAVASCRIPT_CODE,
-    'typescript_frontend': TYPESCRIPT_CODE_FRONTEND,
-    'typescript_backend': TYPESCRIPT_CODE_BACKEND,
-    'java': JAVA_CODE,
-    'symbolic_execution': SYMBOLIC_EXECUTION_CODE,
-    'cross_file_a': CROSS_FILE_MODULE_A,
-    'cross_file_b': CROSS_FILE_MODULE_B,
-    'cross_file_c': CROSS_FILE_MODULE_C,
+    "python_basic": PYTHON_CODE_BASIC,
+    "python_complex": PYTHON_CODE_COMPLEX,
+    "python_vulnerable": PYTHON_CODE_VULNERABLE,
+    "javascript": JAVASCRIPT_CODE,
+    "typescript_frontend": TYPESCRIPT_CODE_FRONTEND,
+    "typescript_backend": TYPESCRIPT_CODE_BACKEND,
+    "java": JAVA_CODE,
+    "symbolic_execution": SYMBOLIC_EXECUTION_CODE,
+    "cross_file_a": CROSS_FILE_MODULE_A,
+    "cross_file_b": CROSS_FILE_MODULE_B,
+    "cross_file_c": CROSS_FILE_MODULE_C,
 }
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("Test fixtures loaded successfully!")
     for name, code in TEST_FIXTURES.items():
-        lines = len(code.strip().split('\n'))
+        lines = len(code.strip().split("\n"))
         print(f"  - {name}: {lines} lines")

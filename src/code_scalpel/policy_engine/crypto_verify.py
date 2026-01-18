@@ -61,7 +61,6 @@ class PolicyManifest:
     signed_by: str = "unknown"  # [20241225_BUGFIX] v3.3.0 - Make optional with default
 
 
-
 @dataclass
 class VerificationResult:
     """
@@ -82,7 +81,6 @@ class VerificationResult:
     files_verified: int = 0
     files_failed: List[str] = field(default_factory=list)
     error: Optional[str] = None
-
 
 
 class CryptographicPolicyVerifier:
@@ -115,7 +113,6 @@ class CryptographicPolicyVerifier:
             print(f"SECURITY: {e}")
             # Fail closed - deny all operations
     """
-
 
     def __init__(
         self,

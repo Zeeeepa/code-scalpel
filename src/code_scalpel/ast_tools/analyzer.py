@@ -50,19 +50,13 @@ class ASTAnalyzer:
         # TIER 1: COMMUNITY (Free - High Priority)
         # ====================================================================
 
-
-
         # ====================================================================
         # TIER 2: PRO (Commercial - Medium Priority)
         # ====================================================================
 
-
-
         # ====================================================================
         # TIER 3: ENTERPRISE (Commercial - Lower Priority)
         # ====================================================================
-
-
 
     def parse_to_ast(self, code: str) -> ast.AST:
         """Parse Python code into an AST with caching."""

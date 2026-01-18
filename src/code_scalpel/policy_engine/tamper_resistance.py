@@ -7,7 +7,6 @@ This module provides tamper-resistant policy enforcement to prevent agents
 from circumventing policy controls.
 """
 
-
 import hashlib
 import hmac
 import os
@@ -36,7 +35,6 @@ class TamperResistance:
     - TOTP-based human override system
     - Comprehensive audit logging
     """
-
 
     def __init__(self, policy_path: str = ".code-scalpel/policy.yaml"):
         """
@@ -77,16 +75,16 @@ class TamperResistance:
 
     def verify_policy_integrity(self) -> bool:
         """
-                Verify policy file has not been tampered with.
+        Verify policy file has not been tampered with.
 
-                # [20251216_FEATURE] v2.5.0 Guardian P0 - Integrity check
+        # [20251216_FEATURE] v2.5.0 Guardian P0 - Integrity check
 
-                Returns:
-                    True if policy is intact, raises error if tampered
+        Returns:
+            True if policy is intact, raises error if tampered
 
 
-                Raises:
-                    TamperDetectedError: If policy integrity check fails
+        Raises:
+            TamperDetectedError: If policy integrity check fails
         """
         current_hash = self._hash_policy_file()
 

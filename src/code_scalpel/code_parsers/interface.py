@@ -1,6 +1,4 @@
-"""Parser Interface - Unified parser contract across all languages.
-
-"""
+"""Parser Interface - Unified parser contract across all languages."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass

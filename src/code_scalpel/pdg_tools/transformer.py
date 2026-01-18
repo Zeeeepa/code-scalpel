@@ -20,7 +20,6 @@ import networkx as nx
 #     - Implement conflict resolution strategies
 
 
-
 class TransformationType(Enum):
     """Types of PDG transformations."""
 

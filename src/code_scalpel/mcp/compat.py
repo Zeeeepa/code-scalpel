@@ -66,9 +66,6 @@ from code_scalpel.mcp.helpers.graph_helpers import (
     _get_cross_file_dependencies_sync,
     _get_project_map_sync,
 )
-from code_scalpel.mcp.helpers.policy_helpers import (
-    _get_current_tier as _get_current_tier_policy,
-)
 
 from code_scalpel.mcp.models.core import (
     AnalysisResult,

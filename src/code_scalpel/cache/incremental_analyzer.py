@@ -14,7 +14,6 @@ T = TypeVar("T")
 
 class IncrementalAnalyzer(Generic[T]):
     """[20251214_FEATURE] Dependency-aware incremental analysis."""
-    
 
     def __init__(self, cache: AnalysisCache[T]) -> None:
         self.cache = cache
@@ -32,9 +31,7 @@ class IncrementalAnalyzer(Generic[T]):
     def update_file(
         self, file_path: Path | str, recompute_fn: Callable[[Path], T]
     ) -> Set[str]:
-        """Update a file and return affected dependents.
-
-        """
+        """Update a file and return affected dependents."""
         path = Path(file_path).resolve()
         key = str(path)
 

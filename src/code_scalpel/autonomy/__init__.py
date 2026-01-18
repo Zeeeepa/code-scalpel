@@ -48,11 +48,6 @@ References:
 - docs/: Architecture and design documentation
 """
 
-
-
-
-
-
 # [20251217_FEATURE] Audit Trail
 from code_scalpel.autonomy.audit import AuditEntry, AutonomyAuditTrail
 

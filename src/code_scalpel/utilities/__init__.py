@@ -5,7 +5,6 @@
 Common utilities for caching, configuration, and helpers.
 """
 
-
 # [20251223_CONSOLIDATION] Re-export from unified cache for backward compatibility
 from code_scalpel.cache import AnalysisCache, CacheConfig
 

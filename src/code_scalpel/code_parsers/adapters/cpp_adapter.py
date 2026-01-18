@@ -3,7 +3,6 @@
 [20251224_FEATURE] Stub adapter for C++ parsing support.
 """
 
-
 from typing import Any, List
 
 from ..interface import IParser, ParseResult

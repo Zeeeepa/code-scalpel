@@ -5,8 +5,6 @@ Policy Engine Exceptions.
 """
 
 
-
-
 class PolicyEngineError(Exception):
     """Base exception for policy engine errors."""
 
@@ -35,5 +33,3 @@ class InvalidOverrideCodeError(PolicyEngineError):
     """Raised when invalid override code is provided."""
 
     pass
-
-

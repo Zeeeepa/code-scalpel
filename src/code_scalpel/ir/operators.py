@@ -5,9 +5,6 @@ These enums normalize operator representations across languages.
 The STRUCTURE is normalized here, but SEMANTICS are handled by LanguageSemantics.
 """
 
-
-
-
 from enum import Enum
 
 
