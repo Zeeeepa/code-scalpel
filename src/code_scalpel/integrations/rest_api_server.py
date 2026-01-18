@@ -109,7 +109,7 @@ from typing import Optional, Union
 from flask import Flask, Response, jsonify, request
 
 # Version updated to match package
-__version__ = "0.7.0"
+__version__ = "1.0.0"
 
 
 @dataclass

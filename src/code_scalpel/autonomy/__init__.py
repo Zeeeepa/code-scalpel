@@ -123,4 +123,4 @@ __all__ = [
 ]
 
 # [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
-__version__ = "3.3.0"
+__version__ = "1.0.0"
