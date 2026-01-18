@@ -1311,7 +1311,11 @@ def _scan_dependencies_sync(
                 file_path = resolved_path / filename
                 if file_path.exists():
                     try:
-                        all_deps.extend(parser(file_path))
+                        parsed_deps = parser(file_path)
+                        # [20260118_FIX] Track source file for each dependency
+                        for dep in parsed_deps:
+                            dep.file_path = str(file_path)
+                        all_deps.extend(parsed_deps)
                     except Exception as e:
                         errors.append(f"Failed to parse {filename}: {str(e)}")
 
@@ -1431,6 +1435,7 @@ def _scan_dependencies_sync(
                         if hasattr(dep.ecosystem, "value")
                         else str(dep.ecosystem)
                     ),
+                    file_path=getattr(dep, "file_path", "unknown"),
                     vulnerabilities=dep_vulns,
                     is_imported=is_imported,
                     license=license_str,
