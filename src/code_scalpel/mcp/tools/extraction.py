@@ -42,6 +42,18 @@ async def extract_code(
     ctx: Context | None = None,
 ) -> Any:
     """Extract code elements with optional dependency context."""
+    if _extract_code is None:
+        # [20260118_BUGFIX] Return error response instead of raising TypeError
+        from code_scalpel.mcp.models.core import ContextualExtractionResult
+
+        return ContextualExtractionResult(
+            success=False,
+            target_name=target_name,
+            target_code="",
+            context_code="",
+            full_code="",
+            error="extract_code helper not loaded",
+        )
     return await _extract_code(
         target_type,
         target_name,
