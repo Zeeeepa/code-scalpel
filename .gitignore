@@ -92,6 +92,21 @@ docs/analysis/  # Internal tool validation and verification documents
 # Internal GitHub workflow prompts (not for public consumption)
 .github/prompts/
 
+# Internal documentation (development-only, not for public repo)
+docs/adr/
+docs/ci_cd/
+docs/compliance/
+docs/configuration/
+docs/deployment/
+docs/features/
+docs/modules/
+docs/parsers/
+docs/performance/
+docs/research/
+docs/roadmap/
+docs/testing/
+docs/DEVELOPMENT_ROADMAP.md
+
 # Benchmark fixtures (generated/cloned data)
 tests/fixtures/data/
 
