@@ -49,6 +49,7 @@ compliance_reports/
 .code-scalpel/limits.local.toml  # [20251225_CONFIG] Local tier limit overrides
 certs/  # Certificate and private key files for signing/encryption
 code_scalpel_community/
+local_pipeline/
 
 # [20260117_CLEANUP] Temporary/ephemeral directories for v1.0 fork
 .bench_tmp/
@@ -94,6 +95,7 @@ docs/analysis/  # Internal tool validation and verification documents
 
 # Internal documentation (development-only, not for public repo)
 docs/adr/
+docs/architecture/
 docs/ci_cd/
 docs/compliance/
 docs/configuration/
@@ -102,10 +104,20 @@ docs/features/
 docs/modules/
 docs/parsers/
 docs/performance/
+docs/reference/
+docs/release_notes/
 docs/research/
 docs/roadmap/
+docs/security/
 docs/testing/
+docs/todo_reports/
+docs/tools/
 docs/DEVELOPMENT_ROADMAP.md
+docs/guides/migration/
+docs/guides/pre_fork_analysis_findings.md
+docs/guides/production_release_v1.0.md
+docs/guides/enhancement_roadmap.md
+docs/guides/tool_architecture_analysis.md
 
 # Benchmark fixtures (generated/cloned data)
 tests/fixtures/data/
