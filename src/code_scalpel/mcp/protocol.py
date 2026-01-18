@@ -12,9 +12,6 @@ from code_scalpel import __version__
 # [20260116_FEATURE] Import license validator for tier determination
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
 
-# [20260116_BUGFIX] Ensure prompt registry is populated on protocol import.
-import code_scalpel.mcp.prompts  # noqa: F401
-
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
 # Can be overridden via CODE_SCALPEL_TIER environment variable.
@@ -171,3 +168,20 @@ Code is PARSED only, never executed.""",
 )
 
 __all__ = ["mcp", "set_current_tier", "_get_current_tier"]
+
+# Lazy loading of prompts to avoid circular imports.
+# Prompts are loaded on first MCP server start via get_current_tier()
+_prompts_loaded = False
+
+
+def _load_prompts_if_needed() -> None:
+    """Lazy load prompts on first access to avoid circular import."""
+    global _prompts_loaded
+    if not _prompts_loaded:
+        import code_scalpel.mcp.prompts  # noqa: F401
+
+        _prompts_loaded = True
+
+
+# Load prompts when module is imported (but after mcp is defined)
+_load_prompts_if_needed()
