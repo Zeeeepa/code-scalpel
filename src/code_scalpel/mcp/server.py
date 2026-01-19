@@ -1797,7 +1797,7 @@ def _security_scan_sync(
             # [20251229_FEATURE] v3.0.4 - Type System Evaporation detection for TypeScript
             if detected_language == "typescript":
                 try:
-                    from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+                    from code_scalpel.security.type_safety.type_evaporation_detector import (
                         TypeEvaporationDetector,
                     )
 
@@ -1818,7 +1818,7 @@ def _security_scan_sync(
                     pass  # Type evaporation detector not available
         else:
             # Use full SecurityAnalyzer for Python (supports taint tracking)
-            from code_scalpel.symbolic_execution_tools.security_analyzer import (
+            from code_scalpel.security.analyzers.security_analyzer import (
                 SecurityAnalyzer,
             )
 
@@ -2056,7 +2056,7 @@ def _type_evaporation_scan_sync(
     [20251229_FEATURE] v3.0.4 - Ninja Warrior Stage 3.1 Type System Evaporation
     """
     try:
-        from code_scalpel.symbolic_execution_tools.type_evaporation_detector import (
+        from code_scalpel.security.type_safety.type_evaporation_detector import (
             analyze_type_evaporation_cross_file,
         )
 
@@ -2302,7 +2302,7 @@ def _scan_dependencies_sync(
     resolved_path_str = project_root or path or str(PROJECT_ROOT)
 
     try:
-        from code_scalpel.symbolic_execution_tools.vulnerability_scanner import (
+        from code_scalpel.security.dependencies.vulnerability_scanner import (
             VulnerabilityScanner,
             DependencyParser,
         )
@@ -2509,7 +2509,7 @@ def _scan_dependencies_sync_legacy(
     [20251220_FIX] v3.0.5 - Added timeout parameter for OSV API calls
     """
     try:
-        from code_scalpel.symbolic_execution_tools.vulnerability_scanner import (
+        from code_scalpel.security.dependencies.vulnerability_scanner import (
             VulnerabilityScanner,
         )
 
@@ -5046,12 +5046,10 @@ def _cross_file_security_scan_sync(
     max_depth: int,
     include_diagram: bool,
     timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
-    max_modules: (
-        int | None
-    ) = 500,  # [20251220_PERF] Default module limit for large projects
+    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
-    from code_scalpel.symbolic_execution_tools.cross_file_taint import (
+    from code_scalpel.security.analyzers.cross_file_taint import (
         CrossFileTaintTracker,
     )
 

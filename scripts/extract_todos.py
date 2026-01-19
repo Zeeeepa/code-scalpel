@@ -2,7 +2,7 @@
 """
 [20260114_FEATURE] TODO Extraction and Analysis Tool for Code Scalpel
 
-This script systematically extracts and analyzes TODO/FIXME/HACK items from the
+This script systematically extracts and analyzes TODO items from the
 entire codebase, generating reports organized by module, tier, priority, and file.
 
 Integrated into the pre-release checklist pipeline.
@@ -48,7 +48,7 @@ class TodoItem:
 
     file_path: str
     line_number: int
-    tag: str  # TODO, FIXME, HACK, XXX, NOTE, BUG
+    tag: str  # TODO
     tier: str  # COMMUNITY, PRO, ENTERPRISE, UNSPECIFIED
     category: str  # FEATURE, ENHANCEMENT, BUGFIX, DOCUMENTATION, TEST
     text: str
@@ -265,8 +265,9 @@ class TodoExtractor:
                 # Extract words in comment (after #)
                 # Pattern: TODO must be 1st/2nd word in comment, followed by : or space or (
                 # [20260118_BUGFIX] Also handle format like "# - TODO [TIER]:" with dash/bullet
+                # [20260119_BUGFIX] Support various TODO comment formats
                 pattern = re.compile(
-                    rf"^#\s*(?:[-*]?\s*)?({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()"
+                    rf"^#\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
                 )
                 if pattern.search(comment_part):
                     return True
@@ -276,7 +277,7 @@ class TodoExtractor:
             slash_pos = line.find("//")
             comment_part = line[slash_pos:]
             pattern = re.compile(
-                rf"^//\s*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()"
+                rf"^//\s*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
             )
             if pattern.search(comment_part):
                 return True
@@ -289,7 +290,7 @@ class TodoExtractor:
             or stripped.startswith("//")
         ):
             pattern = re.compile(
-                rf"^[\*\s]*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()"
+                rf"^[\*\s/]*(?:[-*•]\s*)*(?:[a-zA-Z]*\s*)?({re.escape(tag)})(?::|\s|\(|\])"
             )
             if pattern.search(stripped):
                 return True
