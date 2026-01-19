@@ -30,10 +30,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 try:
-    import tomllib  # Python 3.11+
+    import tomllib  # type: ignore[import]  # Python 3.11+
 except ImportError:
     try:
-        import tomli as tomllib  # type: ignore[no-redef]  # Fallback for Python < 3.11
+        import tomli as tomllib  # type: ignore[import,no-redef]  # Fallback for Python < 3.11
     except ImportError:
         tomllib = None  # type: ignore[assignment]  # Will use defaults
 
