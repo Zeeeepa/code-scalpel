@@ -33,9 +33,9 @@ try:
     import tomllib  # Python 3.11+
 except ImportError:
     try:
-        import tomli as tomllib  # Fallback for Python < 3.11
+        import tomli as tomllib  # type: ignore[no-redef]  # Fallback for Python < 3.11
     except ImportError:
-        tomllib = None  # Will use defaults
+        tomllib = None  # type: ignore[assignment]  # Will use defaults
 
 logger = logging.getLogger(__name__)
 
