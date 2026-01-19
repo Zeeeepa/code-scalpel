@@ -19,22 +19,7 @@ class ASTBuilder:
         self.preprocessing_hooks: list[Callable[[str], str]] = []
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
-        # ====================================================================
-        # TIER 1: COMMUNITY (Free - High Priority)
-        # ====================================================================
-
-        # ====================================================================
-        # TIER 2: PRO (Commercial - Medium Priority)
-        # ====================================================================
-
-        # ====================================================================
-        # TIER 3: ENTERPRISE (Commercial - Lower Priority)
-        # ====================================================================
-
-        #     3. Suggest fixes for validation failures
-        #     4. Support configurable rule sets
-        #     5. Add 35+ tests for validation rules
-
+       
     def build_ast(
         self, code: str, preprocess: bool = True, validate: bool = True
     ) -> Optional[ast.AST]:

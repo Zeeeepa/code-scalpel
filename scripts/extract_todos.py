@@ -264,8 +264,9 @@ class TodoExtractor:
                 comment_part = line[hash_pos:]
                 # Extract words in comment (after #)
                 # Pattern: TODO must be 1st/2nd word in comment, followed by : or space or (
+                # [20260118_BUGFIX] Also handle format like "# - TODO [TIER]:" with dash/bullet
                 pattern = re.compile(
-                    rf"^#\s*({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()"
+                    rf"^#\s*(?:[-*]?\s*)?({re.escape(tag)}|[a-zA-Z]+\s+{re.escape(tag)})(?::|\s|\()"
                 )
                 if pattern.search(comment_part):
                     return True

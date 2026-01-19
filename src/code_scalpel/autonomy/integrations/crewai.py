@@ -21,11 +21,6 @@ except ImportError as e:
     ) from e
 
 
-# ============================================================================
-# Tool Input Schemas
-# ============================================================================
-
-
 class CodeInput(BaseModel):
     """Input schema for code analysis tools."""
 
