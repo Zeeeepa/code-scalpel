@@ -104,7 +104,7 @@ class HookResponse:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert response to dictionary for JSON output."""
-        result = {"status": self.status.value}
+        result: Dict[str, Any] = {"status": self.status.value}
         if self.reason:
             result["reason"] = self.reason
         if self.policy:
@@ -358,13 +358,17 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
             try:
                 from code_scalpel.governance import GovernanceContext, Operation
 
-                # [20260116_BUGFIX] Use correct Operation fields (no 'files' parameter)
+                # [20260116_BUGFIX] Use correct Operation fields - create FileChange with operation details
+                from code_scalpel.governance import FileChange
+
+                file_change = FileChange(
+                    file_path=file_path or "<unknown>",
+                    original_code="",
+                    modified_code=new_content or "",
+                )
                 operation = Operation(
-                    type="code_edit",
-                    code=new_content or "",
-                    language="",
-                    file_path=file_path or "",
-                    metadata={},
+                    changes=[file_change],
+                    description="code_edit",
                 )
                 # [20260116_BUGFIX] Pass operator and session_id via metadata to match GovernanceContext signature
                 gov_context = GovernanceContext(
