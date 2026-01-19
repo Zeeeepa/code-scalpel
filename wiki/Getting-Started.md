@@ -1,201 +1,199 @@
 # Getting Started
 
-This guide walks you through your first Code Scalpel operations, from basic extraction to security scanning.
+This guide walks you through your first Code Scalpel operations using natural conversation with your AI assistant.
 
-## Your First Tool Call
+## Your First Interaction
 
-Once installed and configured (see [Installation](Installation)), your AI assistant can use Code Scalpel tools directly.
+Once Code Scalpel is installed and configured (see [Installation](Installation)), talk to your AI assistant—it will use Code Scalpel tools behind the scenes.
 
 ### Example 1: Extract a Function
 
-Instead of reading an entire file, surgically extract just what you need:
+Instead of asking for an entire file, request a specific function:
 
-**AI Assistant Command:**
-```
-Extract the calculate_tax function from utils.py
-```
+**You say:**
+> "Extract the calculate_tax function from utils.py"
 
-**Code Scalpel does:**
-```python
-extract_code(
-    file_path="/project/utils.py",
-    target_type="function",
-    target_name="calculate_tax"
-)
-```
+**AI Assistant (using Code Scalpel):**
+> "Here's the calculate_tax function extracted from utils.py:
+> ```python
+> def calculate_tax(amount: float, tax_rate: float = 0.08) -> float:
+>     return amount * tax_rate
+> ```
+> This was extracted surgically—just the function plus any necessary imports. This approach uses 99% fewer tokens than reading the entire file."
 
-**Result:**
-- Returns only the function definition
-- Includes necessary imports
-- 99% token reduction compared to reading the full file
+**What happened behind the scenes:**
+- Code Scalpel parsed the Python AST
+- Located the function by name
+- Extracted only the function + required imports
+- Your AI assistant returned just what you need
 
-### Example 2: Analyze Code Structure
+### Example 2: Understand Code Structure
 
-Understand a file's architecture before modifying it:
+**You say:**
+> "What's in the payment.py file? What are the main functions and classes?"
 
-**AI Assistant Command:**
-```
-What functions and classes are in payment.py?
-```
+**AI Assistant (using Code Scalpel):**
+> "The payment.py file contains:
+>
+> **Functions:**
+> - process_payment(order) - Main payment processor
+> - validate_card(card_data) - Card validation
+> - refund(transaction_id) - Handles refunds
+>
+> **Classes:**
+> - PaymentProcessor - Main payment service (complexity: 8/10)
+> - PaymentError - Custom exception
+>
+> **Imports:**
+> - stripe - Payment gateway integration
+> - decimal.Decimal - Precise amount calculations
+> - datetime - Transaction timestamps
+>
+> This file has 245 lines of code total."
 
-**Code Scalpel does:**
-```python
-analyze_code(code=file_contents)
-```
+**What happened behind the scenes:**
+- Code Scalpel analyzed the code structure
+- Returned functions, classes, imports, and metrics
+- Your AI assistant formatted it for easy reading
 
-**Returns:**
-```json
-{
-  "functions": ["process_payment", "validate_card", "refund"],
-  "classes": ["PaymentProcessor", "PaymentError"],
-  "imports": ["stripe", "decimal.Decimal"],
-  "complexity_score": 8,
-  "lines_of_code": 245
-}
-```
+### Example 3: Security Check
 
-### Example 3: Security Scan
+**You say:**
+> "Check this code for security vulnerabilities before I use it"
+> [paste code snippet]
 
-Detect vulnerabilities using taint analysis:
+**AI Assistant (using Code Scalpel):**
+> "⚠️ **Security Issues Found (1 HIGH severity):**
+>
+> **SQL Injection** (CWE-89) at line 12:
+> ```python
+> query = f"SELECT * FROM users WHERE id = {user_id}"
+> cursor.execute(query)
+> ```
+>
+> **Issue:** The user_id variable flows directly into SQL without parameterization.
+>
+> **Fix:**
+> ```python
+> query = "SELECT * FROM users WHERE id = %s"
+> cursor.execute(query, (user_id,))
+> ```
+>
+> This uses parameterized queries which prevent SQL injection."
 
-**AI Assistant Command:**
-```
-Check this code for SQL injection vulnerabilities
-```
-
-**Code Scalpel does:**
-```python
-security_scan(
-    code=suspicious_code,
-    entry_points=["handle_request"]
-)
-```
-
-**Returns:**
-- Vulnerabilities found with CWE codes
-- Taint flow from user input to dangerous sinks
-- Line numbers and severity levels
+**What happened behind the scenes:**
+- Code Scalpel performed taint analysis
+- Traced data flow from user input to SQL execution
+- Identified the dangerous pattern
+- Your AI assistant provided remediation
 
 ## Common Workflows
 
 ### Workflow 1: Safe Refactoring
 
-Before changing code, verify it's safe:
+**You say:**
+> "I want to refactor the process_order function. Here's my new version. Is it safe?"
+> [paste original and new code]
 
-```python
-# 1. Extract the current function
-current = extract_code(file_path="app.py", target_name="process_order")
+**AI Assistant (using Code Scalpel):**
+> "✅ **Refactoring is safe!**
+>
+> Analysis:
+> - No new security vulnerabilities introduced
+> - Function signature unchanged (all callers compatible)
+> - All exception handling preserved
+> - No performance regression detected
+>
+> Ready to apply. I can update it in your code if you'd like."
 
-# 2. Simulate your changes
-result = simulate_refactor(
-    original_code=current,
-    new_code=improved_version
-)
-
-# 3. Check if safe
-if result.is_safe:
-    # 4. Apply the change
-    update_symbol(
-        file_path="app.py",
-        target_name="process_order",
-        new_code=improved_version
-    )
-```
+**What happened behind the scenes:**
+- Code Scalpel simulated the refactoring
+- Checked for security issues
+- Verified structural compatibility
+- Your AI assistant gave you confidence before making changes
 
 ### Workflow 2: Find All Usages
 
-Before modifying a function, find everywhere it's called:
+**You say:**
+> "Before I rename the calculate_tax function, show me everywhere it's used"
 
-```python
-# 1. Find all references
-refs = get_symbol_references(symbol_name="calculate_tax")
+**AI Assistant (using Code Scalpel):**
+> "The calculate_tax function is used in 7 places:
+>
+> 1. **handlers/api.py** (line 156) - Direct call: `result = calculate_tax(order_data)`
+> 2. **tests/test_order.py** (line 23) - In test: `assert calculate_tax(100) == 8.0`
+> 3. **services/billing.py** (line 89) - Imported: `from utils import calculate_tax`
+> 4. **utils.py** (line 42) - Definition (this is the function itself)
+> ... and 3 more
+>
+> I can safely rename this across all files."
 
-# Returns:
-# - Definition location
-# - All call sites across the project
-# - Usage context for each reference
-
-# 2. Update all references safely
-rename_symbol(
-    file_path="utils.py",
-    old_name="calculate_tax",
-    new_name="compute_tax_amount"
-)
-# Automatically updates all call sites!
-```
+**What happened behind the scenes:**
+- Code Scalpel found all symbol references
+- Tracked definitions, imports, and calls
+- Your AI assistant showed you the usage context
 
 ### Workflow 3: Generate Tests
 
-Create comprehensive tests automatically:
+**You say:**
+> "Generate comprehensive tests for this function covering all branches"
+> [paste function]
 
-```python
-# 1. Extract the function to test
-func = extract_code(file_path="logic.py", target_name="validate_input")
+**AI Assistant (using Code Scalpel):**
+> "Here are tests covering all execution paths:
+>
+> ```python
+> import pytest
+> from utils import calculate_tax
+>
+> def test_calculate_tax_normal_case():
+>     assert calculate_tax(100, 0.08) == 8.0
+>
+> def test_calculate_tax_zero_amount():
+>     assert calculate_tax(0, 0.08) == 0.0
+>
+> def test_calculate_tax_default_rate():
+>     assert calculate_tax(100) == 8.0
+>
+> def test_calculate_tax_high_rate():
+>     assert calculate_tax(100, 0.25) == 25.0
+> ```
+>
+> These tests cover the normal case, edge cases (zero), default parameters, and boundary conditions."
 
-# 2. Explore all execution paths
-paths = symbolic_execute(code=func, max_paths=10)
+**What happened behind the scenes:**
+- Code Scalpel performed symbolic execution
+- Explored all execution paths through the function
+- Generated test cases for each path
+- Your AI assistant provided ready-to-use pytest code
 
-# 3. Generate tests covering all paths
-tests = generate_unit_tests(
-    code=func,
-    framework="pytest",
-    max_paths=10
-)
+### Workflow 4: Cross-File Analysis
 
-# Returns pytest test code ready to use!
-```
+**You say:**
+> "What are all the dependencies of the billing service? What might break if I modify it?"
 
-### Workflow 4: Cross-File Dependency Analysis
+**AI Assistant (using Code Scalpel):**
+> "The billing service has these dependencies:
+>
+> **Direct imports:**
+> - utils.py (calculate_tax, format_currency)
+> - models.py (Invoice, Transaction)
+> - stripe (payment gateway)
+>
+> **Services that depend on billing:**
+> - api/handlers.py (3 endpoints)
+> - tasks/email.py (sends billing emails)
+> - admin/reports.py (generates reports)
+>
+> If you modify the calculate_tax signature, you'll need to update 4 locations across 3 files."
 
-Understand how modules interact:
+**What happened behind the scenes:**
+- Code Scalpel analyzed the import graph
+- Built the dependency tree
+- Identified impact radius
+- Your AI assistant showed you the scope of changes
 
-```python
-# 1. Get project structure
-project_map = get_project_map(root_path="/project")
-
-# 2. Analyze specific file dependencies
-deps = get_cross_file_dependencies(
-    file_path="/project/services/order.py"
-)
-
-# Returns:
-# - Direct imports
-# - Transitive dependencies
-# - Dependency graph
-```
-
-## Understanding Tool Results
-
-### Success Response
-
-Most tools return structured data:
-
-```json
-{
-  "status": "success",
-  "result": {
-    "code": "def calculate_tax(amount): ...",
-    "imports": ["from decimal import Decimal"],
-    "metadata": {
-      "line_start": 42,
-      "line_end": 58
-    }
-  }
-}
-```
-
-### Error Handling
-
-When something goes wrong:
-
-```json
-{
-  "status": "error",
-  "error_type": "SymbolNotFound",
-  "message": "Function 'calculate_taxes' not found. Did you mean 'calculate_tax'?",
-  "suggestions": ["calculate_tax", "compute_tax"]
-}
-```
+## Understanding AI Responses
 
 ## Token Efficiency
 

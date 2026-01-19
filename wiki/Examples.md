@@ -1,565 +1,490 @@
 # Examples
 
-Practical examples demonstrating Code Scalpel's capabilities across different use cases.
+Real-world scenarios showing how to use Code Scalpel through natural conversation with your AI assistant.
 
 ## Table of Contents
 
-- [Basic Extraction](#basic-extraction)
-- [Security Scanning](#security-scanning)
+- [Extracting Code](#extracting-code)
+- [Security Analysis](#security-analysis)
 - [Safe Refactoring](#safe-refactoring)
 - [Test Generation](#test-generation)
 - [Cross-File Analysis](#cross-file-analysis)
-- [Compliance Checking](#compliance-checking)
 - [Real-World Scenarios](#real-world-scenarios)
 
 ---
 
-## Basic Extraction
+## Extracting Code
 
-### Extract a Function
+### Scenario: Extract a Specific Function
 
-```python
-# Extract a specific function without reading the entire file
-result = extract_code(
-    file_path="/project/utils.py",
-    target_type="function",
-    target_name="calculate_tax"
-)
+**You say:**
+> "I need to understand the payment processing logic. Extract the process_payment function from services/payment.py"
 
-print(result.target_code)
-# Output: Only the calculate_tax function (50 lines instead of 5000)
-```
+**AI Assistant (using Code Scalpel):**
+> "Here's the process_payment function:
+>
+> ```python
+> def process_payment(order: Order, payment_method: str) -> Transaction:
+>     \"\"\"Process payment for an order using the specified method.\"\"\"
+>     if payment_method == 'credit_card':
+>         return process_credit_card(order.total)
+>     elif payment_method == 'paypal':
+>         return process_paypal(order.total)
+>     else:
+>         raise ValueError(f"Unsupported payment method: {payment_method}")
+> ```
+>
+> This function:
+> - Takes an Order object and payment method
+> - Routes to different payment processors
+> - Returns a Transaction object
+> - Raises ValueError for invalid methods
+>
+> The function is 8 lines, complexity score: 2/10"
 
-### Extract with Dependencies
-
-```python
-# Extract function with its dependencies
-result = extract_code(
-    file_path="/project/services/order.py",
-    target_type="function",
-    target_name="process_order",
-    include_cross_file_deps=True
-)
-
-# Returns:
-# - process_order function
-# - Imported classes (Order, Payment, etc.)
-# - Helper functions it calls
-```
-
-### Extract React Component
-
-```python
-# Extract TypeScript React component
-result = extract_code(
-    file_path="/src/components/UserProfile.tsx",
-    target_type="function",
-    target_name="UserProfile",
-    language="tsx"
-)
-
-# Returns JSX component with props interface
-```
+**Why this is better:**
+- Extracted only the function needed (50 tokens vs 10,000)
+- Includes necessary imports automatically
+- Ready to discuss or modify
 
 ---
 
-## Security Scanning
+### Scenario: Extract Component with Dependencies
 
-### Detect SQL Injection
+**You say:**
+> "Show me the UserProfile React component from components/UserProfile.tsx, including any helper hooks it uses"
 
-```python
-# Scan code for SQL injection vulnerabilities
-vulnerable_code = """
-def get_user(user_id):
-    user_id = request.args.get("id")
-    query = "SELECT * FROM users WHERE id=" + user_id
-    cursor.execute(query)
-    return cursor.fetchone()
-"""
+**AI Assistant (using Code Scalpel):**
+> "Here's the UserProfile component and its dependencies:
+>
+> ```typescript
+> // Helper hook (imported from hooks/useUser.ts)
+> function useUser(id: string) {
+>   const [user, setUser] = useState(null);
+>   useEffect(() => {
+>     fetchUser(id).then(setUser);
+>   }, [id]);
+>   return user;
+> }
+>
+> // Main component
+> export function UserProfile({ userId }: { userId: string }) {
+>   const user = useUser(userId);
+>   
+>   if (!user) return <div>Loading...</div>;
+>   
+>   return (
+>     <div className="profile">
+>       <h1>{user.name}</h1>
+>       <p>{user.email}</p>
+>     </div>
+>   );
+> }
+> ```
+>
+> The component:
+> - Uses custom hook useUser for data fetching
+> - Shows loading state
+> - Renders user profile card
+> - Complexity: 3/10"
 
-result = security_scan(
-    code=vulnerable_code,
-    entry_points=["get_user"]
-)
+**Why this is helpful:**
+- All dependencies included automatically
+- No manual hunting through imports
+- Complete context for understanding
 
-# Result:
-# {
-#   "vulnerabilities": [
-#     {
-#       "cwe": "CWE-89",
-#       "severity": "critical",
-#       "description": "SQL injection via user input",
-#       "source_line": 2,
-#       "sink_line": 4,
-#       "taint_flow": [
-#         "user_id = request.args.get('id')",
-#         "query = ... + user_id",
-#         "cursor.execute(query)"
-#       ]
-#     }
-#   ]
-# }
-```
+---
 
-### Safe Version with Parameterized Query
+## Security Analysis
 
-```python
-safe_code = """
-def get_user_safe(user_id):
-    user_id = request.args.get("id")
-    query = "SELECT * FROM users WHERE id = %s"
-    cursor.execute(query, (user_id,))
-    return cursor.fetchone()
-"""
+### Scenario: Find SQL Injection Vulnerability
 
-result = security_scan(code=safe_code)
-# Result: No vulnerabilities found ✅
-```
+**You say:**
+> "I'm concerned about SQL injection in this user search function. Can you analyze it?"
+> ```python
+> def find_user(search_term):
+>     user_id = request.args.get("id")
+>     query = f"SELECT * FROM users WHERE id = {user_id}"
+>     db.execute(query)
+>     return db.fetchone()
+> ```
 
-### Cross-File Security Analysis
+**AI Assistant (using Code Scalpel):**
+> "⚠️ **CRITICAL: SQL Injection Vulnerability Found**
+>
+> **CWE-89** - SQL Injection (Severity: CRITICAL)
+>
+> **Issue:**
+> ```
+> Line 2: user_id = request.args.get("id")  ← Untrusted input source
+> Line 3: query = f"SELECT * FROM users WHERE id = {user_id}"  ← Tainted in SQL
+> Line 4: db.execute(query)  ← Dangerous sink
+> ```
+>
+> **Attack example:**
+> - User provides: `id=1 OR 1=1`
+> - Query becomes: `SELECT * FROM users WHERE id = 1 OR 1=1`
+> - Result: ALL users returned instead of one
+>
+> **Fix:**
+> ```python
+> def find_user_safe(search_term):
+>     user_id = request.args.get("id")
+>     query = "SELECT * FROM users WHERE id = %s"
+>     db.execute(query, (user_id,))  ← Parameterized query
+>     return db.fetchone()
+> ```
+>
+> Using parameterized queries prevents SQL injection by treating the parameter as data, not code."
 
-```python
-# Detect vulnerabilities spanning multiple files
-result = cross_file_security_scan(
-    entry_file="api/handlers.py",
-    entry_points=["handle_request"],
-    max_depth=5
-)
+**Why this matters:**
+- Automatically traces taint from input to sink
+- Identifies attack vectors
+- Suggests proper mitigation
 
-# Example vulnerability:
-# File 1 (api/handlers.py):
-#   user_input = request.GET['id']
-#   services.process(user_input)
-#
-# File 2 (services.py):
-#   def process(data):
-#       db.execute(f"SELECT * WHERE id={data}")
-#
-# Detection: Tracks taint from File 1 → File 2 → SQL sink
-```
+---
 
-### Type Evaporation Detection
+### Scenario: Cross-File Security Analysis
 
-```python
-# Frontend TypeScript code
-frontend_code = """
-type Role = 'admin' | 'user';
+**You say:**
+> "I'm refactoring the API layer. Make sure no security vulnerabilities are introduced by changes that span multiple files"
 
-function updateRole(input: HTMLInputElement) {
-    const role = input.value as Role;  // ⚠️ No runtime validation
-    
-    fetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify({ role })
-    });
-}
-"""
-
-# Backend Python code
-backend_code = """
-@app.route('/api/users', methods=['POST'])
-def update_user():
-    role = request.get_json()['role']  # ⚠️ Accepts ANY value
-    user.role = role
-"""
-
-result = type_evaporation_scan(
-    frontend_code=frontend_code,
-    backend_code=backend_code
-)
-
-# Result: Detects that TypeScript union type evaporates at JSON boundary
-```
+**AI Assistant (using Code Scalpel):**
+> "Running cross-file security analysis...
+>
+> ✅ **No critical vulnerabilities found**
+>
+> **Analysis covered:**
+> - All API endpoints (handlers/)
+> - Service layer (services/)
+> - Database layer (db/)
+> - Taint flow across module boundaries
+>
+> **Results:**
+> - 127 files scanned
+> - 3,847 data flows analyzed
+> - All injection points validated
+>
+> **Checked for:**
+> - SQL injection (CWE-89)
+> - Command injection (CWE-78)
+> - XSS vulnerabilities (CWE-79)
+> - Path traversal (CWE-22)
+> - LDAP injection (CWE-90)
+>
+> Your refactoring is security-safe!"
 
 ---
 
 ## Safe Refactoring
 
-### Simulate Before Applying
+### Scenario: Rename Function Safely
 
-```python
-# Step 1: Extract current implementation
-current = extract_code(
-    file_path="payment.py",
-    target_name="process_payment"
-)
+**You say:**
+> "The validate_input function isn't clear. I want to rename it to validate_user_input. Is it safe to do this?"
 
-# Step 2: Create improved version
-improved = """
-def process_payment(amount, currency='USD'):
-    if currency not in SUPPORTED_CURRENCIES:
-        raise ValueError(f"Unsupported currency: {currency}")
-    
-    if amount <= 0:
-        raise ValueError("Amount must be positive")
-    
-    # ... enhanced logic
-    return payment_result
-"""
+**AI Assistant (using Code Scalpel):**
+> "Analyzing the impact of renaming validate_input → validate_user_input...
+>
+> ✅ **Safe to rename!**
+>
+> **Impact Analysis:**
+> - Function definition: utils.py line 42
+> - Call sites: 5 locations
+>   - handlers.py line 156 (direct call)
+>   - tests/test_utils.py line 23 (imported function)
+>   - services/user.py line 89 (imported function)
+>   - admin/views.py line 34 (imported function)
+>   - conftest.py line 12 (imported in test fixture)
+>
+> **Safety checks:**
+> ✓ No dependencies on function name in strings
+> ✓ No dynamic calls (getattr, eval)
+> ✓ All imports are static (not lazy-loaded)
+> ✓ No backward compatibility needed
+>
+> I can update all 5 locations automatically."
 
-# Step 3: Simulate the refactor
-simulation = simulate_refactor(
-    original_code=current.target_code,
-    new_code=improved
-)
+**Next step:**
+> You: "Go ahead and rename it across all files"
+> AI: (applies rename_symbol across all locations)
 
-# Step 4: Check if safe
-if simulation.is_safe and not simulation.security_issues:
-    print("✅ Safe to apply")
-    
-    # Step 5: Apply the change
-    update_symbol(
-        file_path="payment.py",
-        target_name="process_payment",
-        new_code=improved
-    )
-else:
-    print("⚠️ Issues detected:")
-    for issue in simulation.security_issues:
-        print(f"  - {issue}")
-```
+---
 
-### Rename Symbol Across Project
+### Scenario: Refactor with Confidence
 
-```python
-# Find all usages before renaming
-refs = get_symbol_references("calculate_tax")
-print(f"Found {len(refs.references)} usages:")
-for ref in refs.references:
-    print(f"  {ref.file}:{ref.line}")
+**You say:**
+> "I want to improve this payment processing function for better error handling. Is this refactoring safe?"
+> 
+> **Original:**
+> ```python
+> def process_payment(order):
+>     try:
+>         return stripe.charge(order.total)
+>     except Exception:
+>         return None
+> ```
+>
+> **New version:**
+> ```python
+> def process_payment(order):
+>     try:
+>         return stripe.charge(order.total)
+>     except stripe.CardError as e:
+>         logger.error(f"Card error: {e}")
+>         raise PaymentError(f"Card declined: {str(e)}")
+>     except stripe.RateLimitError:
+>         logger.warning("Stripe rate limit hit")
+>         raise PaymentError("Temporarily unavailable")
+> ```
 
-# Rename consistently everywhere
-result = rename_symbol(
-    file_path="utils.py",
-    target_type="function",
-    target_name="calculate_tax",
-    new_name="compute_tax_amount"
-)
-
-print(f"✅ Renamed in {len(result.files_modified)} files")
-```
+**AI Assistant (using Code Scalpel):**
+> "Analyzing the refactoring...
+>
+> ✅ **Refactoring is SAFE**
+>
+> **Security Analysis:**
+> ✓ No new injection points introduced
+> ✓ Error messages don't leak sensitive data
+> ✓ Proper exception types used
+>
+> **Behavioral Analysis:**
+> ✓ Function signature unchanged (compatible with callers)
+> ✓ Exceptions more specific (better error handling)
+> ⚠️ Return values differ: Old code returns None on error, new code raises exception
+>
+> **Impact:**
+> - Callers that check `if result is None:` need updating (3 locations)
+> - Callers that catch Exception still work
+> - Better error reporting downstream
+>
+> Recommend: Update 3 call sites to handle PaymentError exception instead of None return."
 
 ---
 
 ## Test Generation
 
-### Auto-Generate Unit Tests
+### Scenario: Generate Comprehensive Tests
 
-```python
-# Function to test
-function_code = """
-def validate_password(password):
-    if len(password) < 8:
-        raise ValueError("Password too short")
-    
-    if not any(c.isupper() for c in password):
-        raise ValueError("Password must contain uppercase")
-    
-    if not any(c.isdigit() for c in password):
-        raise ValueError("Password must contain digit")
-    
-    return True
-"""
+**You say:**
+> "Generate unit tests for this validation function. I want tests that cover all branches and edge cases."
+> ```python
+> def validate_email(email: str) -> bool:
+>     if not email:
+>         return False
+>     if '@' not in email:
+>         return False
+>     parts = email.split('@')
+>     if len(parts) != 2:
+>         return False
+>     local, domain = parts
+>     if not domain or '.' not in domain:
+>         return False
+>     return True
+> ```
 
-# Generate tests using symbolic execution
-result = generate_unit_tests(
-    code=function_code,
-    framework="pytest",
-    max_paths=10
-)
-
-print(result.test_code)
-```
-
-**Generated Tests:**
-
-```python
-import pytest
-
-def test_validate_password_too_short():
-    """Test password length < 8 raises ValueError."""
-    with pytest.raises(ValueError, match="Password too short"):
-        validate_password("Ab1")
-
-def test_validate_password_no_uppercase():
-    """Test password without uppercase raises ValueError."""
-    with pytest.raises(ValueError, match="must contain uppercase"):
-        validate_password("abcdefgh1")
-
-def test_validate_password_no_digit():
-    """Test password without digit raises ValueError."""
-    with pytest.raises(ValueError, match="must contain digit"):
-        validate_password("Abcdefgh")
-
-def test_validate_password_valid():
-    """Test valid password returns True."""
-    result = validate_password("Abcdefgh1")
-    assert result is True
-```
-
-### Symbolic Execution Analysis
-
-```python
-# Explore all execution paths
-function = """
-def calculate_discount(price, is_member, quantity):
-    discount = 0
-    
-    if is_member:
-        discount += 0.1
-    
-    if quantity > 10:
-        discount += 0.05
-    
-    final_price = price * (1 - discount)
-    return final_price
-"""
-
-result = symbolic_execute(
-    code=function,
-    max_paths=10
-)
-
-# Results:
-# Path 1: is_member=True, quantity>10 → discount=0.15
-# Path 2: is_member=True, quantity<=10 → discount=0.10
-# Path 3: is_member=False, quantity>10 → discount=0.05
-# Path 4: is_member=False, quantity<=10 → discount=0
-```
+**AI Assistant (using Code Scalpel):**
+> "Analyzing execution paths... Found 8 possible paths.
+>
+> Here are comprehensive tests covering all branches:
+>
+> ```python
+> import pytest
+> from email_validator import validate_email
+>
+> class TestValidateEmail:
+>     \"\"\"Tests covering all execution paths of validate_email\"\"\"
+>
+>     # Path 1: Empty email
+>     def test_empty_string(self):
+>         assert validate_email("") is False
+>     
+>     # Path 2: Email without @
+>     def test_no_at_symbol(self):
+>         assert validate_email("invalid.email") is False
+>     
+>     # Path 3: Multiple @ symbols
+>     def test_multiple_at_symbols(self):
+>         assert validate_email("user@@example.com") is False
+>     
+>     # Path 4: Domain without dot
+>     def test_domain_no_dot(self):
+>         assert validate_email("user@localhost") is False
+>     
+>     # Path 5: Empty domain
+>     def test_empty_domain(self):
+>         assert validate_email("user@") is False
+>     
+>     # Path 6: Valid email (basic)
+>     def test_valid_email(self):
+>         assert validate_email("user@example.com") is True
+>     
+>     # Path 7: Valid with subdomain
+>     def test_valid_email_subdomain(self):
+>         assert validate_email("user@mail.example.co.uk") is True
+>     
+>     # Path 8: Edge case - single char domain
+>     def test_single_char_domain(self):
+>         assert validate_email("user@x.co") is True
+> ```
+>
+> **Coverage:** 8/8 execution paths covered
+> **Complexity:** All branches tested"
 
 ---
 
 ## Cross-File Analysis
 
-### Project Structure Mapping
+### Scenario: Understand Import Dependencies
 
-```python
-# Get high-level project overview
-project_map = get_project_map(
-    root_path="/project",
-    max_depth=3
-)
+**You say:**
+> "I'm planning to refactor the billing module. What other parts of the system depend on it?"
 
-print(f"Project: {project_map.project_root}")
-print(f"Total files: {project_map.total_files}")
-print(f"Total lines: {project_map.total_lines}")
-print(f"Languages: {project_map.languages}")
-print(f"Entry points: {project_map.entry_points}")
-```
-
-### Dependency Analysis
-
-```python
-# Analyze file dependencies
-deps = get_cross_file_dependencies(
-    file_path="/project/services/order.py",
-    resolve_transitive=True
-)
-
-print("Direct imports:")
-for imp in deps.direct_imports:
-    print(f"  - {imp}")
-
-print("\nTransitive dependencies:")
-for dep in deps.transitive_dependencies:
-    print(f"  - {dep}")
-```
-
-### Call Graph Generation
-
-```python
-# Generate call graph for a file
-graph = get_call_graph(
-    file_path="/project/services/order.py",
-    max_depth=3,
-    include_external=False
-)
-
-# Visualize as Mermaid diagram
-print(graph.mermaid_diagram)
-```
-
-**Output:**
-```mermaid
-graph TD
-    process_order --> validate_order
-    process_order --> calculate_total
-    validate_order --> check_inventory
-    calculate_total --> apply_discounts
-```
-
----
-
-## Compliance Checking
-
-### Basic Policy Check (Community Tier)
-
-```python
-# Check for common anti-patterns
-result = code_policy_check(
-    paths=["src/"],
-    rules=["PY001", "PY002", "SEC001", "SEC002"]
-)
-
-# Detected violations:
-# - PY001: Bare except clause
-# - SEC001: Hardcoded password
-# - SEC002: SQL string concatenation
-```
-
-### Enterprise Compliance Audit
-
-```python
-# Full HIPAA compliance check (Enterprise tier)
-result = code_policy_check(
-    paths=["src/"],
-    compliance_standards=["hipaa", "soc2"],
-    generate_report=True
-)
-
-# Generates:
-# - PDF compliance certificate
-# - Audit trail
-# - Compliance score (0-100%)
-# - Remediation checklist
-```
+**AI Assistant (using Code Scalpel):**
+> "Analyzing billing module dependencies...
+>
+> **Direct imports of billing:**
+> - api/handlers.py (3 functions use billing)
+> - admin/reports.py (invoice generation)
+> - tasks/email.py (billing notifications)
+> - tests/test_billing.py (unit tests)
+>
+> **Call chain examples:**
+>
+> ```
+> api/handlers.py:create_order()
+>   └─> billing.process_payment()
+>       └─> stripe.charge()
+>
+> admin/reports.py:generate_invoice_report()
+>   └─> billing.calculate_invoice_total()
+>       └─> billing.apply_discounts()
+>
+> tasks/email.py:send_billing_email()
+>   └─> billing.get_recent_charges()
+> ```
+>
+> **Impact of changes:**
+> - Changing process_payment signature: breaks 5 call sites
+> - Changing calculate_invoice_total: breaks 2 locations
+> - Adding new payment method: no breaking changes needed
+>
+> **Safe refactoring approach:**
+> 1. Add new functions, don't modify existing ones
+> 2. Keep process_payment signature stable
+> 3. Test billing heavily (3 services depend on it)"
 
 ---
 
 ## Real-World Scenarios
 
-### Scenario 1: API Endpoint Security Review
+### Scenario 1: Emergency Security Patch
 
-```python
-# Extract API handler
-handler = extract_code(
-    file_path="api/endpoints.py",
-    target_name="create_user_endpoint"
-)
+**Situation:** You found a security vulnerability that needs immediate fixing.
 
-# Scan for vulnerabilities
-security = security_scan(code=handler.target_code)
+**You say:**
+> "We have a critical SQL injection in the search endpoint. I need:
+> 1. Confirm the vulnerability
+> 2. Fix it
+> 3. Make sure the fix doesn't break anything"
 
-# Check input validation
-if any(v.cwe == "CWE-20" for v in security.vulnerabilities):
-    print("⚠️ Missing input validation")
+**AI Assistant (using Code Scalpel):**
 
-# Find all callers
-refs = get_symbol_references("create_user_endpoint")
-print(f"Endpoint called from {len(refs.references)} locations")
-```
-
-### Scenario 2: Legacy Code Refactoring
-
-```python
-# Step 1: Understand the code
-context = get_file_context(file_path="legacy/processor.py")
-print(f"Complexity: {context.complexity_score}")
-print(f"Functions: {context.functions}")
-
-# Step 2: Extract complex function
-func = extract_code(
-    file_path="legacy/processor.py",
-    target_name="process_transaction",
-    include_context=True
-)
-
-# Step 3: Generate tests for current behavior
-tests = generate_unit_tests(code=func.target_code)
-
-# Step 4: Refactor
-refactored = """
-def process_transaction(transaction):
-    # Simplified logic
-    validate_transaction(transaction)
-    result = execute_transaction(transaction)
-    log_transaction(result)
-    return result
-"""
-
-# Step 5: Verify behavior preserved
-sim = simulate_refactor(
-    original_code=func.target_code,
-    new_code=refactored
-)
-
-if sim.is_safe:
-    update_symbol(
-        file_path="legacy/processor.py",
-        target_name="process_transaction",
-        new_code=refactored
-    )
-```
-
-### Scenario 3: Dependency Vulnerability Scan
-
-```python
-# Scan project dependencies for CVEs
-deps = scan_dependencies(
-    project_root="/project",
-    include_dev=False
-)
-
-critical_vulns = [
-    d for d in deps.dependencies 
-    if any(v.severity == "critical" for v in d.vulnerabilities)
-]
-
-if critical_vulns:
-    print("⚠️ Critical vulnerabilities found:")
-    for dep in critical_vulns:
-        print(f"\n{dep.name} {dep.version}")
-        for vuln in dep.vulnerabilities:
-            if vuln.severity == "critical":
-                print(f"  {vuln.cve}: {vuln.description}")
-                print(f"  Fix: Upgrade to {vuln.fixed_in}")
-```
-
-### Scenario 4: Pre-Commit Security Hook
-
-```bash
-#!/bin/bash
-# .git/hooks/pre-commit
-
-# Scan staged Python files
-for file in $(git diff --cached --name-only --diff-filter=ACMR | grep '.py$'); do
-    echo "Scanning $file..."
-    
-    python -c "
-from code_scalpel.mcp.helpers.security_helpers import security_scan
-
-with open('$file') as f:
-    code = f.read()
-
-result = security_scan(code=code, min_confidence=0.8)
-
-if result.vulnerabilities:
-    print(f'⚠️ Security issues in $file:')
-    for v in result.vulnerabilities:
-        print(f'  {v.cwe}: {v.description} (line {v.source_line})')
-    exit(1)
-    "
-done
-
-echo "✅ Security scan passed"
-```
+> **Step 1: Confirm vulnerability**
+> ✓ SQL Injection found in search_users (CWE-89)
+> ✓ Taint flow: request.args → SQL query
+>
+> **Step 2: Apply fix**
+> ```python
+> # BEFORE (vulnerable)
+> query = f"SELECT * FROM users WHERE name LIKE '%{search_term}%'"
+>
+> # AFTER (safe)
+> query = "SELECT * FROM users WHERE name LIKE %s"
+> cursor.execute(query, (f"%{search_term}%",))
+> ```
+>
+> **Step 3: Impact analysis**
+> - Callers of search_users: 4 locations
+> - All use return value as iterable: ✓ compatible
+> - No breaking changes
+> - Unit tests updated: ✓
+>
+> ✅ **Patch is ready and safe to deploy**
 
 ---
 
-## More Examples
+### Scenario 2: Refactoring Legacy Code
 
-See the `examples/` directory in the repository for additional examples:
+**Situation:** You're modernizing a 10-year-old codebase.
 
-- **`security_analysis_example.py`** - Comprehensive security scanning
-- **`polyglot_extraction_demo.py`** - Multi-language extraction
-- **`jsx_tsx_extraction_example.py`** - React component extraction
-- **`policy_engine_example.py`** - Custom policy rules
-- **`compliance_reporting_demo.py`** - Enterprise compliance
-- **`graph_engine_example.py`** - Call graph analysis
+**You say:**
+> "This authentication module is from 2014. I want to refactor it to use modern practices. Help me understand what depends on it and ensure safe changes."
+
+**AI Assistant (using Code Scalpel):**
+
+> **Current state:**
+> - 347 lines of code
+> - 12 functions
+> - Complexity: 7/10
+>
+> **Dependencies:**
+> - 23 files import from auth.py
+> - 2 externally-facing APIs depend on current signatures
+>
+> **Safe refactoring path:**
+> 1. Create new auth_v2.py alongside old auth.py
+> 2. Migrate services one at a time
+> 3. Keep auth.py as legacy fallback
+> 4. Deprecate after 6 months
+>
+> **Step 1: Extract and analyze current functions**
+> (Shows 12 function signatures)
+>
+> **Step 2: Refactor in phases**
+> - Phase 1: Internal services (8 files)
+> - Phase 2: API endpoints (2 files)
+> - Phase 3: Remove legacy auth.py
+>
+> I can track this migration and verify safety at each step."
 
 ---
 
-**Related Pages:**
-- [MCP Tools Reference](MCP-Tools-Reference) - Complete API documentation
-- [Getting Started](Getting-Started) - First steps tutorial
-- [Troubleshooting](Troubleshooting) - Common issues
+### Scenario 3: Code Review
+
+**Situation:** A team member submitted a PR with significant changes.
+
+**You say:**
+> "Review this pull request for security issues and potential bugs. The PR modifies payment processing and user authentication."
+
+**AI Assistant (using Code Scalpel):**
+
+> **Security Analysis:**
+> ✓ No new SQL injection vectors
+> ✓ Passwords still hashed properly
+> ✓ No hardcoded secrets in code
+> ✓ CSRF tokens validated
+> ⚠️ One concern found (see below)
+>
+> **Behavioral Changes:**
+> - Payment timeout increased from 30s to 60s
+> - User session length extended from 1h to 2h
+> - New OAuth2 provider added (Google)
+>
+> **Concerns:**
+>
+> 1. **Session timeout change - Verify intent**
+>    - Affects security stance
+>    - May need admin notification
+>    - Recommend: 90 minutes compromise
+>
+> 2. **Test coverage**
+>    - 3 new code paths have no tests
+>    - Recommend: Add tests for Google OAuth flow
+>
+> 3. **Breaking changes**
+>    - session.get_remaining_time() now returns different values
+>    - 1 location needs updating
+>
+> **Recommendation:** Approve after addressing 2 tests and verifying session timeout intent with author."
+

@@ -24,40 +24,62 @@ Code Scalpel is an MCP (Model Context Protocol) server that provides AI agents w
 
 ## What is Code Scalpel?
 
-Code Scalpel bridges **Generative AI** and **Reliable Software Engineering** by treating code as a **Graph** (AST + PDG) rather than text. It provides 22 specialized tools that enable AI agents to:
+Code Scalpel is an **MCP server** that enhances AI coding assistants with specialized code analysis tools. You interact with it through **natural conversation**—no Python coding required.
 
-- 🔍 **Extract code surgically** - Get functions/classes by name without reading entire files
-- 🛡️ **Detect vulnerabilities** - Taint-based security analysis across 12+ CWEs
-- ✅ **Verify changes** - Simulate refactors before applying them
-- 🧪 **Generate tests** - Auto-create unit tests using symbolic execution
-- 🔄 **Refactor safely** - Rename symbols and update code with atomic operations
+When you talk to Claude, Copilot, or Cursor, they use Code Scalpel's 22 tools behind the scenes:
+
+- 🔍 **Extract code surgically** - "Extract the calculate_tax function" → 50 tokens instead of 10,000
+- 🛡️ **Detect vulnerabilities** - "Check this for SQL injection" → Taint analysis across 12+ CWEs
+- ✅ **Verify changes** - "Is it safe to refactor this?" → Simulates before applying
+- 🧪 **Generate tests** - "Create tests for this function" → Uses symbolic execution
+- 🔄 **Refactor safely** - "Rename this across the project" → Updates all references
+
+## How It Works
+
+### Without Code Scalpel
+```
+You: "Extract the calculate_tax function"
+AI: Reads entire 5000-line file → 10,000 tokens consumed
+    Manually finds function → Imprecise extraction
+    Returns code with irrelevant context
+```
+
+### With Code Scalpel (MCP Server)
+```
+You: "Extract the calculate_tax function"
+AI: Uses extract_code tool via MCP → 50 tokens consumed
+    Surgical extraction via AST → Exact function + imports only
+    Returns clean code ready to use
+```
 
 ## Key Capabilities
 
+Code Scalpel treats code as a **Graph** (AST + PDG) rather than text, enabling precise operations:
+
 ### 1. Surgical Extraction (99% Token Reduction)
-```python
-# Instead of reading entire files
-extract_code(file_path="services.py", target_type="function", target_name="process_payment")
-```
+Ask: *"Extract the process_payment function from services.py"*
+- AI uses MCP tool to extract by name → 50 tokens
+- Returns only the function + necessary imports
+- No need to read the entire file
 
 ### 2. Taint-Based Security Analysis
-```python
-# Detect SQL injection, XSS, command injection, etc.
-security_scan(code=source_code, entry_points=["handle_request"])
-```
+Ask: *"Check this code for SQL injection vulnerabilities"*
+- AI analyzes data flow from sources to sinks
+- Detects injection, XSS, command execution, path traversal
+- Identifies 12+ CWE vulnerabilities
 
 ### 3. Symbolic Execution & Test Generation
-```python
-# Explore all execution paths and generate tests
-generate_unit_tests(code=function_code, max_paths=10)
-```
+Ask: *"Generate tests for this function"*
+- AI explores all execution paths
+- Creates test cases for edge cases and branches
+- Generates pytest or unittest code
 
 ### 4. Safe Refactoring
-```python
-# Verify changes before applying
-simulate_refactor(original_code=old_code, new_code=new_code)
-update_symbol(file_path="app.py", target_name="old_func", new_code=new_func)
-```
+Ask: *"Is it safe to refactor this? Here's my new version:"*
+- AI simulates the change first
+- Verifies no security issues introduced
+- Checks for breaking changes
+- Only then applies the update
 
 ## Tier System
 

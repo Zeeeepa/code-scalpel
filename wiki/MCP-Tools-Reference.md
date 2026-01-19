@@ -1,33 +1,59 @@
 # MCP Tools Reference
 
-Code Scalpel provides 22 specialized tools divided into five categories. All tools are available in the Community tier with varying limits based on tier level.
+This reference documents Code Scalpel's 22 tools. **You don't call these directly**—your AI assistant (Claude, Copilot, Cursor) uses them automatically when you ask for help with code analysis, security scanning, or refactoring.
+
+## Understanding MCP Tools
+
+### How It Works
+
+```
+You: "Extract the process_payment function from services.py"
+     ↓
+AI Assistant: Uses extract_code tool via MCP (you don't see this)
+     ↓
+You see: The function code extracted cleanly
+```
+
+The tools run on Code Scalpel's backend server and return results to your AI assistant, which presents them in conversation.
+
+## Tool Categories
+
+Code Scalpel provides 22 tools across five categories:
+
+1. **Extraction** - Get specific code elements without reading entire files
+2. **Analysis** - Understand code structure, dependencies, and metrics
+3. **Security** - Detect vulnerabilities using taint analysis
+4. **Modification** - Safely refactor, rename, and update code
+5. **Verification** - Test changes, generate tests, validate compliance
+
+All tools are available in the Community tier. Higher tiers provide enhanced limits and features.
 
 ## Quick Reference
 
-| Tool | Category | Primary Use |
-|------|----------|-------------|
-| [extract_code](#extract_code) | Extraction | Get functions/classes by name |
-| [analyze_code](#analyze_code) | Analysis | Parse code structure |
-| [get_file_context](#get_file_context) | Analysis | Quick file overview |
-| [get_symbol_references](#get_symbol_references) | Navigation | Find all usages |
-| [get_call_graph](#get_call_graph) | Navigation | Function relationships |
-| [get_cross_file_dependencies](#get_cross_file_dependencies) | Navigation | Import resolution |
-| [get_project_map](#get_project_map) | Analysis | Project structure |
-| [crawl_project](#crawl_project) | Analysis | Full project scan |
-| [get_graph_neighborhood](#get_graph_neighborhood) | Analysis | K-hop subgraphs |
-| [security_scan](#security_scan) | Security | Taint analysis |
-| [cross_file_security_scan](#cross_file_security_scan) | Security | Cross-module taint tracking |
-| [unified_sink_detect](#unified_sink_detect) | Security | Dangerous function detection |
-| [type_evaporation_scan](#type_evaporation_scan) | Security | TypeScript type boundary issues |
-| [scan_dependencies](#scan_dependencies) | Security | CVE detection |
-| [update_symbol](#update_symbol) | Modification | Replace functions/classes |
-| [rename_symbol](#rename_symbol) | Modification | Rename with reference updates |
-| [simulate_refactor](#simulate_refactor) | Verification | Test changes before applying |
-| [symbolic_execute](#symbolic_execute) | Verification | Explore execution paths |
-| [generate_unit_tests](#generate_unit_tests) | Verification | Auto-generate tests |
-| [code_policy_check](#code_policy_check) | Verification | Compliance checking |
-| [validate_paths](#validate_paths) | Utility | Path security validation |
-| [verify_policy_integrity](#verify_policy_integrity) | Utility | Cryptographic verification |
+| Tool | Category | What to Ask For |
+|------|----------|-----------------|
+| [extract_code](#extract_code) | Extraction | "Extract the [function/class] from [file]" |
+| [analyze_code](#analyze_code) | Analysis | "What's in this file?" |
+| [get_file_context](#get_file_context) | Analysis | "Quick overview of [file]" |
+| [get_symbol_references](#get_symbol_references) | Navigation | "Where is [function] used?" |
+| [get_call_graph](#get_call_graph) | Navigation | "How does [function] call other functions?" |
+| [get_cross_file_dependencies](#get_cross_file_dependencies) | Navigation | "What does [file] import?" |
+| [get_project_map](#get_project_map) | Analysis | "Show me project structure" |
+| [crawl_project](#crawl_project) | Analysis | "Analyze entire project" |
+| [get_graph_neighborhood](#get_graph_neighborhood) | Analysis | "Functions related to [function]" |
+| [security_scan](#security_scan) | Security | "Check code for vulnerabilities" |
+| [cross_file_security_scan](#cross_file_security_scan) | Security | "Scan entire service for security issues" |
+| [unified_sink_detect](#unified_sink_detect) | Security | "Find dangerous functions used" |
+| [type_evaporation_scan](#type_evaporation_scan) | Security | "Check TypeScript type boundaries" |
+| [scan_dependencies](#scan_dependencies) | Security | "Check for known CVEs in dependencies" |
+| [update_symbol](#update_symbol) | Modification | "Replace this function with new code" |
+| [rename_symbol](#rename_symbol) | Modification | "Rename [function] everywhere it's used" |
+| [simulate_refactor](#simulate_refactor) | Verification | "Is this refactoring safe?" |
+| [symbolic_execute](#symbolic_execute) | Verification | "What are all possible code paths?" |
+| [generate_unit_tests](#generate_unit_tests) | Verification | "Generate tests for this function" |
+| [code_policy_check](#code_policy_check) | Verification | "Check compliance with coding standards" |
+| [validate_paths](#validate_paths) | Utility | "Verify file paths are accessible" |
+| [verify_policy_integrity](#verify_policy_integrity) | Utility | "Verify policy files are legitimate" |
 
 ---
 
@@ -37,7 +63,12 @@ Code Scalpel provides 22 specialized tools divided into five categories. All too
 
 **Surgically extract functions, classes, or methods from files.**
 
-**99% token reduction** compared to reading entire files. The server reads the file directly—you only pay tokens for the extracted code.
+99% token reduction compared to reading entire files. The server reads the file directly—you only pay tokens for the extracted code.
+
+**How to use it:**
+> "Extract the calculate_tax function from utils.py"
+> 
+> AI will return only that function with necessary imports
 
 **Parameters:**
 - `target_type` (string, required): `"function"`, `"class"`, or `"method"`
