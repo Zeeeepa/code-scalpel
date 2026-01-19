@@ -783,7 +783,7 @@ Examples:
 For production deployments with Claude API, use HTTPS:
   code-scalpel mcp --http --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem
 
-For more information, visit: https://github.com/tescolopio/code-scalpel
+For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         """,
     )
 

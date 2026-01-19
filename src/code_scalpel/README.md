@@ -192,4 +192,4 @@ Every subdirectory contains a README.md with detailed module documentation:
 - **Author:** Tim Escolopio
 - **Email:** 3dtsus@gmail.com
 - **License:** MIT
-- **Repository:** [code-scalpel](https://github.com/yourusername/code-scalpel)
+- **Repository:** [code-scalpel](https://github.com/3D-Tech-Solutions/code-scalpel)

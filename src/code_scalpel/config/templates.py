@@ -6,7 +6,7 @@ Configuration templates for .code-scalpel directory.
 
 # Template for policy.yaml
 POLICY_YAML_TEMPLATE = """# Code Scalpel Policy Configuration
-# Learn more: https://github.com/tescolopio/code-scalpel/blob/main/docs/policy_engine_guide.md
+# Learn more: https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/policy_engine_guide.md
 
 version: "1.0.0"
 
@@ -42,7 +42,7 @@ audit:
 
 # Template for budget.yaml
 BUDGET_YAML_TEMPLATE = """# Code Scalpel Change Budget Configuration
-# Learn more: https://github.com/tescolopio/code-scalpel/blob/main/docs/guides/change_budgeting.md
+# Learn more: https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/guides/change_budgeting.md
 
 version: "1.0.0"
 
@@ -104,9 +104,9 @@ Copy `.env.example` to `.env` and update with your actual secrets.
 
 ## Documentation
 
-- [Policy Engine Guide](https://github.com/tescolopio/code-scalpel/blob/main/docs/policy_engine_guide.md)
-- [Change Budgeting Guide](https://github.com/tescolopio/code-scalpel/blob/main/docs/guides/change_budgeting.md)
-- [Tamper Resistance](https://github.com/tescolopio/code-scalpel/blob/main/docs/security/tamper_resistance.md)
+- [Policy Engine Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/policy_engine_guide.md)
+- [Change Budgeting Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/guides/change_budgeting.md)
+- [Tamper Resistance](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/security/tamper_resistance.md)
 
 ## Cryptographic Verification (Optional)
 
@@ -120,7 +120,7 @@ code-scalpel policy sign
 code-scalpel policy verify
 ```
 
-Learn more: https://github.com/tescolopio/code-scalpel
+Learn more: https://github.com/3D-Tech-Solutions/code-scalpel
 """
 
 # Template for config.json (main governance configuration)
