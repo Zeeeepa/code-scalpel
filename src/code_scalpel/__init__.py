@@ -19,12 +19,19 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
+from typing import TYPE_CHECKING
+
 # [20251228_FEATURE] Public sync wrappers for key MCP tools.
 # These are convenience APIs used by tier/tooling validation tests.
 
 __version__ = "1.0.0"
 __author__ = "3D Tech Solutions"
 __email__ = "support@3dtechsolutions.us"
+
+# [20260119_FIX] Import run_server at module level for static analysis
+# This is the MCP server entry point (not the legacy Flask REST API)
+if TYPE_CHECKING:
+    from .mcp import run_server as run_server
 
 # [20251228_BUGFIX] Prefer reorganized modules to avoid importing deprecated
 # shims (keeps backward-compatible top-level symbols without warning noise).
@@ -155,10 +162,12 @@ __all__ = [
     "update_function_in_file",
     "update_class_in_file",
     "update_method_in_file",
-    # MCP Server
-    "create_app",
+    # MCP Server - run_server is the primary entry point
     "run_server",
-    "MCPServerConfig",
+    # Legacy REST API Server (requires Flask: pip install code-scalpel[web])
+    # These are NOT the MCP server - they are the legacy Flask REST API
+    # "create_app",        # REST API only - requires Flask
+    # "MCPServerConfig",   # REST API only - requires Flask
     # Autonomy (v3.0.0)
     "ErrorToDiffEngine",
     "ErrorType",
@@ -278,14 +287,21 @@ def simulate_refactor(
 
 
 def __getattr__(name: str):
-    """Lazy loader for optional dependencies (Flask REST API)."""
-    if name in ("MCPServerConfig", "create_app", "run_server"):
+    """Lazy loader for optional dependencies and MCP server."""
+    # MCP Server - primary entry point
+    if name == "run_server":
+        from .mcp import run_server as mcp_run_server
+        return mcp_run_server
+    
+    # Legacy REST API Server (optional Flask dependency)
+    if name in ("MCPServerConfig", "create_app"):
         try:
             from .integrations import rest_api_server
 
             return getattr(rest_api_server, name)
         except ImportError as e:
             raise ImportError(
-                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
+                f"{name} requires Flask. Install with: pip install code-scalpel[web]\n"
+                "Note: For the MCP server (recommended), use: from code_scalpel.mcp import run_server"
             ) from e
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
