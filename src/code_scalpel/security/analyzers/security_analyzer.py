@@ -476,9 +476,13 @@ class SecurityAnalyzer:
             if self._verify_vulnerability(vuln, code):
                 verified_vulns.append(vuln)
             else:
-                logger.info(
-                    f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution"
-                )
+                # vuln.sink_location can be None in some cases
+                if vuln.sink_location:
+                    logger.info(
+                        f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution"
+                    )
+                else:
+                    logger.info("Pruned vulnerability using symbolic execution")
 
         taint_vulns = verified_vulns
 

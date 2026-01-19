@@ -47,22 +47,23 @@ def _get_server():
 def _get_project_root() -> Path:
     """Get the current PROJECT_ROOT from server, fallback to local if not set."""
     import sys
-    
+
     try:
         # [20260118_BUGFIX] Check local PROJECT_ROOT first (respects test mocking)
         global PROJECT_ROOT
         if PROJECT_ROOT != Path.cwd():
             # Local PROJECT_ROOT has been explicitly set (likely by test fixture)
             return PROJECT_ROOT
-        
+
         # Check if server is imported as __main__
         if "__main__" in sys.modules:
             main_module = sys.modules["__main__"]
-            if hasattr(main_module, 'PROJECT_ROOT'):
+            if hasattr(main_module, "PROJECT_ROOT"):
                 return main_module.PROJECT_ROOT
-        
+
         # Fall back to importing the server module directly
         import code_scalpel.mcp.server as server_module
+
         return server_module.PROJECT_ROOT
     except (ImportError, AttributeError):
         # If we can't access the server's PROJECT_ROOT, use our local fallback
@@ -278,7 +279,9 @@ def _perform_extraction(
                 target_type=target_type,
                 max_depth=context_depth,
             )
-            return cross_file_result.target, cross_file_result, None
+            # cross_file_result.target can be None if not found
+            target = cross_file_result.target if cross_file_result.target is not None else ""  # type: ignore[union-attr]
+            return target, cross_file_result, None
         else:
             # Method - fall back to regular extraction
             result, error = _extract_method(extractor, target_name)

@@ -477,12 +477,12 @@ def _crawl_project_sync(
             for file_result in result.files_analyzed:
                 # [20260116_BUGFIX] Cooperative cancellation for long-running crawls.
                 if ctx:
-                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
                         raise asyncio.CancelledError("Crawl cancelled by user")
                     if (
                         hasattr(ctx, "request_context")
                         and hasattr(ctx.request_context, "lifecycle_context")
-                        and ctx.request_context.lifecycle_context.is_cancelled
+                        and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                     ):
                         raise asyncio.CancelledError("Crawl cancelled by user")
                 file_path = str(file_result.path)
@@ -557,12 +557,12 @@ def _crawl_project_sync(
         for f in result.files_analyzed:
             # [20260116_BUGFIX] Cooperative cancellation during result materialization.
             if ctx:
-                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
                     raise asyncio.CancelledError("Crawl cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
                     and hasattr(ctx.request_context, "lifecycle_context")
-                    and ctx.request_context.lifecycle_context.is_cancelled
+                    and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                 ):
                     raise asyncio.CancelledError("Crawl cancelled by user")
             files.append(to_file_result(f, result.root_path))
@@ -570,12 +570,12 @@ def _crawl_project_sync(
         errors = []
         for f in result.files_with_errors:
             if ctx:
-                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
                     raise asyncio.CancelledError("Crawl cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
                     and hasattr(ctx.request_context, "lifecycle_context")
-                    and ctx.request_context.lifecycle_context.is_cancelled
+                    and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                 ):
                     raise asyncio.CancelledError("Crawl cancelled by user")
             errors.append(to_file_result(f, result.root_path))

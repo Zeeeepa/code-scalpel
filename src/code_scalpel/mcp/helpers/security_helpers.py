@@ -1296,14 +1296,14 @@ def _scan_dependencies_sync(
             for filename, parser in dep_files:
                 # [20260116_BUGFIX] Cooperative cancellation for dependency scanning.
                 if ctx:
-                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                    if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
                         raise asyncio.CancelledError(
                             "Dependency scan cancelled by user"
                         )
                     if (
                         hasattr(ctx, "request_context")
                         and hasattr(ctx.request_context, "lifecycle_context")
-                        and ctx.request_context.lifecycle_context.is_cancelled
+                        and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                     ):
                         raise asyncio.CancelledError(
                             "Dependency scan cancelled by user"
@@ -1314,7 +1314,7 @@ def _scan_dependencies_sync(
                         parsed_deps = parser(file_path)
                         # [20260118_FIX] Track source file for each dependency
                         for dep in parsed_deps:
-                            dep.file_path = str(file_path)
+                            dep.file_path = str(file_path)  # type: ignore[attr-defined]
                         all_deps.extend(parsed_deps)
                     except Exception as e:
                         errors.append(f"Failed to parse {filename}: {str(e)}")
@@ -1352,12 +1352,12 @@ def _scan_dependencies_sync(
         for dep in all_deps:
             # [20260116_BUGFIX] Cooperative cancellation during dependency analysis.
             if ctx:
-                if hasattr(ctx, "should_cancel") and ctx.should_cancel():
+                if hasattr(ctx, "should_cancel") and ctx.should_cancel():  # type: ignore[attr-defined]
                     raise asyncio.CancelledError("Dependency scan cancelled by user")
                 if (
                     hasattr(ctx, "request_context")
                     and hasattr(ctx.request_context, "lifecycle_context")
-                    and ctx.request_context.lifecycle_context.is_cancelled
+                    and ctx.request_context.lifecycle_context.is_cancelled  # type: ignore[attr-defined]
                 ):
                     raise asyncio.CancelledError("Dependency scan cancelled by user")
             dep_vulns: list[DependencyVulnerability] = []

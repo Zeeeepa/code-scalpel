@@ -388,6 +388,7 @@ def _maybe_auto_init_config_dir(
         "message": result.get("message"),
     }
 
+
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 
@@ -5522,8 +5523,8 @@ def run_server(
     # remain authoritative and paid tiers fail closed without a valid license.
     # CLI/env can request a tier, but it will be clamped by the license.
     validator = JWTLicenseValidator()
-    requested_tier = tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get(
-        "SCALPEL_TIER"
+    requested_tier = (
+        tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
     )
     effective_tier, startup_warning = compute_effective_tier_for_startup(
         requested_tier=requested_tier,

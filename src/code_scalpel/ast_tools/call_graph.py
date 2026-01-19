@@ -72,14 +72,6 @@ class CallGraphBuilder:
     Builds a static call graph for a Python project.
     """
 
-    # ====================================================================
-    # TIER 2: PRO (Commercial - Medium Priority)
-    # ====================================================================
-
-    # ====================================================================
-    # TIER 3: ENTERPRISE (Commercial - Lower Priority)
-    # ====================================================================
-
     def __init__(self, root_path: Path):
         self.root_path = root_path
         self.definitions: Dict[str, Set[str]] = (
@@ -582,9 +574,11 @@ class CallGraphBuilder:
             ):
                 obj = getattr(callee, "object", None)
                 prop = getattr(callee, "property", None)
-                if isinstance(obj, esprima.nodes.Identifier) and isinstance(
+                if isinstance(
+                    obj, esprima.nodes.Identifier  # type: ignore[attr-defined]
+                ) and isinstance(
                     prop, esprima.nodes.Identifier
-                ):
+                ):  # type: ignore[attr-defined]
                     return f"{obj.name}.{prop.name}"
             return None
 
