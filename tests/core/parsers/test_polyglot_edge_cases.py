@@ -30,9 +30,7 @@ def process(data):
         return n
     return 0
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="process"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="process")
         assert result.success
         assert ":=" in result.target_code
 
@@ -51,9 +49,7 @@ def handle_command(command):
         case _:
             return "Unknown command"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="handle_command"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="handle_command")
         assert result.success
         assert "match" in result.target_code
 
@@ -64,9 +60,7 @@ def handle_command(command):
 def divmod_custom(a, b, /):
     return a // b, a % b
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="divmod_custom"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="divmod_custom")
         assert result.success
         assert "/" in result.target_code
 
@@ -77,9 +71,7 @@ def divmod_custom(a, b, /):
 def configure(*, debug=False, timeout=30):
     return {"debug": debug, "timeout": timeout}
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="configure"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="configure")
         assert result.success
 
     @pytest.mark.asyncio
@@ -89,9 +81,7 @@ def configure(*, debug=False, timeout=30):
 def complex_params(pos_only, /, normal, *args, kw_only, **kwargs):
     return (pos_only, normal, args, kw_only, kwargs)
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="complex_params"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="complex_params")
         assert result.success
 
     @pytest.mark.asyncio
@@ -101,9 +91,7 @@ def complex_params(pos_only, /, normal, *args, kw_only, **kwargs):
 def nested_fstring(items):
     return f"{len(items)} items: {', '.join(f'{i}: {v}' for i, v in enumerate(items))}"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="nested_fstring"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="nested_fstring")
         assert result.success
 
     @pytest.mark.asyncio
@@ -115,9 +103,7 @@ async def async_range(n):
         await asyncio.sleep(0.1)
         yield i
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="async_range"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="async_range")
         assert result.success
         assert "async def" in result.target_code
         assert "yield" in result.target_code
@@ -135,9 +121,7 @@ class Config:
     values: List[int] = field(default_factory=list)
     _cache: dict = field(default_factory=dict, repr=False)
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="Config"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="Config")
         assert result.success
         assert "@dataclass" in result.target_code
 

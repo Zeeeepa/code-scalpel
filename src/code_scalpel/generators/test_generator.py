@@ -179,10 +179,7 @@ class GeneratedTestSuite:
         try:
             tree = ast.parse(self.source_code)
             for node in ast.walk(tree):
-                if (
-                    isinstance(node, ast.FunctionDef)
-                    and node.name == self.function_name
-                ):
+                if isinstance(node, ast.FunctionDef) and node.name == self.function_name:
                     return ast.unparse(node)
         except Exception:
             pass
@@ -264,9 +261,7 @@ class GeneratedTestSuite:
 
         return "\n".join(lines)
 
-    def _generate_parametrized_test(
-        self, test_cases: list[TestCase], group_idx: int
-    ) -> str:
+    def _generate_parametrized_test(self, test_cases: list[TestCase], group_idx: int) -> str:
         """Generate a single parametrized test for a group of test cases."""
         if not test_cases:
             return ""
@@ -291,9 +286,7 @@ class GeneratedTestSuite:
             lines.append(f"    {repr(values)},")
 
         lines.append(f"], ids={repr(test_ids)})")
-        lines.append(
-            f"def test_{self.function_name}_parametrized_{group_idx}({param_str}):"
-        )
+        lines.append(f"def test_{self.function_name}_parametrized_{group_idx}({param_str}):")
         lines.append('    """')
         lines.append(f"    Data-driven test for {self.function_name}")
         lines.append("    Tests multiple execution paths with different inputs")
@@ -367,9 +360,7 @@ class GeneratedTestSuite:
 
         return "\n".join(lines)
 
-    def _generate_unittest_subtest_method(
-        self, test_cases: list[TestCase], group_idx: int
-    ) -> str:
+    def _generate_unittest_subtest_method(self, test_cases: list[TestCase], group_idx: int) -> str:
         """Generate a unittest method using subTest for multiple test cases."""
         if not test_cases:
             return ""
@@ -401,9 +392,7 @@ class GeneratedTestSuite:
         # Call function with unpacked parameters
         args = ", ".join(f"{p}={p}" for p in param_names)
         lines.append(f"                result = {self.function_name}({args})")
-        lines.append(
-            "                self.assertIsNotNone(result)  # Path executed successfully"
-        )
+        lines.append("                self.assertIsNotNone(result)  # Path executed successfully")
 
         return "\n".join(lines)
 
@@ -463,9 +452,7 @@ class TestGenerator:
             symbolic_result = self._run_symbolic_execution(code, language)
 
         # Extract test cases from paths
-        test_cases = self._extract_test_cases(
-            symbolic_result, function_name, code, language
-        )
+        test_cases = self._extract_test_cases(symbolic_result, function_name, code, language)
 
         return GeneratedTestSuite(
             function_name=function_name,
@@ -493,9 +480,7 @@ class TestGenerator:
         Returns:
             GeneratedTestSuite with test cases
         """
-        test_cases = self._extract_test_cases(
-            symbolic_result, function_name, code, language
-        )
+        test_cases = self._extract_test_cases(symbolic_result, function_name, code, language)
 
         return GeneratedTestSuite(
             function_name=function_name,
@@ -557,9 +542,7 @@ class TestGenerator:
             framework=self.framework,
         )
 
-    def _parse_crash_log(
-        self, crash_log: str, function_name: str, language: str
-    ) -> dict[str, Any]:
+    def _parse_crash_log(self, crash_log: str, function_name: str, language: str) -> dict[str, Any]:
         """Parse crash log to extract bug reproduction information.
 
         Supports:
@@ -577,9 +560,7 @@ class TestGenerator:
         if language == "python":
             # Parse Python traceback
             # Extract exception type and message
-            exception_match = re.search(
-                r"(\w+(?:Error|Exception)):\s*(.+?)(?:\n|$)", crash_log
-            )
+            exception_match = re.search(r"(\w+(?:Error|Exception)):\s*(.+?)(?:\n|$)", crash_log)
             if exception_match:
                 bug_info["exception_type"] = exception_match.group(1)
                 bug_info["exception_message"] = exception_match.group(2).strip()
@@ -623,9 +604,7 @@ class TestGenerator:
 
         elif language == "java":
             # Parse Java stack trace
-            exception_match = re.search(
-                r"([\w.]+(?:Exception|Error)):\s*(.+?)(?:\n|$)", crash_log
-            )
+            exception_match = re.search(r"([\w.]+(?:Exception|Error)):\s*(.+?)(?:\n|$)", crash_log)
             if exception_match:
                 bug_info["exception_type"] = exception_match.group(1).split(".")[-1]
                 bug_info["exception_message"] = exception_match.group(2).strip()
@@ -708,9 +687,7 @@ class TestGenerator:
                                 "path_id": path_id,
                                 "conditions": [condition],
                                 "state": {
-                                    var: self._generate_satisfying_value(
-                                        condition, var, True
-                                    )
+                                    var: self._generate_satisfying_value(condition, var, True)
                                     for var in symbolic_vars
                                 },
                                 "reachable": True,
@@ -724,9 +701,7 @@ class TestGenerator:
                                 "path_id": path_id,
                                 "conditions": [f"not ({condition})"],
                                 "state": {
-                                    var: self._generate_satisfying_value(
-                                        condition, var, False
-                                    )
+                                    var: self._generate_satisfying_value(condition, var, False)
                                     for var in symbolic_vars
                                 },
                                 "reachable": True,
@@ -754,9 +729,7 @@ class TestGenerator:
             "constraints": constraints,
         }
 
-    def _generate_satisfying_value(
-        self, condition: str, var: str, should_satisfy: bool
-    ) -> Any:
+    def _generate_satisfying_value(self, condition: str, var: str, should_satisfy: bool) -> Any:
         """Generate a value that satisfies (or doesn't satisfy) a condition."""
         # Parse common patterns
         # Support both integer and float comparisons (e.g., x > 0, x > 100.0)
@@ -764,43 +737,27 @@ class TestGenerator:
             # Float patterns (must come before int patterns)
             (
                 rf"{var}\s*>\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) + 1.0
-                    if should_satisfy
-                    else float(m.group(1)) - 1.0
-                ),
+                lambda m: (float(m.group(1)) + 1.0 if should_satisfy else float(m.group(1)) - 1.0),
             ),
             (
                 rf"{var}\s*<\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) - 1.0
-                    if should_satisfy
-                    else float(m.group(1)) + 1.0
-                ),
+                lambda m: (float(m.group(1)) - 1.0 if should_satisfy else float(m.group(1)) + 1.0),
             ),
             (
                 rf"{var}\s*>=\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) if should_satisfy else float(m.group(1)) - 1.0
-                ),
+                lambda m: (float(m.group(1)) if should_satisfy else float(m.group(1)) - 1.0),
             ),
             (
                 rf"{var}\s*<=\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0
-                ),
+                lambda m: (float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0),
             ),
             (
                 rf"{var}\s*==\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0
-                ),
+                lambda m: (float(m.group(1)) if should_satisfy else float(m.group(1)) + 1.0),
             ),
             (
                 rf"{var}\s*!=\s*(\d+\.?\d*)",
-                lambda m: (
-                    float(m.group(1)) + 1.0 if should_satisfy else float(m.group(1))
-                ),
+                lambda m: (float(m.group(1)) + 1.0 if should_satisfy else float(m.group(1))),
             ),
         ]
 
@@ -882,17 +839,13 @@ class TestGenerator:
                 description = "Default/linear execution path"
 
             # Infer expected result from path conditions
-            expected_result = self._infer_expected_result(
-                conditions, return_value_map, inputs
-            )
+            expected_result = self._infer_expected_result(conditions, return_value_map, inputs)
 
             # If possible, compute the expected return value from the actual
             # control flow using the concrete inputs (without executing user code).
             # This fixes cases where symbolic execution falls back to a shallow
             # path analysis and condition->return matching becomes ambiguous.
-            interpreted = self._safe_interpret_return(
-                code, function_name, inputs, language
-            )
+            interpreted = self._safe_interpret_return(code, function_name, inputs, language)
             if interpreted is not None:
                 expected_result = interpreted
 
@@ -1144,9 +1097,7 @@ class TestGenerator:
 
         return value
 
-    def _analyze_return_paths(
-        self, code: str, function_name: str, language: str
-    ) -> dict[str, Any]:
+    def _analyze_return_paths(self, code: str, function_name: str, language: str) -> dict[str, Any]:
         """Analyze code to map conditions to their return values.
 
         For boolean functions, this maps branch conditions to True/False returns.
@@ -1184,18 +1135,14 @@ class TestGenerator:
                         if ret_val is not None:
                             # Create key from conditions
                             cond_key = (
-                                " AND ".join(condition_stack)
-                                if condition_stack
-                                else "default"
+                                " AND ".join(condition_stack) if condition_stack else "default"
                             )
                             return_map[cond_key] = ret_val
 
                 elif isinstance(stmt, ast.If):
                     # Analyze if branch
                     condition_str = (
-                        ast.unparse(stmt.test)
-                        if hasattr(ast, "unparse")
-                        else str(stmt.test)
+                        ast.unparse(stmt.test) if hasattr(ast, "unparse") else str(stmt.test)
                     )
                     visit_body(stmt.body, condition_stack + [condition_str])
 
@@ -1293,10 +1240,7 @@ class TestGenerator:
                             negated_match = True
                             break
                         # Check for explicit "not" in conditions
-                        if (
-                            inner_normalized in pc_normalized
-                            and "not" in pc_str.lower()
-                        ):
+                        if inner_normalized in pc_normalized and "not" in pc_str.lower():
                             negated_match = True
                             break
 
@@ -1304,10 +1248,7 @@ class TestGenerator:
                         match_score += 1
                     else:
                         # Check if the positive form is in conditions (mismatch)
-                        if any(
-                            inner_normalized in str(c).replace(" ", "")
-                            for c in conditions
-                        ):
+                        if any(inner_normalized in str(c).replace(" ", "") for c in conditions):
                             mismatch_count += 1
                 else:
                     # Non-negated condition - check for direct match

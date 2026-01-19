@@ -53,9 +53,7 @@ def _tail_text(path: Path, max_lines: int = 40) -> str:
     return "\n".join(tail) if tail else "(empty server log)"
 
 
-@pytest.mark.parametrize(
-    "transport,expected_path", [("streamable-http", "/mcp"), ("sse", "/sse")]
-)
+@pytest.mark.parametrize("transport,expected_path", [("streamable-http", "/mcp"), ("sse", "/sse")])
 async def test_http_transport_endpoint_path_matches_fastmcp_defaults(
     tmp_path: Path, transport: str, expected_path: str
 ):

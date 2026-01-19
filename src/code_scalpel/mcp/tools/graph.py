@@ -98,8 +98,7 @@ async def get_call_graph(
         actual_depth = max_depth
 
     advanced_resolution = (
-        "polymorphism_resolution" in capabilities
-        or "advanced_call_graph" in capabilities
+        "polymorphism_resolution" in capabilities or "advanced_call_graph" in capabilities
     )
     include_enterprise_metrics = (
         "hot_path_identification" in capabilities

@@ -20,18 +20,14 @@ def _write_config(path: Path, *, max_lines_per_change: int) -> None:
             {
                 "version": "3.0.0",
                 "profile": "test",
-                "governance": {
-                    "change_budgeting": {"max_lines_per_change": max_lines_per_change}
-                },
+                "governance": {"change_budgeting": {"max_lines_per_change": max_lines_per_change}},
             }
         ),
         encoding="utf-8",
     )
 
 
-def test_profile_env_selects_profile_file(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_profile_env_selects_profile_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     policy_dir = tmp_path / ".code-scalpel"
     policy_dir.mkdir(parents=True, exist_ok=True)

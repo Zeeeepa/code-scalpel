@@ -120,9 +120,7 @@ async def test_tool_wrappers_success(monkeypatch):
     assert (await agent.analyze_code_security("print('hi')"))["success"] is True
     assert (await agent.extract_function("file.py", "foo"))["success"] is True
     assert (await agent.simulate_code_change("old", "new"))["success"] is True
-    assert (await agent.apply_safe_change("f.py", "function", "foo", "code"))[
-        "success"
-    ] is True
+    assert (await agent.apply_safe_change("f.py", "function", "foo", "code"))["success"] is True
 
 
 # [20251214_TEST] Cover wrapper error path to capture exceptions.

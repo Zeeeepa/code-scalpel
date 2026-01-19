@@ -70,9 +70,7 @@ class PDGTransformer:
         #     - Track transformation dependencies for partial undo
         #     - Generate reverse transformations automatically
 
-    def transform(
-        self, transformation_type: TransformationType, **kwargs
-    ) -> TransformationResult:
+    def transform(self, transformation_type: TransformationType, **kwargs) -> TransformationResult:
         """
         Apply a transformation to the PDG.
 
@@ -228,9 +226,7 @@ class PDGTransformer:
 
         # Connect split nodes sequentially
         for idx in range(len(new_nodes) - 1):
-            self.pdg.add_edge(
-                new_nodes[idx], new_nodes[idx + 1], type="control_dependency"
-            )
+            self.pdg.add_edge(new_nodes[idx], new_nodes[idx + 1], type="control_dependency")
 
         # Reconnect dependencies
         self._reconnect_split_dependencies(node, new_nodes)
@@ -247,9 +243,7 @@ class PDGTransformer:
             metrics={"nodes_created": len(new_nodes)},
         )
 
-    def _reconnect_split_dependencies(
-        self, original_node: str, new_nodes: list[str]
-    ) -> None:
+    def _reconnect_split_dependencies(self, original_node: str, new_nodes: list[str]) -> None:
         """Reconnect dependencies for split nodes."""
         # Incoming edges go to the first new node
         for pred, _, data in list(self.pdg.in_edges(original_node, data=True)):
@@ -310,9 +304,7 @@ class PDGTransformer:
             metrics={"nodes_removed": 1},
         )
 
-    def replace_node(
-        self, old_node: str, new_node: str, data: dict
-    ) -> TransformationResult:
+    def replace_node(self, old_node: str, new_node: str, data: dict) -> TransformationResult:
         """Replace an existing node with a new node in the PDG."""
         if old_node not in self.pdg:
             return TransformationResult(
@@ -373,9 +365,7 @@ class PDGTransformer:
 
         # Find constant assignments
         for node, data in self.pdg.nodes(data=True):
-            if data.get("type") == "assign" and self._is_constant_value(
-                data.get("value")
-            ):
+            if data.get("type") == "assign" and self._is_constant_value(data.get("value")):
                 constant_values[data["target"]] = data["value"]
 
         # Propagate constants
@@ -401,9 +391,7 @@ class PDGTransformer:
 
         # Find loop nodes
         loop_nodes = [
-            node
-            for node, data in self.pdg.nodes(data=True)
-            if data.get("type") in ("for", "while")
+            node for node, data in self.pdg.nodes(data=True) if data.get("type") in ("for", "while")
         ]
 
         for loop_node in loop_nodes:
@@ -543,8 +531,7 @@ class PDGTransformer:
     def _has_effect(self, node: str) -> bool:
         """Check if a node has any effect on the program output."""
         return any(
-            edge[2].get("type") == "data_dependency"
-            for edge in self.pdg.out_edges(node, data=True)
+            edge[2].get("type") == "data_dependency" for edge in self.pdg.out_edges(node, data=True)
         )
 
     def _is_constant_value(self, value: Any) -> bool:
@@ -566,9 +553,7 @@ class PDGTransformer:
         new_data = copy.deepcopy(data)
         if "value" in new_data:
             for const_name, const_value in constants.items():
-                new_data["value"] = new_data["value"].replace(
-                    const_name, str(const_value)
-                )
+                new_data["value"] = new_data["value"].replace(const_name, str(const_value))
         return new_data
 
     def _find_loop_invariant_nodes(self, loop_node: str) -> set[str]:
@@ -640,9 +625,7 @@ class PDGTransformer:
         )
         return method_node
 
-    def _update_method_dependencies(
-        self, method_node: str, extracted_nodes: list[str]
-    ) -> None:
+    def _update_method_dependencies(self, method_node: str, extracted_nodes: list[str]) -> None:
         """Update dependencies for the new method node."""
         # Incoming edges to extracted nodes become incoming edges to method node
         for node in extracted_nodes:

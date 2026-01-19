@@ -156,9 +156,7 @@ def example():
 """
         result = self.analyzer.analyze(code)
 
-        unreachable = [
-            item for item in result.dead_code if item.code_type == "statement"
-        ]
+        unreachable = [item for item in result.dead_code if item.code_type == "statement"]
         self.assertGreater(len(unreachable), 0)
 
     def test_detect_unused_import(self):
@@ -247,9 +245,7 @@ x = used()
 
         result_tree = ast.parse(new_code)
         function_names = [
-            node.name
-            for node in ast.walk(result_tree)
-            if isinstance(node, ast.FunctionDef)
+            node.name for node in ast.walk(result_tree) if isinstance(node, ast.FunctionDef)
         ]
 
         # The 'unused' function should be removed
@@ -264,9 +260,7 @@ CONST_VALUE = 42
 result = CONST_VALUE + 10
 print(CONST_VALUE)
 """
-        result = self.analyzer.apply_refactor(
-            code, "inline_constant", target="CONST_VALUE"
-        )
+        result = self.analyzer.apply_refactor(code, "inline_constant", target="CONST_VALUE")
 
         # The constant should be inlined - the value 42 should appear directly
         self.assertIn("42", result)

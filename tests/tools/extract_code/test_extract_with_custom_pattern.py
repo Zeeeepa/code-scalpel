@@ -572,6 +572,4 @@ class TestExtractWithCustomPatternExplanation:
 
         assert result.success is True
         assert result.explanation is not None
-        assert (
-            "Scanned" in result.explanation or "scanned" in result.explanation.lower()
-        )
+        assert "Scanned" in result.explanation or "scanned" in result.explanation.lower()

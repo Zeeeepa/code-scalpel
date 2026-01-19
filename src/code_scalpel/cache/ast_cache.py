@@ -375,9 +375,7 @@ class IncrementalASTCache:
             "total_tracked_files": total_files,
             "memory_cached_asts": memory_cached,
             "disk_cached_files": disk_files,
-            "dependency_edges": sum(
-                len(deps) for deps in self.dependency_graph.values()
-            ),
+            "dependency_edges": sum(len(deps) for deps in self.dependency_graph.values()),
             "cache_dir": str(self.cache_dir),
         }
 

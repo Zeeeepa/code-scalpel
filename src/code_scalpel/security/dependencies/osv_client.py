@@ -139,9 +139,7 @@ class OSVClient:
         for attempt in range(MAX_RETRIES):
             try:
                 req = urllib.request.Request(url, data=payload, headers=headers)
-                with urllib.request.urlopen(
-                    req, timeout=self.timeout
-                ) as response:  # nosec B310
+                with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
                 if e.code == 429:  # Rate limited
@@ -303,14 +301,10 @@ class OSVClient:
                 severity=self._parse_severity(vuln),
                 package=package,
                 vulnerable_version=version,
-                fixed_version=self._parse_fixed_version(
-                    vuln.get("affected", []), package
-                ),
+                fixed_version=self._parse_fixed_version(vuln.get("affected", []), package),
                 aliases=vuln.get("aliases", []),
                 references=[
-                    ref.get("url", "")
-                    for ref in vuln.get("references", [])
-                    if ref.get("url")
+                    ref.get("url", "") for ref in vuln.get("references", []) if ref.get("url")
                 ][
                     :5
                 ],  # Limit to 5 references
@@ -323,9 +317,7 @@ class OSVClient:
 
         return vulnerabilities
 
-    def query_batch(
-        self, packages: List[Dict[str, str]]
-    ) -> Dict[str, List[Vulnerability]]:
+    def query_batch(self, packages: List[Dict[str, str]]) -> Dict[str, List[Vulnerability]]:
         """
         Query OSV for vulnerabilities in multiple packages at once.
 
@@ -378,14 +370,10 @@ class OSVClient:
                     severity=self._parse_severity(vuln),
                     package=pkg["name"],
                     vulnerable_version=pkg["version"],
-                    fixed_version=self._parse_fixed_version(
-                        vuln.get("affected", []), pkg["name"]
-                    ),
+                    fixed_version=self._parse_fixed_version(vuln.get("affected", []), pkg["name"]),
                     aliases=vuln.get("aliases", []),
                     references=[
-                        ref.get("url", "")
-                        for ref in vuln.get("references", [])
-                        if ref.get("url")
+                        ref.get("url", "") for ref in vuln.get("references", []) if ref.get("url")
                     ][:5],
                 )
                 vulnerabilities.append(v)

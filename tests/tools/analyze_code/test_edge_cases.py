@@ -474,9 +474,7 @@ public class Outer {
 
         result = _analyze_code_sync(code=code, language="java")
 
-        assert (
-            "Outer" in result.classes
-        )  # Java inner class extraction depends on parser
+        assert "Outer" in result.classes  # Java inner class extraction depends on parser
 
     def test_java_generics(self):
         """Java generics should not break extraction."""

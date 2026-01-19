@@ -25,7 +25,7 @@ async def test_mcp_rename_symbol_envelope_and_success(tmp_path: Path):
     # [20260118_FIX] Project root setup: Create project subdirectory for security checks.
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     file_path = project_root / "app.py"
     file_path.write_text("def old():\n    return 1\n", encoding="utf-8")
 

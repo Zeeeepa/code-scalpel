@@ -77,9 +77,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
         risk_assessment = self._assess_overall_risk(categorized_vulns, attack_vectors)
 
         # Generate remediation strategies
-        remediation_plan = self._generate_remediation_plan(
-            categorized_vulns, attack_vectors
-        )
+        remediation_plan = self._generate_remediation_plan(categorized_vulns, attack_vectors)
 
         return {
             "success": True,
@@ -213,9 +211,7 @@ class SecurityAgent(BaseCodeAnalysisAgent):
                     "function": function_name,
                     "usage_count": usage_count,
                     "exposure_level": (
-                        "high"
-                        if usage_count > 10
-                        else "medium" if usage_count > 3 else "low"
+                        "high" if usage_count > 10 else "medium" if usage_count > 3 else "low"
                     ),
                     "attack_surface": self._calculate_attack_surface(vuln, usage_count),
                 }

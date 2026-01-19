@@ -29,9 +29,7 @@ def community_server():
         async def get_project_map(self, **kwargs):
             """Community tier: max_files=100, max_modules=50."""
             # Mock tier detection to return 'community'
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="community"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
                 return await get_project_map(**kwargs)
 
     return MockCommunityServer()
@@ -65,9 +63,7 @@ def enterprise_server():
 
         async def get_project_map(self, **kwargs):
             """Enterprise tier: Unlimited files, max_modules=1000."""
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
                 return await get_project_map(**kwargs)
 
     return MockEnterpriseServer()
@@ -296,9 +292,7 @@ def server_expired_license():
 
         async def get_project_map(self, **kwargs):
             # Mock expired license scenario
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="community"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
                 result = await get_project_map(**kwargs)
                 # Add warning about expired license
                 if not hasattr(result, "warnings"):
@@ -319,9 +313,7 @@ def server_invalid_license():
             self._tier = "community"
 
         async def get_project_map(self, **kwargs):
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="community"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
                 result = await get_project_map(**kwargs)
                 if not hasattr(result, "warnings"):
                     result.warnings = []
@@ -341,9 +333,7 @@ def server_no_license():
             self._tier = "community"
 
         async def get_project_map(self, **kwargs):
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="community"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
                 return await get_project_map(**kwargs)
 
     return MockNoLicenseServer()

@@ -521,9 +521,7 @@ class SurgicalPatcher:
 
         if target_type == "function":
             if not isinstance(body[0], (ast.FunctionDef, ast.AsyncFunctionDef)):
-                raise ValueError(
-                    "Replacement for function must be a function definition"
-                )
+                raise ValueError("Replacement for function must be a function definition")
         elif target_type == "class":
             if not isinstance(body[0], ast.ClassDef):
                 raise ValueError("Replacement for class must be a class definition")
@@ -531,9 +529,7 @@ class SurgicalPatcher:
             if not isinstance(body[0], (ast.FunctionDef, ast.AsyncFunctionDef)):
                 raise ValueError("Replacement for method must be a function definition")
 
-    def _apply_patch(
-        self, symbol: _SymbolLocation, new_code: str
-    ) -> tuple[str, int, int]:
+    def _apply_patch(self, symbol: _SymbolLocation, new_code: str) -> tuple[str, int, int]:
         """
         Apply a patch to the current code.
 
@@ -551,9 +547,7 @@ class SurgicalPatcher:
         original_indent = ""
         if start_line <= len(lines):
             original_line = lines[start_line - 1]
-            original_indent = original_line[
-                : len(original_line) - len(original_line.lstrip())
-            ]
+            original_indent = original_line[: len(original_line) - len(original_line.lstrip())]
 
         # Prepare replacement lines with proper indentation
         new_lines = new_code.splitlines(keepends=True)
@@ -563,9 +557,7 @@ class SurgicalPatcher:
         # Apply indentation to replacement (detect its base indent and adjust)
         if new_lines:
             # Find the base indentation of the new code
-            first_non_empty = next(
-                (line for line in new_lines if line.strip()), new_lines[0]
-            )
+            first_non_empty = next((line for line in new_lines if line.strip()), new_lines[0])
             new_base_indent = first_non_empty[
                 : len(first_non_empty) - len(first_non_empty.lstrip())
             ]
@@ -835,9 +827,7 @@ class SurgicalPatcher:
             lines_after=len(new_code.splitlines()),
         )
 
-    def update_method(
-        self, class_name: str, method_name: str, new_code: str
-    ) -> PatchResult:
+    def update_method(self, class_name: str, method_name: str, new_code: str) -> PatchResult:
         """
         Replace a method within a class.
 
@@ -976,21 +966,15 @@ class SurgicalPatcher:
         for sym in self._symbols.values():
             if sym.parent_class == class_name:
                 method_line = lines[sym.line_start - 1]
-                method_indent = method_line[
-                    : len(method_line) - len(method_line.lstrip())
-                ]
+                method_indent = method_line[: len(method_line) - len(method_line.lstrip())]
                 break
 
         # Prepare new code
         new_lines = new_code.splitlines(keepends=True)
         indented_lines = []
 
-        first_non_empty = next(
-            (line for line in new_lines if line.strip()), new_lines[0]
-        )
-        base_indent = first_non_empty[
-            : len(first_non_empty) - len(first_non_empty.lstrip())
-        ]
+        first_non_empty = next((line for line in new_lines if line.strip()), new_lines[0])
+        base_indent = first_non_empty[: len(first_non_empty) - len(first_non_empty.lstrip())]
 
         for line in new_lines:
             if line.strip():
@@ -1020,9 +1004,7 @@ class SurgicalPatcher:
             lines_after=len(indented_lines),
         )
 
-    def rename_symbol(
-        self, target_type: str, target_name: str, new_name: str
-    ) -> PatchResult:
+    def rename_symbol(self, target_type: str, target_name: str, new_name: str) -> PatchResult:
         """
         Rename a symbol (function, class, or method) in the file.
 
@@ -1179,9 +1161,7 @@ class SurgicalPatcher:
 
         # Atomic write: write to temp file, then rename
         dir_path = os.path.dirname(self.file_path)
-        with tempfile.NamedTemporaryFile(
-            mode="w", dir=dir_path, delete=False, suffix=".tmp"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", dir=dir_path, delete=False, suffix=".tmp") as f:
             f.write(self.current_code)
             temp_path = f.name
 
@@ -1586,9 +1566,7 @@ class JavaScriptParser:
             symbols.append(class_symbol)
 
             # Find methods within this class
-            symbols.extend(
-                self._find_methods_in_class(class_name, line_start, line_end)
-            )
+            symbols.extend(self._find_methods_in_class(class_name, line_start, line_end))
 
         return symbols
 
@@ -1883,9 +1861,7 @@ class JavaParser:
             symbols.append(class_symbol)
 
             # Find methods within this class
-            symbols.extend(
-                self._find_methods_in_class(class_name, line_start, line_end)
-            )
+            symbols.extend(self._find_methods_in_class(class_name, line_start, line_end))
 
         return symbols
 
@@ -2051,11 +2027,7 @@ class JavaParser:
             prev_line = self.lines[line_idx - 1].strip()
             if prev_line.startswith("@"):
                 line_idx -= 1
-            elif (
-                prev_line == ""
-                or prev_line.startswith("//")
-                or prev_line.startswith("/*")
-            ):
+            elif prev_line == "" or prev_line.startswith("//") or prev_line.startswith("/*"):
                 line_idx -= 1
             else:
                 break
@@ -2116,9 +2088,7 @@ class PolyglotPatcher:
         ".java": PatchLanguage.JAVA,
     }
 
-    def __init__(
-        self, code: str, language: PatchLanguage, file_path: Optional[str] = None
-    ):
+    def __init__(self, code: str, language: PatchLanguage, file_path: Optional[str] = None):
         """
         Initialize the polyglot patcher.
 
@@ -2204,9 +2174,7 @@ class PolyglotPatcher:
         self._ensure_parsed()
         return self._symbols.get(name)
 
-    def _apply_patch(
-        self, symbol: PolyglotSymbolLocation, new_code: str
-    ) -> tuple[str, int, int]:
+    def _apply_patch(self, symbol: PolyglotSymbolLocation, new_code: str) -> tuple[str, int, int]:
         """Apply a patch replacing a symbol."""
         lines = self.current_code.splitlines(keepends=True)
 
@@ -2217,9 +2185,7 @@ class PolyglotPatcher:
         original_indent = ""
         if start_line <= len(lines):
             original_line = lines[start_line - 1]
-            original_indent = original_line[
-                : len(original_line) - len(original_line.lstrip())
-            ]
+            original_indent = original_line[: len(original_line) - len(original_line.lstrip())]
 
         # Prepare replacement
         new_lines = new_code.splitlines(keepends=True)
@@ -2228,9 +2194,7 @@ class PolyglotPatcher:
 
         # Adjust indentation
         if new_lines:
-            first_non_empty = next(
-                (line for line in new_lines if line.strip()), new_lines[0]
-            )
+            first_non_empty = next((line for line in new_lines if line.strip()), new_lines[0])
             new_base_indent = first_non_empty[
                 : len(first_non_empty) - len(first_non_empty.lstrip())
             ]
@@ -2346,9 +2310,7 @@ class PolyglotPatcher:
             lines_after=lines_added,
         )
 
-    def update_method(
-        self, class_name: str, method_name: str, new_code: str
-    ) -> PatchResult:
+    def update_method(self, class_name: str, method_name: str, new_code: str) -> PatchResult:
         """
         Replace a method within a class.
 
@@ -2439,9 +2401,7 @@ class PolyglotPatcher:
             self._backup_path = backup_path
 
         dir_path = os.path.dirname(self.file_path)
-        with tempfile.NamedTemporaryFile(
-            mode="w", dir=dir_path, delete=False, suffix=".tmp"
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", dir=dir_path, delete=False, suffix=".tmp") as f:
             f.write(self.current_code)
             temp_path = f.name
 
@@ -2451,9 +2411,7 @@ class PolyglotPatcher:
 
         return backup_path
 
-    def rename_symbol(
-        self, target_type: str, target_name: str, new_name: str
-    ) -> PatchResult:
+    def rename_symbol(self, target_type: str, target_name: str, new_name: str) -> PatchResult:
         """
         Rename a symbol (function, class, or method) in JS/TS/Java file.
 
@@ -2644,14 +2602,10 @@ class PolyglotPatcher:
         if target_type == "function":
             # Match function calls and references: oldName( or oldName, or oldName; etc.
             # But NOT .oldName (that would be a method/property)
-            pattern = re.compile(
-                rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}\s]|$)"
-            )
+            pattern = re.compile(rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}\s]|$)")
         elif target_type == "class":
             # Match class references: new ClassName, : ClassName, extends ClassName, etc.
-            pattern = re.compile(
-                rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}<:\s]|$)"
-            )
+            pattern = re.compile(rf"(?<![.\w]){re.escape(old_name)}(?=\s*[\(,;\)\]\}}<:\s]|$)")
         elif target_type == "method":
             # Match method calls via this. or object.
             pattern = re.compile(rf"(?<=\.){re.escape(old_name)}(?=\s*[\(])")
@@ -2766,9 +2720,7 @@ class UnifiedPatcher:
         """Replace a class definition."""
         return self._patcher.update_class(name, new_code)
 
-    def update_method(
-        self, class_name: str, method_name: str, new_code: str
-    ) -> PatchResult:
+    def update_method(self, class_name: str, method_name: str, new_code: str) -> PatchResult:
         """Replace a method within a class."""
         return self._patcher.update_method(class_name, method_name, new_code)
 
@@ -2790,9 +2742,7 @@ class UnifiedPatcher:
         """Write modified code back to file."""
         return self._patcher.save(backup=backup)
 
-    def rename_symbol(
-        self, target_type: str, target_name: str, new_name: str
-    ) -> PatchResult:
+    def rename_symbol(self, target_type: str, target_name: str, new_name: str) -> PatchResult:
         """[20260103_BUGFIX] Forward rename operations to the concrete patcher."""
         file_path = str(getattr(self._patcher, "file_path", ""))
         language = getattr(self._patcher, "language", None)

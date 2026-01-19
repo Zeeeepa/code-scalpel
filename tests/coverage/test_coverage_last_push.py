@@ -58,7 +58,9 @@ class TestMoreBranches1:
         """Cover for-else handling."""
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        code = "\nfor i in range(5):\n    if i == 10:\n        break\nelse:\n    print('no break')\n"
+        code = (
+            "\nfor i in range(5):\n    if i == 10:\n        break\nelse:\n    print('no break')\n"
+        )
         builder = PDGBuilder()
         pdg, cfg = builder.build(code)
         assert pdg is not None

@@ -95,6 +95,9 @@ from code_scalpel.mcp.models.core import ClassInfo as CoreClassInfo
 
 # [20260116_FEATURE] License-gated tier system restored from archive
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
+from code_scalpel.licensing.tier_detector import (
+    get_current_tier as get_current_tier_from_license,
+)
 
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
@@ -387,7 +390,6 @@ def _maybe_auto_init_config_dir(
         "target": selected_target,
         "message": result.get("message"),
     }
-
 
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
@@ -5523,8 +5525,8 @@ def run_server(
     # remain authoritative and paid tiers fail closed without a valid license.
     # CLI/env can request a tier, but it will be clamped by the license.
     validator = JWTLicenseValidator()
-    requested_tier = (
-        tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
+    requested_tier = tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get(
+        "SCALPEL_TIER"
     )
     effective_tier, startup_warning = compute_effective_tier_for_startup(
         requested_tier=requested_tier,

@@ -86,14 +86,10 @@ class CoverityParser:
     def analyze_security_risks(self, defects: List[CoverityDefect]) -> Dict[str, Any]:
         raise NotImplementedError("Phase 2: Security analysis")
 
-    def map_to_cwe(
-        self, defects: List[CoverityDefect]
-    ) -> Dict[str, List[CoverityDefect]]:
+    def map_to_cwe(self, defects: List[CoverityDefect]) -> Dict[str, List[CoverityDefect]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def generate_report(
-        self, defects: List[CoverityDefect], format: str = "json"
-    ) -> str:
+    def generate_report(self, defects: List[CoverityDefect], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def track_defect_trends(self, historical_data: List[Dict]) -> Dict[str, Any]:

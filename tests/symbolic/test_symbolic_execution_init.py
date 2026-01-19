@@ -7,9 +7,7 @@ import importlib
 
 def test_symbolic_execution_init_exports_and_warns(recwarn):
     """Test symbolic_execution_tools module exports correctly."""
-    module = importlib.reload(
-        importlib.import_module("code_scalpel.symbolic_execution_tools")
-    )
+    module = importlib.reload(importlib.import_module("code_scalpel.symbolic_execution_tools"))
 
     assert "SymbolicAnalyzer" in module.__all__
     assert module.CrossFileTaintTracker is None or module.CrossFileTaintTracker

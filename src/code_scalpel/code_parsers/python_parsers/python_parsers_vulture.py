@@ -355,6 +355,4 @@ class VultureParser:
             Filtered VultureReport
 
         """
-        raise NotImplementedError(
-            "VultureParser.filter_by_confidence() not yet implemented"
-        )
+        raise NotImplementedError("VultureParser.filter_by_confidence() not yet implemented")

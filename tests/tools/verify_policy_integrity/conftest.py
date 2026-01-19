@@ -66,9 +66,7 @@ def create_manifest() -> Callable[[Path, str, list[str]], Path]:
 
         # Sign with HMAC-SHA256
         message = json.dumps(manifest_data, sort_keys=True, separators=(",", ":"))
-        signature = hmac.new(
-            secret.encode(), message.encode(), hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
 
         manifest_data["signature"] = signature
 

@@ -109,9 +109,7 @@ class RoutePatternMatcher:
     - Dynamic routes: "/api/" + version + "/users" (confidence 0.5)
     """
 
-    def match_routes(
-        self, client_route: str, endpoint_route: str
-    ) -> tuple[bool, float, str]:
+    def match_routes(self, client_route: str, endpoint_route: str) -> tuple[bool, float, str]:
         """
         Match client route against endpoint route.
 
@@ -152,9 +150,7 @@ class RoutePatternMatcher:
 
         return False, 0.0, "none"
 
-    def _has_structural_similarity(
-        self, client_route: str, endpoint_route: str
-    ) -> bool:
+    def _has_structural_similarity(self, client_route: str, endpoint_route: str) -> bool:
         """Check if routes have structural similarity (common path segments)."""
 
         # Extract clean path segments from dynamic route
@@ -308,9 +304,7 @@ class HTTPLinkDetector:
                 )
 
                 if matches:
-                    evidence = self._build_evidence(
-                        client, endpoint, match_type, confidence
-                    )
+                    evidence = self._build_evidence(client, endpoint, match_type, confidence)
 
                     link = HTTPLink(
                         client_id=client["node_id"],
@@ -351,9 +345,7 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_clients.add(client["node_id"])
                     break
@@ -369,9 +361,7 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_endpoints.add(endpoint["node_id"])
                     break

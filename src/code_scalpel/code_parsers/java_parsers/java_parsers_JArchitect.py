@@ -160,9 +160,7 @@ class JArchitectParser:
         """
         return [m for m in report.metrics if m.status == "VIOLATION"]
 
-    def get_cyclic_dependencies(
-        self, report: JArchitectReport
-    ) -> list[DependencyIssue]:
+    def get_cyclic_dependencies(self, report: JArchitectReport) -> list[DependencyIssue]:
         """
         Get cyclic dependency issues.
 
@@ -172,6 +170,4 @@ class JArchitectParser:
         Returns:
             List of cyclic dependency issues
         """
-        return [
-            d for d in report.dependency_issues if d.issue_type == "CYCLIC_DEPENDENCY"
-        ]
+        return [d for d in report.dependency_issues if d.issue_type == "CYCLIC_DEPENDENCY"]

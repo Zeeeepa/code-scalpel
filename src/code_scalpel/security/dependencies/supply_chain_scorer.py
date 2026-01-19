@@ -114,9 +114,7 @@ class SupplyChainRiskScorer:
 
         # Calculate metrics
         avg_score = (
-            sum(s.overall_score for s in risk_scores) / len(risk_scores)
-            if risk_scores
-            else 0.0
+            sum(s.overall_score for s in risk_scores) / len(risk_scores) if risk_scores else 0.0
         )
 
         # Estimate transitive dependencies (simplified)
@@ -189,9 +187,7 @@ class SupplyChainRiskScorer:
         )
 
         # Generate recommendation
-        recommendation = self._generate_package_recommendation(
-            name, risk_level, risk_factors
-        )
+        recommendation = self._generate_package_recommendation(name, risk_level, risk_factors)
 
         return RiskScore(
             package_name=name,
@@ -404,9 +400,7 @@ class SupplyChainRiskScorer:
             recommendations.append(
                 f"⚠️ {len(high_risk)} high-risk dependencies found - review supply chain"
             )
-            recommendations.append(
-                "Consider dependency pruning to reduce attack surface"
-            )
+            recommendations.append("Consider dependency pruning to reduce attack surface")
 
         if avg_score > 50:
             recommendations.append(
@@ -419,9 +413,7 @@ class SupplyChainRiskScorer:
             )
 
         if not high_risk and avg_score < 30:
-            recommendations.append(
-                "✅ Supply chain appears healthy - continue monitoring"
-            )
+            recommendations.append("✅ Supply chain appears healthy - continue monitoring")
 
         recommendations.append("Regularly audit dependencies with `scan_dependencies`")
 

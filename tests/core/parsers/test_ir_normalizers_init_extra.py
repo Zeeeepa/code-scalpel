@@ -11,9 +11,7 @@ import code_scalpel.ir.normalizers as normalizers
 def test_normalizers_without_javascript(monkeypatch):
     original_import = builtins.__import__
 
-    def fail_js_import(
-        name, *args, **kwargs
-    ):  # pragma: no cover - explicit patch behavior
+    def fail_js_import(name, *args, **kwargs):  # pragma: no cover - explicit patch behavior
         if name.endswith("javascript_normalizer"):
             raise ImportError("js missing")
         return original_import(name, *args, **kwargs)

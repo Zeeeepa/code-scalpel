@@ -15,8 +15,7 @@ try:
     from autogen import AssistantAgent, UserProxyAgent
 except ImportError as e:
     raise ImportError(
-        "AutoGen is required for this integration. "
-        "Install it with: pip install pyautogen"
+        "AutoGen is required for this integration. " "Install it with: pip install pyautogen"
     ) from e
 
 

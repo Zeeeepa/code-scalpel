@@ -412,24 +412,18 @@ class TestSchemaDriftDetection:
         drift = compare_graphql_schemas(OLD_SCHEMA, NEW_SCHEMA_BREAKING)
 
         field_removed = [
-            c
-            for c in drift.breaking_changes
-            if c.change_type == GraphQLChangeType.FIELD_REMOVED
+            c for c in drift.breaking_changes if c.change_type == GraphQLChangeType.FIELD_REMOVED
         ]
         assert len(field_removed) > 0
         # name was removed from User, searchUsers was removed from Query
-        assert any(
-            "name" in c.message or "searchUsers" in c.message for c in field_removed
-        )
+        assert any("name" in c.message or "searchUsers" in c.message for c in field_removed)
 
     def test_detect_type_changed(self):
         """Test detection of field type change (BREAKING/DANGEROUS)."""
         drift = compare_graphql_schemas(OLD_SCHEMA, NEW_SCHEMA_BREAKING)
 
         type_changed = [
-            c
-            for c in drift.changes
-            if c.change_type == GraphQLChangeType.FIELD_TYPE_CHANGED
+            c for c in drift.changes if c.change_type == GraphQLChangeType.FIELD_TYPE_CHANGED
         ]
         assert len(type_changed) > 0
         # status changed from UserStatus! to String!
@@ -487,9 +481,7 @@ class TestSchemaDriftDetection:
         drift = compare_graphql_schemas(OLD_SCHEMA, NEW_SCHEMA_NON_BREAKING)
 
         field_added = [
-            c
-            for c in drift.info_changes
-            if c.change_type == GraphQLChangeType.FIELD_ADDED
+            c for c in drift.info_changes if c.change_type == GraphQLChangeType.FIELD_ADDED
         ]
         assert len(field_added) > 0
         # avatar was added to User
@@ -500,9 +492,7 @@ class TestSchemaDriftDetection:
         drift = compare_graphql_schemas(OLD_SCHEMA, NEW_SCHEMA_NON_BREAKING)
 
         enum_added = [
-            c
-            for c in drift.info_changes
-            if c.change_type == GraphQLChangeType.ENUM_VALUE_ADDED
+            c for c in drift.info_changes if c.change_type == GraphQLChangeType.ENUM_VALUE_ADDED
         ]
         assert len(enum_added) > 0
         # VERIFIED was added to UserStatus
@@ -513,9 +503,7 @@ class TestSchemaDriftDetection:
         drift = compare_graphql_schemas(OLD_SCHEMA, NEW_SCHEMA_NON_BREAKING)
 
         type_added = [
-            c
-            for c in drift.info_changes
-            if c.change_type == GraphQLChangeType.TYPE_ADDED
+            c for c in drift.info_changes if c.change_type == GraphQLChangeType.TYPE_ADDED
         ]
         assert len(type_added) > 0
         # Comment type was added

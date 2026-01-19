@@ -313,9 +313,7 @@ class ProtobufParser:
     )
     ENUM_VALUE_PATTERN = re.compile(r"(\w+)\s*=\s*(-?\d+)\s*;")
     SERVICE_PATTERN = re.compile(r"service\s+(\w+)\s*\{")
-    RPC_PATTERN = re.compile(
-        r"rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)"
-    )
+    RPC_PATTERN = re.compile(r"rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)")
 
     def parse(self, proto_content: str) -> ProtobufSchema:
         """
@@ -604,9 +602,7 @@ class SchemaDriftDetector:
             old_msg = old_schema.messages[name]
             new_msg = new_schema.messages[name]
             self._compare_protobuf_fields(old_msg, new_msg, name, result)
-            self._compare_protobuf_enums(
-                old_msg.nested_enums, new_msg.nested_enums, name, result
-            )
+            self._compare_protobuf_enums(old_msg.nested_enums, new_msg.nested_enums, name, result)
 
     def _compare_protobuf_fields(
         self,
@@ -975,9 +971,7 @@ class SchemaDriftDetector:
             is_required = prop in new_required
             severity = ChangeSeverity.BREAKING if is_required else ChangeSeverity.INFO
             change_type = (
-                ChangeType.REQUIRED_FIELD_ADDED
-                if is_required
-                else ChangeType.OPTIONAL_FIELD_ADDED
+                ChangeType.REQUIRED_FIELD_ADDED if is_required else ChangeType.OPTIONAL_FIELD_ADDED
             )
 
             result.changes.append(

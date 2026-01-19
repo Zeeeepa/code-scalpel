@@ -94,9 +94,7 @@ class ErrorToDiffEngine:
             ErrorType.LINT_WARNING: LintFixGenerator(),
         }
 
-    def analyze_error(
-        self, error_output: str, language: str, source_code: str
-    ) -> ErrorAnalysis:
+    def analyze_error(self, error_output: str, language: str, source_code: str) -> ErrorAnalysis:
         """
         Parse error output and generate fix suggestions.
 
@@ -136,9 +134,7 @@ class ErrorToDiffEngine:
                 requires_human_review=True,
             )
 
-        fixes = generator.generate_fixes(
-            parsed=parsed, source_code=source_code, language=language
-        )
+        fixes = generator.generate_fixes(parsed=parsed, source_code=source_code, language=language)
 
         # Validate fixes produce valid AST (for Python only)
         validated_fixes = []
@@ -385,9 +381,7 @@ class SyntaxFixGenerator:
         },
     }
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate syntax fix suggestions."""
         fixes = []
 
@@ -409,9 +403,7 @@ class SyntaxFixGenerator:
 
         return fixes
 
-    def _fix_add_colon(
-        self, source: str, line: int, col: Optional[int]
-    ) -> Optional[str]:
+    def _fix_add_colon(self, source: str, line: int, col: Optional[int]) -> Optional[str]:
         """Add missing colon after function/class definition."""
         lines = source.split("\n")
         if line < 1 or line > len(lines):
@@ -427,9 +419,7 @@ class SyntaxFixGenerator:
 
         return None
 
-    def _fix_indentation(
-        self, source: str, line: int, col: Optional[int]
-    ) -> Optional[str]:
+    def _fix_indentation(self, source: str, line: int, col: Optional[int]) -> Optional[str]:
         """Fix indentation issues."""
         lines = source.split("\n")
         if line < 1 or line > len(lines):
@@ -454,9 +444,7 @@ class SyntaxFixGenerator:
 
         return None
 
-    def _fix_balance_parentheses(
-        self, source: str, line: int, col: Optional[int]
-    ) -> Optional[str]:
+    def _fix_balance_parentheses(self, source: str, line: int, col: Optional[int]) -> Optional[str]:
         """Balance unmatched parentheses."""
         lines = source.split("\n")
         if line < 1 or line > len(lines):
@@ -489,9 +477,7 @@ class SyntaxFixGenerator:
 
         return None
 
-    def _fix_general_syntax(
-        self, source: str, line: int, col: Optional[int]
-    ) -> Optional[str]:
+    def _fix_general_syntax(self, source: str, line: int, col: Optional[int]) -> Optional[str]:
         """Attempt general syntax fix (low confidence)."""
         # This is a placeholder for more complex fixes
         return None
@@ -500,9 +486,7 @@ class SyntaxFixGenerator:
 class TypeFixGenerator:
     """Generate fixes for type errors."""
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate type fix suggestions."""
         fixes = []
 
@@ -527,17 +511,13 @@ class TypeFixGenerator:
 class NameFixGenerator:
     """Generate fixes for NameError (undefined names)."""
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate name fix suggestions (typo corrections, imports)."""
         fixes = []
 
         # Extract undefined name
         # [20251217_FEATURE] Enhanced regex to capture complex identifiers
-        name_match = re.search(
-            r"name '([a-zA-Z_][\w.]*)' is not defined", parsed.message
-        )
+        name_match = re.search(r"name '([a-zA-Z_][\w.]*)' is not defined", parsed.message)
         if name_match:
             undefined_name = name_match.group(1)
 
@@ -607,9 +587,7 @@ class NameFixGenerator:
 class ImportFixGenerator:
     """Generate fixes for import errors."""
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate import fix suggestions."""
         fixes = []
 
@@ -633,9 +611,7 @@ class ImportFixGenerator:
 class TestFixGenerator:
     """Generate fixes for test failures."""
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate test fix suggestions."""
         fixes = []
 
@@ -727,9 +703,7 @@ class TestFixGenerator:
 class LintFixGenerator:
     """Generate fixes for linter warnings."""
 
-    def generate_fixes(
-        self, parsed: ParsedError, source_code: str, language: str
-    ) -> list[FixHint]:
+    def generate_fixes(self, parsed: ParsedError, source_code: str, language: str) -> list[FixHint]:
         """Generate linter fix suggestions."""
         fixes = []
 

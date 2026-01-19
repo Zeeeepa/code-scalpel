@@ -72,12 +72,8 @@ class CppLintParser:
     ) -> Dict[StyleViolationType, List[CppLintViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def calculate_style_score(
-        self, violations: List[CppLintViolation], total_lines: int
-    ) -> float:
+    def calculate_style_score(self, violations: List[CppLintViolation], total_lines: int) -> float:
         raise NotImplementedError("Phase 2: Style score calculation")
 
-    def generate_report(
-        self, violations: List[CppLintViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: List[CppLintViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

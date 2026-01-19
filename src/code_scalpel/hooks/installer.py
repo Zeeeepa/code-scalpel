@@ -223,12 +223,8 @@ def install_claude_hooks(
         pre_hooks = existing_hooks.get("PreToolUse", [])
         post_hooks = existing_hooks.get("PostToolUse", [])
 
-        our_pre_hooks = [
-            h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
-        our_post_hooks = [
-            h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
+        our_pre_hooks = [h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()]
+        our_post_hooks = [h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()]
 
         if our_pre_hooks or our_post_hooks:
             return True, f"Code Scalpel hooks already installed in {settings_path}"

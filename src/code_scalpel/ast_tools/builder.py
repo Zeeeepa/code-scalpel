@@ -19,7 +19,7 @@ class ASTBuilder:
         self.preprocessing_hooks: list[Callable[[str], str]] = []
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
-       
+
     def build_ast(
         self, code: str, preprocess: bool = True, validate: bool = True
     ) -> Optional[ast.AST]:

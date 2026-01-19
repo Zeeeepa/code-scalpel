@@ -46,8 +46,7 @@ def process(data):
         assert result.is_safe is False
         assert result.status.value == "unsafe"
         assert any(
-            "eval" in issue.description.lower()
-            or "code injection" in issue.type.lower()
+            "eval" in issue.description.lower() or "code injection" in issue.type.lower()
             for issue in result.security_issues
         )
 
@@ -400,9 +399,7 @@ def load_config(data):
         result = simulator.simulate(original, new_code=new_code)
 
         # Should not flag yaml.safe_load
-        yaml_issues = [
-            i for i in result.security_issues if "yaml" in i.description.lower()
-        ]
+        yaml_issues = [i for i in result.security_issues if "yaml" in i.description.lower()]
         assert len(yaml_issues) == 0
 
 
@@ -774,9 +771,7 @@ def calculate_tax(amount, rate=0.1):
     return amount * rate
 """
         simulator = RefactorSimulator()
-        result = simulator.simulate(
-            original, new_code=new_code, enable_test_impact=True
-        )
+        result = simulator.simulate(original, new_code=new_code, enable_test_impact=True)
 
         assert hasattr(result, "test_impact")
         assert isinstance(result.test_impact, dict)
@@ -1202,9 +1197,7 @@ def foo(:
         assert result.is_safe is True
         # Soft threshold - log but don't fail if exceeded
         if duration >= 0.1:
-            print(
-                f"Performance notice: small input took {duration:.3f}s (target <100ms)"
-            )
+            print(f"Performance notice: small input took {duration:.3f}s (target <100ms)")
 
     def test_performance_medium_input_under_1s_pro(self):
         """Test medium input (~1000 LOC) completes within ~1s (Pro tier soft threshold)."""

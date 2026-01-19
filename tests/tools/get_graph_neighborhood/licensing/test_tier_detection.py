@@ -76,12 +76,8 @@ class TestTierDetectionFromLicense:
 
     def test_enterprise_tier_detected_from_license(self, monkeypatch):
         """Enterprise license should be detected from JWT 'tier' claim."""
-        enterprise_licenses = list(
-            LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt")
-        )
-        enterprise_licenses = [
-            lic for lic in enterprise_licenses if "broken" not in lic.name
-        ]
+        enterprise_licenses = list(LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt"))
+        enterprise_licenses = [lic for lic in enterprise_licenses if "broken" not in lic.name]
 
         if not enterprise_licenses:
             pytest.skip("No valid Enterprise license found")
@@ -90,21 +86,15 @@ class TestTierDetectionFromLicense:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         tier = _get_current_tier()
-        assert (
-            tier == "enterprise"
-        ), f"Expected enterprise tier from license, got {tier}"
+        assert tier == "enterprise", f"Expected enterprise tier from license, got {tier}"
 
     def test_community_tier_when_no_license(self, monkeypatch, tmp_path):
         """No license should default to Community tier."""
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-        monkeypatch.setenv(
-            "CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt")
-        )
+        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt"))
 
         tier = _get_current_tier()
-        assert (
-            tier == "community"
-        ), f"Expected community tier without license, got {tier}"
+        assert tier == "community", f"Expected community tier without license, got {tier}"
 
 
 class TestTierNormalization:

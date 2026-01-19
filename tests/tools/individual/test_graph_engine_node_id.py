@@ -134,9 +134,7 @@ class TestParseNodeID:
 
     def test_parse_java_method(self):
         """Test parsing a Java method ID."""
-        node_id = parse_node_id(
-            "java::com.example.api::controller::UserController:getUser"
-        )
+        node_id = parse_node_id("java::com.example.api::controller::UserController:getUser")
 
         assert node_id.language == "java"
         assert node_id.module == "com.example.api"

@@ -291,8 +291,7 @@ class ParallelCrawler:
         if analyzer:
             with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
                 future_to_file = {
-                    executor.submit(self._safe_analyze, Path(f.path), analyzer): f
-                    for f in files
+                    executor.submit(self._safe_analyze, Path(f.path), analyzer): f for f in files
                 }
 
                 for future in as_completed(future_to_file):

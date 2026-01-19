@@ -80,9 +80,7 @@ class TestPDGTransformer:
     def test_transform_dispatch(self, simple_pdg):
         transformer = PDGTransformer(simple_pdg)
 
-        result = transformer.transform(
-            TransformationType.OPTIMIZE, optimize_dead_code=True
-        )
+        result = transformer.transform(TransformationType.OPTIMIZE, optimize_dead_code=True)
         assert result.success
         assert len(transformer.history) == 1
         assert transformer.history[0][0] == TransformationType.OPTIMIZE
@@ -153,9 +151,7 @@ class TestPDGTransformer:
 
     def test_replace_node(self, simple_pdg):
         transformer = PDGTransformer(simple_pdg)
-        result = transformer.replace_node(
-            "1", "1_new", {"type": "assign", "value": "6"}
-        )
+        result = transformer.replace_node("1", "1_new", {"type": "assign", "value": "6"})
         assert result.success
         assert "1" not in transformer.pdg.nodes
         assert "1_new" in transformer.pdg.nodes
@@ -180,9 +176,7 @@ class TestPDGTransformer:
         transformer = PDGTransformer(simple_pdg)
 
         # Create a function node and a call node
-        transformer.pdg.add_node(
-            "func_node", type="function", body_nodes=["body1", "body2"]
-        )
+        transformer.pdg.add_node("func_node", type="function", body_nodes=["body1", "body2"])
         transformer.pdg.add_node("body1", type="stmt")
         transformer.pdg.add_node("body2", type="stmt")
         transformer.pdg.add_node("call_node", type="call", function="func_node")
@@ -212,9 +206,7 @@ class TestPDGTransformer:
         transformer.pdg.add_node(
             "loop_head", type="while", body_nodes=["invariant_node", "variant_node"]
         )
-        transformer.pdg.add_node(
-            "invariant_node", type="assign", value="5", has_side_effects=False
-        )
+        transformer.pdg.add_node("invariant_node", type="assign", value="5", has_side_effects=False)
         transformer.pdg.add_node(
             "variant_node", type="assign", value="i + 1", has_side_effects=False
         )

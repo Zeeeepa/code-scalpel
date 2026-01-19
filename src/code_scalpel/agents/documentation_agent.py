@@ -120,9 +120,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
 
         # Filter for critical documentation needs
         critical_docs = [
-            op
-            for op in opportunities
-            if op.get("priority", "low") in ["critical", "high"]
+            op for op in opportunities if op.get("priority", "low") in ["critical", "high"]
         ]
 
         # Create action plan
@@ -171,9 +169,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "results": results,
         }
 
-    def _analyze_docstring_coverage(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_docstring_coverage(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze docstring coverage and identify gaps."""
         gaps = []
         # Implementation placeholder
@@ -188,9 +184,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return gaps
 
-    def _identify_api_docs(
-        self, symbol_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _identify_api_docs(self, symbol_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
         Identify API documentation needs.
         """
@@ -199,9 +193,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return docs
 
-    def _prioritize_documentation(
-        self, docs: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _prioritize_documentation(self, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Prioritize documentation by priority and scope."""
         priority_map = {"critical": 3, "high": 2, "medium": 1, "low": 0}
         return sorted(

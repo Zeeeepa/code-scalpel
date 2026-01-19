@@ -242,25 +242,19 @@ class TestImportErrorBranches:
 
         # If ASTTransformer is None, that branch was executed
         # If it's not None, that means the import succeeded
-        assert ast_tools.ASTTransformer is None or hasattr(
-            ast_tools.ASTTransformer, "__call__"
-        )
+        assert ast_tools.ASTTransformer is None or hasattr(ast_tools.ASTTransformer, "__call__")
 
     def test_import_with_mocked_visualizer_failure(self):
         """Test handling when visualizer import fails (lines 13-14)."""
         from code_scalpel import ast_tools
 
-        assert ast_tools.ASTVisualizer is None or hasattr(
-            ast_tools.ASTVisualizer, "__call__"
-        )
+        assert ast_tools.ASTVisualizer is None or hasattr(ast_tools.ASTVisualizer, "__call__")
 
     def test_import_with_mocked_validator_failure(self):
         """Test handling when validator import fails (lines 18-19)."""
         from code_scalpel import ast_tools
 
-        assert ast_tools.ASTValidator is None or hasattr(
-            ast_tools.ASTValidator, "__call__"
-        )
+        assert ast_tools.ASTValidator is None or hasattr(ast_tools.ASTValidator, "__call__")
 
     def test_utils_import_failure_handling(self):
         """Test handling when utils imports fail."""

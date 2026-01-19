@@ -251,9 +251,7 @@ class JavaScriptParserAdapter(IParser):
         if hasattr(self._parser, "extract_functions"):
             try:
                 funcs = self._parser.extract_functions(ast)
-                self._last_functions = [
-                    f.name for f in funcs if f.name and f.name != "<anonymous>"
-                ]
+                self._last_functions = [f.name for f in funcs if f.name and f.name != "<anonymous>"]
             except Exception:
                 pass
 
@@ -404,14 +402,10 @@ class TypeScriptParserAdapter(JavaScriptParserAdapter):
             code,
             flags=re.MULTILINE,
         )
-        code = re.sub(
-            r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE
-        )
+        code = re.sub(r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE)
 
         # Remove : Type from parameters and return types (very basic)
-        code = re.sub(
-            r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code
-        )
+        code = re.sub(r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code)
 
         # Remove <T> generics (basic)
         code = re.sub(r"<\w+(?:\s*,\s*\w+)*>", "", code)

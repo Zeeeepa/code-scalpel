@@ -138,8 +138,7 @@ class PolicyEngine:
             if isinstance(node, ast.Call):
                 func_name = self._get_function_name(node)
                 if func_name and any(
-                    log_func in func_name.lower()
-                    for log_func in ["log", "print", "logger"]
+                    log_func in func_name.lower() for log_func in ["log", "print", "logger"]
                 ):
                     # Check arguments for sensitive keywords
                     for arg in node.args:

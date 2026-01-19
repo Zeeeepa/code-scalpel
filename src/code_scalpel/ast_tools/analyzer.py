@@ -119,9 +119,7 @@ class ASTAnalyzer:
                 methods.append(item.name)
             elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
                 attributes[item.target.id] = (
-                    astor.to_source(item.annotation).strip()
-                    if item.annotation
-                    else None
+                    astor.to_source(item.annotation).strip() if item.annotation else None
                 )
             elif isinstance(item, ast.Assign):
                 for target in item.targets:
@@ -130,11 +128,7 @@ class ASTAnalyzer:
 
         # Find instance variables in __init__
         init_method = next(
-            (
-                m
-                for m in node.body
-                if isinstance(m, ast.FunctionDef) and m.name == "__init__"
-            ),
+            (m for m in node.body if isinstance(m, ast.FunctionDef) and m.name == "__init__"),
             None,
         )
         if init_method:
@@ -230,9 +224,7 @@ class ASTAnalyzer:
                 if isinstance(child.func, ast.Name):
                     calls.append(child.func.id)
                 elif isinstance(child.func, ast.Attribute):
-                    calls.append(
-                        f"{astor.to_source(child.func.value).strip()}.{child.func.attr}"
-                    )
+                    calls.append(f"{astor.to_source(child.func.value).strip()}.{child.func.attr}")
         return calls
 
     def _extract_variables(self, node: ast.AST) -> set[str]:
@@ -262,9 +254,7 @@ class ASTAnalyzer:
             if isinstance(node, (ast.If, ast.For, ast.While)):
                 current_depth += 1
                 if current_depth > 3:
-                    issues["deep_nesting"].append(
-                        f"Deep nesting detected at line {node.lineno}"
-                    )
+                    issues["deep_nesting"].append(f"Deep nesting detected at line {node.lineno}")
             for child in ast.iter_child_nodes(node):
                 get_nesting_depth(child, current_depth)
 
@@ -288,9 +278,7 @@ class ASTAnalyzer:
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                 if node.func.attr in {"execute", "executemany"}:
                     # Check if string formatting or concatenation is used
-                    if any(
-                        isinstance(arg, (ast.BinOp, ast.JoinedStr)) for arg in node.args
-                    ):
+                    if any(isinstance(arg, (ast.BinOp, ast.JoinedStr)) for arg in node.args):
                         issues.append(
                             {
                                 "type": "sql_injection",

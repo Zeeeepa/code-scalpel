@@ -200,9 +200,7 @@ class TestSandboxAdditionalGaps:
 
         executor = SandboxExecutor(isolation_level="process")
         changes = [
-            FileChange(
-                relative_path="test.py", operation="create", new_content="print('test')"
-            )
+            FileChange(relative_path="test.py", operation="create", new_content="print('test')")
         ]
         with tempfile.TemporaryDirectory() as tmp_dir:
             result = executor.execute_with_changes(

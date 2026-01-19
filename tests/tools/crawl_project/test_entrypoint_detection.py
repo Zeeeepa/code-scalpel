@@ -21,9 +21,7 @@ class TestEntrypointDetection:
         result = crawler.crawl()
 
         # At least main.py should have this pattern
-        main_file = next(
-            (f for f in result.files_analyzed if "main.py" in str(f.path)), None
-        )
+        main_file = next((f for f in result.files_analyzed if "main.py" in str(f.path)), None)
         assert main_file is not None
 
     def test_flask_route_decorators_detected(self, flask_project):

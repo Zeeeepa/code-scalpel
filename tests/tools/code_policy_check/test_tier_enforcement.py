@@ -158,9 +158,7 @@ class TestEnterpriseTierLimits:
         result = await code_policy_check(paths=[str(tmp_path)])
 
         # Verify tier is Enterprise
-        assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
 
         # Should check all files (no limit)
         assert (
@@ -181,9 +179,7 @@ except:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Verify tier is Enterprise
-        assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
 
         # Should apply more than 200 rules (Pro limit) - Enterprise has no limit
         # Note: Current implementation may apply all rules regardless of tier
@@ -230,9 +226,7 @@ def func(x):
         ), "Pro tier should provide best_practices_violations attribute"
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_compliance_reports(
-        self, tmp_path, enterprise_license
-    ):
+    async def test_enterprise_has_compliance_reports(self, tmp_path, enterprise_license):
         """Enterprise tier should include compliance_reports."""
         test_file = tmp_path / "test.py"
         test_file.write_text("""
@@ -249,9 +243,7 @@ def func(x):
         ), "Enterprise tier should provide compliance_reports attribute"
 
     @pytest.mark.asyncio
-    async def test_community_custom_rules_not_exposed(
-        self, tmp_path, community_license
-    ):
+    async def test_community_custom_rules_not_exposed(self, tmp_path, community_license):
         """Community tier should not expose custom rule results."""
         # [20260105_TEST] Strengthen feature gating expectations.
         test_file = tmp_path / "test.py"
@@ -285,14 +277,10 @@ def handler(request):
         assert not getattr(
             result, "compliance_reports", None
         ), "Pro tier should ignore compliance_reports field"
-        assert not getattr(
-            result, "pdf_report", None
-        ), "Pro tier should not generate PDF reports"
+        assert not getattr(result, "pdf_report", None), "Pro tier should not generate PDF reports"
 
     @pytest.mark.asyncio
-    async def test_enterprise_includes_audit_trail_and_score(
-        self, tmp_path, enterprise_license
-    ):
+    async def test_enterprise_includes_audit_trail_and_score(self, tmp_path, enterprise_license):
         """Enterprise tier should populate compliance score and audit trail."""
         test_file = tmp_path / "test.py"
         test_file.write_text("""
@@ -308,9 +296,7 @@ def log_patient(patient_id):
 
         assert result.tier == "enterprise"
         assert getattr(result, "compliance_score", 0) >= 0
-        assert getattr(
-            result, "audit_trail", []
-        ), "Enterprise tier should include audit trail"
+        assert getattr(result, "audit_trail", []), "Enterprise tier should include audit trail"
         assert (
             getattr(result, "pdf_report", None) is not None
         ), "Enterprise tier should generate PDF when requested"

@@ -176,25 +176,19 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return opportunities
 
-    def _detect_pattern_violations(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _detect_pattern_violations(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Detect design pattern violations and anti-patterns."""
         violations = []
         # Implementation placeholder
         return violations
 
-    def _identify_modularization(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _identify_modularization(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Identify opportunities for better modularization."""
         opportunities = []
         # Implementation placeholder
         return opportunities
 
-    def _prioritize_refactorings(
-        self, refactorings: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _prioritize_refactorings(self, refactorings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Prioritize refactorings by safety and impact."""
         return sorted(
             refactorings,

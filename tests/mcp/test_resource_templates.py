@@ -48,9 +48,7 @@ class TestModuleResolution:
                 "export function UserCard() {}"
             )
 
-            result = resolve_module_path(
-                "typescript", "components/UserCard", project_root
-            )
+            result = resolve_module_path("typescript", "components/UserCard", project_root)
             assert result is not None
             assert result.name == "UserCard.tsx"
 
@@ -63,9 +61,7 @@ class TestModuleResolution:
 
             # Create test files
             (project_root / "lib").mkdir()
-            (project_root / "lib" / "helpers.js").write_text(
-                "export const add = () => {}"
-            )
+            (project_root / "lib" / "helpers.js").write_text("export const add = () => {}")
 
             result = resolve_module_path("javascript", "lib/helpers", project_root)
             assert result is not None
@@ -159,9 +155,7 @@ def calculate_tax(amount):
 ''')
 
                 # Test resource access
-                result_json = await get_code_resource(
-                    "python", "utils", "calculate_tax"
-                )
+                result_json = await get_code_resource("python", "utils", "calculate_tax")
                 result = json.loads(result_json)
 
                 assert "error" not in result
@@ -203,9 +197,7 @@ export function Button({ label }: { label: string }) {
 """)
 
                 # Test resource access
-                result_json = await get_code_resource(
-                    "typescript", "components/Button", "Button"
-                )
+                result_json = await get_code_resource("typescript", "components/Button", "Button")
                 result = json.loads(result_json)
 
                 assert "error" not in result

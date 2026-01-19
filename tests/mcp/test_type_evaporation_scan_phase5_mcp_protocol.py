@@ -70,8 +70,7 @@ async def test_mcp_response_tool_id(tmp_path: Path):
     assert isinstance(data, dict)
     # Should have at least vulnerability-related fields
     assert any(
-        key in data
-        for key in ["frontend_vulnerabilities", "backend_vulnerabilities", "success"]
+        key in data for key in ["frontend_vulnerabilities", "backend_vulnerabilities", "success"]
     )
 
 

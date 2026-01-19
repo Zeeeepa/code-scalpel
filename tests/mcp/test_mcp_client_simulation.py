@@ -45,9 +45,7 @@ class TestClass:
     def test_method(self):
         return "hello"
 """
-        result = await session.call_tool(
-            "analyze_code", arguments={"code": code_sample}
-        )
+        result = await session.call_tool("analyze_code", arguments={"code": code_sample})
         # FastMCP returns a list of TextContent or ImageContent
         content = result.content[0].text
         print(f"Analysis Result: {content[:100]}...")
@@ -61,9 +59,7 @@ def get_creds():
     aws_key = "AKIAIOSFODNN7EXAMPLE"
     return aws_key
 """
-        result = await session.call_tool(
-            "security_scan", arguments={"code": secret_code}
-        )
+        result = await session.call_tool("security_scan", arguments={"code": secret_code})
         content = result.content[0].text
         print(f"Security Scan Result: {content[:100]}...")
 

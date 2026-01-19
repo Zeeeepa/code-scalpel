@@ -147,9 +147,7 @@ class PrettierConfig:
     prose_wrap: ProseWrap = ProseWrap.PRESERVE
 
     # HTML
-    html_whitespace_sensitivity: HTMLWhitespaceSensitivity = (
-        HTMLWhitespaceSensitivity.CSS
-    )
+    html_whitespace_sensitivity: HTMLWhitespaceSensitivity = HTMLWhitespaceSensitivity.CSS
 
     # Vue
     vue_indent_script_and_style: bool = False
@@ -279,9 +277,7 @@ class PrettierFormatter:
 
                     config_data = yaml.safe_load(content)
                 except ImportError:
-                    raise ValueError(
-                        "Cannot parse config - install PyYAML for YAML support"
-                    )
+                    raise ValueError("Cannot parse config - install PyYAML for YAML support")
         elif path.suffix == ".js":
             # For JS configs, need to run through Node
             raise NotImplementedError("JS config files require Node.js evaluation")
@@ -324,9 +320,7 @@ class PrettierFormatter:
                     value = EndOfLine(value)
                 elif attr_name == "prose_wrap" and isinstance(value, str):
                     value = ProseWrap(value)
-                elif attr_name == "html_whitespace_sensitivity" and isinstance(
-                    value, str
-                ):
+                elif attr_name == "html_whitespace_sensitivity" and isinstance(value, str):
                     value = HTMLWhitespaceSensitivity(value)
                 setattr(config, attr_name, value)
 
@@ -355,9 +349,7 @@ class PrettierFormatter:
 
         try:
             cmd = (
-                self._prettier_path.split()
-                if " " in self._prettier_path
-                else [self._prettier_path]
+                self._prettier_path.split() if " " in self._prettier_path else [self._prettier_path]
             )
             cmd.extend(["--parser", parser, temp_path])
 
@@ -461,11 +453,7 @@ class PrettierFormatter:
 
         original_code = path.read_text()
 
-        cmd = (
-            self._prettier_path.split()
-            if " " in self._prettier_path
-            else [self._prettier_path]
-        )
+        cmd = self._prettier_path.split() if " " in self._prettier_path else [self._prettier_path]
         if write:
             cmd.extend(["--write", file_path])
         else:

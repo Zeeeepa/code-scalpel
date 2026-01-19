@@ -316,9 +316,7 @@ class TestCriticalPathScenarios:
         """Test critical path with specific file patterns."""
         from code_scalpel.governance import BlastRadiusConfig
 
-        config = BlastRadiusConfig(
-            critical_paths=["config/production.yaml", "src/*/security/*.py"]
-        )
+        config = BlastRadiusConfig(critical_paths=["config/production.yaml", "src/*/security/*.py"])
 
         # Exact file match
         assert config.is_critical_path("config/production.yaml")

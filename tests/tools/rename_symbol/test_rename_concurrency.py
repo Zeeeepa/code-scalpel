@@ -22,9 +22,7 @@ from code_scalpel.surgery.rename_symbol_refactor import rename_references_across
 from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
 
-def test_parallel_renames_different_symbols_isolated(
-    tmp_path: Path, scope_filesystem: None
-):
+def test_parallel_renames_different_symbols_isolated(tmp_path: Path, scope_filesystem: None):
     """[20260108_TEST] Parallel renames to different symbols don't interfere."""
     # Create project with two independent symbols
     a_py = tmp_path / "a.py"
@@ -183,9 +181,7 @@ def test_lock_semantics_prevent_corruption(tmp_path: Path, scope_filesystem: Non
     ast.parse(text)  # Should not raise SyntaxError
 
 
-def test_concurrent_cross_file_renames_consistent(
-    tmp_path: Path, scope_filesystem: None
-):
+def test_concurrent_cross_file_renames_consistent(tmp_path: Path, scope_filesystem: None):
     """[20260108_TEST] Cross-file renames maintain consistency under concurrency."""
     a_py = tmp_path / "a.py"
     a_py.write_text("def func_a():\n    return 1\n", encoding="utf-8")

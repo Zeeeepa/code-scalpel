@@ -100,9 +100,7 @@ def test_remote_verify_populates_cache_and_allows_when_valid(
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     decision = remote_verifier.authorize_token(token)
     assert decision.allowed is True
@@ -117,9 +115,7 @@ def test_cache_fresh_skips_remote_call(tmp_path: Path, verifier_url: str, monkey
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     # First call hits remote and writes cache.
     decision1 = remote_verifier.authorize_token(token)
@@ -144,9 +140,7 @@ def test_offline_grace_allows_only_with_hash_match_and_recent_cache(
 
     remote_verifier._IN_MEMORY_CACHE = None
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     base_time = 10_000.0
     monkeypatch.setattr(remote_verifier.time, "time", lambda: base_time)
@@ -177,9 +171,7 @@ def test_offline_grace_allows_only_with_hash_match_and_recent_cache(
     assert decision3.allowed is False
 
 
-def test_expiry_denies_even_during_grace(
-    tmp_path: Path, verifier_url: str, monkeypatch
-):
+def test_expiry_denies_even_during_grace(tmp_path: Path, verifier_url: str, monkeypatch):
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
@@ -202,9 +194,7 @@ def test_remote_verify_error_message_never_leaks_token(
     cache_path = tmp_path / "license_cache.json"
     _set_env(monkeypatch, url=verifier_url, cache_path=cache_path)
 
-    token = (
-        "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
-    )
+    token = "header.eyJ0aWVyIjoicHJvIiwiZXhwIjo5OTk5OTk5OTk5LCJmZWF0dXJlcyI6W119.signature"
 
     def _down(*args, **kwargs):
         raise remote_verifier.urllib.error.URLError(f"network down: {token}")

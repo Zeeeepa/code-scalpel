@@ -193,16 +193,8 @@ class RpcMethod:
     @property
     def full_signature(self) -> str:
         """Get the full RPC signature."""
-        req = (
-            f"stream {self.request_type}"
-            if self.client_streaming
-            else self.request_type
-        )
-        resp = (
-            f"stream {self.response_type}"
-            if self.server_streaming
-            else self.response_type
-        )
+        req = f"stream {self.request_type}" if self.client_streaming else self.request_type
+        resp = f"stream {self.response_type}" if self.server_streaming else self.response_type
         return f"rpc {self.name}({req}) returns ({resp})"
 
 
@@ -223,16 +215,12 @@ class GrpcService:
     @property
     def streaming_methods(self) -> List[RpcMethod]:
         """Get all streaming methods."""
-        return [
-            m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY
-        ]
+        return [m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY]
 
     @property
     def unary_methods(self) -> List[RpcMethod]:
         """Get all unary methods."""
-        return [
-            m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY
-        ]
+        return [m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY]
 
 
 @dataclass
@@ -378,9 +366,7 @@ class GrpcContractAnalyzer:
         self._proto_parser = ProtobufParser()
         self._drift_detector = SchemaDriftDetector()
 
-    def analyze(
-        self, proto_content: str, source_file: Optional[str] = None
-    ) -> GrpcContract:
+    def analyze(self, proto_content: str, source_file: Optional[str] = None) -> GrpcContract:
         """
         Analyze a .proto file and extract the gRPC contract.
 
@@ -663,9 +649,7 @@ class GrpcContractAnalyzer:
         for msg in contract.messages.values():
             lines.append(f"message {msg.name} {{")
             for msg_field in msg.fields.values():
-                lines.append(
-                    f"  {msg_field.type} {msg_field.name} = {msg_field.number};"
-                )
+                lines.append(f"  {msg_field.type} {msg_field.name} = {msg_field.number};")
             lines.append("}")
             lines.append("")
 

@@ -251,9 +251,7 @@ class RefactorSimulator:
                 security_issues.extend(type_errors)
 
         # Check structural changes
-        structural_changes = self._analyze_structural_changes(
-            original_code, new_code, language
-        )
+        structural_changes = self._analyze_structural_changes(original_code, new_code, language)
 
         # [20251230_FEATURE] Enterprise tier: Regression prediction
         if enable_regression_prediction:
@@ -602,12 +600,7 @@ class RefactorSimulator:
                     continue
 
                 # Skip template literal expressions ${...}
-                if (
-                    in_template
-                    and char == "$"
-                    and i + 1 < len(line)
-                    and line[i + 1] == "{"
-                ):
+                if in_template and char == "$" and i + 1 < len(line) and line[i + 1] == "{":
                     # Count nested braces in template
                     i += 2
                     template_brace = 1
@@ -934,19 +927,11 @@ class RefactorSimulator:
                 old_tree = ast.parse(original)
                 new_tree = ast.parse(new_code)
 
-                old_funcs = {
-                    n.name for n in ast.walk(old_tree) if isinstance(n, ast.FunctionDef)
-                }
-                new_funcs = {
-                    n.name for n in ast.walk(new_tree) if isinstance(n, ast.FunctionDef)
-                }
+                old_funcs = {n.name for n in ast.walk(old_tree) if isinstance(n, ast.FunctionDef)}
+                new_funcs = {n.name for n in ast.walk(new_tree) if isinstance(n, ast.FunctionDef)}
 
-                old_classes = {
-                    n.name for n in ast.walk(old_tree) if isinstance(n, ast.ClassDef)
-                }
-                new_classes = {
-                    n.name for n in ast.walk(new_tree) if isinstance(n, ast.ClassDef)
-                }
+                old_classes = {n.name for n in ast.walk(old_tree) if isinstance(n, ast.ClassDef)}
+                new_classes = {n.name for n in ast.walk(new_tree) if isinstance(n, ast.ClassDef)}
 
                 old_imports = set()
                 new_imports = set()
@@ -955,17 +940,13 @@ class RefactorSimulator:
                     if isinstance(node, ast.Import):
                         old_imports.update(a.name for a in node.names)
                     elif isinstance(node, ast.ImportFrom):
-                        old_imports.update(
-                            f"{node.module}.{a.name}" for a in node.names
-                        )
+                        old_imports.update(f"{node.module}.{a.name}" for a in node.names)
 
                 for node in ast.walk(new_tree):
                     if isinstance(node, ast.Import):
                         new_imports.update(a.name for a in node.names)
                     elif isinstance(node, ast.ImportFrom):
-                        new_imports.update(
-                            f"{node.module}.{a.name}" for a in node.names
-                        )
+                        new_imports.update(f"{node.module}.{a.name}" for a in node.names)
 
                 changes["functions_added"] = list(new_funcs - old_funcs)
                 changes["functions_removed"] = list(old_funcs - new_funcs)
@@ -988,25 +969,13 @@ class RefactorSimulator:
             changes["functions_removed"] = list(
                 old_structure["functions"] - new_structure["functions"]
             )
-            changes["classes_added"] = list(
-                new_structure["classes"] - old_structure["classes"]
-            )
-            changes["classes_removed"] = list(
-                old_structure["classes"] - new_structure["classes"]
-            )
-            changes["imports_added"] = list(
-                new_structure["imports"] - old_structure["imports"]
-            )
-            changes["imports_removed"] = list(
-                old_structure["imports"] - new_structure["imports"]
-            )
+            changes["classes_added"] = list(new_structure["classes"] - old_structure["classes"])
+            changes["classes_removed"] = list(old_structure["classes"] - new_structure["classes"])
+            changes["imports_added"] = list(new_structure["imports"] - old_structure["imports"])
+            changes["imports_removed"] = list(old_structure["imports"] - new_structure["imports"])
 
         # Count line changes
-        diff = list(
-            difflib.unified_diff(
-                original.splitlines(), new_code.splitlines(), lineterm=""
-            )
-        )
+        diff = list(difflib.unified_diff(original.splitlines(), new_code.splitlines(), lineterm=""))
 
         for line in diff:
             if line.startswith("+") and not line.startswith("+++"):
@@ -1074,10 +1043,7 @@ class RefactorSimulator:
             for child in node.children:
                 if child.type == "identifier":
                     name_node = child
-                if (
-                    child.type == "arrow_function"
-                    or child.type == "function_expression"
-                ):
+                if child.type == "arrow_function" or child.type == "function_expression":
                     has_function = True
             if name_node and has_function:
                 structure["functions"].add(name_node.text.decode("utf-8"))
@@ -1126,9 +1092,7 @@ class RefactorSimulator:
             structure["functions"].add(match.group(1))
 
         # Function expressions assigned to const/let/var
-        func_expr_pattern = (
-            r"\b(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\("
-        )
+        func_expr_pattern = r"\b(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?function\s*\("
         for match in re.finditer(func_expr_pattern, code):
             structure["functions"].add(match.group(1))
 
@@ -1138,9 +1102,7 @@ class RefactorSimulator:
             structure["classes"].add(match.group(1))
 
         # Import statements: import ... from 'module' or import 'module'
-        import_pattern = (
-            r"""import\s+.*?from\s+['"]([^'"]+)['"]|import\s+['"]([^'"]+)['"]"""
-        )
+        import_pattern = r"""import\s+.*?from\s+['"]([^'"]+)['"]|import\s+['"]([^'"]+)['"]"""
         for match in re.finditer(import_pattern, code):
             module = match.group(1) or match.group(2)
             if module:
@@ -1169,9 +1131,7 @@ class RefactorSimulator:
         lines_removed = structural_changes.get("lines_removed", 0)
 
         if lines_removed > lines_added * 2:
-            warnings.append(
-                f"Large deletion: {lines_removed} lines removed vs {lines_added} added"
-            )
+            warnings.append(f"Large deletion: {lines_removed} lines removed vs {lines_added} added")
 
         if lines_added > 100:
             warnings.append(f"Large addition: {lines_added} new lines")
@@ -1263,9 +1223,7 @@ class RefactorSimulator:
         if security_issues:
             # Lower confidence if we detected issues (they might be false positives)
             high_severity = len([i for i in security_issues if i.severity == "high"])
-            medium_severity = len(
-                [i for i in security_issues if i.severity == "medium"]
-            )
+            medium_severity = len([i for i in security_issues if i.severity == "medium"])
             # More issues = less confident in the "unsafe" verdict (could be FPs)
             factors["security_analysis"] = max(
                 0.6, 1.0 - (high_severity * 0.1 + medium_severity * 0.05)
@@ -1413,9 +1371,7 @@ class RefactorSimulator:
             )
 
         if structural_changes.get("functions_added"):
-            impact["recommendations"].append(
-                "New functions should have corresponding tests"
-            )
+            impact["recommendations"].append("New functions should have corresponding tests")
 
         return impact
 
@@ -1445,9 +1401,7 @@ class RefactorSimulator:
 
         strategy = {
             "rollback_type": "single_file",
-            "original_checksum": hashlib.sha256(original_code.encode()).hexdigest()[
-                :12
-            ],
+            "original_checksum": hashlib.sha256(original_code.encode()).hexdigest()[:12],
             "new_checksum": hashlib.sha256(new_code.encode()).hexdigest()[:12],
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "steps": [],
@@ -1805,9 +1759,7 @@ class RefactorSimulator:
                     root_path = Path(project_root)
                     if root_path.exists():
                         builder = CallGraphBuilder(root_path)
-                        graph = builder.build_with_details(
-                            entry_point=None, depth=5, max_nodes=500
-                        )
+                        graph = builder.build_with_details(entry_point=None, depth=5, max_nodes=500)
 
                         # Find callers of changed functions
                         for func_name in changed_functions:
@@ -1848,13 +1800,9 @@ class RefactorSimulator:
 
             # Generate summary
             if predictions["risk_score"] > 0.7:
-                predictions["impact_summary"] = (
-                    "HIGH RISK: Significant breaking changes detected"
-                )
+                predictions["impact_summary"] = "HIGH RISK: Significant breaking changes detected"
             elif predictions["risk_score"] > 0.4:
-                predictions["impact_summary"] = (
-                    "MEDIUM RISK: Some functions may be affected"
-                )
+                predictions["impact_summary"] = "MEDIUM RISK: Some functions may be affected"
             elif predictions["risk_score"] > 0:
                 predictions["impact_summary"] = "LOW RISK: Minor changes detected"
             else:

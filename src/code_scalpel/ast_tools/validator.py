@@ -268,10 +268,7 @@ class ASTValidator:
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in {"execute", "executemany"}:
                         # Check if string formatting or concatenation is used
-                        if any(
-                            isinstance(arg, (ast.BinOp, ast.JoinedStr))
-                            for arg in node.args
-                        ):
+                        if any(isinstance(arg, (ast.BinOp, ast.JoinedStr)) for arg in node.args):
                             self.issues.append(
                                 ValidationIssue(
                                     "Possible SQL injection vulnerability",

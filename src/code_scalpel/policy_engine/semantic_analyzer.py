@@ -133,9 +133,7 @@ class SemanticAnalyzer:
 
             # Check binary operations with % (old-style formatting)
             if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod):
-                if isinstance(node.left, ast.Constant) and isinstance(
-                    node.left.value, str
-                ):
+                if isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
                     if any(kw in node.left.value.upper() for kw in self.SQL_KEYWORDS):
                         return True
 
@@ -159,7 +157,9 @@ class SemanticAnalyzer:
         """
         # For Java, we'll use text-based analysis since we don't have a Java parser
         # Check for StringBuilder/StringBuffer patterns
-        string_builder_pattern = r"(StringBuilder|StringBuffer)\s+\w+\s*=\s*new\s+(StringBuilder|StringBuffer)"
+        string_builder_pattern = (
+            r"(StringBuilder|StringBuffer)\s+\w+\s*=\s*new\s+(StringBuilder|StringBuffer)"
+        )
         if re.search(string_builder_pattern, code):
             # Check if appends contain SQL keywords
             append_pattern = r"\.append\s*\([^)]*\)"
@@ -436,8 +436,7 @@ class SemanticAnalyzer:
         elif language_lower == "java":
             if "response.getWriter()" in code or "PrintWriter" in code:
                 if any(
-                    req_access in code
-                    for req_access in ["request.getParameter", "getQueryString"]
+                    req_access in code for req_access in ["request.getParameter", "getQueryString"]
                 ):
                     return True
 
@@ -701,11 +700,7 @@ class SemanticAnalyzer:
 
         # Java XXE
         elif language.lower() == "java":
-            if (
-                "DocumentBuilder" in code
-                or "SAXParser" in code
-                or "XMLInputFactory" in code
-            ):
+            if "DocumentBuilder" in code or "SAXParser" in code or "XMLInputFactory" in code:
                 # Check for XXE prevention patterns
                 safe_patterns = [
                     "XMLConstants.ACCESS_EXTERNAL",

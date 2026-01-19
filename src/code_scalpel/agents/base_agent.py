@@ -136,9 +136,7 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("analyze_security", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def extract_function(
-        self, file_path: str, function_name: str
-    ) -> Dict[str, Any]:
+    async def extract_function(self, file_path: str, function_name: str) -> Dict[str, Any]:
         """Extract a specific function using extract_code tool."""
         try:
             result = await extract_code(file_path, "function", function_name)
@@ -149,9 +147,7 @@ class BaseCodeAnalysisAgent(ABC):
             self.context.add_operation("extract_function", str(e), False)
             return {"success": False, "error": str(e)}
 
-    async def simulate_code_change(
-        self, original_code: str, new_code: str
-    ) -> Dict[str, Any]:
+    async def simulate_code_change(self, original_code: str, new_code: str) -> Dict[str, Any]:
         """Simulate a code change to verify safety using simulate_refactor tool."""
         try:
             result = await simulate_refactor(original_code, new_code)

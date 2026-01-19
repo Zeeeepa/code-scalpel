@@ -96,9 +96,7 @@ class DiktatParser:
         """
         raise NotImplementedError("Phase 2: diktat config parsing")
 
-    def execute_diktat(
-        self, project_path: Path, format_code: bool = False
-    ) -> dict[str, Any]:
+    def execute_diktat(self, project_path: Path, format_code: bool = False) -> dict[str, Any]:
         """
 
         Args:

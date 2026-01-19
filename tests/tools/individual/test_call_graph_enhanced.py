@@ -209,9 +209,7 @@ def format_output(data):
         result = builder.build_with_details()
 
         # Find edge from main to helper
-        main_to_helper = [
-            e for e in result.edges if "main" in e.caller and "helper" in e.callee
-        ]
+        main_to_helper = [e for e in result.edges if "main" in e.caller and "helper" in e.callee]
         assert len(main_to_helper) > 0
 
     def test_entry_point_filtering(self, simple_project):
@@ -607,9 +605,7 @@ def factorial(n):
 
         # Should have edge from factorial to itself
         factorial_edges = [
-            e
-            for e in result.edges
-            if "factorial" in e.caller and "factorial" in e.callee
+            e for e in result.edges if "factorial" in e.caller and "factorial" in e.callee
         ]
         assert len(factorial_edges) > 0
 

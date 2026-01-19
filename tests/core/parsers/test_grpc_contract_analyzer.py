@@ -413,10 +413,7 @@ class TestRpcMethod:
             response_type="GetUserResponse",
         )
 
-        assert (
-            method.full_signature
-            == "rpc GetUser(GetUserRequest) returns (GetUserResponse)"
-        )
+        assert method.full_signature == "rpc GetUser(GetUserRequest) returns (GetUserResponse)"
 
     def test_full_signature_server_streaming(self):
         """Test full signature for server streaming RPC."""
@@ -427,10 +424,7 @@ class TestRpcMethod:
             server_streaming=True,
         )
 
-        assert (
-            method.full_signature
-            == "rpc ListUsers(ListUsersRequest) returns (stream User)"
-        )
+        assert method.full_signature == "rpc ListUsers(ListUsersRequest) returns (stream User)"
 
     def test_full_signature_client_streaming(self):
         """Test full signature for client streaming RPC."""
@@ -442,8 +436,7 @@ class TestRpcMethod:
         )
 
         assert (
-            method.full_signature
-            == "rpc BulkCreate(stream CreateRequest) returns (BulkResponse)"
+            method.full_signature == "rpc BulkCreate(stream CreateRequest) returns (BulkResponse)"
         )
 
     def test_full_signature_bidirectional(self):
@@ -456,10 +449,7 @@ class TestRpcMethod:
             server_streaming=True,
         )
 
-        assert (
-            method.full_signature
-            == "rpc Chat(stream ChatMessage) returns (stream ChatMessage)"
-        )
+        assert method.full_signature == "rpc Chat(stream ChatMessage) returns (stream ChatMessage)"
 
 
 # =============================================================================
@@ -568,9 +558,7 @@ class TestIntegration:
 
         # All should work without errors
         assert contract.service_count == 1
-        assert len(issues) == 0 or all(
-            i.severity != IssueSeverity.ERROR for i in issues
-        )
+        assert len(issues) == 0 or all(i.severity != IssueSeverity.ERROR for i in issues)
         assert sum(stats.values()) == 6
         assert len(deps) == 6
 

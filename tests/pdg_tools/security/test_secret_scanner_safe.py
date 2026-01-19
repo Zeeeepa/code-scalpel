@@ -31,17 +31,11 @@ def connect_aws():
 """
     result = analyzer.analyze(code)
     assert result.has_vulnerabilities
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) >= 1
     # taint_path is a list - check if any vulnerability contains the AWS key type
     # [20251214_BUGFIX] v2.0.0 - Check any vuln, not just first, since order may vary
-    assert any(
-        any("AWS Access Key" in path for path in vuln.taint_path) for vuln in vulns
-    )
+    assert any(any("AWS Access Key" in path for path in vuln.taint_path) for vuln in vulns)
 
 
 def test_stripe_secret_detection():
@@ -78,11 +72,7 @@ def test_private_key_detection():
     code = 'key = "-----BEGIN RSA PRIVATE KEY-----"'
     result = analyzer.analyze(code)
     assert result.has_vulnerabilities
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) == 1
     # taint_path is a list - check if any element contains the key type
     assert any("Private Key" in path for path in vulns[0].taint_path)
@@ -101,11 +91,7 @@ config = "api_key='abcdefghijklmnopqrstuvwx'"
 """
     result = analyzer.analyze(code)
     assert result.has_vulnerabilities
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) >= 1
     # Check if any element contains "API Key"
     assert any("API Key" in path for path in vulns[0].taint_path)
@@ -120,11 +106,7 @@ other_var = "abcdefghijklmnopqrstuvwxyz123456"
 """
     result = analyzer.analyze(code)
     # Should be 0 because api_key is too short, and other_var is not a target key
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) == 0
 
 
@@ -141,11 +123,7 @@ def unsafe():
     result = analyzer.analyze(code)
     assert result.has_vulnerabilities
 
-    secrets = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    secrets = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     sqli = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY]
 
     assert len(secrets) == 1
@@ -161,11 +139,7 @@ def connect_aws():
     client = boto3.client('s3', aws_access_key_id=access_key)
 """
     result = analyzer.analyze(code)
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) >= 1
     # taint_path is a list - check if any element contains the key type
     assert any("AWS Access Key" in path for path in vulns[0].taint_path)
@@ -178,11 +152,7 @@ def test_fstring_secret_detection():
 msg = f"Your key is AKIAIOSFODNN7EXAMPLE for now"
 """
     result = analyzer.analyze(code)
-    vulns = [
-        v
-        for v in result.vulnerabilities
-        if v.sink_type == SecuritySink.HARDCODED_SECRET
-    ]
+    vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.HARDCODED_SECRET]
     assert len(vulns) >= 1
     # taint_path is a list - check if any element contains the key type
     assert any("AWS Access Key" in path for path in vulns[0].taint_path)
@@ -234,9 +204,7 @@ def test_same_location_dedup():
 
     # _add_vuln now takes (secret_type, matched_value, node)
     scanner._add_vuln("aws_access_key", "AKIAIOSFODNN7EXAMPLE", node1)
-    scanner._add_vuln(
-        "aws_access_key", "AKIAIOSFODNN7EXAMPLE", node1
-    )  # Should be deduped
+    scanner._add_vuln("aws_access_key", "AKIAIOSFODNN7EXAMPLE", node1)  # Should be deduped
 
     # Should only have 1 vulnerability (deduped)
     assert len(scanner.vulnerabilities) == 1
@@ -302,6 +270,4 @@ def test_deprecated_ast_str_node():
     # Should detect the AWS key
     assert len(scanner.vulnerabilities) == 1
     # taint_path is a list - check if any element contains the key type
-    assert any(
-        "AWS Access Key" in path for path in scanner.vulnerabilities[0].taint_path
-    )
+    assert any("AWS Access Key" in path for path in scanner.vulnerabilities[0].taint_path)

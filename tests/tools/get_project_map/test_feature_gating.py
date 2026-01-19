@@ -21,9 +21,7 @@ class TestFeatureGatingCommunityToPro:
             project_root=str(flask_project), include_complexity=True
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If coupling_metrics exists, it should be empty
         if "coupling_metrics" in result_dict:
@@ -41,9 +39,7 @@ class TestFeatureGatingCommunityToPro:
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If git_ownership exists, it should be empty
         if "git_ownership" in result_dict:
@@ -61,9 +57,7 @@ class TestFeatureGatingCommunityToPro:
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If architectural_layers exists, it should be empty
         if "architectural_layers" in result_dict:
@@ -85,9 +79,7 @@ class TestFeatureGatingProToEnterprise:
             project_root=str(simple_project), include_complexity=True
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If city_map_data exists, it should be empty
         if "city_map_data" in result_dict:
@@ -105,9 +97,7 @@ class TestFeatureGatingProToEnterprise:
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If compliance_overlay exists, it should be empty
         if "compliance_overlay" in result_dict:
@@ -125,9 +115,7 @@ class TestFeatureGatingProToEnterprise:
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = (
-            result.model_dump() if hasattr(result, "model_dump") else vars(result)
-        )
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
 
         # If multi_repo_summary exists, it should be empty
         if "multi_repo_summary" in result_dict:

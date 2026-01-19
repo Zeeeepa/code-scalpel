@@ -6,9 +6,7 @@ from code_scalpel.analysis.project_crawler import ProjectCrawler
 class TestTierEnforcement:
     """Validate Community tier restrictions and feature availability."""
 
-    def test_community_tier_basic_crawl_works(
-        self, small_python_extended, community_env
-    ):
+    def test_community_tier_basic_crawl_works(self, small_python_extended, community_env):
         """Verify Community tier can perform basic crawl."""
         crawler = ProjectCrawler(str(small_python_extended))
         result = crawler.crawl()

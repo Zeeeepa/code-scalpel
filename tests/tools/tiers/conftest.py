@@ -58,17 +58,14 @@ def clear_tier_cache():
 # Paths to test license files (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 # [20260106_TEST] Prefer signed fixture licenses that validate against vault-prod-2026-01
-PRO_LICENSE_PATH = (
-    PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
-)
+PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_190345.jwt"
 ENTERPRISE_LICENSE_PATH = (
     PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt"
 )
 
 # Fallback to archive if tests/licenses doesn't have valid ones
 ARCHIVE_PRO_LICENSE = (
-    PROJECT_ROOT
-    / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+    PROJECT_ROOT / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
 )
 
 
@@ -82,15 +79,13 @@ def _find_valid_license(tier: str) -> Path | None:
     if tier == "pro":
         candidates = [
             PRO_LICENSE_PATH,
-            PROJECT_ROOT
-            / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
+            PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
             ARCHIVE_PRO_LICENSE,
         ]
     elif tier == "enterprise":
         candidates = [
             ENTERPRISE_LICENSE_PATH,
-            PROJECT_ROOT
-            / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
+            PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
         ]
     else:
         return None

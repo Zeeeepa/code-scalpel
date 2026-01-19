@@ -15,9 +15,7 @@ class TestLicenseFallback:
     """Test invalid/expired license handling."""
 
     @pytest.mark.asyncio
-    async def test_expired_license_fallback(
-        self, server_expired_license, project_120_files
-    ):
+    async def test_expired_license_fallback(self, server_expired_license, project_120_files):
         """Expired license → fallback to Community tier with warning."""
         result = await server_expired_license.get_project_map(
             project_root=str(project_120_files), include_complexity=False
@@ -38,9 +36,7 @@ class TestLicenseFallback:
         ), f"Expected 'expired' warning, got: {result.warnings}"
 
     @pytest.mark.asyncio
-    async def test_invalid_license_fallback(
-        self, server_invalid_license, project_120_files
-    ):
+    async def test_invalid_license_fallback(self, server_invalid_license, project_120_files):
         """Invalid license → fallback to Community tier with warning."""
         result = await server_invalid_license.get_project_map(
             project_root=str(project_120_files), include_complexity=False
@@ -61,9 +57,7 @@ class TestLicenseFallback:
         ), f"Expected 'invalid' warning, got: {result.warnings}"
 
     @pytest.mark.asyncio
-    async def test_missing_license_default_community(
-        self, server_no_license, project_120_files
-    ):
+    async def test_missing_license_default_community(self, server_no_license, project_120_files):
         """Missing license file → default to Community tier."""
         result = await server_no_license.get_project_map(
             project_root=str(project_120_files), include_complexity=False
@@ -86,9 +80,7 @@ class TestLicenseFallback:
 
         from .conftest import has_pro_features
 
-        assert not has_pro_features(
-            com_result
-        ), "Community tier should not have Pro features"
+        assert not has_pro_features(com_result), "Community tier should not have Pro features"
 
         # Pro: Pro features available
         pro_result = await pro_server.get_project_map(
@@ -97,9 +89,7 @@ class TestLicenseFallback:
 
         # Pro should have Pro feature fields in model
         pro_dict = (
-            pro_result.model_dump()
-            if hasattr(pro_result, "model_dump")
-            else vars(pro_result)
+            pro_result.model_dump() if hasattr(pro_result, "model_dump") else vars(pro_result)
         )
         pro_features = ["coupling_metrics", "git_ownership", "architectural_layers"]
 

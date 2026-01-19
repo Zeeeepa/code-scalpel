@@ -58,9 +58,7 @@ class AutonomyAuditTrail:
     [20251217_FEATURE] v3.0.0 Autonomy P0 - Audit trail manager
     """
 
-    storage_path: Path = field(
-        default_factory=lambda: Path(".code-scalpel/autonomy_audit")
-    )
+    storage_path: Path = field(default_factory=lambda: Path(".code-scalpel/autonomy_audit"))
     current_session_id: str = field(default="")
 
     def __post_init__(self):
@@ -236,9 +234,7 @@ class AutonomyAuditTrail:
         Format: YYYYMMDD_HHMMSS_<short_hash>
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        hash_suffix = hashlib.sha256(
-            str(datetime.now().timestamp()).encode()
-        ).hexdigest()[:6]
+        hash_suffix = hashlib.sha256(str(datetime.now().timestamp()).encode()).hexdigest()[:6]
         return f"{timestamp}_{hash_suffix}"
 
     def _generate_entry_id(self) -> str:
@@ -310,9 +306,7 @@ class AutonomyAuditTrail:
             json.dump({"data": input_str, "truncated": len(str(input_data)) > 10000}, f)
 
         with open(data_dir / f"{entry.id}_output.json", "w") as f:
-            json.dump(
-                {"data": output_str, "truncated": len(str(output_data)) > 10000}, f
-            )
+            json.dump({"data": output_str, "truncated": len(str(output_data)) > 10000}, f)
 
     def _load_entries(self) -> list[AuditEntry]:
         """

@@ -131,9 +131,7 @@ class TestSpec_MCP_GetSymbolReferences:
         with tempfile.TemporaryDirectory() as tmpdir:
             def_path = os.path.join(tmpdir, "definitions.py")
             with open(def_path, "w") as f:
-                f.write(
-                    '\ndef target_func():\n    """The target function."""\n    return 42\n'
-                )
+                f.write('\ndef target_func():\n    """The target function."""\n    return 42\n')
             use_path = os.path.join(tmpdir, "consumer.py")
             with open(use_path, "w") as f:
                 f.write(
@@ -208,9 +206,7 @@ class TestSpec_Detection_XXE_CWE611:
             SecuritySink,
         )
 
-        matching_sinks = [
-            k for k in SINK_PATTERNS.keys() if sink_name in k or k in sink_name
-        ]
+        matching_sinks = [k for k in SINK_PATTERNS.keys() if sink_name in k or k in sink_name]
         assert len(matching_sinks) > 0, f"No sink pattern found matching {sink_name}"
         for sink in matching_sinks:
             assert SINK_PATTERNS[sink] == SecuritySink.XXE
@@ -242,9 +238,7 @@ class TestSpec_Detection_XXE_CWE611:
         code = "\nfrom flask import request\nimport xml.etree.ElementTree as ET\n\nxml_file = request.args.get('file')\ntree = ET.parse(xml_file)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        xxe_vulns = [
-            v for v in result.vulnerabilities if v.sink_type == SecuritySink.XXE
-        ]
+        xxe_vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.XXE]
         assert len(xxe_vulns) >= 1, "XXE vulnerability not detected"
 
 
@@ -263,9 +257,7 @@ class TestSpec_Detection_SSTI_CWE1336:
         code = "\nfrom flask import request\nimport jinja2\n\ntemplate = request.args.get('t')\nrendered = jinja2.Template(template).render()\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        ssti_vulns = [
-            v for v in result.vulnerabilities if v.sink_type == SecuritySink.SSTI
-        ]
+        ssti_vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.SSTI]
         assert len(ssti_vulns) >= 1, "SSTI vulnerability not detected"
 
     def test_allows_file_loading_jinja2(self):
@@ -296,9 +288,7 @@ class TestSpec_Detection_SSTI_CWE1336:
         """
         from code_scalpel.security.analyzers.taint_tracker import SINK_PATTERNS
 
-        matching = any(
-            (template_engine in k or k in template_engine for k in SINK_PATTERNS.keys())
-        )
+        matching = any((template_engine in k or k in template_engine for k in SINK_PATTERNS.keys()))
         assert matching, f"No SSTI sink pattern for {template_engine}"
 
 
@@ -315,9 +305,7 @@ class TestSpec_Regression_V130:
         code = "\nfrom flask import request\nimport sqlite3\n\nuser_id = request.args.get('id')\ncursor.execute(\"SELECT * FROM users WHERE id = \" + user_id)\n"
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        sqli_vulns = [
-            v for v in result.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY
-        ]
+        sqli_vulns = [v for v in result.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY]
         assert len(sqli_vulns) >= 1
 
     def test_command_injection_still_detected(self):
@@ -329,9 +317,7 @@ class TestSpec_Regression_V130:
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         cmdi_vulns = [
-            v
-            for v in result.vulnerabilities
-            if v.sink_type == SecuritySink.SHELL_COMMAND
+            v for v in result.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND
         ]
         assert len(cmdi_vulns) >= 1
 

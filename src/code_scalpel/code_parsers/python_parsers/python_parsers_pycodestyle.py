@@ -528,11 +528,7 @@ class PycodestyleParser:
                 message = match.group(5)
 
                 # Determine severity
-                severity = (
-                    StyleSeverity.WARNING
-                    if code.startswith("W")
-                    else StyleSeverity.ERROR
-                )
+                severity = StyleSeverity.WARNING if code.startswith("W") else StyleSeverity.ERROR
 
                 # Get category
                 category = get_category_for_code(code)

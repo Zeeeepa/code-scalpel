@@ -159,9 +159,7 @@ class ComplianceReporter:
         else:
             return report
 
-    def _load_events(
-        self, time_range: Tuple[datetime, datetime]
-    ) -> List[Dict[str, Any]]:
+    def _load_events(self, time_range: Tuple[datetime, datetime]) -> List[Dict[str, Any]]:
         """
         Load events from audit log for the specified time range.
 
@@ -196,28 +194,16 @@ class ComplianceReporter:
             ReportSummary with key statistics
         """
         return ReportSummary(
-            total_operations=len(
-                [e for e in events if e["event_type"].startswith("OPERATION_")]
-            ),
-            blocked_operations=len(
-                [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
-            ),
-            allowed_operations=len(
-                [e for e in events if e["event_type"] == "OPERATION_ALLOWED"]
-            ),
-            overrides_requested=len(
-                [e for e in events if e["event_type"] == "OVERRIDE_REQUESTED"]
-            ),
-            overrides_approved=len(
-                [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
-            ),
+            total_operations=len([e for e in events if e["event_type"].startswith("OPERATION_")]),
+            blocked_operations=len([e for e in events if e["event_type"] == "POLICY_VIOLATION"]),
+            allowed_operations=len([e for e in events if e["event_type"] == "OPERATION_ALLOWED"]),
+            overrides_requested=len([e for e in events if e["event_type"] == "OVERRIDE_REQUESTED"]),
+            overrides_approved=len([e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]),
             tamper_attempts=len([e for e in events if "TAMPER" in e["event_type"]]),
             most_violated_policies=self._rank_violated_policies(events),
         )
 
-    def _rank_violated_policies(
-        self, events: List[Dict[str, Any]]
-    ) -> List[Tuple[str, int]]:
+    def _rank_violated_policies(self, events: List[Dict[str, Any]]) -> List[Tuple[str, int]]:
         """
         Rank policies by number of violations.
 
@@ -431,19 +417,13 @@ class ComplianceReporter:
                     f"High override rate ({override_rate:.1%}) suggests policies may be too restrictive"
                 )
 
-        critical_violations = [
-            e for e in violations if e["details"].get("severity") == "CRITICAL"
-        ]
+        critical_violations = [e for e in violations if e["details"].get("severity") == "CRITICAL"]
         if critical_violations:
-            weaknesses.append(
-                f"{len(critical_violations)} critical violations detected"
-            )
+            weaknesses.append(f"{len(critical_violations)} critical violations detected")
 
         return weaknesses if weaknesses else ["No significant weaknesses identified"]
 
-    def _generate_recommendations(
-        self, events: List[Dict[str, Any]]
-    ) -> List[Recommendation]:
+    def _generate_recommendations(self, events: List[Dict[str, Any]]) -> List[Recommendation]:
         """
         Generate actionable recommendations.
 

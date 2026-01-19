@@ -312,9 +312,7 @@ class BabelParser:
         analysis.modern_syntax = self._count_modern_syntax(code)
 
         # Determine minimum ES version needed
-        analysis.min_es_version = self._determine_min_es_version(
-            analysis.syntax_features
-        )
+        analysis.min_es_version = self._determine_min_es_version(analysis.syntax_features)
 
         return analysis
 
@@ -415,15 +413,11 @@ class BabelParser:
             private_fields=len(re.findall(r"#\w+", code)),
             static_blocks=len(re.findall(r"static\s*\{", code)),
             decorators=len(re.findall(r"@\w+", code)),
-            class_fields=len(
-                re.findall(r"(?:public|private|protected)?\s*\w+\s*=", code)
-            ),
+            class_fields=len(re.findall(r"(?:public|private|protected)?\s*\w+\s*=", code)),
             logical_assignment=len(re.findall(r"(?:\?\?|&&|\|\|)=", code)),
         )
 
-    def _determine_min_es_version(
-        self, features: list[SyntaxFeature]
-    ) -> ECMAScriptVersion:
+    def _determine_min_es_version(self, features: list[SyntaxFeature]) -> ECMAScriptVersion:
         """Determine minimum ECMAScript version needed for the features."""
         if not features:
             return ECMAScriptVersion.ES5
@@ -552,11 +546,7 @@ class BabelParser:
             temp_path = f.name
 
         try:
-            cmd = (
-                self._babel_path.split()
-                if " " in self._babel_path
-                else [self._babel_path]
-            )
+            cmd = self._babel_path.split() if " " in self._babel_path else [self._babel_path]
             cmd.extend(["--source-maps", "inline"])
 
             # Add presets
@@ -592,9 +582,7 @@ class BabelParser:
                 # Extract inline source map
                 import base64
 
-                match = re.search(
-                    r"//# sourceMappingURL=data:[^;]+;base64,([^\s]+)", transformed
-                )
+                match = re.search(r"//# sourceMappingURL=data:[^;]+;base64,([^\s]+)", transformed)
                 if match:
                     try:
                         map_data = base64.b64decode(match.group(1))
@@ -602,9 +590,7 @@ class BabelParser:
                     except Exception:
                         pass
                     # Remove source map from output
-                    transformed = re.sub(
-                        r"\n?//# sourceMappingURL=[^\n]+", "", transformed
-                    )
+                    transformed = re.sub(r"\n?//# sourceMappingURL=[^\n]+", "", transformed)
 
             return TransformationResult(
                 original_code=code,

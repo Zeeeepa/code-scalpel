@@ -195,9 +195,7 @@ class ComplianceMapper:
         """
         return self.GDPR_MAPPING.get(vulnerability_type, [])
 
-    def map_all_vulnerabilities(
-        self, vulnerabilities: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def map_all_vulnerabilities(self, vulnerabilities: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Map all vulnerabilities to compliance frameworks.
 
@@ -265,9 +263,7 @@ class ComplianceMapper:
             report_parts.append("\nOWASP Top 10 2021:")
             for owasp_id, count in sorted(owasp.items()):
                 category_name = self.OWASP_TOP_10_2021[owasp_id]["name"]
-                report_parts.append(
-                    f"  {owasp_id} - {category_name}: {count} finding(s)"
-                )
+                report_parts.append(f"  {owasp_id} - {category_name}: {count} finding(s)")
 
         # PCI DSS
         pci = mapping.get("PCI_DSS", [])
@@ -284,8 +280,6 @@ class ComplianceMapper:
         if gdpr:
             report_parts.append(f"\nGDPR Articles: {', '.join(gdpr)}")
 
-        report_parts.append(
-            f"\nTotal Vulnerabilities: {mapping.get('total_vulnerabilities', 0)}"
-        )
+        report_parts.append(f"\nTotal Vulnerabilities: {mapping.get('total_vulnerabilities', 0)}")
 
         return "\n".join(report_parts)

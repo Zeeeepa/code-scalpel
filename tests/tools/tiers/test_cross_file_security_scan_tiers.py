@@ -171,9 +171,7 @@ class TestOutputMetadataFields:
 # ============================================================================
 
 
-async def test_cross_file_security_scan_community_enforces_depth_cap(
-    tmp_path: Path, monkeypatch
-):
+async def test_cross_file_security_scan_community_enforces_depth_cap(tmp_path: Path, monkeypatch):
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
     root = tmp_path / "repo"
@@ -215,9 +213,7 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(
     assert state["effective_max_modules"] == 10
 
 
-async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(
-    tmp_path: Path, monkeypatch
-):
+async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(tmp_path: Path, monkeypatch):
     # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
     from code_scalpel.mcp import server
 
@@ -327,7 +323,5 @@ async def test_cross_file_security_scan_enterprise_returns_extra_fields(
 
     # Global flow hints are best-effort; ensure the field exists and is list-or-None.
     assert r.global_flows is None or isinstance(r.global_flows, list)
-    assert r.microservice_boundaries is None or isinstance(
-        r.microservice_boundaries, list
-    )
+    assert r.microservice_boundaries is None or isinstance(r.microservice_boundaries, list)
     assert r.distributed_trace is None or isinstance(r.distributed_trace, dict)

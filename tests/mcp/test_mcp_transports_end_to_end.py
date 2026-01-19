@@ -116,9 +116,7 @@ def _pythonpath_env(repo_root: Path) -> dict[str, str]:
         if (src_root / "code_scalpel").exists():
             break
         if candidate == candidate.parent:
-            raise AssertionError(
-                f"Could not locate src/code_scalpel starting from: {repo_root}"
-            )
+            raise AssertionError(f"Could not locate src/code_scalpel starting from: {repo_root}")
         candidate = candidate.parent
 
     env = os.environ.copy()
@@ -162,9 +160,7 @@ class PolicyEngine:
     return root, target_file
 
 
-def _with_hs256_test_license_env(
-    env: dict[str, str], tmp_path: Path, tier: str
-) -> None:
+def _with_hs256_test_license_env(env: dict[str, str], tmp_path: Path, tier: str) -> None:
     """Configure a valid HS256 license for server subprocesses."""
 
     from code_scalpel.licensing.jwt_generator import generate_license
@@ -238,9 +234,7 @@ async def _strict_stdio_client(server: StdioServerParameters):
 
         async with write_stream_reader:
             async for session_message in write_stream_reader:
-                payload = session_message.message.model_dump_json(
-                    by_alias=True, exclude_none=True
-                )
+                payload = session_message.message.model_dump_json(by_alias=True, exclude_none=True)
                 await process.stdin.send(
                     (payload + "\n").encode(
                         encoding=server.encoding,
@@ -404,9 +398,7 @@ async def test_mcp_stdio_transport_pro_tier_excludes_enterprise_only_tools(
         ("sse", "/sse"),
     ],
 )
-async def test_mcp_http_transports_end_to_end(
-    tmp_path: Path, transport: str, endpoint_path: str
-):
+async def test_mcp_http_transports_end_to_end(tmp_path: Path, transport: str, endpoint_path: str):
     with anyio.fail_after(180):
         repo_root = Path(__file__).resolve().parents[1]
         env = _pythonpath_env(repo_root)
@@ -459,16 +451,12 @@ async def test_mcp_http_transports_end_to_end(
                 ):
                     async with ClientSession(read_stream, write_stream) as session:
                         await session.initialize()
-                        await _assert_core_mcp_contract(
-                            session, project_root, target_file
-                        )
+                        await _assert_core_mcp_contract(session, project_root, target_file)
             else:
                 async with sse_client(base_url) as (read, write):
                     async with ClientSession(read, write) as session:
                         await session.initialize()
-                        await _assert_core_mcp_contract(
-                            session, project_root, target_file
-                        )
+                        await _assert_core_mcp_contract(session, project_root, target_file)
 
         finally:
             proc.terminate()

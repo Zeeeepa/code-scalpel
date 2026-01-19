@@ -310,9 +310,7 @@ def _extract_code_sync(
             context = extractor.get_function_with_context(target_name)
 
     if not target.success:
-        return server._extraction_error(
-            target_name, target.error or "Extraction failed"
-        )
+        return server._extraction_error(target_name, target.error or "Extraction failed")
 
     context_code = context.context_code if context else ""
     context_items = context.context_items if context else (target.dependencies or [])

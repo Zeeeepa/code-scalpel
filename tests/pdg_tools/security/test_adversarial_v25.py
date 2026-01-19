@@ -120,9 +120,7 @@ def level_{i}_func():
 
         # The deepest dependency should have confidence ≈ 0.349
         if deepest_dep:
-            assert (
-                deepest_dep.depth >= 9
-            ), f"Expected deep chain, got max depth {max_depth}"
+            assert deepest_dep.depth >= 9, f"Expected deep chain, got max depth {max_depth}"
 
             # Confidence at depth 10 should be ~0.349, NOT 0.9
             expected_at_depth = 0.9**deepest_dep.depth
@@ -232,9 +230,7 @@ def level_{i}_func():
                 abs(dep.confidence - 1.0) < 0.001
             ), f"With decay_factor=1.0, all deps should have confidence=1.0, got {dep.confidence}"
 
-    def test_telephone_game_extreme_decay_factor_greater_than_one(
-        self, ten_hop_chain_project
-    ):
+    def test_telephone_game_extreme_decay_factor_greater_than_one(self, ten_hop_chain_project):
         """
         ADV-2.5.1 ADVERSARIAL: decay_factor > 1.0 should be clamped or rejected.
 
@@ -382,9 +378,7 @@ def level_{i}_func():
 
         # Find dependencies below threshold
         low_conf_deps = [
-            d
-            for d in result.dependencies
-            if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
+            d for d in result.dependencies if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
         ]
 
         # With 0.9 decay, depth 7+ should be below 0.5 threshold
@@ -419,9 +413,7 @@ def level_{i}_func():
         assert result.success
 
         if result.low_confidence_count > 0:
-            assert (
-                result.has_low_confidence_symbols
-            ), "has_low_confidence_symbols should be True"
+            assert result.has_low_confidence_symbols, "has_low_confidence_symbols should be True"
 
             # Check for warning
             low_conf_symbols = result.get_low_confidence_symbols()
@@ -670,16 +662,12 @@ class TestADV253ContextExplosion:
         graph, hub_id = dense_hub_graph
 
         # Request neighborhood with default max_nodes=100
-        result = graph.get_neighborhood(
-            center_node_id=hub_id, k=2, max_nodes=100, direction="both"
-        )
+        result = graph.get_neighborhood(center_node_id=hub_id, k=2, max_nodes=100, direction="both")
 
         assert result.success, "Neighborhood extraction failed"
 
         # CRITICAL: Must be truncated
-        assert (
-            result.truncated
-        ), "Graph with 501 nodes should be truncated when max_nodes=100"
+        assert result.truncated, "Graph with 501 nodes should be truncated when max_nodes=100"
 
         # Must not exceed max_nodes
         assert (
@@ -698,9 +686,7 @@ class TestADV253ContextExplosion:
         """
         graph, hub_id = dense_hub_graph
 
-        result = graph.get_neighborhood(
-            center_node_id=hub_id, k=1, max_nodes=50, direction="both"
-        )
+        result = graph.get_neighborhood(center_node_id=hub_id, k=1, max_nodes=50, direction="both")
 
         assert result.success
         assert result.truncated
@@ -802,9 +788,7 @@ class TestADV254Relevance:
                 name=name,
                 line=20 + i,
             )
-            graph.add_node(
-                GraphNode(id=node_id, metadata={"confidence_group": "medium"})
-            )
+            graph.add_node(GraphNode(id=node_id, metadata={"confidence_group": "medium"}))
 
             from_id = center_str if i == 0 else f"python::med::function::med_{i}"
             graph.add_edge(
@@ -862,14 +846,10 @@ class TestADV254Relevance:
         node_ids = [str(n.id) for n in result.subgraph.nodes]
 
         # High confidence nodes should be present
-        assert any(
-            "high" in nid for nid in node_ids
-        ), "High confidence nodes should be retained"
+        assert any("high" in nid for nid in node_ids), "High confidence nodes should be retained"
 
         # Medium confidence nodes should be present (0.7 > 0.5)
-        assert any(
-            "med" in nid for nid in node_ids
-        ), "Medium confidence nodes should be retained"
+        assert any("med" in nid for nid in node_ids), "Medium confidence nodes should be retained"
 
         # Low confidence nodes should be EXCLUDED (0.3 < 0.5)
         assert not any(
@@ -884,14 +864,10 @@ class TestADV254Relevance:
 
         # Test different confidence thresholds
         # With 0.8 threshold, only high confidence should pass
-        result_high = graph.get_neighborhood(
-            center_node_id=center_id, k=3, min_confidence=0.8
-        )
+        result_high = graph.get_neighborhood(center_node_id=center_id, k=3, min_confidence=0.8)
 
         # With 0.2 threshold, all should pass
-        result_all = graph.get_neighborhood(
-            center_node_id=center_id, k=3, min_confidence=0.2
-        )
+        result_all = graph.get_neighborhood(center_node_id=center_id, k=3, min_confidence=0.2)
 
         # High threshold should have fewer nodes
         assert len(result_high.subgraph.nodes) < len(
@@ -1238,9 +1214,7 @@ class TestADV254Relevance:
         # Run 10 times with max_nodes=5 (forces tie-breaking)
         results = []
         for _ in range(10):
-            result = graph.get_neighborhood(
-                center_node_id=str(center_id), k=1, max_nodes=5
-            )
+            result = graph.get_neighborhood(center_node_id=str(center_id), k=1, max_nodes=5)
             assert result.success
             node_ids = sorted([str(n.id) for n in result.subgraph.nodes])
             results.append(node_ids)
@@ -1316,9 +1290,7 @@ policies:
         policy_file = policy_dir / "policy.yaml"
 
         # Step 1: Agent runs chmod +w (simulated)
-        policy_file.chmod(
-            stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
-        )  # 0o644
+        policy_file.chmod(stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)  # 0o644
 
         # Step 2: Agent modifies the policy (ATTACK)
         malicious_content = """
@@ -1351,9 +1323,7 @@ policies:
             # Verify the error message indicates tampering
             error_msg = str(exc.value).lower()
             assert (
-                "tampered" in error_msg
-                or "mismatch" in error_msg
-                or "denied" in error_msg
+                "tampered" in error_msg or "mismatch" in error_msg or "denied" in error_msg
             ), f"Expected tampering detection, got: {exc.value}"
 
     def test_chmod_bypass_hash_mismatch_details(self, signed_policy_dir):
@@ -1877,9 +1847,7 @@ class TestADV256ManifestTamper:
         )
 
         # Clear environment completely, system should fail closed
-        env_without_secret = {
-            k: v for k, v in os.environ.items() if k != "SCALPEL_MANIFEST_SECRET"
-        }
+        env_without_secret = {k: v for k, v in os.environ.items() if k != "SCALPEL_MANIFEST_SECRET"}
         with patch.dict(os.environ, env_without_secret, clear=True):
             with pytest.raises(SecurityError):
                 CryptographicPolicyVerifier(
@@ -1922,9 +1890,7 @@ class TestEvidenceGeneration:
             test_count += len(methods)
 
         # Should have at least 2 tests per adversarial category
-        assert (
-            test_count >= 12
-        ), f"Expected at least 12 adversarial tests, found {test_count}"
+        assert test_count >= 12, f"Expected at least 12 adversarial tests, found {test_count}"
 
     def test_evidence_format(self):
         """

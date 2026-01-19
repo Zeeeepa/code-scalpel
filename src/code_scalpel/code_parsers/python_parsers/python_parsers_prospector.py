@@ -347,9 +347,7 @@ class ProspectorProfileLoader:
         """
         if name not in BUILTIN_PROFILES:
             available = ", ".join(BUILTIN_PROFILES.keys())
-            raise ValueError(
-                f"Unknown built-in profile: {name}. " f"Available: {available}"
-            )
+            raise ValueError(f"Unknown built-in profile: {name}. " f"Available: {available}")
 
         return cls._from_dict(BUILTIN_PROFILES[name], name)
 
@@ -381,9 +379,7 @@ class ProspectorProfileLoader:
 
         if "ignore-patterns" in data:
             patterns = data["ignore-patterns"]
-            profile.ignore_patterns = (
-                patterns if isinstance(patterns, list) else [patterns]
-            )
+            profile.ignore_patterns = patterns if isinstance(patterns, list) else [patterns]
 
         # Parse inherits
         if "inherits" in data:
@@ -539,10 +535,7 @@ class ProspectorMessage:
 
     def format(self) -> str:
         """Format the message for display."""
-        return (
-            f"{self.location.location_string}: "
-            f"[{self.source}] {self.code}: {self.message}"
-        )
+        return f"{self.location.location_string}: " f"[{self.source}] {self.code}: {self.message}"
 
 
 @dataclass
@@ -623,9 +616,7 @@ class ProspectorReport:
             "total_messages": self.message_count,
             "errors": self.error_count,
             "warnings": self.warning_count,
-            "by_tool": {
-                tool: len(msgs) for tool, msgs in self.messages_by_tool.items()
-            },
+            "by_tool": {tool: len(msgs) for tool, msgs in self.messages_by_tool.items()},
             "by_severity": {
                 sev.value: len(msgs) for sev, msgs in self.messages_by_severity.items()
             },
@@ -667,9 +658,7 @@ class ProspectorReport:
                 if dup_key in seen:
                     existing = seen[dup_key]
                     # Keep the higher severity message
-                    if self._severity_rank(msg.severity) > self._severity_rank(
-                        existing.severity
-                    ):
+                    if self._severity_rank(msg.severity) > self._severity_rank(existing.severity):
                         seen[dup_key] = msg
                 else:
                     seen[dup_key] = msg

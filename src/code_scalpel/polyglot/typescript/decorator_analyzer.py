@@ -122,9 +122,7 @@ class DecoratorAnalyzer:
                 arguments = [arg.strip() for arg in args_str.split(",")]
 
             # Find line number
-            param_pattern = (
-                f"@{decorator_name}\\s*\\({re.escape(args_str)}\\)\\s+{param_name}\\s*:"
-            )
+            param_pattern = f"@{decorator_name}\\s*\\({re.escape(args_str)}\\)\\s+{param_name}\\s*:"
             for line_num, line in enumerate(code.split("\n"), 1):
                 if re.search(param_pattern, line):
                     result["parameters"].append(
@@ -185,9 +183,7 @@ class DecoratorAnalyzer:
                 continue
 
             # Check for method declaration
-            method_match = re.match(
-                r"(?:async\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*[^{]+)?", stripped
-            )
+            method_match = re.match(r"(?:async\s+)?(\w+)\s*\([^)]*\)\s*(?::\s*[^{]+)?", stripped)
             if method_match and current_decorators:
                 result["methods"].append(
                     {
@@ -201,14 +197,9 @@ class DecoratorAnalyzer:
 
             # Reset decorators if we hit a non-decorator line
             # (unless it's a blank line or comment)
-            if (
-                stripped
-                and not stripped.startswith("@")
-                and not stripped.startswith("//")
-            ):
+            if stripped and not stripped.startswith("@") and not stripped.startswith("//"):
                 if not any(
-                    keyword in stripped
-                    for keyword in ["class", "function", "async", "constructor"]
+                    keyword in stripped for keyword in ["class", "function", "async", "constructor"]
                 ):
                     # Keep decorators for next declaration
                     pass

@@ -149,9 +149,7 @@ class LogicalRelationshipDetector:
 
             # Find test relationships
             if "test_for" in relationship_types or "tested_by" in relationship_types:
-                test_rels = self._find_test_relationships(
-                    center_ctx, contexts, relationship_types
-                )
+                test_rels = self._find_test_relationships(center_ctx, contexts, relationship_types)
                 relationships.extend(test_rels)
 
             # Find sibling relationships
@@ -255,9 +253,7 @@ class LogicalRelationshipDetector:
                     node, contexts, file_path, module, is_test_file, node.name
                 )
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                ctx = self._make_function_context(
-                    node, file_path, module, is_test_file, class_name
-                )
+                ctx = self._make_function_context(node, file_path, module, is_test_file, class_name)
                 key = f"{file_path}:{ctx.name}:{ctx.line}"
                 contexts[key] = ctx
 
@@ -397,11 +393,7 @@ class LogicalRelationshipDetector:
         if center.is_private and "uses_helper" in relationship_types:
             # This is a helper - find public functions in same module
             for ctx in contexts.values():
-                if (
-                    ctx.file_path == center.file_path
-                    and not ctx.is_private
-                    and not ctx.is_dunder
-                ):
+                if ctx.file_path == center.file_path and not ctx.is_private and not ctx.is_dunder:
                     relationships.append(
                         LogicalRelationship(
                             source_node=self._make_node_id(center),

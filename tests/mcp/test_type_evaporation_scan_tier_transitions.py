@@ -129,10 +129,7 @@ async def test_tier_transition_community_to_pro_adds_fields(
     # assert pro_env["tier"] == "pro"
     assert pro_data.get("implicit_any_count", 0) >= 1  # Should detect .json() calls
     # Network/library boundaries may or may not be populated depending on detection
-    assert (
-        "network_boundaries" in pro_data
-        or pro_data.get("network_boundaries") is not None
-    )
+    assert "network_boundaries" in pro_data or pro_data.get("network_boundaries") is not None
 
     # Core fields should remain consistent
     assert comm_data.get("success") == pro_data.get("success")
@@ -305,9 +302,7 @@ def set_role():
 
     # Vulnerability counts should be identical (core data preserved)
     assert pro_data.get("frontend_vulnerabilities", 0) == comm_frontend_vulns
-    assert pro_data.get("backend_vulnerabilities", 0) == comm_data.get(
-        "backend_vulnerabilities", 0
-    )
+    assert pro_data.get("backend_vulnerabilities", 0) == comm_data.get("backend_vulnerabilities", 0)
 
     # Test with Enterprise tier
     ent_env_vars = _license_env(
@@ -333,9 +328,7 @@ def set_role():
 
     # Enterprise should also preserve core vulnerability data
     assert ent_data.get("frontend_vulnerabilities", 0) == comm_frontend_vulns
-    assert ent_data.get("backend_vulnerabilities", 0) == comm_data.get(
-        "backend_vulnerabilities", 0
-    )
+    assert ent_data.get("backend_vulnerabilities", 0) == comm_data.get("backend_vulnerabilities", 0)
 
 
 async def test_tier_transition_capability_consistency():

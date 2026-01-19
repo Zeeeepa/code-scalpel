@@ -39,9 +39,7 @@ async def symbolic_execute(
 
     effective_max_paths: int | None
     if max_paths is None:
-        effective_max_paths = (
-            None if configured_max_paths is None else int(configured_max_paths)
-        )
+        effective_max_paths = None if configured_max_paths is None else int(configured_max_paths)
     else:
         effective_max_paths = int(max_paths)
         if configured_max_paths is not None:
@@ -49,9 +47,7 @@ async def symbolic_execute(
 
     effective_max_depth: int | None
     if max_depth is None:
-        effective_max_depth = (
-            None if configured_max_depth is None else int(configured_max_depth)
-        )
+        effective_max_depth = None if configured_max_depth is None else int(configured_max_depth)
     else:
         effective_max_depth = int(max_depth)
         if configured_max_depth is not None:

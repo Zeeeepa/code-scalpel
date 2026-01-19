@@ -52,9 +52,7 @@ class TestMalformedInputs:
     @pytest.mark.asyncio
     async def test_extract_whitespace_only(self):
         """Whitespace-only code should fail gracefully."""
-        result = await extract_code(
-            code="   \n\t\n   ", target_type="function", target_name="foo"
-        )
+        result = await extract_code(code="   \n\t\n   ", target_type="function", target_name="foo")
         assert not result.success
 
     @pytest.mark.asyncio
@@ -75,18 +73,14 @@ def broken():
     x = [1, 2, 3
     return x
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="broken"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="broken")
         assert not result.success
 
     @pytest.mark.asyncio
     async def test_extract_null_bytes(self):
         """Code with null bytes should be handled."""
         code = "def foo():\x00\n    pass"
-        result = await extract_code(
-            code=code, target_type="function", target_name="foo"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="foo")
         # Should either clean or reject
         assert result is not None
 
@@ -94,18 +88,14 @@ def broken():
     async def test_extract_mixed_indentation(self):
         """Mixed tabs and spaces should be handled."""
         code = "def mixed():\n\treturn 1\n    return 2"
-        result = await extract_code(
-            code=code, target_type="function", target_name="mixed"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="mixed")
         # Python would reject this, so should we
         assert not result.success or "indent" in str(result.error).lower()
 
     @pytest.mark.asyncio
     async def test_security_scan_binary_content(self):
         """Binary content should be rejected gracefully."""
-        binary = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]).decode(
-            "latin-1"
-        )
+        binary = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]).decode("latin-1")
         result = await security_scan(code=binary)
         # Should not crash
         assert result is not None
@@ -126,9 +116,7 @@ class TestUnicodeEdgeCases:
 def 计算税(金额, 税率=0.1):
     return 金额 * 税率
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="计算税"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="计算税")
         # Python 3 supports Unicode identifiers
         assert result.success or "unicode" in str(result.error).lower()
 
@@ -139,9 +127,7 @@ def 计算税(金额, 税率=0.1):
 def greet():
     return "Hello 👋 World 🌍!"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="greet"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="greet")
         assert result.success
         assert "👋" in result.target_code or result.success
 
@@ -153,9 +139,7 @@ def test_rtl():
     # مرحبا
     return "שלום"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="test_rtl"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="test_rtl")
         assert result.success
 
     @pytest.mark.asyncio
@@ -163,9 +147,7 @@ def test_rtl():
         """Zero-width characters should not break parsing."""
         # Zero-width space and zero-width joiner
         code = "def foo\u200b\u200c():\n    pass"
-        result = await extract_code(
-            code=code, target_type="function", target_name="foo"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="foo")
         # Should either succeed or fail gracefully
         assert result is not None
 
@@ -206,9 +188,7 @@ class A:
                                         def deeply_nested(self):
                                             return "found"
 """
-        result = await extract_code(
-            code=code, target_type="method", target_name="J.deeply_nested"
-        )
+        result = await extract_code(code=code, target_type="method", target_name="J.deeply_nested")
         assert result.success
         assert "deeply_nested" in result.target_code
 
@@ -219,9 +199,7 @@ class A:
 def matrix_cube():
     return [[[[[x*y*z*w*v for v in range(2)] for w in range(2)] for z in range(2)] for y in range(2)] for x in range(2)]
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="matrix_cube"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="matrix_cube")
         assert result.success
 
     @pytest.mark.asyncio
@@ -255,9 +233,7 @@ class TestLargeInputs:
         code = "\n".join(functions)
 
         # Extract function from middle
-        result = await extract_code(
-            code=code, target_type="function", target_name="func_500"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="func_500")
         assert result.success
         assert "500" in result.target_code
 
@@ -267,9 +243,7 @@ class TestLargeInputs:
         lines = ["    x = " + str(i) for i in range(500)]
         code = "def huge_function():\n" + "\n".join(lines) + "\n    return x"
 
-        result = await extract_code(
-            code=code, target_type="function", target_name="huge_function"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="huge_function")
         assert result.success
         assert result.line_end - result.line_start >= 500
 
@@ -353,9 +327,7 @@ password = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
         params = ", ".join([f"arg{i}=None" for i in range(100)])
         code = f"def many_params({params}):\n    return locals()"
 
-        result = await extract_code(
-            code=code, target_type="function", target_name="many_params"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="many_params")
         assert result.success
 
 
@@ -564,9 +536,7 @@ class TestConcurrentAccess:
     @pytest.mark.asyncio
     async def test_concurrent_security_scans(self):
         """Multiple concurrent security scans should complete."""
-        codes = [
-            f"def vuln_{i}(x):\n    cursor.execute(f'SELECT {{x}}')" for i in range(10)
-        ]
+        codes = [f"def vuln_{i}(x):\n    cursor.execute(f'SELECT {{x}}')" for i in range(10)]
 
         results = await asyncio.gather(*[security_scan(code=code) for code in codes])
 
@@ -580,9 +550,7 @@ class TestConcurrentAccess:
         java_code = "public class JavaClass { void method() {} }"
 
         results = await asyncio.gather(
-            extract_code(
-                code=python_code, target_type="function", target_name="py_func"
-            ),
+            extract_code(code=python_code, target_type="function", target_name="py_func"),
             extract_code(
                 code=ts_code,
                 target_type="function",
@@ -621,9 +589,7 @@ class AsyncDBConnection:
         await self.conn.close()
         return False
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="AsyncDBConnection"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="AsyncDBConnection")
         assert result.success
         assert "__aenter__" in result.target_code
 
@@ -639,9 +605,7 @@ class SingletonMeta(type):
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="SingletonMeta"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="SingletonMeta")
         assert result.success
 
     @pytest.mark.asyncio
@@ -664,9 +628,7 @@ class Temperature:
     def fahrenheit(self):
         del self._celsius
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="Temperature"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="Temperature")
         assert result.success
         assert "@property" in result.target_code
 
@@ -709,18 +671,13 @@ class TestErrorRecovery:
             code=code, target_type="function", target_name="nonexistent_function"
         )
         assert not result.success
-        assert (
-            "not found" in result.error.lower()
-            or "nonexistent" in str(result.error).lower()
-        )
+        assert "not found" in result.error.lower() or "nonexistent" in str(result.error).lower()
 
     @pytest.mark.asyncio
     async def test_extract_wrong_type(self):
         """Extracting wrong type should fail gracefully."""
         code = "class MyClass:\n    pass"
-        result = await extract_code(
-            code=code, target_type="function", target_name="MyClass"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="MyClass")
         # Should either succeed (finding nothing) or fail gracefully
         assert result is not None
 

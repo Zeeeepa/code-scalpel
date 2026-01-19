@@ -1477,9 +1477,7 @@ for i in range(10):
         from code_scalpel.ir.operators import AugAssignOperator
 
         attr = IRAttribute(value=IRName(id="obj"), attr="x")
-        aug = IRAugAssign(
-            target=attr, op=AugAssignOperator.ADD, value=IRConstant(value=1)
-        )
+        aug = IRAugAssign(target=attr, op=AugAssignOperator.ADD, value=IRConstant(value=1))
         ir = IRModule(body=[aug])
         interp = IRSymbolicInterpreter()
         result = interp.execute(ir)

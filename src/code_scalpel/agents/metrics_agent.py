@@ -84,9 +84,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         metrics.update(complexity_metrics)
 
         # Calculate coupling metrics
-        coupling_metrics = self._calculate_coupling_metrics(
-            observations.get("symbol_analysis", {})
-        )
+        coupling_metrics = self._calculate_coupling_metrics(observations.get("symbol_analysis", {}))
         metrics.update(coupling_metrics)
 
         # Calculate cohesion metrics
@@ -178,9 +176,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "report_path": report.get("path"),
         }
 
-    def _calculate_complexity_metrics(
-        self, file_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_complexity_metrics(self, file_info: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate cyclomatic and cognitive complexity metrics."""
         return {
             "cyclomatic_complexity": 5,
@@ -188,9 +184,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "max_nesting_depth": 3,
         }
 
-    def _calculate_coupling_metrics(
-        self, symbol_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_coupling_metrics(self, symbol_analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate coupling and dependency metrics."""
         return {
             "afferent_coupling": 3,

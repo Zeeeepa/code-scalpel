@@ -64,9 +64,7 @@ def _validate_paths_sync(
                 suggestions.append(
                     "Running in Docker: Mount your project with -v /path/to/project:/workspace"
                 )
-                suggestions.append(
-                    "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
-                )
+                suggestions.append("Example: docker run -v $(pwd):/workspace code-scalpel:latest")
             else:
                 suggestions.append(
                     "Ensure files exist and use absolute paths or place in workspace roots:"
@@ -94,9 +92,7 @@ def _validate_paths_sync(
                             for target in target_patterns:
                                 alias_key = alias.replace("/*", "")
                                 target_path = target.replace("/*", "")
-                                resolved = str(
-                                    PathLib(project_root) / base_url / target_path
-                                )
+                                resolved = str(PathLib(project_root) / base_url / target_path)
                                 alias_resolutions.append(
                                     {
                                         "alias": alias_key,
@@ -121,9 +117,7 @@ def _validate_paths_sync(
                                     "alias": alias,
                                     "original_path": f"src/{alias.replace('@', '')}",
                                     "resolved_path": str(
-                                        PathLib(project_root)
-                                        / "src"
-                                        / alias.replace("@", "")
+                                        PathLib(project_root) / "src" / alias.replace("@", "")
                                     ),
                                     "source": "webpack.config.js",
                                 }
@@ -195,9 +189,7 @@ def _validate_paths_sync(
             critical_count = sum(
                 1 for v in traversal_vulnerabilities if v.get("severity") == "critical"
             )
-            high_count = sum(
-                1 for v in traversal_vulnerabilities if v.get("severity") == "high"
-            )
+            high_count = sum(1 for v in traversal_vulnerabilities if v.get("severity") == "high")
             score -= critical_count * 3.0 + high_count * 1.5
             score -= len(boundary_violations) * 2.0
             score -= len(inaccessible) * 0.5
@@ -225,9 +217,7 @@ def _validate_paths_sync(
 
         response_config = get_cached_response_config()
         try:
-            filtered_dict = filter_response(
-                result.model_dump(), "validate_paths", response_config
-            )
+            filtered_dict = filter_response(result.model_dump(), "validate_paths", response_config)
             return PathValidationResult(**filtered_dict)
         except Exception as e:  # noqa: BLE001
             _ = e
@@ -305,9 +295,7 @@ def _verify_policy_integrity_sync(
             for ext in ["*.yaml", "*.yml", "*.json"]:
                 policy_files.extend(policy_path.glob(ext))
 
-            policy_files = [
-                pf for pf in policy_files if pf.name != "policy.manifest.json"
-            ]
+            policy_files = [pf for pf in policy_files if pf.name != "policy.manifest.json"]
 
             policy_files = sorted(policy_files, key=lambda p: p.name)
 

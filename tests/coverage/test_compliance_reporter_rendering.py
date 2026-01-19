@@ -174,9 +174,7 @@ def _install_fake_reportlab(monkeypatch) -> None:
 
     monkeypatch.setitem(sys.modules, "reportlab", fake_reportlab)
     monkeypatch.setitem(sys.modules, "reportlab.lib", fake_reportlab.lib)
-    monkeypatch.setitem(
-        sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes
-    )
+    monkeypatch.setitem(sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes)
     monkeypatch.setitem(sys.modules, "reportlab.lib.units", fake_reportlab.lib.units)
     monkeypatch.setitem(sys.modules, "reportlab.lib.styles", fake_reportlab.lib.styles)
     monkeypatch.setitem(sys.modules, "reportlab.lib.colors", fake_reportlab.lib.colors)

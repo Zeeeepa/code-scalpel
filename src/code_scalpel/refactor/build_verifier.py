@@ -254,10 +254,7 @@ class BuildVerifier:
                 if result.returncode != 0:
                     errors.append(result.stderr)
 
-                if (
-                    "warning" in result.stdout.lower()
-                    or "warning" in result.stderr.lower()
-                ):
+                if "warning" in result.stdout.lower() or "warning" in result.stderr.lower():
                     warnings.append(result.stdout + result.stderr)
 
                 return BuildResult(

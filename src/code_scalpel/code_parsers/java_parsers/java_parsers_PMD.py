@@ -192,9 +192,7 @@ class PMDParser:
         """
         return [v for v in violations if v.priority <= max_priority]
 
-    def get_by_ruleset(
-        self, violations: list[PMDViolation], ruleset: str
-    ) -> list[PMDViolation]:
+    def get_by_ruleset(self, violations: list[PMDViolation], ruleset: str) -> list[PMDViolation]:
         """
         Filter violations by ruleset.
 

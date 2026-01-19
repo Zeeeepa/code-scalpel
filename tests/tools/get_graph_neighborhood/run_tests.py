@@ -83,9 +83,7 @@ def main():
         print()
         print("Next Steps:")
         print("  1. Run full test suite: pytest tests/tools/get_graph_neighborhood/ -v")
-        print(
-            "  2. Check coverage: pytest --cov=code_scalpel.mcp.server --cov-report=html"
-        )
+        print("  2. Check coverage: pytest --cov=code_scalpel.mcp.server --cov-report=html")
         print("  3. Update assessment document with test references")
         return 0
     else:

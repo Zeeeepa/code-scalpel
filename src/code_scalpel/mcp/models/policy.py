@@ -48,9 +48,7 @@ class PathValidationResult(BaseModel):
     workspace_roots: list[str] = Field(
         default_factory=list, description="Detected workspace root directories"
     )
-    is_docker: bool = Field(
-        default=False, description="Whether running in Docker container"
-    )
+    is_docker: bool = Field(default=False, description="Whether running in Docker container")
 
     # [20251225_FEATURE] v3.3.0 - Tier-specific outputs
     # Pro tier additions
@@ -79,30 +77,20 @@ class PolicyVerificationResult(BaseModel):
     """Result of cryptographic policy verification."""
 
     success: bool = Field(description="Whether all policy files verified successfully")
-    manifest_valid: bool = Field(
-        default=False, description="Whether manifest signature is valid"
-    )
-    files_verified: int = Field(
-        default=0, description="Number of files successfully verified"
-    )
+    manifest_valid: bool = Field(default=False, description="Whether manifest signature is valid")
+    files_verified: int = Field(default=0, description="Number of files successfully verified")
     files_failed: list[str] = Field(
         default_factory=list, description="List of files that failed verification"
     )
-    error: str | None = Field(
-        default=None, description="Error message if verification failed"
-    )
+    error: str | None = Field(default=None, description="Error message if verification failed")
     error_code: str | None = Field(
         default=None,
         description=(
             "Stable, machine-readable error code for failures (non-breaking additive field)"
         ),
     )
-    manifest_source: str | None = Field(
-        default=None, description="Source of the policy manifest"
-    )
-    policy_dir: str | None = Field(
-        default=None, description="Policy directory that was verified"
-    )
+    manifest_source: str | None = Field(default=None, description="Source of the policy manifest")
+    policy_dir: str | None = Field(default=None, description="Policy directory that was verified")
     # [20251226_FEATURE] Tier-specific outputs
     tier: str = Field(default="community", description="Tier used for verification")
     signature_validated: bool = Field(

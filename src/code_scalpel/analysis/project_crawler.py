@@ -234,9 +234,7 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Handle class definitions."""
         bases: list[str] = [
-            base_name
-            for base in node.bases
-            if (base_name := self._get_base_name(base)) is not None
+            base_name for base in node.bases if (base_name := self._get_base_name(base)) is not None
         ]
         class_info = ClassInfo(
             name=node.name,
@@ -384,9 +382,7 @@ class ProjectCrawler:
         if self.respect_gitignore:
             gitignore_file = self.root_path / ".gitignore"
             if gitignore_file.exists() and gitignore_file.is_file():
-                for raw in gitignore_file.read_text(
-                    encoding="utf-8", errors="ignore"
-                ).splitlines():
+                for raw in gitignore_file.read_text(encoding="utf-8", errors="ignore").splitlines():
                     line = raw.strip()
                     if not line or line.startswith("#"):
                         continue
@@ -464,9 +460,7 @@ class ProjectCrawler:
         # Stable key regardless of OS path separators
         return rel_path.replace("\\", "/")
 
-    def _try_load_cached(
-        self, file_path: Path, rel_path: str
-    ) -> FileAnalysisResult | None:
+    def _try_load_cached(self, file_path: Path, rel_path: str) -> FileAnalysisResult | None:
         if not self.enable_cache:
             return None
 
@@ -653,9 +647,7 @@ class ProjectCrawler:
                         break
                     analyzed_files += 1
                     file_path = Path(root) / filename
-                    rel_path = str(
-                        (Path(root) / filename).resolve().relative_to(self.root_path)
-                    )
+                    rel_path = str((Path(root) / filename).resolve().relative_to(self.root_path))
                     files_to_analyze.append((file_path, rel_path))
 
             if reached_limit:
@@ -676,12 +668,8 @@ class ProjectCrawler:
 
         parallelism = self.parallelism
         if parallelism == "threads":
-            with ThreadPoolExecutor(
-                max_workers=min(32, (os.cpu_count() or 4) + 4)
-            ) as ex:
-                futs = {
-                    ex.submit(_analyze_one, item): item for item in files_to_analyze
-                }
+            with ThreadPoolExecutor(max_workers=min(32, (os.cpu_count() or 4) + 4)) as ex:
+                futs = {ex.submit(_analyze_one, item): item for item in files_to_analyze}
                 for fut in as_completed(futs):
                     analyzed_results.append(fut.result())
         elif parallelism == "processes":
@@ -706,8 +694,7 @@ class ProjectCrawler:
                     mp_context=ctx,
                 ) as ex:
                     futs = {
-                        ex.submit(_analyze_file_worker, str(fp)): (fp, relp)
-                        for fp, relp in misses
+                        ex.submit(_analyze_file_worker, str(fp)): (fp, relp) for fp, relp in misses
                     }
                     for fut in as_completed(futs):
                         fp, relp = futs[fut]
@@ -790,9 +777,7 @@ class ProjectCrawler:
             complexity = self._estimate_complexity_text(code, language)
             warnings: list[FunctionInfo] = []
             if complexity > self.complexity_threshold:
-                warnings.append(
-                    FunctionInfo(name=path_obj.name, lineno=1, complexity=complexity)
-                )
+                warnings.append(FunctionInfo(name=path_obj.name, lineno=1, complexity=complexity))
 
             return FileAnalysisResult(
                 path=file_path,
@@ -867,9 +852,7 @@ class ProjectCrawler:
         else:
             md_lines.append("| File | Function | Complexity | Line |")
             md_lines.append("|------|----------|------------|------|")
-            for file_path, func in sorted(
-                warnings, key=lambda x: x[1].complexity, reverse=True
-            ):
+            for file_path, func in sorted(warnings, key=lambda x: x[1].complexity, reverse=True):
                 rel_path = os.path.relpath(file_path, result.root_path)
                 md_lines.append(
                     f"| `{rel_path}` | `{func.qualified_name}` | **{func.complexity}** | {func.lineno} |"

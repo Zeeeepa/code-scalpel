@@ -198,20 +198,14 @@ class JavaVisitor(TreeSitterVisitor):
         bases: List[Any] = []
         superclass_node = node.child_by_field_name("superclass")
         if superclass_node:
-            bases.extend(
-                IRName(id=b) for b in self._extract_type_names(superclass_node)
-            )
+            bases.extend(IRName(id=b) for b in self._extract_type_names(superclass_node))
 
         interfaces_node = node.child_by_field_name("interfaces")
         if interfaces_node:
-            bases.extend(
-                IRName(id=b) for b in self._extract_type_names(interfaces_node)
-            )
+            bases.extend(IRName(id=b) for b in self._extract_type_names(interfaces_node))
 
         decorators = self._collect_annotations(node)
-        type_params = self._extract_type_params(
-            node.child_by_field_name("type_parameters")
-        )
+        type_params = self._extract_type_params(node.child_by_field_name("type_parameters"))
 
         if body_node:
             for child in body_node.children:
@@ -299,9 +293,7 @@ class JavaVisitor(TreeSitterVisitor):
 
         return IRClassDef(
             name=name,
-            bases=[
-                IRName(id="Record")
-            ],  # [20251220_BUGFIX] Use IRName instead of string
+            bases=[IRName(id="Record")],  # [20251220_BUGFIX] Use IRName instead of string
             body=body,
             source_language=self.language,
             loc=self._get_location(node),
@@ -325,9 +317,7 @@ class JavaVisitor(TreeSitterVisitor):
             name="__init__",
             params=[],  # Compact constructors have implicit params
             body=(
-                body_stmts
-                if isinstance(body_stmts, list)
-                else [body_stmts] if body_stmts else []
+                body_stmts if isinstance(body_stmts, list) else [body_stmts] if body_stmts else []
             ),
             return_type=name,
             source_language=self.language,
@@ -348,9 +338,7 @@ class JavaVisitor(TreeSitterVisitor):
         class_name = self.get_text(name_node) if name_node else "Unknown"
 
         decorators = self._collect_annotations(node)
-        type_params = self._extract_type_params(
-            node.child_by_field_name("type_parameters")
-        )
+        type_params = self._extract_type_params(node.child_by_field_name("type_parameters"))
 
         # Parameters
         params = []
@@ -369,8 +357,7 @@ class JavaVisitor(TreeSitterVisitor):
                         )
                         if annotations:
                             param._metadata["annotations"] = [
-                                a.id if isinstance(a, IRName) else a
-                                for a in annotations
+                                a.id if isinstance(a, IRName) else a for a in annotations
                             ]
                         params.append(param)
 
@@ -384,9 +371,7 @@ class JavaVisitor(TreeSitterVisitor):
             name="__init__",  # Use Python convention for constructors
             params=params,
             body=(
-                body_stmts
-                if isinstance(body_stmts, list)
-                else [body_stmts] if body_stmts else []
+                body_stmts if isinstance(body_stmts, list) else [body_stmts] if body_stmts else []
             ),
             return_type=class_name,  # Constructor "returns" instance of class
             source_language=self.language,
@@ -424,9 +409,7 @@ class JavaVisitor(TreeSitterVisitor):
         name = self.get_text(name_node)
 
         decorators = self._collect_annotations(node)
-        type_params = self._extract_type_params(
-            node.child_by_field_name("type_parameters")
-        )
+        type_params = self._extract_type_params(node.child_by_field_name("type_parameters"))
         return_type_node = node.child_by_field_name("type")
         return_type = self.get_text(return_type_node) if return_type_node else None
 
@@ -446,8 +429,7 @@ class JavaVisitor(TreeSitterVisitor):
                         )
                         if annotations:
                             param._metadata["annotations"] = [
-                                a.id if isinstance(a, IRName) else a
-                                for a in annotations
+                                a.id if isinstance(a, IRName) else a for a in annotations
                             ]
                         params.append(param)
 
@@ -457,9 +439,7 @@ class JavaVisitor(TreeSitterVisitor):
         if body_node:
             # visit_block returns List[IRNode]
             result = self.visit(body_node)
-            body_stmts = (
-                result if isinstance(result, list) else []
-            )  # [20251220_BUGFIX] Handle list
+            body_stmts = result if isinstance(result, list) else []  # [20251220_BUGFIX] Handle list
 
         func = IRFunctionDef(
             name=name,
@@ -467,9 +447,7 @@ class JavaVisitor(TreeSitterVisitor):
             body=body_stmts,
             return_type=return_type,
             source_language=self.language,
-            loc=self._get_location(
-                node
-            ),  # [20251214_FEATURE] Add location for extraction
+            loc=self._get_location(node),  # [20251214_FEATURE] Add location for extraction
             decorators=cast(List[Any], decorators),  # [20251220_BUGFIX] Cast decorators
         )
 
@@ -614,9 +592,7 @@ class JavaVisitor(TreeSitterVisitor):
 
     def visit_binary_expression(self, node: Any) -> IRBinaryOp:
         """a + b"""
-        left = self._norm_expr(
-            node.child_by_field_name("left")
-        )  # [20251220_BUGFIX] Normalize left
+        left = self._norm_expr(node.child_by_field_name("left"))  # [20251220_BUGFIX] Normalize left
         right = self._norm_expr(
             node.child_by_field_name("right")
         )  # [20251220_BUGFIX] Normalize right
@@ -634,9 +610,7 @@ class JavaVisitor(TreeSitterVisitor):
             "/": BinaryOperator.DIV,
             "%": BinaryOperator.MOD,
         }
-        op = op_map.get(
-            operator_text, BinaryOperator.ADD
-        )  # Default to ADD if unknown for now
+        op = op_map.get(operator_text, BinaryOperator.ADD)  # Default to ADD if unknown for now
 
         return IRBinaryOp(
             left=cast(Any, left), op=op, right=cast(Any, right)
@@ -717,9 +691,7 @@ class JavaVisitor(TreeSitterVisitor):
             handlers=handlers,
             orelse=[],  # Java doesn't have try/else
             finalbody=(
-                finalbody
-                if isinstance(finalbody, list)
-                else [finalbody] if finalbody else []
+                finalbody if isinstance(finalbody, list) else [finalbody] if finalbody else []
             ),
             loc=self._get_location(node),
         )
@@ -834,9 +806,7 @@ class JavaVisitor(TreeSitterVisitor):
             elif child.type == "assignment_expression" and init is None:
                 init = self.visit(child)
             elif child.type == "binary_expression" and condition is None:
-                condition = self._norm_expr(
-                    child
-                )  # [20251220_BUGFIX] Normalize condition
+                condition = self._norm_expr(child)  # [20251220_BUGFIX] Normalize condition
             elif child.type == "update_expression":
                 self.visit(child)
             elif child.type in ("block", "expression_statement"):
@@ -869,9 +839,7 @@ class JavaVisitor(TreeSitterVisitor):
                 "identifier",
             ):
                 if iterable is None:
-                    iterable = self._norm_expr(
-                        child
-                    )  # [20251220_BUGFIX] Normalize iterable
+                    iterable = self._norm_expr(child)  # [20251220_BUGFIX] Normalize iterable
             elif child.type == "block":
                 body = self.visit(child)
 
@@ -948,9 +916,7 @@ class JavaVisitor(TreeSitterVisitor):
         for child in node.children:
             if child.type in ("annotation", "marker_annotation"):
                 name_node = child.child_by_field_name("name")
-                name_text = (
-                    self.get_text(name_node) if name_node else self.get_text(child)
-                )
+                name_text = self.get_text(name_node) if name_node else self.get_text(child)
                 annotations.append(IRName(id=name_text.lstrip("@")))
             elif child.type == "modifiers":
                 annotations.extend(self._collect_annotations(child))
@@ -968,10 +934,7 @@ class JavaVisitor(TreeSitterVisitor):
         if node is None:
             return []
         text = (
-            self.get_text(node)
-            .replace("implements", " ")
-            .replace("extends", " ")
-            .replace(",", " ")
+            self.get_text(node).replace("implements", " ").replace("extends", " ").replace(",", " ")
         )
         names = []
         for part in text.split():

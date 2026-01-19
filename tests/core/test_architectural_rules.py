@@ -190,9 +190,7 @@ class TestLayerDetection:
 class TestDependencyRuleChecking:
     """Tests for dependency rule checking."""
 
-    def test_upward_dependency_violation(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_upward_dependency_violation(self, temp_project: Path, sample_config_toml: str):
         """Test detecting upward dependency violations."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()
@@ -212,9 +210,7 @@ class TestDependencyRuleChecking:
         assert len(upward) == 1
         assert upward[0].severity == ViolationSeverity.MAJOR
 
-    def test_downward_dependency_allowed(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_downward_dependency_allowed(self, temp_project: Path, sample_config_toml: str):
         """Test that downward dependencies are allowed."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()
@@ -271,9 +267,7 @@ class TestDependencyRuleChecking:
 class TestCustomRules:
     """Tests for custom dependency rules."""
 
-    def test_custom_deny_rule_triggers(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_custom_deny_rule_triggers(self, temp_project: Path, sample_config_toml: str):
         """Test custom deny rule triggering violation."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()
@@ -283,18 +277,14 @@ class TestCustomRules:
         engine.load_config()
 
         # API directly accessing database - matches custom rule
-        violations = engine.check_dependency(
-            "src/api/endpoints", "src/database/connection"
-        )
+        violations = engine.check_dependency("src/api/endpoints", "src/database/connection")
 
         custom = [v for v in violations if v.rule_name == "no_db_from_api"]
         assert len(custom) == 1
         assert custom[0].severity == ViolationSeverity.CRITICAL
         assert custom[0].action == ViolationAction.BLOCK
 
-    def test_custom_warn_rule_triggers(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_custom_warn_rule_triggers(self, temp_project: Path, sample_config_toml: str):
         """Test custom warn rule triggering."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()
@@ -305,9 +295,7 @@ class TestCustomRules:
 
         # Service -> Service - matches circular warning rule
         # Pattern is "**/services/**" so we need a path with services in it
-        violations = engine.check_dependency(
-            "myapp/services/auth", "myapp/services/user"
-        )
+        violations = engine.check_dependency("myapp/services/auth", "myapp/services/user")
 
         custom = [v for v in violations if v.rule_name == "no_circular_services"]
         assert len(custom) == 1
@@ -343,9 +331,7 @@ class TestCouplingLimits:
         engine.load_config()
 
         # max_fan_out is 8 in config
-        violations = engine.check_coupling(
-            "services.mega_service", fan_in=5, fan_out=12
-        )
+        violations = engine.check_coupling("services.mega_service", fan_in=5, fan_out=12)
 
         fan_out = [v for v in violations if v.rule_name == "high_fan_out"]
         assert len(fan_out) == 1
@@ -360,9 +346,7 @@ class TestCouplingLimits:
         engine.load_config()
 
         # max_dependency_depth is 5 in config
-        violations = engine.check_coupling(
-            "deeply.nested.module", fan_in=3, fan_out=3, max_depth=8
-        )
+        violations = engine.check_coupling("deeply.nested.module", fan_in=3, fan_out=3, max_depth=8)
 
         deep = [v for v in violations if v.rule_name == "deep_dependency_chain"]
         assert len(deep) == 1
@@ -376,9 +360,7 @@ class TestCouplingLimits:
         engine = ArchitecturalRuleEngine(temp_project)
         engine.load_config()
 
-        violations = engine.check_coupling(
-            "balanced.module", fan_in=5, fan_out=4, max_depth=3
-        )
+        violations = engine.check_coupling("balanced.module", fan_in=5, fan_out=4, max_depth=3)
 
         assert len(violations) == 0
 
@@ -414,9 +396,7 @@ class TestExemptions:
         assert engine.is_exempt("mypackage.__init__") is True
         assert engine.is_exempt("config.constants") is True
 
-    def test_exempt_module_skips_checks(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_exempt_module_skips_checks(self, temp_project: Path, sample_config_toml: str):
         """Test that exempt modules skip violation checking."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()
@@ -437,9 +417,7 @@ class TestExemptions:
 class TestModuleDependencyChecking:
     """Tests for checking all dependencies of a module."""
 
-    def test_check_module_dependencies(
-        self, temp_project: Path, sample_config_toml: str
-    ):
+    def test_check_module_dependencies(self, temp_project: Path, sample_config_toml: str):
         """Test checking multiple dependencies at once."""
         config_dir = temp_project / ".code-scalpel"
         config_dir.mkdir()

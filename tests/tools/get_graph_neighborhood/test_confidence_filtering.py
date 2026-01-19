@@ -21,9 +21,7 @@ class TestConfidenceParameterBasic:
 
         assert result.success
         # All edges should be included
-        baseline_result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        baseline_result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         # Should have same or more edges than default
         assert len(result.subgraph.edges) >= len(baseline_result.subgraph.edges)
@@ -54,17 +52,13 @@ class TestConfidenceParameterBasic:
 
     def test_min_confidence_defaults_to_zero(self, sample_call_graph):
         """Default min_confidence (not specified) should be 0.0."""
-        result_default = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result_default = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
         result_explicit_zero = sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, min_confidence=0.0
         )
 
         # Should have same edges
-        assert set(result_default.subgraph.edges) == set(
-            result_explicit_zero.subgraph.edges
-        )
+        assert set(result_default.subgraph.edges) == set(result_explicit_zero.subgraph.edges)
 
 
 class TestConfidenceEdgeFilteringBehavior:
@@ -172,9 +166,7 @@ class TestConfidenceWithK:
         )
 
         # Stricter filter should have fewer edges
-        assert len(result_k1_strict.subgraph.edges) <= len(
-            result_k1_lenient.subgraph.edges
-        )
+        assert len(result_k1_strict.subgraph.edges) <= len(result_k1_lenient.subgraph.edges)
 
     def test_confidence_filtering_k2(self, sample_call_graph):
         """Confidence filtering should work with k=2."""
@@ -186,9 +178,7 @@ class TestConfidenceWithK:
         )
 
         # Stricter filter should have fewer edges
-        assert len(result_k2_strict.subgraph.edges) <= len(
-            result_k2_lenient.subgraph.edges
-        )
+        assert len(result_k2_strict.subgraph.edges) <= len(result_k2_lenient.subgraph.edges)
 
     def test_confidence_may_reduce_depth_reachability(self, sample_call_graph):
         """High confidence threshold may prevent reaching depth 2."""
@@ -202,9 +192,7 @@ class TestConfidenceWithK:
         # If all edges have < 0.99 confidence, unreachable nodes appear
         # (nodes at depth 2 may not be reachable with high threshold)
         # Nodes at depth 2 require 2 edges; if any edge < threshold, node unreachable
-        assert len(result_high_conf.subgraph.nodes) <= len(
-            result_low_conf.subgraph.nodes
-        )
+        assert len(result_high_conf.subgraph.nodes) <= len(result_low_conf.subgraph.nodes)
 
 
 class TestConfidenceMetadata:
@@ -212,9 +200,7 @@ class TestConfidenceMetadata:
 
     def test_confidence_values_reported(self, sample_call_graph):
         """Edge confidence values should be reported in results."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         # Each edge should have confidence value
         for src, dst, conf in result.subgraph.edges:

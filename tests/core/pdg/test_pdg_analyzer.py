@@ -97,9 +97,7 @@ class TestPDGAnalyzer:
         """Create a PDG with data flow anomalies."""
         g = nx.DiGraph()
         # Undefined variable use
-        g.add_node(
-            "use_undefined", type="assign", defines=["y"], uses=["undefined_var"]
-        )
+        g.add_node("use_undefined", type="assign", defines=["y"], uses=["undefined_var"])
         # Unused variable definition
         g.add_node("unused_def", type="assign", defines=["unused_var"], uses=[])
         return g
@@ -241,9 +239,7 @@ class TestPDGAnalyzer:
 
     def test_generate_vulnerability_description(self, simple_pdg):
         """Test vulnerability description generation."""
-        desc = PDGAnalyzer._generate_vulnerability_description(
-            "user_input", "sql_injection"
-        )
+        desc = PDGAnalyzer._generate_vulnerability_description("user_input", "sql_injection")
 
         assert "user_input" in desc
         assert "sql_injection" in desc
@@ -339,9 +335,7 @@ class TestAnalyzerCoverageGaps:
         """Test taint analysis with actual paths (lines 184-192)."""
         g = nx.DiGraph()
         g.add_node("source", type="call", function="input", taint_type="user_input")
-        g.add_node(
-            "sink", type="call", function="cursor.execute", sink_type="sql_query"
-        )
+        g.add_node("sink", type="call", function="cursor.execute", sink_type="sql_query")
         g.add_edge("source", "sink", type="data")
 
         analyzer = PDGAnalyzer(g)
@@ -565,9 +559,7 @@ class TestAnalyzerFinalCoverage:
         # Intermediate node - NOT a sanitizer
         g.add_node("mid1", type="assign")
         # Sink node - dangerous sink (use call_target with execute)
-        g.add_node(
-            "sink1", type="call", call_target="cursor.execute", sink_type="sql_query"
-        )
+        g.add_node("sink1", type="call", call_target="cursor.execute", sink_type="sql_query")
 
         # Create path from source to sink
         g.add_edge("source1", "mid1", type=DependencyType.DATA.value)
@@ -628,9 +620,7 @@ class TestAnalyzerFinalCoverage:
         g = nx.DiGraph()
         # Create nodes with constant_value attribute - must use type="computation"
         g.add_node("comp1", type="computation", constant_value=100)
-        g.add_node(
-            "comp2", type="computation", constant_value=100
-        )  # Same value - redundant
+        g.add_node("comp2", type="computation", constant_value=100)  # Same value - redundant
 
         analyzer = PDGAnalyzer(g)
         redundant = analyzer._find_redundant_computations()

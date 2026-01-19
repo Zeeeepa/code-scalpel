@@ -87,9 +87,7 @@ class TestCommunityTierLineLimits:
         # Should not exceed 500 lines in context
         if result.expanded_context:
             lines = result.expanded_context.count("\n")
-            assert (
-                lines <= 500
-            ), f"Community tier exceeded 500-line limit: {lines} lines"
+            assert lines <= 500, f"Community tier exceeded 500-line limit: {lines} lines"
 
 
 class TestCommunityTierSecurityIssues:
@@ -157,9 +155,7 @@ class TestCommunityTierNoProFeatures:
         )
 
         # Community tier should not have doc_coverage
-        assert (
-            result.doc_coverage is None
-        ), "Community tier should not return doc_coverage"
+        assert result.doc_coverage is None, "Community tier should not return doc_coverage"
 
     def test_maintainability_index_empty_for_community(self, temp_python_project):
         """Community tier should NOT include maintainability_index (Pro feature)."""
@@ -225,9 +221,7 @@ class TestCommunityTierNoEnterpriseFeatures:
         )
 
         # Community tier should have empty owners
-        assert (
-            not result.owners or result.owners == []
-        ), "Community tier should not return owners"
+        assert not result.owners or result.owners == [], "Community tier should not return owners"
 
     def test_technical_debt_score_empty_for_community(self, temp_python_project):
         """Community tier should NOT include technical_debt_score (Enterprise feature)."""

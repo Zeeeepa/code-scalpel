@@ -65,9 +65,7 @@ def test_update_symbol_memory_leak_guard(tmp_path):
 
     # Allow generous headroom; we only care that usage stays within a small envelope
     peak_mb = peak / (1024 * 1024)
-    assert (
-        peak_mb < 50
-    ), f"Peak memory too high for 50 sequential operations: {peak_mb:.2f} MB"
+    assert peak_mb < 50, f"Peak memory too high for 50 sequential operations: {peak_mb:.2f} MB"
 
 
 def _generate_lines(name: str, lines: int) -> str:

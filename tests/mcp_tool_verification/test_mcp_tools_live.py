@@ -158,8 +158,7 @@ class TestMCPToolVerification:
         # Should detect path traversal or SQL injection
         sink_types = [str(s.sink_type) for s in sinks]
         assert any(
-            "path" in t.lower() or "sql" in t.lower() or "file" in t.lower()
-            for t in sink_types
+            "path" in t.lower() or "sql" in t.lower() or "file" in t.lower() for t in sink_types
         )
 
     def test_unified_sink_confidence_scores(self):
@@ -189,10 +188,7 @@ class TestMCPToolVerification:
         for sink in sinks:
             # vulnerability_type should be set for high-confidence detections
             if sink.confidence >= 0.7:
-                assert (
-                    sink.vulnerability_type is not None
-                    and sink.vulnerability_type != ""
-                )
+                assert sink.vulnerability_type is not None and sink.vulnerability_type != ""
             # Or we can get OWASP category from sink type name
             sink_name = sink.vulnerability_type or str(sink.sink_type.name).lower()
             assert sink_name != ""
@@ -411,9 +407,7 @@ def abs_value(x):
 
         # Valid request → result has expected structure
         simulator = RefactorSimulator()
-        result = simulator.simulate(
-            original_code="def foo(): pass", new_code="def foo(): return 1"
-        )
+        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
 
         # Result should have standard fields (no hallucinated fields)
         result_dict = result.to_dict()
@@ -426,9 +420,7 @@ def abs_value(x):
         # The MCP server would convert this to JSON-RPC error with:
         # {"jsonrpc": "2.0", "error": {"code": -32602, "message": "..."}, "id": <request_id>}
         with pytest.raises(ValueError, match="Must provide"):
-            simulator.simulate(
-                original_code="def bar(): pass"
-            )  # Missing new_code/patch
+            simulator.simulate(original_code="def bar(): pass")  # Missing new_code/patch
 
     def test_simulate_refactor_recovers_after_invalid_request(self):
         """Simulator should continue working after invalid request errors."""
@@ -439,9 +431,7 @@ def abs_value(x):
         with pytest.raises(ValueError):
             simulator.simulate(original_code="def foo(): pass")
 
-        result = simulator.simulate(
-            original_code="def foo(): pass", new_code="def foo(): return 1"
-        )
+        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
 
         assert result.status.value in ("safe", "warning")
         assert result.is_safe in (True, False)

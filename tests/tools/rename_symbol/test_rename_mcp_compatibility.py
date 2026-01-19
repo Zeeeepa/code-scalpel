@@ -115,9 +115,7 @@ class TestToolMCPCompatibility:
         ref = tmp_path / "ref.py"
 
         target.write_text("def old_func():\n    return 1\n", encoding="utf-8")
-        ref.write_text(
-            "from target import old_func\nvalue = old_func()\n", encoding="utf-8"
-        )
+        ref.write_text("from target import old_func\nvalue = old_func()\n", encoding="utf-8")
 
         # Cross-file rename uses different response type
         result = rename_references_across_project(
@@ -209,9 +207,7 @@ class TestToolAsyncCompatibility:
 
         async def rename_one(src: Path, index: int):
             patcher = UnifiedPatcher.from_file(str(src))
-            result = patcher.rename_symbol(
-                "function", f"old_func_{index}", f"new_func_{index}"
-            )
+            result = patcher.rename_symbol("function", f"old_func_{index}", f"new_func_{index}")
             if result.success:
                 patcher.save(backup=False)
             return result

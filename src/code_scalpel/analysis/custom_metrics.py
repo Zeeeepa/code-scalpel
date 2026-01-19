@@ -164,9 +164,7 @@ class LinesOfCodeCollector(MetricCollector):
         lines = content.splitlines()
         total = len(lines)
         blank = sum(1 for line in lines if not line.strip())
-        comment = sum(
-            1 for line in lines if line.strip().startswith(("#", "//", "/*", "*"))
-        )
+        comment = sum(1 for line in lines if line.strip().startswith(("#", "//", "/*", "*")))
         code = total - blank - comment
 
         return MetricValue(
@@ -538,9 +536,7 @@ class MetricsCollector:
             by_name[m.name].append(m)
 
         for name, values in by_name.items():
-            numeric_values = [
-                v.value for v in values if isinstance(v.value, (int, float))
-            ]
+            numeric_values = [v.value for v in values if isinstance(v.value, (int, float))]
 
             if numeric_values:
                 summaries[name] = MetricSummary(

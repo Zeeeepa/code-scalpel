@@ -63,9 +63,7 @@ class TestValidLicenseDetection:
                 is_valid=False, tier=None, error_message="No license"
             )
             tier = _get_current_tier()
-            assert (
-                tier == "community"
-            ), f"Expected community tier without license, got {tier}"
+            assert tier == "community", f"Expected community tier without license, got {tier}"
 
     def test_valid_pro_license_detected(self):
         """Valid Pro license should be detected."""
@@ -77,9 +75,7 @@ class TestValidLicenseDetection:
             )
             mock_validate.return_value = license_data
             tier = _get_current_tier()
-            assert (
-                tier == "pro"
-            ), f"Expected pro tier with valid pro license, got {tier}"
+            assert tier == "pro", f"Expected pro tier with valid pro license, got {tier}"
 
     def test_valid_enterprise_license_detected(self):
         """Valid Enterprise license should be detected."""
@@ -180,9 +176,7 @@ class TestInvalidLicenseHandling:
             )
             mock_validate.return_value = license_data
             tier = _get_current_tier()
-            assert (
-                tier == "community"
-            ), f"Expected community tier for malformed license, got {tier}"
+            assert tier == "community", f"Expected community tier for malformed license, got {tier}"
 
     def test_license_with_wrong_signature_rejected(self):
         """License with incorrect signature should be rejected."""
@@ -197,9 +191,7 @@ class TestInvalidLicenseHandling:
             )
             mock_validate.return_value = license_data
             tier = _get_current_tier()
-            assert (
-                tier == "community"
-            ), f"Expected community tier for invalid signature, got {tier}"
+            assert tier == "community", f"Expected community tier for invalid signature, got {tier}"
 
 
 class TestLicenseEnvironmentVariables:
@@ -207,9 +199,7 @@ class TestLicenseEnvironmentVariables:
 
     def test_code_scalpel_license_key_env_var(self):
         """CODE_SCALPEL_LICENSE_KEY env var should be used for license."""
-        mock_license = (
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWVyIjoicHJvIn0.invalid"
-        )
+        mock_license = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWVyIjoicHJvIn0.invalid"
         with patch.dict(os.environ, {"CODE_SCALPEL_LICENSE_KEY": mock_license}):
             with patch(
                 "code_scalpel.licensing.jwt_validator.JWTLicenseValidator.validate"
@@ -251,9 +241,7 @@ class TestLicenseEnvironmentVariables:
                 )
                 mock_validate.return_value = license_data
                 tier = _get_current_tier()
-                assert (
-                    tier == "community"
-                ), f"Expected community tier for empty license, got {tier}"
+                assert tier == "community", f"Expected community tier for empty license, got {tier}"
 
 
 class TestTierNormalization:
@@ -285,9 +273,7 @@ class TestTierNormalization:
                 )
                 mock_validate.return_value = license_data
                 tier = _get_current_tier()
-                assert (
-                    tier == "community"
-                ), f"Expected 'free' to map to 'community', got {tier}"
+                assert tier == "community", f"Expected 'free' to map to 'community', got {tier}"
 
     def test_all_tier_maps_to_enterprise(self):
         """'all' tier should map to 'enterprise'."""
@@ -303,9 +289,7 @@ class TestTierNormalization:
                 )
                 mock_validate.return_value = license_data
                 tier = _get_current_tier()
-                assert (
-                    tier == "enterprise"
-                ), f"Expected 'all' to map to 'enterprise', got {tier}"
+                assert tier == "enterprise", f"Expected 'all' to map to 'enterprise', got {tier}"
 
 
 if __name__ == "__main__":

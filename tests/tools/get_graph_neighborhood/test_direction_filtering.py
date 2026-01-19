@@ -158,9 +158,7 @@ class TestDirectionBoth:
 
     def test_both_is_default(self, sample_call_graph):
         """Default direction (no parameter) should equal direction='both'."""
-        result_default = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result_default = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
         result_both = sample_call_graph.get_neighborhood(
             "python::main::function::center", k=1, direction="both"
         )

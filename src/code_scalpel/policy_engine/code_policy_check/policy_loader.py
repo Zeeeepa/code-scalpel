@@ -74,11 +74,7 @@ def merge_policies(base: dict[str, Any], override: dict[str, Any]) -> dict[str, 
     for key, value in override.items():
         if key == "extends":
             # extends is handled by resolution; keep it for transparency
-            if (
-                key in result
-                and isinstance(result[key], list)
-                and isinstance(value, list)
-            ):
+            if key in result and isinstance(result[key], list) and isinstance(value, list):
                 result[key] = _merge_lists_unique(result[key], value)
             else:
                 result[key] = value
@@ -86,9 +82,7 @@ def merge_policies(base: dict[str, Any], override: dict[str, Any]) -> dict[str, 
 
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = merge_policies(result[key], value)
-        elif (
-            key in result and isinstance(result[key], list) and isinstance(value, list)
-        ):
+        elif key in result and isinstance(result[key], list) and isinstance(value, list):
             result[key] = _merge_lists_unique(result[key], value)
         else:
             result[key] = value
@@ -147,9 +141,7 @@ def resolve_policy(
         composed = merge_policies(composed, resolved_ext)
 
     # Finally overlay the concrete policy on top
-    composed = merge_policies(
-        composed, {k: v for k, v in policy.items() if k != "extends"}
-    )
+    composed = merge_policies(composed, {k: v for k, v in policy.items() if k != "extends"})
     return composed
 
 

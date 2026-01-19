@@ -179,9 +179,7 @@ def connect():
         result = await security_scan(code)
         assert result.success is True
         assert result.has_vulnerabilities is True
-        assert any(
-            "Secret" in v.type or "Hardcoded" in v.type for v in result.vulnerabilities
-        )
+        assert any("Secret" in v.type or "Hardcoded" in v.type for v in result.vulnerabilities)
 
     async def test_scan_empty_code(self):
         """Test scanning empty code."""
@@ -591,9 +589,7 @@ def hello():
 def goodbye():
     return "Goodbye!"
 """
-        result = await extract_code(
-            code=code, target_type="function", target_name="hello"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="hello")
         assert result.success is True
         assert result.target_name == "hello"
         assert "return" in result.target_code
@@ -635,9 +631,7 @@ class MyClass:
     def get_value(self):
         return self.value
 """
-        result = await extract_code(
-            code=code, target_type="class", target_name="MyClass"
-        )
+        result = await extract_code(code=code, target_type="class", target_name="MyClass")
         assert result.success is True
         assert result.target_name == "MyClass"
         assert "__init__" in result.target_code
@@ -655,9 +649,7 @@ class Calculator:
     def subtract(self, a, b):
         return a - b
 """
-        result = await extract_code(
-            code=code, target_type="method", target_name="Calculator.add"
-        )
+        result = await extract_code(code=code, target_type="method", target_name="Calculator.add")
         assert result.success is True
         assert result.target_name == "Calculator.add"
         assert "return a + b" in result.target_code
@@ -676,9 +668,7 @@ class Calculator:
         from code_scalpel.mcp.server import extract_code
 
         code = "def foo(): pass"
-        result = await extract_code(
-            code=code, target_type="function", target_name="nonexistent"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="nonexistent")
         assert result.success is False
         assert "not found" in result.error.lower()
 
@@ -738,9 +728,7 @@ class MyClass:
         from code_scalpel.mcp.server import extract_code
 
         code = "def broken("
-        result = await extract_code(
-            code=code, target_type="function", target_name="broken"
-        )
+        result = await extract_code(code=code, target_type="function", target_name="broken")
         assert result.success is False
         assert result.error is not None
 
@@ -916,10 +904,7 @@ def unrelated():
 
         assert result.success is False
         # [20251214_BUGFIX] Updated to match PathResolver's detailed error messages
-        assert (
-            "cannot access file" in result.error.lower()
-            or "not found" in result.error.lower()
-        )
+        assert "cannot access file" in result.error.lower() or "not found" in result.error.lower()
 
     async def test_extract_function_not_found_in_file(self, tmp_path):
         """Test extraction of non-existent function from valid file."""
@@ -1990,9 +1975,7 @@ def test_func():
     return 42
 """)
 
-        result = await cross_file_security_scan(
-            project_root=str(tmp_path), include_diagram=True
-        )
+        result = await cross_file_security_scan(project_root=str(tmp_path), include_diagram=True)
 
         assert result.success is True
         # Diagram should be string (may be empty if no taint flows)

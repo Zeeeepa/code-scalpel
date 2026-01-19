@@ -135,9 +135,7 @@ def test_malformed_license_fails_closed(
     )
 
     # Should fail due to Enterprise tier requirements (no manifest/secret)
-    assert (
-        result.success is False
-    ), "Malformed license should not allow Enterprise tier features"
+    assert result.success is False, "Malformed license should not allow Enterprise tier features"
     assert result.error is not None
 
 
@@ -174,7 +172,5 @@ def test_missing_license_defaults_to_community(
 
     assert result.success is True, "Community tier should work without license"
     assert result.tier == "community"
-    assert (
-        result.signature_validated is False
-    ), "Community tier should not validate signatures"
+    assert result.signature_validated is False, "Community tier should not validate signatures"
     assert result.files_verified == 1

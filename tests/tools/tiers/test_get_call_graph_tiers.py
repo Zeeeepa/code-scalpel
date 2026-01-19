@@ -136,9 +136,7 @@ def level_4():
 def level_5():
     pass
 """)
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
-        ):
+        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="community"):
             result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
@@ -166,9 +164,7 @@ def level_5():
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-        ):
+        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
             result = await get_call_graph(project_root=str(tmp_path), depth=100)
 
         assert result.success is True
@@ -186,9 +182,7 @@ class TestCapabilityFlags:
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
-        ):
+        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="community"):
             result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
@@ -214,9 +208,7 @@ class TestCapabilityFlags:
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-        ):
+        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
             result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True

@@ -25,9 +25,7 @@ class TestCodeReviewAgentCoverage:
     @pytest.mark.asyncio
     async def test_observe_file_failure(self, agent):
         """Test observe returns early when file observation fails (line 43)."""
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
 
         result = await agent.observe("/missing/file.py")
 
@@ -210,9 +208,7 @@ class TestSecurityAgentCoverage:
     @pytest.mark.asyncio
     async def test_observe_file_failure(self, agent):
         """Test observe returns early when file observation fails (line 42)."""
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
 
         result = await agent.observe("/missing/file.py")
 
@@ -241,9 +237,7 @@ class TestSecurityAgentCoverage:
         """Test orient with vulnerabilities key (line 102->101)."""
         observations = {
             "file_info": {},
-            "security_scan": {
-                "vulnerabilities": [{"type": "sql_injection", "severity": "high"}]
-            },
+            "security_scan": {"vulnerabilities": [{"type": "sql_injection", "severity": "high"}]},
             "symbol_analysis": {},
         }
 
@@ -273,9 +267,7 @@ class TestSecurityAgentCoverage:
 
     def test_assess_overall_risk_critical(self, agent):
         """Test _assess_overall_risk critical path (line 222)."""
-        categorized = {
-            "sql_injection": [{"severity": "critical"}, {"severity": "critical"}]
-        }
+        categorized = {"sql_injection": [{"severity": "critical"}, {"severity": "critical"}]}
         assessment = agent._assess_overall_risk(categorized, [])
         assert assessment["overall_level"] == "critical"
 
@@ -304,17 +296,13 @@ class TestSecurityAgentCoverage:
 
     def test_create_remediation_actions_sql_injection(self, agent):
         """Test _create_remediation_actions for SQL injection (lines 272-285)."""
-        actions = agent._create_remediation_actions(
-            "sql_injection", [{"severity": "high"}]
-        )
+        actions = agent._create_remediation_actions("sql_injection", [{"severity": "high"}])
         assert actions[0]["type"] == "input_validation"
         assert "parameterized queries" in actions[0]["description"]
 
     def test_create_remediation_actions_command_injection(self, agent):
         """Test _create_remediation_actions for command injection (lines 272-285)."""
-        actions = agent._create_remediation_actions(
-            "command_injection", [{"severity": "high"}]
-        )
+        actions = agent._create_remediation_actions("command_injection", [{"severity": "high"}])
         assert actions[0]["type"] == "sanitize_input"
 
     def test_create_remediation_actions_xxe(self, agent):
@@ -372,9 +360,7 @@ class TestSecurityAgentCoverage:
 
     def test_estimate_remediation_risk(self, agent):
         """Test _estimate_remediation_risk (line 380)."""
-        assert (
-            agent._estimate_remediation_risk({"type": "input_validation"}) == "medium"
-        )
+        assert agent._estimate_remediation_risk({"type": "input_validation"}) == "medium"
         assert agent._estimate_remediation_risk({"type": "other"}) == "low"
 
     def test_estimate_security_effort(self, agent):
@@ -410,9 +396,7 @@ class TestOptimizationAgentCoverage:
     @pytest.mark.asyncio
     async def test_observe_file_failure(self, agent):
         """Test observe returns early when file observation fails (line 46)."""
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
 
         result = await agent.observe("/missing/file.py")
 
@@ -748,9 +732,7 @@ class TestBaseAgentCoverage:
         original = base_module.update_symbol
         base_module.update_symbol = AsyncMock(
             return_value=MagicMock(
-                model_dump=MagicMock(
-                    return_value={"success": True, "message": "Applied"}
-                )
+                model_dump=MagicMock(return_value={"success": True, "message": "Applied"})
             )
         )
 

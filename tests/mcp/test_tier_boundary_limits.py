@@ -64,7 +64,7 @@ def _tool_json(result) -> dict:
 
 def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
     """Assert response envelope is valid.
-    
+
     [20260118_FIX] Minimal response profile removed 'data' wrapper.
     Responses are now flattened - the payload itself is the data.
     """
@@ -73,7 +73,7 @@ def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
     # [20260113_FIX] Tier and other metadata fields are filtered by minimal response profile
     # The response now contains tool fields directly (success, file_path, etc.)
     # rather than wrapped in a 'data' field.
-    
+
     # If 'data' exists, use it (old format). Otherwise use payload directly (new format).
     data = payload.get("data", payload)
 
@@ -93,8 +93,9 @@ def _assert_envelope(payload: dict, *, tool_name: str) -> dict:
 def _assert_tier(env_json: dict, expected_tier: str) -> None:
     """Assert tier if present in response (filtered by minimal profile)."""
     if "tier" in env_json:
-        assert env_json["tier"] == expected_tier, \
-            f"Expected tier {expected_tier}, got {env_json.get('tier')}"
+        assert (
+            env_json["tier"] == expected_tier
+        ), f"Expected tier {expected_tier}, got {env_json.get('tier')}"
 
 
 def _assert_capabilities_subset(env_json: dict, expected_caps: set) -> None:
@@ -156,9 +157,7 @@ max_api_calls_per_hour: 1000
 
 
 @asynccontextmanager
-async def _stdio_session(
-    *, project_root: Path, extra_env: dict[str, str] | None = None
-):
+async def _stdio_session(*, project_root: Path, extra_env: dict[str, str] | None = None):
     repo_root = _repo_root()
     env = _pythonpath_env(repo_root)
 
@@ -368,9 +367,7 @@ main();
         assert data is not None
         edges = data.get("edges") or []
         # Expect at least one resolved edge to util.js:foo
-        assert any(
-            (e.get("callee") == "util.js:foo") for e in edges if isinstance(e, dict)
-        )
+        assert any((e.get("callee") == "util.js:foo") for e in edges if isinstance(e, dict))
 
 
 @pytest.mark.parametrize("requested_sinks", [60, 120])
@@ -593,31 +590,30 @@ async def test_unified_sink_detect_enterprise_unsupported_language_error_code(
 def _write_large_project(root: Path, num_functions: int) -> None:
     """Create project with specified number of functions."""
     root.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate functions across multiple modules
     funcs_per_module = 25
     num_modules = (num_functions + funcs_per_module - 1) // funcs_per_module
-    
+
     for mod_idx in range(num_modules):
         lines = []
         for func_idx in range(funcs_per_module):
             global_idx = mod_idx * funcs_per_module + func_idx
             if global_idx >= num_functions:
                 break
-            
+
             func_name = f"func_{global_idx}"
             if func_idx == 0:
                 lines.append(f"def {func_name}():\n    return {global_idx}\n\n")
             else:
                 prev_func = f"func_{global_idx - 1}"
                 lines.append(f"def {func_name}():\n    return {prev_func}()\n\n")
-        
+
         (root / f"module_{mod_idx}.py").write_text("".join(lines), encoding="utf-8")
-    
+
     # Main entry point
     (root / "main.py").write_text(
-        "from module_0 import func_0\n\n"
-        "def main():\n    return func_0()\n",
+        "from module_0 import func_0\n\n" "def main():\n    return func_0()\n",
         encoding="utf-8",
     )
 
@@ -649,21 +645,23 @@ async def test_get_call_graph_community_50_node_limit(
         _assert_tier(env_json, "community")
         assert data is not None
         assert data.get("success") is True
-        
+
         # Verify node truncation
         assert data.get("nodes_truncated") is True, "Community should truncate at 50 nodes"
-        
+
         # Verify nodes list is capped at 50
         nodes = data.get("nodes", [])
         assert len(nodes) <= 50, f"Community exceeded 50-node limit: {len(nodes)} nodes"
-        assert len(nodes) == 50, f"Community should return exactly 50 nodes when truncated, got {len(nodes)}"
-        
+        assert (
+            len(nodes) == 50
+        ), f"Community should return exactly 50 nodes when truncated, got {len(nodes)}"
+
         # Verify truncation warning
         assert "truncation_warning" in data, "Should include truncation warning"
         warning = data["truncation_warning"]
-        assert "50" in warning or "node" in warning.lower() or "limit" in warning.lower(), (
-            f"Warning should mention limit: {warning}"
-        )
+        assert (
+            "50" in warning or "node" in warning.lower() or "limit" in warning.lower()
+        ), f"Warning should mention limit: {warning}"
 
 
 async def test_get_call_graph_pro_500_node_limit(
@@ -706,11 +704,11 @@ async def test_get_call_graph_pro_500_node_limit(
         _assert_tier(env_json, "pro")
         assert data is not None
         assert data.get("success") is True
-        
+
         # Verify Pro handles more than 50 nodes
         nodes = data.get("nodes", [])
         assert len(nodes) > 50, f"Pro should handle >50 nodes, got {len(nodes)}"
-        
+
         # Should NOT be truncated at this size
         assert data.get("nodes_truncated") is False, "Pro should not truncate at 150 nodes"
 
@@ -723,7 +721,7 @@ async def test_get_call_graph_enterprise_metrics(
     """Enterprise tier includes hot_nodes and dead_code_candidates."""
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     # Create project with dead code
     (project_root / "app.py").write_text(
         "def main():\n"
@@ -754,11 +752,11 @@ async def test_get_call_graph_enterprise_metrics(
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="get_call_graph")
         _assert_tier(env_json, "community")
-        
+
         # Community should NOT have Enterprise metrics
         assert "hot_nodes" not in data, "Community should not have hot_nodes"
         assert "dead_code_candidates" not in data, "Community should not have dead_code_candidates"
-        
+
         # Nodes should NOT have degree attributes
         for node in data.get("nodes", []):
             assert "in_degree" not in node, "Community nodes should not have in_degree"
@@ -795,21 +793,23 @@ async def test_get_call_graph_enterprise_metrics(
         _assert_tier(env_json, "enterprise")
         assert data is not None
         assert data.get("success") is True
-        
+
         # Verify Enterprise metrics exist
         assert "hot_nodes" in data, "Enterprise should include hot_nodes"
         assert "dead_code_candidates" in data, "Enterprise should include dead_code_candidates"
-        
+
         # Verify hot_nodes structure
         hot_nodes = data["hot_nodes"]
         assert isinstance(hot_nodes, list), "hot_nodes should be a list"
         assert len(hot_nodes) <= 10, "hot_nodes should be limited to top 10"
-        
+
         # Verify dead code detection
         dead_code = data["dead_code_candidates"]
         assert isinstance(dead_code, list), "dead_code_candidates should be a list"
-        assert len(dead_code) >= 2, f"Should detect at least 2 dead functions, found {len(dead_code)}"
-        
+        assert (
+            len(dead_code) >= 2
+        ), f"Should detect at least 2 dead functions, found {len(dead_code)}"
+
         # Verify nodes have degree attributes
         for node in data.get("nodes", []):
             assert "in_degree" in node, f"Enterprise node {node.get('id')} should have in_degree"
@@ -826,7 +826,7 @@ async def test_get_call_graph_pro_polymorphism_python_class_hierarchy(
     """Pro tier resolves polymorphic method calls in Python class hierarchies."""
     project_root = tmp_path / "poly_proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     # Create project with class hierarchy and polymorphic calls
     (project_root / "animals.py").write_text(
         "class Animal:\n"
@@ -846,7 +846,7 @@ async def test_get_call_graph_pro_polymorphism_python_class_hierarchy(
         "        self.speak()\n",
         encoding="utf-8",
     )
-    
+
     (project_root / "main.py").write_text(
         "from animals import Dog, Cat\n\n"
         "def main():\n"
@@ -876,15 +876,15 @@ async def test_get_call_graph_pro_polymorphism_python_class_hierarchy(
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="get_call_graph")
         _assert_tier(env_json, "community")
-        
+
         # Community should have basic call graph
         assert data.get("success") is True
         assert "nodes" in data
         assert "edges" in data
-        
+
         # But may not have all polymorphic edges due to lack of advanced resolution
         # This is acceptable - Community doesn't have polymorphism support
-    
+
     # Test Pro tier (should have enhanced polymorphic resolution)
     license_path = write_hs256_license_jwt(
         jti="lic-pro-poly",
@@ -915,17 +915,17 @@ async def test_get_call_graph_pro_polymorphism_python_class_hierarchy(
         _assert_tier(env_json, "pro")
         assert data is not None
         assert data.get("success") is True
-        
+
         # Verify Pro tier returns call graph with class methods
         nodes = data.get("nodes", [])
         edges = data.get("edges", [])
-        
+
         # Should have Dog and Cat classes with their methods
         node_names = {node.get("name") for node in nodes}
-        assert "speak" in node_names or any("Dog" in str(n) for n in node_names), (
-            "Pro should detect class methods"
-        )
-        
+        assert "speak" in node_names or any(
+            "Dog" in str(n) for n in node_names
+        ), "Pro should detect class methods"
+
         # Should have call edges
         assert len(edges) > 0, "Pro should detect call relationships"
 
@@ -960,12 +960,12 @@ async def test_get_call_graph_invalid_license_fallback_to_community(
         )
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="get_call_graph")
-        
+
         # Should fallback to Community tier
         _assert_tier(env_json, "community"), (
             f"Invalid license should fallback to Community, got {env_json.get('tier')}"
         )
-        
+
         # Should apply Community limits
         assert data.get("depth_limit") == 3, "Invalid license should enforce Community depth limit"
         assert data.get("success") is True
@@ -997,12 +997,12 @@ async def test_get_call_graph_missing_license_defaults_to_community(
         )
         env_json = _tool_json(payload)
         data = _assert_envelope(env_json, tool_name="get_call_graph")
-        
+
         # Should default to Community tier
         _assert_tier(env_json, "community"), (
             f"Missing license should default to Community, got {env_json.get('tier')}"
         )
-        
+
         # Should apply Community limits
         assert data.get("success") is True
 
@@ -1215,6 +1215,7 @@ subprocess.call(f"echo {user_input}", shell=True)
             # Check for expected sink fields
             assert "code_snippet" in sink or "name" in sink
             assert "confidence" in sink or "line" in sink
+
 
 # ============================================================================
 # symbolic_execute Tier Enforcement & Feature Tests (New: 20260105)
@@ -1761,8 +1762,7 @@ def keep_feature():
 
         warnings = data.get("warnings") or []
         assert any(
-            "Compliance validation: detected removed functions/classes." in w
-            for w in warnings
+            "Compliance validation: detected removed functions/classes." in w for w in warnings
         )
 
         removed = (data.get("structural_changes") or {}).get("functions_removed") or []
@@ -1831,7 +1831,9 @@ def feature(x):
         data = _assert_envelope(env_json, tool_name="simulate_refactor")
 
         _assert_tier(env_json, "pro")
-        _assert_capabilities_subset(env_json, {"advanced_simulation", "behavior_preservation", "type_checking"})
+        _assert_capabilities_subset(
+            env_json, {"advanced_simulation", "behavior_preservation", "type_checking"}
+        )
 
         structural_changes = data.get("structural_changes") or {}
         modified = structural_changes.get("functions_modified") or []
@@ -1862,7 +1864,9 @@ def feature(x):
         data = _assert_envelope(env_json, tool_name="simulate_refactor")
 
         _assert_tier(env_json, "enterprise")
-        _assert_capabilities_subset(env_json, {"advanced_simulation", "compliance_validation", "regression_prediction"})
+        _assert_capabilities_subset(
+            env_json, {"advanced_simulation", "compliance_validation", "regression_prediction"}
+        )
 
         structural_changes = data.get("structural_changes") or {}
         modified = structural_changes.get("functions_modified") or []
@@ -1879,7 +1883,9 @@ def feature(x):
         data = _assert_envelope(env_json, tool_name="simulate_refactor")
 
         _assert_tier(env_json, "community")
-        _assert_capabilities_disjoint(env_json, {"advanced_simulation", "regression_prediction", "compliance_validation"})
+        _assert_capabilities_disjoint(
+            env_json, {"advanced_simulation", "regression_prediction", "compliance_validation"}
+        )
 
         structural_changes = data.get("structural_changes") or {}
         assert "functions_modified" not in structural_changes
@@ -1997,23 +2003,29 @@ async def test_rename_symbol_community_single_file_only(
     """Community tier rename_symbol is single-file only (no cross-file updates)."""
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     # Create definition file
     main_py = project_root / "main.py"
-    main_py.write_text("""def old_function():
+    main_py.write_text(
+        """def old_function():
     return 1
 
 def caller():
     return old_function()
-""", encoding="utf-8")
-    
+""",
+        encoding="utf-8",
+    )
+
     # Create a file that imports and uses the function
     utils_py = project_root / "utils.py"
-    utils_py.write_text("""from main import old_function
+    utils_py.write_text(
+        """from main import old_function
 
 def use_it():
     return old_function()
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     license_path = write_hs256_license_jwt(
         tier="community",
@@ -2047,15 +2059,15 @@ def use_it():
         # Community tier confirmed
         _assert_tier(env_json, "community")
         assert data["success"] is True
-        
+
         # Warnings should indicate definition-only rename
         warnings = data.get("warnings") or []
         assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
-        
+
         # main.py should be updated
         main_content = main_py.read_text()
         assert "def new_function():" in main_content
-        
+
         # utils.py should NOT be updated (Community tier)
         utils_content = utils_py.read_text()
         assert "from main import old_function" in utils_content  # NOT updated
@@ -2069,20 +2081,26 @@ async def test_rename_symbol_pro_enables_cross_file(
     """Pro tier rename_symbol enables cross-file reference updates."""
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     # Create definition file
     main_py = project_root / "main.py"
-    main_py.write_text("""def old_function():
+    main_py.write_text(
+        """def old_function():
     return 1
-""", encoding="utf-8")
-    
+""",
+        encoding="utf-8",
+    )
+
     # Create a file that imports and uses the function
     utils_py = project_root / "utils.py"
-    utils_py.write_text("""from main import old_function
+    utils_py.write_text(
+        """from main import old_function
 
 def use_it():
     return old_function()
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     license_path = write_hs256_license_jwt(
         tier="pro",
@@ -2116,20 +2134,22 @@ def use_it():
         # Pro tier confirmed
         _assert_tier(env_json, "pro")
         assert data["success"] is True
-        
+
         # Pro tier should have cross_file_reference_rename capability
         # [20260113_FIX] capabilities may be filtered by minimal profile
         # caps = set(env_json.get("capabilities", []))
         # assert "cross_file_reference_rename" in caps
-        
+
         # main.py should be updated
         main_content = main_py.read_text()
         assert "def new_function():" in main_content
-        
+
         # Warnings should indicate cross-file updates
         warnings = data.get("warnings") or []
         # Pro tier should attempt cross-file (may or may not find updates depending on implementation)
-        assert not any("Definition-only" in w for w in warnings), "Pro should not be definition-only"
+        assert not any(
+            "Definition-only" in w for w in warnings
+        ), "Pro should not be definition-only"
 
 
 async def test_rename_symbol_invalid_license_fallback_to_community(
@@ -2138,15 +2158,21 @@ async def test_rename_symbol_invalid_license_fallback_to_community(
     """Invalid license falls back to Community tier (single-file only)."""
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     main_py = project_root / "main.py"
-    main_py.write_text("""def old_function():
+    main_py.write_text(
+        """def old_function():
     return 1
-""", encoding="utf-8")
-    
+""",
+        encoding="utf-8",
+    )
+
     utils_py = project_root / "utils.py"
-    utils_py.write_text("""from main import old_function
-""", encoding="utf-8")
+    utils_py.write_text(
+        """from main import old_function
+""",
+        encoding="utf-8",
+    )
 
     # Write invalid JWT
     invalid_jwt_path = tmp_path / "invalid.jwt"
@@ -2177,7 +2203,7 @@ async def test_rename_symbol_invalid_license_fallback_to_community(
         # Should fallback to Community tier
         _assert_tier(env_json, "community")
         assert data["success"] is True
-        
+
         # Definition-only warning for Community
         warnings = data.get("warnings") or []
         assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
@@ -2191,11 +2217,14 @@ async def test_rename_symbol_enterprise_unlimited_files(
     """Enterprise tier has unlimited cross-file capabilities."""
     project_root = tmp_path / "proj"
     project_root.mkdir(parents=True, exist_ok=True)
-    
+
     main_py = project_root / "main.py"
-    main_py.write_text("""def old_function():
+    main_py.write_text(
+        """def old_function():
     return 1
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     license_path = write_hs256_license_jwt(
         tier="enterprise",
@@ -2229,13 +2258,13 @@ async def test_rename_symbol_enterprise_unlimited_files(
         # Enterprise tier confirmed
         _assert_tier(env_json, "enterprise")
         assert data["success"] is True
-        
+
         # Enterprise should have organization_wide_rename capability
         # [20260113_FIX] capabilities may be filtered by minimal profile
         # caps = set(env_json.get("capabilities", []))
         # assert "organization_wide_rename" in caps
         # assert "cross_file_reference_rename" in caps
-        
+
         # Should NOT show "Definition-only" warning
         warnings = data.get("warnings") or []
         assert not any("Definition-only" in w for w in warnings)

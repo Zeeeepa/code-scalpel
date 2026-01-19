@@ -52,9 +52,7 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv(
-                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
-                )
+                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
@@ -73,9 +71,7 @@ async def test_nosql_injection_detection(monkeypatch: pytest.MonkeyPatch):
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(
-        v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities
-    )
+    assert any(v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities)
 
 
 async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
@@ -92,9 +88,7 @@ async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(
-        v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities
-    )
+    assert any(v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities)
 
 
 async def test_secret_detection(monkeypatch: pytest.MonkeyPatch):

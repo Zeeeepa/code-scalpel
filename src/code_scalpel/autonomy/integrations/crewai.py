@@ -16,8 +16,7 @@ try:
     from pydantic import BaseModel, Field
 except ImportError as e:
     raise ImportError(
-        "CrewAI is required for this integration. "
-        "Install it with: pip install crewai"
+        "CrewAI is required for this integration. " "Install it with: pip install crewai"
     ) from e
 
 
@@ -50,9 +49,7 @@ class ScalpelAnalyzeTool(BaseTool):
     """Tool for analyzing code using Code Scalpel AST analyzer."""
 
     name: str = "scalpel_analyze"
-    description: str = (
-        "Analyzes Python code using AST parsing to detect syntax and style issues"
-    )
+    description: str = "Analyzes Python code using AST parsing to detect syntax and style issues"
     args_schema: type[BaseModel] = CodeInput
 
     def _run(self, code: str) -> str:

@@ -84,9 +84,7 @@ class GolangciLintParser:
     def load_config(self, config_file: Path) -> GolangciLintConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_by_linter(
-        self, issues: List[LintIssue]
-    ) -> Dict[LinterType, List[LintIssue]]:
+    def categorize_by_linter(self, issues: List[LintIssue]) -> Dict[LinterType, List[LintIssue]]:
         raise NotImplementedError("Phase 2: Issue categorization by linter")
 
     def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:

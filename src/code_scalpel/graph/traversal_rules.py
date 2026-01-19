@@ -93,8 +93,7 @@ class TraversalRuleEngine:
         },
         "skip_private": {
             "type": RuleType.FILTER,
-            "condition": lambda e: "::_" in e.get("to_id", "")
-            and "::__" not in e.get("to_id", ""),
+            "condition": lambda e: "::_" in e.get("to_id", "") and "::__" not in e.get("to_id", ""),
             "description": "Skip edges to private functions",
         },
         "complexity_weight": {
@@ -288,9 +287,7 @@ class TraversalRuleEngine:
                 error=str(e),
             )
 
-    def _get_active_rules(
-        self, active_rules: Optional[Set[str]]
-    ) -> List[TraversalRule]:
+    def _get_active_rules(self, active_rules: Optional[Set[str]]) -> List[TraversalRule]:
         """Get list of active rules sorted by priority."""
         rules = []
         for rule in self._rules.values():

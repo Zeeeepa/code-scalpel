@@ -127,10 +127,7 @@ database = Database()
         assert result.target.name == "search_users"
 
         # Should have the function code
-        assert (
-            "SELECT * FROM users" in result.target.code
-            or "execute_query" in result.target.code
-        )
+        assert "SELECT * FROM users" in result.target.code or "execute_query" in result.target.code
 
     def test_cross_file_taint_tracking(self, flask_project):
         """Test that CrossFileTaintTracker detects cross-file vulnerabilities."""
@@ -486,9 +483,7 @@ def func_5():
         # Confidence should decrease with depth
         prev_conf = 1.0
         for depth in sorted(by_depth.keys()):
-            assert (
-                by_depth[depth] < prev_conf
-            ), f"Confidence should decrease at depth {depth}"
+            assert by_depth[depth] < prev_conf, f"Confidence should decrease at depth {depth}"
             prev_conf = by_depth[depth]
 
     def test_low_confidence_count_tracked(self, deep_dependency_project):
@@ -514,11 +509,7 @@ def func_5():
 
         # Verify count matches actual low-confidence symbols
         actual_low_conf = len(
-            [
-                d
-                for d in result.dependencies
-                if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
-            ]
+            [d for d in result.dependencies if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD]
         )
         assert result.low_confidence_count == actual_low_conf
 
@@ -570,14 +561,10 @@ def func_5():
             assert hasattr(sym, "low_confidence")
 
         # Target should have full confidence
-        target_sym = next(
-            (s for s in result.extracted_symbols if s.name == "entry_point"), None
-        )
+        target_sym = next((s for s in result.extracted_symbols if s.name == "entry_point"), None)
         if target_sym:
             assert target_sym.confidence == 1.0
-            assert (
-                not target_sym.low_confidence
-            )  # Target has confidence 1.0, should not be low
+            assert not target_sym.low_confidence  # Target has confidence 1.0, should not be low
 
     def test_mcp_tool_custom_decay_factor(self, deep_dependency_project):
         """Test MCP tool with custom confidence decay factor."""
@@ -672,9 +659,7 @@ def sample_graph():
             name=f"func_{letter}",
             line=10,
         )
-        graph.add_node(
-            GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"})
-        )
+        graph.add_node(GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"}))
 
         # Edge from center to this node
         graph.add_edge(
@@ -692,9 +677,7 @@ def sample_graph():
         for level in [1, 2]:
             parent_name = f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
             parent_module = (
-                f"module_{letter.lower()}"
-                if level == 1
-                else f"module_{letter.lower()}{level-1}"
+                f"module_{letter.lower()}" if level == 1 else f"module_{letter.lower()}{level-1}"
             )
 
             node_id = UniversalNodeID(

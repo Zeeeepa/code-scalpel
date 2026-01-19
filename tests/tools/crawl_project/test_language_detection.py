@@ -45,9 +45,7 @@ class TestLanguageDetection:
         }
 
         # Language counts should match
-        assert (
-            lang_count1 == lang_count2
-        ), f"Language counts differ: {lang_count1} vs {lang_count2}"
+        assert lang_count1 == lang_count2, f"Language counts differ: {lang_count1} vs {lang_count2}"
 
     def test_all_files_have_language(self, multilang_project, community_env):
         """Test that all files have a detected language."""

@@ -51,9 +51,7 @@ def _get_free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def _get_free_port_pair(
-    host: str = "127.0.0.1", attempts: int = 200
-) -> tuple[int, int]:
+def _get_free_port_pair(host: str = "127.0.0.1", attempts: int = 200) -> tuple[int, int]:
     for _ in range(attempts):
         base = _get_free_port()
         if base <= 0:
@@ -113,9 +111,7 @@ def add(a: int, b: int) -> int:
         encoding="utf-8",
     )
 
-    (project_root / "requirements.txt").write_text(
-        "requests==2.31.0\n", encoding="utf-8"
-    )
+    (project_root / "requirements.txt").write_text("requests==2.31.0\n", encoding="utf-8")
 
     (project_root / "package.json").write_text(
         """\

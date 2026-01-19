@@ -48,9 +48,7 @@ def _generate_test_mermaid(
     """
     # Convert to Pydantic models
     nodes = [
-        NeighborhoodNodeModel(
-            id=node_id, depth=node_depths.get(node_id, 0), metadata={}
-        )
+        NeighborhoodNodeModel(id=node_id, depth=node_depths.get(node_id, 0), metadata={})
         for node_id in node_ids
     ]
     edge_models = [
@@ -174,9 +172,7 @@ def sample_call_graph():
     mock_graph.edges = edges
     mock_graph.nodes_by_depth = nodes_by_depth
 
-    def mock_get_neighborhood(
-        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
-    ):
+    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0):
         """Simulate neighborhood extraction with depth limiting."""
         result = MagicMock()
         result.success = True
@@ -193,9 +189,7 @@ def sample_call_graph():
         included_edges = [
             (src, dst, conf)
             for src, dst, conf in edges
-            if src in included_nodes
-            and dst in included_nodes
-            and conf >= min_confidence
+            if src in included_nodes and dst in included_nodes and conf >= min_confidence
         ]
 
         # Handle truncation
@@ -257,9 +251,7 @@ def simple_graph():
     mock_graph.nodes = nodes
     mock_graph.edges = edges
 
-    def mock_get_neighborhood(
-        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
-    ):
+    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0):
         result = MagicMock()
         result.success = center_id in nodes
         result.subgraph = MagicMock()

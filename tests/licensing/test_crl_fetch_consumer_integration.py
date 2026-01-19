@@ -49,9 +49,7 @@ def _serve_token(token: str) -> _Server:
         httpd.shutdown()
         httpd.server_close()
 
-    return _Server(
-        url=f"http://127.0.0.1:{port}/.well-known/license-crl.jwt", shutdown=_shutdown
-    )
+    return _Server(url=f"http://127.0.0.1:{port}/.well-known/license-crl.jwt", shutdown=_shutdown)
 
 
 @pytest.mark.usefixtures("disable_health_server")

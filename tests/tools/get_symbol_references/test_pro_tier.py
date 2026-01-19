@@ -38,9 +38,7 @@ result = target()
         }
     )
 
-    result = await server.get_symbol_references(
-        symbol_name="target", project_root=str(project)
-    )
+    result = await server.get_symbol_references(symbol_name="target", project_root=str(project))
 
     assert result.success is True
     assert result.category_counts is not None
@@ -52,9 +50,7 @@ result = target()
 
 
 @pytest.mark.asyncio
-async def test_pro_scope_filtering_and_test_exclusion(
-    make_project, patch_tier, patch_capabilities
-):
+async def test_pro_scope_filtering_and_test_exclusion(make_project, patch_tier, patch_capabilities):
     """[20260104_TEST] Pro filtering gates scope_prefix and include_tests flags."""
     import code_scalpel.mcp.tools.context as server
 

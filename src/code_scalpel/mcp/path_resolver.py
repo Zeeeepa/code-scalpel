@@ -255,9 +255,7 @@ class PathResolver:
             # Raise with helpful error message
             raise FileNotFoundError(self._format_error_message(path, result))
 
-    def _attempt_resolution(
-        self, path: str, project_root: Optional[str]
-    ) -> PathResolutionResult:
+    def _attempt_resolution(self, path: str, project_root: Optional[str]) -> PathResolutionResult:
         """
         Attempt to resolve path with multiple strategies.
 
@@ -379,9 +377,7 @@ class PathResolver:
             suggestion=self._generate_suggestion(path, attempted_paths),
         )
 
-    def _find_file_in_tree(
-        self, root: str, filename: str, max_depth: int = 5
-    ) -> Optional[str]:
+    def _find_file_in_tree(self, root: str, filename: str, max_depth: int = 5) -> Optional[str]:
         """
         Search for a file in directory tree.
 
@@ -475,12 +471,8 @@ class PathResolver:
                     suggestions.append(f"  - {root}")
 
         # Add workspace root hint
-        suggestions.append(
-            f"\nCurrent workspace roots: {', '.join(self.workspace_roots)}"
-        )
-        suggestions.append(
-            "Set WORKSPACE_ROOT environment variable to specify custom root."
-        )
+        suggestions.append(f"\nCurrent workspace roots: {', '.join(self.workspace_roots)}")
+        suggestions.append("Set WORKSPACE_ROOT environment variable to specify custom root.")
 
         return "\n".join(suggestions)
 

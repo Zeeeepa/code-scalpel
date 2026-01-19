@@ -17,9 +17,7 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-def _write_budget_yaml(
-    policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1
-) -> None:
+def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1) -> None:
     (policy_dir / "budget.yaml").write_text(
         """budgets:
   default:
@@ -116,9 +114,7 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
                 return_value={
                     "tool_id": "update_symbol",
                     "error": {"error_code": "forbidden", "message": "Budget exceeded"},
-                    "warnings": [
-                        "Governance BLOCK: budget exceeded (max_total_lines=1)"
-                    ],
+                    "warnings": ["Governance BLOCK: budget exceeded (max_total_lines=1)"],
                 }
             ),
         )
@@ -205,9 +201,7 @@ async def test_pro_block_mode_emits_audit_event_on_budget_deny(
     audit_path = policy_dir / "audit.jsonl"
     assert audit_path.exists()
 
-    lines = [
-        ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()
-    ]
+    lines = [ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
     assert lines
     last = json.loads(lines[-1])
     assert last["tool_id"] == "update_symbol"

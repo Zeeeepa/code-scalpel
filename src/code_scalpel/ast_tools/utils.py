@@ -196,9 +196,7 @@ class ASTUtils:
 # Standalone utility functions for convenience
 def is_constant(node: ast.AST) -> bool:
     """Check if a node represents a constant value."""
-    return isinstance(
-        node, (ast.Constant, ast.Num, ast.Str, ast.Bytes, ast.NameConstant)
-    )
+    return isinstance(node, (ast.Constant, ast.Num, ast.Str, ast.Bytes, ast.NameConstant))
 
 
 def get_node_type(node: ast.AST) -> str:

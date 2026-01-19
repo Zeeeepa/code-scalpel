@@ -157,9 +157,7 @@ class TestGovernanceConfigLoader:
         # Calculate correct signature
         with open(temp_config_file, "rb") as f:
             content = f.read()
-            expected_sig = hmac.new(
-                secret.encode(), content, hashlib.sha256
-            ).hexdigest()
+            expected_sig = hmac.new(secret.encode(), content, hashlib.sha256).hexdigest()
 
         monkeypatch.setenv("SCALPEL_CONFIG_SECRET", secret)
         monkeypatch.setenv("SCALPEL_CONFIG_SIGNATURE", expected_sig)

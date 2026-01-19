@@ -130,9 +130,7 @@ class SonarQubeParser:
         page_size = 100
 
         while True:
-            endpoint = (
-                f"issues/search?componentKeys={project_key}&ps={page_size}&p={page}"
-            )
+            endpoint = f"issues/search?componentKeys={project_key}&ps={page_size}&p={page}"
             data = self._make_request(endpoint)
             if not data or "issues" not in data:
                 break
@@ -178,9 +176,7 @@ class SonarQubeParser:
             "reliability_rating,security_rating"
         )
 
-        endpoint = (
-            f"measures/component?component={project_key}&metricKeys={metric_keys}"
-        )
+        endpoint = f"measures/component?component={project_key}&metricKeys={metric_keys}"
         data = self._make_request(endpoint)
         if not data or "component" not in data:
             return metrics
@@ -239,9 +235,7 @@ class SonarQubeParser:
         """
         return [i for i in issues if i.issue_type == "BUG"]
 
-    def get_by_severity(
-        self, issues: list[SonarIssue], severity: str
-    ) -> list[SonarIssue]:
+    def get_by_severity(self, issues: list[SonarIssue], severity: str) -> list[SonarIssue]:
         """
         Filter issues by severity.
 

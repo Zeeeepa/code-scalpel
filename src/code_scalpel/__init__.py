@@ -226,9 +226,7 @@ def security_scan(code: str | None = None, file_path: str | None = None):
     return _run_mcp_tool_sync(_security_scan_async, code=code, file_path=file_path)
 
 
-def symbolic_execute(
-    code: str, max_paths: int | None = None, max_depth: int | None = None
-):
+def symbolic_execute(code: str, max_paths: int | None = None, max_depth: int | None = None):
     """[20251228_FEATURE] Sync wrapper for MCP symbolic_execute tool."""
     from code_scalpel.mcp.server import symbolic_execute as _symbolic_execute_async
 

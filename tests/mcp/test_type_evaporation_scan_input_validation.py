@@ -91,9 +91,7 @@ async def test_missing_frontend_code_parameter(tmp_path: Path):
     # Check if error is in response - tool will return error for missing required param
     assert "error" in env_json
     # Error should be present indicating a problem
-    assert isinstance(env_json.get("error"), dict) or isinstance(
-        env_json.get("error"), str
-    )
+    assert isinstance(env_json.get("error"), dict) or isinstance(env_json.get("error"), str)
 
 
 async def test_missing_backend_code_parameter(tmp_path: Path):
@@ -116,9 +114,7 @@ async def test_missing_backend_code_parameter(tmp_path: Path):
     # Tool will return error for missing required parameter
     assert "error" in env_json
     # Error should be present indicating a problem
-    assert isinstance(env_json.get("error"), dict) or isinstance(
-        env_json.get("error"), str
-    )
+    assert isinstance(env_json.get("error"), dict) or isinstance(env_json.get("error"), str)
 
 
 async def test_invalid_frontend_code_type(tmp_path: Path):
@@ -217,10 +213,7 @@ async def test_very_large_valid_input(tmp_path: Path):
     """Very large valid code is handled (within limits)."""
     # Create a large TypeScript file with many valid interfaces
     frontend_code = "\n".join(
-        [
-            f"interface Interface{i} {{\n" f"  field{i}: string;\n" f"}}\n"
-            for i in range(100)
-        ]
+        [f"interface Interface{i} {{\n" f"  field{i}: string;\n" f"}}\n" for i in range(100)]
     )
 
     # Create a large Python file with many functions

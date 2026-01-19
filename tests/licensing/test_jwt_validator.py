@@ -124,9 +124,7 @@ def clean_env():
     original_secret_key = os.environ.get("CODE_SCALPEL_SECRET_KEY")
     original_allow_hs256 = os.environ.get("CODE_SCALPEL_ALLOW_HS256")
     original_license_path = os.environ.get("CODE_SCALPEL_LICENSE_PATH")
-    original_disable_discovery = os.environ.get(
-        "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"
-    )
+    original_disable_discovery = os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY")
 
     # Clean environment
     os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
@@ -157,9 +155,7 @@ def clean_env():
         os.environ.pop("CODE_SCALPEL_ALLOW_HS256", None)
 
     if original_disable_discovery is not None:
-        os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = (
-            original_disable_discovery
-        )
+        os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = original_disable_discovery
     else:
         os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
 
@@ -181,9 +177,7 @@ class TestJWTValidation:
         assert result.organization == TEST_ORGANIZATION
         assert len(result.features) > 0
 
-    def test_validate_valid_enterprise_token(
-        self, enterprise_license_token, validator_hs256
-    ):
+    def test_validate_valid_enterprise_token(self, enterprise_license_token, validator_hs256):
         """Test validating a valid Enterprise tier token."""
         result = validator_hs256.validate_token(enterprise_license_token)
 
@@ -200,9 +194,7 @@ class TestJWTValidation:
         assert result.error_message is not None
         assert "expired" in result.error_message.lower()
 
-    def test_validate_expired_token_grace_period(
-        self, expired_license_token, validator_hs256
-    ):
+    def test_validate_expired_token_grace_period(self, expired_license_token, validator_hs256):
         """Test that expired tokens are in grace period within 7 days."""
         result = validator_hs256.validate_token(expired_license_token)
 
@@ -295,26 +287,20 @@ class TestLicenseRevalidationCache:
             validate_calls["n"] += 1
             return original_validate_token(self, token)
 
-        monkeypatch.setattr(
-            JWTLicenseValidator, "validate_token", _wrapped_validate_token
-        )
+        monkeypatch.setattr(JWTLicenseValidator, "validate_token", _wrapped_validate_token)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
             license_path.write_text(pro_license_token)
             os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
-            v1 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v1 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r1 = v1.validate()
             assert r1.is_valid is True
             assert validate_calls["n"] == 1
 
             # New instance, same unchanged file, same time window.
-            v2 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v2 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r2 = v2.validate()
             assert r2.is_valid is True
             assert validate_calls["n"] == 1
@@ -348,27 +334,21 @@ class TestLicenseRevalidationCache:
             validate_calls["n"] += 1
             return original_validate_token(self, token)
 
-        monkeypatch.setattr(
-            JWTLicenseValidator, "validate_token", _wrapped_validate_token
-        )
+        monkeypatch.setattr(JWTLicenseValidator, "validate_token", _wrapped_validate_token)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
             license_path.write_text(pro_license_token)
             os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
-            v1 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v1 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r1 = v1.validate()
             assert r1.is_valid is True
             assert validate_calls["n"] == 1
 
             # Change file contents/mtime; should force revalidation even within TTL.
             license_path.write_text(pro_license_token + "\n")
-            v2 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v2 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r2 = v2.validate()
             assert r2.is_valid is True
             assert validate_calls["n"] == 2
@@ -486,9 +466,7 @@ class TestLicenseFileHandling:
 class TestLicenseInfo:
     """Tests for license info API."""
 
-    def test_get_license_info_valid_license(
-        self, clean_env, pro_license_token, validator_hs256
-    ):
+    def test_get_license_info_valid_license(self, clean_env, pro_license_token, validator_hs256):
         """Test getting license info for valid license."""
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
@@ -554,9 +532,7 @@ class TestGracePeriod:
 
         token = jwt.encode(claims, TEST_SECRET_KEY, algorithm="HS256")
 
-        validator = JWTLicenseValidator(
-            algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-        )
+        validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
         result = validator.validate_token(token)
 
         assert result.is_expired is True
@@ -580,9 +556,7 @@ class TestGracePeriod:
 
         token = jwt.encode(claims, TEST_SECRET_KEY, algorithm="HS256")
 
-        validator = JWTLicenseValidator(
-            algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-        )
+        validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
         result = validator.validate_token(token)
 
         assert result.is_expired is True

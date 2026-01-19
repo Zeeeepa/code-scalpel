@@ -875,9 +875,7 @@ class PylintConfig:
     max_attributes: int = 7
     max_public_methods: int = 20
     min_public_methods: int = 2
-    good_names: list[str] = field(
-        default_factory=lambda: ["i", "j", "k", "ex", "Run", "_"]
-    )
+    good_names: list[str] = field(default_factory=lambda: ["i", "j", "k", "ex", "Run", "_"])
     ignore_patterns: list[str] = field(default_factory=list)
     plugins: list[str] = field(default_factory=list)
 
@@ -908,9 +906,7 @@ class PylintConfig:
     def _from_pyproject(cls, path: Path) -> PylintConfig:
         """Load configuration from pyproject.toml."""
         if tomllib is None:
-            raise ImportError(
-                "tomllib (Python 3.11+) or tomli is required for TOML parsing"
-            )
+            raise ImportError("tomllib (Python 3.11+) or tomli is required for TOML parsing")
 
         with open(path, "rb") as f:
             data = tomllib.load(f)
@@ -938,9 +934,7 @@ class PylintConfig:
         if "MESSAGES CONTROL" in parser:
             s = parser["MESSAGES CONTROL"]
             if "disable" in s:
-                config.disable = [
-                    m.strip() for m in s["disable"].split(",") if m.strip()
-                ]
+                config.disable = [m.strip() for m in s["disable"].split(",") if m.strip()]
             if "enable" in s:
                 config.enable = [m.strip() for m in s["enable"].split(",") if m.strip()]
 
@@ -995,9 +989,7 @@ class PylintConfig:
         # Check for flat structure or nested structure
         master = get_nested(data, "master") or get_nested(data, "MASTER") or {}
         messages = (
-            get_nested(data, "messages_control")
-            or get_nested(data, "MESSAGES CONTROL")
-            or {}
+            get_nested(data, "messages_control") or get_nested(data, "MESSAGES CONTROL") or {}
         )
         fmt = get_nested(data, "format") or get_nested(data, "FORMAT") or {}
         design = get_nested(data, "design") or get_nested(data, "DESIGN") or {}
@@ -1025,9 +1017,7 @@ class PylintConfig:
             if "enable" in messages:
                 enable = messages["enable"]
                 config.enable = (
-                    enable
-                    if isinstance(enable, list)
-                    else [m.strip() for m in enable.split(",")]
+                    enable if isinstance(enable, list) else [m.strip() for m in enable.split(",")]
                 )
 
         # Parse from format
@@ -1059,9 +1049,7 @@ class PylintConfig:
             if "good-names" in basic:
                 names = basic["good-names"]
                 config.good_names = (
-                    names
-                    if isinstance(names, list)
-                    else [n.strip() for n in names.split(",")]
+                    names if isinstance(names, list) else [n.strip() for n in names.split(",")]
                 )
 
         return config
@@ -1110,11 +1098,7 @@ class PylintConfig:
                 try:
                     config = cls._from_pyproject(pyproject)
                     # Check if config has non-default values
-                    if (
-                        config.disable
-                        or config.plugins
-                        or config.max_line_length != 100
-                    ):
+                    if config.disable or config.plugins or config.max_line_length != 100:
                         return config
                 except Exception:
                     pass
@@ -1232,9 +1216,7 @@ class PylintReport:
             "score": self.score,
             "message_count": self.message_count,
             "by_severity": {
-                "fatal": sum(
-                    1 for m in self.messages if m.severity == PylintSeverity.FATAL
-                ),
+                "fatal": sum(1 for m in self.messages if m.severity == PylintSeverity.FATAL),
                 "error": self.error_count,
                 "warning": self.warning_count,
                 "refactor": self.refactor_count,
@@ -1242,9 +1224,9 @@ class PylintReport:
             },
             "top_issues": [
                 {"symbol": sym, "count": len(msgs)}
-                for sym, msgs in sorted(
-                    self.messages_by_symbol.items(), key=lambda x: -len(x[1])
-                )[:10]
+                for sym, msgs in sorted(self.messages_by_symbol.items(), key=lambda x: -len(x[1]))[
+                    :10
+                ]
             ],
         }
 
@@ -1372,9 +1354,7 @@ class PylintParser:
 
                     # Parse statistics
                     if "statistics" in data:
-                        report.statistics = PylintStatistics.from_dict(
-                            data["statistics"]
-                        )
+                        report.statistics = PylintStatistics.from_dict(data["statistics"])
 
                 except json.JSONDecodeError as e:
                     report.errors.append(f"Failed to parse Pylint output: {e}")

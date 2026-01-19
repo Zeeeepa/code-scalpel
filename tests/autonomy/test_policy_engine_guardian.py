@@ -39,9 +39,7 @@ def _make_run(side_effects):
     return _runner
 
 
-def test_policy_engine_allows_with_warning(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_policy_engine_allows_with_warning(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     policy_path = _write_policy_file(tmp_path, action="WARN")
 
     eval_output = json.dumps({"result": [{"expressions": [{"value": ["warn"]}]}]})
@@ -78,18 +76,12 @@ def test_policy_engine_allows_with_warning(
                     "data.code-scalpel.security.deny",
                 )
             ]
-        return side_effects.get(
-            key, SimpleNamespace(returncode=0, stdout="{}", stderr=b"")
-        )
+        return side_effects.get(key, SimpleNamespace(returncode=0, stdout="{}", stderr=b""))
 
-    monkeypatch.setattr(
-        "code_scalpel.policy_engine.policy_engine.subprocess.run", fake_run
-    )
+    monkeypatch.setattr("code_scalpel.policy_engine.policy_engine.subprocess.run", fake_run)
 
     engine = PolicyEngine(policy_path=str(policy_path))
-    op = Operation(
-        type="code_edit", code="print('hi')", language="python", file_path="file.py"
-    )
+    op = Operation(type="code_edit", code="print('hi')", language="python", file_path="file.py")
     decision = engine.evaluate(op)
 
     assert decision.allowed is True
@@ -135,13 +127,9 @@ def test_policy_engine_denies_on_eval_error(
                     "data.code-scalpel.security.deny",
                 )
             ]
-        return side_effects.get(
-            key, SimpleNamespace(returncode=0, stdout="{}", stderr=b"")
-        )
+        return side_effects.get(key, SimpleNamespace(returncode=0, stdout="{}", stderr=b""))
 
-    monkeypatch.setattr(
-        "code_scalpel.policy_engine.policy_engine.subprocess.run", fake_run
-    )
+    monkeypatch.setattr("code_scalpel.policy_engine.policy_engine.subprocess.run", fake_run)
 
     engine = PolicyEngine(policy_path=str(policy_path))
     op = Operation(type="file_access", file_path="secret.txt")
@@ -152,9 +140,7 @@ def test_policy_engine_denies_on_eval_error(
     assert decision.requires_override is False
 
 
-def test_request_override_single_use(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_request_override_single_use(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     policy_path = _write_policy_file(tmp_path, action="WARN")
 
     # Simplify init by mocking subprocess calls
@@ -170,13 +156,9 @@ def test_request_override_single_use(
     decision = PolicyDecision(allowed=False, reason="deny", violated_policies=["p1"])
     op = Operation(type="code_edit", file_path="danger.py")
 
-    approved = engine.request_override(
-        op, decision, justification="needed", human_code="123456"
-    )
+    approved = engine.request_override(op, decision, justification="needed", human_code="123456")
     assert approved.approved is True
 
-    reused = engine.request_override(
-        op, decision, justification="again", human_code="123456"
-    )
+    reused = engine.request_override(op, decision, justification="again", human_code="123456")
     assert reused.approved is False
     assert "already used" in reused.reason

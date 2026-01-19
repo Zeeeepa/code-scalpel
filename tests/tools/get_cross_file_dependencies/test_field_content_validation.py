@@ -19,9 +19,7 @@ class TestAliasResolutionContent:
     """Validate actual content of alias_resolutions field (Pro tier)."""
 
     @pytest.mark.asyncio
-    async def test_simple_import_alias_resolution(
-        self, pro_server, alias_import_project
-    ):
+    async def test_simple_import_alias_resolution(self, pro_server, alias_import_project):
         """Validate simple import alias is correctly resolved."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=alias_import_project["target_file"],
@@ -37,17 +35,13 @@ class TestAliasResolutionContent:
         if result.alias_resolutions:
             alias = result.alias_resolutions[0]
             assert hasattr(alias, "alias"), "Should have alias field"
-            assert hasattr(
-                alias, "original_module"
-            ), "Should have original_module field"
+            assert hasattr(alias, "original_module"), "Should have original_module field"
             # Verify the alias mapping makes sense
             assert alias.alias is not None
             assert alias.original_module is not None
 
     @pytest.mark.asyncio
-    async def test_from_import_as_alias_resolution(
-        self, pro_server, alias_import_project
-    ):
+    async def test_from_import_as_alias_resolution(self, pro_server, alias_import_project):
         """Validate 'from X import Y as Z' alias resolution."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=alias_import_project["target_file"],
@@ -82,15 +76,11 @@ class TestWildcardExpansionContent:
             expansion = result.wildcard_expansions[0]
             # Check structure
             assert hasattr(expansion, "from_module"), "Should have from_module"
-            assert hasattr(
-                expansion, "expanded_symbols"
-            ), "Should have expanded_symbols"
+            assert hasattr(expansion, "expanded_symbols"), "Should have expanded_symbols"
 
             # Verify symbols are list and non-empty
             assert isinstance(expansion.expanded_symbols, list)
-            assert (
-                len(expansion.expanded_symbols) > 0
-            ), "Should have symbols from __all__"
+            assert len(expansion.expanded_symbols) > 0, "Should have symbols from __all__"
 
             # Private symbols should not be included
             for symbol in expansion.expanded_symbols:
@@ -99,9 +89,7 @@ class TestWildcardExpansionContent:
                 ), f"Private symbol {symbol} should not be in __all__"
 
     @pytest.mark.asyncio
-    async def test_no_private_symbols_in_expansion(
-        self, pro_server, wildcard_import_project
-    ):
+    async def test_no_private_symbols_in_expansion(self, pro_server, wildcard_import_project):
         """__all__ expansion should exclude private symbols."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=wildcard_import_project["target_file"],
@@ -206,9 +194,7 @@ class TestArchitecturalViolationContent:
                 ], f"Invalid severity level: {violation.severity}"
 
     @pytest.mark.asyncio
-    async def test_boundary_alert_has_layer_info(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_boundary_alert_has_layer_info(self, enterprise_server, simple_two_file_project):
         """Boundary alert should identify layers involved."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -231,9 +217,7 @@ class TestLayerMappingContent:
     """Validate actual content of layer_mapping field (Enterprise tier)."""
 
     @pytest.mark.asyncio
-    async def test_layer_mapping_file_assignment(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_layer_mapping_file_assignment(self, enterprise_server, simple_two_file_project):
         """Layer mapping should correctly assign files to layers."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -246,9 +230,7 @@ class TestLayerMappingContent:
         if result.layer_mapping:
             for layer_name, files in result.layer_mapping.items():
                 # Should be list of files
-                assert isinstance(
-                    files, list
-                ), f"Layer {layer_name} should map to file list"
+                assert isinstance(files, list), f"Layer {layer_name} should map to file list"
 
                 # Files should be strings (paths)
                 for file_path in files:
@@ -286,9 +268,7 @@ class TestExemptedFilesContent:
     """Validate actual content of exempted_files field (Enterprise tier)."""
 
     @pytest.mark.asyncio
-    async def test_exempted_files_match_patterns(
-        self, enterprise_server, simple_two_file_project
-    ):
+    async def test_exempted_files_match_patterns(self, enterprise_server, simple_two_file_project):
         """exempted_files should contain files matching exemption patterns."""
         result = await enterprise_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -311,9 +291,7 @@ class TestDependencyChainContent:
     """Validate actual content of dependency_chains field."""
 
     @pytest.mark.asyncio
-    async def test_dependency_chains_are_valid_paths(
-        self, pro_server, deep_chain_project
-    ):
+    async def test_dependency_chains_are_valid_paths(self, pro_server, deep_chain_project):
         """Dependency chains should represent valid import paths."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=deep_chain_project["target_file"],
@@ -326,9 +304,7 @@ class TestDependencyChainContent:
         if result.dependency_chains:
             for chain in result.dependency_chains:
                 # Chain should be a list of files
-                assert isinstance(
-                    chain, list
-                ), f"Chain should be list, got {type(chain)}"
+                assert isinstance(chain, list), f"Chain should be list, got {type(chain)}"
 
                 # Each element should be a string (file path)
                 for file_path in chain:
@@ -367,9 +343,7 @@ class TestCircularImportContent:
 
             # Each circular import entry should be a list (the cycle)
             for cycle in result.circular_imports:
-                assert isinstance(
-                    cycle, list
-                ), f"Cycle should be list, got {type(cycle)}"
+                assert isinstance(cycle, list), f"Cycle should be list, got {type(cycle)}"
                 assert len(cycle) >= 2, "Cycle should have at least 2 modules"
 
 
@@ -377,9 +351,7 @@ class TestFileAnalyzedCount:
     """Validate files_analyzed field accuracy."""
 
     @pytest.mark.asyncio
-    async def test_files_analyzed_count_accurate(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_files_analyzed_count_accurate(self, community_server, simple_two_file_project):
         """files_analyzed count should match actual files processed."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -402,9 +374,7 @@ class TestMaxDepthReachedAccuracy:
     """Validate max_depth_reached field accuracy."""
 
     @pytest.mark.asyncio
-    async def test_max_depth_reached_matches_actual_depth(
-        self, pro_server, deep_chain_project
-    ):
+    async def test_max_depth_reached_matches_actual_depth(self, pro_server, deep_chain_project):
         """max_depth_reached should reflect actual chain depth found."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=deep_chain_project["target_file"],

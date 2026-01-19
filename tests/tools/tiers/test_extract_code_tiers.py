@@ -17,9 +17,7 @@ import pytest
 # [20260101_SKIP] Spec test for Pro tier warnings field - not implemented
 @pytest.mark.skip(reason="ContextualExtractionResult.warnings not implemented")
 @pytest.mark.asyncio
-async def test_extract_code_pro_clamps_depth_and_emits_confidence(
-    monkeypatch, tmp_path: Path
-):
+async def test_extract_code_pro_clamps_depth_and_emits_confidence(monkeypatch, tmp_path: Path):
     """Pro tier clamps context_depth to max_depth=1 and returns confidence metadata."""
     from code_scalpel.mcp import server
 

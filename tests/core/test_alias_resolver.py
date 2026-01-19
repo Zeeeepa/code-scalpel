@@ -64,9 +64,7 @@ class TestTsconfigAliases:
 
     def test_multiple_targets_uses_first(self, tmp_path):
         """Test that multiple targets use the first one."""
-        tsconfig = {
-            "compilerOptions": {"paths": {"@utils": ["./src/utils", "./lib/utils"]}}
-        }
+        tsconfig = {"compilerOptions": {"paths": {"@utils": ["./src/utils", "./lib/utils"]}}}
 
         tsconfig_path = tmp_path / "tsconfig.json"
         with open(tsconfig_path, "w") as f:

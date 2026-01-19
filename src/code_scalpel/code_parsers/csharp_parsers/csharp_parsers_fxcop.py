@@ -67,9 +67,7 @@ class FxCopParser:
         self.config = FxCopConfig()
         self.violations: List[FxCopViolation] = []
 
-    def execute_fxcop(
-        self, paths: List[Path], config: FxCopConfig = None
-    ) -> List[FxCopViolation]:
+    def execute_fxcop(self, paths: List[Path], config: FxCopConfig = None) -> List[FxCopViolation]:
         raise NotImplementedError("Phase 2: FxCop execution")
 
     def parse_json_report(self, report_path: Path) -> List[FxCopViolation]:
@@ -83,7 +81,5 @@ class FxCopParser:
     ) -> Dict[RuleCategory, List[FxCopViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def generate_report(
-        self, violations: List[FxCopViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: List[FxCopViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

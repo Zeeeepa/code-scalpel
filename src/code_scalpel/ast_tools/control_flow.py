@@ -146,9 +146,7 @@ class ControlFlowBuilder:
         self.block_counter += 1
         return block_id
 
-    def _process_if_statement(
-        self, node: ast.If, current_block: str
-    ) -> Tuple[str, str]:
+    def _process_if_statement(self, node: ast.If, current_block: str) -> Tuple[str, str]:
         """Process if/elif/else statement and return merge block."""
         # Implementation placeholder
         return current_block, ""

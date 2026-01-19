@@ -86,7 +86,5 @@ class SecurityCodeScanParser:
     ) -> Dict[str, List[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: OWASP mapping")
 
-    def generate_report(
-        self, vulns: List[SecurityVulnerability], format: str = "json"
-    ) -> str:
+    def generate_report(self, vulns: List[SecurityVulnerability], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

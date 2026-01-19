@@ -197,9 +197,7 @@ class ArchitecturalRuleEngine:
             if env_path:
                 paths_to_try = [Path(env_path)]
             else:
-                paths_to_try = [
-                    self.project_root / p for p in self.DEFAULT_CONFIG_PATHS
-                ]
+                paths_to_try = [self.project_root / p for p in self.DEFAULT_CONFIG_PATHS]
 
         config_data = None
         for path in paths_to_try:
@@ -253,12 +251,8 @@ class ArchitecturalRuleEngine:
         rules_section = data.get("rules", {})
         self.config.enable_layer_rules = rules_section.get("enable_layer_rules", True)
         self.config.enable_custom_rules = rules_section.get("enable_custom_rules", True)
-        self.config.enable_coupling_rules = rules_section.get(
-            "enable_coupling_rules", True
-        )
-        self.config.layer_direction = rules_section.get(
-            "layer_direction", "downward_only"
-        )
+        self.config.enable_coupling_rules = rules_section.get("enable_coupling_rules", True)
+        self.config.layer_direction = rules_section.get("layer_direction", "downward_only")
         self.config.allow_same_layer = rules_section.get("allow_same_layer", True)
 
         # Parse custom rules
@@ -352,9 +346,7 @@ class ArchitecturalRuleEngine:
         except ValueError:
             return -1
 
-    def check_dependency(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def check_dependency(self, from_module: str, to_module: str) -> List[ArchitecturalViolation]:
         """
         Check a single dependency for architectural violations.
 
@@ -386,9 +378,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def _check_layer_rules(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def _check_layer_rules(self, from_module: str, to_module: str) -> List[ArchitecturalViolation]:
         """Check layer boundary rules."""
         violations = []
 
@@ -460,9 +450,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def _check_custom_rules(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def _check_custom_rules(self, from_module: str, to_module: str) -> List[ArchitecturalViolation]:
         """Check custom dependency rules."""
         violations = []
 
@@ -471,9 +459,9 @@ class ArchitecturalRuleEngine:
         to_path = to_module.replace(".", "/")
 
         for rule in self.config.custom_rules:
-            from_matches = fnmatch.fnmatch(
-                from_path, rule.from_pattern
-            ) or fnmatch.fnmatch(from_module, rule.from_pattern)
+            from_matches = fnmatch.fnmatch(from_path, rule.from_pattern) or fnmatch.fnmatch(
+                from_module, rule.from_pattern
+            )
             to_matches = fnmatch.fnmatch(to_path, rule.to_pattern) or fnmatch.fnmatch(
                 to_module, rule.to_pattern
             )

@@ -89,9 +89,7 @@ class TestBaseCodeAnalysisAgent:
         original_get_file_context = base_module.get_file_context
         base_module.get_file_context = AsyncMock(
             return_value=MagicMock(
-                model_dump=MagicMock(
-                    return_value={"success": False, "error": "File not found"}
-                )
+                model_dump=MagicMock(return_value={"success": False, "error": "File not found"})
             )
         )
 
@@ -190,9 +188,7 @@ class TestBaseCodeAnalysisAgent:
         original_update_symbol = base_module.update_symbol
         base_module.update_symbol = AsyncMock(
             return_value=MagicMock(
-                model_dump=MagicMock(
-                    return_value={"success": True, "message": "Change applied"}
-                )
+                model_dump=MagicMock(return_value={"success": True, "message": "Change applied"})
             )
         )
 
@@ -232,9 +228,7 @@ class TestCodeReviewAgent:
             }
         )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 2}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 2})
 
         result = await agent.observe("/test/file.py")
 
@@ -379,9 +373,7 @@ class TestCodeReviewAgent:
     @pytest.mark.asyncio
     async def test_observe_with_file_failure(self, agent):
         """Test observe method with file observation failure (covers line 43)."""
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
         agent.analyze_code_security = AsyncMock()
         agent.find_symbol_usage = AsyncMock()
 
@@ -578,9 +570,7 @@ class TestSecurityAgent:
     @pytest.mark.asyncio
     async def test_observe_success(self, agent):
         """Test successful security observation."""
-        agent.observe_file = AsyncMock(
-            return_value={"success": True, "functions": ["func1"]}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": True, "functions": ["func1"]})
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
         agent.find_symbol_usage = AsyncMock(return_value={"success": True})
 
@@ -644,9 +634,7 @@ class TestSecurityAgent:
     async def test_observe_file_failure_returns_early(self, agent):
         """Test that observe returns early when file observation fails (line 42)."""
         # Mock observe_file to return failure
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
 
         result = await agent.observe("/nonexistent/file.py")
 
@@ -671,9 +659,7 @@ class TestSecurityAgent:
             }
         )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 2}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 2})
 
         result = await agent.observe("/test/file.py")
 
@@ -717,9 +703,7 @@ class TestSecurityAgent:
 
     def test_assess_overall_risk_critical_path(self, agent):
         """Test _assess_overall_risk critical path (covers line 222)."""
-        categorized_vulns = {
-            "sql_injection": [{"severity": "critical"}, {"severity": "critical"}]
-        }
+        categorized_vulns = {"sql_injection": [{"severity": "critical"}, {"severity": "critical"}]}
         attack_vectors = []
 
         assessment = agent._assess_overall_risk(categorized_vulns, attack_vectors)
@@ -729,9 +713,7 @@ class TestSecurityAgent:
 
     def test_assess_overall_risk_high_path(self, agent):
         """Test _assess_overall_risk high path (covers line 224)."""
-        categorized_vulns = {
-            "sql_injection": [{"severity": "high"}, {"severity": "high"}]
-        }
+        categorized_vulns = {"sql_injection": [{"severity": "high"}, {"severity": "high"}]}
         attack_vectors = []
 
         assessment = agent._assess_overall_risk(categorized_vulns, attack_vectors)
@@ -1103,9 +1085,7 @@ class TestOptimizationAgent:
     async def test_observe_file_failure_returns_early(self, agent):
         """Test that observe returns early when file observation fails (line 46)."""
         # Mock observe_file to return failure
-        agent.observe_file = AsyncMock(
-            return_value={"success": False, "error": "File not found"}
-        )
+        agent.observe_file = AsyncMock(return_value={"success": False, "error": "File not found"})
 
         result = await agent.observe("/nonexistent/file.py")
 
@@ -1129,9 +1109,7 @@ class TestOptimizationAgent:
                 ],  # More than 5 to test slicing
             }
         )
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 2}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 2})
 
         result = await agent.observe("/test/file.py")
 
@@ -1522,9 +1500,7 @@ class TestAgentIntegration:
             }
         )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 1}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 1})
 
         result = await agent.execute_ooda_loop("/test/file.py")
 
@@ -1545,9 +1521,7 @@ class TestAgentIntegration:
             return_value={"success": True, "functions": ["vulnerable_func"]}
         )
         agent.analyze_code_security = AsyncMock(return_value={"vulnerabilities": []})
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 1}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 1})
 
         result = await agent.execute_ooda_loop("/test/file.py")
 
@@ -1567,9 +1541,7 @@ class TestAgentIntegration:
                 "functions": ["slow_func"],
             }
         )
-        agent.find_symbol_usage = AsyncMock(
-            return_value={"success": True, "total_references": 1}
-        )
+        agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 1})
 
         result = await agent.execute_ooda_loop("/test/file.py")
 

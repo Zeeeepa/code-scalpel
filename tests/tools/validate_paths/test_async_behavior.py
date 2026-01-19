@@ -52,9 +52,7 @@ async def test_validate_paths_handles_concurrent_requests():
         ["/tmp/d", "/tmp/e", "/tmp/f"],
     ]
 
-    results = await asyncio.gather(
-        *(mcp_server.validate_paths(paths=batch) for batch in batches)
-    )
+    results = await asyncio.gather(*(mcp_server.validate_paths(paths=batch) for batch in batches))
 
     for batch, result in zip(batches, results, strict=False):
         total = len(result.accessible) + len(result.inaccessible)
@@ -81,14 +79,10 @@ async def test_validate_paths_timeout_propagates_cleanly(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(
-        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
-    )
+    monkeypatch.setattr(mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync)
 
     with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(
-            mcp_server.validate_paths(paths=["/tmp/very-slow"]), timeout=0.05
-        )
+        await asyncio.wait_for(mcp_server.validate_paths(paths=["/tmp/very-slow"]), timeout=0.05)
 
 
 @pytest.mark.asyncio
@@ -111,17 +105,13 @@ async def test_validate_paths_timeout_respects_tier_limit(monkeypatch):
             security_score=None,
         )
 
-    monkeypatch.setattr(
-        mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync
-    )
+    monkeypatch.setattr(mcp_server, "_validate_paths_sync", very_slow_validate_paths_sync)
 
     tier_limits = {
         "capabilities": [],
         "limits": {"timeout_seconds": 0.05},
     }
-    monkeypatch.setattr(
-        mcp_server, "get_tool_capabilities", lambda tool, tier: tier_limits
-    )
+    monkeypatch.setattr(mcp_server, "get_tool_capabilities", lambda tool, tier: tier_limits)
 
     timeout_seconds = tier_limits["limits"]["timeout_seconds"]
 
@@ -154,9 +144,7 @@ async def test_validate_paths_10_concurrent_requests(monkeypatch):
     monkeypatch.setattr(mcp_server, "_validate_paths_sync", fast_validate_paths_sync)
 
     batches = [[f"/tmp/p-{i}-{j}" for j in range(3)] for i in range(10)]
-    results = await asyncio.gather(
-        *(mcp_server.validate_paths(paths=batch) for batch in batches)
-    )
+    results = await asyncio.gather(*(mcp_server.validate_paths(paths=batch) for batch in batches))
 
     for batch, result in zip(batches, results, strict=False):
         total = len(result.accessible) + len(result.inaccessible)
@@ -231,6 +219,4 @@ async def test_validate_paths_response_time_small_medium_large(monkeypatch):
         duration = time.monotonic() - start
         total = len(result.accessible) + len(result.inaccessible)
         assert total == len(paths)
-        assert (
-            duration < thresholds[key]
-        ), f"{key} batch exceeded threshold: {duration:.2f}s"
+        assert duration < thresholds[key], f"{key} batch exceeded threshold: {duration:.2f}s"

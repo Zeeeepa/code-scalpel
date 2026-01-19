@@ -280,9 +280,7 @@ async def test_reachability_analysis_pro_sets_is_imported(
         )
         data = _tool_json(payload).get("data") or {}
         deps = data.get("dependencies") or []
-        assert any(
-            d.get("is_imported") is True for d in deps if d.get("name") == "requests"
-        )
+        assert any(d.get("is_imported") is True for d in deps if d.get("name") == "requests")
         break
 
 
@@ -516,9 +514,7 @@ async def test_enterprise_policy_violations_for_typosquatting(
         # assert env_json["tier"] == "enterprise"
         assert data.get("success") is True
         policy_violations = data.get("policy_violations") or []
-        assert (
-            len(policy_violations) > 0
-        ), f"Expected policy violations, got: {policy_violations}"
+        assert len(policy_violations) > 0, f"Expected policy violations, got: {policy_violations}"
         assert policy_violations[0]["type"] in [
             "typosquatting",
             "license",
@@ -572,9 +568,7 @@ async def test_enterprise_unlimited_dependencies(
         break
 
 
-async def test_multi_format_maven(
-    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
-):
+async def test_multi_format_maven(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
     """Pro tier detects Maven ecosystem from pom.xml."""
     project = tmp_path / "maven_proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -644,9 +638,7 @@ async def test_multi_format_maven(
         break
 
 
-async def test_multi_format_gradle(
-    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
-):
+async def test_multi_format_gradle(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
     """Pro tier detects build.gradle and parses Maven ecosystem from it."""
     project = tmp_path / "gradle_proj"
     project.mkdir(parents=True, exist_ok=True)
@@ -709,9 +701,7 @@ dependencies {
         break
 
 
-async def test_monorepo_aggregation(
-    tmp_path: Path, hs256_test_secret, write_hs256_license_jwt
-):
+async def test_monorepo_aggregation(tmp_path: Path, hs256_test_secret, write_hs256_license_jwt):
     """Pro tier scans multiple manifest file formats in the same directory."""
     project = tmp_path / "monorepo"
     project.mkdir(parents=True, exist_ok=True)
@@ -1016,9 +1006,7 @@ async def test_pro_license_compliance_flags_gpl(
         assert len(deps) >= 2
 
         # Find mysql-connector-python (GPL-2.0 - copyleft)
-        gpl_dep = next(
-            (d for d in deps if "mysql-connector" in d.get("name", "").lower()), None
-        )
+        gpl_dep = next((d for d in deps if "mysql-connector" in d.get("name", "").lower()), None)
         if gpl_dep:
             # Should have license fields at Pro tier
             assert "license" in gpl_dep or "license_compliant" in gpl_dep

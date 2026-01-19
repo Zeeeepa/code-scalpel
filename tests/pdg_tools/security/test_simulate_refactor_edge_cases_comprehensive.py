@@ -45,8 +45,7 @@ def outer():
         # All nested functions should be tracked as structural changes
         assert result.is_safe is True
         assert (
-            "outer" in str(result.structural_changes).lower()
-            or len(result.structural_changes) >= 0
+            "outer" in str(result.structural_changes).lower() or len(result.structural_changes) >= 0
         )
 
     def test_nested_class_definitions(self):

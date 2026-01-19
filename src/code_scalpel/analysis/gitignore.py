@@ -35,9 +35,7 @@ class GitignoreParser:
         try:
             path = Path(gitignore_path)
             if path.exists() and path.is_file():
-                for raw in path.read_text(
-                    encoding="utf-8", errors="ignore"
-                ).splitlines():
+                for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
                     line = raw.strip()
                     # Skip empty lines and comments
                     if not line or line.startswith("#"):
@@ -52,9 +50,7 @@ class GitignoreParser:
 
         return cls(patterns)
 
-    def _matches_pattern(
-        self, rel_posix_path: str, pattern: str, *, is_dir: bool
-    ) -> bool:
+    def _matches_pattern(self, rel_posix_path: str, pattern: str, *, is_dir: bool) -> bool:
         """Check if a path matches a gitignore pattern.
 
         Args:
@@ -95,7 +91,4 @@ class GitignoreParser:
             rel_path = Path(rel_path)
 
         rel_posix = rel_path.as_posix().lstrip("./")
-        return any(
-            self._matches_pattern(rel_posix, pat, is_dir=is_dir)
-            for pat in self.patterns
-        )
+        return any(self._matches_pattern(rel_posix, pat, is_dir=is_dir) for pat in self.patterns)

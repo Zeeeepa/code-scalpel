@@ -86,9 +86,7 @@ class TestAutonomyIntegrationsCoverage:
             pytest.skip("CrewAI not available")
         with patch("code_scalpel.autonomy.integrations.crewai.Agent"):
             with patch("code_scalpel.autonomy.integrations.crewai.Task"):
-                with patch(
-                    "code_scalpel.autonomy.integrations.crewai.Crew"
-                ) as mock_crew:
+                with patch("code_scalpel.autonomy.integrations.crewai.Crew") as mock_crew:
                     mock_crew.return_value = MagicMock()
                     crew = create_scalpel_fix_crew()
                     assert crew is not None
@@ -102,7 +100,9 @@ class TestErrorToDiffFinalGaps:
         from code_scalpel.autonomy import ErrorToDiffEngine, ErrorType
 
         engine = ErrorToDiffEngine(project_root="/tmp")
-        error_output = "user.ts(5,1): error TS2741: Property 'email' is missing in type '{ name: string }'"
+        error_output = (
+            "user.ts(5,1): error TS2741: Property 'email' is missing in type '{ name: string }'"
+        )
         source_code = "const user: User = { name: 'John' };"
         analysis = engine.analyze_error(error_output, "typescript", source_code)
         assert analysis.error_type == ErrorType.TYPE_ERROR

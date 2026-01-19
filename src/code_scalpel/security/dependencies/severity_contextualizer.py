@@ -79,9 +79,7 @@ class SeverityContextualizer:
         if isinstance(original_severity, list):
             # Extract first severity if it's a list
             original_severity = (
-                original_severity[0].get("severity", "UNKNOWN")
-                if original_severity
-                else "UNKNOWN"
+                original_severity[0].get("severity", "UNKNOWN") if original_severity else "UNKNOWN"
             )
 
         # Build severity factors
@@ -97,14 +95,10 @@ class SeverityContextualizer:
         contextualized = self._adjust_severity(original_severity, factors)
 
         # Assess exploit likelihood
-        exploit_likelihood = self._assess_exploit_likelihood(
-            vulnerability, factors, is_reachable
-        )
+        exploit_likelihood = self._assess_exploit_likelihood(vulnerability, factors, is_reachable)
 
         # Determine business impact
-        business_impact = self._assess_business_impact(
-            vulnerability, factors, has_sensitive_data
-        )
+        business_impact = self._assess_business_impact(vulnerability, factors, has_sensitive_data)
 
         # Calculate remediation priority
         remediation_priority = self._calculate_priority(
@@ -141,17 +135,13 @@ class SeverityContextualizer:
         # Classification hierarchy
         if any(x in combined for x in ["rce", "remote code execution", "code exec"]):
             return "RCE"
-        elif any(
-            x in combined for x in ["injection", "sqli", "sql injection", "command"]
-        ):
+        elif any(x in combined for x in ["injection", "sqli", "sql injection", "command"]):
             return "INJECTION"
         elif any(x in combined for x in ["xss", "cross-site scripting"]):
             return "XSS"
         elif any(x in combined for x in ["csrf", "cross-site request forgery"]):
             return "CSRF"
-        elif any(
-            x in combined for x in ["auth", "authentication", "authorization", "bypass"]
-        ):
+        elif any(x in combined for x in ["auth", "authentication", "authorization", "bypass"]):
             return "AUTH_BYPASS"
         elif any(x in combined for x in ["disclosure", "leak", "exposure"]):
             return "INFO_DISCLOSURE"
@@ -241,13 +231,13 @@ class SeverityContextualizer:
         vuln_type = factors["vulnerability_type"]
 
         if vuln_type == "RCE":
-            return (
-                "Complete system compromise, potential data breach, service disruption"
-            )
+            return "Complete system compromise, potential data breach, service disruption"
 
         elif vuln_type == "INJECTION":
             if has_sensitive_data:
-                return "Database compromise, data theft, unauthorized access to sensitive information"
+                return (
+                    "Database compromise, data theft, unauthorized access to sensitive information"
+                )
             else:
                 return "Unauthorized data access, potential system manipulation"
 
@@ -261,9 +251,7 @@ class SeverityContextualizer:
             if has_sensitive_data:
                 return "Exposure of sensitive user data, compliance violations (GDPR, HIPAA)"
             else:
-                return (
-                    "Information leakage, potential reconnaissance for further attacks"
-                )
+                return "Information leakage, potential reconnaissance for further attacks"
 
         elif vuln_type == "DOS":
             return "Service unavailability, revenue loss, reputation damage"
@@ -316,18 +304,14 @@ class SeverityContextualizer:
                         break
 
         if fixed_version:
-            guidance_parts.append(
-                f"Update {package_name} to version {fixed_version} or later"
-            )
+            guidance_parts.append(f"Update {package_name} to version {fixed_version} or later")
         else:
             guidance_parts.append(f"Check for latest version of {package_name}")
 
         # Add workarounds if high severity
         if severity in ["HIGH", "CRITICAL"]:
             vuln_id = vulnerability.get("id", "")
-            guidance_parts.append(
-                f"Review security advisory {vuln_id} for temporary workarounds"
-            )
+            guidance_parts.append(f"Review security advisory {vuln_id} for temporary workarounds")
             guidance_parts.append("Consider removing package if updates not available")
 
         # Add testing guidance
@@ -335,9 +319,7 @@ class SeverityContextualizer:
 
         return " | ".join(guidance_parts)
 
-    def _recommend_timeline(
-        self, severity: str, exploit_likelihood: str, priority: int
-    ) -> str:
+    def _recommend_timeline(self, severity: str, exploit_likelihood: str, priority: int) -> str:
         """Recommend when to fix the vulnerability."""
         if priority == 1:
             return "immediate" if severity == "CRITICAL" else "within 24 hours"

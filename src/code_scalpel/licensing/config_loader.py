@@ -74,9 +74,7 @@ def _find_config_file() -> Optional[Path]:
             logger.info(f"Using limits from CODE_SCALPEL_LIMITS_FILE: {path}")
             return path
         else:
-            logger.warning(
-                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
-            )
+            logger.warning(f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}")
 
     # Priority 2-6: Standard search locations
     candidates = [
@@ -280,9 +278,7 @@ def _find_response_config_file() -> Optional[Path]:
     if env_path:
         path = Path(env_path).expanduser()
         if path.exists():
-            logger.info(
-                f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}"
-            )
+            logger.info(f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}")
             return path
 
     # Priority 2-5: Standard search locations

@@ -28,11 +28,7 @@ def test_django_installed_apps_detection(tmp_path: Path) -> None:
     module_name = resolver.file_to_module[str(settings_py)]
     imports = resolver.imports[module_name]
 
-    apps = {
-        i.module: i.import_type
-        for i in imports
-        if i.import_type == ImportType.FRAMEWORK
-    }
+    apps = {i.module: i.import_type for i in imports if i.import_type == ImportType.FRAMEWORK}
     assert "django.contrib.admin" in apps
     assert "django.contrib.auth" in apps
     assert "myapp" in apps

@@ -259,9 +259,7 @@ def process_messages():
 """
         result = tracker.analyze_file(code, "test.py", "python")
 
-        assert any(
-            c.pattern_type == KafkaPatternType.CONSUMER_POLL for c in result.consumers
-        )
+        assert any(c.pattern_type == KafkaPatternType.CONSUMER_POLL for c in result.consumers)
 
     def test_consumer_is_taint_source(self, tracker):
         """Test that consumers are marked as taint sources."""
@@ -288,9 +286,7 @@ class TestFaustAgentDetection:
 
         assert result.detected_library == KafkaLibrary.FAUST
         handlers = [
-            c
-            for c in result.consumers
-            if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
+            c for c in result.consumers if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
         ]
         assert len(handlers) == 2
 
@@ -373,9 +369,7 @@ class TestKafkaJSDetection:
         result = tracker.analyze_file(kafkajs_code, "service.js", "javascript")
 
         handlers = [
-            c
-            for c in result.consumers
-            if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
+            c for c in result.consumers if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
         ]
         assert len(handlers) >= 1
 
@@ -443,16 +437,10 @@ producer.send("events", value=user_input)
 consumer.subscribe(['events'])
 msg = consumer.poll()
 """
-        producer_result = tracker_with_tainted.analyze_file(
-            producer_code, "producer.py", "python"
-        )
-        consumer_result = tracker_with_tainted.analyze_file(
-            consumer_code, "consumer.py", "python"
-        )
+        producer_result = tracker_with_tainted.analyze_file(producer_code, "producer.py", "python")
+        consumer_result = tracker_with_tainted.analyze_file(consumer_code, "consumer.py", "python")
 
-        bridges = tracker_with_tainted.create_taint_bridge(
-            producer_result, consumer_result
-        )
+        bridges = tracker_with_tainted.create_taint_bridge(producer_result, consumer_result)
 
         assert len(bridges) == 1
         assert bridges[0].topic == "events"
@@ -467,16 +455,10 @@ producer.send("events", value=payload)
         consumer_code = """
 consumer.subscribe(['events'])
 """
-        producer_result = tracker_with_tainted.analyze_file(
-            producer_code, "producer.py", "python"
-        )
-        consumer_result = tracker_with_tainted.analyze_file(
-            consumer_code, "consumer.py", "python"
-        )
+        producer_result = tracker_with_tainted.analyze_file(producer_code, "producer.py", "python")
+        consumer_result = tracker_with_tainted.analyze_file(consumer_code, "consumer.py", "python")
 
-        bridges = tracker_with_tainted.create_taint_bridge(
-            producer_result, consumer_result
-        )
+        bridges = tracker_with_tainted.create_taint_bridge(producer_result, consumer_result)
 
         assert len(bridges) == 1
         assert bridges[0].original_taint_source == "payload"
@@ -553,9 +535,7 @@ producer.send("events", value=user_input)
         result = tracker_with_tainted.analyze_file(code, "test.py", "python")
         findings = tracker_with_tainted.get_security_findings(result)
 
-        tainted_findings = [
-            f for f in findings if f["type"] == "KAFKA_TAINTED_PRODUCER"
-        ]
+        tainted_findings = [f for f in findings if f["type"] == "KAFKA_TAINTED_PRODUCER"]
         assert len(tainted_findings) == 1
         assert tainted_findings[0]["cwe"] == "CWE-200"
 
@@ -564,9 +544,7 @@ producer.send("events", value=user_input)
         result = tracker.analyze_file(faust_agent_code, "app.py", "python")
         findings = tracker.get_security_findings(result)
 
-        handler_findings = [
-            f for f in findings if f["type"] == "KAFKA_CONSUMER_TAINT_SOURCE"
-        ]
+        handler_findings = [f for f in findings if f["type"] == "KAFKA_CONSUMER_TAINT_SOURCE"]
         assert len(handler_findings) >= 1
         assert handler_findings[0]["severity"] == "INFO"
 
@@ -620,12 +598,8 @@ producer.send("events", value=user_input)
 producer.send("events", value={"type": "info"})
 """
 
-        tainted_result = tracker_with_tainted.analyze_file(
-            tainted_code, "test.py", "python"
-        )
-        clean_result = tracker_with_tainted.analyze_file(
-            clean_code, "test.py", "python"
-        )
+        tainted_result = tracker_with_tainted.analyze_file(tainted_code, "test.py", "python")
+        clean_result = tracker_with_tainted.analyze_file(clean_code, "test.py", "python")
 
         assert tainted_result.has_taint_risks
         assert not clean_result.has_taint_risks
@@ -640,15 +614,11 @@ producer.send("logs", value={"type": "info"})
         result = tracker_with_tainted.analyze_file(code, "test.py", "python")
 
         risk_counts = result.risk_count
-        assert (
-            KafkaRiskLevel.HIGH in risk_counts or KafkaRiskLevel.CRITICAL in risk_counts
-        )
+        assert KafkaRiskLevel.HIGH in risk_counts or KafkaRiskLevel.CRITICAL in risk_counts
 
     def test_summary_generation(self, tracker_with_tainted, python_producer_code):
         """Test summary generation."""
-        result = tracker_with_tainted.analyze_file(
-            python_producer_code, "test.py", "python"
-        )
+        result = tracker_with_tainted.analyze_file(python_producer_code, "test.py", "python")
         summary = result.summary()
 
         assert "Kafka Analysis" in summary
@@ -858,9 +828,7 @@ def process_messages():
         assert len(consumer_result.consumers) >= 1
 
         # Create taint bridge
-        bridges = tracker_with_tainted.create_taint_bridge(
-            producer_result, consumer_result
-        )
+        bridges = tracker_with_tainted.create_taint_bridge(producer_result, consumer_result)
 
         # Verify bridge
         assert len(bridges) == 1
@@ -894,15 +862,9 @@ await producer.send({
 });
 """
 
-        py_result = tracker_with_tainted.analyze_file(
-            python_code, "producer.py", "python"
-        )
-        java_result = tracker_with_tainted.analyze_file(
-            java_code, "Consumer.java", "java"
-        )
-        js_result = tracker_with_tainted.analyze_file(
-            js_code, "producer.js", "javascript"
-        )
+        py_result = tracker_with_tainted.analyze_file(python_code, "producer.py", "python")
+        java_result = tracker_with_tainted.analyze_file(java_code, "Consumer.java", "java")
+        js_result = tracker_with_tainted.analyze_file(js_code, "producer.js", "javascript")
 
         assert py_result.detected_library == KafkaLibrary.KAFKA_PYTHON
         assert java_result.detected_library == KafkaLibrary.SPRING_KAFKA

@@ -129,17 +129,13 @@ class MonorepoDetector:
                 for app in apps_dir.iterdir():
                     if app.is_dir() and (app / "package.json").exists():
                         pkg = self._read_package_json(app / "package.json")
-                        if not any(
-                            p.path == str(app.relative_to(self.root)) for p in projects
-                        ):
+                        if not any(p.path == str(app.relative_to(self.root)) for p in projects):
                             projects.append(
                                 MonorepoProject(
                                     name=pkg.get("name", app.name),
                                     path=str(app.relative_to(self.root)),
                                     project_type="nodejs",
-                                    dependencies=list(
-                                        pkg.get("dependencies", {}).keys()
-                                    ),
+                                    dependencies=list(pkg.get("dependencies", {}).keys()),
                                 )
                             )
 
@@ -334,8 +330,7 @@ class MonorepoDetector:
             projects: List[MonorepoProject] = []
             for pkg_dir in packages_dir.iterdir():
                 if pkg_dir.is_dir() and (
-                    (pkg_dir / "setup.py").exists()
-                    or (pkg_dir / "pyproject.toml").exists()
+                    (pkg_dir / "setup.py").exists() or (pkg_dir / "pyproject.toml").exists()
                 ):
                     projects.append(
                         MonorepoProject(
@@ -392,9 +387,7 @@ class MonorepoDetector:
                                     name=pkg.get("name", pkg_dir.name),
                                     path=str(pkg_dir.relative_to(self.root)),
                                     project_type="nodejs",
-                                    dependencies=list(
-                                        pkg.get("dependencies", {}).keys()
-                                    ),
+                                    dependencies=list(pkg.get("dependencies", {}).keys()),
                                 )
                             )
 
@@ -411,23 +404,17 @@ class MonorepoDetector:
         """Detect the type of a project directory."""
         if (project_path / "package.json").exists():
             return "nodejs"
-        if (project_path / "pyproject.toml").exists() or (
-            project_path / "setup.py"
-        ).exists():
+        if (project_path / "pyproject.toml").exists() or (project_path / "setup.py").exists():
             return "python"
         if (project_path / "go.mod").exists():
             return "go"
         if (project_path / "Cargo.toml").exists():
             return "rust"
-        if (project_path / "pom.xml").exists() or (
-            project_path / "build.gradle"
-        ).exists():
+        if (project_path / "pom.xml").exists() or (project_path / "build.gradle").exists():
             return "java"
         return "unknown"
 
-    def _build_cross_deps(
-        self, projects: List[MonorepoProject]
-    ) -> Dict[str, List[str]]:
+    def _build_cross_deps(self, projects: List[MonorepoProject]) -> Dict[str, List[str]]:
         """Build cross-project dependency graph."""
         project_names = {p.name for p in projects}
         cross_deps: Dict[str, List[str]] = {}

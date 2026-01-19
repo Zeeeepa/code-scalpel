@@ -257,9 +257,7 @@ class TestResponseFormatBreach:
             node_id="typescript::UserService",
             node_type="class",
             language="typescript",
-            metadata={
-                "expected_format": {"id": "number", "name": "string"}  # Expects number
-            },
+            metadata={"expected_format": {"id": "number", "name": "string"}},  # Expects number
         )
 
         edge = Edge(
@@ -288,9 +286,7 @@ class TestConfidenceWeighting:
         """Test that low-confidence edges are skipped."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="java::User", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="java::User", node_type="class", language="java", fields={"id"})
 
         client = Node(
             node_id="typescript::User",
@@ -322,9 +318,7 @@ class TestConfidenceWeighting:
         """Test using a custom confidence threshold."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="java::User", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="java::User", node_type="class", language="java", fields={"id"})
 
         client = Node(
             node_id="typescript::User",
@@ -363,9 +357,7 @@ class TestFixHints:
         """Test that field breach provides a fix hint."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="java::User", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="java::User", node_type="class", language="java", fields={"id"})
 
         client = Node(
             node_id="typescript::User",
@@ -436,9 +428,7 @@ class TestConvenienceFunction:
         """Test the detect_breaches convenience function."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="server", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="server", node_type="class", language="java", fields={"id"})
 
         client = Node(
             node_id="client",
@@ -575,9 +565,7 @@ class TestAcceptanceCriteria:
         """Acceptance: Provide fix hints for each breach."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="server", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="server", node_type="class", language="java", fields={"id"})
 
         client = Node(
             node_id="client",
@@ -607,9 +595,7 @@ class TestAcceptanceCriteria:
         """Acceptance: Confidence-weighted detection (skip uncertain links)."""
         graph = UnifiedGraph()
 
-        server = Node(
-            node_id="server", node_type="class", language="java", fields={"id"}
-        )
+        server = Node(node_id="server", node_type="class", language="java", fields={"id"})
         client = Node(
             node_id="client",
             node_type="interface",

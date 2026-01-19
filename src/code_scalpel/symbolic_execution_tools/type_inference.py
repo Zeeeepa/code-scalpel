@@ -140,9 +140,7 @@ class TypeInferenceEngine:
             value_type = self._infer_expr_type(node.value)
 
             # Result type depends on operation and operands
-            result_type = self._combine_types_for_binop(
-                current_type, node.op, value_type
-            )
+            result_type = self._combine_types_for_binop(current_type, node.op, value_type)
             self._types[var_name] = result_type
 
     def _infer_expr_type(self, node: ast.expr) -> InferredType:

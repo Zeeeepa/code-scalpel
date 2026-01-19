@@ -18,16 +18,12 @@ class CallContextModel(BaseModel):
 
     in_loop: bool = Field(default=False, description="Call is inside a loop")
     in_try_block: bool = Field(default=False, description="Call is inside a try block")
-    in_conditional: bool = Field(
-        default=False, description="Call is inside an if/else block"
-    )
+    in_conditional: bool = Field(default=False, description="Call is inside an if/else block")
     condition_summary: str | None = Field(
         default=None, description="Summary of condition, e.g., 'if user.is_admin'"
     )
     in_async: bool = Field(default=False, description="Call is in an async function")
-    in_except_handler: bool = Field(
-        default=False, description="Call is in an except handler"
-    )
+    in_except_handler: bool = Field(default=False, description="Call is in an except handler")
 
 
 class CallNodeModel(BaseModel):
@@ -37,13 +33,9 @@ class CallNodeModel(BaseModel):
     file: str = Field(description="File path (relative) or '<external>'")
     line: int = Field(description="Line number (0 if unknown)")
     end_line: int | None = Field(default=None, description="End line number")
-    is_entry_point: bool = Field(
-        default=False, description="Whether function is an entry point"
-    )
+    is_entry_point: bool = Field(default=False, description="Whether function is an entry point")
     # [20260110_FEATURE] v3.3.0 - source_uri for IDE click-through
-    source_uri: str | None = Field(
-        default=None, description="IDE-friendly URI: file:///path#L42"
-    )
+    source_uri: str | None = Field(default=None, description="IDE-friendly URI: file:///path#L42")
     # [20251225_FEATURE] Enterprise metrics (best-effort)
     in_degree: int | None = Field(default=None, description="Inbound call count")
     out_degree: int | None = Field(default=None, description="Outbound call count")
@@ -67,9 +59,7 @@ class CallEdgeModel(BaseModel):
     )
     call_line: int | None = Field(default=None, description="Line number of the call")
     # [20260110_FEATURE] v3.3.0 - Call context metadata
-    context: CallContextModel | None = Field(
-        default=None, description="Context where call is made"
-    )
+    context: CallContextModel | None = Field(default=None, description="Context where call is made")
 
 
 class CallGraphResultModel(BaseModel):
@@ -77,15 +67,9 @@ class CallGraphResultModel(BaseModel):
 
     success: bool = Field(default=True, description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
-    nodes: list[CallNodeModel] = Field(
-        default_factory=list, description="Functions in the graph"
-    )
-    edges: list[CallEdgeModel] = Field(
-        default_factory=list, description="Call relationships"
-    )
-    entry_point: str | None = Field(
-        default=None, description="Entry point used for filtering"
-    )
+    nodes: list[CallNodeModel] = Field(default_factory=list, description="Functions in the graph")
+    edges: list[CallEdgeModel] = Field(default_factory=list, description="Call relationships")
+    entry_point: str | None = Field(default=None, description="Entry point used for filtering")
     depth_limit: int | None = Field(default=None, description="Depth limit used")
     mermaid: str = Field(default="", description="Mermaid diagram representation")
     circular_imports: list[list[str]] = Field(
@@ -101,18 +85,10 @@ class CallGraphResultModel(BaseModel):
         default=None, description="Functions the subgraph is focused on"
     )
     # [20251225_FEATURE] Neutral truncation metadata (tier limits)
-    total_nodes: int | None = Field(
-        default=None, description="Total nodes before truncation"
-    )
-    total_edges: int | None = Field(
-        default=None, description="Total edges before truncation"
-    )
-    nodes_truncated: bool | None = Field(
-        default=None, description="Whether nodes were truncated"
-    )
-    edges_truncated: bool | None = Field(
-        default=None, description="Whether edges were truncated"
-    )
+    total_nodes: int | None = Field(default=None, description="Total nodes before truncation")
+    total_edges: int | None = Field(default=None, description="Total edges before truncation")
+    nodes_truncated: bool | None = Field(default=None, description="Whether nodes were truncated")
+    edges_truncated: bool | None = Field(default=None, description="Whether edges were truncated")
     truncation_warning: str | None = Field(
         default=None, description="Neutral truncation note if applied"
     )
@@ -179,13 +155,9 @@ class GraphNeighborhoodResult(BaseModel):
     total_edges: int = Field(default=0, description="Number of edges in subgraph")
 
     # Truncation info
-    max_depth_reached: int = Field(
-        default=0, description="Maximum depth actually reached"
-    )
+    max_depth_reached: int = Field(default=0, description="Maximum depth actually reached")
     truncated: bool = Field(default=False, description="Whether graph was truncated")
-    truncation_warning: str | None = Field(
-        default=None, description="Warning if truncated"
-    )
+    truncation_warning: str | None = Field(default=None, description="Warning if truncated")
 
     # Mermaid diagram
     mermaid: str = Field(default="", description="Mermaid diagram of neighborhood")
@@ -225,16 +197,10 @@ class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
 
     path: str = Field(description="Relative file path")
-    functions: list[str] = Field(
-        default_factory=list, description="Function names in the module"
-    )
-    classes: list[str] = Field(
-        default_factory=list, description="Class names in the module"
-    )
+    functions: list[str] = Field(default_factory=list, description="Function names in the module")
+    classes: list[str] = Field(default_factory=list, description="Class names in the module")
     imports: list[str] = Field(default_factory=list, description="Import statements")
-    entry_points: list[str] = Field(
-        default_factory=list, description="Detected entry points"
-    )
+    entry_points: list[str] = Field(default_factory=list, description="Detected entry points")
     line_count: int = Field(default=0, description="Number of lines in file")
     complexity_score: int = Field(default=0, description="Cyclomatic complexity score")
 
@@ -244,9 +210,7 @@ class PackageInfo(BaseModel):
 
     name: str = Field(description="Package name")
     path: str = Field(description="Relative path to package")
-    modules: list[str] = Field(
-        default_factory=list, description="Module names in package"
-    )
+    modules: list[str] = Field(default_factory=list, description="Module names in package")
     subpackages: list[str] = Field(default_factory=list, description="Subpackage names")
 
 
@@ -271,15 +235,11 @@ class ProjectMapResult(BaseModel):
     languages: dict[str, int] = Field(
         default_factory=dict, description="Language breakdown by file count"
     )
-    packages: list[PackageInfo] = Field(
-        default_factory=list, description="Detected packages"
-    )
+    packages: list[PackageInfo] = Field(default_factory=list, description="Detected packages")
     modules: list[ModuleInfo] = Field(
         default_factory=list, description="Modules analyzed (max 50 in Mermaid diagram)"
     )
-    entry_points: list[str] = Field(
-        default_factory=list, description="All detected entry points"
-    )
+    entry_points: list[str] = Field(default_factory=list, description="All detected entry points")
     circular_imports: list[list[str]] = Field(
         default_factory=list, description="Circular import cycles"
     )
@@ -487,9 +447,7 @@ class AliasResolutionModel(BaseModel):
     """Import alias resolution details (Pro tier)."""
 
     alias: str = Field(description="Alias name as used in the importing module")
-    original_module: str = Field(
-        description="Module where the symbol originates (pre-alias)"
-    )
+    original_module: str = Field(description="Module where the symbol originates (pre-alias)")
     original_name: str | None = Field(
         default=None, description="Original symbol name before aliasing"
     )
@@ -536,17 +494,11 @@ class ChainedAliasResolutionModel(BaseModel):
 class CouplingViolationModel(BaseModel):
     """Coupling metric violation (Enterprise tier)."""
 
-    metric: str = Field(
-        description="Metric name, e.g., fan_in/fan_out/dependency_depth"
-    )
+    metric: str = Field(description="Metric name, e.g., fan_in/fan_out/dependency_depth")
     value: int | float = Field(description="Observed metric value")
     limit: int | float = Field(description="Configured limit for the metric")
-    module: str | None = Field(
-        default=None, description="Module evaluated for coupling"
-    )
-    severity: str | None = Field(
-        default=None, description="Severity level for violation"
-    )
+    module: str | None = Field(default=None, description="Module evaluated for coupling")
+    severity: str | None = Field(default=None, description="Severity level for violation")
     description: str | None = Field(default=None, description="Human-readable summary")
 
 
@@ -583,18 +535,14 @@ class CrossFileDependenciesResult(BaseModel):
 
     # Target symbol info
     target_name: str = Field(default="", description="Name of the analyzed symbol")
-    target_file: str = Field(
-        default="", description="File containing the target symbol"
-    )
+    target_file: str = Field(default="", description="File containing the target symbol")
 
     # Dependency info
     extracted_symbols: list[ExtractedSymbolModel] = Field(
         default_factory=list,
         description="All symbols extracted (target + dependencies)",
     )
-    total_dependencies: int = Field(
-        default=0, description="Number of dependencies resolved"
-    )
+    total_dependencies: int = Field(default=0, description="Number of dependencies resolved")
     unresolved_imports: list[str] = Field(
         default_factory=list, description="External imports that could not be resolved"
     )
@@ -611,9 +559,7 @@ class CrossFileDependenciesResult(BaseModel):
     combined_code: str = Field(
         default="", description="All extracted code combined, ready for AI consumption"
     )
-    token_estimate: int = Field(
-        default=0, description="Estimated token count for combined code"
-    )
+    token_estimate: int = Field(default=0, description="Estimated token count for combined code")
 
     # [20251226_FEATURE] Tier-aware metadata
     transitive_depth: int = Field(
@@ -713,9 +659,7 @@ class CrossFileDependenciesResult(BaseModel):
     )
 
     # Mermaid diagram
-    mermaid: str = Field(
-        default="", description="Mermaid diagram of import relationships"
-    )
+    mermaid: str = Field(default="", description="Mermaid diagram of import relationships")
 
     # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
     confidence_decay_factor: float = Field(
@@ -756,9 +700,7 @@ class CrossFileVulnerabilityModel(BaseModel):
     source_file: str = Field(description="File where taint originates")
     sink_file: str = Field(description="File where vulnerability manifests")
     description: str = Field(description="Human-readable description")
-    flow: TaintFlowModel = Field(
-        description="The taint flow that causes this vulnerability"
-    )
+    flow: TaintFlowModel = Field(description="The taint flow that causes this vulnerability")
 
 
 class CrossFileSecurityResult(BaseModel):
@@ -794,9 +736,7 @@ class CrossFileSecurityResult(BaseModel):
     has_vulnerabilities: bool = Field(
         default=False, description="Whether vulnerabilities were found"
     )
-    vulnerability_count: int = Field(
-        default=0, description="Total vulnerabilities found"
-    )
+    vulnerability_count: int = Field(default=0, description="Total vulnerabilities found")
     risk_level: str = Field(default="low", description="Overall risk level")
 
     # Detailed findings

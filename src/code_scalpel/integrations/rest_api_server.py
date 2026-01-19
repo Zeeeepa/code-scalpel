@@ -155,9 +155,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
     @app.route("/health", methods=["GET"])
     def health_check() -> Response:
         """Health check endpoint."""
-        return jsonify(
-            {"status": "healthy", "service": "code-scalpel-mcp", "version": __version__}
-        )
+        return jsonify({"status": "healthy", "service": "code-scalpel-mcp", "version": __version__})
 
     @app.route("/analyze", methods=["POST"])
     def analyze_code() -> Union[Response, tuple[Response, int]]:
@@ -597,15 +595,9 @@ if __name__ == "__main__":
     import os
 
     parser = argparse.ArgumentParser(description="Code Scalpel MCP Server")
-    parser.add_argument(
-        "--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)"
-    )
-    parser.add_argument(
-        "--port", type=int, default=8080, help="Port to bind to (default: 8080)"
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode (development only)"
-    )
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8080, help="Port to bind to (default: 8080)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode (development only)")
 
     args = parser.parse_args()
 

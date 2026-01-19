@@ -64,11 +64,7 @@ class TestMermaidBasicStructure:
             "python::main::function::center", k=1, max_nodes=100
         )
 
-        if (
-            hasattr(result, "mermaid")
-            and result.mermaid
-            and len(result.subgraph.edges) > 0
-        ):
+        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
             mermaid = str(result.mermaid)
             # Skip validation for MagicMock objects
             if "MagicMock" in mermaid or "Mock" in mermaid:
@@ -133,9 +129,7 @@ class TestMermaidNodeRepresentation:
             # Look for balanced quotes or proper escaping
             # This is a basic check - advanced would parse Mermaid AST
             assert (
-                mermaid.count('"') % 2 == 0
-                or mermaid.count("'") % 2 == 0
-                or "\\" in mermaid
+                mermaid.count('"') % 2 == 0 or mermaid.count("'") % 2 == 0 or "\\" in mermaid
             ), "Quotes should be balanced or escaped"
 
 
@@ -148,11 +142,7 @@ class TestMermaidEdgeRepresentation:
             "python::service::function::caller", k=1, max_nodes=100
         )
 
-        if (
-            hasattr(result, "mermaid")
-            and result.mermaid
-            and len(result.subgraph.edges) > 0
-        ):
+        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
             mermaid = str(result.mermaid)
             # Skip validation for MagicMock objects
             if "MagicMock" in mermaid or "Mock" in mermaid:
@@ -173,11 +163,7 @@ class TestMermaidEdgeRepresentation:
             "python::service::function::caller", k=1, max_nodes=100
         )
 
-        if (
-            hasattr(result, "mermaid")
-            and result.mermaid
-            and len(result.subgraph.edges) > 0
-        ):
+        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
             mermaid = str(result.mermaid)
             # Pattern: nodeA --> nodeB
             edge_connection_pattern = (
@@ -193,11 +179,7 @@ class TestMermaidEdgeRepresentation:
             "python::main::function::center", k=1, max_nodes=100
         )
 
-        if (
-            hasattr(result, "mermaid")
-            and result.mermaid
-            and len(result.subgraph.edges) > 0
-        ):
+        if hasattr(result, "mermaid") and result.mermaid and len(result.subgraph.edges) > 0:
             mermaid = str(result.mermaid)
             # Edge labels: A -->|label| B or A -->|"label"| B
             label_pattern = r"-->\|[^\|]+\|"
@@ -275,15 +257,9 @@ class TestMermaidSyntaxCorrectness:
 
             # Check for common syntax errors
             # 1. Balanced brackets
-            assert mermaid.count("[") == mermaid.count(
-                "]"
-            ), "Square brackets should be balanced"
-            assert mermaid.count("(") == mermaid.count(
-                ")"
-            ), "Parentheses should be balanced"
-            assert mermaid.count("{") == mermaid.count(
-                "}"
-            ), "Curly braces should be balanced"
+            assert mermaid.count("[") == mermaid.count("]"), "Square brackets should be balanced"
+            assert mermaid.count("(") == mermaid.count(")"), "Parentheses should be balanced"
+            assert mermaid.count("{") == mermaid.count("}"), "Curly braces should be balanced"
 
             # 2. No unescaped dangerous characters in node IDs (if simple format)
             # Node IDs should be alphanumeric + underscore + hyphen

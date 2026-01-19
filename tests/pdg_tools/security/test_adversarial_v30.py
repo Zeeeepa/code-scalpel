@@ -77,9 +77,7 @@ class TestADV300FixHints:
         graph = self._build_graph(edge_confidence=0.95)
         detector = ContractBreachDetector(graph)
 
-        breaches = detector.detect_breaches(
-            "java::UserController:getUser", min_confidence=0.8
-        )
+        breaches = detector.detect_breaches("java::UserController:getUser", min_confidence=0.8)
         assert breaches, "Expected breaches for contract drift"
 
         hints = [b.fix_hint for b in breaches]
@@ -95,9 +93,7 @@ class TestADV300FixHints:
         graph = self._build_graph(edge_confidence=0.2)
         detector = ContractBreachDetector(graph)
 
-        breaches = detector.detect_breaches(
-            "java::UserController:getUser", min_confidence=0.8
-        )
+        breaches = detector.detect_breaches("java::UserController:getUser", min_confidence=0.8)
         assert breaches == [], "Low-confidence edges must be ignored"
 
 
@@ -121,9 +117,7 @@ class TestADV301SandboxContainment:
         patch = "@@ -1,2 +1,3 @@\n def add(x, y):\n-    return x + y\n+    return x + y  # safe change\n"
 
         result = simulator.simulate(original_code=original, patch=patch)
-        assert (
-            result.patched_code
-        ), "Simulation should return patched code without side effects"
+        assert result.patched_code, "Simulation should return patched code without side effects"
         assert sentinel.read_text() == "baseline"
 
 
@@ -133,9 +127,7 @@ class TestADV302LoopTermination:
     """
 
     def test_symbolic_analyzer_bounds_infinite_loop(self):
-        analyzer = SymbolicAnalyzer(
-            max_loop_iterations=3, solver_timeout=500, enable_cache=False
-        )
+        analyzer = SymbolicAnalyzer(max_loop_iterations=3, solver_timeout=500, enable_cache=False)
         code = """
 while True:
     x = 1

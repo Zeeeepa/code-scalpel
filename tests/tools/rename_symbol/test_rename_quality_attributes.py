@@ -138,9 +138,7 @@ class TestStressTesting:
         def rename_one(index: int, src_path: Path):
             """Rename one file."""
             patcher = UnifiedPatcher.from_file(str(src_path))
-            return patcher.rename_symbol(
-                "function", f"old_func_{index}", f"new_func_{index}"
-            )
+            return patcher.rename_symbol("function", f"old_func_{index}", f"new_func_{index}")
 
         # Run 10 concurrent renames via ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=10) as executor:

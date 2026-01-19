@@ -266,9 +266,7 @@ class JSHintParser:
                 files[file_path] = []
             files[file_path].append(jshint_error)
 
-        return [
-            JSHintFileResult(file_path=fp, errors=errs) for fp, errs in files.items()
-        ]
+        return [JSHintFileResult(file_path=fp, errors=errs) for fp, errs in files.items()]
 
     def parse_config(self, config_path: str) -> JSHintConfig:
         """
@@ -312,9 +310,7 @@ class JSHintParser:
 
         return config
 
-    def analyze_file(
-        self, file_path: str, config_path: Optional[str] = None
-    ) -> JSHintFileResult:
+    def analyze_file(self, file_path: str, config_path: Optional[str] = None) -> JSHintFileResult:
         """
         Run JSHint on a file.
 
@@ -325,11 +321,7 @@ class JSHintParser:
         if not self._jshint_path:
             raise RuntimeError("JSHint not found. Install with: npm install jshint")
 
-        cmd = (
-            self._jshint_path.split()
-            if " " in self._jshint_path
-            else [self._jshint_path]
-        )
+        cmd = self._jshint_path.split() if " " in self._jshint_path else [self._jshint_path]
         cmd.extend(["--reporter=json", file_path])
         if config_path:
             cmd.extend(["--config", config_path])

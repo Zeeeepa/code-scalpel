@@ -243,15 +243,11 @@ class PDGVisualizer:
             # Add relevant attributes based on node type
             if "condition" in attrs:
                 label_parts.append(
-                    self._wrap_text(
-                        f"Condition: {attrs['condition']}", self.config.label_wrapping
-                    )
+                    self._wrap_text(f"Condition: {attrs['condition']}", self.config.label_wrapping)
                 )
             elif "value" in attrs:
                 label_parts.append(
-                    self._wrap_text(
-                        f"Value: {attrs['value']}", self.config.label_wrapping
-                    )
+                    self._wrap_text(f"Value: {attrs['value']}", self.config.label_wrapping)
                 )
 
             # Add line numbers if available
@@ -346,9 +342,7 @@ class PDGVisualizer:
             ],
         }
 
-    def _generate_interactive_html(
-        self, graph_data: dict, include_details: bool
-    ) -> str:
+    def _generate_interactive_html(self, graph_data: dict, include_details: bool) -> str:
         """Generate HTML content for interactive visualization."""
         return f"""
         <!DOCTYPE html>
@@ -575,9 +569,7 @@ class PDGVisualizer:
         }
         """
 
-    def _highlight_graph_differences(
-        self, graph1_data: dict, graph2_data: dict
-    ) -> None:
+    def _highlight_graph_differences(self, graph1_data: dict, graph2_data: dict) -> None:
         """Highlight differences between two graphs."""
         nodes1 = {n["id"] for n in graph1_data["nodes"]}
         nodes2 = {n["id"] for n in graph2_data["nodes"]}

@@ -38,9 +38,7 @@ class SwiftFormatParser:
     def apply_formatting(self, paths: List[Path]) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Format application")
 
-    def detect_formatting_violations(
-        self, issues: List[FormattingIssue]
-    ) -> List[FormattingIssue]:
+    def detect_formatting_violations(self, issues: List[FormattingIssue]) -> List[FormattingIssue]:
         raise NotImplementedError("Phase 2: Violation detection")
 
     def generate_format_report(self, issues: List[FormattingIssue]) -> str:

@@ -149,9 +149,7 @@ class RefactoringAnalyzer:
         """Suggest applicable design patterns."""
         return []
 
-    def calculate_refactoring_impact(
-        self, opportunity: RefactoringOpportunity
-    ) -> Dict[str, Any]:
+    def calculate_refactoring_impact(self, opportunity: RefactoringOpportunity) -> Dict[str, Any]:
         """Calculate estimated impact of a refactoring."""
         return {}
 

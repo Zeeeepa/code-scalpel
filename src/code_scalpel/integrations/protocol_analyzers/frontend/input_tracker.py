@@ -707,16 +707,16 @@ class FrontendInputTracker:
         """Track which state variables are assigned from input."""
         # React useState pattern: const [value, setValue] = useState(...)
         # Look for setValue(e.target.value) pattern
-        state_pattern = re.compile(
-            r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE
-        )
+        state_pattern = re.compile(r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE)
 
         for match in state_pattern.finditer(source_code):
             var_name = match.group(1)
             setter_name = f"set{match.group(2)}"
 
             # Check if setter is called with event target value
-            setter_pattern = rf"{setter_name}\s*\(\s*(?:e|event|evt)\.(?:target|currentTarget)\.value"
+            setter_pattern = (
+                rf"{setter_name}\s*\(\s*(?:e|event|evt)\.(?:target|currentTarget)\.value"
+            )
             if re.search(setter_pattern, source_code):
                 line_num = source_code[: match.start()].count("\n") + 1
                 source = InputSource(
@@ -761,10 +761,7 @@ class FrontendInputTracker:
 
                     # Indirect flow via variable
                     elif source.variable_name:
-                        if (
-                            source.variable_name in sink_line
-                            or source.variable_name in context
-                        ):
+                        if source.variable_name in sink_line or source.variable_name in context:
                             flow = DataFlow(
                                 source=source,
                                 sink=sink,

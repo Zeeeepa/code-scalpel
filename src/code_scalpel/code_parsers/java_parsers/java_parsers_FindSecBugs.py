@@ -104,12 +104,8 @@ class FindSecBugsParser:
                 # Get class and method
                 class_elem = bug_instance.find(".//Class")
                 method_elem = bug_instance.find(".//Method")
-                class_name = (
-                    class_elem.get("classname") if class_elem is not None else None
-                )
-                method_name = (
-                    method_elem.get("name") if method_elem is not None else None
-                )
+                class_name = class_elem.get("classname") if class_elem is not None else None
+                method_name = method_elem.get("name") if method_elem is not None else None
 
                 # Get message
                 long_message = bug_instance.find("LongMessage")
@@ -147,9 +143,7 @@ class FindSecBugsParser:
         """
         return [b for b in bugs if b.priority == 1]
 
-    def get_bugs_by_cwe(
-        self, bugs: list[SecurityBug], cwe_id: int
-    ) -> list[SecurityBug]:
+    def get_bugs_by_cwe(self, bugs: list[SecurityBug], cwe_id: int) -> list[SecurityBug]:
         """
         Filter bugs by CWE ID.
 

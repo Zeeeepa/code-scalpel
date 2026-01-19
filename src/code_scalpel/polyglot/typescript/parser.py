@@ -265,9 +265,7 @@ class TypeScriptParser:
                     {
                         "name": match.group(1),
                         "params": match.group(2),
-                        "return_type": (
-                            match.group(3).strip() if match.group(3) else None
-                        ),
+                        "return_type": (match.group(3).strip() if match.group(3) else None),
                         "line": line_num,
                         "is_async": "async" in stripped.split("function")[0],
                         "is_exported": stripped.startswith("export"),
@@ -298,9 +296,7 @@ class TypeScriptParser:
                     {
                         "name": match.group(1),
                         "extends": match.group(2),
-                        "implements": (
-                            match.group(3).strip() if match.group(3) else None
-                        ),
+                        "implements": (match.group(3).strip() if match.group(3) else None),
                         "line": line_num,
                         "is_exported": stripped.startswith("export"),
                     }

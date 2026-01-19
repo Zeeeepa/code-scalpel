@@ -109,9 +109,7 @@ class TestProCouplingAnalysis:
     """Pro tier should provide coupling score."""
 
     @pytest.mark.asyncio
-    async def test_coupling_score_calculation(
-        self, pro_server, simple_two_file_project
-    ):
+    async def test_coupling_score_calculation(self, pro_server, simple_two_file_project):
         """Should calculate coupling score."""
         result = await pro_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],

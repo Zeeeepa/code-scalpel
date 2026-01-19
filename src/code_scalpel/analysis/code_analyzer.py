@@ -438,9 +438,7 @@ class CodeAnalyzer:
                     lang_enum = Language[lang_enum_name]
 
                 # Create extractor with language detection
-                extractor = PolyglotExtractor(
-                    code, file_path=filepath, language=lang_enum
-                )
+                extractor = PolyglotExtractor(code, file_path=filepath, language=lang_enum)
 
                 # For Python, also populate AST for backward compatibility
                 if language == "python":
@@ -450,9 +448,7 @@ class CodeAnalyzer:
                     # Extract functions and classes from Python AST
                     if result["ast"]:
                         for node in ast.walk(result["ast"]):
-                            if isinstance(
-                                node, (ast.FunctionDef, ast.AsyncFunctionDef)
-                            ):
+                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                                 result["functions"].append(node.name)
                             elif isinstance(node, ast.ClassDef):
                                 result["classes"].append(node.name)
@@ -481,13 +477,8 @@ class CodeAnalyzer:
                                     result["classes"].append(node.name)
                                 # Also extract methods from class body
                                 for method in node.body:
-                                    if (
-                                        isinstance(method, IRFunctionDef)
-                                        and method.name
-                                    ):
-                                        result["functions"].append(
-                                            f"{node.name}.{method.name}"
-                                        )
+                                    if isinstance(method, IRFunctionDef) and method.name:
+                                        result["functions"].append(f"{node.name}.{method.name}")
 
                         # Store the IR module as parser_result
                         result["parser_result"] = ir_module
@@ -515,9 +506,7 @@ class CodeAnalyzer:
         result["errors"].append(f"No parser available for language: {language}")
         return result
 
-    def _extract_symbols_from_js_ast(
-        self, ast_data: Any
-    ) -> tuple[list[str], list[str]]:
+    def _extract_symbols_from_js_ast(self, ast_data: Any) -> tuple[list[str], list[str]]:
         """
         Extract function and class names from JavaScript/TypeScript AST.
 
@@ -545,9 +534,7 @@ class CodeAnalyzer:
 
         return functions, classes
 
-    def _walk_js_ast_dict(
-        self, node: dict, functions: list[str], classes: list[str]
-    ) -> None:
+    def _walk_js_ast_dict(self, node: dict, functions: list[str], classes: list[str]) -> None:
         """Walk a dictionary-based JavaScript AST."""
         if not isinstance(node, dict):
             return
@@ -574,8 +561,7 @@ class CodeAnalyzer:
             if (
                 "init" in node
                 and node["init"]
-                and node["init"].get("type")
-                in ("FunctionExpression", "ArrowFunctionExpression")
+                and node["init"].get("type") in ("FunctionExpression", "ArrowFunctionExpression")
                 and "id" in node
                 and node["id"]
                 and "name" in node["id"]
@@ -591,9 +577,7 @@ class CodeAnalyzer:
                     if isinstance(item, dict):
                         self._walk_js_ast_dict(item, functions, classes)
 
-    def _walk_js_ast_node(
-        self, node: Any, functions: list[str], classes: list[str]
-    ) -> None:
+    def _walk_js_ast_node(self, node: Any, functions: list[str], classes: list[str]) -> None:
         """Walk an object-based JavaScript AST (esprima Node objects)."""
         try:
             node_type = getattr(node, "type", None)
@@ -716,11 +700,7 @@ class CodeAnalyzer:
 
             # [20260105_BUGFIX] Calculate metrics from IR for non-Python languages
             parser_result = parse_result.get("parser_result")
-            if (
-                parser_result
-                and hasattr(parser_result, "body")
-                and language != "python"
-            ):
+            if parser_result and hasattr(parser_result, "body") and language != "python":
                 # Calculate metrics from IR nodes
                 ir_metrics = self._calculate_metrics_from_ir(parser_result, language)
                 metrics.cyclomatic_complexity = ir_metrics["cyclomatic_complexity"]
@@ -730,12 +710,8 @@ class CodeAnalyzer:
                 pr_metrics = parser_result.metrics
                 if isinstance(pr_metrics, dict):
                     metrics.halstead_volume = pr_metrics.get("halstead_volume", 0.0)
-                    metrics.halstead_difficulty = pr_metrics.get(
-                        "halstead_difficulty", 0.0
-                    )
-                    metrics.cognitive_complexity = pr_metrics.get(
-                        "cognitive_complexity", 0
-                    )
+                    metrics.halstead_difficulty = pr_metrics.get("halstead_difficulty", 0.0)
+                    metrics.cognitive_complexity = pr_metrics.get("cognitive_complexity", 0)
 
         # For Python AST, compute metrics directly
         if tree and language == "python":
@@ -772,18 +748,13 @@ class CodeAnalyzer:
                 # Simplified maintainability calculation
                 mi = max(
                     0,
-                    171
-                    - 5.2 * math.log(loc * 10 + 1)
-                    - 0.23 * cc
-                    - 16.2 * math.log(loc + 1),
+                    171 - 5.2 * math.log(loc * 10 + 1) - 0.23 * cc - 16.2 * math.log(loc + 1),
                 )
                 metrics.maintainability_index = min(100, mi)
 
         return metrics
 
-    def _calculate_metrics_from_ir(
-        self, ir_module: Any, language: str
-    ) -> dict[str, Any]:
+    def _calculate_metrics_from_ir(self, ir_module: Any, language: str) -> dict[str, Any]:
         """
         Calculate metrics from IR nodes for non-Python languages.
 
@@ -1033,9 +1004,7 @@ class CodeAnalyzer:
                     name = alias.asname or alias.name
                     definitions["imports"][name] = {
                         "line": node.lineno,
-                        "module": (
-                            f"{node.module}.{alias.name}" if node.module else alias.name
-                        ),
+                        "module": (f"{node.module}.{alias.name}" if node.module else alias.name),
                     }
 
         return definitions
@@ -1102,9 +1071,7 @@ class CodeAnalyzer:
 
         return dead_code
 
-    def _find_unused_imports(
-        self, tree: ast.AST, uses: dict[str, set[str]]
-    ) -> list[DeadCodeItem]:
+    def _find_unused_imports(self, tree: ast.AST, uses: dict[str, set[str]]) -> list[DeadCodeItem]:
         """Find imports that are never used."""
         dead_code = []
         used_names = uses.get("imports", set())
@@ -1130,11 +1097,7 @@ class CodeAnalyzer:
                     if name not in used_names and alias.name != "*":
                         dead_code.append(
                             DeadCodeItem(
-                                name=(
-                                    f"{node.module}.{alias.name}"
-                                    if node.module
-                                    else alias.name
-                                ),
+                                name=(f"{node.module}.{alias.name}" if node.module else alias.name),
                                 code_type="import",
                                 line_start=node.lineno,
                                 line_end=node.lineno,
@@ -1156,9 +1119,7 @@ class CodeAnalyzer:
 
             # Check if this is a computation with no uses
             if node_data.get("type") == "assign":
-                has_data_dep = any(
-                    edge[2].get("type") == "data_dependency" for edge in out_edges
-                )
+                has_data_dep = any(edge[2].get("type") == "data_dependency" for edge in out_edges)
                 if not has_data_dep and "lineno" in node_data:
                     dead_code.append(
                         DeadCodeItem(
@@ -1394,9 +1355,7 @@ class CodeAnalyzer:
             self.logger.debug(f"Failed to convert AST to source: {e}")
             return code
 
-    def _rename_variable(
-        self, code: str, tree: ast.AST, old_name: str, new_name: str
-    ) -> str:
+    def _rename_variable(self, code: str, tree: ast.AST, old_name: str, new_name: str) -> str:
         """Rename a variable throughout the code."""
 
         class VariableRenamer(ast.NodeTransformer):
@@ -1550,9 +1509,7 @@ class CodeAnalyzer:
             # Add data dependencies
             for var in self._extract_variables(node.value):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Add control dependencies
             for ctrl_node in self.control_deps:
@@ -1572,9 +1529,7 @@ class CodeAnalyzer:
             # Add data dependencies for condition
             for var in self._extract_variables(node.test):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Add control dependencies
             for ctrl_node in self.control_deps:
@@ -1603,9 +1558,7 @@ class CodeAnalyzer:
             # Add data dependencies for iterator
             for var in self._extract_variables(node.iter):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Process body
             self.control_deps.append(node_id)
@@ -1621,9 +1574,7 @@ class CodeAnalyzer:
             # Add data dependencies for condition
             for var in self._extract_variables(node.test):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Process body
             self.control_deps.append(node_id)
@@ -1640,9 +1591,7 @@ class CodeAnalyzer:
             elif isinstance(node.func, ast.Attribute):
                 func_name = node.func.attr
 
-            self.graph.add_node(
-                node_id, type="call", function=func_name, lineno=node.lineno
-            )
+            self.graph.add_node(node_id, type="call", function=func_name, lineno=node.lineno)
 
             # Add to call graph
             if self.current_function and func_name:
@@ -1652,9 +1601,7 @@ class CodeAnalyzer:
             for arg in node.args:
                 for var in self._extract_variables(arg):
                     if var in self.var_defs:
-                        self.graph.add_edge(
-                            self.var_defs[var], node_id, type="data_dependency"
-                        )
+                        self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             self.generic_visit(node)
 
@@ -1666,9 +1613,7 @@ class CodeAnalyzer:
             if node.value:
                 for var in self._extract_variables(node.value):
                     if var in self.var_defs:
-                        self.graph.add_edge(
-                            self.var_defs[var], node_id, type="data_dependency"
-                        )
+                        self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             for ctrl_node in self.control_deps:
                 self.graph.add_edge(ctrl_node, node_id, type="control_dependency")

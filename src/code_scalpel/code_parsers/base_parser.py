@@ -47,9 +47,7 @@ class BaseParser(ABC):
     ) -> ParseResult:
         pass
 
-    def _preprocess_code(
-        self, code: str, language: Language, config: PreprocessorConfig
-    ) -> str:
+    def _preprocess_code(self, code: str, language: Language, config: PreprocessorConfig) -> str:
         """Preprocess code according to configuration."""
         if config.remove_comments:
             code = self._remove_comments(code, language)
@@ -173,9 +171,7 @@ class CodeParser(BaseParser):
         try:
             # Preprocess if requested
             if preprocess:
-                code = self._preprocess_code(
-                    code, language, config or PreprocessorConfig()
-                )
+                code = self._preprocess_code(code, language, config or PreprocessorConfig())
 
             # Parse code
             if language == Language.PYTHON:

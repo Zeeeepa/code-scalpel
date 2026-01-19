@@ -157,9 +157,7 @@ class ProgramSlicer:
             nodes=nodes,
             edges=edges,
             variables=variables,
-            line_range=(
-                (min(line_numbers), max(line_numbers)) if line_numbers else (0, 0)
-            ),
+            line_range=((min(line_numbers), max(line_numbers)) if line_numbers else (0, 0)),
             size=len(nodes),
             complexity=self._calculate_slice_complexity(sliced_pdg),
         )
@@ -199,9 +197,7 @@ class ProgramSlicer:
     def _extract_data_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract data dependency component from a slice."""
         edges_to_keep = [
-            (u, v)
-            for u, v, d in sliced_pdg.edges(data=True)
-            if d.get("type") == "data_dependency"
+            (u, v) for u, v, d in sliced_pdg.edges(data=True) if d.get("type") == "data_dependency"
         ]
         subgraph = sliced_pdg.edge_subgraph(edges_to_keep)
         return nx.DiGraph(subgraph)
@@ -218,16 +214,12 @@ class ProgramSlicer:
 
     def _extract_core_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract core component (nodes with multiple dependencies)."""
-        core_nodes = {
-            node for node in sliced_pdg.nodes() if sliced_pdg.in_degree(node) > 1
-        }
+        core_nodes = {node for node in sliced_pdg.nodes() if sliced_pdg.in_degree(node) > 1}
         return self._induce_subgraph(core_nodes)
 
     def _extract_auxiliary_component(self, sliced_pdg: nx.DiGraph) -> nx.DiGraph:
         """Extract auxiliary component (leaf nodes)."""
-        auxiliary_nodes = {
-            node for node in sliced_pdg.nodes() if sliced_pdg.out_degree(node) == 0
-        }
+        auxiliary_nodes = {node for node in sliced_pdg.nodes() if sliced_pdg.out_degree(node) == 0}
         return self._induce_subgraph(auxiliary_nodes)
 
     def _compute_backward_slice(self, criteria: SlicingCriteria) -> nx.DiGraph:
@@ -379,9 +371,7 @@ class ProgramSlicer:
         subgraph = self.pdg.subgraph(nodes)
         return nx.DiGraph(subgraph)
 
-    def _make_cache_key(
-        self, criteria: SlicingCriteria, slice_type: SliceType
-    ) -> tuple:
+    def _make_cache_key(self, criteria: SlicingCriteria, slice_type: SliceType) -> tuple:
         """Create a cache key for the given criteria and slice type."""
         return (
             frozenset(criteria.nodes),
@@ -406,6 +396,4 @@ def compute_slice(
     slicer = ProgramSlicer(pdg)
     if criteria is None:
         criteria = SlicingCriteria(nodes={node}, variables=set())
-    return slicer.compute_slice(
-        criteria, SliceType.BACKWARD if backward else SliceType.FORWARD
-    )
+    return slicer.compute_slice(criteria, SliceType.BACKWARD if backward else SliceType.FORWARD)
