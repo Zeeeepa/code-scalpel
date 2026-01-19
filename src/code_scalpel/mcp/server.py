@@ -184,18 +184,20 @@ def _get_current_tier() -> str:
 
     The tier system works as follows:
     1. License file determines the MAXIMUM tier you're entitled to
-    2. Environment variable can REQUEST a tier (for testing/downgrade)
+    2. Environment variable can REQUEST a tier (downgrade only - no upgrade via env var)
     3. The effective tier is the MINIMUM of licensed and requested
 
     This allows Enterprise license holders to test Pro/Community behavior
     by setting CODE_SCALPEL_TIER=pro or CODE_SCALPEL_TIER=community.
+    
+    SECURITY NOTE: Environment variables can ONLY downgrade, not upgrade.
+    To access a higher tier, you must provide a valid license file.
 
     Environment Variables:
         CODE_SCALPEL_TIER: Request a specific tier (downgrade only)
         SCALPEL_TIER: Legacy alias for CODE_SCALPEL_TIER
         CODE_SCALPEL_LICENSE_PATH: Path to JWT license file
         CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY: Set to "1" to disable auto-discovery
-        CODE_SCALPEL_TEST_FORCE_TIER: Set to "1" to force tier for testing
 
     Returns:
         str: One of 'community', 'pro', or 'enterprise'
@@ -206,16 +208,10 @@ def _get_current_tier() -> str:
     disable_license_discovery = (
         os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
     )
-    force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
-
-    # [TESTING/OFFLINE] If license discovery is disabled and explicit test override
-    # is set, honor the requested tier (used for tier-gated contract tests only).
-    if disable_license_discovery and force_tier_override and requested:
-        return requested
 
     # When discovery is disabled and no explicit license path is provided, clamp to
     # Community to avoid silently elevating tier just via env vars.
-    if disable_license_discovery and not force_tier_override:
+    if disable_license_discovery:
         if not os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
             return "community"
 
@@ -243,9 +239,22 @@ def _get_current_tier() -> str:
     if requested is None:
         return licensed
 
-    # Allow downgrade only: effective tier = min(requested, licensed)
+    # [20260119_SECURITY] Allow downgrade ONLY: effective tier = min(requested, licensed)
+    # Environment variables CANNOT be used to upgrade to a higher tier.
+    # Users must provide a valid license file to access higher tiers.
     rank = {"community": 0, "pro": 1, "enterprise": 2}
-    return requested if rank[requested] <= rank[licensed] else licensed
+    effective = requested if rank[requested] <= rank[licensed] else licensed
+    
+    # Log if user tried to upgrade via env var (security audit)
+    if rank[requested] > rank[licensed]:
+        import sys
+        print(
+            f"Warning: Tier downgrade ignored - requested {requested} but licensed {licensed}. "
+            f"Use a valid license file to upgrade tier.",
+            file=sys.stderr,
+        )
+    
+    return effective
 
 
 # =============================================================================
