@@ -110,7 +110,7 @@ class UniversalNodeID:
     @staticmethod
     def from_dict(data: dict) -> UniversalNodeID:
         """Create from dictionary."""
-        return UniversalNodeID(
+        return UniversalNodeID(  # type: ignore[call-arg]
             language=data["language"],
             module=data["module"],
             node_type=NodeType(data["type"]),
@@ -164,7 +164,7 @@ def parse_node_id(id_string: str) -> UniversalNodeID:
     except ValueError:
         raise ValueError(f"Invalid node type: {type_str}")
 
-    return UniversalNodeID(
+    return UniversalNodeID(  # type: ignore[call-arg]
         language=language,
         module=module,
         node_type=node_type,
@@ -207,7 +207,7 @@ def create_node_id(
     if isinstance(node_type, str):
         node_type = NodeType(node_type)
 
-    return UniversalNodeID(
+    return UniversalNodeID(  # type: ignore[call-arg]
         language=language,
         module=module,
         node_type=node_type,
