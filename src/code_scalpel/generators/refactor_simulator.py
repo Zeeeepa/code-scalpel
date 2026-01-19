@@ -485,11 +485,11 @@ class RefactorSimulator:
         if language in ("javascript", "typescript"):
             try:
                 # Try tree-sitter first (most accurate)
-                from tree_sitter_languages import get_parser
+                from tree_sitter_languages import get_parser  # type: ignore[import]
 
                 parser_lang = "typescript" if language == "typescript" else "javascript"
-                parser = get_parser(parser_lang)
-                tree = parser.parse(code.encode("utf-8"))
+                parser = get_parser(parser_lang)  # type: ignore[call-arg]
+                tree = parser.parse(code.encode("utf-8"))  # type: ignore[union-attr]
 
                 # Check for ERROR nodes in the tree
                 if tree.root_node.has_error:
@@ -509,10 +509,10 @@ class RefactorSimulator:
         # Java - try tree-sitter
         if language == "java":
             try:
-                from tree_sitter_languages import get_parser
+                from tree_sitter_languages import get_parser  # type: ignore[import]
 
-                parser = get_parser("java")
-                tree = parser.parse(code.encode("utf-8"))
+                parser = get_parser("java")  # type: ignore[call-arg]
+                tree = parser.parse(code.encode("utf-8"))  # type: ignore[union-attr]
 
                 if tree.root_node.has_error:
                     error_node = self._find_first_error_node(tree.root_node)
@@ -1030,12 +1030,12 @@ class RefactorSimulator:
 
         try:
             # Try tree-sitter first
-            from tree_sitter_languages import get_parser
+            from tree_sitter_languages import get_parser  # type: ignore[import]
 
-            parser = get_parser("typescript")  # TypeScript parser handles JS too
-            tree = parser.parse(code.encode("utf-8"))
+            parser = get_parser("typescript")  # type: ignore[call-arg]  # TypeScript parser handles JS too
+            tree = parser.parse(code.encode("utf-8"))  # type: ignore[union-attr]
 
-            self._extract_js_symbols_from_tree(tree.root_node, structure)
+            self._extract_js_symbols_from_tree(tree.root_node, structure)  # type: ignore[union-attr]
             return structure
         except ImportError:
             pass
