@@ -258,3 +258,6 @@ smoke_test*.py
 verify_*.py
 stress_test*.sh
 src/code_scalpel/mcp/archive/server.py
+
+# Internal examples (not for public distribution)
+examples/.internal/
