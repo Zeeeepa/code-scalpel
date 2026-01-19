@@ -200,7 +200,7 @@ Welcome to the Code Scalpel documentation! This directory contains comprehensive
 
 ### External Links
 
-- **[GitHub Repository](https://github.com/tescolopio/code-scalpel)** - Source code and issues
+- **[GitHub Repository](https://github.com/3D-Tech-Solutions/code-scalpel)** - Source code and issues
 - **[PyPI Package](https://pypi.org/project/code-scalpel/)** - Package downloads
 - **[MCP Protocol Documentation](https://modelcontextprotocol.io/)** - Model Context Protocol
 - **[Open Policy Agent](https://www.openpolicyagent.org/)** - OPA/Rego policy engine

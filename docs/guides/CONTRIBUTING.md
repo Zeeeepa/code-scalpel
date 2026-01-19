@@ -43,7 +43,7 @@ Code Scalpel is transforming from a development prototype into a production-read
 
 ```bash
 # Clone the repository
-git clone https://github.com/tescolopio/code-scalpel.git
+git clone https://github.com/3D-Tech-Solutions/code-scalpel.git
 cd code-scalpel
 
 # Create virtual environment

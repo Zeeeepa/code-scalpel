@@ -350,5 +350,5 @@ Full working examples are available in the `examples/` directory:
 ## Support
 
 For issues, questions, or contributions:
-- GitHub Issues: https://github.com/tescolopio/code-scalpel/issues
-- Documentation: https://github.com/tescolopio/code-scalpel/tree/main/docs
+- GitHub Issues: https://github.com/3D-Tech-Solutions/code-scalpel/issues
+- Documentation: https://github.com/3D-Tech-Solutions/code-scalpel/tree/main/docs

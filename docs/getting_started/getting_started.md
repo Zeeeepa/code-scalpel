@@ -111,18 +111,18 @@ Then use `python -m code_scalpel.mcp` in your MCP configs instead of `uvx code-s
 
 ```bash
 # Pull from GitHub Container Registry
-docker pull ghcr.io/tescolopio/code-scalpel:3.0.0
+docker pull ghcr.io/3D-Tech-Solutions/code-scalpel:3.0.0
 
 # Run HTTP server
 docker run -d -p 8593:8593 -p 8594:8594 \
   -v /path/to/project:/project \
-  ghcr.io/tescolopio/code-scalpel:3.0.0
+  ghcr.io/3D-Tech-Solutions/code-scalpel:3.0.0
 ```
 
 ### Option 4: From Source (Development)
 
 ```bash
-git clone https://github.com/tescolopio/code-scalpel.git
+git clone https://github.com/3D-Tech-Solutions/code-scalpel.git
 cd code-scalpel
 pip install -e ".[dev]"
 ```
@@ -159,7 +159,7 @@ curl http://localhost:8594/health
 version: '3.8'
 services:
   code-scalpel:
-    image: ghcr.io/tescolopio/code-scalpel:3.0.0
+    image: ghcr.io/3D-Tech-Solutions/code-scalpel:3.0.0
     ports:
       - "8593:8593"
       - "8594:8594"
@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       code-scalpel:
-        image: ghcr.io/tescolopio/code-scalpel:3.0.0
+        image: ghcr.io/3D-Tech-Solutions/code-scalpel:3.0.0
         ports:
           - 8593:8593
     steps:
@@ -378,8 +378,8 @@ curl -v http://localhost:8594/health
 
 ## Getting Help
 
-- **GitHub Issues:** [Report bugs](https://github.com/tescolopio/code-scalpel/issues)
-- **GitHub Discussions:** [Ask questions](https://github.com/tescolopio/code-scalpel/discussions)
+- **GitHub Issues:** [Report bugs](https://github.com/3D-Tech-Solutions/code-scalpel/issues)
+- **GitHub Discussions:** [Ask questions](https://github.com/3D-Tech-Solutions/code-scalpel/discussions)
 - **Release Notes:** [v1.0.0 Changes](release_notes/RELEASE_NOTES_v1.0.0.md)
 
 ---
