@@ -189,7 +189,8 @@ Every subdirectory contains a README.md with detailed module documentation:
 
 ## Contact
 
-- **Author:** Tim Escolopio
-- **Email:** 3dtsus@gmail.com
+- **Author:** Timmothy Escolopio
+- **Email:** time@3dtechsolutions.us
+- **Organization:** 3D Tech Solutions LLC
 - **License:** MIT
 - **Repository:** [code-scalpel](https://github.com/3D-Tech-Solutions/code-scalpel)

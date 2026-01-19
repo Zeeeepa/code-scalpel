@@ -1,7 +1,7 @@
 # Security Policy
 
 ## Reporting a Vulnerability
-- Email: time@3dtechsolutions.example (monitored business days).
+- Email: time@3dtechsolutions.us (monitored business days).
 - Provide: affected version, reproduction steps, impact, and any proofs of concept.
 - Please avoid including secrets or customer data; minimize payloads to essentials.
 

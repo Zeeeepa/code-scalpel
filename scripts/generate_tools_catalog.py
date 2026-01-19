@@ -27,7 +27,7 @@ MATRIX_PATH = DEEP_DIVE_DIR / "TOOL_CAPABILITY_MATRIX.md"
 OUTPUT_PATH = REPO_ROOT / "website" / "assets" / "tool_catalog.json"
 
 GITHUB_DEEP_DIVE_BASE = (
-    "https://github.com/tescolopio/code-scalpel/blob/main/docs/tools/deep_dive/"
+    "https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/tools/deep_dive/"
 )
 
 
