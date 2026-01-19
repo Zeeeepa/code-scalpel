@@ -1,64 +1,55 @@
-"""
-Code Scalpel MCP Server - Real MCP Protocol Implementation.
+# Code Scalpel MCP Server - Real MCP Protocol Implementation.
+#
+# This server implements the Model Context Protocol (MCP) specification using
+# the official Python SDK. It exposes Code Scalpel's analysis tools to any
+# MCP-compliant client (Claude Desktop, Cursor, etc.).
+#
+# Transports:
+# - stdio: Default. Client spawns server as subprocess. Best for local use.
+# - streamable-http: Network deployment. Requires explicit --transport flag.
+#
+# Usage:
+#     # stdio (default)
+#     python -m code_scalpel.mcp.server
+#
+#     # HTTP transport for network access
+#     python -m code_scalpel.mcp.server --transport streamable-http --port 8080
+#
+# Security:
+#     - Code is PARSED, never executed (ast.parse only)
+#     - Maximum code size enforced
+#     - HTTP transport binds to 127.0.0.1 by default
 
-This server implements the Model Context Protocol (MCP) specification using
-the official Python SDK. It exposes Code Scalpel's analysis tools to any
-MCP-compliant client (Claude Desktop, Cursor, etc.).
-
-Transports:
-- stdio: Default. Client spawns server as subprocess. Best for local use.
-- streamable-http: Network deployment. Requires explicit --transport flag.
-
-Usage:
-    # stdio (default)
-    python -m code_scalpel.mcp.server
-
-    # HTTP transport for network access
-    python -m code_scalpel.mcp.server --transport streamable-http --port 8080
-
-Security:
-    - Code is PARSED, never executed (ast.parse only)
-    - Maximum code size enforced
-    - HTTP transport binds to 127.0.0.1 by default
-
-TODO ITEMS:
-
-COMMUNITY TIER (Core Server Features):
-1. TODO: Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
-2. TODO: Add stdin/stdout MCP transport implementation
-3. TODO: Implement FastMCP server with tool registration
-4. TODO: Add request/response envelope wrapping
-5. TODO: Implement error handling with error codes
-6. TODO: Add tool timeout enforcement
-7. TODO: Implement maximum payload size limits
-8. TODO: Create tool initialization and health checks
-9. TODO: Add comprehensive server logging
-10. TODO: Document server setup and deployment
-
-PRO TIER (Advanced Server Capabilities):
-11. TODO: Implement HTTP transport with TLS
-12. TODO: Add client authentication (API key, JWT)
-13. TODO: Implement tier-aware tool filtering
-14. TODO: Add tool-level performance profiling
-15. TODO: Implement response compression for large outputs
-16. TODO: Add request queuing and concurrency limits
-17. TODO: Implement custom tool metrics collection
-18. TODO: Add batch tool invocation support
-19. TODO: Create advanced analytics and monitoring
-20. TODO: Implement tool versioning and backward compatibility
-
-ENTERPRISE TIER (Scalability & Security):
-21. TODO: Implement distributed server with load balancing
-22. TODO: Add multi-protocol MCP (gRPC, WebSocket)
-23. TODO: Implement federated MCP across servers
-24. TODO: Add OpenTelemetry instrumentation
-25. TODO: Implement RBAC and fine-grained permissions
-26. TODO: Add audit logging for compliance
-27. TODO: Implement request signing and verification
-28. TODO: Add health checks and failover
-29. TODO: Support custom authentication providers
-30. TODO: Implement AI-powered request optimization
-"""
+# TODO [COMMUNITY] Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
+# TODO [COMMUNITY] Add stdin/stdout MCP transport implementation
+# TODO [COMMUNITY] Implement FastMCP server with tool registration
+# TODO [COMMUNITY] Add request/response envelope wrapping
+# TODO [COMMUNITY] Implement error handling with error codes
+# TODO [COMMUNITY] Add tool timeout enforcement
+# TODO [COMMUNITY] Implement maximum payload size limits
+# TODO [COMMUNITY] Create tool initialization and health checks
+# TODO [COMMUNITY] Add comprehensive server logging
+# TODO [COMMUNITY] Document server setup and deployment
+# TODO [PRO] Implement HTTP transport with TLS
+# TODO [PRO] Add client authentication (API key, JWT)
+# TODO [PRO] Implement tier-aware tool filtering
+# TODO [PRO] Add tool-level performance profiling
+# TODO [PRO] Implement response compression for large outputs
+# TODO [PRO] Add request queuing and concurrency limits
+# TODO [PRO] Implement custom tool metrics collection
+# TODO [PRO] Add batch tool invocation support
+# TODO [PRO] Create advanced analytics and monitoring
+# TODO [PRO] Implement tool versioning and backward compatibility
+# TODO [ENTERPRISE] Implement distributed server with load balancing
+# TODO [ENTERPRISE] Add multi-protocol MCP (gRPC, WebSocket)
+# TODO [ENTERPRISE] Implement federated MCP across servers
+# TODO [ENTERPRISE] Add OpenTelemetry instrumentation
+# TODO [ENTERPRISE] Implement RBAC and fine-grained permissions
+# TODO [ENTERPRISE] Add audit logging for compliance
+# TODO [ENTERPRISE] Implement request signing and verification
+# TODO [ENTERPRISE] Add health checks and failover
+# TODO [ENTERPRISE] Support custom authentication providers
+# TODO [ENTERPRISE] Implement AI-powered request optimization
 
 from __future__ import annotations
 
@@ -95,9 +86,12 @@ from code_scalpel.mcp.models.core import ClassInfo as CoreClassInfo
 
 # [20260116_FEATURE] License-gated tier system restored from archive
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
-from code_scalpel.licensing.tier_detector import (
-    get_current_tier as get_current_tier_from_license,
+from code_scalpel.licensing.tier_detector import (  # noqa: F401
+    get_current_tier as get_current_tier_from_license,  # Re-exported for test mocking
 )
+
+# [20260119_REFACTOR] get_current_tier_from_license is re-exported for tests that mock it.
+# server.py has its own _get_current_tier() that does full license validation with env var support.
 
 # Current tier for response envelope metadata.
 # Initialized to "community" (free tier) by default.
@@ -271,29 +265,29 @@ DEFAULT_MIN_CONFIDENCE = (
     0.7  # Balanced: catches most issues without too many false positives
 )
 
-# [20251220_TODO] Add configurable confidence thresholds:
-#     - Support per-tool threshold configuration
-#     - Allow environment variable overrides (SCALPEL_MIN_CONFIDENCE_*)
-#     - Implement adaptive thresholds based on false positive rates
-#     - Add user feedback loop to tune thresholds per project
+# TODO [COMMUNITY] Add configurable confidence thresholds
+# TODO [COMMUNITY] Support per-tool threshold configuration
+# TODO [COMMUNITY] Allow environment variable overrides (SCALPEL_MIN_CONFIDENCE_*)
+# TODO [COMMUNITY] Implement adaptive thresholds based on false positive rates
+# TODO [COMMUNITY] Add user feedback loop to tune thresholds per project
 
-# [20251220_TODO] Add streaming/incremental response support:
-#     - Implement Tool Use with streaming for large result sets
-#     - Add pagination for crawl_project and cross_file_security_scan
-#     - Support partial results with continuation tokens
-#     - Allow clients to limit result size
+# TODO [COMMUNITY] Add streaming/incremental response support
+# TODO [COMMUNITY] Implement Tool Use with streaming for large result sets
+# TODO [COMMUNITY] Add pagination for crawl_project and cross_file_security_scan
+# TODO [COMMUNITY] Support partial results with continuation tokens
+# TODO [COMMUNITY] Allow clients to limit result size
 
-# [20251220_TODO] Add request timeout and cancellation:
-#     - Implement per-tool timeout configuration
-#     - Support client-initiated cancellation via MCP protocol
-#     - Add graceful shutdown for long-running operations
-#     - Track timeout-prone tools for monitoring
+# TODO [COMMUNITY] Add request timeout and cancellation
+# TODO [COMMUNITY] Implement per-tool timeout configuration
+# TODO [COMMUNITY] Support client-initiated cancellation via MCP protocol
+# TODO [COMMUNITY] Add graceful shutdown for long-running operations
+# TODO [COMMUNITY] Track timeout-prone tools for monitoring
 
-# [20251220_TODO] Add result deduplication:
-#     - Deduplicate vulnerabilities across multiple scan runs
-#     - Track vulnerability lineage (new/fixed/regressed)
-#     - Implement baseline comparisons for security scans
-#     - Support incremental scan mode
+# TODO [PRO] Add result deduplication
+# TODO [PRO] Deduplicate vulnerabilities across multiple scan runs
+# TODO [PRO] Track vulnerability lineage (new/fixed/regressed)
+# TODO [PRO] Implement baseline comparisons for security scans
+# TODO [PRO] Support incremental scan mode
 
 # Project root for resources (default to current directory)
 PROJECT_ROOT = Path.cwd()
@@ -409,17 +403,13 @@ CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 _AST_CACHE: dict[tuple[str, float], "ast.Module"] = {}
 _AST_CACHE_MAX_SIZE = 500  # Limit memory usage - keep last 500 files
 
-# [20251220_TODO] Add persistent AST caching:
-#     - Serialize parsed ASTs to disk for session persistence
-#     - Use SQLite or pickle-based cache backend
-#     - Implement cache invalidation on Python version change
-#     - Add cache statistics endpoint for monitoring
-
-# [20251220_TODO] Add cache eviction strategies:
-#     - Implement LRU eviction instead of FIFO
-#     - Track cache hit/miss rates for monitoring
-#     - Add adaptive cache sizing based on memory pressure
-#     - Support cache preloading for frequently accessed files
+# TODO [COMMUNITY] Add persistent AST caching with disk serialization (SQLite or pickle)
+# TODO [COMMUNITY] Implement cache invalidation on Python version change
+# TODO [COMMUNITY] Add cache statistics endpoint for monitoring
+# TODO [PRO] Implement LRU eviction strategy instead of FIFO
+# TODO [PRO] Track cache hit/miss rates for monitoring
+# TODO [PRO] Add adaptive cache sizing based on memory pressure
+# TODO [PRO] Support cache preloading for frequently accessed files
 
 
 def _get_cached_ast(file_path: Path) -> "ast.Module | None":
@@ -483,17 +473,17 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
     return _SINK_DETECTOR  # type: ignore[return-value]
 
 
-# [20251220_TODO] Add detector warm-up and preloading:
-#     - Precompile patterns on server startup
-#     - Detect regex performance issues
-#     - Support custom pattern injection from config
-#     - Add pattern versioning and updates
+# TODO [PRO] Add detector warm-up and preloading
+# TODO [PRO] Precompile patterns on server startup
+# TODO [PRO] Detect regex performance issues
+# TODO [PRO] Support custom pattern injection from config
+# TODO [PRO] Add pattern versioning and updates
 
-# [20251220_TODO] Add detector metrics and monitoring:
-#     - Track pattern match times
-#     - Monitor false positive rates per pattern
-#     - Detect performance regressions
-#     - Support pattern profiling and optimization hints
+# TODO [PRO] Add detector metrics and monitoring
+# TODO [PRO] Track pattern match times
+# TODO [PRO] Monitor false positive rates per pattern
+# TODO [PRO] Detect performance regressions
+# TODO [PRO] Support pattern profiling and optimization hints
 
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
 # Stores UniversalGraph objects keyed by project root path
@@ -502,17 +492,16 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
 _GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
 
-# [20251220_TODO] Add graph cache invalidation on file changes:
-#     - Watch for file system changes (using watchdog or similar)
-#     - Invalidate only affected portions of graph on incremental changes
-#     - Support manual cache invalidation via MCP
-#     - Track invalidation frequency for debugging
-
-# [20251220_TODO] Add graph cache compression:
-#     - Serialize graphs to compressed format for memory efficiency
-#     - Implement graph delta encoding for incremental updates
-#     - Support distributed cache (Redis) for multi-process deployments
-#     - Add cache statistics and memory usage monitoring
+# TODO [PRO] Add graph cache invalidation on file changes
+# TODO [PRO] Watch for file system changes (using watchdog or similar)
+# TODO [PRO] Invalidate only affected portions of graph on incremental changes
+# TODO [PRO] Support manual cache invalidation via MCP
+# TODO [PRO] Track invalidation frequency for debugging
+# TODO [ENTERPRISE] Add graph cache compression
+# TODO [ENTERPRISE] Serialize graphs to compressed format for memory efficiency
+# TODO [ENTERPRISE] Implement graph delta encoding for incremental updates
+# TODO [ENTERPRISE] Support distributed cache (Redis) for multi-process deployments
+# TODO [ENTERPRISE] Add cache statistics and memory usage monitoring
 
 
 def _get_cached_graph(project_root: Path) -> UniversalGraph | None:  # type: ignore[name-defined]
@@ -564,13 +553,12 @@ def _is_path_allowed(path: Path) -> bool:
 
     Returns:
         True if path is within allowed roots, False otherwise
-
-    [20251220_TODO] Add path traversal detection:
-        - Detect symlink escape attempts
-        - Validate path components don't contain suspicious patterns
-        - Support denied path patterns (blacklist certain directories)
-        - Log security-relevant path access attempts
     """
+    # TODO [PRO] Add path traversal detection
+    # TODO [PRO] Detect symlink escape attempts
+    # TODO [PRO] Validate path components don't contain suspicious patterns
+    # TODO [PRO] Support denied path patterns (blacklist certain directories)
+    # TODO [ENTERPRISE] Log security-relevant path access attempts
     resolved = path.resolve()
 
     # If no roots specified, use PROJECT_ROOT
@@ -600,13 +588,12 @@ def _validate_path_security(path: Path) -> Path:
 
     Raises:
         PermissionError: If path is outside allowed roots
-
-    [20251220_TODO] Add audit logging for path access:
-        - Log all path validations with caller identity
-        - Track denied access attempts
-        - Generate security alerts for suspicious patterns
-        - Support per-client access control lists
     """
+    # TODO [PRO] Add audit logging for path access
+    # TODO [PRO] Log all path validations with caller identity
+    # TODO [PRO] Track denied access attempts
+    # TODO [PRO] Generate security alerts for suspicious patterns
+    # TODO [ENTERPRISE] Support per-client access control lists
     resolved = path.resolve()
 
     if not _is_path_allowed(resolved):
@@ -736,9 +723,9 @@ class AnalysisResult(BaseModel):
     issues: list[str] = Field(default_factory=list, description="Issues found")
     error: str | None = Field(default=None, description="Error message if failed")
 
-    # [20260119_FEATURE] v1.0.0 - Alias for backward compatibility with tests
+    # [20260119_FEATURE] v1.0.0 - Pro tier feature (tier-gated, not an alias)
     cognitive_complexity: int | None = Field(
-        default=None, description="Cognitive complexity (alias for complexity)"
+        default=None, description="Cognitive complexity (Pro tier feature)"
     )
 
     # [20260119_FEATURE] v1.0.0 - Pro/Enterprise analysis features (placeholder for future)
@@ -769,18 +756,6 @@ class AnalysisResult(BaseModel):
     class_details: list[ClassInfo] = Field(
         default_factory=list, description="Detailed class info with line numbers"
     )
-
-    def __init__(self, **data):
-        """Initialize with cognitive_complexity as alias for complexity."""
-        if "cognitive_complexity" in data and "complexity" not in data:
-            data["complexity"] = data["cognitive_complexity"]
-        super().__init__(**data)
-
-    def __getattr__(self, name):
-        """Provide cognitive_complexity as alias for complexity."""
-        if name == "cognitive_complexity":
-            return self.complexity
-        return super().__getattr__(name)
 
 
 class VulnerabilityInfo(BaseModel):
@@ -3507,51 +3482,6 @@ def _build_full_code(
     return "\n\n".join(parts)
 
 
-# [20260116_REFACTOR] @mcp.tool() extract_code moved to tools/*.py
-
-
-# [20260116_REFACTOR] @mcp.tool() update_symbol moved to tools/*.py
-
-
-# [20260116_REFACTOR] @mcp.tool() crawl_project moved to tools/*.py
-
-
-# ============================================================================
-# RESOURCES
-# ============================================================================
-
-
-# [20260116_REFACTOR] @mcp.resource() get_project_call_graph moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_project_dependencies moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_project_structure moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_version moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_health moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_capabilities moved to resources/*.py
-
-
-# ============================================================================
-# RESOURCE TEMPLATES - Dynamic URI-based Context
-# [20251215_FEATURE] v2.0.0 - MCP Resource Templates for dynamic content access
-# ============================================================================
-
-
-# [20260116_REFACTOR] @mcp.resource() get_file_resource moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_analysis_resource moved to resources/*.py
-
-
-# [20251215_BUGFIX] Provide synchronous extraction helper for URI templates using SurgicalExtractor.
 def _extract_code_sync(
     target_type: str,
     target_name: str,
@@ -3628,27 +3558,6 @@ def _extract_code_sync(
         token_estimate=token_estimate,
         error=None,
     )
-
-
-# [20260116_REFACTOR] @mcp.resource() get_symbol_resource moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_security_resource moved to resources/*.py
-
-
-# [20260116_REFACTOR] @mcp.resource() get_code_resource moved to resources/*.py
-
-
-# ============================================================================
-# PROMPTS - All prompts migrated to prompts.py
-# [20260116_REFACTOR] See code_scalpel.mcp.prompts for all @mcp.prompt handlers
-# ============================================================================
-
-
-# ============================================================================
-# v1.4.0 MCP TOOLS - Enhanced AI Context
-# ============================================================================
-
 
 def _get_file_context_sync(file_path: str) -> FileContextResult:
     """
@@ -3957,15 +3866,6 @@ def _get_symbol_references_sync(
             error=f"Search failed: {str(e)}",
         )
 
-
-# [20260116_REFACTOR] @mcp.tool() get_symbol_references moved to tools/*.py
-
-
-# ============================================================================
-# [20251213_FEATURE] v1.5.0 - get_call_graph MCP Tool
-# ============================================================================
-
-
 class CallNodeModel(BaseModel):
     """Node in the call graph representing a function."""
 
@@ -4075,15 +3975,6 @@ def _get_call_graph_sync(
             success=False,
             error=f"Call graph analysis failed: {str(e)}",
         )
-
-
-# [20260116_REFACTOR] @mcp.tool() get_call_graph moved to tools/*.py
-
-
-# ============================================================================
-# [20251216_FEATURE] v2.5.0 - get_graph_neighborhood MCP Tool
-# ============================================================================
-
 
 class NeighborhoodNodeModel(BaseModel):
     """A node in the neighborhood subgraph."""
@@ -4285,15 +4176,6 @@ def _fast_validate_python_function_node_exists(
     except Exception:
         # If parsing fails, fall back to the slow path (graph build)
         return True, None
-
-
-# [20260116_REFACTOR] @mcp.tool() get_graph_neighborhood moved to tools/*.py
-
-
-# ============================================================================
-# [20251213_FEATURE] v1.5.0 - get_project_map MCP Tool
-# ============================================================================
-
 
 class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
@@ -4644,15 +4526,6 @@ def _get_project_map_sync(
             project_root=str(root_path),
             error=f"Project map analysis failed: {str(e)}",
         )
-
-
-# [20260116_REFACTOR] @mcp.tool() get_project_map moved to tools/*.py
-
-
-# ============================================================================
-# [20251213_FEATURE] v1.5.1 - get_cross_file_dependencies MCP Tool
-# ============================================================================
-
 
 class ImportNodeModel(BaseModel):
     """Information about an import in the import graph."""
@@ -5086,15 +4959,6 @@ def _get_cross_file_dependencies_sync(
             error=f"Cross-file dependency analysis failed: {str(e)}",
         )
 
-
-# [20260116_REFACTOR] @mcp.tool() get_cross_file_dependencies moved to tools/*.py
-
-
-# ============================================================================
-# [20251213_FEATURE] v1.5.1 - cross_file_security_scan MCP Tool
-# ============================================================================
-
-
 class TaintFlowModel(BaseModel):
     """Model for a taint flow across files."""
 
@@ -5336,15 +5200,6 @@ def _cross_file_security_scan_sync(
             error=f"Cross-file security analysis failed: {str(e)}",
         )
 
-
-# [20260116_REFACTOR] @mcp.tool() cross_file_security_scan moved to tools/*.py
-
-
-# ============================================================================
-# PATH VALIDATION (v1.5.3)
-# ============================================================================
-
-
 class PathValidationResult(BaseModel):
     """Result of path validation."""
 
@@ -5417,16 +5272,6 @@ def _validate_paths_sync(
         is_docker=resolver.is_docker,
     )
 
-
-# [20260116_REFACTOR] @mcp.tool() validate_paths moved to tools/*.py
-
-
-# ============================================================================
-# POLICY VERIFICATION TOOL
-# ============================================================================
-
-
-# [20250108_FEATURE] v2.5.0 Guardian - Policy verification models
 class PolicyVerificationResult(BaseModel):
     """Result of cryptographic policy verification."""
 
@@ -5500,16 +5345,6 @@ def _verify_policy_integrity_sync(
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
-
-
-# [20260116_REFACTOR] @mcp.tool() verify_policy_integrity moved to tools/*.py
-
-
-# ============================================================================
-# ENTRYPOINT
-# ============================================================================
-
-
 def run_server(
     transport: str = "stdio",
     host: str = "127.0.0.1",
@@ -5839,6 +5674,65 @@ if __name__ == "__main__":
 #     from code_scalpel.mcp import <symbol>
 # This section will be removed in a future major release.
 # ============================================================================
+
+# [20260119_REFACTOR] Explicit __all__ to silence Pylance "not accessed" warnings
+# These are intentional re-exports for backward compatibility
+__all__ = [
+    # Server functions
+    "run_server",
+    "CURRENT_TIER",
+    "PROJECT_ROOT",
+    "ALLOWED_ROOTS",
+    # Tools (22 total)
+    "analyze_code",
+    "security_scan",
+    "scan_dependencies",
+    "type_evaporation_scan",
+    "unified_sink_detect",
+    "extract_code",
+    "rename_symbol",
+    "update_symbol",
+    "generate_unit_tests",
+    "simulate_refactor",
+    "symbolic_execute",
+    "crawl_project",
+    "get_file_context",
+    "get_symbol_references",
+    "cross_file_security_scan",
+    "get_call_graph",
+    "get_cross_file_dependencies",
+    "get_graph_neighborhood",
+    "get_project_map",
+    "code_policy_check",
+    "validate_paths",
+    "verify_policy_integrity",
+    # Resources
+    "get_code_resource",
+    "get_project_call_graph",
+    "get_project_dependencies",
+    "get_project_structure",
+    # Prompts (Intent-Driven UX)
+    "deep_security_audit",
+    "explain_and_document",
+    "map_architecture",
+    "modernize_legacy",
+    "safe_refactor",
+    "verify_supply_chain",
+    # Models (public)
+    "AnalysisResult",
+    "SecurityResult",
+    "SymbolicResult",
+    "RefactorSimulationResult",
+    "ProjectCrawlResult",
+    "ContextualExtractionResult",
+    "FileContextResult",
+    "SymbolReferencesResult",
+    "CallGraphResultModel",
+    "GraphNeighborhoodResult",
+    "CrossFileSecurityResult",
+    # Licensing
+    "get_tool_capabilities",
+]
 
 # Re-export session variables for backward compatibility
 from code_scalpel.mcp.session import (  # noqa: E402, F401
