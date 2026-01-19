@@ -1,3 +1,3 @@
 def test_func():
-    '''Update 8'''
+    '''Update 0'''
     pass

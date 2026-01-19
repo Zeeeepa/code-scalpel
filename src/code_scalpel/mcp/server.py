@@ -727,6 +727,19 @@ class AnalysisResult(BaseModel):
     issues: list[str] = Field(default_factory=list, description="Issues found")
     error: str | None = Field(default=None, description="Error message if failed")
 
+    # [20260119_FEATURE] v1.0.0 - Alias for backward compatibility with tests
+    cognitive_complexity: int | None = Field(
+        default=None, description="Cognitive complexity (alias for complexity)"
+    )
+
+    # [20260119_FEATURE] v1.0.0 - Pro/Enterprise analysis features (placeholder for future)
+    code_smells: list[str] | None = Field(
+        default=None, description="Code smells detected (Pro tier)"
+    )
+    halstead_metrics: dict[str, Any] | None = Field(
+        default=None, description="Halstead complexity metrics (Pro tier)"
+    )
+
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
     semantic_summary: Optional[str] = Field(
         default=None, description="AI-generated semantic summary (Pro)"
@@ -747,6 +760,18 @@ class AnalysisResult(BaseModel):
     class_details: list[ClassInfo] = Field(
         default_factory=list, description="Detailed class info with line numbers"
     )
+
+    def __init__(self, **data):
+        """Initialize with cognitive_complexity as alias for complexity."""
+        if "cognitive_complexity" in data and "complexity" not in data:
+            data["complexity"] = data["cognitive_complexity"]
+        super().__init__(**data)
+
+    def __getattr__(self, name):
+        """Provide cognitive_complexity as alias for complexity."""
+        if name == "cognitive_complexity":
+            return self.complexity
+        return super().__getattr__(name)
 
 
 class VulnerabilityInfo(BaseModel):
@@ -5640,69 +5665,24 @@ def run_server(
 
 
 def _apply_tier_tool_filter(tier: str) -> None:
-    """Filter the registered MCP tools by tier.
+    """Apply tier-based limits to tool responses.
 
-    Default tier is "enterprise" (no filtering).
+    [20260119_FEATURE] v1.0.0 - All tools available in all tiers.
+    Tier enforcement is done through response limits, not tool removal.
+    
+    The tier is available to all tools via CURRENT_TIER global variable.
+    Each tool applies tier-specific limits (max results, max paths, etc.) at runtime.
+    
+    Example tier limits:
+    - Community: symbolic_execute limited to 50 paths max
+    - Community: crawl_project limited to discovery mode
+    - Pro: Most features available with reasonable limits
+    - Enterprise: Full access with audit logging
     """
-
-    # Canonical tool IDs currently registered by this repo.
-    all_tools = {
-        "analyze_code",
-        "crawl_project",
-        "cross_file_security_scan",
-        "extract_code",
-        "generate_unit_tests",
-        "get_call_graph",
-        "get_cross_file_dependencies",
-        "get_file_context",
-        "get_graph_neighborhood",
-        "get_project_map",
-        "get_symbol_references",
-        "scan_dependencies",
-        "security_scan",
-        "simulate_refactor",
-        "symbolic_execute",
-        "type_evaporation_scan",
-        "unified_sink_detect",
-        "update_symbol",
-        "validate_paths",
-        "verify_policy_integrity",
-    }
-
-    # Draft contract from docs/guides/production_release_v1.0.md.
-    community_tools = {
-        "analyze_code",
-        "extract_code",
-        "update_symbol",
-        "get_project_map",
-        "get_file_context",
-        "get_symbol_references",
-        "security_scan",
-        "unified_sink_detect",
-        "scan_dependencies",
-        "validate_paths",
-    }
-
-    # Option B split (implemented): Enterprise-only governance/cross-file tools.
-    enterprise_only_tools = {
-        "verify_policy_integrity",
-        "cross_file_security_scan",
-        "get_cross_file_dependencies",
-    }
-
-    if tier == "enterprise":
-        return
-    if tier == "pro":
-        allowed = all_tools - enterprise_only_tools
-    else:
-        allowed = community_tools
-
-    for tool_name in all_tools - allowed:
-        try:
-            mcp.remove_tool(tool_name)
-        except Exception:
-            # If a tool isn't present for some reason, ignore and continue.
-            pass
+    # Tool availability is now uniform across all tiers.
+    # Tier-specific limits are applied within individual tool implementations,
+    # not by removing tools from the MCP server.
+    pass
 
 
 def _register_http_health_endpoint(
