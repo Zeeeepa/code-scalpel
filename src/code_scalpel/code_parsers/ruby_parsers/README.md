@@ -518,7 +518,7 @@ class BundlerIntegration:
 
 ```bash
 # Clone Code Scalpel repository
-git clone https://github.com/modelcontextprotocol/code-scalpel.git
+git clone https://github.com/3D-Tech-Solutions/code-scalpel.git
 cd code-scalpel
 
 # Install with Ruby parser support
@@ -712,4 +712,4 @@ Quality Gate:     ✅ PASSING
 **Last Updated:** December 21, 2025  
 **Module Maintainers:** Code Scalpel Team  
 **License:** MIT  
-**Repository:** [github.com/modelcontextprotocol/code-scalpel](https://github.com/modelcontextprotocol/code-scalpel)
+**Repository:** [github.com/3D-Tech-Solutions/code-scalpel](https://github.com/3D-Tech-Solutions/code-scalpel)
