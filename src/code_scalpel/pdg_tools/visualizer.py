@@ -8,7 +8,6 @@ import networkx as nx
 from graphviz import Digraph
 
 
-
 class VisualizationFormat(Enum):
     """Supported visualization output formats."""
 

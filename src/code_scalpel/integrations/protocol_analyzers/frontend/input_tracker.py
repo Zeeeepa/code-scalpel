@@ -52,11 +52,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 
-
-
-
-
-
 class FrontendFramework(Enum):
     """Supported frontend frameworks."""
 

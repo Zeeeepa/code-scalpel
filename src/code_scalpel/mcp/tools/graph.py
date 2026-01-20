@@ -23,6 +23,7 @@ from code_scalpel.mcp.protocol import mcp
 def _get_current_tier() -> str:
     """Get current tier using JWT validation (late import to avoid circular dependency)."""
     from code_scalpel.mcp.server import _get_current_tier as get_tier
+
     return get_tier()
 
 
@@ -94,7 +95,7 @@ async def get_call_graph(
 
     max_depth = limits.get("max_depth")
     max_nodes = limits.get("max_nodes")
-    
+
     # [20260120_FIX] Ensure limits are integers (TOML values should be int, but ensure type safety)
     if max_depth is not None:
         max_depth = int(max_depth)

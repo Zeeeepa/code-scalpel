@@ -12,7 +12,7 @@ pytestmark = pytest.mark.asyncio
 
 def _make_repetitive_vuln_code(count: int) -> str:
     """Generate code with tainted input reaching eval() sinks.
-    
+
     [20260120_BUGFIX] Changed from eval('1') to eval(user_input) to ensure
     symbolic execution verification doesn't prune these as non-exploitable.
     """
@@ -88,7 +88,7 @@ def process_data(user_input: str):
     assert result.success is True
     # Enterprise tier enrichments are what we're testing, not exact count
     assert result.vulnerability_count >= 2  # At least some vulnerabilities detected
-    
+
     # Enterprise tier should have ALL enrichments populated
     assert result.confidence_scores is not None
     assert result.false_positive_analysis is not None
@@ -96,7 +96,7 @@ def process_data(user_input: str):
     assert result.priority_ordered_findings is not None
     assert result.reachability_analysis is not None
     assert result.false_positive_tuning is not None
-    
+
     # Verify compliance mappings exist when vulnerabilities are found
     if result.vulnerability_count > 0:
         assert result.compliance_mappings is not None
@@ -130,7 +130,6 @@ async def test_security_scan_community_rejects_large_file(community_tier):
 
     # community_tier fixture sets up the environment
     oversized_code = "a" * (520 * 1024)
-
 
     from code_scalpel.mcp.server import security_scan
 

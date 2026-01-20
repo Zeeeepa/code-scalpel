@@ -98,6 +98,7 @@ def set_default_license_path():
             os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
             break
 
+
 # [20251214_FEATURE] v1.5.3 - Ensure osv_client is imported early
 # Now that ast_tools.__init__ imports osv_client, this will automatically
 # make osv_client available in the ast_tools namespace

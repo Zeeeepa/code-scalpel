@@ -8,7 +8,6 @@ from typing import Any, Optional
 import networkx as nx
 
 
-
 @dataclass
 class NodeInfo:
     """Information about a PDG node."""
@@ -34,7 +33,6 @@ class DependencyType(Enum):
 
 class PDGUtils:
     """Utility functions for working with Program Dependence Graphs."""
-
 
     @staticmethod
     def analyze_node(pdg: nx.DiGraph, node: str) -> NodeInfo:

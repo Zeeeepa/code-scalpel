@@ -2059,12 +2059,28 @@ def _security_scan_sync(
     false_positive_tuning: dict[str, Any] | None = None
 
     # [20260120_BUGFIX] Normalize capability flags so Pro/Enterprise populate advanced fields
-    has_sanitizers = "sanitizer_detection" in caps_set or "sanitizer_recognition" in caps_set
+    has_sanitizers = (
+        "sanitizer_detection" in caps_set or "sanitizer_recognition" in caps_set
+    )
     has_confidence = "confidence_scores" in caps_set or "confidence_scoring" in caps_set
-    has_fp_analysis = "false_positive_analysis" in caps_set or "false_positive_reduction" in caps_set
-    has_policy = "policy_checks" in caps_set or "custom_policy_engine" in caps_set or "org_specific_rules" in caps_set
-    has_compliance = "compliance_mappings" in caps_set or "compliance_rule_checking" in caps_set or "compliance_reporting" in caps_set
-    has_priority = "priority_findings" in caps_set or "priority_finding_ordering" in caps_set or "priority_cve_alerts" in caps_set
+    has_fp_analysis = (
+        "false_positive_analysis" in caps_set or "false_positive_reduction" in caps_set
+    )
+    has_policy = (
+        "policy_checks" in caps_set
+        or "custom_policy_engine" in caps_set
+        or "org_specific_rules" in caps_set
+    )
+    has_compliance = (
+        "compliance_mappings" in caps_set
+        or "compliance_rule_checking" in caps_set
+        or "compliance_reporting" in caps_set
+    )
+    has_priority = (
+        "priority_findings" in caps_set
+        or "priority_finding_ordering" in caps_set
+        or "priority_cve_alerts" in caps_set
+    )
 
     if has_sanitizers:
         sanitizer_paths = _detect_sanitizers(code)
@@ -2086,7 +2102,10 @@ def _security_scan_sync(
         remediation_suggestions = _build_remediation_suggestions_list(vulnerabilities)
     if has_priority:
         priority_ordered_findings = _build_priority_ordered_findings(vulnerabilities)
-    if "reachability_analysis" in caps_set or "vulnerability_reachability_analysis" in caps_set:
+    if (
+        "reachability_analysis" in caps_set
+        or "vulnerability_reachability_analysis" in caps_set
+    ):
         reachability_analysis = _build_reachability_analysis(vulnerabilities, code)
     if "false_positive_tuning" in caps_set:
         false_positive_tuning = _build_false_positive_tuning(

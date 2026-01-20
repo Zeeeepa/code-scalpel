@@ -47,7 +47,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 
-
 class ChangeType(Enum):
     """Types of schema changes."""
 

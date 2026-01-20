@@ -259,4 +259,4 @@ stress_test*.sh
 src/code_scalpel/mcp/archive/server.py
 
 # Internal examples (not for public distribution)
-examples/.internal/
+examples/.internal/.pypirc

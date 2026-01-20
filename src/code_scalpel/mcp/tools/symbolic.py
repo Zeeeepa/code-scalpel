@@ -83,7 +83,11 @@ async def generate_unit_tests(
     try:
         server_module = import_module("code_scalpel.mcp.server")
         tier_override = getattr(server_module, "_get_current_tier", None)
-        tier = tier_override() if callable(tier_override) else tier_detector.get_current_tier()
+        tier = (
+            tier_override()
+            if callable(tier_override)
+            else tier_detector.get_current_tier()
+        )
     except Exception:
         tier = tier_detector.get_current_tier()
     caps = get_tool_capabilities("generate_unit_tests", tier)
@@ -155,14 +159,20 @@ async def generate_unit_tests(
             return False
 
         params = sig.parameters.values()
-        positional_params = [p for p in params if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)]
+        positional_params = [
+            p for p in params if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
+        ]
         has_var_positional = any(p.kind == p.VAR_POSITIONAL for p in params)
         has_var_keyword = any(p.kind == p.VAR_KEYWORD for p in params)
 
         # Need to accept at least 7 positional args or be variadic.
         return has_var_positional or has_var_keyword or len(positional_params) >= 7
 
-    sync_impl = sync_impl_candidate if callable(sync_impl_candidate) and _is_compatible(sync_impl_candidate) else _generate_tests_sync
+    sync_impl = (
+        sync_impl_candidate
+        if callable(sync_impl_candidate) and _is_compatible(sync_impl_candidate)
+        else _generate_tests_sync
+    )
 
     result = await asyncio.to_thread(
         sync_impl,

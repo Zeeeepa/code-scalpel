@@ -6,7 +6,6 @@ from typing import Optional, Union
 import networkx as nx
 
 
-
 class SliceType(Enum):
     """Types of program slices."""
 
@@ -50,7 +49,6 @@ class ProgramSlicer:
         self.pdg = pdg
         self.cache = {}
         self._initialize_indices()
-
 
     def _initialize_indices(self):
         """Initialize indices for faster slicing."""

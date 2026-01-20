@@ -7,7 +7,6 @@ from typing import Optional
 import networkx as nx
 
 
-
 class NodeType(Enum):
     """Types of nodes in the PDG."""
 
@@ -53,7 +52,6 @@ class PDGBuilder(ast.NodeVisitor):
         self.interprocedural = interprocedural
         self.current_function: Optional[str] = None
         self.node_counter = defaultdict(int)
-
 
     def build(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
         """Build PDG and call graph from code."""

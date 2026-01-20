@@ -1,4 +1,3 @@
-
 """
 CrewAIScalpel - Integration wrapper for CrewAI with Code Scalpel analysis capabilities.
 

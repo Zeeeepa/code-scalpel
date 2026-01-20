@@ -16,7 +16,6 @@ Endpoints:
 - POST /refactor - Code refactoring suggestions
 """
 
-
 import time
 from dataclasses import dataclass
 from typing import Optional, Union

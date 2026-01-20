@@ -7,7 +7,6 @@ from typing import Any, Optional
 import networkx as nx
 
 
-
 class DependencyType(Enum):
     """Types of dependencies in the PDG."""
 
@@ -47,9 +46,6 @@ class PDGAnalyzer:
     def __init__(self, pdg: nx.DiGraph):
         self.pdg = pdg
         self.cached_results = {}
-
-
-
 
     def analyze_data_flow(self) -> dict[str, Any]:
         """Perform comprehensive data flow analysis."""

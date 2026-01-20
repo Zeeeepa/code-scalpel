@@ -8,7 +8,6 @@ from typing import Any, Optional
 import networkx as nx
 
 
-
 class TransformationType(Enum):
     """Types of PDG transformations."""
 
@@ -40,9 +39,6 @@ class PDGTransformer:
         self.pdg = pdg
         self.history: list[tuple[TransformationType, TransformationResult]] = []
         self.node_counter = defaultdict(int)
-
-
-
 
     def transform(
         self, transformation_type: TransformationType, **kwargs
