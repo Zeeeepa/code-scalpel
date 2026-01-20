@@ -5114,52 +5114,27 @@ class PolicyVerificationResult(BaseModel):
 def _verify_policy_integrity_sync(
     policy_dir: str | None = None,
     manifest_source: str = "file",
+    tier: str | None = None,
+    capabilities: dict | None = None,
 ) -> PolicyVerificationResult:
     """
     Synchronous implementation of policy integrity verification.
 
     [20250108_FEATURE] v2.5.0 Guardian - Cryptographic verification
     [20251220_BUGFIX] v3.0.5 - Consolidated imports inside try block
+    [20260120_BUGFIX] Added tier and capabilities parameters to match signature
     """
-    dir_path = policy_dir or ".code-scalpel"
+    # Delegate to the helper implementation which has the full tier-aware logic
+    from code_scalpel.mcp.helpers.policy_helpers import (
+        _verify_policy_integrity_sync as helper_verify,
+    )
 
-    try:
-        # Import directly from the crypto verifier module to avoid importing
-        # YAML/OPA policy engine components (which may require optional deps).
-        from code_scalpel.policy_engine.crypto_verify import CryptographicPolicyVerifier
-
-        verifier = CryptographicPolicyVerifier(
-            manifest_source=manifest_source,
-            policy_dir=dir_path,
-        )
-
-        result = verifier.verify_all_policies()
-
-        return PolicyVerificationResult(
-            success=result.success,
-            manifest_valid=result.manifest_valid,
-            files_verified=result.files_verified,
-            files_failed=result.files_failed,
-            error=result.error,
-            manifest_source=manifest_source,
-            policy_dir=dir_path,
-        )
-
-    except ImportError as e:
-        return PolicyVerificationResult(
-            success=False,
-            error=f"Policy engine not available: {str(e)}.",
-            manifest_source=manifest_source,
-            policy_dir=dir_path,
-        )
-    except Exception as e:
-        # Handle SecurityError and other exceptions
-        return PolicyVerificationResult(
-            success=False,
-            error=f"Verification failed: {str(e)}.",
-            manifest_source=manifest_source,
-            policy_dir=dir_path,
-        )
+    return helper_verify(
+        policy_dir=policy_dir,
+        manifest_source=manifest_source,
+        tier=tier,
+        capabilities=capabilities,
+    )
 
 
 def run_server(
