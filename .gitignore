@@ -105,7 +105,7 @@ docs/modules/
 docs/parsers/
 docs/performance/
 docs/reference/
-docs/release_notes/
+# docs/release_notes/  [20260119] REMOVED - release notes are now tracked in git
 docs/research/
 docs/roadmap/
 docs/security/
