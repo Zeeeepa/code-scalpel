@@ -6,6 +6,18 @@ Code Scalpel is the bridge between **Generative AI** and **Reliable Software Eng
 
 It is an **MCP (Model Context Protocol) server** designed to be the primary toolset for AI agents (like Claude, GitHub Copilot, and Cursor) to perceive, analyze, and modify codebases with surgical precision.
 
+## Quick Start (3 Steps)
+
+**New to Code Scalpel?** Start here:
+
+1. **[📖 Beginner's Guide](docs/BEGINNER_GUIDE.md)** — No software experience needed. Plain English explanation of what Code Scalpel is and how to use it.
+2. **[✅ Setup Checklist](docs/SETUP_CHECKLIST.md)** — Step-by-step checklist to get up and running in 5 minutes.
+3. **Start asking your AI assistant** — Ask Claude, Copilot, or Cursor to help you with your code.
+
+**Developers?** See [Installation Options](#installation-options) and [Docs](#documentation) below.
+
+---
+
 ## The Problem: Why Agents Struggle with Code
 Today's AI agents treat code as **text**. They read file contents, guess line numbers, and generate diffs. This leads to:
 *   **Hallucination**: "Replace line 50" fails when the file changed.

@@ -15,24 +15,14 @@ Use cases:
 - Fuzzing optimization: Find bugs faster
 - Security testing: Discover crash vulnerabilities
 - Test generation: Create tests for edge cases
-
-# ==========================================
-#
-# COMMUNITY (Current & Planned):
-#
-# COMMUNITY Examples & Tutorials:
-#
-# COMMUNITY Testing & Validation:
-#
-# PRO (Enhanced Features):
-#
-# ENTERPRISE (Advanced Capabilities):
 """
 
 import ast
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional
+
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 
 from .state_manager import SymbolicState
 
@@ -137,8 +127,8 @@ class PathPrioritizer:
             return
 
         try:
-            tree = ast.parse(self.code)
-        except SyntaxError:
+            tree, _report = parse_python_code(self.code, filename="<path_prioritizer>")
+        except ParsingError:
             return
 
         for node in ast.walk(tree):

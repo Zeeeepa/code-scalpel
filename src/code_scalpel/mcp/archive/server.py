@@ -257,6 +257,7 @@ _GOVERNANCE_FEATURE_POLICY_EVALUATION = "policy_evaluation"
 
 def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> None:
     """Emit a structured audit event.
+
     Events are appended to `.code-scalpel/audit.jsonl`.
 
     [20251231_FEATURE] Audit logging for governance preflight decisions.
@@ -264,6 +265,7 @@ def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> Non
     # Default: on when governance is active; can be disabled.
     if not _parse_bool_env("SCALPEL_GOVERNANCE_AUDIT", default=True):
         return
+
     try:
         audit_path = policy_dir / "audit.jsonl"
         payload = dict(event)
@@ -1096,8 +1098,8 @@ def _configure_logging(transport: str = "stdio"):
         logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     )
 
-    # [20251229_CONFIG] Use SCALPEL_MCP_OUTPUT with string levels (DEBUG, INFO, ALERT)
-    env_level = os.environ.get("SCALPEL_MCP_OUTPUT", "WARNING").upper()
+    # [20251229_CONFIG] Use SCALPEL_MCP_INFO with string levels (DEBUG, INFO, ALERT)
+    env_level = os.environ.get("SCALPEL_MCP_INFO", "WARNING").upper()
     if env_level == "DEBUG":
         level = logging.DEBUG
     elif env_level == "INFO":
@@ -2824,7 +2826,7 @@ def _add_tool_with_envelope_output(
             if code == "internal_error":
                 # Default to a generic message; allow opt-in detail in debug mode.
                 safe_message = "Tool error"
-                if os.environ.get("SCALPEL_MCP_OUTPUT", "").upper() == "DEBUG":
+                if os.environ.get("SCALPEL_MCP_INFO", "").upper() == "DEBUG":
                     safe_message = str(exc) or safe_message
             else:
                 safe_message = str(exc) or "Tool error"
@@ -10308,6 +10310,7 @@ async def _extract_polyglot(
         )
 
     try:
+        import subprocess
         # Create extractor from file or code
         if file_path is not None:
             resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
@@ -11279,7 +11282,7 @@ async def _update_cross_file_references(
             project_root = project_root.parent
 
         # Use get_symbol_references to find all references
-        from code_scalpel.mcp.server import _get_symbol_references_sync
+        from code_scalpel.mcp.archive.server import _get_symbol_references_sync
 
         refs_result = await asyncio.to_thread(
             _get_symbol_references_sync, target_name, str(project_root)
@@ -16217,6 +16220,7 @@ class ProjectMapResult(BaseModel):
 
     # [20251226_BUGFIX] Provide tier-gated attributes via properties when model schema differs
     def _get_extra_value(self, name: str):  # type: ignore[override]
+        import subprocess
 
         try:
             extra = object.__getattribute__(self, "__pydantic_extra__")

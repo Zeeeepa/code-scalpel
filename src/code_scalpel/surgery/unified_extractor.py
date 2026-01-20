@@ -30,10 +30,6 @@ Usage:
     # Extract from Java
     extractor = UnifiedExtractor.from_file("Utils.java")
     result = extractor.extract("method", "Calculator.add")
-
-
-PRO (Enhanced Features):
-
 """
 
 from __future__ import annotations
@@ -623,9 +619,11 @@ class UnifiedExtractor:
 
         symbols: list[SymbolInfo] = []
 
+        # [20260119_REFACTOR] Use unified parser for deterministic behavior
         try:
-            tree = ast.parse(self.code)
-        except SyntaxError:
+            from code_scalpel.parsing import parse_python_code, ParsingError
+            tree, _ = parse_python_code(self.code, filename=self.file_path or None)
+        except (ParsingError, SyntaxError):
             return symbols
 
         # Track current class for method detection
@@ -877,9 +875,11 @@ class UnifiedExtractor:
 
         imports: list[ImportInfo] = []
 
+        # [20260119_REFACTOR] Use unified parser for deterministic behavior
         try:
-            tree = ast.parse(self.code)
-        except SyntaxError:
+            from code_scalpel.parsing import parse_python_code, ParsingError
+            tree, _ = parse_python_code(self.code, filename=self.file_path or None)
+        except (ParsingError, SyntaxError):
             return imports
 
         for node in ast.walk(tree):
@@ -999,9 +999,11 @@ class UnifiedExtractor:
 
         signatures: list[SignatureInfo] = []
 
+        # [20260119_REFACTOR] Use unified parser for deterministic behavior
         try:
-            tree = ast.parse(self.code)
-        except SyntaxError:
+            from code_scalpel.parsing import parse_python_code, ParsingError
+            tree, _ = parse_python_code(self.code, filename=self.file_path or None)
+        except (ParsingError, SyntaxError):
             return signatures
 
         class SignatureVisitor(ast.NodeVisitor):
@@ -1136,9 +1138,11 @@ class UnifiedExtractor:
         """Get docstring from Python code."""
         import ast
 
+        # [20260119_REFACTOR] Use unified parser for deterministic behavior
         try:
-            tree = ast.parse(self.code)
-        except SyntaxError:
+            from code_scalpel.parsing import parse_python_code, ParsingError
+            tree, _ = parse_python_code(self.code, filename=self.file_path or None)
+        except (ParsingError, SyntaxError):
             return None
 
         # Handle method names

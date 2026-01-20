@@ -38,6 +38,51 @@
         }
       }
     },
+    "parsing": {
+      "type": "object",
+      "description": "Deterministic parsing configuration - standardizes error handling across all entry points",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["strict", "permissive"],
+          "description": "strict=fail on syntax errors, permissive=auto-sanitize with warnings"
+        },
+        "sanitization_policy": {
+          "type": "object",
+          "properties": {
+            "allow_merge_conflicts": {
+              "type": "boolean",
+              "description": "If true, strip merge conflict markers. If false, fail with error."
+            },
+            "allow_templates": {
+              "type": "boolean",
+              "description": "If true, strip Jinja2/Django templates. If false, fail with error."
+            },
+            "report_modifications": {
+              "type": "boolean",
+              "description": "If true, include sanitization report in tool response"
+            }
+          }
+        },
+        "error_reporting": {
+          "type": "object",
+          "properties": {
+            "include_sanitization_details": {
+              "type": "boolean",
+              "description": "Include what was modified during sanitization"
+            },
+            "include_error_location": {
+              "type": "boolean",
+              "description": "Include line/column of syntax errors"
+            },
+            "include_suggestions": {
+              "type": "boolean",
+              "description": "Include suggested fixes for common errors"
+            }
+          }
+        }
+      }
+    },
     "profiles": {
       "type": "object",
       "description": "Named output profiles with different verbosity levels",
@@ -54,6 +99,25 @@
                 "items": {
                   "type": "string",
                   "enum": ["tier", "tool_version", "tool_id", "request_id", "capabilities", "duration_ms", "error", "upgrade_hints"]
+                }
+              }
+            }
+          },
+          "parsing": {
+            "type": "object",
+            "description": "Profile-specific parsing configuration",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "enum": ["fail_fast", "auto_sanitize"],
+                "description": "fail_fast=crash on errors, auto_sanitize=fix and warn"
+              },
+              "sanitization_policy": {
+                "type": "object",
+                "properties": {
+                  "allow_merge_conflicts": {"type": "boolean"},
+                  "allow_templates": {"type": "boolean"},
+                  "report_modifications": {"type": "boolean"}
                 }
               }
             }
@@ -89,6 +153,11 @@
                 "type": "array",
                 "items": {"type": "string"},
                 "description": "Whitelist mode: Only include these fields (overrides exclusions)"
+              },
+              "include_on_error": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Fields to include only when tool returns an error (e.g., parser_warnings, sanitization_report)"
               }
             }
           }

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from __future__ import annotations
 
 import ast
 import asyncio
@@ -12,6 +11,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Optional
+
+from code_scalpel.parsing import ParsingError, parse_python_code
 
 # Fallback Levenshtein if available
 try:
@@ -879,7 +880,8 @@ def _analyze_reachability(project_root: Path) -> set[str]:
 
         try:
             content = py_file.read_text(encoding="utf-8", errors="ignore")
-            tree = ast.parse(content, filename=str(py_file))
+            # [20260119_FEATURE] Use unified parser for deterministic behavior
+            tree, _ = parse_python_code(content, filename=str(py_file))
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
@@ -890,7 +892,8 @@ def _analyze_reachability(project_root: Path) -> set[str]:
                     if node.module:
                         package = node.module.split(".")[0]
                         imported_packages.add(package)
-        except (SyntaxError, UnicodeDecodeError, OSError):
+        except (ParsingError, UnicodeDecodeError, OSError):
+            # Skip unparseable files (existing behavior preserved)
             continue
 
     return imported_packages

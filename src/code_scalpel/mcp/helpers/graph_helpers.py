@@ -10,6 +10,7 @@ from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.licensing.tier_detector import (
     get_current_tier as _get_current_tier,
 )
+from code_scalpel.parsing import ParsingError, parse_python_code
 from code_scalpel.mcp.models.graph import (
     AliasResolutionModel,
     ArchitecturalViolationModel,
@@ -103,6 +104,7 @@ def _get_call_graph_sync(
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
     # [20251226_BUGFIX] Ensure deterministic truncation and advanced resolution enrichment.
+    # [20260119_FEATURE] Uses unified parser for deterministic behavior.
     def _infer_polymorphic_edges(
         root: Path, graph_nodes: list[CallNodeModel]
     ) -> set[tuple[str, str]]:
@@ -117,8 +119,8 @@ def _get_call_graph_sync(
                 continue
             try:
                 code = file_path.read_text(encoding="utf-8")
-                tree = ast.parse(code)
-            except Exception:
+                tree, _ = parse_python_code(code, filename=rel_path)
+            except (ParsingError, UnicodeDecodeError, OSError):
                 continue
 
             class_name: str | None = None
@@ -477,16 +479,17 @@ def _fast_validate_python_function_node_exists(
         return False, f"Center node file not found for module '{module}': {candidate}"
 
     # Quick AST scan for a matching function name in that single file.
+    # [20260119_FEATURE] Uses unified parser for deterministic behavior.
     try:
         import ast
 
         code = candidate.read_text(encoding="utf-8")
-        tree = ast.parse(code)
+        tree, _ = parse_python_code(code, filename=str(candidate))
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
                 return True, None
         return False, f"Center node function '{name}' not found in {candidate}"
-    except Exception:
+    except (ParsingError, UnicodeDecodeError, OSError):
         # If parsing fails, fall back to the slow path (graph build)
         return True, None
 
@@ -1086,7 +1089,8 @@ def _get_project_map_sync(
                 lines = code.count("\n") + 1
                 total_lines += lines
 
-                tree = ast.parse(code)
+                # [20260119_FEATURE] Uses unified parser for deterministic behavior.
+                tree, _ = parse_python_code(code, filename=rel_path)
 
                 # Extract module info
                 functions = []

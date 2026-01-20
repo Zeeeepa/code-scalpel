@@ -50,103 +50,28 @@ Usage:
 #
 # COMMUNITY (Current & Planned):
 # Documentation & Learning:
-# - TODO [COMMUNITY]: Add comprehensive Kafka tracking guide (current)
-# - TODO [COMMUNITY]: Document taint propagation patterns
-# - TODO [COMMUNITY]: Create library detection examples
-# - TODO [COMMUNITY]: Add API reference documentation
-# - TODO [COMMUNITY]: Create quick-start guide
-# - TODO [COMMUNITY]: Document topic mapping
-# - TODO [COMMUNITY]: Add best practices guide
-# - TODO [COMMUNITY]: Create troubleshooting guide
 #
 # Examples & Use Cases:
-# - TODO [COMMUNITY]: Add basic producer analysis example
-# - TODO [COMMUNITY]: Create consumer handler example
-# - TODO [COMMUNITY]: Add taint bridge example
-# - TODO [COMMUNITY]: Document multi-file analysis
-# - TODO [COMMUNITY]: Create topic mapping example
 #
 # Testing:
-# - TODO [COMMUNITY]: Add tests for pattern detection
-# - TODO [COMMUNITY]: Create library detection tests
-# - TODO [COMMUNITY]: Add multi-language tests
-# - TODO [COMMUNITY]: Document test coverage
 #
 # PRO (Enhanced Features):
 # Core Capabilities:
-# - TODO [PRO]: Improve library detection accuracy
-# - TODO [PRO]: Add more Kafka library support
-# - TODO [PRO]: Implement producer send detection
-# - TODO [PRO]: Add consumer subscribe detection
-# - TODO [PRO]: Support handler function extraction
-# - TODO [PRO]: Implement topic name resolution
-# - TODO [PRO]: Add payload analysis
-# - TODO [PRO]: Support field-level tracking
 #
 # Taint Analysis:
-# - TODO [PRO]: Implement taint source detection
-# - TODO [PRO]: Add producer taint tracking
-# - TODO [PRO]: Support consumer taint propagation
-# - TODO [PRO]: Implement cross-service bridges
-# - TODO [PRO]: Add sanitizer detection
-# - TODO [PRO]: Support transitive taint
-# - TODO [PRO]: Implement sink detection
 #
 # Message Handling:
-# - TODO [PRO]: Support Avro schema analysis
-# - TODO [PRO]: Implement Protobuf field mapping
-# - TODO [PRO]: Add JSON schema tracking
-# - TODO [PRO]: Support MessagePack handling
-# - TODO [PRO]: Implement custom serialization
-# - TODO [PRO]: Add compression tracking
-# - TODO [PRO]: Support encryption detection
 #
 # Additional Brokers:
-# - TODO [PRO]: Support RabbitMQ (AMQP) tracking
-# - TODO [PRO]: Add Redis Pub/Sub support
-# - TODO [PRO]: Implement Apache Pulsar tracking
-# - TODO [PRO]: Add AWS SQS/SNS support
-# - TODO [PRO]: Support Google Cloud Pub/Sub
-# - TODO [PRO]: Implement Azure Service Bus
-# - TODO [PRO]: Add GCP Pub/Sub tracking
 #
 # ENTERPRISE (Advanced Capabilities):
 # Advanced Security:
-# - TODO [ENTERPRISE]: Detect topic ACL violations
-# - TODO [ENTERPRISE]: Track consumer group vulnerabilities
-# - TODO [ENTERPRISE]: Identify partition key injection
-# - TODO [ENTERPRISE]: Detect message timestamp manipulation
-# - TODO [ENTERPRISE]: Validate schema registry usage
-# - TODO [ENTERPRISE]: Add authentication validation
-# - TODO [ENTERPRISE]: Implement authorization checking
 #
 # Cross-Service Intelligence:
-# - TODO [ENTERPRISE]: Build service dependency graph via topics
-# - TODO [ENTERPRISE]: Map producers to consumers automatically
-# - TODO [ENTERPRISE]: Track taint through dead letter queues
-# - TODO [ENTERPRISE]: Analyze replay attack risks
-# - TODO [ENTERPRISE]: Support monorepo analysis
-# - TODO [ENTERPRISE]: Implement microservice mapping
-# - TODO [ENTERPRISE]: Add service health correlation
 #
 # Performance & Reliability:
-# - TODO [ENTERPRISE]: Handle exactly-once semantics
-# - TODO [ENTERPRISE]: Track idempotency key usage
-# - TODO [ENTERPRISE]: Analyze message ordering guarantees
-# - TODO [ENTERPRISE]: Detect poison pill messages
-# - TODO [ENTERPRISE]: Implement transaction tracking
-# - TODO [ENTERPRISE]: Add consistency checking
-# - TODO [ENTERPRISE]: Support partition analysis
 #
 # Integration & Monitoring:
-# - TODO [ENTERPRISE]: Add schema registry integration
-# - TODO [ENTERPRISE]: Implement continuous monitoring
-# - TODO [ENTERPRISE]: Support compliance reporting
-# - TODO [ENTERPRISE]: Add audit trail logging
-# - TODO [ENTERPRISE]: Implement automated remediation
-# - TODO [ENTERPRISE]: Support policy enforcement
-# - TODO [ENTERPRISE]: Add incident detection
-# - TODO [ENTERPRISE]: Implement SIEM integration
 
 from __future__ import annotations
 

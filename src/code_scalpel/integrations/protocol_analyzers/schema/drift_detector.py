@@ -49,83 +49,14 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 # =============================================
 #
 # COMMUNITY (Current & Planned):
-# - TODO [COMMUNITY]: Add comprehensive schema guide (current)
-# - TODO [COMMUNITY]: Document breaking vs non-breaking changes
-# - TODO [COMMUNITY]: Create Protobuf evolution guide
-# - TODO [COMMUNITY]: Document JSON Schema changes
-# - TODO [COMMUNITY]: Add schema comparison examples
-# - TODO [COMMUNITY]: Create migration strategy guide
-# - TODO [COMMUNITY]: Add troubleshooting documentation
-# - TODO [COMMUNITY]: Create best practices guide
 #
 # COMMUNITY Examples & Tutorials:
-# - TODO [COMMUNITY]: Add basic Protobuf comparison example
-# - TODO [COMMUNITY]: Create JSON Schema drift example
-# - TODO [COMMUNITY]: Add field change detection example
-# - TODO [COMMUNITY]: Document enum evolution example
-# - TODO [COMMUNITY]: Create service change example
-# - TODO [COMMUNITY]: Add compatibility checking example
 #
 # COMMUNITY Testing & Validation:
-# - TODO [COMMUNITY]: Add Protobuf parsing tests
-# - TODO [COMMUNITY]: Create schema comparison tests
-# - TODO [COMMUNITY]: Add change detection tests
-# - TODO [COMMUNITY]: Test edge cases in drift detection
-# - TODO [COMMUNITY]: Create regression test suite
-# - TODO [COMMUNITY]: Add integration tests
 #
 # PRO (Enhanced Features):
-# - TODO [PRO]: Add support for additional schema formats
-# - TODO [PRO]: Implement Avro schema evolution rules
-# - TODO [PRO]: Add Thrift IDL change detection
-# - TODO [PRO]: Support AsyncAPI specification
-# - TODO [PRO]: Implement CloudEvents schema validation
-# - TODO [PRO]: Add JSON-LD context change detection
-# - TODO [PRO]: Support OpenAPI/Swagger comparison
-# - TODO [PRO]: Implement GraphQL schema drift
-# - TODO [PRO]: Add gRPC service change detection
-# - TODO [PRO]: Generate database migration scripts
-# - TODO [PRO]: Create API client update patches
-# - TODO [PRO]: Auto-generate deprecation warnings
-# - TODO [PRO]: Build backward-compatible adapters
-# - TODO [PRO]: Implement compatibility layers
-# - TODO [PRO]: Support gradual deprecation
-# - TODO [PRO]: Add version negotiation logic
-# - TODO [PRO]: Estimate number of affected clients
-# - TODO [PRO]: Calculate deployment risk score
-# - TODO [PRO]: Identify dependent services
-# - TODO [PRO]: Suggest rollout strategies
-# - TODO [PRO]: Support canary deployment planning
-# - TODO [PRO]: Add blue-green migration planning
-# - TODO [PRO]: Implement rollback strategies
-# - TODO [PRO]: Support impact reporting
 #
 # ENTERPRISE (Advanced Capabilities):
-# - TODO [ENTERPRISE]: Automated migration generation
-# - TODO [ENTERPRISE]: Generate test cases for breaking changes
-# - TODO [ENTERPRISE]: Validate old clients against new schema
-# - TODO [ENTERPRISE]: Check schema registry compatibility
-# - TODO [ENTERPRISE]: Simulate version negotiation
-# - TODO [ENTERPRISE]: Implement schema versioning strategies
-# - TODO [ENTERPRISE]: Support semantic versioning
-# - TODO [ENTERPRISE]: Add SLA-based change planning
-# - TODO [ENTERPRISE]: Implement ML-based impact prediction
-# - TODO [ENTERPRISE]: Add automated migration generation
-# - TODO [ENTERPRISE]: Support intelligent rollout planning
-# - TODO [ENTERPRISE]: Implement continuous schema monitoring
-# - TODO [ENTERPRISE]: Add breaking change prediction
-# - TODO [ENTERPRISE]: Support cross-service dependency analysis
-# - TODO [ENTERPRISE]: Implement automated compatibility fixes
-# - TODO [ENTERPRISE]: Real-time schema drift monitoring
-# - TODO [ENTERPRISE]: Support schema governance enforcement
-# - TODO [ENTERPRISE]: Add compliance validation
-# - TODO [ENTERPRISE]: Implement audit logging
-# - TODO [ENTERPRISE]: Support regulatory compliance checks
-# - TODO [ENTERPRISE]: Add change approval workflows
-# - TODO [ENTERPRISE]: Implement automatic remediation
-# - TODO [ENTERPRISE]: Support SLA tracking
-# - TODO [ENTERPRISE]: Add incident correlation
-# - TODO [ENTERPRISE]: Implement continuous validation\n\n# TODO: Add support for additional schema formats
 #   - Avro schema evolution rules
 #   - Thrift IDL change detection
 #   - AsyncAPI specification (message schemas)

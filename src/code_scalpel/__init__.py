@@ -19,19 +19,13 @@ For AI agent integrations:
     >>> from code_scalpel.integrations import AutogenScalpel, CrewAIScalpel
 """
 
-from typing import TYPE_CHECKING
-
 # [20251228_FEATURE] Public sync wrappers for key MCP tools.
 # These are convenience APIs used by tier/tooling validation tests.
 
+# [20251225_RELEASE] v3.3.0 - Project Reorganization (Phases 1-4)
 __version__ = "1.0.0"
-__author__ = "3D Tech Solutions"
-__email__ = "support@3dtechsolutions.us"
-
-# [20260119_FIX] Import run_server at module level for static analysis
-# This is the MCP server entry point (not the legacy Flask REST API)
-if TYPE_CHECKING:
-    from .mcp import run_server as run_server
+__author__ = "Timmothy Escolopio"
+__email__ = "time@3dtechsolutions.us"
 
 # [20251228_BUGFIX] Prefer reorganized modules to avoid importing deprecated
 # shims (keeps backward-compatible top-level symbols without warning noise).
@@ -73,6 +67,21 @@ from .autonomy import ErrorAnalysis, ErrorToDiffEngine, ErrorType, FixHint, Pars
 # crash on bare `pip install code-scalpel`. Users who need REST API should either:
 # 1. Install: pip install code-scalpel[web]
 # 2. Import directly: from code_scalpel.integrations.rest_api_server import run_server
+
+
+def __getattr__(name: str):
+    """Lazy loader for optional dependencies (Flask REST API)."""
+    if name in ("MCPServerConfig", "create_app", "run_server"):
+        try:
+            from .integrations import rest_api_server
+
+            return getattr(rest_api_server, name)
+        except ImportError as e:
+            raise ImportError(
+                "REST API server requires Flask. Install with: pip install code-scalpel[web]"
+            ) from e
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # PDG tools
 from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg
@@ -162,12 +171,10 @@ __all__ = [
     "update_function_in_file",
     "update_class_in_file",
     "update_method_in_file",
-    # MCP Server - run_server is the primary entry point
+    # MCP Server
+    "create_app",
     "run_server",
-    # Legacy REST API Server (requires Flask: pip install code-scalpel[web])
-    # These are NOT the MCP server - they are the legacy Flask REST API
-    # "create_app",        # REST API only - requires Flask
-    # "MCPServerConfig",   # REST API only - requires Flask
+    "MCPServerConfig",
     # Autonomy (v3.0.0)
     "ErrorToDiffEngine",
     "ErrorType",
@@ -212,7 +219,7 @@ def extract_code(
     include_token_estimate: bool = True,
 ):
     """[20251228_FEATURE] Sync wrapper for MCP extract_code tool."""
-    from code_scalpel.mcp.server import extract_code as _extract_code_async
+    from code_scalpel.mcp.archive.server import extract_code as _extract_code_async
 
     return _run_mcp_tool_sync(
         _extract_code_async,
@@ -230,14 +237,16 @@ def extract_code(
 
 def security_scan(code: str | None = None, file_path: str | None = None):
     """[20251228_FEATURE] Sync wrapper for MCP security_scan tool."""
-    from code_scalpel.mcp.server import security_scan as _security_scan_async
+    from code_scalpel.mcp.archive.server import security_scan as _security_scan_async
 
     return _run_mcp_tool_sync(_security_scan_async, code=code, file_path=file_path)
 
 
-def symbolic_execute(code: str, max_paths: int | None = None, max_depth: int | None = None):
+def symbolic_execute(
+    code: str, max_paths: int | None = None, max_depth: int | None = None
+):
     """[20251228_FEATURE] Sync wrapper for MCP symbolic_execute tool."""
-    from code_scalpel.mcp.server import symbolic_execute as _symbolic_execute_async
+    from code_scalpel.mcp.archive.server import symbolic_execute as _symbolic_execute_async
 
     # Allow mixed value types for optional numeric parameters
     kwargs: dict[str, str | int] = {"code": code}
@@ -255,7 +264,7 @@ def generate_unit_tests(
     framework: str = "pytest",
 ):
     """[20251228_FEATURE] Sync wrapper for MCP generate_unit_tests tool."""
-    from code_scalpel.mcp.server import (
+    from code_scalpel.mcp.archive.server import (
         generate_unit_tests as _generate_unit_tests_async,
     )
 
@@ -275,7 +284,7 @@ def simulate_refactor(
     strict_mode: bool = False,
 ):
     """[20251228_FEATURE] Sync wrapper for MCP simulate_refactor tool."""
-    from code_scalpel.mcp.server import simulate_refactor as _simulate_refactor_async
+    from code_scalpel.mcp.archive.server import simulate_refactor as _simulate_refactor_async
 
     return _run_mcp_tool_sync(
         _simulate_refactor_async,
@@ -284,24 +293,3 @@ def simulate_refactor(
         patch=patch,
         strict_mode=strict_mode,
     )
-
-
-def __getattr__(name: str):
-    """Lazy loader for optional dependencies and MCP server."""
-    # MCP Server - primary entry point
-    if name == "run_server":
-        from .mcp import run_server as mcp_run_server
-        return mcp_run_server
-    
-    # Legacy REST API Server (optional Flask dependency)
-    if name in ("MCPServerConfig", "create_app"):
-        try:
-            from .integrations import rest_api_server
-
-            return getattr(rest_api_server, name)
-        except ImportError as e:
-            raise ImportError(
-                f"{name} requires Flask. Install with: pip install code-scalpel[web]\n"
-                "Note: For the MCP server (recommended), use: from code_scalpel.mcp import run_server"
-            ) from e
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

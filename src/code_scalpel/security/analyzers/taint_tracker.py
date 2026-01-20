@@ -60,70 +60,6 @@ class VulnerabilityDict(TypedDict):
     cwe_link: str
 
 
-# - TODO [COMMUNITY]: Improve documentation of taint sources and sinks (current)
-# - TODO [COMMUNITY]: Add more built-in sanitizer patterns
-# - TODO [COMMUNITY]: Create sanitizer registry guide
-# - TODO [COMMUNITY]: Document taint levels and their meanings
-# - TODO [COMMUNITY]: Add troubleshooting guide for taint analysis
-# - TODO [COMMUNITY]: Create validation examples
-# - TODO [COMMUNITY]: Document source/sink matching algorithm
-# - TODO [COMMUNITY]: Add sanitizer effectiveness guide
-# - TODO [COMMUNITY]: Create vulnerability explanation guide
-# - TODO [COMMUNITY]: Document taint propagation rules
-# - TODO [COMMUNITY]: Create SQL injection example
-# - TODO [COMMUNITY]: Add XSS vulnerability example
-# - TODO [COMMUNITY]: Show path traversal example
-# - TODO [COMMUNITY]: Create custom sanitizer example
-# - TODO [COMMUNITY]: Add source/sink matching example
-# - TODO [COMMUNITY]: Show taint flow visualization
-# - TODO [COMMUNITY]: Create false positive handling guide
-# - TODO [COMMUNITY]: Add sanitizer detection tests
-# - TODO [COMMUNITY]: Test source/sink matching
-# - TODO [COMMUNITY]: Verify taint propagation
-# - TODO [COMMUNITY]: Test all vulnerability types
-# - TODO [COMMUNITY]: Add regression test suite
-# - TODO [PRO]: Implement probabilistic taint tracking
-# - TODO [PRO]: Add object field tracking (track x.field separately)
-# - TODO [PRO]: Support array element tracking with symbolic indices
-# - TODO [PRO]: Implement interprocedural taint flow
-# - TODO [PRO]: Add sanitizer effectiveness scoring
-# - TODO [PRO]: Support taint isolation via context
-# - TODO [PRO]: Implement taint decay over trust boundaries
-# - TODO [PRO]: Add custom source/sink definitions
-# - TODO [PRO]: Support framework-specific sources (Django, Flask)
-# - TODO [PRO]: Implement taint graph visualization
-# - TODO [PRO]: Add context-sensitive taint analysis
-# - TODO [PRO]: Implement flow-sensitive tracking
-# - TODO [PRO]: Support implicit information flows
-# - TODO [PRO]: Add taint inference heuristics
-# - TODO [PRO]: Implement incremental taint analysis
-# - TODO [PRO]: Implement vulnerability evidence collection
-# - TODO [PRO]: Add taint flow explanation
-# - TODO [PRO]: Support JSON taint graph export
-# - TODO [PRO]: Implement severity classification
-# - TODO [PRO]: Add contextual vulnerability explanations
-# - TODO [PRO]: Support evidence-based reporting
-# - TODO [PRO]: Implement false positive scoring
-# - TODO [ENTERPRISE]: Implement polyglot taint tracking
-# - TODO [ENTERPRISE]: Add distributed taint analysis
-# - TODO [ENTERPRISE]: Support inter-language taint flow
-# - TODO [ENTERPRISE]: Implement ML-based sanitizer learning
-# - TODO [ENTERPRISE]: Add taint policy DSL
-# - TODO [ENTERPRISE]: Support custom taint levels
-# - TODO [ENTERPRISE]: Implement fine-grained object tracking
-# - TODO [ENTERPRISE]: Add dataflow-sensitive analysis
-# - TODO [ENTERPRISE]: Support probabilistic vulnerability scoring
-# - TODO [ENTERPRISE]: Implement continuous taint tracking
-# - TODO [ENTERPRISE]: Add symbolic taint values
-# - TODO [ENTERPRISE]: Implement taint reasoning with Z3
-# - TODO [ENTERPRISE]: Support taint-based program synthesis
-# - TODO [ENTERPRISE]: Add temporal taint analysis
-# - TODO [ENTERPRISE]: Implement taint provenance tracking
-# - TODO [ENTERPRISE]: Support cloud-based taint analysis
-# - TODO [ENTERPRISE]: Implement real-time taint monitoring
-# - TODO [ENTERPRISE]: Add SIEM taint integration
-# - TODO [ENTERPRISE]: Support compliance-aware taint tracking
-# - TODO [ENTERPRISE]: Implement automated taint remediation
 
 
 class TaintSource(Enum):
@@ -807,25 +743,56 @@ class TaintTracker:
         Returns:
             TaintInfo if target is now tainted
         """
-        # Merge taint from all sources
+        # [20260119_BUGFIX] Preserve sanitizer history and cleared sinks when merging taint.
         merged_taint = None
 
         for source_name in source_names:
             source_taint = self._taint_map.get(source_name)
-            if source_taint is not None:
-                if merged_taint is None:
-                    merged_taint = source_taint.propagate(target)
-                else:
-                    # Merge: take highest taint level
-                    if source_taint.level.value < merged_taint.level.value:
-                        merged_taint = TaintInfo(
-                            source=source_taint.source,
-                            level=source_taint.level,
-                            source_location=merged_taint.source_location,
-                            propagation_path=merged_taint.propagation_path + [target],
-                            sanitizers_applied=merged_taint.sanitizers_applied
-                            & source_taint.sanitizers_applied,
-                        )
+            if source_taint is None:
+                continue
+
+            candidate = source_taint.propagate(target)
+
+            if merged_taint is None:
+                merged_taint = candidate
+                continue
+
+            # Pick the most tainted level (HIGH < MEDIUM < LOW < NONE when using Enum auto values)
+            most_tainted = (
+                candidate if candidate.level.value < merged_taint.level.value else merged_taint
+            )
+
+            combined_sanitizers = merged_taint.sanitizers_applied & candidate.sanitizers_applied
+            combined_cleared = merged_taint.cleared_sinks & candidate.cleared_sinks
+
+            combined_history: List[str] = []
+            for name in merged_taint.sanitizer_history + candidate.sanitizer_history:
+                if name not in combined_history:
+                    combined_history.append(name)
+
+            combined_path: List[str] = []
+            for name in merged_taint.propagation_path + candidate.propagation_path:
+                if name not in combined_path:
+                    combined_path.append(name)
+
+            new_level = most_tainted.level
+            if combined_cleared >= {
+                SecuritySink.SQL_QUERY,
+                SecuritySink.HTML_OUTPUT,
+                SecuritySink.FILE_PATH,
+                SecuritySink.SHELL_COMMAND,
+            }:
+                new_level = TaintLevel.NONE
+
+            merged_taint = TaintInfo(
+                source=most_tainted.source,
+                level=new_level,
+                source_location=most_tainted.source_location,
+                propagation_path=combined_path,
+                sanitizers_applied=combined_sanitizers,
+                sanitizer_history=combined_history,
+                cleared_sinks=combined_cleared,
+            )
 
         if merged_taint is not None:
             self._taint_map[target] = merged_taint
@@ -984,6 +951,19 @@ class Vulnerability:
             SecuritySink.REDIRECT: "Open Redirect",
             # [20251229_FEATURE] v3.0.4 - Type System Evaporation
             SecuritySink.UNVALIDATED_OUTPUT: "Unvalidated Input in HTTP Response",
+            # [20260119_BUGFIX] Add names for extended sink coverage
+            SecuritySink.LDAP_INJECTION: "LDAP Injection",
+            SecuritySink.XPATH_INJECTION: "XPath Injection",
+            SecuritySink.NOSQL_INJECTION: "NoSQL Injection",
+            SecuritySink.EMAIL_INJECTION: "Email Header Injection",
+            SecuritySink.REGEX_DOS: "Regular Expression Denial of Service",
+            SecuritySink.FORMAT_STRING: "Format String Vulnerability",
+            SecuritySink.UNSAFE_REFLECTION: "Unsafe Reflection",
+            SecuritySink.EL_INJECTION: "Expression Language Injection",
+            SecuritySink.GRAPHQL_INJECTION: "GraphQL Injection",
+            SecuritySink.CORS_MISCONFIGURATION: "CORS Misconfiguration",
+            SecuritySink.JWT_WEAKNESS: "JWT Weakness",
+            SecuritySink.HTML_INJECTION: "HTML Injection",
         }
         return mapping.get(self.sink_type, "Unknown Vulnerability")
 

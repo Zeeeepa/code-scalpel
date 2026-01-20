@@ -199,6 +199,27 @@ class ResponseConfig:
                 return set(include_only)
         return None
 
+    def get_error_inclusions(self, tool_name: Optional[str] = None) -> Set[str]:
+        """
+        Get fields to include only when response indicates an error.
+
+        [20260119_FEATURE] Implements include_on_error from response_config.json.
+        These fields are normally excluded but included when the tool returns an error,
+        providing diagnostic context (error_location, suggested_fix, sanitization_report).
+
+        Args:
+            tool_name: Name of the tool that generated the response
+
+        Returns:
+            Set of field names to include on error responses
+        """
+        if tool_name and tool_name in self.config.get("tool_overrides", {}):
+            tool_config = self.config["tool_overrides"][tool_name]
+            include_on_error = tool_config.get("include_on_error")
+            if include_on_error:
+                return set(include_on_error)
+        return set()
+
     def should_exclude_empty_arrays(self) -> bool:
         """Check if empty arrays should be excluded."""
         return self.config["global"].get("exclude_empty_arrays", True)
@@ -220,6 +241,7 @@ class ResponseConfig:
         data: Dict[str, Any],
         tool_name: Optional[str] = None,
         tier: Optional[str] = None,
+        is_error: bool = False,
     ) -> FilteredResponseDict:
         """
         Filter response data according to configuration.
@@ -228,9 +250,14 @@ class ResponseConfig:
             data: Response data to filter
             tool_name: Name of the tool that generated the response
             tier: Current tier (community, pro, enterprise)
+            is_error: Whether this is an error response (enables include_on_error fields)
 
         Returns:
             Filtered response data
+
+        [20260119_FEATURE] Added is_error parameter to support include_on_error config.
+        When is_error=True, fields listed in tool_overrides[tool].include_on_error
+        are preserved even if they would otherwise be excluded.
         """
         if not isinstance(data, dict):
             return data
@@ -238,6 +265,8 @@ class ResponseConfig:
         filtered = {}
         exclusions = self.get_exclusions(tool_name, tier)
         inclusions = self.get_inclusions(tool_name)
+        # [20260119_FEATURE] Get error-conditional fields
+        error_inclusions = self.get_error_inclusions(tool_name) if is_error else set()
 
         for key, value in data.items():
             # [20251228_BUGFIX] Preserve contract-critical fields.
@@ -245,6 +274,20 @@ class ResponseConfig:
             # in the tool-specific payload, even when token-efficiency exclusions are
             # enabled.
             if key == "success":
+                filtered[key] = value
+                continue
+
+            # [20260119_FEATURE] Preserve error-conditional fields on error responses.
+            # Fields in include_on_error are always included when is_error=True,
+            # bypassing normal exclusion rules.
+            if is_error and key in error_inclusions:
+                # Still apply null/empty filtering to error fields
+                if self.should_exclude_null_values() and value is None:
+                    continue
+                if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
+                    continue
+                if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
+                    continue
                 filtered[key] = value
                 continue
 
@@ -270,7 +313,7 @@ class ResponseConfig:
 
             # Recursively filter nested dicts
             if isinstance(value, dict):
-                filtered_value = self.filter_response(value, tool_name, tier)
+                filtered_value = self.filter_response(value, tool_name, tier, is_error)
                 if filtered_value:  # Only include if not empty after filtering
                     filtered[key] = filtered_value
             else:
@@ -292,7 +335,10 @@ def get_response_config() -> ResponseConfig:
 
 
 def filter_tool_response(
-    data: Dict[str, Any], tool_name: Optional[str] = None, tier: Optional[str] = None
+    data: Dict[str, Any],
+    tool_name: Optional[str] = None,
+    tier: Optional[str] = None,
+    is_error: bool = False,
 ) -> FilteredResponseDict:
     """
     Filter tool response data for token efficiency.
@@ -301,9 +347,12 @@ def filter_tool_response(
         data: Response data to filter
         tool_name: Name of the tool that generated the response
         tier: Current tier (community, pro, enterprise)
+        is_error: Whether this is an error response (enables include_on_error fields)
 
     Returns:
         Filtered response data
+
+    [20260119_FEATURE] Added is_error parameter for include_on_error support.
     """
     config = get_response_config()
-    return config.filter_response(data, tool_name, tier)
+    return config.filter_response(data, tool_name, tier, is_error)

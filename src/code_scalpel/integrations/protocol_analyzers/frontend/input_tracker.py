@@ -82,35 +82,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 # ===============================================
 #
 # COMMUNITY (Current & Planned):
-# - TODO [COMMUNITY]: Add comprehensive documentation (current)
-# - TODO [COMMUNITY]: Create framework support guide
-# - TODO [COMMUNITY]: Document vulnerability patterns
-# - TODO [COMMUNITY]: Add troubleshooting guide
-# - TODO [COMMUNITY]: Create remediation guide
 #
 # PRO (Enhanced Features):
-# - TODO [PRO]: Support additional frameworks
-# - TODO [PRO]: Implement enhanced XSS detection
-# - TODO [PRO]: Add routing vulnerability detection
-# - TODO [PRO]: Support storage security analysis
-# - TODO [PRO]: Implement WebAPI taint tracking
-# - TODO [PRO]: Add incremental analysis
-# - TODO [PRO]: Support custom framework definitions
-# - TODO [PRO]: Implement flow visualization
-# - TODO [PRO]: Add false positive reduction
-# - TODO [PRO]: Support performance optimization
 #
 # ENTERPRISE (Advanced Capabilities):
-# - TODO [ENTERPRISE]: Implement distributed analysis
-# - TODO [ENTERPRISE]: Add ML-based vulnerability detection
-# - TODO [ENTERPRISE]: Support all JavaScript frameworks
-# - TODO [ENTERPRISE]: Implement real-time analysis
-# - TODO [ENTERPRISE]: Add continuous monitoring
-# - TODO [ENTERPRISE]: Support SIEM integration
-# - TODO [ENTERPRISE]: Implement automated remediation
-# - TODO [ENTERPRISE]: Add advanced visualization
-# - TODO [ENTERPRISE]: Support compliance reporting
-# - TODO [ENTERPRISE]: Implement vulnerability prediction
 
 
 class FrontendFramework(Enum):

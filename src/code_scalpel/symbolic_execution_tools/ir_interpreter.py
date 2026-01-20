@@ -34,31 +34,6 @@ Usage:
     ir = PythonNormalizer().normalize(code)
     interp = IRSymbolicInterpreter()
     result = interp.execute(ir)
-
-# ========================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-#
-# Examples & Tutorials:
-#
-# Testing:
-#
-# PRO (Enhanced Features):
-# Core Language Support:
-#
-# Type System:
-#
-# Semantics Improvements:
-#
-# Analysis Capabilities:
-#
-# ENTERPRISE (Advanced Capabilities):
-# Polyglot & Distribution:
-#
-# Advanced Features:
-#
-# Integration & Monitoring:
 """
 
 from __future__ import annotations

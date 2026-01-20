@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional
 
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 from .audit_trail import AuditEntry, get_audit_trail
 from .compliance import check_rename_compliance, format_compliance_error
 
@@ -224,8 +225,8 @@ def _collect_reference_edits(
     Import statement rewriting is also applied when the module matches.
     """
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
+        tree, _report = parse_python_code(code, filename="<rename>")
+    except ParsingError:
         return RenameEdits(token_replacements={})
 
     tokens = _tokenize(code)

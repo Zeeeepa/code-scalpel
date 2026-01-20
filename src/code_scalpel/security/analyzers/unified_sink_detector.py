@@ -97,69 +97,6 @@ class DetectedSink:
         return self.pattern.rsplit(".", 1)[-1]
 
 
-# - TODO [COMMUNITY]: Add more framework-specific sinks (current)
-# - TODO [COMMUNITY]: Document all supported sink types
-# - TODO [COMMUNITY]: Create sink detection rule guide
-# - TODO [COMMUNITY]: Add examples for each sink type
-# - TODO [COMMUNITY]: Document confidence scoring
-# - TODO [COMMUNITY]: Create CWE mapping documentation
-# - TODO [COMMUNITY]: Add OWASP mapping guide
-# - TODO [COMMUNITY]: Document sink categories
-# - TODO [COMMUNITY]: Create best practices guide
-# - TODO [COMMUNITY]: Create SQL injection sink example
-# - TODO [COMMUNITY]: Add XSS sink detection example
-# - TODO [COMMUNITY]: Show command injection sink
-# - TODO [COMMUNITY]: Create path traversal example
-# - TODO [COMMUNITY]: Add SSRF sink example
-# - TODO [COMMUNITY]: Show deserialization sink
-# - TODO [COMMUNITY]: Add sink detection tests
-# - TODO [COMMUNITY]: Test confidence scoring
-# - TODO [COMMUNITY]: Verify CWE mappings
-# - TODO [COMMUNITY]: Test all languages
-# - TODO [COMMUNITY]: Add regression suite
-# - TODO [PRO]: Add emerging vulnerability types
-# - TODO [PRO]: Implement framework-specific detection
-# - TODO [PRO]: Add cloud-native security sinks
-# - TODO [PRO]: Support custom sink definitions
-# - TODO [PRO]: Implement sink effectiveness scoring
-# - TODO [PRO]: Add machine learning-based sink detection
-# - TODO [PRO]: Support polyglot sink detection
-# - TODO [PRO]: Implement confidence calibration
-# - TODO [PRO]: Add sink categorization UI
-# - TODO [PRO]: Support sink severity mapping
-# - TODO [PRO]: Implement context-aware sinks
-# - TODO [PRO]: Add sink chaining detection
-# - TODO [PRO]: Support parametrization detection
-# - TODO [PRO]: Implement sanitizer verification
-# - TODO [PRO]: Add sink aliasing support
-# - TODO [PRO]: Add Django ORM sinks
-# - TODO [PRO]: Support Spring Framework sinks
-# - TODO [PRO]: Add Rails ActiveRecord sinks
-# - TODO [PRO]: Implement ASP.NET sinks
-# - TODO [PRO]: Add Go template sinks
-# - TODO [PRO]: Support Node.js framework sinks
-# - TODO [PRO]: Add PHP framework detection
-# - TODO [PRO]: Support Ruby framework sinks
-# - TODO [ENTERPRISE]: Implement distributed sink detection
-# - TODO [ENTERPRISE]: Add AI/ML specific vulnerability detection
-# - TODO [ENTERPRISE]: Support supply chain vulnerability tracking
-# - TODO [ENTERPRISE]: Implement custom vulnerability databases
-# - TODO [ENTERPRISE]: Add probabilistic sink scoring
-# - TODO [ENTERPRISE]: Support enterprise sink patterns
-# - TODO [ENTERPRISE]: Implement SIEM integration
-# - TODO [ENTERPRISE]: Add zero-day vulnerability detection
-# - TODO [ENTERPRISE]: Support continuous security monitoring
-# - TODO [ENTERPRISE]: Implement automated remediation
-# - TODO [ENTERPRISE]: Add sink graph visualization
-# - TODO [ENTERPRISE]: Support sink reasoning with Z3
-# - TODO [ENTERPRISE]: Implement sink-based synthesis
-# - TODO [ENTERPRISE]: Add temporal sink tracking
-# - TODO [ENTERPRISE]: Support sink evolution
-# - TODO [ENTERPRISE]: Implement ML sink learning
-# - TODO [ENTERPRISE]: Add adaptive sink detection
-# - TODO [ENTERPRISE]: Support threat model generation
-# - TODO [ENTERPRISE]: Implement compliance sink mapping
-# - TODO [ENTERPRISE]: Add predictive sink analysis
 
 # [20251216_FEATURE] Unified sink registry with confidence scores across all languages
 

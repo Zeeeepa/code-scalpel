@@ -15,6 +15,7 @@ from code_scalpel.licensing.jwt_validator import (
     get_current_tier as get_current_tier_from_license,
 )
 from code_scalpel.mcp.models.core import AnalysisResult, ClassInfo, FunctionInfo
+from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
 
@@ -1062,9 +1063,22 @@ def _analyze_code_sync(
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
 
-    # Python analysis using ast module
+    # Python analysis using unified parser
+    # [20260119_FEATURE] Use parse_python_code for deterministic error handling
     try:
-        tree = ast.parse(code)
+        tree, sanitization_report = parse_python_code(code)
+
+        # Track parser warnings for sanitization
+        parser_warnings: list[str] = []
+        sanitization_dict: dict[str, Any] | None = None
+        if sanitization_report.was_sanitized:
+            parser_warnings.append(
+                f"Code was auto-sanitized: {'; '.join(sanitization_report.changes)}"
+            )
+            sanitization_dict = {
+                "was_sanitized": True,
+                "changes": sanitization_report.changes,
+            }
 
         functions = []
         function_details = []
@@ -1280,6 +1294,9 @@ def _analyze_code_sync(
             # [20260110_FEATURE] v1.0 - Metadata fields
             language_detected="python",
             tier_applied=tier,
+            # [20260119_FEATURE] Parsing context fields (governed by response_config.json)
+            sanitization_report=sanitization_dict,
+            parser_warnings=parser_warnings,
         )
 
         # Cache successful result
@@ -1288,7 +1305,8 @@ def _analyze_code_sync(
 
         return result
 
-    except SyntaxError as e:
+    except ParsingError as e:
+        # [20260119_FEATURE] Deterministic parsing error with context fields
         return AnalysisResult(
             success=False,
             functions=[],
@@ -1296,7 +1314,9 @@ def _analyze_code_sync(
             imports=[],
             complexity=0,
             lines_of_code=0,
-            error=f"Syntax error at line {e.lineno}: {e.msg}. Please check your code syntax.",
+            error=str(e),
+            error_location=e.location,
+            suggested_fix=e.suggestion,
         )
     except Exception as e:
         return AnalysisResult(

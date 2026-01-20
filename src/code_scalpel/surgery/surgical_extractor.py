@@ -37,12 +37,6 @@ COMPLETED (v3.1.0 - December 2025):
 - Caller discovery for impact analysis (find_callers())
 - LRU caching for extraction performance (2.8x speedup)
 - Source file tracking in extraction results
-
-COMMUNITY (Current & Planned):
-
-PRO (Enhanced Features):
-
-ENTERPRISE (Advanced Capabilities):
 """
 
 from __future__ import annotations
@@ -61,6 +55,7 @@ except ImportError:
     tiktoken = None  # type: ignore[assignment]
 
 from code_scalpel.utilities.path_resolution import resolve_file_path
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 
 
 # [20251221_FEATURE] Token counting utilities
@@ -558,8 +553,9 @@ class SurgicalExtractor:
             return
 
         try:
-            self._tree = ast.parse(self.code)
-        except SyntaxError as e:
+            tree, _report = parse_python_code(self.code, filename="<extraction>")
+            self._tree = tree if isinstance(tree, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
             raise ValueError(f"Invalid Python code: {e}")
 
         # [20251215_BUGFIX] Index all definitions including nested classes
@@ -1934,7 +1930,19 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
             )
 
         # Parse the function to find local variables that could be promoted
-        tree = ast.parse(code)
+        try:
+            tree_node, _report = parse_python_code(code, filename="<promotion>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return VariablePromotionResult(
+                success=False,
+                promoted_function="",
+                promoted_variables=[],
+                original_function="",
+                explanation=f"Failed to parse code: {e}",
+                error=str(e),
+            )
+        
         func_node = None
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -2006,8 +2014,15 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
         defaults = list(func_node.args.defaults)
         for candidate in candidates:
             # Parse the default value back to AST
-            default_ast = ast.parse(candidate["default_value"]).body[0].value
-            defaults.append(default_ast)
+            try:
+                default_tree_node, _report = parse_python_code(candidate["default_value"], filename="<default>")
+                default_tree = default_tree_node if isinstance(default_tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                if default_tree.body and isinstance(default_tree.body[0], ast.Expr):
+                    default_ast = default_tree.body[0].value
+                    defaults.append(default_ast)
+            except (ParsingError, IndexError, AttributeError) as e:
+                # Skip invalid default values
+                continue
 
         # Create new function with promoted parameters
         import sys
@@ -2157,7 +2172,20 @@ def extract_as_microservice(
             )
 
         # Parse function signature to generate API spec
-        tree = ast.parse(code)
+        try:
+            tree_node, _report = parse_python_code(code, filename="<api_spec>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return MicroserviceExtractionResult(
+                success=False,
+                function_code="",
+                dockerfile="",
+                api_spec="",
+                requirements_txt="",
+                readme="",
+                error=f"Failed to parse code: {e}",
+            )
+        
         func_node = None
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -2512,7 +2540,8 @@ def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisRe
         'global'
     """
     try:
-        tree = ast.parse(code)
+        tree_node, _report = parse_python_code(code, filename="<closure>")
+        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
         func_node = None
 
         # Find the target function
@@ -2761,7 +2790,19 @@ def suggest_dependency_injection(code: str, function_name: str) -> DependencyInj
 
         if not closure_result.closure_variables:
             # No closures = no DI suggestions
-            tree = ast.parse(code)
+            try:
+                tree, _report = parse_python_code(code, filename="<di_suggest>")
+            except ParsingError:
+                return DependencyInjectionResult(
+                    success=False,
+                    function_name=function_name,
+                    suggestions=[],
+                    has_suggestions=False,
+                    original_signature="",
+                    refactored_signature="",
+                    explanation="Failed to parse code for DI analysis.",
+                    error="ParsingError",
+                )
             func_node = None
             for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -2785,7 +2826,20 @@ def suggest_dependency_injection(code: str, function_name: str) -> DependencyInj
 
         # Build DI suggestions from closure variables
         suggestions = []
-        tree = ast.parse(code)
+        try:
+            tree_node, _report = parse_python_code(code, filename="<di_build>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return DependencyInjectionResult(
+                success=False,
+                function_name=function_name,
+                suggestions=[],
+                has_suggestions=False,
+                original_signature="",
+                refactored_signature="",
+                explanation=f"Failed to parse code: {e}",
+                error=str(e),
+            )
         func_node = None
 
         for node in ast.walk(tree):
@@ -3008,7 +3062,20 @@ def resolve_organization_wide(
             )
 
         # Analyze imports in the code
-        tree = ast.parse(code)
+        try:
+            tree_node, _report = parse_python_code(code, filename="<imports>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return OrganizationWideResolutionResult(
+                success=False,
+                target_name=function_name,
+                target_code="",
+                cross_repo_imports=[],
+                resolved_symbols={},
+                monorepo_structure={},
+                explanation=f"Failed to parse code: {e}",
+                error=str(e),
+            )
         imports_to_resolve = []
 
         for node in ast.walk(tree):
@@ -3044,7 +3111,11 @@ def resolve_organization_wide(
                                 file_content = f.read()
 
                             # Extract symbols from this file
-                            file_tree = ast.parse(file_content)
+                            try:
+                                file_tree_node, _report = parse_python_code(file_content, filename=str(py_file))
+                                file_tree = file_tree_node if isinstance(file_tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                            except ParsingError:
+                                continue  # Skip files that don't parse
                             symbols = []
 
                             for node in file_tree.body:
@@ -3197,7 +3268,11 @@ def extract_with_custom_pattern(
                     # Simple regex pattern matching
                     if re.search(pattern, content, re.IGNORECASE):
                         # Parse to find which symbols contain the pattern
-                        tree = ast.parse(content)
+                        try:
+                            tree_node, _report = parse_python_code(content, filename=str(py_file))
+                            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                        except ParsingError:
+                            continue  # Skip files that don't parse
                         for node in ast.walk(tree):
                             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                                 func_code = ast.unparse(node)
@@ -3228,7 +3303,11 @@ def extract_with_custom_pattern(
 
                 elif pattern_type == "function_call":
                     # Match functions that call a specific function
-                    tree = ast.parse(content)
+                    try:
+                        tree_node, _report = parse_python_code(content, filename=str(py_file))
+                        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                    except ParsingError:
+                        continue  # Skip files that don't parse
                     for node in ast.walk(tree):
                         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                             # Check if this function calls the target
@@ -3259,7 +3338,11 @@ def extract_with_custom_pattern(
 
                 elif pattern_type == "import":
                     # Match files that import a specific module
-                    tree = ast.parse(content)
+                    try:
+                        tree_node, _report = parse_python_code(content, filename=str(py_file))
+                        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                    except ParsingError:
+                        continue  # Skip files that don't parse
                     imports_pattern = False
 
                     for node in tree.body:
@@ -3412,7 +3495,11 @@ def detect_service_boundaries(
                 with open(py_file, "r", encoding="utf-8") as f:
                     content = f.read()
 
-                tree = ast.parse(content)
+                try:
+                    tree_node, _report = parse_python_code(content, filename=str(py_file))
+                    tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                except ParsingError:
+                    continue  # Skip files that don't parse
                 imports = set()
 
                 for node in tree.body:

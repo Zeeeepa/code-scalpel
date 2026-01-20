@@ -1,22 +1,3 @@
-"""
-Code Scalpel CLI - Command-line interface for code analysis.
-
-Usage:
-    code-scalpel analyze <file>           Analyze a Python file
-    code-scalpel analyze --code "..."     Analyze code string
-    code-scalpel scan <file>              Security vulnerability scan
-    code-scalpel mcp                      Start MCP server (for AI clients)
-    code-scalpel server [--port PORT]     Start REST API server (legacy)
-    code-scalpel version                  Show version
-
-=============================
-
-COMMUNITY (Current & Planned):
-
-PRO (Enhanced Features):
-
-ENTERPRISE (Advanced Capabilities):
-"""
 
 import argparse
 import json
@@ -25,7 +6,9 @@ import sys
 from pathlib import Path
 
 
-def analyze_file(filepath: str, output_format: str = "text", language: str | None = None) -> int:
+def analyze_file(
+    filepath: str, output_format: str = "text", language: str | None = None
+) -> int:
     """Analyze a file and print results."""
 
     path = Path(filepath)
@@ -224,7 +207,9 @@ def analyze_code(
         if result.dead_code:
             print(f"\nDead Code Detected ({len(result.dead_code)} items):")
             for dc in result.dead_code:
-                print(f"   - {dc.code_type} '{dc.name}' (lines {dc.line_start}-{dc.line_end})")
+                print(
+                    f"   - {dc.code_type} '{dc.name}' (lines {dc.line_start}-{dc.line_end})"
+                )
                 print(f"     Reason: {dc.reason}")
 
         if result.security_issues:
@@ -295,7 +280,9 @@ def scan_security(filepath: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
+            print(
+                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
+            )
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -345,7 +332,9 @@ def scan_code_security(code: str, output_format: str = "text") -> int:
         if not result.has_vulnerabilities:
             print("\n[OK] No vulnerabilities detected.")
         else:
-            print(f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n")
+            print(
+                f"\n[WARNING] Found {result.vulnerability_count} vulnerability(ies):\n"
+            )
             for i, v in enumerate(result.vulnerabilities, 1):
                 print(f"  {i}. {v.vulnerability_type} ({v.cwe_id})")
                 print(f"     Source: {v.taint_source.name}")
@@ -398,7 +387,9 @@ def init_configuration(target_dir: str = ".", force: bool = False) -> int:
     # [20241225_FEATURE] v3.3.0 - Show validation results
     if "validation" in result:
         validation = result["validation"]
-        print(f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:")
+        print(
+            f"\n[VALIDATION] Checked {len(validation['files_validated'])} configuration files:"
+        )
         if validation["success"]:
             print("   ✅ All files have valid syntax")
         else:
@@ -473,7 +464,7 @@ def start_mcp_server(
     """Start the MCP-compliant server (for AI clients like Claude Desktop, Cursor)."""
     import inspect
 
-    from .mcp.server import run_server
+    from .mcp.archive.server import run_server
 
     # [20251228_FEATURE] Support explicit license file path for deployments.
     # Fail fast to avoid silently falling back to other discovery paths.
@@ -504,7 +495,9 @@ def start_mcp_server(
         print("   Add to your Claude Desktop config or use with MCP Inspector.")
         print("\nPress Ctrl+C to stop.\n")
     else:
-        print(f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}")
+        print(
+            f"Starting Code Scalpel MCP Server ({protocol.upper()} transport) on {host}:{port}"
+        )
         endpoint_path = "/mcp" if transport == "streamable-http" else "/sse"
         print(f"   MCP endpoint: {protocol}://{host}:{port}{endpoint_path}")
         if use_https:
@@ -556,7 +549,9 @@ def start_mcp_server(
     return 0
 
 
-def _license_install(source_path: str, dest_path: str | None = None, force: bool = False) -> int:
+def _license_install(
+    source_path: str, dest_path: str | None = None, force: bool = False
+) -> int:
     """[20251228_FEATURE] Implements `code-scalpel license install`.
 
     Args:
@@ -707,7 +702,9 @@ def regenerate_manifest_command(
     # Find all policy files
     policy_files = []
     for pattern in ["*.yaml", "*.yml", "policies/**/*.rego"]:
-        policy_files.extend([str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)])
+        policy_files.extend(
+            [str(f.relative_to(policy_path)) for f in policy_path.glob(pattern)]
+        )
 
     if not policy_files:
         print(f"\n[ERROR] No policy files found in {policy_dir}")
@@ -767,7 +764,7 @@ Examples:
 For production deployments with Claude API, use HTTPS:
   code-scalpel mcp --http --ssl-cert /path/to/cert.pem --ssl-key /path/to/key.pem
 
-For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
+For more information, visit: https://github.com/tescolopio/code-scalpel
         """,
     )
 
@@ -777,7 +774,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     analyze_parser = subparsers.add_parser("analyze", help="Analyze code")
     analyze_parser.add_argument("file", nargs="?", help="File to analyze")
     analyze_parser.add_argument("--code", "-c", help="Code string to analyze")
-    analyze_parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
+    analyze_parser.add_argument(
+        "--json", "-j", action="store_true", help="Output as JSON"
+    )
     analyze_parser.add_argument(
         "--language",
         "-l",
@@ -811,7 +810,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # Server command (REST API - legacy)
-    server_parser = subparsers.add_parser("server", help="Start REST API server (legacy)")
+    server_parser = subparsers.add_parser(
+        "server", help="Start REST API server (legacy)"
+    )
     server_parser.add_argument(
         "--host",
         default="127.0.0.1",
@@ -822,7 +823,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # MCP command (Model Context Protocol - recommended)
-    mcp_parser = subparsers.add_parser("mcp", help="Start MCP server (for Claude Desktop, Cursor)")
+    mcp_parser = subparsers.add_parser(
+        "mcp", help="Start MCP server (for Claude Desktop, Cursor)"
+    )
     mcp_parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "streamable-http"],
@@ -880,7 +883,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
     )
 
     # License management commands
-    license_parser = subparsers.add_parser("license", help="Manage Code Scalpel licenses")
+    license_parser = subparsers.add_parser(
+        "license", help="Manage Code Scalpel licenses"
+    )
     license_subparsers = license_parser.add_subparsers(dest="license_command")
 
     install_parser = license_subparsers.add_parser(
@@ -936,136 +941,14 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
         help="Signer identity for manifest",
     )
 
-    # [20260116_FEATURE] v3.4.0 - Claude Code hooks commands
-    # Hook command (for Claude Code PreToolUse/PostToolUse)
-    hook_parser = subparsers.add_parser(
-        "hook", help="Claude Code hook commands (reads context from stdin)"
-    )
-    hook_subparsers = hook_parser.add_subparsers(dest="hook_command")
-
-    hook_subparsers.add_parser(
-        "pre-tool-use",
-        help="Run pre-tool-use governance validation (reads JSON from stdin)",
-    )
-    hook_subparsers.add_parser(
-        "post-tool-use",
-        help="Run post-tool-use audit logging (reads JSON from stdin)",
-    )
-
-    # Verify audit coverage command
-    verify_audit_parser = subparsers.add_parser(
-        "verify-audit-coverage",
-        help="Verify audit coverage for a file",
-    )
-    verify_audit_parser.add_argument(
-        "file",
-        help="File to verify audit coverage for",
-    )
-    verify_audit_parser.add_argument(
-        "--within",
-        type=int,
-        default=3600,
-        help="Time window in seconds to look for audit entries (default: 3600)",
-    )
-
-    # Install Claude Code hooks command
-    install_hooks_parser = subparsers.add_parser(
-        "install-hooks",
-        help="Install Claude Code governance hooks",
-    )
-    install_hooks_parser.add_argument(
-        "--user",
-        action="store_true",
-        help="Install to user-level settings (~/.claude/settings.json)",
-    )
-    install_hooks_parser.add_argument(
-        "--enterprise",
-        action="store_true",
-        help="Install enterprise managed settings (requires admin)",
-    )
-    install_hooks_parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite existing hooks with same name",
-    )
-    install_hooks_parser.add_argument(
-        "--path",
-        default=None,
-        help="Project path for project-local settings (default: current directory)",
-    )
-
-    # Uninstall Claude Code hooks command
-    uninstall_hooks_parser = subparsers.add_parser(
-        "uninstall-hooks",
-        help="Uninstall Claude Code governance hooks",
-    )
-    uninstall_hooks_parser.add_argument(
-        "--user",
-        action="store_true",
-        help="Remove from user-level settings",
-    )
-    uninstall_hooks_parser.add_argument(
-        "--enterprise",
-        action="store_true",
-        help="Remove from enterprise managed settings",
-    )
-    uninstall_hooks_parser.add_argument(
-        "--path",
-        default=None,
-        help="Project path for project-local settings",
-    )
-
-    # Install git hooks command
-    install_git_hooks_parser = subparsers.add_parser(
-        "install-git-hooks",
-        help="Install git hooks for commit-time audit verification",
-    )
-    install_git_hooks_parser.add_argument(
-        "--path",
-        default=None,
-        help="Path to git repository (default: current directory)",
-    )
-    install_git_hooks_parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite existing hooks",
-    )
-
-    # Git hook command (called by git hooks)
-    git_hook_parser = subparsers.add_parser("git-hook", help="Git hook commands (called by git)")
-    git_hook_subparsers = git_hook_parser.add_subparsers(dest="git_hook_command")
-
-    git_hook_subparsers.add_parser(
-        "pre-commit",
-        help="Run pre-commit audit verification",
-    )
-    commit_msg_parser = git_hook_subparsers.add_parser(
-        "commit-msg",
-        help="Run commit-msg hook",
-    )
-    commit_msg_parser.add_argument(
-        "msg_file",
-        nargs="?",
-        help="Path to commit message file",
-    )
-
-    # Log blocked commit command (used by pre-commit hook)
-    log_blocked_parser = subparsers.add_parser(
-        "log-blocked-commit",
-        help="Log a blocked commit attempt to audit trail",
-    )
-    log_blocked_parser.add_argument(
-        "files",
-        nargs="+",
-        help="Files that were blocked",
-    )
-
     args = parser.parse_args()
 
     if args.command == "analyze":
         output_format = "json" if args.json else "text"
         if args.code:
-            return analyze_code(args.code, output_format, language=args.language or "python")
+            return analyze_code(
+                args.code, output_format, language=args.language or "python"
+            )
         elif args.file:
             return analyze_file(args.file, output_format, language=args.language)
         else:
@@ -1096,7 +979,9 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
 
     elif args.command == "license":
         if args.license_command == "install":
-            return _license_install(args.license_file, dest_path=args.dest, force=args.force)
+            return _license_install(
+                args.license_file, dest_path=args.dest, force=args.force
+            )
 
         license_parser.print_help()
         return 1
@@ -1148,76 +1033,13 @@ For more information, visit: https://github.com/3D-Tech-Solutions/code-scalpel
             allowed = set(sig.parameters.keys())
             return {k: v for k, v in kwargs.items() if k in allowed}
 
-        return start_mcp_server(**_filter_kwargs_for_callable(start_mcp_server, start_kwargs))
+        return start_mcp_server(
+            **_filter_kwargs_for_callable(start_mcp_server, start_kwargs)
+        )
 
     elif args.command == "version":
         print(f"Code Scalpel v{__version__}")
         print(f"Python {sys.version}")
-        return 0
-
-    # [20260116_FEATURE] v3.4.0 - Claude Code hooks command handlers
-    elif args.command == "hook":
-        from code_scalpel.hooks.claude_hooks import (
-            post_tool_use_cli,
-            pre_tool_use_cli,
-        )
-
-        if args.hook_command == "pre-tool-use":
-            return pre_tool_use_cli()
-        elif args.hook_command == "post-tool-use":
-            return post_tool_use_cli()
-        else:
-            hook_parser.print_help()
-            return 1
-
-    elif args.command == "verify-audit-coverage":
-        from code_scalpel.hooks.git_hooks import verify_audit_coverage_cli
-
-        return verify_audit_coverage_cli(args.file)
-
-    elif args.command == "install-hooks":
-        from code_scalpel.hooks.installer import install_claude_hooks_cli
-
-        return install_claude_hooks_cli(
-            project_path=args.path,
-            user_level=args.user,
-            enterprise=args.enterprise,
-            force=args.force,
-        )
-
-    elif args.command == "uninstall-hooks":
-        from code_scalpel.hooks.installer import uninstall_claude_hooks_cli
-
-        return uninstall_claude_hooks_cli(
-            project_path=args.path,
-            user_level=args.user,
-            enterprise=args.enterprise,
-        )
-
-    elif args.command == "install-git-hooks":
-        from code_scalpel.hooks.git_hooks import install_git_hooks_cli
-
-        return install_git_hooks_cli(force=args.force)
-
-    elif args.command == "git-hook":
-        from code_scalpel.hooks.git_hooks import (
-            git_hook_commit_msg_cli,
-            git_hook_pre_commit_cli,
-        )
-
-        if args.git_hook_command == "pre-commit":
-            return git_hook_pre_commit_cli()
-        elif args.git_hook_command == "commit-msg":
-            msg_file = getattr(args, "msg_file", None)
-            return git_hook_commit_msg_cli(msg_file)
-        else:
-            git_hook_parser.print_help()
-            return 1
-
-    elif args.command == "log-blocked-commit":
-        from code_scalpel.hooks.git_hooks import _log_blocked_commit
-
-        _log_blocked_commit(args.files)
         return 0
 
     else:

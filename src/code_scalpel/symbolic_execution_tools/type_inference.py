@@ -33,6 +33,8 @@ from typing import Any, Dict
 
 from z3 import BoolSort, IntSort, RealSort, StringSort
 
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
+
 
 class InferredType(Enum):
     """
@@ -101,8 +103,8 @@ class TypeInferenceEngine:
             return {}
 
         try:
-            tree = ast.parse(code)
-        except SyntaxError:
+            tree, _report = parse_python_code(code, filename="<type_inference>")
+        except ParsingError:
             return {}
 
         self._visit(tree)

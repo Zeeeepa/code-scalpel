@@ -20,36 +20,6 @@
 #     - Maximum code size enforced
 #     - HTTP transport binds to 127.0.0.1 by default
 
-# TODO [COMMUNITY] Implement all 20 core MCP tools (analyze_code, extract_code, etc.)
-# TODO [COMMUNITY] Add stdin/stdout MCP transport implementation
-# TODO [COMMUNITY] Implement FastMCP server with tool registration
-# TODO [COMMUNITY] Add request/response envelope wrapping
-# TODO [COMMUNITY] Implement error handling with error codes
-# TODO [COMMUNITY] Add tool timeout enforcement
-# TODO [COMMUNITY] Implement maximum payload size limits
-# TODO [COMMUNITY] Create tool initialization and health checks
-# TODO [COMMUNITY] Add comprehensive server logging
-# TODO [COMMUNITY] Document server setup and deployment
-# TODO [PRO] Implement HTTP transport with TLS
-# TODO [PRO] Add client authentication (API key, JWT)
-# TODO [PRO] Implement tier-aware tool filtering
-# TODO [PRO] Add tool-level performance profiling
-# TODO [PRO] Implement response compression for large outputs
-# TODO [PRO] Add request queuing and concurrency limits
-# TODO [PRO] Implement custom tool metrics collection
-# TODO [PRO] Add batch tool invocation support
-# TODO [PRO] Create advanced analytics and monitoring
-# TODO [PRO] Implement tool versioning and backward compatibility
-# TODO [ENTERPRISE] Implement distributed server with load balancing
-# TODO [ENTERPRISE] Add multi-protocol MCP (gRPC, WebSocket)
-# TODO [ENTERPRISE] Implement federated MCP across servers
-# TODO [ENTERPRISE] Add OpenTelemetry instrumentation
-# TODO [ENTERPRISE] Implement RBAC and fine-grained permissions
-# TODO [ENTERPRISE] Add audit logging for compliance
-# TODO [ENTERPRISE] Implement request signing and verification
-# TODO [ENTERPRISE] Add health checks and failover
-# TODO [ENTERPRISE] Support custom authentication providers
-# TODO [ENTERPRISE] Implement AI-powered request optimization
 
 from __future__ import annotations
 
@@ -75,6 +45,14 @@ from code_scalpel.security.analyzers.unified_sink_detector import (
 
 # [20251218_BUGFIX] Import version from package instead of hardcoding
 from code_scalpel import __version__
+from code_scalpel.mcp.helpers.analyze_helpers import (
+    _analyze_code_sync as helper_analyze_code_sync,
+    _analyze_java_code as helper_analyze_java_code,
+    _analyze_javascript_code as helper_analyze_js_code,
+)
+from code_scalpel.mcp.paths import (
+    maybe_auto_init_config_dir as _maybe_auto_init_config_dir,  # [20260119_BUGFIX]
+)
 
 # [20260116_REFACTOR] Import shared mcp instance from protocol
 from code_scalpel.mcp.protocol import mcp, set_current_tier
@@ -82,7 +60,7 @@ from code_scalpel.mcp.protocol import mcp, set_current_tier
 # [20260117_SECURITY] Authoritative startup tier selection via authorization helper
 from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
 
-from code_scalpel.mcp.models.core import ClassInfo as CoreClassInfo
+from code_scalpel.mcp.models.core import AnalysisResult, FunctionInfo, ClassInfo
 
 # [20260116_FEATURE] License-gated tier system restored from archive
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
@@ -251,104 +229,25 @@ def _get_current_tier() -> str:
     return effective
 
 
-# =============================================================================
-# End License-Gated Tier System
-# =============================================================================
+# [20251230_FEATURE] Support "invisible" onboarding: MCP startup can generate
+# the `.code-scalpel/` directory so users do not need to run `code-scalpel init`.
+#
+# This is intentionally opt-in because it writes files.
+#
+# Environment:
+# - SCALPEL_AUTO_INIT=1 enables auto-init
+# - SCALPEL_AUTO_INIT_MODE=full|templates_only selects init behavior
+# - SCALPEL_AUTO_INIT_TARGET=project|user selects where to create `.code-scalpel/`
 
 
-# Maximum code size to prevent resource exhaustion
-MAX_CODE_SIZE = 100_000
-
-# [20251220_FEATURE] v3.0.5 - Consistent confidence thresholds across security tools
-# Default minimum confidence for sink detection across all tools
-DEFAULT_MIN_CONFIDENCE = (
-    0.7  # Balanced: catches most issues without too many false positives
-)
-
-# TODO [COMMUNITY] Add configurable confidence thresholds
-# TODO [COMMUNITY] Support per-tool threshold configuration
-# TODO [COMMUNITY] Allow environment variable overrides (SCALPEL_MIN_CONFIDENCE_*)
-# TODO [COMMUNITY] Implement adaptive thresholds based on false positive rates
-# TODO [COMMUNITY] Add user feedback loop to tune thresholds per project
-
-# TODO [COMMUNITY] Add streaming/incremental response support
-# TODO [COMMUNITY] Implement Tool Use with streaming for large result sets
-# TODO [COMMUNITY] Add pagination for crawl_project and cross_file_security_scan
-# TODO [COMMUNITY] Support partial results with continuation tokens
-# TODO [COMMUNITY] Allow clients to limit result size
-
-# TODO [COMMUNITY] Add request timeout and cancellation
-# TODO [COMMUNITY] Implement per-tool timeout configuration
-# TODO [COMMUNITY] Support client-initiated cancellation via MCP protocol
-# TODO [COMMUNITY] Add graceful shutdown for long-running operations
-# TODO [COMMUNITY] Track timeout-prone tools for monitoring
-
-# TODO [PRO] Add result deduplication
-# TODO [PRO] Deduplicate vulnerabilities across multiple scan runs
-# TODO [PRO] Track vulnerability lineage (new/fixed/regressed)
-# TODO [PRO] Implement baseline comparisons for security scans
-# TODO [PRO] Support incremental scan mode
-
-# Project root for resources (default to current directory)
-PROJECT_ROOT = Path.cwd()
-
-# [20251215_FEATURE] v2.0.0 - Roots capability for file system boundaries
-# Client-specified allowed directories. If empty, PROJECT_ROOT is used.
-ALLOWED_ROOTS: list[Path] = []
-
-
-# =============================================================================
-# [20251230_FEATURE] Auto-init support for MCP startup
-# =============================================================================
-
-
-def _env_truthy(value: str | None) -> bool:
-    """Check if an environment variable value is truthy."""
-    return (value or "").strip().lower() in {"1", "true", "yes", "on"}
-
-
-def _scalpel_home_dir() -> Path:
-    """Return the user-level Code Scalpel home directory.
-
-    [20251230_FEATURE] Support non-IDE MCP deployments (Claude Desktop, ChatGPT)
-    where there may be no project checkout / no dedicated working directory.
-
-    Precedence:
-    1) SCALPEL_HOME (explicit)
-    2) $XDG_CONFIG_HOME/code-scalpel
-    3) ~/.config/code-scalpel
-    """
-    env_home = os.environ.get("SCALPEL_HOME")
-    if env_home:
-        return Path(env_home).expanduser()
-
-    xdg = os.environ.get("XDG_CONFIG_HOME")
-    if xdg:
-        return Path(xdg).expanduser() / "code-scalpel"
-
-    return Path.home() / ".config" / "code-scalpel"
-
-
-def _maybe_auto_init_config_dir(
-    *,
+def auto_init_if_enabled(
     project_root: Path,
     tier: str,
     enabled: bool | None = None,
     mode: str | None = None,
     target: str | None = None,
 ) -> dict[str, Any] | None:
-    """Optionally create `.code-scalpel/` at startup.
-
-    [20251230_FEATURE] Support "invisible" onboarding: MCP startup can generate
-    the `.code-scalpel/` directory so users do not need to run `code-scalpel init`.
-
-    This is intentionally opt-in because it writes files.
-
-    Environment:
-    - SCALPEL_AUTO_INIT=1 enables auto-init
-    - SCALPEL_AUTO_INIT_MODE=full|templates_only selects init behavior
-    - SCALPEL_AUTO_INIT_TARGET=project|user selects where to create `.code-scalpel/`
-    """
+    """Auto-initialize .code-scalpel/ if enabled via env."""
     if enabled is None:
         enabled = _env_truthy(os.environ.get("SCALPEL_AUTO_INIT"))
     if not enabled:
@@ -403,13 +302,6 @@ CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 _AST_CACHE: dict[tuple[str, float], "ast.Module"] = {}
 _AST_CACHE_MAX_SIZE = 500  # Limit memory usage - keep last 500 files
 
-# TODO [COMMUNITY] Add persistent AST caching with disk serialization (SQLite or pickle)
-# TODO [COMMUNITY] Implement cache invalidation on Python version change
-# TODO [COMMUNITY] Add cache statistics endpoint for monitoring
-# TODO [PRO] Implement LRU eviction strategy instead of FIFO
-# TODO [PRO] Track cache hit/miss rates for monitoring
-# TODO [PRO] Add adaptive cache sizing based on memory pressure
-# TODO [PRO] Support cache preloading for frequently accessed files
 
 
 def _get_cached_ast(file_path: Path) -> "ast.Module | None":
@@ -473,17 +365,7 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
     return _SINK_DETECTOR  # type: ignore[return-value]
 
 
-# TODO [PRO] Add detector warm-up and preloading
-# TODO [PRO] Precompile patterns on server startup
-# TODO [PRO] Detect regex performance issues
-# TODO [PRO] Support custom pattern injection from config
-# TODO [PRO] Add pattern versioning and updates
 
-# TODO [PRO] Add detector metrics and monitoring
-# TODO [PRO] Track pattern match times
-# TODO [PRO] Monitor false positive rates per pattern
-# TODO [PRO] Detect performance regressions
-# TODO [PRO] Support pattern profiling and optimization hints
 
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
 # Stores UniversalGraph objects keyed by project root path
@@ -492,16 +374,6 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
 _GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
 
-# TODO [PRO] Add graph cache invalidation on file changes
-# TODO [PRO] Watch for file system changes (using watchdog or similar)
-# TODO [PRO] Invalidate only affected portions of graph on incremental changes
-# TODO [PRO] Support manual cache invalidation via MCP
-# TODO [PRO] Track invalidation frequency for debugging
-# TODO [ENTERPRISE] Add graph cache compression
-# TODO [ENTERPRISE] Serialize graphs to compressed format for memory efficiency
-# TODO [ENTERPRISE] Implement graph delta encoding for incremental updates
-# TODO [ENTERPRISE] Support distributed cache (Redis) for multi-process deployments
-# TODO [ENTERPRISE] Add cache statistics and memory usage monitoring
 
 
 def _get_cached_graph(project_root: Path) -> UniversalGraph | None:  # type: ignore[name-defined]
@@ -554,11 +426,6 @@ def _is_path_allowed(path: Path) -> bool:
     Returns:
         True if path is within allowed roots, False otherwise
     """
-    # TODO [PRO] Add path traversal detection
-    # TODO [PRO] Detect symlink escape attempts
-    # TODO [PRO] Validate path components don't contain suspicious patterns
-    # TODO [PRO] Support denied path patterns (blacklist certain directories)
-    # TODO [ENTERPRISE] Log security-relevant path access attempts
     resolved = path.resolve()
 
     # If no roots specified, use PROJECT_ROOT
@@ -589,11 +456,6 @@ def _validate_path_security(path: Path) -> Path:
     Raises:
         PermissionError: If path is outside allowed roots
     """
-    # TODO [PRO] Add audit logging for path access
-    # TODO [PRO] Log all path validations with caller identity
-    # TODO [PRO] Track denied access attempts
-    # TODO [PRO] Generate security alerts for suspicious patterns
-    # TODO [ENTERPRISE] Support per-client access control lists
     resolved = path.resolve()
 
     if not _is_path_allowed(resolved):
@@ -690,72 +552,6 @@ def _get_cache():
 # ============================================================================
 # STRUCTURED OUTPUT MODELS
 # ============================================================================
-
-
-class FunctionInfo(BaseModel):
-    """Information about a function."""
-
-    name: str = Field(description="Function name")
-    lineno: int = Field(description="Line number where function starts")
-    end_lineno: int | None = Field(
-        default=None, description="Line number where function ends"
-    )
-    is_async: bool = Field(default=False, description="Whether function is async")
-
-
-# Local wrapper to keep existing references; underlying model comes from core
-class ClassInfo(CoreClassInfo):
-    pass
-
-
-class AnalysisResult(BaseModel):
-    """Result of code analysis."""
-
-    success: bool = Field(description="Whether analysis succeeded")
-    server_version: str = Field(default=__version__, description="Code Scalpel version")
-    functions: list[str] = Field(description="List of function names found")
-    classes: list[str] = Field(description="List of class names found")
-    imports: list[str] = Field(description="List of import statements")
-    function_count: int = Field(description="Total number of functions found")
-    class_count: int = Field(description="Total number of classes found")
-    complexity: int = Field(description="Cyclomatic complexity estimate")
-    lines_of_code: int = Field(description="Total lines of code")
-    issues: list[str] = Field(default_factory=list, description="Issues found")
-    error: str | None = Field(default=None, description="Error message if failed")
-
-    # [20260119_FEATURE] v1.0.0 - Pro tier feature (tier-gated, not an alias)
-    cognitive_complexity: int | None = Field(
-        default=None, description="Cognitive complexity (Pro tier feature)"
-    )
-
-    # [20260119_FEATURE] v1.0.0 - Pro/Enterprise analysis features (placeholder for future)
-    code_smells: list[str] | None = Field(
-        default=None, description="Code smells detected (Pro tier)"
-    )
-    halstead_metrics: dict[str, Any] | None = Field(
-        default=None, description="Halstead complexity metrics (Pro tier)"
-    )
-
-    # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(
-        default=None, description="AI-generated semantic summary (Pro)"
-    )
-    related_imports: List[str] = Field(
-        default_factory=list, description="Related imports from other files (Pro)"
-    )
-    pii_redacted: bool = Field(
-        default=False, description="Whether PII was redacted (Enterprise)"
-    )
-    access_controlled: bool = Field(
-        default=False, description="Whether access control was applied (Enterprise)"
-    )
-    # v1.3.0: Detailed info with line numbers
-    function_details: list[FunctionInfo] = Field(
-        default_factory=list, description="Detailed function info with line numbers"
-    )
-    class_details: list[ClassInfo] = Field(
-        default_factory=list, description="Detailed class info with line numbers"
-    )
 
 
 class VulnerabilityInfo(BaseModel):
@@ -1135,16 +931,24 @@ class PatchResultModel(BaseModel):
 # [20251212_FEATURE] v1.4.0 - New MCP tool models for enhanced AI context
 
 
+from code_scalpel.mcp.models.core import FunctionInfo, ClassInfo
+
 class FileContextResult(BaseModel):
     """Result of get_file_context - file overview without full content."""
+
+    # [20260119_REFACTOR] Align schema with models.core to support rich info objects
 
     success: bool = Field(description="Whether analysis succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     file_path: str = Field(description="Path to the analyzed file")
     language: str = Field(default="python", description="Detected language")
     line_count: int = Field(description="Total lines in file")
-    functions: list[str] = Field(default_factory=list, description="Function names")
-    classes: list[str] = Field(default_factory=list, description="Class names")
+    functions: list[FunctionInfo | str] = Field(
+        default_factory=list, description="Function names or detailed info"
+    )
+    classes: list[ClassInfo | str] = Field(
+        default_factory=list, description="Class names or detailed info"
+    )
     imports: list[str] = Field(
         default_factory=list, description="Import statements (max 20)"
     )
@@ -1239,6 +1043,9 @@ class SymbolReferencesResult(BaseModel):
 # [20260116_REFACTOR] mcp instance and envelope wrapper moved to protocol.py
 # ============================================================================
 
+# Maximum code size for analysis (100KB)
+MAX_CODE_SIZE = 100_000
+
 
 def _validate_code(code: str) -> tuple[bool, str | None]:
     """Validate code before analysis."""
@@ -1263,234 +1070,15 @@ def _count_complexity(tree: ast.AST) -> int:
 
 
 def _analyze_java_code(code: str) -> AnalysisResult:
-    """Analyze Java code using tree-sitter."""
-    try:
-        from code_scalpel.code_parsers.java_parsers.java_parser_treesitter import (
-            JavaParser,
-        )
+    """Delegate Java analysis to helper implementation (single source of truth)."""
 
-        parser = JavaParser()
-        result = parser.parse(code)
-        return AnalysisResult(
-            success=True,
-            functions=result["functions"],
-            classes=result["classes"],
-            imports=result["imports"],
-            function_count=len(result["functions"]),
-            class_count=len(result["classes"]),
-            complexity=result["complexity"],
-            lines_of_code=result["lines_of_code"],
-            issues=result["issues"],
-        )
-    except ImportError:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error="Java support not available. Please install tree-sitter and tree-sitter-java.",
-        )
-    except Exception as e:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error=f"Java analysis failed: {str(e)}.",
-        )
+    return helper_analyze_java_code(code)
 
 
 def _analyze_javascript_code(code: str, is_typescript: bool = False) -> AnalysisResult:
-    """
-    Analyze JavaScript/TypeScript code using tree-sitter.
+    """Delegate JavaScript/TypeScript analysis to helper implementation."""
 
-    [20251220_FEATURE] v3.0.4 - Multi-language analyze_code support.
-    [20251220_BUGFIX] v3.0.5 - Consolidated tree-sitter imports.
-    """
-    try:
-        from tree_sitter import Language, Parser
-
-        if is_typescript:
-            import tree_sitter_typescript as ts_ts
-
-            lang = Language(ts_ts.language_typescript())
-        else:
-            import tree_sitter_javascript as ts_js
-
-            lang = Language(ts_js.language())
-
-        parser = Parser(lang)
-        tree = parser.parse(bytes(code, "utf-8"))
-
-        functions = []
-        function_details = []
-        classes = []
-        class_details = []
-        imports = []
-
-        def walk_tree(node, depth=0):
-            """Walk tree-sitter tree to extract structure."""
-            node_type = node.type
-
-            # Functions (function declarations, arrow functions, methods)
-            if node_type in (
-                "function_declaration",
-                "function",
-                "generator_function_declaration",
-            ):
-                name_node = node.child_by_field_name("name")
-                name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
-                functions.append(name)
-                function_details.append(
-                    FunctionInfo(
-                        name=name,
-                        lineno=node.start_point[0] + 1,
-                        end_lineno=node.end_point[0] + 1,
-                        is_async=any(c.type == "async" for c in node.children),
-                    )
-                )
-
-            # Arrow functions with variable declaration
-            elif (
-                node_type == "lexical_declaration"
-                or node_type == "variable_declaration"
-            ):
-                for child in node.children:
-                    if child.type == "variable_declarator":
-                        name_node = child.child_by_field_name("name")
-                        value_node = child.child_by_field_name("value")
-                        if value_node and value_node.type == "arrow_function":
-                            name = (
-                                name_node.text.decode("utf-8")
-                                if name_node
-                                else "<anonymous>"
-                            )
-                            functions.append(name)
-                            function_details.append(
-                                FunctionInfo(
-                                    name=name,
-                                    lineno=child.start_point[0] + 1,
-                                    end_lineno=child.end_point[0] + 1,
-                                    is_async=any(
-                                        c.type == "async" for c in value_node.children
-                                    ),
-                                )
-                            )
-
-            # Classes
-            elif node_type == "class_declaration":
-                name_node = node.child_by_field_name("name")
-                name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
-
-                # Extract methods
-                methods = []
-                body_node = node.child_by_field_name("body")
-                if body_node:
-                    for member in body_node.children:
-                        if member.type == "method_definition":
-                            method_name_node = member.child_by_field_name("name")
-                            if method_name_node:
-                                methods.append(method_name_node.text.decode("utf-8"))
-
-                classes.append(name)
-                class_details.append(
-                    ClassInfo(
-                        name=name,
-                        lineno=node.start_point[0] + 1,
-                        end_lineno=node.end_point[0] + 1,
-                        methods=methods,
-                    )
-                )
-
-            # Imports (ES6 import statements)
-            elif node_type == "import_statement":
-                source_node = node.child_by_field_name("source")
-                if source_node:
-                    module = source_node.text.decode("utf-8").strip("'\"")
-                    imports.append(module)
-
-            # CommonJS require
-            elif node_type == "call_expression":
-                func_node = node.child_by_field_name("function")
-                if func_node and func_node.text == b"require":
-                    args_node = node.child_by_field_name("arguments")
-                    if args_node and args_node.children:
-                        for arg in args_node.children:
-                            if arg.type == "string":
-                                imports.append(arg.text.decode("utf-8").strip("'\""))
-
-            # Recurse into children
-            for child in node.children:
-                walk_tree(child, depth + 1)
-
-        walk_tree(tree.root_node)
-
-        # Estimate complexity (branches)
-        complexity = 1
-        for node in _walk_ts_tree(tree.root_node):
-            if node.type in (
-                "if_statement",
-                "while_statement",
-                "for_statement",
-                "for_in_statement",
-                "catch_clause",
-                "ternary_expression",
-                "switch_case",
-            ):
-                complexity += 1
-            elif node.type == "binary_expression":
-                op_node = node.child_by_field_name("operator")
-                if op_node and op_node.text in (b"&&", b"||"):
-                    complexity += 1
-
-        lang_name = "TypeScript" if is_typescript else "JavaScript"
-        return AnalysisResult(
-            success=True,
-            functions=functions,
-            classes=classes,
-            imports=imports,
-            function_count=len(functions),
-            class_count=len(classes),
-            complexity=complexity,
-            lines_of_code=len(code.splitlines()),
-            issues=[],
-            function_details=function_details,
-            class_details=class_details,
-        )
-    except ImportError as e:
-        lang_name = "TypeScript" if is_typescript else "JavaScript"
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error=f"{lang_name} support not available. Please install tree-sitter packages: {str(e)}.",
-        )
-    except Exception as e:
-        lang_name = "TypeScript" if is_typescript else "JavaScript"
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error=f"{lang_name} analysis failed: {str(e)}.",
-        )
+    return helper_analyze_js_code(code, is_typescript=is_typescript)
 
 
 def _walk_ts_tree(node):
@@ -1519,10 +1107,11 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             functions=[],
             classes=[],
             imports=[],
-            function_count=0,
-            class_count=0,
             complexity=0,
             lines_of_code=0,
+            issues=[],
+            function_details=[],
+            class_details=[],
             error=error,
         )
 
@@ -1570,109 +1159,13 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
 
-    # Python analysis using ast module
-    try:
-        tree = ast.parse(code)
+    # Python analysis - delegate to helper for tier-gated fields
+    result = helper_analyze_code_sync(code=code, language="python", file_path=None)
 
-        functions = []
-        function_details = []
-        classes = []
-        class_details = []
-        imports = []
-        issues = []
+    if cache and result.success:
+        cache.set(code, "analysis", result.model_dump(), cache_config)
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                functions.append(node.name)
-                function_details.append(
-                    FunctionInfo(
-                        name=node.name,
-                        lineno=node.lineno,
-                        end_lineno=getattr(node, "end_lineno", None),
-                        is_async=False,
-                    )
-                )
-                # Flag potential issues
-                if len(node.name) < 2:
-                    issues.append(f"Function '{node.name}' has very short name")
-            elif isinstance(node, ast.AsyncFunctionDef):
-                functions.append(f"async {node.name}")
-                function_details.append(
-                    FunctionInfo(
-                        name=node.name,
-                        lineno=node.lineno,
-                        end_lineno=getattr(node, "end_lineno", None),
-                        is_async=True,
-                    )
-                )
-            elif isinstance(node, ast.ClassDef):
-                classes.append(node.name)
-                # Extract method names
-                methods = [
-                    n.name
-                    for n in node.body
-                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                ]
-                class_details.append(
-                    ClassInfo(
-                        name=node.name,
-                        lineno=node.lineno,
-                        end_lineno=getattr(node, "end_lineno", None),
-                        methods=methods,
-                    )
-                )
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    imports.append(alias.name)
-            elif isinstance(node, ast.ImportFrom):
-                module = node.module or ""
-                for alias in node.names:
-                    imports.append(f"{module}.{alias.name}")
-
-        result = AnalysisResult(
-            success=True,
-            functions=functions,
-            classes=classes,
-            imports=imports,
-            function_count=len(functions),
-            class_count=len(classes),
-            complexity=_count_complexity(tree),
-            lines_of_code=len(code.splitlines()),
-            issues=issues,
-            function_details=function_details,
-            class_details=class_details,
-        )
-
-        # Cache successful result
-        if cache:
-            cache.set(code, "analysis", result.model_dump(), cache_config)
-
-        return result
-
-    except SyntaxError as e:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error=f"Syntax error at line {e.lineno}: {e.msg}. Please check your code syntax.",
-        )
-    except Exception as e:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            function_count=0,
-            class_count=0,
-            complexity=0,
-            lines_of_code=0,
-            error=f"Analysis failed: {str(e)}",
-        )
+    return result
 
 
 # [20260116_REFACTOR] @mcp.tool() analyze_code moved to tools/analyze.py
@@ -3581,7 +3074,12 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
     try:
         # [20251214_FEATURE] Use PathResolver for intelligent path resolution
         try:
-            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            # [20260119_BUGFIX] Safe fallback when PROJECT_ROOT not initialized
+            try:
+                base_root = str(PROJECT_ROOT)  # type: ignore[name-defined]
+            except NameError:
+                base_root = str(Path.cwd())
+            resolved_path = resolve_path(file_path, base_root)
             path = Path(resolved_path)
         except FileNotFoundError as e:
             # PathResolver provides helpful error messages
@@ -3619,32 +3117,58 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 error=analysis.error,
             )
 
-        # Python-specific parsing
+        # [20260119_REFACTOR] Use unified parser for Python files
+        # Python-specific parsing via unified parser with filename context
         try:
-            tree = ast.parse(code)
-        except SyntaxError as e:
+            from code_scalpel.parsing import ParsingError, parse_python_code
+
+            tree, _san_report = parse_python_code(code, filename=str(path))
+        except Exception as e:  # Handle ParsingError or unexpected exceptions
+            # Prefer explicit ParsingError details when available
+            err_msg = str(e)
             return FileContextResult(
                 success=False,
                 file_path=str(path),
                 line_count=len(lines),
-                error=f"Syntax error at line {e.lineno}: {e.msg}.",
+                error=err_msg,
             )
 
-        functions = []
-        classes = []
+        from code_scalpel.mcp.models.core import FunctionInfo, ClassInfo
+
+        functions: list[FunctionInfo] = []
+        classes: list[ClassInfo] = []
         imports = []
         exports = []
         complexity = 0
 
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 # Only top-level functions
                 if hasattr(node, "col_offset") and node.col_offset == 0:
-                    functions.append(node.name)
+                    functions.append(
+                        FunctionInfo(
+                            name=node.name,
+                            lineno=getattr(node, "lineno", 0),
+                            end_lineno=getattr(node, "end_lineno", None),
+                            is_async=isinstance(node, ast.AsyncFunctionDef),
+                        )
+                    )
                     complexity += _count_complexity_node(node)
             elif isinstance(node, ast.ClassDef):
                 if hasattr(node, "col_offset") and node.col_offset == 0:
-                    classes.append(node.name)
+                    # Collect method names for the class
+                    method_names: list[str] = []
+                    for child in getattr(node, "body", []):
+                        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            method_names.append(child.name)
+                    classes.append(
+                        ClassInfo(
+                            name=node.name,
+                            lineno=getattr(node, "lineno", 0),
+                            end_lineno=getattr(node, "end_lineno", None),
+                            methods=method_names,
+                        )
+                    )
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     imports.append(alias.name)

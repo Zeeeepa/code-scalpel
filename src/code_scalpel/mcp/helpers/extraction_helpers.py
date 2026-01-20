@@ -5,29 +5,35 @@ from __future__ import annotations
 import ast
 import asyncio
 import logging
+import os
+import re
+import math
+import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 from mcp.server.fastmcp import Context
 
 from code_scalpel.mcp.models.core import ContextualExtractionResult, PatchResultModel
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 from code_scalpel.mcp.path_resolver import resolve_path
-from code_scalpel.licensing.tier_detector import get_current_tier
-from code_scalpel.mcp.helpers.session import (
-    get_session_update_count,
-    increment_session_update_count,
-    add_audit_entry,
-)
-from code_scalpel.mcp.helpers.security_helpers import validate_path_security
+from code_scalpel.parsing import ParsingError, parse_python_code
 
 # Surgical / Extraction imports
-# Note: Some imports might be inside functions to avoid circular deps or lazy load,
+# Note: Some imports might be inside functions to avoid circular deps or lazy load, 
 # but we can try top-level here if safe.
 # from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
 # from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
 
 logger = logging.getLogger("code_scalpel.mcp.extraction")
+
+from code_scalpel.licensing.tier_detector import get_current_tier
+from code_scalpel.mcp.helpers.session import (
+    get_session_update_count, 
+    increment_session_update_count, 
+    add_audit_entry
+)
+from code_scalpel.mcp.helpers.security_helpers import validate_path_security
 
 # Define PROJECT_ROOT locally if not imported
 # In a real app this should come from a Context/Config singleton
@@ -39,50 +45,20 @@ MAX_CODE_SIZE = 100_000
 
 def _get_server():
     """Lazy import to avoid circular dependencies with server module."""
-    from code_scalpel.mcp import server as _server
+    from code_scalpel.mcp.archive import server as _server
 
     return _server
-
-
-def _get_project_root() -> Path:
-    """Get the current PROJECT_ROOT from server, fallback to local if not set."""
-    import sys
-
-    try:
-        # [20260118_BUGFIX] Check local PROJECT_ROOT first (respects test mocking)
-        global PROJECT_ROOT
-        if PROJECT_ROOT != Path.cwd():
-            # Local PROJECT_ROOT has been explicitly set (likely by test fixture)
-            return PROJECT_ROOT
-
-        # Check if server is imported as __main__
-        if "__main__" in sys.modules:
-            main_module = sys.modules["__main__"]
-            if hasattr(main_module, "PROJECT_ROOT"):
-                return main_module.PROJECT_ROOT
-
-        # Fall back to importing the server module directly
-        import code_scalpel.mcp.server as server_module
-
-        return server_module.PROJECT_ROOT
-    except (ImportError, AttributeError):
-        # If we can't access the server's PROJECT_ROOT, use our local fallback
-        return PROJECT_ROOT
-
 
 def _get_cache():
     try:
         from code_scalpel.cache import get_cache
-
         return get_cache()
     except ImportError:
         return None
 
-
 # PLACEHOLDER_FOR_EXTRACTION_ERRORS
 
 # PLACEHOLDER_FUNCTIONS
-
 
 def _extraction_error(
     target_name: str,
@@ -106,7 +82,6 @@ def _extraction_error(
         cross_file_deps_enabled=False,
         max_depth_applied=None,
     )
-
 
 async def _extract_polyglot(
     target_type: str,
@@ -135,15 +110,20 @@ async def _extract_polyglot(
     """
     # [20251221_FEATURE] v3.1.0 - Use UnifiedExtractor instead of PolyglotExtractor
     # [20251228_BUGFIX] Avoid deprecated shim imports.
+    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
 
     if file_path is None and code is None:
-        return _extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
+        return _extraction_error(
+            target_name, "Must provide either 'file_path' or 'code' argument"
+        )
 
     try:
+        import subprocess
         # Create extractor from file or code
         if file_path is not None:
-            resolved_path = resolve_path(file_path, str(_get_project_root()))
+            server = _get_server()
+            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
             extractor = UnifiedExtractor.from_file(resolved_path, language)
         else:
             # code is guaranteed to be str here (checked earlier in function)
@@ -201,10 +181,9 @@ async def _extract_polyglot(
     except Exception as e:
         return _extraction_error(target_name, f"Extraction failed: {str(e)}")
 
-
 def _create_extractor(
     file_path: str | None, code: str | None, target_name: str
-) -> tuple[Any, ContextualExtractionResult | None]:
+) -> tuple["SurgicalExtractor | None", ContextualExtractionResult | None]:
     """
     Create a SurgicalExtractor from file_path or code.
 
@@ -213,6 +192,7 @@ def _create_extractor(
     Returns (extractor, None) on success, (None, error_result) on failure.
     """
     from code_scalpel import SurgicalExtractor
+    from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
         return None, _extraction_error(
@@ -222,7 +202,8 @@ def _create_extractor(
     if file_path is not None:
         try:
             # [20251214_FEATURE] Use PathResolver for intelligent path resolution
-            resolved_path = resolve_path(file_path, str(_get_project_root()))
+            server = _get_server()
+            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
             return SurgicalExtractor.from_file(resolved_path), None
         except FileNotFoundError as e:
             # PathResolver provides helpful error messages
@@ -235,10 +216,11 @@ def _create_extractor(
             assert code is not None
             return SurgicalExtractor(code), None
         except (SyntaxError, ValueError) as e:
-            return None, _extraction_error(target_name, f"Syntax error in code: {str(e)}")
+            return None, _extraction_error(
+                target_name, f"Syntax error in code: {str(e)}"
+            )
 
-
-def _extract_method(extractor: Any, target_name: str):
+def _extract_method(extractor: "SurgicalExtractor", target_name: str):
     """Extract a method, handling the ClassName.method_name parsing."""
     if "." not in target_name:
         return None, _extraction_error(
@@ -247,9 +229,8 @@ def _extract_method(extractor: Any, target_name: str):
     class_name, method_name = target_name.rsplit(".", 1)
     return extractor.get_method(class_name, method_name), None
 
-
 def _perform_extraction(
-    extractor: Any,
+    extractor: "SurgicalExtractor",
     target_type: str,
     target_name: str,
     include_context: bool,
@@ -275,9 +256,7 @@ def _perform_extraction(
                 target_type=target_type,
                 max_depth=context_depth,
             )
-            # cross_file_result.target can be None if not found
-            target = cross_file_result.target if cross_file_result.target is not None else ""  # type: ignore[union-attr]
-            return target, cross_file_result, None
+            return cross_file_result.target, cross_file_result, None
         else:
             # Method - fall back to regular extraction
             result, error = _extract_method(extractor, target_name)
@@ -287,7 +266,9 @@ def _perform_extraction(
     if target_type == "function":
         if include_context:
             return (
-                extractor.get_function_with_context(target_name, max_depth=context_depth),
+                extractor.get_function_with_context(
+                    target_name, max_depth=context_depth
+                ),
                 None,
                 None,
             )
@@ -315,7 +296,6 @@ def _perform_extraction(
         ),
     )
 
-
 def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
     """Process cross-file resolution results into context_code and context_items."""
     if cross_file_result is None or not cross_file_result.external_symbols:
@@ -339,8 +319,9 @@ def _process_cross_file_context(cross_file_result) -> tuple[str, list[str]]:
 
     return context_code, external_names
 
-
-def _build_full_code(imports_needed: list[str], context_code: str, target_code: str) -> str:
+def _build_full_code(
+    imports_needed: list[str], context_code: str, target_code: str
+) -> str:
     """Build the combined full_code for LLM consumption."""
     parts = []
     if imports_needed:
@@ -349,7 +330,6 @@ def _build_full_code(imports_needed: list[str], context_code: str, target_code: 
         parts.append(context_code)
     parts.append(target_code)
     return "\n\n".join(parts)
-
 
 async def _extract_code_impl(
     target_type: str,
@@ -437,6 +417,7 @@ async def _extract_code_impl(
             include_cross_file_deps=True
         )
     """
+    server = _get_server()
     # [20251215_FEATURE] v2.0.0 - Roots capability support
     # Fetch allowed roots from client for security boundary enforcement
     if ctx and file_path:
@@ -452,7 +433,9 @@ async def _extract_code_impl(
 
     # [20251228_FEATURE] Tier-limited option: cross-file dependency resolution.
     tier = get_current_tier()
-    if include_cross_file_deps and not has_capability("extract_code", "cross_file_deps", tier):
+    if include_cross_file_deps and not has_capability(
+        "extract_code", "cross_file_deps", tier
+    ):
         return ContextualExtractionResult(
             success=False,
             target_name=target_name,
@@ -537,10 +520,13 @@ async def _extract_code_impl(
             if not result.success:
                 return _extraction_error(
                     target_name,
-                    result.error or f"{target_type.capitalize()} '{target_name}' not found",
+                    result.error
+                    or f"{target_type.capitalize()} '{target_name}' not found",
                 )
             target_code = result.code
-            total_lines = result.line_end - result.line_start + 1 if result.line_end > 0 else 0
+            total_lines = (
+                result.line_end - result.line_start + 1 if result.line_end > 0 else 0
+            )
             line_start = result.line_start
             line_end = result.line_end
             imports_needed = result.imports_needed
@@ -552,7 +538,8 @@ async def _extract_code_impl(
             if not result.target.success:
                 return _extraction_error(
                     target_name,
-                    result.target.error or f"{target_type.capitalize()} '{target_name}' not found",
+                    result.target.error
+                    or f"{target_type.capitalize()} '{target_name}' not found",
                 )
             target_code = result.target.code
             context_items = result.context_items
@@ -577,7 +564,7 @@ async def _extract_code_impl(
             if file_path is not None:
                 from code_scalpel.mcp.path_resolver import resolve_path
 
-                resolved = resolve_path(file_path, str(_get_project_root()))
+                resolved = resolve_path(file_path, str(PROJECT_ROOT))
                 return Path(resolved).read_text(encoding="utf-8")
             return code or ""
 
@@ -587,7 +574,9 @@ async def _extract_code_impl(
                     target_name, "variable_promotion requires target_type='function'."
                 )
             if not has_capability("extract_code", "variable_promotion", tier):
-                return _extraction_error(target_name, "variable_promotion requires PRO tier")
+                return _extraction_error(
+                    target_name, "variable_promotion requires PRO tier"
+                )
             try:
                 from code_scalpel.surgery.surgical_extractor import promote_variables
 
@@ -601,10 +590,13 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["variable_promotion"] = {
-                        "error": getattr(promoted, "error", None) or "Variable promotion failed",
+                        "error": getattr(promoted, "error", None)
+                        or "Variable promotion failed",
                     }
             except Exception as e:
-                advanced["variable_promotion"] = {"error": f"Variable promotion failed: {e}"}
+                advanced["variable_promotion"] = {
+                    "error": f"Variable promotion failed: {e}"
+                }
 
         if closure_detection:
             if target_type != "function":
@@ -612,7 +604,9 @@ async def _extract_code_impl(
                     target_name, "closure_detection requires target_type='function'."
                 )
             if tier == "community":
-                return _extraction_error(target_name, "closure_detection requires PRO tier")
+                return _extraction_error(
+                    target_name, "closure_detection requires PRO tier"
+                )
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     detect_closure_variables as _detect_closures,
@@ -638,10 +632,13 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["closure_detection"] = {
-                        "error": getattr(clos, "error", None) or "Closure analysis failed",
+                        "error": getattr(clos, "error", None)
+                        or "Closure analysis failed",
                     }
             except Exception as e:
-                advanced["closure_detection"] = {"error": f"Closure analysis failed: {e}"}
+                advanced["closure_detection"] = {
+                    "error": f"Closure analysis failed: {e}"
+                }
 
         if dependency_injection_suggestions:
             if target_type != "function":
@@ -684,7 +681,9 @@ async def _extract_code_impl(
                         or "Dependency injection analysis failed",
                     }
             except Exception as e:
-                advanced["dependency_injection_suggestions"] = {"error": f"DI analysis failed: {e}"}
+                advanced["dependency_injection_suggestions"] = {
+                    "error": f"DI analysis failed: {e}"
+                }
 
         if as_microservice:
             if target_type != "function":
@@ -692,7 +691,9 @@ async def _extract_code_impl(
                     target_name, "as_microservice requires target_type='function'."
                 )
             if not has_capability("extract_code", "dockerfile_generation", tier):
-                return _extraction_error(target_name, "as_microservice requires ENTERPRISE tier")
+                return _extraction_error(
+                    target_name, "as_microservice requires ENTERPRISE tier"
+                )
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     extract_as_microservice as _extract_microservice,
@@ -714,16 +715,23 @@ async def _extract_code_impl(
                     }
                 else:
                     advanced["microservice"] = {
-                        "error": getattr(ms, "error", None) or "Microservice extraction failed",
+                        "error": getattr(ms, "error", None)
+                        or "Microservice extraction failed",
                     }
             except Exception as e:
-                advanced["microservice"] = {"error": f"Microservice extraction failed: {e}"}
+                advanced["microservice"] = {
+                    "error": f"Microservice extraction failed: {e}"
+                }
 
         if organization_wide:
             if not has_capability("extract_code", "org_wide_resolution", tier):
-                return _extraction_error(target_name, "organization_wide requires ENTERPRISE tier")
+                return _extraction_error(
+                    target_name, "organization_wide requires ENTERPRISE tier"
+                )
             if not code:
-                return _extraction_error(target_name, "organization_wide requires 'code' input")
+                return _extraction_error(
+                    target_name, "organization_wide requires 'code' input"
+                )
             try:
                 from code_scalpel.surgery.surgical_extractor import (
                     resolve_organization_wide as _resolve_org,
@@ -787,7 +795,6 @@ async def _extract_code_impl(
     except Exception as e:
         return _extraction_error(target_name, f"Extraction failed: {str(e)}")
 
-
 async def rename_symbol(
     file_path: str,
     target_type: str,
@@ -810,20 +817,22 @@ async def rename_symbol(
     Returns:
         PatchResultModel with success status.
     """
+    server = _get_server()
     from code_scalpel.licensing.config_loader import (
         get_cached_limits,
         get_tool_limits,
         merge_limits,
     )
     from code_scalpel.licensing.features import get_tool_capabilities
+    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     warnings: list[str] = []
 
     try:
-        resolved = resolve_path(file_path, str(_get_project_root()))
+        resolved = resolve_path(file_path, str(PROJECT_ROOT))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, _get_project_root())
+        validate_path_security(resolved_path, PROJECT_ROOT)
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection
@@ -871,7 +880,7 @@ async def rename_symbol(
                 )
 
                 xres = rename_references_across_project(
-                    project_root=Path(_get_project_root()),
+                    project_root=Path(PROJECT_ROOT),
                     target_file=Path(file_path),
                     target_type=target_type,
                     target_name=target_name,
@@ -882,7 +891,9 @@ async def rename_symbol(
                 )
 
                 if not xres.success:
-                    warnings.append(f"Cross-file rename skipped: {xres.error or 'unknown error'}")
+                    warnings.append(
+                        f"Cross-file rename skipped: {xres.error or 'unknown error'}"
+                    )
                 elif xres.changed_files:
                     warnings.append(
                         f"Updated references/imports in {len(xres.changed_files)} additional file(s)."
@@ -892,7 +903,9 @@ async def rename_symbol(
             except Exception as e:
                 warnings.append(f"Cross-file rename skipped due to error: {e}")
         else:
-            warnings.append("Definition-only rename (no cross-file updates) at this tier.")
+            warnings.append(
+                "Definition-only rename (no cross-file updates) at this tier."
+            )
 
         return PatchResultModel(
             success=True,
@@ -913,7 +926,6 @@ async def rename_symbol(
             error=result.error,
             warnings=warnings,
         )
-
 
 async def update_symbol(
     file_path: str,
@@ -975,6 +987,8 @@ async def update_symbol(
             - Original indentation preserved
     """
     # [20251228_BUGFIX] Avoid deprecated shim imports.
+    server = _get_server()
+    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
@@ -1017,9 +1031,21 @@ async def update_symbol(
         if new_code is None:
             return "Replacement code is required for operation='replace'."
         try:
-            tree = ast.parse(new_code)
-        except SyntaxError as e:
-            return f"Replacement code has syntax error: {e}"
+            # [20260119_FEATURE] Use unified parser for deterministic error handling
+            tree, report = parse_python_code(new_code)
+            if report.was_sanitized:
+                # Warn but don't fail - sanitization is informational
+                nonlocal warnings
+                warnings.append(
+                    f"Replacement code was auto-sanitized: {'; '.join(report.changes)}"
+                )
+        except ParsingError as e:
+            msg = f"Replacement code has syntax error: {e}"
+            if e.location:
+                msg += f" at {e.location}"
+            if e.suggestion:
+                msg += f". {e.suggestion}"
+            return msg
 
         if not tree.body:
             return "Replacement code is empty."
@@ -1034,9 +1060,7 @@ async def update_symbol(
             if not isinstance(first, ast.ClassDef):
                 return "Replacement for class must be a class definition."
             if first.name != target_name:
-                return (
-                    f"Replacement class name '{first.name}' does not match target '{target_name}'."
-                )
+                return f"Replacement class name '{first.name}' does not match target '{target_name}'."
         elif target_type == "method":
             if "." not in target_name:
                 return "Method name must be 'ClassName.method_name' format."
@@ -1123,9 +1147,9 @@ async def update_symbol(
 
     # Load the file
     try:
-        resolved = resolve_path(file_path, str(_get_project_root()))
+        resolved = resolve_path(file_path, str(PROJECT_ROOT))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, _get_project_root())
+        validate_path_security(resolved_path, PROJECT_ROOT)
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection
@@ -1189,7 +1213,9 @@ async def update_symbol(
 
     # [20250101_FEATURE] v1.0 roadmap: Pro pre-update hook
     if "pre_update_hook" in capabilities:
-        hook_result = await _run_pre_update_hook(file_path, target_name, target_type, new_code)
+        hook_result = await _run_pre_update_hook(
+            file_path, target_name, target_type, new_code
+        )
         if not hook_result.get("continue", True):
             return PatchResultModel(
                 success=False,
@@ -1249,9 +1275,13 @@ async def update_symbol(
                     lines_after=getattr(rename_result, "lines_after", 0),
                     lines_delta=getattr(rename_result, "lines_delta", 0),
                     backup_path=getattr(rename_result, "backup_path", None),
-                    max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
+                    max_updates_per_session=(
+                        int(max_updates) if max_updates > 0 else None
+                    ),
                     updates_used=(int(new_count) if max_updates > 0 else None),
-                    updates_remaining=(int(max_updates - new_count) if max_updates > 0 else None),
+                    updates_remaining=(
+                        int(max_updates - new_count) if max_updates > 0 else None
+                    ),
                     warnings=merged_warnings,
                 )
 
@@ -1270,7 +1300,9 @@ async def update_symbol(
                 hint=getattr(rename_result, "hint", None),
                 max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
                 updates_used=(
-                    int(get_session_update_count("update_symbol")) if max_updates > 0 else None
+                    int(get_session_update_count("update_symbol"))
+                    if max_updates > 0
+                    else None
                 ),
                 updates_remaining=(
                     int(max_updates - get_session_update_count("update_symbol"))
@@ -1297,17 +1329,23 @@ async def update_symbol(
                 ):
                     result = patcher.insert_function(new_code)  # type: ignore[attr-defined]
                 if result.success:
-                    warnings.append(f"Function '{target_name}' was not found, so it was inserted.")
+                    warnings.append(
+                        f"Function '{target_name}' was not found, so it was inserted."
+                    )
 
         elif target_type == "class":
             result = patcher.update_class(target_name, new_code)
             # [20251229_FEATURE] Auto-insert if not found
             if not result.success and "not found" in (result.error or ""):
                 # [20260101_BUGFIX] Verify method exists before calling
-                if hasattr(patcher, "insert_class") and callable(getattr(patcher, "insert_class")):
+                if hasattr(patcher, "insert_class") and callable(
+                    getattr(patcher, "insert_class")
+                ):
                     result = patcher.insert_class(new_code)  # type: ignore[attr-defined]
                 if result.success:
-                    warnings.append(f"Class '{target_name}' was not found, so it was inserted.")
+                    warnings.append(
+                        f"Class '{target_name}' was not found, so it was inserted."
+                    )
 
         elif target_type == "method":
             if "." not in target_name:
@@ -1397,7 +1435,9 @@ async def update_symbol(
         tests_passed = None
         if "git_integration" in capabilities:
             try:
-                git_result = await _perform_atomic_git_refactor(file_path, target_name, new_code)
+                git_result = await _perform_atomic_git_refactor(
+                    file_path, target_name, new_code
+                )
                 git_branch = git_result.get("branch_name")
                 tests_passed = git_result.get("tests_passed")
 
@@ -1426,8 +1466,15 @@ async def update_symbol(
                 with open(file_path, "r", encoding="utf-8") as f:
                     updated_source = f.read()
 
-                # Syntax check on the full file
-                ast.parse(updated_source)
+                # [20260119_FEATURE] Use unified parser for syntax check
+                try:
+                    _, post_save_report = parse_python_code(updated_source, filename=file_path)
+                    if post_save_report.was_sanitized:
+                        warnings.append(
+                            "Post-save verification: file required sanitization to parse"
+                        )
+                except ParsingError as parse_err:
+                    raise ValueError(f"Post-save syntax verification failed: {parse_err}") from parse_err
 
                 # Verify the symbol is still extractable (guards against boundary mistakes)
                 from code_scalpel import SurgicalExtractor
@@ -1488,7 +1535,9 @@ async def update_symbol(
             backup_path=backup_path,
             max_updates_per_session=(int(max_updates) if max_updates > 0 else None),
             updates_used=(int(new_count) if max_updates > 0 else None),
-            updates_remaining=(int(max_updates - new_count) if max_updates > 0 else None),
+            updates_remaining=(
+                int(max_updates - new_count) if max_updates > 0 else None
+            ),
             warnings=warnings,
         )
 
@@ -1513,7 +1562,6 @@ async def update_symbol(
             error_code="UPDATE_SYMBOL_INTERNAL_ERROR",
             error=f"Patch failed: {str(e)}",
         )
-
 
 async def _perform_atomic_git_refactor(
     file_path: str, target_name: str, new_code: str
@@ -1611,7 +1659,9 @@ async def _perform_atomic_git_refactor(
         # If tests failed, revert
         if tests_run and not tests_passed_flag:
             # Go back to previous branch
-            subprocess.run(["git", "checkout", "-"], cwd=project_root, capture_output=True)
+            subprocess.run(
+                ["git", "checkout", "-"], cwd=project_root, capture_output=True
+            )
             # Delete the failed branch
             subprocess.run(
                 ["git", "branch", "-D", branch_name],
@@ -1631,7 +1681,6 @@ async def _perform_atomic_git_refactor(
             pass
         result["error"] = str(e)
         return result
-
 
 async def _update_cross_file_references(
     modified_file: str, target_type: str, target_name: str, new_code: str
@@ -1664,12 +1713,14 @@ async def _update_cross_file_references(
 
         # Find project root by looking for .git or pyproject.toml
         while project_root.parent != project_root:
-            if (project_root / ".git").exists() or (project_root / "pyproject.toml").exists():
+            if (project_root / ".git").exists() or (
+                project_root / "pyproject.toml"
+            ).exists():
                 break
             project_root = project_root.parent
 
         # Use get_symbol_references to find all references
-        from code_scalpel.mcp.server import _get_symbol_references_sync
+        from code_scalpel.mcp.archive.server import _get_symbol_references_sync
 
         refs_result = await asyncio.to_thread(
             _get_symbol_references_sync, target_name, str(project_root)
@@ -1682,14 +1733,14 @@ async def _update_cross_file_references(
         new_sig = None
 
         try:
-            # Parse new code to get signature
-            new_tree = ast.parse(new_code)
+            # [20260119_FEATURE] Use unified parser for best-effort signature detection
+            new_tree, _ = parse_python_code(new_code)
             for node in ast.walk(new_tree):
                 if isinstance(node, ast.FunctionDef) and node.name == target_name:
                     new_sig = ast.unparse(node.args)
                     break
-        except Exception:
-            # [20260102_BUGFIX] Avoid bare except while keeping best-effort parsing
+        except ParsingError:
+            # Best-effort signature detection - continue if parsing fails
             pass
 
         if not new_sig:
@@ -1719,7 +1770,8 @@ async def _update_cross_file_references(
                         # Add warning comment
                         indent = len(line) - len(line.lstrip())
                         warning = (
-                            " " * indent + f"# WARNING: {target_name} signature may have changed\n"
+                            " " * indent
+                            + f"# WARNING: {target_name} signature may have changed\n"
                         )
                         lines.insert(ref.line - 1, warning)
 
@@ -1738,7 +1790,6 @@ async def _update_cross_file_references(
     except Exception as e:
         result["errors"].append(f"Cross-file update failed: {str(e)}")
         return result
-
 
 async def _check_code_review_approval(
     file_path: str,
@@ -1794,7 +1845,6 @@ async def _check_code_review_approval(
             break
 
     return result
-
 
 async def _check_compliance(
     file_path: str,
@@ -1855,7 +1905,6 @@ async def _check_compliance(
             result["warnings"].append(f"Compliance warning: {message}")
 
     return result
-
 
 async def _run_pre_update_hook(
     file_path: str,
@@ -1921,7 +1970,6 @@ async def _run_pre_update_hook(
 
     return result
 
-
 async def _run_post_update_hook(
     file_path: str,
     target_name: str,
@@ -1973,7 +2021,9 @@ async def _run_post_update_hook(
                             file_path=file_path,
                             target_name=target_name,
                             target_type=target_type,
-                            success=(result.success if hasattr(result, "success") else True),
+                            success=(
+                                result.success if hasattr(result, "success") else True
+                            ),
                         )
                         if isinstance(post_result, dict):
                             hook_result.update(post_result)

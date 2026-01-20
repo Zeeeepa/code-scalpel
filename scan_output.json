@@ -1,0 +1,33 @@
+[01/19/26 18:59:59] INFO     Loading tier limits from:                                                             config_loader.py:102
+                             /mnt/k/backup/Develop/code-scalpel/.code-scalpel/limits.toml                                              
+{
+  "success": true,
+  "server_version": "1.0.0",
+  "has_vulnerabilities": true,
+  "vulnerability_count": 3,
+  "risk_level": "high",
+  "vulnerabilities": [
+    {
+      "type": "SQL Injection",
+      "cwe": "CWE-89",
+      "severity": "high",
+      "line": 5,
+      "description": "SQL Injection: user input (Dangerous pattern detected)"
+    },
+    {
+      "type": "Command Injection",
+      "cwe": "CWE-78",
+      "severity": "high",
+      "line": 6,
+      "description": "Command Injection: user input (Dangerous pattern detected)"
+    },
+    {
+      "type": "Path Traversal",
+      "cwe": "CWE-22",
+      "severity": "medium",
+      "line": 7,
+      "description": "Path Traversal: user input (Dangerous pattern detected)"
+    }
+  ],
+  "error": null
+}

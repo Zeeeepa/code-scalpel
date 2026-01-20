@@ -58,6 +58,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 from code_scalpel.utilities.source_sanitizer import sanitize_python_source
 
 __all__ = [
@@ -253,8 +254,8 @@ def _collect_same_file_references(
         Dict mapping (line, col) -> (old_token, new_token) for replacements
     """
     try:
-        tree = ast.parse(code)
-    except SyntaxError:
+        tree, _report = parse_python_code(code, filename="<token_analysis>")
+    except ParsingError:
         return {}
 
     replacements: dict[tuple[int, int], tuple[str, str]] = {}
@@ -400,14 +401,19 @@ class SurgicalPatcher:
             return
 
         try:
-            self._tree = ast.parse(self.current_code)
-        except SyntaxError as e:
+            tree_node, _report = parse_python_code(self.current_code, filename=self.file_path or "<patcher>")
+            self._tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
             # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
             sanitized, changed = sanitize_python_source(self.current_code)
             if not changed:
                 raise ValueError(f"Invalid Python code: {e}")
             self.current_code = sanitized
-            self._tree = ast.parse(self.current_code)
+            try:
+                tree_node, _report = parse_python_code(self.current_code, filename=self.file_path or "<patcher>")
+                self._tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+            except ParsingError as e2:
+                raise ValueError(f"Invalid Python code after sanitization: {e2}")
 
         self._index_symbols()
         self._parsed = True
@@ -510,8 +516,9 @@ class SurgicalPatcher:
 
         """
         try:
-            tree = ast.parse(new_code)
-        except SyntaxError as e:
+            tree_node, _report = parse_python_code(new_code, filename="<replacement>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
             raise ValueError(f"Replacement code has syntax error: {e}")
 
         # Verify it contains the expected type
@@ -720,7 +727,18 @@ class SurgicalPatcher:
                 error=str(e),
             )
 
-        tree = ast.parse(new_code)
+        try:
+            tree_node, _report = parse_python_code(new_code, filename="<function_update>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="function",
+                error=f"Failed to parse replacement code: {e}",
+            )
+        
         # [20260101_BUGFIX] Type assertion for FunctionDef/AsyncFunctionDef node
         first_node = tree.body[0]
         if not isinstance(first_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -785,7 +803,18 @@ class SurgicalPatcher:
                 error=str(e),
             )
 
-        tree = ast.parse(new_code)
+        try:
+            tree_node, _report = parse_python_code(new_code, filename="<class_update>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="class",
+                error=f"Failed to parse replacement code: {e}",
+            )
+        
         # [20260101_BUGFIX] Type assertion for ClassDef node
         first_node = tree.body[0]
         if not isinstance(first_node, ast.ClassDef):
@@ -931,7 +960,18 @@ class SurgicalPatcher:
                 error=str(e),
             )
 
-        tree = ast.parse(new_code)
+        try:
+            tree_node, _report = parse_python_code(new_code, filename="<method_update>")
+            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        except ParsingError as e:
+            return PatchResult(
+                success=False,
+                file_path=self.file_path or "",
+                target_name="<new>",
+                target_type="method",
+                error=f"Failed to parse replacement code: {e}",
+            )
+        
         # [20260101_BUGFIX] Type assertion for FunctionDef/AsyncFunctionDef node
         first_node = tree.body[0]
         if not isinstance(first_node, (ast.FunctionDef, ast.AsyncFunctionDef)):

@@ -9,6 +9,20 @@
     "exclude_null_values": true,
     "exclude_default_values": true
   },
+  "parsing": {
+    "description": "Deterministic parsing behavior - standardized across all entry points",
+    "mode": "strict",
+    "sanitization_policy": {
+      "allow_merge_conflicts": false,
+      "allow_templates": false,
+      "report_modifications": true
+    },
+    "error_reporting": {
+      "include_sanitization_details": true,
+      "include_error_location": true,
+      "include_suggestions": true
+    }
+  },
   "profiles": {
     "minimal": {
       "description": "Bare minimum for LLM understanding - maximum token efficiency (~50-100 tokens)",
@@ -47,6 +61,34 @@
         "include": ["tier", "tool_version", "tool_id", "request_id", "capabilities", "duration_ms", "error", "upgrade_hints"]
       },
       "common_exclusions": []
+    },
+    "strict": {
+      "description": "Strict parsing mode - fail immediately on syntax errors, report detailed error context",
+      "parsing": {
+        "mode": "fail_fast",
+        "sanitization_policy": {
+          "allow_merge_conflicts": false,
+          "allow_templates": false,
+          "report_modifications": false
+        }
+      },
+      "envelope": {
+        "include": ["error", "upgrade_hints"]
+      }
+    },
+    "permissive": {
+      "description": "Permissive parsing mode - auto-sanitize with explicit warnings about modifications",
+      "parsing": {
+        "mode": "auto_sanitize",
+        "sanitization_policy": {
+          "allow_merge_conflicts": true,
+          "allow_templates": true,
+          "report_modifications": true
+        }
+      },
+      "envelope": {
+        "include": ["error", "upgrade_hints"]
+      }
     }
   },
   "tool_overrides": {
@@ -54,7 +96,8 @@
 
     "analyze_code": {
       "profile": "minimal",
-      "exclude_fields": ["raw_ast", "parser_warnings", "token_positions"]
+      "exclude_fields": ["raw_ast", "token_positions"],
+      "include_on_error": ["parser_warnings", "sanitization_report", "error_location", "suggested_fix"]
     },
 
     "security_scan": {
@@ -64,7 +107,8 @@
 
     "extract_code": {
       "profile": "minimal",
-      "exclude_fields": ["extraction_metadata", "ast_node_ids"]
+      "exclude_fields": ["extraction_metadata", "ast_node_ids"],
+      "include_on_error": ["parser_warnings", "error_location", "suggested_fix"]
     },
 
     "rename_symbol": {
@@ -165,7 +209,8 @@
 
     "update_symbol": {
       "profile": "minimal",
-      "exclude_fields": ["backup_metadata", "syntax_tree_diff"]
+      "exclude_fields": ["backup_metadata", "syntax_tree_diff"],
+      "include_on_error": ["parser_warnings", "error_location", "suggested_fix"]
     },
 
     "get_file_context": {

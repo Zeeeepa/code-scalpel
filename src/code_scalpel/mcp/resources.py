@@ -11,7 +11,7 @@ from code_scalpel import __version__
 from code_scalpel.mcp.protocol import mcp
 
 if TYPE_CHECKING:
-    from code_scalpel.mcp.server import ContextualExtractionResult, TreeNodeDict
+    from code_scalpel.mcp.archive.server import ContextualExtractionResult, TreeNodeDict
 
 
 def _server():
@@ -30,14 +30,15 @@ def _run_in_thread(func, *args, **kwargs):
 
 
 @mcp.resource("scalpel://project/call-graph")
-def get_project_call_graph() -> str:
+async def get_project_call_graph() -> str:
     """Return the project-wide call graph as JSON."""
     import json
 
     from code_scalpel.mcp.helpers.graph_helpers import _get_call_graph_sync
 
     server = _server()
-    result = _get_call_graph_sync(
+    result = await _run_in_thread(
+        _get_call_graph_sync,
         str(server.PROJECT_ROOT),
         None,
         25,
@@ -57,19 +58,21 @@ def get_project_call_graph() -> str:
 
 
 @mcp.resource("scalpel://project/dependencies")
-def get_project_dependencies() -> str:
+async def get_project_dependencies() -> str:
     """Return detected project dependencies as JSON."""
     import json
 
     from code_scalpel.ast_tools.dependency_parser import DependencyParser
 
     server = _server()
-    deps = DependencyParser(str(server.PROJECT_ROOT)).get_dependencies()
+    deps = await _run_in_thread(
+        DependencyParser(str(server.PROJECT_ROOT)).get_dependencies
+    )
     return json.dumps(deps, indent=2)
 
 
 @mcp.resource("scalpel://project/structure")
-def get_project_structure() -> str:
+async def get_project_structure() -> str:
     """Return the project directory structure as JSON."""
     import json
 
@@ -96,7 +99,7 @@ def get_project_structure() -> str:
         return tree
 
     server = _server()
-    tree = build_tree(server.PROJECT_ROOT)
+    tree = await _run_in_thread(build_tree, server.PROJECT_ROOT)
     return json.dumps(tree, indent=2)
 
 
@@ -310,7 +313,9 @@ def _extract_code_sync(
             context = extractor.get_function_with_context(target_name)
 
     if not target.success:
-        return server._extraction_error(target_name, target.error or "Extraction failed")
+        return server._extraction_error(
+            target_name, target.error or "Extraction failed"
+        )
 
     context_code = context.context_code if context else ""
     context_items = context.context_items if context else (target.dependencies or [])

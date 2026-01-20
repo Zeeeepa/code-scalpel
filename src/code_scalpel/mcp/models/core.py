@@ -141,6 +141,24 @@ class AnalysisResult(BaseModel):
         description="Tier applied for feature gating (community/pro/enterprise)",
     )
 
+    # [20260119_FEATURE] Parsing error context fields (governed by response_config.json include_on_error)
+    error_location: str | None = Field(
+        default=None,
+        description="Line/column of syntax error (e.g., 'line 5' or 'myfile.py:5')",
+    )
+    suggested_fix: str | None = Field(
+        default=None,
+        description="Suggested fix for syntax error when applicable",
+    )
+    sanitization_report: dict[str, Any] | None = Field(
+        default=None,
+        description="Parsing sanitization details when code was auto-modified",
+    )
+    parser_warnings: list[str] = Field(
+        default_factory=list,
+        description="Parser warnings (e.g., sanitization notices)",
+    )
+
     # [20251228_BUGFIX] Backward-compatible convenience counts used by tests.
     @property
     def function_count(self) -> int:

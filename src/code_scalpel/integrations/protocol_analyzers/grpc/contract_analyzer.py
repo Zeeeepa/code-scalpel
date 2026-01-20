@@ -49,104 +49,28 @@ from ..schema.drift_detector import (
 #
 # COMMUNITY (Current & Planned):
 # Documentation & Learning:
-# - TODO [COMMUNITY]: Add comprehensive contract analysis guide (current)
-# - TODO [COMMUNITY]: Document .proto file parsing
-# - TODO [COMMUNITY]: Create service contract examples
-# - TODO [COMMUNITY]: Add API reference documentation
-# - TODO [COMMUNITY]: Create quick-start guide
-# - TODO [COMMUNITY]: Document validation workflow
-# - TODO [COMMUNITY]: Add best practices guide
-# - TODO [COMMUNITY]: Create troubleshooting guide
 #
 # Examples & Use Cases:
-# - TODO [COMMUNITY]: Add basic contract parsing example
-# - TODO [COMMUNITY]: Create streaming pattern example
-# - TODO [COMMUNITY]: Add validation example
-# - TODO [COMMUNITY]: Document contract comparison
-# - TODO [COMMUNITY]: Create service dependency example
 #
 # Testing:
-# - TODO [COMMUNITY]: Add tests for proto parsing
-# - TODO [COMMUNITY]: Create tests for validation
-# - TODO [COMMUNITY]: Add streaming detection tests
-# - TODO [COMMUNITY]: Document test coverage
 #
 # PRO (Enhanced Features):
 # Core Capabilities:
-# - TODO [PRO]: Improve proto file parser accuracy
-# - TODO [PRO]: Add support for proto3 features
-# - TODO [PRO]: Implement message field validation
-# - TODO [PRO]: Add enum validation
-# - TODO [PRO]: Support oneof field analysis
-# - TODO [PRO]: Implement nested type tracking
-# - TODO [PRO]: Add service method validation
-# - TODO [PRO]: Support custom option parsing
 #
 # Security Analysis:
-# - TODO [PRO]: Detect missing authentication interceptors
-# - TODO [PRO]: Identify unencrypted metadata (credentials leak)
-# - TODO [PRO]: Validate TLS configuration
-# - TODO [PRO]: Detect rate limiting gaps
-# - TODO [PRO]: Check for request size limits
-# - TODO [PRO]: Validate authorization patterns
-# - TODO [PRO]: Add credential handling detection
 #
 # Best Practices Validation:
-# - TODO [PRO]: Enforce timeout configuration
-# - TODO [PRO]: Validate retry policies
-# - TODO [PRO]: Check keepalive settings
-# - TODO [PRO]: Detect blocking calls in async contexts
-# - TODO [PRO]: Verify health check implementation
-# - TODO [PRO]: Validate error code usage
-# - TODO [PRO]: Check metadata handling
 #
 # Contract Evolution:
-# - TODO [PRO]: Detect field number reuse (Protobuf)
-# - TODO [PRO]: Validate oneof field changes
-# - TODO [PRO]: Check for reserved field violations
-# - TODO [PRO]: Enforce deprecation before removal
-# - TODO [PRO]: Validate service method additions
-# - TODO [PRO]: Track deprecated API removal
-# - TODO [PRO]: Validate message type evolution
 #
 # Performance Analysis:
-# - TODO [PRO]: Detect large message sizes
-# - TODO [PRO]: Identify missing pagination
-# - TODO [PRO]: Check for N+1 query patterns
-# - TODO [PRO]: Validate streaming vs unary usage
-# - TODO [PRO]: Analyze compression settings
-# - TODO [PRO]: Detect inefficient payload patterns
-# - TODO [PRO]: Validate batching strategies
 #
 # ENTERPRISE (Advanced Capabilities):
 # Advanced Analysis:
-# - TODO [ENTERPRISE]: Implement load testing integration
-# - TODO [ENTERPRISE]: Add resource consumption analysis
-# - TODO [ENTERPRISE]: Detect service coupling issues
-# - TODO [ENTERPRISE]: Validate federation patterns
-# - TODO [ENTERPRISE]: Add schema fingerprinting
-# - TODO [ENTERPRISE]: Support contract versioning
-# - TODO [ENTERPRISE]: Implement backward compatibility checking
-# - TODO [ENTERPRISE]: Add forward compatibility analysis
 #
 # Intelligence & Automation:
-# - TODO [ENTERPRISE]: Add ML-based contract recommendations
-# - TODO [ENTERPRISE]: Implement automatic contract optimization
-# - TODO [ENTERPRISE]: Support impact analysis
-# - TODO [ENTERPRISE]: Add usage-based optimization
-# - TODO [ENTERPRISE]: Implement anomaly detection
-# - TODO [ENTERPRISE]: Support predictive validation
-# - TODO [ENTERPRISE]: Add performance predictions
 #
 # Integration & Monitoring:
-# - TODO [ENTERPRISE]: Add registry integration (protobuf registry)
-# - TODO [ENTERPRISE]: Implement continuous contract monitoring
-# - TODO [ENTERPRISE]: Support compliance reporting
-# - TODO [ENTERPRISE]: Add audit trail logging
-# - TODO [ENTERPRISE]: Implement automated rollback
-# - TODO [ENTERPRISE]: Support policy enforcement
-# - TODO [ENTERPRISE]: Add incident detection
-# - TODO [ENTERPRISE]: Implement service mesh integration
 
 
 class StreamingType(Enum):

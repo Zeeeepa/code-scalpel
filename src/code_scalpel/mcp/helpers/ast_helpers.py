@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 from code_scalpel.utilities.source_sanitizer import sanitize_python_source
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 
 logger = logging.getLogger("code_scalpel.mcp.ast")
 
@@ -42,7 +43,7 @@ def cache_ast(file_path: Path, tree: ast.AST) -> None:
 
 
 def parse_file_cached(file_path: Path) -> Optional[ast.Module]:
-    """Parse a Python file with caching."""
+    """Parse a Python file with caching using unified parser."""
     # Check cache first
     cached = get_cached_ast(file_path)
     if cached is not None:
@@ -51,14 +52,10 @@ def parse_file_cached(file_path: Path) -> Optional[ast.Module]:
     try:
         code = file_path.read_text(encoding="utf-8")
         try:
-            tree = ast.parse(code)
-        except SyntaxError:
-            # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
-            sanitized, changed = sanitize_python_source(code)
-            if not changed:
-                return None
-            tree = ast.parse(sanitized)
+            tree, _report = parse_python_code(code, filename=str(file_path))
+        except ParsingError:
+            return None
         cache_ast(file_path, tree)
         return tree  # type: ignore
-    except (OSError, SyntaxError):
+    except OSError:
         return None

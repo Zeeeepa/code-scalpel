@@ -1,0 +1,50 @@
+Code Scalpel MCP Server v1.0.0
+Project Root: /mnt/k/backup/Develop/code-scalpel
+Tier: enterprise
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n  \"success\": true,\n  \"server_version\": \"1.0.0\",\n  \"has_vulnerabilities\": true,\n  \"vulnerability_count\": 1,\n  \"risk_level\": \"medium\",\n  \"vulnerabilities\": [\n    {\n      \"type\": \"SQL Injection\",\n      \"cwe\": \"CWE-89\",\n      \"severity\": \"high\",\n      \"line\": 6,\n      \"description\": \"SQL Injection: user input (query)\"\n    }\n  ],\n  \"taint_sources\": [],\n  \"sanitizer_paths\": null,\n  \"confidence_scores\": null,\n  \"false_positive_analysis\": null,\n  \"remediation_suggestions\": [\n    \"CWE-89: Use parameterized queries or ORM to prevent SQL injection\"\n  ],\n  \"policy_violations\": null,\n  \"compliance_mappings\": null,\n  \"custom_rule_results\": null,\n  \"priority_ordered_findings\": null,\n  \"reachability_analysis\": null,\n  \"false_positive_tuning\": {\n    \"sanitizers_detected\": 0,\n    \"tuning_suggestions\": [],\n    \"suppression_candidates\": [],\n    \"recommended_actions\": []\n  },\n  \"error\": null\n}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "success": true,
+    "server_version": "1.0.0",
+    "has_vulnerabilities": true,
+    "vulnerability_count": 1,
+    "risk_level": "medium",
+    "vulnerabilities": [
+      {
+        "type": "SQL Injection",
+        "cwe": "CWE-89",
+        "severity": "high",
+        "line": 6,
+        "description": "SQL Injection: user input (query)"
+      }
+    ],
+    "taint_sources": [],
+    "sanitizer_paths": null,
+    "confidence_scores": null,
+    "false_positive_analysis": null,
+    "remediation_suggestions": [
+      "CWE-89: Use parameterized queries or ORM to prevent SQL injection"
+    ],
+    "policy_violations": null,
+    "compliance_mappings": null,
+    "custom_rule_results": null,
+    "priority_ordered_findings": null,
+    "reachability_analysis": null,
+    "false_positive_tuning": {
+      "sanitizers_detected": 0,
+      "tuning_suggestions": [],
+      "suppression_candidates": [],
+      "recommended_actions": []
+    },
+    "error": null
+  },
+  "isError": false
+}

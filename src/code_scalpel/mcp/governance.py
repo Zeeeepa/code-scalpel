@@ -23,6 +23,45 @@ _GOVERNANCE_FEATURE_DEV_GOVERNANCE = "dev_governance"
 _GOVERNANCE_FEATURE_PROJECT_STRUCTURE = "project_structure"
 _GOVERNANCE_FEATURE_POLICY_EVALUATION = "policy_evaluation"
 
+
+# [20260119_BUGFIX] Provide auto-init scaffold for .code-scalpel/ when requested.
+def auto_init_config_dir(
+    *,
+    project_root: Path,
+    tier: str,
+    mode: str = "templates_only",
+    target: str = "project",
+) -> dict[str, Any] | None:
+    """Create .code-scalpel scaffolding if missing.
+
+    This is a conservative initializer: it only ensures the directory exists
+    and returns metadata. No secrets or policy files are written here; those
+    remain user-managed.
+    """
+
+    try:
+        if target not in {"project", "user"}:
+            target = "project"
+
+        base_dir = Path(project_root).resolve() if target == "project" else Path.home()
+        config_dir = base_dir / ".code-scalpel"
+
+        created = False
+        if not config_dir.exists():
+            config_dir.mkdir(parents=True, exist_ok=True)
+            created = True
+
+        return {
+            "created": created,
+            "path": str(config_dir),
+            "mode": mode,
+            "tier": tier,
+            "target": target,
+        }
+    except Exception:
+        # Best-effort: do not block server startup if initialization fails.
+        return None
+
 # [20251230_FEATURE] Invisible governance enforcement.
 # Once an organization defines `.code-scalpel` rulesets, the MCP server should
 # enforce them automatically without requiring users to remember to run a tool.

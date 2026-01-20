@@ -14,6 +14,7 @@ from mcp.server.fastmcp import Context
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 from code_scalpel.licensing import get_current_tier
 from code_scalpel.utilities.source_sanitizer import sanitize_python_source
+from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError, ParsingConfig
 from importlib import import_module
 
 _analyze_code_sync = import_module("code_scalpel.mcp.helpers.analyze_helpers")._analyze_code_sync
@@ -1338,25 +1339,48 @@ def _get_file_context_sync(
                 error=analysis.error,
             )
 
-        # Python-specific parsing
+        # Python-specific parsing (unified parser)
         try:
-            tree = ast.parse(code)
-        except SyntaxError as e:
-            # [20260116_BUGFIX] Sanitize malformed source before retrying parse.
+            tree, report = parse_python_code(code, filename=str(path))
+            if getattr(report, "was_sanitized", False):
+                code = report.sanitized_code or code
+        except ParsingError:
+            # [20260119_BUGFIX] Fallback sanitize for enterprise redaction flow.
             sanitized, changed = sanitize_python_source(code)
             if not changed:
+                # Return error result but preserve redaction metadata
                 return FileContextResult(
                     success=False,
                     file_path=str(path),
-                    line_count=line_count,
                     tier_applied=tier,
                     max_context_lines_applied=max_context_lines,
                     pro_features_enabled=pro_features_enabled,
                     enterprise_features_enabled=enterprise_features_enabled,
-                    error=f"Syntax error at line {e.lineno}: {e.msg}.",
+                    language=detected_lang,
+                    line_count=line_count,
+                    functions=[],
+                    classes=[],
+                    imports=[],
+                    exports=[],
+                    complexity_score=0,
+                    has_security_issues=False,
+                    summary="",
+                    imports_truncated=False,
+                    total_imports=0,
+                    semantic_summary=None,
+                    expanded_context=None,
+                    pii_redacted=pii_redacted,
+                    secrets_masked=secrets_masked,
+                    redaction_summary=redaction_summary,
+                    access_controlled="rbac_aware_retrieval" in cap_set or "file_access_control" in cap_set,
+                    error="Invalid Python syntax and sanitization failed.",
                 )
             code = sanitized
-            tree = ast.parse(code)
+            tree, report = parse_python_code(
+                code,
+                filename=str(path),
+                config=ParsingConfig(mode="permissive", allow_merge_conflicts=True, allow_templates=True, report_modifications=False),
+            )
 
         # [20260104_BUGFIX] Return structured symbol info for tiered file context tests.
         functions: list[FunctionInfo] = []
