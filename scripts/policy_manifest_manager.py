@@ -86,7 +86,7 @@ def cmd_sign(args):
             )
             if result.returncode == 0:
                 args.signed_by = result.stdout.strip()
-        except:
+        except Exception:
             pass
 
         if not args.signed_by:

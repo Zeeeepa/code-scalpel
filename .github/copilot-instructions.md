@@ -254,6 +254,133 @@ def _validate_input(self, data: dict) -> bool:
 - For modifications: Place tag as inline comment or above the changed block
 - For multi-line changes: Single tag above the block is sufficient
 
+### Tier Testing Guidelines (CRITICAL)
+
+**DO NOT use monkeypatch for tier testing.** Tier detection uses cryptographic JWT license validation which cannot be bypassed with simple mocking.
+
+**Why Monkeypatch Fails:**
+The tier detection flow validates cryptographic JWT licenses across multiple modules (`licensing.tier_detector`, tool modules, etc.). Monkeypatching only affects the function in a single module where you patch it, making it unreliable and incomplete. Instead, use real license files via fixtures.
+
+**Correct Approach: Use Test Licenses**
+
+Test licenses are located in `tests/licenses/` directory:
+- `code_scalpel_license_pro_20260101_170435.jwt` - Pro tier license
+- `code_scalpel_license_enterprise_20260101_170506.jwt` - Enterprise tier license
+
+**Test Fixtures (Required Pattern):**
+
+Use pytest fixtures from `tests/tools/tiers/conftest.py` to manage license paths and tier detection. Fixtures set environment variables BEFORE tier detection runs:
+
+```python
+# From tests/tools/tiers/conftest.py
+@pytest.fixture
+def community_tier(monkeypatch):
+    """Activate Community tier (disable license discovery)."""
+    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
+    yield
+
+@pytest.fixture
+def pro_tier(monkeypatch):
+    """Activate Pro tier via license file."""
+    license_path = Path(__file__).parent / "licenses" / "code_scalpel_license_pro_20260101_170435.jwt"
+    monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
+    yield
+
+@pytest.fixture
+def enterprise_tier(monkeypatch):
+    """Activate Enterprise tier via license file."""
+    license_path = Path(__file__).parent / "licenses" / "code_scalpel_license_enterprise_20260101_170506.jwt"
+    monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
+    yield
+```
+
+**Test Usage Pattern:**
+```python
+@pytest.mark.asyncio
+async def test_pro_depth_limit(tmp_path, pro_tier):
+    """Verify Pro tier get_call_graph respects max_depth from limits.toml."""
+    main_file = tmp_path / "main.py"
+    main_file.write_text("def foo(): pass")
+    
+    # pro_tier fixture activates Pro tier before this code runs
+    from code_scalpel.mcp.server import get_call_graph
+    result = await get_call_graph(project_root=str(tmp_path), depth=100)
+    
+    # Verify tier and limits from .code-scalpel/limits.toml [pro.get_call_graph]
+    assert result.tier_applied == "pro"
+    assert result.max_depth_applied == 50  # from limits.toml
+    assert result.max_nodes_applied == 500  # from limits.toml
+```
+
+**Critical Rules:**
+
+1. **License Path MUST Be Set First**: Set `CODE_SCALPEL_LICENSE_PATH` env var BEFORE importing any Code Scalpel modules
+2. **Monkeypatch Only Works For Downgrading**: You can mock `_get_current_tier()` to downgrade from enterprise→pro or enterprise/pro→community, but you CANNOT upgrade tiers with mocking
+3. **No Env Var Tier Override**: `CODE_SCALPEL_TIER` env var is read-only and only works if no valid license exists; it cannot override a valid license
+4. **License Validation is Cryptographic**: Tier detection uses RSA public key authentication (`vault-prod-2026-01.pem`); cannot be bypassed without the corresponding private key
+
+**Why Monkeypatch Fails:**
+
+The tier detection flow is:
+1. Check for valid JWT license file (cryptographic validation)
+2. If valid license found → use license tier (CANNOT be overridden)
+3. If no license → fall back to `CODE_SCALPEL_TIER` env var
+4. If no env var → default to "community"
+
+Monkeypatching `_get_current_tier()` only affects the function in the module where you patch it, but tier detection happens in multiple modules (`licensing.tier_detector`, tool modules, etc.), making monkeypatch unreliable.
+
+**Metadata Fields in Results:**
+
+All MCP tool results must populate tier and limit metadata (see `.code-scalpel/limits.toml` for expected values):
+
+```python
+# Result from get_call_graph with Pro tier active
+result = CallGraphResultModel(
+    nodes=[...],
+    edges=[...],
+    tier_applied="pro",                    # Tier from license
+    max_depth_applied=50,                  # From limits.toml [pro.get_call_graph]
+    max_nodes_applied=500,                 # From limits.toml [pro.get_call_graph]
+    advanced_resolution_enabled=True,      # Pro capability
+    enterprise_metrics_enabled=False,      # Enterprise only
+    actual_depth=12,                       # Actual depth traversed
+    actual_nodes=248,                      # Nodes included
+    was_truncated=False                    # Within limits
+)
+```
+
+Tests verify these metadata fields are populated correctly from tier and limits.toml.
+
+**License Status & Storage (As of 2026-01-20):**
+
+Test licenses stored in `tests/licenses/` (git-ignored):
+- `code_scalpel_license_pro_20260101_*.jwt` - Pro tier license
+- `code_scalpel_license_enterprise_20260101_*.jwt` - Enterprise tier license
+- Also stored as GitHub Secrets: `TEST_PRO_LICENSE_JWT`, `TEST_ENTERPRISE_LICENSE_JWT`
+
+**For local development:**
+1. License files must exist in `tests/licenses/` for tier tests to run
+2. Files are git-ignored (blocked by `.gitignore`)
+3. Fixtures from `tests/tools/tiers/conftest.py` automatically use detected licenses
+4. See `tests/licenses/README.md` for license generation and validation
+
+**For CI/CD:**
+- Licenses injected from GitHub Secrets before test execution
+- See `.github/workflows/ci.yml` for injection logic
+- Tier detection works identically in CI and local environments
+
+**Tier Limit Reference:**
+All tier limits are centralized in `.code-scalpel/limits.toml`. Tier tests must verify that:
+1. Results populate `tier_applied` (e.g., "pro", "enterprise")
+2. Results populate `*_applied` fields (e.g., `max_depth_applied`, `max_nodes_applied`)
+3. `*_applied` values match corresponding section in limits.toml
+4. Results reflect capabilities enabled for that tier
+
+Example: Community tier tests should verify `max_depth_applied == 3` matches limits.toml `[community.get_call_graph]`.
+
+See `tests/licenses/README.md` for detailed documentation.
+
 ### Checklist Execution Policy (CRITICAL)
 
 **NEVER DEFER CHECKLIST ITEMS.** Deferring items to future versions is prohibited.
@@ -373,11 +500,31 @@ source .env && python -m twine upload dist/* -u __token__ -p "$PYPI_TOKEN"
 | `restrictive` | 20+ devs | Enterprise | SOC2/ISO | ~150 tokens |
 
 **Configuration Files:**
-- `.code-scalpel/config.minimal.json` - Budget-constrained teams
-- `.code-scalpel/config.json` - Standard balanced profile
-- `.code-scalpel/config.restrictive.json` - Enterprise compliance
-- `.code-scalpel/dev-governance.minimal.yaml` - ~70 lines, security-focused only
-- `.code-scalpel/dev-governance.yaml` - Full 680-line policy set
+- `.code-scalpel/config.json` - Standard balanced governance profile
+- `.code-scalpel/limits.toml` - **Tier-based capability limits** (Community/Pro/Enterprise) - SOURCE OF TRUTH for tier tests
+- `.code-scalpel/response_config.json` - Response verbosity & token efficiency profiles
+- `.code-scalpel/architecture.toml` - Dependency rules & architectural boundaries
+- `.code-scalpel/budget.yaml` - Agent operation budgets (max files, tokens, API calls)
+- `.code-scalpel/governance.yaml` - Full governance policy set
+- `.code-scalpel/governance.minimal.yaml` - Minimal security-focused policy
+- `.code-scalpel/policy.yaml` - OPA-based policy rules
+- `.code-scalpel/GOVERNANCE_PROFILES.md` - Profile selection matrix & guidance
+
+**CRITICAL: limits.toml defines tier limits used in tier tests:**
+```toml
+[community.get_call_graph]
+max_depth = 3
+max_nodes = 50
+
+[pro.get_call_graph]
+max_depth = 50
+max_nodes = 500
+
+[enterprise.get_call_graph]
+max_depth = ~
+max_nodes = ~
+```
+Tests verify these limits are enforced. See `tests/tools/tiers/test_get_call_graph_tiers.py` for pattern.
 
 **Key Design Principle:** Governance is server-side. The agent only receives pass/fail (~50 tokens), never the full policy files. This preserves context window for code work.
 
@@ -646,10 +793,11 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 **Coverage Gate:** ≥90% combined (statement + branch)
 **Current Coverage:** 94.86% combined (96.28% stmt, 90.95% branch)
 
-**MCP Tools (Current - v3.0.5 - 20 tools):**
+**MCP Tools (Current - v1.0.0 - 22 tools):**
 - `analyze_code` - Parse and extract code structure (Python, JS, TS, Java)
 - `extract_code` - Surgical extraction by symbol name with cross-file deps
 - `update_symbol` - Safely replace functions/classes/methods in files
+- `rename_symbol` - Rename functions/classes/methods throughout codebase
 - `security_scan` - Taint-based vulnerability detection
 - `unified_sink_detect` - Unified polyglot sink detection with confidence
 - `cross_file_security_scan` - Cross-module taint tracking
@@ -666,12 +814,13 @@ Code Scalpel v3.1.0 is an MCP server toolkit for AI-driven surgical code operati
 - `get_project_map` - Generate comprehensive project structure map
 - `validate_paths` - Validate path accessibility for Docker deployments
 - `verify_policy_integrity` - Cryptographic policy file verification (v3.0.0)
+- `code_policy_check` - Check code against style guides and compliance standards
 - `type_evaporation_scan` - Detect TypeScript type evaporation vulnerabilities (v3.0.4)
 
-**Latest Release:** v3.0.5 "Ninja Consolidation"
-- Release Date: December 23, 2025
-- Release Notes: `docs/release_notes/RELEASE_NOTES_v3.0.5.md`
-- Evidence Files: `release_artifacts/v3.0.5/`
+**Latest Release:** v1.0.0
+- Release Date: January 20, 2026
+- Release Notes: `docs/release_notes/RELEASE_NOTES_v1.0.0.md`
+- Evidence Files: `release_artifacts/v1.0.0/`
 - **Key Changes:**
   - Cache consolidation: merged `cache/analysis_cache.py` + `utilities/cache.py` → `cache/unified_cache.py` (677 LOC → 714 LOC unified)
   - Eliminated 277 lines of redundancy while preserving all features

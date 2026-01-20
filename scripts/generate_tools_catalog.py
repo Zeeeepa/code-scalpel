@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEEP_DIVE_DIR = REPO_ROOT / "docs" / "tools" / "deep_dive"
 MATRIX_PATH = DEEP_DIVE_DIR / "TOOL_CAPABILITY_MATRIX.md"

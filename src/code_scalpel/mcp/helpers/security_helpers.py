@@ -73,7 +73,18 @@ def _get_cache():
         return None
 
 
-PROJECT_ROOT = Path.cwd()
+def _get_project_root() -> Path:
+    """Get the server's PROJECT_ROOT dynamically.
+
+    [20260120_BUGFIX] Import from server module to get the initialized value.
+    Using a getter function ensures we get the value after main() sets it.
+    """
+    try:
+        from code_scalpel.mcp.server import get_project_root
+
+        return get_project_root()
+    except ImportError:
+        return Path.cwd()
 
 
 def _get_current_tier() -> str:
@@ -109,8 +120,13 @@ def _get_sink_detector() -> UnifiedSinkDetector:
     return _SINK_DETECTOR
 
 
-def validate_path_security(path: Path, project_root: Path) -> Path:
-    """Validate path is within allowed roots and return resolved path."""
+def validate_path_security(path: Path, project_root: Path | None = None) -> Path:
+    """Validate path is within allowed roots and return resolved path.
+
+    [20260120_BUGFIX] If project_root is None, use the server's PROJECT_ROOT.
+    """
+    if project_root is None:
+        project_root = _get_project_root()
     try:
         resolved = path.resolve()
         root_resolved = project_root.resolve()
@@ -1248,7 +1264,7 @@ def _scan_dependencies_sync(
     caps = capabilities or get_tool_capabilities("scan_dependencies", tier)
     caps_set = set(caps.get("capabilities", set()) or [])
     limits = caps.get("limits", {}) or {}
-    resolved_path_str = project_root or path or str(PROJECT_ROOT)
+    resolved_path_str = project_root or path or str(_get_project_root())
 
     try:
         from code_scalpel.security.dependencies import (
@@ -1262,7 +1278,7 @@ def _scan_dependencies_sync(
             return DependencyScanResult(success=False, error=f"Invalid path: {exc}")
 
         if not resolved_path.is_absolute():
-            resolved_path = PROJECT_ROOT / resolved_path_str
+            resolved_path = _get_project_root() / resolved_path_str
 
         if not resolved_path.exists():
             return DependencyScanResult(
@@ -2042,17 +2058,25 @@ def _security_scan_sync(
     reachability_analysis: dict[str, Any] | None = None
     false_positive_tuning: dict[str, Any] | None = None
 
-    if "sanitizer_detection" in caps_set:
+    # [20260120_BUGFIX] Normalize capability flags so Pro/Enterprise populate advanced fields
+    has_sanitizers = "sanitizer_detection" in caps_set or "sanitizer_recognition" in caps_set
+    has_confidence = "confidence_scores" in caps_set or "confidence_scoring" in caps_set
+    has_fp_analysis = "false_positive_analysis" in caps_set or "false_positive_reduction" in caps_set
+    has_policy = "policy_checks" in caps_set or "custom_policy_engine" in caps_set or "org_specific_rules" in caps_set
+    has_compliance = "compliance_mappings" in caps_set or "compliance_rule_checking" in caps_set or "compliance_reporting" in caps_set
+    has_priority = "priority_findings" in caps_set or "priority_finding_ordering" in caps_set or "priority_cve_alerts" in caps_set
+
+    if has_sanitizers:
         sanitizer_paths = _detect_sanitizers(code)
-    if "confidence_scores" in caps_set:
+    if has_confidence:
         confidence_scores = _build_confidence_scores(vulnerabilities)
-    if "false_positive_analysis" in caps_set:
+    if has_fp_analysis:
         false_positive_analysis = _build_false_positive_analysis(
             len(vulnerabilities), limits.get("max_findings")
         )
-    if "policy_checks" in caps_set:
+    if has_policy:
         policy_violations = _detect_policy_violations(code)
-    if "compliance_mappings" in caps_set:
+    if has_compliance:
         compliance_mappings = _build_compliance_mappings(
             vulnerabilities, policy_violations or []
         )
@@ -2060,9 +2084,9 @@ def _security_scan_sync(
         custom_rule_results = _detect_custom_logging_rules(code)
     if "remediation_suggestions" in caps_set:
         remediation_suggestions = _build_remediation_suggestions_list(vulnerabilities)
-    if "priority_findings" in caps_set:
+    if has_priority:
         priority_ordered_findings = _build_priority_ordered_findings(vulnerabilities)
-    if "reachability_analysis" in caps_set:
+    if "reachability_analysis" in caps_set or "vulnerability_reachability_analysis" in caps_set:
         reachability_analysis = _build_reachability_analysis(vulnerabilities, code)
     if "false_positive_tuning" in caps_set:
         false_positive_tuning = _build_false_positive_tuning(
@@ -2280,7 +2304,7 @@ async def _scan_dependencies_impl(
         DependencyScanResult with dependency-level vulnerability tracking.
     """
     # Resolve path parameter (support both 'path' and 'project_root')
-    resolved_path = path or project_root or str(PROJECT_ROOT)
+    resolved_path = path or project_root or str(_get_project_root())
 
     # [20251229_FEATURE] v3.3.1 - Get tier and capabilities
     tier = get_current_tier()

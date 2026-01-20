@@ -9,9 +9,8 @@ DO NOT use in production. For educational purposes only.
 import sqlite3
 import subprocess
 import os
-from flask import Flask, request, render_template_string, redirect
+from flask import Flask, request
 from typing import Dict, Any
-
 
 app = Flask(__name__)
 
@@ -203,11 +202,9 @@ def ldap_search(username: str) -> list:
     VULNERABILITY: LDAP injection
     CWE-90: LDAP Injection
     """
-    import ldap
 
     # BAD: User input in LDAP filter
-    search_filter = f"(uid={username})"
-
+    # Example vulnerable filter: f"(uid={username})"
     # This would connect to LDAP server and search
     # Attacker could inject: *)(uid=*))(|(uid=*
     return []

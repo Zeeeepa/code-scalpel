@@ -13,11 +13,15 @@ This module loads and enforces custom validation rules from .code-scalpel/rules.
 import ast
 import logging
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypedDict
 
-import toml
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 class RuleSummaryDict(TypedDict):
@@ -75,7 +79,8 @@ class CustomRulesEngine:
             return
 
         try:
-            config = toml.load(path)
+            with open(path, "rb") as f:
+                config = tomllib.load(f)
             self.rules = config.get("rules", {})
             logger.info(f"Loaded {len(self.rules)} custom rules from {path}")
         except Exception as e:

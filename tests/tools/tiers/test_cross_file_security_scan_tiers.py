@@ -90,12 +90,9 @@ class TestOutputMetadataFields:
         assert result.framework_aware_enabled is False  # Disabled by default
         assert result.enterprise_features_enabled is False  # Disabled by default
 
-    async def test_community_tier_metadata(self, tmp_path: Path, monkeypatch):
+    async def test_community_tier_metadata(self, tmp_path: Path, community_tier):
         """Community tier should report correct metadata."""
-        from code_scalpel.mcp import server
-
-        monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-
+        # community_tier fixture from conftest.py disables license discovery
         root = tmp_path / "repo"
         root.mkdir()
         _make_python_deep_chain_project(root)
@@ -115,12 +112,9 @@ class TestOutputMetadataFields:
         assert r.framework_aware_enabled is False
         assert r.enterprise_features_enabled is False
 
-    async def test_pro_tier_metadata(self, tmp_path: Path, monkeypatch):
+    async def test_pro_tier_metadata(self, tmp_path: Path, pro_tier):
         """Pro tier should report correct metadata."""
-        from code_scalpel.mcp import server
-
-        monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
-
+        # pro_tier fixture from conftest.py sets up Pro tier via license or mock
         root = tmp_path / "repo"
         root.mkdir()
         _make_python_deep_chain_project(root)
@@ -140,12 +134,9 @@ class TestOutputMetadataFields:
         assert r.framework_aware_enabled is True
         assert r.enterprise_features_enabled is False
 
-    async def test_enterprise_tier_metadata(self, tmp_path: Path, monkeypatch):
+    async def test_enterprise_tier_metadata(self, tmp_path: Path, enterprise_tier):
         """Enterprise tier should report correct metadata."""
-        from code_scalpel.mcp import server
-
-        monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
-
+        # enterprise_tier fixture from conftest.py sets up Enterprise tier via license or mock
         root = tmp_path / "repo"
         root.mkdir()
         _make_python_deep_chain_project(root)
@@ -216,12 +207,9 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(
 
 
 async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(
-    tmp_path: Path, monkeypatch
+    tmp_path: Path, pro_tier
 ):
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    from code_scalpel.mcp import server
-
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # pro_tier fixture sets up the environment
 
     root = tmp_path / "repo"
     root.mkdir()
@@ -244,11 +232,10 @@ async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(
     assert any(v.cwe == "CWE-89" for v in r.vulnerabilities)
 
 
-async def test_cross_file_security_scan_pro_clamps_limits(tmp_path: Path, monkeypatch):
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    from code_scalpel.mcp import server
-
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+async def test_cross_file_security_scan_pro_clamps_limits(
+    tmp_path: Path, pro_tier, monkeypatch
+):
+    # pro_tier fixture sets up the environment
 
     root = tmp_path / "repo"
     root.mkdir()
@@ -283,12 +270,9 @@ async def test_cross_file_security_scan_pro_clamps_limits(tmp_path: Path, monkey
 
 
 async def test_cross_file_security_scan_enterprise_returns_extra_fields(
-    tmp_path: Path, monkeypatch
+    tmp_path: Path, enterprise_tier
 ):
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    from code_scalpel.mcp import server
-
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
+    # enterprise_tier fixture sets up the environment
 
     root = tmp_path / "repo"
     root.mkdir()

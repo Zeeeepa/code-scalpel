@@ -14,7 +14,9 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_community_limits_and_framework(monkeypatch):
+async def test_generate_unit_tests_community_limits_and_framework(
+    community_tier, monkeypatch
+):
     from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
@@ -47,7 +49,7 @@ async def test_generate_unit_tests_community_limits_and_framework(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
+    # community_tier fixture sets up the environment
 
     # Community: pytest only
     bad = await server.generate_unit_tests(
@@ -74,7 +76,9 @@ async def test_generate_unit_tests_community_limits_and_framework(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(monkeypatch):
+async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(
+    pro_tier, monkeypatch
+):
     from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
@@ -106,8 +110,7 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(monkeypat
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # pro_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
         code="def f(x):\n    return x\n",
@@ -123,7 +126,9 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(monkeypat
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_enterprise_allows_bug_repro(monkeypatch):
+async def test_generate_unit_tests_enterprise_allows_bug_repro(
+    enterprise_tier, monkeypatch
+):
     from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
@@ -149,8 +154,7 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    # [20250108_BUGFIX] Mock _get_current_tier directly since env var only allows downgrade
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
+    # enterprise_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
         code="def divide(a, b):\n    return a / b\n",
@@ -165,7 +169,9 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_generate_unit_tests_limits_toml_override(monkeypatch, tmp_path):
+async def test_generate_unit_tests_limits_toml_override(
+    community_tier, monkeypatch, tmp_path
+):
     """limits.toml should be the source of truth for numeric limits."""
     from code_scalpel.licensing import clear_cache
     from code_scalpel.mcp import server

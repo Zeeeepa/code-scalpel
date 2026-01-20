@@ -22,9 +22,7 @@ def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 0) -> None:
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(
-            max_total_lines=max_total_lines
-        ),
+""".format(max_total_lines=max_total_lines),
         encoding="utf-8",
     )
 
@@ -116,14 +114,15 @@ async def test_pro_allows_verify_policy_integrity_tool_even_when_broken(
     # Force effective tier to Pro for deterministic testing.
     monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
 
-    tool = server.mcp._tool_manager.get_tool("verify_policy_integrity")
-    result = await tool.run(
-        {"policy_dir": str(policy_dir), "manifest_source": "file"},
-        context=None,
-        convert_result=False,
+    # Import tool directly (FastMCP doesn't expose _tool_manager)
+    from code_scalpel.mcp.tools.policy import verify_policy_integrity
+
+    result = await verify_policy_integrity(
+        policy_dir=str(policy_dir),
+        manifest_source="file",
     )
 
-    # [20260117_BUGFIX] PolicyVerificationResult is a Pydantic model, access via attributes
+    # [20260119_BUGFIX] Tool returns PolicyVerificationResult (Pydantic model)
     # Should return a normal tool result (possibly failing), not be blocked
     assert result.success is False  # Expected to fail without proper manifest
 
@@ -236,15 +235,16 @@ async def test_write_tools_only_flag_skips_policy_integrity_for_read_tools(
 
     monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
 
-    tool = server.mcp._tool_manager.get_tool("analyze_code")
-    result = await tool.run(
-        {"code": "def f():\n    return 1\n", "language": "python", "file_path": None},
-        context=None,
-        convert_result=False,
+    # Import tool directly (FastMCP doesn't expose _tool_manager)
+    from code_scalpel.mcp.tools.analyze import analyze_code
+
+    result = await analyze_code(
+        code="def f():\n    return 1\n",
+        language="python",
+        file_path=None,
     )
 
-    # [20250112_BUGFIX] tool_id not in minimal profile - removed assertion
-    # [20260117_TEST] Tools now return Pydantic models, not dicts
+    # [20260119_BUGFIX] Tool returns AnalysisResult (Pydantic model)
     assert result.error is None
 
 

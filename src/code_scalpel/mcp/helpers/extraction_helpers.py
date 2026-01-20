@@ -5,12 +5,8 @@ from __future__ import annotations
 import ast
 import asyncio
 import logging
-import os
-import re
-import math
-import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, TYPE_CHECKING
 
 from mcp.server.fastmcp import Context
 
@@ -18,15 +14,6 @@ from code_scalpel.mcp.models.core import ContextualExtractionResult, PatchResult
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
 from code_scalpel.mcp.path_resolver import resolve_path
 from code_scalpel.parsing import ParsingError, parse_python_code
-
-# Surgical / Extraction imports
-# Note: Some imports might be inside functions to avoid circular deps or lazy load,
-# but we can try top-level here if safe.
-# from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
-# from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
-
-logger = logging.getLogger("code_scalpel.mcp.extraction")
-
 from code_scalpel.licensing.tier_detector import get_current_tier
 from code_scalpel.mcp.helpers.session import (
     get_session_update_count,
@@ -35,8 +22,28 @@ from code_scalpel.mcp.helpers.session import (
 )
 from code_scalpel.mcp.helpers.security_helpers import validate_path_security
 
-# Define PROJECT_ROOT locally if not imported
-# In a real app this should come from a Context/Config singleton
+if TYPE_CHECKING:
+    from code_scalpel import SurgicalExtractor
+
+logger = logging.getLogger("code_scalpel.mcp.extraction")
+
+
+def _get_project_root() -> Path:
+    """Get the server's PROJECT_ROOT dynamically.
+
+    [20260120_BUGFIX] Import from server module to get the initialized value.
+    Using a getter function ensures we get the value after main() sets it.
+    """
+    try:
+        from code_scalpel.mcp.server import get_project_root
+
+        return get_project_root()
+    except ImportError:
+        return Path.cwd()
+
+
+# [20260120_DEPRECATED] Use _get_project_root() instead of this static variable.
+# Kept for backward compatibility with code that references PROJECT_ROOT directly.
 PROJECT_ROOT = Path.cwd()
 
 
@@ -115,7 +122,6 @@ async def _extract_polyglot(
     """
     # [20251221_FEATURE] v3.1.0 - Use UnifiedExtractor instead of PolyglotExtractor
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.unified_extractor import Language, UnifiedExtractor
 
     if file_path is None and code is None:
@@ -124,12 +130,10 @@ async def _extract_polyglot(
         )
 
     try:
-        import subprocess
 
         # Create extractor from file or code
         if file_path is not None:
-            server = _get_server()
-            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            resolved_path = resolve_path(file_path, str(_get_project_root()))
             extractor = UnifiedExtractor.from_file(resolved_path, language)
         else:
             # code is guaranteed to be str here (checked earlier in function)
@@ -199,7 +203,6 @@ def _create_extractor(
     Returns (extractor, None) on success, (None, error_result) on failure.
     """
     from code_scalpel import SurgicalExtractor
-    from code_scalpel.mcp.path_resolver import resolve_path
 
     if file_path is None and code is None:
         return None, _extraction_error(
@@ -209,8 +212,7 @@ def _create_extractor(
     if file_path is not None:
         try:
             # [20251214_FEATURE] Use PathResolver for intelligent path resolution
-            server = _get_server()
-            resolved_path = resolve_path(file_path, str(PROJECT_ROOT))
+            resolved_path = resolve_path(file_path, str(_get_project_root()))
             return SurgicalExtractor.from_file(resolved_path), None
         except FileNotFoundError as e:
             # PathResolver provides helpful error messages
@@ -429,12 +431,9 @@ async def _extract_code_impl(
             include_cross_file_deps=True
         )
     """
-    server = _get_server()
     # [20251215_FEATURE] v2.0.0 - Roots capability support
     # Fetch allowed roots from client for security boundary enforcement
-    if ctx and file_path:
-        # await server._fetch_and_cache_roots(ctx)  # Deprecated in helper
-        pass
+    # (Deprecated: roots fetching moved to session initialization)
 
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.surgical_extractor import (
@@ -576,7 +575,7 @@ async def _extract_code_impl(
             if file_path is not None:
                 from code_scalpel.mcp.path_resolver import resolve_path
 
-                resolved = resolve_path(file_path, str(PROJECT_ROOT))
+                resolved = resolve_path(file_path, str(_get_project_root()))
                 return Path(resolved).read_text(encoding="utf-8")
             return code or ""
 
@@ -830,22 +829,20 @@ async def rename_symbol(
     Returns:
         PatchResultModel with success status.
     """
-    server = _get_server()
     from code_scalpel.licensing.config_loader import (
         get_cached_limits,
         get_tool_limits,
         merge_limits,
     )
     from code_scalpel.licensing.features import get_tool_capabilities
-    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     warnings: list[str] = []
 
     try:
-        resolved = resolve_path(file_path, str(PROJECT_ROOT))
+        resolved = resolve_path(file_path, str(_get_project_root()))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, PROJECT_ROOT)
+        validate_path_security(resolved_path, _get_project_root())
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection
@@ -893,7 +890,7 @@ async def rename_symbol(
                 )
 
                 xres = rename_references_across_project(
-                    project_root=Path(PROJECT_ROOT),
+                    project_root=_get_project_root(),
                     target_file=Path(file_path),
                     target_type=target_type,
                     target_name=target_name,
@@ -1001,8 +998,6 @@ async def update_symbol(
             - Original indentation preserved
     """
     # [20251228_BUGFIX] Avoid deprecated shim imports.
-    server = _get_server()
-    from code_scalpel.mcp.path_resolver import resolve_path
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
@@ -1161,9 +1156,9 @@ async def update_symbol(
 
     # Load the file
     try:
-        resolved = resolve_path(file_path, str(PROJECT_ROOT))
+        resolved = resolve_path(file_path, str(_get_project_root()))
         resolved_path = Path(resolved)
-        validate_path_security(resolved_path, PROJECT_ROOT)
+        validate_path_security(resolved_path, _get_project_root())
         file_path = str(resolved_path)
 
         # [20260103_BUGFIX] Use UnifiedPatcher for automatic language detection

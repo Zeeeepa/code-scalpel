@@ -7,17 +7,6 @@ from typing import Optional
 import networkx as nx
 from graphviz import Digraph
 
-# # TODO Add interactive visualization framework:
-#     - Build web UI for PDG exploration (React/Vue)
-#     - Implement zoom, pan, and search capabilities
-#     - Add real-time updates for dynamic PDGs
-#     - Support code preview and jump-to-source
-
-# # TODO Add visualization analytics:
-#     - Track user interaction patterns on visualizations
-#     - Identify frequently accessed graph regions
-#     - Suggest interesting subgraphs based on history
-#     - Generate heatmaps of high-risk code areas
 
 
 class VisualizationFormat(Enum):
@@ -53,24 +42,6 @@ class PDGVisualizer:
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()
         self._init_default_styles()
-
-        # # TODO Add adaptive visualization:
-        #     - Detect graph complexity and auto-adjust layout
-        #     - Hide/collapse low-importance subgraphs
-        #     - Focus visualization on user-specified regions
-        #     - Support progressive rendering for large graphs
-
-        # # TODO Add annotation capabilities:
-        #     - Allow user annotations on PDG nodes/edges
-        #     - Support collaborative annotations
-        #     - Track annotation history and changes
-        #     - Export annotations with PDG snapshots
-
-        # # TODO Add comparison visualization:
-        #     - Side-by-side visualization of multiple PDGs
-        #     - Highlight differences between PDGs
-        #     - Support diff mode for before/after transformations
-        #     - Generate visual summaries of PDG changes
 
     def _init_default_styles(self):
         """Initialize default visualization styles."""

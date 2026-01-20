@@ -6,17 +6,6 @@ from typing import Any, Optional
 
 import networkx as nx
 
-# # TODO Add taint analysis improvements:
-#     - Support custom taint sources (config files, environment variables)
-#     - Implement context-sensitive taint tracking
-#     - Add taint sanitization pattern recognition
-#     - Support data structure field-sensitive taints
-
-# # TODO Add advanced alias analysis:
-#     - Implement flow-sensitive alias tracking
-#     - Support pointer analysis for complex reference patterns
-#     - Detect must-alias and may-alias relationships
-#     - Track alias propagation through function parameters
 
 
 class DependencyType(Enum):
@@ -59,23 +48,8 @@ class PDGAnalyzer:
         self.pdg = pdg
         self.cached_results = {}
 
-        # # TODO Add incremental analysis capabilities:
-        #     - Support differential analysis for PDG changes
-        #     - Cache intermediate analysis results
-        #     - Reuse previous analysis on code updates
-        #     - Track analysis invalidation triggers
 
-        # # TODO Add result aggregation and summarization:
-        #     - Aggregate findings across modules/packages
-        #     - Generate executive summaries of issues
-        #     - Support result filtering and prioritization
-        #     - Implement result suppression/baselines for known issues
 
-        # # TODO Add blame/attribution tracking:
-        #     - Link findings to specific developers/commits
-        #     - Track when issues were introduced/fixed
-        #     - Generate responsibility reports
-        #     - Support team-based issue assignment
 
     def analyze_data_flow(self) -> dict[str, Any]:
         """Perform comprehensive data flow analysis."""

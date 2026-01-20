@@ -23,7 +23,6 @@ from pathlib import Path
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-
 TIERS: tuple[str, ...] = ("community", "pro", "enterprise")
 
 

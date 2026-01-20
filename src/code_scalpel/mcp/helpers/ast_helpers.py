@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
-from code_scalpel.utilities.source_sanitizer import sanitize_python_source
 from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
 
 logger = logging.getLogger("code_scalpel.mcp.ast")

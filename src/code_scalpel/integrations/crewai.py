@@ -1,93 +1,9 @@
+
 """
 CrewAIScalpel - Integration wrapper for CrewAI with Code Scalpel analysis capabilities.
 
 This module provides the CrewAIScalpel class that wraps Code Scalpel's
 AST analysis capabilities for use with CrewAI agents and tools.
-
-======================================================================
-COMMUNITY TIER - Core CrewAI Integration
-======================================================================
-1. Add CrewAIClient initialization
-2. Add Agent creation with role and goal
-3. Add Task definition with description
-4. Add Crew assembly with agents and tasks
-5. Add CrewConfig dataclass
-6. Add agent_role() definition
-7. Add agent_goal() specification
-8. Add agent_backstory() context
-9. Add task_description() definition
-10. Add task_expected_output() format
-11. Add team_composition() agent grouping
-12. Add execute_crew() run workflow
-13. Add task_dependency() sequencing
-14. Add parallel_task_execution() concurrent tasks
-15. Add task_input_output() data flow
-16. Add error_handling_crew() failure recovery
-17. Add logging_crew() activity tracking
-18. Add state_management_crew() persistent state
-19. Add memory_management_crew() conversation context
-20. Add configuration_validation_crew() setup verification
-21. Add crew_monitoring() real-time stats
-22. Add crew_metrics() performance analytics
-23. Add task_metrics() individual task stats
-24. Add agent_performance() agent metrics
-25. Add crew_timeout() execution limits
-
-PRO TIER - Advanced CrewAI Features
-======================================================================
-26. Add async_crew_execution() non-blocking
-27. Add streaming_crew_output() real-time results
-28. Add dynamic_task_generation() runtime tasks
-29. Add adaptive_crew_composition() dynamic team
-30. Add skill_sharing() agent capabilities
-31. Add knowledge_sharing_crew() team learning
-32. Add collaboration_patterns() cooperation models
-33. Add delegation_support() task assignment
-34. Add negotiation_support() consensus building
-35. Add voting_mechanism() group decisions
-36. Add consensus_building() agreement reaching
-37. Add conflict_resolution_crew() handling disagreement
-38. Add priority_handling_crew() urgent tasks
-39. Add backpressure_handling() queue management
-40. Add resource_allocation_crew() optimal distribution
-41. Add workload_balancing_crew() even distribution
-42. Add cost_optimization_crew() expense reduction
-43. Add performance_profiling_crew() bottleneck detection
-44. Add debugging_crew() error investigation
-45. Add crew_visualization() workflow diagrams
-46. Add crew_replay() execution replay
-47. Add crew_checkpointing() save state
-48. Add crew_versioning() version tracking
-49. Add crew_rollback() revert capability
-50. Add advanced_analytics_crew() detailed insights
-
-ENTERPRISE TIER - Enterprise CrewAI Features
-======================================================================
-51. Add multi_crew_coordination() multiple teams
-52. Add crew_federation() distributed teams
-53. Add hierarchical_crew_structure() nested teams
-54. Add crew_scaling() handle many agents
-55. Add load_balancing_crew() distribute load
-56. Add auto_scaling_crew() dynamic scaling
-57. Add service_mesh_integration() networking
-58. Add service_discovery() dynamic endpoints
-59. Add circuit_breaker_crew() failure handling
-60. Add bulkhead_pattern_crew() isolation
-61. Add rate_limiting_crew() request throttling
-62. Add quota_management_crew() usage limits
-63. Add audit_logging_crew() forensic trail
-64. Add compliance_crew() regulatory adherence
-65. Add encryption_crew() data protection
-66. Add key_management_crew() secret handling
-67. Add authentication_crew() access control
-68. Add authorization_crew() role enforcement
-69. Add sso_integration_crew() enterprise auth
-70. Add saml_support_crew() identity federation
-71. Add sla_management_crew() service levels
-72. Add incident_management_crew() crisis response
-73. Add disaster_recovery_crew() backup operations
-74. Add multi_region_crew() geographic distribution
-75. Add executive_reporting_crew() leadership metrics
 
 v0.3.1: Now includes taint-based SecurityAnalyzer and SymbolicAnalyzer.
 """

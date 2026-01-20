@@ -16,7 +16,7 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_invalid_license_falls_back_to_community(monkeypatch):
+async def test_invalid_license_falls_back_to_community(community_tier, monkeypatch):
     """Invalid license should fallback to Community tier with warning."""
     from code_scalpel.mcp import server
 
@@ -52,8 +52,7 @@ async def test_invalid_license_falls_back_to_community(monkeypatch):
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Simulate invalid license by mocking tier detection
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up the environment
 
     # Try to use Pro feature (data_driven) without valid license
     result = await server.generate_unit_tests(
@@ -68,7 +67,7 @@ async def test_invalid_license_falls_back_to_community(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_expired_license_falls_back_to_community(monkeypatch):
+async def test_expired_license_falls_back_to_community(community_tier, monkeypatch):
     """Expired license should fallback to Community tier."""
     from code_scalpel.mcp import server
 
@@ -97,8 +96,7 @@ async def test_expired_license_falls_back_to_community(monkeypatch):
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Simulate expired license by clamping to community
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up the environment
 
     # Basic pytest should still work in Community
     result = await server.generate_unit_tests(
@@ -112,7 +110,7 @@ async def test_expired_license_falls_back_to_community(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_missing_license_defaults_to_community(monkeypatch):
+async def test_missing_license_defaults_to_community(community_tier, monkeypatch):
     """Missing license should default to Community tier."""
     from code_scalpel.mcp import server
 
@@ -141,9 +139,7 @@ async def test_missing_license_defaults_to_community(monkeypatch):
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Disable license discovery and no license path provided
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     result = await server.generate_unit_tests(
         code="def f():\n    return 1\n",
@@ -158,12 +154,11 @@ async def test_missing_license_defaults_to_community(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_pro_feature_rejected_without_valid_license(monkeypatch):
+async def test_pro_feature_rejected_without_valid_license(community_tier, monkeypatch):
     """Pro tier features (unittest, data_driven) should be rejected without valid license."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up the environment
 
     # Test 1: unittest framework rejected for Community
     result = await server.generate_unit_tests(
@@ -184,12 +179,13 @@ async def test_pro_feature_rejected_without_valid_license(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_enterprise_feature_rejected_without_valid_license(monkeypatch):
+async def test_enterprise_feature_rejected_without_valid_license(
+    community_tier, monkeypatch
+):
     """Enterprise tier features (crash_log) should be rejected without valid license."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up the environment
 
     # Enterprise feature: crash_log
     result = await server.generate_unit_tests(
@@ -205,7 +201,9 @@ async def test_enterprise_feature_rejected_without_valid_license(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_license_fallback_preserves_community_features(monkeypatch):
+async def test_license_fallback_preserves_community_features(
+    community_tier, monkeypatch
+):
     """License fallback should preserve all Community features."""
     from code_scalpel.mcp import server
 
@@ -257,8 +255,7 @@ async def test_license_fallback_preserves_community_features(monkeypatch):
         )
 
     monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up tier, no need for additional monkeypatch
 
     # Community should support: pytest tests with path-based generation
     result = await server.generate_unit_tests(
@@ -280,8 +277,7 @@ async def test_license_fallback_warning_message_when_feature_gated(monkeypatch):
     """License fallback should include clear warning about gated features."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # community_tier fixture sets up the environment
 
     result = await server.generate_unit_tests(
         code="def f(x):\n    return x\n",

@@ -8,6 +8,7 @@ Pytest configuration and fixtures for Code Scalpel tests.
 
 import json
 import os
+from pathlib import Path
 import sys
 import time
 import urllib.error
@@ -68,6 +69,34 @@ warnings.filterwarnings(
 src_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
+
+
+# [20260120_TEST] Ensure tiered tests load a real license when available
+@pytest.fixture(scope="session", autouse=True)
+def set_default_license_path():
+    """Prime CODE_SCALPEL_LICENSE_PATH with a bundled test license if unset.
+
+    We prefer Enterprise (superset of Pro) but fall back to Pro; we never
+    override an explicitly provided path (e.g., pipeline secrets).
+    """
+
+    if os.environ.get("CODE_SCALPEL_LICENSE_PATH"):
+        return
+
+    license_dir = Path(__file__).parent / "licenses"
+    candidates = [
+        license_dir / "code_scalpel_license_enterprise_20260101_190754.jwt",
+        license_dir / "code_scalpel_license_enterprise_20260101_170506.jwt",
+        license_dir / "code_scalpel_license_pro_20260101_190345.jwt",
+        license_dir / "code_scalpel_license_pro_20260101_170435.jwt",
+    ]
+
+    for candidate in candidates:
+        if candidate.exists():
+            # Allow explicit env overrides while keeping discovery enabled
+            os.environ.setdefault("CODE_SCALPEL_LICENSE_PATH", str(candidate))
+            os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
+            break
 
 # [20251214_FEATURE] v1.5.3 - Ensure osv_client is imported early
 # Now that ast_tools.__init__ imports osv_client, this will automatically

@@ -86,14 +86,14 @@ async def test_missing_frontend_code_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    # This should fail at MCP level or return error
-    env_json = _tool_json(payload)
-    # Check if error is in response - tool will return error for missing required param
-    assert "error" in env_json
-    # Error should be present indicating a problem
-    assert isinstance(env_json.get("error"), dict) or isinstance(
-        env_json.get("error"), str
-    )
+    # [20260120_FIX] MCP returns validation errors via isError=True, not JSON envelope
+    # Missing required parameters trigger pydantic validation which the MCP framework
+    # catches and returns as an error response.
+    assert payload.isError is True
+    assert payload.content, "Error result should have content describing the error"
+    # Error message should mention the missing field
+    error_text = payload.content[0].text if payload.content else ""
+    assert "frontend_code" in error_text.lower() or "required" in error_text.lower()
 
 
 async def test_missing_backend_code_parameter(tmp_path: Path):
@@ -111,14 +111,12 @@ async def test_missing_backend_code_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    # This should fail at MCP level or return error
-    env_json = _tool_json(payload)
-    # Tool will return error for missing required parameter
-    assert "error" in env_json
-    # Error should be present indicating a problem
-    assert isinstance(env_json.get("error"), dict) or isinstance(
-        env_json.get("error"), str
-    )
+    # [20260120_FIX] MCP returns validation errors via isError=True
+    assert payload.isError is True
+    assert payload.content, "Error result should have content describing the error"
+    # Error message should mention the missing field
+    error_text = payload.content[0].text if payload.content else ""
+    assert "backend_code" in error_text.lower() or "required" in error_text.lower()
 
 
 async def test_invalid_frontend_code_type(tmp_path: Path):
@@ -137,10 +135,15 @@ async def test_invalid_frontend_code_type(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
-    # Should have error or MCP should catch type mismatch
-    # Tool should either reject or coerce to string
-    assert "result" in env_json or "error" in env_json
+    # [20260120_FIX] Pydantic may coerce integer to string, or MCP may return error
+    # Either way is acceptable behavior for type validation
+    if payload.isError:
+        # MCP caught validation error
+        assert payload.content, "Error should have content"
+    else:
+        # Pydantic coerced to string - tool should still succeed
+        env_json = _tool_json(payload)
+        assert "success" in env_json or "error" in env_json
 
 
 async def test_invalid_backend_code_type(tmp_path: Path):
@@ -159,9 +162,15 @@ async def test_invalid_backend_code_type(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
-    # Should have error or MCP should catch type mismatch
-    assert "result" in env_json or "error" in env_json
+    # [20260120_FIX] MCP/Pydantic will reject list as string type
+    # Either isError=True, or if somehow accepted, we check the JSON response
+    if payload.isError:
+        # MCP caught validation error
+        assert payload.content, "Error should have content"
+    else:
+        # Fallback check if tool somehow processed it
+        env_json = _tool_json(payload)
+        assert "success" in env_json or "error" in env_json
 
 
 async def test_optional_file_names_have_defaults(tmp_path: Path):

@@ -46,37 +46,6 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-# =============================================
-#
-# COMMUNITY (Current & Planned):
-#
-# COMMUNITY Examples & Tutorials:
-#
-# COMMUNITY Testing & Validation:
-#
-# PRO (Enhanced Features):
-#
-# ENTERPRISE (Advanced Capabilities):
-#   - Avro schema evolution rules
-#   - Thrift IDL change detection
-#   - AsyncAPI specification (message schemas)
-#   - CloudEvents schema validation
-#   - JSON-LD context changes
-
-#   - Generate database migration scripts from schema drift
-#   - Create API client update patches
-#   - Auto-generate deprecation warnings
-#   - Build backward-compatible adapters
-
-#   - Estimate number of affected clients
-#   - Calculate deployment risk score
-#   - Identify dependent services
-#   - Suggest rollout strategy (canary, blue-green)
-
-#   - Generate test cases for breaking changes
-#   - Validate old clients against new schema
-#   - Check schema registry compatibility levels
-#   - Simulate version negotiation
 
 
 class ChangeType(Enum):

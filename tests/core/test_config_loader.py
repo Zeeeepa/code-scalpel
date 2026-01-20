@@ -35,16 +35,14 @@ def test_load_limits_from_default_location():
 def test_load_limits_with_explicit_path(tmp_path):
     """Test loading from explicit path."""
     config_file = tmp_path / "test_limits.toml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [pro.extract_code]
 max_depth = 999
 cross_file_deps = true
 
 [community.security_scan]
 max_findings = 123
-"""
-    )
+""")
 
     limits = load_limits(config_file)
 
@@ -57,12 +55,10 @@ def test_get_tool_limits():
     """Test extracting limits for specific tool/tier."""
     with tempfile.TemporaryDirectory() as tmpdir:
         config_file = Path(tmpdir) / "limits.toml"
-        config_file.write_text(
-            """
+        config_file.write_text("""
 [pro.extract_code]
 max_depth = 42
-"""
-        )
+""")
 
         limits_config = load_limits(config_file)
         tool_limits = get_tool_limits("extract_code", "pro", limits_config)
@@ -86,12 +82,10 @@ def test_get_tool_capabilities_with_config_override(tmp_path, monkeypatch):
     """Test that get_tool_capabilities merges external config."""
     # Create a config with overrides
     config_file = tmp_path / "limits.toml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [pro.extract_code]
 max_depth = 555
-"""
-    )
+""")
 
     # Point loader to our test config
     monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(config_file))
@@ -111,12 +105,10 @@ max_depth = 555
 def test_config_priority_env_var(tmp_path, monkeypatch):
     """Test that CODE_SCALPEL_LIMITS_FILE env var takes priority."""
     config_file = tmp_path / "custom.toml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [community.extract_code]
 max_depth = 777
-"""
-    )
+""")
 
     monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(config_file))
     clear_cache()
@@ -175,12 +167,10 @@ def test_null_values_in_config(tmp_path):
     config_file = tmp_path / "limits.toml"
     # TOML uses 'inf' or omit the key for unlimited; null is not valid TOML
     # Instead, test that we can handle the Python None from omitted values
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [enterprise.extract_code]
 cross_file_deps = true
-"""
-    )
+""")
 
     limits = load_limits(config_file)
 
@@ -199,12 +189,10 @@ cross_file_deps = true
 def test_array_values_in_config(tmp_path):
     """Test that array limit values work."""
     config_file = tmp_path / "limits.toml"
-    config_file.write_text(
-        """
+    config_file.write_text("""
 [pro.symbolic_execute]
 constraint_types = ["int", "bool", "string"]
-"""
-    )
+""")
 
     limits = load_limits(config_file)
 
@@ -221,12 +209,10 @@ def test_local_override_precedence(tmp_path, monkeypatch):
     # In reality, _find_config_file() checks .local.toml first
 
     local_config = tmp_path / "limits.local.toml"
-    local_config.write_text(
-        """
+    local_config.write_text("""
 [pro.extract_code]
 max_depth = 999
-"""
-    )
+""")
 
     monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(local_config))
     clear_cache()
@@ -262,8 +248,7 @@ def test_full_integration_workflow(tmp_path, monkeypatch):
     """Test full workflow: deploy config, tune limits, tool uses them."""
     # Simulate deployment: ship limits.toml with package
     deployed_config = tmp_path / "limits.toml"
-    deployed_config.write_text(
-        """
+    deployed_config.write_text("""
 [pro.extract_code]
 max_depth = 5
 cross_file_deps = true
@@ -271,8 +256,7 @@ max_extraction_size_mb = 20
 
 [community.security_scan]
 max_findings = 100
-"""
-    )
+""")
 
     # Deployer customizes for their environment
     monkeypatch.setenv("CODE_SCALPEL_LIMITS_FILE", str(deployed_config))

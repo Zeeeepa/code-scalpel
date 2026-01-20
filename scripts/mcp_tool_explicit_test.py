@@ -35,7 +35,6 @@ from typing import Any
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-
 # [20251228_TEST] Canonical MCP tool registry (all tiers list all tools).
 EXPECTED_ALL_TOOLS: set[str] = {
     "analyze_code",

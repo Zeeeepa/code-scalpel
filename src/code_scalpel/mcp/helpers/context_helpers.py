@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import asyncio
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Any, cast
@@ -1106,6 +1107,12 @@ async def crawl_project(
 
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
     tier = get_current_tier()
+    # [20260119_BUGFIX] Honor explicit tier override for tests without upconverting community
+    if os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1":
+        forced_tier = os.environ.get("CODE_SCALPEL_TIER")
+        if forced_tier in {"community", "pro", "enterprise"}:
+            tier = forced_tier
+
     caps = get_tool_capabilities("crawl_project", tier)
     capabilities = set(caps.get("capabilities", set()))
     limits = caps.get("limits", {})
@@ -1117,6 +1124,9 @@ async def crawl_project(
     crawl_mode = "discovery" if tier == "community" else "deep"
 
     if tier == "community":
+        # [20260119_BUGFIX] Enforce community default limit when not provided
+        if not max_files:
+            max_files = 100
         # Community: Discovery crawl (inventory + entrypoints)
         result = await asyncio.to_thread(
             _crawl_project_discovery,

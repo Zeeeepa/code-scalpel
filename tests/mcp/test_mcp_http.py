@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client

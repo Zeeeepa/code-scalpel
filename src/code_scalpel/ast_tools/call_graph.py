@@ -565,13 +565,7 @@ class CallGraphBuilder:
             callee = getattr(call_node, "callee", None)
             if isinstance(callee, esprima.nodes.Identifier):
                 return callee.name
-            if isinstance(
-                callee,
-                (
-                    esprima.nodes.StaticMemberExpression,
-                    esprima.nodes.ComputedMemberExpression,
-                ),
-            ):
+            if isinstance(callee, esprima.nodes.MemberExpression):
                 obj = getattr(callee, "object", None)
                 prop = getattr(callee, "property", None)
                 if isinstance(

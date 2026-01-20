@@ -175,9 +175,12 @@ def community_tier(monkeypatch):
     """
     Fixture that sets up Community tier for testing.
 
-    Ensures no license is loaded by disabling license discovery.
+    Ensures no license is loaded by disabling license discovery AND
+    removing any LICENSE_PATH that might point to a valid license.
     """
     # Disable license discovery to ensure community tier
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
+    # Also remove LICENSE_PATH if it exists
+    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
 
     yield {"tier": "community", "license_path": None, "is_mocked": False}

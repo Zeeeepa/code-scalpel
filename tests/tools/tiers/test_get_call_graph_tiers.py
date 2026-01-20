@@ -5,8 +5,6 @@ Tests for get_call_graph tier enforcement and output metadata.
 are properly enforced and populated.
 """
 
-from unittest.mock import patch
-
 import pytest
 
 from src.code_scalpel.mcp.server import CallGraphResultModel, get_call_graph
@@ -16,19 +14,18 @@ class TestOutputMetadataFields:
     """Test that output metadata fields are present and correctly populated."""
 
     @pytest.mark.asyncio
-    async def test_basic_call_graph_includes_metadata(self, tmp_path):
+    async def test_basic_call_graph_includes_metadata(self, tmp_path, community_tier):
         """Basic call graph should include all metadata fields."""
         # Create a simple project
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def main():
     helper()
 
 def helper():
     return 42
-"""
-        )
+""")
+        # community_tier fixture ensures community tier detection
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
         assert result.success is True
@@ -45,11 +42,12 @@ def helper():
         assert isinstance(result.enterprise_metrics_enabled, bool)
 
     @pytest.mark.asyncio
-    async def test_metadata_reflects_actual_limits(self, tmp_path):
+    async def test_metadata_reflects_actual_limits(self, tmp_path, community_tier):
         """Metadata should accurately reflect applied limits."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
+        # community_tier fixture ensures community tier detection
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
@@ -115,12 +113,11 @@ class TestTierEnforcement:
     """Test that tier limits are properly enforced."""
 
     @pytest.mark.asyncio
-    async def test_community_tier_depth_limit(self, tmp_path):
+    async def test_community_tier_depth_limit(self, tmp_path, community_tier):
         """Community tier should enforce max_depth=3."""
         # Create a deeply nested call chain
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def level_0():
     level_1()
 
@@ -138,12 +135,9 @@ def level_4():
 
 def level_5():
     pass
-"""
-        )
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
-        ):
-            result = await get_call_graph(project_root=str(tmp_path), depth=10)
+""")
+        # community_tier fixture from conftest.py disables license discovery
+        result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
         assert result.tier_applied == "community"
@@ -151,13 +145,13 @@ def level_5():
         # Depth should be clamped to 3 even if requested 10
 
     @pytest.mark.asyncio
-    async def test_pro_tier_higher_limits(self, tmp_path):
+    async def test_pro_tier_higher_limits(self, tmp_path, pro_tier):
         """Pro tier should have higher limits than Community."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="pro"):
-            result = await get_call_graph(project_root=str(tmp_path), depth=10)
+        # pro_tier fixture from conftest.py sets JWT license
+        result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
         assert result.success is True
         assert result.tier_applied == "pro"
@@ -165,15 +159,13 @@ def level_5():
         assert result.max_nodes_applied == 500  # Pro limit
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_unlimited(self, tmp_path):
+    async def test_enterprise_tier_unlimited(self, tmp_path, enterprise_tier):
         """Enterprise tier should have unlimited (None) limits."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-        ):
-            result = await get_call_graph(project_root=str(tmp_path), depth=100)
+        # enterprise_tier fixture from conftest.py sets JWT license
+        result = await get_call_graph(project_root=str(tmp_path), depth=100)
 
         assert result.success is True
         assert result.tier_applied == "enterprise"
@@ -185,43 +177,39 @@ class TestCapabilityFlags:
     """Test that capability flags are correctly set based on tier."""
 
     @pytest.mark.asyncio
-    async def test_community_no_advanced_resolution(self, tmp_path):
-        """Community tier should not have advanced resolution."""
+    async def test_community_no_advanced_resolution(self, tmp_path, community_tier):
+        """Community tier should not have advanced_resolution_enabled."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="community"
-        ):
-            result = await get_call_graph(project_root=str(tmp_path))
+        # community_tier fixture from conftest.py disables license discovery
+        result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
         assert result.advanced_resolution_enabled is False
         assert result.enterprise_metrics_enabled is False
 
     @pytest.mark.asyncio
-    async def test_pro_has_advanced_resolution(self, tmp_path):
-        """Pro tier should have advanced resolution enabled."""
+    async def test_pro_has_advanced_resolution(self, tmp_path, pro_tier):
+        """Pro tier should have advanced_resolution_enabled."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch("src.code_scalpel.mcp.server._get_current_tier", return_value="pro"):
-            result = await get_call_graph(project_root=str(tmp_path))
+        # pro_tier fixture from conftest.py sets JWT license
+        result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
         assert result.advanced_resolution_enabled is True
         assert result.enterprise_metrics_enabled is False  # Pro doesn't have this
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_all_features(self, tmp_path):
+    async def test_enterprise_has_all_features(self, tmp_path, enterprise_tier):
         """Enterprise tier should have all capabilities enabled."""
         main_file = tmp_path / "main.py"
         main_file.write_text("def foo(): pass")
 
-        with patch(
-            "src.code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-        ):
-            result = await get_call_graph(project_root=str(tmp_path))
+        # enterprise_tier fixture from conftest.py sets JWT license
+        result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
         assert result.advanced_resolution_enabled is True
@@ -235,15 +223,13 @@ class TestTruncationMetadata:
     async def test_no_truncation_when_within_limits(self, tmp_path):
         """When within limits, truncation fields should indicate no truncation."""
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def foo():
     bar()
 
 def bar():
     pass
-"""
-        )
+""")
         result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True

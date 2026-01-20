@@ -19,6 +19,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 # Import the server module to access resource functions
 import code_scalpel.mcp.server as server_module
 
@@ -31,6 +33,8 @@ from code_scalpel.mcp.resources import (
     get_version,
 )
 
+pytestmark = pytest.mark.asyncio
+
 
 class TestProjectCallGraphResource:
     """Tests for scalpel://project/call-graph resource."""
@@ -39,31 +43,29 @@ class TestProjectCallGraphResource:
         """Verify the resource function exists."""
         assert callable(get_project_call_graph)
 
-    def test_returns_valid_json(self):
+    async def test_returns_valid_json(self):
         """Verify resource returns valid JSON."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a simple Python file
-            Path(tmpdir, "main.py").write_text(
-                """
+            Path(tmpdir, "main.py").write_text("""
 def caller():
     helper()
 
 def helper():
     print("helping")
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_call_graph()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_call_graph()
 
                 # Should be valid JSON
                 data = json.loads(result)
                 assert isinstance(data, dict)
 
-    def test_call_graph_structure(self):
+    async def test_call_graph_structure(self):
         """Verify call graph has correct structure."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "example.py").write_text(
-                """
+            Path(tmpdir, "example.py").write_text("""
 def main():
     process()
     validate()
@@ -73,26 +75,31 @@ def process():
 
 def validate():
     pass
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_call_graph()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_call_graph()
                 data = json.loads(result)
 
-                # Should have file:function keys
-                assert any("main" in key for key in data.keys())
+                # [20260120_FIX] Call graph returns structured result with nodes/edges
+                assert data.get("success") is True
+                assert "nodes" in data
+                assert "edges" in data
 
-                # Values should be lists
-                for key, value in data.items():
-                    assert isinstance(value, list)
+                # Should have nodes including 'main' function
+                nodes = data.get("nodes", [])
+                assert any(n.get("name") == "main" for n in nodes)
 
-    def test_call_graph_empty_project(self):
+    async def test_call_graph_empty_project(self):
         """Verify empty project returns empty graph."""
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_call_graph()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_call_graph()
                 data = json.loads(result)
-                assert data == {}
+                # [20260120_FIX] Empty project still returns structured success result
+                assert data.get("success") is True
+                assert data.get("nodes", []) == []
 
 
 class TestProjectDependenciesResource:
@@ -102,25 +109,25 @@ class TestProjectDependenciesResource:
         """Verify the resource function exists."""
         assert callable(get_project_dependencies)
 
-    def test_returns_valid_json(self):
+    async def test_returns_valid_json(self):
         """Verify resource returns valid JSON."""
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_dependencies()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_dependencies()
                 data = json.loads(result)
                 assert isinstance(data, dict)
 
-    def test_parses_requirements_txt(self):
+    async def test_parses_requirements_txt(self):
         """Verify requirements.txt is parsed."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text(
-                """
+            Path(tmpdir, "requirements.txt").write_text("""
 requests>=2.28.0
 flask>=2.0.0
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_dependencies()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_dependencies()
                 data = json.loads(result)
 
                 assert "python" in data
@@ -128,27 +135,26 @@ flask>=2.0.0
                 assert "requests" in names
                 assert "flask" in names
 
-    def test_parses_pyproject_toml(self):
+    async def test_parses_pyproject_toml(self):
         """Verify pyproject.toml is parsed."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text(
-                """
+            Path(tmpdir, "pyproject.toml").write_text("""
 [project]
 dependencies = [
     "pydantic>=2.0.0",
     "click>=8.0.0",
 ]
-"""
-            )
+""")
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_dependencies()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_dependencies()
                 data = json.loads(result)
 
                 assert "python" in data
                 names = [d["name"] for d in data["python"]]
                 assert "pydantic" in names
 
-    def test_parses_package_json(self):
+    async def test_parses_package_json(self):
         """Verify package.json is parsed."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pkg = {
@@ -157,7 +163,8 @@ dependencies = [
             }
             Path(tmpdir, "package.json").write_text(json.dumps(pkg))
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_dependencies()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_dependencies()
                 data = json.loads(result)
 
                 assert "javascript" in data
@@ -165,11 +172,12 @@ dependencies = [
                 assert "express" in names
                 assert "jest" in names
 
-    def test_empty_project_returns_empty_dict(self):
+    async def test_empty_project_returns_empty_dict(self):
         """Verify empty project returns empty deps."""
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_dependencies()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_dependencies()
                 data = json.loads(result)
                 assert data == {}
 
@@ -181,20 +189,22 @@ class TestProjectStructureResource:
         """Verify the resource function exists."""
         assert callable(get_project_structure)
 
-    def test_returns_valid_json(self):
+    async def test_returns_valid_json(self):
         """Verify resource returns valid JSON."""
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
                 assert isinstance(data, dict)
 
-    def test_structure_has_required_fields(self):
+    async def test_structure_has_required_fields(self):
         """Verify structure has name, type, and children."""
         with tempfile.TemporaryDirectory() as tmpdir:
             Path(tmpdir, "file.txt").touch()
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 assert "name" in data
@@ -202,7 +212,7 @@ class TestProjectStructureResource:
                 assert data["type"] == "directory"
                 assert "children" in data
 
-    def test_includes_files_and_directories(self):
+    async def test_includes_files_and_directories(self):
         """Verify files and directories are included."""
         with tempfile.TemporaryDirectory() as tmpdir:
             Path(tmpdir, "file.py").touch()
@@ -211,7 +221,8 @@ class TestProjectStructureResource:
             Path(subdir, "nested.py").touch()
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 children_names = [c["name"] for c in data["children"]]
@@ -224,21 +235,22 @@ class TestProjectStructureResource:
                 nested_names = [c["name"] for c in subdir_node["children"]]
                 assert "nested.py" in nested_names
 
-    def test_excludes_hidden_files(self):
+    async def test_excludes_hidden_files(self):
         """Verify hidden files are excluded."""
         with tempfile.TemporaryDirectory() as tmpdir:
             Path(tmpdir, ".hidden").touch()
             Path(tmpdir, "visible.py").touch()
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 children_names = [c["name"] for c in data["children"]]
                 assert ".hidden" not in children_names
                 assert "visible.py" in children_names
 
-    def test_excludes_pycache(self):
+    async def test_excludes_pycache(self):
         """Verify __pycache__ is excluded."""
         with tempfile.TemporaryDirectory() as tmpdir:
             cache_dir = Path(tmpdir, "__pycache__")
@@ -247,14 +259,15 @@ class TestProjectStructureResource:
             Path(tmpdir, "module.py").touch()
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 children_names = [c["name"] for c in data["children"]]
                 assert "__pycache__" not in children_names
                 assert "module.py" in children_names
 
-    def test_excludes_venv(self):
+    async def test_excludes_venv(self):
         """Verify venv directory is excluded."""
         with tempfile.TemporaryDirectory() as tmpdir:
             venv_dir = Path(tmpdir, "venv")
@@ -262,13 +275,14 @@ class TestProjectStructureResource:
             Path(tmpdir, "main.py").touch()
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 children_names = [c["name"] for c in data["children"]]
                 assert "venv" not in children_names
 
-    def test_excludes_node_modules(self):
+    async def test_excludes_node_modules(self):
         """Verify node_modules is excluded."""
         with tempfile.TemporaryDirectory() as tmpdir:
             node_dir = Path(tmpdir, "node_modules")
@@ -276,7 +290,8 @@ class TestProjectStructureResource:
             Path(tmpdir, "index.js").touch()
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
-                result = get_project_structure()
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
+                result = await get_project_structure()
                 data = json.loads(result)
 
                 children_names = [c["name"] for c in data["children"]]
@@ -341,7 +356,7 @@ class TestCapabilitiesResource:
 class TestResourceIntegration:
     """Integration tests for MCP resources."""
 
-    def test_all_resources_work_together(self):
+    async def test_all_resources_work_together(self):
         """Test that all resources can be called in sequence."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Setup a mini project
@@ -349,10 +364,11 @@ class TestResourceIntegration:
             Path(tmpdir, "requirements.txt").write_text("requests>=2.0\n")
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
                 # Call all resources
-                call_graph = get_project_call_graph()
-                deps = get_project_dependencies()
-                structure = get_project_structure()
+                call_graph = await get_project_call_graph()
+                deps = await get_project_dependencies()
+                structure = await get_project_structure()
                 version = get_version()
                 capabilities = get_capabilities()
 
@@ -363,55 +379,49 @@ class TestResourceIntegration:
                 assert len(version) > 0
                 assert len(capabilities) > 0
 
-    def test_resources_handle_complex_project(self):
+    async def test_resources_handle_complex_project(self):
         """Test resources with a more complex project structure."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create src directory
             src = Path(tmpdir, "src")
             src.mkdir()
             Path(src, "__init__.py").touch()
-            Path(src, "core.py").write_text(
-                """
+            Path(src, "core.py").write_text("""
 from .utils import helper
 
 def main():
     helper()
-"""
-            )
-            Path(src, "utils.py").write_text(
-                """
+""")
+            Path(src, "utils.py").write_text("""
 def helper():
     pass
-"""
-            )
+""")
 
             # Create tests directory
             tests = Path(tmpdir, "tests")
             tests.mkdir()
-            Path(tests, "test_core.py").write_text(
-                """
+            Path(tests, "test_core.py").write_text("""
 def test_main():
     pass
-"""
-            )
+""")
 
             # Create config files
-            Path(tmpdir, "pyproject.toml").write_text(
-                """
+            Path(tmpdir, "pyproject.toml").write_text("""
 [project]
 name = "test-project"
 dependencies = ["click>=8.0"]
-"""
-            )
+""")
 
             with patch.object(server_module, "PROJECT_ROOT", Path(tmpdir)):
+                server_module._PROJECT_ROOT_HOLDER[0] = Path(tmpdir)
                 # All resources should work
-                call_graph = json.loads(get_project_call_graph())
-                deps = json.loads(get_project_dependencies())
-                structure = json.loads(get_project_structure())
+                call_graph = json.loads(await get_project_call_graph())
+                deps = json.loads(await get_project_dependencies())
+                structure = json.loads(await get_project_structure())
 
-                # Verify call graph has entries
-                assert len(call_graph) > 0
+                # [20260120_FIX] Verify call graph has nodes
+                assert call_graph.get("success") is True
+                assert len(call_graph.get("nodes", [])) > 0
 
                 # Verify deps found
                 assert "python" in deps

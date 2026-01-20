@@ -6,10 +6,6 @@ These vulnerabilities are detected by Pro tier but NOT by Community tier.
 Demonstrates the value of upgrading for modern security coverage.
 """
 
-import os
-import json
-
-
 # ==============================================================================
 # NoSQL INJECTION EXAMPLES (Pro Tier Only)
 # ==============================================================================
@@ -391,12 +387,12 @@ def ldap_authenticate_secure(username: str, password: str) -> bool:
     import ldap.filter
 
     # SECURE: Escape special LDAP characters
-    safe_username = ldap.filter.escape_filter_chars(username)
-    safe_password = ldap.filter.escape_filter_chars(password)
-
-    search_filter = f"(&(uid={safe_username})(password={safe_password}))"
-
+    # Example safe usage:
+    # safe_username = ldap.filter.escape_filter_chars(username)
+    # safe_password = ldap.filter.escape_filter_chars(password)
+    # search_filter = f"(&(uid={safe_username})(password={safe_password}))"
     # ... rest of authentication
+    return "LDAP authentication with proper escaping"
     return False
 
 

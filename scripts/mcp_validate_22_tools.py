@@ -29,7 +29,6 @@ from typing import Any
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-
 EXPECTED_ALL_TOOLS: list[str] = [
     "analyze_code",
     "code_policy_check",

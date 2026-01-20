@@ -950,18 +950,6 @@ def _analyze_code_sync(
     if code.startswith("\ufeff"):
         code = code[1:]
 
-    valid, error = _validate_code(code)
-    if not valid:
-        return AnalysisResult(
-            success=False,
-            functions=[],
-            classes=[],
-            imports=[],
-            complexity=0,
-            lines_of_code=0,
-            error=error,
-        )
-
     # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
     if language == "auto" or language is None:
         # [20251228_BUGFIX] Avoid deprecated shim imports.
@@ -976,7 +964,8 @@ def _analyze_code_sync(
         }
         language = lang_map.get(detected, "python")
 
-    # [20260110_FEATURE] v1.0 - Explicit language validation
+    # [20260110_FEATURE] v1.0 - Explicit language validation (BEFORE code validation)
+    # Must happen before _validate_code() to prevent parsing unsupported languages as Python
     SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
     if language.lower() not in SUPPORTED_LANGUAGES:
         return AnalysisResult(
@@ -987,6 +976,18 @@ def _analyze_code_sync(
             complexity=0,
             lines_of_code=0,
             error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
+        )
+
+    valid, error = _validate_code(code)
+    if not valid:
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            complexity=0,
+            lines_of_code=0,
+            error=error,
         )
 
     # Check cache first

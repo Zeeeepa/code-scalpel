@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from code_scalpel.mcp.server import _get_project_map_sync
+from code_scalpel.mcp.helpers.graph_helpers import _get_project_map_sync
 
 
 @pytest.fixture
@@ -31,8 +31,7 @@ def temp_project_dir():
         (src_dir / "__init__.py").write_text("# Package init\n")
 
         # Create some Python files
-        (src_dir / "main.py").write_text(
-            '''
+        (src_dir / "main.py").write_text('''
 """Main module."""
 
 def main():
@@ -41,18 +40,15 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
-        )
+''')
 
-        (src_dir / "utils.py").write_text(
-            '''
+        (src_dir / "utils.py").write_text('''
 """Utility functions."""
 
 def helper():
     """A helper function."""
     return 42
-'''
-        )
+''')
 
         yield tmpdir
 

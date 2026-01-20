@@ -45,33 +45,6 @@ from ..schema.drift_detector import (
     SchemaDriftResult,
 )
 
-# ===============================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-#
-# Examples & Use Cases:
-#
-# Testing:
-#
-# PRO (Enhanced Features):
-# Core Capabilities:
-#
-# Security Analysis:
-#
-# Best Practices Validation:
-#
-# Contract Evolution:
-#
-# Performance Analysis:
-#
-# ENTERPRISE (Advanced Capabilities):
-# Advanced Analysis:
-#
-# Intelligence & Automation:
-#
-# Integration & Monitoring:
-
 
 class StreamingType(Enum):
     """gRPC streaming patterns."""

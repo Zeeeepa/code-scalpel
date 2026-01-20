@@ -5,11 +5,6 @@ from typing import Optional, Union
 
 import networkx as nx
 
-# # TODO Add multi-dimensional slicing:
-#     - Support simultaneous slicing by multiple criteria
-#     - Implement context-specific slices (class/function scope)
-#     - Add value-dependent slices (track specific constant values)
-#     - Support nondeterministic slicing for concurrent code
 
 
 class SliceType(Enum):
@@ -56,23 +51,6 @@ class ProgramSlicer:
         self.cache = {}
         self._initialize_indices()
 
-        # # TODO Add amnestic slicing:
-        #     - Implement memory-bounded slicing for large graphs
-        #     - Support incremental slice computation with snapshots
-        #     - Add slice compression/summarization
-        #     - Implement lightweight slices for streaming analysis
-
-        # # TODO Add assertion-guided slicing:
-        #     - Slice based on specific program assertions
-        #     - Support property-based slicing for formal verification
-        #     - Track assertion satisfaction along slice paths
-        #     - Generate minimal failing slices for bug reproduction
-
-        # # TODO Add interactive slice refinement:
-        #     - Support user feedback on slice results
-        #     - Enable iterative slice refinement
-        #     - Track slice quality metrics and feedback
-        #     - Learn preferences for future slicing operations
 
     def _initialize_indices(self):
         """Initialize indices for faster slicing."""

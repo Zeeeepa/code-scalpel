@@ -65,12 +65,11 @@ local_pipeline/
 .code-scalpel/test_write.json
 
 # [20250101_TEST] Test license files - valid JWT licenses for tier testing
-tests/licenses/
+# [20260120_SECURITY] ALL license files blocked - injected via GitHub Secrets in CI
+tests/licenses/*.jwt
+tests/licenses/**/*.jwt
 
 # License management (separate repo, ignore if checked out locally)
-code_scalpel_tier_management/
-license-management/
-tier-management/
 .code-scalpel/license/  # License directory contains JWT license files
 .code-scalpel/archive/  # Archived license files (potentially sensitive)
 keys/  # Private keys should never be in this repo

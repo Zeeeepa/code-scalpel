@@ -40,6 +40,23 @@ if TYPE_CHECKING:
     from code_scalpel.graph_engine.graph import UniversalGraph
 
 logger = logging.getLogger("code_scalpel.mcp.graph")
+
+
+def _get_project_root() -> Path:
+    """Get the server's PROJECT_ROOT dynamically.
+
+    [20260120_BUGFIX] Import from server module to get the initialized value.
+    Using a getter function ensures we get the value after main() sets it.
+    """
+    try:
+        from code_scalpel.mcp.server import get_project_root
+
+        return get_project_root()
+    except ImportError:
+        return Path.cwd()
+
+
+# [20260120_DEPRECATED] Use _get_project_root() instead.
 PROJECT_ROOT = Path.cwd()
 
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
@@ -99,8 +116,12 @@ def _get_call_graph_sync(
     paths_from: str | None = None,
     paths_to: str | None = None,
     focus_functions: list[str] | None = None,
+    tier: str = "community",
+    capabilities: dict | None = None,
 ) -> CallGraphResultModel:
-    """Synchronous implementation of get_call_graph."""
+    """Synchronous implementation of get_call_graph with tier-aware metadata."""
+    if capabilities is None:
+        capabilities = {}
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
     # [20251226_BUGFIX] Ensure deterministic truncation and advanced resolution enrichment.
@@ -144,7 +165,7 @@ def _get_call_graph_sync(
                                 edges.add((caller, callee))
         return edges
 
-    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    root_path = Path(project_root) if project_root else _get_project_root()
 
     if not root_path.exists():
         return CallGraphResultModel(
@@ -364,6 +385,14 @@ def _get_call_graph_sync(
             truncation_warning=truncation_warning,
             hot_nodes=hot_nodes,
             dead_code_candidates=dead_code_candidates,
+            # [20260120_FEATURE] Metadata transparency: report tier's limits and capabilities
+            tier_applied=tier,
+            max_depth_applied=capabilities.get("limits", {}).get("max_depth"),
+            max_nodes_applied=capabilities.get("limits", {}).get("max_nodes"),
+            advanced_resolution_enabled="advanced_call_graph"
+            in capabilities.get("capabilities", []),
+            enterprise_metrics_enabled="hot_path_identification"
+            in capabilities.get("capabilities", []),
         )
 
     except Exception as e:
@@ -525,7 +554,7 @@ def _get_graph_neighborhood_sync(
     query: str | None = None,
 ) -> GraphNeighborhoodResult:
     """Synchronous implementation of get_graph_neighborhood."""
-    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    root_path = Path(project_root) if project_root else _get_project_root()
 
     if not root_path.exists():
         return GraphNeighborhoodResult(
@@ -969,7 +998,7 @@ def _get_project_map_sync(
 
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
-    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    root_path = Path(project_root) if project_root else _get_project_root()
 
     # [20250112_FIX] Resolve tier before try block so it's available in except
     tier = tier or _get_current_tier()
@@ -1891,7 +1920,7 @@ def _get_cross_file_dependencies_sync(
     from code_scalpel.licensing.features import get_tool_capabilities
     import os
 
-    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    root_path = Path(project_root) if project_root else _get_project_root()
 
     # [20260127_FIX] Heuristic Auto-Scoping for Community Tier
     # If project_root is not provided by user, check if default usage would cover too many files.
@@ -2689,7 +2718,7 @@ def _cross_file_security_scan_sync(
     elif max_depth_limit is not None:
         max_depth = max_depth_limit
 
-    root_path = Path(project_root) if project_root else PROJECT_ROOT
+    root_path = Path(project_root) if project_root else _get_project_root()
 
     if not root_path.exists():
         return CrossFileSecurityResult(

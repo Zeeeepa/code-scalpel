@@ -51,41 +51,10 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-#   - Solid.js (reactive framework)
-#   - Qwik (resumable framework)
-#   - Lit (web components)
-#   - Alpine.js (lightweight reactive)
-#   - Preact (React alternative)
-#   - Ember.js (MVC framework)
 
-#   - Track innerHTML/outerHTML with tainted data
-#   - Detect dangerouslySetInnerHTML in React
-#   - Identify v-html in Vue (unsafe)
-#   - Track document.write with user input
-#   - Detect eval() with DOM data
 
-#   - Open redirect via router.push(userInput)
-#   - History manipulation attacks
-#   - Route parameter injection
-#   - Hash fragment injection
 
-#   - XSS via localStorage.setItem + getItem
-#   - Session fixation via sessionStorage
-#   - Cookie injection and theft
-#   - IndexedDB taint tracking
 
-#   - PostMessage origin validation
-#   - WebSocket message taint
-#   - Service Worker message handling
-#   - Broadcast Channel API taint
-
-# ===============================================
-#
-# COMMUNITY (Current & Planned):
-#
-# PRO (Enhanced Features):
-#
-# ENTERPRISE (Advanced Capabilities):
 
 
 class FrontendFramework(Enum):

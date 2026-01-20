@@ -136,6 +136,20 @@ jobs:
         pip install pytest pytest-cov
         pip install -e .
     
+    # [20260120_SECURITY] Inject test licenses from GitHub Secrets
+    - name: Setup test licenses for tier testing
+      run: |
+        mkdir -p tests/licenses
+        echo "${{ secrets.TEST_PRO_LICENSE_JWT }}" > tests/licenses/code_scalpel_license_pro_20260101_190345.jwt
+        echo "${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}" > tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
+        echo "${{ secrets.TEST_PRO_LICENSE_BROKEN_JWT }}" > tests/licenses/code_scalpel_license_pro_test_broken.jwt
+        echo "${{ secrets.TEST_ENTERPRISE_LICENSE_BROKEN_JWT }}" > tests/licenses/code_scalpel_license_enterprise_test_broken.jwt
+      env:
+        TEST_PRO_LICENSE_JWT: ${{ secrets.TEST_PRO_LICENSE_JWT }}
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
+        TEST_PRO_LICENSE_BROKEN_JWT: ${{ secrets.TEST_PRO_LICENSE_BROKEN_JWT }}
+        TEST_ENTERPRISE_LICENSE_BROKEN_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_BROKEN_JWT }}
+    
     - name: Run tests with coverage
       run: |
         pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing \

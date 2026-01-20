@@ -52,6 +52,8 @@ from code_scalpel.mcp.helpers.analyze_helpers import (
 )
 from code_scalpel.mcp.paths import (
     maybe_auto_init_config_dir as _maybe_auto_init_config_dir,  # [20260119_BUGFIX]
+    env_truthy as _env_truthy,
+    scalpel_home_dir as _scalpel_home_dir,
 )
 
 # [20260116_REFACTOR] Import shared mcp instance from protocol
@@ -75,6 +77,34 @@ from code_scalpel.licensing.tier_detector import (  # noqa: F401
 # Initialized to "community" (free tier) by default.
 # The actual tier is determined by license validation at runtime.
 CURRENT_TIER = "community"
+
+# [20260119_BUGFIX] Restore backward-compatible project root globals for tests and path validation.
+# [20260120_BUGFIX] Use a mutable container to allow dynamic updates from main().
+# Direct assignment to PROJECT_ROOT creates a new object, but _PROJECT_ROOT_HOLDER[0]
+# can be updated in place and accessed via get_project_root().
+_PROJECT_ROOT_HOLDER: list[Path] = [Path.cwd()]
+PROJECT_ROOT: Path = Path.cwd()  # Backward compat - may be stale after main() runs
+ALLOWED_ROOTS: list[Path] = []
+
+
+def get_project_root() -> Path:
+    """Get the current project root.
+
+    [20260120_FEATURE] Getter function to access PROJECT_ROOT.
+    This allows helper modules to get the dynamically-set value after main() runs.
+    """
+    return _PROJECT_ROOT_HOLDER[0]
+
+
+def set_project_root(path: Path) -> None:
+    """Set the project root (called by main()).
+
+    [20260120_FEATURE] Setter to update both the holder and backward-compat global.
+    """
+    global PROJECT_ROOT
+    _PROJECT_ROOT_HOLDER[0] = path
+    PROJECT_ROOT = path
+
 
 # [20251228_FEATURE] Runtime license grace for long-lived server processes.
 # If a license expires mid-session, keep the last known valid tier for 24h.
@@ -714,6 +744,14 @@ class TestGenerationResult(BaseModel):
     test_cases: list[GeneratedTestCase] = Field(
         default_factory=list, description="Generated test cases"
     )
+    # [20260120_BUGFIX] Align metadata fields with core model for tier transparency and truncation
+    total_test_cases: int = Field(
+        default=0, description="Total test cases before truncation"
+    )
+    truncated: bool = Field(default=False, description="Whether results were truncated")
+    truncation_warning: str | None = Field(
+        default=None, description="Neutral warning when truncation occurs"
+    )
     pytest_code: str = Field(default="", description="Generated pytest code")
     unittest_code: str = Field(default="", description="Generated unittest code")
     error: str | None = Field(default=None, description="Error message if failed")
@@ -730,6 +768,27 @@ class TestGenerationResult(BaseModel):
     )
     access_controlled: bool = Field(
         default=False, description="Whether access control was applied (Enterprise)"
+    )
+    # [20260120_BUGFIX] Output metadata (mirrors mcp.models.core.TestGenerationResult)
+    tier_applied: str = Field(
+        default="community",
+        description="Tier used for this generation (community/pro/enterprise)",
+    )
+    framework_used: str = Field(
+        default="pytest",
+        description="Test framework used for generation",
+    )
+    max_test_cases_limit: int | None = Field(
+        default=None,
+        description="Max test cases limit applied (None=unlimited)",
+    )
+    data_driven_enabled: bool = Field(
+        default=False,
+        description="Whether data-driven/parametrized tests were generated",
+    )
+    bug_reproduction_enabled: bool = Field(
+        default=False,
+        description="Whether bug reproduction mode was used",
     )
 
 
@@ -828,6 +887,16 @@ class CrawlSummary(BaseModel):
 class ProjectCrawlResult(BaseModel):
     """Result of crawling an entire project."""
 
+    # Allow tier-gated feature fields without breaking older clients.
+    try:
+        from pydantic import ConfigDict as _ConfigDict  # type: ignore
+
+        model_config = _ConfigDict(extra="allow")
+    except Exception:
+
+        class Config:  # type: ignore
+            extra = "allow"
+
     success: bool = Field(description="Whether crawl succeeded")
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     root_path: str = Field(description="Project root path")
@@ -841,6 +910,35 @@ class ProjectCrawlResult(BaseModel):
     )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
+    # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
+    tier_applied: str | None = Field(
+        default=None,
+        description="Which tier's rules were applied (community/pro/enterprise)",
+    )
+    crawl_mode: str | None = Field(
+        default=None,
+        description="Crawl mode used: 'discovery' (Community) or 'deep' (Pro/Enterprise)",
+    )
+    files_limit_applied: int | None = Field(
+        default=None, description="Max files limit that was applied (None = unlimited)"
+    )
+    # Tier-gated fields (best-effort, optional)
+    language_breakdown: dict[str, int] | None = Field(
+        default=None, description="Counts of files per detected language"
+    )
+    cache_hits: int | None = Field(
+        default=None,
+        description="Number of files reused from cache (Pro/Enterprise incremental)",
+    )
+    compliance_summary: dict[str, Any] | None = Field(
+        default=None, description="Enterprise compliance scanning summary"
+    )
+    framework_hints: list[str] | None = Field(
+        default=None, description="Detected frameworks/entrypoints in discovery mode"
+    )
+    entrypoints: list[str] | None = Field(
+        default=None, description="Detected entrypoint file paths"
+    )
 
 
 class SurgicalExtractionResult(BaseModel):
@@ -927,9 +1025,6 @@ class PatchResultModel(BaseModel):
 
 
 # [20251212_FEATURE] v1.4.0 - New MCP tool models for enhanced AI context
-
-
-from code_scalpel.mcp.models.core import FunctionInfo, ClassInfo
 
 
 class FileContextResult(BaseModel):
@@ -1099,6 +1194,33 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
     if code.startswith("\ufeff"):
         code = code[1:]
 
+    # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
+    if language == "auto" or language is None:
+        from code_scalpel.unified_extractor import detect_language, Language
+
+        detected = detect_language(None, code)
+        lang_map = {
+            Language.PYTHON: "python",
+            Language.JAVASCRIPT: "javascript",
+            Language.TYPESCRIPT: "typescript",
+            Language.JAVA: "java",
+        }
+        language = lang_map.get(detected, "python")
+
+    # [20260110_FEATURE] v1.0 - Explicit language validation (BEFORE code validation)
+    # Must happen before _validate_code() to prevent parsing unsupported languages as Python
+    SUPPORTED_LANGUAGES = {"python", "javascript", "typescript", "java"}
+    if language.lower() not in SUPPORTED_LANGUAGES:
+        return AnalysisResult(
+            success=False,
+            functions=[],
+            classes=[],
+            imports=[],
+            complexity=0,
+            lines_of_code=0,
+            error=f"Unsupported language '{language}'. Supported: {', '.join(sorted(SUPPORTED_LANGUAGES))}. Roadmap: Go/Rust in Q1 2026.",
+        )
+
     valid, error = _validate_code(code)
     if not valid:
         return AnalysisResult(
@@ -1114,19 +1236,6 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             error=error,
         )
 
-    # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
-    if language == "auto" or language is None:
-        from code_scalpel.unified_extractor import detect_language, Language
-
-        detected = detect_language(None, code)
-        lang_map = {
-            Language.PYTHON: "python",
-            Language.JAVASCRIPT: "javascript",
-            Language.TYPESCRIPT: "typescript",
-            Language.JAVA: "java",
-        }
-        language = lang_map.get(detected, "python")
-
     # Check cache first
     cache = _get_cache()
     cache_config = {"language": language}
@@ -1136,11 +1245,22 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
             logger.debug("Cache hit for analyze_code")
             # Convert dict back to AnalysisResult if needed
             if isinstance(cached, dict):
-                return AnalysisResult(**cached)
+                cached = AnalysisResult(**cached)
+
+            # [20260119_BUGFIX] Ensure cached entries carry metadata for output contract
+            if cached.language_detected is None:
+                cached.language_detected = language
+            if cached.tier_applied is None:
+                cached.tier_applied = get_current_tier_from_license()
+
             return cached
 
     if language.lower() == "java":
         result = _analyze_java_code(code)
+        if result.success:
+            # [20260119_BUGFIX] Populate metadata fields for v1.0 output contract
+            result.language_detected = "java"
+            result.tier_applied = get_current_tier_from_license()
         if cache and result.success:
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
@@ -1148,12 +1268,20 @@ def _analyze_code_sync(code: str, language: str = "auto") -> AnalysisResult:
     # [20251220_FEATURE] v3.0.4 - Route JavaScript/TypeScript to tree-sitter analyzer
     if language.lower() == "javascript":
         result = _analyze_javascript_code(code, is_typescript=False)
+        if result.success:
+            # [20260119_BUGFIX] Populate metadata fields for v1.0 output contract
+            result.language_detected = "javascript"
+            result.tier_applied = get_current_tier_from_license()
         if cache and result.success:
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
 
     if language.lower() == "typescript":
         result = _analyze_javascript_code(code, is_typescript=True)
+        if result.success:
+            # [20260119_BUGFIX] Populate metadata fields for v1.0 output contract
+            result.language_detected = "typescript"
+            result.tier_applied = get_current_tier_from_license()
         if cache and result.success:
             cache.set(code, "analysis", result.model_dump(), cache_config)
         return result
@@ -3105,8 +3233,8 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
                 file_path=str(path),
                 language=detected_lang,
                 line_count=len(lines),
-                functions=analysis.functions,
-                classes=analysis.classes,
+                functions=analysis.functions,  # type: ignore[assignment]
+                classes=analysis.classes,  # type: ignore[assignment]
                 imports=analysis.imports[:20],
                 exports=[],
                 complexity_score=analysis.complexity,
@@ -3120,7 +3248,7 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
         # [20260119_REFACTOR] Use unified parser for Python files
         # Python-specific parsing via unified parser with filename context
         try:
-            from code_scalpel.parsing import ParsingError, parse_python_code
+            from code_scalpel.parsing import parse_python_code
 
             tree, _san_report = parse_python_code(code, filename=str(path))
         except Exception as e:  # Handle ParsingError or unexpected exceptions
@@ -3225,8 +3353,8 @@ def _get_file_context_sync(file_path: str) -> FileContextResult:
             file_path=str(path),
             language="python",
             line_count=len(lines),
-            functions=functions,
-            classes=classes,
+            functions=functions,  # type: ignore[assignment]
+            classes=classes,  # type: ignore[assignment]
             imports=imports[:20],
             exports=exports,
             complexity_score=complexity,
@@ -3431,6 +3559,24 @@ class CallGraphResultModel(BaseModel):
     )
     error: str | None = Field(default=None, description="Error message if failed")
 
+    # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
+    tier_applied: str = Field(
+        default="community",
+        description="Which tier's rules were applied (community/pro/enterprise)",
+    )
+    max_depth_applied: int | None = Field(
+        default=None, description="Max depth limit that was applied (None = unlimited)"
+    )
+    max_nodes_applied: int | None = Field(
+        default=None, description="Max nodes limit that was applied (None = unlimited)"
+    )
+    advanced_resolution_enabled: bool = Field(
+        default=False, description="Whether advanced resolution is enabled (Pro)"
+    )
+    enterprise_metrics_enabled: bool = Field(
+        default=False, description="Whether enterprise metrics are enabled"
+    )
+
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
     semantic_summary: Optional[str] = Field(
         default=None, description="AI-generated semantic summary (Pro)"
@@ -3444,6 +3590,12 @@ class CallGraphResultModel(BaseModel):
     access_controlled: bool = Field(
         default=False, description="Whether access control was applied (Enterprise)"
     )
+    hot_nodes: Optional[list[str]] = Field(
+        default=None, description="Hot nodes detected by call frequency (Enterprise)"
+    )
+    dead_code_candidates: Optional[list[str]] = Field(
+        default=None, description="Potential dead code nodes (Enterprise)"
+    )
 
 
 def _get_call_graph_sync(
@@ -3451,6 +3603,8 @@ def _get_call_graph_sync(
     entry_point: str | None,
     depth: int,
     include_circular_import_check: bool,
+    tier: str = "community",
+    capabilities: dict[str, Any] | None = None,
 ) -> CallGraphResultModel:
     """Synchronous implementation of get_call_graph."""
     from code_scalpel.ast_tools.call_graph import CallGraphBuilder
@@ -3461,11 +3615,48 @@ def _get_call_graph_sync(
         return CallGraphResultModel(
             success=False,
             error=f"Project root not found: {root_path}.",
+            tier_applied=tier,
         )
+
+    # [20260120_FEATURE] Apply tier limits
+    limits = capabilities.get("limits", {}) if capabilities else {}
+    max_depth_limit = limits.get("max_depth", None)
+    max_nodes_limit = limits.get("max_nodes", None)
+
+    # Ensure limits and depth are integers
+    try:
+        if max_depth_limit is not None:
+            max_depth_limit = int(max_depth_limit)
+        if max_nodes_limit is not None:
+            max_nodes_limit = int(max_nodes_limit)
+        if depth is not None:
+            depth = int(depth)
+    except (ValueError, TypeError) as e:
+        return CallGraphResultModel(
+            success=False,
+            error=f"Invalid depth or limit types: depth={depth} ({type(depth)}), max_depth={max_depth_limit} ({type(max_depth_limit)}), max_nodes={max_nodes_limit} ({type(max_nodes_limit)}): {e}",
+            tier_applied=tier,
+        )
+
+    # Apply depth limit
+    if max_depth_limit is not None and (depth is None or depth > max_depth_limit):
+        depth = max_depth_limit
+
+    # [20260120_FEATURE] Check for advanced resolution capability
+    advanced_resolution = (
+        "advanced_call_graph" in capabilities.get("capabilities", set())
+        if capabilities
+        else False
+    )
 
     try:
         builder = CallGraphBuilder(root_path)
-        result = builder.build_with_details(entry_point=entry_point, depth=depth)
+        result = builder.build_with_details(
+            entry_point=entry_point,
+            depth=depth,
+            max_nodes=max_nodes_limit,
+            advanced_resolution=advanced_resolution,
+        )
 
         # Convert dataclasses to Pydantic models
         nodes = [
@@ -3486,6 +3677,9 @@ def _get_call_graph_sync(
         if include_circular_import_check:
             circular_imports = builder.detect_circular_imports()
 
+        # [20260120_FEATURE] Populate metadata fields
+        enterprise_metrics = tier == "enterprise"
+
         return CallGraphResultModel(
             nodes=nodes,
             edges=edges,
@@ -3493,12 +3687,18 @@ def _get_call_graph_sync(
             depth_limit=result.depth_limit,
             mermaid=result.mermaid,
             circular_imports=circular_imports,
+            tier_applied=tier,
+            max_depth_applied=max_depth_limit,
+            max_nodes_applied=max_nodes_limit,
+            advanced_resolution_enabled=advanced_resolution,
+            enterprise_metrics_enabled=enterprise_metrics,
         )
 
     except Exception as e:
         return CallGraphResultModel(
             success=False,
             error=f"Call graph analysis failed: {str(e)}",
+            tier_applied=tier,
         )
 
 
@@ -3768,6 +3968,25 @@ class ProjectMapResult(BaseModel):
         default=False, description="Whether Mermaid diagram was truncated"
     )
     error: str | None = Field(default=None, description="Error message if failed")
+
+    # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
+    tier_applied: str | None = Field(
+        default=None,
+        description="Which tier's rules were applied (community/pro/enterprise)",
+    )
+    max_files_applied: int | None = Field(
+        default=None, description="Max files limit that was applied (None = unlimited)"
+    )
+    max_modules_applied: int | None = Field(
+        default=None,
+        description="Max modules limit that was applied (None = unlimited)",
+    )
+    pro_features_enabled: bool = Field(
+        default=False, description="Whether Pro features are enabled"
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False, description="Whether enterprise features are enabled"
+    )
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
     semantic_summary: Optional[str] = Field(
@@ -4549,10 +4768,26 @@ class CrossFileSecurityResult(BaseModel):
         default_factory=list, description="Functions containing dangerous sinks"
     )
 
-    # Visualization
-    mermaid: str = Field(default="", description="Mermaid diagram of taint flows")
-
     error: str | None = Field(default=None, description="Error message if failed")
+
+    # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
+    tier_applied: str = Field(
+        default="community",
+        description="Which tier's rules were applied (community/pro/enterprise)",
+    )
+    max_depth_applied: int | None = Field(
+        default=None, description="Max depth limit that was applied (None = unlimited)"
+    )
+    max_modules_applied: int | None = Field(
+        default=None,
+        description="Max modules limit that was applied (None = unlimited)",
+    )
+    framework_aware_enabled: bool = Field(
+        default=False, description="Whether framework-aware analysis is enabled (Pro)"
+    )
+    enterprise_features_enabled: bool = Field(
+        default=False, description="Whether enterprise features are enabled"
+    )
 
     # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
     semantic_summary: Optional[str] = Field(
@@ -4567,6 +4802,25 @@ class CrossFileSecurityResult(BaseModel):
     access_controlled: bool = Field(
         default=False, description="Whether access control was applied (Enterprise)"
     )
+    framework_contexts: Optional[dict[str, Any]] = Field(
+        default=None, description="Framework-specific analysis context (Enterprise)"
+    )
+    dependency_chains: Optional[list[str]] = Field(
+        default=None, description="Full dependency chains (Enterprise)"
+    )
+    confidence_scores: Optional[dict[str, float]] = Field(
+        default=None, description="Confidence scores for findings (Enterprise)"
+    )
+    global_flows: Optional[list[TaintFlowModel]] = Field(
+        default=None, description="Global taint flows across all modules (Enterprise)"
+    )
+    microservice_boundaries: Optional[list[str]] = Field(
+        default=None, description="Detected microservice boundaries (Enterprise)"
+    )
+    distributed_trace: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Distributed trace information for cross-service flows (Enterprise)",
+    )
 
 
 def _cross_file_security_scan_sync(
@@ -4578,6 +4832,9 @@ def _cross_file_security_scan_sync(
     max_modules: (
         int | None
     ) = 500,  # [20251220_PERF] Default module limit for large projects
+    tier: str = "community",
+    capabilities: dict[str, Any] | None = None,
+    confidence_threshold: float = 0.7,
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
     from code_scalpel.security.analyzers.cross_file_taint import (
@@ -4590,6 +4847,19 @@ def _cross_file_security_scan_sync(
         return CrossFileSecurityResult(
             success=False,
             error=f"Project root not found: {root_path}.",
+        )
+
+    # [20260120_FEATURE] Apply tier limits
+    limits = capabilities.get("limits", {}) if capabilities else {}
+    max_depth_limit = limits.get("max_depth", max_depth)
+    max_modules_limit = limits.get("max_modules", max_modules)
+
+    # Apply limits (None means unlimited)
+    if max_depth_limit is not None:
+        max_depth = min(max_depth, max_depth_limit)
+    if max_modules_limit is not None:
+        max_modules = (
+            min(max_modules, max_modules_limit) if max_modules else max_modules_limit
         )
 
     try:
@@ -4690,9 +4960,10 @@ def _cross_file_security_scan_sync(
             risk_level = "critical"
 
         # Generate Mermaid diagram
-        mermaid = ""
+        # Generate mermaid diagram if requested
         if include_diagram:
-            mermaid = tracker.get_taint_graph_mermaid()
+            _ = tracker.get_taint_graph_mermaid()  # Future enhancement
+            # Store diagram for potential future use in result
 
         # Extract taint sources from tracker's internal state
         taint_sources = []
@@ -4720,7 +4991,20 @@ def _cross_file_security_scan_sync(
             taint_flows=taint_flows,
             taint_sources=taint_sources,
             dangerous_sinks=dangerous_sinks,
-            mermaid=mermaid,
+            # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
+            tier_applied=tier,
+            max_depth_applied=max_depth if max_depth else None,
+            max_modules_applied=max_modules,
+            framework_aware_enabled=(
+                bool(
+                    capabilities
+                    and "framework_aware_taint"
+                    in capabilities.get("capabilities", set())
+                )
+                if capabilities
+                else False
+            ),
+            enterprise_features_enabled=tier == "enterprise",
         )
 
     except Exception as e:
@@ -4957,22 +5241,23 @@ def run_server(
     # NOTE: this is process-global; the server is intended to run once per process.
     _apply_tier_tool_filter(tier)
 
-    global PROJECT_ROOT
+    # [20260120_BUGFIX] Use set_project_root() to update both holder and global.
     if root_path:
-        PROJECT_ROOT = Path(root_path).resolve()
-        if not PROJECT_ROOT.exists():
+        resolved_root = Path(root_path).resolve()
+        if not resolved_root.exists():
             # Use stderr for warnings to avoid corrupting stdio transport
             print(
-                f"Warning: Root path {PROJECT_ROOT} does not exist. Using current directory.",
+                f"Warning: Root path {resolved_root} does not exist. Using current directory.",
                 file=sys.stderr,
             )
-            PROJECT_ROOT = Path.cwd()
+            resolved_root = Path.cwd()
+        set_project_root(resolved_root)
 
     # [20260117_FEATURE] v1.0.0 - Auto-initialize .code-scalpel/ on first run
     # Creates essential config files if the directory doesn't exist.
     # Uses "templates_only" mode (no secrets) by default for safety.
     init_result = _maybe_auto_init_config_dir(
-        project_root=PROJECT_ROOT,
+        project_root=get_project_root(),
         tier=tier,
         enabled=True,  # Always enabled for v1.0 - creates config on first run
         mode="templates_only",  # Safe default - no secrets written
@@ -4987,7 +5272,7 @@ def run_server(
     # [20251215_BUGFIX] Print to stderr for stdio transport
     output = sys.stderr if transport == "stdio" else sys.stdout
     print(f"Code Scalpel MCP Server v{__version__}", file=output)
-    print(f"Project Root: {PROJECT_ROOT}", file=output)
+    print(f"Project Root: {get_project_root()}", file=output)
     print(f"Tier: {tier}", file=output)
 
     # [20251215_FEATURE] SSL/HTTPS support for production deployments
@@ -5139,6 +5424,15 @@ def _register_http_health_endpoint(
 
 
 if __name__ == "__main__":
+    # [20260120_BUGFIX] Register this module as code_scalpel.mcp.server in sys.modules.
+    # When running via `python -m`, the module is loaded as __main__ but helpers import
+    # from code_scalpel.mcp.server. Without this fix, those imports get a DIFFERENT
+    # module object, causing _PROJECT_ROOT_HOLDER to not be shared.
+    import sys
+
+    if "code_scalpel.mcp.server" not in sys.modules:
+        sys.modules["code_scalpel.mcp.server"] = sys.modules[__name__]
+
     import argparse
 
     parser = argparse.ArgumentParser(description="Code Scalpel MCP Server")

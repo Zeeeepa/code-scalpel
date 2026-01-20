@@ -189,7 +189,7 @@ async def test_pro_unlimited_dependencies(
             read_timeout_seconds=timedelta(seconds=90),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         assert data.get("total_dependencies") == 150
@@ -233,7 +233,7 @@ async def test_enterprise_unlimited_and_compliance_report(
             read_timeout_seconds=timedelta(seconds=45),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "enterprise"
         assert data.get("success") is True
         # Enterprise adds compliance fields (violations may be absent if none)
@@ -278,7 +278,8 @@ async def test_reachability_analysis_pro_sets_is_imported(
             },
             read_timeout_seconds=timedelta(seconds=30),
         )
-        data = _tool_json(payload).get("data") or {}
+        env_json = _tool_json(payload)
+        data = env_json.get("data") or env_json
         deps = data.get("dependencies") or []
         assert any(
             d.get("is_imported") is True for d in deps if d.get("name") == "requests"
@@ -320,7 +321,7 @@ async def test_pro_omits_enterprise_fields(
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         assert data.get("compliance_report") is None
@@ -345,7 +346,8 @@ async def test_missing_license_defaults_to_community_with_limit(tmp_path: Path):
             },
             read_timeout_seconds=timedelta(seconds=30),
         )
-        data = _tool_json(payload).get("data") or {}
+        env_json = _tool_json(payload)
+        data = env_json.get("data") or env_json
         assert data.get("total_dependencies") == 50
         break
 
@@ -368,7 +370,7 @@ async def test_community_truncation_warning(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
         assert data.get("total_dependencies") == 50
@@ -415,7 +417,7 @@ async def test_pro_typosquatting_detection(
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         deps = data.get("dependencies") or []
@@ -463,7 +465,7 @@ async def test_pro_supply_chain_risk_scoring(
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         deps = data.get("dependencies") or []
@@ -512,7 +514,7 @@ async def test_enterprise_policy_violations_for_typosquatting(
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "enterprise"
         assert data.get("success") is True
         policy_violations = data.get("policy_violations") or []
@@ -561,7 +563,7 @@ async def test_enterprise_unlimited_dependencies(
             read_timeout_seconds=timedelta(seconds=60),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "enterprise"
         assert data.get("success") is True
         assert data.get("total_dependencies") == 100
@@ -631,7 +633,7 @@ async def test_multi_format_maven(
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         # Verify Maven ecosystem detection
@@ -696,7 +698,7 @@ dependencies {
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         # Verify Gradle file parsed (build.gradle is classified as Maven ecosystem by parser)
@@ -766,7 +768,7 @@ async def test_monorepo_aggregation(
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
         # Verify aggregation: requirements.txt(5) + pom.xml(1) = at least 6 dependencies
@@ -799,7 +801,7 @@ async def test_community_suppresses_pro_fields(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
 
@@ -835,7 +837,7 @@ async def test_community_suppresses_enterprise_fields(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
 
@@ -869,7 +871,7 @@ async def test_community_typosquat_returns_no_pro_fields(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
         deps = data.get("dependencies") or []
@@ -900,7 +902,7 @@ async def test_unsupported_file_format_graceful_handling(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         assert data.get("success") is True
         assert data.get("total_dependencies") == 0
         deps = data.get("dependencies") or []
@@ -944,7 +946,7 @@ async def test_expired_license_fallback_to_community(
             read_timeout_seconds=timedelta(seconds=30),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # Fallback to community tier
         # assert env_json["tier"] == "community"
         assert data.get("success") is True
@@ -1007,7 +1009,7 @@ async def test_pro_license_compliance_flags_gpl(
             read_timeout_seconds=timedelta(seconds=60),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
         # assert env_json["tier"] == "pro"
         assert data.get("success") is True
 
@@ -1066,7 +1068,7 @@ async def test_community_output_metadata_fields(tmp_path: Path):
             },
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
 
         # tier_applied should be present and correct
         # assert "tier_applied" in data, "tier_applied field missing from response"
@@ -1134,7 +1136,7 @@ async def test_pro_output_metadata_fields(
             read_timeout_seconds=timedelta(seconds=60),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
 
         # tier_applied should be "pro"
         # assert "tier_applied" in data, "tier_applied field missing from response"
@@ -1151,7 +1153,6 @@ async def test_pro_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features
-        pro_features = data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Pro tier"
@@ -1217,7 +1218,7 @@ async def test_enterprise_output_metadata_fields(
             read_timeout_seconds=timedelta(seconds=60),
         )
         env_json = _tool_json(payload)
-        data = env_json.get("data") or {}
+        data = env_json.get("data") or env_json
 
         # tier_applied should be "enterprise"
         # assert "tier_applied" in data, "tier_applied field missing from response"
@@ -1234,7 +1235,6 @@ async def test_enterprise_output_metadata_fields(
         ), f"Expected max_dependencies_applied=None (unlimited), got: {max_deps}"
 
         # pro_features_enabled should list Pro features (Enterprise includes all Pro features)
-        pro_features = data.get("pro_features_enabled")
         # assert (
         #     pro_features is not None
         # ), "pro_features_enabled should be populated at Enterprise tier"

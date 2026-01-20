@@ -14,11 +14,11 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_deterministic_output_multiple_runs(monkeypatch):
+async def test_deterministic_output_multiple_runs(community_tier):
     """Generated test output should be identical across multiple runs with same input."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def classify_number(n):
@@ -60,11 +60,11 @@ def classify_number(n):
 
 
 @pytest.mark.asyncio
-async def test_stable_test_naming_no_random_elements(monkeypatch):
+async def test_stable_test_naming_no_random_elements(community_tier):
     """Test names should not contain random elements (UUIDs, timestamps, random IDs)."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def is_even(n):
@@ -93,11 +93,11 @@ def is_even(n):
 
 
 @pytest.mark.asyncio
-async def test_consistent_test_ordering(monkeypatch):
+async def test_consistent_test_ordering(community_tier):
     """Test cases should maintain consistent ordering across runs."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def get_sign(x):
@@ -127,11 +127,11 @@ def get_sign(x):
 
 
 @pytest.mark.asyncio
-async def test_framework_output_format_reproducible(monkeypatch):
+async def test_framework_output_format_reproducible(community_tier):
     """Framework output (pytest/unittest) should be reproducible."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def add(a, b):
@@ -158,11 +158,11 @@ def add(a, b):
 
 
 @pytest.mark.asyncio
-async def test_parametrized_test_stability_pro_tier(monkeypatch):
+async def test_parametrized_test_stability_pro_tier(pro_tier):
     """Parametrized tests (Pro tier) should have stable structure."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # pro_tier fixture sets up the environment
 
     code = """
 def max_number(a, b):
@@ -194,11 +194,11 @@ def max_number(a, b):
 
 
 @pytest.mark.asyncio
-async def test_determinism_with_complex_control_flow(monkeypatch):
+async def test_determinism_with_complex_control_flow(community_tier):
     """Determinism should hold for complex control flow."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def grade(score):
@@ -231,11 +231,11 @@ def grade(score):
 
 
 @pytest.mark.asyncio
-async def test_consistency_across_frameworks(monkeypatch):
+async def test_consistency_across_frameworks(pro_tier):
     """Same test cases should be stable whether pytest or unittest."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # pro_tier fixture sets up the environment
 
     code = """
 def double(x):
@@ -273,11 +273,11 @@ def double(x):
 
 
 @pytest.mark.asyncio
-async def test_determinism_with_boundary_values(monkeypatch):
+async def test_determinism_with_boundary_values(community_tier):
     """Boundary value tests should be generated deterministically."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
+    # community_tier fixture sets up the environment
 
     code = """
 def in_range(x, min_val, max_val):

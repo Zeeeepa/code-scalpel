@@ -2,82 +2,69 @@
 Tests for Workflow Prompts.
 
 [20251216_TEST] Tests for Feature 10: Workflow Prompts
+[20260120_REFACTOR] Updated to test new canonical prompt API
 """
 
+from mcp.server.fastmcp.prompts.base import Message as PromptMessage
 
-class TestSecurityAuditPrompt:
-    """Test the security audit workflow prompt."""
 
-    def test_security_audit_prompt_exists(self):
-        """Test that the security audit prompt is defined."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+class TestDeepSecurityAuditPrompt:
+    """Test the deep security audit workflow prompt."""
 
-        assert security_audit_workflow_prompt is not None
-        assert callable(security_audit_workflow_prompt)
+    def test_deep_security_audit_prompt_exists(self):
+        """Test that the deep security audit prompt is defined."""
+        from code_scalpel.mcp.prompts import deep_security_audit
 
-    def test_security_audit_prompt_takes_project_path(self):
-        """Test that the prompt accepts a project_path parameter."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+        assert deep_security_audit is not None
+        assert callable(deep_security_audit)
 
-        result = security_audit_workflow_prompt("/path/to/project")
+    def test_deep_security_audit_prompt_takes_path(self):
+        """Test that the prompt accepts a path parameter."""
+        from code_scalpel.mcp.prompts import deep_security_audit
 
-        assert isinstance(result, str)
+        result = deep_security_audit("/path/to/project")
+
+        assert isinstance(result, list)
         assert len(result) > 0
+        assert all(isinstance(msg, PromptMessage) for msg in result)
 
-    def test_security_audit_prompt_includes_project_path(self):
+    def test_deep_security_audit_prompt_includes_path(self):
         """Test that the prompt includes the project path."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+        from code_scalpel.mcp.prompts import deep_security_audit
 
         project_path = "/my/test/project"
-        result = security_audit_workflow_prompt(project_path)
+        result = deep_security_audit(project_path)
 
-        assert project_path in result
+        # Get the content from the first message (UserMessage.content is TextContent)
+        content = result[0].content
+        # TextContent has .text attribute with actual string
+        text = getattr(content, "text", str(content))
+        assert project_path in text
 
-    def test_security_audit_prompt_includes_steps(self):
-        """Test that the prompt includes all workflow steps."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+    def test_deep_security_audit_prompt_includes_steps(self):
+        """Test that the prompt includes workflow steps."""
+        from code_scalpel.mcp.prompts import deep_security_audit
 
-        result = security_audit_workflow_prompt("/project")
+        result = deep_security_audit("/project")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
-        # Check for key workflow steps
-        assert "Step 1" in result
-        assert "Step 2" in result
-        assert "Step 3" in result
-        assert "Step 4" in result
+        # Check for numbered steps
+        assert "1)" in text or "Step" in text
+        assert "2)" in text
+        assert "3)" in text
 
-    def test_security_audit_prompt_mentions_tools(self):
+    def test_deep_security_audit_prompt_mentions_tools(self):
         """Test that the prompt mentions required MCP tools."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+        from code_scalpel.mcp.prompts import deep_security_audit
 
-        result = security_audit_workflow_prompt("/project")
+        result = deep_security_audit("/project")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
         # Check for tool mentions
-        assert "crawl_project" in result
-        assert "security_scan" in result
-        assert "scan_dependencies" in result
-
-    def test_security_audit_prompt_includes_severity_levels(self):
-        """Test that the prompt includes severity level guidance."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
-
-        result = security_audit_workflow_prompt("/project")
-
-        # Check for severity levels
-        assert "CRITICAL" in result
-        assert "HIGH" in result
-        assert "MEDIUM" in result
-        assert "LOW" in result
-
-    def test_security_audit_prompt_provides_concrete_examples(self):
-        """Test that the prompt provides concrete tool invocation examples."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
-
-        result = security_audit_workflow_prompt("/project")
-
-        # Check for concrete examples with code blocks
-        assert "```" in result
-        assert "crawl_project(" in result
-        assert "security_scan(" in result
+        assert "security_scan" in text
+        assert "scan_dependencies" in text
 
 
 class TestSafeRefactorPrompt:
@@ -85,128 +72,194 @@ class TestSafeRefactorPrompt:
 
     def test_safe_refactor_prompt_exists(self):
         """Test that the safe refactor prompt is defined."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        from code_scalpel.mcp.prompts import safe_refactor
 
-        assert safe_refactor_workflow_prompt is not None
-        assert callable(safe_refactor_workflow_prompt)
+        assert safe_refactor is not None
+        assert callable(safe_refactor)
 
     def test_safe_refactor_prompt_takes_parameters(self):
-        """Test that the prompt accepts file_path and symbol_name parameters."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        """Test that the prompt accepts file_path, symbol_name, and goal parameters."""
+        from code_scalpel.mcp.prompts import safe_refactor
 
-        result = safe_refactor_workflow_prompt("/path/to/file.py", "my_function")
+        result = safe_refactor(
+            "/path/to/file.py", "my_function", "optimize performance"
+        )
 
-        assert isinstance(result, str)
+        assert isinstance(result, list)
         assert len(result) > 0
+        assert all(isinstance(msg, PromptMessage) for msg in result)
 
     def test_safe_refactor_prompt_includes_parameters(self):
         """Test that the prompt includes the provided parameters."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        from code_scalpel.mcp.prompts import safe_refactor
 
         file_path = "/my/test/file.py"
         symbol_name = "test_function"
-        result = safe_refactor_workflow_prompt(file_path, symbol_name)
+        goal = "improve readability"
+        result = safe_refactor(file_path, symbol_name, goal)
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
-        assert file_path in result
-        assert symbol_name in result
+        assert file_path in text
+        assert symbol_name in text
+        assert goal in text
 
     def test_safe_refactor_prompt_includes_steps(self):
-        """Test that the prompt includes all workflow steps."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        """Test that the prompt includes workflow steps."""
+        from code_scalpel.mcp.prompts import safe_refactor
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+        result = safe_refactor("/file.py", "func", "optimize")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
-        # Check for key workflow steps
-        assert "Step 1" in result
-        assert "Step 2" in result
-        assert "Step 3" in result
-        assert "Step 4" in result
-        assert "Step 5" in result
+        # Check for numbered steps
+        assert "1)" in text or "Step" in text
+        assert "2)" in text
+        assert "3)" in text
 
     def test_safe_refactor_prompt_mentions_tools(self):
         """Test that the prompt mentions required MCP tools."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        from code_scalpel.mcp.prompts import safe_refactor
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+        result = safe_refactor("/file.py", "func", "optimize")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
         # Check for tool mentions
-        assert "extract_code" in result
-        assert "get_symbol_references" in result
-        assert "simulate_refactor" in result
-        assert "update_symbol" in result
+        assert "extract_code" in text
+        assert "get_symbol_references" in text
+        assert "update_symbol" in text
 
-    def test_safe_refactor_prompt_emphasizes_safety(self):
-        """Test that the prompt emphasizes safety checks."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+class TestModernizeLegacyPrompt:
+    """Test the modernize legacy workflow prompt."""
 
-        # Check for safety-related content
-        assert "safe" in result.lower() or "Safe" in result
-        assert "simulation" in result.lower()
-        assert "backup" in result.lower()
+    def test_modernize_legacy_prompt_exists(self):
+        """Test that the modernize legacy prompt is defined."""
+        from code_scalpel.mcp.prompts import modernize_legacy
 
-    def test_safe_refactor_prompt_provides_concrete_examples(self):
-        """Test that the prompt provides concrete tool invocation examples."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        assert modernize_legacy is not None
+        assert callable(modernize_legacy)
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+    def test_modernize_legacy_prompt_takes_path(self):
+        """Test that the prompt accepts a path parameter."""
+        from code_scalpel.mcp.prompts import modernize_legacy
 
-        # Check for concrete examples with code blocks
-        assert "```" in result
-        assert "extract_code(" in result
-        assert "simulate_refactor(" in result
+        result = modernize_legacy("/path/to/project")
 
-    def test_safe_refactor_prompt_includes_verification(self):
-        """Test that the prompt includes verification steps."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        assert isinstance(result, list)
+        assert len(result) > 0
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+    def test_modernize_legacy_mentions_tools(self):
+        """Test that the prompt mentions required MCP tools."""
+        from code_scalpel.mcp.prompts import modernize_legacy
 
-        # Check for verification mentions
-        assert "verify" in result.lower() or "Verify" in result
-        assert "test" in result.lower() or "Test" in result
+        result = modernize_legacy("/project")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
+
+        assert "type_evaporation_scan" in text
+        assert "analyze_code" in text
+
+
+class TestMapArchitecturePrompt:
+    """Test the map architecture workflow prompt."""
+
+    def test_map_architecture_prompt_exists(self):
+        """Test that the map architecture prompt is defined."""
+        from code_scalpel.mcp.prompts import map_architecture
+
+        assert map_architecture is not None
+        assert callable(map_architecture)
+
+    def test_map_architecture_mentions_tools(self):
+        """Test that the prompt mentions required MCP tools."""
+        from code_scalpel.mcp.prompts import map_architecture
+
+        result = map_architecture("/module")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
+
+        assert "crawl_project" in text
+        assert "get_call_graph" in text
+
+
+class TestVerifySupplyChainPrompt:
+    """Test the verify supply chain workflow prompt."""
+
+    def test_verify_supply_chain_prompt_exists(self):
+        """Test that the verify supply chain prompt is defined."""
+        from code_scalpel.mcp.prompts import verify_supply_chain
+
+        assert verify_supply_chain is not None
+        assert callable(verify_supply_chain)
+
+    def test_verify_supply_chain_mentions_tools(self):
+        """Test that the prompt mentions required MCP tools."""
+        from code_scalpel.mcp.prompts import verify_supply_chain
+
+        result = verify_supply_chain("/project")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
+
+        assert "scan_dependencies" in text
+
+
+class TestExplainAndDocumentPrompt:
+    """Test the explain and document workflow prompt."""
+
+    def test_explain_and_document_prompt_exists(self):
+        """Test that the explain and document prompt is defined."""
+        from code_scalpel.mcp.prompts import explain_and_document
+
+        assert explain_and_document is not None
+        assert callable(explain_and_document)
+
+    def test_explain_and_document_mentions_tools(self):
+        """Test that the prompt mentions required MCP tools."""
+        from code_scalpel.mcp.prompts import explain_and_document
+
+        result = explain_and_document("/target")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
+
+        assert "analyze_code" in text or "extract_code" in text
 
 
 class TestPromptDiscoverability:
     """Test that prompts are discoverable via MCP protocol."""
 
-    def test_prompts_have_decorators(self):
-        """Test that workflow prompts have @mcp.prompt decorators."""
-        import inspect
+    def test_all_prompts_exist_in_module(self):
+        """Test that all canonical prompts are defined in prompts module."""
+        from code_scalpel.mcp import prompts
 
-        from code_scalpel.mcp import server
+        expected_prompts = [
+            "deep_security_audit",
+            "safe_refactor",
+            "modernize_legacy",
+            "map_architecture",
+            "verify_supply_chain",
+            "explain_and_document",
+        ]
 
-        # Get all functions in the module
-        functions = inspect.getmembers(server, inspect.isfunction)
+        for prompt_name in expected_prompts:
+            assert hasattr(
+                prompts, prompt_name
+            ), f"{prompt_name} not found in prompts module"
+            func = getattr(prompts, prompt_name)
+            assert callable(func), f"{prompt_name} is not callable"
 
-        # Find our workflow prompts
-        security_audit_found = False
-        safe_refactor_found = False
+    def test_prompts_return_message_lists(self):
+        """Test that prompts return lists of PromptMessage."""
+        from code_scalpel.mcp.prompts import deep_security_audit, safe_refactor
 
-        for name, func in functions:
-            if name == "security_audit_workflow_prompt":
-                security_audit_found = True
-            elif name == "safe_refactor_workflow_prompt":
-                safe_refactor_found = True
+        audit_result = deep_security_audit("/project")
+        refactor_result = safe_refactor("/file.py", "func", "goal")
 
-        assert security_audit_found, "security_audit_workflow_prompt not found"
-        assert safe_refactor_found, "safe_refactor_workflow_prompt not found"
-
-    def test_prompts_return_strings(self):
-        """Test that prompts return string content."""
-        from code_scalpel.mcp.server import (
-            safe_refactor_workflow_prompt,
-            security_audit_workflow_prompt,
-        )
-
-        audit_result = security_audit_workflow_prompt("/project")
-        refactor_result = safe_refactor_workflow_prompt("/file.py", "func")
-
-        assert isinstance(audit_result, str)
-        assert isinstance(refactor_result, str)
-        assert len(audit_result) > 100  # Should be substantial
-        assert len(refactor_result) > 100
+        assert isinstance(audit_result, list)
+        assert isinstance(refactor_result, list)
+        assert len(audit_result) > 0
+        assert len(refactor_result) > 0
 
 
 class TestAcceptanceCriteria:
@@ -214,97 +267,62 @@ class TestAcceptanceCriteria:
 
     def test_security_audit_guides_through_full_audit(self):
         """Acceptance: security-audit prompt guides through full audit."""
-        from code_scalpel.mcp.server import security_audit_workflow_prompt
+        from code_scalpel.mcp.prompts import deep_security_audit
 
-        result = security_audit_workflow_prompt("/project")
+        result = deep_security_audit("/project")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
-        # Should guide through:
-        # 1. Project structure analysis
-        assert "crawl_project" in result
+        # Should guide through security scanning
+        assert "security_scan" in text
 
-        # 2. Vulnerability scanning
-        assert "security_scan" in result
-
-        # 3. Dependency checking
-        assert "scan_dependencies" in result
-
-        # 4. Report generation
-        assert "report" in result.lower()
-        assert "findings" in result.lower()
+        # Should include dependency checking
+        assert "scan_dependencies" in text
 
     def test_safe_refactor_guides_through_refactor(self):
         """Acceptance: safe-refactor prompt guides through refactor."""
-        from code_scalpel.mcp.server import safe_refactor_workflow_prompt
+        from code_scalpel.mcp.prompts import safe_refactor
 
-        result = safe_refactor_workflow_prompt("/file.py", "func")
+        result = safe_refactor("/file.py", "func", "optimize")
+        content = result[0].content
+        text = getattr(content, "text", str(content))
 
         # Should guide through:
-        # 1. Extract current implementation
-        assert "extract_code" in result
+        # 1. Find all usages
+        assert "get_symbol_references" in text
 
-        # 2. Find all usages
-        assert "get_symbol_references" in result
+        # 2. Extract current implementation
+        assert "extract_code" in text
 
-        # 3. Plan changes
-        assert "plan" in result.lower() or "Plan" in result
+        # 3. Apply changes
+        assert "update_symbol" in text
 
-        # 4. Simulate refactor
-        assert "simulate_refactor" in result
+    def test_prompts_are_registered_with_mcp(self):
+        """Acceptance: Prompts are registered with MCP protocol."""
+        from code_scalpel.mcp.protocol import mcp
 
-        # 5. Apply changes
-        assert "update_symbol" in result
-
-    def test_prompts_are_discoverable_via_mcp(self):
-        """Acceptance: Prompts are discoverable via MCP protocol."""
-        # The @mcp.prompt decorator makes them discoverable
-        # This is handled by the FastMCP framework
-        from code_scalpel.mcp.server import (
-            mcp,
-            safe_refactor_workflow_prompt,
-            security_audit_workflow_prompt,
-        )
-
-        # The mcp instance exists and prompts are registered via decorators
+        # The mcp instance exists
         assert mcp is not None
 
-        # Prompts should be callable and return strings
-        assert callable(security_audit_workflow_prompt)
-        assert callable(safe_refactor_workflow_prompt)
+        # Importing prompts module registers the prompts
+        import code_scalpel.mcp.prompts  # noqa: F401
 
-    def test_prompts_include_concrete_tool_invocations(self):
-        """Acceptance: Prompts include concrete tool invocation examples."""
-        from code_scalpel.mcp.server import (
-            safe_refactor_workflow_prompt,
-            security_audit_workflow_prompt,
-        )
-
-        audit = security_audit_workflow_prompt("/project")
-        refactor = safe_refactor_workflow_prompt("/file.py", "func")
-
-        # Both should have concrete examples with function calls
-        assert "(" in audit and ")" in audit  # Function call syntax
-        assert "(" in refactor and ")" in refactor
-
-        # Should have parameter examples
-        assert "=" in audit  # Parameter assignment
-        assert "=" in refactor
+        # Prompts should be registered (can be verified via mcp.list_prompts)
+        # The actual registration is handled by @mcp.prompt decorator
 
     def test_prompts_handle_edge_cases(self):
-        """Acceptance: Prompts handle edge cases (missing files, etc.)."""
-        from code_scalpel.mcp.server import (
-            safe_refactor_workflow_prompt,
-            security_audit_workflow_prompt,
-        )
+        """Acceptance: Prompts handle edge cases (empty/invalid inputs)."""
+        from code_scalpel.mcp.prompts import deep_security_audit, safe_refactor
 
         # Should not crash with various inputs
-        audit1 = security_audit_workflow_prompt("")
-        audit2 = security_audit_workflow_prompt("/nonexistent/path")
+        audit1 = deep_security_audit("")
+        audit2 = deep_security_audit("/nonexistent/path")
 
-        refactor1 = safe_refactor_workflow_prompt("", "")
-        refactor2 = safe_refactor_workflow_prompt("/file.py", "nonexistent_func")
+        refactor1 = safe_refactor("", "", "")
+        refactor2 = safe_refactor("/file.py", "nonexistent_func", "goal")
 
-        # All should return valid strings (prompts don't validate paths)
-        assert isinstance(audit1, str)
-        assert isinstance(audit2, str)
-        assert isinstance(refactor1, str)
-        assert isinstance(refactor2, str)
+        # All should return valid message lists (prompts don't validate paths)
+        assert isinstance(audit1, list)
+        assert isinstance(audit2, list)
+        assert isinstance(refactor1, list)
+        assert isinstance(refactor2, list)

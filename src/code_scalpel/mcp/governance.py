@@ -34,25 +34,67 @@ def auto_init_config_dir(
 ) -> dict[str, Any] | None:
     """Create .code-scalpel scaffolding if missing.
 
-    This is a conservative initializer: it only ensures the directory exists
-    and returns metadata. No secrets or policy files are written here; those
-    remain user-managed.
+    Args:
+        project_root: Root directory for project-level initialization
+        tier: License tier (community, pro, enterprise)
+        mode: Initialization mode:
+            - "templates_only": Minimal scaffolding (directory only for server startup)
+            - "full": Complete CLI-style init with templates, manifest, and .env
+        target: Where to create config:
+            - "project": In project_root/.code-scalpel/
+            - "user": In XDG_CONFIG_HOME/code-scalpel/.code-scalpel/
+
+    Returns:
+        Dictionary with initialization results, or None on failure
     """
+    from code_scalpel.mcp.paths import scalpel_home_dir
 
     try:
         if target not in {"project", "user"}:
             target = "project"
 
-        base_dir = Path(project_root).resolve() if target == "project" else Path.home()
+        if target == "project":
+            base_dir = Path(project_root).resolve()
+        else:
+            # User target: use XDG_CONFIG_HOME/code-scalpel as base
+            xdg_base = scalpel_home_dir()
+            base_dir = xdg_base / "code-scalpel"
+            base_dir.mkdir(parents=True, exist_ok=True)
+
         config_dir = base_dir / ".code-scalpel"
 
-        created = False
-        if not config_dir.exists():
-            config_dir.mkdir(parents=True, exist_ok=True)
-            created = True
+        # Check if already exists
+        if config_dir.exists():
+            return {
+                "created": False,
+                "path": str(config_dir),
+                "mode": mode,
+                "tier": tier,
+                "target": target,
+            }
+
+        # For full mode, delegate to the complete init_config_dir
+        if mode == "full":
+            from code_scalpel.config.init_config import init_config_dir
+
+            result = init_config_dir(target_dir=str(base_dir), mode="full")
+            if result.get("success"):
+                return {
+                    "created": True,
+                    "path": result.get("path", str(config_dir)),
+                    "mode": mode,
+                    "tier": tier,
+                    "target": target,
+                    "files_created": result.get("files_created", []),
+                }
+            # Fall through to minimal init if full init fails
+            pass
+
+        # Minimal scaffolding (templates_only mode or fallback)
+        config_dir.mkdir(parents=True, exist_ok=True)
 
         return {
-            "created": created,
+            "created": True,
             "path": str(config_dir),
             "mode": mode,
             "tier": tier,

@@ -63,15 +63,13 @@ async def test_security_scan_community_enforces_finding_cap(monkeypatch):
     assert result.false_positive_analysis is None
 
 
-async def test_security_scan_pro_allows_unlimited_findings(monkeypatch):
+async def test_security_scan_pro_allows_unlimited_findings(pro_tier):
     """Pro tier returns all findings and enables Pro-only enrichments."""
-    from code_scalpel.mcp import server
+    from code_scalpel.mcp.server import security_scan
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
+    # pro_tier fixture sets up the environment
 
     code = _make_repetitive_vuln_code(60)
-
-    from code_scalpel.mcp.server import security_scan
 
     result = await security_scan(code=code)
 
@@ -83,11 +81,11 @@ async def test_security_scan_pro_allows_unlimited_findings(monkeypatch):
     assert result.false_positive_analysis is not None
 
 
-async def test_security_scan_enterprise_enables_enterprise_fields(monkeypatch):
+async def test_security_scan_enterprise_enables_enterprise_fields(enterprise_tier):
     """Enterprise tier populates Enterprise-only enrichment fields."""
-    from code_scalpel.mcp import server
+    from code_scalpel.mcp.server import security_scan
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
+    # enterprise_tier fixture sets up the environment
 
     # Include weak crypto and multiple sinks to trigger enrichments
     code = """\
@@ -96,11 +94,7 @@ import hashlib
 def insecure_hash(user_input: str):
     return hashlib.sha1(user_input.encode()).hexdigest()
 
-""" + _make_repetitive_vuln_code(
-        5
-    )
-
-    from code_scalpel.mcp.server import security_scan
+""" + _make_repetitive_vuln_code(5)
 
     result = await security_scan(code=code)
 
@@ -141,15 +135,12 @@ async def test_security_scan_invalid_license_falls_back_to_community(
     assert result.false_positive_analysis is None
 
 
-async def test_security_scan_community_rejects_large_file(monkeypatch):
+async def test_security_scan_community_rejects_large_file(community_tier):
     """Community tier enforces 500KB file size limit."""
-    from code_scalpel.mcp import server
-
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "community")
-
-    oversized_code = "a" * (520 * 1024)
-
     from code_scalpel.mcp.server import security_scan
+
+    # community_tier fixture sets up the environment
+    oversized_code = "a" * (520 * 1024)
 
     result = await security_scan(code=oversized_code)
 
@@ -266,10 +257,10 @@ async def test_security_scan_expired_license_after_grace_downgrades(monkeypatch)
     assert result.false_positive_analysis is None
 
 
-async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
+async def test_security_scan_pro_detects_nosql_ldap_and_secrets(pro_tier, monkeypatch):
     """Pro tier should surface Pro-only vulnerability types and enrichments."""
-    from code_scalpel.mcp import server
 
+    # pro_tier fixture sets up the environment
     vulns = [
         {
             "type": "NoSQL Injection",
@@ -301,7 +292,6 @@ async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
     monkeypatch.setattr(
         "code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer
     )
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
 
     code = "db.users.find_one({'a':user}); ldap.search(filter); secret='abc'"
 
@@ -317,11 +307,13 @@ async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
 
 
 async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
+    enterprise_tier,
     monkeypatch,
 ):
     """Enterprise tier should populate compliance, custom rules, priority ordering, reachability, and FP tuning."""
     from code_scalpel.mcp import server
 
+    # enterprise_tier fixture sets up the environment
     vulns = [
         {
             "type": "SQL Injection",
@@ -369,7 +361,6 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
         "code_scalpel.security.analyzers.policy_engine.PolicyEngine", _StubPolicyEngine
     )
     monkeypatch.setattr(server, "PolicyEngine", _StubPolicyEngine, raising=False)
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
 
     code = "sanitize(user); cursor.execute(sql); os.system('ls')"
 
@@ -389,12 +380,11 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
     )
 
 
-async def test_security_scan_capability_limits_respected(monkeypatch):
+async def test_security_scan_capability_limits_respected(pro_tier, monkeypatch):
     """Feature gating must use capability limits, not tier name assumptions."""
     from code_scalpel.mcp import server
 
-    monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
-
+    # pro_tier fixture sets up the environment
     def _limited_caps(tool_name, tier):
         assert tool_name == "security_scan"
         return {

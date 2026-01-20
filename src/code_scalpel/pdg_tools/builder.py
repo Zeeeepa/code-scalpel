@@ -6,11 +6,6 @@ from typing import Optional
 
 import networkx as nx
 
-# # TODO Add support for non-local scope analysis:
-#     - Properly handle nonlocal and global declarations
-#     - Track variable scope chains across nested functions
-#     - Detect scope-related bugs (shadowing, unintended globals)
-#     - Support closure variable capture tracking
 
 
 class NodeType(Enum):
@@ -59,23 +54,6 @@ class PDGBuilder(ast.NodeVisitor):
         self.current_function: Optional[str] = None
         self.node_counter = defaultdict(int)
 
-        # # TODO Add interprocedural parameter tracking:
-        #     - Track parameter passing and type flow through call sites
-        #     - Compute parameter-to-argument mappings
-        #     - Support return value tracking across calls
-        #     - Enable context-sensitive analysis for indirect calls
-
-        # # TODO Add exception path tracking:
-        #     - Model exception flow through try/except/finally blocks
-        #     - Track exception propagation to callers
-        #     - Detect uncaught exception paths
-        #     - Support custom exception hierarchies
-
-        # # TODO Add memory/reference semantics:
-        #     - Track aliasing relationships between variables
-        #     - Model object identity vs. value equality
-        #     - Support pointer analysis for reference types
-        #     - Detect use-after-free and memory leak patterns
 
     def build(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
         """Build PDG and call graph from code."""

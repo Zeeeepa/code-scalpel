@@ -1,36 +1,23 @@
 """
-Tier Detector - Detect current license tier from environment.
+Tier Detector - Detect current license tier from environment and configuration.
 
-[20251225_FEATURE] Created as part of Project Reorganization Issue #4.
+[20251225_FEATURE] Tier detection system with multi-source support and organization hierarchy.
 
-This module provides tier detection from multiple sources:
+DETECTION PRIORITY ORDER:
 1. Environment variable: CODE_SCALPEL_TIER
-2. Config file: .code-scalpel/license.json
-3. Default: COMMUNITY
+2. License key extraction: SCALPEL-{TIER}-{DATA} format
+3. Config file: .code-scalpel/license.json
+4. Organization hierarchy: CODE_SCALPEL_ORGANIZATION env var
+5. Default: COMMUNITY tier
 
-COMPLETED ITEMS: tier_detector.py (v3.0.5 - 2025-12-25)
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [P0_CRITICAL] Environment variable detection
-# [P1_HIGH] Config file detection
-# [P1_HIGH] Default tier fallback
-# [P2_MEDIUM] Tier validation and logging (comprehensive validation with audit logging)
-
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [P1_HIGH] License key tier extraction (parses SCALPEL-{TIER}-{DATA} format)
-# [P2_MEDIUM] Multiple config file locations (3 default paths + custom)
-# [P3_LOW] Tier caching (in-memory cache with force_refresh)
-
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [P2_MEDIUM] Organization-based tier detection (CODE_SCALPEL_ORGANIZATION env var)
-# [P3_LOW] Tier inheritance from parent orgs (hierarchical organization support)
-# [P4_LOW] Custom tier definitions (custom tier names mapping to standard tiers)
-============================================================================
+FEATURES IMPLEMENTED:
+- Multi-source tier detection (environment, config, license, organization)
+- License key parsing with SCALPEL-{TIER}-{DATA} format
+- Configuration file support with custom tier definitions
+- Organization-based tier assignment and hierarchy
+- Tier validation with comprehensive audit logging
+- In-memory caching with force_refresh capability
+- Custom tier name mapping (e.g., "startup" -> "pro")
 """
 
 from __future__ import annotations

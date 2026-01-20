@@ -5,12 +5,11 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from code_scalpel.mcp.contract import ToolResponseEnvelope
+
 from mcp.server.fastmcp import Context
 
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
-from code_scalpel.licensing.tier_detector import (
-    get_current_tier as _get_current_tier,
-)
 from code_scalpel.mcp.helpers.graph_helpers import (
     _cross_file_security_scan_sync,
     _get_call_graph_sync,
@@ -19,6 +18,12 @@ from code_scalpel.mcp.helpers.graph_helpers import (
     _get_project_map_sync,
 )
 from code_scalpel.mcp.protocol import mcp
+
+
+def _get_current_tier() -> str:
+    """Get current tier using JWT validation (late import to avoid circular dependency)."""
+    from code_scalpel.mcp.server import _get_current_tier as get_tier
+    return get_tier()
 
 
 @mcp.tool()
@@ -86,27 +91,21 @@ async def get_call_graph(
     tier = _get_current_tier()
     caps = get_tool_capabilities("get_call_graph", tier) or {}
     limits = caps.get("limits", {}) or {}
-    cap_list = caps.get("capabilities", []) or []
-
-    capabilities = set(cap_list) if not isinstance(cap_list, set) else cap_list
 
     max_depth = limits.get("max_depth")
     max_nodes = limits.get("max_nodes")
+    
+    # [20260120_FIX] Ensure limits are integers (TOML values should be int, but ensure type safety)
+    if max_depth is not None:
+        max_depth = int(max_depth)
+    if max_nodes is not None:
+        max_nodes = int(max_nodes)
 
     actual_depth = depth
     if max_depth is not None and depth > max_depth:
         actual_depth = max_depth
 
-    advanced_resolution = (
-        "polymorphism_resolution" in capabilities
-        or "advanced_call_graph" in capabilities
-    )
-    include_enterprise_metrics = (
-        "hot_path_identification" in capabilities
-        or "dead_code_detection" in capabilities
-        or "custom_graph_analysis" in capabilities
-    )
-
+    # [20260120_FEATURE] Call sync function with tier/capabilities for metadata transparency
     result = await asyncio.to_thread(
         _get_call_graph_sync,
         project_root,
@@ -114,20 +113,16 @@ async def get_call_graph(
         actual_depth,
         include_circular_import_check,
         max_nodes,
-        advanced_resolution,
-        include_enterprise_metrics,
+        False,  # advanced_resolution (default)
+        False,  # include_enterprise_metrics (default)
         paths_from,
         paths_to,
         focus_functions,
+        tier,
+        caps,
     )
 
-    # [20260111_FEATURE] v1.0 validation - Populate output metadata
-    result.tier_applied = tier
-    result.max_depth_applied = max_depth
-    result.max_nodes_applied = max_nodes
-    result.advanced_resolution_enabled = advanced_resolution
-    result.enterprise_metrics_enabled = include_enterprise_metrics
-
+    # [20260120_FEATURE] Metadata already populated by sync function with tier/caps
     if ctx:
         node_count = len(result.nodes) if result.nodes else 0
         edge_count = len(result.edges) if result.edges else 0
@@ -443,7 +438,7 @@ async def get_cross_file_dependencies(
     if max_files is not None:
         max_files_limit = max_files
 
-    return await asyncio.to_thread(
+    result = await asyncio.to_thread(
         _get_cross_file_dependencies_sync,
         target_file,
         target_symbol,
@@ -457,6 +452,17 @@ async def get_cross_file_dependencies(
         max_files_limit,
         timeout_seconds,
     )
+
+    # [20260120_BUGFIX] Ensure raw envelope callers see an explicit success flag.
+    if isinstance(result, ToolResponseEnvelope):
+        data = result.data
+        if isinstance(data, dict) and "success" not in data:
+            data["success"] = result.error is None
+            result.data = data
+    elif isinstance(result, dict) and "success" not in result:
+        result["success"] = True
+
+    return result
 
 
 @mcp.tool()

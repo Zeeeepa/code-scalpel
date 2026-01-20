@@ -7,17 +7,6 @@ from typing import Any, Optional
 
 import networkx as nx
 
-# # TODO Add correctness-preserving transformation verification:
-#     - Implement semantic equivalence checking
-#     - Use symbolic execution to verify transformations preserve behavior
-#     - Generate test cases for transformation validation
-#     - Support regression testing for transformed code
-
-# # TODO Add transformation conflict detection:
-#     - Detect conflicts when multiple transformations affect same nodes
-#     - Support transformation composition and ordering
-#     - Generate safe transformation sequences
-#     - Implement conflict resolution strategies
 
 
 class TransformationType(Enum):
@@ -52,23 +41,8 @@ class PDGTransformer:
         self.history: list[tuple[TransformationType, TransformationResult]] = []
         self.node_counter = defaultdict(int)
 
-        # # TODO Add transformation recommendation engine:
-        #     - Suggest transformations based on code patterns
-        #     - Rank transformations by impact and safety
-        #     - Support interactive transformation selection
-        #     - Learn from developer acceptance/rejection patterns
 
-        # # TODO Add parallel safe transformation:
-        #     - Detect independently applicable transformations
-        #     - Support parallel transformation application
-        #     - Ensure no race conditions in transformation order
-        #     - Aggregate results from parallel transformations
 
-        # # TODO Add rollback/undo capabilities:
-        #     - Support full undo of transformation sequences
-        #     - Implement selective transformation rollback
-        #     - Track transformation dependencies for partial undo
-        #     - Generate reverse transformations automatically
 
     def transform(
         self, transformation_type: TransformationType, **kwargs

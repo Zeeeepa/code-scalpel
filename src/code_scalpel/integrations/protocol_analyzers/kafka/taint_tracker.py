@@ -46,33 +46,6 @@ Usage:
     bridge = tracker.create_taint_bridge(producer_result, consumer_result)
 """
 
-# =============================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-#
-# Examples & Use Cases:
-#
-# Testing:
-#
-# PRO (Enhanced Features):
-# Core Capabilities:
-#
-# Taint Analysis:
-#
-# Message Handling:
-#
-# Additional Brokers:
-#
-# ENTERPRISE (Advanced Capabilities):
-# Advanced Security:
-#
-# Cross-Service Intelligence:
-#
-# Performance & Reliability:
-#
-# Integration & Monitoring:
-
 from __future__ import annotations
 
 import ast

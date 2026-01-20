@@ -1,37 +1,32 @@
 """
 License Validator - License key validation for Code Scalpel.
 
-[20251225_FEATURE] Created as part of Project Reorganization Issue #4.
+[20251225_FEATURE] License validation system for PRO and ENTERPRISE tiers.
+COMMUNITY tier does not require validation.
 
-This module provides license key validation for PRO and ENTERPRISE tiers.
-COMMUNITY tier does not require license validation.
+Features:
+- COMMUNITY: Always valid (no key required)
+- PRO: Format validation, HMAC-SHA256 signature verification, expiration checking
+- ENTERPRISE: Organization binding, seat limits, hardware fingerprinting, custom rules
 
-COMPLETED ITEMS: validator.py (v3.0.5 - 2025-12-25)
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [P0_CRITICAL] Basic validation interface
-# [P1_HIGH] COMMUNITY tier always valid
-# [P2_MEDIUM] Validation result caching (5-minute TTL)
+Validation Methods:
+- validate(): Offline validation with format/signature/expiration checks
+- validate_offline(): Validation without network access
+- validate_online(): Server-based validation with offline fallback
 
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [P1_HIGH] License key format validation
-# [P1_HIGH] License signature verification (HMAC-SHA256)
-# [P2_MEDIUM] Offline validation support
-# [P2_MEDIUM] Online validation fallback (with timeout)
-# [P3_LOW] License expiration checking (Unix timestamp parsing)
+Caching:
+- 5-minute TTL for validation results
+- Cache key: "{license_key}:{tier}:{organization}"
 
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [P2_MEDIUM] Organization binding (SHA-256 hash verification)
-# [P2_MEDIUM] Seat limit enforcement (usage tracking)
-# [P3_LOW] Hardware fingerprinting (machine ID + system info)
-# [P3_LOW] License server integration (HTTP POST with JSON)
-# [P4_LOW] Custom validation rules (embedded in license key)
-============================================================================
+License Key Format:
+- SCALPEL-{TIER}-{TIMESTAMP}-{DATA}-...-{SIGNATURE}
+- SIGNATURE = HMAC-SHA256(data_parts, secret_key)[:8]
+
+ENTERPRISE Extensions:
+- Organization hash verification (SHA-256)
+- Seat limit enforcement (usage tracking)
+- Hardware ID binding (machine ID + system info)
+- Custom rule evaluation
 """
 
 from __future__ import annotations

@@ -52,16 +52,6 @@ TSNode = TypeVar("TSNode")
 @dataclass
 class VisitorContext:
     """Context for tree-sitter visitor traversal.
-
-
-    COMMUNITY TIER (Basic Tree-Sitter Visiting):
-
-    PRO TIER (Advanced Tree-Sitter Features):
-
-    ENTERPRISE TIER (Advanced Analysis & Optimization):
-    """
-
-    """
     Context passed through the visitor tree.
 
     Attributes:

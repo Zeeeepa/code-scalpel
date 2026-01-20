@@ -10,7 +10,6 @@ Test cases:
 """
 
 import sys
-import traceback
 from pathlib import Path
 
 # Add src to path
@@ -26,7 +25,7 @@ print("=" * 80)
 print("\n[TEST 1] PDG Builder with Merge Conflict Markers")
 print("-" * 80)
 
-from code_scalpel.pdg_tools.builder import PDGBuilder
+from code_scalpel.pdg_tools.builder import PDGBuilder  # noqa: E402
 
 dirty_python_with_conflict = """
 def calculate_tax(amount):
@@ -56,7 +55,7 @@ except Exception as e:
 print("\n[TEST 2] Surgical Extractor with Jinja2 Templates")
 print("-" * 80)
 
-from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
+from code_scalpel.surgery.surgical_extractor import SurgicalExtractor  # noqa: E402
 
 dirty_python_with_jinja = """
 def greet(name):
@@ -72,7 +71,7 @@ try:
     extractor = SurgicalExtractor(dirty_python_with_jinja)
     # Just check if it can initialize and get functions
     functions = extractor.functions
-    print(f"⚠️  SILENT SUCCESS: Initialized extractor with Jinja2!")
+    print("⚠️  SILENT SUCCESS: Initialized extractor with Jinja2!")
     print(f"   Functions found: {list(functions.keys())}")
 except ValueError as e:
     print(f"✅ CRASH as expected: {e}")
@@ -107,7 +106,7 @@ function calculateTotal(items) {
     parser = Parser(lang)
     tree = parser.parse(bytes(dirty_js_missing_semicolon, "utf-8"))
 
-    print(f"⚠️  SILENT SUCCESS: Tree-sitter parsed without error!")
+    print("⚠️  SILENT SUCCESS: Tree-sitter parsed without error!")
     print(f"   Has errors: {tree.root_node.has_error}")
     print(f"   Root type: {tree.root_node.type}")
 except ImportError:
@@ -121,7 +120,7 @@ except Exception as e:
 print("\n[TEST 4] Python AST Parser with Incomplete Function")
 print("-" * 80)
 
-import ast
+import ast  # noqa: E402
 
 dirty_python_incomplete = """
 def calculate_discount(price):
@@ -136,7 +135,7 @@ print("\nResult: ", end="")
 
 try:
     tree = ast.parse(dirty_python_incomplete)
-    print(f"✅ SILENT SUCCESS: ast.parse accepted incomplete code!")
+    print("✅ SILENT SUCCESS: ast.parse accepted incomplete code!")
     print(
         f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}"
     )
@@ -149,8 +148,7 @@ except SyntaxError as e:
 print("\n" + "=" * 80)
 print("THE ARCHITECT'S VERDICT")
 print("=" * 80)
-print(
-    """
+print("""
 1. PDG Builder (pdg_tools/builder.py): 
    ❌ NO sanitization - CRASHES on merge conflicts
    ❌ NO fallback - ast.parse() called directly (line 82)
@@ -181,5 +179,4 @@ This tool is NOT "deterministic" because:
 It IS "fail-fast" in some places (surgical_extractor) but NOT others (pdg_builder).
 
 The real-world verdict: **PARTIALLY ROBUST** but **INCONSISTENT**.
-"""
-)
+""")

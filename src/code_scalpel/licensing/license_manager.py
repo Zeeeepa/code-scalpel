@@ -1,36 +1,22 @@
 """
 License Manager - Central license management for Code Scalpel.
 
-[20251225_FEATURE] Created as part of Project Reorganization Issue #4.
+[20251225_FEATURE] Tier-based licensing with feature availability checks,
+license validation, expiration handling, seat counting, and custom terms.
 
-This module provides the central LicenseManager class that coordinates
-tier detection, license validation, and feature availability checks.
+Core Responsibilities:
+- Detect and manage license tiers (community, pro, enterprise)
+- Validate license keys and enforce expiration/grace periods
+- Track feature availability based on current tier
+- Manage concurrent user seats and organization hierarchies
+- Persist license state and provide renewal reminders
 
-COMPLETED ITEMS: license_manager.py (v3.0.5 - 2025-12-25)
-============================================================================
-COMMUNITY TIER (P0-P2)
-============================================================================
-# [COMPLETED] [P0_CRITICAL] Tier-based feature availability
-# [COMPLETED] [P1_HIGH] Feature registry integration
-# [COMPLETED] [P1_HIGH] Graceful degradation messaging
-# [COMPLETED] [P2_MEDIUM] License state persistence (JSON file storage)
-
-============================================================================
-PRO TIER (P1-P3)
-============================================================================
-# [COMPLETED] [P1_HIGH] License key validation (integrated with LicenseValidator)
-# [COMPLETED] [P2_MEDIUM] License expiration handling (with datetime tracking)
-# [COMPLETED] [P2_MEDIUM] Grace period support (30-day default grace period)
-# [COMPLETED] [P3_LOW] License renewal reminders (tiered urgency messages)
-
-============================================================================
-ENTERPRISE TIER (P2-P4)
-============================================================================
-# [COMPLETED] [P2_MEDIUM] Seat counting (thread-safe active user tracking)
-# [COMPLETED] [P3_LOW] Concurrent usage limits (seat limit enforcement)
-# [COMPLETED] [P3_LOW] Organization management (org info and hierarchy)
-# [COMPLETED] [P4_LOW] Custom license terms (custom rules evaluation)
-============================================================================
+Key Features:
+- Feature registry with tier-based access control
+- Thread-safe seat counting and concurrent user tracking
+- 30-day grace period for expired licenses
+- JSON-based state persistence
+- Custom license terms and rules evaluation
 """
 
 from __future__ import annotations

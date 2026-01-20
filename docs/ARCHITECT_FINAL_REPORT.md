@@ -28,11 +28,7 @@ After conducting a comprehensive security audit of all AST parsing entry points,
 **Input Code**:
 ```python
 def calculate_tax(amount):
-<<<<<<< HEAD
-    return amount * 0.05
-=======
     return amount * 0.08
->>>>>>> feature-branch
 ```
 
 **Results by Entry Point**:

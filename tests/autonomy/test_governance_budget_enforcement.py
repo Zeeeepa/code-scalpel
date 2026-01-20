@@ -29,9 +29,7 @@ def _write_budget_yaml(
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(
-            max_total_lines=max_total_lines, max_files=max_files
-        ),
+""".format(max_total_lines=max_total_lines, max_files=max_files),
         encoding="utf-8",
     )
 
@@ -144,12 +142,9 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
         assert result["error"]["error_code"] == "forbidden"
 
         # Ensure file was not modified.
-        assert (
-            target_file.read_text(encoding="utf-8")
-            == """def f():
+        assert target_file.read_text(encoding="utf-8") == """def f():
     return 1
 """
-        )
     finally:
         # [20250112_BUGFIX] Restore original run method to avoid leaking mock to other tests
         object.__setattr__(tool, "run", original_run)
@@ -477,20 +472,18 @@ async def test_pro_warn_mode_allows_rename_symbol_with_break_glass_and_warning_s
         lambda *_, **__: {"files_updated": 0, "updated_files": [], "errors": []},
     )
 
-    tool = server.mcp._tool_manager.get_tool("rename_symbol")
-    result = await tool.run(
-        {
-            "file_path": str(target_file),
-            "target_type": "function",
-            "target_name": "f",
-            "new_name": "g",
-            "create_backup": False,
-        },
-        context=None,
-        convert_result=False,
+    # Import rename_symbol tool directly (FastMCP doesn't expose _tool_manager)
+    from code_scalpel.mcp.tools.extraction import rename_symbol
+
+    result = await rename_symbol(
+        file_path=str(target_file),
+        target_type="function",
+        target_name="f",
+        new_name="g",
+        create_backup=False,
     )
 
-    # [20260117_BUGFIX] PatchResultModel is a Pydantic model, access via attributes
+    # [20260119_BUGFIX] Tool returns PatchResultModel (Pydantic), not dict
     assert result.success is True
     # In warn mode, governance warnings may or may not appear depending on feature enablement
     # But the rename should succeed

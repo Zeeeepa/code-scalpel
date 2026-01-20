@@ -266,7 +266,7 @@ def parse_javascript_code(
             location = f"line {line}, column {col}"
 
             raise ParsingError(
-                f"JavaScript/TypeScript contains syntax errors",
+                "JavaScript/TypeScript contains syntax errors",
                 location=location,
                 suggestion="Fix syntax errors or set parsing.mode='permissive'",
             )

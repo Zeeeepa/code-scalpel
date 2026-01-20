@@ -12,8 +12,6 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from decimal import Decimal
-
 
 # Configuration and Constants
 TAX_RATES = {

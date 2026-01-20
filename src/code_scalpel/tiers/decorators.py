@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 class Tier(Enum):
     """License tier levels for Code Scalpel."""
 
-    COMMUNITY = "community"
-    PRO = "pro"
-    ENTERPRISE = "enterprise"
+    COMMUNITY = "Community"
+    PRO = "Pro"
+    ENTERPRISE = "Enterprise"
 
 
 # Type variable for decorated functions

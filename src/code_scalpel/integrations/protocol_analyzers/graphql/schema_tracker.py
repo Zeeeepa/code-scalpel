@@ -39,33 +39,6 @@ Usage:
         print(f"BREAKING: {drift.breaking_changes}")
 """
 
-# ===============================================
-#
-# COMMUNITY (Current & Planned):
-# Documentation & Learning:
-#
-# Examples & Use Cases:
-#
-# Testing:
-#
-# PRO (Enhanced Features):
-# Core Capabilities:
-#
-# Security Analysis:
-#
-# Performance Analysis:
-#
-# Schema Evolution:
-#
-# Federation Support:
-#
-# ENTERPRISE (Advanced Capabilities):
-# Advanced Analysis:
-#
-# Intelligence & Optimization:
-#
-# Integration & Monitoring:
-
 from __future__ import annotations
 
 import re

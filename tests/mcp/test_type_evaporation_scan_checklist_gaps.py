@@ -155,10 +155,11 @@ async def test_type_evaporation_scan_missing_required_parameter(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
-
-    # Should return error - missing required parameter
-    assert env_json.get("error") is not None
+    # [20260120_FIX] MCP returns validation errors via isError=True, not JSON envelope
+    assert payload.isError is True
+    assert payload.content, "Error should have content describing the error"
+    error_text = payload.content[0].text if payload.content else ""
+    assert "frontend_code" in error_text.lower() or "required" in error_text.lower()
 
 
 async def test_type_evaporation_scan_optional_file_names_default(tmp_path: Path):
@@ -462,16 +463,14 @@ async def test_type_evaporation_scan_enterprise_performance_at_scale(
     # Create 500 virtual files with complex patterns
     frontend_segments = []
     for i in range(500):
-        frontend_segments.append(
-            f"""// FILE: complex{i}.ts
+        frontend_segments.append(f"""// FILE: complex{i}.ts
 interface Data{i} {{ id: string; value: number; }}
 async function process{i}() {{
   const r = await fetch('/api/data{i}');
   const data: Data{i} = await r.json();
   return {{ id: data.id, calculated: data.value * 2 }};
 }}
-"""
-        )
+""")
     frontend_code = "\n".join(frontend_segments)
 
     backend_code = """
@@ -543,14 +542,15 @@ async def test_type_evaporation_scan_invalid_parameter_type(tmp_path: Path):
             read_timeout_seconds=timedelta(seconds=120),
         )
 
-    env_json = _tool_json(payload)
-
-    # Should either error or convert gracefully
-    # If it processes, check that success reflects the issue
-    data = env_json.get("data", {})
-    if isinstance(data, dict):
-        # If processing succeeded, at least should not crash
-        assert "error" not in str(env_json) or "error" in env_json
+    # [20260120_FIX] Pydantic may coerce integer to string, or MCP may return error
+    # Either way is acceptable behavior for type validation
+    if payload.isError:
+        # MCP/Pydantic caught validation error - acceptable
+        assert payload.content, "Error should have content"
+    else:
+        # Pydantic coerced to string - tool should still succeed
+        env_json = _tool_json(payload)
+        assert "success" in env_json or "error" in env_json
 
 
 # =============================================================================

@@ -84,10 +84,10 @@ def __getattr__(name: str):
 
 
 # PDG tools
-from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg
+from .pdg_tools import PDGAnalyzer, PDGBuilder, build_pdg  # noqa: E402
 
 # Surgical Extractor (Token-efficient extraction)
-from .surgery.surgical_extractor import (
+from .surgery.surgical_extractor import (  # noqa: E402
     ContextualExtraction,
     CrossFileResolution,
     CrossFileSymbol,
@@ -100,7 +100,7 @@ from .surgery.surgical_extractor import (
 )
 
 # Surgical Patcher (Safe code modification)
-from .surgery.surgical_patcher import (
+from .surgery.surgical_patcher import (  # noqa: E402
     PatchResult,
     SurgicalPatcher,
     update_class_in_file,
@@ -110,7 +110,7 @@ from .surgery.surgical_patcher import (
 
 # Unified Extractor (Multi-language extraction) - v3.1.0
 # [20251221_FEATURE] v3.1.0 - Unified interface for all languages
-from .surgery.unified_extractor import (
+from .surgery.unified_extractor import (  # noqa: E402
     Language,
     UnifiedExtractionResult,
     UnifiedExtractor,
