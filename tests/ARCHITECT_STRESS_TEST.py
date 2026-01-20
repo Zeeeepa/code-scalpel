@@ -5,7 +5,7 @@ Proof that this parser is NOT deterministic on dirty code.
 
 Test cases:
 1. Missing semicolon in JavaScript
-2. Jinja2 template mixed with Python  
+2. Jinja2 template mixed with Python
 3. Git merge conflict markers (<<<<<<, ======, >>>>>>)
 """
 
@@ -88,7 +88,7 @@ print("-" * 80)
 try:
     from tree_sitter import Parser, Language
     import tree_sitter_javascript as ts_js
-    
+
     dirty_js_missing_semicolon = """
 function calculateTotal(items) {
     let total = 0
@@ -106,7 +106,7 @@ function calculateTotal(items) {
     lang = Language(ts_js.language())
     parser = Parser(lang)
     tree = parser.parse(bytes(dirty_js_missing_semicolon, "utf-8"))
-    
+
     print(f"⚠️  SILENT SUCCESS: Tree-sitter parsed without error!")
     print(f"   Has errors: {tree.root_node.has_error}")
     print(f"   Root type: {tree.root_node.type}")
@@ -137,7 +137,9 @@ print("\nResult: ", end="")
 try:
     tree = ast.parse(dirty_python_incomplete)
     print(f"✅ SILENT SUCCESS: ast.parse accepted incomplete code!")
-    print(f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}")
+    print(
+        f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}"
+    )
 except SyntaxError as e:
     print(f"⚠️  Failed: {e}")
 
@@ -147,7 +149,8 @@ except SyntaxError as e:
 print("\n" + "=" * 80)
 print("THE ARCHITECT'S VERDICT")
 print("=" * 80)
-print("""
+print(
+    """
 1. PDG Builder (pdg_tools/builder.py): 
    ❌ NO sanitization - CRASHES on merge conflicts
    ❌ NO fallback - ast.parse() called directly (line 82)
@@ -178,4 +181,5 @@ This tool is NOT "deterministic" because:
 It IS "fail-fast" in some places (surgical_extractor) but NOT others (pdg_builder).
 
 The real-world verdict: **PARTIALLY ROBUST** but **INCONSISTENT**.
-""")
+"""
+)

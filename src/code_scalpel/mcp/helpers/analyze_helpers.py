@@ -202,7 +202,9 @@ def _detect_code_smells_python(tree: ast.AST, code: str) -> list[str]:
         # God class detection
         elif isinstance(node, ast.ClassDef):
             methods = [
-                n for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                n
+                for n in node.body
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
             ]
             if len(methods) > 10:
                 smells.append(
@@ -265,10 +267,14 @@ def _compute_halstead_metrics_python(tree: ast.AST) -> dict[str, float]:
     }
 
 
-def _detect_duplicate_code_blocks(code: str, min_lines: int = 5) -> list[dict[str, Any]]:
+def _detect_duplicate_code_blocks(
+    code: str, min_lines: int = 5
+) -> list[dict[str, Any]]:
     """Detect duplicate code blocks using line-hash sliding windows."""
     lines = [
-        ln.strip() for ln in code.splitlines() if ln.strip() and not ln.strip().startswith("#")
+        ln.strip()
+        for ln in code.splitlines()
+        if ln.strip() and not ln.strip().startswith("#")
     ]
     if len(lines) < min_lines:
         return []
@@ -312,10 +318,16 @@ def _detect_naming_issues_python(tree: ast.AST) -> list[str]:
     pascal = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not snake.match(node.name):
-            issues.append(f"Function '{node.name}' should be snake_case at line {node.lineno}.")
+        if isinstance(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef)
+        ) and not snake.match(node.name):
+            issues.append(
+                f"Function '{node.name}' should be snake_case at line {node.lineno}."
+            )
         if isinstance(node, ast.ClassDef) and not pascal.match(node.name):
-            issues.append(f"Class '{node.name}' should be PascalCase at line {node.lineno}.")
+            issues.append(
+                f"Class '{node.name}' should be PascalCase at line {node.lineno}."
+            )
     return issues
 
 
@@ -349,9 +361,13 @@ def _detect_compliance_issues_python(tree: ast.AST, code: str) -> list[str]:
     issues: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler) and node.type is None:
-            issues.append(f"Bare except detected at line {node.lineno}. Specify exception types.")
+            issues.append(
+                f"Bare except detected at line {node.lineno}. Specify exception types."
+            )
     if "password" in code.lower() and "hashlib" not in code.lower():
-        issues.append("Potential plaintext password handling detected. Ensure hashing/encryption.")
+        issues.append(
+            "Potential plaintext password handling detected. Ensure hashing/encryption."
+        )
     return issues
 
 
@@ -460,20 +476,29 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
                 )
 
             # Arrow functions with variable declaration
-            elif node_type == "lexical_declaration" or node_type == "variable_declaration":
+            elif (
+                node_type == "lexical_declaration"
+                or node_type == "variable_declaration"
+            ):
                 for child in node.children:
                     if child.type == "variable_declarator":
                         name_node = child.child_by_field_name("name")
                         value_node = child.child_by_field_name("value")
                         if value_node and value_node.type == "arrow_function":
-                            name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
+                            name = (
+                                name_node.text.decode("utf-8")
+                                if name_node
+                                else "<anonymous>"
+                            )
                             functions.append(name)
                             function_details.append(
                                 FunctionInfo(
                                     name=name,
                                     lineno=child.start_point[0] + 1,
                                     end_lineno=child.end_point[0] + 1,
-                                    is_async=any(c.type == "async" for c in value_node.children),
+                                    is_async=any(
+                                        c.type == "async" for c in value_node.children
+                                    ),
                                 )
                             )
 
@@ -609,7 +634,11 @@ def _detect_frameworks_from_code(
         frameworks.add("fastapi")
 
     # Java / Spring
-    if lang == "java" or "org.springframework" in code_lower or "@component" in code_lower:
+    if (
+        lang == "java"
+        or "org.springframework" in code_lower
+        or "@component" in code_lower
+    ):
         if (
             "springframework" in code_lower
             or "@autowired" in code_lower
@@ -619,7 +648,11 @@ def _detect_frameworks_from_code(
 
     # React / Next.js style patterns (JS/TS)
     if lang in {"javascript", "typescript"} or "tsx" in lang:
-        if "from 'react'" in code_lower or 'from "react"' in code_lower or "react" in code_lower:
+        if (
+            "from 'react'" in code_lower
+            or 'from "react"' in code_lower
+            or "react" in code_lower
+        ):
             if (
                 "usestate(" in code_lower
                 or "useeffect(" in code_lower
@@ -665,7 +698,9 @@ def _detect_dead_code_hints_python(tree: ast.AST, code: str) -> list[str]:
             for st in stmts:
                 if terminated:
                     ln = getattr(st, "lineno", None)
-                    hints.append(f"Unreachable statement after terminator in {scope} (L{ln})")
+                    hints.append(
+                        f"Unreachable statement after terminator in {scope} (L{ln})"
+                    )
                     continue
                 if isinstance(st, (ast.Return, ast.Raise)):  # simple terminators
                     terminated = True
@@ -813,7 +848,9 @@ def _summarize_types_python(tree: ast.AST) -> dict[str, Any]:
     }
 
 
-def _compute_api_surface_from_symbols(functions: list[str], classes: list[str]) -> dict[str, Any]:
+def _compute_api_surface_from_symbols(
+    functions: list[str], classes: list[str]
+) -> dict[str, Any]:
     def _is_public(name: str) -> bool:
         # Treat async prefix as implementation detail in inventory
         norm = name.replace("async ", "")
@@ -864,7 +901,9 @@ def _update_and_get_complexity_trends(
         return None
     key = str(file_path)
     history = _ANALYZE_CODE_COMPLEXITY_HISTORY.setdefault(key, [])
-    history.append({"cyclomatic": cyclomatic, "cognitive": cognitive, "ts": time.time()})
+    history.append(
+        {"cyclomatic": cyclomatic, "cognitive": cognitive, "ts": time.time()}
+    )
     if len(history) > max_points:
         history[:] = history[-max_points:]
 
@@ -977,7 +1016,9 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(code, "java", result.imports)
+                result.frameworks = _detect_frameworks_from_code(
+                    code, "java", result.imports
+                )
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
                 result.api_surface = _compute_api_surface_from_symbols(
@@ -1009,7 +1050,9 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(code, "javascript", result.imports)
+                result.frameworks = _detect_frameworks_from_code(
+                    code, "javascript", result.imports
+                )
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
                 result.api_surface = _compute_api_surface_from_symbols(
@@ -1040,7 +1083,9 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(code, "typescript", result.imports)
+                result.frameworks = _detect_frameworks_from_code(
+                    code, "typescript", result.imports
+                )
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
                 result.api_surface = _compute_api_surface_from_symbols(
@@ -1182,7 +1227,9 @@ def _analyze_code_sync(
 
             if has_capability("analyze_code", "duplicate_code_detection", tier):
                 duplicate_code_blocks = _detect_duplicate_code_blocks(code)
-                logger.debug(f"Detected {len(duplicate_code_blocks)} duplicate code block(s)")
+                logger.debug(
+                    f"Detected {len(duplicate_code_blocks)} duplicate code block(s)"
+                )
 
             if has_capability("analyze_code", "dependency_graph", tier):
                 dependency_graph = _build_dependency_graph_python(tree)

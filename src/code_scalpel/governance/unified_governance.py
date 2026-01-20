@@ -246,7 +246,10 @@ class UnifiedGovernance:
                 with open(budget_path, "r") as f:
                     budget_config = yaml.safe_load(f) or {}
                     # Extract the 'default' budget if using the budgets structure
-                    if "budgets" in budget_config and "default" in budget_config["budgets"]:
+                    if (
+                        "budgets" in budget_config
+                        and "default" in budget_config["budgets"]
+                    ):
                         budget_limits = budget_config["budgets"]["default"]
                     else:
                         budget_limits = budget_config
@@ -314,7 +317,9 @@ class UnifiedGovernance:
                         FileChange(  # type: ignore[misc]
                             file_path=operation.get("file_path", ""),
                             added_lines=(
-                                [operation.get("code", "")] if operation.get("code") else []
+                                [operation.get("code", "")]
+                                if operation.get("code")
+                                else []
                             ),
                         )
                     ],
@@ -350,7 +355,9 @@ class UnifiedGovernance:
 
         return decision
 
-    def _evaluate_semantic(self, operation: Dict[str, Any]) -> List[GovernanceViolation]:
+    def _evaluate_semantic(
+        self, operation: Dict[str, Any]
+    ) -> List[GovernanceViolation]:
         """Evaluate operation for semantic security issues."""
         violations = []
 
@@ -567,7 +574,9 @@ class UnifiedGovernance:
             return {
                 "type": "code_edit",
                 "code": "\n".join(
-                    line for change in changes for line in getattr(change, "added_lines", [])
+                    line
+                    for change in changes
+                    for line in getattr(change, "added_lines", [])
                 ),
                 "language": "python",  # Default, could detect
                 "file_path": changes[0].file_path if changes else "",
@@ -685,7 +694,9 @@ class UnifiedGovernance:
 
         # Convert from BudgetOperation
         changes = getattr(operation, "changes", [])
-        code = "\n".join(line for change in changes for line in getattr(change, "added_lines", []))
+        code = "\n".join(
+            line for change in changes for line in getattr(change, "added_lines", [])
+        )
 
         return EngineOperation(  # type: ignore[misc]
             type="code_edit",

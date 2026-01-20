@@ -23,12 +23,16 @@ class TestCommunityTierLimits:
         )
 
         # Should truncate to 100 files
-        assert result.total_files <= 100, f"Expected ≤100 files, got {result.total_files}"
+        assert (
+            result.total_files <= 100
+        ), f"Expected ≤100 files, got {result.total_files}"
 
         # Should have truncation warning
         if hasattr(result, "warnings") and result.warnings:
             assert any(
-                "100" in str(w) or "limit" in str(w).lower() or "truncat" in str(w).lower()
+                "100" in str(w)
+                or "limit" in str(w).lower()
+                or "truncat" in str(w).lower()
                 for w in result.warnings
             ), f"Expected file limit warning, got: {result.warnings}"
 
@@ -43,7 +47,9 @@ class TestCommunityTierLimits:
         total_modules = len(result.modules)
 
         # Should truncate to ~50 modules (allowing some flexibility for __init__.py files)
-        assert total_modules <= 72, f"Expected ≤72 modules (50 + packages), got {total_modules}"
+        assert (
+            total_modules <= 72
+        ), f"Expected ≤72 modules (50 + packages), got {total_modules}"
 
     @pytest.mark.asyncio
     async def test_community_basic_detail_level(self, community_server, simple_project):
@@ -59,7 +65,9 @@ class TestCommunityTierLimits:
         assert hasattr(result, "languages")
 
         # Pro features should NOT be present or should be empty
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # Check Pro features are absent or empty
         pro_features = [
@@ -90,7 +98,9 @@ class TestCommunityTierLimits:
         from .conftest import has_enterprise_features, has_pro_features
 
         # Should not have Pro features
-        assert not has_pro_features(result), "Community tier should not have Pro features"
+        assert not has_pro_features(
+            result
+        ), "Community tier should not have Pro features"
 
         # Should not have Enterprise features
         assert not has_enterprise_features(

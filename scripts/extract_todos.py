@@ -315,7 +315,9 @@ class TodoExtractor:
                     if (line_in_docstring and tag in line) or self._tag_in_comment(
                         line, tag
                     ):
-                        todo = self._parse_todo_line(str(file_path), line_num, line, tag)
+                        todo = self._parse_todo_line(
+                            str(file_path), line_num, line, tag
+                        )
                         if todo:
                             self.todos.append(todo)
                             # [20260117_FEATURE] Track line numbers for removal

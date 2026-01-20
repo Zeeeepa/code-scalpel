@@ -295,9 +295,7 @@ class TestSurgicalExtractorDeepCoverage:
         """Cover nested class extraction."""
         from code_scalpel.surgical_extractor import SurgicalExtractor
 
-        code = (
-            "\nclass Outer:\n    class Inner:\n        def inner_method(self):\n            pass\n"
-        )
+        code = "\nclass Outer:\n    class Inner:\n        def inner_method(self):\n            pass\n"
         extractor = SurgicalExtractor(code)
         result = extractor.get_class("Outer")
         assert result is not None

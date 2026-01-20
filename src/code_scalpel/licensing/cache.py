@@ -105,9 +105,12 @@ class LicenseCache:
         self._lock = threading.RLock()
 
         # [20251225_FEATURE] P1_HIGH: Persistent cache to disk
-        self._persistence_path = persistence_path or Path(".code-scalpel/license_cache.json")
+        self._persistence_path = persistence_path or Path(
+            ".code-scalpel/license_cache.json"
+        )
         self._enable_persistence = (
-            persistence_path is not None or os.getenv("CODE_SCALPEL_CACHE_PERSIST") == "true"
+            persistence_path is not None
+            or os.getenv("CODE_SCALPEL_CACHE_PERSIST") == "true"
         )
 
         # [20251225_FEATURE] P4_LOW: Cache encryption
@@ -117,7 +120,9 @@ class LicenseCache:
         self._enable_distributed = (
             enable_distributed or os.getenv("CODE_SCALPEL_CACHE_DISTRIBUTED") == "true"
         )
-        self._redis_url = redis_url or os.getenv("CODE_SCALPEL_REDIS_URL", "redis://localhost:6379")
+        self._redis_url = redis_url or os.getenv(
+            "CODE_SCALPEL_REDIS_URL", "redis://localhost:6379"
+        )
         self._redis_client = None
 
         # [20251225_FEATURE] P3_LOW: Cache replication
@@ -308,7 +313,9 @@ class LicenseCache:
             Number of expired entries removed
         """
         with self._lock:
-            expired_keys = [key for key, entry in self._cache.items() if entry.is_expired()]
+            expired_keys = [
+                key for key, entry in self._cache.items() if entry.is_expired()
+            ]
 
             for key in expired_keys:
                 del self._cache[key]
@@ -370,7 +377,9 @@ class LicenseCache:
         with self._lock:
             if replica not in self._replicas:
                 self._replicas.append(replica)
-                logger.info(f"Added cache replica. Total replicas: {len(self._replicas)}")
+                logger.info(
+                    f"Added cache replica. Total replicas: {len(self._replicas)}"
+                )
 
     def remove_replica(self, replica: "LicenseCache") -> bool:
         """
@@ -385,7 +394,9 @@ class LicenseCache:
         with self._lock:
             if replica in self._replicas:
                 self._replicas.remove(replica)
-                logger.info(f"Removed cache replica. Total replicas: {len(self._replicas)}")
+                logger.info(
+                    f"Removed cache replica. Total replicas: {len(self._replicas)}"
+                )
                 return True
             return False
 
@@ -450,7 +461,8 @@ class LicenseCache:
 
             self._stats["loads"] += 1
             logger.info(
-                f"Cache loaded from {self._persistence_path}. " f"Loaded {len(self._cache)} entries"
+                f"Cache loaded from {self._persistence_path}. "
+                f"Loaded {len(self._cache)} entries"
             )
 
         except (IOError, OSError, json.JSONDecodeError) as e:
@@ -471,7 +483,8 @@ class LicenseCache:
 
         # XOR each byte with key bytes (cycling through key)
         encrypted = bytes(
-            data_bytes[i] ^ key_bytes[i % len(key_bytes)] for i in range(len(data_bytes))
+            data_bytes[i] ^ key_bytes[i % len(key_bytes)]
+            for i in range(len(data_bytes))
         )
 
         # Base64 encode for storage
@@ -527,7 +540,9 @@ class LicenseCache:
             )
             self._enable_distributed = False
         except Exception as e:
-            logger.warning(f"Failed to connect to Redis: {e}. Distributed cache disabled.")
+            logger.warning(
+                f"Failed to connect to Redis: {e}. Distributed cache disabled."
+            )
             self._enable_distributed = False
             self._redis_client = None
 

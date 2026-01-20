@@ -24,7 +24,9 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
@@ -43,7 +45,8 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         from flask import request, Flask
         app = Flask(__name__)
 
@@ -53,7 +56,8 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
             account = request.form['account']
             transfer(amount, account)
             return 'Success'
-        """)
+        """
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -67,14 +71,17 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
         "csrf" in v.type.lower() or v.cwe == "CWE-352" for v in result.vulnerabilities
     )
     # If not detected by CSRF detector, at least form access should be flagged
-    assert csrf_detected or any("form" in v.description.lower() for v in result.vulnerabilities)
+    assert csrf_detected or any(
+        "form" in v.description.lower() for v in result.vulnerabilities
+    )
 
 
 async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
     """Detect SSRF via requests library."""
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         import requests
         from flask import request
 
@@ -82,7 +89,8 @@ async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
             user_url = request.args.get('url')
             response = requests.get(user_url)  # SSRF - no URL validation
             return response.text
-        """)
+        """
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -99,7 +107,9 @@ async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
     assert ssrf_detected
 
 
-@pytest.mark.skip(reason="[v1.1 Enhancement] JWT API misuse detection requires argument analysis")
+@pytest.mark.skip(
+    reason="[v1.1 Enhancement] JWT API misuse detection requires argument analysis"
+)
 async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     """Detect JWT decoded without signature verification.
 
@@ -110,14 +120,16 @@ async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         import jwt
 
         def validate_token(token):
             # Insecure: verify=False bypasses signature check
             payload = jwt.decode(token, verify=False)
             return payload
-        """)
+        """
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -133,7 +145,9 @@ async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     assert jwt_detected
 
     # Should be marked as critical severity
-    critical_vulns = [v for v in result.vulnerabilities if v.severity.lower() == "critical"]
+    critical_vulns = [
+        v for v in result.vulnerabilities if v.severity.lower() == "critical"
+    ]
     assert len(critical_vulns) >= 1
 
 
@@ -150,14 +164,16 @@ async def test_jwt_none_algorithm(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         import jwt
 
         def create_admin_token():
             # Critical vulnerability: 'none' algorithm allows unsigned tokens
             token = jwt.encode({'user': 'admin'}, key='', algorithm='none')
             return token
-        """)
+        """
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -175,5 +191,7 @@ async def test_jwt_none_algorithm(monkeypatch: pytest.MonkeyPatch):
     assert jwt_none_detected
 
     # Should be marked as critical severity
-    critical_vulns = [v for v in result.vulnerabilities if v.severity.lower() == "critical"]
+    critical_vulns = [
+        v for v in result.vulnerabilities if v.severity.lower() == "critical"
+    ]
     assert len(critical_vulns) >= 1

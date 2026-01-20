@@ -76,7 +76,9 @@ class SwiftLintParser:
     ) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-correction")
 
-    def generate_report(self, violations: List[SwiftLintViolation], format: str = "json") -> str:
+    def generate_report(
+        self, violations: List[SwiftLintViolation], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[SwiftLintViolation]) -> Dict[str, Any]:

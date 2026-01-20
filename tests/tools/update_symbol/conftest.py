@@ -69,7 +69,8 @@ ENTERPRISE_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/enterprise.license.jwt"
 
 # Fallback to archive if tests/licenses doesn't have valid ones
 ARCHIVE_PRO_LICENSE = (
-    PROJECT_ROOT / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
+    PROJECT_ROOT
+    / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
 )
 
 
@@ -83,13 +84,15 @@ def _find_valid_license(tier: str) -> Path | None:
     if tier == "pro":
         candidates = [
             PRO_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
             ARCHIVE_PRO_LICENSE,
         ]
     elif tier == "enterprise":
         candidates = [
             ENTERPRISE_LICENSE_PATH,
-            PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
+            PROJECT_ROOT
+            / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
         ]
     else:
         return None
@@ -179,7 +182,8 @@ def community_tier(monkeypatch):
 def temp_python_file(tmp_path):
     """Create a temporary Python file with sample code."""
     py_file = tmp_path / "sample.py"
-    py_file.write_text("""
+    py_file.write_text(
+        """
 def add_numbers(a, b):
     '''Add two numbers.'''
     return a + b
@@ -194,7 +198,8 @@ class Calculator:
     def multiply(self, x, y):
         '''Multiply two numbers.'''
         return x * y
-""")
+"""
+    )
     return py_file
 
 
@@ -202,7 +207,8 @@ class Calculator:
 def temp_js_file(tmp_path):
     """Create a temporary JavaScript file with sample code."""
     js_file = tmp_path / "sample.js"
-    js_file.write_text("""
+    js_file.write_text(
+        """
 function addNumbers(a, b) {
     // Add two numbers
     return a + b;
@@ -221,7 +227,8 @@ class Calculator {
         return x * y;
     }
 }
-""")
+"""
+    )
     return js_file
 
 
@@ -233,7 +240,8 @@ def temp_multifile_project(tmp_path):
 
     # File 1: utils.py
     utils_file = src_dir / "utils.py"
-    utils_file.write_text("""
+    utils_file.write_text(
+        """
 def calculate_discount(price, rate=0.1):
     '''Calculate discount.'''
     return price * (1 - rate)
@@ -241,11 +249,13 @@ def calculate_discount(price, rate=0.1):
 def validate_price(price):
     '''Validate price.'''
     return price > 0
-""")
+"""
+    )
 
     # File 2: services.py
     services_file = src_dir / "services.py"
-    services_file.write_text("""
+    services_file.write_text(
+        """
 from utils import calculate_discount
 
 def apply_discount(price):
@@ -256,7 +266,8 @@ def process_order(items):
     '''Process order.'''
     total = sum(items)
     return apply_discount(total)
-""")
+"""
+    )
 
     return {"root": tmp_path, "utils": utils_file, "services": services_file}
 
@@ -612,7 +623,9 @@ def assert_result_has_community_fields():
         ]
         for field_name in pro_fields:
             if field_name in result:
-                assert result[field_name] is None, f"Community tier should not expose {field_name}"
+                assert (
+                    result[field_name] is None
+                ), f"Community tier should not expose {field_name}"
 
         return True
 
@@ -647,7 +660,9 @@ def assert_result_has_pro_fields():
         ]
         for field_name in enterprise_fields:
             if field_name in result:
-                assert result[field_name] is None, f"Pro tier should not expose {field_name}"
+                assert (
+                    result[field_name] is None
+                ), f"Pro tier should not expose {field_name}"
 
         return True
 
@@ -679,7 +694,9 @@ def assert_result_has_enterprise_fields():
             "error",
         ]
         for field_name in all_fields:
-            assert field_name in result, f"Enterprise result missing field: {field_name}"
+            assert (
+                field_name in result
+            ), f"Enterprise result missing field: {field_name}"
 
         return True
 

@@ -13,7 +13,9 @@ mcp = import_module("code_scalpel.mcp.protocol").mcp
 
 
 @mcp.tool()
-async def analyze_code(code: str, language: str = "auto", file_path: str | None = None) -> Any:
+async def analyze_code(
+    code: str, language: str = "auto", file_path: str | None = None
+) -> Any:
     """
     Analyze source code structure.
 

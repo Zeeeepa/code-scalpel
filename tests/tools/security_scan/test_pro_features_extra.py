@@ -52,7 +52,9 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
@@ -61,17 +63,21 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
 
 async def test_nosql_injection_detection(monkeypatch: pytest.MonkeyPatch):
     _use_pro_license(monkeypatch)
-    code = textwrap.dedent("""
+    code = textwrap.dedent(
+        """
         from flask import request
         def find_docs(collection):
             qv = request.args.get('q')
             return collection.find(qv)
-        """)
+        """
+    )
     from code_scalpel.mcp.server import security_scan
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-943" or "nosql" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
@@ -88,7 +94,9 @@ async def test_ldap_injection_detection(monkeypatch: pytest.MonkeyPatch):
 
     result = await security_scan(code=code)
     assert result.success is True
-    assert any(v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities)
+    assert any(
+        v.cwe == "CWE-90" or "ldap" in v.type.lower() for v in result.vulnerabilities
+    )
 
 
 async def test_secret_detection(monkeypatch: pytest.MonkeyPatch):
@@ -123,11 +131,13 @@ async def test_remediation_suggestions_pro_tier(monkeypatch: pytest.MonkeyPatch)
     import uuid
 
     unique_id = uuid.uuid4().hex[:8]
-    code = textwrap.dedent(f"""
+    code = textwrap.dedent(
+        f"""
         import subprocess
         def run_cmd_{unique_id}(user_input):
             subprocess.run(f"ls {{user_input}}", shell=True)  # CWE-78
-        """)
+        """
+    )
 
     # Import fresh to pick up license changes
     import sys
@@ -166,11 +176,13 @@ async def test_remediation_suggestions_community_none(monkeypatch: pytest.Monkey
     import uuid
 
     unique_id = uuid.uuid4().hex[:8]
-    code = textwrap.dedent(f"""
+    code = textwrap.dedent(
+        f"""
         import subprocess
         def run_cmd_{unique_id}(user_input):
             subprocess.run(f"ls {{user_input}}", shell=True)
-        """)
+        """
+    )
 
     # Import fresh to pick up license changes
     import sys

@@ -21,7 +21,9 @@ def test_tier_limits(tier: str, expected_max_k, expected_max_nodes):
     max_k = limits.get("max_k")
     max_nodes = limits.get("max_nodes")
 
-    assert max_k == expected_max_k, f"{tier} expected max_k={expected_max_k}, got {max_k}"
+    assert (
+        max_k == expected_max_k
+    ), f"{tier} expected max_k={expected_max_k}, got {max_k}"
     assert (
         max_nodes == expected_max_nodes
     ), f"{tier} expected max_nodes={expected_max_nodes}, got {max_nodes}"

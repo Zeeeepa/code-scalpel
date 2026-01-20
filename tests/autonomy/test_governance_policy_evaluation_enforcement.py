@@ -91,12 +91,17 @@ async def test_pro_block_mode_denies_update_symbol_when_policy_denies(
     assert result["error"]["error_code"] == "forbidden"
 
     # Ensure file was not modified.
-    assert target_file.read_text(encoding="utf-8") == """def f():
+    assert (
+        target_file.read_text(encoding="utf-8")
+        == """def f():
     return 1
 """
+    )
 
 
-@pytest.mark.skip(reason="[20250112_TEST] Test hangs - needs cross-file reference scanning mocks")
+@pytest.mark.skip(
+    reason="[20250112_TEST] Test hangs - needs cross-file reference scanning mocks"
+)
 @pytest.mark.anyio
 async def test_pro_warn_mode_allows_update_symbol_with_break_glass_and_warning(
     tmp_path: Path,
@@ -205,7 +210,9 @@ async def test_pro_block_mode_emits_audit_event_on_policy_deny(
     audit_path = policy_dir / "audit.jsonl"
     assert audit_path.exists()
 
-    lines = [ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    lines = [
+        ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()
+    ]
     assert lines
 
     events = [json.loads(ln) for ln in lines]
@@ -218,7 +225,9 @@ async def test_pro_block_mode_emits_audit_event_on_policy_deny(
     )
 
 
-@pytest.mark.skip(reason="[20250112_TEST] Test hangs - needs cross-file reference scanning mocks")
+@pytest.mark.skip(
+    reason="[20250112_TEST] Test hangs - needs cross-file reference scanning mocks"
+)
 @pytest.mark.anyio
 async def test_pro_warn_mode_allows_when_policy_yaml_missing_with_break_glass(
     tmp_path: Path,
@@ -321,6 +330,9 @@ async def test_pro_block_mode_denies_when_policy_yaml_missing(
     assert result["error"]["error_code"] == "forbidden"
 
     # Ensure file was not modified.
-    assert target_file.read_text(encoding="utf-8") == """def f():
+    assert (
+        target_file.read_text(encoding="utf-8")
+        == """def f():
     return 1
 """
+    )

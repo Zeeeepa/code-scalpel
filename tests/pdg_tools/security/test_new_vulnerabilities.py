@@ -66,7 +66,9 @@ class TestWeakCryptographyDetection:
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
         weak_crypto_vulns = [
-            v for v in result.vulnerabilities if "WEAK_CRYPTO" in str(v.vulnerability_type)
+            v
+            for v in result.vulnerabilities
+            if "WEAK_CRYPTO" in str(v.vulnerability_type)
         ]
         assert len(weak_crypto_vulns) == 0
 
@@ -128,7 +130,9 @@ class TestSSRFDetection:
         code = '\nimport requests\nresponse = requests.get("https://api.example.com/status")\n'
         analyzer = SecurityAnalyzer()
         result = analyzer.analyze(code)
-        ssrf_vulns = [v for v in result.vulnerabilities if "SSRF" in str(v.vulnerability_type)]
+        ssrf_vulns = [
+            v for v in result.vulnerabilities if "SSRF" in str(v.vulnerability_type)
+        ]
         assert len(ssrf_vulns) == 0
 
 

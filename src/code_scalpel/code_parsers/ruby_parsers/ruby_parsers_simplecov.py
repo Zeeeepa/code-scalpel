@@ -64,5 +64,7 @@ class SimpleCovParser:
     def generate_coverage_report(self, metrics: CoverageMetrics) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
-    def identify_coverage_hotspots(self, files: List[FileCoverage]) -> List[FileCoverage]:
+    def identify_coverage_hotspots(
+        self, files: List[FileCoverage]
+    ) -> List[FileCoverage]:
         raise NotImplementedError("Phase 2: Hotspot identification")

@@ -31,7 +31,8 @@ def temp_project_dir():
         (src_dir / "__init__.py").write_text("# Package init\n")
 
         # Create some Python files
-        (src_dir / "main.py").write_text('''
+        (src_dir / "main.py").write_text(
+            '''
 """Main module."""
 
 def main():
@@ -40,15 +41,18 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
+'''
+        )
 
-        (src_dir / "utils.py").write_text('''
+        (src_dir / "utils.py").write_text(
+            '''
 """Utility functions."""
 
 def helper():
     """A helper function."""
     return 42
-''')
+'''
+        )
 
         yield tmpdir
 
@@ -362,7 +366,9 @@ class TestOutputMetadataConsistency:
             assert r.max_files_applied == results[0].max_files_applied
             assert r.max_modules_applied == results[0].max_modules_applied
             assert r.pro_features_enabled == results[0].pro_features_enabled
-            assert r.enterprise_features_enabled == results[0].enterprise_features_enabled
+            assert (
+                r.enterprise_features_enabled == results[0].enterprise_features_enabled
+            )
 
     def test_metadata_matches_capabilities(self, temp_project_dir):
         """Pro features enabled should match coupling_metrics presence."""
@@ -377,4 +383,6 @@ class TestOutputMetadataConsistency:
         # If pro_features_enabled, Pro-tier features should be populated
         if result.pro_features_enabled:
             # coupling_metrics should be a list (even if empty)
-            assert result.coupling_metrics is not None or isinstance(result.coupling_metrics, list)
+            assert result.coupling_metrics is not None or isinstance(
+                result.coupling_metrics, list
+            )

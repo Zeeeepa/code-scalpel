@@ -73,10 +73,14 @@ class PDGUtils:
         node_data = pdg.nodes[node]
 
         # Get dependencies
-        dependencies = [(pred, pdg.edges[pred, node]["type"]) for pred in pdg.predecessors(node)]
+        dependencies = [
+            (pred, pdg.edges[pred, node]["type"]) for pred in pdg.predecessors(node)
+        ]
 
         # Get dependents
-        dependents = [(succ, pdg.edges[node, succ]["type"]) for succ in pdg.successors(node)]
+        dependents = [
+            (succ, pdg.edges[node, succ]["type"]) for succ in pdg.successors(node)
+        ]
 
         # Calculate node metrics
         metrics = PDGUtils.calculate_node_metrics(pdg, node)
@@ -246,7 +250,9 @@ class PDGUtils:
 
         # Find connected components (clusters)
         clusters = [
-            cluster for cluster in nx.connected_components(sim_graph) if len(cluster) >= min_size
+            cluster
+            for cluster in nx.connected_components(sim_graph)
+            if len(cluster) >= min_size
         ]
 
         return clusters

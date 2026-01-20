@@ -51,7 +51,9 @@ class TestValidatePathsMCPToolAvailability:
 
         sig = inspect.signature(tool.fn)
         param_names = list(sig.parameters.keys())
-        assert "paths" in param_names, f"Tool should have 'paths' parameter, found: {param_names}"
+        assert (
+            "paths" in param_names
+        ), f"Tool should have 'paths' parameter, found: {param_names}"
 
 
 class TestValidatePathsMCPInvocation:
@@ -115,7 +117,9 @@ class TestValidatePathsMCPInvocation:
         missing = tmp_path / "missing.txt"
 
         tool = mcp._tool_manager._tools.get("validate_paths")
-        result = await tool.fn(paths=[str(ok), str(missing)], project_root=str(tmp_path))
+        result = await tool.fn(
+            paths=[str(ok), str(missing)], project_root=str(tmp_path)
+        )
         assert str(ok) in result.accessible
         assert str(missing) in result.inaccessible
         assert result.success is False
@@ -200,7 +204,9 @@ class TestValidatePathsMCPTierFiltering:
     """Test response filtering based on tier."""
 
     @pytest.mark.asyncio
-    async def test_community_tier_100_paths_enforced_in_mcp(self, tmp_path, monkeypatch):
+    async def test_community_tier_100_paths_enforced_in_mcp(
+        self, tmp_path, monkeypatch
+    ):
         """Community tier should truncate to 100 paths and signal truncation."""
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
         monkeypatch.setenv("CODE_SCALPEL_TEST_FORCE_TIER", "1")

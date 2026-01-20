@@ -352,7 +352,10 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_id)
         result = analyze_security(code)
 
         summary = result.summary()
-        assert "vulnerability" in summary.lower() or "no vulnerabilities" in summary.lower()
+        assert (
+            "vulnerability" in summary.lower()
+            or "no vulnerabilities" in summary.lower()
+        )
 
     def test_result_to_dict(self):
         """Result should serialize to dict."""
@@ -612,7 +615,9 @@ class TestSanitizerRegistry:
         # Clean up after test
         test_name = "_test_custom_sanitizer_123"
         try:
-            register_sanitizer(test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False)
+            register_sanitizer(
+                test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False
+            )
 
             assert test_name in SANITIZER_REGISTRY
             sanitizer = SANITIZER_REGISTRY[test_name]
@@ -642,10 +647,12 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [tool.code-scalpel.sanitizers]
 "my_utils.clean_sql" = ["SQL_QUERY"]
-""")
+"""
+        )
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -665,10 +672,12 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [tool.code-scalpel.sanitizers]
 "my_utils.super_clean" = ["ALL"]
-""")
+"""
+        )
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -687,12 +696,14 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [tool.code-scalpel.sanitizers]
 "utils.clean_sql" = ["SQL_QUERY"]
 "utils.clean_html" = ["HTML_OUTPUT"]
 "utils.clean_all" = ["ALL"]
-""")
+"""
+        )
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -712,10 +723,12 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [tool.code-scalpel.sanitizers]
 "utils.paranoid_clean" = ["SQL_QUERY", "HTML_OUTPUT"]
-""")
+"""
+        )
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -734,10 +747,12 @@ class TestConfigLoader:
         )
 
         config_file = tmp_path / "pyproject.toml"
-        config_file.write_text("""
+        config_file.write_text(
+            """
 [tool.code-scalpel.sanitizers]
 "utils.mixed" = ["SQL_QUERY", "INVALID_SINK"]
-""")
+"""
+        )
 
         try:
             count = load_sanitizers_from_config(str(config_file))
@@ -1629,7 +1644,9 @@ class TestTaintTrackerConfigEdgeCases:
         fake_config = {
             "tool": {
                 "code-scalpel": {
-                    "sanitizers": {"bad_sanitizer": "not_a_list"}  # Invalid - should be list
+                    "sanitizers": {
+                        "bad_sanitizer": "not_a_list"
+                    }  # Invalid - should be list
                 }
             }
         }

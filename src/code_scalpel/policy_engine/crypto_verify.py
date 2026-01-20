@@ -222,9 +222,13 @@ class CryptographicPolicyVerifier:
             return PolicyManifest(**data)
 
         except subprocess.TimeoutExpired:
-            raise SecurityError("Git command timeout while loading manifest. Failing CLOSED.")
+            raise SecurityError(
+                "Git command timeout while loading manifest. Failing CLOSED."
+            )
         except json.JSONDecodeError as e:
-            raise SecurityError(f"Policy manifest is not valid JSON: {e}. Failing CLOSED.")
+            raise SecurityError(
+                f"Policy manifest is not valid JSON: {e}. Failing CLOSED."
+            )
 
     def _load_from_env(self) -> PolicyManifest:
         """
@@ -243,14 +247,17 @@ class CryptographicPolicyVerifier:
         manifest_json = os.environ.get("SCALPEL_POLICY_MANIFEST")
         if not manifest_json:
             raise SecurityError(
-                "SCALPEL_POLICY_MANIFEST environment variable not set. " "Failing CLOSED."
+                "SCALPEL_POLICY_MANIFEST environment variable not set. "
+                "Failing CLOSED."
             )
 
         try:
             data = json.loads(manifest_json)
             return PolicyManifest(**data)
         except json.JSONDecodeError as e:
-            raise SecurityError(f"SCALPEL_POLICY_MANIFEST is not valid JSON: {e}. Failing CLOSED.")
+            raise SecurityError(
+                f"SCALPEL_POLICY_MANIFEST is not valid JSON: {e}. Failing CLOSED."
+            )
 
     def _load_from_file(self) -> PolicyManifest:
         """
@@ -280,7 +287,9 @@ class CryptographicPolicyVerifier:
                 data = json.load(f)
             return PolicyManifest(**data)
         except json.JSONDecodeError as e:
-            raise SecurityError(f"Policy manifest is not valid JSON: {e}. Failing CLOSED.")
+            raise SecurityError(
+                f"Policy manifest is not valid JSON: {e}. Failing CLOSED."
+            )
 
     def verify_all_policies(self) -> VerificationResult:
         """
@@ -372,7 +381,9 @@ class CryptographicPolicyVerifier:
             raise SecurityError("Policy manifest not loaded. Cannot verify file.")
 
         if filename not in self.manifest.files:
-            raise SecurityError(f"File '{filename}' not in policy manifest. Cannot verify.")
+            raise SecurityError(
+                f"File '{filename}' not in policy manifest. Cannot verify."
+            )
 
         # [20241224_BUGFIX] v3.2.9 - Handle both flat hash strings and nested dicts
         expected_hash_or_dict = self.manifest.files[filename]
@@ -512,7 +523,9 @@ class CryptographicPolicyVerifier:
         message = json.dumps(
             manifest_data, sort_keys=True, separators=(",", ":")
         )  # [20241225_BUGFIX] v3.3.0 - Use canonical format
-        signature = hmac.new(secret_key.encode(), message.encode(), hashlib.sha256).hexdigest()
+        signature = hmac.new(
+            secret_key.encode(), message.encode(), hashlib.sha256
+        ).hexdigest()
 
         return PolicyManifest(
             version=manifest_data["version"],
@@ -523,7 +536,9 @@ class CryptographicPolicyVerifier:
         )
 
     @staticmethod
-    def save_manifest(manifest: PolicyManifest, policy_dir: str = ".code-scalpel") -> Path:
+    def save_manifest(
+        manifest: PolicyManifest, policy_dir: str = ".code-scalpel"
+    ) -> Path:
         """
         Save manifest to file.
 
@@ -581,4 +596,6 @@ def verify_policy_integrity_crypto(policy_dir: str = ".code-scalpel") -> bool:
         raise
     except Exception as e:
         # Any unexpected error - FAIL CLOSED
-        raise SecurityError(f"Unexpected error during policy verification: {e}. Failing CLOSED.")
+        raise SecurityError(
+            f"Unexpected error during policy verification: {e}. Failing CLOSED."
+        )

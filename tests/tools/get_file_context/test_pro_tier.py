@@ -135,7 +135,9 @@ class TestProTierDocumentationCoverage:
 
         # Good code has docstrings
         if result.doc_coverage is not None:
-            assert result.doc_coverage > 0, "Well-documented code should have >0% coverage"
+            assert (
+                result.doc_coverage > 0
+            ), "Well-documented code should have >0% coverage"
 
     def test_undocumented_code_has_low_coverage(self, temp_python_project):
         """Undocumented code should have low coverage."""
@@ -150,7 +152,9 @@ class TestProTierDocumentationCoverage:
 
         # Undocumented code should have lower coverage
         if result.doc_coverage is not None:
-            assert result.doc_coverage < 100, "Undocumented code should have <100% coverage"
+            assert (
+                result.doc_coverage < 100
+            ), "Undocumented code should have <100% coverage"
 
 
 class TestProTierMaintainabilityIndex:

@@ -40,7 +40,13 @@ class ParsingConfig:
 class ParsingError(ValueError):
     """Raised when code cannot be parsed deterministically."""
 
-    def __init__(self, message: str, *, location: str | None = None, suggestion: str | None = None):
+    def __init__(
+        self,
+        message: str,
+        *,
+        location: str | None = None,
+        suggestion: str | None = None,
+    ):
         super().__init__(message)
         self.location = location
         self.suggestion = suggestion
@@ -163,8 +169,7 @@ def parse_python_code(
         if not (config.allow_merge_conflicts or config.allow_templates):
             # Permissive but sanitization disabled
             raise ParsingError(
-                f"Invalid Python syntax: {e}. "
-                "Sanitization disabled in config.",
+                f"Invalid Python syntax: {e}. " "Sanitization disabled in config.",
                 location=_format_location(e.lineno),
             ) from e
 
@@ -172,8 +177,7 @@ def parse_python_code(
         sanitized, changed = sanitize_python_source(code)
         if not changed:
             raise ParsingError(
-                f"Invalid Python syntax: {e}. "
-                "Code could not be auto-sanitized.",
+                f"Invalid Python syntax: {e}. " "Code could not be auto-sanitized.",
                 location=_format_location(e.lineno),
             ) from e
 

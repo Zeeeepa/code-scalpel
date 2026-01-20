@@ -20,12 +20,16 @@ async def test_async_get_file_context_pro(monkeypatch, tmp_path):
     helper.write_text("CONST = 1\n")
 
     target = tmp_path / "target.py"
-    target.write_text(textwrap.dedent("""
+    target.write_text(
+        textwrap.dedent(
+            """
             import helper
 
             def calc(x):
                 return helper.CONST + x
-            """))
+            """
+        )
+    )
 
     pro_caps = _caps(
         2000,
@@ -77,7 +81,9 @@ async def test_async_get_file_context_enterprise_redaction(monkeypatch, tmp_path
     import code_scalpel.mcp.server as server
 
     monkeypatch.setattr(server, "get_current_tier_from_license", lambda: "enterprise")
-    monkeypatch.setattr(server, "get_tool_capabilities", lambda tool, tier: enterprise_caps)
+    monkeypatch.setattr(
+        server, "get_tool_capabilities", lambda tool, tier: enterprise_caps
+    )
 
     result = await get_file_context(str(secret))
 

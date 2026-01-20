@@ -29,7 +29,9 @@ class TestDeterminism:
 
         # Validate identical results
         assert files1 == files2, f"File count differs: {files1} vs {files2}"
-        assert functions1 == functions2, f"Function count differs: {functions1} vs {functions2}"
+        assert (
+            functions1 == functions2
+        ), f"Function count differs: {functions1} vs {functions2}"
         assert classes1 == classes2, f"Class count differs: {classes1} vs {classes2}"
 
     def test_language_detection_consistent(self, multilang_project, community_env):

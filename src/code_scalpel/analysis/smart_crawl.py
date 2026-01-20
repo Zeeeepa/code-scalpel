@@ -112,13 +112,17 @@ class SmartCrawler:
             try:
                 content = json.loads(pkg_json.read_text())
                 # Higher confidence if it has dependencies
-                has_deps = bool(content.get("dependencies") or content.get("devDependencies"))
+                has_deps = bool(
+                    content.get("dependencies") or content.get("devDependencies")
+                )
                 detected_types["nodejs"] = 0.9 if has_deps else 0.7
             except Exception:
                 detected_types["nodejs"] = 0.5
 
         # Check for specific Node.js frameworks
-        if (self.root / "next.config.js").exists() or (self.root / "next.config.mjs").exists():
+        if (self.root / "next.config.js").exists() or (
+            self.root / "next.config.mjs"
+        ).exists():
             markers_found.append("next.config.js")
             detected_types["nodejs"] = max(detected_types.get("nodejs", 0), 0.95)
 
@@ -226,7 +230,9 @@ class SmartCrawler:
         exclude_patterns: List[str] = []
 
         if pt in ("nodejs", "mixed"):
-            include_patterns.extend(["*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs"])
+            include_patterns.extend(
+                ["*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs"]
+            )
             exclude_patterns.extend(["*.min.js", "*.bundle.js"])
         if pt in ("python", "mixed"):
             include_patterns.extend(["*.py", "*.pyi"])

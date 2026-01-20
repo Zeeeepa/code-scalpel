@@ -94,7 +94,9 @@ class TreeSitterNode:
         """Node text content."""
         if not self.node:
             return ""
-        return self.source_code[self.node.start_byte : self.node.end_byte].decode("utf-8")
+        return self.source_code[self.node.start_byte : self.node.end_byte].decode(
+            "utf-8"
+        )
 
     @property
     def start_line(self) -> int:
@@ -165,7 +167,9 @@ class JSSymbol:
     """A JavaScript/TypeScript symbol (function, class, variable, etc.)."""
 
     name: str
-    kind: str  # "function", "class", "variable", "const", "let", "import", "export", etc.
+    kind: (
+        str  # "function", "class", "variable", "const", "let", "import", "export", etc.
+    )
     line: int
     column: int
     end_line: Optional[int] = None
@@ -201,7 +205,9 @@ class ImportStatement:
     is_type_only: bool = False  # TypeScript: import type
     default_import: Optional[str] = None
     namespace_import: Optional[str] = None  # import * as name
-    named_imports: list[tuple[str, Optional[str]]] = field(default_factory=list)  # [(name, alias)]
+    named_imports: list[tuple[str, Optional[str]]] = field(
+        default_factory=list
+    )  # [(name, alias)]
     is_dynamic: bool = False  # import()
 
 
@@ -264,7 +270,9 @@ class TreeSitterJSParser:
         :param language_path: Optional path to compiled language .so file.
         """
         if not TREE_SITTER_AVAILABLE:
-            raise ImportError("tree-sitter not installed. Install with: pip install tree-sitter")
+            raise ImportError(
+                "tree-sitter not installed. Install with: pip install tree-sitter"
+            )
 
         self._parsers: dict[JSLanguageVariant, Parser] = {}
         self._languages: dict[JSLanguageVariant, Language] = {}
@@ -506,7 +514,10 @@ class TreeSitterJSParser:
                 )
 
             # Arrow functions assigned to variables
-            elif node_type == "lexical_declaration" or node_type == "variable_declaration":
+            elif (
+                node_type == "lexical_declaration"
+                or node_type == "variable_declaration"
+            ):
                 for declarator in [
                     c for c in node.named_children if c.type == "variable_declarator"
                 ]:
@@ -530,7 +541,8 @@ class TreeSitterJSParser:
                     elif name_node:
                         kind = (
                             "const"
-                            if node_type == "lexical_declaration" and "const" in node.text[:10]
+                            if node_type == "lexical_declaration"
+                            and "const" in node.text[:10]
                             else "let" if "let" in node.text[:10] else "var"
                         )
                         symbols.append(
@@ -655,7 +667,9 @@ class TreeSitterJSParser:
         for child in params_node.named_children:
             if child.type == "identifier":
                 params.append(child.text)
-            elif child.type == "required_parameter" or child.type == "optional_parameter":
+            elif (
+                child.type == "required_parameter" or child.type == "optional_parameter"
+            ):
                 pattern = child.child_by_field("pattern")
                 if pattern:
                     params.append(pattern.text)
@@ -883,7 +897,9 @@ class TreeSitterJSParser:
         """
         return [node for node in self.walk(root) if predicate(node)]
 
-    def find_by_type(self, root: TreeSitterNode, node_type: str) -> list[TreeSitterNode]:
+    def find_by_type(
+        self, root: TreeSitterNode, node_type: str
+    ) -> list[TreeSitterNode]:
         """
         Find all nodes of a specific type.
 

@@ -232,7 +232,9 @@ class GraphQueryEngine:
             if to_id in self._reverse_adjacency:
                 self._reverse_adjacency[to_id].append(from_id)
 
-    def load_graph(self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) -> None:
+    def load_graph(
+        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]
+    ) -> None:
         """Backwards-compatible alias for loading raw graph data.
 
         Some internal tier tests and older callers expect `load_graph(nodes, edges)`.
@@ -318,7 +320,9 @@ class GraphQueryEngine:
         query_str = query_str.strip()
 
         # Parse WHERE clauses
-        where_match = re.search(r"WHERE\s+(.+?)(?:RETURN|LIMIT|ORDER|$)", query_str, re.IGNORECASE)
+        where_match = re.search(
+            r"WHERE\s+(.+?)(?:RETURN|LIMIT|ORDER|$)", query_str, re.IGNORECASE
+        )
         if where_match:
             conditions = where_match.group(1).strip()
             parsed.node_predicates = self._parse_conditions(conditions)
@@ -329,7 +333,9 @@ class GraphQueryEngine:
             parsed.limit = int(limit_match.group(1))
 
         # Parse ORDER BY
-        order_match = re.search(r"ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?", query_str, re.IGNORECASE)
+        order_match = re.search(
+            r"ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?", query_str, re.IGNORECASE
+        )
         if order_match:
             parsed.order_by = order_match.group(1)
             parsed.order_desc = (order_match.group(2) or "").upper() == "DESC"
@@ -472,9 +478,9 @@ class GraphQueryEngine:
                     # Find the edge
                     edge_match = False
                     for edge in self._edges:
-                        if (edge["from_id"] == current and edge["to_id"] == neighbor) or (
-                            edge["to_id"] == current and edge["from_id"] == neighbor
-                        ):
+                        if (
+                            edge["from_id"] == current and edge["to_id"] == neighbor
+                        ) or (edge["to_id"] == current and edge["from_id"] == neighbor):
                             if edge_pred.matches(edge):
                                 edge_match = True
                                 break
@@ -580,8 +586,12 @@ class GraphQueryEngine:
                 if edge_filter:
                     edge_ok = False
                     for edge in self._edges:
-                        if (edge["from_id"] == current_id and edge["to_id"] == neighbor_id) or (
-                            edge["to_id"] == current_id and edge["from_id"] == neighbor_id
+                        if (
+                            edge["from_id"] == current_id
+                            and edge["to_id"] == neighbor_id
+                        ) or (
+                            edge["to_id"] == current_id
+                            and edge["from_id"] == neighbor_id
                         ):
                             if edge_filter(edge):
                                 edge_ok = True

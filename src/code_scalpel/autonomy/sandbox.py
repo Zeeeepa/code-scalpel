@@ -117,11 +117,13 @@ class SandboxExecutor:
         if isolation_level == "container":
             if not DOCKER_AVAILABLE:
                 raise ImportError(
-                    "Docker support requires 'docker' package. " "Install with: pip install docker"
+                    "Docker support requires 'docker' package. "
+                    "Install with: pip install docker"
                 )
             if docker is None:
                 raise ImportError(
-                    "Docker support requires 'docker' package. " "Install with: pip install docker"
+                    "Docker support requires 'docker' package. "
+                    "Install with: pip install docker"
                 )
 
             self.docker_client = docker.from_env()
@@ -477,22 +479,30 @@ class SandboxExecutor:
                             LintResult(
                                 file=parts[0] if len(parts) > 0 else "",
                                 line=(
-                                    int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None
+                                    int(parts[1])
+                                    if len(parts) > 1 and parts[1].isdigit()
+                                    else None
                                 ),
                                 column=None,
                                 message=parts[-1].strip() if parts else line,
-                                severity=("error" if "error" in line.lower() else "warning"),
+                                severity=(
+                                    "error" if "error" in line.lower() else "warning"
+                                ),
                             )
                         )
 
-        success = build_success and (test_result.returncode == 0 if test_result else True)
+        success = build_success and (
+            test_result.returncode == 0 if test_result else True
+        )
 
         return SandboxResult(
             success=success,
             test_results=test_results,
             lint_results=lint_results,
             build_success=build_success,
-            side_effects_detected=self._detect_side_effects(Path(tempfile.gettempdir())),
+            side_effects_detected=self._detect_side_effects(
+                Path(tempfile.gettempdir())
+            ),
             execution_time_ms=execution_time_ms,
             stdout=stdout,
             stderr=stderr,

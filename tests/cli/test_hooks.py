@@ -193,7 +193,9 @@ class TestHookResponse:
 
     def test_to_json(self):
         """Test HookResponse JSON serialization."""
-        response = HookResponse(status=HookStatus.LOGGED, files_modified=["/path/to/file.py"])
+        response = HookResponse(
+            status=HookStatus.LOGGED, files_modified=["/path/to/file.py"]
+        )
         json_str = response.to_json()
         data = json.loads(json_str)
 

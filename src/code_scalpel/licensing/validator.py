@@ -130,7 +130,9 @@ class LicenseValidator:
 
     # [20251225_FEATURE] Secret key for signature verification (in production, load from secure storage)
     # This is a placeholder - in production, use a secure key management system
-    _SIGNATURE_SECRET = os.getenv("CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1")
+    _SIGNATURE_SECRET = os.getenv(
+        "CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1"
+    )
 
     def __init__(self):
         """Initialize the validator."""
@@ -216,7 +218,9 @@ class LicenseValidator:
 
         # [20251225_FEATURE] ENTERPRISE tier validation
         if key_tier == "enterprise":
-            enterprise_result = self._validate_enterprise(license_key, organization, seats_used)
+            enterprise_result = self._validate_enterprise(
+                license_key, organization, seats_used
+            )
             if not enterprise_result.is_valid:
                 self._cache_result(cache_key, enterprise_result)
                 return enterprise_result
@@ -260,7 +264,9 @@ class LicenseValidator:
                 message=f"Invalid tier in license key: {tier}",
             )
 
-        return ValidationResult(status=ValidationStatus.VALID, tier=tier, message="Format valid")
+        return ValidationResult(
+            status=ValidationStatus.VALID, tier=tier, message="Format valid"
+        )
 
     def _extract_tier(self, license_key: str) -> str:
         """Extract tier from license key."""
@@ -303,7 +309,9 @@ class LicenseValidator:
         ]  # Use first 8 chars for brevity
 
         # Compare signatures (timing-safe comparison)
-        if not hmac.compare_digest(provided_signature.lower(), expected_signature.lower()):
+        if not hmac.compare_digest(
+            provided_signature.lower(), expected_signature.lower()
+        ):
             logger.warning(f"Signature verification failed for {tier} license key")
             return ValidationResult(
                 status=ValidationStatus.INVALID,
@@ -372,7 +380,9 @@ class LicenseValidator:
                 if result_data.get("valid"):
                     expiration = None
                     if result_data.get("expiration_date"):
-                        expiration = datetime.fromisoformat(result_data["expiration_date"])
+                        expiration = datetime.fromisoformat(
+                            result_data["expiration_date"]
+                        )
 
                     return ValidationResult(
                         status=ValidationStatus.VALID,

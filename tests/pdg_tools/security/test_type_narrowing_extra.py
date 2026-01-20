@@ -12,14 +12,16 @@ from code_scalpel.polyglot.typescript.type_narrowing import (
 
 
 def test_regex_fallback_tracks_negated_predicates_and_truthy_guards() -> None:
-    code = dedent("""
+    code = dedent(
+        """
         if (!isValid(value)) {
           doThing(value);
         }
         if (typeof value === 'number') {
           return value + 1;
         }
-        """)
+        """
+    )
 
     narrowing = TypeNarrowing()
     result = narrowing.analyze(code)
@@ -79,7 +81,9 @@ def test_manual_tree_analysis_creates_branch_state() -> None:
     assert branch_states
     assert analyzer.is_taint_eliminated(
         "foo",
-        NarrowingResult(type_guards, branch_states, taint_eliminated, taint_reduced, {}),
+        NarrowingResult(
+            type_guards, branch_states, taint_eliminated, taint_reduced, {}
+        ),
         at_line=1,
     )
 

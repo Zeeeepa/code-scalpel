@@ -26,7 +26,9 @@ class _DummyLicenseData:
 
 
 class _DummyAnalyzerResult:
-    def __init__(self, vulnerabilities: list[dict], taint_sources: list[str] | None = None):
+    def __init__(
+        self, vulnerabilities: list[dict], taint_sources: list[str] | None = None
+    ):
         self._vulns = vulnerabilities
         self._taints = taint_sources or []
 
@@ -94,7 +96,9 @@ import hashlib
 def insecure_hash(user_input: str):
     return hashlib.sha1(user_input.encode()).hexdigest()
 
-""" + _make_repetitive_vuln_code(5)
+""" + _make_repetitive_vuln_code(
+        5
+    )
 
     from code_scalpel.mcp.server import security_scan
 
@@ -111,7 +115,9 @@ def insecure_hash(user_input: str):
     assert result.false_positive_tuning is not None
 
 
-async def test_security_scan_invalid_license_falls_back_to_community(tmp_path: Path, monkeypatch):
+async def test_security_scan_invalid_license_falls_back_to_community(
+    tmp_path: Path, monkeypatch
+):
     """Invalid license should fall back to Community limits (50 findings)."""
     license_path = tmp_path / "invalid.jwt"
     license_path.write_text("invalid.jwt.token.malformed\n", encoding="utf-8")
@@ -213,7 +219,9 @@ async def test_security_scan_expired_license_within_grace_uses_last_tier(monkeyp
     monkeypatch.setattr(
         jwt_validator.JWTLicenseValidator,
         "validate",
-        lambda self: _DummyLicenseData(False, tier="pro", error="expired", is_expired=True),
+        lambda self: _DummyLicenseData(
+            False, tier="pro", error="expired", is_expired=True
+        ),
     )
 
     code = _make_repetitive_vuln_code(60)
@@ -235,12 +243,16 @@ async def test_security_scan_expired_license_after_grace_downgrades(monkeypatch)
     from code_scalpel.mcp import server
 
     server._LAST_VALID_LICENSE_TIER = "pro"
-    server._LAST_VALID_LICENSE_AT = time.time() - (server._MID_SESSION_EXPIRY_GRACE_SECONDS + 10)
+    server._LAST_VALID_LICENSE_AT = time.time() - (
+        server._MID_SESSION_EXPIRY_GRACE_SECONDS + 10
+    )
 
     monkeypatch.setattr(
         jwt_validator.JWTLicenseValidator,
         "validate",
-        lambda self: _DummyLicenseData(False, tier="pro", error="expired", is_expired=True),
+        lambda self: _DummyLicenseData(
+            False, tier="pro", error="expired", is_expired=True
+        ),
     )
 
     code = _make_repetitive_vuln_code(70)
@@ -286,7 +298,9 @@ async def test_security_scan_pro_detects_nosql_ldap_and_secrets(monkeypatch):
         def analyze(self, _code):
             return _DummyAnalyzerResult(vulns)
 
-    monkeypatch.setattr("code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer)
+    monkeypatch.setattr(
+        "code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer
+    )
     monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
 
     code = "db.users.find_one({'a':user}); ldap.search(filter); secret='abc'"
@@ -339,12 +353,18 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
 
     class _StubPolicyEngine:
         def check_weak_crypto(self, _code):
-            return [_StubPolicyViolation("weak_crypto", 5, "medium", "MD5", "Use SHA-256")]
+            return [
+                _StubPolicyViolation("weak_crypto", 5, "medium", "MD5", "Use SHA-256")
+            ]
 
         def check_sensitive_logging(self, _code):
-            return [_StubPolicyViolation("log_pii", 12, "high", "PII logged", "Remove PII")]
+            return [
+                _StubPolicyViolation("log_pii", 12, "high", "PII logged", "Remove PII")
+            ]
 
-    monkeypatch.setattr("code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer)
+    monkeypatch.setattr(
+        "code_scalpel.security.analyzers.SecurityAnalyzer", _StubAnalyzer
+    )
     monkeypatch.setattr(
         "code_scalpel.security.analyzers.policy_engine.PolicyEngine", _StubPolicyEngine
     )
@@ -363,7 +383,10 @@ async def test_security_scan_enterprise_enables_compliance_and_custom_rules(
     assert result.reachability_analysis is not None
     # custom_rule_results may be None if no custom rules are triggered
     # But other Enterprise enrichments should be present
-    assert result.custom_rule_results is not None or result.false_positive_tuning is not None
+    assert (
+        result.custom_rule_results is not None
+        or result.false_positive_tuning is not None
+    )
 
 
 async def test_security_scan_capability_limits_respected(monkeypatch):

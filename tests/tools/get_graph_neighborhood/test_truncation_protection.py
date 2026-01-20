@@ -265,7 +265,9 @@ class TestMaxNodesLimits:
     def test_max_nodes_parameter_required(self, sample_call_graph):
         """max_nodes parameter should have a default value."""
         # When not specified, should use default (not crash)
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1
+        )
 
         assert result.success
 

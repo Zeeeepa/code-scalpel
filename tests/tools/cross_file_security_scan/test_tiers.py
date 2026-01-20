@@ -88,7 +88,9 @@ def run_query(user_supplied: str) -> str:
 # =============================================================================
 
 
-async def test_cross_file_security_scan_community_enforces_depth_cap(tmp_path: Path, monkeypatch):
+async def test_cross_file_security_scan_community_enforces_depth_cap(
+    tmp_path: Path, monkeypatch
+):
     """
     [20260103_TEST] Community tier enforces strict depth cap of 3.
 
@@ -133,11 +135,17 @@ async def test_cross_file_security_scan_community_enforces_depth_cap(tmp_path: P
 
     # Verify Community tier clamped the limits
     assert r.success is True
-    assert state["effective_max_depth"] == 3, "Community tier should enforce max_depth=3"
-    assert state["effective_max_modules"] == 10, "Community tier should enforce max_modules=10"
+    assert (
+        state["effective_max_depth"] == 3
+    ), "Community tier should enforce max_depth=3"
+    assert (
+        state["effective_max_modules"] == 10
+    ), "Community tier should enforce max_modules=10"
 
 
-async def test_community_tier_cannot_detect_deep_chain_vuln(tmp_path: Path, monkeypatch):
+async def test_community_tier_cannot_detect_deep_chain_vuln(
+    tmp_path: Path, monkeypatch
+):
     """
     [20260103_TEST] Community tier may detect vulnerabilities despite depth=3 cap.
 
@@ -176,7 +184,9 @@ async def test_community_tier_cannot_detect_deep_chain_vuln(tmp_path: Path, monk
 
     # Verify Community tier enforces depth cap in analyzer
     assert r.success is True
-    assert state["effective_max_depth"] == 3, "Community tier should enforce max_depth=3"
+    assert (
+        state["effective_max_depth"] == 3
+    ), "Community tier should enforce max_depth=3"
     # Note: Tool may still report vulnerabilities even with depth cap
     # The important thing is that the depth parameter is clamped
 
@@ -217,7 +227,9 @@ async def test_community_tier_invalid_license_fallback(tmp_path: Path, monkeypat
 # =============================================================================
 
 
-async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(tmp_path: Path, monkeypatch):
+async def test_cross_file_security_scan_pro_finds_deep_chain_vuln(
+    tmp_path: Path, monkeypatch
+):
     """
     [20260103_TEST] Pro tier can detect deep vulnerability chains.
 
@@ -292,7 +304,9 @@ async def test_cross_file_security_scan_pro_clamps_limits(tmp_path: Path, monkey
 
     assert r.success is True
     assert state["effective_max_depth"] == 10, "Pro tier should enforce max_depth=10"
-    assert state["effective_max_modules"] == 100, "Pro tier should enforce max_modules=100"
+    assert (
+        state["effective_max_modules"] == 100
+    ), "Pro tier should enforce max_modules=100"
 
 
 async def test_pro_tier_confidence_scoring_available(tmp_path: Path, monkeypatch):
@@ -322,7 +336,9 @@ async def test_pro_tier_confidence_scoring_available(tmp_path: Path, monkeypatch
 
     assert r.success is True
     # Pro tier should populate confidence scores
-    assert hasattr(r, "confidence_scores"), "Pro tier should have confidence_scores field"
+    assert hasattr(
+        r, "confidence_scores"
+    ), "Pro tier should have confidence_scores field"
     # Field may be None or populated depending on vulnerabilities found
     assert r.confidence_scores is None or isinstance(
         r.confidence_scores, (list, dict)
@@ -355,7 +371,9 @@ async def test_pro_tier_dependency_injection_hints(tmp_path: Path, monkeypatch):
     )
 
     assert r.success is True
-    assert hasattr(r, "dependency_chains"), "Pro tier should have dependency_chains field"
+    assert hasattr(
+        r, "dependency_chains"
+    ), "Pro tier should have dependency_chains field"
     assert r.dependency_chains is None or isinstance(
         r.dependency_chains, (list, dict)
     ), "dependency_chains should be None or list/dict"
@@ -366,7 +384,9 @@ async def test_pro_tier_dependency_injection_hints(tmp_path: Path, monkeypatch):
 # =============================================================================
 
 
-async def test_cross_file_security_scan_enterprise_unlimited_limits(tmp_path: Path, monkeypatch):
+async def test_cross_file_security_scan_enterprise_unlimited_limits(
+    tmp_path: Path, monkeypatch
+):
     """
     [20260103_TEST] Enterprise tier has unlimited depth and modules.
 
@@ -406,7 +426,9 @@ async def test_cross_file_security_scan_enterprise_unlimited_limits(tmp_path: Pa
     assert r.success is True
     # Enterprise tier should allow high limits (no clamping)
     assert state["effective_max_depth"] == 999, "Enterprise tier should not clamp depth"
-    assert state["effective_max_modules"] == 999, "Enterprise tier should not clamp modules"
+    assert (
+        state["effective_max_modules"] == 999
+    ), "Enterprise tier should not clamp modules"
 
 
 async def test_cross_file_security_scan_enterprise_returns_extra_fields(
@@ -456,13 +478,19 @@ async def test_cross_file_security_scan_enterprise_returns_extra_fields(
     assert r.has_vulnerabilities is True
 
     # Enterprise should populate tier-gated extras when heuristics match
-    assert r.framework_contexts is not None, "Enterprise should populate framework_contexts"
+    assert (
+        r.framework_contexts is not None
+    ), "Enterprise should populate framework_contexts"
     assert any(
         ctx.get("framework") == "react" for ctx in r.framework_contexts
     ), "Should detect React framework in TSX file"
 
-    assert r.dependency_chains is not None, "Enterprise should populate dependency_chains"
-    assert r.confidence_scores is not None, "Enterprise should populate confidence_scores"
+    assert (
+        r.dependency_chains is not None
+    ), "Enterprise should populate dependency_chains"
+    assert (
+        r.confidence_scores is not None
+    ), "Enterprise should populate confidence_scores"
 
     # Global flow hints and microservice boundaries are best-effort
     assert r.global_flows is None or isinstance(
@@ -564,7 +592,9 @@ async def test_community_cannot_access_pro_features(tmp_path: Path, monkeypatch)
     assert r.success is True
     # Community tier should not have Pro features
     if hasattr(r, "confidence_scores"):
-        assert r.confidence_scores is None, "Community tier should not have confidence_scores"
+        assert (
+            r.confidence_scores is None
+        ), "Community tier should not have confidence_scores"
     if hasattr(r, "dependency_chains"):
         # Community might not have this field or it should be None
         assert (
@@ -601,6 +631,8 @@ async def test_pro_cannot_access_enterprise_features(tmp_path: Path, monkeypatch
     assert r.success is True
     # Pro tier should not have Enterprise-only features
     if hasattr(r, "microservice_boundaries"):
-        assert r.microservice_boundaries is None, "Pro tier should not have microservice_boundaries"
+        assert (
+            r.microservice_boundaries is None
+        ), "Pro tier should not have microservice_boundaries"
     if hasattr(r, "distributed_trace"):
         assert r.distributed_trace is None, "Pro tier should not have distributed_trace"

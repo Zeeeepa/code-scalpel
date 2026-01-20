@@ -12,7 +12,9 @@ def test_regex_fallback_truthiness_negated() -> None:
     assert result.type_guards[0].guard_type == "truthiness"
     assert result.type_guards[0].negated is True
     assert result.taint_eliminated.get("input") is False
-    assert analyzer.get_narrowed_type("input", result, at_line=1) == {NarrowedType.UNKNOWN}
+    assert analyzer.get_narrowed_type("input", result, at_line=1) == {
+        NarrowedType.UNKNOWN
+    }
 
 
 def test_reduced_risk_instanceof_date() -> None:

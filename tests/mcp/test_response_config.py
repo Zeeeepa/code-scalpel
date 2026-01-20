@@ -38,7 +38,9 @@ def test_response_config_loaded_from_cwd_filters_fields(
         "tool_overrides": {},
     }
 
-    (config_dir / "response_config.json").write_text(json.dumps(config), encoding="utf-8")
+    (config_dir / "response_config.json").write_text(
+        json.dumps(config), encoding="utf-8"
+    )
 
     monkeypatch.chdir(tmp_path)
     _reset_response_config_singleton()

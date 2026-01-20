@@ -22,9 +22,12 @@ from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
 
+
 def _get_server():
     from code_scalpel.mcp.archive import server as _server
+
     return _server
+
 
 __all__ = [
     "_detect_requested_constraint_types",

@@ -512,7 +512,9 @@ class UnrelatedClass:
         savings_percent = (1 - extracted_chars / total_chars) * 100
 
         # We expect at least 50% token savings
-        assert savings_percent > 50, f"Expected >50% savings, got {savings_percent:.1f}%"
+        assert (
+            savings_percent > 50
+        ), f"Expected >50% savings, got {savings_percent:.1f}%"
 
         # But the extraction should include the dependencies
         assert "utility_1" in result.context_items

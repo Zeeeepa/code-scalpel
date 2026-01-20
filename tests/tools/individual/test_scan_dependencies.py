@@ -120,14 +120,16 @@ class TestScanDependenciesSync:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create pyproject.toml
             pyproject = Path(tmpdir) / "pyproject.toml"
-            pyproject.write_text("""
+            pyproject.write_text(
+                """
 [project]
 name = "test-project"
 dependencies = [
     "click>=8.0",
     "rich>=10.0",
 ]
-""")
+"""
+            )
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -242,7 +244,9 @@ dependencies = [
             )
 
             # Should have more deps when including dev
-            assert result_with_dev.total_dependencies >= result_no_dev.total_dependencies
+            assert (
+                result_with_dev.total_dependencies >= result_no_dev.total_dependencies
+            )
 
 
 class TestScanDependenciesAsync:
@@ -397,12 +401,14 @@ class TestEdgeCases:
         """Test that comments in requirements.txt are ignored."""
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
-            req_path.write_text("""
+            req_path.write_text(
+                """
 # This is a comment
 requests==2.25.0  # inline comment
 # Another comment
 flask>=2.0
-""")
+"""
+            )
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -418,13 +424,15 @@ flask>=2.0
         """Test parsing Poetry dependencies from pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pp_path = Path(tmpdir) / "pyproject.toml"
-            pp_path.write_text("""
+            pp_path.write_text(
+                """
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.25.0"
 flask = "2.0.0"
 pandas = ">=1.0"
-""")
+"""
+            )
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -443,14 +451,16 @@ pandas = ">=1.0"
         """Test parsing PEP 621 dependencies from pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pp_path = Path(tmpdir) / "pyproject.toml"
-            pp_path.write_text("""
+            pp_path.write_text(
+                """
 [project]
 name = "test-app"
 dependencies = [
     "requests>=2.25.0",
     "flask>=2.0",
 ]
-""")
+"""
+            )
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -482,12 +492,14 @@ dependencies = [
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
             # Create file with only comments and whitespace
-            req_path.write_text("""
+            req_path.write_text(
+                """
 # Comment line
    
 # Another comment
 -e git+https://github.com/example/repo.git  # Options line, should be skipped
-""")
+"""
+            )
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -598,7 +610,9 @@ class TestPriorityValidationAndReliability:
 
     def test_missing_path_returns_error(self):
         """Nonexistent path should return a clear error."""
-        result = _scan_dependencies_sync(path="/no/such/path/for/scan", scan_vulnerabilities=False)
+        result = _scan_dependencies_sync(
+            path="/no/such/path/for/scan", scan_vulnerabilities=False
+        )
         assert result.success is False
         assert "Path not found" in (result.error or "")
 
@@ -621,7 +635,9 @@ class TestPriorityValidationAndReliability:
             req = Path(tmpdir) / "requirements.txt"
             req.write_bytes(b"\xff\xfe\xfa\xfb")
 
-            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            result = _scan_dependencies_sync(
+                project_root=tmpdir, scan_vulnerabilities=False
+            )
             assert result.success is True
             errors = result.errors or []
             assert any("Failed to parse" in e for e in errors), errors
@@ -658,7 +674,9 @@ class TestPriorityValidationAndReliability:
                 encoding="utf-8",
             )
 
-            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            result = _scan_dependencies_sync(
+                project_root=tmpdir, scan_vulnerabilities=False
+            )
             assert result.success is True
             names = {d.name for d in result.dependencies}
             assert names == expected
@@ -667,14 +685,18 @@ class TestPriorityValidationAndReliability:
         """Unsupported manifest types should be ignored, producing zero deps."""
         with tempfile.TemporaryDirectory() as tmpdir:
             (Path(tmpdir) / "random.lock").write_text("foo", encoding="utf-8")
-            result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+            result = _scan_dependencies_sync(
+                project_root=tmpdir, scan_vulnerabilities=False
+            )
             assert result.success is True
             assert result.total_dependencies == 0
 
     def test_optional_fields_absent_for_community(self):
         """Community tier should not include Pro/Enterprise fields."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            Path(tmpdir, "requirements.txt").write_text(
+                "requests==2.25.0\n", encoding="utf-8"
+            )
             result = _scan_dependencies_sync(
                 project_root=tmpdir, scan_vulnerabilities=False, tier="community"
             )
@@ -687,18 +709,26 @@ class TestPriorityValidationAndReliability:
     def test_sequential_scans_stable(self):
         """Multiple sequential scans should not regress or leak errors."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            Path(tmpdir, "requirements.txt").write_text(
+                "requests==2.25.0\n", encoding="utf-8"
+            )
             for _ in range(50):
-                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+                result = _scan_dependencies_sync(
+                    project_root=tmpdir, scan_vulnerabilities=False
+                )
                 assert result.success is True
 
     def test_concurrent_scans_stable(self):
         """Concurrent scans should complete without deadlock/timeouts."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            Path(tmpdir, "requirements.txt").write_text(
+                "requests==2.25.0\n", encoding="utf-8"
+            )
 
             def run_scan():
-                res = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=False)
+                res = _scan_dependencies_sync(
+                    project_root=tmpdir, scan_vulnerabilities=False
+                )
                 assert res.success is True
                 return res.total_dependencies
 
@@ -723,14 +753,18 @@ class TestPriorityValidationAndReliability:
                 raise TimeoutError("OSV timeout")
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("requests==2.25.0\n", encoding="utf-8")
+            Path(tmpdir, "requirements.txt").write_text(
+                "requests==2.25.0\n", encoding="utf-8"
+            )
 
             with monkeypatch.context() as m:
                 m.setattr(
                     "code_scalpel.security.dependencies.VulnerabilityScanner",
                     FakeScanner,
                 )
-                result = _scan_dependencies_sync(project_root=tmpdir, scan_vulnerabilities=True)
+                result = _scan_dependencies_sync(
+                    project_root=tmpdir, scan_vulnerabilities=True
+                )
 
             assert result.success is True
             errors = result.errors or []

@@ -336,7 +336,9 @@ class CodeQualityAnalyzer:
         result.medium_count = sum(
             1 for s in result.code_smells if s.severity == CodeSmellSeverity.MEDIUM
         )
-        result.low_count = sum(1 for s in result.code_smells if s.severity == CodeSmellSeverity.LOW)
+        result.low_count = sum(
+            1 for s in result.code_smells if s.severity == CodeSmellSeverity.LOW
+        )
         result.info_count = sum(
             1 for s in result.code_smells if s.severity == CodeSmellSeverity.INFO
         )
@@ -636,11 +638,15 @@ class CodeQualityAnalyzer:
 
         return smells
 
-    def _detect_console_statements(self, code: str, lines: list[str]) -> list[CodeSmell]:
+    def _detect_console_statements(
+        self, code: str, lines: list[str]
+    ) -> list[CodeSmell]:
         """Detect console.log and debug statements."""
         smells: list[CodeSmell] = []
 
-        console_pattern = re.compile(r"console\.(log|debug|info|warn|error|trace|dir|table)\s*\(")
+        console_pattern = re.compile(
+            r"console\.(log|debug|info|warn|error|trace|dir|table)\s*\("
+        )
 
         for i, line in enumerate(lines, 1):
             # Skip comments
@@ -652,7 +658,9 @@ class CodeQualityAnalyzer:
             if match:
                 method = match.group(1)
                 severity = (
-                    CodeSmellSeverity.LOW if method in ("error", "warn") else CodeSmellSeverity.INFO
+                    CodeSmellSeverity.LOW
+                    if method in ("error", "warn")
+                    else CodeSmellSeverity.INFO
                 )
                 smells.append(
                     CodeSmell(
@@ -708,7 +716,9 @@ class CodeQualityAnalyzer:
 
         return smells
 
-    def _detect_complex_conditions(self, code: str, lines: list[str]) -> list[CodeSmell]:
+    def _detect_complex_conditions(
+        self, code: str, lines: list[str]
+    ) -> list[CodeSmell]:
         """Detect overly complex boolean conditions."""
         smells: list[CodeSmell] = []
 
@@ -881,7 +891,9 @@ class CodeQualityAnalyzer:
         commonjs_exports = len(re.findall(r"module\.exports|exports\.", code))
         es6_imports = len(re.findall(r'import\s+.+\s+from\s+[\'"]', code))
         es6_exports = len(
-            re.findall(r"export\s+(default\s+)?(?:const|let|var|function|class|{)", code)
+            re.findall(
+                r"export\s+(default\s+)?(?:const|let|var|function|class|{)", code
+            )
         )
         dynamic_imports = len(re.findall(r'import\s*\([\'"]', code))
 
@@ -907,7 +919,9 @@ class CodeQualityAnalyzer:
             dynamic_imports=dynamic_imports,
         )
 
-    def _detect_duplicate_blocks(self, code: str, lines: list[str]) -> list[DuplicateCodeBlock]:
+    def _detect_duplicate_blocks(
+        self, code: str, lines: list[str]
+    ) -> list[DuplicateCodeBlock]:
         """Detect duplicate code blocks using line hashing."""
         duplicates: list[DuplicateCodeBlock] = []
 
@@ -932,7 +946,8 @@ class CodeQualityAnalyzer:
                 break
 
             sequence = tuple(
-                h[1] for h in line_hashes[start_idx : start_idx + self.min_duplicate_lines]
+                h[1]
+                for h in line_hashes[start_idx : start_idx + self.min_duplicate_lines]
             )
             seq_hash = hashlib.sha256("".join(sequence).encode()).hexdigest()
 
@@ -952,7 +967,8 @@ class CodeQualityAnalyzer:
                         lines_start=line_starts,
                         # [20251222_BUGFIX] Avoid ambiguous variable name (E741).
                         lines_end=[
-                            start_line + self.min_duplicate_lines - 1 for start_line in line_starts
+                            start_line + self.min_duplicate_lines - 1
+                            for start_line in line_starts
                         ],
                         line_count=self.min_duplicate_lines,
                         similarity=1.0,
@@ -1012,5 +1028,7 @@ class CodeQualityAnalyzer:
 
         min_idx = severity_order.index(min_severity)
         return [
-            smell for smell in result.code_smells if severity_order.index(smell.severity) >= min_idx
+            smell
+            for smell in result.code_smells
+            if severity_order.index(smell.severity) >= min_idx
         ]

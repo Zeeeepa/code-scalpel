@@ -96,7 +96,9 @@ class TypeGuard:
     """Represents a detected type guard in code."""
 
     variable: str
-    guard_type: str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
+    guard_type: (
+        str  # 'typeof', 'instanceof', 'in', 'equality', 'truthiness', 'predicate'
+    )
     narrowed_to: NarrowedType
     condition_text: str
     line: int
@@ -183,7 +185,9 @@ class TypeNarrowing:
                 import tree_sitter_typescript
 
                 # Create Language object from the PyCapsule
-                typescript_lang = tree_sitter.Language(tree_sitter_typescript.language_typescript())
+                typescript_lang = tree_sitter.Language(
+                    tree_sitter_typescript.language_typescript()
+                )
                 self._parser = tree_sitter.Parser(typescript_lang)
             except Exception:
                 pass
@@ -221,7 +225,9 @@ class TypeNarrowing:
             )
         else:
             # Fallback: regex-based detection
-            self._analyze_regex(code, type_guards, branch_states, taint_eliminated, taint_reduced)
+            self._analyze_regex(
+                code, type_guards, branch_states, taint_eliminated, taint_reduced
+            )
 
         return NarrowingResult(
             type_guards=type_guards,
@@ -659,7 +665,9 @@ class TypeNarrowing:
         """
         # Find the most recent type guard for this variable before the line
         relevant_guards = [
-            g for g in result.type_guards if g.variable == variable and g.line <= at_line
+            g
+            for g in result.type_guards
+            if g.variable == variable and g.line <= at_line
         ]
 
         if not relevant_guards:

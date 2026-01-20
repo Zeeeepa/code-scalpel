@@ -28,7 +28,9 @@ class IncrementalAnalyzer(Generic[T]):
     def get_dependents(self, file_path: Path | str) -> Set[str]:
         return set(self.dependency_graph.get(str(Path(file_path).resolve()), set()))
 
-    def update_file(self, file_path: Path | str, recompute_fn: Callable[[Path], T]) -> Set[str]:
+    def update_file(
+        self, file_path: Path | str, recompute_fn: Callable[[Path], T]
+    ) -> Set[str]:
         """Update a file and return affected dependents."""
         path = Path(file_path).resolve()
         key = str(path)

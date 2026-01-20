@@ -46,12 +46,16 @@ class CodeAnalysisToolkit:
             value_code = astor.to_source(node.value).strip()
             node_id = f"assign_{target_id}"
 
-            self.graph.add_node(node_id, type="assign", target=target_id, value=value_code)
+            self.graph.add_node(
+                node_id, type="assign", target=target_id, value=value_code
+            )
 
             # Add data dependencies
             for var in self._extract_variables(node.value):
                 if var in self.var_defs:
-                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
+                    self.graph.add_edge(
+                        self.var_defs[var], node_id, type="data_dependency"
+                    )
 
             self.var_defs[target_id] = node_id
             self.generic_visit(node)

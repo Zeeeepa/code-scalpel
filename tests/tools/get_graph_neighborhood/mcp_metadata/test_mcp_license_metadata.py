@@ -68,8 +68,12 @@ def use_pro_tier(monkeypatch):
 @pytest.fixture
 def use_enterprise_tier(monkeypatch):
     """Use real Enterprise tier license."""
-    enterprise_licenses = list(LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt"))
-    enterprise_licenses = [lic for lic in enterprise_licenses if "broken" not in lic.name]
+    enterprise_licenses = list(
+        LICENSE_DIR.glob("code_scalpel_license_enterprise_*.jwt")
+    )
+    enterprise_licenses = [
+        lic for lic in enterprise_licenses if "broken" not in lic.name
+    ]
     assert enterprise_licenses, f"No valid Enterprise license found in {LICENSE_DIR}"
 
     monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(enterprise_licenses[0]))
@@ -85,13 +89,15 @@ class TestMCPResponseTierMetadata:
         """MCP response should include 'tier' field in metadata or response."""
         # Create a simple test project
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -110,13 +116,15 @@ def bar():
     async def test_community_tier_metadata_correct(self, use_community_tier, tmp_path):
         """Community tier MCP response should indicate 'community' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -132,13 +140,15 @@ def bar():
     async def test_pro_tier_metadata_correct(self, use_pro_tier, tmp_path):
         """Pro tier MCP response should indicate 'pro' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -151,16 +161,20 @@ def bar():
         # Pro tier allows k=3
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_metadata_correct(self, use_enterprise_tier, tmp_path):
+    async def test_enterprise_tier_metadata_correct(
+        self, use_enterprise_tier, tmp_path
+    ):
         """Enterprise tier MCP response should indicate 'enterprise' tier."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return bar()
 
 def bar():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",
@@ -198,7 +212,9 @@ class TestMCPUpgradeHints:
             # Ideally would contain "upgrade" or "Pro" hint, but we verify truncation occurred
 
     @pytest.mark.asyncio
-    async def test_pro_limit_hit_includes_upgrade_hint(self, use_pro_tier, sample_call_graph):
+    async def test_pro_limit_hit_includes_upgrade_hint(
+        self, use_pro_tier, sample_call_graph
+    ):
         """When Pro tier hits node limit, response should suggest Enterprise."""
         result = sample_call_graph.get_neighborhood(
             "python::main::function::center",
@@ -222,10 +238,12 @@ class TestMCPLicenseExpirationWarnings:
     async def test_valid_license_no_expiration_warning(self, use_pro_tier, tmp_path):
         """Valid, non-expiring license should not generate warnings."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def foo():
     return "result"
-""")
+"""
+        )
 
         result = await get_graph_neighborhood(
             center_node_id="python::test::function::foo",

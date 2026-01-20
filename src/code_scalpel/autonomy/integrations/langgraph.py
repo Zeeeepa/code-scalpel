@@ -16,7 +16,8 @@ try:
     from langgraph.graph import END, StateGraph
 except ImportError as e:
     raise ImportError(
-        "LangGraph is required for this integration. " "Install it with: pip install langgraph"
+        "LangGraph is required for this integration. "
+        "Install it with: pip install langgraph"
     ) from e
 
 
@@ -182,7 +183,9 @@ def validate_fix_node(state: ScalpelState) -> ScalpelState:
 
         validation = {
             "step": "validate_fix",
-            "validation": ("passed" if not result.has_vulnerabilities else "failed_security"),
+            "validation": (
+                "passed" if not result.has_vulnerabilities else "failed_security"
+            ),
             "vulnerabilities": result.vulnerability_count,
         }
 

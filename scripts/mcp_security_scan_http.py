@@ -10,7 +10,9 @@ from typing import Any
 import requests
 
 
-def call_tool(base_url: str, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+def call_tool(
+    base_url: str, tool_name: str, arguments: dict[str, Any]
+) -> dict[str, Any]:
     payload = {
         "jsonrpc": "2.0",
         "id": 1,

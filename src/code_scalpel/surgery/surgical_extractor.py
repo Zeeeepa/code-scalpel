@@ -276,12 +276,16 @@ class ContextualExtraction:
                 parts.append(f"- Source: {self.target.source_file}")
             if self.target.docstring:
                 parts.append(f"- Docstring: {self.target.docstring[:100]}...")
-            parts.append(f"- Dependencies: {', '.join(self.target.dependencies) or 'None'}")
+            parts.append(
+                f"- Dependencies: {', '.join(self.target.dependencies) or 'None'}"
+            )
             parts.append(f"- Context items: {len(self.context_items)}")
             parts.append(f"- Total lines: {self.total_lines}")
             parts.append(f"- Estimated tokens: {self.token_estimate}")
             if self.truncated:
-                parts.append(f"- ⚠️ Context truncated (omitted: {', '.join(self.omitted_items)})")
+                parts.append(
+                    f"- ⚠️ Context truncated (omitted: {', '.join(self.omitted_items)})"
+                )
             parts.append("")
 
         # Context section
@@ -328,7 +332,9 @@ class ContextualExtraction:
 
         return " | ".join(summary_parts)
 
-    def trim_to_budget(self, max_tokens: int, model: str = "gpt-4") -> "ContextualExtraction":
+    def trim_to_budget(
+        self, max_tokens: int, model: str = "gpt-4"
+    ) -> "ContextualExtraction":
         """
         Trim context to fit within a token budget while preserving essentials.
 
@@ -554,7 +560,11 @@ class SurgicalExtractor:
 
         try:
             tree, _report = parse_python_code(self.code, filename="<extraction>")
-            self._tree = tree if isinstance(tree, ast.Module) else ast.Module(body=[], type_ignores=[])
+            self._tree = (
+                tree
+                if isinstance(tree, ast.Module)
+                else ast.Module(body=[], type_ignores=[])
+            )
         except ParsingError as e:
             raise ValueError(f"Invalid Python code: {e}")
 
@@ -626,7 +636,9 @@ class SurgicalExtractor:
         def collect_decorator_names(node: ast.AST) -> None:
             """Recursively collect decorator names."""
             for child in ast.walk(node):
-                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if isinstance(
+                    child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                ):
                     for dec in child.decorator_list:
                         if isinstance(dec, ast.Name):
                             decorators.add(dec.id)
@@ -681,7 +693,9 @@ class SurgicalExtractor:
         # [20251221_FEATURE] Extract metadata
         docstring = ast.get_docstring(node)
         decorators = (
-            [ast.unparse(dec) for dec in node.decorator_list] if node.decorator_list else []
+            [ast.unparse(dec) for dec in node.decorator_list]
+            if node.decorator_list
+            else []
         )
         is_async = isinstance(node, ast.AsyncFunctionDef)
 
@@ -791,7 +805,9 @@ class SurgicalExtractor:
         # [20251221_FEATURE] Extract metadata
         docstring = ast.get_docstring(node)
         decorators = (
-            [ast.unparse(dec) for dec in node.decorator_list] if node.decorator_list else []
+            [ast.unparse(dec) for dec in node.decorator_list]
+            if node.decorator_list
+            else []
         )
         signature = f"class {node.name}"
         if node.bases:
@@ -1002,7 +1018,9 @@ class SurgicalExtractor:
             finder.visit(self._tree)
         return callers
 
-    def get_function_with_context(self, name: str, max_depth: int = 2) -> ContextualExtraction:
+    def get_function_with_context(
+        self, name: str, max_depth: int = 2
+    ) -> ContextualExtraction:
         """
         Extract a function with all its dependencies.
 
@@ -1077,7 +1095,9 @@ class SurgicalExtractor:
             context_items=context_items,
         )
 
-    def get_class_with_context(self, name: str, max_depth: int = 2) -> ContextualExtraction:
+    def get_class_with_context(
+        self, name: str, max_depth: int = 2
+    ) -> ContextualExtraction:
         """
         Extract a class with all its dependencies.
 
@@ -1195,7 +1215,9 @@ class SurgicalExtractor:
                     for t in node.targets:
                         if isinstance(t, ast.Name):
                             class_attributes.append(t.id)
-                elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                elif isinstance(node, ast.AnnAssign) and isinstance(
+                    node.target, ast.Name
+                ):
                     # Annotated class attributes
                     class_attributes.append(node.target.id)
 
@@ -1206,7 +1228,10 @@ class SurgicalExtractor:
                 # Look for Call nodes where func is Attribute on 'self'
                 if isinstance(child, ast.Call):
                     if isinstance(child.func, ast.Attribute):
-                        if isinstance(child.func.value, ast.Name) and child.func.value.id == "self":
+                        if (
+                            isinstance(child.func.value, ast.Name)
+                            and child.func.value.id == "self"
+                        ):
                             self_calls.append(child.func.attr)
                 # Also look for self.attr accesses (class attributes)
                 elif isinstance(child, ast.Attribute):
@@ -1214,7 +1239,9 @@ class SurgicalExtractor:
                         self_calls.append(child.attr)
             return self_calls
 
-        def gather_deps(deps: list[str], depth: int, from_node: ast.AST | None = None) -> None:
+        def gather_deps(
+            deps: list[str], depth: int, from_node: ast.AST | None = None
+        ) -> None:
             if depth > max_depth:
                 return
 
@@ -1233,7 +1260,9 @@ class SurgicalExtractor:
                     method_node = sibling_methods[dep]
                     method_code = self._node_to_code(method_node)
                     context_items.append(f"{class_name}.{dep}")
-                    context_code_parts.append(f"# From class {class_name}:\n{method_code}")
+                    context_code_parts.append(
+                        f"# From class {class_name}:\n{method_code}"
+                    )
                     # Recursively gather deps from sibling method
                     method_deps = self._find_dependencies(method_node)
                     gather_deps(method_deps, depth + 1, method_node)
@@ -1241,7 +1270,9 @@ class SurgicalExtractor:
                 # Check if it's a class attribute
                 elif dep in class_attributes:
                     # Include class header with attribute
-                    attr_context = f"# Class attribute from {class_name}:\n# {dep} = ..."
+                    attr_context = (
+                        f"# Class attribute from {class_name}:\n# {dep} = ..."
+                    )
                     if attr_context not in context_code_parts:
                         context_items.append(f"{class_name}.{dep}")
 
@@ -1471,9 +1502,13 @@ class SurgicalExtractor:
                                     depth + 1,
                                 )
                             else:
-                                unresolved.append(f"{symbol_name} (re-export module not found)")
+                                unresolved.append(
+                                    f"{symbol_name} (re-export module not found)"
+                                )
                         else:
-                            unresolved.append(f"{symbol_name} (not found in {module_path})")
+                            unresolved.append(
+                                f"{symbol_name} (not found in {module_path})"
+                            )
 
             except (FileNotFoundError, ValueError) as e:
                 unresolved.append(f"{symbol_name} ({e})")
@@ -1534,7 +1569,9 @@ class SurgicalExtractor:
             if isinstance(imp, ast.ImportFrom):
                 # from module import name1, name2
                 module_name = imp.module or ""
-                module_path = self._resolve_module_path(module_name, base_dir, imp.level)
+                module_path = self._resolve_module_path(
+                    module_name, base_dir, imp.level
+                )
                 import_stmt = ast.unparse(imp)
 
                 for alias in imp.names:
@@ -1556,7 +1593,9 @@ class SurgicalExtractor:
 
         return import_map
 
-    def _resolve_module_path(self, module_name: str, base_dir: Path, level: int = 0) -> str | None:
+    def _resolve_module_path(
+        self, module_name: str, base_dir: Path, level: int = 0
+    ) -> str | None:
         """
         Resolve a module name to a file path.
 
@@ -1932,7 +1971,11 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
         # Parse the function to find local variables that could be promoted
         try:
             tree_node, _report = parse_python_code(code, filename="<promotion>")
-            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+            tree = (
+                tree_node
+                if isinstance(tree_node, ast.Module)
+                else ast.Module(body=[], type_ignores=[])
+            )
         except ParsingError as e:
             return VariablePromotionResult(
                 success=False,
@@ -1942,7 +1985,7 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
                 explanation=f"Failed to parse code: {e}",
                 error=str(e),
             )
-        
+
         func_node = None
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -1967,13 +2010,20 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
         # Look for simple assignments at the function start
         for i, stmt in enumerate(func_node.body):
             # Skip docstrings
-            if i == 0 and isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Constant):
+            if (
+                i == 0
+                and isinstance(stmt, ast.Expr)
+                and isinstance(stmt.value, ast.Constant)
+            ):
                 continue
 
             # Look for assignments of constants
             if isinstance(stmt, ast.Assign):
                 for target in stmt.targets:
-                    if isinstance(target, ast.Name) and target.id not in existing_params:
+                    if (
+                        isinstance(target, ast.Name)
+                        and target.id not in existing_params
+                    ):
                         # Check if the value is a constant (good candidate)
                         if isinstance(stmt.value, ast.Constant):
                             var_name = target.id
@@ -2015,8 +2065,14 @@ def promote_variables(code: str, function_name: str) -> VariablePromotionResult:
         for candidate in candidates:
             # Parse the default value back to AST
             try:
-                default_tree_node, _report = parse_python_code(candidate["default_value"], filename="<default>")
-                default_tree = default_tree_node if isinstance(default_tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                default_tree_node, _report = parse_python_code(
+                    candidate["default_value"], filename="<default>"
+                )
+                default_tree = (
+                    default_tree_node
+                    if isinstance(default_tree_node, ast.Module)
+                    else ast.Module(body=[], type_ignores=[])
+                )
                 if default_tree.body and isinstance(default_tree.body[0], ast.Expr):
                     default_ast = default_tree.body[0].value
                     defaults.append(default_ast)
@@ -2174,7 +2230,11 @@ def extract_as_microservice(
         # Parse function signature to generate API spec
         try:
             tree_node, _report = parse_python_code(code, filename="<api_spec>")
-            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+            tree = (
+                tree_node
+                if isinstance(tree_node, ast.Module)
+                else ast.Module(body=[], type_ignores=[])
+            )
         except ParsingError as e:
             return MicroserviceExtractionResult(
                 success=False,
@@ -2185,7 +2245,7 @@ def extract_as_microservice(
                 readme="",
                 error=f"Failed to parse code: {e}",
             )
-        
+
         func_node = None
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -2310,11 +2370,15 @@ CMD ["uvicorn", "service:app", "--host", "{host}", "--port", "{port}"]
         docstring = func_result.docstring or f"Execute {function_name} function"
         param_specs = []
         for param in params:
-            param_specs.append(f"""          {param}:
+            param_specs.append(
+                f"""          {param}:
             type: {param_types[param]}
-            description: Parameter {param}""")
+            description: Parameter {param}"""
+            )
 
-        param_spec_str = "\n".join(param_specs) if param_specs else "          # No parameters"
+        param_spec_str = (
+            "\n".join(param_specs) if param_specs else "          # No parameters"
+        )
 
         api_spec = f"""openapi: 3.0.0
 info:
@@ -2541,7 +2605,11 @@ def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisRe
     """
     try:
         tree_node, _report = parse_python_code(code, filename="<closure>")
-        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+        tree = (
+            tree_node
+            if isinstance(tree_node, ast.Module)
+            else ast.Module(body=[], type_ignores=[])
+        )
         func_node = None
 
         # Find the target function
@@ -2630,7 +2698,9 @@ def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisRe
                 for target in node.targets:
                     if isinstance(target, ast.Name):
                         global_names.add(target.id)
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            elif isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+            ):
                 global_names.add(node.name)
 
         # Build closure variable list
@@ -2647,14 +2717,14 @@ def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisRe
                     source = "class_attribute"
                     risk_level = "medium"
                     captured_from = f"Class instance attribute '{name}'"
-                    suggestion = (
-                        f"Pass '{attr}' as a parameter or ensure class context is preserved"
-                    )
+                    suggestion = f"Pass '{attr}' as a parameter or ensure class context is preserved"
                 else:
                     source = "outer_scope"
                     risk_level = "high"
                     captured_from = f"Attribute access on outer scope variable '{base}'"
-                    suggestion = f"Pass '{name}' as a parameter or refactor to avoid closure"
+                    suggestion = (
+                        f"Pass '{name}' as a parameter or refactor to avoid closure"
+                    )
             elif name in global_names:
                 source = "global"
                 risk_level = "high"
@@ -2665,9 +2735,7 @@ def detect_closure_variables(code: str, function_name: str) -> ClosureAnalysisRe
                 source = "nonlocal"
                 risk_level = "medium"
                 captured_from = f"Variable '{name}' from outer scope or import"
-                suggestion = (
-                    f"Verify '{name}' is available in extraction context or pass as parameter"
-                )
+                suggestion = f"Verify '{name}' is available in extraction context or pass as parameter"
 
             closures.append(
                 ClosureVariable(
@@ -2744,7 +2812,9 @@ class DependencyInjectionResult:
     error: str | None = None
 
 
-def suggest_dependency_injection(code: str, function_name: str) -> DependencyInjectionResult:
+def suggest_dependency_injection(
+    code: str, function_name: str
+) -> DependencyInjectionResult:
     """
     Suggest dependency injection refactorings for better testability.
 
@@ -2811,7 +2881,9 @@ def suggest_dependency_injection(code: str, function_name: str) -> DependencyInj
                         break
 
             original_sig = (
-                ast.unparse(func_node).split("\n")[0] if func_node else f"def {function_name}(...)"
+                ast.unparse(func_node).split("\n")[0]
+                if func_node
+                else f"def {function_name}(...)"
             )
 
             return DependencyInjectionResult(
@@ -2828,7 +2900,11 @@ def suggest_dependency_injection(code: str, function_name: str) -> DependencyInj
         suggestions = []
         try:
             tree_node, _report = parse_python_code(code, filename="<di_build>")
-            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+            tree = (
+                tree_node
+                if isinstance(tree_node, ast.Module)
+                else ast.Module(body=[], type_ignores=[])
+            )
         except ParsingError as e:
             return DependencyInjectionResult(
                 success=False,
@@ -2902,7 +2978,9 @@ def suggest_dependency_injection(code: str, function_name: str) -> DependencyInj
                     # New injected parameter
                     default_idx = i - len(current_params)
                     if default_idx < len(param_defaults):
-                        refactored_parts.append(f"{param}={param_defaults[default_idx]}")
+                        refactored_parts.append(
+                            f"{param}={param_defaults[default_idx]}"
+                        )
                     else:
                         refactored_parts.append(param)
 
@@ -3064,7 +3142,11 @@ def resolve_organization_wide(
         # Analyze imports in the code
         try:
             tree_node, _report = parse_python_code(code, filename="<imports>")
-            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+            tree = (
+                tree_node
+                if isinstance(tree_node, ast.Module)
+                else ast.Module(body=[], type_ignores=[])
+            )
         except ParsingError as e:
             return OrganizationWideResolutionResult(
                 success=False,
@@ -3105,15 +3187,23 @@ def resolve_organization_wide(
                     rel_path = py_file.relative_to(repo_path)
                     module_path = str(rel_path.with_suffix("")).replace("/", ".")
 
-                    if module_path.endswith(import_name) or module_path.startswith(import_name):
+                    if module_path.endswith(import_name) or module_path.startswith(
+                        import_name
+                    ):
                         try:
                             with open(py_file, "r", encoding="utf-8") as f:
                                 file_content = f.read()
 
                             # Extract symbols from this file
                             try:
-                                file_tree_node, _report = parse_python_code(file_content, filename=str(py_file))
-                                file_tree = file_tree_node if isinstance(file_tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                                file_tree_node, _report = parse_python_code(
+                                    file_content, filename=str(py_file)
+                                )
+                                file_tree = (
+                                    file_tree_node
+                                    if isinstance(file_tree_node, ast.Module)
+                                    else ast.Module(body=[], type_ignores=[])
+                                )
                             except ParsingError:
                                 continue  # Skip files that don't parse
                             symbols = []
@@ -3251,7 +3341,8 @@ def extract_with_custom_pattern(
             f
             for f in python_files
             if not any(
-                part in f.parts for part in [".venv", "venv", "__pycache__", ".git", "node_modules"]
+                part in f.parts
+                for part in [".venv", "venv", "__pycache__", ".git", "node_modules"]
             )
         ]
 
@@ -3269,19 +3360,29 @@ def extract_with_custom_pattern(
                     if re.search(pattern, content, re.IGNORECASE):
                         # Parse to find which symbols contain the pattern
                         try:
-                            tree_node, _report = parse_python_code(content, filename=str(py_file))
-                            tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                            tree_node, _report = parse_python_code(
+                                content, filename=str(py_file)
+                            )
+                            tree = (
+                                tree_node
+                                if isinstance(tree_node, ast.Module)
+                                else ast.Module(body=[], type_ignores=[])
+                            )
                         except ParsingError:
                             continue  # Skip files that don't parse
                         for node in ast.walk(tree):
-                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if isinstance(
+                                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                            ):
                                 func_code = ast.unparse(node)
                                 if re.search(pattern, func_code, re.IGNORECASE):
                                     matches.append(
                                         PatternMatch(
                                             symbol_name=node.name,
                                             symbol_type="function",
-                                            file_path=str(py_file.relative_to(root_path)),
+                                            file_path=str(
+                                                py_file.relative_to(root_path)
+                                            ),
                                             line_number=node.lineno,
                                             code=func_code,
                                             match_reason=f"Regex pattern '{pattern}' matched",
@@ -3294,7 +3395,9 @@ def extract_with_custom_pattern(
                                         PatternMatch(
                                             symbol_name=node.name,
                                             symbol_type="class",
-                                            file_path=str(py_file.relative_to(root_path)),
+                                            file_path=str(
+                                                py_file.relative_to(root_path)
+                                            ),
                                             line_number=node.lineno,
                                             code=class_code,
                                             match_reason=f"Regex pattern '{pattern}' matched",
@@ -3304,8 +3407,14 @@ def extract_with_custom_pattern(
                 elif pattern_type == "function_call":
                     # Match functions that call a specific function
                     try:
-                        tree_node, _report = parse_python_code(content, filename=str(py_file))
-                        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                        tree_node, _report = parse_python_code(
+                            content, filename=str(py_file)
+                        )
+                        tree = (
+                            tree_node
+                            if isinstance(tree_node, ast.Module)
+                            else ast.Module(body=[], type_ignores=[])
+                        )
                     except ParsingError:
                         continue  # Skip files that don't parse
                     for node in ast.walk(tree):
@@ -3339,8 +3448,14 @@ def extract_with_custom_pattern(
                 elif pattern_type == "import":
                     # Match files that import a specific module
                     try:
-                        tree_node, _report = parse_python_code(content, filename=str(py_file))
-                        tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                        tree_node, _report = parse_python_code(
+                            content, filename=str(py_file)
+                        )
+                        tree = (
+                            tree_node
+                            if isinstance(tree_node, ast.Module)
+                            else ast.Module(body=[], type_ignores=[])
+                        )
                     except ParsingError:
                         continue  # Skip files that don't parse
                     imports_pattern = False
@@ -3359,7 +3474,9 @@ def extract_with_custom_pattern(
                     if imports_pattern:
                         # Add all functions from this file
                         for node in tree.body:
-                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if isinstance(
+                                node, (ast.FunctionDef, ast.AsyncFunctionDef)
+                            ):
                                 matches.append(
                                     PatternMatch(
                                         symbol_name=node.name,
@@ -3496,8 +3613,14 @@ def detect_service_boundaries(
                     content = f.read()
 
                 try:
-                    tree_node, _report = parse_python_code(content, filename=str(py_file))
-                    tree = tree_node if isinstance(tree_node, ast.Module) else ast.Module(body=[], type_ignores=[])
+                    tree_node, _report = parse_python_code(
+                        content, filename=str(py_file)
+                    )
+                    tree = (
+                        tree_node
+                        if isinstance(tree_node, ast.Module)
+                        else ast.Module(body=[], type_ignores=[])
+                    )
                 except ParsingError:
                     continue  # Skip files that don't parse
                 imports = set()
@@ -3518,7 +3641,9 @@ def detect_service_boundaries(
                 for imp in imports:
                     for other_file in python_files:
                         other_rel = str(other_file.relative_to(root_path))
-                        if imp in other_rel or other_rel.replace("/", ".").startswith(imp):
+                        if imp in other_rel or other_rel.replace("/", ".").startswith(
+                            imp
+                        ):
                             dependency_graph[rel_path].append(other_rel)
 
             except Exception:
@@ -3563,7 +3688,9 @@ def detect_service_boundaries(
 
             # Generate service name from common path prefix
             common_prefix = (
-                Path(cluster_files[0]).parent.name if cluster_files else f"service{service_counter}"
+                Path(cluster_files[0]).parent.name
+                if cluster_files
+                else f"service{service_counter}"
             )
             service_name = f"{common_prefix}-service"
 
@@ -3577,7 +3704,9 @@ def detect_service_boundaries(
                     service_name=service_name,
                     included_files=cluster_files,
                     external_dependencies=list(external_deps),
-                    internal_dependencies=[d for d in cluster_deps if d in cluster_files],
+                    internal_dependencies=[
+                        d for d in cluster_deps if d in cluster_files
+                    ],
                     isolation_level=isolation_level,
                     rationale=rationale,
                 )

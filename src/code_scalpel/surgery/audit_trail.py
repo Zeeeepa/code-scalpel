@@ -117,7 +117,9 @@ class AuditTrail:
 
         if self.enabled and self.log_to_file:
             self.log_dir.mkdir(parents=True, exist_ok=True)
-            self.log_file = self.log_dir / f"audit_{datetime.now().strftime('%Y%m%d')}.jsonl"
+            self.log_file = (
+                self.log_dir / f"audit_{datetime.now().strftime('%Y%m%d')}.jsonl"
+            )
 
     def log(self, entry: AuditEntry) -> None:
         """

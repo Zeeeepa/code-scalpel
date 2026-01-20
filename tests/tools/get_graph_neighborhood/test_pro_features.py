@@ -175,7 +175,9 @@ def delete_user(user_id: int):
         neighbor_names = [n.name for n in result.neighbors]
         if len(neighbor_names) > 0:
             # Functions with shared params should be found
-            assert any(name in ["update_user", "validate_user"] for name in neighbor_names)
+            assert any(
+                name in ["update_user", "validate_user"] for name in neighbor_names
+            )
 
 
 # =============================================================================
@@ -292,7 +294,9 @@ def test_validate_items():
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_tests)
-        result = detector.find_relationships("calculate_total", relationship_types={"test_for"})
+        result = detector.find_relationships(
+            "calculate_total", relationship_types={"test_for"}
+        )
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]
@@ -352,7 +356,9 @@ def _another_helper():
         from code_scalpel.graph.logical_relationships import LogicalRelationshipDetector
 
         detector = LogicalRelationshipDetector(project_with_helpers)
-        result = detector.find_relationships("public_function", relationship_types={"helper_of"})
+        result = detector.find_relationships(
+            "public_function", relationship_types={"helper_of"}
+        )
 
         if result.success and len(result.relationships) > 0:
             relationship_types = [r.relationship_type for r in result.relationships]

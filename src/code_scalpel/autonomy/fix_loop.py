@@ -186,7 +186,9 @@ class FixLoop:
         for attempt_num in range(1, self.max_attempts + 1):
             # [20251217_FEATURE] P0: Check timeout
             if (time.monotonic() - start_monotonic) > self.max_duration_seconds:
-                self.logger.warning(f"Fix loop timeout after {attempt_num - 1} attempts")
+                self.logger.warning(
+                    f"Fix loop timeout after {attempt_num - 1} attempts"
+                )
                 return self._create_result(
                     attempts=attempts,
                     success=False,
@@ -213,7 +215,9 @@ class FixLoop:
             )
 
             # [20251217_FEATURE] P0: Check for fix availability
-            valid_fixes = [f for f in analysis.fixes if f.confidence >= self.min_confidence]
+            valid_fixes = [
+                f for f in analysis.fixes if f.confidence >= self.min_confidence
+            ]
             if not valid_fixes:
                 self.logger.warning(f"No valid fixes available (attempt {attempt_num})")
                 return self._create_result(
@@ -226,7 +230,8 @@ class FixLoop:
             # Try best fix
             best_fix = valid_fixes[0]
             self.logger.info(
-                f"Attempt {attempt_num}: Applying fix " f"(confidence={best_fix.confidence:.2f})"
+                f"Attempt {attempt_num}: Applying fix "
+                f"(confidence={best_fix.confidence:.2f})"
             )
 
             # [20251217_FEATURE] Apply fix and test in sandbox

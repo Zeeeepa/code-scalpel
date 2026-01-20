@@ -227,7 +227,9 @@ class GraphQLSchema:
     @property
     def input_types(self) -> List[GraphQLType]:
         """Get all input types."""
-        return [t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT]
+        return [
+            t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT
+        ]
 
     @property
     def enum_types(self) -> List[GraphQLType]:
@@ -322,7 +324,9 @@ class GraphQLSchemaDrift:
     @property
     def dangerous_changes(self) -> List[GraphQLSchemaChange]:
         """Get dangerous changes."""
-        return [c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS]
+        return [
+            c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS
+        ]
 
     @property
     def info_changes(self) -> List[GraphQLSchemaChange]:
@@ -383,12 +387,18 @@ class GraphQLSchemaParser:
     )
 
     INPUT_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?' r"input\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?'
+        r"input\s+(\w+)\s*"
+        r'(?:@[\w\s()=",]+)?\s*'
+        r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
     ENUM_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?' r"enum\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?'
+        r"enum\s+(\w+)\s*"
+        r'(?:@[\w\s()=",]+)?\s*'
+        r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
@@ -398,7 +408,9 @@ class GraphQLSchemaParser:
         re.MULTILINE,
     )
 
-    SCALAR_PATTERN = re.compile(r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE)
+    SCALAR_PATTERN = re.compile(
+        r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE
+    )
 
     DIRECTIVE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
@@ -617,7 +629,9 @@ class GraphQLSchemaParser:
 
             directive = GraphQLDirective(
                 name=name,
-                locations=[loc.strip() for loc in locations_str.split("|") if loc.strip()],
+                locations=[
+                    loc.strip() for loc in locations_str.split("|") if loc.strip()
+                ],
                 repeatable="repeatable" in content[match.start() : match.end()].lower(),
             )
 

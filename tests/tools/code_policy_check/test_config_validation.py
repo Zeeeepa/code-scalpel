@@ -32,8 +32,12 @@ class TestConfigurationLoading:
         # Verify Community tier
         assert community_caps is not None, "Community capabilities not loaded"
         assert "limits" in community_caps, "limits not in Community capabilities"
-        assert "max_files" in community_caps["limits"], "max_files not in Community limits"
-        assert "max_rules" in community_caps["limits"], "max_rules not in Community limits"
+        assert (
+            "max_files" in community_caps["limits"]
+        ), "max_files not in Community limits"
+        assert (
+            "max_rules" in community_caps["limits"]
+        ), "max_rules not in Community limits"
 
         # Verify Pro tier
         assert pro_caps is not None, "Pro capabilities not loaded"
@@ -161,11 +165,15 @@ class TestConfigurationLoading:
         # Try common locations
         possible_paths = [
             Path.cwd() / ".code-scalpel" / "limits.toml",
-            Path(__file__).parent.parent.parent.parent / ".code-scalpel" / "limits.toml",
+            Path(__file__).parent.parent.parent.parent
+            / ".code-scalpel"
+            / "limits.toml",
         ]
 
         exists = any(p.exists() for p in possible_paths)
-        assert exists, f".code-scalpel/limits.toml not found in: {[str(p) for p in possible_paths]}"
+        assert (
+            exists
+        ), f".code-scalpel/limits.toml not found in: {[str(p) for p in possible_paths]}"
 
 
 if __name__ == "__main__":

@@ -60,7 +60,9 @@ class GosecParser:
         self.config = GosecConfig()
         self.issues: List[SecurityIssue] = []
 
-    def execute_gosec(self, paths: List[Path], config: GosecConfig = None) -> List[SecurityIssue]:
+    def execute_gosec(
+        self, paths: List[Path], config: GosecConfig = None
+    ) -> List[SecurityIssue]:
         raise NotImplementedError("Phase 2: Gosec execution")
 
     def parse_json_report(self, report_path: Path) -> List[SecurityIssue]:

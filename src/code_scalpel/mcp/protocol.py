@@ -68,7 +68,9 @@ def _get_current_tier() -> str:
     global _LAST_VALID_LICENSE_AT, _LAST_VALID_LICENSE_TIER
 
     requested = _requested_tier_from_env()
-    disable_license_discovery = os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    disable_license_discovery = (
+        os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY") == "1"
+    )
     force_tier_override = os.environ.get("CODE_SCALPEL_TEST_FORCE_TIER") == "1"
 
     # [TESTING/OFFLINE] If license discovery is disabled and explicit test override

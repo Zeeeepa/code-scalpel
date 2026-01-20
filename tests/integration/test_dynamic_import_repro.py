@@ -39,13 +39,19 @@ def test_dynamic_imports_not_detected_yet():
 
     # __import__("json") -> module="json", type=DUNDER
     # We expect 2 json imports: one literal and one variable
-    json_imports = [i for i in imports if i.module == "json" and i.import_type == ImportType.DUNDER]
-    assert len(json_imports) == 2, "Failed to detect __import__('json') (literal + variable)"
+    json_imports = [
+        i for i in imports if i.module == "json" and i.import_type == ImportType.DUNDER
+    ]
+    assert (
+        len(json_imports) == 2
+    ), "Failed to detect __import__('json') (literal + variable)"
 
     # Variable import -> module="datetime", type=DYNAMIC
     # Note: This requires Phase 2 implementation
     dt_imports = [
-        i for i in imports if i.module == "datetime" and i.import_type == ImportType.DYNAMIC
+        i
+        for i in imports
+        if i.module == "datetime" and i.import_type == ImportType.DYNAMIC
     ]
     assert len(dt_imports) == 1, "Failed to resolve variable import 'datetime'"
 

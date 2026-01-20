@@ -122,7 +122,9 @@ class TypeChecker:
                     checker="mypy",
                     output=result.stdout,
                     errors=(
-                        errors if errors else ([result.stdout] if result.returncode != 0 else [])
+                        errors
+                        if errors
+                        else ([result.stdout] if result.returncode != 0 else [])
                     ),
                     warnings=warnings,
                     exit_code=result.returncode,
@@ -207,7 +209,9 @@ class TypeChecker:
                     checker="tsc",
                     output=result.stdout + result.stderr,
                     errors=(
-                        errors if errors else ([result.stdout] if result.returncode != 0 else [])
+                        errors
+                        if errors
+                        else ([result.stdout] if result.returncode != 0 else [])
                     ),
                     warnings=warnings,
                     exit_code=result.returncode,

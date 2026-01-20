@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Optional
 
 
-def resolve_module_path(language: str, module: str, project_root: Path) -> Optional[Path]:
+def resolve_module_path(
+    language: str, module: str, project_root: Path
+) -> Optional[Path]:
     """
     Resolve a module name to a file path for a given language.
 

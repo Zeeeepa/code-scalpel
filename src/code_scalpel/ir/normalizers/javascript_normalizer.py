@@ -393,7 +393,9 @@ class JavaScriptNormalizer(BaseNormalizer):
 
     def _normalize_continue_statement(self, node) -> IRContinue:
         """Normalize continue statement."""
-        return cast(IRContinue, self._set_language(IRContinue(loc=self._make_loc(node))))
+        return cast(
+            IRContinue, self._set_language(IRContinue(loc=self._make_loc(node)))
+        )
 
     def _normalize_empty_statement(self, node) -> None:
         """Empty statement (;) - skip."""
@@ -565,7 +567,9 @@ class JavaScriptNormalizer(BaseNormalizer):
                 params.append(
                     IRParameter(
                         name=self._get_text(name_node) if name_node else "",
-                        default=(self._norm_expr(default_node) if default_node else None),
+                        default=(
+                            self._norm_expr(default_node) if default_node else None
+                        ),
                     )
                 )
             elif child.type == "rest_pattern":
@@ -705,10 +709,15 @@ class JavaScriptNormalizer(BaseNormalizer):
 
         # For now, return as IRWhile with init prepended
         while_node = IRWhile(
-            test=cast(Optional[IRExpr], condition if condition else IRConstant(value=True)),
+            test=cast(
+                Optional[IRExpr], condition if condition else IRConstant(value=True)
+            ),
             body=cast(
                 List[IRNode],
-                body + ([IRExprStmt(value=cast(Optional[IRExpr], update))] if update else []),
+                body
+                + (
+                    [IRExprStmt(value=cast(Optional[IRExpr], update))] if update else []
+                ),
             ),
             loc=self._make_loc(node),
         )
@@ -730,7 +739,9 @@ class JavaScriptNormalizer(BaseNormalizer):
         # Left can be variable declaration or identifier
         if left_node:
             if left_node.type in ("variable_declaration", "lexical_declaration"):
-                declarator = [c for c in left_node.children if c.type == "variable_declarator"][0]
+                declarator = [
+                    c for c in left_node.children if c.type == "variable_declarator"
+                ][0]
                 name_node = self._child_by_field(declarator, "name")
                 # [20251214_BUGFIX] IRName constructor uses 'id' rather than 'name'.
                 target = IRName(id=self._get_text(name_node)) if name_node else None
@@ -789,7 +800,9 @@ class JavaScriptNormalizer(BaseNormalizer):
             return cast(IRExpr, result) if not isinstance(result, list) else None
         return None
 
-    def _normalize_binary_expression(self, node) -> Union[IRBinaryOp, IRCompare, IRBoolOp]:
+    def _normalize_binary_expression(
+        self, node
+    ) -> Union[IRBinaryOp, IRCompare, IRBoolOp]:
         """
         Normalize binary expression.
 
@@ -1073,7 +1086,9 @@ class JavaScriptNormalizer(BaseNormalizer):
         obj = self._norm_expr(obj_node) if obj_node else None
 
         # Check if bracket notation (computed)
-        is_computed = any(self._get_text(c) == "[" for c in node.children if not c.is_named)
+        is_computed = any(
+            self._get_text(c) == "[" for c in node.children if not c.is_named
+        )
 
         if is_computed and prop_node:
             # obj[key] -> IRSubscript
@@ -1450,7 +1465,9 @@ class JavaScriptNormalizer(BaseNormalizer):
         body = self._normalize_block(body_node) if body_node else []
 
         # Check for async, static, get, set keywords
-        is_async = any(self._get_text(c) == "async" for c in node.children if not c.is_named)
+        is_async = any(
+            self._get_text(c) == "async" for c in node.children if not c.is_named
+        )
 
         return cast(
             IRFunctionDef,
@@ -1494,7 +1511,9 @@ class JavaScriptNormalizer(BaseNormalizer):
             catch_body_node = self._child_by_field(handler_node, "body")
 
             param_name = self._get_text(param_node) if param_node else None
-            catch_body = self._normalize_block(catch_body_node) if catch_body_node else []
+            catch_body = (
+                self._normalize_block(catch_body_node) if catch_body_node else []
+            )
 
             # (exception_type, name, body) - JS doesn't have typed exceptions
             handlers.append((None, param_name, catch_body))
@@ -1503,7 +1522,9 @@ class JavaScriptNormalizer(BaseNormalizer):
         if finalizer_node:
             # finally_clause just has body
             finally_body_node = self._child_by_field(finalizer_node, "body")
-            finalbody = self._normalize_block(finally_body_node) if finally_body_node else []
+            finalbody = (
+                self._normalize_block(finally_body_node) if finally_body_node else []
+            )
 
         return cast(
             IRTry,
@@ -1530,7 +1551,11 @@ class JavaScriptNormalizer(BaseNormalizer):
         """
         named_children = self._get_named_children(node)
         exc_node = self.normalize_node(named_children[0]) if named_children else None
-        exc = cast(IRExpr, exc_node) if exc_node and not isinstance(exc_node, list) else None
+        exc = (
+            cast(IRExpr, exc_node)
+            if exc_node and not isinstance(exc_node, list)
+            else None
+        )
 
         return cast(
             IRRaise,
@@ -1739,10 +1764,20 @@ class JavaScriptNormalizer(BaseNormalizer):
         body_node = self.normalize_node(cons_node) if cons_node else None
         orelse_node = self.normalize_node(alt_node) if alt_node else None
 
-        test = cast(IRExpr, test_node) if test_node and not isinstance(test_node, list) else None
-        body = cast(IRExpr, body_node) if body_node and not isinstance(body_node, list) else None
+        test = (
+            cast(IRExpr, test_node)
+            if test_node and not isinstance(test_node, list)
+            else None
+        )
+        body = (
+            cast(IRExpr, body_node)
+            if body_node and not isinstance(body_node, list)
+            else None
+        )
         orelse = (
-            cast(IRExpr, orelse_node) if orelse_node and not isinstance(orelse_node, list) else None
+            cast(IRExpr, orelse_node)
+            if orelse_node and not isinstance(orelse_node, list)
+            else None
         )
 
         return cast(

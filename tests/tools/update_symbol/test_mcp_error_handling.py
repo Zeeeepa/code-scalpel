@@ -56,16 +56,20 @@ async def test_update_symbol_invalid_param_types_return_error_envelope(tmp_path)
         assert "error" in str(error_payload).lower()
 
 
-async def test_update_symbol_fault_injection_returns_internal_error(monkeypatch, tmp_path):
+async def test_update_symbol_fault_injection_returns_internal_error(
+    monkeypatch, tmp_path
+):
     """Unexpected exceptions should be wrapped in an internal_error envelope."""
 
     tool = mcp._tool_manager._tools["update_symbol"]
 
     # Force an unexpected exception inside the envelope (post tool execution)
     sample_file = tmp_path / "sample.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     def boom(*_args, **_kwargs):
         raise RuntimeError("boom")
@@ -105,9 +109,11 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "timeout_sample.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     args = {
         "file_path": str(sample_file),
@@ -116,7 +122,9 @@ async def test_update_symbol_respects_timeout_budget(monkeypatch, tmp_path):
         "new_code": "def foo():\n    return 1\n",
     }
 
-    result = await asyncio.wait_for(tool.run(args, context=None, convert_result=False), timeout=1.0)
+    result = await asyncio.wait_for(
+        tool.run(args, context=None, convert_result=False), timeout=1.0
+    )
 
     assert isinstance(result, dict)
     # Timeout guard: response should return quickly and include duration metadata.
@@ -139,9 +147,11 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
 
     async def invoke(i: int) -> dict[str, object]:
         sample_file = tmp_path / f"async_{i}.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
         args = {
             "file_path": str(sample_file),
             "target_type": "function",
@@ -168,7 +178,9 @@ async def test_update_symbol_async_calls_do_not_block_event_loop(monkeypatch, tm
                 assert data.get("success") is True
 
 
-async def test_update_symbol_memory_error_returns_structured_envelope(monkeypatch, tmp_path):
+async def test_update_symbol_memory_error_returns_structured_envelope(
+    monkeypatch, tmp_path
+):
     """MemoryError during patching should return structured error envelope."""
 
     from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
@@ -177,9 +189,11 @@ async def test_update_symbol_memory_error_returns_structured_envelope(monkeypatc
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "oom_sample.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     # Inject MemoryError in the patcher
     def mock_from_file(*args, **kwargs):
@@ -206,7 +220,9 @@ async def test_update_symbol_memory_error_returns_structured_envelope(monkeypatc
         assert "error" in str(err).lower()
 
 
-async def test_update_symbol_redacts_pii_from_error_details(monkeypatch, tmp_path, caplog):
+async def test_update_symbol_redacts_pii_from_error_details(
+    monkeypatch, tmp_path, caplog
+):
     """Secret strings in args should not appear in error_details or logs."""
 
     import logging
@@ -217,9 +233,11 @@ async def test_update_symbol_redacts_pii_from_error_details(monkeypatch, tmp_pat
     tool = mcp._tool_manager._tools["update_symbol"]
 
     sample_file = tmp_path / "pii_sample.py"
-    sample_file.write_text("""def foo():
+    sample_file.write_text(
+        """def foo():
     return 0
-""")
+"""
+    )
 
     secret_string = "sk_live_51AbC123XyZ456SECRET789"
     args = {
@@ -241,7 +259,9 @@ async def test_update_symbol_redacts_pii_from_error_details(monkeypatch, tmp_pat
 
     # Secret should not appear in logs
     for record in caplog.records:
-        assert secret_string not in record.message, f"Secret leaked in log: {record.message}"
+        assert (
+            secret_string not in record.message
+        ), f"Secret leaked in log: {record.message}"
 
     # Temp paths should be redacted (e.g., /tmp/pytest-of-user/... -> [REDACTED]/...)
     if isinstance(err, dict) and err.get("error_details"):

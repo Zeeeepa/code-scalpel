@@ -31,6 +31,7 @@ PRO TIER (Enhanced MCP Features):
 ENTERPRISE TIER (Distributed & Scale):
 
 """
+
 # [20260119_BUGFIX] Close module docstring to fix SyntaxError during imports.
 
 from __future__ import annotations

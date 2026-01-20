@@ -81,11 +81,13 @@ class TestParsePythonDeps:
     def test_parse_requirements_txt(self):
         """Test parsing requirements.txt."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 requests==2.28.0
 flask>=2.0.0
 django<4.0
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -97,12 +99,14 @@ django<4.0
     def test_parse_requirements_with_comments(self):
         """Test that comments are ignored in requirements.txt."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 # This is a comment
 requests==2.28.0
 # Another comment
 flask>=2.0.0
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -114,11 +118,13 @@ flask>=2.0.0
     def test_parse_requirements_with_flags(self):
         """Test that flag lines are ignored (like -r other.txt)."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 -r base.txt
 --index-url https://pypi.org/simple
 requests==2.28.0
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -129,12 +135,14 @@ requests==2.28.0
     def test_parse_requirements_empty_lines(self):
         """Test that empty lines are handled."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 requests==2.28.0
 
 flask>=2.0.0
 
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -144,14 +152,16 @@ flask>=2.0.0
     def test_parse_pyproject_toml_pep621(self):
         """Test parsing PEP 621 format in pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text("""
+            Path(tmpdir, "pyproject.toml").write_text(
+                """
 [project]
 name = "myproject"
 dependencies = [
     "requests>=2.28.0",
     "flask>=2.0.0",
 ]
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -162,7 +172,8 @@ dependencies = [
     def test_parse_pyproject_toml_poetry(self):
         """Test parsing Poetry format in pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text("""
+            Path(tmpdir, "pyproject.toml").write_text(
+                """
 [tool.poetry]
 name = "myproject"
 
@@ -170,7 +181,8 @@ name = "myproject"
 python = "^3.9"
 requests = "^2.28.0"
 flask = "^2.0.0"
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -183,14 +195,18 @@ flask = "^2.0.0"
     def test_parse_both_pyproject_and_requirements(self):
         """Test that both files are parsed and deduplicated."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text("""
+            Path(tmpdir, "pyproject.toml").write_text(
+                """
 [project]
 dependencies = ["requests>=2.28.0"]
-""")
-            Path(tmpdir, "requirements.txt").write_text("""
+"""
+            )
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 requests==2.28.0
 flask>=2.0.0
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -202,10 +218,12 @@ flask>=2.0.0
     def test_parse_malformed_pyproject(self):
         """Test handling of malformed pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "pyproject.toml").write_text("""
+            Path(tmpdir, "pyproject.toml").write_text(
+                """
 [project
 name = "broken"
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             # Should not raise, just return empty
             deps = parser._parse_python_deps()
@@ -470,7 +488,8 @@ class TestEdgeCases:
     def test_version_specifiers_comprehensive(self):
         """Test various version specifier formats."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 pkg1==1.0.0
 pkg2>=1.0
 pkg3<=2.0
@@ -480,7 +499,8 @@ pkg6!=1.5.0
 pkg7~=1.4.2
 pkg8>=1.0,<2.0
 pkg9
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             deps = parser._parse_python_deps()
 
@@ -498,7 +518,8 @@ class TestIntegration:
         """Test with a realistic Python project structure."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a realistic pyproject.toml
-            Path(tmpdir, "pyproject.toml").write_text("""
+            Path(tmpdir, "pyproject.toml").write_text(
+                """
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
@@ -517,7 +538,8 @@ dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
 ]
-""")
+"""
+            )
             parser = DependencyParser(tmpdir)
             result = parser.get_dependencies()
 
@@ -531,11 +553,13 @@ dev = [
         """Test with a fullstack project (Python + Node)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Python backend
-            Path(tmpdir, "requirements.txt").write_text("""
+            Path(tmpdir, "requirements.txt").write_text(
+                """
 fastapi>=0.100.0
 uvicorn>=0.23.0
 sqlalchemy>=2.0.0
-""")
+"""
+            )
             # Node frontend
             pkg_json = {
                 "name": "frontend",
@@ -602,7 +626,9 @@ class TestCoverageGaps:
             with patch("builtins.open", side_effect=PermissionError("denied")):
                 with patch(
                     "os.path.exists",
-                    side_effect=lambda p: (True if "requirements" in p else original_exists(p)),
+                    side_effect=lambda p: (
+                        True if "requirements" in p else original_exists(p)
+                    ),
                 ):
                     result = parser._parse_python_deps()
                     # Should not crash, just return empty or partial

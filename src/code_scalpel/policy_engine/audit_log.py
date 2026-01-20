@@ -125,7 +125,9 @@ class AuditLog:
         secret = os.environ.get("SCALPEL_AUDIT_SECRET", "default-secret")
 
         message = json.dumps(event, sort_keys=True)
-        signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
+        signature = hmac.new(
+            secret.encode(), message.encode(), hashlib.sha256
+        ).hexdigest()
 
         return signature
 

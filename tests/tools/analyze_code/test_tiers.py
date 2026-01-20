@@ -31,12 +31,16 @@ from code_scalpel.mcp.server import _analyze_code_sync
 # Path to license files
 LICENSES_DIR = Path(__file__).parent.parent.parent / "licenses"
 PRO_LICENSE = LICENSES_DIR / "code_scalpel_license_pro_20260101_190345.jwt"
-ENTERPRISE_LICENSE = LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+ENTERPRISE_LICENSE = (
+    LICENSES_DIR / "code_scalpel_license_enterprise_20260101_190754.jwt"
+)
 PRO_BROKEN = LICENSES_DIR / "code_scalpel_license_pro_test_broken.jwt"
 ENTERPRISE_BROKEN = LICENSES_DIR / "code_scalpel_license_enterprise_test_broken.jwt"
 
 
-def _force_tier_or_license(monkeypatch: pytest.MonkeyPatch, tier: str, license_path: Path) -> None:
+def _force_tier_or_license(
+    monkeypatch: pytest.MonkeyPatch, tier: str, license_path: Path
+) -> None:
     """Use a valid license if available; otherwise force tier for tests.
 
     - If the license file validates against the current public key and matches the
@@ -52,7 +56,9 @@ def _force_tier_or_license(monkeypatch: pytest.MonkeyPatch, tier: str, license_p
             result = validator.validate_token(token)
             if result.is_valid and result.tier and result.tier.lower() == tier:
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
-                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
+                monkeypatch.delenv(
+                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
+                )
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return
@@ -375,7 +381,9 @@ def complex_func(x):
         assert hasattr(result, "halstead_metrics")
         assert hasattr(result, "duplicate_code_blocks")
 
-    def test_enterprise_custom_rules_capability_real_license(self, set_enterprise_license):
+    def test_enterprise_custom_rules_capability_real_license(
+        self, set_enterprise_license
+    ):
         """
         Enterprise tier has custom_rules capability (real license).
 
@@ -388,7 +396,9 @@ def complex_func(x):
         capabilities = get_tool_capabilities("analyze_code", tier)
         assert "custom_rules" in capabilities.get("capabilities", set())
 
-    def test_enterprise_compliance_checks_capability_real_license(self, set_enterprise_license):
+    def test_enterprise_compliance_checks_capability_real_license(
+        self, set_enterprise_license
+    ):
         """
         Enterprise tier includes compliance checking (real license).
 
@@ -398,7 +408,9 @@ def complex_func(x):
         capabilities = get_tool_capabilities("analyze_code", tier)
         assert "compliance_checks" in capabilities.get("capabilities", set())
 
-    def test_enterprise_organization_patterns_capability_real_license(self, set_enterprise_license):
+    def test_enterprise_organization_patterns_capability_real_license(
+        self, set_enterprise_license
+    ):
         """
         Enterprise tier detects org-specific patterns (real license).
 
@@ -408,7 +420,9 @@ def complex_func(x):
         capabilities = get_tool_capabilities("analyze_code", tier)
         assert "organization_patterns" in capabilities.get("capabilities", set())
 
-    def test_enterprise_multi_language_with_all_features_real_license(self, set_enterprise_license):
+    def test_enterprise_multi_language_with_all_features_real_license(
+        self, set_enterprise_license
+    ):
         """
         Enterprise tier provides all features for multi-language code (real license).
 
@@ -609,4 +623,6 @@ class TestLicenseFileIntegrity:
 
         # Enterprise license should have 3 parts
         ent_content = ENTERPRISE_LICENSE.read_text().strip()
-        assert ent_content.count(".") == 2, "Enterprise license should be JWT format (3 parts)"
+        assert (
+            ent_content.count(".") == 2
+        ), "Enterprise license should be JWT format (3 parts)"

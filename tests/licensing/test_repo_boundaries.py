@@ -70,7 +70,8 @@ def test_no_private_keys_present() -> None:
 
             # Catch common private key PEM naming patterns, but avoid flagging public keys.
             if name_lower.endswith(".pem") and any(
-                marker in name_lower for marker in ("private", "privkey", "signing", "rsa_private")
+                marker in name_lower
+                for marker in ("private", "privkey", "signing", "rsa_private")
             ):
                 hits.append(str(path.relative_to(root)))
 

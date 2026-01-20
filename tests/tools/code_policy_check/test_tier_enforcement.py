@@ -79,12 +79,14 @@ class TestCommunityTierLimits:
     async def test_community_enforces_50_rule_limit(self, tmp_path, community_license):
         """Community tier should enforce 50 rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -122,12 +124,14 @@ class TestProTierLimits:
     async def test_pro_enforces_200_rule_limit(self, tmp_path, pro_license):
         """Pro tier should enforce 200 rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -158,7 +162,9 @@ class TestEnterpriseTierLimits:
         result = await code_policy_check(paths=[str(tmp_path)])
 
         # Verify tier is Enterprise
-        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
+        assert (
+            result.tier == "enterprise"
+        ), f"Expected enterprise tier, got {result.tier}"
 
         # Should check all files (no limit)
         assert (
@@ -169,17 +175,21 @@ class TestEnterpriseTierLimits:
     async def test_enterprise_has_unlimited_rules(self, tmp_path, enterprise_license):
         """Enterprise tier should have no rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
         # Verify tier is Enterprise
-        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
+        assert (
+            result.tier == "enterprise"
+        ), f"Expected enterprise tier, got {result.tier}"
 
         # Should apply more than 200 rules (Pro limit) - Enterprise has no limit
         # Note: Current implementation may apply all rules regardless of tier
@@ -195,10 +205,12 @@ class TestTierFeatureGating:
     async def test_community_no_best_practices(self, tmp_path, community_license):
         """Community tier should not include best_practices_violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -212,10 +224,12 @@ def func(x):
     async def test_pro_has_best_practices(self, tmp_path, pro_license):
         """Pro tier should include best_practices_violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -226,13 +240,17 @@ def func(x):
         ), "Pro tier should provide best_practices_violations attribute"
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_compliance_reports(self, tmp_path, enterprise_license):
+    async def test_enterprise_has_compliance_reports(
+        self, tmp_path, enterprise_license
+    ):
         """Enterprise tier should include compliance_reports."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -243,13 +261,17 @@ def func(x):
         ), "Enterprise tier should provide compliance_reports attribute"
 
     @pytest.mark.asyncio
-    async def test_community_custom_rules_not_exposed(self, tmp_path, community_license):
+    async def test_community_custom_rules_not_exposed(
+        self, tmp_path, community_license
+    ):
         """Community tier should not expose custom rule results."""
         # [20260105_TEST] Strengthen feature gating expectations.
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 value = 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)], rules=["CUSTOM001"])
 
@@ -262,10 +284,12 @@ value = 1
     async def test_pro_blocks_compliance_outputs(self, tmp_path, pro_license):
         """Pro tier should not return compliance artifacts even if requested."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def handler(request):
     return request.json.get("email")
-""")
+"""
+        )
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -277,16 +301,22 @@ def handler(request):
         assert not getattr(
             result, "compliance_reports", None
         ), "Pro tier should ignore compliance_reports field"
-        assert not getattr(result, "pdf_report", None), "Pro tier should not generate PDF reports"
+        assert not getattr(
+            result, "pdf_report", None
+        ), "Pro tier should not generate PDF reports"
 
     @pytest.mark.asyncio
-    async def test_enterprise_includes_audit_trail_and_score(self, tmp_path, enterprise_license):
+    async def test_enterprise_includes_audit_trail_and_score(
+        self, tmp_path, enterprise_license
+    ):
         """Enterprise tier should populate compliance score and audit trail."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def log_patient(patient_id):
     print(f"patient_id={patient_id}")
-""")
+"""
+        )
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -296,7 +326,9 @@ def log_patient(patient_id):
 
         assert result.tier == "enterprise"
         assert getattr(result, "compliance_score", 0) >= 0
-        assert getattr(result, "audit_trail", []), "Enterprise tier should include audit trail"
+        assert getattr(
+            result, "audit_trail", []
+        ), "Enterprise tier should include audit trail"
         assert (
             getattr(result, "pdf_report", None) is not None
         ), "Enterprise tier should generate PDF when requested"

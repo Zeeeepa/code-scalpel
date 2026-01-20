@@ -106,7 +106,9 @@ class GeneratedCodeDetector:
         """Initialize detector with project root."""
         self.root = Path(project_root)
 
-    def detect(self, check_headers: bool = True, max_files: int = 10000) -> GeneratedCodeResult:
+    def detect(
+        self, check_headers: bool = True, max_files: int = 10000
+    ) -> GeneratedCodeResult:
         """
         Detect generated files in the project.
 
@@ -194,7 +196,9 @@ class GeneratedCodeDetector:
             total_generated=len(generated_files) + len(generated_dirs),
         )
 
-    def _check_header(self, file_path: Path, max_lines: int = 10) -> Optional[tuple[str, str]]:
+    def _check_header(
+        self, file_path: Path, max_lines: int = 10
+    ) -> Optional[tuple[str, str]]:
         """Check file header for generated code patterns."""
         try:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:

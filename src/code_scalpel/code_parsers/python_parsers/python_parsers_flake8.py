@@ -819,7 +819,8 @@ class Flake8Report:
             "warning_count": self.warning_count,
             "files_with_issues": len(self.violations_by_file),
             "by_source": {
-                source: len(violations) for source, violations in self.violations_by_source.items()
+                source: len(violations)
+                for source, violations in self.violations_by_source.items()
             },
             "top_violations": [
                 {"code": code, "count": len(violations)}
@@ -1068,7 +1069,8 @@ class Flake8Parser:
 
         # Check if flake8-json is installed
         has_json_plugin = any(
-            p.name == "flake8-json" or p.name == "flake8_json" for p in self.installed_plugins
+            p.name == "flake8-json" or p.name == "flake8_json"
+            for p in self.installed_plugins
         )
 
         # Build targets list
@@ -1106,7 +1108,9 @@ class Flake8Parser:
                             for v_data in violations:
                                 # Ensure filename is set
                                 v_data["filename"] = filename
-                                report.violations.append(Flake8Violation.from_dict(v_data))
+                                report.violations.append(
+                                    Flake8Violation.from_dict(v_data)
+                                )
                     except json.JSONDecodeError as e:
                         report.errors.append(f"Failed to parse JSON output: {e}")
                         # Fall back to text parsing

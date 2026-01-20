@@ -17,7 +17,9 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1) -> None:
+def _write_budget_yaml(
+    policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1
+) -> None:
     (policy_dir / "budget.yaml").write_text(
         """budgets:
   default:
@@ -27,7 +29,9 @@ def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 1, max_files:
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(max_total_lines=max_total_lines, max_files=max_files),
+""".format(
+            max_total_lines=max_total_lines, max_files=max_files
+        ),
         encoding="utf-8",
     )
 
@@ -114,7 +118,9 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
                 return_value={
                     "tool_id": "update_symbol",
                     "error": {"error_code": "forbidden", "message": "Budget exceeded"},
-                    "warnings": ["Governance BLOCK: budget exceeded (max_total_lines=1)"],
+                    "warnings": [
+                        "Governance BLOCK: budget exceeded (max_total_lines=1)"
+                    ],
                 }
             ),
         )
@@ -138,9 +144,12 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
         assert result["error"]["error_code"] == "forbidden"
 
         # Ensure file was not modified.
-        assert target_file.read_text(encoding="utf-8") == """def f():
+        assert (
+            target_file.read_text(encoding="utf-8")
+            == """def f():
     return 1
 """
+        )
     finally:
         # [20250112_BUGFIX] Restore original run method to avoid leaking mock to other tests
         object.__setattr__(tool, "run", original_run)
@@ -201,7 +210,9 @@ async def test_pro_block_mode_emits_audit_event_on_budget_deny(
     audit_path = policy_dir / "audit.jsonl"
     assert audit_path.exists()
 
-    lines = [ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    lines = [
+        ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()
+    ]
     assert lines
     last = json.loads(lines[-1])
     assert last["tool_id"] == "update_symbol"

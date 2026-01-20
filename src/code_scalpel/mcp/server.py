@@ -161,7 +161,7 @@ def _get_current_tier() -> str:
 
     This allows Enterprise license holders to test Pro/Community behavior
     by setting CODE_SCALPEL_TIER=pro or CODE_SCALPEL_TIER=community.
-    
+
     SECURITY NOTE: Environment variables can ONLY downgrade, not upgrade.
     To access a higher tier, you must provide a valid license file.
 
@@ -216,16 +216,17 @@ def _get_current_tier() -> str:
     # Users must provide a valid license file to access higher tiers.
     rank = {"community": 0, "pro": 1, "enterprise": 2}
     effective = requested if rank[requested] <= rank[licensed] else licensed
-    
+
     # Log if user tried to upgrade via env var (security audit)
     if rank[requested] > rank[licensed]:
         import sys
+
         print(
             f"Warning: Tier downgrade ignored - requested {requested} but licensed {licensed}. "
             f"Use a valid license file to upgrade tier.",
             file=sys.stderr,
         )
-    
+
     return effective
 
 
@@ -293,6 +294,7 @@ def auto_init_if_enabled(
         "message": result.get("message"),
     }
 
+
 # Caching enabled by default
 CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 
@@ -301,7 +303,6 @@ CACHE_ENABLED = os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
 # Format: {(file_path_str, mtime): ast.Module}
 _AST_CACHE: dict[tuple[str, float], "ast.Module"] = {}
 _AST_CACHE_MAX_SIZE = 500  # Limit memory usage - keep last 500 files
-
 
 
 def _get_cached_ast(file_path: Path) -> "ast.Module | None":
@@ -365,15 +366,12 @@ def _get_sink_detector() -> "UnifiedSinkDetector":  # type: ignore[return-value]
     return _SINK_DETECTOR  # type: ignore[return-value]
 
 
-
-
 # [20251219_FEATURE] v3.0.4 - Call graph cache for get_graph_neighborhood
 # Stores UniversalGraph objects keyed by project root path
 # Format: {project_root_str: (UniversalGraph, timestamp)}
 # [20251220_PERF] v3.0.5 - Increased cache TTL from 60s to 300s for large codebases
 _GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
-
 
 
 def _get_cached_graph(project_root: Path) -> UniversalGraph | None:  # type: ignore[name-defined]
@@ -932,6 +930,7 @@ class PatchResultModel(BaseModel):
 
 
 from code_scalpel.mcp.models.core import FunctionInfo, ClassInfo
+
 
 class FileContextResult(BaseModel):
     """Result of get_file_context - file overview without full content."""
@@ -3052,6 +3051,7 @@ def _extract_code_sync(
         error=None,
     )
 
+
 def _get_file_context_sync(file_path: str) -> FileContextResult:
     """
     Synchronous implementation of get_file_context.
@@ -3390,6 +3390,7 @@ def _get_symbol_references_sync(
             error=f"Search failed: {str(e)}",
         )
 
+
 class CallNodeModel(BaseModel):
     """Node in the call graph representing a function."""
 
@@ -3499,6 +3500,7 @@ def _get_call_graph_sync(
             success=False,
             error=f"Call graph analysis failed: {str(e)}",
         )
+
 
 class NeighborhoodNodeModel(BaseModel):
     """A node in the neighborhood subgraph."""
@@ -3700,6 +3702,7 @@ def _fast_validate_python_function_node_exists(
     except Exception:
         # If parsing fails, fall back to the slow path (graph build)
         return True, None
+
 
 class ModuleInfo(BaseModel):
     """Information about a Python module/file."""
@@ -4050,6 +4053,7 @@ def _get_project_map_sync(
             project_root=str(root_path),
             error=f"Project map analysis failed: {str(e)}",
         )
+
 
 class ImportNodeModel(BaseModel):
     """Information about an import in the import graph."""
@@ -4483,6 +4487,7 @@ def _get_cross_file_dependencies_sync(
             error=f"Cross-file dependency analysis failed: {str(e)}",
         )
 
+
 class TaintFlowModel(BaseModel):
     """Model for a taint flow across files."""
 
@@ -4570,7 +4575,9 @@ def _cross_file_security_scan_sync(
     max_depth: int,
     include_diagram: bool,
     timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
-    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
+    max_modules: (
+        int | None
+    ) = 500,  # [20251220_PERF] Default module limit for large projects
 ) -> CrossFileSecurityResult:
     """Synchronous implementation of cross_file_security_scan."""
     from code_scalpel.security.analyzers.cross_file_taint import (
@@ -4722,6 +4729,7 @@ def _cross_file_security_scan_sync(
             error=f"Cross-file security analysis failed: {str(e)}",
         )
 
+
 class PathValidationResult(BaseModel):
     """Result of path validation."""
 
@@ -4793,6 +4801,7 @@ def _validate_paths_sync(
         workspace_roots=resolver.workspace_roots,
         is_docker=resolver.is_docker,
     )
+
 
 class PolicyVerificationResult(BaseModel):
     """Result of cryptographic policy verification."""
@@ -4867,6 +4876,8 @@ def _verify_policy_integrity_sync(
             manifest_source=manifest_source,
             policy_dir=dir_path,
         )
+
+
 def run_server(
     transport: str = "stdio",
     host: str = "127.0.0.1",
@@ -4916,8 +4927,8 @@ def run_server(
     # remain authoritative and paid tiers fail closed without a valid license.
     # CLI/env can request a tier, but it will be clamped by the license.
     validator = JWTLicenseValidator()
-    requested_tier = tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get(
-        "SCALPEL_TIER"
+    requested_tier = (
+        tier or os.environ.get("CODE_SCALPEL_TIER") or os.environ.get("SCALPEL_TIER")
     )
     effective_tier, startup_warning = compute_effective_tier_for_startup(
         requested_tier=requested_tier,
@@ -5035,10 +5046,10 @@ def _apply_tier_tool_filter(tier: str) -> None:
 
     [20260119_FEATURE] v1.0.0 - All tools available in all tiers.
     Tier enforcement is done through response limits, not tool removal.
-    
+
     The tier is available to all tools via CURRENT_TIER global variable.
     Each tool applies tier-specific limits (max results, max paths, etc.) at runtime.
-    
+
     Example tier limits:
     - Community: symbolic_execute limited to 50 paths max
     - Community: crawl_project limited to discovery mode

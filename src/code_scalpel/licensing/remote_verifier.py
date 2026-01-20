@@ -298,7 +298,9 @@ def _verify_retries() -> int:
 def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlements:
     base = verifier_base_url()
     if not base:
-        raise RuntimeError(f"Remote verifier URL not configured. Set {VERIFIER_BASE_URL_ENV_VAR}.")
+        raise RuntimeError(
+            f"Remote verifier URL not configured. Set {VERIFIER_BASE_URL_ENV_VAR}."
+        )
 
     import urllib.parse
 
@@ -402,7 +404,9 @@ def remote_verify(token: str, *, environment: str | None) -> VerifiedEntitlement
         token_hash_hint,
         exc_name,
     )
-    raise RuntimeError(f"Remote verify failed (hash={token_hash_hint}, error={exc_name})")
+    raise RuntimeError(
+        f"Remote verify failed (hash={token_hash_hint}, error={exc_name})"
+    )
 
 
 @dataclass(frozen=True)

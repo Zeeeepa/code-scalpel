@@ -373,7 +373,9 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
     def find_children_by_type(self, node: TSNode, node_type: str) -> List[TSNode]:
         """Find all children of a specific type."""
         return [
-            child for child in self._get_children(node) if self._get_node_type(child) == node_type
+            child
+            for child in self._get_children(node)
+            if self._get_node_type(child) == node_type
         ]
 
     def error(self, message: str, node: TSNode) -> None:

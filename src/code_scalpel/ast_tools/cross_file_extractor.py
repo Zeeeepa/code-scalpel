@@ -267,7 +267,9 @@ class CrossFileExtractor:
         """
         if not self._built:
             if not self.build():
-                return ExtractionResult(success=False, errors=["Failed to build import graph"])
+                return ExtractionResult(
+                    success=False, errors=["Failed to build import graph"]
+                )
 
         result = ExtractionResult()
         # [20251216_FEATURE] v2.5.0 - Store decay factor for confidence calculation
@@ -282,7 +284,9 @@ class CrossFileExtractor:
         abs_path = abs_path.resolve()
 
         if not abs_path.exists():
-            return ExtractionResult(success=False, errors=[f"File not found: {file_path}"])
+            return ExtractionResult(
+                success=False, errors=[f"File not found: {file_path}"]
+            )
 
         # Get module name for this file
         try:
@@ -361,7 +365,9 @@ class CrossFileExtractor:
         """
         if not self._built:
             if not self.build():
-                return ExtractionResult(success=False, errors=["Failed to build import graph"])
+                return ExtractionResult(
+                    success=False, errors=["Failed to build import graph"]
+                )
 
         combined_result = ExtractionResult()
         all_dependencies: Set[ExtractedSymbol] = set()
@@ -447,7 +453,9 @@ class CrossFileExtractor:
         except SyntaxError:
             return None
 
-    def _find_symbol_in_file(self, file_path: str, symbol_name: str) -> Optional[ExtractedSymbol]:
+    def _find_symbol_in_file(
+        self, file_path: str, symbol_name: str
+    ) -> Optional[ExtractedSymbol]:
         """
         Find and extract a symbol from a file.
 
@@ -469,7 +477,9 @@ class CrossFileExtractor:
         # Handle method names (ClassName.method_name)
         if "." in symbol_name:
             class_name, method_name = symbol_name.split(".", 1)
-            return self._extract_method(file_path, source, tree, class_name, method_name)
+            return self._extract_method(
+                file_path, source, tree, class_name, method_name
+            )
 
         # Look for function or class
         for node in ast.walk(tree):
@@ -508,7 +518,9 @@ class CrossFileExtractor:
         return ExtractedSymbol(
             name=node.name,
             symbol_type=(
-                "async_function" if isinstance(node, ast.AsyncFunctionDef) else "function"
+                "async_function"
+                if isinstance(node, ast.AsyncFunctionDef)
+                else "function"
             ),
             module=module,
             file=file_path,
@@ -518,7 +530,9 @@ class CrossFileExtractor:
             dependencies=deps,
         )
 
-    def _extract_class(self, file_path: str, source: str, node: ast.ClassDef) -> ExtractedSymbol:
+    def _extract_class(
+        self, file_path: str, source: str, node: ast.ClassDef
+    ) -> ExtractedSymbol:
         """Extract a class definition."""
         lines = source.split("\n")
         start_line = node.lineno - 1
@@ -564,7 +578,9 @@ class CrossFileExtractor:
                             if end_line:
                                 code = "\n".join(lines[start_line:end_line])
                             else:
-                                code = self._extract_to_next_definition(lines, start_line)
+                                code = self._extract_to_next_definition(
+                                    lines, start_line
+                                )
 
                             module = self._path_to_module(Path(file_path))
                             deps = self._analyze_symbol_dependencies(item)
@@ -834,7 +850,9 @@ class CrossFileExtractor:
         # Add a header comment
         code_parts.append("# ===== Cross-File Extraction =====")
         if result.target:
-            code_parts.append(f"# Target: {result.target.name} from {result.target.module}")
+            code_parts.append(
+                f"# Target: {result.target.name} from {result.target.module}"
+            )
         code_parts.append(f"# Dependencies: {len(result.dependencies)}")
         code_parts.append(f"# Files: {len(result.files_touched)}")
         code_parts.append("")

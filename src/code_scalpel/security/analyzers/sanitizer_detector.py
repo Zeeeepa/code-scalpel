@@ -247,7 +247,9 @@ class SanitizerDetector:
                             covered += 1
                             break
 
-        coverage_pct = (covered / len(vulnerabilities) * 100.0) if vulnerabilities else 0.0
+        coverage_pct = (
+            (covered / len(vulnerabilities) * 100.0) if vulnerabilities else 0.0
+        )
 
         return {
             "coverage_percentage": coverage_pct,

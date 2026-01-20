@@ -441,7 +441,9 @@ class MypyError:
         return "\n".join(parts)
 
     @classmethod
-    def from_line(cls, line: str, *, context_line: str | None = None) -> MypyError | None:
+    def from_line(
+        cls, line: str, *, context_line: str | None = None
+    ) -> MypyError | None:
         """
         Parse a mypy output line.
 
@@ -702,7 +704,9 @@ class MypyConfig:
     def _from_pyproject(cls, path: Path) -> MypyConfig:
         """Load configuration from pyproject.toml."""
         if tomllib is None:
-            raise ImportError("tomllib (Python 3.11+) or tomli is required for TOML parsing")
+            raise ImportError(
+                "tomllib (Python 3.11+) or tomli is required for TOML parsing"
+            )
 
         with open(path, "rb") as f:
             data = tomllib.load(f)
@@ -990,8 +994,12 @@ class MypyReport:
             "files_analyzed": self.files_analyzed,
             "revealed_types": len(self.revealed_types),
             "coverage": {
-                "function_coverage": (self.coverage.function_coverage if self.coverage else None),
-                "overall_coverage": (self.coverage.overall_coverage if self.coverage else None),
+                "function_coverage": (
+                    self.coverage.function_coverage if self.coverage else None
+                ),
+                "overall_coverage": (
+                    self.coverage.overall_coverage if self.coverage else None
+                ),
             },
             "by_category": {
                 cat.name: len(errors) for cat, errors in self.errors_by_category.items()
@@ -1145,7 +1153,9 @@ class MypyParser:
                 report.errors.append(current_error)
 
             # Success if no errors (notes are OK)
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:
@@ -1220,7 +1230,10 @@ class MypyParser:
                     error = MypyError.from_dict(data)
 
                     # Check if it's a revealed type note
-                    if error.severity == MypySeverity.NOTE and "Revealed type" in error.message:
+                    if (
+                        error.severity == MypySeverity.NOTE
+                        and "Revealed type" in error.message
+                    ):
                         revealed = RevealedType.from_note(error)
                         if revealed:
                             report.revealed_types.append(revealed)
@@ -1234,7 +1247,9 @@ class MypyParser:
                         report.errors.append(error)
 
             # Success if no errors
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:
@@ -1354,7 +1369,9 @@ class MypyParser:
                     current_error = error
                 else:
                     # Context line (source code shown with --show-error-context)
-                    if current_error and (line.startswith("    ") or line.startswith("\t")):
+                    if current_error and (
+                        line.startswith("    ") or line.startswith("\t")
+                    ):
                         context_buffer.append(line)
 
                 i += 1
@@ -1365,7 +1382,9 @@ class MypyParser:
                     current_error.context = "\n".join(context_buffer)
                 report.errors.append(current_error)
 
-            report.success = all(e.severity != MypySeverity.ERROR for e in report.errors)
+            report.success = all(
+                e.severity != MypySeverity.ERROR for e in report.errors
+            )
             report.files_analyzed = len(set(e.file for e in report.errors)) or 1
 
             if result.stderr:

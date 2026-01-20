@@ -105,7 +105,9 @@ class TypeEvaporationResult:
         default_factory=dict
     )  # name -> (line, definition)
     fetch_endpoints: List[Tuple[str, int]] = field(default_factory=list)  # (url, line)
-    dom_accesses: List[Tuple[str, int]] = field(default_factory=list)  # (element_id, line)
+    dom_accesses: List[Tuple[str, int]] = field(
+        default_factory=list
+    )  # (element_id, line)
     type_assertions: List[Tuple[str, int, str]] = field(
         default_factory=list
     )  # (type, line, context)
@@ -120,7 +122,9 @@ class TypeEvaporationResult:
 
         lines = [f"Found {len(self.vulnerabilities)} type evaporation issue(s):"]
         for v in self.vulnerabilities:
-            lines.append(f"  - {v.risk_type.name} at line {v.location[0]}: {v.description}")
+            lines.append(
+                f"  - {v.risk_type.name} at line {v.location[0]}: {v.description}"
+            )
         return "\n".join(lines)
 
 
@@ -263,7 +267,9 @@ class TypeEvaporationDetector:
 
         return result
 
-    def _analyze_with_tree_sitter(self, code: str, result: TypeEvaporationResult) -> None:
+    def _analyze_with_tree_sitter(
+        self, code: str, result: TypeEvaporationResult
+    ) -> None:
         """Analyze using tree-sitter AST parsing."""
         assert self._parser is not None  # Caller must verify tree-sitter is available
         tree = self._parser.parse(bytes(code, "utf-8"))
@@ -341,7 +347,9 @@ class TypeEvaporationDetector:
                 type_node = child
                 break
 
-        type_name = code[type_node.start_byte : type_node.end_byte] if type_node else "unknown"
+        type_name = (
+            code[type_node.start_byte : type_node.end_byte] if type_node else "unknown"
+        )
 
         # Check if the expression being cast is from DOM or external source
         expr_text = ""
@@ -354,9 +362,9 @@ class TypeEvaporationDetector:
         result.type_assertions.append((type_name, line_num, snippet))
 
         # Check if this is on DOM input
-        is_dom_input = any(pattern in expr_text for pattern in self.DOM_INPUT_PATTERNS) or any(
-            prop in expr_text for prop in self.DOM_VALUE_PROPERTIES
-        )
+        is_dom_input = any(
+            pattern in expr_text for pattern in self.DOM_INPUT_PATTERNS
+        ) or any(prop in expr_text for prop in self.DOM_VALUE_PROPERTIES)
 
         # Check for chained assertions like: (x as HTMLInputElement).value as Role
         # This is the dangerous pattern in the test file
@@ -495,7 +503,10 @@ class TypeEvaporationDetector:
                 result.type_assertions.append((type_name, i, line.strip()))
 
                 # Check if DOM input
-                if any(pattern in line for pattern in self.DOM_INPUT_PATTERNS) or ".value" in line:
+                if (
+                    any(pattern in line for pattern in self.DOM_INPUT_PATTERNS)
+                    or ".value" in line
+                ):
                     result.vulnerabilities.append(
                         TypeEvaporationVulnerability(
                             risk_type=TypeEvaporationRisk.UNSAFE_TYPE_ASSERTION,
@@ -574,7 +585,9 @@ class CrossFileTypeEvaporationResult:
 
     def summary(self) -> str:
         lines = ["=== Cross-File Type Evaporation Analysis ==="]
-        lines.append(f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}")
+        lines.append(
+            f"Frontend vulnerabilities: {len(self.frontend_result.vulnerabilities)}"
+        )
         lines.append(f"Backend vulnerabilities: {len(self.backend_vulnerabilities)}")
         lines.append(f"Matched endpoints: {len(self.matched_endpoints)}")
         lines.append(f"Cross-file issues: {len(self.cross_file_issues)}")
@@ -582,7 +595,9 @@ class CrossFileTypeEvaporationResult:
         if self.matched_endpoints:
             lines.append("\nEndpoint Correlations:")
             for endpoint, ts_line, py_line in self.matched_endpoints:
-                lines.append(f"  - {endpoint}: TS line {ts_line} → Python line {py_line}")
+                lines.append(
+                    f"  - {endpoint}: TS line {ts_line} → Python line {py_line}"
+                )
 
         return "\n".join(lines)
 

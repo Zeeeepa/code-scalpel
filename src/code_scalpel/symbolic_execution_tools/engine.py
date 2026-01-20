@@ -277,7 +277,9 @@ class SymbolicAnalyzer:
         # Fresh components for this analysis
         self._type_engine = TypeInferenceEngine()
         self._solver = ConstraintSolver(timeout_ms=self.solver_timeout)
-        self._interpreter = IRSymbolicInterpreter(max_loop_iterations=self.max_loop_iterations)
+        self._interpreter = IRSymbolicInterpreter(
+            max_loop_iterations=self.max_loop_iterations
+        )
 
         # Step 1: Type inference (Python only for now)
         inferred_types = {}
@@ -339,7 +341,9 @@ class SymbolicAnalyzer:
                 logger.debug(f"Creating symbolic parameter: {param_name} ({sort_name})")
                 # declare_symbolic expects z3.Sort objects (IntSort(), BoolSort(), etc.)
                 # param_sort is already the result of z3.IntSort(), so it's a Sort object
-                self._interpreter.declare_symbolic(param_name, cast(z3.Sort, param_sort))
+                self._interpreter.declare_symbolic(
+                    param_name, cast(z3.Sort, param_sort)
+                )
 
             # Execute the function body instead of module body
             modified_ir = IRModule(

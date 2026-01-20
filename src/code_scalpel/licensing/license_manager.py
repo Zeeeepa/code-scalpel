@@ -217,11 +217,15 @@ class LicenseManager:
 
                     # [20251225_FEATURE] P2_MEDIUM: Grace period support
                     if validation_result.status == ValidationStatus.EXPIRED:
-                        days_expired = (_utcnow_naive() - validation_result.expiration_date).days
+                        days_expired = (
+                            _utcnow_naive() - validation_result.expiration_date
+                        ).days
                         if days_expired <= self._default_grace_period_days:
                             is_valid = True
                             is_in_grace_period = True
-                            grace_period_days = self._default_grace_period_days - days_expired
+                            grace_period_days = (
+                                self._default_grace_period_days - days_expired
+                            )
                             logger.warning(
                                 f"License expired {days_expired} days ago, "
                                 f"in grace period ({grace_period_days} days remaining)"
@@ -243,7 +247,9 @@ class LicenseManager:
             self._license_info = LicenseInfo(
                 tier=tier,
                 is_valid=is_valid,
-                expiration_date=(validation_result.expiration_date if validation_result else None),
+                expiration_date=(
+                    validation_result.expiration_date if validation_result else None
+                ),
                 organization=organization,
                 seats=seats,
                 seats_used=seats_used,
@@ -410,11 +416,15 @@ class LicenseManager:
             # Check seat limit for ENTERPRISE tier
             if info.tier == "enterprise" and info.seats is not None:
                 if len(self._active_users) >= info.seats:
-                    logger.warning(f"Seat limit reached: {len(self._active_users)}/{info.seats}")
+                    logger.warning(
+                        f"Seat limit reached: {len(self._active_users)}/{info.seats}"
+                    )
                     return False
 
             self._active_users.add(user_id)
-            logger.info(f"User {user_id} added. Active users: {len(self._active_users)}")
+            logger.info(
+                f"User {user_id} added. Active users: {len(self._active_users)}"
+            )
 
             # Invalidate cached license info to reflect new seat count
             self._license_info = None
@@ -435,7 +445,9 @@ class LicenseManager:
         with self._user_lock:
             if user_id in self._active_users:
                 self._active_users.remove(user_id)
-                logger.info(f"User {user_id} removed. Active users: {len(self._active_users)}")
+                logger.info(
+                    f"User {user_id} removed. Active users: {len(self._active_users)}"
+                )
 
                 # Invalidate cached license info
                 self._license_info = None
@@ -467,7 +479,9 @@ class LicenseManager:
             return {
                 "active_users": len(self._active_users),
                 "seat_limit": info.seats if info.seats else -1,
-                "seats_available": ((info.seats - len(self._active_users)) if info.seats else -1),
+                "seats_available": (
+                    (info.seats - len(self._active_users)) if info.seats else -1
+                ),
                 "utilization_percent": (
                     (len(self._active_users) / info.seats * 100) if info.seats else 0
                 ),

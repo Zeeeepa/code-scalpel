@@ -297,7 +297,9 @@ class AnalysisCache(Generic[T]):
         # Fall back to global cache
         if self.config.use_global_cache:
             if os.name == "nt":  # Windows
-                base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+                base = Path(
+                    os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")
+                )
             else:  # Unix
                 base = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
             return base / "code-scalpel"
@@ -507,7 +509,9 @@ class AnalysisCache(Generic[T]):
             if self._is_valid(entry):
                 entry.hits += 1
                 self.stats.memory_hits += 1
-                logger.debug(f"Cache hit (memory): {result_type} for {code_hash[:8]}...")
+                logger.debug(
+                    f"Cache hit (memory): {result_type} for {code_hash[:8]}..."
+                )
                 return entry.result
 
         # Check disk cache
@@ -520,7 +524,9 @@ class AnalysisCache(Generic[T]):
                     self._content_cache[cache_key] = entry
                     entry.hits += 1
                     self.stats.disk_hits += 1
-                    logger.debug(f"Cache hit (disk): {result_type} for {code_hash[:8]}...")
+                    logger.debug(
+                        f"Cache hit (disk): {result_type} for {code_hash[:8]}..."
+                    )
                     return entry.result
             except Exception as e:
                 logger.warning(f"Failed to load cache entry: {e}")
@@ -735,7 +741,9 @@ class AnalysisCache(Generic[T]):
 
         # Calculate disk size
         if self._cache_dir and self._cache_dir.exists():
-            total_size = sum(f.stat().st_size for f in self._cache_dir.rglob("*") if f.is_file())
+            total_size = sum(
+                f.stat().st_size for f in self._cache_dir.rglob("*") if f.is_file()
+            )
             self.stats.size_bytes = total_size
 
         return self.stats

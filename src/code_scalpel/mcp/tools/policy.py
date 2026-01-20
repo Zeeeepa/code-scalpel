@@ -20,11 +20,15 @@ from code_scalpel.mcp.protocol import mcp
 
 
 @mcp.tool()
-async def validate_paths(paths: list[str], project_root: str | None = None) -> PathValidationResult:
+async def validate_paths(
+    paths: list[str], project_root: str | None = None
+) -> PathValidationResult:
     """Validate that paths are accessible before running file-based operations."""
     tier = _get_current_tier()
     capabilities = get_tool_capabilities("validate_paths", tier) or {}
-    return await asyncio.to_thread(_validate_paths_sync, paths, project_root, tier, capabilities)
+    return await asyncio.to_thread(
+        _validate_paths_sync, paths, project_root, tier, capabilities
+    )
 
 
 @mcp.tool()

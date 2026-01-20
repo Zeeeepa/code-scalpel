@@ -252,7 +252,9 @@ class TestComplianceErrorMessages:
 
     def test_error_message_without_violations(self):
         """Error message works without violations list."""
-        result = ComplianceCheckResult(allowed=False, reason="Generic compliance failure")
+        result = ComplianceCheckResult(
+            allowed=False, reason="Generic compliance failure"
+        )
 
         msg = format_compliance_error(result)
         assert "Compliance check failed" in msg

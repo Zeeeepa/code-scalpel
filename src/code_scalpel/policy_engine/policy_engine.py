@@ -30,7 +30,9 @@ from typing import Any, Dict, List, Optional
 try:
     import yaml
 except ImportError:
-    raise ImportError("PyYAML is required for policy engine. Install with: pip install pyyaml")
+    raise ImportError(
+        "PyYAML is required for policy engine. Install with: pip install pyyaml"
+    )
 
 
 class PolicyError(Exception):
@@ -89,7 +91,9 @@ class Policy:
         try:
             PolicySeverity(self.severity)
         except ValueError:
-            raise PolicyError(f"Invalid severity '{self.severity}' in policy '{self.name}'")
+            raise PolicyError(
+                f"Invalid severity '{self.severity}' in policy '{self.name}'"
+            )
 
         # Validate action
         try:
@@ -231,7 +235,9 @@ class PolicyEngine:
         self.policy_path = Path(policy_path)
         self.policies: List[Policy] = []
         # [20240613_SECURITY] Persist used override codes to disk to enforce single-use guarantee across restarts
-        self._used_override_codes_path = self.policy_path.parent / "used_override_codes.json"
+        self._used_override_codes_path = (
+            self.policy_path.parent / "used_override_codes.json"
+        )
         self._used_override_codes: set[str] = self._load_used_override_codes()
 
         # [20251222_BUGFIX] Check OPA availability but don't require it at init time.
@@ -264,7 +270,9 @@ class PolicyEngine:
         if shutil.which("opa") is not None:
             return True
         try:
-            result = subprocess.run(["opa", "version"], capture_output=True, text=True, timeout=1)
+            result = subprocess.run(
+                ["opa", "version"], capture_output=True, text=True, timeout=1
+            )
             return result.returncode == 0
         except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
             return False
@@ -306,7 +314,9 @@ class PolicyEngine:
                 return set(codes)
             except Exception as e:
                 # Fail CLOSED - if we can't read the file, deny all overrides
-                raise PolicyError(f"Failed to load used override codes: {e}. Failing CLOSED.")
+                raise PolicyError(
+                    f"Failed to load used override codes: {e}. Failing CLOSED."
+                )
         return set()
 
     def _save_used_override_codes(self) -> None:
@@ -318,7 +328,9 @@ class PolicyEngine:
                 json.dump(list(self._used_override_codes), f)
         except Exception as e:
             # Fail CLOSED - if we can't write the file, deny all overrides
-            raise PolicyError(f"Failed to save used override codes: {e}. Failing CLOSED.")
+            raise PolicyError(
+                f"Failed to save used override codes: {e}. Failing CLOSED."
+            )
 
     def _load_policies(self) -> List[Policy]:
         """
@@ -452,7 +464,9 @@ class PolicyEngine:
             PolicyError: If OPA CLI not found
         """
         try:
-            result = subprocess.run(["opa", "version"], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["opa", "version"], capture_output=True, text=True, timeout=5
+            )
             if result.returncode != 0:
                 raise PolicyError("OPA CLI check failed. Failing CLOSED.")
         except FileNotFoundError:
@@ -482,7 +496,8 @@ class PolicyEngine:
                 )
                 if result.returncode != 0:
                     raise PolicyError(
-                        f"Invalid Rego in policy '{policy.name}': " f"{result.stderr.decode()}"
+                        f"Invalid Rego in policy '{policy.name}': "
+                        f"{result.stderr.decode()}"
                     )
             except subprocess.TimeoutExpired:
                 raise PolicyError(
@@ -656,15 +671,22 @@ class PolicyEngine:
 
         for policy in self.policies:
             try:
-                if self._policy_matches_operation(policy.rule, input_operation) is False:
+                if (
+                    self._policy_matches_operation(policy.rule, input_operation)
+                    is False
+                ):
                     continue
 
                 matched, message = self._policy_matches_code(policy.rule, input_code)
 
                 # If the policy appears SQL-related, add semantic safety check.
-                sql_related = "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
+                sql_related = (
+                    "SELECT" in policy.rule.upper() or "SQL" in policy.name.upper()
+                )
                 if matched and sql_related:
-                    if self._semantic_analyzer.has_parameterization(input_code, input_language):
+                    if self._semantic_analyzer.has_parameterization(
+                        input_code, input_language
+                    ):
                         matched = False
 
                 if matched:

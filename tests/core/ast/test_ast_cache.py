@@ -218,7 +218,9 @@ class TestCachePersistence:
         cache2 = IncrementalASTCache(cache_dir)
 
         # Should have same dependency
-        assert str(file2.resolve()) in cache2.dependency_graph.get(str(file1.resolve()), set())
+        assert str(file2.resolve()) in cache2.dependency_graph.get(
+            str(file1.resolve()), set()
+        )
 
 
 class TestCacheStatistics:

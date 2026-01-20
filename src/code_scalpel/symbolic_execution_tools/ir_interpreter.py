@@ -325,56 +325,78 @@ class PythonSemantics(LanguageSemantics):
     def name(self) -> str:
         return "python"
 
-    def binary_add(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_add(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         """Python addition: requires matching types."""
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left + right
         # String + String not yet supported in Z3 symbolic execution
         return None
 
-    def binary_sub(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_sub(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left - right
         return None
 
-    def binary_mul(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_mul(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return cast(ExprRef, left * right)
         return None
 
-    def binary_div(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_div(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             # Z3 integer division
             return left / right
         return None
 
-    def binary_mod(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_mod(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left % right
         return None
 
-    def compare_eq(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_eq(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         return cast(BoolRef, left == right)
 
-    def compare_ne(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_ne(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         return cast(BoolRef, left != right)
 
-    def compare_lt(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_lt(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left < right
         return None
 
-    def compare_le(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_le(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left <= right
         return None
 
-    def compare_gt(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_gt(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left > right
         return None
 
-    def compare_ge(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_ge(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left >= right
         return None
@@ -416,56 +438,78 @@ class JavaScriptSemantics(LanguageSemantics):
     def name(self) -> str:
         return "javascript"
 
-    def binary_add(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_add(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         """JavaScript addition with coercion (simplified)."""
         # For now, same as Python - full coercion is complex
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left + right
         return None
 
-    def binary_sub(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_sub(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left - right
         return None
 
-    def binary_mul(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_mul(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return cast(ExprRef, left * right)
         return None
 
-    def binary_div(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_div(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left / right
         return None
 
-    def binary_mod(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[ExprRef]:
+    def binary_mod(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[ExprRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left % right
         return None
 
-    def compare_eq(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_eq(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         # JavaScript == has coercion, but we use strict equality for simplicity
         return cast(BoolRef, left == right)
 
-    def compare_ne(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_ne(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         return cast(BoolRef, left != right)
 
-    def compare_lt(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_lt(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left < right
         return None
 
-    def compare_le(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_le(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left <= right
         return None
 
-    def compare_gt(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_gt(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left > right
         return None
 
-    def compare_ge(self, left: ExprRef, right: ExprRef, state: SymbolicState) -> Optional[BoolRef]:
+    def compare_ge(
+        self, left: ExprRef, right: ExprRef, state: SymbolicState
+    ) -> Optional[BoolRef]:
         if isinstance(left, ArithRef) and isinstance(right, ArithRef):
             return left >= right
         return None
@@ -927,7 +971,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
                     exit_state.add_constraint(cast(BoolRef, Not(condition)))
                     # Execute else clause if present
                     if stmt.orelse:
-                        else_states = self._execute_block(stmt.orelse, exit_state, result)
+                        else_states = self._execute_block(
+                            stmt.orelse, exit_state, result
+                        )
                         exit_states.extend(else_states)
                     else:
                         exit_states.append(exit_state)
@@ -974,7 +1020,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
                 next_states.extend(body_states)
 
             current_states = next_states
-            if not current_states:  # pragma: no branch - rare case when all paths pruned
+            if (
+                not current_states
+            ):  # pragma: no branch - rare case when all paths pruned
                 break  # pragma: no cover - defensive break when all paths pruned
 
         return current_states
@@ -983,7 +1031,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
     # Expression Evaluation
     # =========================================================================
 
-    def _eval_expr(self, expr: Optional[IRExpr], state: SymbolicState) -> Optional[ExprRef]:
+    def _eval_expr(
+        self, expr: Optional[IRExpr], state: SymbolicState
+    ) -> Optional[ExprRef]:
         """
         Evaluate an IR expression to a Z3 expression.
 
@@ -1047,7 +1097,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         # Variable doesn't exist - create it as unknown int
         return state.create_variable(name, cast(Sort, IntSort()))
 
-    def _eval_binary_op(self, expr: IRBinaryOp, state: SymbolicState) -> Optional[ExprRef]:
+    def _eval_binary_op(
+        self, expr: IRBinaryOp, state: SymbolicState
+    ) -> Optional[ExprRef]:
         """Evaluate a binary operation."""
         left = self._eval_expr(expr.left, state)
         right = self._eval_expr(expr.right, state)
@@ -1071,7 +1123,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         else:
             return None
 
-    def _eval_unary_op(self, expr: IRUnaryOp, state: SymbolicState) -> Optional[ExprRef]:
+    def _eval_unary_op(
+        self, expr: IRUnaryOp, state: SymbolicState
+    ) -> Optional[ExprRef]:
         """Evaluate a unary operation."""
         operand = self._eval_expr(expr.operand, state)
         if operand is None or self._semantics is None:
@@ -1165,7 +1219,9 @@ class IRSymbolicInterpreter(IRNodeVisitor):
         # Other calls not supported yet
         return None
 
-    def _handle_symbolic_call(self, expr: IRCall, state: SymbolicState) -> Optional[ExprRef]:
+    def _handle_symbolic_call(
+        self, expr: IRCall, state: SymbolicState
+    ) -> Optional[ExprRef]:
         """
         Handle symbolic('name', type) call.
 

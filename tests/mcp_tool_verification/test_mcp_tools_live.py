@@ -158,7 +158,8 @@ class TestMCPToolVerification:
         # Should detect path traversal or SQL injection
         sink_types = [str(s.sink_type) for s in sinks]
         assert any(
-            "path" in t.lower() or "sql" in t.lower() or "file" in t.lower() for t in sink_types
+            "path" in t.lower() or "sql" in t.lower() or "file" in t.lower()
+            for t in sink_types
         )
 
     def test_unified_sink_confidence_scores(self):
@@ -188,7 +189,10 @@ class TestMCPToolVerification:
         for sink in sinks:
             # vulnerability_type should be set for high-confidence detections
             if sink.confidence >= 0.7:
-                assert sink.vulnerability_type is not None and sink.vulnerability_type != ""
+                assert (
+                    sink.vulnerability_type is not None
+                    and sink.vulnerability_type != ""
+                )
             # Or we can get OWASP category from sink type name
             sink_name = sink.vulnerability_type or str(sink.sink_type.name).lower()
             assert sink_name != ""
@@ -407,7 +411,9 @@ def abs_value(x):
 
         # Valid request → result has expected structure
         simulator = RefactorSimulator()
-        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
 
         # Result should have standard fields (no hallucinated fields)
         result_dict = result.to_dict()
@@ -420,7 +426,9 @@ def abs_value(x):
         # The MCP server would convert this to JSON-RPC error with:
         # {"jsonrpc": "2.0", "error": {"code": -32602, "message": "..."}, "id": <request_id>}
         with pytest.raises(ValueError, match="Must provide"):
-            simulator.simulate(original_code="def bar(): pass")  # Missing new_code/patch
+            simulator.simulate(
+                original_code="def bar(): pass"
+            )  # Missing new_code/patch
 
     def test_simulate_refactor_recovers_after_invalid_request(self):
         """Simulator should continue working after invalid request errors."""
@@ -431,7 +439,9 @@ def abs_value(x):
         with pytest.raises(ValueError):
             simulator.simulate(original_code="def foo(): pass")
 
-        result = simulator.simulate(original_code="def foo(): pass", new_code="def foo(): return 1")
+        result = simulator.simulate(
+            original_code="def foo(): pass", new_code="def foo(): return 1"
+        )
 
         assert result.status.value in ("safe", "warning")
         assert result.is_safe in (True, False)
@@ -719,7 +729,8 @@ def double(x: int) -> int:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create a mini project structure
-            (Path(tmpdir) / "main.py").write_text('''
+            (Path(tmpdir) / "main.py").write_text(
+                '''
 def main():
     """Main entry point."""
     from utils import helper
@@ -727,8 +738,10 @@ def main():
 
 if __name__ == "__main__":
     main()
-''')
-            (Path(tmpdir) / "utils.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "utils.py").write_text(
+                '''
 def helper():
     """Helper function."""
     return 42
@@ -736,8 +749,10 @@ def helper():
 def unused_func():
     """This function is never called."""
     pass
-''')
-            (Path(tmpdir) / "models.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "models.py").write_text(
+                '''
 class User:
     """User model."""
     def __init__(self, name: str):
@@ -745,7 +760,8 @@ class User:
     
     def greet(self) -> str:
         return f"Hello, {self.name}"
-''')
+'''
+            )
 
             # Test project crawling (underlying functionality of get_project_map)
             crawler = ProjectCrawler(tmpdir)
@@ -801,18 +817,22 @@ def complex_function(a, b, c, d, e):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create circular import structure
-            (Path(tmpdir) / "module_a.py").write_text("""
+            (Path(tmpdir) / "module_a.py").write_text(
+                """
 from module_b import func_b
 
 def func_a():
     return func_b()
-""")
-            (Path(tmpdir) / "module_b.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "module_b.py").write_text(
+                """
 from module_a import func_a
 
 def func_b():
     return func_a()
-""")
+"""
+            )
 
             builder = CallGraphBuilder(Path(tmpdir))
             circular_imports = builder.detect_circular_imports()
@@ -828,19 +848,23 @@ def func_b():
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create inter-dependent files
-            (Path(tmpdir) / "models.py").write_text('''
+            (Path(tmpdir) / "models.py").write_text(
+                '''
 class TaxRate:
     """Tax rate configuration."""
     STANDARD = 0.2
     REDUCED = 0.05
-''')
-            (Path(tmpdir) / "calculator.py").write_text('''
+'''
+            )
+            (Path(tmpdir) / "calculator.py").write_text(
+                '''
 from models import TaxRate
 
 def calculate_tax(amount: float) -> float:
     """Calculate tax using standard rate."""
     return amount * TaxRate.STANDARD
-''')
+'''
+            )
 
             # Extract with cross-file dependencies
             extractor = SurgicalExtractor.from_file(str(Path(tmpdir) / "calculator.py"))
@@ -879,7 +903,8 @@ def calculate_tax(amount: float) -> float:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            (Path(tmpdir) / "app.py").write_text("""
+            (Path(tmpdir) / "app.py").write_text(
+                """
 from db import get_user
 from cache import check_cache
 
@@ -888,15 +913,20 @@ def handle_request(user_id):
     if cached:
         return cached
     return get_user(user_id)
-""")
-            (Path(tmpdir) / "db.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "db.py").write_text(
+                """
 def get_user(user_id):
     return {"id": user_id}
-""")
-            (Path(tmpdir) / "cache.py").write_text("""
+"""
+            )
+            (Path(tmpdir) / "cache.py").write_text(
+                """
 def check_cache(key):
     return None
-""")
+"""
+            )
 
             builder = CallGraphBuilder(Path(tmpdir))
             result = builder.build_with_details(entry_point="handle_request", depth=5)

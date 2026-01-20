@@ -196,7 +196,9 @@ class RepoWideRename:
 
         for root, dirs, files in os.walk(self.project_root):
             # Skip excluded directories (modify in-place to prune walk)
-            dirs[:] = [d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")]
+            dirs[:] = [
+                d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")
+            ]
 
             for filename in files:
                 file_path = Path(root) / filename
@@ -277,7 +279,9 @@ class RepoWideRename:
                 batch_results["files_scanned"] += 1
             except Exception as e:
                 batch_results["files_failed"] += 1
-                batch_results["errors"].append({"file": str(file_path), "error": str(e)})
+                batch_results["errors"].append(
+                    {"file": str(file_path), "error": str(e)}
+                )
 
         return batch_results
 
@@ -333,7 +337,8 @@ class RepoWideRename:
 
         # Split into batches
         batches = [
-            candidate_files[i : i + self.batch_size] for i in range(0, total_files, self.batch_size)
+            candidate_files[i : i + self.batch_size]
+            for i in range(0, total_files, self.batch_size)
         ]
 
         completed = 0
@@ -362,7 +367,9 @@ class RepoWideRename:
             result.files_updated = len(files_with_symbol)
             # Note: Actual rename implementation would go here
             # For now, we just track which files would be updated
-            result.warnings.append(f"Dry-run mode: would update {len(files_with_symbol)} files")
+            result.warnings.append(
+                f"Dry-run mode: would update {len(files_with_symbol)} files"
+            )
         else:
             result.files_updated = 0
             result.files_skipped = total_files - len(files_with_symbol)

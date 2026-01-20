@@ -44,7 +44,9 @@ class TestPerformanceTimings:
             "def foo():\n    return bar()\n\ndef bar():\n    return 1\n"
         )
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -60,7 +62,9 @@ class TestPerformanceTimings:
                 )
                 elapsed = time.perf_counter() - start
 
-                assert elapsed < 2.0, f"Response time {elapsed:.2f}s exceeds 2s threshold"
+                assert (
+                    elapsed < 2.0
+                ), f"Response time {elapsed:.2f}s exceeds 2s threshold"
                 # Result may succeed or fail (node not found), timing is key
                 assert isinstance(result, GraphNeighborhoodResult)
 
@@ -98,7 +102,9 @@ class TestPerformanceTimings:
                 )
                 elapsed = time.perf_counter() - start
 
-                assert elapsed < 5.0, f"Response time {elapsed:.2f}s exceeds 5s threshold"
+                assert (
+                    elapsed < 5.0
+                ), f"Response time {elapsed:.2f}s exceeds 5s threshold"
                 assert isinstance(result, GraphNeighborhoodResult)
 
     async def test_confidence_filtering_performance(self, tmp_path):
@@ -109,7 +115,9 @@ class TestPerformanceTimings:
             "def a():\n    return b()\n\ndef b():\n    return c()\n\ndef c():\n    return 1\n"
         )
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -138,7 +146,9 @@ class TestPerformanceTimings:
 
                 # Filtering should not add more than 50% overhead
                 overhead_ratio = elapsed_filtered / max(elapsed_baseline, 0.001)
-                assert overhead_ratio < 1.5, f"Filtering overhead {overhead_ratio:.2f}x too high"
+                assert (
+                    overhead_ratio < 1.5
+                ), f"Filtering overhead {overhead_ratio:.2f}x too high"
 
 
 # ============================================================================
@@ -146,7 +156,9 @@ class TestPerformanceTimings:
 # ============================================================================
 
 
-@pytest.mark.skipif(not HAS_PSUTIL, reason="psutil not available for memory measurements")
+@pytest.mark.skipif(
+    not HAS_PSUTIL, reason="psutil not available for memory measurements"
+)
 class TestMemoryUsage:
     """Test memory footprint characteristics."""
 
@@ -160,7 +172,9 @@ class TestMemoryUsage:
         gc.collect()
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -178,7 +192,9 @@ class TestMemoryUsage:
         mem_after = process.memory_info().rss / 1024 / 1024  # MB
         mem_delta = mem_after - mem_before
 
-        assert mem_delta < 100, f"Memory delta {mem_delta:.2f}MB exceeds 100MB threshold"
+        assert (
+            mem_delta < 100
+        ), f"Memory delta {mem_delta:.2f}MB exceeds 100MB threshold"
 
     async def test_large_graph_memory_bounded(self, tmp_path):
         """Large graph extraction should stay under 500MB delta."""
@@ -203,7 +219,9 @@ class TestMemoryUsage:
         gc.collect()
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": [
@@ -225,7 +243,9 @@ class TestMemoryUsage:
         mem_after = process.memory_info().rss / 1024 / 1024  # MB
         mem_delta = mem_after - mem_before
 
-        assert mem_delta < 500, f"Memory delta {mem_delta:.2f}MB exceeds 500MB threshold"
+        assert (
+            mem_delta < 500
+        ), f"Memory delta {mem_delta:.2f}MB exceeds 500MB threshold"
 
     async def test_truncation_prevents_memory_explosion(self, tmp_path):
         """Truncation should prevent unbounded memory growth."""
@@ -249,7 +269,9 @@ class TestMemoryUsage:
         gc.collect()
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -282,7 +304,9 @@ class TestMemoryUsage:
 # ============================================================================
 
 
-@pytest.mark.skipif(not HAS_PSUTIL, reason="psutil not available for memory measurements")
+@pytest.mark.skipif(
+    not HAS_PSUTIL, reason="psutil not available for memory measurements"
+)
 class TestMemoryLeaks:
     """Test for memory leaks over repeated operations."""
 
@@ -298,7 +322,9 @@ class TestMemoryLeaks:
         gc.collect()
 
         # Warmup
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -316,7 +342,9 @@ class TestMemoryLeaks:
         mem_baseline = process.memory_info().rss / 1024 / 1024  # MB
 
         # Run 50 iterations
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -381,7 +409,9 @@ class TestSequentialLoad:
             "def a():\n    return 1\n\ndef b():\n    return 2\n\ndef c():\n    return 3\n"
         )
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -414,7 +444,9 @@ class TestConcurrentLoad:
             "def foo():\n    return bar()\n\ndef bar():\n    return 1\n"
         )
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
                 mock_caps.return_value = {
                     "capabilities": ["basic_neighborhood"],
@@ -478,8 +510,12 @@ class TestConcurrentLoad:
         )
 
         async def request_community():
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value="community"
+            ):
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood"],
                         "limits": {"max_k": 1, "max_nodes": 20},
@@ -493,7 +529,9 @@ class TestConcurrentLoad:
 
         async def request_pro():
             with patch("code_scalpel.mcp.server._get_current_tier", return_value="pro"):
-                with patch("code_scalpel.mcp.server.get_tool_capabilities") as mock_caps:
+                with patch(
+                    "code_scalpel.mcp.server.get_tool_capabilities"
+                ) as mock_caps:
                     mock_caps.return_value = {
                         "capabilities": ["basic_neighborhood", "advanced_neighborhood"],
                         "limits": {"max_k": 5, "max_nodes": 200},

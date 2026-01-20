@@ -66,7 +66,8 @@ class ParallelParser(Generic[T]):
         if to_parse:
             # [20251214_PERF] Batch files to reduce per-file pickle overhead
             batches = [
-                to_parse[i : i + self.batch_size] for i in range(0, len(to_parse), self.batch_size)
+                to_parse[i : i + self.batch_size]
+                for i in range(0, len(to_parse), self.batch_size)
             ]
 
             # Spawning/forking processes from a non-main thread can hang on some
@@ -93,10 +94,14 @@ class ParallelParser(Generic[T]):
                                 results[file_path] = value
                                 self.cache.store(file_path, value)
                             else:
-                                logger.warning("Parse failed for %s: %s", file_path, error)
+                                logger.warning(
+                                    "Parse failed for %s: %s", file_path, error
+                                )
                                 errors.append(file_path)
                     except Exception as exc:
-                        logger.warning("Batch parse failed for %d files: %s", len(batch), exc)
+                        logger.warning(
+                            "Batch parse failed for %d files: %s", len(batch), exc
+                        )
                         errors.extend(batch)
 
         return results, errors

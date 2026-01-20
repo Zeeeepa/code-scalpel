@@ -48,7 +48,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
         # Find symbol references for key functions
         symbol_analysis = {}
-        for func_name in file_info.get("functions", [])[:3]:  # Analyze first 3 functions
+        for func_name in file_info.get("functions", [])[
+            :3
+        ]:  # Analyze first 3 functions
             refs = await self.find_symbol_usage(func_name, self.context.workspace_root)
             if refs.get("success"):
                 symbol_analysis[func_name] = refs
@@ -80,7 +82,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
         issues.extend(security_issues)
 
         # Analyze symbol usage
-        symbol_issues = self._analyze_symbol_usage(observations.get("symbol_analysis", {}))
+        symbol_issues = self._analyze_symbol_usage(
+            observations.get("symbol_analysis", {})
+        )
         issues.extend(symbol_issues)
 
         # Generate improvement suggestions
@@ -169,7 +173,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
     # Analysis Helper Methods
 
-    def _analyze_file_structure(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_file_structure(
+        self, file_info: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Analyze file structure for quality issues."""
         issues = []
 
@@ -219,7 +225,9 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
         return issues
 
-    def _analyze_symbol_usage(self, symbol_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_symbol_usage(
+        self, symbol_analysis: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Analyze symbol usage patterns."""
         issues = []
 
@@ -332,20 +340,26 @@ class CodeReviewAgent(BaseCodeAnalysisAgent):
 
     # Action Execution Methods
 
-    async def _execute_function_refactor(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_function_refactor(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a function refactoring action."""
         # This would use extract_code and update_symbol tools
         # For demo purposes, return success
         self.logger.info(f"Executing function refactor: {action}")
         return {"success": True, "message": "Function refactor completed"}
 
-    async def _execute_security_improvement(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_security_improvement(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a security improvement action."""
         # This would use simulate_refactor and update_symbol tools
         self.logger.info(f"Executing security improvement: {action}")
         return {"success": True, "message": "Security improvement applied"}
 
-    async def _execute_documentation_improvement(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_documentation_improvement(
+        self, action: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a documentation improvement action."""
         # This would use update_symbol to add docstrings
         self.logger.info(f"Executing documentation improvement: {action}")

@@ -50,7 +50,10 @@ def test_dependency_parser_maven_and_gradle():
         assert maven["org.springframework:spring-core"]["version"] == "6.1.0"
 
         assert "org.springframework.security:spring-security-web" in maven
-        assert maven["org.springframework.security:spring-security-web"].get("type") == "dev"
+        assert (
+            maven["org.springframework.security:spring-security-web"].get("type")
+            == "dev"
+        )
 
         gradle = {d["name"]: d for d in deps.get("maven", [])}
         assert "org.hibernate.orm:hibernate-core" in gradle

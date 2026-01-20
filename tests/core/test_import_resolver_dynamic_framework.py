@@ -44,7 +44,9 @@ def build(app):
     assert ImportType.FRAMEWORK in kinds
     assert ImportType.LAZY in kinds  # unknown dynamic_name
 
-    dynamic_targets = [info.module for info in imports if info.import_type == ImportType.DYNAMIC]
+    dynamic_targets = [
+        info.module for info in imports if info.import_type == ImportType.DYNAMIC
+    ]
     assert "pkg.mod" in dynamic_targets
 
     framework_targets = [

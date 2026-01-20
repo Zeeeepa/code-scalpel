@@ -221,7 +221,9 @@ class AutogenScalpel:
 
         return result
 
-    async def refactor_async(self, code: str, refactor_type: str = "auto") -> AnalysisResult:
+    async def refactor_async(
+        self, code: str, refactor_type: str = "auto"
+    ) -> AnalysisResult:
         """
         Perform async code refactoring based on analysis.
 
@@ -233,7 +235,9 @@ class AutogenScalpel:
             AnalysisResult with refactored code.
         """
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self._refactor_sync, code, refactor_type)
+        return await loop.run_in_executor(
+            None, self._refactor_sync, code, refactor_type
+        )
 
     def _refactor_sync(self, code: str, refactor_type: str) -> AnalysisResult:
         """

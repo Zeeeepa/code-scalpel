@@ -48,14 +48,16 @@ class TestCryptographicPolicyVerifier:
 
         # Create sample policy file
         policy_file = policy_path / "policy.yaml"
-        policy_file.write_text("""
+        policy_file.write_text(
+            """
 policies:
   - name: no_sql_injection
     description: Prevent SQL injection
     rule: |
       package scalpel.security
       deny[msg] { msg := "SQL injection detected" }
-""")
+"""
+        )
 
         return policy_path
 
@@ -226,7 +228,10 @@ policies:
             with pytest.raises(SecurityError) as exc:
                 verifier.verify_all_policies()
 
-            assert "missing" in str(exc.value).lower() or "tampered" in str(exc.value).lower()
+            assert (
+                "missing" in str(exc.value).lower()
+                or "tampered" in str(exc.value).lower()
+            )
 
     def test_verify_single_file(self, policy_dir, secret_key):
         """Test verifying a single policy file."""

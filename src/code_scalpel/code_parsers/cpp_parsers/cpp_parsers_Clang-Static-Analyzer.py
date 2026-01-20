@@ -104,13 +104,19 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
     def parse_plist_report(self, report_path: Path) -> List[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: plist parsing")
 
-    def extract_bug_paths(self, findings: List[AnalyzerFinding]) -> List[Dict[str, Any]]:
+    def extract_bug_paths(
+        self, findings: List[AnalyzerFinding]
+    ) -> List[Dict[str, Any]]:
         raise NotImplementedError("Phase 2: Bug path extraction")
 
-    def detect_memory_issues(self, findings: List[AnalyzerFinding]) -> List[AnalyzerFinding]:
+    def detect_memory_issues(
+        self, findings: List[AnalyzerFinding]
+    ) -> List[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: Memory bug detection")
 
-    def generate_report(self, findings: List[AnalyzerFinding], format: str = "json") -> str:
+    def generate_report(
+        self, findings: List[AnalyzerFinding], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
 

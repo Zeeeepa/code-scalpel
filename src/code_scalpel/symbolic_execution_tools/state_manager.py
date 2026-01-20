@@ -159,7 +159,8 @@ class SymbolicState:
             expr = Real(name)
         else:
             raise ValueError(
-                f"Unsupported sort: {sort}. " "Supported: IntSort, BoolSort, StringSort, RealSort."
+                f"Unsupported sort: {sort}. "
+                "Supported: IntSort, BoolSort, StringSort, RealSort."
             )
 
         self._variables[name] = expr
@@ -374,7 +375,9 @@ class SymbolicState:
         """
         return {
             "depth": self._depth,
-            "variables": {name: str(expr.sort()) for name, expr in self._variables.items()},
+            "variables": {
+                name: str(expr.sort()) for name, expr in self._variables.items()
+            },
             "constraint_count": len(self._constraints),
             "is_feasible": self.is_feasible(),
         }

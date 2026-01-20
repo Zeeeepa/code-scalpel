@@ -31,7 +31,9 @@ class TestCacheLifecycle:
         crawler_cached = ProjectCrawler(str(small_python_extended), enable_cache=True)
         result_cached = crawler_cached.crawl()
 
-        crawler_uncached = ProjectCrawler(str(small_python_extended), enable_cache=False)
+        crawler_uncached = ProjectCrawler(
+            str(small_python_extended), enable_cache=False
+        )
         result_uncached = crawler_uncached.crawl()
 
         assert result_cached.total_files == result_uncached.total_files

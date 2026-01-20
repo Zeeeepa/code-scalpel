@@ -180,7 +180,9 @@ class MutationTestGate:
                 mutations_survived=0,
                 hollow_fix_detected=False,
                 weak_tests=[],
-                recommendations=["Fix does not pass tests - not ready for mutation testing"],
+                recommendations=[
+                    "Fix does not pass tests - not ready for mutation testing"
+                ],
             )
 
         # [20251217_FEATURE] P0: Step 2: Critical - revert fix, tests MUST fail

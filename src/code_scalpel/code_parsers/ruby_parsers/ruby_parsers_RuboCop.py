@@ -75,10 +75,14 @@ class RuboCopParser:
     ) -> Dict[str, List[RuboCopViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def apply_autocorrect(self, paths: List[Path], config: RuboCopConfig = None) -> Dict[str, int]:
+    def apply_autocorrect(
+        self, paths: List[Path], config: RuboCopConfig = None
+    ) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-correction")
 
-    def generate_report(self, violations: List[RuboCopViolation], format: str = "json") -> str:
+    def generate_report(
+        self, violations: List[RuboCopViolation], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def calculate_metrics(self, violations: List[RuboCopViolation]) -> Dict[str, Any]:

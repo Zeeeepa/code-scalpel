@@ -38,7 +38,9 @@ class TestMCPAsyncExecution:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Should be result object, not coroutine
-        assert not inspect.iscoroutine(result), "Result should be resolved object, not coroutine"
+        assert not inspect.iscoroutine(
+            result
+        ), "Result should be resolved object, not coroutine"
         assert hasattr(result, "success"), "Result should have success attribute"
 
 
@@ -121,12 +123,14 @@ class TestResultFormatCompliance:
     async def test_result_violations_format(self, tmp_path):
         """Violations should be properly formatted list of dicts."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -176,10 +180,12 @@ class TestErrorHandling:
     async def test_tool_does_not_crash_on_syntax_errors(self, tmp_path):
         """Tool should handle files with syntax errors gracefully."""
         test_file = tmp_path / "syntax_error.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def broken(
     # Missing closing parenthesis
-""")
+"""
+        )
 
         # Should not raise exception
         result = await code_policy_check(paths=[str(test_file)])
@@ -215,7 +221,9 @@ class TestOutputMetadata:
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert hasattr(result, "files_limit_applied"), "Result missing files_limit_applied metadata"
+        assert hasattr(
+            result, "files_limit_applied"
+        ), "Result missing files_limit_applied metadata"
         # Value is int or None (None = unlimited for Enterprise)
         assert result.files_limit_applied is None or isinstance(
             result.files_limit_applied, int
@@ -229,7 +237,9 @@ class TestOutputMetadata:
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert hasattr(result, "rules_limit_applied"), "Result missing rules_limit_applied metadata"
+        assert hasattr(
+            result, "rules_limit_applied"
+        ), "Result missing rules_limit_applied metadata"
         # Value is int or None (None = unlimited for Enterprise)
         assert result.rules_limit_applied is None or isinstance(
             result.rules_limit_applied, int

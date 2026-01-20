@@ -181,7 +181,9 @@ result = calcualte_total([1, 2, 3])"""
 
         assert len(analysis.fixes) > 0
         # Should suggest the correct spelling
-        typo_fixes = [f for f in analysis.fixes if "calculate_total" in f.diff and "->" in f.diff]
+        typo_fixes = [
+            f for f in analysis.fixes if "calculate_total" in f.diff and "->" in f.diff
+        ]
         assert len(typo_fixes) > 0
         assert typo_fixes[0].confidence > 0.6
 

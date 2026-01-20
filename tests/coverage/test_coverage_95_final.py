@@ -111,7 +111,9 @@ class TestASTCacheUncovered:
             cache = IncrementalASTCache(cache_dir=td)
 
             # Mock to raise exception during save
-            with patch.object(cache, "_metadata_path", return_value=Path("/readonly/path")):
+            with patch.object(
+                cache, "_metadata_path", return_value=Path("/readonly/path")
+            ):
                 # Should not raise, just log
                 cache._save_metadata()
 
@@ -153,7 +155,9 @@ class TestASTCacheUncovered:
             test_file.write_text("x = 1")
 
             custom_result = {"custom": "result"}
-            result = cache.get_or_parse(str(test_file), "python", parse_fn=lambda p: custom_result)
+            result = cache.get_or_parse(
+                str(test_file), "python", parse_fn=lambda p: custom_result
+            )
             assert result == custom_result
 
     def test_parse_file_non_python(self):

@@ -11,8 +11,12 @@ def _write(p: Path, content: str) -> None:
 
 
 # [20260101_SKIP] Spec test for multi-language crawl - feature in progress
-@pytest.mark.skip(reason="Multi-language crawl and language_breakdown not yet implemented")
-async def test_crawl_project_community_multilanguage_and_limits(tmp_path: Path, monkeypatch):
+@pytest.mark.skip(
+    reason="Multi-language crawl and language_breakdown not yet implemented"
+)
+async def test_crawl_project_community_multilanguage_and_limits(
+    tmp_path: Path, monkeypatch
+):
     # Force deterministic tier in tests
     monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -67,8 +71,12 @@ async def test_crawl_project_pro_cache_hits(tmp_path: Path, monkeypatch):
 
 
 # [20260101_SKIP] Spec test for Enterprise compliance - feature not implemented
-@pytest.mark.skip(reason="compliance_summary field not implemented in ProjectCrawlResult")
-async def test_crawl_project_enterprise_compliance_best_effort(tmp_path: Path, monkeypatch):
+@pytest.mark.skip(
+    reason="compliance_summary field not implemented in ProjectCrawlResult"
+)
+async def test_crawl_project_enterprise_compliance_best_effort(
+    tmp_path: Path, monkeypatch
+):
     monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
     root = tmp_path / "proj"
@@ -88,7 +96,9 @@ async def test_crawl_project_enterprise_compliance_best_effort(tmp_path: Path, m
     assert summary is None or isinstance(summary, dict)
 
 
-async def test_crawl_project_enterprise_custom_rules_config(tmp_path: Path, monkeypatch):
+async def test_crawl_project_enterprise_custom_rules_config(
+    tmp_path: Path, monkeypatch
+):
     monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
     root = tmp_path / "proj"

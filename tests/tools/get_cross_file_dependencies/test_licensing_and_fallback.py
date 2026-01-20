@@ -62,7 +62,9 @@ class TestProTierCapabilities:
     """Test Pro tier has enhanced capabilities vs Community."""
 
     @pytest.mark.asyncio
-    async def test_pro_tier_increased_depth(self, pro_server, deep_chain_project, monkeypatch):
+    async def test_pro_tier_increased_depth(
+        self, pro_server, deep_chain_project, monkeypatch
+    ):
         """Pro tier should support deeper depth analysis (up to 5)."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -78,7 +80,9 @@ class TestProTierCapabilities:
         assert result.transitive_depth <= 5
 
     @pytest.mark.asyncio
-    async def test_pro_tier_alias_resolution(self, pro_server, alias_import_project, monkeypatch):
+    async def test_pro_tier_alias_resolution(
+        self, pro_server, alias_import_project, monkeypatch
+    ):
         """Pro tier should resolve import aliases."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 

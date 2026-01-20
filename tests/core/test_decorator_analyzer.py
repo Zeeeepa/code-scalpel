@@ -154,7 +154,9 @@ class TestSecuritySinkDetection:
     def test_get_decorator_is_security_sink(self):
         """Test that @Get is identified as a security sink."""
         analyzer = DecoratorAnalyzer()
-        decorators = [Decorator(name="Get", arguments=["':id'"], is_factory=True, line=1)]
+        decorators = [
+            Decorator(name="Get", arguments=["':id'"], is_factory=True, line=1)
+        ]
 
         assert analyzer.is_security_sink(decorators) is True
 
@@ -188,7 +190,9 @@ class TestSecuritySinkDetection:
         decorators = [
             Decorator(name="Injectable", arguments=[], is_factory=True, line=1),
             Decorator(name="Post", arguments=[], is_factory=True, line=2),
-            Decorator(name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=3),
+            Decorator(
+                name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=3
+            ),
         ]
 
         assert analyzer.is_security_sink(decorators) is True
@@ -200,7 +204,9 @@ class TestSecurityMetadata:
     def test_get_security_metadata_for_endpoint(self):
         """Test extraction of endpoint metadata."""
         analyzer = DecoratorAnalyzer()
-        decorators = [Decorator(name="Get", arguments=["':id'"], is_factory=True, line=1)]
+        decorators = [
+            Decorator(name="Get", arguments=["':id'"], is_factory=True, line=1)
+        ]
 
         metadata = analyzer.get_security_metadata(decorators)
 
@@ -211,7 +217,9 @@ class TestSecurityMetadata:
     def test_get_security_metadata_for_controller(self):
         """Test extraction of controller metadata."""
         analyzer = DecoratorAnalyzer()
-        decorators = [Decorator(name="Controller", arguments=["'users'"], is_factory=True, line=1)]
+        decorators = [
+            Decorator(name="Controller", arguments=["'users'"], is_factory=True, line=1)
+        ]
 
         metadata = analyzer.get_security_metadata(decorators)
 
@@ -221,7 +229,11 @@ class TestSecurityMetadata:
     def test_get_security_metadata_for_auth(self):
         """Test extraction of authentication metadata."""
         analyzer = DecoratorAnalyzer()
-        decorators = [Decorator(name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=1)]
+        decorators = [
+            Decorator(
+                name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=1
+            )
+        ]
 
         metadata = analyzer.get_security_metadata(decorators)
 
@@ -240,9 +252,13 @@ class TestSecurityMetadata:
         """Test extraction of combined security metadata."""
         analyzer = DecoratorAnalyzer()
         decorators = [
-            Decorator(name="Controller", arguments=["'users'"], is_factory=True, line=1),
+            Decorator(
+                name="Controller", arguments=["'users'"], is_factory=True, line=1
+            ),
             Decorator(name="Post", arguments=[], is_factory=True, line=2),
-            Decorator(name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=3),
+            Decorator(
+                name="UseGuards", arguments=["AuthGuard"], is_factory=True, line=3
+            ),
         ]
 
         metadata = analyzer.get_security_metadata(decorators)

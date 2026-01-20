@@ -64,7 +64,9 @@ async def _invoke_tool(
             error_info = {"error_code": "internal_error", "error": error_msg}
     else:
         # Raw result is the data itself
-        data_payload = raw_result if isinstance(raw_result, dict) else {"result": raw_result}
+        data_payload = (
+            raw_result if isinstance(raw_result, dict) else {"result": raw_result}
+        )
         warnings = []
         # Check if data indicates failure
         if isinstance(data_payload, dict) and data_payload.get("success") is False:
@@ -125,7 +127,9 @@ class TestMCPProtocol:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_async_concurrency_handles_parallel_requests(self, monkeypatch, tmp_path, tool):
+    async def test_async_concurrency_handles_parallel_requests(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         async def invoke(i: int):
@@ -178,7 +182,9 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_syntax_error_returns_structured_error(self, monkeypatch, tmp_path, tool):
+    async def test_syntax_error_returns_structured_error(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "broken.py"
@@ -194,7 +200,9 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_invalid_encoding_returns_error_envelope(self, monkeypatch, tmp_path, tool):
+    async def test_invalid_encoding_returns_error_envelope(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "invalid_encoding.py"
@@ -214,14 +222,18 @@ class TestEdgeAndSecurityCases:
         data = result.get("data") or {}
         assert data.get("success") is False or data == {}
 
-    async def test_secret_strings_not_leaked_on_error(self, monkeypatch, tmp_path, caplog, tool):
+    async def test_secret_strings_not_leaked_on_error(
+        self, monkeypatch, tmp_path, caplog, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
         caplog.set_level(logging.DEBUG)
 
         secret = "sk_live_123_SECRET_DO_NOT_LEAK"
 
         target_file = tmp_path / "secret_source.py"
-        target_file.write_text(f"""def hidden():\n    api_key = '{secret}'\n    return api_key\n""")
+        target_file.write_text(
+            f"""def hidden():\n    api_key = '{secret}'\n    return api_key\n"""
+        )
 
         # Force an error by requesting a missing symbol; include_code disabled to avoid payload echo.
         result = await tool.run(
@@ -247,7 +259,9 @@ class TestEdgeAndSecurityCases:
 class TestMultiLanguageSupport:
     """Multi-language parsing: verify unsupported-language error envelopes."""
 
-    async def test_javascript_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
+    async def test_javascript_returns_unsupported_language_error(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "app.js"
@@ -272,13 +286,20 @@ class TestMultiLanguageSupport:
             assert isinstance(result["error"], dict)
         else:
             # Or success=False with no extracted symbols
-            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
+            assert (
+                data.get("success") is False
+                or len(data.get("extracted_symbols", [])) == 0
+            )
 
-    async def test_typescript_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
+    async def test_typescript_returns_unsupported_language_error(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "app.ts"
-        target_file.write_text("""function hello(): string {\n    return "world";\n}\n""")
+        target_file.write_text(
+            """function hello(): string {\n    return "world";\n}\n"""
+        )
 
         result = await tool.run(
             {
@@ -296,13 +317,20 @@ class TestMultiLanguageSupport:
         if result.get("error"):
             assert isinstance(result["error"], dict)
         else:
-            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
+            assert (
+                data.get("success") is False
+                or len(data.get("extracted_symbols", [])) == 0
+            )
 
-    async def test_java_returns_unsupported_language_error(self, monkeypatch, tmp_path, tool):
+    async def test_java_returns_unsupported_language_error(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "App.java"
-        target_file.write_text("""public class App {\n    public void hello() {}\n}\n""")
+        target_file.write_text(
+            """public class App {\n    public void hello() {}\n}\n"""
+        )
 
         result = await tool.run(
             {
@@ -320,7 +348,10 @@ class TestMultiLanguageSupport:
         if result.get("error"):
             assert isinstance(result["error"], dict)
         else:
-            assert data.get("success") is False or len(data.get("extracted_symbols", [])) == 0
+            assert (
+                data.get("success") is False
+                or len(data.get("extracted_symbols", [])) == 0
+            )
 
 
 class TestProtocolStrictness:
@@ -337,7 +368,9 @@ class TestProtocolStrictness:
         assert tool.name == "get_cross_file_dependencies"
         # MCP tools don't require mcp_code-scalpel_ prefix in FastMCP
 
-    async def test_error_envelope_includes_error_code(self, monkeypatch, tmp_path, tool):
+    async def test_error_envelope_includes_error_code(
+        self, monkeypatch, tmp_path, tool
+    ):
         """Error responses include machine-parseable error_code."""
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
@@ -370,14 +403,16 @@ class TestEdgeConstructs:
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "decorated.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 def decorator(f):
     return f
 
 @decorator
 def target():
     return 1
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -390,10 +425,12 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "async_func.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 async def target():
     return 1
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -406,12 +443,14 @@ async def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "nested.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 class Outer:
     class Inner:
         def method(self):
             return 1
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "Outer")
 
@@ -423,11 +462,13 @@ class Outer:
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "lambda_func.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 def target():
     f = lambda x: x + 1
     return f(10)
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -436,15 +477,19 @@ def target():
         symbols = data.get("extracted_symbols", [])
         assert any(s.get("name") == "target" for s in symbols)
 
-    async def test_function_with_docstring_extraction(self, monkeypatch, tmp_path, tool):
+    async def test_function_with_docstring_extraction(
+        self, monkeypatch, tmp_path, tool
+    ):
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "docstring.py"
-        target_file.write_text('''
+        target_file.write_text(
+            '''
 def target():
     """This is a docstring."""
     return 1
-''')
+'''
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -457,14 +502,16 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "multiline.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 def target():
     result = (
         1 + 2 + 3 +
         4 + 5 + 6
     )
     return result
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -477,11 +524,13 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "indented.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 def target():
         x = 1  # Extra indentation
         return x
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 
@@ -573,7 +622,9 @@ class TestLimitsAndExhaustion:
 
         target_file = tmp_path / "large.py"
         # Create a file with many functions to test size handling
-        large_content = "\n".join([f"def func_{i}():\n    return {i}\n" for i in range(100)])
+        large_content = "\n".join(
+            [f"def func_{i}():\n    return {i}\n" for i in range(100)]
+        )
         target_file.write_text(large_content)
 
         result = await _invoke_tool(tool, tmp_path, target_file, "func_0")
@@ -650,11 +701,13 @@ class TestSecurityAndPrivacy:
         secret = "sk_prod_987_REDACT_ME"
 
         target_file = tmp_path / "secret_code.py"
-        target_file.write_text(f"""
+        target_file.write_text(
+            f"""
 def target():
     api_key = "{secret}"
     return api_key
-""")
+"""
+        )
 
         # Request with include_code=True and force error by wrong symbol
         result = await tool.run(
@@ -680,11 +733,13 @@ def target():
         monkeypatch.setattr(mcp_server, "_get_current_tier", lambda: "community")
 
         target_file = tmp_path / "partial.py"
-        target_file.write_text("""
+        target_file.write_text(
+            """
 def target():
     x = 1
 # Missing closing of something, but syntactically valid so far
-""")
+"""
+        )
 
         result = await _invoke_tool(tool, tmp_path, target_file, "target")
 

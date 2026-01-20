@@ -91,7 +91,9 @@ def test_visit_children_and_find_helpers():
     visitor = _Visitor()
     child_a = _FakeNode("alpha", text="a")
     child_b = _FakeNode("beta", text="b")
-    parent = _FakeNode("parent", children=[child_a, child_b], named_children=[child_a, child_b])
+    parent = _FakeNode(
+        "parent", children=[child_a, child_b], named_children=[child_a, child_b]
+    )
 
     assert visitor.visit_children(parent) == []
     assert visitor.find_child_by_type(parent, "beta") is child_b

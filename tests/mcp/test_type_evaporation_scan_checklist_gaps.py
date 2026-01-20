@@ -445,7 +445,10 @@ async def e0():
     warnings = data.get("warnings") or []
     assert not any("truncated" in w.lower() for w in warnings)
     # Should have enterprise-specific fields like api_contract or compliance_report
-    assert data.get("api_contract") is not None or data.get("compliance_report") is not None
+    assert (
+        data.get("api_contract") is not None
+        or data.get("compliance_report") is not None
+    )
 
 
 async def test_type_evaporation_scan_enterprise_performance_at_scale(
@@ -459,14 +462,16 @@ async def test_type_evaporation_scan_enterprise_performance_at_scale(
     # Create 500 virtual files with complex patterns
     frontend_segments = []
     for i in range(500):
-        frontend_segments.append(f"""// FILE: complex{i}.ts
+        frontend_segments.append(
+            f"""// FILE: complex{i}.ts
 interface Data{i} {{ id: string; value: number; }}
 async function process{i}() {{
   const r = await fetch('/api/data{i}');
   const data: Data{i} = await r.json();
   return {{ id: data.id, calculated: data.value * 2 }};
 }}
-""")
+"""
+        )
     frontend_code = "\n".join(frontend_segments)
 
     backend_code = """

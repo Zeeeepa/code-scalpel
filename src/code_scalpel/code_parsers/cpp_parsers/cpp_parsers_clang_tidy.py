@@ -87,7 +87,9 @@ class ClangTidyParser:
     def apply_fixes(self, checks: List[ClangTidyCheck]) -> Dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-fix application")
 
-    def generate_report(self, checks: List[ClangTidyCheck], format: str = "json") -> str:
+    def generate_report(
+        self, checks: List[ClangTidyCheck], format: str = "json"
+    ) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
     def analyze_cpp_standard_compatibility(

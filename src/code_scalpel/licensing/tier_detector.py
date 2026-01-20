@@ -172,7 +172,9 @@ class TierDetector:
         valid_tiers = {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}
 
         if tier_lower in valid_tiers:
-            logger.debug(f"Detected tier '{tier_lower}' from environment variable {self.ENV_VAR}")
+            logger.debug(
+                f"Detected tier '{tier_lower}' from environment variable {self.ENV_VAR}"
+            )
             return TierDetectionResult(
                 tier=tier_lower,
                 source="environment",
@@ -224,7 +226,9 @@ class TierDetector:
                             continue
 
                     if tier_value in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
-                        logger.debug(f"Detected tier '{tier_value}' from config file {config_path}")
+                        logger.debug(
+                            f"Detected tier '{tier_value}' from config file {config_path}"
+                        )
 
                         # Extract additional metadata
                         license_key = config.get("license_key")
@@ -265,7 +269,9 @@ class TierDetector:
         """Check if current tier is ENTERPRISE."""
         return self.get_tier_string() == Tier.ENTERPRISE
 
-    def _detect_from_license_key(self, license_key: str) -> Optional[TierDetectionResult]:
+    def _detect_from_license_key(
+        self, license_key: str
+    ) -> Optional[TierDetectionResult]:
         """
         [20251225_FEATURE] P1_HIGH: Extract tier from license key.
 
@@ -323,7 +329,9 @@ class TierDetector:
 
         return None
 
-    def _validate_and_log_tier(self, result: TierDetectionResult) -> TierDetectionResult:
+    def _validate_and_log_tier(
+        self, result: TierDetectionResult
+    ) -> TierDetectionResult:
         """
         [20251225_FEATURE] P2_MEDIUM: Validate and log tier detection result.
 
@@ -412,7 +420,9 @@ class TierDetector:
             hierarchy_config: Dict mapping org_name -> [parent_orgs]
         """
         self._org_hierarchy.update(hierarchy_config)
-        logger.debug(f"Loaded organization hierarchy for {len(hierarchy_config)} organizations")
+        logger.debug(
+            f"Loaded organization hierarchy for {len(hierarchy_config)} organizations"
+        )
 
     def _load_custom_tiers(self, custom_tiers_config: Dict[str, str]) -> None:
         """
@@ -446,7 +456,9 @@ class TierDetector:
             True if successfully registered, False if invalid
         """
         if standard_tier.lower() not in {Tier.COMMUNITY, Tier.PRO, Tier.ENTERPRISE}:
-            logger.error(f"Cannot register custom tier: invalid standard tier '{standard_tier}'")
+            logger.error(
+                f"Cannot register custom tier: invalid standard tier '{standard_tier}'"
+            )
             return False
 
         self._custom_tiers[custom_name.lower()] = standard_tier.lower()

@@ -27,7 +27,9 @@ class TestCrossPlatformSmoke:
         tool = mcp._tool_manager._tools["update_symbol"]
         assert tool is not None
 
-    @pytest.mark.skip(reason="Requires longer timeout - SCALPEL_ROOT scanning is slow in /tmp")
+    @pytest.mark.skip(
+        reason="Requires longer timeout - SCALPEL_ROOT scanning is slow in /tmp"
+    )
     async def test_minimal_update_returns_envelope_on_platform(
         self, platform, tmp_path, monkeypatch
     ):
@@ -49,9 +51,11 @@ class TestCrossPlatformSmoke:
         tool = mcp._tool_manager._tools["update_symbol"]
 
         sample_file = tmp_path / "platform_test.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
 
         args = {
             "file_path": str(sample_file),
@@ -68,7 +72,9 @@ class TestCrossPlatformSmoke:
         # Check for either envelope fields OR data/error presence.
         has_envelope = "capabilities" in result or "tier" in result
         has_content = "data" in result or "error" in result
-        assert has_envelope or has_content, f"Expected envelope or content, got: {result}"
+        assert (
+            has_envelope or has_content
+        ), f"Expected envelope or content, got: {result}"
         # May succeed or error depending on platform path handling
         assert result.get("error") is not None or result.get("data") is not None
 
@@ -88,7 +94,9 @@ class TestPythonVersionCompatibility:
         # Tool should load on supported Python versions
         assert "update_symbol" in mcp._tool_manager._tools
 
-    @pytest.mark.skip(reason="Requires longer timeout - SCALPEL_ROOT scanning is slow in /tmp")
+    @pytest.mark.skip(
+        reason="Requires longer timeout - SCALPEL_ROOT scanning is slow in /tmp"
+    )
     async def test_envelope_structure_consistent_across_versions(
         self, python_version, tmp_path, monkeypatch
     ):
@@ -111,9 +119,11 @@ class TestPythonVersionCompatibility:
         tool = mcp._tool_manager._tools["update_symbol"]
 
         sample_file = tmp_path / "version_test.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
 
         args = {
             "file_path": str(sample_file),

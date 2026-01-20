@@ -417,8 +417,12 @@ query = sorted(
 async def test_edge_case_many_small_functions(tmp_path: Path):
     """Test handling of code with many small functions."""
     # Create code with 50 small functions
-    funcs_ts = "\n".join([f"const func{i} = () => fetch('/api/{i}');" for i in range(50)])
-    funcs_py = "\n".join([f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)])
+    funcs_ts = "\n".join(
+        [f"const func{i} = () => fetch('/api/{i}');" for i in range(50)]
+    )
+    funcs_py = "\n".join(
+        [f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)]
+    )
 
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(

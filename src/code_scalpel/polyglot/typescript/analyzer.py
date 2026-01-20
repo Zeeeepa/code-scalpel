@@ -105,7 +105,13 @@ class TypeScriptAnalyzer:
 
         # Calculate metrics
         lines = code.split("\n")
-        loc = len([line for line in lines if line.strip() and not line.strip().startswith("//")])
+        loc = len(
+            [
+                line
+                for line in lines
+                if line.strip() and not line.strip().startswith("//")
+            ]
+        )
 
         # Estimate complexity (stub - would use AST for real calculation)
         complexity = self._estimate_complexity(code)
@@ -143,7 +149,9 @@ class TypeScriptAnalyzer:
         """
         path = Path(filepath)
         if not path.exists():
-            return TSAnalysisResult(success=False, errors=[f"File not found: {filepath}"])
+            return TSAnalysisResult(
+                success=False, errors=[f"File not found: {filepath}"]
+            )
 
         code = path.read_text(encoding="utf-8")
         return self.analyze(code, str(path))
@@ -194,7 +202,9 @@ class TypeScriptAnalyzer:
 
         return max_depth
 
-    def _scan_security(self, code: str, parse_result: TSParseResult) -> list[dict[str, Any]]:
+    def _scan_security(
+        self, code: str, parse_result: TSParseResult
+    ) -> list[dict[str, Any]]:
         """
         Scan for common security issues in TypeScript/JavaScript.
 
@@ -356,7 +366,9 @@ def normalize_typescript_class(ts_class: dict[str, Any]) -> NormalizedClass:
         name=ts_class.get("name", "Anonymous"),
         base_classes=[ts_class["extends"]] if ts_class.get("extends") else [],
         interfaces=(
-            ts_class.get("implements", "").split(",") if ts_class.get("implements") else []
+            ts_class.get("implements", "").split(",")
+            if ts_class.get("implements")
+            else []
         ),
         methods=[],  # Would extract from class body
         properties=[],

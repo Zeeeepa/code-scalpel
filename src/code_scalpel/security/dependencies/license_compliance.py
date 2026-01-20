@@ -149,7 +149,9 @@ class LicenseComplianceScanner:
             licenses_found[license_id] = licenses_found.get(license_id, 0) + 1
 
         # Generate recommendations
-        recommendations = self._generate_recommendations(high_risk, unknown, compliance_issues)
+        recommendations = self._generate_recommendations(
+            high_risk, unknown, compliance_issues
+        )
 
         return ComplianceReport(
             success=len(compliance_issues) == 0,
@@ -281,7 +283,9 @@ class LicenseComplianceScanner:
 
         # AGPL incompatible with web services
         if info.license_id == "AGPL-3.0":
-            issues.append("AGPL-3.0 requires source disclosure for network-accessible software")
+            issues.append(
+                "AGPL-3.0 requires source disclosure for network-accessible software"
+            )
 
         # GPL v2/v3 incompatibility
         if info.license_id == "GPL-2.0":
@@ -313,7 +317,9 @@ class LicenseComplianceScanner:
             )
 
         if issues:
-            recommendations.append("Review license compatibility issues with legal counsel")
+            recommendations.append(
+                "Review license compatibility issues with legal counsel"
+            )
         else:
             recommendations.append("✅ No license compliance issues detected")
 

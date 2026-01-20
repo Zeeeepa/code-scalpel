@@ -219,8 +219,11 @@ SECURITY_PATTERNS: list[PatternDefinition] = [
         ast_node_types=(ast.Call,),
         ast_validator=lambda node: (  # type: ignore[union-attr]
             isinstance(cast(ast.Call, node).func, ast.Attribute)
-            and isinstance(cast(ast.Attribute, cast(ast.Call, node).func).value, ast.Name)
-            and cast(ast.Name, cast(ast.Attribute, cast(ast.Call, node).func).value).id == "os"
+            and isinstance(
+                cast(ast.Attribute, cast(ast.Call, node).func).value, ast.Name
+            )
+            and cast(ast.Name, cast(ast.Attribute, cast(ast.Call, node).func).value).id
+            == "os"
             and cast(ast.Attribute, cast(ast.Call, node).func).attr == "system"
         ),
         suggestion="Use subprocess.run() with shell=False and a list of arguments",

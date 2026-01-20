@@ -109,7 +109,9 @@ class ErrorToDiffEngine:
     fix suggestions using AI/ML techniques.
     """
 
-    def analyze_error(self, error_output: str, language: str, source_code: str) -> ErrorAnalysis:
+    def analyze_error(
+        self, error_output: str, language: str, source_code: str
+    ) -> ErrorAnalysis:
         """Analyze error and suggest fixes."""
         # Stub implementation
         return ErrorAnalysis(message=error_output, error_type="unknown", fixes=[])

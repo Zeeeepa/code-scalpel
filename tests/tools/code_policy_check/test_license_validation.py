@@ -44,7 +44,9 @@ class TestBrokenLicenseHandling:
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
 
     @pytest.mark.asyncio
-    async def test_broken_enterprise_license_falls_back_to_community(self, tmp_path, monkeypatch):
+    async def test_broken_enterprise_license_falls_back_to_community(
+        self, tmp_path, monkeypatch
+    ):
         """Broken Enterprise license should also fall back to Community tier."""
         license_dir = Path(__file__).parent.parent.parent / "licenses"
         broken_license = license_dir / "code_scalpel_license_enterprise_test_broken.jwt"
@@ -72,10 +74,14 @@ class TestMissingLicenseHandling:
     """Test handling when no license file is present."""
 
     @pytest.mark.asyncio
-    async def test_missing_license_file_defaults_to_community(self, tmp_path, monkeypatch):
+    async def test_missing_license_file_defaults_to_community(
+        self, tmp_path, monkeypatch
+    ):
         """When license file doesn't exist, should default to Community tier."""
         # Point to non-existent file and disable discovery
-        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt"))
+        monkeypatch.setenv(
+            "CODE_SCALPEL_LICENSE_PATH", str(tmp_path / "nonexistent.jwt")
+        )
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         test_file = tmp_path / "test.py"
@@ -91,7 +97,9 @@ class TestMissingLicenseHandling:
         monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
 
     @pytest.mark.asyncio
-    async def test_empty_license_directory_defaults_to_community(self, tmp_path, monkeypatch):
+    async def test_empty_license_directory_defaults_to_community(
+        self, tmp_path, monkeypatch
+    ):
         """Empty license directory should default to Community tier."""
         empty_dir = tmp_path / "empty_license_dir"
         empty_dir.mkdir()
@@ -116,7 +124,9 @@ class TestLicenseGracefulDegradation:
     """Test graceful degradation when license validation has issues."""
 
     @pytest.mark.asyncio
-    async def test_tool_continues_with_community_tier_on_license_error(self, tmp_path, monkeypatch):
+    async def test_tool_continues_with_community_tier_on_license_error(
+        self, tmp_path, monkeypatch
+    ):
         """Tool should continue working with Community tier even if license validation fails."""
         # Create a malformed JWT file (not valid base64)
         malformed_license = tmp_path / "malformed.jwt"
@@ -126,12 +136,14 @@ class TestLicenseGracefulDegradation:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         # Should not raise exception, should fall back to Community tier
         result = await code_policy_check(paths=[str(test_file)])

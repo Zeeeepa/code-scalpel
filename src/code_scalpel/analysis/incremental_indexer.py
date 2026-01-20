@@ -123,7 +123,8 @@ class IncrementalIndexer:
     def _init_database(self) -> None:
         """Initialize SQLite cache database."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS file_hashes (
                     file_path TEXT PRIMARY KEY,
                     file_hash TEXT NOT NULL,
@@ -131,8 +132,10 @@ class IncrementalIndexer:
                     file_size INTEGER NOT NULL,
                     indexed_at REAL NOT NULL
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS analyses (
                     file_path TEXT PRIMARY KEY,
                     file_hash TEXT NOT NULL,
@@ -141,10 +144,13 @@ class IncrementalIndexer:
                     ttl_seconds INTEGER NOT NULL,
                     FOREIGN KEY(file_path) REFERENCES file_hashes(file_path)
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE INDEX IF NOT EXISTS idx_file_hash ON file_hashes(file_hash)
-            """)
+            """
+            )
             conn.commit()
 
     def _init_redis(self) -> None:
@@ -301,8 +307,12 @@ class IncrementalIndexer:
                 conn.execute("DELETE FROM analyses")
                 conn.execute("DELETE FROM file_hashes")
             else:
-                conn.execute("DELETE FROM analyses WHERE file_path = ?", (str(file_path),))
-                conn.execute("DELETE FROM file_hashes WHERE file_path = ?", (str(file_path),))
+                conn.execute(
+                    "DELETE FROM analyses WHERE file_path = ?", (str(file_path),)
+                )
+                conn.execute(
+                    "DELETE FROM file_hashes WHERE file_path = ?", (str(file_path),)
+                )
             conn.commit()
 
     def _invalidate_analysis(self, file_path: Path) -> None:
@@ -314,8 +324,12 @@ class IncrementalIndexer:
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
         with sqlite3.connect(self.db_path) as conn:
-            cached_files = conn.execute("SELECT COUNT(*) FROM file_hashes").fetchone()[0]
-            cached_analyses = conn.execute("SELECT COUNT(*) FROM analyses").fetchone()[0]
+            cached_files = conn.execute("SELECT COUNT(*) FROM file_hashes").fetchone()[
+                0
+            ]
+            cached_analyses = conn.execute("SELECT COUNT(*) FROM analyses").fetchone()[
+                0
+            ]
             db_size = self.db_path.stat().st_size if self.db_path.exists() else 0
 
         return {

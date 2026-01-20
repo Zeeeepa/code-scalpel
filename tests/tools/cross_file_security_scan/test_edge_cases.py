@@ -62,13 +62,15 @@ class TestEmptyProjects:
 
     def test_single_file_project(self, temp_project):
         """[20260103_TEST] Single-file project without imports."""
-        (temp_project / "main.py").write_text("""
+        (temp_project / "main.py").write_text(
+            """
 def add(a, b):
     return a + b
 
 def multiply(x, y):
     return x * y
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -112,17 +114,21 @@ class TestErrorHandling:
 
     def test_import_error_recovery(self, temp_project):
         """[20260103_TEST] Handles import errors and continues analysis."""
-        (temp_project / "a.py").write_text("""
+        (temp_project / "a.py").write_text(
+            """
 from nonexistent_module import something
 
 def process():
     return something()
-""")
+"""
+        )
 
-        (temp_project / "b.py").write_text("""
+        (temp_project / "b.py").write_text(
+            """
 def safe_operation():
     return 42
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -141,7 +147,8 @@ class TestSafeCode:
 
     def test_no_dangerous_code(self, temp_project):
         """[20260103_TEST] Safe project reports no vulnerabilities."""
-        (temp_project / "utils.py").write_text("""
+        (temp_project / "utils.py").write_text(
+            """
 def add(a, b):
     return a + b
 
@@ -153,7 +160,8 @@ def calculate(values):
     for v in values:
         total = add(total, v)
     return total
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -163,7 +171,8 @@ def calculate(values):
 
     def test_parametrized_queries_safe(self, temp_project):
         """[20260103_TEST] Parametrized queries are not flagged as vulnerable."""
-        (temp_project / "db.py").write_text("""
+        (temp_project / "db.py").write_text(
+            """
 import sqlite3
 
 def get_user_safe(user_id):
@@ -172,16 +181,19 @@ def get_user_safe(user_id):
     # Safe: parameterized query
     cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
     return cursor.fetchone()
-""")
+"""
+        )
 
-        (temp_project / "routes.py").write_text("""
+        (temp_project / "routes.py").write_text(
+            """
 from flask import request
 from db import get_user_safe
 
 def handler():
     user_id = request.args.get('id')
     return get_user_safe(user_id)
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -201,22 +213,26 @@ class TestMermaidGeneration:
 
     def test_generate_mermaid_diagram(self, temp_project):
         """[20260103_TEST] Mermaid diagram generation works."""
-        (temp_project / "routes.py").write_text("""
+        (temp_project / "routes.py").write_text(
+            """
 from flask import request
 from db import execute_query
 
 def get_user():
     user_id = request.args.get('id')
     return execute_query(user_id)
-""")
+"""
+        )
 
-        (temp_project / "db.py").write_text("""
+        (temp_project / "db.py").write_text(
+            """
 import sqlite3
 
 def execute_query(user_id):
     cursor = sqlite3.cursor()
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         tracker.analyze()
@@ -265,11 +281,13 @@ class TestTimeoutHandling:
         """[20260103_TEST] Short timeout prevents excessive analysis."""
         # Create a project with many files to ensure timeout matters
         for i in range(20):
-            (temp_project / f"module_{i}.py").write_text(f"""
+            (temp_project / f"module_{i}.py").write_text(
+                f"""
 def function_{i}(data):
     import os
     os.system(data)
-""")
+"""
+            )
 
         tracker = CrossFileTaintTracker(temp_project)
         # Use very short timeout
@@ -280,11 +298,13 @@ def function_{i}(data):
 
     def test_no_timeout_parameter(self, temp_project):
         """[20260103_TEST] Analysis works with default timeout."""
-        (temp_project / "test.py").write_text("""
+        (temp_project / "test.py").write_text(
+            """
 import os
 def process(data):
     os.system(data)
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         # Call without timeout parameter
@@ -304,30 +324,36 @@ class TestComplexDependencies:
     def test_deep_module_chain(self, temp_project):
         """[20260103_TEST] Handles deep module call chains."""
         # Create a 10-level call chain
-        (temp_project / "level0.py").write_text("""
+        (temp_project / "level0.py").write_text(
+            """
 from flask import request
 from level1 import func1
 
 def handler():
     data = request.args.get('input')
     return func1(data)
-""")
+"""
+        )
 
         for i in range(1, 9):
             next_level = i + 1
-            (temp_project / f"level{i}.py").write_text(f"""
+            (temp_project / f"level{i}.py").write_text(
+                f"""
 from level{next_level} import func{next_level}
 
 def func{i}(data):
     return func{next_level}(data)
-""")
+"""
+            )
 
-        (temp_project / "level9.py").write_text("""
+        (temp_project / "level9.py").write_text(
+            """
 import os
 
 def func9(data):
     os.system(data)
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze(max_depth=20)
@@ -359,10 +385,12 @@ def handler(data):
         (temp_project / "root.py").write_text(root_content)
 
         for i in range(15):
-            (temp_project / f"module_{i}.py").write_text(f"""
+            (temp_project / f"module_{i}.py").write_text(
+                f"""
 def func_{i}(data):
     return data.upper()
-""")
+"""
+            )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -373,7 +401,8 @@ def func_{i}(data):
     def test_circular_import_graph(self, temp_project):
         """[20260103_TEST] Handles circular import patterns."""
         # Create circular: a -> b -> c -> a
-        (temp_project / "a.py").write_text("""
+        (temp_project / "a.py").write_text(
+            """
 try:
     from b import func_b
 except ImportError:
@@ -383,9 +412,11 @@ def func_a(data):
     if func_b:
         return func_b(data)
     return data
-""")
+"""
+        )
 
-        (temp_project / "b.py").write_text("""
+        (temp_project / "b.py").write_text(
+            """
 try:
     from c import func_c
 except ImportError:
@@ -395,9 +426,11 @@ def func_b(data):
     if func_c:
         return func_c(data)
     return data
-""")
+"""
+        )
 
-        (temp_project / "c.py").write_text("""
+        (temp_project / "c.py").write_text(
+            """
 try:
     from a import func_a
 except ImportError:
@@ -407,7 +440,8 @@ def func_c(data):
     if func_a:
         return func_a(data)
     return data
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -426,7 +460,8 @@ class TestSpecialCases:
 
     def test_unicode_identifiers(self, temp_project):
         """[20260103_TEST] Handles unicode in identifiers."""
-        (temp_project / "unicode_test.py").write_text("""
+        (temp_project / "unicode_test.py").write_text(
+            """
 # -*- coding: utf-8 -*-
 
 def σημα(δεδομένα):
@@ -434,7 +469,8 @@ def σημα(δεδομένα):
 
 def hello():
     return σημα("test")
-""")
+"""
+        )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze()
@@ -479,10 +515,12 @@ class TestLargeProjects:
         """[20260103_TEST] Handles projects with many modules."""
         # Create 50 small modules
         for i in range(50):
-            (temp_project / f"mod_{i:03d}.py").write_text(f"""
+            (temp_project / f"mod_{i:03d}.py").write_text(
+                f"""
 def process_{i}(data):
     return data
-""")
+"""
+            )
 
         tracker = CrossFileTaintTracker(temp_project)
         result = tracker.analyze(max_modules=100)

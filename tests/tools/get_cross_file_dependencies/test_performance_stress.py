@@ -37,7 +37,9 @@ class TestLargeProjectAnalysis:
             next_i = i + 1
             mod_file = tmp_path / f"mod_{i}.py"
             import_stmt = (
-                f"from mod_{next_i} import func_{next_i}" if next_i < num_files - 1 else ""
+                f"from mod_{next_i} import func_{next_i}"
+                if next_i < num_files - 1
+                else ""
             )
             mod_file.write_text(f"{import_stmt}\n" f"def func_{i}(): return {i}\n")
 
@@ -85,7 +87,9 @@ class TestLargeProjectAnalysis:
         assert result.transitive_depth <= 1
 
     @pytest.mark.asyncio
-    async def test_pro_tier_handles_large_project_within_limits(self, tmp_path, pro_server):
+    async def test_pro_tier_handles_large_project_within_limits(
+        self, tmp_path, pro_server
+    ):
         """Pro should limit analysis to 500 files max."""
         main_file = self.create_large_project(tmp_path, num_files=600)
 
@@ -188,7 +192,9 @@ class TestDepthLimitEnforcement:
         ), f"Pro should clamp depth to 5, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
-    async def test_enterprise_respects_requested_depth(self, tmp_path, enterprise_server):
+    async def test_enterprise_respects_requested_depth(
+        self, tmp_path, enterprise_server
+    ):
         """Enterprise should respect max_depth parameter up to full graph."""
         main_file = self.create_deep_chain(tmp_path, depth=10)
 
@@ -274,7 +280,9 @@ class TestTimeoutProtection:
 
         # Should either succeed quickly or indicate timeout in error message
         # [20260111_FIX] Check error field for TIMEOUT instead of hasattr
-        is_timeout = result.error and "TIMEOUT" in result.error if result.error else False
+        is_timeout = (
+            result.error and "TIMEOUT" in result.error if result.error else False
+        )
         assert (
             result.success is True or is_timeout
         ), f"Expected success or timeout, got error: {result.error}"
@@ -296,7 +304,9 @@ class TestMemoryEfficiency:
         return main_file
 
     @pytest.mark.asyncio
-    async def test_no_memory_explosion_on_large_project(self, tmp_path, enterprise_server):
+    async def test_no_memory_explosion_on_large_project(
+        self, tmp_path, enterprise_server
+    ):
         """Large project analysis should not cause memory explosion."""
         main_file = self.create_moderately_large_project(tmp_path, num_files=200)
 
@@ -389,7 +399,9 @@ class TestPerformanceRegression:
 
         assert result.success is True
         # Community should complete in <5 seconds for 100 files
-        assert elapsed < 5.0, f"Community tier took {elapsed:.2f}s for 100 files, expected <5s"
+        assert (
+            elapsed < 5.0
+        ), f"Community tier took {elapsed:.2f}s for 100 files, expected <5s"
 
         # Provide feedback on actual performance
         print(f"\nCommunity tier performance: {elapsed:.3f}s for 100 files")

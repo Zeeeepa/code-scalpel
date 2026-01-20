@@ -116,7 +116,9 @@ class TestAutonomyEngineIntegration:
         self, temp_project_root, default_config_file
     ):
         """Test engine initializes correctly with default config."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Verify config loaded correctly
         assert engine.config.change_budgeting.max_lines_per_change == 500
@@ -132,7 +134,9 @@ class TestAutonomyEngineIntegration:
         self, temp_project_root, restrictive_config_file
     ):
         """Test engine respects restrictive config limits."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=restrictive_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=restrictive_config_file
+        )
 
         # Verify restrictive limits
         assert engine.config.change_budgeting.max_lines_per_change == 100
@@ -143,9 +147,13 @@ class TestAutonomyEngineIntegration:
         # Verify components use restrictive limits
         assert engine.fix_loop.max_attempts == 3
 
-    def test_change_allowed_within_standard_limits(self, temp_project_root, default_config_file):
+    def test_change_allowed_within_standard_limits(
+        self, temp_project_root, default_config_file
+    ):
         """Test that changes within standard limits are allowed."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Change to non-critical file within limits
         result = engine.check_change_allowed(
@@ -156,9 +164,13 @@ class TestAutonomyEngineIntegration:
         assert not result.critical_path_violation
         assert result.max_lines_allowed == 500  # Standard limit
 
-    def test_change_blocked_exceeds_standard_limits(self, temp_project_root, default_config_file):
+    def test_change_blocked_exceeds_standard_limits(
+        self, temp_project_root, default_config_file
+    ):
         """Test that changes exceeding standard limits are blocked."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Change exceeds max_lines_per_change
         result = engine.check_change_allowed(
@@ -171,12 +183,16 @@ class TestAutonomyEngineIntegration:
 
     def test_critical_path_detection(self, temp_project_root, default_config_file):
         """Test that critical paths are detected correctly."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Change to critical path file within critical path limits
         result = engine.check_change_allowed(
             files=["src/security/auth.py"],
-            lines_changed={"src/security/auth.py": 30},  # Within 50 line critical path limit
+            lines_changed={
+                "src/security/auth.py": 30
+            },  # Within 50 line critical path limit
         )
 
         # Should be blocked due to require_approval_for_security_changes
@@ -186,7 +202,9 @@ class TestAutonomyEngineIntegration:
 
     def test_critical_path_exceeds_limits(self, temp_project_root, default_config_file):
         """Test that critical path changes exceeding limits are blocked."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Change to critical path file exceeds critical path limits
         result = engine.check_change_allowed(
@@ -201,7 +219,9 @@ class TestAutonomyEngineIntegration:
 
     def test_multiple_files_within_limits(self, temp_project_root, default_config_file):
         """Test multiple file changes within limits."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # 5 files, each with small changes
         result = engine.check_change_allowed(
@@ -224,9 +244,13 @@ class TestAutonomyEngineIntegration:
         assert result.allowed
         assert result.max_files_allowed == 10
 
-    def test_multiple_files_exceeds_file_limit(self, temp_project_root, restrictive_config_file):
+    def test_multiple_files_exceeds_file_limit(
+        self, temp_project_root, restrictive_config_file
+    ):
         """Test that exceeding file limit blocks change."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=restrictive_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=restrictive_config_file
+        )
 
         # 5 files, but restrictive config allows only 3
         result = engine.check_change_allowed(
@@ -257,7 +281,9 @@ class TestAutonomyEngineIntegration:
         self, temp_project_root, default_config_file
     ):
         """Test BlastRadiusCalculator critical path pattern matching."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Test exact prefix matching
         is_crit, reason, max_lines = engine.blast_radius.check_critical_path_impact(
@@ -275,9 +301,13 @@ class TestAutonomyEngineIntegration:
         assert not is_crit
         assert max_lines == 500  # Standard limit
 
-    def test_config_summary_returns_all_settings(self, temp_project_root, default_config_file):
+    def test_config_summary_returns_all_settings(
+        self, temp_project_root, default_config_file
+    ):
         """Test that config summary includes all key settings."""
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         summary = engine.get_config_summary()
 
@@ -303,7 +333,9 @@ class TestAutonomyEngineIntegration:
         monkeypatch.setenv("SCALPEL_CHANGE_BUDGET_MAX_LINES", "1000")
         monkeypatch.setenv("SCALPEL_MAX_AUTONOMOUS_ITERATIONS", "20")
 
-        engine = AutonomyEngine(project_root=temp_project_root, config_path=default_config_file)
+        engine = AutonomyEngine(
+            project_root=temp_project_root, config_path=default_config_file
+        )
 
         # Verify overrides applied
         assert engine.config.change_budgeting.max_lines_per_change == 1000

@@ -90,7 +90,8 @@ class IncrementalIndex:
     def _init_database(self) -> None:
         """Create database schema if not exists."""
         with self._get_connection() as conn:
-            conn.executescript("""
+            conn.executescript(
+                """
                 CREATE TABLE IF NOT EXISTS schema_version (
                     version INTEGER PRIMARY KEY
                 );
@@ -114,7 +115,8 @@ class IncrementalIndex:
                 
                 CREATE INDEX IF NOT EXISTS idx_content_hash ON file_analysis(content_hash);
                 CREATE INDEX IF NOT EXISTS idx_timestamp ON file_analysis(analysis_timestamp);
-            """)
+            """
+            )
 
             # Check/set schema version
             cursor = conn.execute("SELECT version FROM schema_version LIMIT 1")
@@ -128,7 +130,9 @@ class IncrementalIndex:
                 # Handle schema migration if needed
                 self._migrate_schema(conn, row[0], self.SCHEMA_VERSION)
 
-    def _migrate_schema(self, conn: sqlite3.Connection, from_ver: int, to_ver: int) -> None:
+    def _migrate_schema(
+        self, conn: sqlite3.Connection, from_ver: int, to_ver: int
+    ) -> None:
         """Migrate database schema between versions."""
         # For now, just update the version - add migrations as needed
         conn.execute("UPDATE schema_version SET version = ?", (to_ver,))
@@ -149,7 +153,11 @@ class IncrementalIndex:
 
     def compute_file_hash(self, file_path: str | Path) -> str:
         """Compute content hash for a file."""
-        full_path = self.root / file_path if not Path(file_path).is_absolute() else Path(file_path)
+        full_path = (
+            self.root / file_path
+            if not Path(file_path).is_absolute()
+            else Path(file_path)
+        )
 
         hasher = hashlib.sha256()
         try:
@@ -268,7 +276,9 @@ class IncrementalIndex:
             cursor = conn.execute("SELECT COUNT(*) FROM file_analysis")
             total_cached = cursor.fetchone()[0]
 
-            cursor = conn.execute("SELECT value FROM crawl_metadata WHERE key = 'last_full_crawl'")
+            cursor = conn.execute(
+                "SELECT value FROM crawl_metadata WHERE key = 'last_full_crawl'"
+            )
             row = cursor.fetchone()
             last_crawl = float(row["value"]) if row else None
 
@@ -301,6 +311,8 @@ class IncrementalIndex:
     def get_metadata(self, key: str) -> Optional[str]:
         """Get stored metadata."""
         with self._get_connection() as conn:
-            cursor = conn.execute("SELECT value FROM crawl_metadata WHERE key = ?", (key,))
+            cursor = conn.execute(
+                "SELECT value FROM crawl_metadata WHERE key = ?", (key,)
+            )
             row = cursor.fetchone()
             return row["value"] if row else None

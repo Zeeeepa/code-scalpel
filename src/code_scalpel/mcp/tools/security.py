@@ -109,7 +109,9 @@ async def scan_dependencies(
     caps = get_tool_capabilities("scan_dependencies", tier)
 
     if ctx:
-        await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
+        await ctx.report_progress(
+            0, 100, f"Scanning dependencies in {resolved_path}..."
+        )
 
     result = await asyncio.to_thread(
         _scan_dependencies_sync,
@@ -124,7 +126,9 @@ async def scan_dependencies(
 
     if ctx:
         vuln_count = result.total_vulnerabilities
-        await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
+        await ctx.report_progress(
+            100, 100, f"Scan complete: {vuln_count} vulnerabilities found"
+        )
 
     return result
 

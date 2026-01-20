@@ -55,7 +55,10 @@ def test_detect_main_function_variants():
     generator = TestGenerator()
 
     # SyntaxError path returns default target
-    assert generator._detect_main_function("def broken(:", language="python") == "target_function"
+    assert (
+        generator._detect_main_function("def broken(:", language="python")
+        == "target_function"
+    )
 
     # JavaScript arrow function detection
     js_code = "const calc = async () => 42;"
@@ -148,7 +151,10 @@ def test_to_python_value_conversions_and_coercions():
             return self.flag
 
     assert generator._to_python_value(LongMock(3), expected_type="float") == 3.0
-    assert generator._to_python_value(FractionMock(Fraction(3, 2)), expected_type="int") == 1
+    assert (
+        generator._to_python_value(FractionMock(Fraction(3, 2)), expected_type="int")
+        == 1
+    )
     assert generator._to_python_value(StringMock("hello")) == "hello"
     assert generator._to_python_value(BoolMock(True)) is True
     assert generator._to_python_value(7, expected_type="str") == "7"
@@ -161,7 +167,9 @@ def test_to_python_value_conversions_and_coercions():
 def test_analyze_return_paths_and_ast_value_helpers():
     generator = TestGenerator()
 
-    assert generator._analyze_return_paths("function foo() {}", "foo", "javascript") == {}
+    assert (
+        generator._analyze_return_paths("function foo() {}", "foo", "javascript") == {}
+    )
 
     assert generator._ast_value_to_python(ast.Constant(value=5)) == 5
     assert generator._ast_value_to_python(ast.Name(id="True")) is True

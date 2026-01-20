@@ -100,7 +100,9 @@ class TamperResistance:
             )
 
             # Fail CLOSED - deny all operations
-            raise TamperDetectedError("Policy file integrity check failed. All operations denied.")
+            raise TamperDetectedError(
+                "Policy file integrity check failed. All operations denied."
+            )
 
         return True
 
@@ -231,7 +233,9 @@ class TamperResistance:
                 severity="HIGH",
                 details={"operation": operation.type, "override_id": override_id},
             )
-            return OverrideDecision(approved=False, reason="Override code cannot be reused")
+            return OverrideDecision(
+                approved=False, reason="Override code cannot be reused"
+            )
 
         # Mark override as used
         self._used_override_ids.add(override_id)
@@ -337,9 +341,9 @@ class TamperResistance:
         secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
 
         # Generate expected code
-        expected_code = hmac.new(secret.encode(), challenge.encode(), hashlib.sha256).hexdigest()[
-            :8
-        ]
+        expected_code = hmac.new(
+            secret.encode(), challenge.encode(), hashlib.sha256
+        ).hexdigest()[:8]
 
         return code == expected_code
 

@@ -214,7 +214,9 @@ class CodeMetrics:
     # Issues
     magic_numbers: list[tuple[int, str]] = field(default_factory=list)  # (line, value)
     empty_methods: list[str] = field(default_factory=list)
-    deeply_nested: list[tuple[str, int]] = field(default_factory=list)  # (method, depth)
+    deeply_nested: list[tuple[str, int]] = field(
+        default_factory=list
+    )  # (method, depth)
 
 
 class JavaParser(BaseParser):
@@ -316,7 +318,9 @@ class JavaParser(BaseParser):
         self._current_class: Optional[str] = None
         self._current_method: Optional[str] = None
 
-    def _preprocess_java_code(self, code: str, config: Optional[PreprocessorConfig]) -> str:
+    def _preprocess_java_code(
+        self, code: str, config: Optional[PreprocessorConfig]
+    ) -> str:
         """
         Preprocess the Java code.
 
@@ -325,7 +329,9 @@ class JavaParser(BaseParser):
         :return: The preprocessed code.
         """
         if config is None:
-            config = PreprocessorConfig(remove_comments=False, normalize_whitespace=False)
+            config = PreprocessorConfig(
+                remove_comments=False, normalize_whitespace=False
+            )
         if config.remove_comments:
             code = self._remove_comments(code, Language.JAVA)
         if config.normalize_whitespace:
@@ -433,7 +439,9 @@ class JavaParser(BaseParser):
             ):
                 complexity += 1
             if isinstance(child, javalang.ast.Node):
-                complexity += self._calculate_cyclomatic_complexity(child) - 1  # Subtract base
+                complexity += (
+                    self._calculate_cyclomatic_complexity(child) - 1
+                )  # Subtract base
         return complexity
 
     def _check_java_code(self, ast: JavaCompilationUnit) -> list[str]:
@@ -485,13 +493,17 @@ class JavaParser(BaseParser):
             if parent:
                 try:
                     parent_children = self.get_children(parent)
-                    node_index = parent_children.index(node) if node in parent_children else -1
+                    node_index = (
+                        parent_children.index(node) if node in parent_children else -1
+                    )
                     if node_index >= 0 and any(
                         isinstance(n, javalang.tree.Statement)
                         for n in parent_children[node_index + 1 :]
                     ):
                         line = getattr(getattr(node, "position", None), "line", "?")
-                        warnings.append(f"Unreachable code after return statement at line {line}")
+                        warnings.append(
+                            f"Unreachable code after return statement at line {line}"
+                        )
                 except (ValueError, AttributeError):
                     pass
 
@@ -508,7 +520,9 @@ class JavaParser(BaseParser):
         """
         children: list[Any] = []
         if isinstance(node, list):
-            children.extend([item for item in node if isinstance(item, javalang.ast.Node)])
+            children.extend(
+                [item for item in node if isinstance(item, javalang.ast.Node)]
+            )
         elif isinstance(node, dict):
             children.extend([v for k, v in node.items() if isinstance(v, (dict, list))])
         elif isinstance(node, javalang.ast.Node):
@@ -583,7 +597,9 @@ class JavaParser(BaseParser):
             complexity += 1
 
         # Continue and break in unusual places
-        if isinstance(node, (javalang.tree.BreakStatement, javalang.tree.ContinueStatement)):
+        if isinstance(
+            node, (javalang.tree.BreakStatement, javalang.tree.ContinueStatement)
+        ):
             # Only add if breaking to a label
             label = getattr(node, "label", None)
             if label:
@@ -635,7 +651,9 @@ class JavaParser(BaseParser):
         elif isinstance(node, javalang.tree.Assignment):
             operators["="] += 1
 
-        elif isinstance(node, (javalang.tree.MemberReference, javalang.tree.MethodInvocation)):
+        elif isinstance(
+            node, (javalang.tree.MemberReference, javalang.tree.MethodInvocation)
+        ):
             operators["."] += 1
 
         elif isinstance(node, javalang.tree.ArraySelector):
@@ -701,7 +719,9 @@ class JavaParser(BaseParser):
 
     # ==================== METHOD CALL GRAPH ====================
 
-    def _build_method_call_graph(self, ast: JavaCompilationUnit) -> list[MethodCallInfo]:
+    def _build_method_call_graph(
+        self, ast: JavaCompilationUnit
+    ) -> list[MethodCallInfo]:
         """
         Build a method call graph from the AST.
 
@@ -734,7 +754,11 @@ class JavaParser(BaseParser):
             if self._current_class and self._current_method:
                 callee_class = getattr(node, "qualifier", None)
                 member = getattr(node, "member", None)
-                line = getattr(getattr(node, "position", None), "line", 0) if node.position else 0
+                line = (
+                    getattr(getattr(node, "position", None), "line", 0)
+                    if node.position
+                    else 0
+                )
 
                 if member:
                     self._method_calls.append(
@@ -756,7 +780,9 @@ class JavaParser(BaseParser):
 
     # ==================== TYPE HIERARCHY ====================
 
-    def _extract_type_hierarchy(self, ast: JavaCompilationUnit) -> dict[str, TypeHierarchy]:
+    def _extract_type_hierarchy(
+        self, ast: JavaCompilationUnit
+    ) -> dict[str, TypeHierarchy]:
         """
         Extract type hierarchy (inheritance relationships) from AST.
 
@@ -809,7 +835,9 @@ class JavaParser(BaseParser):
 
     # ==================== DESIGN PATTERN DETECTION ====================
 
-    def _detect_design_patterns(self, ast: JavaCompilationUnit) -> list[DesignPatternMatch]:
+    def _detect_design_patterns(
+        self, ast: JavaCompilationUnit
+    ) -> list[DesignPatternMatch]:
         """
         Detect common design patterns in the code.
 
@@ -836,7 +864,9 @@ class JavaParser(BaseParser):
 
         return patterns
 
-    def _check_singleton_pattern(self, class_node: JavaNode) -> Optional[DesignPatternMatch]:
+    def _check_singleton_pattern(
+        self, class_node: JavaNode
+    ) -> Optional[DesignPatternMatch]:
         """
         Check if class implements Singleton pattern.
 
@@ -900,7 +930,9 @@ class JavaParser(BaseParser):
             )
         return None
 
-    def _check_builder_pattern(self, class_node: JavaNode) -> Optional[DesignPatternMatch]:
+    def _check_builder_pattern(
+        self, class_node: JavaNode
+    ) -> Optional[DesignPatternMatch]:
         """
         Check if class implements Builder pattern.
 
@@ -949,7 +981,9 @@ class JavaParser(BaseParser):
             )
         return None
 
-    def _check_factory_pattern(self, class_node: JavaNode) -> Optional[DesignPatternMatch]:
+    def _check_factory_pattern(
+        self, class_node: JavaNode
+    ) -> Optional[DesignPatternMatch]:
         """
         Check if class implements Factory pattern.
 
@@ -1072,7 +1106,9 @@ class JavaParser(BaseParser):
 
         return warnings
 
-    def _find_shared_field_access(self, node: JavaNode, shared_fields: set[str]) -> set[str]:
+    def _find_shared_field_access(
+        self, node: JavaNode, shared_fields: set[str]
+    ) -> set[str]:
         """Find accesses to shared fields in a method."""
         accessed: set[str] = set()
 
@@ -1089,7 +1125,9 @@ class JavaParser(BaseParser):
 
     # ==================== SECURITY ANALYSIS ====================
 
-    def _detect_security_issues(self, ast: JavaCompilationUnit, code: str) -> list[SecurityIssue]:
+    def _detect_security_issues(
+        self, ast: JavaCompilationUnit, code: str
+    ) -> list[SecurityIssue]:
         """
         Detect potential security vulnerabilities.
 
@@ -1107,7 +1145,9 @@ class JavaParser(BaseParser):
 
         return issues
 
-    def _detect_sql_injection(self, ast: JavaCompilationUnit, code: str) -> list[SecurityIssue]:
+    def _detect_sql_injection(
+        self, ast: JavaCompilationUnit, code: str
+    ) -> list[SecurityIssue]:
         """Detect potential SQL injection vulnerabilities."""
         issues: list[SecurityIssue] = []
 
@@ -1155,7 +1195,9 @@ class JavaParser(BaseParser):
 
         return issues
 
-    def _detect_hardcoded_secrets(self, ast: JavaCompilationUnit) -> list[SecurityIssue]:
+    def _detect_hardcoded_secrets(
+        self, ast: JavaCompilationUnit
+    ) -> list[SecurityIssue]:
         """Detect hardcoded passwords, API keys, etc."""
         issues: list[SecurityIssue] = []
         secret_patterns = (
@@ -1255,7 +1297,12 @@ class JavaParser(BaseParser):
                 # Check if it's a number
                 try:
                     # Handle integer and float literals
-                    if value.replace(".", "").replace("-", "").replace("_", "").isdigit():
+                    if (
+                        value.replace(".", "")
+                        .replace("-", "")
+                        .replace("_", "")
+                        .isdigit()
+                    ):
                         # Normalize: remove underscores, L/l suffix, etc.
                         normalized = value.replace("_", "").rstrip("LlFfDd")
 
@@ -1371,7 +1418,9 @@ class JavaParser(BaseParser):
 
     # ==================== TRY-CATCH PATTERN EXTRACTION ====================
 
-    def _extract_try_catch_patterns(self, ast: JavaCompilationUnit) -> list[TryCatchPattern]:
+    def _extract_try_catch_patterns(
+        self, ast: JavaCompilationUnit
+    ) -> list[TryCatchPattern]:
         """
         Extract try-catch-finally patterns for error handling analysis.
 
@@ -1394,7 +1443,9 @@ class JavaParser(BaseParser):
                         exc_types = getattr(parameter, "types", None)
                         if exc_types:
                             for exc_type in exc_types:
-                                exc_name = getattr(exc_type, "name", None) or str(exc_type)
+                                exc_name = getattr(exc_type, "name", None) or str(
+                                    exc_type
+                                )
                                 caught_exceptions.append(exc_name)
                         else:
                             exc_type = getattr(parameter, "type", None)

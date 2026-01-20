@@ -49,7 +49,9 @@ class TestPDGVisualizer:
 
     @patch("builtins.open", new_callable=MagicMock)
     @patch("code_scalpel.pdg_tools.visualizer.Digraph")
-    def test_create_comparison_view(self, mock_digraph, mock_open, visualizer, simple_pdg):
+    def test_create_comparison_view(
+        self, mock_digraph, mock_open, visualizer, simple_pdg
+    ):
         mock_file = MagicMock()
         mock_open.return_value.__enter__.return_value = mock_file
 

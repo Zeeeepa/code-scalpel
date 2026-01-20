@@ -23,11 +23,11 @@ def build(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
             f"Location: {e.location}\\n"
             f"Suggestion: {e.suggestion}"
         ) from e
-    
+
     # Track if code was modified
     if report.was_sanitized:
         self._sanitization_report = report
-    
+
     self.visit(tree)
     return self.graph, self.call_graph
 ```

@@ -62,6 +62,7 @@ def auto_init_config_dir(
         # Best-effort: do not block server startup if initialization fails.
         return None
 
+
 # [20251230_FEATURE] Invisible governance enforcement.
 # Once an organization defines `.code-scalpel` rulesets, the MCP server should
 # enforce them automatically without requiring users to remember to run a tool.
@@ -83,7 +84,9 @@ def _emit_governance_audit_event(policy_dir: Path, event: dict[str, Any]) -> Non
         audit_path = policy_dir / "audit.jsonl"
         payload = dict(event)
         payload.setdefault("ts", time.time())
-        payload.setdefault("iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+        payload.setdefault(
+            "iso_utc", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        )
         with audit_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             f.write("\n")
@@ -158,7 +161,9 @@ def _is_budgeted_write_tool(tool_id: str) -> bool:
     return tool_id in {"update_symbol", "rename_symbol"}
 
 
-def _diff_added_removed_lines(old_code: str, new_code: str) -> tuple[list[str], list[str]]:
+def _diff_added_removed_lines(
+    old_code: str, new_code: str
+) -> tuple[list[str], list[str]]:
     """Compute added/removed lines for budget accounting.
 
     [20251231_FEATURE] Used by governance budget preflight.
@@ -279,7 +284,9 @@ def _evaluate_change_budget_for_write_tool(
         return True, {"skipped": True, "reason": f"Path resolve failed: {e}"}
 
     budget_config = load_budget_config(str(policy_dir / "budget.yaml"))
-    default_budget = budget_config.get("default", {}) if isinstance(budget_config, dict) else {}
+    default_budget = (
+        budget_config.get("default", {}) if isinstance(budget_config, dict) else {}
+    )
     budget = ChangeBudget(default_budget)
 
     try:
@@ -343,7 +350,9 @@ def _evaluate_change_budget_for_write_tool(
                             "reason": "Invalid method target_name",
                         }
                     class_name, method_name = target_name.rsplit(".", 1)
-                    patch_result = patcher.update_method(class_name, method_name, str(new_code))
+                    patch_result = patcher.update_method(
+                        class_name, method_name, str(new_code)
+                    )
                     if (
                         not patch_result.success
                         and "not found" in (patch_result.error or "").lower()
@@ -485,7 +494,11 @@ def _parse_governance_features_env() -> set[str] | None:
 
 def _compute_effective_governance_features(tier: str) -> tuple[set[str], list[str]]:
     requested = _parse_governance_features_env()
-    effective = requested if requested is not None else _default_governance_features_for_tier(tier)
+    effective = (
+        requested
+        if requested is not None
+        else _default_governance_features_for_tier(tier)
+    )
 
     supported = _supported_governance_features_for_tier(tier)
     unsupported = sorted(effective - supported)
@@ -563,7 +576,9 @@ def _maybe_enforce_governance_before_tool(
 
     # [20251231_FEATURE] Optional optimization: apply governance preflight only
     # to write-capable tools (keeps Community/Pro read tools low overhead).
-    write_tools_only = _parse_bool_env("SCALPEL_GOVERNANCE_WRITE_TOOLS_ONLY", default=False)
+    write_tools_only = _parse_bool_env(
+        "SCALPEL_GOVERNANCE_WRITE_TOOLS_ONLY", default=False
+    )
 
     server = import_module("code_scalpel.mcp.server")
     policy_dir = server._resolve_policy_dir()
@@ -605,7 +620,9 @@ def _maybe_enforce_governance_before_tool(
             manifest_source = "file"
 
         fingerprint = _policy_state_fingerprint(policy_dir)
-        cache_key = f"tier={tier};dir={policy_dir};source={manifest_source};{fingerprint}"
+        cache_key = (
+            f"tier={tier};dir={policy_dir};source={manifest_source};{fingerprint}"
+        )
         cached = _GOVERNANCE_VERIFY_CACHE.get(cache_key)
         if cached is not None:
             verified = cached
@@ -631,7 +648,10 @@ def _maybe_enforce_governance_before_tool(
         )
 
         if not getattr(verified, "success", False):
-            err = getattr(verified, "error", None) or "Policy integrity verification failed"
+            err = (
+                getattr(verified, "error", None)
+                or "Policy integrity verification failed"
+            )
             if enforcement == "warn":
                 warnings.append(
                     "Governance WARN: policy integrity check failed; proceeding due to break-glass."

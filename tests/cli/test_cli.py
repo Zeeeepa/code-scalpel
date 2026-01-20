@@ -27,7 +27,9 @@ class TestCLIBasics:
             text=True,
         )
         assert result.returncode == 0
-        assert "code-scalpel" in result.stdout.lower() or "usage" in result.stdout.lower()
+        assert (
+            "code-scalpel" in result.stdout.lower() or "usage" in result.stdout.lower()
+        )
         assert "analyze" in result.stdout
         assert "server" in result.stdout
         assert "version" in result.stdout
@@ -156,7 +158,11 @@ class TestCLIAnalyze:
         # Should handle gracefully, not crash
         # May return 0 with error message or non-zero
         combined = result.stdout + result.stderr
-        assert result.returncode != 0 or "error" in combined.lower() or "syntax" in combined.lower()
+        assert (
+            result.returncode != 0
+            or "error" in combined.lower()
+            or "syntax" in combined.lower()
+        )
 
 
 class TestCLIServer:
@@ -195,7 +201,11 @@ class TestCLIEdgeCases:
         )
         # Should show error or usage
         combined = result.stdout + result.stderr
-        assert result.returncode != 0 or "error" in combined.lower() or "usage" in combined.lower()
+        assert (
+            result.returncode != 0
+            or "error" in combined.lower()
+            or "usage" in combined.lower()
+        )
 
 
 class TestCLILicenseInstall:
@@ -282,7 +292,9 @@ class TestCLILicenseInstall:
 
 # [20251214_TEST] In-process coverage for cli helpers without subprocess overhead.
 class TestCLIInProcess:
-    def test_analyze_file_defaults_to_python_for_unknown_extension(self, tmp_path, monkeypatch):
+    def test_analyze_file_defaults_to_python_for_unknown_extension(
+        self, tmp_path, monkeypatch
+    ):
         from code_scalpel import cli
 
         test_file = tmp_path / "sample.unknown"
@@ -290,7 +302,9 @@ class TestCLIInProcess:
 
         captured = {}
 
-        def fake_analyze_code(code: str, output_format: str, source: str, language: str):
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
             captured["code"] = code
             captured["source"] = source
             captured["language"] = language
@@ -298,7 +312,9 @@ class TestCLIInProcess:
 
         monkeypatch.setattr(cli, "analyze_code", fake_analyze_code)
 
-        exit_code = cli.analyze_file(str(test_file), output_format="json", language=None)
+        exit_code = cli.analyze_file(
+            str(test_file), output_format="json", language=None
+        )
 
         assert exit_code == 0
         assert captured["language"] == "python"
@@ -319,7 +335,9 @@ class TestCLIInProcess:
 
         captured = {}
 
-        def fake_analyze_code(code: str, output_format: str, source: str, language: str):
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
             captured["language"] = language
             return 0
 
@@ -336,7 +354,9 @@ class TestCLIInProcess:
 
         languages_seen = []
 
-        def fake_analyze_code(code: str, output_format: str, source: str, language: str):
+        def fake_analyze_code(
+            code: str, output_format: str, source: str, language: str
+        ):
             languages_seen.append(language)
             return 0
 
@@ -349,7 +369,9 @@ class TestCLIInProcess:
         java_file.write_text("class Main {}")
 
         assert cli.analyze_file(str(js_file), output_format="text", language=None) == 0
-        assert cli.analyze_file(str(java_file), output_format="text", language=None) == 0
+        assert (
+            cli.analyze_file(str(java_file), output_format="text", language=None) == 0
+        )
 
         assert languages_seen == ["javascript", "java"]
 
@@ -481,7 +503,9 @@ class TestCLIInProcess:
         class DummyResult:
             metrics = DummyMetrics()
             dead_code = []
-            security_issues = [{"type": "SQL Injection", "description": "unescaped input"}]
+            security_issues = [
+                {"type": "SQL Injection", "description": "unescaped input"}
+            ]
             refactor_suggestions = []
             errors = []
 
@@ -532,7 +556,9 @@ class TestCLIInProcess:
 
         monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
 
-        exit_code = cli._analyze_javascript("code", output_format="json", source="inline")
+        exit_code = cli._analyze_javascript(
+            "code", output_format="json", source="inline"
+        )
         captured = capsys.readouterr().out
 
         assert exit_code == 0
@@ -565,7 +591,9 @@ class TestCLIInProcess:
 
         monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
 
-        exit_code = cli._analyze_javascript("code", output_format="text", source="inline")
+        exit_code = cli._analyze_javascript(
+            "code", output_format="text", source="inline"
+        )
         output = capsys.readouterr().out
 
         assert exit_code == 0
@@ -582,7 +610,9 @@ class TestCLIInProcess:
 
         monkeypatch.setattr(symbolic_tools, "SymbolicAnalyzer", lambda: DummyAnalyzer())
 
-        exit_code = cli._analyze_javascript("code", output_format="text", source="inline")
+        exit_code = cli._analyze_javascript(
+            "code", output_format="text", source="inline"
+        )
         output = capsys.readouterr().err
 
         assert exit_code == 1
@@ -605,13 +635,15 @@ class TestCLIInProcess:
     def test_analyze_file_with_dead_code(self, tmp_path):
         """Test analyzing a file with dead code for detection."""
         test_file = tmp_path / "dead_code.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def unused_function():
     return "never called"
 
 def main():
     return 42
-""")
+"""
+        )
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],
@@ -750,7 +782,9 @@ def main():
             vulnerabilities = [DummyVuln()]
 
         fake_module = SimpleNamespace(analyze_security=lambda code: DummyResult())
-        monkeypatch.setitem(sys.modules, "code_scalpel.symbolic_execution_tools", fake_module)
+        monkeypatch.setitem(
+            sys.modules, "code_scalpel.symbolic_execution_tools", fake_module
+        )
 
         exit_code = cli.scan_code_security("print('hi')", output_format="json")
         captured = capsys.readouterr().out
@@ -883,7 +917,8 @@ def main():
     def test_analyze_complex_code(self, tmp_path):
         """Test analyzing more complex code with all features."""
         test_file = tmp_path / "complex.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 import os
 
 class Calculator:
@@ -905,7 +940,8 @@ def main():
     calc = Calculator()
     calc.add(5).add(10)
     return calc.get_value()
-""")
+"""
+        )
 
         result = subprocess.run(
             [sys.executable, "-m", "code_scalpel.cli", "analyze", str(test_file)],
@@ -915,7 +951,9 @@ def main():
         assert result.returncode == 0
         # Should detect classes and functions
         assert (
-            "Classes" in result.stdout or "Functions" in result.stdout or "Metrics" in result.stdout
+            "Classes" in result.stdout
+            or "Functions" in result.stdout
+            or "Metrics" in result.stdout
         )
 
 
@@ -1114,7 +1152,9 @@ class TestCLIDirectImport:
         assert exit_code == 0
         assert calls == {"host": "127.0.0.1", "port": 1234, "debug": False}
 
-    def test_start_mcp_server_http_allows_lan_host_rewrite(self, capsys, monkeypatch, tmp_path):
+    def test_start_mcp_server_http_allows_lan_host_rewrite(
+        self, capsys, monkeypatch, tmp_path
+    ):
         from code_scalpel import cli
 
         calls = {}

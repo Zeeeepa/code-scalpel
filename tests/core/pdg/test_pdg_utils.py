@@ -35,7 +35,9 @@ class TestPDGUtils:
         assert isinstance(info, NodeInfo)
         assert info.id == "3"
         assert info.type == "assign"
-        assert len(info.dependencies) == 3  # 1->3 (data), 2->3 (data), func->3 (control)
+        assert (
+            len(info.dependencies) == 3
+        )  # 1->3 (data), 2->3 (data), func->3 (control)
         assert len(info.dependents) == 0
         assert info.scope == "function:my_func"
 

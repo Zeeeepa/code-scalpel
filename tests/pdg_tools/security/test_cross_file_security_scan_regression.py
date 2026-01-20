@@ -20,7 +20,8 @@ def test_cross_file_sql_injection_flow_detected(tmp_path: Path):
     pkg.mkdir()
     (pkg / "__init__.py").write_text("# test package\n")
 
-    (pkg / "routes.py").write_text("""\
+    (pkg / "routes.py").write_text(
+        """\
 from flask import Flask, request
 from .services import search_users, search_users_safe
 
@@ -35,17 +36,21 @@ def search_route() -> str:
 def search_route_safe() -> str:
     q = request.args.get('q', '')
     return search_users_safe(q)
-""")
+"""
+    )
 
-    (pkg / "sanitizers.py").write_text("""\
+    (pkg / "sanitizers.py").write_text(
+        """\
 def sanitize_decoy(value: str) -> str:
     return value
 
 def sanitize_allowlist_alpha(value: str) -> str:
     return ''.join(ch for ch in value if ch.isalnum() or ch in {'_', '-'})
-""")
+"""
+    )
 
-    (pkg / "services.py").write_text("""\
+    (pkg / "services.py").write_text(
+        """\
 from . import sanitizers as s
 from .db import run_query as rq
 
@@ -56,9 +61,11 @@ def search_users(raw_query: str) -> str:
 def search_users_safe(raw_query: str) -> str:
     query = s.sanitize_allowlist_alpha(raw_query)
     return rq(query)
-""")
+"""
+    )
 
-    (pkg / "db.py").write_text("""\
+    (pkg / "db.py").write_text(
+        """\
 import sqlite3
 
 def run_query(user_supplied: str) -> str:
@@ -68,7 +75,8 @@ def run_query(user_supplied: str) -> str:
     cur.execute(sql)
     conn.close()
     return sql
-""")
+"""
+    )
 
     tracker = CrossFileTaintTracker(tmp_path)
     result = tracker.analyze(max_depth=8, timeout_seconds=10.0, max_modules=100)
@@ -78,4 +86,6 @@ def run_query(user_supplied: str) -> str:
     assert any(v.cwe_id == "CWE-89" for v in result.vulnerabilities)
 
     # The safe route should not be flagged as vulnerable.
-    assert all(flow.source_function != "search_route_safe" for flow in result.taint_flows)
+    assert all(
+        flow.source_function != "search_route_safe" for flow in result.taint_flows
+    )

@@ -246,7 +246,9 @@ def symbolic_execute(
     code: str, max_paths: int | None = None, max_depth: int | None = None
 ):
     """[20251228_FEATURE] Sync wrapper for MCP symbolic_execute tool."""
-    from code_scalpel.mcp.archive.server import symbolic_execute as _symbolic_execute_async
+    from code_scalpel.mcp.archive.server import (
+        symbolic_execute as _symbolic_execute_async,
+    )
 
     # Allow mixed value types for optional numeric parameters
     kwargs: dict[str, str | int] = {"code": code}
@@ -284,7 +286,9 @@ def simulate_refactor(
     strict_mode: bool = False,
 ):
     """[20251228_FEATURE] Sync wrapper for MCP simulate_refactor tool."""
-    from code_scalpel.mcp.archive.server import simulate_refactor as _simulate_refactor_async
+    from code_scalpel.mcp.archive.server import (
+        simulate_refactor as _simulate_refactor_async,
+    )
 
     return _run_mcp_tool_sync(
         _simulate_refactor_async,

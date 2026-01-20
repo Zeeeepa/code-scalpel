@@ -166,7 +166,9 @@ def test_policy_modification_attempt_logged(tamper_resistance):
     """Test that policy modification attempts are logged."""
     # [20251216_TEST] P0 acceptance criteria
 
-    operation = Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")])
+    operation = Operation(
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
+    )
 
     try:
         tamper_resistance.prevent_policy_modification(operation)
@@ -174,7 +176,9 @@ def test_policy_modification_attempt_logged(tamper_resistance):
         pass
 
     # Verify event was logged
-    events = tamper_resistance.audit_log.get_events(event_type="POLICY_MODIFICATION_ATTEMPTED")
+    events = tamper_resistance.audit_log.get_events(
+        event_type="POLICY_MODIFICATION_ATTEMPTED"
+    )
     assert len(events) > 0
     assert events[-1]["severity"] == "CRITICAL"
     assert ".code-scalpel/policy.yaml" in str(events[-1]["details"])
@@ -204,7 +208,9 @@ def test_override_totp_verification(tamper_resistance):
     import hmac
 
     secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
-    valid_code = hmac.new(secret.encode(), challenge.encode(), hashlib.sha256).hexdigest()[:8]
+    valid_code = hmac.new(
+        secret.encode(), challenge.encode(), hashlib.sha256
+    ).hexdigest()[:8]
 
     # Valid code should pass
     assert tamper_resistance._verify_totp(valid_code, challenge) is True
@@ -246,7 +252,9 @@ def test_override_logged_with_justification(tamper_resistance, tmp_path, monkeyp
     """Test that overrides are logged with justification."""
     # [20251216_TEST] P0 acceptance criteria
 
-    operation = Operation(type="security_override", affected_files=[Path("src/sensitive.py")])
+    operation = Operation(
+        type="security_override", affected_files=[Path("src/sensitive.py")]
+    )
 
     policy_decision = PolicyDecision(
         allowed=False,
@@ -260,7 +268,9 @@ def test_override_logged_with_justification(tamper_resistance, tmp_path, monkeyp
     def mock_generate_challenge():
         return fixed_challenge
 
-    monkeypatch.setattr(tamper_resistance, "_generate_challenge", mock_generate_challenge)
+    monkeypatch.setattr(
+        tamper_resistance, "_generate_challenge", mock_generate_challenge
+    )
 
     # Create mock response file in the policy directory
     response_file = tamper_resistance.policy_path.parent / "override_response.json"
@@ -270,7 +280,9 @@ def test_override_logged_with_justification(tamper_resistance, tmp_path, monkeyp
     import hmac
 
     secret = os.environ.get("SCALPEL_TOTP_SECRET", "default-totp-secret")
-    valid_code = hmac.new(secret.encode(), fixed_challenge.encode(), hashlib.sha256).hexdigest()[:8]
+    valid_code = hmac.new(
+        secret.encode(), fixed_challenge.encode(), hashlib.sha256
+    ).hexdigest()[:8]
 
     response_data = {
         "code": valid_code,
@@ -306,7 +318,9 @@ def test_override_timeout(tamper_resistance):
     """Test that override requests timeout."""
     # [20251216_TEST] P0 acceptance criteria
 
-    operation = Operation(type="security_override", affected_files=[Path("src/test.py")])
+    operation = Operation(
+        type="security_override", affected_files=[Path("src/test.py")]
+    )
 
     policy_decision = PolicyDecision(
         allowed=False, violated_policies=["security_check"], reason="Security violation"
@@ -335,7 +349,9 @@ def test_audit_log_event_signing(audit_log):
     """Test that audit log events are signed with HMAC."""
     # [20251216_TEST] P0 acceptance criteria
 
-    audit_log.record_event(event_type="TEST_EVENT", severity="MEDIUM", details={"key": "value"})
+    audit_log.record_event(
+        event_type="TEST_EVENT", severity="MEDIUM", details={"key": "value"}
+    )
 
     # Verify event was written with signature
     with open(audit_log.log_path, "r") as f:
@@ -351,8 +367,12 @@ def test_audit_log_integrity_verification_success(audit_log):
     # [20251216_TEST] P0 acceptance criteria
 
     # Record some events
-    audit_log.record_event(event_type="EVENT_1", severity="LOW", details={"info": "test1"})
-    audit_log.record_event(event_type="EVENT_2", severity="MEDIUM", details={"info": "test2"})
+    audit_log.record_event(
+        event_type="EVENT_1", severity="LOW", details={"info": "test1"}
+    )
+    audit_log.record_event(
+        event_type="EVENT_2", severity="MEDIUM", details={"info": "test2"}
+    )
 
     # Verify integrity
     assert audit_log.verify_integrity() is True
@@ -392,7 +412,9 @@ def test_audit_log_append_only(audit_log):
 
     # Record multiple events
     for i in range(3):
-        audit_log.record_event(event_type=f"EVENT_{i}", severity="LOW", details={"index": i})
+        audit_log.record_event(
+            event_type=f"EVENT_{i}", severity="LOW", details={"index": i}
+        )
 
     # Verify all events are present (no deletion)
     events = audit_log.get_events()
@@ -432,7 +454,9 @@ def test_audit_log_handles_corrupted_json(audit_log):
     # [20251216_TEST] P0 acceptance criteria
 
     # Record valid event
-    audit_log.record_event(event_type="VALID_EVENT", severity="LOW", details={"valid": "data"})
+    audit_log.record_event(
+        event_type="VALID_EVENT", severity="LOW", details={"valid": "data"}
+    )
 
     # Corrupt the log file
     with open(audit_log.log_path, "a") as f:
@@ -531,7 +555,9 @@ def test_full_tamper_resistance_workflow(temp_policy_dir, tmp_path):
     assert tr.verify_policy_integrity() is True
 
     # 2. Try to modify policy file (should be blocked)
-    operation = Operation(type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")])
+    operation = Operation(
+        type="file_write", affected_files=[Path(".code-scalpel/policy.yaml")]
+    )
 
     with pytest.raises(PolicyModificationError):
         tr.prevent_policy_modification(operation)

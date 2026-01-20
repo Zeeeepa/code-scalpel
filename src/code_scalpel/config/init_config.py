@@ -80,7 +80,9 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(json_file.name))
             except json.JSONDecodeError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(f"{json_file.name}: Invalid JSON - {e}")
+                validation_results["errors"].append(
+                    f"{json_file.name}: Invalid JSON - {e}"
+                )
 
     # Validate YAML files
     yaml_files = list(config_dir.glob("*.yaml")) + list(config_dir.glob("*.yml"))
@@ -92,7 +94,9 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(yaml_file.name))
             except yaml.YAMLError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(f"{yaml_file.name}: Invalid YAML - {e}")
+                validation_results["errors"].append(
+                    f"{yaml_file.name}: Invalid YAML - {e}"
+                )
 
     # Validate Rego files (basic syntax check - just ensure they're readable)
     rego_files = list(config_dir.rglob("*.rego"))
@@ -106,7 +110,9 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                         validation_results["warnings"].append(
                             f"{rego_file.relative_to(config_dir)}: Missing 'package' declaration"
                         )
-                validation_results["files_validated"].append(str(rego_file.relative_to(config_dir)))
+                validation_results["files_validated"].append(
+                    str(rego_file.relative_to(config_dir))
+                )
             except Exception as e:
                 validation_results["success"] = False
                 validation_results["errors"].append(
@@ -220,7 +226,9 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     arch_dir = policies_dir / "architecture"
     arch_dir.mkdir(exist_ok=True)
     (arch_dir / "README.md").write_text(ARCHITECTURE_README_TEMPLATE)
-    (arch_dir / "layered_architecture.rego").write_text(LAYERED_ARCHITECTURE_REGO_TEMPLATE)
+    (arch_dir / "layered_architecture.rego").write_text(
+        LAYERED_ARCHITECTURE_REGO_TEMPLATE
+    )
     files_created.append("policies/architecture/README.md")
     files_created.append("policies/architecture/layered_architecture.rego")
 
@@ -255,7 +263,8 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     license_dir.mkdir(exist_ok=True)
 
     license_readme = license_dir / "README.md"
-    license_readme.write_text("""# Code Scalpel License Directory
+    license_readme.write_text(
+        """# Code Scalpel License Directory
 
 This directory stores license keys and cached license state.
 
@@ -263,7 +272,8 @@ This directory stores license keys and cached license state.
 - `license_state.json`: Automatically generated cache of license validation results.
 
 Do not commit `license.jwt` to version control if it contains sensitive information.
-""")
+"""
+    )
     files_created.append("license/README.md")
 
     # ========================================================================
@@ -320,7 +330,9 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
         )
 
         # Save manifest
-        manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, str(config_dir))
+        manifest_path = CryptographicPolicyVerifier.save_manifest(
+            manifest, str(config_dir)
+        )
         # [20251230_BUGFIX] init creates policy.manifest.json (not policy_manifest.json)
         files_created.append("policy.manifest.json")
 

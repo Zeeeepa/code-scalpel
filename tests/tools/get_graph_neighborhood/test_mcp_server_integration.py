@@ -139,7 +139,9 @@ class TestAsyncConcurrentHandling:
 
         # Mock different tier contexts
         async def call_with_tier(tier_name):
-            with patch("code_scalpel.mcp.server._get_current_tier", return_value=tier_name):
+            with patch(
+                "code_scalpel.mcp.server._get_current_tier", return_value=tier_name
+            ):
                 return await get_graph_neighborhood(
                     center_node_id="python::main::function::center",
                     k=2 if tier_name == "pro" else 1,
@@ -162,7 +164,9 @@ class TestAsyncConcurrentHandling:
         from code_scalpel.mcp.server import get_graph_neighborhood
 
         # First request: invalid (nonexistent node)
-        result1 = await get_graph_neighborhood(center_node_id="python::fake::function::fake", k=1)
+        result1 = await get_graph_neighborhood(
+            center_node_id="python::fake::function::fake", k=1
+        )
         assert not result1.success
 
         # Second request: valid (should work despite previous error)
@@ -371,7 +375,9 @@ class TestErrorMessages:
 
         assert not result.success
         # Should suggest valid values
-        assert any(word in result.error.lower() for word in ["must", "should", "least", "at"])
+        assert any(
+            word in result.error.lower() for word in ["must", "should", "least", "at"]
+        )
 
     @pytest.mark.asyncio
     async def test_error_message_not_empty(self):
@@ -397,14 +403,19 @@ class TestToolCapabilityGating:
         # [20260104_TEST] Tier capability gating validation
         from code_scalpel.mcp.server import get_graph_neighborhood
 
-        with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
+        with patch(
+            "code_scalpel.mcp.server._get_current_tier", return_value="community"
+        ):
             result = await get_graph_neighborhood(
                 center_node_id="python::main::function::center", k=1, max_nodes=20
             )
 
         if result.success:
             # Community shouldn't have semantic neighbors
-            assert not hasattr(result, "semantic_neighbors") or not result.semantic_neighbors
+            assert (
+                not hasattr(result, "semantic_neighbors")
+                or not result.semantic_neighbors
+            )
 
     @pytest.mark.asyncio
     async def test_enterprise_features_absent_in_pro(self):

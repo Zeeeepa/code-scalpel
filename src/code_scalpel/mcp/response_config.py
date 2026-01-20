@@ -102,13 +102,17 @@ class ResponseConfig:
                     self._last_mtime = config_path.stat().st_mtime
                     return config
             except Exception as e:
-                logger.warning(f"Failed to load response config from {config_path}: {e}")
+                logger.warning(
+                    f"Failed to load response config from {config_path}: {e}"
+                )
 
         # Search common locations
         search_paths = [
             Path.cwd() / ".code-scalpel" / "response_config.json",
             Path.home() / ".config" / "code-scalpel" / "response_config.json",
-            Path(__file__).parent.parent.parent / ".code-scalpel" / "response_config.json",
+            Path(__file__).parent.parent.parent
+            / ".code-scalpel"
+            / "response_config.json",
         ]
 
         for path in search_paths:
@@ -284,9 +288,17 @@ class ResponseConfig:
                 # Still apply null/empty filtering to error fields
                 if self.should_exclude_null_values() and value is None:
                     continue
-                if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
+                if (
+                    self.should_exclude_empty_arrays()
+                    and isinstance(value, list)
+                    and len(value) == 0
+                ):
                     continue
-                if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
+                if (
+                    self.should_exclude_empty_objects()
+                    and isinstance(value, dict)
+                    and len(value) == 0
+                ):
                     continue
                 filtered[key] = value
                 continue
@@ -300,11 +312,19 @@ class ResponseConfig:
                 continue
 
             # Skip empty arrays
-            if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
+            if (
+                self.should_exclude_empty_arrays()
+                and isinstance(value, list)
+                and len(value) == 0
+            ):
                 continue
 
             # Skip empty objects
-            if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
+            if (
+                self.should_exclude_empty_objects()
+                and isinstance(value, dict)
+                and len(value) == 0
+            ):
                 continue
 
             # Skip null values

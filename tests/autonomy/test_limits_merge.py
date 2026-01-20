@@ -14,7 +14,9 @@ from code_scalpel.licensing.features import TOOL_CAPABILITIES, get_tool_capabili
 print("=" * 80)
 print("HARDCODED DEFAULTS from features.py:")
 print("=" * 80)
-enterprise_defaults = TOOL_CAPABILITIES.get("get_graph_neighborhood", {}).get("enterprise", {})
+enterprise_defaults = TOOL_CAPABILITIES.get("get_graph_neighborhood", {}).get(
+    "enterprise", {}
+)
 print(f"Enterprise limits (hardcoded): {enterprise_defaults.get('limits', {})}")
 print()
 

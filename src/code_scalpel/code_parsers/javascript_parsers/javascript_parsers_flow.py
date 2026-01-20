@@ -136,7 +136,9 @@ class FlowInterface:
     end_line: Optional[int] = None
     type_parameters: list[FlowTypeParameter] = field(default_factory=list)
     extends: list[str] = field(default_factory=list)
-    properties: list[tuple[str, str, bool]] = field(default_factory=list)  # (name, type, optional)
+    properties: list[tuple[str, str, bool]] = field(
+        default_factory=list
+    )  # (name, type, optional)
     is_exported: bool = False
 
 
@@ -198,9 +200,13 @@ class FlowAnalysis:
     coverage: Optional[FlowCoverage] = None
     config: Optional[FlowConfig] = None
     utility_types_used: list[str] = field(default_factory=list)
-    maybe_types: list[tuple[int, int]] = field(default_factory=list)  # (line, col) of ?T usages
+    maybe_types: list[tuple[int, int]] = field(
+        default_factory=list
+    )  # (line, col) of ?T usages
     exact_objects: list[tuple[int, int]] = field(default_factory=list)  # {| |} usages
-    suppress_comments: list[tuple[int, str]] = field(default_factory=list)  # (line, type)
+    suppress_comments: list[tuple[int, str]] = field(
+        default_factory=list
+    )  # (line, type)
 
 
 class FlowParser:
@@ -479,7 +485,11 @@ class FlowParser:
             "empty",
         ):
             return FlowTypeKind.PRIMITIVE
-        if type_value.startswith('"') or type_value.startswith("'") or type_value.isdigit():
+        if (
+            type_value.startswith('"')
+            or type_value.startswith("'")
+            or type_value.isdigit()
+        ):
             return FlowTypeKind.LITERAL
 
         return FlowTypeKind.CLASS
@@ -653,7 +663,9 @@ class FlowParser:
         code = re.sub(r":\s*\??\w+(?:<[^>]+>)?(?:\[\])?", "", code)
 
         # Remove type imports
-        code = re.sub(r"import\s+type\s+\{[^}]+\}\s+from\s+['\"][^'\"]+['\"];?", "", code)
+        code = re.sub(
+            r"import\s+type\s+\{[^}]+\}\s+from\s+['\"][^'\"]+['\"];?", "", code
+        )
         code = re.sub(r"import\s+type\s+\w+\s+from\s+['\"][^'\"]+['\"];?", "", code)
 
         # Remove type exports

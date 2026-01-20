@@ -1507,7 +1507,9 @@ def get_tool_capabilities(tool_id: str, tier: str) -> Dict[str, Any]:
     try:
         from .config_loader import get_cached_limits, get_tool_limits, merge_limits
 
-        overrides = get_tool_limits(tool_id, normalized_tier, config=get_cached_limits())
+        overrides = get_tool_limits(
+            tool_id, normalized_tier, config=get_cached_limits()
+        )
         if overrides:
             merged_caps = dict(tier_caps)
             merged_caps["limits"] = merge_limits(tier_caps.get("limits", {}), overrides)
@@ -1534,7 +1536,9 @@ def has_capability(tool_id: str, capability: str, tier: str) -> bool:
     return capability in caps.get("capabilities", set())
 
 
-def get_upgrade_hint(tool_id: str, missing_capability: str, current_tier: str) -> Optional[str]:
+def get_upgrade_hint(
+    tool_id: str, missing_capability: str, current_tier: str
+) -> Optional[str]:
     """
     Generate upgrade hint for a missing capability.
 
@@ -1577,7 +1581,9 @@ def get_all_tools_for_tier(tier: str) -> List[str]:
     return list(TOOL_CAPABILITIES.keys())
 
 
-def get_missing_capabilities(tool_id: str, current_tier: str, target_tier: str) -> Set[str]:
+def get_missing_capabilities(
+    tool_id: str, current_tier: str, target_tier: str
+) -> Set[str]:
     """
     Get capabilities available in target tier but not in current tier.
 

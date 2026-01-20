@@ -122,7 +122,9 @@ def check_rename_compliance(
                     "rule": v.rule,
                     "message": v.message,
                     "severity": v.severity,
-                    "source": (v.source.value if hasattr(v.source, "value") else str(v.source)),
+                    "source": (
+                        v.source.value if hasattr(v.source, "value") else str(v.source)
+                    ),
                 }
                 for v in decision.violations
             ]

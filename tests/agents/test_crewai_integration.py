@@ -59,7 +59,9 @@ def branch(x):
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    symbolic_result = loop.run_until_complete(_run_coro(scalpel.analyze_symbolic_async(code)))
+    symbolic_result = loop.run_until_complete(
+        _run_coro(scalpel.analyze_symbolic_async(code))
+    )
     assert isinstance(symbolic_result, dict)
     assert "paths" in symbolic_result
 
@@ -90,7 +92,9 @@ def test_analyze_symbolic_handles_runtime_errors(monkeypatch):
     import types
 
     fake_module = types.SimpleNamespace(SymbolicAnalyzer=_Boom)
-    monkeypatch.setitem(sys.modules, "code_scalpel.symbolic_execution_tools", fake_module)
+    monkeypatch.setitem(
+        sys.modules, "code_scalpel.symbolic_execution_tools", fake_module
+    )
 
     result = scalpel.analyze_symbolic("x = 1")
     assert result["success"] is False

@@ -172,7 +172,9 @@ class HalsteadMetrics:
         """Program difficulty (D = (n1/2) * (N2/n2))."""
         if self.distinct_operands == 0:
             return 0.0
-        return (self.distinct_operators / 2) * (self.total_operands / self.distinct_operands)
+        return (self.distinct_operators / 2) * (
+            self.total_operands / self.distinct_operands
+        )
 
     @property
     def effort(self) -> float:
@@ -386,7 +388,9 @@ class JavaScriptParser(BaseParser):
         "require",  # Dynamic requires
     }
 
-    def _preprocess_javascript_code(self, code: str, config: Optional[PreprocessorConfig]) -> str:
+    def _preprocess_javascript_code(
+        self, code: str, config: Optional[PreprocessorConfig]
+    ) -> str:
         """
         Preprocess the JavaScript code.
 
@@ -395,7 +399,9 @@ class JavaScriptParser(BaseParser):
         :return: The preprocessed code.
         """
         if config is None:
-            config = PreprocessorConfig(remove_comments=False, normalize_whitespace=False)
+            config = PreprocessorConfig(
+                remove_comments=False, normalize_whitespace=False
+            )
         if config.remove_comments:
             code = self._remove_comments(code, Language.JAVASCRIPT)
         if config.normalize_whitespace:
@@ -588,7 +594,9 @@ class JavaScriptParser(BaseParser):
                 complexity += 1
 
         # Increment for break to label or continue to label
-        if isinstance(node, (esprima.nodes.BreakStatement, esprima.nodes.ContinueStatement)):
+        if isinstance(
+            node, (esprima.nodes.BreakStatement, esprima.nodes.ContinueStatement)
+        ):
             if hasattr(node, "label") and node.label:
                 complexity += 1
 
@@ -738,7 +746,9 @@ class JavaScriptParser(BaseParser):
         visit(ast)
         return dict(call_graph)
 
-    def _extract_call_info(self, node: JSNode, is_new: bool = False) -> FunctionCallInfo:
+    def _extract_call_info(
+        self, node: JSNode, is_new: bool = False
+    ) -> FunctionCallInfo:
         """Extract function call information from a call/new expression."""
         callee = ""
         is_method = False
@@ -775,7 +785,9 @@ class JavaScriptParser(BaseParser):
             is_new_call=is_new,
         )
 
-    def detect_security_issues(self, ast: JSNode, code: str = "") -> list[SecurityIssue]:
+    def detect_security_issues(
+        self, ast: JSNode, code: str = ""
+    ) -> list[SecurityIssue]:
         """
         Detect potential security vulnerabilities in the code.
 
@@ -796,7 +808,9 @@ class JavaScriptParser(BaseParser):
                                 message="Use of eval() is dangerous and can lead to code injection",
                                 severity=SecuritySeverity.CRITICAL,
                                 line=(
-                                    node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                                    node.loc.start.line
+                                    if hasattr(node, "loc") and node.loc
+                                    else 0
                                 ),
                                 column=(
                                     node.loc.start.column
@@ -815,7 +829,9 @@ class JavaScriptParser(BaseParser):
                                 message="Use of Function constructor is equivalent to eval()",
                                 severity=SecuritySeverity.HIGH,
                                 line=(
-                                    node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                                    node.loc.start.line
+                                    if hasattr(node, "loc") and node.loc
+                                    else 0
                                 ),
                                 column=(
                                     node.loc.start.column
@@ -831,7 +847,9 @@ class JavaScriptParser(BaseParser):
                 # Check for setTimeout/setInterval with strings
                 if isinstance(node.callee, esprima.nodes.Identifier):
                     if node.callee.name in ("setTimeout", "setInterval"):
-                        if node.arguments and isinstance(node.arguments[0], esprima.nodes.Literal):
+                        if node.arguments and isinstance(
+                            node.arguments[0], esprima.nodes.Literal
+                        ):
                             if isinstance(node.arguments[0].value, str):
                                 issues.append(
                                     SecurityIssue(
@@ -896,7 +914,9 @@ class JavaScriptParser(BaseParser):
                 ):
                     if isinstance(node.callee.object, esprima.nodes.Identifier):
                         if node.callee.object.name == "document":
-                            if isinstance(node.callee.property, esprima.nodes.Identifier):
+                            if isinstance(
+                                node.callee.property, esprima.nodes.Identifier
+                            ):
                                 if node.callee.property.name in ("write", "writeln"):
                                     issues.append(
                                         SecurityIssue(
@@ -932,7 +952,10 @@ class JavaScriptParser(BaseParser):
                     )
                     if any(pattern in name_lower for pattern in secret_patterns):
                         if isinstance(node.init, esprima.nodes.Literal):
-                            if isinstance(node.init.value, str) and len(node.init.value) > 5:
+                            if (
+                                isinstance(node.init.value, str)
+                                and len(node.init.value) > 5
+                            ):
                                 issues.append(
                                     SecurityIssue(
                                         rule_id="no-hardcoded-secrets",
@@ -999,8 +1022,12 @@ class JavaScriptParser(BaseParser):
                                 params.append(f"...{param.argument.name}")
 
                 line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
-                column = node.loc.start.column if hasattr(node, "loc") and node.loc else 0
-                end_line = node.loc.end.line if hasattr(node, "loc") and node.loc else None
+                column = (
+                    node.loc.start.column if hasattr(node, "loc") and node.loc else 0
+                )
+                end_line = (
+                    node.loc.end.line if hasattr(node, "loc") and node.loc else None
+                )
 
                 func_info = FunctionInfo(
                     name=name,
@@ -1024,7 +1051,9 @@ class JavaScriptParser(BaseParser):
             # Check for method definitions
             if isinstance(node, esprima.nodes.MethodDefinition):
                 name = "<anonymous>"
-                if hasattr(node, "key") and isinstance(node.key, esprima.nodes.Identifier):
+                if hasattr(node, "key") and isinstance(
+                    node.key, esprima.nodes.Identifier
+                ):
                     name = node.key.name
 
                 value = node.value if hasattr(node, "value") else None
@@ -1035,16 +1064,24 @@ class JavaScriptParser(BaseParser):
                             if isinstance(param, esprima.nodes.Identifier):
                                 params.append(param.name)
 
-                    line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                    line = (
+                        node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                    )
 
                     func_info = FunctionInfo(
                         name=name,
                         line=line,
-                        column=(node.loc.start.column if hasattr(node, "loc") and node.loc else 0),
+                        column=(
+                            node.loc.start.column
+                            if hasattr(node, "loc") and node.loc
+                            else 0
+                        ),
                         params=params,
                         is_method=True,
                         is_constructor=getattr(node, "kind", "") == "constructor",
-                        cyclomatic_complexity=self._calculate_cyclomatic_complexity(value),
+                        cyclomatic_complexity=self._calculate_cyclomatic_complexity(
+                            value
+                        ),
                         cognitive_complexity=self.calculate_cognitive_complexity(value),
                     )
                     functions.append(func_info)
@@ -1078,7 +1115,9 @@ class JavaScriptParser(BaseParser):
 
         def visit(node: JSNode) -> None:
             if isinstance(node, esprima.nodes.ImportDeclaration):
-                module = node.source.value if hasattr(node, "source") and node.source else ""
+                module = (
+                    node.source.value if hasattr(node, "source") and node.source else ""
+                )
                 line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
 
                 named_imports: list[str] = []
@@ -1139,7 +1178,11 @@ class JavaScriptParser(BaseParser):
                 exports.append(
                     ExportInfo(
                         name=name,
-                        line=(node.loc.start.line if hasattr(node, "loc") and node.loc else 0),
+                        line=(
+                            node.loc.start.line
+                            if hasattr(node, "loc") and node.loc
+                            else 0
+                        ),
                         is_default=True,
                     )
                 )
@@ -1147,7 +1190,9 @@ class JavaScriptParser(BaseParser):
             elif isinstance(node, esprima.nodes.ExportNamedDeclaration):
                 line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
                 source_module = (
-                    node.source.value if hasattr(node, "source") and node.source else None
+                    node.source.value
+                    if hasattr(node, "source") and node.source
+                    else None
                 )
 
                 if hasattr(node, "declaration") and node.declaration:
@@ -1230,7 +1275,9 @@ class JavaScriptParser(BaseParser):
         :return: CodeMetrics object.
         """
         lines = code.split("\n")
-        code_lines = sum(1 for line in lines if line.strip() and not line.strip().startswith("//"))
+        code_lines = sum(
+            1 for line in lines if line.strip() and not line.strip().startswith("//")
+        )
         comment_lines = sum(1 for line in lines if line.strip().startswith("//"))
         blank_lines = sum(1 for line in lines if not line.strip())
 
@@ -1242,13 +1289,19 @@ class JavaScriptParser(BaseParser):
 
         max_cyclomatic = max(cyclomatic_values) if cyclomatic_values else 0
         avg_cyclomatic = (
-            sum(cyclomatic_values) / len(cyclomatic_values) if cyclomatic_values else 0.0
+            sum(cyclomatic_values) / len(cyclomatic_values)
+            if cyclomatic_values
+            else 0.0
         )
         max_cognitive = max(cognitive_values) if cognitive_values else 0
-        avg_cognitive = sum(cognitive_values) / len(cognitive_values) if cognitive_values else 0.0
+        avg_cognitive = (
+            sum(cognitive_values) / len(cognitive_values) if cognitive_values else 0.0
+        )
         max_nesting = max(f.nested_depth for f in functions) if functions else 0
 
-        maintainability = self.calculate_maintainability_index(halstead, max_cyclomatic, code_lines)
+        maintainability = self.calculate_maintainability_index(
+            halstead, max_cyclomatic, code_lines
+        )
 
         return CodeMetrics(
             line_count=len(lines),
@@ -1316,7 +1369,9 @@ class JavaScriptParser(BaseParser):
         if isinstance(node, esprima.nodes.VariableDeclarator):
             if hasattr(node, "id") and hasattr(node.id, "name"):
                 if not find_identifiers(node, node.id.name):
-                    line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                    line = (
+                        node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                    )
                     warnings.append(f"Unused variable '{node.id.name}' at line {line}")
 
         # Check for unreachable code
@@ -1324,9 +1379,16 @@ class JavaScriptParser(BaseParser):
             parent_children = self.get_children(node.parent)
             try:
                 idx = parent_children.index(node)
-                if any(isinstance(n, esprima.nodes.Statement) for n in parent_children[idx + 1 :]):
-                    line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
-                    warnings.append(f"Unreachable code after return statement at line {line}")
+                if any(
+                    isinstance(n, esprima.nodes.Statement)
+                    for n in parent_children[idx + 1 :]
+                ):
+                    line = (
+                        node.loc.start.line if hasattr(node, "loc") and node.loc else 0
+                    )
+                    warnings.append(
+                        f"Unreachable code after return statement at line {line}"
+                    )
             except (ValueError, AttributeError):
                 pass
 
@@ -1343,7 +1405,9 @@ class JavaScriptParser(BaseParser):
         """
         children = []
         if isinstance(node, list):
-            children.extend([item for item in node if isinstance(item, esprima.nodes.Node)])
+            children.extend(
+                [item for item in node if isinstance(item, esprima.nodes.Node)]
+            )
         elif isinstance(node, dict):
             children.extend([v for k, v in node.items() if isinstance(v, (dict, list))])
         elif isinstance(node, esprima.nodes.Node):

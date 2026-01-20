@@ -26,7 +26,9 @@ class TestCommunityTierLimits:
         # With k=1, should have center + direct neighbors
         assert len(result.subgraph.nodes) >= 1
 
-    def test_community_max_nodes_limited_to_20(self, sample_call_graph, mock_tier_community):
+    def test_community_max_nodes_limited_to_20(
+        self, sample_call_graph, mock_tier_community
+    ):
         """Community tier should limit max_nodes to 20."""
         with mock_tier_community:
             result = sample_call_graph.get_neighborhood(
@@ -40,12 +42,16 @@ class TestCommunityTierLimits:
     def test_community_k1_allowed(self, sample_call_graph, mock_tier_community):
         """Community tier should allow k=1."""
         with mock_tier_community:
-            result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+            result = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=1
+            )
 
             assert result.success
             assert len(result.subgraph.nodes) >= 1
 
-    def test_community_lower_max_nodes_allowed(self, sample_call_graph, mock_tier_community):
+    def test_community_lower_max_nodes_allowed(
+        self, sample_call_graph, mock_tier_community
+    ):
         """Community tier should allow max_nodes < 20."""
         with mock_tier_community:
             result = sample_call_graph.get_neighborhood(
@@ -83,7 +89,9 @@ class TestProTierLimits:
     def test_pro_k5_allowed(self, sample_call_graph, mock_tier_pro):
         """Pro tier should allow k=5."""
         with mock_tier_pro:
-            result = sample_call_graph.get_neighborhood("python::main::function::center", k=5)
+            result = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=5
+            )
 
             assert result.success
 
@@ -129,7 +137,9 @@ class TestEnterpriseTierLimits:
             assert result.success
             # Should not be clamped (or clamped to actual graph depth)
 
-    def test_enterprise_unlimited_max_nodes(self, sample_call_graph, mock_tier_enterprise):
+    def test_enterprise_unlimited_max_nodes(
+        self, sample_call_graph, mock_tier_enterprise
+    ):
         """Enterprise tier should allow unlimited max_nodes."""
         with mock_tier_enterprise:
             result = sample_call_graph.get_neighborhood(
@@ -143,7 +153,9 @@ class TestEnterpriseTierLimits:
     def test_enterprise_large_k_allowed(self, sample_call_graph, mock_tier_enterprise):
         """Enterprise tier should allow large k values."""
         with mock_tier_enterprise:
-            result = sample_call_graph.get_neighborhood("python::main::function::center", k=50)
+            result = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=50
+            )
 
             assert result.success
 
@@ -189,7 +201,9 @@ class TestTierTransitions:
 class TestInvalidLicenseFallback:
     """Test fallback behavior for invalid licenses."""
 
-    def test_invalid_license_falls_back_to_community(self, sample_call_graph, mock_tier_community):
+    def test_invalid_license_falls_back_to_community(
+        self, sample_call_graph, mock_tier_community
+    ):
         """Invalid license should fall back to Community tier."""
         # Simulating Community tier fallback behavior
         result = sample_call_graph.get_neighborhood(
@@ -200,7 +214,9 @@ class TestInvalidLicenseFallback:
         # Should have Community-tier behavior
         assert len(result.subgraph.nodes) >= 1
 
-    def test_fallback_enforces_community_limits(self, sample_call_graph, mock_tier_community):
+    def test_fallback_enforces_community_limits(
+        self, sample_call_graph, mock_tier_community
+    ):
         """Fallback should enforce Community limits."""
         with mock_tier_community:
             result = sample_call_graph.get_neighborhood(
@@ -217,7 +233,9 @@ class TestParameterClamping:
     def test_k_clamped_to_community_limit(self, sample_call_graph, mock_tier_community):
         """k parameter should be clamped to Community tier limit."""
         with mock_tier_community:
-            result = sample_call_graph.get_neighborhood("python::main::function::center", k=10)
+            result = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=10
+            )
 
             assert result.success
             # k=10 should be clamped to k=1
@@ -226,7 +244,9 @@ class TestParameterClamping:
     def test_k_clamped_to_pro_limit(self, sample_call_graph, mock_tier_pro):
         """k parameter should be clamped to Pro tier limit."""
         with mock_tier_pro:
-            result = sample_call_graph.get_neighborhood("python::main::function::center", k=20)
+            result = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=20
+            )
 
             assert result.success
             # k=20 should be clamped to k=5
@@ -241,7 +261,9 @@ class TestParameterClamping:
             assert result.success
             # Should not be clamped
 
-    def test_max_nodes_clamped_to_community_limit(self, sample_call_graph, mock_tier_community):
+    def test_max_nodes_clamped_to_community_limit(
+        self, sample_call_graph, mock_tier_community
+    ):
         """max_nodes should be clamped to Community tier limit."""
         with mock_tier_community:
             result = sample_call_graph.get_neighborhood(
@@ -271,7 +293,9 @@ class TestTierCapabilities:
     ):
         """Community tier should support basic neighborhood extraction."""
         # Community should have 'basic_neighborhood' capability
-        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
+        result = sample_call_graph.get_neighborhood(
+            "python::main::function::center", k=1
+        )
 
         assert result.success
 
@@ -306,11 +330,15 @@ class TestTierEnforcementMechanism:
         """Tier should be checked on every get_neighborhood call."""
         with mock_tier_community:
             # First call with k=5
-            result1 = sample_call_graph.get_neighborhood("python::main::function::center", k=5)
+            result1 = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=5
+            )
             # Should be clamped to k=1
 
             # Second call with same parameters
-            result2 = sample_call_graph.get_neighborhood("python::main::function::center", k=5)
+            result2 = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=5
+            )
             # Should be clamped to k=1 again
 
             # Both should have same behavior
@@ -319,7 +347,9 @@ class TestTierEnforcementMechanism:
     def test_tier_enforcement_consistent(self, sample_call_graph, mock_tier_pro):
         """Tier enforcement should be consistent across calls."""
         with mock_tier_pro:
-            result_first = sample_call_graph.get_neighborhood("python::main::function::center", k=5)
+            result_first = sample_call_graph.get_neighborhood(
+                "python::main::function::center", k=5
+            )
             result_second = sample_call_graph.get_neighborhood(
                 "python::main::function::center", k=5
             )

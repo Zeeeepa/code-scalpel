@@ -182,7 +182,9 @@ class PathConstraintEngine:
             # Determine effective max depth
             effective_max_depth = max_search_depth
             if constraints.max_length is not None:
-                effective_max_depth = min(effective_max_depth, constraints.max_length + 1)
+                effective_max_depth = min(
+                    effective_max_depth, constraints.max_length + 1
+                )
 
             # Find all paths
             all_paths = self._find_all_paths(start, end, effective_max_depth)
@@ -238,7 +240,9 @@ class PathConstraintEngine:
         paths: List[Tuple[List[str], List[Dict[str, Any]]]] = []
 
         # DFS stack: (current_node, path, edges)
-        stack: List[Tuple[str, List[str], List[Dict[str, Any]]]] = [(start, [start], [])]
+        stack: List[Tuple[str, List[str], List[Dict[str, Any]]]] = [
+            (start, [start], [])
+        ]
 
         while stack:
             current, path, edges = stack.pop()
@@ -364,7 +368,9 @@ class PathConstraintEngine:
         )
 
         # Build node list with full data
-        path_nodes = [self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids]
+        path_nodes = [
+            self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids
+        ]
 
         return ConstrainedPath(
             nodes=path_nodes,

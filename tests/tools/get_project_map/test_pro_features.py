@@ -22,7 +22,9 @@ class TestProFeatureCoupling:
             project_root=str(flask_project), include_complexity=True
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # coupling_metrics should exist in Pro tier model
         assert (
@@ -36,7 +38,9 @@ class TestProFeatureCoupling:
             project_root=str(flask_project), include_complexity=True
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # If field exists, it should be empty
         if "coupling_metrics" in result_dict:
@@ -58,7 +62,9 @@ class TestProFeatureOwnership:
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # git_ownership should exist in Pro tier model
         assert (
@@ -72,7 +78,9 @@ class TestProFeatureOwnership:
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # If field exists, it should be empty
         if "git_ownership" in result_dict:
@@ -94,7 +102,9 @@ class TestProFeatureArchitecturalLayers:
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # architectural_layers should exist in Pro tier model
         assert (
@@ -108,7 +118,9 @@ class TestProFeatureArchitecturalLayers:
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # For Flask project, architectural_layers might detect layers
         # This is a capability test - field should exist even if detection varies
@@ -117,13 +129,17 @@ class TestProFeatureArchitecturalLayers:
         ), "Pro tier should have architectural_layers field for Flask project"
 
     @pytest.mark.asyncio
-    async def test_community_no_architectural_layers(self, community_server, flask_project):
+    async def test_community_no_architectural_layers(
+        self, community_server, flask_project
+    ):
         """Community tier: architectural_layers not populated."""
         result = await community_server.get_project_map(
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # If field exists, it should be empty
         if "architectural_layers" in result_dict:
@@ -145,7 +161,9 @@ class TestProFeatureModuleRelationships:
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # module_relationships should exist in Pro tier model
         assert (
@@ -159,7 +177,9 @@ class TestProFeatureModuleRelationships:
             project_root=str(flask_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # dependency_diagram should exist in Pro tier model
         assert (
@@ -167,13 +187,17 @@ class TestProFeatureModuleRelationships:
         ), f"Pro tier missing dependency_diagram. Available: {list(result_dict.keys())}"
 
     @pytest.mark.asyncio
-    async def test_community_no_module_relationships(self, community_server, simple_project):
+    async def test_community_no_module_relationships(
+        self, community_server, simple_project
+    ):
         """Community tier: module_relationships not populated."""
         result = await community_server.get_project_map(
             project_root=str(simple_project), include_complexity=False
         )
 
-        result_dict = result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        result_dict = (
+            result.model_dump() if hasattr(result, "model_dump") else vars(result)
+        )
 
         # If field exists, it should be empty
         if "module_relationships" in result_dict:

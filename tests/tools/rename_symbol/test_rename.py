@@ -7,8 +7,11 @@ from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
 
 class TestRename(unittest.TestCase):
     def setUp(self):
-        self.test_file = tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".py")
-        self.test_file.write("""
+        self.test_file = tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, suffix=".py"
+        )
+        self.test_file.write(
+            """
 def old_func():
     pass
 
@@ -18,7 +21,8 @@ class OldClass:
 
 async def old_async_func():
     pass
-""")
+"""
+        )
         self.test_file.close()
         self.patcher = SurgicalPatcher.from_file(self.test_file.name)
 
@@ -38,13 +42,17 @@ async def old_async_func():
         self.assertNotIn("class OldClass:", self.patcher.current_code)
 
     def test_rename_method(self):
-        result = self.patcher.rename_symbol("method", "OldClass.old_method", "new_method")
+        result = self.patcher.rename_symbol(
+            "method", "OldClass.old_method", "new_method"
+        )
         self.assertTrue(result.success)
         self.assertIn("def new_method(self):", self.patcher.current_code)
         self.assertNotIn("def old_method(self):", self.patcher.current_code)
 
     def test_rename_async_function(self):
-        result = self.patcher.rename_symbol("function", "old_async_func", "new_async_func")
+        result = self.patcher.rename_symbol(
+            "function", "old_async_func", "new_async_func"
+        )
         self.assertTrue(result.success)
         self.assertIn("async def new_async_func():", self.patcher.current_code)
         self.assertNotIn("async def old_async_func():", self.patcher.current_code)
@@ -122,7 +130,9 @@ instance: OldClass = OldClass()
 
             self.assertTrue(result.success)
             self.assertIn("class NewClass:", patcher.current_code)
-            self.assertIn("def process(obj: NewClass) -> NewClass:", patcher.current_code)
+            self.assertIn(
+                "def process(obj: NewClass) -> NewClass:", patcher.current_code
+            )
             self.assertIn("instance: NewClass = NewClass()", patcher.current_code)
             self.assertNotIn("OldClass", patcher.current_code)
 

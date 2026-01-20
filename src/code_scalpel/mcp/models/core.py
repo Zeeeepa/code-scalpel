@@ -14,7 +14,9 @@ class FunctionInfo(BaseModel):
 
     name: str = Field(description="Function name")
     lineno: int = Field(description="Line number where function starts")
-    end_lineno: int | None = Field(default=None, description="Line number where function ends")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where function ends"
+    )
     is_async: bool = Field(default=False, description="Whether function is async")
 
 
@@ -23,8 +25,12 @@ class ClassInfo(BaseModel):
 
     name: str = Field(description="Class name")
     lineno: int = Field(description="Line number where class starts")
-    end_lineno: int | None = Field(default=None, description="Line number where class ends")
-    methods: list[str] = Field(default_factory=list, description="Method names in class")
+    end_lineno: int | None = Field(
+        default=None, description="Line number where class ends"
+    )
+    methods: list[str] = Field(
+        default_factory=list, description="Method names in class"
+    )
 
 
 class AnalysisResult(BaseModel):
@@ -194,7 +200,9 @@ class SecurityResult(BaseModel):
     vulnerabilities: list[VulnerabilityInfo] = Field(
         default_factory=list, description="List of vulnerabilities"
     )
-    taint_sources: list[str] = Field(default_factory=list, description="Identified taint sources")
+    taint_sources: list[str] = Field(
+        default_factory=list, description="Identified taint sources"
+    )
     # [20251226_FEATURE] Tier-aware optional security outputs for Pro/Enterprise
     sanitizer_paths: list[str] | None = Field(
         default=None, description="Detected sanitizer usages (Pro/Enterprise)"
@@ -237,7 +245,9 @@ class UnifiedDetectedSink(BaseModel):
     """Detected sink with confidence and OWASP mapping."""
 
     # [20260110_FEATURE] v1.0 - Stable identifier for correlation across runs
-    sink_id: str = Field(description="Stable sink identifier (for correlation across runs)")
+    sink_id: str = Field(
+        description="Stable sink identifier (for correlation across runs)"
+    )
 
     pattern: str = Field(description="Sink pattern matched")
     sink_type: str = Field(description="Sink type classification")
@@ -252,10 +262,16 @@ class UnifiedDetectedSink(BaseModel):
     code_snippet_original_len: int | None = Field(
         default=None, description="Original snippet length before truncation"
     )
-    vulnerability_type: str | None = Field(default=None, description="Vulnerability category key")
-    owasp_category: str | None = Field(default=None, description="Mapped OWASP Top 10 category")
+    vulnerability_type: str | None = Field(
+        default=None, description="Vulnerability category key"
+    )
+    owasp_category: str | None = Field(
+        default=None, description="Mapped OWASP Top 10 category"
+    )
     # [20251231_FEATURE] v1.0 - Added CWE mapping
-    cwe_id: str | None = Field(default=None, description="CWE identifier (e.g., CWE-89)")
+    cwe_id: str | None = Field(
+        default=None, description="CWE identifier (e.g., CWE-89)"
+    )
 
 
 class UnifiedSinkResult(BaseModel):
@@ -263,7 +279,9 @@ class UnifiedSinkResult(BaseModel):
 
     success: bool = Field(description="Whether detection succeeded")
     # [20260110_FEATURE] v1.0 - Machine-readable failures
-    error_code: str | None = Field(default=None, description="Machine-readable error code")
+    error_code: str | None = Field(
+        default=None, description="Machine-readable error code"
+    )
     server_version: str = Field(default=__version__, description="Code Scalpel version")
     language: str = Field(description="Language analyzed")
     sink_count: int = Field(description="Number of sinks detected")
@@ -314,7 +332,9 @@ class UnifiedSinkResult(BaseModel):
     )
 
     # [20260110_FEATURE] v1.0 - Limit observability (populated when applicable)
-    truncated: bool | None = Field(default=None, description="Whether results were truncated")
+    truncated: bool | None = Field(
+        default=None, description="Whether results were truncated"
+    )
     sinks_detected: int | None = Field(
         default=None, description="Total sinks detected before truncation"
     )
@@ -356,7 +376,9 @@ class SymbolicResult(BaseModel):
     symbolic_variables: list[str] = Field(
         default_factory=list, description="Variables treated symbolically"
     )
-    constraints: list[str] = Field(default_factory=list, description="Discovered constraints")
+    constraints: list[str] = Field(
+        default_factory=list, description="Discovered constraints"
+    )
     total_paths: int | None = Field(
         default=None,
         description="Total paths discovered before limiting (if known)",
@@ -408,7 +430,9 @@ class TestGenerationResult(BaseModel):
         default_factory=list, description="Generated test cases"
     )
     # [20251225_FEATURE] Tier-aware truncation metadata (neutral messaging).
-    total_test_cases: int = Field(default=0, description="Total test cases before truncation")
+    total_test_cases: int = Field(
+        default=0, description="Total test cases before truncation"
+    )
     truncated: bool = Field(default=False, description="Whether results were truncated")
     truncation_warning: str | None = Field(
         default=None, description="Neutral warning when truncation occurs"
@@ -496,7 +520,9 @@ class CrawlFileResult(BaseModel):
     functions: list[CrawlFunctionInfo] = Field(
         default_factory=list, description="Top-level functions"
     )
-    classes: list[CrawlClassInfo] = Field(default_factory=list, description="Classes found")
+    classes: list[CrawlClassInfo] = Field(
+        default_factory=list, description="Classes found"
+    )
     imports: list[str] = Field(default_factory=list, description="Import statements")
     complexity_warnings: list[CrawlFunctionInfo] = Field(
         default_factory=list, description="High-complexity functions"
@@ -534,8 +560,12 @@ class ProjectCrawlResult(BaseModel):
     root_path: str = Field(description="Project root path")
     timestamp: str = Field(description="When the crawl was performed")
     summary: CrawlSummary = Field(description="Summary statistics")
-    files: list[CrawlFileResult] = Field(default_factory=list, description="Analyzed files")
-    errors: list[CrawlFileResult] = Field(default_factory=list, description="Files with errors")
+    files: list[CrawlFileResult] = Field(
+        default_factory=list, description="Analyzed files"
+    )
+    errors: list[CrawlFileResult] = Field(
+        default_factory=list, description="Files with errors"
+    )
     markdown_report: str = Field(default="", description="Markdown report")
     error: str | None = Field(default=None, description="Error if failed")
     # [20260106_FEATURE] v1.0 pre-release - Output transparency metadata
@@ -579,7 +609,9 @@ class SurgicalExtractionResult(BaseModel):
     node_type: str = Field(description="Type: function, class, or method")
     line_start: int = Field(default=0, description="Starting line number")
     line_end: int = Field(default=0, description="Ending line number")
-    dependencies: list[str] = Field(default_factory=list, description="Names of dependencies")
+    dependencies: list[str] = Field(
+        default_factory=list, description="Names of dependencies"
+    )
     imports_needed: list[str] = Field(
         default_factory=list, description="Required import statements"
     )
@@ -635,8 +667,12 @@ class ContextualExtractionResult(BaseModel):
     )
 
     # [20251216_FEATURE] v2.0.2 - JSX/TSX extraction metadata
-    jsx_normalized: bool = Field(default=False, description="Whether JSX syntax was normalized")
-    is_server_component: bool = Field(default=False, description="Next.js Server Component (async)")
+    jsx_normalized: bool = Field(
+        default=False, description="Whether JSX syntax was normalized"
+    )
+    is_server_component: bool = Field(
+        default=False, description="Next.js Server Component (async)"
+    )
     is_server_action: bool = Field(
         default=False, description="Next.js Server Action ('use server')"
     )
@@ -669,7 +705,9 @@ class PatchResultModel(BaseModel):
     error_code: str | None = Field(
         default=None, description="Machine-readable error code if failed"
     )
-    hint: str | None = Field(default=None, description="Actionable hint to remediate failure")
+    hint: str | None = Field(
+        default=None, description="Actionable hint to remediate failure"
+    )
     # [20260110_FEATURE] Session limit observability for update_symbol.
     max_updates_per_session: int | None = Field(
         default=None, description="Session max updates applied for this tool"
@@ -728,13 +766,23 @@ class FileContextResult(BaseModel):
     classes: list[ClassInfo | str] = Field(
         default_factory=list, description="Class names or detailed info"
     )
-    imports: list[str] = Field(default_factory=list, description="Import statements (max 20)")
-    exports: list[str] = Field(default_factory=list, description="Exported symbols (__all__)")
-    complexity_score: int = Field(default=0, description="Overall cyclomatic complexity")
-    has_security_issues: bool = Field(default=False, description="Whether file has security issues")
+    imports: list[str] = Field(
+        default_factory=list, description="Import statements (max 20)"
+    )
+    exports: list[str] = Field(
+        default_factory=list, description="Exported symbols (__all__)"
+    )
+    complexity_score: int = Field(
+        default=0, description="Overall cyclomatic complexity"
+    )
+    has_security_issues: bool = Field(
+        default=False, description="Whether file has security issues"
+    )
     summary: str = Field(default="", description="Brief description of file purpose")
     # [20251220_FEATURE] v3.0.5 - Truncation communication
-    imports_truncated: bool = Field(default=False, description="Whether imports list was truncated")
+    imports_truncated: bool = Field(
+        default=False, description="Whether imports list was truncated"
+    )
     total_imports: int = Field(default=0, description="Total imports before truncation")
     # [20251225_FEATURE] v3.3.0 - Tiered enrichments and safeguards
     semantic_summary: str | None = Field(
@@ -751,8 +799,12 @@ class FileContextResult(BaseModel):
     expanded_context: str | None = Field(
         default=None, description="Smartly expanded context when allowed by tier limits"
     )
-    pii_redacted: bool = Field(default=False, description="Whether PII content was redacted")
-    secrets_masked: bool = Field(default=False, description="Whether secrets/API keys were masked")
+    pii_redacted: bool = Field(
+        default=False, description="Whether PII content was redacted"
+    )
+    secrets_masked: bool = Field(
+        default=False, description="Whether secrets/API keys were masked"
+    )
     redaction_summary: list[str] = Field(
         default_factory=list, description="What redactions/masking actions were taken"
     )
@@ -803,7 +855,9 @@ class SymbolReference(BaseModel):
     line: int = Field(description="Line number of the reference")
     column: int = Field(default=0, description="Column number")
     context: str = Field(description="Code snippet showing usage context")
-    is_definition: bool = Field(default=False, description="Whether this is the definition")
+    is_definition: bool = Field(
+        default=False, description="Whether this is the definition"
+    )
     # [20251225_FEATURE] Tiered symbol references: optional metadata
     reference_type: str | None = Field(
         default=None,
@@ -848,16 +902,26 @@ class SymbolReferencesResult(BaseModel):
     )
 
     symbol_name: str = Field(description="Name of the searched symbol")
-    definition_file: str | None = Field(default=None, description="File where symbol is defined")
-    definition_line: int | None = Field(default=None, description="Line where symbol is defined")
+    definition_file: str | None = Field(
+        default=None, description="File where symbol is defined"
+    )
+    definition_line: int | None = Field(
+        default=None, description="Line where symbol is defined"
+    )
     references: list[SymbolReference] = Field(
         default_factory=list, description="References found (max 100)"
     )
-    total_references: int = Field(default=0, description="Total reference count before truncation")
+    total_references: int = Field(
+        default=0, description="Total reference count before truncation"
+    )
     # [20251225_FEATURE] Tiered symbol references: scan metadata
     files_scanned: int = Field(default=0, description="Number of files scanned")
-    total_files: int = Field(default=0, description="Total candidate files before filtering")
-    files_truncated: bool = Field(default=False, description="Whether file scanning was truncated")
+    total_files: int = Field(
+        default=0, description="Total candidate files before filtering"
+    )
+    files_truncated: bool = Field(
+        default=False, description="Whether file scanning was truncated"
+    )
     file_truncation_warning: str | None = Field(
         default=None, description="Warning if file scan was truncated"
     )
@@ -867,12 +931,16 @@ class SymbolReferencesResult(BaseModel):
     owner_counts: dict[str, int] | None = Field(
         default=None, description="Counts by CODEOWNERS owner (Enterprise)"
     )
-    change_risk: str | None = Field(default=None, description="Heuristic change risk (Enterprise)")
+    change_risk: str | None = Field(
+        default=None, description="Heuristic change risk (Enterprise)"
+    )
     # [20251220_FEATURE] v3.0.5 - Truncation communication
     references_truncated: bool = Field(
         default=False, description="Whether references list was truncated"
     )
-    truncation_warning: str | None = Field(default=None, description="Warning if results truncated")
+    truncation_warning: str | None = Field(
+        default=None, description="Warning if results truncated"
+    )
     # [20251226_FEATURE] Enterprise tier: Impact analysis fields
     risk_score: int | None = Field(
         default=None, description="Weighted risk score 0-100 (Enterprise)"

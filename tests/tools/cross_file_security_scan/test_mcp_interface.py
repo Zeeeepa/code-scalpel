@@ -59,7 +59,9 @@ class TestToolAvailability:
         }
 
         # All expected parameters should be present
-        assert expected_params.issubset(params), f"Missing parameters: {expected_params - params}"
+        assert expected_params.issubset(
+            params
+        ), f"Missing parameters: {expected_params - params}"
 
     async def test_tool_in_server_registry(self):
         """[20260103_TEST] Tool is in MCP server registry."""
@@ -303,23 +305,27 @@ class TestEndToEndWorkflow:
             tmpdir_path = Path(tmpdir)
 
             # Create vulnerable project
-            (tmpdir_path / "routes.py").write_text("""
+            (tmpdir_path / "routes.py").write_text(
+                """
 from flask import request
 from db import query
 
 def handler():
     user_id = request.args.get('id')
     return query(user_id)
-""")
+"""
+            )
 
-            (tmpdir_path / "db.py").write_text("""
+            (tmpdir_path / "db.py").write_text(
+                """
 import sqlite3
 
 def query(user_id):
     sql = f"SELECT * FROM users WHERE id = {user_id}"
     cursor = sqlite3.cursor()
     cursor.execute(sql)
-""")
+"""
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,
@@ -342,20 +348,24 @@ def query(user_id):
             tmpdir_path = Path(tmpdir)
 
             # Create safe project
-            (tmpdir_path / "utils.py").write_text("""
+            (tmpdir_path / "utils.py").write_text(
+                """
 def add(a, b):
     return a + b
 
 def multiply(x, y):
     return x * y
-""")
+"""
+            )
 
-            (tmpdir_path / "main.py").write_text("""
+            (tmpdir_path / "main.py").write_text(
+                """
 from utils import add, multiply
 
 def calculate(x, y):
     return add(x, multiply(x, y))
-""")
+"""
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,
@@ -378,7 +388,9 @@ def calculate(x, y):
             tmpdir_path = Path(tmpdir)
 
             (tmpdir_path / "a.py").write_text("def f_a(): pass")
-            (tmpdir_path / "b.py").write_text("from a import f_a\ndef f_b(): return f_a()")
+            (tmpdir_path / "b.py").write_text(
+                "from a import f_a\ndef f_b(): return f_a()"
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,
@@ -392,7 +404,9 @@ def calculate(x, y):
             assert result.success
             # Diagram should be generated (check if field exists)
             if hasattr(result, "mermaid_diagram"):
-                assert result.mermaid_diagram is None or isinstance(result.mermaid_diagram, str)
+                assert result.mermaid_diagram is None or isinstance(
+                    result.mermaid_diagram, str
+                )
 
 
 # =============================================================================
@@ -481,7 +495,8 @@ class TestRegressions:
             pkg.mkdir()
             (pkg / "__init__.py").write_text("# test package\n")
 
-            (pkg / "routes.py").write_text("""\
+            (pkg / "routes.py").write_text(
+                """\
 from flask import Flask, request
 from .services import search_users
 
@@ -491,23 +506,29 @@ app = Flask(__name__)
 def search_route() -> str:
     q = request.args.get('q', '')
     return search_users(q)
-""")
+"""
+            )
 
-            (pkg / "services.py").write_text("""\
+            (pkg / "services.py").write_text(
+                """\
 from . import sanitizers as s
 from .db import run_query as rq
 
 def search_users(raw_query: str) -> str:
     query = s.sanitize_decoy(raw_query)
     return rq(query)
-""")
+"""
+            )
 
-            (pkg / "sanitizers.py").write_text("""\
+            (pkg / "sanitizers.py").write_text(
+                """\
 def sanitize_decoy(value: str) -> str:
     return value
-""")
+"""
+            )
 
-            (pkg / "db.py").write_text("""\
+            (pkg / "db.py").write_text(
+                """\
 import sqlite3
 
 def run_query(user_supplied: str) -> str:
@@ -517,7 +538,8 @@ def run_query(user_supplied: str) -> str:
     cur.execute(sql)
     conn.close()
     return sql
-""")
+"""
+            )
 
             result = await cross_file_security_scan(
                 project_root=tmpdir,

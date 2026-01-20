@@ -157,7 +157,9 @@ max_api_calls_per_hour: 1000
 
 
 @asynccontextmanager
-async def _stdio_session(*, project_root: Path, extra_env: dict[str, str] | None = None):
+async def _stdio_session(
+    *, project_root: Path, extra_env: dict[str, str] | None = None
+):
     repo_root = _repo_root()
     env = _pythonpath_env(repo_root)
 
@@ -367,7 +369,9 @@ main();
         assert data is not None
         edges = data.get("edges") or []
         # Expect at least one resolved edge to util.js:foo
-        assert any((e.get("callee") == "util.js:foo") for e in edges if isinstance(e, dict))
+        assert any(
+            (e.get("callee") == "util.js:foo") for e in edges if isinstance(e, dict)
+        )
 
 
 @pytest.mark.parametrize("requested_sinks", [60, 120])
@@ -480,7 +484,9 @@ async def test_unified_sink_detect_sinks_include_stable_sink_id(tmp_path: Path):
             arguments={"code": code, "language": "python", "min_confidence": 0.0},
             read_timeout_seconds=timedelta(seconds=20),
         )
-        data_1 = _assert_envelope(_tool_json(payload_1), tool_name="unified_sink_detect")
+        data_1 = _assert_envelope(
+            _tool_json(payload_1), tool_name="unified_sink_detect"
+        )
         assert data_1 is not None
         assert data_1.get("success") is True
 
@@ -489,7 +495,9 @@ async def test_unified_sink_detect_sinks_include_stable_sink_id(tmp_path: Path):
             arguments={"code": code, "language": "python", "min_confidence": 0.0},
             read_timeout_seconds=timedelta(seconds=20),
         )
-        data_2 = _assert_envelope(_tool_json(payload_2), tool_name="unified_sink_detect")
+        data_2 = _assert_envelope(
+            _tool_json(payload_2), tool_name="unified_sink_detect"
+        )
         assert data_2 is not None
         assert data_2.get("success") is True
 
@@ -647,7 +655,9 @@ async def test_get_call_graph_community_50_node_limit(
         assert data.get("success") is True
 
         # Verify node truncation
-        assert data.get("nodes_truncated") is True, "Community should truncate at 50 nodes"
+        assert (
+            data.get("nodes_truncated") is True
+        ), "Community should truncate at 50 nodes"
 
         # Verify nodes list is capped at 50
         nodes = data.get("nodes", [])
@@ -710,7 +720,9 @@ async def test_get_call_graph_pro_500_node_limit(
         assert len(nodes) > 50, f"Pro should handle >50 nodes, got {len(nodes)}"
 
         # Should NOT be truncated at this size
-        assert data.get("nodes_truncated") is False, "Pro should not truncate at 150 nodes"
+        assert (
+            data.get("nodes_truncated") is False
+        ), "Pro should not truncate at 150 nodes"
 
 
 async def test_get_call_graph_enterprise_metrics(
@@ -755,12 +767,16 @@ async def test_get_call_graph_enterprise_metrics(
 
         # Community should NOT have Enterprise metrics
         assert "hot_nodes" not in data, "Community should not have hot_nodes"
-        assert "dead_code_candidates" not in data, "Community should not have dead_code_candidates"
+        assert (
+            "dead_code_candidates" not in data
+        ), "Community should not have dead_code_candidates"
 
         # Nodes should NOT have degree attributes
         for node in data.get("nodes", []):
             assert "in_degree" not in node, "Community nodes should not have in_degree"
-            assert "out_degree" not in node, "Community nodes should not have out_degree"
+            assert (
+                "out_degree" not in node
+            ), "Community nodes should not have out_degree"
 
     # Test Enterprise tier (should have metrics)
     license_path = write_hs256_license_jwt(
@@ -796,7 +812,9 @@ async def test_get_call_graph_enterprise_metrics(
 
         # Verify Enterprise metrics exist
         assert "hot_nodes" in data, "Enterprise should include hot_nodes"
-        assert "dead_code_candidates" in data, "Enterprise should include dead_code_candidates"
+        assert (
+            "dead_code_candidates" in data
+        ), "Enterprise should include dead_code_candidates"
 
         # Verify hot_nodes structure
         hot_nodes = data["hot_nodes"]
@@ -812,8 +830,12 @@ async def test_get_call_graph_enterprise_metrics(
 
         # Verify nodes have degree attributes
         for node in data.get("nodes", []):
-            assert "in_degree" in node, f"Enterprise node {node.get('id')} should have in_degree"
-            assert "out_degree" in node, f"Enterprise node {node.get('id')} should have out_degree"
+            assert (
+                "in_degree" in node
+            ), f"Enterprise node {node.get('id')} should have in_degree"
+            assert (
+                "out_degree" in node
+            ), f"Enterprise node {node.get('id')} should have out_degree"
             assert isinstance(node["in_degree"], int), "in_degree should be int"
             assert isinstance(node["out_degree"], int), "out_degree should be int"
 
@@ -967,7 +989,9 @@ async def test_get_call_graph_invalid_license_fallback_to_community(
         )
 
         # Should apply Community limits
-        assert data.get("depth_limit") == 3, "Invalid license should enforce Community depth limit"
+        assert (
+            data.get("depth_limit") == 3
+        ), "Invalid license should enforce Community depth limit"
         assert data.get("success") is True
 
 
@@ -1762,7 +1786,8 @@ def keep_feature():
 
         warnings = data.get("warnings") or []
         assert any(
-            "Compliance validation: detected removed functions/classes." in w for w in warnings
+            "Compliance validation: detected removed functions/classes." in w
+            for w in warnings
         )
 
         removed = (data.get("structural_changes") or {}).get("functions_removed") or []
@@ -1865,7 +1890,8 @@ def feature(x):
 
         _assert_tier(env_json, "enterprise")
         _assert_capabilities_subset(
-            env_json, {"advanced_simulation", "compliance_validation", "regression_prediction"}
+            env_json,
+            {"advanced_simulation", "compliance_validation", "regression_prediction"},
         )
 
         structural_changes = data.get("structural_changes") or {}
@@ -1884,7 +1910,8 @@ def feature(x):
 
         _assert_tier(env_json, "community")
         _assert_capabilities_disjoint(
-            env_json, {"advanced_simulation", "regression_prediction", "compliance_validation"}
+            env_json,
+            {"advanced_simulation", "regression_prediction", "compliance_validation"},
         )
 
         structural_changes = data.get("structural_changes") or {}
@@ -2062,7 +2089,9 @@ def use_it():
 
         # Warnings should indicate definition-only rename
         warnings = data.get("warnings") or []
-        assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
+        assert any(
+            "Definition-only" in w or "no cross-file" in w.lower() for w in warnings
+        )
 
         # main.py should be updated
         main_content = main_py.read_text()
@@ -2206,7 +2235,9 @@ async def test_rename_symbol_invalid_license_fallback_to_community(
 
         # Definition-only warning for Community
         warnings = data.get("warnings") or []
-        assert any("Definition-only" in w or "no cross-file" in w.lower() for w in warnings)
+        assert any(
+            "Definition-only" in w or "no cross-file" in w.lower() for w in warnings
+        )
 
 
 async def test_rename_symbol_enterprise_unlimited_files(

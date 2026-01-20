@@ -36,7 +36,9 @@ class TestTaintTrackerFinal:
         taint = TaintInfo(source=TaintSource.USER_INPUT)
         tracker.mark_tainted("input", taint)
         for i in range(5):
-            tracker.propagate_assignment(f"step{i}", [f"step{i - 1}" if i > 0 else "input"])
+            tracker.propagate_assignment(
+                f"step{i}", [f"step{i - 1}" if i > 0 else "input"]
+            )
         assert tracker.is_tainted("step4")
 
 
@@ -59,7 +61,9 @@ class TestCallGraphFinal:
         from code_scalpel.ast_tools.call_graph import CallGraphBuilder
 
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "a.py").write_text("from b import helper\ndef main(): return helper()")
+            (Path(tmp) / "a.py").write_text(
+                "from b import helper\ndef main(): return helper()"
+            )
             (Path(tmp) / "b.py").write_text("def helper(): return 42")
             builder = CallGraphBuilder(Path(tmp))
             graph = builder.build()

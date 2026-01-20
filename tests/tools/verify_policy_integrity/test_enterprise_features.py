@@ -60,7 +60,9 @@ def test_enterprise_full_integrity_check_includes_audit_logging(
     assert enterprise_result.success is True
     assert enterprise_result.tier == "enterprise"
     assert enterprise_result.signature_validated is True
-    assert enterprise_result.audit_log_entry is not None, "Enterprise tier MUST have audit logging"
+    assert (
+        enterprise_result.audit_log_entry is not None
+    ), "Enterprise tier MUST have audit logging"
 
     # Validate audit log structure
     audit = enterprise_result.audit_log_entry

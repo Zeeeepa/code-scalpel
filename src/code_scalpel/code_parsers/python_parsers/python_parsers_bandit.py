@@ -850,11 +850,15 @@ class BanditConfig:
 
     config_file: Path | None = None
     profile: str | None = None
-    tests: list[str] = field(default_factory=list)  # Tests to run (e.g., ["B101", "B102"])
+    tests: list[str] = field(
+        default_factory=list
+    )  # Tests to run (e.g., ["B101", "B102"])
     skips: list[str] = field(default_factory=list)  # Tests to skip
     severity: BanditSeverity = BanditSeverity.LOW  # Minimum severity to report
     confidence: BanditConfidence = BanditConfidence.LOW  # Minimum confidence
-    exclude_dirs: list[str] = field(default_factory=lambda: [".git", "__pycache__", "venv"])
+    exclude_dirs: list[str] = field(
+        default_factory=lambda: [".git", "__pycache__", "venv"]
+    )
     baseline: Path | None = None  # Baseline file for filtering
     recursive: bool = True
 
@@ -980,7 +984,9 @@ class BanditReport:
             },
             "top_cwe": [
                 {"cwe": cwe, "count": len(issues)}
-                for cwe, issues in sorted(self.issues_by_cwe.items(), key=lambda x: -len(x[1]))[:5]
+                for cwe, issues in sorted(
+                    self.issues_by_cwe.items(), key=lambda x: -len(x[1])
+                )[:5]
             ],
         }
 
@@ -1195,7 +1201,8 @@ class BanditParser:
         """
         # Create lookup set for baseline issues
         baseline_set = {
-            (issue.filename, issue.line_number, issue.test_id) for issue in baseline_issues
+            (issue.filename, issue.line_number, issue.test_id)
+            for issue in baseline_issues
         }
 
         # Filter out issues that exist in baseline
@@ -1240,7 +1247,9 @@ class BanditParser:
                             "rules": self._get_sarif_rules(report),
                         }
                     },
-                    "results": [self._issue_to_sarif_result(issue) for issue in report.issues],
+                    "results": [
+                        self._issue_to_sarif_result(issue) for issue in report.issues
+                    ],
                 }
             ],
         }
@@ -1315,7 +1324,9 @@ class BanditParser:
 
         # Add code snippet if available
         if issue.code:
-            result["locations"][0]["physicalLocation"]["region"]["snippet"] = {"text": issue.code}
+            result["locations"][0]["physicalLocation"]["region"]["snippet"] = {
+                "text": issue.code
+            }
 
         return result
 
@@ -1434,7 +1445,9 @@ class BanditParser:
             return OWASP_TOP_10_MAPPING[issue.cwe.id]
         return None
 
-    def get_issues_by_owasp(self, report: BanditReport) -> dict[OWASPCategory, list[BanditIssue]]:
+    def get_issues_by_owasp(
+        self, report: BanditReport
+    ) -> dict[OWASPCategory, list[BanditIssue]]:
         """
         Group report issues by OWASP Top 10 category.
 
@@ -1473,7 +1486,9 @@ class BanditParser:
         if "version" not in sarif:
             errors.append("Missing required field: version")
         elif sarif["version"] != "2.1.0":
-            errors.append(f"Unsupported SARIF version: {sarif['version']} (expected 2.1.0)")
+            errors.append(
+                f"Unsupported SARIF version: {sarif['version']} (expected 2.1.0)"
+            )
 
         if "runs" not in sarif:
             errors.append("Missing required field: runs")
@@ -1514,7 +1529,9 @@ class BanditParser:
         else:
             # Validate each result
             for j, result in enumerate(run["results"]):
-                result_errors = self._validate_sarif_result(result, f"{prefix}.results[{j}]")
+                result_errors = self._validate_sarif_result(
+                    result, f"{prefix}.results[{j}]"
+                )
                 errors.extend(result_errors)
 
         return errors
@@ -1581,7 +1598,9 @@ def parse_bandit_json(output: str) -> BanditReport:
 
     for filename, metrics in data.get("metrics", {}).items():
         if filename != "_totals":
-            report.file_metrics[filename] = BanditFileMetrics.from_dict(filename, metrics)
+            report.file_metrics[filename] = BanditFileMetrics.from_dict(
+                filename, metrics
+            )
 
     report.errors = data.get("errors", [])
 

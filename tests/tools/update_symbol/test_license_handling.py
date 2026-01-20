@@ -345,7 +345,9 @@ class TestLicenseErrorMessages:
     async def test_unsupported_tier_error_message(self):
         """Error message for unsupported tier is clear."""
         # [20260117_TEST] Token created for context; not used directly
-        _unsupported_tier_token = jwt.encode({"tier": "premium"}, "secret")  # Not a valid tier
+        _unsupported_tier_token = jwt.encode(
+            {"tier": "premium"}, "secret"
+        )  # Not a valid tier
 
         error_message = (
             "License tier 'premium' not recognized. "

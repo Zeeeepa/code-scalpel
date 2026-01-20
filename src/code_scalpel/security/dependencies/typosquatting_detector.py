@@ -27,7 +27,9 @@ class TyposquattingAlert:
     package_version: str
     suspected_target: str  # The legitimate package name
     similarity_score: float  # 0.0-1.0
-    typo_type: str  # "character_swap", "missing_char", "extra_char", "visual_similarity"
+    typo_type: (
+        str  # "character_swap", "missing_char", "extra_char", "visual_similarity"
+    )
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
     evidence: str  # Why this is suspicious
     recommendation: str  # What to do
@@ -110,7 +112,9 @@ class TyposquattingDetector:
         """Initialize the typosquatting detector."""
         pass
 
-    def scan_for_typosquatting(self, dependencies: list[dict[str, Any]]) -> TyposquattingReport:
+    def scan_for_typosquatting(
+        self, dependencies: list[dict[str, Any]]
+    ) -> TyposquattingReport:
         """
         Scan dependencies for typosquatting attacks.
 
@@ -155,7 +159,9 @@ class TyposquattingDetector:
             recommendations=recommendations,
         )
 
-    def _check_typosquatting(self, package_name: str, version: str) -> TyposquattingAlert | None:
+    def _check_typosquatting(
+        self, package_name: str, version: str
+    ) -> TyposquattingAlert | None:
         """
         Check if a package name is potential typosquatting.
 
@@ -170,7 +176,9 @@ class TyposquattingDetector:
                 typo_type, evidence = self._analyze_difference(package_name, popular)
 
                 # Calculate risk level
-                risk_level = self._assess_risk(similarity, typo_type, package_name, popular)
+                risk_level = self._assess_risk(
+                    similarity, typo_type, package_name, popular
+                )
 
                 if risk_level != "NONE":
                     return TyposquattingAlert(
@@ -321,7 +329,9 @@ class TyposquattingDetector:
                 f"Verify it's the correct dependency."
             )
         else:
-            return f"Double-check '{suspicious}' - possibly confused with '{legitimate}'."
+            return (
+                f"Double-check '{suspicious}' - possibly confused with '{legitimate}'."
+            )
 
     def _generate_recommendations(self, alerts: list[TyposquattingAlert]) -> list[str]:
         """Generate overall recommendations."""
@@ -336,7 +346,9 @@ class TyposquattingDetector:
                 f"⚠️ {high_risk} high-risk typosquatting alerts - review immediately"
             )
 
-        recommendations.append("Verify all flagged packages are intentional dependencies")
+        recommendations.append(
+            "Verify all flagged packages are intentional dependencies"
+        )
         recommendations.append("Check package registry (npm, PyPI) for legitimacy")
         recommendations.append("Review package download counts and maintainer history")
 

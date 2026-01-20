@@ -39,7 +39,9 @@ def calculate_total(items):
         assert result.language_detected == "python"
         assert isinstance(result.cross_file_deps_enabled, bool)
         # max_depth_applied can be int or None (None means unlimited)
-        assert result.max_depth_applied is None or isinstance(result.max_depth_applied, int)
+        assert result.max_depth_applied is None or isinstance(
+            result.max_depth_applied, int
+        )
 
     @pytest.mark.asyncio
     async def test_javascript_extraction_includes_metadata(self):

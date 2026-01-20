@@ -40,16 +40,19 @@ def temp_project():
 def simple_project(temp_project):
     """Create a simple two-file project."""
     # main.py
-    (temp_project / "main.py").write_text("""
+    (temp_project / "main.py").write_text(
+        """
 import utils
 from utils import helper_func
 
 def main():
     return helper_func()
-""")
+"""
+    )
 
     # utils.py
-    (temp_project / "utils.py").write_text("""
+    (temp_project / "utils.py").write_text(
+        """
 def helper_func():
     return 42
     
@@ -59,7 +62,8 @@ def another_func():
 class HelperClass:
     def method(self):
         pass
-""")
+"""
+    )
 
     return temp_project
 
@@ -72,40 +76,48 @@ def package_project(temp_project):
     pkg_dir.mkdir()
 
     # mypackage/__init__.py
-    (pkg_dir / "__init__.py").write_text("""
+    (pkg_dir / "__init__.py").write_text(
+        """
 from .core import process
 from .utils import helper
 
 __all__ = ['process', 'helper']
-""")
+"""
+    )
 
     # mypackage/core.py
-    (pkg_dir / "core.py").write_text("""
+    (pkg_dir / "core.py").write_text(
+        """
 from .utils import helper, validate
 
 def process(data):
     if validate(data):
         return helper(data)
     return None
-""")
+"""
+    )
 
     # mypackage/utils.py
-    (pkg_dir / "utils.py").write_text("""
+    (pkg_dir / "utils.py").write_text(
+        """
 def helper(data):
     return data.upper()
     
 def validate(data):
     return isinstance(data, str)
-""")
+"""
+    )
 
     # main.py at root
-    (temp_project / "main.py").write_text("""
+    (temp_project / "main.py").write_text(
+        """
 from mypackage import process
 from mypackage.utils import helper
 
 def run():
     return process("test")
-""")
+"""
+    )
 
     return temp_project
 
@@ -114,20 +126,24 @@ def run():
 def circular_project(temp_project):
     """Create a project with circular imports."""
     # a.py imports from b
-    (temp_project / "a.py").write_text("""
+    (temp_project / "a.py").write_text(
+        """
 from b import func_b
 
 def func_a():
     return func_b() + 1
-""")
+"""
+    )
 
     # b.py imports from a
-    (temp_project / "b.py").write_text("""
+    (temp_project / "b.py").write_text(
+        """
 from a import func_a
 
 def func_b():
     return 10
-""")
+"""
+    )
 
     return temp_project
 
@@ -145,23 +161,30 @@ def complex_project(temp_project):
     # src/models/
     models = src / "models"
     models.mkdir()
-    (models / "__init__.py").write_text("from .user import User\nfrom .product import Product")
-    (models / "user.py").write_text("""
+    (models / "__init__.py").write_text(
+        "from .user import User\nfrom .product import Product"
+    )
+    (models / "user.py").write_text(
+        """
 class User:
     def __init__(self, name):
         self.name = name
-""")
-    (models / "product.py").write_text("""
+"""
+    )
+    (models / "product.py").write_text(
+        """
 class Product:
     def __init__(self, title):
         self.title = title
-""")
+"""
+    )
 
     # src/services/
     services = src / "services"
     services.mkdir()
     (services / "__init__.py").write_text("")
-    (services / "user_service.py").write_text("""
+    (services / "user_service.py").write_text(
+        """
 from ..models import User
 from ..utils.helpers import format_name
 
@@ -169,22 +192,26 @@ class UserService:
     def create_user(self, name):
         formatted = format_name(name)
         return User(formatted)
-""")
+"""
+    )
 
     # src/utils/
     utils = src / "utils"
     utils.mkdir()
     (utils / "__init__.py").write_text("")
-    (utils / "helpers.py").write_text("""
+    (utils / "helpers.py").write_text(
+        """
 def format_name(name):
     return name.strip().title()
     
 def validate_email(email):
     return "@" in email
-""")
+"""
+    )
 
     # app.py at root
-    (temp_project / "app.py").write_text("""
+    (temp_project / "app.py").write_text(
+        """
 from src.models import User, Product
 from src.services.user_service import UserService
 
@@ -192,7 +219,8 @@ def main():
     service = UserService()
     user = service.create_user("john")
     return user
-""")
+"""
+    )
 
     return temp_project
 
@@ -224,17 +252,21 @@ class TestBasicImports:
         resolver.build()
 
         main_imports = resolver.imports.get("main", [])
-        from_imports = [imp for imp in main_imports if imp.import_type == ImportType.FROM]
+        from_imports = [
+            imp for imp in main_imports if imp.import_type == ImportType.FROM
+        ]
 
         assert len(from_imports) >= 1
         assert any(imp.name == "helper_func" for imp in from_imports)
 
     def test_import_with_alias(self, temp_project):
         """Test parsing 'import module as alias' statements."""
-        (temp_project / "test.py").write_text("""
+        (temp_project / "test.py").write_text(
+            """
 import numpy as np
 from os import path as p
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -248,9 +280,11 @@ from os import path as p
 
     def test_multiple_imports_same_line(self, temp_project):
         """Test parsing 'from x import a, b, c' statements."""
-        (temp_project / "test.py").write_text("""
+        (temp_project / "test.py").write_text(
+            """
 from os import path, getcwd, listdir
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -265,15 +299,19 @@ from os import path, getcwd, listdir
     def test_wildcard_import(self, temp_project):
         """Test parsing 'from module import *' statements."""
         (temp_project / "utils.py").write_text("def func(): pass")
-        (temp_project / "test.py").write_text("""
+        (temp_project / "test.py").write_text(
+            """
 from utils import *
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
 
         test_imports = resolver.imports.get("test", [])
-        wildcards = [imp for imp in test_imports if imp.import_type == ImportType.WILDCARD]
+        wildcards = [
+            imp for imp in test_imports if imp.import_type == ImportType.WILDCARD
+        ]
 
         assert len(wildcards) == 1
         assert wildcards[0].name == "*"
@@ -475,10 +513,12 @@ class TestDefinitionExtraction:
 
     def test_extract_async_functions(self, temp_project):
         """Test extraction of async function definitions."""
-        (temp_project / "async_mod.py").write_text("""
+        (temp_project / "async_mod.py").write_text(
+            """
 async def fetch_data():
     return await some_async_call()
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -490,10 +530,12 @@ async def fetch_data():
 
     def test_extract_function_signature(self, temp_project):
         """Test extraction of function signatures."""
-        (temp_project / "typed.py").write_text("""
+        (temp_project / "typed.py").write_text(
+            """
 def process(data: str, count: int = 5) -> bool:
     return True
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -508,7 +550,8 @@ def process(data: str, count: int = 5) -> bool:
 
     def test_extract_docstrings(self, temp_project):
         """Test extraction of docstrings."""
-        (temp_project / "documented.py").write_text('''
+        (temp_project / "documented.py").write_text(
+            '''
 def documented_func():
     """This is a docstring."""
     pass
@@ -516,7 +559,8 @@ def documented_func():
 class DocumentedClass:
     """Class docstring."""
     pass
-''')
+'''
+        )
 
         resolver = ImportResolver(temp_project)
         resolver.build()
@@ -938,11 +982,13 @@ class TestEdgeCases:
 
     def test_only_comments_file(self, temp_project):
         """Test handling of files with only comments."""
-        (temp_project / "comments.py").write_text("""
+        (temp_project / "comments.py").write_text(
+            """
 # This is a comment
 # Another comment
 '''" Docstring-like but not really. "'''
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         result = resolver.build()
@@ -984,9 +1030,11 @@ class TestEdgeCases:
         pkg.mkdir()
 
         (pkg / "__init__.py").write_text("ROOT_CONST = 42")
-        (pkg / "sub.py").write_text("""
+        (pkg / "sub.py").write_text(
+            """
 from pkg import ROOT_CONST
-""")
+"""
+        )
 
         resolver = ImportResolver(temp_project)
         result = resolver.build()

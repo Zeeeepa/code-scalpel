@@ -128,7 +128,9 @@ def test_missing_certificate_fields_gap_analysis(
     print(f"[GAP REPORT] crl_status exists: {has_crl}")
 
     if has_cert_chain:
-        print(f"[GAP REPORT] certificate_chain_valid value: {result.certificate_chain_valid}")
+        print(
+            f"[GAP REPORT] certificate_chain_valid value: {result.certificate_chain_valid}"
+        )
 
     # This assertion documents the gap.
     # If the user expects them to work, and they don't verify, we know why.

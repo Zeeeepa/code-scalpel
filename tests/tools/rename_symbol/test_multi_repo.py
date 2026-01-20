@@ -168,7 +168,9 @@ class TestDependencyOrdering:
             repo1 = str(Path(tmpdir) / "repo1")
             repo2 = str(Path(tmpdir) / "repo2")
 
-            success = coordinator.set_dependencies(session_id, dependency_order=[repo1, repo2])
+            success = coordinator.set_dependencies(
+                session_id, dependency_order=[repo1, repo2]
+            )
             assert success is True
 
     def test_set_dependencies_invalid_session(self):

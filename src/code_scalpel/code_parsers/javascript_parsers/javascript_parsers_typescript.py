@@ -307,7 +307,9 @@ class TypeScriptParser:
     _NAMESPACE_PATTERN = re.compile(
         r"(?:export\s+)?(?:declare\s+)?(?:namespace|module)\s+(\w+)\s*\{", re.MULTILINE
     )
-    _TYPE_GUARD_PATTERN = re.compile(r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE)
+    _TYPE_GUARD_PATTERN = re.compile(
+        r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE
+    )
     _ANY_USAGE_PATTERN = re.compile(r":\s*any\b|<any>|as\s+any\b", re.MULTILINE)
 
     def __init__(self, tsc_path: Optional[str] = None):
@@ -700,7 +702,11 @@ class TypeScriptParser:
             "bigint",
         ):
             return TypeKind.PRIMITIVE
-        if type_value.startswith('"') or type_value.startswith("'") or type_value.isdigit():
+        if (
+            type_value.startswith('"')
+            or type_value.startswith("'")
+            or type_value.isdigit()
+        ):
             return TypeKind.LITERAL
 
         return TypeKind.UNKNOWN

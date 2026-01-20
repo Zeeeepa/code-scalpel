@@ -45,7 +45,8 @@ def outer():
         # All nested functions should be tracked as structural changes
         assert result.is_safe is True
         assert (
-            "outer" in str(result.structural_changes).lower() or len(result.structural_changes) >= 0
+            "outer" in str(result.structural_changes).lower()
+            or len(result.structural_changes) >= 0
         )
 
     def test_nested_class_definitions(self):
@@ -556,7 +557,9 @@ def func_1():
 def func_2():
     pass
 
-""" + "\n".join([f"def func_{i}(): pass" for i in range(3, 50)])
+""" + "\n".join(
+            [f"def func_{i}(): pass" for i in range(3, 50)]
+        )
 
         async def run_large_async():
             simulator = RefactorSimulator()

@@ -88,7 +88,9 @@ class TestingAgent(BaseCodeAnalysisAgent):
         testing_ops.extend(edge_cases)
 
         # Detect integration test opportunities
-        integration_ops = self._identify_integration_tests(observations.get("symbol_analysis", {}))
+        integration_ops = self._identify_integration_tests(
+            observations.get("symbol_analysis", {})
+        )
         testing_ops.extend(integration_ops)
 
         # Prioritize by coverage impact
@@ -183,7 +185,9 @@ class TestingAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return cases
 
-    def _identify_integration_tests(self, symbol_analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _identify_integration_tests(
+        self, symbol_analysis: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Identify opportunities for integration testing."""
         tests = []
         # Implementation placeholder

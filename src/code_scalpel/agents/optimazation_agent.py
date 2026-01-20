@@ -80,7 +80,9 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         opportunities = self._analyze_optimization_opportunities(bottlenecks, file_info)
 
         # Calculate performance metrics
-        performance_score = self._calculate_performance_score(bottlenecks, opportunities)
+        performance_score = self._calculate_performance_score(
+            bottlenecks, opportunities
+        )
 
         # Generate optimization recommendations
         recommendations = self._generate_optimization_recommendations(opportunities)
@@ -234,7 +236,9 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
                     "location": "file",
                     "severity": issue.get("severity"),
                     "description": issue.get("description"),
-                    "estimated_impact": ("high" if issue.get("severity") == "high" else "medium"),
+                    "estimated_impact": (
+                        "high" if issue.get("severity") == "high" else "medium"
+                    ),
                 }
             )
 
@@ -420,7 +424,9 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
                 "scalability_improvement": "minimal",
             }
 
-    def _estimate_total_benefit(self, detailed_actions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _estimate_total_benefit(
+        self, detailed_actions: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Estimate total benefit from all optimizations."""
         total_time_improvement = 0
         total_memory_improvement = 0
@@ -462,7 +468,9 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "actions_count": len(detailed_actions),
         }
 
-    def _assess_optimization_risks(self, detailed_actions: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _assess_optimization_risks(
+        self, detailed_actions: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """Assess risks of implementing optimizations."""
         high_risk_count = sum(
             1 for a in detailed_actions if a.get("action", {}).get("risk") == "high"
@@ -506,7 +514,9 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         return {
             "safe": True,
             "confidence": 0.8,
-            "potential_issues": ["May affect functionality if not implemented correctly"],
+            "potential_issues": [
+                "May affect functionality if not implemented correctly"
+            ],
             "recommendations": ["Test with comprehensive test suite"],
         }
 

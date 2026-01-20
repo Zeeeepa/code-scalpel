@@ -151,7 +151,9 @@ def calculateSum(numbers):
         """Test that analysis detects deep nesting issues."""
         result = self.scalpel.analyze(self.sample_code)
         # Check for deep nesting in issues
-        has_nesting_issue = any(issue.get("category") == "deep_nesting" for issue in result.issues)
+        has_nesting_issue = any(
+            issue.get("category") == "deep_nesting" for issue in result.issues
+        )
         self.assertTrue(has_nesting_issue)
 
     def test_analyze_security_async(self):
@@ -293,7 +295,9 @@ def BadFunc():
         # New taint-based API returns different fields
         # Check for new format (vulnerabilities) or old format (recommendations)
         has_security_info = (
-            "vulnerabilities" in data or "recommendations" in data or "vulnerability_count" in data
+            "vulnerabilities" in data
+            or "recommendations" in data
+            or "vulnerability_count" in data
         )
         self.assertTrue(has_security_info)
 
@@ -328,7 +332,9 @@ def BadFunc():
 
     def test_refactor_endpoint_missing_body(self):
         """Test refactor endpoint with no request body."""
-        response = self.client.post("/refactor", content_type="application/json", data="")
+        response = self.client.post(
+            "/refactor", content_type="application/json", data=""
+        )
         self.assertIn(response.status_code, [400, 415])
 
     def test_refactor_code_not_string(self):
@@ -357,7 +363,9 @@ def BadFunc():
 
     def test_security_endpoint_missing_body(self):
         """Test security endpoint with no request body."""
-        response = self.client.post("/security", content_type="application/json", data="")
+        response = self.client.post(
+            "/security", content_type="application/json", data=""
+        )
         self.assertIn(response.status_code, [400, 415])
 
     def test_security_code_not_string(self):

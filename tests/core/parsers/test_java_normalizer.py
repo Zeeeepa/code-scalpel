@@ -187,7 +187,9 @@ class TestJavaNormalizer(unittest.TestCase):
         }.get(name)
 
         visitor.get_text = MagicMock(
-            side_effect=lambda n: {id(name_node): "method", id(object_node): "obj"}.get(id(n))
+            side_effect=lambda n: {id(name_node): "method", id(object_node): "obj"}.get(
+                id(n)
+            )
         )
 
         mock_arg_ir = MagicMock()
@@ -339,7 +341,9 @@ class TestJavaNormalizerIntegration(unittest.TestCase):
         self.assertEqual(inner.name, "Inner")
 
         compute = next(
-            n for n in outer.body if isinstance(n, IRFunctionDef) and n.name == "compute"
+            n
+            for n in outer.body
+            if isinstance(n, IRFunctionDef) and n.name == "compute"
         )
         self.assertEqual(compute.return_type, "R")
         self.assertEqual(compute._metadata.get("type_params"), ["R extends Number"])

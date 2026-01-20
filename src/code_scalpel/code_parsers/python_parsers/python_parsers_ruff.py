@@ -480,7 +480,9 @@ class RuffConfig:
             KeyError: If [tool.ruff] section not found.
         """
         if tomllib is None:
-            raise ImportError("tomllib (Python 3.11+) or tomli is required for TOML parsing")
+            raise ImportError(
+                "tomllib (Python 3.11+) or tomli is required for TOML parsing"
+            )
 
         with open(path, "rb") as f:
             data = tomllib.load(f)
@@ -503,7 +505,9 @@ class RuffConfig:
             RuffConfig populated from file.
         """
         if tomllib is None:
-            raise ImportError("tomllib (Python 3.11+) or tomli is required for TOML parsing")
+            raise ImportError(
+                "tomllib (Python 3.11+) or tomli is required for TOML parsing"
+            )
 
         with open(path, "rb") as f:
             data = tomllib.load(f)
@@ -686,10 +690,12 @@ class RuffReport:
             "fixable_count": self.fixable_count,
             "files_analyzed": self.files_analyzed,
             "by_severity": {
-                s.name: sum(1 for v in self.violations if v.severity == s) for s in RuffSeverity
+                s.name: sum(1 for v in self.violations if v.severity == s)
+                for s in RuffSeverity
             },
             "by_category": {
-                cat: len(violations) for cat, violations in self.violations_by_category.items()
+                cat: len(violations)
+                for cat, violations in self.violations_by_category.items()
             },
         }
 
@@ -820,7 +826,9 @@ class RuffParser:
             # Parse JSON output
             if result.stdout.strip():
                 violations_data = json.loads(result.stdout)
-                report.violations = [RuffViolation.from_dict(v) for v in violations_data]
+                report.violations = [
+                    RuffViolation.from_dict(v) for v in violations_data
+                ]
 
             # Count files (approximate from violations)
             report.files_analyzed = len(set(v.filename for v in report.violations)) or 1
@@ -1091,7 +1099,9 @@ class RuffParser:
             for v in sorted(violations, key=lambda x: (-x.line, -x.column)):
                 if v.fix and v.fix.is_safe():
                     try:
-                        result = self.apply_edits(result, v.fix.edits, check_conflicts=False)
+                        result = self.apply_edits(
+                            result, v.fix.edits, check_conflicts=False
+                        )
                         count += 1
                     except Exception:
                         continue

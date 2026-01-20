@@ -68,7 +68,9 @@ class SymbolicMemory:
         """
         raise NotImplementedError("Symbolic array load not yet implemented")
 
-    def store(self, array: SymbolicArray, index: Union[int, z3.ArithRef], value: Any) -> None:
+    def store(
+        self, array: SymbolicArray, index: Union[int, z3.ArithRef], value: Any
+    ) -> None:
         """
         - Generate bounds check constraint
         - Update Z3 array representation

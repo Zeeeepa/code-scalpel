@@ -116,7 +116,9 @@ class TestSandboxResult:
 
     def test_create_sandbox_result_failure(self):
         """Test creating failed SandboxResult."""
-        result = SandboxResult(success=False, build_success=False, stderr="Build failed")
+        result = SandboxResult(
+            success=False, build_success=False, stderr="Build failed"
+        )
         assert result.success is False
         assert result.build_success is False
 
@@ -451,7 +453,9 @@ class TestIntegration:
         )
 
         # Verify original file unchanged
-        assert (project_dir / "main.py").read_text() == "def add(a, b):\n    return a + b\n"
+        assert (
+            project_dir / "main.py"
+        ).read_text() == "def add(a, b):\n    return a + b\n"
 
         # Verify result structure
         assert result is not None
@@ -510,7 +514,9 @@ class TestIntegration:
         (project_dir / "main.py").write_text("x = 1")
 
         changes = []
-        executor = SandboxExecutor(max_memory_mb=512, max_cpu_seconds=5, max_disk_mb=100)
+        executor = SandboxExecutor(
+            max_memory_mb=512, max_cpu_seconds=5, max_disk_mb=100
+        )
 
         result = executor.execute_with_changes(
             project_path=str(project_dir),
@@ -619,7 +625,9 @@ class TestErrorHandling:
     def test_apply_changes_handles_empty_content(self, tmp_path):
         """Test applying change with empty content."""
         executor = SandboxExecutor()
-        changes = [FileChange(relative_path="empty.txt", operation="create", new_content="")]
+        changes = [
+            FileChange(relative_path="empty.txt", operation="create", new_content="")
+        ]
 
         executor._apply_changes(tmp_path, changes)
         assert (tmp_path / "empty.txt").exists()
@@ -713,7 +721,9 @@ class TestResourceLimits:
 
     def test_resource_limits_set_correctly(self):
         """Test resource limits are configured correctly."""
-        executor = SandboxExecutor(max_memory_mb=1024, max_cpu_seconds=120, max_disk_mb=500)
+        executor = SandboxExecutor(
+            max_memory_mb=1024, max_cpu_seconds=120, max_disk_mb=500
+        )
 
         assert executor.max_memory_mb == 1024
         assert executor.max_cpu_seconds == 120

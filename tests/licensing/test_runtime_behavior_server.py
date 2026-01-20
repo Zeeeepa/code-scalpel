@@ -119,4 +119,6 @@ async def test_in_flight_operation_keeps_tier_snapshot(
     assert hasattr(
         result, "tier_applied"
     ), f"Expected dataclass with tier_applied, got {type(result)}"
-    assert result.tier_applied == "pro", f"Expected tier_applied=pro, got {result.tier_applied}"
+    assert (
+        result.tier_applied == "pro"
+    ), f"Expected tier_applied=pro, got {result.tier_applied}"

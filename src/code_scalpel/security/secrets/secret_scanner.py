@@ -35,6 +35,7 @@ warnings.filterwarnings(
     category=DeprecationWarning,
 )
 
+
 class SecretScanner(ast.NodeVisitor):
     """
     Scans AST for hardcoded secrets using comprehensive pattern matching.
@@ -49,12 +50,14 @@ class SecretScanner(ast.NodeVisitor):
 
         # Compile all patterns from HARDCODED_SECRET_PATTERNS
         self.compiled_patterns: Dict[str, Pattern] = {
-            name: re.compile(pattern) for name, pattern in HARDCODED_SECRET_PATTERNS.items()
+            name: re.compile(pattern)
+            for name, pattern in HARDCODED_SECRET_PATTERNS.items()
         }
 
         # [20251214_FEATURE] v2.0.0 - Compile variable name patterns
         self.compiled_var_patterns: Dict[str, Pattern] = {
-            name: re.compile(pattern) for name, pattern in SECRET_VARIABLE_PATTERNS.items()
+            name: re.compile(pattern)
+            for name, pattern in SECRET_VARIABLE_PATTERNS.items()
         }
 
         # Placeholder patterns to ignore (not real secrets)
@@ -158,7 +161,9 @@ class SecretScanner(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def _check_variable_name(self, var_name: str, value_node: ast.expr, node: ast.AST) -> None:
+    def _check_variable_name(
+        self, var_name: str, value_node: ast.expr, node: ast.AST
+    ) -> None:
         """
         Check if a variable name suggests it holds a secret.
 
@@ -171,7 +176,9 @@ class SecretScanner(ast.NodeVisitor):
         for secret_type, pattern in self.compiled_var_patterns.items():
             if pattern.match(var_name):
                 # Only flag if the value is a non-empty string constant
-                if isinstance(value_node, ast.Constant) and isinstance(value_node.value, str):
+                if isinstance(value_node, ast.Constant) and isinstance(
+                    value_node.value, str
+                ):
                     value = value_node.value
                     # Skip obvious placeholders and empty strings
                     # [20251214_BUGFIX] v2.0.0 - Require minimum 8 chars for var name detection
@@ -254,7 +261,9 @@ class SecretScanner(ast.NodeVisitor):
         # [20251215_REFACTOR] Remove unused inline warnings import; we simply record the vulnerability.
         self.vulnerabilities.append(vuln)
 
-    def _add_var_vuln(self, var_name: str, value: str, secret_type: str, node: ast.AST) -> None:
+    def _add_var_vuln(
+        self, var_name: str, value: str, secret_type: str, node: ast.AST
+    ) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Add vulnerability for secret-named variable.
 

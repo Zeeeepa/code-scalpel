@@ -34,7 +34,9 @@ class TestRepoWideBasics:
 
     def test_repo_wide_rename_init(self, temp_project):
         """RepoWideRename can be initialized."""
-        renamer = RepoWideRename(project_root=temp_project, max_workers=4, batch_size=50)
+        renamer = RepoWideRename(
+            project_root=temp_project, max_workers=4, batch_size=50
+        )
 
         assert renamer.project_root == temp_project
         assert renamer.max_workers == 4

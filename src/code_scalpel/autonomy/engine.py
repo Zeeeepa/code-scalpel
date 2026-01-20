@@ -75,7 +75,9 @@ class BlastRadiusCalculator:
             Tuple of (is_critical, reason, max_lines_allowed)
         """
         # Check if any file is in critical path
-        critical_files = [f for f in files if self.config.blast_radius.is_critical_path(f)]
+        critical_files = [
+            f for f in files if self.config.blast_radius.is_critical_path(f)
+        ]
 
         if not critical_files:
             # Standard limits apply
@@ -212,8 +214,8 @@ class AutonomyEngine:
             ChangeValidationResult with detailed decision
         """
         # [20251218_FEATURE] Check critical path impact first
-        is_critical, crit_reason, max_lines = self.blast_radius.check_critical_path_impact(
-            files, lines_changed
+        is_critical, crit_reason, max_lines = (
+            self.blast_radius.check_critical_path_impact(files, lines_changed)
         )
 
         if is_critical and "exceed" in crit_reason:
@@ -253,7 +255,10 @@ class AutonomyEngine:
             if self.config.autonomy_constraints.require_approval_for_security_changes:
                 return ChangeValidationResult(
                     allowed=False,
-                    reason=(f"Critical path changes require human approval. " f"Files: {files}"),
+                    reason=(
+                        f"Critical path changes require human approval. "
+                        f"Files: {files}"
+                    ),
                     critical_path_violation=True,
                     max_lines_allowed=max_lines,
                 )
