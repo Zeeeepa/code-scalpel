@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import inspect
 from importlib import import_module
 from typing import Any
 
@@ -79,17 +78,8 @@ async def generate_unit_tests(
     crash_log: str | None = None,
 ) -> Any:
     """Generate unit tests from code using symbolic execution."""
-    # [20260120_BUGFIX] Allow test monkeypatch of server._get_current_tier for tier overrides
-    try:
-        server_module = import_module("code_scalpel.mcp.server")
-        tier_override = getattr(server_module, "_get_current_tier", None)
-        tier = (
-            tier_override()
-            if callable(tier_override)
-            else tier_detector.get_current_tier()
-        )
-    except Exception:
-        tier = tier_detector.get_current_tier()
+    # [20260120_BUGFIX] Consistent tier detection pattern
+    tier = tier_detector.get_current_tier()
     caps = get_tool_capabilities("generate_unit_tests", tier)
     limits = caps.get("limits", {})
     cap_set = caps.get("capabilities", set())
@@ -144,38 +134,8 @@ async def generate_unit_tests(
             bug_reproduction_enabled=crash_log is not None,
         )
 
-    # [20260120_BUGFIX] Allow tests to monkeypatch sync impl via server._generate_tests_sync
-    try:
-        server_module = import_module("code_scalpel.mcp.server")
-        sync_impl_candidate = getattr(server_module, "_generate_tests_sync", None)
-    except Exception:
-        sync_impl_candidate = None
-
-    # [20260120_BUGFIX] Only use monkeypatched sync impl if it supports extended args
-    def _is_compatible(func: Any) -> bool:
-        try:
-            sig = inspect.signature(func)
-        except (TypeError, ValueError):
-            return False
-
-        params = sig.parameters.values()
-        positional_params = [
-            p for p in params if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
-        ]
-        has_var_positional = any(p.kind == p.VAR_POSITIONAL for p in params)
-        has_var_keyword = any(p.kind == p.VAR_KEYWORD for p in params)
-
-        # Need to accept at least 7 positional args or be variadic.
-        return has_var_positional or has_var_keyword or len(positional_params) >= 7
-
-    sync_impl = (
-        sync_impl_candidate
-        if callable(sync_impl_candidate) and _is_compatible(sync_impl_candidate)
-        else _generate_tests_sync
-    )
-
-    result = await asyncio.to_thread(
-        sync_impl,
+    return await asyncio.to_thread(
+        _generate_tests_sync,
         code,
         file_path,
         function_name,
@@ -183,16 +143,9 @@ async def generate_unit_tests(
         max_test_cases,
         data_driven,
         crash_log,
+        tier,
+        caps,
     )
-
-    # Add output metadata for transparency
-    result.tier_applied = tier
-    result.framework_used = framework
-    result.max_test_cases_limit = max_test_cases
-    result.data_driven_enabled = data_driven
-    result.bug_reproduction_enabled = crash_log is not None
-
-    return result
 
 
 @mcp.tool()
@@ -206,12 +159,6 @@ async def simulate_refactor(
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
     tier = tier_detector.get_current_tier()
     caps = get_tool_capabilities("simulate_refactor", tier)
-    limits = caps.get("limits", {})
-    tool_caps = caps.get("capabilities", set())
-
-    max_file_size_mb = limits.get("max_file_size_mb")
-    analysis_depth = limits.get("analysis_depth", "basic")
-    compliance_validation = "compliance_validation" in tool_caps
 
     return await asyncio.to_thread(
         _simulate_refactor_sync,
@@ -219,9 +166,8 @@ async def simulate_refactor(
         new_code,
         patch,
         strict_mode,
-        max_file_size_mb=max_file_size_mb,
-        analysis_depth=analysis_depth,
-        compliance_validation=compliance_validation,
+        tier,
+        caps,
     )
 
 
