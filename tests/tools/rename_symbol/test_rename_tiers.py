@@ -192,6 +192,88 @@ def test_changed_files_are_relative_paths(temp_project):
     assert all(not Path(p).is_absolute() for p in result.changed_files)
 
 
+# ---------------------------------------------------------------------------
+# Compatibility wrappers for legacy CI test names
+# ---------------------------------------------------------------------------
+
+
+def test_community_tier_same_file_only(temp_project):
+    """[20260119_TEST] Legacy alias: community tier refuses cross-file updates."""
+    main_py = temp_project / "main.py"
+    utils_py = temp_project / "utils.py"
+
+    result = rename_references_across_project(
+        project_root=temp_project,
+        target_file=main_py,
+        target_type="function",
+        target_name="old_function",
+        new_name="new_function",
+        create_backup=False,
+        max_files_searched=0,
+        max_files_updated=0,
+    )
+
+    assert result.success is True
+    assert result.changed_files == []
+    assert any("max_files_searched=0" in w for w in result.warnings)
+
+    # No cross-file updates should occur at community tier
+    utils_content = utils_py.read_text()
+    assert "old_function" in utils_content
+    assert "new_function" not in utils_content
+
+
+def test_community_limits_search_and_update():
+    """[20260119_TEST] Legacy alias: community tier limits are 0/0."""
+    caps = get_tool_capabilities("rename_symbol", "community")
+
+    assert caps["enabled"] is True
+    assert caps["limits"]["max_files_searched"] == 0
+    assert caps["limits"]["max_files_updated"] == 0
+    assert "cross_file_reference_rename" not in caps["capabilities"]
+
+
+def test_pro_tier_cross_file(temp_project):
+    """[20260119_TEST] Legacy alias: pro tier supports cross-file rename."""
+    from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
+
+    main_py = temp_project / "main.py"
+    utils_py = temp_project / "utils.py"
+
+    # Rename definition
+    patcher = UnifiedPatcher.from_file(str(main_py))
+    def_result = patcher.rename_symbol("function", "old_function", "new_function")
+    assert def_result.success
+    patcher.save(backup=False)
+
+    # Cross-file updates within pro limits
+    result = rename_references_across_project(
+        project_root=temp_project,
+        target_file=main_py,
+        target_type="function",
+        target_name="old_function",
+        new_name="new_function",
+        create_backup=False,
+        max_files_searched=500,
+        max_files_updated=200,
+    )
+
+    assert result.success is True
+    utils_content = utils_py.read_text()
+    assert "from main import new_function" in utils_content
+    assert "new_function()" in utils_content
+
+
+def test_pro_limits_500_search_200_update():
+    """[20260119_TEST] Legacy alias: pro tier limit definitions."""
+    caps = get_tool_capabilities("rename_symbol", "pro")
+
+    assert caps["enabled"] is True
+    assert caps["limits"]["max_files_searched"] == 500
+    assert caps["limits"]["max_files_updated"] == 200
+    assert "cross_file_reference_rename" in caps["capabilities"]
+
+
 class TestRenameSymbolBackupCapability:
     """Test backup creation (available at all tiers per features.py)."""
 
