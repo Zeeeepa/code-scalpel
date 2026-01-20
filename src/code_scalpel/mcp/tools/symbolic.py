@@ -166,8 +166,8 @@ async def simulate_refactor(
         new_code,
         patch,
         strict_mode,
-        tier,
-        caps,
+        tier=tier,
+        caps=caps,
     )
 
 
