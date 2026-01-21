@@ -120,16 +120,14 @@ class TestScanDependenciesSync:
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create pyproject.toml
             pyproject = Path(tmpdir) / "pyproject.toml"
-            pyproject.write_text(
-                """
+            pyproject.write_text("""
 [project]
 name = "test-project"
 dependencies = [
     "click>=8.0",
     "rich>=10.0",
 ]
-"""
-            )
+""")
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -401,14 +399,12 @@ class TestEdgeCases:
         """Test that comments in requirements.txt are ignored."""
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
-            req_path.write_text(
-                """
+            req_path.write_text("""
 # This is a comment
 requests==2.25.0  # inline comment
 # Another comment
 flask>=2.0
-"""
-            )
+""")
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -424,15 +420,13 @@ flask>=2.0
         """Test parsing Poetry dependencies from pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pp_path = Path(tmpdir) / "pyproject.toml"
-            pp_path.write_text(
-                """
+            pp_path.write_text("""
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.25.0"
 flask = "2.0.0"
 pandas = ">=1.0"
-"""
-            )
+""")
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -451,16 +445,14 @@ pandas = ">=1.0"
         """Test parsing PEP 621 dependencies from pyproject.toml."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pp_path = Path(tmpdir) / "pyproject.toml"
-            pp_path.write_text(
-                """
+            pp_path.write_text("""
 [project]
 name = "test-app"
 dependencies = [
     "requests>=2.25.0",
     "flask>=2.0",
 ]
-"""
-            )
+""")
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,
@@ -492,14 +484,12 @@ dependencies = [
         with tempfile.TemporaryDirectory() as tmpdir:
             req_path = Path(tmpdir) / "requirements.txt"
             # Create file with only comments and whitespace
-            req_path.write_text(
-                """
+            req_path.write_text("""
 # Comment line
    
 # Another comment
 -e git+https://github.com/example/repo.git  # Options line, should be skipped
-"""
-            )
+""")
 
             result = _scan_dependencies_sync(
                 project_root=tmpdir,

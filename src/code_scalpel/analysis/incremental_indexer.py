@@ -123,8 +123,7 @@ class IncrementalIndexer:
     def _init_database(self) -> None:
         """Initialize SQLite cache database."""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS file_hashes (
                     file_path TEXT PRIMARY KEY,
                     file_hash TEXT NOT NULL,
@@ -132,10 +131,8 @@ class IncrementalIndexer:
                     file_size INTEGER NOT NULL,
                     indexed_at REAL NOT NULL
                 )
-            """
-            )
-            conn.execute(
-                """
+            """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS analyses (
                     file_path TEXT PRIMARY KEY,
                     file_hash TEXT NOT NULL,
@@ -144,13 +141,10 @@ class IncrementalIndexer:
                     ttl_seconds INTEGER NOT NULL,
                     FOREIGN KEY(file_path) REFERENCES file_hashes(file_path)
                 )
-            """
-            )
-            conn.execute(
-                """
+            """)
+            conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_file_hash ON file_hashes(file_hash)
-            """
-            )
+            """)
             conn.commit()
 
     def _init_redis(self) -> None:

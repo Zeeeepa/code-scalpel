@@ -406,8 +406,7 @@ class TestMermaidTierExpectations:
 
     @staticmethod
     def _expected_community_mermaid() -> str:
-        return dedent(
-            """
+        return dedent("""
             graph TD
                 python_main_function_center["center"]:::center
                 python_module_a_function_func_A["func_A"]:::depth1
@@ -421,13 +420,11 @@ class TestMermaidTierExpectations:
                 classDef center fill:#f9f,stroke:#333,stroke-width:3px
                 classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px
                 classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px
-            """
-        ).strip()
+            """).strip()
 
     @staticmethod
     def _expected_full_mermaid() -> str:
-        return dedent(
-            """
+        return dedent("""
             graph TD
                 python_main_function_center["center"]:::center
                 python_module_a_function_func_A["func_A"]:::depth1
@@ -451,8 +448,7 @@ class TestMermaidTierExpectations:
                 classDef center fill:#f9f,stroke:#333,stroke-width:3px
                 classDef depth1 fill:#bbf,stroke:#333,stroke-width:2px
                 classDef depth2plus fill:#ddd,stroke:#333,stroke-width:1px
-            """
-        ).strip()
+            """).strip()
 
     def test_community_mermaid_expected(self, sample_call_graph):
         """Community tier (k=1) should render depth-1 neighborhood only."""

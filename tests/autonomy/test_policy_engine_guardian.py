@@ -15,8 +15,7 @@ from code_scalpel.policy_engine.policy_engine import (
 
 def _write_policy_file(tmp_path: Path, action: str = "WARN") -> Path:
     policy_path = tmp_path / "policy.yaml"
-    policy_path.write_text(
-        """
+    policy_path.write_text("""
 policies:
   - name: safe-edit
     description: Test policy
@@ -25,10 +24,7 @@ policies:
       deny = []
     severity: MEDIUM
     action: {action}
-""".format(
-            action=action
-        )
-    )
+""".format(action=action))
     return policy_path
 
 

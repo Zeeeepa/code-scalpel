@@ -18,15 +18,13 @@ class TestOutputMetadataFields:
         """Basic call graph should include all metadata fields."""
         # Create a simple project
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def main():
     helper()
 
 def helper():
     return 42
-"""
-        )
+""")
         # community_tier fixture ensures community tier detection
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
@@ -119,8 +117,7 @@ class TestTierEnforcement:
         """Community tier should enforce max_depth=3."""
         # Create a deeply nested call chain
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def level_0():
     level_1()
 
@@ -138,8 +135,7 @@ def level_4():
 
 def level_5():
     pass
-"""
-        )
+""")
         # community_tier fixture from conftest.py disables license discovery
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -227,15 +223,13 @@ class TestTruncationMetadata:
     async def test_no_truncation_when_within_limits(self, tmp_path):
         """When within limits, truncation fields should indicate no truncation."""
         main_file = tmp_path / "main.py"
-        main_file.write_text(
-            """
+        main_file.write_text("""
 def foo():
     bar()
 
 def bar():
     pass
-"""
-        )
+""")
         result = await get_call_graph(project_root=str(tmp_path))
 
         assert result.success is True
@@ -306,14 +300,12 @@ class TestEntryPointDetection:
     @pytest.mark.asyncio
     async def test_pytest_entry_point_marked(self, tmp_path, community_tier):
         """[20260121_TEST] pytest-style test_* function is flagged as entry point in test modules."""
-        (tmp_path / "test_sample.py").write_text(
-            """
+        (tmp_path / "test_sample.py").write_text("""
 import helper
 
 def test_example():
     helper.fn()
-"""
-        )
+""")
         (tmp_path / "helper.py").write_text("def fn():\n    return 1\n")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
@@ -324,15 +316,13 @@ def test_example():
     @pytest.mark.asyncio
     async def test_js_entry_point_consistent_pro(self, tmp_path, pro_tier):
         """[20260121_TEST] JS entry points (invoked main) remain entry points under Pro tier."""
-        (tmp_path / "index.js").write_text(
-            """
+        (tmp_path / "index.js").write_text("""
 function main() {
     return 1;
 }
 
 main();
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
@@ -344,15 +334,13 @@ main();
         self, tmp_path, enterprise_tier
     ):
         """[20260121_TEST] TS entry points remain entry points under Enterprise tier."""
-        (tmp_path / "index.ts").write_text(
-            """
+        (tmp_path / "index.ts").write_text("""
 function main(): number {
     return 1;
 }
 
 main();
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
@@ -394,8 +382,7 @@ class TestProConfidenceAndMetrics:
     @pytest.mark.asyncio
     async def test_pro_confidence_scores_present(self, tmp_path, pro_tier):
         """[20260121_TEST] Pro edges should include confidence metadata within bounds."""
-        (tmp_path / "a.py").write_text(
-            """
+        (tmp_path / "a.py").write_text("""
 class Base:
     def call(self):
         return 1
@@ -409,8 +396,7 @@ def run(x: Base):
 
 def main():
     return run(Impl())
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -428,8 +414,7 @@ def main():
     @pytest.mark.asyncio
     async def test_pro_polymorphism_resolution(self, tmp_path, pro_tier):
         """[20260121_TEST] Advanced resolution should map instance method calls to class-qualified targets."""
-        (tmp_path / "poly.py").write_text(
-            """
+        (tmp_path / "poly.py").write_text("""
 class Worker:
     def do(self):
         return 1
@@ -437,8 +422,7 @@ class Worker:
 def use():
     w = Worker()
     return w.do()
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=5)
 
@@ -453,8 +437,7 @@ class TestEnterpriseHotPathsAndDeadCode:
     @pytest.mark.asyncio
     async def test_enterprise_hot_nodes_and_dead_code(self, tmp_path, enterprise_tier):
         """[20260121_TEST] Enterprise should populate hot_nodes and dead_code_candidates with meaningful entries."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def entry():
     hub()
     leaf1()
@@ -471,8 +454,7 @@ def leaf2():
 
 def ghost():
     return 0
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -491,8 +473,7 @@ class TestProCallbacksAndClosures:
     @pytest.mark.asyncio
     async def test_pro_nested_function_resolution(self, tmp_path, pro_tier):
         """[20260121_TEST] Pro should resolve nested function calls in advanced mode."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def outer():
     def inner():
         helper()
@@ -500,8 +481,7 @@ def outer():
 
 def helper():
     pass
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -518,8 +498,7 @@ def helper():
     @pytest.mark.asyncio
     async def test_pro_method_chaining(self, tmp_path, pro_tier):
         """[20260121_TEST] Pro should resolve method chains with advanced resolution."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 class Builder:
     def configure(self):
         self.setup()
@@ -533,8 +512,7 @@ class Builder:
 
 builder = Builder()
 builder.configure().setup()
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -552,8 +530,7 @@ class TestProMermaidAndMetrics:
     @pytest.mark.asyncio
     async def test_pro_edge_metrics_completeness(self, tmp_path, pro_tier):
         """[20260121_TEST] Pro edges should have confidence and inference_source populated."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 class Service:
     def process(self):
         self.validate()
@@ -563,8 +540,7 @@ class Service:
 
 svc = Service()
 svc.process()
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -590,8 +566,7 @@ svc.process()
     @pytest.mark.asyncio
     async def test_pro_multiple_call_site_tracking(self, tmp_path, pro_tier):
         """[20260121_TEST] Pro should track multiple call sites for same target."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def utility():
     pass
 
@@ -603,8 +578,7 @@ def caller_two():
 
 caller_one()
 caller_two()
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -672,8 +646,7 @@ class TestEnterpriseComplexGraphPatterns:
         self, tmp_path, enterprise_tier
     ):
         """[20260121_TEST] Enterprise should detect and report circular dependencies."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def func_a():
     func_b()
 
@@ -682,8 +655,7 @@ def func_b():
 
 def func_c():
     func_a()  # Circular: func_c -> func_a -> func_b -> func_c
-"""
-        )
+""")
 
         result = await get_call_graph(
             project_root=str(tmp_path),
@@ -699,8 +671,7 @@ def func_c():
     @pytest.mark.asyncio
     async def test_enterprise_entry_point_expansion(self, tmp_path, enterprise_tier):
         """[20260121_TEST] Enterprise should identify all entry points (main, CLI, API routes)."""
-        (tmp_path / "main.py").write_text(
-            """
+        (tmp_path / "main.py").write_text("""
 def main():
     init()
 
@@ -712,8 +683,7 @@ def setup():
 
 if __name__ == "__main__":
     main()
-"""
-        )
+""")
 
         result = await get_call_graph(
             project_root=str(tmp_path),
@@ -733,8 +703,7 @@ class TestEnterpriseMermaidAndVisualization:
     @pytest.mark.asyncio
     async def test_enterprise_mermaid_generation(self, tmp_path, enterprise_tier):
         """[20260121_TEST] Enterprise should generate Mermaid diagrams showing full graph."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def render_dashboard():
     fetch_metrics()
     fetch_user()
@@ -747,8 +716,7 @@ def fetch_user():
 
 def query_database():
     pass
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 
@@ -760,8 +728,7 @@ def query_database():
     @pytest.mark.asyncio
     async def test_enterprise_rich_metadata_export(self, tmp_path, enterprise_tier):
         """[20260121_TEST] Enterprise call graph should include rich metadata for visualization."""
-        (tmp_path / "app.py").write_text(
-            """
+        (tmp_path / "app.py").write_text("""
 def hub_function():
     leaf_a()
     leaf_b()
@@ -778,8 +745,7 @@ def leaf_c():
 
 def unused_function():
     pass
-"""
-        )
+""")
 
         result = await get_call_graph(project_root=str(tmp_path), depth=10)
 

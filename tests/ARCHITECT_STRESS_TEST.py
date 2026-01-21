@@ -148,8 +148,7 @@ except SyntaxError as e:
 print("\n" + "=" * 80)
 print("THE ARCHITECT'S VERDICT")
 print("=" * 80)
-print(
-    """
+print("""
 1. PDG Builder (pdg_tools/builder.py): 
    ❌ NO sanitization - CRASHES on merge conflicts
    ❌ NO fallback - ast.parse() called directly (line 82)
@@ -180,5 +179,4 @@ This tool is NOT "deterministic" because:
 It IS "fail-fast" in some places (surgical_extractor) but NOT others (pdg_builder).
 
 The real-world verdict: **PARTIALLY ROBUST** but **INCONSISTENT**.
-"""
-)
+""")

@@ -45,8 +45,7 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent(
-        """
+    code = textwrap.dedent("""
         from flask import request, Flask
         app = Flask(__name__)
 
@@ -56,8 +55,7 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
             account = request.form['account']
             transfer(amount, account)
             return 'Success'
-        """
-    )
+        """)
 
     from code_scalpel.mcp.server import security_scan
 
@@ -80,8 +78,7 @@ async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
     """Detect SSRF via requests library."""
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent(
-        """
+    code = textwrap.dedent("""
         import requests
         from flask import request
 
@@ -89,8 +86,7 @@ async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
             user_url = request.args.get('url')
             response = requests.get(user_url)  # SSRF - no URL validation
             return response.text
-        """
-    )
+        """)
 
     from code_scalpel.mcp.server import security_scan
 
@@ -120,16 +116,14 @@ async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent(
-        """
+    code = textwrap.dedent("""
         import jwt
 
         def validate_token(token):
             # Insecure: verify=False bypasses signature check
             payload = jwt.decode(token, verify=False)
             return payload
-        """
-    )
+        """)
 
     from code_scalpel.mcp.server import security_scan
 
@@ -164,16 +158,14 @@ async def test_jwt_none_algorithm(monkeypatch: pytest.MonkeyPatch):
     """
     _use_pro_license(monkeypatch)
 
-    code = textwrap.dedent(
-        """
+    code = textwrap.dedent("""
         import jwt
 
         def create_admin_token():
             # Critical vulnerability: 'none' algorithm allows unsigned tokens
             token = jwt.encode({'user': 'admin'}, key='', algorithm='none')
             return token
-        """
-    )
+        """)
 
     from code_scalpel.mcp.server import security_scan
 

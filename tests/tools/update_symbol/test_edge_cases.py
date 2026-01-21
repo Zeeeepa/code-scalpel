@@ -19,14 +19,12 @@ class TestUpdateSymbolAsyncFunctions:
     async def test_async_function_replacement(self, tmp_path):
         """update_symbol should handle async function replacement."""
         py_file = tmp_path / "async_sample.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 async def fetch_data(url):
     '''Fetch data asynchronously.'''
     # Simulated async operation
     return {"url": url}
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -45,14 +43,12 @@ async def fetch_data(url):
     async def test_async_method_replacement(self, tmp_path):
         """update_symbol should handle async method replacement."""
         py_file = tmp_path / "async_class.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class AsyncHandler:
     async def process(self, data):
         '''Process data asynchronously.'''
         return await self.handle(data)
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -74,15 +70,13 @@ class TestUpdateSymbolDecoratedFunctions:
     async def test_single_decorator(self, tmp_path):
         """update_symbol should handle functions with single decorator."""
         py_file = tmp_path / "decorated.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 @staticmethod
 def parse_json(data):
     '''Parse JSON string.'''
     import json
     return json.loads(data)
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -100,15 +94,13 @@ def parse_json(data):
     async def test_multiple_decorators(self, tmp_path):
         """update_symbol should handle multiple decorators."""
         py_file = tmp_path / "multi_decorated.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 @classmethod
 @staticmethod
 def get_config(cls):
     '''Get configuration.'''
     return cls._config
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -126,8 +118,7 @@ def get_config(cls):
     async def test_property_decorator(self, tmp_path):
         """update_symbol should handle @property decorated methods."""
         py_file = tmp_path / "property_class.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class Config:
     @property
     def value(self):
@@ -138,8 +129,7 @@ class Config:
     def value(self, val):
         '''Set value.'''
         self._value = val
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -161,16 +151,14 @@ class TestUpdateSymbolNestedFunctions:
     async def test_nested_function_replacement(self, tmp_path):
         """update_symbol should handle nested functions (outer function)."""
         py_file = tmp_path / "nested.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 def outer_function(x):
     '''Outer function.'''
     def inner_function(y):
         '''Inner function.'''
         return x + y
     return inner_function
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -189,14 +177,12 @@ def outer_function(x):
         """update_symbol should NOT be able to replace inner nested functions directly."""
         # This is an edge case - inner functions should be part of outer function scope
         py_file = tmp_path / "nested2.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 def outer_function(x):
     def inner_function(y):
         return x + y
     return inner_function
-"""
-        )
+""")
 
         # Attempting to replace inner_function directly should fail
         result = {
@@ -219,15 +205,13 @@ class TestUpdateSymbolStaticAndClassMethods:
     async def test_static_method_replacement(self, tmp_path):
         """update_symbol should handle @staticmethod replacement."""
         py_file = tmp_path / "static_methods.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class Math:
     @staticmethod
     def add(x, y):
         '''Add two numbers.'''
         return x + y
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -245,15 +229,13 @@ class Math:
     async def test_classmethod_replacement(self, tmp_path):
         """update_symbol should handle @classmethod replacement."""
         py_file = tmp_path / "class_methods.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class Factory:
     @classmethod
     def create(cls, name):
         '''Create instance.'''
         return cls(name)
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -275,16 +257,14 @@ class TestUpdateSymbolLambdaAssignments:
     async def test_lambda_assignment_as_function(self, tmp_path):
         """update_symbol may or may not support lambda assignments."""
         py_file = tmp_path / "lambdas.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 # Lambda assignment
 simple_multiply = lambda x, y: x * y
 
 # Function definition
 def complex_multiply(x, y):
     return x * y
-"""
-        )
+""")
 
         # Lambda might not be supported (they're expressions, not statements)
         # This tests whether tool handles it gracefully
@@ -308,8 +288,7 @@ class TestUpdateSymbolInheritance:
     async def test_method_in_parent_class(self, tmp_path):
         """update_symbol should replace method in parent class."""
         py_file = tmp_path / "inheritance.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class Parent:
     def method(self):
         '''Parent method.'''
@@ -317,8 +296,7 @@ class Parent:
 
 class Child(Parent):
     pass
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -336,8 +314,7 @@ class Child(Parent):
     async def test_overridden_method_in_child(self, tmp_path):
         """update_symbol should replace overridden method in child class."""
         py_file = tmp_path / "override.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class Parent:
     def method(self):
         return "parent"
@@ -346,8 +323,7 @@ class Child(Parent):
     def method(self):
         '''Overridden method.'''
         return "child"
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -369,8 +345,7 @@ class TestUpdateSymbolComplexDocstrings:
     async def test_multiline_docstring_preserved(self, tmp_path):
         """update_symbol should preserve multiline docstrings."""
         py_file = tmp_path / "docstring.py"
-        py_file.write_text(
-            '''
+        py_file.write_text('''
 def complex_function(data):
     """
     Process complex data.
@@ -392,8 +367,7 @@ def complex_function(data):
     if not isinstance(data, dict):
         raise ValueError("Data must be dict")
     return {k: v for k, v in data.items() if v is not None}
-'''
-        )
+''')
 
         result = {
             "success": True,
@@ -415,8 +389,7 @@ class TestUpdateSymbolLineNumberAccuracy:
     async def test_lines_changed_accuracy(self, tmp_path):
         """update_symbol should report accurate line count."""
         py_file = tmp_path / "lines.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 def function1():
     '''First function.'''
     return 1
@@ -426,8 +399,7 @@ def function2():
     x = 10
     y = 20
     return x + y
-"""
-        )
+""")
 
         result = {
             "success": True,
@@ -449,8 +421,7 @@ class TestUpdateSymbolSpecialMethods:
     async def test_dunder_method_replacement(self, tmp_path):
         """update_symbol should handle __str__, __repr__, etc."""
         py_file = tmp_path / "special.py"
-        py_file.write_text(
-            """
+        py_file.write_text("""
 class MyClass:
     def __init__(self, value):
         self.value = value
@@ -462,8 +433,7 @@ class MyClass:
     def __repr__(self):
         '''Developer representation.'''
         return f"MyClass(value={self.value!r})"
-"""
-        )
+""")
 
         result = {
             "success": True,

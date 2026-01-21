@@ -136,14 +136,12 @@ class TestLicenseGracefulDegradation:
         monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
         test_file = tmp_path / "test.py"
-        test_file.write_text(
-            """
+        test_file.write_text("""
 try:
     pass
 except:
     pass
-"""
-        )
+""")
 
         # Should not raise exception, should fall back to Community tier
         result = await code_policy_check(paths=[str(test_file)])

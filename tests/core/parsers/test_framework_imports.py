@@ -11,15 +11,13 @@ from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
 def test_django_installed_apps_detection(tmp_path: Path) -> None:
     settings_py = tmp_path / "settings.py"
     settings_py.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             INSTALLED_APPS = [
                 "django.contrib.admin",
                 "django.contrib.auth",
                 "myapp",
             ]
-            """
-        ),
+            """),
         encoding="utf-8",
     )
 
