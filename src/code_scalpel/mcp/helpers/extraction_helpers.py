@@ -50,13 +50,6 @@ PROJECT_ROOT = Path.cwd()
 MAX_CODE_SIZE = 100_000
 
 
-def _get_server():
-    """Lazy import to avoid circular dependencies with server module."""
-    from code_scalpel.mcp.archive import server as _server
-
-    return _server
-
-
 def _get_cache():
     try:
         from code_scalpel.cache import get_cache
@@ -149,7 +142,7 @@ async def _extract_polyglot(
         token_estimate = result.token_estimate if include_token_estimate else 0
 
         # [20260111_FEATURE] Get tier and limits for metadata
-        tier = _get_server()._get_current_tier()
+        tier = get_current_tier()
         from code_scalpel.licensing.config_loader import get_tool_limits
 
         limits = get_tool_limits("extract_code", tier)
@@ -1039,9 +1032,16 @@ async def update_symbol(
         """Best-effort semantic validation that the replacement defines the target."""
         if new_code is None:
             return "Replacement code is required for operation='replace'."
+
+        tree = None
         try:
             # [20260119_FEATURE] Use unified parser for deterministic error handling
-            tree, report = parse_python_code(new_code)
+            parsed_tree, report = parse_python_code(new_code)
+            # Type narrowing: ensure we got a Module
+            if not isinstance(parsed_tree, ast.Module):
+                return "Replacement code must be a valid Python module."
+            tree = parsed_tree
+
             if report.was_sanitized:
                 # Warn but don't fail - sanitization is informational
                 nonlocal warnings
@@ -1055,6 +1055,12 @@ async def update_symbol(
             if e.suggestion:
                 msg += f". {e.suggestion}"
             return msg
+        except Exception as e:
+            return f"Failed to parse replacement code: {str(e)}"
+
+        # Check if tree was successfully parsed (guaranteed to be Module here)
+        if tree is None:
+            return "Failed to parse replacement code structure."
 
         if not tree.body:
             return "Replacement code is empty."

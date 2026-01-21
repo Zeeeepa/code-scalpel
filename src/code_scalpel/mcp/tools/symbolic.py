@@ -63,8 +63,8 @@ async def symbolic_execute(
         effective_max_paths,
         effective_max_depth,
         constraint_types,
-        tier,
-        caps,
+        tier=tier,
+        capabilities=caps,
     )
 
 
@@ -143,8 +143,6 @@ async def generate_unit_tests(
         max_test_cases,
         data_driven,
         crash_log,
-        tier,
-        caps,
     )
 
 
@@ -159,6 +157,12 @@ async def simulate_refactor(
     # [20251225_FEATURE] Tier-based behavior via capability matrix (no upgrade hints).
     tier = tier_detector.get_current_tier()
     caps = get_tool_capabilities("simulate_refactor", tier)
+    limits = caps.get("limits", {})
+    tool_caps = caps.get("capabilities", set())
+
+    max_file_size_mb = limits.get("max_file_size_mb")
+    analysis_depth = limits.get("analysis_depth", "basic")
+    compliance_validation = "compliance_validation" in tool_caps
 
     return await asyncio.to_thread(
         _simulate_refactor_sync,
@@ -166,8 +170,9 @@ async def simulate_refactor(
         new_code,
         patch,
         strict_mode,
-        tier=tier,
-        caps=caps,
+        max_file_size_mb=max_file_size_mb,
+        analysis_depth=analysis_depth,
+        compliance_validation=compliance_validation,
     )
 
 
