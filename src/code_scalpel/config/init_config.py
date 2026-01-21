@@ -263,7 +263,8 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     license_dir.mkdir(exist_ok=True)
 
     license_readme = license_dir / "README.md"
-    license_readme.write_text("""# Code Scalpel License Directory
+    license_readme.write_text(
+        """# Code Scalpel License Directory
 
 This directory stores license keys and cached license state.
 
@@ -271,7 +272,8 @@ This directory stores license keys and cached license state.
 - `license_state.json`: Automatically generated cache of license validation results.
 
 Do not commit `license.jwt` to version control if it contains sensitive information.
-""")
+"""
+    )
     files_created.append("license/README.md")
 
     # ========================================================================

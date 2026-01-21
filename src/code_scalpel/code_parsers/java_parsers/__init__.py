@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-
+# Phase 1: Define Java parser registry and import core parsers
+# This module sets up the framework for integrating various Java parsers
+# into the code analysis tool. The actual implementation of registry methods
+# will be completed in Phase 2.
 
 from .java_parser_treesitter import (
     JavaAnnotation,

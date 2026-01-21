@@ -271,6 +271,12 @@ class ResponseConfig:
         inclusions = self.get_inclusions(tool_name)
         # [20260119_FEATURE] Get error-conditional fields
         error_inclusions = self.get_error_inclusions(tool_name) if is_error else set()
+        # [20260121_BUGFIX] Fields specified in include_on_error must be excluded
+        # when not an error response, even if not listed in exclude_fields.
+        if not is_error and tool_name:
+            conditional_exclude = self.get_error_inclusions(tool_name)
+            if conditional_exclude:
+                exclusions.update(conditional_exclude)
 
         for key, value in data.items():
             # [20251228_BUGFIX] Preserve contract-critical fields.

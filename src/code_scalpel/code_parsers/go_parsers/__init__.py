@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-
+# Phase 1: Define Go parser registry and placeholders for individual parsers
+# This module sets up the framework for integrating various Go parsers
+# into the code analysis tool. The actual implementation of parsers and
+# registry methods will be completed in Phase 2.
 
 __all__ = [
     "GoParserRegistry",

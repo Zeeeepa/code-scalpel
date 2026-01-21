@@ -11,7 +11,12 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from code_scalpel.policy_engine.audit_log import (
+    AuditLog,
+)  # [20260121_BUGFIX] Persist audit trail to disk
 
 logger = logging.getLogger("code_scalpel.mcp.session")
 
@@ -22,6 +27,30 @@ logger = logging.getLogger("code_scalpel.mcp.session")
 # These are the CANONICAL instances. All code MUST use these exact objects.
 _SESSION_UPDATE_COUNTS: Dict[str, int] = {}
 _SESSION_AUDIT_TRAIL: List[Dict[str, Any]] = []
+
+
+def _get_project_root() -> Path:
+    """Get current project root for locating .code-scalpel.
+
+    [20260121_BUGFIX] Mirror server getter to anchor persistent audit log.
+    """
+
+    try:
+        from code_scalpel.mcp.server import get_project_root
+
+        return get_project_root()
+    except Exception:
+        return Path.cwd()
+
+
+def _get_persistent_audit_log() -> AuditLog | None:
+    """Return disk-backed audit log in .code-scalpel/audit.log if available."""
+
+    try:
+        log_path = _get_project_root() / ".code-scalpel" / "audit.log"
+        return AuditLog(str(log_path))
+    except Exception:
+        return None
 
 
 # =============================================================================
@@ -74,6 +103,30 @@ class SessionManager:
         logger.info(
             f"AUDIT [{entry.get('tool', entry.get('operation', 'unknown'))}] {entry.get('success', entry.get('outcome', '-'))}"
         )
+
+        # [20260121_BUGFIX] Persist audit trail to disk (tamper-resistant)
+        try:
+            audit_log = _get_persistent_audit_log()
+            if audit_log is not None:
+                severity = "LOW" if entry.get("success", True) else "HIGH"
+                details = {
+                    "tool": entry.get("tool") or entry.get("operation"),
+                    "file_path": entry.get("file_path"),
+                    "target_name": entry.get("target_name"),
+                    "tier": entry.get("tier"),
+                    "metadata": entry.get("metadata"),
+                    "outcome": entry.get("outcome"),
+                    "user_id": entry.get("user_id"),
+                }
+                audit_log.record_event(
+                    event_type=entry.get("tool")
+                    or entry.get("operation")
+                    or "audit_event",
+                    severity=severity,
+                    details=details,
+                )
+        except Exception:
+            logger.warning("Persistent audit logging failed", exc_info=False)
 
 
 # =============================================================================

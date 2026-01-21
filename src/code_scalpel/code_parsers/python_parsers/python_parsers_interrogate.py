@@ -329,7 +329,10 @@ class InterrogateReport:
     @property
     def is_coverage_acceptable(self) -> bool:
         """Check if coverage meets minimum threshold."""
-        # Note: Would need min_coverage from config
+        # [20260120_BUGFIX] Use a conservative default threshold until config is wired.
+        # InterrogateConfig defaults to 80%, but we don't have config access on the report,
+        # so use the same default here to keep behavior predictable and satisfy static checks.
+        return self.coverage.coverage_percentage >= 80.0
 
     @property
     def summary(self) -> str:

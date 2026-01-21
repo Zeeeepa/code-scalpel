@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from code_scalpel.policy_engine.audit_log import (
+    AuditLog,
+)  # [20260121_BUGFIX] Persist audit events
+
 from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.mcp.models.policy import (
     CodePolicyCheckResult,
@@ -277,6 +281,32 @@ def _verify_policy_integrity_sync(
     tamper_detection_enabled = limits.get("tamper_detection", False)
     audit_logging_enabled = "audit_logging" in caps_set
 
+    def _finalize(result: PolicyVerificationResult) -> PolicyVerificationResult:
+        """Attach persistent audit entry when enabled."""
+
+        if audit_logging_enabled:
+            severity = "LOW" if result.success else "HIGH"
+            try:
+                log_path = Path(dir_path) / "audit.log"
+                AuditLog(str(log_path)).record_event(
+                    event_type="verify_policy_integrity",
+                    severity=severity,
+                    details={
+                        "manifest_source": result.manifest_source,
+                        "policy_dir": result.policy_dir,
+                        "files_verified": result.files_verified,
+                        "files_failed": result.files_failed,
+                        "error": result.error,
+                        "error_code": result.error_code,
+                        "tier": result.tier,
+                        "signature_validated": result.signature_validated,
+                    },
+                )
+            except Exception:
+                pass
+
+        return result
+
     result = PolicyVerificationResult(
         success=False,
         manifest_source=manifest_source,
@@ -299,7 +329,7 @@ def _verify_policy_integrity_sync(
             if not policy_path.exists():
                 result.error = f"Policy directory not found: {dir_path}"
                 result.error_code = "POLICY_DIR_NOT_FOUND"
-                return result
+                return _finalize(result)
 
             policy_files = []
             for ext in ["*.yaml", "*.yml", "*.json"]:
@@ -314,7 +344,7 @@ def _verify_policy_integrity_sync(
             if not policy_files:
                 result.error = f"No policy files found in {dir_path}"
                 result.error_code = "NO_POLICY_FILES"
-                return result
+                return _finalize(result)
 
             from code_scalpel.licensing.config_loader import get_tool_limits
 
@@ -328,7 +358,7 @@ def _verify_policy_integrity_sync(
                 )
                 result.success = False
                 result.error_code = "POLICY_FILE_LIMIT_EXCEEDED"
-                return result
+                return _finalize(result)
 
             def _safe_error_text(text: str) -> str:
                 out: list[str] = []
@@ -361,7 +391,7 @@ def _verify_policy_integrity_sync(
                 if files_failed:
                     result.error = f"Invalid policy files: {', '.join(files_failed)}"
                     result.error_code = "POLICY_PARSE_ERROR"
-                return result
+                return _finalize(result)
 
         if "signature_validation" in caps_set and signature_validation_enabled:
             from code_scalpel.policy_engine.crypto_verify import (
@@ -403,16 +433,16 @@ def _verify_policy_integrity_sync(
                 "tier": tier,
             }
 
-        return result
+        return _finalize(result)
 
     except ImportError as e:
         result.error = f"Policy engine not available: {str(e)}."
         result.error_code = "POLICY_ENGINE_UNAVAILABLE"
-        return result
+        return _finalize(result)
     except Exception as e:  # noqa: BLE001
         result.error = f"Verification failed: {str(e)}."
         result.error_code = "INTERNAL_ERROR"
-        return result
+        return _finalize(result)
 
 
 def _code_policy_check_sync(

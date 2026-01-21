@@ -47,12 +47,6 @@ Features:
         - Line counts (total, code, comments, blank)
         - Function and class counts
         - Comprehensive CodeMetrics aggregation
-
-Future Enhancements:
-    - Prototype pollution detection
-    - Control flow graph generation
-    - Data flow / taint analysis
-    - Design pattern detection improvements
 """
 
 import math
@@ -670,13 +664,7 @@ class JavaScriptParser(BaseParser):
                 operands[str(node.value)] += 1
         elif isinstance(node, esprima.nodes.CallExpression):
             operators["()"] += 1
-        elif isinstance(
-            node,
-            (
-                esprima.nodes.StaticMemberExpression,
-                esprima.nodes.ComputedMemberExpression,
-            ),
-        ):
+        elif isinstance(node, esprima.nodes.MemberExpression):
             operators["."] += 1
         elif isinstance(node, esprima.nodes.NewExpression):
             operators["new"] += 1
@@ -758,17 +746,15 @@ class JavaScriptParser(BaseParser):
             callee_node = node.callee
             if isinstance(callee_node, esprima.nodes.Identifier):
                 callee = callee_node.name
-            elif isinstance(
-                callee_node,
-                (
-                    esprima.nodes.StaticMemberExpression,
-                    esprima.nodes.ComputedMemberExpression,
-                ),
-            ):
+            elif isinstance(callee_node, esprima.nodes.MemberExpression):
                 is_method = True
-                if isinstance(callee_node.property, esprima.nodes.Identifier):
+                if hasattr(callee_node, "property") and isinstance(
+                    callee_node.property, esprima.nodes.Identifier
+                ):
                     callee = callee_node.property.name
-                if isinstance(callee_node.object, esprima.nodes.Identifier):
+                if hasattr(callee_node, "object") and isinstance(
+                    callee_node.object, esprima.nodes.Identifier
+                ):
                     object_name = callee_node.object.name
 
         args_count = len(node.arguments) if hasattr(node, "arguments") else 0
@@ -873,14 +859,10 @@ class JavaScriptParser(BaseParser):
 
             # Check for innerHTML/outerHTML assignments
             if isinstance(node, esprima.nodes.AssignmentExpression):
-                if isinstance(
-                    node.left,
-                    (
-                        esprima.nodes.StaticMemberExpression,
-                        esprima.nodes.ComputedMemberExpression,
-                    ),
-                ):
-                    if isinstance(node.left.property, esprima.nodes.Identifier):
+                if isinstance(node.left, esprima.nodes.MemberExpression):
+                    if hasattr(node.left, "property") and isinstance(
+                        node.left.property, esprima.nodes.Identifier
+                    ):
                         if node.left.property.name in ("innerHTML", "outerHTML"):
                             issues.append(
                                 SecurityIssue(
@@ -905,38 +887,38 @@ class JavaScriptParser(BaseParser):
 
             # Check for document.write
             if isinstance(node, esprima.nodes.CallExpression):
-                if isinstance(
-                    node.callee,
-                    (
-                        esprima.nodes.StaticMemberExpression,
-                        esprima.nodes.ComputedMemberExpression,
-                    ),
-                ):
-                    if isinstance(node.callee.object, esprima.nodes.Identifier):
-                        if node.callee.object.name == "document":
-                            if isinstance(
+                if isinstance(node.callee, esprima.nodes.MemberExpression):
+                    if (
+                        hasattr(node.callee, "object")
+                        and isinstance(node.callee.object, esprima.nodes.Identifier)
+                        and node.callee.object.name == "document"
+                    ):
+                        if (
+                            hasattr(node.callee, "property")
+                            and isinstance(
                                 node.callee.property, esprima.nodes.Identifier
-                            ):
-                                if node.callee.property.name in ("write", "writeln"):
-                                    issues.append(
-                                        SecurityIssue(
-                                            rule_id="no-document-write",
-                                            message="document.write can lead to XSS and performance issues",
-                                            severity=SecuritySeverity.MEDIUM,
-                                            line=(
-                                                node.loc.start.line
-                                                if hasattr(node, "loc") and node.loc
-                                                else 0
-                                            ),
-                                            column=(
-                                                node.loc.start.column
-                                                if hasattr(node, "loc") and node.loc
-                                                else 0
-                                            ),
-                                            cwe_id="CWE-79",
-                                            recommendation="Use DOM manipulation methods instead",
-                                        )
-                                    )
+                            )
+                            and node.callee.property.name in ("write", "writeln")
+                        ):
+                            issues.append(
+                                SecurityIssue(
+                                    rule_id="no-document-write",
+                                    message="document.write can lead to XSS and performance issues",
+                                    severity=SecuritySeverity.MEDIUM,
+                                    line=(
+                                        node.loc.start.line
+                                        if hasattr(node, "loc") and node.loc
+                                        else 0
+                                    ),
+                                    column=(
+                                        node.loc.start.column
+                                        if hasattr(node, "loc") and node.loc
+                                        else 0
+                                    ),
+                                    cwe_id="CWE-79",
+                                    recommendation="Use DOM manipulation methods instead",
+                                )
+                            )
 
             # Check for hardcoded secrets patterns
             if isinstance(node, esprima.nodes.VariableDeclarator):
@@ -1115,9 +1097,10 @@ class JavaScriptParser(BaseParser):
 
         def visit(node: JSNode) -> None:
             if isinstance(node, esprima.nodes.ImportDeclaration):
-                module = (
-                    node.source.value if hasattr(node, "source") and node.source else ""
-                )
+                module = ""
+                if hasattr(node, "source") and node.source:
+                    source_value = node.source.value
+                    module = str(source_value) if source_value else ""
                 line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
 
                 named_imports: list[str] = []
@@ -1172,8 +1155,10 @@ class JavaScriptParser(BaseParser):
                     decl = node.declaration
                     if isinstance(decl, esprima.nodes.Identifier):
                         name = decl.name
-                    elif hasattr(decl, "id") and decl.id:
-                        name = decl.id.name
+                    else:
+                        decl_id = getattr(decl, "id", None)
+                        if decl_id and hasattr(decl_id, "name"):
+                            name = decl_id.name
 
                 exports.append(
                     ExportInfo(
@@ -1189,26 +1174,33 @@ class JavaScriptParser(BaseParser):
 
             elif isinstance(node, esprima.nodes.ExportNamedDeclaration):
                 line = node.loc.start.line if hasattr(node, "loc") and node.loc else 0
-                source_module = (
-                    node.source.value
-                    if hasattr(node, "source") and node.source
-                    else None
-                )
+                source_module = None
+                if hasattr(node, "source") and node.source:
+                    source_value = node.source.value
+                    source_module = str(source_value) if source_value else None
 
                 if hasattr(node, "declaration") and node.declaration:
                     decl = node.declaration
-                    if hasattr(decl, "id") and decl.id:
-                        exports.append(
-                            ExportInfo(
-                                name=decl.id.name,
-                                line=line,
-                                is_named=True,
+                    if isinstance(decl, esprima.nodes.Identifier):
+                        name = decl.name
+                    else:
+                        decl_id = getattr(decl, "id", None)
+                        if decl_id and hasattr(decl_id, "name"):
+                            name = decl_id.name
+                            exports.append(
+                                ExportInfo(
+                                    name=name,
+                                    line=line,
+                                    is_named=True,
+                                )
                             )
-                        )
-                    elif hasattr(decl, "declarations"):
-                        for var_decl in decl.declarations:
-                            if hasattr(var_decl, "id") and isinstance(
-                                var_decl.id, esprima.nodes.Identifier
+                    decl_declarations = getattr(decl, "declarations", None)
+                    if decl_declarations and isinstance(decl_declarations, list):
+                        for var_decl in decl_declarations:
+                            if (
+                                hasattr(var_decl, "id")
+                                and var_decl.id
+                                and isinstance(var_decl.id, esprima.nodes.Identifier)
                             ):
                                 exports.append(
                                     ExportInfo(
@@ -1367,7 +1359,11 @@ class JavaScriptParser(BaseParser):
         """
         # Check for unused variables
         if isinstance(node, esprima.nodes.VariableDeclarator):
-            if hasattr(node, "id") and hasattr(node.id, "name"):
+            if (
+                hasattr(node, "id")
+                and node.id
+                and isinstance(node.id, esprima.nodes.Identifier)
+            ):
                 if not find_identifiers(node, node.id.name):
                     line = (
                         node.loc.start.line if hasattr(node, "loc") and node.loc else 0
@@ -1431,7 +1427,7 @@ class JavaScriptParser(BaseParser):
         if isinstance(node, esprima.nodes.Node):
             node.parent = parent  # type: ignore[attr-defined]
             next_parent: Optional[JSNode] = node
-        else:
+        else:  # noqa: PLW2901
             next_parent = parent
 
         for child in self.get_children(node):

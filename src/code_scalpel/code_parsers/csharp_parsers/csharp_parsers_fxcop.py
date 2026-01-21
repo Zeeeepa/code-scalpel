@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# fxCop parser for .NET code analysis
+# Provides comprehensive code analysis for .NET assemblies
+# following Microsoft design guidelines and best practices.
 
 from dataclasses import dataclass
 from enum import Enum
@@ -68,7 +71,7 @@ class FxCopParser:
         self.violations: List[FxCopViolation] = []
 
     def execute_fxcop(
-        self, paths: List[Path], config: FxCopConfig = None
+        self, paths: List[Path], config: Optional[FxCopConfig] = None
     ) -> List[FxCopViolation]:
         raise NotImplementedError("Phase 2: FxCop execution")
 

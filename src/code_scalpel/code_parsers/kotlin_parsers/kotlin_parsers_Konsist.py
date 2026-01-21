@@ -12,9 +12,6 @@ Konsist provides:
 - Package structure verification
 - Custom DSL for rule definition
 - Integration with testing frameworks
-
-
-
 """
 
 from dataclasses import dataclass

@@ -6,8 +6,6 @@ Parses ESLint output (JSON format) for comprehensive code quality analysis.
 Supports custom rules, plugins, and configuration parsing.
 
 ESLint is the most widely used JavaScript linter with extensive plugin ecosystem.
-
-
 Features:
     Output Parsing:
         - ESLint JSON format parsing
@@ -35,12 +33,6 @@ Features:
         - Real-time ESLint execution via subprocess
         - File and code string analysis
         - Configurable ESLint path
-
-Future Enhancements:
-    - Flat config (eslint.config.js) full support
-    - Plugin version checking
-    - ESLint cache file parsing
-    - Performance timing extraction
 """
 
 import json

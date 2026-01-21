@@ -1,9 +1,7 @@
 """
 Javalang Java Parser - Pure Python Java AST parsing.
-
 Uses javalang library for detailed Java code analysis without native dependencies.
 Provides comprehensive metrics, complexity analysis, and code issue detection.
-
 Implemented Features:
 - Cognitive complexity calculation (more accurate than cyclomatic)
 - Cyclomatic complexity calculation
@@ -19,11 +17,9 @@ Implemented Features:
 - Try-catch-finally pattern extraction
 - Thread safety analysis (synchronized blocks, volatile fields)
 - SQL injection vulnerability detection in string concatenation
-
 Note: javalang library has limited support for newer Java features.
 For Java 14+ records, Java 17+ sealed classes, and Java 21+ pattern matching,
 use the tree-sitter parser instead.
-
 """
 
 import math

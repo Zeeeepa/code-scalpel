@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 JSDoc JavaScript Parser - JSDoc comment analysis and coverage.
-
-
 Reference: https://jsdoc.app/
 """
 

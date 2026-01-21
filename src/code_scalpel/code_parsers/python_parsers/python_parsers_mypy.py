@@ -1,232 +1,32 @@
 #!/usr/bin/env python3
 """
-mypy Parser - Static Type Checking Integration.
-===============================================
+mypy Parser — Static Type Checking Integration
+=================================================
 
-This module provides integration with mypy, Python's static type checker.
-It parses mypy output and provides structured access to type errors,
-type coverage metrics, and revealed type information.
+[20260120_DOCS] Polished public overview and roadmap
 
-Implementation Status: MOSTLY COMPLETED
-Priority: P2 - HIGH
+What this parser does
+---------------------
+- Parse mypy text/JSON output into structured diagnostics and revealed types
+- Compute type coverage metrics, detect missing stubs, and suggest typeshed packages
+- Load mypy configuration (pyproject.toml / mypy.ini / setup.cfg) and map it to CLI args
 
-mypy Features:
-    - Static type checking based on PEP 484+ type hints
-    - Type inference for untyped code
-    - Incremental checking for fast feedback
-    - Strict mode for comprehensive checking
-    - Plugin system for framework support
+Status at a glance
+------------------
+- Implementation: MOSTLY COMPLETED (P2 - HIGH)
+- Completed: text/JSON parsing, revealed types, type coverage, config parsing
+- In progress: incremental-mode optimization, stub-generation hints, plugin guidance
+- Not implemented: .pyi parsing; stub/implementation consistency checks
 
-============================================================================
-============================================================================
-COMMUNITY TIER - Core Type Checking (P0-P2) [MOSTLY COMPLETE]
-============================================================================
+Tier roadmap (summary)
+----------------------
+- Community (P0-P2): core checking, severity mapping, coverage calculation (mostly done)
+- Pro (P1-P3): protocol/generic/advanced type features (planned)
+- Enterprise (P2-P4): multi-project analysis and type quality metrics (planned)
 
-[P0_CRITICAL] Basic Type Checking (COMPLETED ✓):
-    - ✓ Parse mypy text/JSON output
-    - ✓ Error severity mapping
-    - ✓ Type coverage calculation
-    - ✓ Configuration parsing
-    - Test count: 60 tests (COMPLETED)
-
-[P1_HIGH] Advanced Type Analysis (IN PROGRESS):
-    - ✓ Revealed type extraction
-    - ⏳ Incremental mode optimization
-    - ⏳ Stub file generation hints
-    - ⏳ Plugin integration
-    - Test count: 35 tests (25 complete, 10 remaining)
-
-[P2_MEDIUM] Type Coverage Reporting:
-    - Type coverage trend tracking
-    - Per-module type coverage
-    - Type coverage CI integration
-    - Type coverage visualization
-    - Test count: 25 tests
-
-============================================================================
-PRO TIER - Advanced Type Features (P1-P3)
-============================================================================
-
-[P1_HIGH] Protocol Conformance:
-    - Protocol implementation validation
-    - Structural subtyping checks
-    - Protocol variance analysis
-    - Test count: 30 tests
-
-[P2_MEDIUM] Generic Type Analysis:
-    - Type parameter inference
-    - Variance checking (covariant/contravariant)
-    - Generic constraint validation
-    - Test count: 35 tests
-
-[P3_LOW] Advanced Type Features:
-    - Literal type validation
-    - TypedDict completeness checking
-    - NewType usage tracking
-    - Test count: 30 tests
-
-============================================================================
-ENTERPRISE TIER - Enterprise Type Checking (P2-P4)
-============================================================================
-
-[P2_MEDIUM] Multi-project Type Checking:
-    - Workspace-wide type analysis
-    - Cross-package type validation
-    - Shared stub management
-    - Test count: 40 tests
-
-[P3_LOW] Type Quality Metrics:
-    - Type complexity scoring
-    - Type annotation quality
-    - Type usage patterns
-    - Test count: 25 tests
-
-============================================================================
-TOTAL TEST ESTIMATE: 280 tests (120 COMMUNITY + 95 PRO + 65 ENTERPRISE)
-============================================================================
-
-==============================================================================
-COMPLETED [P2-MYPY-001]: MypyParser with structured output
-==============================================================================
-Priority: HIGH
-Status: ✓ COMPLETED
-
-Implemented Features:
-    - [✓] Parse mypy text output format (from_line method)
-    - [✓] Parse mypy JSON output (--output=json) - from_dict, analyze_json
-    - [✓] Map errors to severity levels (error, warning, note)
-    - [✓] Extract error codes for configuration
-    - [✓] Support incremental mode output parsing
-    - [✓] Handle multi-file error chains (related_notes)
-    - [✓] Extract revealed types from reveal_type() calls
-    - [✓] Support --show-error-context output (context parsing implemented)
-
-Output Format Examples:
-    Text format:
-        example.py:10: error: Incompatible return value type [return-value]
-        example.py:15: note: See also: <url>
-
-    JSON format (experimental):
-        {"file": "example.py", "line": 10, "column": 5, "message": "...", "severity": "error", "code": "return-value"}
-
-Error Codes Reference:
-    https://mypy.readthedocs.io/en/stable/error_code_list.html
-
-Test Cases:
-    - Parse simple type errors
-    - Parse errors with notes
-    - Parse revealed types
-    - Handle syntax errors in source
-    - Parse multi-file project errors
-
-==============================================================================
-COMPLETED [P2-MYPY-002]: Type coverage calculation
-==============================================================================
-Priority: HIGH
-Status: ✓ COMPLETED
-Depends On: P2-MYPY-001
-
-Implemented Features:
-    - [✓] Count functions with full type annotations
-    - [✓] Count functions with partial type annotations
-    - [✓] Count functions with no type annotations
-    - [✓] Count variables with type annotations
-    - [✓] Calculate overall coverage percentage
-    - [✓] Track implicit Any usage (from missing annotations)
-    - [✓] Identify missing stub files (from import errors)
-
-Metrics:
-    ```python
-    @dataclass
-    class TypeCoverageInfo:
-        total_functions: int
-        typed_functions: int
-        partially_typed_functions: int
-        untyped_functions: int
-
-        total_variables: int
-        typed_variables: int
-
-        explicit_any_count: int
-        implicit_any_count: int
-
-        missing_stubs: list[str]
-
-        @property
-        def function_coverage(self) -> float:
-            return self.typed_functions / self.total_functions if self.total_functions else 0
-
-        @property
-        def overall_coverage(self) -> float:
-            typed = self.typed_functions + self.typed_variables
-            total = self.total_functions + self.total_variables
-            return typed / total if total else 0
-    ```
-
-==============================================================================
-COMPLETED [P2-MYPY-003]: Revealed type extraction
-==============================================================================
-Priority: MEDIUM
-Status: ✓ COMPLETED
-Depends On: P2-MYPY-001
-
-Implemented Features:
-    - [✓] Parse reveal_type() output from mypy
-    - [✓] Parse reveal_locals() output
-    - [✓] Track inferred vs declared types (is_inferred field)
-    - [✓] Support type narrowing context (narrowing_context field)
-    - [✓] Handle union type reveals
-
-Note: RevealedType dataclass with from_note() parsing method fully implemented.
-
-Revealed Type Format:
-    example.py:5: note: Revealed type is "builtins.int"
-    example.py:10: note: Revealed local types are:
-        example.py:10: note:     x: builtins.str
-        example.py:10: note:     y: builtins.int
-
-==============================================================================
-COMPLETED [P2-MYPY-004]: Configuration parsing
-==============================================================================
-Priority: MEDIUM
-Status: ✓ COMPLETED
-Estimated Effort: 1 day remaining
-
-Implemented Features:
-    - [✓] Parse mypy.ini configuration
-    - [✓] Parse [mypy] section in setup.cfg
-    - [✓] Parse [tool.mypy] in pyproject.toml
-    - [✓] Support per-module configuration
-    - [✓] Handle plugin configuration
-    - [✓] MypyConfig dataclass with to_cli_args() method
-    - [✓] from_file() for mypy.ini, setup.cfg, pyproject.toml
-    - [✓] find_config() for automatic config discovery
-    - [✓] Support for overrides in pyproject.toml
-
-Configuration Example:
-    ```ini
-    [mypy]
-    python_version = 3.11
-    strict = True
-    warn_return_any = True
-    warn_unused_configs = True
-
-    [mypy-tests.*]
-    ignore_errors = True
-    ```
-
-==============================================================================
-MOSTLY COMPLETED [P3-MYPY-005]: Stub file analysis
-==============================================================================
-Priority: LOW
-Status: ✓ MOSTLY COMPLETED
-
-Implemented Features:
-    - [ ] Parse .pyi stub files (not implemented - complex)
-    - [✓] Detect missing stubs for packages (in get_type_coverage)
-    - [✓] Suggest typeshed packages (TYPESHED_SUGGESTIONS mapping)
-    - [ ] Validate stub/implementation consistency (not implemented)
-    - [✓] Track py.typed marker packages (check_py_typed method)
+Test inventory (est.)
+---------------------
+- Total: 280 tests | Community 120 | Pro 95 | Enterprise 65
 """
 
 from __future__ import annotations

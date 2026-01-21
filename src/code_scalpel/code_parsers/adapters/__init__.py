@@ -52,10 +52,12 @@ try:
 except (ImportError, NotImplementedError):
     RubyParserAdapter = None  # type: ignore
 
-try:
-    from .php_adapter import PhpParserAdapter
-except (ImportError, NotImplementedError):
-    PhpParserAdapter = None  # type: ignore
+# [20260120_BUGFIX] PhpParserAdapter import removed - implementation not present
+# try:
+#     from .php_adapter import PhpParserAdapter
+# except (ImportError, NotImplementedError):
+#     PhpParserAdapter = None  # type: ignore
+PhpParserAdapter = None  # type: ignore
 
 try:
     from .swift_adapter import SwiftParserAdapter
@@ -72,6 +74,6 @@ __all__ = [
     "GoParserAdapter",
     "KotlinParserAdapter",
     "RubyParserAdapter",
-    "PhpParserAdapter",
+    # "PhpParserAdapter",  # [20260120_BUGFIX] Removed from __all__ - implementation not present
     "SwiftParserAdapter",
 ]

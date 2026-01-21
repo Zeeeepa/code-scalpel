@@ -453,6 +453,7 @@ class CallGraphBuilder:
 
             return raw_callee
 
+        # [20260122_BUGFIX] Ensure tree-sitter call extraction runs instead of falling through to Esprima.
         if result is not None and root is not None:
             # Build a list of callable symbol ranges for caller attribution
             callable_ranges: list[tuple[int, int, str, str | None]] = []
@@ -494,32 +495,32 @@ class CallGraphBuilder:
                     return str(fn.text)
                 return str(fn.text)
 
-                # Walk tree to find call expressions
-                file_graph: Dict[str, List[str]] = {}
+            # Walk tree to find call expressions
+            file_graph: Dict[str, List[str]] = {}
 
-                def visit(node) -> None:
-                    if node.type in {"call_expression", "new_expression"}:
-                        line = getattr(node, "start_line", None)
-                        if isinstance(line, int):
-                            caller = _caller_for_line(line)
-                            if caller:
-                                caller_name, caller_parent = caller
-                                caller_key = (
-                                    f"{rel_path}:{caller_parent}.{caller_name}"
-                                    if caller_parent
-                                    else f"{rel_path}:{caller_name}"
+            def visit(node) -> None:
+                if node.type in {"call_expression", "new_expression"}:
+                    line = getattr(node, "start_line", None)
+                    if isinstance(line, int):
+                        caller = _caller_for_line(line)
+                        if caller:
+                            caller_name, caller_parent = caller
+                            caller_key = (
+                                f"{rel_path}:{caller_parent}.{caller_name}"
+                                if caller_parent
+                                else f"{rel_path}:{caller_name}"
+                            )
+                            raw = _callee_from_call(node)
+                            if raw:
+                                file_graph.setdefault(caller_key, []).append(
+                                    _resolve_callee(raw, caller_parent)
                                 )
-                                raw = _callee_from_call(node)
-                                if raw:
-                                    file_graph.setdefault(caller_key, []).append(
-                                        _resolve_callee(raw, caller_parent)
-                                    )
 
-                    for child in getattr(node, "named_children", []) or []:
-                        visit(child)
+                for child in getattr(node, "named_children", []) or []:
+                    visit(child)
 
-                visit(root)
-                return file_graph
+            visit(root)
+            return file_graph
 
         # ------------------------------------------------------------------
         # Esprima fallback
@@ -867,7 +868,9 @@ class CallGraphBuilder:
                                 file=rel_path,
                                 line=top.lineno,
                                 end_line=getattr(top, "end_lineno", None),
-                                is_entry_point=self._is_entry_point(top, tree),
+                                is_entry_point=self._is_entry_point(
+                                    top, tree, rel_path=rel_path
+                                ),
                             )
                         elif isinstance(top, ast.ClassDef):
                             for item in top.body:
@@ -892,7 +895,9 @@ class CallGraphBuilder:
                                 file=rel_path,
                                 line=node.lineno,
                                 end_line=getattr(node, "end_lineno", None),
-                                is_entry_point=self._is_entry_point(node, tree),
+                                is_entry_point=self._is_entry_point(
+                                    node, tree, rel_path=rel_path
+                                ),
                             )
             except Exception:
                 continue
@@ -1132,7 +1137,11 @@ class CallGraphBuilder:
         )
 
     def _is_entry_point(
-        self, func_node: ast.FunctionDef | ast.AsyncFunctionDef, tree: ast.AST
+        self,
+        func_node: ast.FunctionDef | ast.AsyncFunctionDef,
+        tree: ast.AST,
+        *,
+        rel_path: str | None = None,
     ) -> bool:
         """
         Detect if a function is likely an entry point.
@@ -1141,9 +1150,20 @@ class CallGraphBuilder:
         - Function named "main"
         - Function decorated with CLI decorators (click.command, etc.)
         - Function called in if __name__ == "__main__" block
+        - [20260121_FEATURE] Test entry points: pytest-style test_* functions in test modules
         """
         if func_node.name == "main":
             return True
+
+        # Heuristic: pytest-style test functions in test files/dirs count as entry points
+        if func_node.name.startswith("test_"):
+            filename = (rel_path or "").lower()
+            if (
+                filename.startswith("test_")
+                or "/tests" in filename
+                or "/test_" in filename
+            ):
+                return True
 
         # Detect calls in if __name__ == "__main__" blocks
         try:

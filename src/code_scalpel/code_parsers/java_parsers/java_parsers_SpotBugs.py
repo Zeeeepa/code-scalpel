@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
 SpotBugs Java Parser - Static analysis to find bugs in Java.
-
 Parses SpotBugs XML output to extract bug patterns.
 SpotBugs is the successor to FindBugs.
-
 Reference: https://spotbugs.github.io/
 Command: spotbugs -textui -xml -output results.xml classes/
-
 """
 
 import subprocess

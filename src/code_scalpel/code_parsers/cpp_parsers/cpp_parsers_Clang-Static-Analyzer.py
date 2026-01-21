@@ -47,8 +47,8 @@ class AnalyzerConfig:
 
     analyzer_version: str = "18.0.0"
     config_file: Optional[Path] = None
-    checkers_enabled: List[str] = None
-    checkers_disabled: List[str] = None
+    checkers_enabled: Optional[List[str]] = None
+    checkers_disabled: Optional[List[str]] = None
 
 
 class ClangStaticAnalyzerParser(base_parser.BaseParser):
@@ -60,10 +60,16 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
     """
 
     def __init__(self, file_path):
-        super().__init__(file_path)
+        super().__init__()
+        self.file_path = file_path
         self.language = "cpp"
         self.config = AnalyzerConfig()
         self.findings: List[AnalyzerFinding] = []
+
+    # [20260120_BUGFIX] Implemented abstract method to satisfy BaseParser interface
+    def parse_code(self, code: str) -> None:
+        """Stub implementation to satisfy BaseParser ABC."""
+        pass
 
     def parse(self):
         try:
@@ -97,7 +103,7 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
         pass
 
     def execute_scan_build(
-        self, paths: List[Path], config: AnalyzerConfig = None
+        self, paths: List[Path], config: Optional[AnalyzerConfig] = None
     ) -> List[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: scan-build execution")
 

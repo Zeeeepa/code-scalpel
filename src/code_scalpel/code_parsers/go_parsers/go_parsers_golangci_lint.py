@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Phase 1: Define data structures and class skeleton for Golangci-Lint parser
+# This module sets up the framework for integrating Golangci-Lint
+# into the code analysis tool. The actual implementation of methods will be
+# completed in Phase 2.
 
 from dataclasses import dataclass
 from enum import Enum
@@ -74,7 +78,7 @@ class GolangciLintParser:
         self.issues: List[LintIssue] = []
 
     def execute_golangci_lint(
-        self, paths: List[Path], config: GolangciLintConfig = None
+        self, paths: List[Path], config: Optional[GolangciLintConfig] = None
     ) -> List[LintIssue]:
         raise NotImplementedError("Phase 2: Golangci-lint execution")
 

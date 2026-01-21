@@ -12,9 +12,6 @@ Kotlin Test Parser features:
 - Spek specification runner support
 - Test coverage analysis
 - Parameterized test detection
-
-
-
 """
 
 from dataclasses import dataclass, field

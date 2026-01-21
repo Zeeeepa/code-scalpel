@@ -19,7 +19,8 @@ from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
 
-MAX_CODE_SIZE = 100_000
+# [20260121_BUGFIX] Align hard cap with tier file-size limits (Enterprise 100MB + buffer).
+MAX_CODE_SIZE = 110 * 1024 * 1024
 
 # Caching enabled by default
 CACHE_ENABLED = (
@@ -949,6 +950,23 @@ def _analyze_code_sync(
     # [20251219_BUGFIX] Strip UTF-8 BOM if present
     if code.startswith("\ufeff"):
         code = code[1:]
+
+    # [20260121_BUGFIX] Enforce tier-based file size limits before parsing
+    limit_mb = capabilities.get("limits", {}).get("max_file_size_mb")
+    if limit_mb is not None and limit_mb >= 0:
+        max_bytes = int(limit_mb * 1024 * 1024)
+        if len(code.encode("utf-8")) > max_bytes:
+            return AnalysisResult(
+                success=False,
+                functions=[],
+                classes=[],
+                imports=[],
+                complexity=0,
+                lines_of_code=0,
+                error=(
+                    f"Input exceeds configured size limit of {limit_mb} MB for analyze_code"
+                ),
+            )
 
     # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
     if language == "auto" or language is None:

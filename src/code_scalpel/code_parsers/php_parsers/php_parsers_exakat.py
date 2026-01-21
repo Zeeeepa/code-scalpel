@@ -13,10 +13,6 @@ Exakat provides:
 - Dead code detection
 - Architecture analysis
 - Multiple output formats (JSON, CSV, HTML)
-
-
-
-
 """
 
 from dataclasses import dataclass

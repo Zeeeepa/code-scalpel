@@ -12,9 +12,6 @@ Gradle Build Parser features:
 - Build configuration analysis
 - Plugin detection and inventory
 - Task graph analysis
-
-
-
 """
 
 from dataclasses import dataclass

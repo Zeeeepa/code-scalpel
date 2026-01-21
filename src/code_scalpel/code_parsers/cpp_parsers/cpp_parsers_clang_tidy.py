@@ -44,8 +44,8 @@ class ClangTidyConfig:
 
     clang_tidy_version: str = "18.0.0"
     config_file: Optional[Path] = None
-    checks_enabled: List[str] = None
-    checks_disabled: List[str] = None
+    checks_enabled: Optional[List[str]] = None
+    checks_disabled: Optional[List[str]] = None
     cpp_standard: str = "c++17"
     fix_mode: bool = False
 
@@ -64,7 +64,7 @@ class ClangTidyParser:
         self.checks: List[ClangTidyCheck] = []
 
     def execute_clang_tidy(
-        self, paths: List[Path], config: ClangTidyConfig = None
+        self, paths: List[Path], config: Optional[ClangTidyConfig] = None
     ) -> List[ClangTidyCheck]:
         raise NotImplementedError("Phase 2: Clang-Tidy execution")
 

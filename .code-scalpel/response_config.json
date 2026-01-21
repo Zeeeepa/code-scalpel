@@ -3,7 +3,7 @@
   "version": "3.3.1",
   "description": "MCP response configuration for token efficiency - controls output verbosity for all tools independent of tier",
   "global": {
-    "profile": "minimal",
+    "profile": "debug",
     "exclude_empty_arrays": true,
     "exclude_empty_objects": true,
     "exclude_null_values": true,

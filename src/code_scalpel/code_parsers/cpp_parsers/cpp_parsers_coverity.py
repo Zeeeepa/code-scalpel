@@ -68,7 +68,7 @@ class CoverityParser:
         self.defects: List[CoverityDefect] = []
 
     def execute_coverity(
-        self, paths: List[Path], config: CoverityConfig = None
+        self, paths: List[Path], config: Optional[CoverityConfig] = None
     ) -> List[CoverityDefect]:
         raise NotImplementedError("Phase 2: Coverity execution")
 

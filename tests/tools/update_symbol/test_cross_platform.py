@@ -51,9 +51,11 @@ class TestCrossPlatformSmoke:
         tool = mcp._tool_manager._tools["update_symbol"]
 
         sample_file = tmp_path / "platform_test.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
 
         args = {
             "file_path": str(sample_file),
@@ -117,9 +119,11 @@ class TestPythonVersionCompatibility:
         tool = mcp._tool_manager._tools["update_symbol"]
 
         sample_file = tmp_path / "version_test.py"
-        sample_file.write_text("""def foo():
+        sample_file.write_text(
+            """def foo():
     return 0
-""")
+"""
+        )
 
         args = {
             "file_path": str(sample_file),

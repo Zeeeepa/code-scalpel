@@ -5,13 +5,6 @@ TSX/JSX Analyzer - React component detection and metadata extraction.
 
 This module provides utilities for detecting React components, Server Components,
 and Server Actions in TypeScript/JavaScript code.
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from __future__ import annotations

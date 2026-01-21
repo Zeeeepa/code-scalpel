@@ -176,6 +176,14 @@ partial_branches = [
 # IMPORT SORTING CONFIGURATION
 # ============================================================================
 
+[tool.ruff]
+extend-exclude = ["*.ipynb"]  # [20260121_BUGFIX] Exclude Jupyter notebooks from linting
+line-length = 88
+
+[tool.ruff.lint]
+# [20260121_BUGFIX] Allow long lines in docstrings and comments
+ignore = ["E501"]  # Line too long - handled by black for code, acceptable in docstrings/comments
+
 [tool.isort]
 profile = "black"  # Compatible with Black formatter
 line_length = 88

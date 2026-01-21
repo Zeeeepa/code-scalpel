@@ -383,8 +383,6 @@ def nosql_login_secure(username: str, password: str) -> dict:
 
 def ldap_authenticate_secure(username: str, password: str) -> bool:
     """Secure version with LDAP escaping."""
-    import ldap
-    import ldap.filter
 
     # SECURE: Escape special LDAP characters
     # Example safe usage:

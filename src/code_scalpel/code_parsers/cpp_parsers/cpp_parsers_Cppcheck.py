@@ -52,7 +52,7 @@ class CppcheckConfig:
     """Cppcheck configuration for analysis."""
 
     cppcheck_version: str = "2.13"
-    enable_checks: List[str] = None
+    enable_checks: Optional[List[str]] = None
     suppress_file: Optional[Path] = None
     standard: str = "c++17"
     jobs: int = 4
@@ -72,7 +72,7 @@ class CppcheckParser:
         self.issues: List[CppcheckIssue] = []
 
     def execute_cppcheck(
-        self, paths: List[Path], config: CppcheckConfig = None
+        self, paths: List[Path], config: Optional[CppcheckConfig] = None
     ) -> List[CppcheckIssue]:
         raise NotImplementedError("Phase 2: Cppcheck execution")
 

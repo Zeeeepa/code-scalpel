@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Semgrep Java Parser - Custom pattern matching and static analysis.
-
-
 Reference: https://semgrep.dev/
 Command: semgrep --json --config=rules.yaml src/ > results.json
          semgrep --config=p/security-audit src/

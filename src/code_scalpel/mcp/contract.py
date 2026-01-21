@@ -19,6 +19,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+# [20260121_FEATURE] Response config integration for token-efficient outputs
+from code_scalpel.mcp.response_config import (
+    get_response_config,
+    filter_tool_response,
+)
+
 
 class UpgradeRequiredError(RuntimeError):
     """Raised when a caller requests a capability unavailable at current tier.
@@ -183,6 +189,78 @@ def _classify_failure_message(message: str | None) -> ErrorCode | None:
     return None
 
 
+def make_envelope(
+    data: Any,
+    tool_id: str,
+    tool_version: str,
+    tier: str,
+    duration_ms: int | None = None,
+    error: ToolError | None = None,
+    upgrade_hints: list[UpgradeHint] | None = None,
+    warnings: list[str] | None = None,
+    request_id: str | None = None,
+) -> ToolResponseEnvelope:
+    """[20260121_FEATURE] Create a ToolResponseEnvelope for internal tool use.
+
+    This helper is called INSIDE tool functions (not at registration layer) to wrap
+    results and metadata. This avoids FastMCP tool discovery issues that occur when
+    wrapping at the decorator layer.
+
+    Args:
+        data: The tool's actual result payload
+        tool_id: Canonical MCP tool ID (e.g., "analyze_code")
+        tool_version: Semantic version (from __version__)
+        tier: License tier ("community", "pro", "enterprise")
+        duration_ms: Execution time in milliseconds (optional)
+        error: Error object if tool failed (optional)
+        upgrade_hints: Upgrade hints for tier features (optional)
+        warnings: Non-fatal warnings (optional)
+        request_id: Correlation ID (optional, generated if not provided)
+
+    Returns:
+        ToolResponseEnvelope with all metadata populated
+    """
+    if request_id is None:
+        request_id = uuid.uuid4().hex
+
+    # [20260121_FEATURE] Apply response_config filtering to envelope and data
+    cfg = get_response_config()
+    envelope_fields = cfg.get_envelope_fields(tool_id)
+
+    # Normalize tool-specific payload to dict for filtering
+    normalized_data = data
+    try:
+        if isinstance(data, BaseModel):
+            normalized_data = data.model_dump(mode="json", exclude_none=True)
+    except Exception:
+        normalized_data = data
+
+    # Filter tool payload according to config; include error-context fields when error present
+    try:
+        is_error = error is not None
+        if isinstance(normalized_data, dict):
+            filtered_data = filter_tool_response(
+                normalized_data, tool_name=tool_id, tier=tier, is_error=is_error
+            )
+        else:
+            filtered_data = normalized_data
+    except Exception:
+        filtered_data = normalized_data
+
+    return ToolResponseEnvelope(
+        tier=tier if "tier" in envelope_fields else None,
+        tool_version=tool_version if "tool_version" in envelope_fields else None,
+        tool_id=tool_id if "tool_id" in envelope_fields else None,
+        request_id=request_id if "request_id" in envelope_fields else None,
+        capabilities=(["envelope-v1"] if "capabilities" in envelope_fields else None),
+        duration_ms=duration_ms if "duration_ms" in envelope_fields else None,
+        error=error,  # Always include errors; clients expect them
+        upgrade_hints=upgrade_hints if "upgrade_hints" in envelope_fields else None,
+        warnings=warnings or [],
+        data=filtered_data,
+    )
+
+
 def envelop_tool_function(
     fn: Callable[..., Any] | Callable[..., Awaitable[Any]],
     *,
@@ -254,15 +332,49 @@ def envelop_tool_function(
                 data=None,
             )
 
-    _wrapped.__signature__ = sig  # type: ignore[attr-defined]
-    _wrapped.__name__ = getattr(fn, "__name__", tool_id)
-    _wrapped.__qualname__ = getattr(fn, "__qualname__", tool_id)
+    # Strip annotations from signature to avoid Pydantic forward-ref issues
+    try:
+        import inspect as _inspect
+
+        _clean_params = [
+            p.replace(annotation=_inspect._empty) for p in sig.parameters.values()
+        ]
+        _wrapped.__signature__ = sig.replace(
+            parameters=tuple(_clean_params), return_annotation=_inspect._empty
+        )  # type: ignore[attr-defined]
+    except Exception:
+        _wrapped.__signature__ = sig  # type: ignore[attr-defined]
+
+    # [20260121_BUGFIX] Ensure MCP tool registration uses canonical tool_id for name
+    # FastMCP defaults to function __name__ for tool discovery; set to tool_id.
+    _wrapped.__name__ = tool_id
+    _wrapped.__qualname__ = tool_id
     _wrapped.__doc__ = getattr(fn, "__doc__", None)
     _wrapped.__module__ = getattr(fn, "__module__", __name__)
-    _wrapped.__annotations__ = getattr(fn, "__annotations__", {})
 
-    # Copy __globals__ so Pydantic can resolve type annotations
+    # To avoid Pydantic v2 forward-ref issues under future annotations,
+    # expose minimal, safe annotation state.
+    try:
+        # Prefer empty annotations; FastMCP will still infer parameters from the signature.
+        _wrapped.__annotations__ = {}
+    except Exception:
+        pass
+
+    # Copy __globals__ so Pydantic can resolve any typing symbols if needed
     if hasattr(fn, "__globals__"):
-        _wrapped.__globals__.update(fn.__globals__)  # type: ignore[attr-defined]
+        try:
+            _wrapped.__globals__.update(fn.__globals__)  # type: ignore[attr-defined]
+        except Exception:
+            pass
+
+    # Ensure common typing symbols exist in globals for safety
+    try:
+        from typing import Optional as _Optional, Union as _Union, Any as _Any
+
+        _wrapped.__globals__.setdefault("Optional", _Optional)
+        _wrapped.__globals__.setdefault("Union", _Union)
+        _wrapped.__globals__.setdefault("Any", _Any)
+    except Exception:
+        pass
 
     return _wrapped

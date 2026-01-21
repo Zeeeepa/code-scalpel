@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 JaCoCo Java Parser - Code coverage analysis tool.
-
-
 Reference: https://www.jacoco.org/
 Command: java -javaagent:jacocoagent.jar=destfile=coverage.exec App
          java -cp jacococli.jar org.jacoco.cli.internal.Main report coverage.exec \

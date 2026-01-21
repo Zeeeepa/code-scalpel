@@ -5,13 +5,6 @@ TypeScript Decorator Analyzer.
 
 This module provides tools to extract decorator information from TypeScript code
 and identify security-sensitive decorators (e.g., HTTP endpoints, database operations).
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from __future__ import annotations

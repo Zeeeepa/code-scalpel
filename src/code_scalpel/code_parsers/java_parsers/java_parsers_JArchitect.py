@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
 JArchitect Parser - Java code quality and architecture analysis.
-
 Parses JArchitect analysis results for architecture and quality metrics.
 JArchitect analyzes code structure, dependencies, and quality.
-
 Reference: https://www.jarchitect.com/
 Note: JArchitect is a commercial tool with GUI-based analysis.
-
 """
 
 from dataclasses import dataclass, field

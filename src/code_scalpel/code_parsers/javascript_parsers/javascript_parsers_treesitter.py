@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""
-Tree-sitter JavaScript Parser - Fast native JavaScript/TypeScript parsing.
+"""Tree-sitter JavaScript Parser - Fast native JavaScript/TypeScript parsing.
 
 Tree-sitter provides incremental parsing with excellent performance for large files.
 This parser supports JavaScript, TypeScript, JSX, and TSX.
-
 
 Features:
     Parsing:
@@ -50,6 +48,8 @@ Future Enhancements:
     - Custom query pattern matching
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -62,10 +62,18 @@ try:
 except ImportError:
     TREE_SITTER_AVAILABLE = False
     # Stub types for when tree-sitter is not installed
-    Language = Any
-    Parser = Any
-    Node = Any
-    Tree = Any
+    Language = type(None)  # type: ignore[misc,assignment]
+    Parser = type(None)  # type: ignore[misc,assignment]
+    Node = type(None)  # type: ignore[misc,assignment]
+    Tree = type(None)  # type: ignore[misc,assignment]
+
+
+def _set_parser_language(parser: Any, language: Any) -> None:
+    """[20260122_BUGFIX] Support tree-sitter >=0.24 which dropped set_language()."""
+    if hasattr(parser, "set_language"):
+        parser.set_language(language)  # type: ignore[attr-defined]
+    else:
+        parser.language = language  # type: ignore[attr-defined,assignment]
 
 
 class JSLanguageVariant(Enum):
@@ -263,7 +271,7 @@ class TreeSitterJSParser:
         imports = result.imports
     """
 
-    def __init__(self, language_path: Optional[str] = None):
+    def __init__(self, language_path: Optional[str] = None) -> None:
         """
         Initialize tree-sitter parser.
 
@@ -274,8 +282,8 @@ class TreeSitterJSParser:
                 "tree-sitter not installed. Install with: pip install tree-sitter"
             )
 
-        self._parsers: dict[JSLanguageVariant, Parser] = {}
-        self._languages: dict[JSLanguageVariant, Language] = {}
+        self._parsers: dict[JSLanguageVariant, Any] = {}
+        self._languages: dict[JSLanguageVariant, Any] = {}
         self._language_path = language_path
 
         # Try to load languages
@@ -283,6 +291,12 @@ class TreeSitterJSParser:
 
     def _init_languages(self) -> None:
         """Initialize tree-sitter languages."""
+        # [20260121_BUGFIX] Guard against missing tree-sitter base package.
+        # If the base `tree_sitter` package is not available, do not attempt
+        # any fallbacks that rely on its `Parser`/`Language` classes. Other
+        # parsers will handle JS/TS via non-tree-sitter paths.
+        if not TREE_SITTER_AVAILABLE:
+            return
         try:
             # Try tree-sitter-languages package first (easiest setup)
             import tree_sitter_languages  # type: ignore[import-untyped]
@@ -303,26 +317,35 @@ class TreeSitterJSParser:
         except ImportError:
             # [20260103_BUGFIX] Fallback to individual tree-sitter language packages
             try:
-                import tree_sitter_javascript
-                import tree_sitter_typescript
+                import tree_sitter_javascript  # type: ignore[import-untyped]
+                import tree_sitter_typescript  # type: ignore[import-untyped]
 
                 # JavaScript and JSX use the same parser
-                js_lang = Language(tree_sitter_javascript.language())
-                js_parser = Parser(js_lang)
+                js_lang = Language(
+                    tree_sitter_javascript.language()  # type: ignore[operator]
+                )
+                js_parser = Parser()
+                _set_parser_language(js_parser, js_lang)
                 self._languages[JSLanguageVariant.JAVASCRIPT] = js_lang
                 self._parsers[JSLanguageVariant.JAVASCRIPT] = js_parser
                 self._languages[JSLanguageVariant.JSX] = js_lang
                 self._parsers[JSLanguageVariant.JSX] = js_parser
 
                 # TypeScript
-                ts_lang = Language(tree_sitter_typescript.language_typescript())
-                ts_parser = Parser(ts_lang)
+                ts_lang = Language(
+                    tree_sitter_typescript.language_typescript()  # type: ignore[operator]
+                )
+                ts_parser = Parser()
+                _set_parser_language(ts_parser, ts_lang)
                 self._languages[JSLanguageVariant.TYPESCRIPT] = ts_lang
                 self._parsers[JSLanguageVariant.TYPESCRIPT] = ts_parser
 
                 # TSX
-                tsx_lang = Language(tree_sitter_typescript.language_tsx())
-                tsx_parser = Parser(tsx_lang)
+                tsx_lang = Language(
+                    tree_sitter_typescript.language_tsx()  # type: ignore[operator]
+                )
+                tsx_parser = Parser()
+                _set_parser_language(tsx_parser, tsx_lang)
                 self._languages[JSLanguageVariant.TSX] = tsx_lang
                 self._parsers[JSLanguageVariant.TSX] = tsx_parser
 
@@ -336,9 +359,9 @@ class TreeSitterJSParser:
         try:
             lang_path = Path(path)
             if lang_path.exists():
-                js_lang = Language(str(lang_path), "javascript")
-                ts_lang = Language(str(lang_path), "typescript")
-                tsx_lang = Language(str(lang_path), "tsx")
+                js_lang = Language(str(lang_path))  # type: ignore[operator]
+                ts_lang = Language(str(lang_path))  # type: ignore[operator]
+                tsx_lang = Language(str(lang_path))  # type: ignore[operator]
 
                 for variant, lang in [
                     (JSLanguageVariant.JAVASCRIPT, js_lang),
@@ -347,10 +370,10 @@ class TreeSitterJSParser:
                     (JSLanguageVariant.TSX, tsx_lang),
                 ]:
                     parser = Parser()
-                    parser.set_language(lang)
+                    _set_parser_language(parser, lang)
                     self._parsers[variant] = parser
                     self._languages[variant] = lang
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
     def is_language_available(self, variant: JSLanguageVariant) -> bool:

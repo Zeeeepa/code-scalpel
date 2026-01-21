@@ -38,7 +38,7 @@ class CppLintConfig:
     """CppLint configuration for style checking."""
 
     cpplint_version: str = "1.6.0"
-    filter_rules: List[str] = None
+    filter_rules: Optional[List[str]] = None
     max_line_length: int = 80
     root_dir: Optional[Path] = None
 
@@ -57,7 +57,7 @@ class CppLintParser:
         self.violations: List[CppLintViolation] = []
 
     def execute_cpplint(
-        self, paths: List[Path], config: CppLintConfig = None
+        self, paths: List[Path], config: Optional[CppLintConfig] = None
     ) -> List[CppLintViolation]:
         raise NotImplementedError("Phase 2: CppLint execution")
 

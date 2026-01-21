@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Maven Java Parser - Build tool and dependency management integration.
-
-
 Reference: https://maven.apache.org/
 Command: mvn dependency:tree -DoutputFile=dependencies.txt
          mvn help:describe -Dplugin=org.apache.maven.plugins:maven-compiler-plugin

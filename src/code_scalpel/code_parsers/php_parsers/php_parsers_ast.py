@@ -11,10 +11,6 @@ PHP-Parser provides:
 - Code pretty-printing
 - Error recovery
 - Visitor pattern support
-
-
-
-
 """
 
 from dataclasses import dataclass, field

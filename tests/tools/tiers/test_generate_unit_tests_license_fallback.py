@@ -19,6 +19,7 @@ import pytest
 async def test_invalid_license_falls_back_to_community(community_tier, monkeypatch):
     """Invalid license should fallback to Community tier with warning."""
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
 
     calls: list[dict[str, Any]] = []
 
@@ -49,7 +50,8 @@ async def test_invalid_license_falls_back_to_community(community_tier, monkeypat
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch helper path after refactor to tools/symbolic.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Simulate invalid license by mocking tier detection
     # community_tier fixture sets up the environment
@@ -70,6 +72,7 @@ async def test_invalid_license_falls_back_to_community(community_tier, monkeypat
 async def test_expired_license_falls_back_to_community(community_tier, monkeypatch):
     """Expired license should fallback to Community tier."""
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
 
     calls: list[dict[str, Any]] = []
 
@@ -93,7 +96,8 @@ async def test_expired_license_falls_back_to_community(community_tier, monkeypat
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch helper path after refactor to tools/symbolic.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Simulate expired license by clamping to community
     # community_tier fixture sets up the environment
@@ -113,6 +117,7 @@ async def test_expired_license_falls_back_to_community(community_tier, monkeypat
 async def test_missing_license_defaults_to_community(community_tier, monkeypatch):
     """Missing license should default to Community tier."""
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
 
     calls: list[dict[str, Any]] = []
 
@@ -136,7 +141,8 @@ async def test_missing_license_defaults_to_community(community_tier, monkeypatch
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch helper path after refactor to tools/symbolic.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
 
     # Disable license discovery and no license path provided
     # community_tier fixture sets up the environment

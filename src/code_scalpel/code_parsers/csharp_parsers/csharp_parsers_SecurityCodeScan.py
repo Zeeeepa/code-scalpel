@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# Phase 1: Define data structures and class skeleton for Security Code Scan parser
+# This module sets up the framework for integrating Security Code Scan (SCS)
+# into the code analysis tool. The actual implementation of methods will be
+# completed in Phase 2.
 
 from dataclasses import dataclass
 from enum import Enum
@@ -61,7 +65,7 @@ class SecurityCodeScanParser:
         self.vulnerabilities: List[SecurityVulnerability] = []
 
     def execute_security_scan(
-        self, paths: List[Path], config: SecurityCodeScanConfig = None
+        self, paths: List[Path], config: Optional[SecurityCodeScanConfig] = None
     ) -> List[SecurityVulnerability]:
         raise NotImplementedError("Phase 2: Security Code Scan execution")
 

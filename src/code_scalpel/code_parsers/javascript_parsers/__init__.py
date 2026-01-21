@@ -58,19 +58,6 @@ Features:
         - Rule documentation URL generation
         - Inline directive parsing (eslint-disable/enable)
         - Suppression report generation
-
-
-
-
-
-Future Enhancements:
-    - Closure and scope chain analysis
-    - Prototype pollution detection
-    - SQL/command injection detection
-    - JSDoc coverage analysis
-    - Test file pattern detection
-    - Webpack/bundle analysis
-    - Unified JavaScriptAnalyzer aggregator
 """
 
 from .javascript_parsers_babel import (

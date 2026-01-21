@@ -17,13 +17,6 @@ Integration Difficulty Assessment:
     - PDG Generation: MODERATE (control flow similar to Python)
     - Symbolic Execution: HARD (JS semantics are complex - coercion, prototypes)
     - Security Analysis: MODERATE (taint tracking transfers cleanly)
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from dataclasses import dataclass, field

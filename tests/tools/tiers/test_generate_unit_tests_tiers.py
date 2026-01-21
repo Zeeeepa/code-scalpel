@@ -18,6 +18,8 @@ async def test_generate_unit_tests_community_limits_and_framework(
     community_tier, monkeypatch
 ):
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    import code_scalpel.mcp.tools.symbolic as symbolic_tools
 
     calls: list[dict[str, Any]] = []
 
@@ -48,7 +50,12 @@ async def test_generate_unit_tests_community_limits_and_framework(
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch at both import sites (symbolic_helpers and tools.symbolic)
+    # to ensure patch affects the asyncio.to_thread() call.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # community_tier fixture sets up the environment
 
     # Community: pytest only
@@ -80,6 +87,8 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(
     pro_tier, monkeypatch
 ):
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    import code_scalpel.mcp.tools.symbolic as symbolic_tools
 
     calls: list[dict[str, Any]] = []
 
@@ -109,7 +118,11 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # pro_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
@@ -130,6 +143,8 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(
     enterprise_tier, monkeypatch
 ):
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    import code_scalpel.mcp.tools.symbolic as symbolic_tools
 
     calls: list[dict[str, Any]] = []
 
@@ -153,7 +168,11 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
     # enterprise_tier fixture sets up the environment
 
     ok = await server.generate_unit_tests(
@@ -175,6 +194,8 @@ async def test_generate_unit_tests_limits_toml_override(
     """limits.toml should be the source of truth for numeric limits."""
     from code_scalpel.licensing import clear_cache
     from code_scalpel.mcp import server
+    import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    import code_scalpel.mcp.tools.symbolic as symbolic_tools
 
     calls: list[dict[str, Any]] = []
 
@@ -198,7 +219,11 @@ async def test_generate_unit_tests_limits_toml_override(
             unittest_code="",
         )
 
-    monkeypatch.setattr(server, "_generate_tests_sync", _fake_generate_tests_sync)
+    # [20260121_TEST] Patch at both import sites to ensure patch affects asyncio.to_thread() call.
+    monkeypatch.setattr(sym_helpers, "_generate_tests_sync", _fake_generate_tests_sync)
+    monkeypatch.setattr(
+        symbolic_tools, "_generate_tests_sync", _fake_generate_tests_sync
+    )
 
     # Force a custom limits file for this test.
     custom = tmp_path / "limits.toml"

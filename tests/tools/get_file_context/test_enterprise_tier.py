@@ -38,14 +38,16 @@ class TestEnterpriseCustomMetadata:
 
         # Create metadata file
         metadata_file = code_dir / "metadata.yaml"
-        metadata_file.write_text("""
+        metadata_file.write_text(
+            """
 owner: security-team
 classification: sensitive
 data_types:
   - pii
   - financial
 team: platform-engineering
-        """)
+        """
+        )
 
         # Create test Python file
         test_file = project_dir / "test.py"
@@ -169,11 +171,13 @@ class TestEnterpriseCodeOwners:
 
         # Create CODEOWNERS file
         codeowners_file = project_dir / "CODEOWNERS"
-        codeowners_file.write_text("""
+        codeowners_file.write_text(
+            """
 *.py @python-team
 src/ @core-team
 tests/ @qa-team
-        """)
+        """
+        )
 
         test_file = project_dir / "test.py"
         test_file.write_text("def hello(): pass")

@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
 SonarQube Java Parser - Code quality and security analysis platform.
-
 Interfaces with SonarQube API to retrieve analysis results.
 SonarQube provides continuous inspection of code quality.
-
 Reference: https://docs.sonarsource.com/sonarqube/latest/
 Command: sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=src
-
 """
 
 import base64

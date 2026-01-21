@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+# Phase 1: Define data structures and class skeleton for Gosec parser
+# This module sets up the framework for integrating Gosec
+# into the code analysis tool. The actual implementation of methods will be
+# completed in Phase 2.
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -43,8 +47,8 @@ class GosecConfig:
 
     gosec_version: str = "2.18.0"
     config_file: Optional[Path] = None
-    exclude_rules: List[str] = None
-    include_rules: List[str] = None
+    exclude_rules: List[str] = field(default_factory=list)
+    include_rules: List[str] = field(default_factory=list)
 
 
 class GosecParser:
@@ -61,7 +65,7 @@ class GosecParser:
         self.issues: List[SecurityIssue] = []
 
     def execute_gosec(
-        self, paths: List[Path], config: GosecConfig = None
+        self, paths: List[Path], config: Optional[GosecConfig] = None
     ) -> List[SecurityIssue]:
         raise NotImplementedError("Phase 2: Gosec execution")
 

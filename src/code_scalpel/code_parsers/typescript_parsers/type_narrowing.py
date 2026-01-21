@@ -24,13 +24,6 @@ Example:
         }
     }
     ```
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from __future__ import annotations

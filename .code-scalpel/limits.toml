@@ -289,16 +289,21 @@ max_extraction_size_mb = 100
 [community.update_symbol]
 backup_enabled = true
 validation_level = "syntax"
-# [20260110_FEATURE] Roadmap v1.0: 10 updates per session (Community)
-max_updates_per_session = 10
+# [20260121_REFACTOR] Switched to stateless per-call throughput cap
+# Community: up to 10 updates per call; each call is independent (no session state)
+max_updates_per_call = 10
 
 [pro.update_symbol]
 backup_enabled = true
 validation_level = "semantic"
+# [20260121_REFACTOR] Per-call model; Pro has unlimited updates
+max_updates_per_call = -1
 
 [enterprise.update_symbol]
 backup_enabled = true
 validation_level = "full"
+# [20260121_REFACTOR] Per-call model; Enterprise has unlimited updates
+max_updates_per_call = -1
 
 # ----------------------------------------------------------------------------
 

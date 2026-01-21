@@ -4,8 +4,6 @@ JavaScript Code Quality Analyzer - Comprehensive code quality and pattern detect
 
 Implements advanced code quality checks, anti-pattern detection, and
 code smell identification for JavaScript/TypeScript code.
-
-
 Features:
     Code Smell Detection:
         - Callback hell / deep nesting detection
@@ -36,13 +34,6 @@ Features:
         - CommonJS vs ES6 module detection
         - Import/export counting
         - Dynamic import detection
-
-Future Enhancements:
-    - Full duplicate code clone detection with token matching
-    - Control flow graph generation
-    - JSDoc coverage percentage
-    - Coupling/cohesion metrics
-    - Technical debt scoring
 """
 
 import hashlib

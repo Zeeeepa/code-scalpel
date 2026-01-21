@@ -708,15 +708,16 @@ class PatchResultModel(BaseModel):
     hint: str | None = Field(
         default=None, description="Actionable hint to remediate failure"
     )
-    # [20260110_FEATURE] Session limit observability for update_symbol.
-    max_updates_per_session: int | None = Field(
-        default=None, description="Session max updates applied for this tool"
+    # [20260121_REFACTOR] Switched to per-call throughput model; removed session state fields
+    # Batch operations report aggregate results and truncation warnings instead of session counts
+    max_updates_per_call: int | None = Field(
+        default=None, description="Per-call throughput cap applied for this tier"
     )
-    updates_used: int | None = Field(
-        default=None, description="Updates used in this session for this tool"
+    updates_in_batch: int | None = Field(
+        default=None, description="Number of updates in this batch (for batch calls)"
     )
-    updates_remaining: int | None = Field(
-        default=None, description="Remaining updates in this session for this tool"
+    batch_truncated: bool = Field(
+        default=False, description="True if batch was truncated due to per-call limit"
     )
     # [20251225_FEATURE] Optional warnings for tier-aware behavior (neutral messaging).
     warnings: list[str] = Field(

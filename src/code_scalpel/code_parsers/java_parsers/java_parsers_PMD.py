@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
 PMD Java Parser - Source code analyzer for Java.
-
 Parses PMD XML output to extract code violations.
 PMD finds common programming flaws like unused variables, empty blocks, etc.
-
 Reference: https://pmd.github.io/
 Command: pmd check -d src -R rulesets/java/quickstart.xml -f xml -r report.xml
-
 """
 
 import subprocess

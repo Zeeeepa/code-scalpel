@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
 Babel Parser - Modern JavaScript/JSX parsing with latest ECMAScript support.
-
 Babel is the industry-standard JavaScript compiler that supports the latest
 ECMAScript features, JSX, TypeScript, and Flow. This parser leverages Babel
 for comprehensive JavaScript analysis.
-
-
 Features:
     Syntax Detection:
         - ECMAScript version detection (ES5 through ES2024+)
@@ -30,14 +27,6 @@ Features:
         - Code transformation via Babel CLI
         - Source map generation
         - Polyfill requirement detection
-
-Future Enhancements:
-    - Babel config (.babelrc.js, babel.config.js) execution
-    - Plugin dependency graph analysis
-    - Preset expansion (included plugins)
-    - Macro detection (@babel/plugin-macros)
-    - Code transformation diff generation
-    - Build time metrics and caching analysis
 """
 
 import json

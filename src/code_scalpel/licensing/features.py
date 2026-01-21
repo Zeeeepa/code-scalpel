@@ -1173,9 +1173,11 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
             "limits": {
                 "backup_enabled": True,
                 "validation_level": "syntax",
-                "max_updates_per_session": 10,  # Roadmap v1.0: "10 updates per session"
+                # [20260121_REFACTOR] Switch to stateless per-call throughput cap
+                # Roadmap v1.0: "10 updates per call" for Community
+                "max_updates_per_call": 10,
             },
-            "description": "Replace a function/class/method with new code (10 updates/session)",
+            "description": "Replace a function/class/method with new code (10 updates/call)",
         },
         "pro": {
             "enabled": True,
@@ -1200,7 +1202,8 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
             "limits": {
                 "backup_enabled": True,
                 "validation_level": "semantic",
-                "max_updates_per_session": -1,  # Unlimited
+                # [20260121_REFACTOR] Per-call model; -1 means unlimited
+                "max_updates_per_call": -1,
             },
             "description": "Unlimited updates with atomic multi-file, rollback, and hooks",
         },
@@ -1236,7 +1239,8 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
             "limits": {
                 "backup_enabled": True,
                 "validation_level": "full",
-                "max_updates_per_session": -1,  # Unlimited
+                # [20260121_REFACTOR] Per-call model; -1 means unlimited
+                "max_updates_per_call": -1,
             },
             "description": "Atomic refactoring: approval, compliance, audit trail, policies",
         },

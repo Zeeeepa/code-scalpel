@@ -211,13 +211,16 @@ def project_with_complexity(tmp_path):
     root.mkdir()
 
     # Low complexity
-    (root / "simple.py").write_text("""
+    (root / "simple.py").write_text(
+        """
 def simple_function():
     return 42
-""")
+"""
+    )
 
     # High complexity (cyclomatic complexity ~15)
-    (root / "complex.py").write_text("""
+    (root / "complex.py").write_text(
+        """
 def complex_function(x, y, z):
     if x > 10:
         if y > 20:
@@ -238,7 +241,8 @@ def complex_function(x, y, z):
             return x
     else:
         return 0
-""")
+"""
+    )
 
     return root
 
@@ -250,32 +254,38 @@ def flask_project(tmp_path):
     root.mkdir()
 
     # Presentation layer
-    (root / "app.py").write_text("""
+    (root / "app.py").write_text(
+        """
 from flask import Flask, request
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return "Hello"
-""")
+"""
+    )
 
     # Business layer
     services = root / "services"
     services.mkdir()
     (services / "__init__.py").write_text("")
-    (services / "order_service.py").write_text("""
+    (services / "order_service.py").write_text(
+        """
 def process_order(order_data):
     pass
-""")
+"""
+    )
 
     # Data layer
     models = root / "models"
     models.mkdir()
     (models / "__init__.py").write_text("")
-    (models / "order.py").write_text("""
+    (models / "order.py").write_text(
+        """
 class Order:
     pass
-""")
+"""
+    )
 
     return root
 

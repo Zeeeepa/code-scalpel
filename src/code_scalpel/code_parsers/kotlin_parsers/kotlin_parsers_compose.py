@@ -11,9 +11,6 @@ Compose Linter features:
 - Composable function analysis
 - Parameter stability analysis
 - Performance metrics
-
-
-
 """
 
 from dataclasses import dataclass

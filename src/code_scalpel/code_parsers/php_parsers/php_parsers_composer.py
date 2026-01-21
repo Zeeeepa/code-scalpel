@@ -12,10 +12,6 @@ Composer provides:
 - Version constraint management
 - Autoload configuration
 - Script management
-
-
-
-
 """
 
 from dataclasses import dataclass, field

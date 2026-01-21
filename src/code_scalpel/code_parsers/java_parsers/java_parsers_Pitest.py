@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Pitest Java Parser - Mutation testing analysis tool.
-
-
 Reference: http://pitest.org/
 Command: mvn org.pitest:pitest-maven:mutationCoverage
          java -jar pitest-command-line.jar --reportDir=target/pit-reports

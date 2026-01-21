@@ -1,11 +1,15 @@
-"""Graph MCP tool registrations."""
+"""Graph MCP tool registrations.
+
+[20260121_REFACTOR] Wrap outputs in ToolResponseEnvelope for MCP contract
+consistency (tier metadata, duration, standardized errors).
+"""
 
 from __future__ import annotations
 
 import asyncio
 from typing import Any
 
-from code_scalpel.mcp.contract import ToolResponseEnvelope
+from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
 
 from mcp.server.fastmcp import Context
 
@@ -18,6 +22,8 @@ from code_scalpel.mcp.helpers.graph_helpers import (
     _get_project_map_sync,
 )
 from code_scalpel.mcp.protocol import mcp
+from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.protocol import _get_current_tier as _tier_getter
 
 
 def _get_current_tier() -> str:
@@ -27,8 +33,7 @@ def _get_current_tier() -> str:
     return get_tier()
 
 
-@mcp.tool()
-async def get_call_graph(
+async def _get_call_graph_tool(
     project_root: str | None = None,
     entry_point: str | None = None,
     depth: int = 10,
@@ -92,6 +97,7 @@ async def get_call_graph(
     tier = _get_current_tier()
     caps = get_tool_capabilities("get_call_graph", tier) or {}
     limits = caps.get("limits", {}) or {}
+    cap_set = set(caps.get("capabilities", []) or [])
 
     max_depth = limits.get("max_depth")
     max_nodes = limits.get("max_nodes")
@@ -106,6 +112,13 @@ async def get_call_graph(
     if max_depth is not None and depth > max_depth:
         actual_depth = max_depth
 
+    # [20260121_BUGFIX] Enable tier-driven advanced resolution and enterprise metrics
+    advanced_resolution = "advanced_call_graph" in cap_set
+    include_enterprise_metrics = bool(
+        {"hot_path_identification", "dead_code_detection", "custom_graph_analysis"}
+        & cap_set
+    )
+
     # [20260120_FEATURE] Call sync function with tier/capabilities for metadata transparency
     result = await asyncio.to_thread(
         _get_call_graph_sync,
@@ -114,8 +127,8 @@ async def get_call_graph(
         actual_depth,
         include_circular_import_check,
         max_nodes,
-        False,  # advanced_resolution (default)
-        False,  # include_enterprise_metrics (default)
+        advanced_resolution,
+        include_enterprise_metrics,
         paths_from,
         paths_to,
         focus_functions,
@@ -136,8 +149,17 @@ async def get_call_graph(
     return result
 
 
-@mcp.tool()
-async def get_graph_neighborhood(
+get_call_graph = mcp.tool()(
+    envelop_tool_function(
+        _get_call_graph_tool,
+        tool_id="get_call_graph",
+        tool_version=_pkg_version,
+        tier_getter=_tier_getter,
+    )
+)
+
+
+async def _get_graph_neighborhood_tool(
     center_node_id: str,
     k: int = 2,
     max_nodes: int = 100,
@@ -224,8 +246,17 @@ async def get_graph_neighborhood(
     )
 
 
-@mcp.tool()
-async def get_project_map(
+get_graph_neighborhood = mcp.tool()(
+    envelop_tool_function(
+        _get_graph_neighborhood_tool,
+        tool_id="get_graph_neighborhood",
+        tool_version=_pkg_version,
+        tier_getter=_tier_getter,
+    )
+)
+
+
+async def _get_project_map_tool(
     project_root: str | None = None,
     include_complexity: bool = True,
     complexity_threshold: int = 10,
@@ -351,8 +382,17 @@ async def get_project_map(
     return result
 
 
-@mcp.tool()
-async def get_cross_file_dependencies(
+get_project_map = mcp.tool()(
+    envelop_tool_function(
+        _get_project_map_tool,
+        tool_id="get_project_map",
+        tool_version=_pkg_version,
+        tier_getter=_tier_getter,
+    )
+)
+
+
+async def _get_cross_file_dependencies_tool(
     target_file: str,
     target_symbol: str,
     project_root: str | None = None,
@@ -466,8 +506,17 @@ async def get_cross_file_dependencies(
     return result
 
 
-@mcp.tool()
-async def cross_file_security_scan(
+get_cross_file_dependencies = mcp.tool()(
+    envelop_tool_function(
+        _get_cross_file_dependencies_tool,
+        tool_id="get_cross_file_dependencies",
+        tool_version=_pkg_version,
+        tier_getter=_tier_getter,
+    )
+)
+
+
+async def _cross_file_security_scan_tool(
     project_root: str | None = None,
     entry_points: list[str] | None = None,
     max_depth: int = 5,
@@ -556,6 +605,16 @@ async def cross_file_security_scan(
         )
 
     return result
+
+
+cross_file_security_scan = mcp.tool()(
+    envelop_tool_function(
+        _cross_file_security_scan_tool,
+        tool_id="cross_file_security_scan",
+        tool_version=_pkg_version,
+        tier_getter=_tier_getter,
+    )
+)
 
 
 __all__ = [

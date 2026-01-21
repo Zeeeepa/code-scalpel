@@ -21,13 +21,6 @@ Supported Languages:
     - JavaScript: Full support via tree-sitter-javascript
     - TypeScript: Full support via tree-sitter-typescript (planned)
     - Java: Full support via tree-sitter-java
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from dataclasses import dataclass, field

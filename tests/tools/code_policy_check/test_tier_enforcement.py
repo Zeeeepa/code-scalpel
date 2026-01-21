@@ -79,12 +79,14 @@ class TestCommunityTierLimits:
     async def test_community_enforces_50_rule_limit(self, tmp_path, community_license):
         """Community tier should enforce 50 rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -122,12 +124,14 @@ class TestProTierLimits:
     async def test_pro_enforces_200_rule_limit(self, tmp_path, pro_license):
         """Pro tier should enforce 200 rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -171,12 +175,14 @@ class TestEnterpriseTierLimits:
     async def test_enterprise_has_unlimited_rules(self, tmp_path, enterprise_license):
         """Enterprise tier should have no rule limit."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 try:
     pass
 except:
     pass
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -199,10 +205,12 @@ class TestTierFeatureGating:
     async def test_community_no_best_practices(self, tmp_path, community_license):
         """Community tier should not include best_practices_violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -216,10 +224,12 @@ def func(x):
     async def test_pro_has_best_practices(self, tmp_path, pro_license):
         """Pro tier should include best_practices_violations."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -235,10 +245,12 @@ def func(x):
     ):
         """Enterprise tier should include compliance_reports."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def func(x):
     return x + 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)])
 
@@ -255,9 +267,11 @@ def func(x):
         """Community tier should not expose custom rule results."""
         # [20260105_TEST] Strengthen feature gating expectations.
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 value = 1
-""")
+"""
+        )
 
         result = await code_policy_check(paths=[str(test_file)], rules=["CUSTOM001"])
 
@@ -270,10 +284,12 @@ value = 1
     async def test_pro_blocks_compliance_outputs(self, tmp_path, pro_license):
         """Pro tier should not return compliance artifacts even if requested."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def handler(request):
     return request.json.get("email")
-""")
+"""
+        )
 
         result = await code_policy_check(
             paths=[str(test_file)],
@@ -295,10 +311,12 @@ def handler(request):
     ):
         """Enterprise tier should populate compliance score and audit trail."""
         test_file = tmp_path / "test.py"
-        test_file.write_text("""
+        test_file.write_text(
+            """
 def log_patient(patient_id):
     print(f"patient_id={patient_id}")
-""")
+"""
+        )
 
         result = await code_policy_check(
             paths=[str(test_file)],

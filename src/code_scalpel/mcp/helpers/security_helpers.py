@@ -1507,8 +1507,15 @@ def _scan_dependencies_sync(
                         }
                     )
 
+        # [20260120_SECURITY] Fail-closed: OSV API failures must return success=False
+        # Network errors are NOT a clean bill of health—don't let agents assume safety
+        # when the guard dog is asleep. Any OSV query failure means we cannot verify
+        # the security posture, so success must be False.
+        osv_query_failed = any("OSV query failed" in err for err in errors)
+        scan_success = not osv_query_failed
+
         return DependencyScanResult(
-            success=True,
+            success=scan_success,
             total_dependencies=len(dependency_infos),
             vulnerable_count=vulnerable_count,
             total_vulnerabilities=total_vulns,

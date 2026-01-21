@@ -421,7 +421,9 @@ async function submit(p: Payload) {
 }
 
 // add some scale
-""" + "\n".join(["// filler line" for _ in range(300)])
+""" + "\n".join(
+        ["// filler line" for _ in range(300)]
+    )
 
     backend_code = """
 from fastapi import FastAPI, Request

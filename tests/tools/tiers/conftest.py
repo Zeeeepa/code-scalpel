@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.utils.tier_setup import activate_tier, clear_tier_caches
+
 
 @pytest.fixture(autouse=True)
 def clear_tier_cache():
@@ -39,20 +41,11 @@ def clear_tier_cache():
 
     config_loader.clear_cache()
 
-    # Also reset any module-level state in server
-    from code_scalpel.mcp import server
-
-    # Clear any cached tier detection
-    if hasattr(server, "_cached_tier"):
-        server._cached_tier = None
-
     yield
 
     # Cleanup AFTER test
     jwt_validator._LICENSE_VALIDATION_CACHE = None
     config_loader.clear_cache()
-    if hasattr(server, "_cached_tier"):
-        server._cached_tier = None
 
 
 # Paths to test license files (relative to project root)
@@ -113,74 +106,58 @@ def _find_valid_license(tier: str) -> Path | None:
 
 
 @pytest.fixture
-def pro_tier(monkeypatch):
+def pro_tier():
     """
     Fixture that sets up Pro tier for testing.
 
-    Uses a real license file if available, otherwise mocks _get_current_tier().
+    Uses a real license file if available, otherwise mocks tier via environment.
 
-    **Current Status**: Mock fallback (no valid Pro license found)
-    **Reason**: Test licenses signed with different key than vault-prod-2026-01.pem
-    **Action**: Generate valid licenses or use mock (both work for testing)
+    [20260121_FIX] Don't skip the fixture itself - activate_tier handles fallback
     """
-    from code_scalpel.mcp import server
-
-    license_path = _find_valid_license("pro")
-
-    if license_path:
-        # Use real license via env var
-        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
-    else:
-        # Fallback to mock - this is acceptable for tier feature testing
-        monkeypatch.setattr(server, "_get_current_tier", lambda: "pro")
-
-    yield {
-        "tier": "pro",
-        "license_path": license_path,
-        "is_mocked": license_path is None,
-    }
+    # Activate Pro tier via license file or env fallback
+    license_path = activate_tier("pro", skip_if_missing=False)
+    try:
+        yield {
+            "tier": "pro",
+            "license_path": license_path,
+            "is_mocked": license_path is None,
+        }
+    finally:
+        clear_tier_caches()
 
 
 @pytest.fixture
-def enterprise_tier(monkeypatch):
+def enterprise_tier():
     """
     Fixture that sets up Enterprise tier for testing.
 
-    Uses a real license file if available, otherwise mocks _get_current_tier().
+    Uses a real license file if available, otherwise mocks tier via environment.
 
-    **Current Status**: Mock fallback (no valid Enterprise license found)
-    **Reason**: Test licenses signed with different key than vault-prod-2026-01.pem
-    **Action**: Generate valid licenses or use mock (both work for testing)
+    [20260121_FIX] Don't skip the fixture itself - activate_tier handles fallback
     """
-    from code_scalpel.mcp import server
-
-    license_path = _find_valid_license("enterprise")
-
-    if license_path:
-        # Use real license via env var
-        monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(license_path))
-    else:
-        # Fallback to mock - this is acceptable for tier feature testing
-        monkeypatch.setattr(server, "_get_current_tier", lambda: "enterprise")
-
-    yield {
-        "tier": "enterprise",
-        "license_path": license_path,
-        "is_mocked": license_path is None,
-    }
+    # Activate Enterprise tier via license file or env fallback
+    license_path = activate_tier("enterprise", skip_if_missing=False)
+    try:
+        yield {
+            "tier": "enterprise",
+            "license_path": license_path,
+            "is_mocked": license_path is None,
+        }
+    finally:
+        clear_tier_caches()
 
 
 @pytest.fixture
-def community_tier(monkeypatch):
+def community_tier():
     """
     Fixture that sets up Community tier for testing.
 
     Ensures no license is loaded by disabling license discovery AND
     removing any LICENSE_PATH that might point to a valid license.
     """
-    # Disable license discovery to ensure community tier
-    monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
-    # Also remove LICENSE_PATH if it exists
-    monkeypatch.delenv("CODE_SCALPEL_LICENSE_PATH", raising=False)
-
-    yield {"tier": "community", "license_path": None, "is_mocked": False}
+    # Activate community tier via env settings
+    activate_tier("community")
+    try:
+        yield {"tier": "community", "license_path": None, "is_mocked": False}
+    finally:
+        clear_tier_caches()

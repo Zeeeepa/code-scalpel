@@ -5,13 +5,6 @@ Bundler/Module Alias Resolver.
 
 This module provides tools to resolve module aliases used in TypeScript/JavaScript projects,
 enabling accurate import resolution for security analysis and extraction.
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from __future__ import annotations

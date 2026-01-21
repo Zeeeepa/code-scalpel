@@ -12,9 +12,6 @@ diktat provides:
 - Custom rule creation support
 - Gradle plugin integration
 - JSON report output
-
-
-
 """
 
 from dataclasses import dataclass, field

@@ -63,6 +63,9 @@ from code_scalpel.mcp.protocol import mcp, set_current_tier
 from code_scalpel.licensing.authorization import compute_effective_tier_for_startup
 
 from code_scalpel.mcp.models.core import AnalysisResult, FunctionInfo, ClassInfo
+from code_scalpel.mcp.models.policy import (
+    PolicyVerificationResult,  # [20260121_BUGFIX] Reuse canonical model to avoid duplication
+)
 
 # [20260116_FEATURE] License-gated tier system restored from archive
 from code_scalpel.licensing.jwt_validator import JWTLicenseValidator
@@ -3519,83 +3522,17 @@ def _get_symbol_references_sync(
         )
 
 
-class CallNodeModel(BaseModel):
-    """Node in the call graph representing a function."""
+# [20260122_REFACTOR] Canonicalize call graph models to avoid duplicate classes
+from code_scalpel.mcp.models.graph import (  # noqa: E402
+    CallEdgeModel as _CallEdgeModelCanonical,
+    CallGraphResultModel as _CallGraphResultModelCanonical,
+    CallNodeModel as _CallNodeModelCanonical,
+)
 
-    name: str = Field(description="Function name")
-    file: str = Field(description="File path (relative) or '<external>'")
-    line: int = Field(description="Line number (0 if unknown)")
-    end_line: int | None = Field(default=None, description="End line number")
-    is_entry_point: bool = Field(
-        default=False, description="Whether function is an entry point"
-    )
-
-
-class CallEdgeModel(BaseModel):
-    """Edge in the call graph representing a function call."""
-
-    caller: str = Field(description="Caller function (file:name)")
-    callee: str = Field(description="Callee function (file:name or external name)")
-
-
-class CallGraphResultModel(BaseModel):
-    """Result of call graph analysis."""
-
-    success: bool = Field(default=True, description="Whether analysis succeeded")
-    server_version: str = Field(default=__version__, description="Code Scalpel version")
-    nodes: list[CallNodeModel] = Field(
-        default_factory=list, description="Functions in the graph"
-    )
-    edges: list[CallEdgeModel] = Field(
-        default_factory=list, description="Call relationships"
-    )
-    entry_point: str | None = Field(
-        default=None, description="Entry point used for filtering"
-    )
-    depth_limit: int | None = Field(default=None, description="Depth limit used")
-    mermaid: str = Field(default="", description="Mermaid diagram representation")
-    circular_imports: list[list[str]] = Field(
-        default_factory=list, description="Detected import cycles"
-    )
-    error: str | None = Field(default=None, description="Error message if failed")
-
-    # [20260120_FEATURE] v1.0 pre-release - Output transparency metadata
-    tier_applied: str = Field(
-        default="community",
-        description="Which tier's rules were applied (community/pro/enterprise)",
-    )
-    max_depth_applied: int | None = Field(
-        default=None, description="Max depth limit that was applied (None = unlimited)"
-    )
-    max_nodes_applied: int | None = Field(
-        default=None, description="Max nodes limit that was applied (None = unlimited)"
-    )
-    advanced_resolution_enabled: bool = Field(
-        default=False, description="Whether advanced resolution is enabled (Pro)"
-    )
-    enterprise_metrics_enabled: bool = Field(
-        default=False, description="Whether enterprise metrics are enabled"
-    )
-
-    # [20251229_FEATURE] v3.3.0 - Pro/Enterprise fields
-    semantic_summary: Optional[str] = Field(
-        default=None, description="AI-generated semantic summary (Pro)"
-    )
-    related_imports: List[str] = Field(
-        default_factory=list, description="Related imports from other files (Pro)"
-    )
-    pii_redacted: bool = Field(
-        default=False, description="Whether PII was redacted (Enterprise)"
-    )
-    access_controlled: bool = Field(
-        default=False, description="Whether access control was applied (Enterprise)"
-    )
-    hot_nodes: Optional[list[str]] = Field(
-        default=None, description="Hot nodes detected by call frequency (Enterprise)"
-    )
-    dead_code_candidates: Optional[list[str]] = Field(
-        default=None, description="Potential dead code nodes (Enterprise)"
-    )
+# Re-export canonical models so imports from server.py match helper/tool outputs
+CallNodeModel = _CallNodeModelCanonical
+CallEdgeModel = _CallEdgeModelCanonical
+CallGraphResultModel = _CallGraphResultModelCanonical
 
 
 def _get_call_graph_sync(
@@ -5084,30 +5021,6 @@ def _validate_paths_sync(
         suggestions=suggestions,
         workspace_roots=resolver.workspace_roots,
         is_docker=resolver.is_docker,
-    )
-
-
-class PolicyVerificationResult(BaseModel):
-    """Result of cryptographic policy verification."""
-
-    success: bool = Field(description="Whether all policy files verified successfully")
-    manifest_valid: bool = Field(
-        default=False, description="Whether manifest signature is valid"
-    )
-    files_verified: int = Field(
-        default=0, description="Number of files successfully verified"
-    )
-    files_failed: list[str] = Field(
-        default_factory=list, description="List of files that failed verification"
-    )
-    error: str | None = Field(
-        default=None, description="Error message if verification failed"
-    )
-    manifest_source: str | None = Field(
-        default=None, description="Source of the policy manifest"
-    )
-    policy_dir: str | None = Field(
-        default=None, description="Policy directory that was verified"
     )
 
 

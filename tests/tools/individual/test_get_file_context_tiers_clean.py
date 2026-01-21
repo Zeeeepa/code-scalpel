@@ -20,12 +20,16 @@ async def test_async_get_file_context_pro(monkeypatch, tmp_path):
     helper.write_text("CONST = 1\n")
 
     target = tmp_path / "target.py"
-    target.write_text(textwrap.dedent("""
+    target.write_text(
+        textwrap.dedent(
+            """
             import helper
 
             def calc(x):
                 return helper.CONST + x
-            """))
+            """
+        )
+    )
 
     pro_caps = _caps(
         2000,

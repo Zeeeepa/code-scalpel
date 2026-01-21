@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Gradle Java Parser - Build tool and dependency management integration.
-
-
 Reference: https://gradle.org/
 Command: gradle dependencies --configuration compileClasspath
          gradle tasks --all

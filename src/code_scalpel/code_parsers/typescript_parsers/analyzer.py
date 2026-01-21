@@ -8,13 +8,6 @@ Provides higher-level analysis on top of the parser, including:
 - Dependency graph construction
 
 Status: STUB - Core interface only.
-
-
-COMMUNITY TIER (Core Functionality):
-
-PRO TIER (Enhanced Features):
-
-ENTERPRISE TIER (Advanced Capabilities):
 """
 
 from dataclasses import dataclass, field

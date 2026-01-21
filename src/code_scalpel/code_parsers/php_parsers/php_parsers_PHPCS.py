@@ -15,9 +15,6 @@ PHPCS Features:
     - Multiple output formats (CSV, JSON, XML, etc.)
     - Custom sniff creation support
 
-Phase 2 Enhancement Areas:
-
-
 """
 
 from dataclasses import dataclass, field

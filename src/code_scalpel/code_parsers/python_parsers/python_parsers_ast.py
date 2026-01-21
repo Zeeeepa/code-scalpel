@@ -1773,8 +1773,6 @@ class SymbolVisitor(ParentTrackingVisitor):
         params: list[PythonParameter] = []
 
         # Positional-only parameters (before /)
-        len(args.posonlyargs) + len(args.args) - len(args.defaults)
-
         for i, arg in enumerate(args.posonlyargs):
             default_idx = i - (
                 len(args.posonlyargs) - len(args.defaults) + len(args.args)

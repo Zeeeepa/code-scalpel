@@ -182,7 +182,8 @@ def community_tier(monkeypatch):
 def temp_python_file(tmp_path):
     """Create a temporary Python file with sample code."""
     py_file = tmp_path / "sample.py"
-    py_file.write_text("""
+    py_file.write_text(
+        """
 def add_numbers(a, b):
     '''Add two numbers.'''
     return a + b
@@ -197,7 +198,8 @@ class Calculator:
     def multiply(self, x, y):
         '''Multiply two numbers.'''
         return x * y
-""")
+"""
+    )
     return py_file
 
 
@@ -205,7 +207,8 @@ class Calculator:
 def temp_js_file(tmp_path):
     """Create a temporary JavaScript file with sample code."""
     js_file = tmp_path / "sample.js"
-    js_file.write_text("""
+    js_file.write_text(
+        """
 function addNumbers(a, b) {
     // Add two numbers
     return a + b;
@@ -224,7 +227,8 @@ class Calculator {
         return x * y;
     }
 }
-""")
+"""
+    )
     return js_file
 
 
@@ -236,7 +240,8 @@ def temp_multifile_project(tmp_path):
 
     # File 1: utils.py
     utils_file = src_dir / "utils.py"
-    utils_file.write_text("""
+    utils_file.write_text(
+        """
 def calculate_discount(price, rate=0.1):
     '''Calculate discount.'''
     return price * (1 - rate)
@@ -244,11 +249,13 @@ def calculate_discount(price, rate=0.1):
 def validate_price(price):
     '''Validate price.'''
     return price > 0
-""")
+"""
+    )
 
     # File 2: services.py
     services_file = src_dir / "services.py"
-    services_file.write_text("""
+    services_file.write_text(
+        """
 from utils import calculate_discount
 
 def apply_discount(price):
@@ -259,7 +266,8 @@ def process_order(items):
     '''Process order.'''
     total = sum(items)
     return apply_discount(total)
-""")
+"""
+    )
 
     return {"root": tmp_path, "utils": utils_file, "services": services_file}
 
