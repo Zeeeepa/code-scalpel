@@ -389,6 +389,7 @@ jobs:
     - name: Regenerate MCP tools reference
       env:
         CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/mcp-tools-docgen
+        CODE_SCALPEL_LICENSE_PATH: ${{ github.workspace }}/tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
       run: |
         mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
         python scripts/generate_mcp_tools_reference.py
