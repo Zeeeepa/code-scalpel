@@ -71,6 +71,8 @@ async def _fetch_tools(project_root: Path) -> list[ToolDoc]:
     # Always document the full tool surface shipped by this repo.
     env = _pythonpath_env(repo_root)
     env["CODE_SCALPEL_TIER"] = "enterprise"
+    # Disable license validation for documentation generation
+    env["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = "1"
 
     params = StdioServerParameters(
         command=sys.executable,
