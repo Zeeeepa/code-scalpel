@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_server():
-    from code_scalpel.mcp.archive import server as _server
+    from code_scalpel.mcp import server as _server
 
     return _server
 
