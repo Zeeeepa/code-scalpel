@@ -13,7 +13,7 @@ PHASE 1 SCOPE (RFC-001): Integers and Booleans only.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 
 import z3
 
@@ -68,13 +68,13 @@ class PathResult:
 
     path_id: int
     status: PathStatus
-    constraints: List[z3.BoolRef]
-    variables: Dict[str, Any]  # Python native values (marshaled from Z3)
-    model: Optional[Dict[str, Any]] = None  # Concrete satisfying assignment
+    constraints: list[z3.BoolRef]
+    variables: dict[str, Any]  # Python native values (marshaled from Z3)
+    model: dict[str, Any] | None = None  # Concrete satisfying assignment
     # [20260114_FEATURE] Line coverage for path-sensitive pruning
-    visited_lines: List[int] = field(default_factory=list)
+    visited_lines: list[int] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to cache-serializable dictionary.
 
         Z3 constraints are converted to string representations.
@@ -89,7 +89,7 @@ class PathResult:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PathResult":
+    def from_dict(cls, data: dict[str, Any]) -> "PathResult":
         """Reconstruct from cached dictionary.
 
         Note: constraints are stored as strings (not executable Z3 objects).
@@ -113,28 +113,27 @@ class AnalysisResult:
     All values are Python natives (int, bool) - no raw Z3 objects.
     """
 
-    paths: List[PathResult] = field(default_factory=list)
-    all_variables: Dict[str, InferredType] = field(default_factory=dict)
+    paths: list[PathResult] = field(default_factory=list)
+    all_variables: dict[str, InferredType] = field(default_factory=dict)
     feasible_count: int = 0
     infeasible_count: int = 0
     total_paths: int = 0
     from_cache: bool = False  # True if result was retrieved from cache
 
-    def get_feasible_paths(self) -> List[PathResult]:
+    def get_feasible_paths(self) -> list[PathResult]:
         """Return only feasible paths."""
         return [p for p in self.paths if p.status == PathStatus.FEASIBLE]
 
-    def get_all_models(self) -> List[Dict[str, Any]]:
+    def get_all_models(self) -> list[dict[str, Any]]:
         """Return concrete models from all feasible paths."""
         return [p.model for p in self.paths if p.model is not None]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to cache-serializable dictionary."""
         return {
             "paths": [p.to_dict() for p in self.paths],
             "all_variables": {
-                k: v.value if isinstance(v, InferredType) else str(v)
-                for k, v in self.all_variables.items()
+                k: v.value if isinstance(v, InferredType) else str(v) for k, v in self.all_variables.items()
             },
             "feasible_count": self.feasible_count,
             "infeasible_count": self.infeasible_count,
@@ -142,13 +141,12 @@ class AnalysisResult:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AnalysisResult":
+    def from_dict(cls, data: dict[str, Any]) -> "AnalysisResult":
         """Reconstruct from cached dictionary."""
         return cls(
             paths=[PathResult.from_dict(p) for p in data.get("paths", [])],
             all_variables={
-                k: InferredType(v) if isinstance(v, str) else v
-                for k, v in data.get("all_variables", {}).items()
+                k: InferredType(v) if isinstance(v, str) else v for k, v in data.get("all_variables", {}).items()
             },
             feasible_count=data.get("feasible_count", 0),
             infeasible_count=data.get("infeasible_count", 0),
@@ -212,15 +210,15 @@ class SymbolicAnalyzer:
                 logger.warning("Cache module not available, caching disabled")
 
         # Core components - initialized fresh for each analysis
-        self._type_engine: Optional[TypeInferenceEngine] = None
-        self._interpreter: Optional[IRSymbolicInterpreter] = None
-        self._solver: Optional[ConstraintSolver] = None
+        self._type_engine: TypeInferenceEngine | None = None
+        self._interpreter: IRSymbolicInterpreter | None = None
+        self._solver: ConstraintSolver | None = None
 
         # Manual symbolic declarations for advanced use
-        self._preconditions: List[z3.BoolRef] = []
-        self._declared_symbols: Dict[str, z3.ExprRef] = {}
+        self._preconditions: list[z3.BoolRef] = []
+        self._declared_symbols: dict[str, z3.ExprRef] = {}
 
-    def _get_cache_config(self, language: str) -> Dict[str, Any]:
+    def _get_cache_config(self, language: str) -> dict[str, Any]:
         """Generate cache configuration key components."""
         return {
             "language": language,
@@ -277,9 +275,7 @@ class SymbolicAnalyzer:
         # Fresh components for this analysis
         self._type_engine = TypeInferenceEngine()
         self._solver = ConstraintSolver(timeout_ms=self.solver_timeout)
-        self._interpreter = IRSymbolicInterpreter(
-            max_loop_iterations=self.max_loop_iterations
-        )
+        self._interpreter = IRSymbolicInterpreter(max_loop_iterations=self.max_loop_iterations)
 
         # Step 1: Type inference (Python only for now)
         inferred_types = {}
@@ -341,9 +337,7 @@ class SymbolicAnalyzer:
                 logger.debug(f"Creating symbolic parameter: {param_name} ({sort_name})")
                 # declare_symbolic expects z3.Sort objects (IntSort(), BoolSort(), etc.)
                 # param_sort is already the result of z3.IntSort(), so it's a Sort object
-                self._interpreter.declare_symbolic(
-                    param_name, cast(z3.Sort, param_sort)
-                )
+                self._interpreter.declare_symbolic(param_name, cast(z3.Sort, param_sort))
 
             # Execute the function body instead of module body
             modified_ir = IRModule(
@@ -460,9 +454,7 @@ class SymbolicAnalyzer:
         elif sort == z3.StringSort():
             var = z3.String(name)
         else:
-            raise NotImplementedError(
-                f"Only IntSort, BoolSort, and StringSort supported, got {sort}"
-            )
+            raise NotImplementedError(f"Only IntSort, BoolSort, and StringSort supported, got {sort}")
 
         self._declared_symbols[name] = var
         return var
@@ -478,7 +470,7 @@ class SymbolicAnalyzer:
         """
         self._preconditions.append(constraint)
 
-    def find_inputs(self, target_condition: z3.BoolRef) -> Optional[Dict[str, Any]]:
+    def find_inputs(self, target_condition: z3.BoolRef) -> dict[str, Any] | None:
         """
         Find input values that make a target condition true.
 

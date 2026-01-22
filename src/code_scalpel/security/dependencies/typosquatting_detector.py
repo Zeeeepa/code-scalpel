@@ -27,9 +27,7 @@ class TyposquattingAlert:
     package_version: str
     suspected_target: str  # The legitimate package name
     similarity_score: float  # 0.0-1.0
-    typo_type: (
-        str  # "character_swap", "missing_char", "extra_char", "visual_similarity"
-    )
+    typo_type: str  # "character_swap", "missing_char", "extra_char", "visual_similarity"
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
     evidence: str  # Why this is suspicious
     recommendation: str  # What to do
@@ -112,9 +110,7 @@ class TyposquattingDetector:
         """Initialize the typosquatting detector."""
         pass
 
-    def scan_for_typosquatting(
-        self, dependencies: list[dict[str, Any]]
-    ) -> TyposquattingReport:
+    def scan_for_typosquatting(self, dependencies: list[dict[str, Any]]) -> TyposquattingReport:
         """
         Scan dependencies for typosquatting attacks.
 
@@ -159,9 +155,7 @@ class TyposquattingDetector:
             recommendations=recommendations,
         )
 
-    def _check_typosquatting(
-        self, package_name: str, version: str
-    ) -> TyposquattingAlert | None:
+    def _check_typosquatting(self, package_name: str, version: str) -> TyposquattingAlert | None:
         """
         Check if a package name is potential typosquatting.
 
@@ -176,9 +170,7 @@ class TyposquattingDetector:
                 typo_type, evidence = self._analyze_difference(package_name, popular)
 
                 # Calculate risk level
-                risk_level = self._assess_risk(
-                    similarity, typo_type, package_name, popular
-                )
+                risk_level = self._assess_risk(similarity, typo_type, package_name, popular)
 
                 if risk_level != "NONE":
                     return TyposquattingAlert(
@@ -189,9 +181,7 @@ class TyposquattingDetector:
                         typo_type=typo_type,
                         risk_level=risk_level,
                         evidence=evidence,
-                        recommendation=self._generate_alert_recommendation(
-                            package_name, popular, risk_level
-                        ),
+                        recommendation=self._generate_alert_recommendation(package_name, popular, risk_level),
                     )
 
         return None
@@ -217,7 +207,7 @@ class TyposquattingDetector:
 
         # Check for single character difference
         if len(suspicious) == len(legitimate):
-            diff_count = sum(c1 != c2 for c1, c2 in zip(suspicious, legitimate))
+            diff_count = sum(c1 != c2 for c1, c2 in zip(suspicious, legitimate, strict=False))
             if diff_count == 1:
                 return (
                     "character_swap",
@@ -252,7 +242,7 @@ class TyposquattingDetector:
         if len(name1) != len(name2):
             return False
 
-        for i, (c1, c2) in enumerate(zip(name1, name2)):
+        for _i, (c1, c2) in enumerate(zip(name1, name2, strict=False)):
             if c1 != c2:
                 # Check if they're confusable
                 if c1 in self.VISUAL_CONFUSABLES:
@@ -267,7 +257,7 @@ class TyposquattingDetector:
     def _find_confusables(self, name1: str, name2: str) -> list[str]:
         """Find confusable character pairs."""
         confusables = []
-        for i, (c1, c2) in enumerate(zip(name1, name2)):
+        for _i, (c1, c2) in enumerate(zip(name1, name2, strict=False)):
             if c1 != c2:
                 confusables.append(f"'{c1}' vs '{c2}'")
         return confusables
@@ -277,7 +267,7 @@ class TyposquattingDetector:
         if len(name1) != len(name2):
             return False
 
-        diff_positions = [i for i, (c1, c2) in enumerate(zip(name1, name2)) if c1 != c2]
+        diff_positions = [i for i, (c1, c2) in enumerate(zip(name1, name2, strict=False)) if c1 != c2]
 
         # Transposition means exactly 2 adjacent positions differ
         if len(diff_positions) == 2:
@@ -288,9 +278,7 @@ class TyposquattingDetector:
 
         return False
 
-    def _assess_risk(
-        self, similarity: float, typo_type: str, suspicious: str, legitimate: str
-    ) -> str:
+    def _assess_risk(self, similarity: float, typo_type: str, suspicious: str, legitimate: str) -> str:
         """Assess risk level of typosquatting."""
         # High similarity + visual confusables = high risk
         if similarity > 0.9 and typo_type == "visual_similarity":
@@ -314,9 +302,7 @@ class TyposquattingDetector:
 
         return "NONE"
 
-    def _generate_alert_recommendation(
-        self, suspicious: str, legitimate: str, risk_level: str
-    ) -> str:
+    def _generate_alert_recommendation(self, suspicious: str, legitimate: str, risk_level: str) -> str:
         """Generate recommendation for typosquatting alert."""
         if risk_level in ["CRITICAL", "HIGH"]:
             return (
@@ -329,9 +315,7 @@ class TyposquattingDetector:
                 f"Verify it's the correct dependency."
             )
         else:
-            return (
-                f"Double-check '{suspicious}' - possibly confused with '{legitimate}'."
-            )
+            return f"Double-check '{suspicious}' - possibly confused with '{legitimate}'."
 
     def _generate_recommendations(self, alerts: list[TyposquattingAlert]) -> list[str]:
         """Generate overall recommendations."""
@@ -342,13 +326,9 @@ class TyposquattingDetector:
 
         high_risk = sum(1 for a in alerts if a.risk_level in ["CRITICAL", "HIGH"])
         if high_risk > 0:
-            recommendations.append(
-                f"⚠️ {high_risk} high-risk typosquatting alerts - review immediately"
-            )
+            recommendations.append(f"⚠️ {high_risk} high-risk typosquatting alerts - review immediately")
 
-        recommendations.append(
-            "Verify all flagged packages are intentional dependencies"
-        )
+        recommendations.append("Verify all flagged packages are intentional dependencies")
         recommendations.append("Check package registry (npm, PyPI) for legitimacy")
         recommendations.append("Review package download counts and maintainer history")
 

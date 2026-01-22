@@ -49,7 +49,7 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class FlowSeverity(Enum):
@@ -98,7 +98,7 @@ class FlowTypeAnnotation:
     column: int
     is_nullable: bool = False  # ?T
     is_exact: bool = False  # {| |}
-    variance: Optional[Variance] = None
+    variance: Variance | None = None
 
 
 @dataclass
@@ -106,8 +106,8 @@ class FlowTypeParameter:
     """A generic type parameter in Flow."""
 
     name: str
-    bound: Optional[str] = None  # T: BoundType
-    default: Optional[str] = None
+    bound: str | None = None  # T: BoundType
+    default: str | None = None
     variance: Variance = Variance.INVARIANT
     line: int = 0
 
@@ -133,12 +133,10 @@ class FlowInterface:
     name: str
     line: int
     column: int
-    end_line: Optional[int] = None
+    end_line: int | None = None
     type_parameters: list[FlowTypeParameter] = field(default_factory=list)
     extends: list[str] = field(default_factory=list)
-    properties: list[tuple[str, str, bool]] = field(
-        default_factory=list
-    )  # (name, type, optional)
+    properties: list[tuple[str, str, bool]] = field(default_factory=list)  # (name, type, optional)
     is_exported: bool = False
 
 
@@ -153,8 +151,8 @@ class FlowError:
     end_line: int
     end_column: int
     file_path: str
-    error_code: Optional[str] = None
-    context: Optional[str] = None
+    error_code: str | None = None
+    context: str | None = None
 
 
 @dataclass
@@ -185,7 +183,7 @@ class FlowConfig:
     libs: list[str] = field(default_factory=list)
     lints: dict[str, str] = field(default_factory=dict)  # lint_name: severity
     options: dict[str, Any] = field(default_factory=dict)
-    version: Optional[str] = None
+    version: str | None = None
     strict: bool = False
     all_: bool = False  # all=true
 
@@ -197,16 +195,12 @@ class FlowAnalysis:
     type_aliases: list[FlowTypeAlias] = field(default_factory=list)
     interfaces: list[FlowInterface] = field(default_factory=list)
     errors: list[FlowError] = field(default_factory=list)
-    coverage: Optional[FlowCoverage] = None
-    config: Optional[FlowConfig] = None
+    coverage: FlowCoverage | None = None
+    config: FlowConfig | None = None
     utility_types_used: list[str] = field(default_factory=list)
-    maybe_types: list[tuple[int, int]] = field(
-        default_factory=list
-    )  # (line, col) of ?T usages
+    maybe_types: list[tuple[int, int]] = field(default_factory=list)  # (line, col) of ?T usages
     exact_objects: list[tuple[int, int]] = field(default_factory=list)  # {| |} usages
-    suppress_comments: list[tuple[int, str]] = field(
-        default_factory=list
-    )  # (line, type)
+    suppress_comments: list[tuple[int, str]] = field(default_factory=list)  # (line, type)
 
 
 class FlowParser:
@@ -271,7 +265,7 @@ class FlowParser:
     _SUPPRESS_PATTERN = re.compile(r"//\s*\$FlowFixMe|\$FlowIgnore|\$FlowIssue")
     _VARIANCE_PATTERN = re.compile(r"([+-])(\w+)")
 
-    def __init__(self, flow_path: Optional[str] = None):
+    def __init__(self, flow_path: str | None = None):
         """
         Initialize Flow parser.
 
@@ -279,7 +273,7 @@ class FlowParser:
         """
         self._flow_path = flow_path or self._find_flow()
 
-    def _find_flow(self) -> Optional[str]:
+    def _find_flow(self) -> str | None:
         """Find Flow binary."""
         flow = shutil.which("flow")
         if flow:
@@ -348,9 +342,7 @@ class FlowParser:
             line = code[: match.start()].count("\n") + 1
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
-            type_parameters = (
-                self._parse_type_parameters(type_params_str) if type_params_str else []
-            )
+            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
             is_exported = "export" in code[max(0, match.start() - 20) : match.start()]
             is_opaque = "opaque" in code[max(0, match.start() - 20) : match.start()]
 
@@ -383,9 +375,7 @@ class FlowParser:
             line = code[: match.start()].count("\n") + 1
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
-            type_parameters = (
-                self._parse_type_parameters(type_params_str) if type_params_str else []
-            )
+            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
             extends = [e.strip() for e in extends_str.split(",")] if extends_str else []
             is_exported = "export" in code[max(0, match.start() - 20) : match.start()]
 
@@ -485,11 +475,7 @@ class FlowParser:
             "empty",
         ):
             return FlowTypeKind.PRIMITIVE
-        if (
-            type_value.startswith('"')
-            or type_value.startswith("'")
-            or type_value.isdigit()
-        ):
+        if type_value.startswith('"') or type_value.startswith("'") or type_value.isdigit():
             return FlowTypeKind.LITERAL
 
         return FlowTypeKind.CLASS
@@ -663,9 +649,7 @@ class FlowParser:
         code = re.sub(r":\s*\??\w+(?:<[^>]+>)?(?:\[\])?", "", code)
 
         # Remove type imports
-        code = re.sub(
-            r"import\s+type\s+\{[^}]+\}\s+from\s+['\"][^'\"]+['\"];?", "", code
-        )
+        code = re.sub(r"import\s+type\s+\{[^}]+\}\s+from\s+['\"][^'\"]+['\"];?", "", code)
         code = re.sub(r"import\s+type\s+\w+\s+from\s+['\"][^'\"]+['\"];?", "", code)
 
         # Remove type exports

@@ -35,7 +35,7 @@ class TestFrameworkDetection:
         """Detect React from imports."""
         source = """
         import React, { useState, useEffect } from 'react';
-        
+
         function App() {
             const [value, setValue] = useState('');
             return <div>{value}</div>;
@@ -66,7 +66,7 @@ class TestFrameworkDetection:
         source = """
         import { Component, Input } from '@angular/core';
         import { FormControl, FormGroup } from '@angular/forms';
-        
+
         @Component({
             selector: 'app-root',
             template: '<input [(ngModel)]="name" />'
@@ -140,9 +140,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(
-            s.source_type == InputSourceType.ELEMENT_VALUE for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.ELEMENT_VALUE for s in result.input_sources)
 
     def test_event_target_value(self):
         """Detect event.target.value patterns."""
@@ -151,7 +149,7 @@ class TestVanillaInputDetection:
             const value = event.target.value;
             processInput(value);
         }
-        
+
         input.addEventListener('change', (e) => {
             const data = e.target.value;
         });
@@ -159,11 +157,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        event_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.EVENT_TARGET
-        ]
+        event_sources = [s for s in result.input_sources if s.source_type == InputSourceType.EVENT_TARGET]
         assert len(event_sources) >= 2
 
     def test_location_search(self):
@@ -176,11 +170,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        url_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.URL_PARAM
-        ]
+        url_sources = [s for s in result.input_sources if s.source_type == InputSourceType.URL_PARAM]
         assert len(url_sources) >= 1
 
     def test_location_hash(self):
@@ -194,9 +184,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(
-            s.source_type == InputSourceType.URL_HASH for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.URL_HASH for s in result.input_sources)
 
     def test_local_storage(self):
         """Detect localStorage access."""
@@ -210,8 +198,7 @@ class TestVanillaInputDetection:
         storage_sources = [
             s
             for s in result.input_sources
-            if s.source_type
-            in (InputSourceType.LOCAL_STORAGE, InputSourceType.SESSION_STORAGE)
+            if s.source_type in (InputSourceType.LOCAL_STORAGE, InputSourceType.SESSION_STORAGE)
         ]
         assert len(storage_sources) >= 2
 
@@ -226,9 +213,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(
-            s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources)
 
     def test_file_input(self):
         """Detect file input access."""
@@ -242,9 +227,7 @@ class TestVanillaInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        assert any(
-            s.source_type == InputSourceType.FILE_INPUT for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.FILE_INPUT for s in result.input_sources)
 
 
 # =============================================================================
@@ -259,12 +242,12 @@ class TestReactInputDetection:
         """Detect useState with event handler."""
         source = """
         import React, { useState } from 'react';
-        
+
         function SearchBox() {
             const [query, setQuery] = useState('');
-            
+
             return (
-                <input 
+                <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
@@ -275,44 +258,38 @@ class TestReactInputDetection:
         result = tracker.analyze_file(source, "SearchBox.tsx")
 
         assert result.framework == FrontendFramework.REACT
-        assert any(
-            s.source_type == InputSourceType.REACT_STATE for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.REACT_STATE for s in result.input_sources)
 
     def test_use_ref(self):
         """Detect useRef for DOM access."""
         source = """
         import React, { useRef } from 'react';
-        
+
         function Form() {
             const inputRef = useRef<HTMLInputElement>(null);
-            
+
             const handleSubmit = () => {
                 const value = inputRef.current.value;
                 submit(value);
             };
-            
+
             return <input ref={inputRef} />;
         }
         """
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Form.tsx")
 
-        ref_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.REACT_REF
-        ]
+        ref_sources = [s for s in result.input_sources if s.source_type == InputSourceType.REACT_REF]
         assert len(ref_sources) >= 1
 
     def test_on_change_handler(self):
         """Detect onChange event handlers."""
         source = """
         import React from 'react';
-        
+
         function Input({ onChange }) {
             return (
-                <input 
+                <input
                     onChange={(event) => handleChange(event)}
                     onInput={(e) => processInput(e)}
                 />
@@ -322,23 +299,19 @@ class TestReactInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Input.tsx")
 
-        form_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.REACT_FORM
-        ]
+        form_sources = [s for s in result.input_sources if s.source_type == InputSourceType.REACT_FORM]
         assert len(form_sources) >= 2
 
     def test_controlled_input(self):
         """Detect controlled input pattern."""
         source = """
         import React, { useState } from 'react';
-        
+
         function ControlledInput() {
             const [name, setName] = useState('');
-            
+
             return (
-                <input 
+                <input
                     type="text"
                     value={name}
                     onChange={e => setName(e.target.value)}
@@ -356,7 +329,7 @@ class TestReactInputDetection:
         """Detect form submission handlers."""
         source = """
         import React from 'react';
-        
+
         function LoginForm() {
             return (
                 <form onSubmit={handleSubmit}>
@@ -369,9 +342,7 @@ class TestReactInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "LoginForm.tsx")
 
-        assert any(
-            s.source_type == InputSourceType.REACT_FORM for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.REACT_FORM for s in result.input_sources)
 
 
 # =============================================================================
@@ -397,11 +368,7 @@ class TestVueInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Search.vue")
 
-        v_model_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.VUE_V_MODEL
-        ]
+        v_model_sources = [s for s in result.input_sources if s.source_type == InputSourceType.VUE_V_MODEL]
         assert len(v_model_sources) >= 2
 
     def test_vue_ref(self):
@@ -409,7 +376,7 @@ class TestVueInputDetection:
         source = """
         <script setup>
         import { ref, reactive } from 'vue';
-        
+
         const message = ref('');
         const form = reactive({
             username: '',
@@ -420,9 +387,7 @@ class TestVueInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Form.vue")
 
-        ref_sources = [
-            s for s in result.input_sources if s.source_type == InputSourceType.VUE_REF
-        ]
+        ref_sources = [s for s in result.input_sources if s.source_type == InputSourceType.VUE_REF]
         assert len(ref_sources) >= 2
 
     def test_vue_event_handlers(self):
@@ -454,7 +419,7 @@ class TestAngularInputDetection:
         source = """
         import { Component } from '@angular/core';
         import { FormsModule } from '@angular/forms';
-        
+
         @Component({
             template: `
                 <input [(ngModel)]="username" />
@@ -469,11 +434,7 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "app.component.ts")
 
-        ng_model_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.ANGULAR_NG_MODEL
-        ]
+        ng_model_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_NG_MODEL]
         assert len(ng_model_sources) >= 2
 
     def test_reactive_forms(self):
@@ -481,18 +442,18 @@ class TestAngularInputDetection:
         source = """
         import { Component } from '@angular/core';
         import { FormControl, FormGroup, FormBuilder } from '@angular/forms';
-        
+
         @Component({})
         export class LoginComponent {
             loginForm = new FormGroup({
                 username: new FormControl(''),
                 password: new FormControl('')
             });
-            
+
             constructor(private fb: FormBuilder) {
                 this.searchControl = fb.control('');
             }
-            
+
             ngOnInit() {
                 this.searchControl.valueChanges.subscribe(value => {
                     this.search(value);
@@ -503,18 +464,14 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "login.component.ts")
 
-        form_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.ANGULAR_FORM
-        ]
+        form_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_FORM]
         assert len(form_sources) >= 3
 
     def test_input_decorator(self):
         """Detect @Input() decorator."""
         source = """
         import { Component, Input } from '@angular/core';
-        
+
         @Component({})
         export class ChildComponent {
             @Input() userData: string;
@@ -524,18 +481,14 @@ class TestAngularInputDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "child.component.ts")
 
-        input_sources = [
-            s
-            for s in result.input_sources
-            if s.source_type == InputSourceType.ANGULAR_INPUT
-        ]
+        input_sources = [s for s in result.input_sources if s.source_type == InputSourceType.ANGULAR_INPUT]
         assert len(input_sources) >= 2
 
     def test_template_events(self):
         """Detect Angular template event bindings."""
         source = """
         import { Component } from '@angular/core';
-        
+
         @Component({
             template: `
                 <input (input)="onInput($event)" />
@@ -573,8 +526,7 @@ class TestDangerousSinkDetection:
         html_sinks = [
             s
             for s in result.dangerous_sinks
-            if s.sink_type
-            in (DangerousSinkType.INNER_HTML, DangerousSinkType.DOM_MANIPULATION)
+            if s.sink_type in (DangerousSinkType.INNER_HTML, DangerousSinkType.DOM_MANIPULATION)
         ]
         assert len(html_sinks) >= 3
 
@@ -587,24 +539,20 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        write_sinks = [
-            s
-            for s in result.dangerous_sinks
-            if s.sink_type == DangerousSinkType.DOCUMENT_WRITE
-        ]
+        write_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.DOCUMENT_WRITE]
         assert len(write_sinks) >= 2
 
     def test_react_dangerously_set_inner_html(self):
         """Detect React dangerouslySetInnerHTML."""
         source = """
         import React from 'react';
-        
+
         function RawHtml({ content }) {
             return (
                 <div dangerouslySetInnerHTML={{ __html: content }} />
             );
         }
-        
+
         const element = {
             dangerouslySetInnerHTML: { __html: userContent }
         };
@@ -612,11 +560,7 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "RawHtml.tsx")
 
-        dangerous_sinks = [
-            s
-            for s in result.dangerous_sinks
-            if s.sink_type == DangerousSinkType.DANGEROUSLY_SET
-        ]
+        dangerous_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.DANGEROUSLY_SET]
         assert len(dangerous_sinks) >= 2
 
     def test_vue_v_html(self):
@@ -633,16 +577,14 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "Content.vue")
 
-        v_html_sinks = [
-            s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.V_HTML
-        ]
+        v_html_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.V_HTML]
         assert len(v_html_sinks) >= 2
 
     def test_angular_inner_html_binding(self):
         """Detect Angular [innerHTML] binding."""
         source = """
         import { Component } from '@angular/core';
-        
+
         @Component({
             template: `
                 <div [innerHTML]="htmlContent"></div>
@@ -653,10 +595,7 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "raw.component.ts")
 
-        assert any(
-            s.sink_type == DangerousSinkType.INNER_HTML_BINDING
-            for s in result.dangerous_sinks
-        )
+        assert any(s.sink_type == DangerousSinkType.INNER_HTML_BINDING for s in result.dangerous_sinks)
 
     def test_eval(self):
         """Detect eval and Function constructor."""
@@ -669,9 +608,7 @@ class TestDangerousSinkDetection:
         tracker = FrontendInputTracker()
         result = tracker.analyze_file(source, "script.js")
 
-        eval_sinks = [
-            s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.EVAL
-        ]
+        eval_sinks = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.EVAL]
         assert len(eval_sinks) >= 4
 
     def test_location_redirect(self):
@@ -686,9 +623,7 @@ class TestDangerousSinkDetection:
         result = tracker.analyze_file(source, "redirect.js")
 
         redirect_sinks = [
-            s
-            for s in result.dangerous_sinks
-            if s.sink_type in (DangerousSinkType.LOCATION, DangerousSinkType.OPEN)
+            s for s in result.dangerous_sinks if s.sink_type in (DangerousSinkType.LOCATION, DangerousSinkType.OPEN)
         ]
         assert len(redirect_sinks) >= 4
 
@@ -712,21 +647,19 @@ class TestDataFlowAnalysis:
         result = tracker.analyze_file(source, "script.js")
 
         assert len(result.data_flows) >= 1
-        assert any(
-            f.sink.sink_type == DangerousSinkType.INNER_HTML for f in result.data_flows
-        )
+        assert any(f.sink.sink_type == DangerousSinkType.INNER_HTML for f in result.data_flows)
 
     def test_react_state_to_dangerous_html(self):
         """Detect React state flowing to dangerouslySetInnerHTML."""
         source = """
         import React, { useState } from 'react';
-        
+
         function Editor() {
             const [content, setContent] = useState('');
-            
+
             return (
                 <>
-                    <textarea 
+                    <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                     />
@@ -740,9 +673,7 @@ class TestDataFlowAnalysis:
 
         # Should detect flow from state to dangerous sink
         dangerous = result.dangerous_flows
-        assert any(
-            f.sink.sink_type == DangerousSinkType.DANGEROUSLY_SET for f in dangerous
-        )
+        assert any(f.sink.sink_type == DangerousSinkType.DANGEROUSLY_SET for f in dangerous)
 
     def test_url_param_to_inner_html(self):
         """Detect URL parameter flowing to innerHTML."""
@@ -770,12 +701,8 @@ class TestDataFlowAnalysis:
         result = tracker.analyze_file(source, "message.js")
 
         # Verify we detect both the post message source and eval sink
-        assert any(
-            s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources
-        )
-        assert any(
-            s.sink_type == DangerousSinkType.EVAL for s in result.dangerous_sinks
-        )
+        assert any(s.source_type == InputSourceType.POST_MESSAGE for s in result.input_sources)
+        assert any(s.sink_type == DangerousSinkType.EVAL for s in result.dangerous_sinks)
 
 
 # =============================================================================
@@ -790,7 +717,7 @@ class TestSanitizationDetection:
         """Detect DOMPurify.sanitize as safe pattern."""
         source = """
         import DOMPurify from 'dompurify';
-        
+
         const input = document.getElementById('input');
         const userHtml = input.value;
         const cleanHtml = DOMPurify.sanitize(userHtml);
@@ -814,11 +741,7 @@ class TestSanitizationDetection:
         result = tracker.analyze_file(source, "script.js")
 
         # textContent should not be flagged as dangerous sink
-        dangerous_html = [
-            s
-            for s in result.dangerous_sinks
-            if s.sink_type == DangerousSinkType.INNER_HTML
-        ]
+        dangerous_html = [s for s in result.dangerous_sinks if s.sink_type == DangerousSinkType.INNER_HTML]
         assert len(dangerous_html) == 0
 
     def test_encode_uri_component(self):
@@ -881,7 +804,7 @@ class TestSecurityFindings:
         """Verify recommendations include helpful guidance."""
         source = """
         import React, { useState } from 'react';
-        
+
         function Widget() {
             const [html, setHtml] = useState('');
             return <div dangerouslySetInnerHTML={{ __html: html }} />;
@@ -893,10 +816,7 @@ class TestSecurityFindings:
 
         for finding in findings:
             if finding["type"] == "FRONTEND_XSS_RISK":
-                assert (
-                    "DOMPurify" in finding["recommendation"]
-                    or "sanitize" in finding["recommendation"].lower()
-                )
+                assert "DOMPurify" in finding["recommendation"] or "sanitize" in finding["recommendation"].lower()
 
 
 # =============================================================================
@@ -912,40 +832,40 @@ class TestIntegration:
         source = """
         import React, { useState, useRef } from 'react';
         import DOMPurify from 'dompurify';
-        
+
         interface FormData {
             name: string;
             bio: string;
         }
-        
+
         function UserProfile() {
             const [formData, setFormData] = useState<FormData>({ name: '', bio: '' });
             const [preview, setPreview] = useState('');
             const fileInputRef = useRef<HTMLInputElement>(null);
-            
+
             const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                 setFormData({ ...formData, name: e.target.value });
             };
-            
+
             const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                 const rawHtml = e.target.value;
                 // SAFE: Using DOMPurify
                 setPreview(DOMPurify.sanitize(rawHtml));
             };
-            
+
             const handleSubmit = (e: React.FormEvent) => {
                 e.preventDefault();
                 // UNSAFE: Direct innerHTML
                 document.getElementById('result')!.innerHTML = formData.name;
             };
-            
+
             return (
                 <form onSubmit={handleSubmit}>
-                    <input 
+                    <input
                         value={formData.name}
                         onChange={handleNameChange}
                     />
-                    <textarea 
+                    <textarea
                         value={formData.bio}
                         onChange={handleBioChange}
                     />
@@ -975,18 +895,18 @@ class TestIntegration:
                 <div v-html="searchResults"></div>
             </div>
         </template>
-        
+
         <script setup lang="ts">
         import { ref, computed, watch } from 'vue';
         import DOMPurify from 'dompurify';
-        
+
         const searchQuery = ref('');
         const rawResults = ref('');
-        
+
         const searchResults = computed(() => {
             return DOMPurify.sanitize(rawResults.value);
         });
-        
+
         async function handleSearch() {
             const response = await fetch(`/api/search?q=${searchQuery.value}`);
             rawResults.value = await response.text();
@@ -997,12 +917,8 @@ class TestIntegration:
         result = tracker.analyze_file(source, "Search.vue", "vue")
 
         assert result.framework == FrontendFramework.VUE
-        assert any(
-            s.source_type == InputSourceType.VUE_V_MODEL for s in result.input_sources
-        )
-        assert any(
-            s.sink_type == DangerousSinkType.V_HTML for s in result.dangerous_sinks
-        )
+        assert any(s.source_type == InputSourceType.VUE_V_MODEL for s in result.input_sources)
+        assert any(s.sink_type == DangerousSinkType.V_HTML for s in result.dangerous_sinks)
 
     def test_angular_reactive_form(self):
         """Test Angular Reactive Forms analysis."""
@@ -1010,7 +926,7 @@ class TestIntegration:
         import { Component, OnInit } from '@angular/core';
         import { FormBuilder, FormGroup, Validators } from '@angular/forms';
         import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-        
+
         @Component({
             selector: 'app-contact',
             template: `
@@ -1024,24 +940,24 @@ class TestIntegration:
         export class ContactComponent implements OnInit {
             contactForm: FormGroup;
             previewHtml: SafeHtml = '';
-            
+
             constructor(
                 private fb: FormBuilder,
                 private sanitizer: DomSanitizer
             ) {}
-            
+
             ngOnInit() {
                 this.contactForm = this.fb.group({
                     email: ['', Validators.email],
                     message: ['']
                 });
-                
+
                 this.contactForm.get('message')?.valueChanges.subscribe(value => {
                     // Using Angular's sanitizer
                     this.previewHtml = this.sanitizer.bypassSecurityTrustHtml(value);
                 });
             }
-            
+
             onSubmit() {
                 console.log(this.contactForm.value);
             }
@@ -1051,9 +967,7 @@ class TestIntegration:
         result = tracker.analyze_file(source, "contact.component.ts", "angular")
 
         assert result.framework == FrontendFramework.ANGULAR
-        assert any(
-            s.source_type == InputSourceType.ANGULAR_FORM for s in result.input_sources
-        )
+        assert any(s.source_type == InputSourceType.ANGULAR_FORM for s in result.input_sources)
 
     def test_summary_output(self):
         """Test summary generation."""
@@ -1151,7 +1065,7 @@ class TestEdgeCases:
         // This is a multiline file with various patterns
         const userInput = document.getElementById('search');
         const value = userInput.value;
-            
+
         // Multiple lines of code
         const output = document.getElementById('output');
         output.innerHTML = value;
@@ -1199,7 +1113,7 @@ class TestConvenienceFunctions:
         const userInput = event.target.value;
         const clean = DOMPurify.sanitize(userInput);
         element.innerHTML = clean;
-        
+
         const unsafe = input.value;
         other.innerHTML = unsafe;
         """

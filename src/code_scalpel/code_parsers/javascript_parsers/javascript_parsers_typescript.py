@@ -57,7 +57,7 @@ import tempfile
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 
 class TypeKind(Enum):
@@ -112,8 +112,8 @@ class TypeParameter:
     """A generic type parameter."""
 
     name: str  # T, U, K, etc.
-    constraint: Optional[str] = None  # extends clause
-    default: Optional[str] = None  # = DefaultType
+    constraint: str | None = None  # extends clause
+    default: str | None = None  # = DefaultType
     line: int = 0
 
 
@@ -124,14 +124,14 @@ class InterfaceDeclaration:
     name: str
     line: int
     column: int
-    end_line: Optional[int] = None
+    end_line: int | None = None
     type_parameters: list[TypeParameter] = field(default_factory=list)
     extends: list[str] = field(default_factory=list)
     properties: list["PropertySignature"] = field(default_factory=list)
     methods: list["MethodSignature"] = field(default_factory=list)
     index_signatures: list["IndexSignature"] = field(default_factory=list)
     is_exported: bool = False
-    jsdoc: Optional[str] = None
+    jsdoc: str | None = None
 
 
 @dataclass
@@ -145,7 +145,7 @@ class TypeAliasDeclaration:
     type_kind: TypeKind
     type_parameters: list[TypeParameter] = field(default_factory=list)
     is_exported: bool = False
-    jsdoc: Optional[str] = None
+    jsdoc: str | None = None
 
 
 @dataclass
@@ -153,7 +153,7 @@ class PropertySignature:
     """A property in an interface or type."""
 
     name: str
-    type_annotation: Optional[TypeAnnotation]
+    type_annotation: TypeAnnotation | None
     is_optional: bool = False
     is_readonly: bool = False
     line: int = 0
@@ -165,7 +165,7 @@ class MethodSignature:
 
     name: str
     parameters: list["ParameterDeclaration"] = field(default_factory=list)
-    return_type: Optional[TypeAnnotation] = None
+    return_type: TypeAnnotation | None = None
     type_parameters: list[TypeParameter] = field(default_factory=list)
     is_optional: bool = False
     line: int = 0
@@ -187,10 +187,10 @@ class ParameterDeclaration:
     """A function/method parameter."""
 
     name: str
-    type_annotation: Optional[TypeAnnotation] = None
+    type_annotation: TypeAnnotation | None = None
     is_optional: bool = False
     is_rest: bool = False  # ...args
-    default_value: Optional[str] = None
+    default_value: str | None = None
     line: int = 0
 
 
@@ -211,7 +211,7 @@ class EnumMember:
     """An enum member."""
 
     name: str
-    value: Optional[Union[str, int]] = None
+    value: str | int | None = None
     is_computed: bool = False
     line: int = 0
 
@@ -225,7 +225,7 @@ class DecoratorUsage:
     line: int
     column: int
     arguments: list[str] = field(default_factory=list)
-    target_name: Optional[str] = None  # Name of decorated element
+    target_name: str | None = None  # Name of decorated element
 
 
 @dataclass
@@ -235,7 +235,7 @@ class NamespaceDeclaration:
     name: str
     line: int
     column: int
-    end_line: Optional[int] = None
+    end_line: int | None = None
     is_exported: bool = False
     is_ambient: bool = False  # declare namespace
     nested_namespaces: list["NamespaceDeclaration"] = field(default_factory=list)
@@ -248,7 +248,7 @@ class TypeGuard:
 
     parameter_name: str
     guarded_type: str
-    function_name: Optional[str] = None
+    function_name: str | None = None
     line: int = 0
     is_assertion: bool = False  # asserts x is T
 
@@ -294,25 +294,17 @@ class TypeScriptParser:
         r"(?:export\s+)?interface\s+(\w+)(?:<([^>]+)>)?(?:\s+extends\s+([^{]+))?\s*\{",
         re.MULTILINE,
     )
-    _TYPE_ALIAS_PATTERN = re.compile(
-        r"(?:export\s+)?type\s+(\w+)(?:<([^>]+)>)?\s*=\s*([^;]+);", re.MULTILINE
-    )
-    _ENUM_PATTERN = re.compile(
-        r"(?:export\s+)?(?:const\s+)?enum\s+(\w+)\s*\{([^}]+)\}", re.MULTILINE
-    )
+    _TYPE_ALIAS_PATTERN = re.compile(r"(?:export\s+)?type\s+(\w+)(?:<([^>]+)>)?\s*=\s*([^;]+);", re.MULTILINE)
+    _ENUM_PATTERN = re.compile(r"(?:export\s+)?(?:const\s+)?enum\s+(\w+)\s*\{([^}]+)\}", re.MULTILINE)
     _DECORATOR_PATTERN = re.compile(
         r"@(\w+)(?:\(([^)]*)\))?\s*(?:(?:export\s+)?(?:class|function|get|set|async)|\w+\s*[:(])",
         re.MULTILINE,
     )
-    _NAMESPACE_PATTERN = re.compile(
-        r"(?:export\s+)?(?:declare\s+)?(?:namespace|module)\s+(\w+)\s*\{", re.MULTILINE
-    )
-    _TYPE_GUARD_PATTERN = re.compile(
-        r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE
-    )
+    _NAMESPACE_PATTERN = re.compile(r"(?:export\s+)?(?:declare\s+)?(?:namespace|module)\s+(\w+)\s*\{", re.MULTILINE)
+    _TYPE_GUARD_PATTERN = re.compile(r"(\w+)\s+is\s+(\w+(?:\[\])?(?:<[^>]+>)?)", re.MULTILINE)
     _ANY_USAGE_PATTERN = re.compile(r":\s*any\b|<any>|as\s+any\b", re.MULTILINE)
 
-    def __init__(self, tsc_path: Optional[str] = None):
+    def __init__(self, tsc_path: str | None = None):
         """
         Initialize TypeScript parser.
 
@@ -320,7 +312,7 @@ class TypeScriptParser:
         """
         self._tsc_path = tsc_path or self._find_tsc()
 
-    def _find_tsc(self) -> Optional[str]:
+    def _find_tsc(self) -> str | None:
         """Find TypeScript compiler."""
         tsc = shutil.which("tsc")
         if tsc:
@@ -397,9 +389,7 @@ class TypeScriptParser:
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
             # Parse type parameters
-            type_parameters = (
-                self._parse_type_parameters(type_params_str) if type_params_str else []
-            )
+            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
 
             # Parse extends clause
             extends = [e.strip() for e in extends_str.split(",")] if extends_str else []
@@ -436,9 +426,7 @@ class TypeScriptParser:
             line = code[: match.start()].count("\n") + 1
             column = match.start() - code.rfind("\n", 0, match.start()) - 1
 
-            type_parameters = (
-                self._parse_type_parameters(type_params_str) if type_params_str else []
-            )
+            type_parameters = self._parse_type_parameters(type_params_str) if type_params_str else []
             is_exported = "export" in code[max(0, match.start() - 20) : match.start()]
 
             # Determine type kind
@@ -482,7 +470,7 @@ class TypeScriptParser:
                     member_value = member_value.strip()
                     # Try to parse as number
                     try:
-                        parsed_value: Optional[Union[str, int]] = int(member_value)
+                        parsed_value: str | int | None = int(member_value)
                     except ValueError:
                         parsed_value = member_value.strip("\"'")
                 else:
@@ -702,11 +690,7 @@ class TypeScriptParser:
             "bigint",
         ):
             return TypeKind.PRIMITIVE
-        if (
-            type_value.startswith('"')
-            or type_value.startswith("'")
-            or type_value.isdigit()
-        ):
+        if type_value.startswith('"') or type_value.startswith("'") or type_value.isdigit():
             return TypeKind.LITERAL
 
         return TypeKind.UNKNOWN
@@ -738,9 +722,7 @@ class TypeScriptParser:
         :return: List of type errors.
         """
         if not self._tsc_path:
-            raise RuntimeError(
-                "TypeScript compiler not found. Install with: npm install typescript"
-            )
+            raise RuntimeError("TypeScript compiler not found. Install with: npm install typescript")
 
         cmd = self._tsc_path.split() if " " in self._tsc_path else [self._tsc_path]
         cmd.extend(["--noEmit", "--pretty", "false"])

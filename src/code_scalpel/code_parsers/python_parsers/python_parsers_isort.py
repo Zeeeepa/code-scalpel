@@ -166,12 +166,12 @@ class IsortConfig:
     known_third_party: list[str] = field(default_factory=list)
 
     @classmethod
-    def from_pyproject(cls, pyproject_path: str | Path) -> "IsortConfig":
+    def from_pyproject(cls, pyproject_path: str | Path) -> IsortConfig:
         """Load configuration from pyproject.toml."""
         return cls()
 
     @classmethod
-    def from_file(cls, config_path: str | Path) -> "IsortConfig":
+    def from_file(cls, config_path: str | Path) -> IsortConfig:
         """Load configuration from .isort.cfg or setup.cfg."""
         return cls()
 

@@ -52,17 +52,12 @@ class TestDetectServiceBoundariesBasic:
 
         # Create cluster 1: auth related
         (tmp_path / "auth_model.py").write_text("class User:\n" "    pass\n")
-        (tmp_path / "auth_service.py").write_text(
-            "from auth_model import User\n" "\n" "def login():\n" "    pass\n"
-        )
+        (tmp_path / "auth_service.py").write_text("from auth_model import User\n" "\n" "def login():\n" "    pass\n")
 
         # Create cluster 2: payment related
         (tmp_path / "payment_model.py").write_text("class Transaction:\n" "    pass\n")
         (tmp_path / "payment_service.py").write_text(
-            "from payment_model import Transaction\n"
-            "\n"
-            "def charge():\n"
-            "    pass\n"
+            "from payment_model import Transaction\n" "\n" "def charge():\n" "    pass\n"
         )
 
         result = detect_service_boundaries(project_root=str(tmp_path))
@@ -81,9 +76,7 @@ class TestDetectServiceBoundariesDependencyGraph:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         (tmp_path / "a.py").write_text("def func_a():\n" "    pass\n")
-        (tmp_path / "b.py").write_text(
-            "from a import func_a\n" "\n" "def func_b():\n" "    pass\n"
-        )
+        (tmp_path / "b.py").write_text("from a import func_a\n" "\n" "def func_b():\n" "    pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -100,9 +93,7 @@ class TestDetectServiceBoundariesDependencyGraph:
         from code_scalpel.surgery.surgical_extractor import detect_service_boundaries
 
         (tmp_path / "lib.py").write_text("def helper():\n" "    pass\n")
-        (tmp_path / "app.py").write_text(
-            "from lib import helper\n" "\n" "def main():\n" "    helper()\n"
-        )
+        (tmp_path / "app.py").write_text("from lib import helper\n" "\n" "def main():\n" "    helper()\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -123,10 +114,7 @@ class TestDetectServiceBoundariesIsolationScore:
         # Create highly isolated cluster
         (tmp_path / "payment_calc.py").write_text("def calculate_fee():\n" "    pass\n")
         (tmp_path / "payment_gateway.py").write_text(
-            "from payment_calc import calculate_fee\n"
-            "\n"
-            "def process():\n"
-            "    return calculate_fee()\n"
+            "from payment_calc import calculate_fee\n" "\n" "def process():\n" "    return calculate_fee()\n"
         )
 
         result = detect_service_boundaries(project_root=str(tmp_path))
@@ -157,9 +145,7 @@ class TestDetectServiceBoundariesIsolationScore:
         for service in result.suggested_services:
             # Calculate isolation score from external/internal deps
             external_count = len(service.external_dependencies)
-            total_count = len(service.external_dependencies) + len(
-                service.internal_dependencies
-            )
+            total_count = len(service.external_dependencies) + len(service.internal_dependencies)
             if total_count > 0:
                 1.0 - (external_count / total_count)
                 # Due to implementation details, score might vary
@@ -175,9 +161,7 @@ class TestDetectServiceBoundariesServiceStructure:
 
         # Create multi-file project
         (tmp_path / "models.py").write_text("class Model:\n    pass\n")
-        (tmp_path / "views.py").write_text(
-            "from models import Model\n\ndef view(): pass\n"
-        )
+        (tmp_path / "views.py").write_text("from models import Model\n\ndef view(): pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -236,12 +220,9 @@ class TestDetectServiceBoundariesComplexProjects:
         for service in services:
             service_dir = tmp_path / service
             service_dir.mkdir(exist_ok=True)
-            (service_dir / "models.py").write_text(
-                f"class {service.capitalize()}Model:\n    pass\n"
-            )
+            (service_dir / "models.py").write_text(f"class {service.capitalize()}Model:\n    pass\n")
             (service_dir / "service.py").write_text(
-                f"from models import {service.capitalize()}Model\n\n"
-                f"def {service}_operation():\n    pass\n"
+                f"from models import {service.capitalize()}Model\n\n" f"def {service}_operation():\n    pass\n"
             )
 
         result = detect_service_boundaries(project_root=str(tmp_path))
@@ -271,12 +252,8 @@ class TestDetectServiceBoundariesComplexProjects:
         (tmp_path / "common.py").write_text("def utility():\n    pass\n")
 
         # Create services that depend on shared lib
-        (tmp_path / "service1.py").write_text(
-            "from common import utility\n\ndef s1(): pass\n"
-        )
-        (tmp_path / "service2.py").write_text(
-            "from common import utility\n\ndef s2(): pass\n"
-        )
+        (tmp_path / "service1.py").write_text("from common import utility\n\ndef s1(): pass\n")
+        (tmp_path / "service2.py").write_text("from common import utility\n\ndef s2(): pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 
@@ -440,9 +417,7 @@ class TestDetectServiceBoundariesServiceNaming:
         auth_dir = tmp_path / "auth_service"
         auth_dir.mkdir()
         (auth_dir / "models.py").write_text("class User: pass\n")
-        (auth_dir / "handlers.py").write_text(
-            "from models import User\ndef handle(): pass\n"
-        )
+        (auth_dir / "handlers.py").write_text("from models import User\ndef handle(): pass\n")
 
         result = detect_service_boundaries(project_root=str(tmp_path))
 

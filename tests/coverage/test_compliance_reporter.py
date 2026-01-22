@@ -99,9 +99,9 @@ policies:
     action: DENY
     rule: |
       package test_policy
-      
+
       default allow = false
-      
+
       allow {
         input.type == "allowed_operation"
       }
@@ -179,9 +179,7 @@ policies:
 
         log.record_event("OVERRIDE_APPROVED", "MEDIUM", {"policy_name": "test_policy"})
 
-        log.record_event(
-            "TAMPER_ATTEMPT_DETECTED", "CRITICAL", {"details": "suspicious_activity"}
-        )
+        log.record_event("TAMPER_ATTEMPT_DETECTED", "CRITICAL", {"details": "suspicious_activity"})
 
         return log
 
@@ -507,9 +505,7 @@ policies:
             {"policy_name": "test", "severity": "HIGH"},
             timestamp=base_time,
         )
-        log.log_event(
-            "TAMPER_ATTEMPT_DETECTED", {"details": "test"}, timestamp=base_time
-        )
+        log.log_event("TAMPER_ATTEMPT_DETECTED", {"details": "test"}, timestamp=base_time)
         log.log_event("OPERATION_ALLOWED", {"op": "test"}, timestamp=base_time)
 
         engine = PolicyEngine()

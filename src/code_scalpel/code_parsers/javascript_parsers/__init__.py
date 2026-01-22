@@ -137,13 +137,11 @@ from .javascript_parsers_prettier import (
     HTMLWhitespaceSensitivity,
     PrettierConfig,
     PrettierFormatter,
-)
-from .javascript_parsers_prettier import PrettierParser as PrettierParserType
-from .javascript_parsers_prettier import (
     ProseWrap,
     QuoteType,
     TrailingComma,
 )
+from .javascript_parsers_prettier import PrettierParser as PrettierParserType
 from .javascript_parsers_standard import (
     StandardConfig,
     StandardFileResult,
@@ -157,13 +155,11 @@ from .javascript_parsers_treesitter import (
     JSLanguageVariant,
     JSSymbol,
     JSXComponent,
-)
-from .javascript_parsers_treesitter import SyntaxError as TreeSitterSyntaxError
-from .javascript_parsers_treesitter import (
     TreeSitterJSParser,
     TreeSitterNode,
     TreeSitterParseResult,
 )
+from .javascript_parsers_treesitter import SyntaxError as TreeSitterSyntaxError
 from .javascript_parsers_typescript import (
     DecoratorKind,
     DecoratorUsage,

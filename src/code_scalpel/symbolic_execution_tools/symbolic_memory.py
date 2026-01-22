@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any
 
 import z3
 
@@ -19,9 +19,9 @@ class SymbolicArray:
     """Symbolic array representation."""
 
     name: str
-    length: Union[int, z3.ArithRef]  # Concrete or symbolic length
+    length: int | z3.ArithRef  # Concrete or symbolic length
     element_type: type
-    constraints: List[z3.BoolRef]
+    constraints: list[z3.BoolRef]
 
 
 @dataclass
@@ -31,7 +31,7 @@ class SymbolicDict:
     name: str
     key_type: type
     value_type: type
-    constraints: List[z3.BoolRef]
+    constraints: list[z3.BoolRef]
 
 
 class SymbolicMemory:
@@ -46,13 +46,11 @@ class SymbolicMemory:
         - Initialize heap allocator
         - Create constraint tracking
         """
-        self.arrays: Dict[str, SymbolicArray] = {}
-        self.dicts: Dict[str, SymbolicDict] = {}
-        self.constraints: List[z3.BoolRef] = []
+        self.arrays: dict[str, SymbolicArray] = {}
+        self.dicts: dict[str, SymbolicDict] = {}
+        self.constraints: list[z3.BoolRef] = []
 
-    def create_symbolic_array(
-        self, name: str, length: Union[int, z3.ArithRef], element_type: type = int
-    ) -> SymbolicArray:
+    def create_symbolic_array(self, name: str, length: int | z3.ArithRef, element_type: type = int) -> SymbolicArray:
         """
         - Initialize Z3 Array(Int, element_type)
         - Add length constraint
@@ -60,7 +58,7 @@ class SymbolicMemory:
         """
         raise NotImplementedError("Symbolic arrays not yet implemented")
 
-    def load(self, array: SymbolicArray, index: Union[int, z3.ArithRef]) -> Any:
+    def load(self, array: SymbolicArray, index: int | z3.ArithRef) -> Any:
         """
         - Generate bounds check constraint (0 <= index < length)
         - Return symbolic value from Z3 array
@@ -68,9 +66,7 @@ class SymbolicMemory:
         """
         raise NotImplementedError("Symbolic array load not yet implemented")
 
-    def store(
-        self, array: SymbolicArray, index: Union[int, z3.ArithRef], value: Any
-    ) -> None:
+    def store(self, array: SymbolicArray, index: int | z3.ArithRef, value: Any) -> None:
         """
         - Generate bounds check constraint
         - Update Z3 array representation
@@ -78,9 +74,7 @@ class SymbolicMemory:
         """
         raise NotImplementedError("Symbolic array store not yet implemented")
 
-    def create_symbolic_dict(
-        self, name: str, key_type: type = str, value_type: type = int
-    ) -> SymbolicDict:
+    def create_symbolic_dict(self, name: str, key_type: type = str, value_type: type = int) -> SymbolicDict:
         """
         - Initialize Z3 representation
         - Track key-value constraints

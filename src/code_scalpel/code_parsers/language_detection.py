@@ -15,7 +15,6 @@ across all code-scalpel modules.
 import re
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 
 class Language(Enum):
@@ -124,7 +123,7 @@ EXTENSION_MAP: dict[str, Language] = {
 }
 
 # Shebang patterns
-SHEBANG_PATTERNS: List[Tuple[re.Pattern, Language]] = [
+SHEBANG_PATTERNS: list[tuple[re.Pattern, Language]] = [
     (re.compile(r"^#!.*\bpython\d?"), Language.PYTHON),
     (re.compile(r"^#!.*\bnode\b"), Language.JAVASCRIPT),
     (re.compile(r"^#!.*\bdeno\b"), Language.TYPESCRIPT),
@@ -137,7 +136,7 @@ SHEBANG_PATTERNS: List[Tuple[re.Pattern, Language]] = [
 ]
 
 # Content heuristics (patterns that suggest a language)
-CONTENT_HEURISTICS: List[Tuple[re.Pattern, Language, int]] = [
+CONTENT_HEURISTICS: list[tuple[re.Pattern, Language, int]] = [
     # Python
     (re.compile(r"\bdef\s+\w+\s*\("), Language.PYTHON, 5),
     (re.compile(r"\bclass\s+\w+\s*[\(:]"), Language.PYTHON, 4),
@@ -199,8 +198,8 @@ CONTENT_HEURISTICS: List[Tuple[re.Pattern, Language, int]] = [
 
 
 def detect_language(
-    filepath: Optional[str] = None,
-    code: Optional[str] = None,
+    filepath: str | None = None,
+    code: str | None = None,
     *,
     prefer_extension: bool = True,
 ) -> Language:
@@ -334,7 +333,7 @@ def get_language_name(lang: Language) -> str:
     return names.get(lang, "Unknown")
 
 
-def get_file_extensions(lang: Language) -> List[str]:
+def get_file_extensions(lang: Language) -> list[str]:
     """Get list of file extensions for a language."""
     # [20251222_BUGFIX] Avoid ambiguous variable name (E741).
     return [ext for ext, lang_value in EXTENSION_MAP.items() if lang_value == lang]
@@ -353,9 +352,9 @@ def is_parseable_language(lang: Language) -> bool:
 
 
 def detect_language_confidence(
-    filepath: Optional[str] = None,
-    code: Optional[str] = None,
-) -> Tuple[Language, float]:
+    filepath: str | None = None,
+    code: str | None = None,
+) -> tuple[Language, float]:
     """
     Detect language with confidence score.
 

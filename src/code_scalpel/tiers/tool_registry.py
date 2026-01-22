@@ -9,8 +9,9 @@ Maps MCP tools to their tier requirements and provides runtime gating.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +23,18 @@ class MCPTool:
     name: str
     tier: str  # "community", "pro", "enterprise"
     description: str
-    handler: Optional[Callable[..., Any]] = None
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    handler: Callable[..., Any] | None = None
+    parameters: dict[str, Any] = field(default_factory=dict)
     category: str = "general"
     deprecated: bool = False
     beta: bool = False
     version: str = "1.0"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 # [20251225_FEATURE] Default MCP tool registry
 # All 20 MCP tools and their tier requirements
-DEFAULT_TOOLS: Dict[str, MCPTool] = {
+DEFAULT_TOOLS: dict[str, MCPTool] = {
     # COMMUNITY tools (9 tools - always available)
     "analyze_code": MCPTool(
         name="analyze_code",
@@ -268,7 +269,7 @@ class ToolRegistry:
         tools = registry.get_available_tools()
     """
 
-    def __init__(self, tools: Optional[Dict[str, MCPTool]] = None):
+    def __init__(self, tools: dict[str, MCPTool] | None = None):
         """
         Initialize the registry.
 
@@ -316,11 +317,11 @@ class ToolRegistry:
             return "unknown"
         return tool.tier
 
-    def get_tool(self, tool_name: str) -> Optional[MCPTool]:
+    def get_tool(self, tool_name: str) -> MCPTool | None:
         """Get tool definition by name."""
         return self._tools.get(tool_name)
 
-    def get_available_tools(self) -> List[MCPTool]:
+    def get_available_tools(self) -> list[MCPTool]:
         """Get all tools available at the current tier."""
         from code_scalpel.licensing import get_current_tier
 
@@ -335,7 +336,7 @@ class ToolRegistry:
 
         return sorted(available, key=lambda t: t.name)
 
-    def get_unavailable_tools(self) -> List[MCPTool]:
+    def get_unavailable_tools(self) -> list[MCPTool]:
         """Get tools NOT available at the current tier."""
         from code_scalpel.licensing import get_current_tier
 
@@ -350,11 +351,11 @@ class ToolRegistry:
 
         return sorted(unavailable, key=lambda t: (t.tier, t.name))
 
-    def get_tools_by_tier(self, tier: str) -> List[MCPTool]:
+    def get_tools_by_tier(self, tier: str) -> list[MCPTool]:
         """Get all tools that require exactly the specified tier."""
         return [t for t in self._tools.values() if t.tier == tier]
 
-    def get_tools_by_category(self, category: str) -> List[MCPTool]:
+    def get_tools_by_category(self, category: str) -> list[MCPTool]:
         """Get all tools in a category."""
         return [t for t in self._tools.values() if t.category == category]
 
@@ -363,13 +364,13 @@ class ToolRegistry:
         self._tools[tool.name] = tool
         logger.debug(f"Registered tool: {tool.name}")
 
-    def list_all(self) -> List[str]:
+    def list_all(self) -> list[str]:
         """List all tool names."""
         return sorted(self._tools.keys())
 
 
 # [20251225_FEATURE] Global registry instance
-_registry: Optional[ToolRegistry] = None
+_registry: ToolRegistry | None = None
 
 
 def get_tool_registry() -> ToolRegistry:
@@ -385,6 +386,6 @@ def is_tool_available(tool_name: str) -> bool:
     return get_tool_registry().is_tool_available(tool_name)
 
 
-def get_available_tools() -> List[MCPTool]:
+def get_available_tools() -> list[MCPTool]:
     """Get all tools available at the current tier."""
     return get_tool_registry().get_available_tools()

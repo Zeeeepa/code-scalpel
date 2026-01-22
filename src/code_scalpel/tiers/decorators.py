@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import functools
 import logging
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +61,8 @@ def _tier_level(tier: str) -> int:
 
 
 def requires_tier(
-    tier: Union[str, Tier],  # Accept Tier enum or string
-    feature_name: Optional[str] = None,
+    tier: str | Tier,  # Accept Tier enum or string
+    feature_name: str | None = None,
     graceful: bool = False,
     fallback: Any = None,
 ) -> Callable[[F], F]:

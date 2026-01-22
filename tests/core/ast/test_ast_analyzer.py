@@ -206,10 +206,10 @@ def complex_func(x, y):
         code = """
 class MyClass(BaseClass):
     class_var = 10
-    
+
     def __init__(self, value):
         self.value = value
-    
+
     def get_value(self):
         return self.value
 """
@@ -792,7 +792,7 @@ def run_commands(cmd):
 def process():
     handlers = [func1, func2]
     handlers[0]()  # This is ast.Subscript, not Name or Attribute
-    
+
     # Lambda call
     (lambda x: x)()
 """
@@ -814,7 +814,7 @@ class DataContainer:
     # Tuple unpacking - target is ast.Tuple, not ast.Name
     x, y = 1, 2
     a, b, c = "abc"
-    
+
     # Regular assignment for comparison
     normal_var = 100
 """
@@ -840,10 +840,10 @@ def process():
     handlers = [handler1, handler2]
     # Subscript call - handlers[0]() - func is ast.Subscript
     handlers[0]()
-    
+
     # Call on call result - get()() - func is ast.Call
     get_func()()
-    
+
     # Normal calls for comparison
     print("hello")
     obj.method()

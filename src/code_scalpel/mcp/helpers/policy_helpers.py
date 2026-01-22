@@ -2,10 +2,6 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from code_scalpel.policy_engine.audit_log import (
-    AuditLog,
-)  # [20260121_BUGFIX] Persist audit events
-
 from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.mcp.models.policy import (
     CodePolicyCheckResult,
@@ -15,6 +11,9 @@ from code_scalpel.mcp.models.policy import (
 
 # [20260116_BUGFIX] Import _get_current_tier from protocol for consistent license validation
 from code_scalpel.mcp.protocol import _get_current_tier
+from code_scalpel.policy_engine.audit_log import (
+    AuditLog,
+)  # [20260121_BUGFIX] Persist audit events
 
 
 def _validate_paths_sync(
@@ -37,7 +36,7 @@ def _validate_paths_sync(
     if capabilities is None:
         capabilities = get_tool_capabilities("validate_paths", tier) or {}
 
-    caps_set: set[str] = set((capabilities.get("capabilities", []) or []))
+    caps_set: set[str] = set(capabilities.get("capabilities", []) or [])
     limits = capabilities.get("limits", {}) or {}
 
     paths_received = len(paths)
@@ -65,16 +64,10 @@ def _validate_paths_sync(
 
         if inaccessible:
             if resolver.is_docker:
-                suggestions.append(
-                    "Running in Docker: Mount your project with -v /path/to/project:/workspace"
-                )
-                suggestions.append(
-                    "Example: docker run -v $(pwd):/workspace code-scalpel:latest"
-                )
+                suggestions.append("Running in Docker: Mount your project with -v /path/to/project:/workspace")
+                suggestions.append("Example: docker run -v $(pwd):/workspace code-scalpel:latest")
             else:
-                suggestions.append(
-                    "Ensure files exist and use absolute paths or place in workspace roots:"
-                )
+                suggestions.append("Ensure files exist and use absolute paths or place in workspace roots:")
                 for root in workspace_roots_sorted[:3]:
                     suggestions.append(f"  - {root}")
             suggestions.append("Set WORKSPACE_ROOT env variable to specify custom root")
@@ -98,9 +91,7 @@ def _validate_paths_sync(
                             for target in target_patterns:
                                 alias_key = alias.replace("/*", "")
                                 target_path = target.replace("/*", "")
-                                resolved = str(
-                                    PathLib(project_root) / base_url / target_path
-                                )
+                                resolved = str(PathLib(project_root) / base_url / target_path)
                                 alias_resolutions.append(
                                     {
                                         "alias": alias_key,
@@ -124,11 +115,7 @@ def _validate_paths_sync(
                                 {
                                     "alias": alias,
                                     "original_path": f"src/{alias.replace('@', '')}",
-                                    "resolved_path": str(
-                                        PathLib(project_root)
-                                        / "src"
-                                        / alias.replace("@", "")
-                                    ),
+                                    "resolved_path": str(PathLib(project_root) / "src" / alias.replace("@", "")),
                                     "source": "webpack.config.js",
                                 }
                             )
@@ -182,11 +169,7 @@ def _validate_paths_sync(
                         boundary_violations.append(
                             {
                                 "path": str(abs_path),
-                                "boundary": (
-                                    resolver.workspace_roots[0]
-                                    if resolver.workspace_roots
-                                    else "unknown"
-                                ),
+                                "boundary": (resolver.workspace_roots[0] if resolver.workspace_roots else "unknown"),
                                 "violation_type": "workspace_escape",
                                 "risk": "high",
                             }
@@ -196,12 +179,8 @@ def _validate_paths_sync(
 
         if "security_boundary_testing" in caps_set:
             score = 10.0
-            critical_count = sum(
-                1 for v in traversal_vulnerabilities if v.get("severity") == "critical"
-            )
-            high_count = sum(
-                1 for v in traversal_vulnerabilities if v.get("severity") == "high"
-            )
+            critical_count = sum(1 for v in traversal_vulnerabilities if v.get("severity") == "critical")
+            high_count = sum(1 for v in traversal_vulnerabilities if v.get("severity") == "high")
             score -= critical_count * 3.0 + high_count * 1.5
             score -= len(boundary_violations) * 2.0
             score -= len(inaccessible) * 0.5
@@ -229,9 +208,7 @@ def _validate_paths_sync(
 
         response_config = get_cached_response_config()
         try:
-            filtered_dict = filter_response(
-                result.model_dump(), "validate_paths", response_config
-            )
+            filtered_dict = filter_response(result.model_dump(), "validate_paths", response_config)
             return PathValidationResult(**filtered_dict)
         except Exception as e:  # noqa: BLE001
             _ = e
@@ -274,7 +251,7 @@ def _verify_policy_integrity_sync(
     if capabilities is None:
         capabilities = get_tool_capabilities("verify_policy_integrity", tier) or {}
 
-    caps_set: set[str] = set((capabilities.get("capabilities", []) or []))
+    caps_set: set[str] = set(capabilities.get("capabilities", []) or [])
     limits = capabilities.get("limits", {}) or {}
 
     signature_validation_enabled = limits.get("signature_validation", False)
@@ -335,9 +312,7 @@ def _verify_policy_integrity_sync(
             for ext in ["*.yaml", "*.yml", "*.json"]:
                 policy_files.extend(policy_path.glob(ext))
 
-            policy_files = [
-                pf for pf in policy_files if pf.name != "policy.manifest.json"
-            ]
+            policy_files = [pf for pf in policy_files if pf.name != "policy.manifest.json"]
 
             policy_files = sorted(policy_files, key=lambda p: p.name)
 
@@ -480,10 +455,7 @@ def _code_policy_check_sync(
         tier_applied=tier,
         files_limit_applied=files_limit,
         rules_limit_applied=rules_limit,
-        violations=[
-            cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
-            for v in result.violations
-        ],
+        violations=[cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v) for v in result.violations],
         error=result.error,
     )
 
@@ -491,19 +463,15 @@ def _code_policy_check_sync(
 
     if tier in ("pro", "enterprise"):
         mcp_result.best_practices_violations = [
-            cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v)
-            for v in result.best_practices_violations
+            cast(dict[str, Any], v.to_dict() if hasattr(v, "to_dict") else v) for v in result.best_practices_violations
         ]
         mcp_result.security_warnings = [
-            cast(dict[str, Any], w.to_dict() if hasattr(w, "to_dict") else w)
-            for w in result.security_warnings
+            cast(dict[str, Any], w.to_dict() if hasattr(w, "to_dict") else w) for w in result.security_warnings
         ]
         mcp_result.custom_rule_results = result.custom_rule_results
 
     if tier == "enterprise":
-        mcp_result.compliance_reports = {
-            k: v.to_dict() for k, v in result.compliance_reports.items()
-        }
+        mcp_result.compliance_reports = {k: v.to_dict() for k, v in result.compliance_reports.items()}
         mcp_result.compliance_score = result.compliance_score
         mcp_result.certifications = [c.to_dict() for c in result.certifications]
         mcp_result.audit_trail = [e.to_dict() for e in result.audit_trail]

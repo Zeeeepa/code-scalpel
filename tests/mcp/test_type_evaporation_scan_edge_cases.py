@@ -58,11 +58,11 @@ async def test_code_with_decorators(tmp_path: Path):
 
     backend_code = """
     from flask import route
-    
+
     @route('/api/test')
     def test_handler():
         return {'status': 'ok'}
-    
+
     @cached
     def expensive_operation():
         return compute_result()
@@ -93,7 +93,7 @@ async def test_code_with_async_await(tmp_path: Path):
         const response = await fetch(`/api/users/${id}`);
         return await response.json();
     }
-    
+
     async function processData() {
         const data = await fetchUser(123);
         return data;
@@ -104,7 +104,7 @@ async def test_code_with_async_await(tmp_path: Path):
     async def get_user(user_id: int):
         result = await db.query(f'SELECT * FROM users WHERE id = {user_id}')
         return result
-    
+
     async def process():
         user = await get_user(123)
         return user
@@ -137,12 +137,12 @@ async def test_code_with_generics(tmp_path: Path):
         data: T;
         status: number;
     }
-    
+
     async function api<T>(endpoint: string): Promise<Response<T>> {
         const response = await fetch(endpoint);
         return response.json();
     }
-    
+
     function process<T extends { id: number }>(item: T): T {
         return item;
     }
@@ -150,14 +150,14 @@ async def test_code_with_generics(tmp_path: Path):
 
     backend_code = """
     from typing import TypeVar, Generic, List
-    
+
     T = TypeVar('T')
-    
+
     class Response(Generic[T]):
         def __init__(self, data: T, status: int):
             self.data = data
             self.status = status
-    
+
     def get_items() -> List[dict]:
         return [{'id': 1, 'name': 'item1'}]
     """
@@ -191,14 +191,14 @@ async def test_code_with_comments_and_docstrings(tmp_path: Path):
     async function getUser(id: number): Promise<User | null> {
         // Make request to backend
         const response = await fetch(`/api/users/${id}`);
-        
+
         // Check response
         if (!response.ok) {
             // Log error and return null
             console.error('Failed to fetch user');
             return null;
         }
-        
+
         // Parse and return JSON data
         return response.json();
     }
@@ -208,23 +208,23 @@ async def test_code_with_comments_and_docstrings(tmp_path: Path):
     def get_user(user_id: int) -> dict:
         """
         Retrieve user from database
-        
+
         Args:
             user_id: ID of user to fetch
-            
+
         Returns:
             User dict with id, name, email fields
-            
+
         Raises:
             UserNotFound: If user doesn't exist
         """
         # Query database for user
         user = db.query(f"SELECT * FROM users WHERE id = {user_id}")
-        
+
         if not user:
             # User not found
             raise UserNotFound(f"User {user_id} not found")
-        
+
         return user
     '''
 
@@ -298,7 +298,7 @@ async def test_code_with_syntax_errors(tmp_path: Path):
     backend_code = """
     def function_incomplete():
         return {
-    
+
     class InvalidClass
         invalid syntax here!!!
     """
@@ -336,7 +336,7 @@ async def test_nested_structures(tmp_path: Path):
             };
         };
     }
-    
+
     function processNested(obj: Level1): void {
         const val = obj.level2.level3.level4.level5.value;
         fetch('/api/process', { body: JSON.stringify(val) });
@@ -347,11 +347,11 @@ async def test_nested_structures(tmp_path: Path):
     class Level1:
         def __init__(self):
             self.level2 = Level2()
-    
+
     class Level2:
         def __init__(self):
             self.level3 = {}
-    
+
     def process_nested(obj):
         val = obj.level2.level3.get('level4', {}).get('level5', {}).get('value')
         return {'result': val}

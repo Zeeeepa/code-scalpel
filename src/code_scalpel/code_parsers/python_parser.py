@@ -1,7 +1,7 @@
 """Python Parser - Native Python AST parsing implementation."""
 
 import ast
-from typing import Any, List
+from typing import Any
 
 from .interface import IParser, Language, ParseResult
 
@@ -40,21 +40,15 @@ class PythonParser(IParser):
                 language=Language.PYTHON,
             )
 
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         if not isinstance(ast_tree, ast.AST):
             return []
-        return [
-            node.name
-            for node in ast.walk(ast_tree)
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-        ]
+        return [node.name for node in ast.walk(ast_tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
 
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         if not isinstance(ast_tree, ast.AST):
             return []
-        return [
-            node.name for node in ast.walk(ast_tree) if isinstance(node, ast.ClassDef)
-        ]
+        return [node.name for node in ast.walk(ast_tree) if isinstance(node, ast.ClassDef)]
 
     def _calculate_complexity(self, node: ast.AST) -> int:
         """Calculate cyclomatic complexity."""

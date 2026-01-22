@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from code_scalpel.governance.compliance_reporter import ComplianceReporter
 
@@ -9,12 +9,10 @@ from code_scalpel.governance.compliance_reporter import ComplianceReporter
 class _DummyAuditLog:
     """Minimal audit log stub for testing."""
 
-    def __init__(self, events: List[Dict[str, Any]]):
+    def __init__(self, events: list[dict[str, Any]]):
         self._events = events
 
-    def get_events(
-        self, time_range: Tuple[datetime, datetime] | None = None
-    ) -> List[Dict[str, Any]]:  # noqa: ARG002
+    def get_events(self, time_range: tuple[datetime, datetime] | None = None) -> list[dict[str, Any]]:  # noqa: ARG002
         return self._events
 
 
@@ -24,9 +22,9 @@ class _DummyPolicyEngine:
     pass
 
 
-def _sample_events() -> List[Dict[str, Any]]:
+def _sample_events() -> list[dict[str, Any]]:
     """Construct diverse events to exercise report generation paths."""
-    events: List[Dict[str, Any]] = [
+    events: list[dict[str, Any]] = [
         {"event_type": "OPERATION_ALLOWED", "details": {"policy_name": "ALLOW"}},
         {
             "event_type": "POLICY_VIOLATION",
@@ -174,9 +172,7 @@ def _install_fake_reportlab(monkeypatch) -> None:
 
     monkeypatch.setitem(sys.modules, "reportlab", fake_reportlab)
     monkeypatch.setitem(sys.modules, "reportlab.lib", fake_reportlab.lib)
-    monkeypatch.setitem(
-        sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes
-    )
+    monkeypatch.setitem(sys.modules, "reportlab.lib.pagesizes", fake_reportlab.lib.pagesizes)
     monkeypatch.setitem(sys.modules, "reportlab.lib.units", fake_reportlab.lib.units)
     monkeypatch.setitem(sys.modules, "reportlab.lib.styles", fake_reportlab.lib.styles)
     monkeypatch.setitem(sys.modules, "reportlab.lib.colors", fake_reportlab.lib.colors)

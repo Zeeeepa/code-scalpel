@@ -41,7 +41,6 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Optional
 from urllib import parse, request
 from urllib.error import URLError
 
@@ -77,12 +76,12 @@ class ValidationResult:
     status: ValidationStatus
     tier: str
     message: str
-    expiration_date: Optional[datetime] = None
-    organization: Optional[str] = None
-    seats: Optional[int] = None
-    seats_used: Optional[int] = None
-    hardware_id: Optional[str] = None
-    custom_rules: Optional[Dict[str, bool]] = None
+    expiration_date: datetime | None = None
+    organization: str | None = None
+    seats: int | None = None
+    seats_used: int | None = None
+    hardware_id: str | None = None
+    custom_rules: dict[str, bool] | None = None
 
     @property
     def is_valid(self) -> bool:
@@ -90,7 +89,7 @@ class ValidationResult:
         return self.status in {ValidationStatus.VALID, ValidationStatus.NOT_REQUIRED}
 
     @property
-    def days_until_expiration(self) -> Optional[int]:
+    def days_until_expiration(self) -> int | None:
         """Calculate days until expiration."""
         if not self.expiration_date:
             return None
@@ -119,28 +118,24 @@ class LicenseValidator:
     KEY_PREFIX = "SCALPEL"
 
     # [20251225_FEATURE] License server URL for online validation
-    LICENSE_SERVER_URL = os.getenv(
-        "CODE_SCALPEL_LICENSE_SERVER", "https://license.code-scalpel.dev/api/validate"
-    )
+    LICENSE_SERVER_URL = os.getenv("CODE_SCALPEL_LICENSE_SERVER", "https://license.code-scalpel.dev/api/validate")
 
     # [20251225_FEATURE] Secret key for signature verification (in production, load from secure storage)
     # This is a placeholder - in production, use a secure key management system
-    _SIGNATURE_SECRET = os.getenv(
-        "CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1"
-    )
+    _SIGNATURE_SECRET = os.getenv("CODE_SCALPEL_SIGNATURE_SECRET", "scalpel-signing-key-v1")
 
     def __init__(self):
         """Initialize the validator."""
         # [20251225_FEATURE] P2_MEDIUM: Validation result caching
-        self._cache: Dict[str, tuple[ValidationResult, float]] = {}
+        self._cache: dict[str, tuple[ValidationResult, float]] = {}
         self._cache_ttl = 300  # 5 minutes cache TTL
-        self._hardware_id: Optional[str] = None
+        self._hardware_id: str | None = None
 
     def validate(
         self,
-        license_key: Optional[str] = None,
+        license_key: str | None = None,
         tier: str = "community",
-        organization: Optional[str] = None,
+        organization: str | None = None,
         seats_used: int = 0,
     ) -> ValidationResult:
         """
@@ -213,9 +208,7 @@ class LicenseValidator:
 
         # [20251225_FEATURE] ENTERPRISE tier validation
         if key_tier == "enterprise":
-            enterprise_result = self._validate_enterprise(
-                license_key, organization, seats_used
-            )
+            enterprise_result = self._validate_enterprise(license_key, organization, seats_used)
             if not enterprise_result.is_valid:
                 self._cache_result(cache_key, enterprise_result)
                 return enterprise_result
@@ -259,9 +252,7 @@ class LicenseValidator:
                 message=f"Invalid tier in license key: {tier}",
             )
 
-        return ValidationResult(
-            status=ValidationStatus.VALID, tier=tier, message="Format valid"
-        )
+        return ValidationResult(status=ValidationStatus.VALID, tier=tier, message="Format valid")
 
     def _extract_tier(self, license_key: str) -> str:
         """Extract tier from license key."""
@@ -304,9 +295,7 @@ class LicenseValidator:
         ]  # Use first 8 chars for brevity
 
         # Compare signatures (timing-safe comparison)
-        if not hmac.compare_digest(
-            provided_signature.lower(), expected_signature.lower()
-        ):
+        if not hmac.compare_digest(provided_signature.lower(), expected_signature.lower()):
             logger.warning(f"Signature verification failed for {tier} license key")
             return ValidationResult(
                 status=ValidationStatus.INVALID,
@@ -451,7 +440,7 @@ class LicenseValidator:
     def _validate_enterprise(
         self,
         license_key: str,
-        organization: Optional[str],
+        organization: str | None,
         seats_used: int,
     ) -> ValidationResult:
         """
@@ -555,7 +544,7 @@ class LicenseValidator:
             elif os.path.exists("/var/lib/dbus/machine-id"):
                 with open("/var/lib/dbus/machine-id") as f:
                     machine_id = f.read().strip()
-        except (OSError, IOError):
+        except OSError:
             pass
 
         # Fallback to system info
@@ -569,7 +558,7 @@ class LicenseValidator:
         self._hardware_id = machine_id[:16]  # Use first 16 chars
         return self._hardware_id
 
-    def _evaluate_custom_rules(self, license_key: str) -> Dict[str, bool]:
+    def _evaluate_custom_rules(self, license_key: str) -> dict[str, bool]:
         """
         [20251225_FEATURE] P4_LOW: Evaluate custom validation rules from license key.
 
@@ -588,7 +577,7 @@ class LicenseValidator:
             "custom_integrations": True,
         }
 
-    def _get_cached_result(self, cache_key: str) -> Optional[ValidationResult]:
+    def _get_cached_result(self, cache_key: str) -> ValidationResult | None:
         """
         [20251225_FEATURE] P2_MEDIUM: Get cached validation result if still valid.
         """

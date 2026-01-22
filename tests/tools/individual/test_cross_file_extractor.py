@@ -58,7 +58,7 @@ from utils import format_string, validate
 class User:
     def __init__(self, name):
         self.name = format_string(name)
-    
+
     def is_valid(self):
         return validate(self.name)
 """)

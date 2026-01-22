@@ -15,9 +15,7 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src")))
 
 from code_scalpel.surgery.unified_extractor import UnifiedExtractor
 
@@ -52,9 +50,7 @@ def other_function():
 
                 assert result.success, f"Extraction failed: {result.error}"
                 assert "@decorator" in result.code, "Decorator not preserved"
-                assert (
-                    "def process_data" in result.code
-                ), "Function definition not extracted"
+                assert "def process_data" in result.code, "Function definition not extracted"
             finally:
                 os.unlink(f.name)
 
@@ -139,12 +135,8 @@ def sync_function():
                 result = extractor.extract("function", "fetch_data")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "async def fetch_data" in result.code
-                ), "Async keyword not preserved"
-                assert (
-                    "await asyncio.sleep" in result.code
-                ), "Await keyword not preserved"
+                assert "async def fetch_data" in result.code, "Async keyword not preserved"
+                assert "await asyncio.sleep" in result.code, "Await keyword not preserved"
             finally:
                 os.unlink(f.name)
 
@@ -156,7 +148,7 @@ class AsyncService:
     async def process(self, data):
         await asyncio.sleep(0.1)
         return data.upper()
-    
+
     def sync_method(self):
         return "sync"
 """
@@ -169,9 +161,7 @@ class AsyncService:
                 result = extractor.extract("method", "AsyncService.process")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "async def process" in result.code
-                ), "Async method not extracted correctly"
+                assert "async def process" in result.code, "Async method not extracted correctly"
                 assert "await" in result.code, "Await keyword not preserved"
             finally:
                 os.unlink(f.name)
@@ -181,10 +171,10 @@ class AsyncService:
         python_code = """class AsyncResource:
     async def __aenter__(self):
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
-    
+
     def regular_method(self):
         pass
 """
@@ -197,9 +187,7 @@ class AsyncService:
                 result = extractor.extract("method", "AsyncResource.__aenter__")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "async def __aenter__" in result.code
-                ), "Async special method not extracted"
+                assert "async def __aenter__" in result.code, "Async special method not extracted"
             finally:
                 os.unlink(f.name)
 
@@ -228,9 +216,7 @@ def other():
                 assert result.success, f"Extraction failed: {result.error}"
                 assert "def outer" in result.code, "Outer function not extracted"
                 assert "def inner" in result.code, "Nested function not included"
-                assert (
-                    "other" not in result.code
-                ), "Sibling function incorrectly included"
+                assert "other" not in result.code, "Sibling function incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -253,13 +239,9 @@ def unrelated():
                 result = extractor.extract("function", "make_multiplier")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "def make_multiplier" in result.code
-                ), "Outer function not extracted"
+                assert "def make_multiplier" in result.code, "Outer function not extracted"
                 assert "def multiply" in result.code, "Closure not included"
-                assert (
-                    "factor" in result.code
-                ), "Closure variable reference not preserved"
+                assert "factor" in result.code, "Closure variable reference not preserved"
             finally:
                 os.unlink(f.name)
 
@@ -276,7 +258,7 @@ class TestInheritedMethods:
 class Child(Parent):
     def child_method(self):
         return "child"
-    
+
     def override_method(self):
         return "overridden"
 """
@@ -311,10 +293,7 @@ class Derived(Base):
                 result = extractor.extract("class", "Derived")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "class Derived(Base)" in result.code
-                    or "class Derived" in result.code
-                ), "Class not extracted"
+                assert "class Derived(Base)" in result.code or "class Derived" in result.code, "Class not extracted"
                 assert "def method" in result.code, "Method not included"
             finally:
                 os.unlink(f.name)
@@ -354,15 +333,15 @@ def regular_function():
         python_code = """class Person:
     def __init__(self, name):
         self._name = name
-    
+
     @property
     def name(self):
         return self._name
-    
+
     @name.setter
     def name(self, value):
         self._name = value
-    
+
     def regular_method(self):
         pass
 """
@@ -386,7 +365,7 @@ def regular_function():
     @staticmethod
     def add(a, b):
         return a + b
-    
+
     def instance_method(self):
         pass
 """
@@ -399,9 +378,7 @@ def regular_function():
                 result = extractor.extract("method", "MathUtils.add")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "@staticmethod" in result.code
-                ), "Staticmethod decorator not preserved"
+                assert "@staticmethod" in result.code, "Staticmethod decorator not preserved"
                 assert "def add" in result.code, "Static method not extracted"
             finally:
                 os.unlink(f.name)
@@ -412,7 +389,7 @@ def regular_function():
     @classmethod
     def create(cls, name):
         return cls(name)
-    
+
     def __init__(self, name):
         self.name = name
 """
@@ -425,9 +402,7 @@ def regular_function():
                 result = extractor.extract("method", "Factory.create")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "@classmethod" in result.code
-                ), "Classmethod decorator not preserved"
+                assert "@classmethod" in result.code, "Classmethod decorator not preserved"
                 assert "def create" in result.code, "Class method not extracted"
             finally:
                 os.unlink(f.name)

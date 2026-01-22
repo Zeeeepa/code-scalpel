@@ -10,9 +10,7 @@ Generates various sizes of functions, classes, and files for benchmarking:
 """
 
 
-def generate_small_function(
-    name: str = "small_function", complexity: str = "simple"
-) -> str:
+def generate_small_function(name: str = "small_function", complexity: str = "simple") -> str:
     """
     Generate small function (< 50 LOC).
 
@@ -248,9 +246,7 @@ def generate_large_function(name: str = "large_function", lines: int = 300) -> s
     return "\n".join(lines_code) + "\n"
 
 
-def generate_very_large_class(
-    name: str = "VeryLargeClass", method_count: int = 20
-) -> str:
+def generate_very_large_class(name: str = "VeryLargeClass", method_count: int = 20) -> str:
     """
     Generate very large class (500+ LOC) with multiple methods.
 
@@ -426,11 +422,11 @@ def get_medium_function_replacement(name: str = "medium_function") -> str:
     """Updated medium function with enhanced processing."""
     result = []
     error_count = 0
-    
+
     # Enhanced validation
     if not isinstance(data, (list, tuple)):
         raise TypeError("data must be list or tuple")
-    
+
     # Enhanced processing
     for item in data:
         try:
@@ -438,14 +434,14 @@ def get_medium_function_replacement(name: str = "medium_function") -> str:
                 processed = item * 3  # Enhanced multiplier
             else:
                 processed = item
-            
+
             if processed > 2000:
                 processed = 2000
-            
+
             result.append(processed)
         except Exception:
             error_count += 1
-    
+
     return {{"results": result, "errors": error_count}}
 '''
 

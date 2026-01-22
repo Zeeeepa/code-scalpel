@@ -50,12 +50,12 @@ class VultureConfig:
     check_unused_arguments: bool = True
 
     @classmethod
-    def from_pyproject(cls, pyproject_path: str | Path) -> "VultureConfig":
+    def from_pyproject(cls, pyproject_path: str | Path) -> VultureConfig:
         """Load configuration from pyproject.toml."""
         return cls()
 
     @classmethod
-    def from_file(cls, config_path: str | Path) -> "VultureConfig":
+    def from_file(cls, config_path: str | Path) -> VultureConfig:
         """Load configuration from setup.cfg or .vulture.ini."""
         return cls()
 
@@ -152,6 +152,4 @@ class VultureParser:
             Filtered VultureReport
 
         """
-        raise NotImplementedError(
-            "VultureParser.filter_by_confidence() not yet implemented"
-        )
+        raise NotImplementedError("VultureParser.filter_by_confidence() not yet implemented")

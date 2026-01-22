@@ -46,7 +46,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from code_scalpel.policy_engine import Operation as EngineOperation
@@ -110,9 +110,9 @@ class GovernanceViolation:
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     message: str  # Human-readable violation message
     source: ViolationSource  # Where violation came from
-    limit: Optional[int] = None  # Budget limit (if applicable)
-    actual: Optional[int] = None  # Actual value (if applicable)
-    file_path: Optional[str] = None  # File affected (if applicable)
+    limit: int | None = None  # Budget limit (if applicable)
+    actual: int | None = None  # Actual value (if applicable)
+    file_path: str | None = None  # File affected (if applicable)
 
     def __str__(self) -> str:
         """Format violation for display."""
@@ -134,29 +134,29 @@ class GovernanceDecision:
 
     allowed: bool
     reason: str
-    violations: List[GovernanceViolation] = field(default_factory=list)
+    violations: list[GovernanceViolation] = field(default_factory=list)
     requires_override: bool = False
-    override_id: Optional[str] = None
-    expires_at: Optional[datetime] = None
+    override_id: str | None = None
+    expires_at: datetime | None = None
     evaluation_time_ms: float = 0.0  # For metrics
 
     @property
-    def critical_violations(self) -> List[GovernanceViolation]:
+    def critical_violations(self) -> list[GovernanceViolation]:
         """Get all CRITICAL severity violations."""
         return [v for v in self.violations if v.severity == "CRITICAL"]
 
     @property
-    def policy_violations(self) -> List[GovernanceViolation]:
+    def policy_violations(self) -> list[GovernanceViolation]:
         """Get violations from OPA/Rego policies."""
         return [v for v in self.violations if v.source == ViolationSource.POLICY]
 
     @property
-    def budget_violations(self) -> List[GovernanceViolation]:
+    def budget_violations(self) -> list[GovernanceViolation]:
         """Get violations from change budgets."""
         return [v for v in self.violations if v.source == ViolationSource.BUDGET]
 
     @property
-    def semantic_violations(self) -> List[GovernanceViolation]:
+    def semantic_violations(self) -> list[GovernanceViolation]:
         """Get violations from semantic analysis."""
         return [v for v in self.violations if v.source == ViolationSource.SEMANTIC]
 
@@ -185,10 +185,10 @@ class GovernanceContext:
     """
 
     user_role: str = "developer"  # developer, reviewer, architect, system
-    team: Optional[str] = None  # Team name for team-based policies
-    project: Optional[str] = None  # Project name
+    team: str | None = None  # Team name for team-based policies
+    project: str | None = None  # Project name
     environment: str = "development"  # development, staging, production
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class UnifiedGovernance:
@@ -243,13 +243,10 @@ class UnifiedGovernance:
             if budget_path.exists():
                 import yaml
 
-                with open(budget_path, "r") as f:
+                with open(budget_path) as f:
                     budget_config = yaml.safe_load(f) or {}
                     # Extract the 'default' budget if using the budgets structure
-                    if (
-                        "budgets" in budget_config
-                        and "default" in budget_config["budgets"]
-                    ):
+                    if "budgets" in budget_config and "default" in budget_config["budgets"]:
                         budget_limits = budget_config["budgets"]["default"]
                     else:
                         budget_limits = budget_config
@@ -263,12 +260,12 @@ class UnifiedGovernance:
         self.semantic_analyzer = SemanticAnalyzer() if (SEMANTIC_AVAILABLE and SemanticAnalyzer) else None  # type: ignore[misc,truthy-function]
 
         # Audit trail
-        self._decisions_log: List[Dict[str, Any]] = []
+        self._decisions_log: list[dict[str, Any]] = []
 
     def evaluate(
         self,
         operation: Any,  # BudgetOperation | EngineOperation | Dict[str, Any]
-        context: Optional[GovernanceContext] = None,
+        context: GovernanceContext | None = None,
     ) -> GovernanceDecision:
         """
         Evaluate operation against unified governance constraints.
@@ -292,7 +289,7 @@ class UnifiedGovernance:
             context = GovernanceContext()
 
         start_time = datetime.now()
-        violations: List[GovernanceViolation] = []
+        violations: list[GovernanceViolation] = []
 
         # Normalize operation to internal format
         op_dict = self._normalize_operation(operation)
@@ -316,11 +313,7 @@ class UnifiedGovernance:
                     changes=[
                         FileChange(  # type: ignore[misc]
                             file_path=operation.get("file_path", ""),
-                            added_lines=(
-                                [operation.get("code", "")]
-                                if operation.get("code")
-                                else []
-                            ),
+                            added_lines=([operation.get("code", "")] if operation.get("code") else []),
                         )
                     ],
                     description=operation.get("type", "unknown"),
@@ -336,10 +329,7 @@ class UnifiedGovernance:
             v
             for v in violations
             if v.severity in ("CRITICAL", "HIGH")
-            or (
-                v.severity == "MEDIUM"
-                and v.source in (ViolationSource.BUDGET, ViolationSource.POLICY)
-            )
+            or (v.severity == "MEDIUM" and v.source in (ViolationSource.BUDGET, ViolationSource.POLICY))
         ]
 
         decision = GovernanceDecision(
@@ -355,9 +345,7 @@ class UnifiedGovernance:
 
         return decision
 
-    def _evaluate_semantic(
-        self, operation: Dict[str, Any]
-    ) -> List[GovernanceViolation]:
+    def _evaluate_semantic(self, operation: dict[str, Any]) -> list[GovernanceViolation]:
         """Evaluate operation for semantic security issues."""
         violations = []
 
@@ -452,9 +440,9 @@ class UnifiedGovernance:
 
     def _evaluate_policies(
         self,
-        operation: Dict[str, Any],
+        operation: dict[str, Any],
         context: GovernanceContext,
-    ) -> List[GovernanceViolation]:
+    ) -> list[GovernanceViolation]:
         """Evaluate operation against OPA/Rego policies."""
         violations = []
 
@@ -508,7 +496,7 @@ class UnifiedGovernance:
         self,
         operation: Any,  # BudgetOperation | EngineOperation
         context: GovernanceContext,
-    ) -> List[GovernanceViolation]:
+    ) -> list[GovernanceViolation]:
         """Evaluate operation against change budget constraints."""
         violations = []
 
@@ -523,11 +511,7 @@ class UnifiedGovernance:
                     changes=[
                         FileChange(  # type: ignore[misc]
                             file_path=getattr(operation, "file_path", ""),
-                            added_lines=(
-                                [getattr(operation, "code", "")]
-                                if getattr(operation, "code", None)
-                                else []
-                            ),
+                            added_lines=([getattr(operation, "code", "")] if getattr(operation, "code", None) else []),
                         )
                     ],
                     description=f"{getattr(operation, 'type', 'unknown')}: {getattr(operation, 'file_path', '')}",
@@ -564,8 +548,8 @@ class UnifiedGovernance:
         return violations
 
     def _normalize_operation(
-        self, operation: Any  # BudgetOperation | EngineOperation | Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, operation: Any
+    ) -> dict[str, Any]:  # BudgetOperation | EngineOperation | Dict[str, Any]
         """Normalize operation to dictionary format for semantic analysis."""
         if isinstance(operation, dict):
             return operation
@@ -573,11 +557,7 @@ class UnifiedGovernance:
             changes = getattr(operation, "changes", [])
             return {
                 "type": "code_edit",
-                "code": "\n".join(
-                    line
-                    for change in changes
-                    for line in getattr(change, "added_lines", [])
-                ),
+                "code": "\n".join(line for change in changes for line in getattr(change, "added_lines", [])),
                 "language": "python",  # Default, could detect
                 "file_path": changes[0].file_path if changes else "",
             }
@@ -591,7 +571,7 @@ class UnifiedGovernance:
 
     def _generate_decision_reason(
         self,
-        violations: List[GovernanceViolation],
+        violations: list[GovernanceViolation],
         context: GovernanceContext,
     ) -> str:
         """Generate human-readable decision reason."""
@@ -632,7 +612,7 @@ class UnifiedGovernance:
 
         self._decisions_log.append(entry)
 
-    def get_decision_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_decision_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent governance decision history."""
         return self._decisions_log[-limit:]
 
@@ -642,7 +622,7 @@ class UnifiedGovernance:
         decision: GovernanceDecision,
         justification: str,
         human_code: str,
-        context: Optional[GovernanceContext] = None,
+        context: GovernanceContext | None = None,
     ) -> GovernanceDecision:
         """
         Request override of denied governance decision.
@@ -686,17 +666,15 @@ class UnifiedGovernance:
         return decision
 
     def _normalize_to_engine_operation(
-        self, operation: Any  # BudgetOperation | EngineOperation
-    ) -> Any:  # EngineOperation
+        self, operation: Any
+    ) -> Any:  # BudgetOperation | EngineOperation  # EngineOperation
         """Convert to PolicyEngine Operation format."""
         if EngineOperation and isinstance(operation, EngineOperation):  # type: ignore[truthy-function]
             return operation
 
         # Convert from BudgetOperation
         changes = getattr(operation, "changes", [])
-        code = "\n".join(
-            line for change in changes for line in getattr(change, "added_lines", [])
-        )
+        code = "\n".join(line for change in changes for line in getattr(change, "added_lines", []))
 
         return EngineOperation(  # type: ignore[misc]
             type="code_edit",
@@ -705,9 +683,7 @@ class UnifiedGovernance:
             file_path=changes[0].file_path if changes else "",
         )
 
-    def _convert_to_policy_decision(
-        self, governance_decision: GovernanceDecision
-    ) -> Any:  # PolicyDecision
+    def _convert_to_policy_decision(self, governance_decision: GovernanceDecision) -> Any:  # PolicyDecision
         """Convert GovernanceDecision to PolicyDecision."""
         if not PolicyDecision:
             return None

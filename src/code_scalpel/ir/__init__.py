@@ -27,9 +27,9 @@ Modules:
 
 """
 
-from .nodes import IRAttribute  # Base; Statements; Expressions
 from .nodes import (
     IRAssign,
+    IRAttribute,  # Base; Statements; Expressions
     IRAugAssign,
     IRBinaryOp,
     IRBoolOp,

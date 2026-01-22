@@ -61,7 +61,6 @@ import uuid
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class SessionStatus(Enum):
@@ -90,7 +89,7 @@ class RepoChange:
     target_file: str
     old_name: str
     new_name: str
-    metadata: Dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -107,8 +106,8 @@ class RepoState:
     """
 
     repo_path: Path
-    changes: List[RepoChange] = field(default_factory=list)
-    backup_path: Optional[Path] = None
+    changes: list[RepoChange] = field(default_factory=list)
+    backup_path: Path | None = None
     committed: bool = False
     rolled_back: bool = False
 
@@ -131,8 +130,8 @@ class SessionResult:
     success: bool
     repos_affected: int = 0
     changes_applied: int = 0
-    error: Optional[str] = None
-    failed_repo: Optional[str] = None
+    error: str | None = None
+    failed_repo: str | None = None
 
 
 class MultiRepoCoordinator:
@@ -142,7 +141,7 @@ class MultiRepoCoordinator:
     Manages atomic operations across multiple repositories.
     """
 
-    def __init__(self, backup_dir: Optional[Path] = None):
+    def __init__(self, backup_dir: Path | None = None):
         """
         Initialize multi-repo coordinator.
 
@@ -153,11 +152,9 @@ class MultiRepoCoordinator:
         self.backup_dir.mkdir(parents=True, exist_ok=True)
 
         # Active sessions
-        self._sessions: Dict[str, Dict[str, RepoState]] = {}
-        self._session_status: Dict[str, SessionStatus] = {}
-        self._session_dependencies: Dict[str, List[str]] = (
-            {}
-        )  # session_id -> [repo_paths]
+        self._sessions: dict[str, dict[str, RepoState]] = {}
+        self._session_status: dict[str, SessionStatus] = {}
+        self._session_dependencies: dict[str, list[str]] = {}  # session_id -> [repo_paths]
 
     def begin_session(self) -> str:
         """
@@ -201,7 +198,7 @@ class MultiRepoCoordinator:
         self._sessions[session_id][repo_key].changes.append(change)
         return True
 
-    def set_dependencies(self, session_id: str, dependency_order: List[str]) -> bool:
+    def set_dependencies(self, session_id: str, dependency_order: list[str]) -> bool:
         """
         Set repository dependency order for session.
 
@@ -246,7 +243,7 @@ class MultiRepoCoordinator:
             repo_state.backup_path = backup_path
             return True
 
-        except (IOError, OSError):
+        except OSError:
             return False
 
     def _apply_changes(self, repo_state: RepoState) -> bool:
@@ -287,7 +284,7 @@ class MultiRepoCoordinator:
             repo_state.rolled_back = True
             return True
 
-        except (IOError, OSError):
+        except OSError:
             return False
 
     def commit_session(self, session_id: str, dry_run: bool = False) -> SessionResult:
@@ -304,9 +301,7 @@ class MultiRepoCoordinator:
             SessionResult with operation details
         """
         if session_id not in self._sessions:
-            return SessionResult(
-                session_id=session_id, success=False, error="Session not found"
-            )
+            return SessionResult(session_id=session_id, success=False, error="Session not found")
 
         if self._session_status[session_id] != SessionStatus.ACTIVE:
             return SessionResult(
@@ -395,25 +390,21 @@ class MultiRepoCoordinator:
             SessionResult with rollback details
         """
         if session_id not in self._sessions:
-            return SessionResult(
-                session_id=session_id, success=False, error="Session not found"
-            )
+            return SessionResult(session_id=session_id, success=False, error="Session not found")
 
         session = self._sessions[session_id]
         rolled_back_count = 0
 
-        for repo_key, repo_state in session.items():
+        for _repo_key, repo_state in session.items():
             if repo_state.committed and not repo_state.rolled_back:
                 if self._rollback_changes(repo_state):
                     rolled_back_count += 1
 
         self._session_status[session_id] = SessionStatus.ROLLED_BACK
 
-        return SessionResult(
-            session_id=session_id, success=True, repos_affected=rolled_back_count
-        )
+        return SessionResult(session_id=session_id, success=True, repos_affected=rolled_back_count)
 
-    def get_session_status(self, session_id: str) -> Optional[SessionStatus]:
+    def get_session_status(self, session_id: str) -> SessionStatus | None:
         """
         Get status of a session.
 
@@ -425,7 +416,7 @@ class MultiRepoCoordinator:
         """
         return self._session_status.get(session_id)
 
-    def list_session_repos(self, session_id: str) -> List[str]:
+    def list_session_repos(self, session_id: str) -> list[str]:
         """
         List repositories in a session.
 

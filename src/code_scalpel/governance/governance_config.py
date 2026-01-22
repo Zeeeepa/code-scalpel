@@ -13,21 +13,24 @@ This module provides:
 
 Configuration precedence:
 1. Environment variables (SCALPEL_*)
-2. .code-scalpel/config.json (with hash validation)
+2. .code-scalpel/governance.yaml (with hash validation)
 3. Default values
 
-See docs/configuration/governance_config_schema.md for full specification.
+See docs/Configuration_Guide.md for full specification.
 """
 
 import hashlib
-
 import hmac
 import json
 import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +66,7 @@ class BlastRadiusConfig:
     max_call_graph_depth: int = 3
     warn_on_public_api_changes: bool = True
     block_on_critical_paths: bool = True
-    critical_paths: List[str] = field(default_factory=list)
+    critical_paths: list[str] = field(default_factory=list)
     critical_path_max_lines: int = 50
     critical_path_max_complexity_delta: int = 10
 
@@ -141,7 +144,7 @@ class GovernanceConfigLoader:
 
     Configuration precedence:
     1. Environment variables (SCALPEL_*)
-    2. .code-scalpel/config.json (with hash validation)
+    2. .code-scalpel/governance.yaml (with hash validation)
     3. Default values
 
     Security features:
@@ -167,7 +170,7 @@ class GovernanceConfigLoader:
         SCALPEL_MAX_AUTONOMOUS_ITERATIONS - Override iteration limit
     """
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         """
         Initialize config loader.
 
@@ -179,9 +182,9 @@ class GovernanceConfigLoader:
         # This matters for precedence: profile selection should not override an
         # explicit constructor path.
         self._explicit_config_path = config_path is not None
-        self.config_path = config_path or Path.cwd() / ".code-scalpel" / "config.json"
+        self.config_path = config_path or Path.cwd() / ".code-scalpel" / "governance.yaml"
 
-    def _select_profile_config_path(self) -> Optional[Path]:
+    def _select_profile_config_path(self) -> Path | None:
         """Select a profile config path if configured.
 
         Uses `SCALPEL_CONFIG_PROFILE` to load `.code-scalpel/config.<profile>.json`.
@@ -192,12 +195,10 @@ class GovernanceConfigLoader:
         if not profile:
             return None
         # Keep profile string safe and predictable.
-        profile_norm = "".join(
-            ch for ch in profile.lower() if ch.isalnum() or ch in {"-", "_"}
-        )
+        profile_norm = "".join(ch for ch in profile.lower() if ch.isalnum() or ch in {"-", "_"})
         if not profile_norm:
             return None
-        candidate = Path.cwd() / ".code-scalpel" / f"config.{profile_norm}.json"
+        candidate = Path.cwd() / ".code-scalpel" / f"governance.{profile_norm}.yaml"
         return candidate
 
     def load(self) -> GovernanceConfig:
@@ -230,10 +231,7 @@ class GovernanceConfigLoader:
             logger.info(f"Loading governance config from {self.config_path}")
             config_data = self._load_and_validate()
         else:
-            logger.warning(
-                f"No governance configuration found at {self.config_path}, "
-                "using defaults"
-            )
+            logger.warning(f"No governance configuration found at {self.config_path}, " "using defaults")
             config_data = self._get_defaults()
 
         # Apply environment variable overrides
@@ -281,7 +279,12 @@ class GovernanceConfigLoader:
                 )
             logger.debug("Configuration HMAC signature validation passed")
 
-        return json.loads(content)
+        if self.config_path.suffix == ".json":
+            return json.loads(content)
+        else:
+            if yaml is None:
+                raise ImportError("PyYAML is required to load YAML configuration files")
+            return yaml.safe_load(content)
 
     def _get_defaults(self) -> dict:
         """
@@ -292,36 +295,38 @@ class GovernanceConfigLoader:
         """
         return {
             "version": "3.0.0",
-            "governance": {
-                "change_budgeting": {
-                    "enabled": True,
-                    "max_lines_per_change": 500,
-                    "max_files_per_change": 10,
-                    "max_complexity_delta": 50,
-                    "require_justification": True,
-                    "budget_refresh_interval_hours": 24,
-                },
-                "blast_radius": {
-                    "enabled": True,
-                    "max_affected_functions": 20,
-                    "max_affected_classes": 5,
-                    "max_call_graph_depth": 3,
-                    "warn_on_public_api_changes": True,
-                    "block_on_critical_paths": True,
-                    "critical_paths": [],
-                    "critical_path_max_lines": 50,
-                    "critical_path_max_complexity_delta": 10,
-                },
-                "autonomy_constraints": {
-                    "max_autonomous_iterations": 10,
-                    "require_approval_for_breaking_changes": True,
-                    "require_approval_for_security_changes": True,
-                    "sandbox_execution_required": True,
-                },
-                "audit": {
-                    "log_all_changes": True,
-                    "log_rejected_changes": True,
-                    "retention_days": 90,
+            "autonomy": {
+                "governance": {
+                    "change_budgeting": {
+                        "enabled": True,
+                        "max_lines_per_change": 500,
+                        "max_files_per_change": 10,
+                        "max_complexity_delta": 50,
+                        "require_justification": True,
+                        "budget_refresh_interval_hours": 24,
+                    },
+                    "blast_radius": {
+                        "enabled": True,
+                        "max_affected_functions": 20,
+                        "max_affected_classes": 5,
+                        "max_call_graph_depth": 3,
+                        "warn_on_public_api_changes": True,
+                        "block_on_critical_paths": True,
+                        "critical_paths": [],
+                        "critical_path_max_lines": 50,
+                        "critical_path_max_complexity_delta": 10,
+                    },
+                    "autonomy_constraints": {
+                        "max_autonomous_iterations": 10,
+                        "require_approval_for_breaking_changes": True,
+                        "require_approval_for_security_changes": True,
+                        "sandbox_execution_required": True,
+                    },
+                    "audit": {
+                        "log_all_changes": True,
+                        "log_rejected_changes": True,
+                        "retention_days": 90,
+                    },
                 },
             },
         }
@@ -338,7 +343,8 @@ class GovernanceConfigLoader:
         Returns:
             Modified configuration dict
         """
-        gov = config.get("governance", {})
+        autonomy = config.get("autonomy", {})
+        gov = autonomy.get("governance", {})
 
         # Change Budgeting overrides
         cb = gov.get("change_budgeting", {})
@@ -391,13 +397,11 @@ class GovernanceConfigLoader:
         Raises:
             TypeError: If configuration values have wrong types
         """
-        gov = config_data.get("governance", {})
+        gov = config_data.get("autonomy", {}).get("governance", {})
 
         return GovernanceConfig(
             change_budgeting=ChangeBudgetingConfig(**gov.get("change_budgeting", {})),
             blast_radius=BlastRadiusConfig(**gov.get("blast_radius", {})),
-            autonomy_constraints=AutonomyConstraintsConfig(
-                **gov.get("autonomy_constraints", {})
-            ),
+            autonomy_constraints=AutonomyConstraintsConfig(**gov.get("autonomy_constraints", {})),
             audit=AuditConfig(**gov.get("audit", {})),
         )

@@ -9,7 +9,9 @@ from __future__ import annotations
 import asyncio
 import time
 
+from code_scalpel import __version__ as _pkg_version
 from code_scalpel.licensing.features import get_tool_capabilities
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
 from code_scalpel.mcp.helpers.policy_helpers import (
     _code_policy_check_sync,
     _get_current_tier,
@@ -17,22 +19,16 @@ from code_scalpel.mcp.helpers.policy_helpers import (
     _verify_policy_integrity_sync,
 )
 from code_scalpel.mcp.protocol import mcp
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel import __version__ as _pkg_version
 
 
 @mcp.tool()
-async def validate_paths(
-    paths: list[str], project_root: str | None = None
-) -> ToolResponseEnvelope:
+async def validate_paths(paths: list[str], project_root: str | None = None) -> ToolResponseEnvelope:
     """Validate that paths are accessible before running file-based operations."""
     started = time.perf_counter()
     try:
         tier = _get_current_tier()
         capabilities = get_tool_capabilities("validate_paths", tier) or {}
-        result = await asyncio.to_thread(
-            _validate_paths_sync, paths, project_root, tier, capabilities
-        )
+        result = await asyncio.to_thread(_validate_paths_sync, paths, project_root, tier, capabilities)
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
             data=result,

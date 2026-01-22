@@ -2,7 +2,7 @@ import ast
 from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 
@@ -99,9 +99,7 @@ class PDGAnalyzer:
             "redundant_computations": self._find_redundant_computations(),
         }
 
-    def compute_program_slice(
-        self, criterion: str, direction: str = "backward"
-    ) -> nx.DiGraph:
+    def compute_program_slice(self, criterion: str, direction: str = "backward") -> nx.DiGraph:
         """Compute a program slice based on a slicing criterion."""
         visited = set()
         slice_graph = nx.DiGraph()
@@ -191,12 +189,8 @@ class PDGAnalyzer:
                     # Check if taint is sanitized along the path
                     for path in paths:
                         if not self._is_path_sanitized(path):
-                            source_type = (
-                                self.pdg.nodes[source].get("taint_type") or "unknown"
-                            )
-                            sink_type = (
-                                self.pdg.nodes[sink].get("sink_type") or "unknown"
-                            )
+                            source_type = self.pdg.nodes[source].get("taint_type") or "unknown"
+                            sink_type = self.pdg.nodes[sink].get("sink_type") or "unknown"
                             vulnerabilities.append(
                                 SecurityVulnerability(
                                     type=f"{source_type}_to_{sink_type}",
@@ -204,9 +198,7 @@ class PDGAnalyzer:
                                     sink=sink,
                                     path=path,
                                     severity="high",
-                                    description=self._generate_vulnerability_description(
-                                        source_type, sink_type
-                                    ),
+                                    description=self._generate_vulnerability_description(source_type, sink_type),
                                 )
                             )
 
@@ -225,15 +217,13 @@ class PDGAnalyzer:
                         {
                             "node": candidate,
                             "loop": loop,
-                            "savings": self._estimate_optimization_savings(
-                                candidate, loop
-                            ),
+                            "savings": self._estimate_optimization_savings(candidate, loop),
                         }
                     )
 
         return loop_invariants
 
-    def _analyze_value_ranges(self) -> dict[str, tuple[Optional[int], Optional[int]]]:
+    def _analyze_value_ranges(self) -> dict[str, tuple[int | None, int | None]]:
         """Analyze possible value ranges for variables."""
         ranges = {}
         for node, data in self.pdg.nodes(data=True):
@@ -242,9 +232,7 @@ class PDGAnalyzer:
                     ranges[var] = self._compute_value_range(var, node)
         return ranges
 
-    def _compute_value_range(
-        self, var: str, node: str
-    ) -> tuple[Optional[int], Optional[int]]:
+    def _compute_value_range(self, var: str, node: str) -> tuple[int | None, int | None]:
         """Compute possible value range for a variable at a given node."""
         constraints = []
 
@@ -252,9 +240,7 @@ class PDGAnalyzer:
         for pred, _, data in self.pdg.in_edges(node, data=True):
             if data["type"] == DependencyType.CONTROL.value:
                 if "condition" in self.pdg.nodes[pred]:
-                    constraint = self._parse_condition_constraint(
-                        self.pdg.nodes[pred]["condition"], var
-                    )
+                    constraint = self._parse_condition_constraint(self.pdg.nodes[pred]["condition"], var)
                     if constraint:
                         constraints.append(constraint)
 
@@ -276,10 +262,7 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(
-                    func in str(data.get("call_target", ""))
-                    for func in dangerous_functions
-                )
+                and any(func in str(data.get("call_target", "")) for func in dangerous_functions)
             ):
                 sources.add(node)
                 self.pdg.nodes[node]["taint_type"] = "user_input"
@@ -302,10 +285,7 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(
-                    func in str(data.get("call_target", ""))
-                    for func in sensitive_functions
-                )
+                and any(func in str(data.get("call_target", "")) for func in sensitive_functions)
             ):
                 sinks.add(node)
                 sink_type = self._determine_sink_type(data.get("call_target", ""))
@@ -341,10 +321,7 @@ class PDGAnalyzer:
             if (
                 "type" in data
                 and data["type"] == "call"
-                and any(
-                    func in str(data.get("call_target", ""))
-                    for func in sanitizer_functions
-                )
+                and any(func in str(data.get("call_target", "")) for func in sanitizer_functions)
             ):
                 return True
         return False
@@ -378,7 +355,7 @@ class PDGAnalyzer:
         """Identify redundant computations that could be optimized."""
         redundant = []
 
-        def get_computation_result(node: str) -> Optional[Any]:
+        def get_computation_result(node: str) -> Any | None:
             """Try to determine the result of a computation statically."""
             data = self.pdg.nodes[node]
             if "constant_value" in data:
@@ -391,11 +368,7 @@ class PDGAnalyzer:
                 if result is not None:
                     # Find other nodes computing the same result
                     for other_node, other_data in self.pdg.nodes(data=True):
-                        if (
-                            other_node != node
-                            and "type" in other_data
-                            and other_data["type"] == "computation"
-                        ):
+                        if other_node != node and "type" in other_data and other_data["type"] == "computation":
                             other_result = get_computation_result(other_node)
                             if result == other_result:
                                 redundant.append(
@@ -531,7 +504,7 @@ class PDGAnalyzer:
         """Estimate savings from optimization."""
         return 0  # Stub implementation
 
-    def _parse_condition_constraint(self, condition: str, var: str) -> Optional[tuple]:
+    def _parse_condition_constraint(self, condition: str, var: str) -> tuple | None:
         """Parse a condition into a constraint for a variable.
 
         Returns a tuple (operator, value) if the condition constrains the variable.
@@ -566,13 +539,11 @@ class PDGAnalyzer:
 
         return None
 
-    def _solve_constraints(
-        self, constraints: list
-    ) -> tuple[Optional[int], Optional[int]]:
+    def _solve_constraints(self, constraints: list) -> tuple[int | None, int | None]:
         """Solve constraints to determine value range."""
         return (None, None)  # Stub implementation
 
-    def _matches_exception(self, exc: Exception, exc_type: Optional[str]) -> bool:
+    def _matches_exception(self, exc: Exception, exc_type: str | None) -> bool:
         """Check if an exception matches a handler type."""
         return exc_type is None or type(exc).__name__ == exc_type
 

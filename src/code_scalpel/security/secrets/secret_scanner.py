@@ -17,7 +17,7 @@ Detects hardcoded secrets in Python code using comprehensive regex patterns:
 import ast
 import re
 import warnings
-from typing import Dict, List, Pattern
+from re import Pattern
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..analyzers.taint_tracker import (  # [20251214_FEATURE] v2.0.0 - Variable name patterns
@@ -46,18 +46,16 @@ class SecretScanner(ast.NodeVisitor):
     """
 
     def __init__(self) -> None:
-        self.vulnerabilities: List[Vulnerability] = []
+        self.vulnerabilities: list[Vulnerability] = []
 
         # Compile all patterns from HARDCODED_SECRET_PATTERNS
-        self.compiled_patterns: Dict[str, Pattern] = {
-            name: re.compile(pattern)
-            for name, pattern in HARDCODED_SECRET_PATTERNS.items()
+        self.compiled_patterns: dict[str, Pattern] = {
+            name: re.compile(pattern) for name, pattern in HARDCODED_SECRET_PATTERNS.items()
         }
 
         # [20251214_FEATURE] v2.0.0 - Compile variable name patterns
-        self.compiled_var_patterns: Dict[str, Pattern] = {
-            name: re.compile(pattern)
-            for name, pattern in SECRET_VARIABLE_PATTERNS.items()
+        self.compiled_var_patterns: dict[str, Pattern] = {
+            name: re.compile(pattern) for name, pattern in SECRET_VARIABLE_PATTERNS.items()
         }
 
         # Placeholder patterns to ignore (not real secrets)
@@ -78,12 +76,10 @@ class SecretScanner(ast.NodeVisitor):
             r"^insert[-_]?",
             r"^fake[-_]?",
         ]
-        self._compiled_placeholders = [
-            re.compile(p, re.IGNORECASE) for p in self.placeholder_patterns
-        ]
+        self._compiled_placeholders = [re.compile(p, re.IGNORECASE) for p in self.placeholder_patterns]
 
     @property
-    def string_patterns(self) -> List[tuple[str, Pattern[str]]]:
+    def string_patterns(self) -> list[tuple[str, Pattern[str]]]:
         """
         Backward compatibility property for tests.
 
@@ -92,7 +88,7 @@ class SecretScanner(ast.NodeVisitor):
         """
         return [(name, pattern) for name, pattern in self.compiled_patterns.items()]
 
-    def scan(self, tree: ast.AST) -> List[Vulnerability]:
+    def scan(self, tree: ast.AST) -> list[Vulnerability]:
         """
         Scan an AST for hardcoded secrets.
 
@@ -161,9 +157,7 @@ class SecretScanner(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-    def _check_variable_name(
-        self, var_name: str, value_node: ast.expr, node: ast.AST
-    ) -> None:
+    def _check_variable_name(self, var_name: str, value_node: ast.expr, node: ast.AST) -> None:
         """
         Check if a variable name suggests it holds a secret.
 
@@ -176,9 +170,7 @@ class SecretScanner(ast.NodeVisitor):
         for secret_type, pattern in self.compiled_var_patterns.items():
             if pattern.match(var_name):
                 # Only flag if the value is a non-empty string constant
-                if isinstance(value_node, ast.Constant) and isinstance(
-                    value_node.value, str
-                ):
+                if isinstance(value_node, ast.Constant) and isinstance(value_node.value, str):
                     value = value_node.value
                     # Skip obvious placeholders and empty strings
                     # [20251214_BUGFIX] v2.0.0 - Require minimum 8 chars for var name detection
@@ -261,9 +253,7 @@ class SecretScanner(ast.NodeVisitor):
         # [20251215_REFACTOR] Remove unused inline warnings import; we simply record the vulnerability.
         self.vulnerabilities.append(vuln)
 
-    def _add_var_vuln(
-        self, var_name: str, value: str, secret_type: str, node: ast.AST
-    ) -> None:
+    def _add_var_vuln(self, var_name: str, value: str, secret_type: str, node: ast.AST) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Add vulnerability for secret-named variable.
 

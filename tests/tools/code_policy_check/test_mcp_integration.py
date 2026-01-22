@@ -38,9 +38,7 @@ class TestMCPAsyncExecution:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Should be result object, not coroutine
-        assert not inspect.iscoroutine(
-            result
-        ), "Result should be resolved object, not coroutine"
+        assert not inspect.iscoroutine(result), "Result should be resolved object, not coroutine"
         assert hasattr(result, "success"), "Result should have success attribute"
 
 
@@ -217,9 +215,7 @@ class TestOutputMetadata:
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert hasattr(
-            result, "files_limit_applied"
-        ), "Result missing files_limit_applied metadata"
+        assert hasattr(result, "files_limit_applied"), "Result missing files_limit_applied metadata"
         # Value is int or None (None = unlimited for Enterprise)
         assert result.files_limit_applied is None or isinstance(
             result.files_limit_applied, int
@@ -233,9 +229,7 @@ class TestOutputMetadata:
 
         result = await code_policy_check(paths=[str(test_file)])
 
-        assert hasattr(
-            result, "rules_limit_applied"
-        ), "Result missing rules_limit_applied metadata"
+        assert hasattr(result, "rules_limit_applied"), "Result missing rules_limit_applied metadata"
         # Value is int or None (None = unlimited for Enterprise)
         assert result.rules_limit_applied is None or isinstance(
             result.rules_limit_applied, int
@@ -263,9 +257,5 @@ class TestOutputMetadata:
         result_dict = result.model_dump()
 
         assert "tier_applied" in result_dict, "tier_applied missing from serialization"
-        assert (
-            "files_limit_applied" in result_dict
-        ), "files_limit_applied missing from serialization"
-        assert (
-            "rules_limit_applied" in result_dict
-        ), "rules_limit_applied missing from serialization"
+        assert "files_limit_applied" in result_dict, "files_limit_applied missing from serialization"
+        assert "rules_limit_applied" in result_dict, "rules_limit_applied missing from serialization"

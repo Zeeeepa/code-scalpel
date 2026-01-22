@@ -6,11 +6,11 @@ Tests for governance configuration system.
 
 import hashlib
 import hmac
-import json
 import tempfile
 from pathlib import Path
 
 import pytest
+import yaml
 
 from code_scalpel.governance import BlastRadiusConfig, GovernanceConfigLoader
 
@@ -40,9 +40,7 @@ class TestBlastRadiusConfig:
 
     def test_is_critical_path_multiple_patterns(self):
         """Test multiple patterns."""
-        config = BlastRadiusConfig(
-            critical_paths=["src/security/", "src/core/", "config/production.yaml"]
-        )
+        config = BlastRadiusConfig(critical_paths=["src/security/", "src/core/", "config/production.yaml"])
         assert config.is_critical_path("src/security/auth.py")
         assert config.is_critical_path("src/core/engine.py")
         assert config.is_critical_path("config/production.yaml")
@@ -55,24 +53,26 @@ class TestGovernanceConfigLoader:
     @pytest.fixture
     def temp_config_file(self):
         """Create temporary config file."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             config = {
                 "version": "3.0.0",
-                "governance": {
-                    "change_budgeting": {
-                        "enabled": True,
-                        "max_lines_per_change": 750,
-                        "max_files_per_change": 15,
+                "autonomy": {
+                    "governance": {
+                        "change_budgeting": {
+                            "enabled": True,
+                            "max_lines_per_change": 750,
+                            "max_files_per_change": 15,
+                        },
+                        "blast_radius": {
+                            "enabled": True,
+                            "critical_paths": ["src/security/", "src/core/"],
+                        },
+                        "autonomy_constraints": {"max_autonomous_iterations": 20},
+                        "audit": {"retention_days": 180},
                     },
-                    "blast_radius": {
-                        "enabled": True,
-                        "critical_paths": ["src/security/", "src/core/"],
-                    },
-                    "autonomy_constraints": {"max_autonomous_iterations": 20},
-                    "audit": {"retention_days": 180},
                 },
             }
-            json.dump(config, f)
+            yaml.dump(config, f)
             path = Path(f.name)
 
         yield path
@@ -94,7 +94,7 @@ class TestGovernanceConfigLoader:
 
     def test_load_defaults_when_no_file(self):
         """Test loading defaults when config file doesn't exist."""
-        loader = GovernanceConfigLoader(Path("/nonexistent/path/config.json"))
+        loader = GovernanceConfigLoader(Path("/nonexistent/path/governance.yaml"))
         config = loader.load()
 
         # Should use defaults
@@ -157,9 +157,7 @@ class TestGovernanceConfigLoader:
         # Calculate correct signature
         with open(temp_config_file, "rb") as f:
             content = f.read()
-            expected_sig = hmac.new(
-                secret.encode(), content, hashlib.sha256
-            ).hexdigest()
+            expected_sig = hmac.new(secret.encode(), content, hashlib.sha256).hexdigest()
 
         monkeypatch.setenv("SCALPEL_CONFIG_SECRET", secret)
         monkeypatch.setenv("SCALPEL_CONFIG_SIGNATURE", expected_sig)
@@ -185,7 +183,7 @@ class TestGovernanceConfigLoader:
         monkeypatch.setenv("SCALPEL_CONFIG", str(temp_config_file))
 
         # Use wrong path initially, should be overridden by env var
-        loader = GovernanceConfigLoader(Path("/wrong/path/config.json"))
+        loader = GovernanceConfigLoader(Path("/wrong/path/governance.yaml"))
         config = loader.load()
 
         # Should load from env var path
@@ -213,47 +211,49 @@ class TestGovernanceConfigIntegration:
     def test_full_config_lifecycle(self):
         """Test complete configuration lifecycle."""
         # Create config
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             config = {
                 "version": "3.0.0",
-                "governance": {
-                    "change_budgeting": {
-                        "enabled": True,
-                        "max_lines_per_change": 500,
-                        "max_files_per_change": 10,
-                        "max_complexity_delta": 50,
-                        "require_justification": True,
-                        "budget_refresh_interval_hours": 24,
-                    },
-                    "blast_radius": {
-                        "enabled": True,
-                        "max_affected_functions": 20,
-                        "max_affected_classes": 5,
-                        "max_call_graph_depth": 3,
-                        "warn_on_public_api_changes": True,
-                        "block_on_critical_paths": True,
-                        "critical_paths": [
-                            "src/core/",
-                            "src/security/",
-                            "src/mcp/server.py",
-                        ],
-                        "critical_path_max_lines": 50,
-                        "critical_path_max_complexity_delta": 10,
-                    },
-                    "autonomy_constraints": {
-                        "max_autonomous_iterations": 10,
-                        "require_approval_for_breaking_changes": True,
-                        "require_approval_for_security_changes": True,
-                        "sandbox_execution_required": True,
-                    },
-                    "audit": {
-                        "log_all_changes": True,
-                        "log_rejected_changes": True,
-                        "retention_days": 90,
+                "autonomy": {
+                    "governance": {
+                        "change_budgeting": {
+                            "enabled": True,
+                            "max_lines_per_change": 500,
+                            "max_files_per_change": 10,
+                            "max_complexity_delta": 50,
+                            "require_justification": True,
+                            "budget_refresh_interval_hours": 24,
+                        },
+                        "blast_radius": {
+                            "enabled": True,
+                            "max_affected_functions": 20,
+                            "max_affected_classes": 5,
+                            "max_call_graph_depth": 3,
+                            "warn_on_public_api_changes": True,
+                            "block_on_critical_paths": True,
+                            "critical_paths": [
+                                "src/core/",
+                                "src/security/",
+                                "src/mcp/server.py",
+                            ],
+                            "critical_path_max_lines": 50,
+                            "critical_path_max_complexity_delta": 10,
+                        },
+                        "autonomy_constraints": {
+                            "max_autonomous_iterations": 10,
+                            "require_approval_for_breaking_changes": True,
+                            "require_approval_for_security_changes": True,
+                            "sandbox_execution_required": True,
+                        },
+                        "audit": {
+                            "log_all_changes": True,
+                            "log_rejected_changes": True,
+                            "retention_days": 90,
+                        },
                     },
                 },
             }
-            json.dump(config, f)
+            yaml.dump(config, f)
             path = Path(f.name)
 
         try:
@@ -281,7 +281,7 @@ class TestGovernanceConfigIntegration:
 
     def test_defaults_are_sensible(self):
         """Test that default configuration is sensible."""
-        loader = GovernanceConfigLoader(Path("/nonexistent/config.json"))
+        loader = GovernanceConfigLoader(Path("/nonexistent/governance.yaml"))
         config = loader.load()
 
         # Change budgeting defaults

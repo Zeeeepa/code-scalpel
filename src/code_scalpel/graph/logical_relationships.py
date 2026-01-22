@@ -23,7 +23,7 @@ import ast
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
 @dataclass
@@ -35,7 +35,7 @@ class LogicalRelationship:
     relationship_type: str  # e.g., "sibling", "test_for", "helper_of"
     confidence: float  # 0.0 - 1.0
     evidence: str  # Description of why this relationship exists
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -44,9 +44,9 @@ class LogicalRelationshipResult:
 
     success: bool
     center_node: str
-    relationships: List[LogicalRelationship]
+    relationships: list[LogicalRelationship]
     total_found: int
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -57,9 +57,9 @@ class FunctionContext:
     file_path: str
     line: int
     module: str
-    class_name: Optional[str]  # If method
-    decorators: List[str]
-    docstring: Optional[str]
+    class_name: str | None  # If method
+    decorators: list[str]
+    docstring: str | None
     is_test: bool
     is_private: bool
     is_dunder: bool
@@ -89,12 +89,12 @@ class LogicalRelationshipDetector:
     def __init__(self, project_root: str | Path):
         """Initialize detector with project root."""
         self.root = Path(project_root)
-        self._context_cache: Dict[str, FunctionContext] = {}
+        self._context_cache: dict[str, FunctionContext] = {}
 
     def find_relationships(
         self,
         center_name: str,
-        relationship_types: Optional[Set[str]] = None,
+        relationship_types: set[str] | None = None,
         max_relationships: int = 20,
     ) -> LogicalRelationshipResult:
         """
@@ -145,13 +145,11 @@ class LogicalRelationshipDetector:
                     error=f"Center function '{center_name}' not found",
                 )
 
-            relationships: List[LogicalRelationship] = []
+            relationships: list[LogicalRelationship] = []
 
             # Find test relationships
             if "test_for" in relationship_types or "tested_by" in relationship_types:
-                test_rels = self._find_test_relationships(
-                    center_ctx, contexts, relationship_types
-                )
+                test_rels = self._find_test_relationships(center_ctx, contexts, relationship_types)
                 relationships.extend(test_rels)
 
             # Find sibling relationships
@@ -161,9 +159,7 @@ class LogicalRelationshipDetector:
 
             # Find helper relationships
             if "helper_of" in relationship_types or "uses_helper" in relationship_types:
-                helper_rels = self._find_helper_relationships(
-                    center_ctx, contexts, relationship_types
-                )
+                helper_rels = self._find_helper_relationships(center_ctx, contexts, relationship_types)
                 relationships.extend(helper_rels)
 
             # Find same-class relationships
@@ -191,12 +187,12 @@ class LogicalRelationshipDetector:
                 error=str(e),
             )
 
-    def _extract_all_contexts(self) -> Dict[str, FunctionContext]:
+    def _extract_all_contexts(self) -> dict[str, FunctionContext]:
         """Extract context for all functions in the project."""
         if self._context_cache:
             return self._context_cache
 
-        contexts: Dict[str, FunctionContext] = {}
+        contexts: dict[str, FunctionContext] = {}
 
         exclude_dirs = {
             "__pycache__",
@@ -216,9 +212,7 @@ class LogicalRelationshipDetector:
 
             try:
                 rel_path = str(py_file.relative_to(self.root))
-                is_test_file = any(
-                    re.search(pattern, rel_path) for pattern in self.TEST_FILE_PATTERNS
-                )
+                is_test_file = any(re.search(pattern, rel_path) for pattern in self.TEST_FILE_PATTERNS)
 
                 code = py_file.read_text(encoding="utf-8", errors="ignore")
                 tree = ast.parse(code)
@@ -228,9 +222,7 @@ class LogicalRelationshipDetector:
                 if module.endswith(".py"):
                     module = module[:-3]
 
-                self._extract_functions_from_tree(
-                    tree, contexts, rel_path, module, is_test_file, None
-                )
+                self._extract_functions_from_tree(tree, contexts, rel_path, module, is_test_file, None)
 
             except (SyntaxError, UnicodeDecodeError):
                 continue
@@ -241,23 +233,19 @@ class LogicalRelationshipDetector:
     def _extract_functions_from_tree(
         self,
         tree: ast.AST,
-        contexts: Dict[str, FunctionContext],
+        contexts: dict[str, FunctionContext],
         file_path: str,
         module: str,
         is_test_file: bool,
-        class_name: Optional[str],
+        class_name: str | None,
     ) -> None:
         """Extract function contexts from an AST tree."""
         for node in ast.iter_child_nodes(tree):
             if isinstance(node, ast.ClassDef):
                 # Recurse into class
-                self._extract_functions_from_tree(
-                    node, contexts, file_path, module, is_test_file, node.name
-                )
+                self._extract_functions_from_tree(node, contexts, file_path, module, is_test_file, node.name)
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                ctx = self._make_function_context(
-                    node, file_path, module, is_test_file, class_name
-                )
+                ctx = self._make_function_context(node, file_path, module, is_test_file, class_name)
                 key = f"{file_path}:{ctx.name}:{ctx.line}"
                 contexts[key] = ctx
 
@@ -267,7 +255,7 @@ class LogicalRelationshipDetector:
         file_path: str,
         module: str,
         is_test_file: bool,
-        class_name: Optional[str],
+        class_name: str | None,
     ) -> FunctionContext:
         """Create a FunctionContext from an AST node."""
         name = node.name
@@ -282,9 +270,7 @@ class LogicalRelationshipDetector:
                     decorators.append(dec.id)
 
         # Check patterns
-        is_test = is_test_file or any(
-            re.match(pattern, name) for pattern in self.TEST_FUNCTION_PATTERNS
-        )
+        is_test = is_test_file or any(re.match(pattern, name) for pattern in self.TEST_FUNCTION_PATTERNS)
         is_private = name.startswith("_") and not name.startswith("__")
         is_dunder = name.startswith("__") and name.endswith("__")
 
@@ -304,9 +290,9 @@ class LogicalRelationshipDetector:
     def _find_test_relationships(
         self,
         center: FunctionContext,
-        contexts: Dict[str, FunctionContext],
-        relationship_types: Set[str],
-    ) -> List[LogicalRelationship]:
+        contexts: dict[str, FunctionContext],
+        relationship_types: set[str],
+    ) -> list[LogicalRelationship]:
         """Find test-implementation relationships."""
         relationships = []
 
@@ -350,8 +336,8 @@ class LogicalRelationshipDetector:
     def _find_sibling_relationships(
         self,
         center: FunctionContext,
-        contexts: Dict[str, FunctionContext],
-    ) -> List[LogicalRelationship]:
+        contexts: dict[str, FunctionContext],
+    ) -> list[LogicalRelationship]:
         """Find sibling functions in the same module."""
         relationships = []
 
@@ -388,20 +374,16 @@ class LogicalRelationshipDetector:
     def _find_helper_relationships(
         self,
         center: FunctionContext,
-        contexts: Dict[str, FunctionContext],
-        relationship_types: Set[str],
-    ) -> List[LogicalRelationship]:
+        contexts: dict[str, FunctionContext],
+        relationship_types: set[str],
+    ) -> list[LogicalRelationship]:
         """Find helper function relationships."""
         relationships = []
 
         if center.is_private and "uses_helper" in relationship_types:
             # This is a helper - find public functions in same module
             for ctx in contexts.values():
-                if (
-                    ctx.file_path == center.file_path
-                    and not ctx.is_private
-                    and not ctx.is_dunder
-                ):
+                if ctx.file_path == center.file_path and not ctx.is_private and not ctx.is_dunder:
                     relationships.append(
                         LogicalRelationship(
                             source_node=self._make_node_id(center),
@@ -431,8 +413,8 @@ class LogicalRelationshipDetector:
     def _find_same_class_relationships(
         self,
         center: FunctionContext,
-        contexts: Dict[str, FunctionContext],
-    ) -> List[LogicalRelationship]:
+        contexts: dict[str, FunctionContext],
+    ) -> list[LogicalRelationship]:
         """Find other methods in the same class."""
         relationships = []
 

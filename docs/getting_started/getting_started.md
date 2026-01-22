@@ -80,6 +80,120 @@ Add to `~/.cursor/mcp.json`:
 
 ---
 
+## Detailed Setup Instructions (For Beginners)
+
+If the Quick Start didn't work or you need step-by-step guidance, follow these detailed instructions.
+
+### Step 1: Start the MCP Server
+
+The "MCP Server" is like a tiny service on your computer that your AI assistant talks to.
+
+#### Option A: VS Code + GitHub Copilot (Detailed)
+
+1. **Open VS Code** and open your project folder.
+
+2. **Create the config file:**
+   - In the file explorer, create a new folder: `.vscode` (note the dot)
+   - Right-click inside `.vscode` → New File → name it `mcp.json`
+   - Paste this exactly (replace `PATH_TO_YOUR_PROJECT` with your actual path):
+
+```json
+{
+  "servers": {
+    "code-scalpel": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "-m",
+        "code_scalpel.mcp.server",
+        "--transport",
+        "stdio",
+        "--root",
+        "PATH_TO_YOUR_PROJECT"
+      ],
+      "env": {
+        "PYTHONPATH": "PATH_TO_YOUR_PROJECT/src",
+        "CODE_SCALPEL_LICENSE_PATH": "PATH_TO_YOUR_PROJECT/.code-scalpel/license/license.jwt"
+      }
+    }
+  }
+}
+```
+
+**Example:** If your project is at `/Users/alice/myproject`, use `/Users/alice/myproject`.
+
+VS Code will automatically start Code Scalpel when you use Copilot.
+
+#### Option B: Claude Desktop (Detailed)
+
+1. **Find the config file:**
+   - **Windows:** `C:\Users\YourUsername\AppData\Roaming\Claude\claude_desktop_config.json`
+   - **Mac:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+2. **Add Code Scalpel:**
+```json
+{
+  "mcpServers": {
+    "code-scalpel": {
+      "command": "python",
+      "args": [
+        "-m",
+        "code_scalpel.mcp.server",
+        "--transport",
+        "stdio",
+        "--root",
+        "/path/to/your/project"
+      ],
+      "env": {
+        "PYTHONPATH": "/path/to/your/project/src",
+        "CODE_SCALPEL_LICENSE_PATH": "/path/to/your/project/.code-scalpel/license/license.jwt"
+      }
+    }
+  }
+}
+```
+
+3. **Restart Claude Desktop** - the server starts automatically.
+
+#### Option C: Cursor IDE
+
+Same as Claude Desktop, but file is at `~/.cursor/mcp.json`.
+
+### Step 2: Install Code Scalpel
+
+Open a terminal and run:
+
+```bash
+pip install code-scalpel
+```
+
+**Don't have Python?**
+- Windows: Download from [python.org](https://www.python.org/downloads/)
+- Mac: Run `brew install python3` (requires Homebrew)
+- Linux: Run `sudo apt-get install python3`
+
+### Step 3: Add Your License
+
+Code Scalpel includes a free Community Edition. If you have Pro/Enterprise, place your license at `.code-scalpel/license/license.jwt`.
+
+### Step 4: Use It with Your AI Agent
+
+Now ask your AI assistant questions like:
+- "Scan this file for security vulnerabilities"
+- "Extract the processPayment function"
+- "Show me all places where this variable is used"
+- "Generate tests for this function"
+
+### Troubleshooting
+
+- **"Code Scalpel not found":** Run `pip install code-scalpel`
+- **"License not found":** Check `.code-scalpel/license/license.jwt` path
+- **Server crashes:** Verify paths in MCP config
+- **Tools not available:** Restart AI assistant, check config file
+
+---
+
 ## Installation Options
 
 ### Option 1: uv (Recommended - Zero Install)

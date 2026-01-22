@@ -37,7 +37,7 @@ from __future__ import annotations
 import ast  # [20251216_FEATURE] v2.2.0 - Required for SSR vulnerability detection
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict
+from typing import Any, TypedDict
 
 from z3 import ExprRef, String
 
@@ -121,9 +121,7 @@ class SecuritySink(Enum):
     # [20251215_FEATURE] v2.0.0 P1 - Additional vulnerability types
     REDIRECT = auto()  # Open Redirect (redirect to user-controlled URL)
     # [20251229_FEATURE] v3.0.4 - Type System Evaporation detection
-    UNVALIDATED_OUTPUT = (
-        auto()
-    )  # Tainted data returned in HTTP response without validation (CWE-20)
+    UNVALIDATED_OUTPUT = auto()  # Tainted data returned in HTTP response without validation (CWE-20)
     # [20251219_FEATURE] v3.0.4 - Additional 12 vulnerability types for comprehensive coverage
     LDAP_INJECTION = auto()  # LDAP filter injection (CWE-90)
     XPATH_INJECTION = auto()  # XPath query injection (CWE-643)
@@ -172,11 +170,11 @@ class TaintInfo:
 
     source: TaintSource
     level: TaintLevel = TaintLevel.HIGH
-    source_location: Optional[Tuple[int, int]] = None
-    propagation_path: List[str] = field(default_factory=list)
-    sanitizers_applied: Set[str] = field(default_factory=set)
-    sanitizer_history: List[str] = field(default_factory=list)
-    cleared_sinks: Set[SecuritySink] = field(default_factory=set)
+    source_location: tuple[int, int] | None = None
+    propagation_path: list[str] = field(default_factory=list)
+    sanitizers_applied: set[str] = field(default_factory=set)
+    sanitizer_history: list[str] = field(default_factory=list)
+    cleared_sinks: set[SecuritySink] = field(default_factory=set)
 
     def propagate(self, through_var: str) -> TaintInfo:
         """
@@ -275,7 +273,7 @@ class TaintInfo:
 
 
 # Mapping of sinks to sanitizers that make them safe
-SINK_SANITIZERS: Dict[SecuritySink, Set[str]] = {
+SINK_SANITIZERS: dict[SecuritySink, set[str]] = {
     SecuritySink.SQL_QUERY: {
         "parameterized_query",
         "sqlalchemy_text_bindparams",
@@ -318,14 +316,14 @@ class SanitizerInfo:
     """
 
     name: str
-    clears_sinks: Set[SecuritySink] = field(default_factory=set)
+    clears_sinks: set[SecuritySink] = field(default_factory=set)
     full_clear: bool = False
     confidence: float = 1.0
 
 
 # Built-in sanitizer registry
 # Users can extend via pyproject.toml [tool.code-scalpel.sanitizers]
-SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
+SANITIZER_REGISTRY: dict[str, SanitizerInfo] = {
     # XSS sanitizers
     "html.escape": SanitizerInfo("html.escape", {SecuritySink.HTML_OUTPUT}),
     "markupsafe.escape": SanitizerInfo("markupsafe.escape", {SecuritySink.HTML_OUTPUT}),
@@ -334,14 +332,10 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "cgi.escape": SanitizerInfo("cgi.escape", {SecuritySink.HTML_OUTPUT}),
     # SQL sanitizers
     "escape_string": SanitizerInfo("escape_string", {SecuritySink.SQL_QUERY}),
-    "mysql.connector.escape_string": SanitizerInfo(
-        "mysql.connector.escape_string", {SecuritySink.SQL_QUERY}
-    ),
+    "mysql.connector.escape_string": SanitizerInfo("mysql.connector.escape_string", {SecuritySink.SQL_QUERY}),
     # Path sanitizers
     "os.path.basename": SanitizerInfo("os.path.basename", {SecuritySink.FILE_PATH}),
-    "werkzeug.utils.secure_filename": SanitizerInfo(
-        "werkzeug.utils.secure_filename", {SecuritySink.FILE_PATH}
-    ),
+    "werkzeug.utils.secure_filename": SanitizerInfo("werkzeug.utils.secure_filename", {SecuritySink.FILE_PATH}),
     "secure_filename": SanitizerInfo("secure_filename", {SecuritySink.FILE_PATH}),
     # Shell sanitizers
     "shlex.quote": SanitizerInfo("shlex.quote", {SecuritySink.SHELL_COMMAND}),
@@ -358,67 +352,35 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     # [20251212_FEATURE] v1.4.0 - XXE Sanitizers (defusedxml is safe)
     "defusedxml.parse": SanitizerInfo("defusedxml.parse", {SecuritySink.XXE}),
     "defusedxml.fromstring": SanitizerInfo("defusedxml.fromstring", {SecuritySink.XXE}),
-    "defusedxml.ElementTree.parse": SanitizerInfo(
-        "defusedxml.ElementTree.parse", {SecuritySink.XXE}
-    ),
-    "defusedxml.ElementTree.fromstring": SanitizerInfo(
-        "defusedxml.ElementTree.fromstring", {SecuritySink.XXE}
-    ),
-    "defusedxml.minidom.parse": SanitizerInfo(
-        "defusedxml.minidom.parse", {SecuritySink.XXE}
-    ),
-    "defusedxml.minidom.parseString": SanitizerInfo(
-        "defusedxml.minidom.parseString", {SecuritySink.XXE}
-    ),
+    "defusedxml.ElementTree.parse": SanitizerInfo("defusedxml.ElementTree.parse", {SecuritySink.XXE}),
+    "defusedxml.ElementTree.fromstring": SanitizerInfo("defusedxml.ElementTree.fromstring", {SecuritySink.XXE}),
+    "defusedxml.minidom.parse": SanitizerInfo("defusedxml.minidom.parse", {SecuritySink.XXE}),
+    "defusedxml.minidom.parseString": SanitizerInfo("defusedxml.minidom.parseString", {SecuritySink.XXE}),
     "defusedxml.sax.parse": SanitizerInfo("defusedxml.sax.parse", {SecuritySink.XXE}),
     # [20251212_FEATURE] v1.4.0 - SSTI Sanitizers (file-based templates are safe)
-    "render_template": SanitizerInfo(
-        "render_template", {SecuritySink.SSTI}
-    ),  # Flask file-based
-    "flask.render_template": SanitizerInfo(
-        "flask.render_template", {SecuritySink.SSTI}
-    ),
-    "django.shortcuts.render": SanitizerInfo(
-        "django.shortcuts.render", {SecuritySink.SSTI}
-    ),
+    "render_template": SanitizerInfo("render_template", {SecuritySink.SSTI}),  # Flask file-based
+    "flask.render_template": SanitizerInfo("flask.render_template", {SecuritySink.SSTI}),
+    "django.shortcuts.render": SanitizerInfo("django.shortcuts.render", {SecuritySink.SSTI}),
     # ==========================================================================
     # [20251215_FEATURE] v2.0.0 - JavaScript/TypeScript Sanitizers
     # ==========================================================================
     # DOM XSS Sanitizers
-    "DOMPurify.sanitize": SanitizerInfo(
-        "DOMPurify.sanitize", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
-    "sanitize-html": SanitizerInfo(
-        "sanitize-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
+    "DOMPurify.sanitize": SanitizerInfo("DOMPurify.sanitize", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "sanitize-html": SanitizerInfo("sanitize-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
     "xss": SanitizerInfo("xss", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
-    "xss-filters": SanitizerInfo(
-        "xss-filters", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
-    "he.encode": SanitizerInfo(
-        "he.encode", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
-    "he.escape": SanitizerInfo(
-        "he.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
-    "escape-html": SanitizerInfo(
-        "escape-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
-    "validator.escape": SanitizerInfo(
-        "validator.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}
-    ),
+    "xss-filters": SanitizerInfo("xss-filters", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "he.encode": SanitizerInfo("he.encode", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "he.escape": SanitizerInfo("he.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "escape-html": SanitizerInfo("escape-html", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
+    "validator.escape": SanitizerInfo("validator.escape", {SecuritySink.DOM_XSS, SecuritySink.HTML_OUTPUT}),
     "textContent": SanitizerInfo("textContent", {SecuritySink.DOM_XSS}),  # Safe DOM API
     "innerText": SanitizerInfo("innerText", {SecuritySink.DOM_XSS}),  # Safe DOM API
-    "createTextNode": SanitizerInfo(
-        "createTextNode", {SecuritySink.DOM_XSS}
-    ),  # Safe DOM API
+    "createTextNode": SanitizerInfo("createTextNode", {SecuritySink.DOM_XSS}),  # Safe DOM API
     # SQL Sanitizers (Node.js)
     "mysql.escape": SanitizerInfo("mysql.escape", {SecuritySink.SQL_QUERY}),
     "mysql2.escape": SanitizerInfo("mysql2.escape", {SecuritySink.SQL_QUERY}),
     "pg.escapeLiteral": SanitizerInfo("pg.escapeLiteral", {SecuritySink.SQL_QUERY}),
-    "pg.escapeIdentifier": SanitizerInfo(
-        "pg.escapeIdentifier", {SecuritySink.SQL_QUERY}
-    ),
+    "pg.escapeIdentifier": SanitizerInfo("pg.escapeIdentifier", {SecuritySink.SQL_QUERY}),
     "sqlstring.escape": SanitizerInfo("sqlstring.escape", {SecuritySink.SQL_QUERY}),
     # Path Sanitizers (Node.js)
     "path.basename": SanitizerInfo("path.basename", {SecuritySink.FILE_PATH}),
@@ -426,9 +388,7 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "sanitize-filename": SanitizerInfo("sanitize-filename", {SecuritySink.FILE_PATH}),
     # Shell Sanitizers (Node.js)
     "shell-escape": SanitizerInfo("shell-escape", {SecuritySink.SHELL_COMMAND}),
-    "shell-quote.quote": SanitizerInfo(
-        "shell-quote.quote", {SecuritySink.SHELL_COMMAND}
-    ),
+    "shell-quote.quote": SanitizerInfo("shell-quote.quote", {SecuritySink.SHELL_COMMAND}),
     # URL Sanitizers
     "encodeURIComponent": SanitizerInfo("encodeURIComponent", {SecuritySink.SSRF}),
     "encodeURI": SanitizerInfo("encodeURI", {SecuritySink.SSRF}),
@@ -439,9 +399,7 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     "Boolean": SanitizerInfo("Boolean", set(), full_clear=True),
     # JSON parse with validation
     "JSON.parse": SanitizerInfo("JSON.parse", set()),  # Not a sanitizer by itself
-    "ajv.validate": SanitizerInfo(
-        "ajv.validate", {SecuritySink.DESERIALIZATION}
-    ),  # Schema validation
+    "ajv.validate": SanitizerInfo("ajv.validate", {SecuritySink.DESERIALIZATION}),  # Schema validation
     "joi.validate": SanitizerInfo("joi.validate", {SecuritySink.DESERIALIZATION}),
     "yup.validate": SanitizerInfo("yup.validate", {SecuritySink.DESERIALIZATION}),
     "zod.parse": SanitizerInfo("zod.parse", {SecuritySink.DESERIALIZATION}),
@@ -449,50 +407,24 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
     # [20251215_FEATURE] v2.0.0 - Java Sanitizers
     # ==========================================================================
     # XSS Sanitizers
-    "StringEscapeUtils.escapeHtml4": SanitizerInfo(
-        "StringEscapeUtils.escapeHtml4", {SecuritySink.HTML_OUTPUT}
-    ),
-    "HtmlUtils.htmlEscape": SanitizerInfo(
-        "HtmlUtils.htmlEscape", {SecuritySink.HTML_OUTPUT}
-    ),  # Spring
-    "OWASP.encoder": SanitizerInfo(
-        "OWASP.encoder", {SecuritySink.HTML_OUTPUT, SecuritySink.DOM_XSS}
-    ),
-    "Encode.forHtml": SanitizerInfo(
-        "Encode.forHtml", {SecuritySink.HTML_OUTPUT}
-    ),  # OWASP Java Encoder
-    "Encode.forJavaScript": SanitizerInfo(
-        "Encode.forJavaScript", {SecuritySink.DOM_XSS}
-    ),
+    "StringEscapeUtils.escapeHtml4": SanitizerInfo("StringEscapeUtils.escapeHtml4", {SecuritySink.HTML_OUTPUT}),
+    "HtmlUtils.htmlEscape": SanitizerInfo("HtmlUtils.htmlEscape", {SecuritySink.HTML_OUTPUT}),  # Spring
+    "OWASP.encoder": SanitizerInfo("OWASP.encoder", {SecuritySink.HTML_OUTPUT, SecuritySink.DOM_XSS}),
+    "Encode.forHtml": SanitizerInfo("Encode.forHtml", {SecuritySink.HTML_OUTPUT}),  # OWASP Java Encoder
+    "Encode.forJavaScript": SanitizerInfo("Encode.forJavaScript", {SecuritySink.DOM_XSS}),
     "Encode.forCssString": SanitizerInfo("Encode.forCssString", {SecuritySink.DOM_XSS}),
     # SQL Sanitizers (parameterized queries)
-    "PreparedStatement.setString": SanitizerInfo(
-        "PreparedStatement.setString", {SecuritySink.SQL_QUERY}
-    ),
-    "PreparedStatement.setInt": SanitizerInfo(
-        "PreparedStatement.setInt", {SecuritySink.SQL_QUERY}
-    ),
-    "PreparedStatement.setObject": SanitizerInfo(
-        "PreparedStatement.setObject", {SecuritySink.SQL_QUERY}
-    ),
+    "PreparedStatement.setString": SanitizerInfo("PreparedStatement.setString", {SecuritySink.SQL_QUERY}),
+    "PreparedStatement.setInt": SanitizerInfo("PreparedStatement.setInt", {SecuritySink.SQL_QUERY}),
+    "PreparedStatement.setObject": SanitizerInfo("PreparedStatement.setObject", {SecuritySink.SQL_QUERY}),
     # Path Sanitizers
-    "FilenameUtils.getName": SanitizerInfo(
-        "FilenameUtils.getName", {SecuritySink.FILE_PATH}
-    ),
-    "Paths.get": SanitizerInfo(
-        "Paths.get", set()
-    ),  # Not a sanitizer, but commonly used
+    "FilenameUtils.getName": SanitizerInfo("FilenameUtils.getName", {SecuritySink.FILE_PATH}),
+    "Paths.get": SanitizerInfo("Paths.get", set()),  # Not a sanitizer, but commonly used
     # XXE Safe Parsers
-    "DocumentBuilderFactory.setFeature": SanitizerInfo(
-        "DocumentBuilderFactory.setFeature", {SecuritySink.XXE}
-    ),
-    "SAXParserFactory.setFeature": SanitizerInfo(
-        "SAXParserFactory.setFeature", {SecuritySink.XXE}
-    ),
+    "DocumentBuilderFactory.setFeature": SanitizerInfo("DocumentBuilderFactory.setFeature", {SecuritySink.XXE}),
+    "SAXParserFactory.setFeature": SanitizerInfo("SAXParserFactory.setFeature", {SecuritySink.XXE}),
     # Input validation
-    "StringUtils.isNumeric": SanitizerInfo(
-        "StringUtils.isNumeric", set(), full_clear=True
-    ),
+    "StringUtils.isNumeric": SanitizerInfo("StringUtils.isNumeric", set(), full_clear=True),
     "StringUtils.isAlphanumeric": SanitizerInfo(
         "StringUtils.isAlphanumeric",
         {SecuritySink.SQL_QUERY, SecuritySink.SHELL_COMMAND},
@@ -505,7 +437,7 @@ SANITIZER_REGISTRY: Dict[str, SanitizerInfo] = {
 
 def register_sanitizer(
     name: str,
-    clears_sinks: Optional[Set[SecuritySink]] = None,
+    clears_sinks: set[SecuritySink] | None = None,
     full_clear: bool = False,
 ) -> None:
     """
@@ -526,7 +458,7 @@ def register_sanitizer(
     )
 
 
-def load_sanitizers_from_config(config_path: Optional[str] = None) -> int:
+def load_sanitizers_from_config(config_path: str | None = None) -> int:
     """
     Load custom sanitizers from pyproject.toml.
 
@@ -563,9 +495,7 @@ def load_sanitizers_from_config(config_path: Optional[str] = None) -> int:
         if config is None:
             return 0
 
-        sanitizers = (
-            config.get("tool", {}).get("code-scalpel", {}).get("sanitizers", {})
-        )
+        sanitizers = config.get("tool", {}).get("code-scalpel", {}).get("sanitizers", {})
 
         count = 0
         for func_name, sinks in sanitizers.items():
@@ -582,9 +512,7 @@ def load_sanitizers_from_config(config_path: Optional[str] = None) -> int:
                         sink_set.add(SecuritySink[sink_name])
                     except KeyError:
                         pass  # Unknown sink name, skip
-                if (
-                    sink_set
-                ):  # Only register if we matched at least one sink  # pragma: no branch
+                if sink_set:  # Only register if we matched at least one sink  # pragma: no branch
                     register_sanitizer(func_name, sink_set)
             count += 1
 
@@ -595,7 +523,7 @@ def load_sanitizers_from_config(config_path: Optional[str] = None) -> int:
         return 0
 
 
-def _find_config_file() -> Optional[str]:
+def _find_config_file() -> str | None:
     """Search for pyproject.toml in current and parent directories."""
     import os
 
@@ -615,7 +543,7 @@ def _find_config_file() -> Optional[str]:
     return None
 
 
-def _load_toml(path: str) -> Optional[Dict[str, Any]]:
+def _load_toml(path: str) -> dict[str, Any] | None:
     """Load a TOML file using available parser."""
     # Python 3.11+ has tomllib built-in
     try:
@@ -653,7 +581,7 @@ class TaintedValue:
     """
 
     expr: ExprRef
-    taint: Optional[TaintInfo] = None
+    taint: TaintInfo | None = None
 
     @property
     def is_tainted(self) -> bool:
@@ -694,16 +622,14 @@ class TaintTracker:
 
     def __init__(self):
         """Initialize the taint tracker."""
-        self._taint_map: Dict[str, TaintInfo] = {}
-        self._vulnerabilities: List[Vulnerability] = []
+        self._taint_map: dict[str, TaintInfo] = {}
+        self._vulnerabilities: list[Vulnerability] = []
 
     # =========================================================================
     # Taint Sources
     # =========================================================================
 
-    def taint_source(
-        self, name: str, source: TaintSource, location: Optional[Tuple[int, int]] = None
-    ) -> TaintedValue:
+    def taint_source(self, name: str, source: TaintSource, location: tuple[int, int] | None = None) -> TaintedValue:
         """
         Create a tainted symbolic string from a source.
 
@@ -737,7 +663,7 @@ class TaintTracker:
         """
         self._taint_map[name] = taint_info
 
-    def get_taint(self, name: str) -> Optional[TaintInfo]:
+    def get_taint(self, name: str) -> TaintInfo | None:
         """
         Get taint info for a variable.
 
@@ -766,9 +692,7 @@ class TaintTracker:
     # Taint Propagation
     # =========================================================================
 
-    def propagate_assignment(
-        self, target: str, source_names: List[str]
-    ) -> Optional[TaintInfo]:
+    def propagate_assignment(self, target: str, source_names: list[str]) -> TaintInfo | None:
         """
         Propagate taint through an assignment.
 
@@ -796,23 +720,17 @@ class TaintTracker:
                 continue
 
             # Pick the most tainted level (HIGH < MEDIUM < LOW < NONE when using Enum auto values)
-            most_tainted = (
-                candidate
-                if candidate.level.value < merged_taint.level.value
-                else merged_taint
-            )
+            most_tainted = candidate if candidate.level.value < merged_taint.level.value else merged_taint
 
-            combined_sanitizers = (
-                merged_taint.sanitizers_applied & candidate.sanitizers_applied
-            )
+            combined_sanitizers = merged_taint.sanitizers_applied & candidate.sanitizers_applied
             combined_cleared = merged_taint.cleared_sinks & candidate.cleared_sinks
 
-            combined_history: List[str] = []
+            combined_history: list[str] = []
             for name in merged_taint.sanitizer_history + candidate.sanitizer_history:
                 if name not in combined_history:
                     combined_history.append(name)
 
-            combined_path: List[str] = []
+            combined_path: list[str] = []
             for name in merged_taint.propagation_path + candidate.propagation_path:
                 if name not in combined_path:
                     combined_path.append(name)
@@ -844,9 +762,7 @@ class TaintTracker:
 
         return merged_taint
 
-    def propagate_concat(
-        self, result_name: str, operand_names: List[str]
-    ) -> Optional[TaintInfo]:
+    def propagate_concat(self, result_name: str, operand_names: list[str]) -> TaintInfo | None:
         """
         Propagate taint through string concatenation.
 
@@ -862,7 +778,7 @@ class TaintTracker:
         """
         return self.propagate_assignment(result_name, operand_names)
 
-    def apply_sanitizer(self, var_name: str, sanitizer: str) -> Optional[TaintInfo]:
+    def apply_sanitizer(self, var_name: str, sanitizer: str) -> TaintInfo | None:
         """
         Record that a sanitizer was applied to a variable.
 
@@ -889,8 +805,8 @@ class TaintTracker:
         self,
         var_name: str,
         sink: SecuritySink,
-        location: Optional[Tuple[int, int]] = None,
-    ) -> Optional["Vulnerability"]:
+        location: tuple[int, int] | None = None,
+    ) -> Vulnerability | None:
         """
         Check if tainted data reaches a security sink.
 
@@ -923,7 +839,7 @@ class TaintTracker:
         self._vulnerabilities.append(vuln)
         return vuln
 
-    def get_vulnerabilities(self) -> List["Vulnerability"]:
+    def get_vulnerabilities(self) -> list[Vulnerability]:
         """Get all detected vulnerabilities."""
         return self._vulnerabilities.copy()
 
@@ -931,7 +847,7 @@ class TaintTracker:
     # State Management
     # =========================================================================
 
-    def fork(self) -> "TaintTracker":
+    def fork(self) -> TaintTracker:
         """
         Create an isolated copy for branching.
 
@@ -965,10 +881,10 @@ class Vulnerability:
 
     sink_type: SecuritySink
     taint_source: TaintSource
-    taint_path: List[str]
-    sink_location: Optional[Tuple[int, int]] = None
-    source_location: Optional[Tuple[int, int]] = None
-    sanitizers_applied: Set[str] = field(default_factory=set)
+    taint_path: list[str]
+    sink_location: tuple[int, int] | None = None
+    source_location: tuple[int, int] | None = None
+    sanitizers_applied: set[str] = field(default_factory=set)
 
     @property
     def vulnerability_type(self) -> str:
@@ -1152,9 +1068,7 @@ class Vulnerability:
             SecuritySink.JWT_WEAKNESS: "Always verify algorithm (reject 'none'), use strong secrets (256+ bits), validate all claims",
             SecuritySink.HTML_INJECTION: "Escape HTML output with html.escape() or use textContent. Even non-script HTML can be dangerous",
         }
-        return recommendations.get(
-            self.sink_type, "Review the code for potential security issues"
-        )
+        return recommendations.get(self.sink_type, "Review the code for potential security issues")
 
     def _calculate_severity(self) -> str:
         """
@@ -1206,11 +1120,7 @@ class Vulnerability:
 
     def __repr__(self) -> str:  # pragma: no cover
         path_str = " → ".join(self.taint_path)
-        return (
-            f"Vulnerability({self.vulnerability_type}, "
-            f"flow: {path_str}, "
-            f"{self.cwe_id})"
-        )
+        return f"Vulnerability({self.vulnerability_type}, " f"flow: {path_str}, " f"{self.cwe_id})"
 
 
 # =============================================================================
@@ -1218,7 +1128,7 @@ class Vulnerability:
 # =============================================================================
 
 # Function calls that introduce taint
-TAINT_SOURCE_PATTERNS: Dict[str, TaintSource] = {
+TAINT_SOURCE_PATTERNS: dict[str, TaintSource] = {
     # Flask/Django request handling
     "request.args.get": TaintSource.USER_INPUT,
     "request.form.get": TaintSource.USER_INPUT,
@@ -1346,7 +1256,7 @@ TAINT_SOURCE_PATTERNS: Dict[str, TaintSource] = {
 }
 
 # Function calls that are security sinks
-SINK_PATTERNS: Dict[str, SecuritySink] = {
+SINK_PATTERNS: dict[str, SecuritySink] = {
     # SQL
     "cursor.execute": SecuritySink.SQL_QUERY,
     "connection.execute": SecuritySink.SQL_QUERY,
@@ -2053,7 +1963,7 @@ SINK_PATTERNS: Dict[str, SecuritySink] = {
 # =============================================================================
 # These patterns detect vulnerabilities in modern web frameworks with server-side
 # rendering (Next.js, Remix, Nuxt, etc.)
-SSR_SINK_PATTERNS: Dict[str, SecuritySink] = {
+SSR_SINK_PATTERNS: dict[str, SecuritySink] = {
     # Next.js - Pages Router
     "getServerSideProps": SecuritySink.SSTI,
     "getStaticProps": SecuritySink.SSTI,
@@ -2092,7 +2002,7 @@ SSR_SINK_PATTERNS: Dict[str, SecuritySink] = {
 
 # Hardcoded Secret Patterns (v1.3.0, enhanced v2.0.0)
 # These are regex patterns for detecting hardcoded secrets in string literals
-HARDCODED_SECRET_PATTERNS: Dict[str, str] = {
+HARDCODED_SECRET_PATTERNS: dict[str, str] = {
     # AWS (enhanced patterns)
     "aws_access_key": r"(?i)AKIA[A-Z0-9]{16}",
     "aws_secret_key": r"(?i)aws[_-]?secret[_-]?access[_-]?key\s*[=:]\s*['\"][A-Za-z0-9/+=]{40}['\"]",
@@ -2159,7 +2069,7 @@ HARDCODED_SECRET_PATTERNS: Dict[str, str] = {
 # [20251216_FEATURE] v2.2.0 - SSR Framework Detection Patterns
 # =============================================================================
 # Framework detection based on import statements
-SSR_FRAMEWORK_IMPORTS: Dict[str, str] = {
+SSR_FRAMEWORK_IMPORTS: dict[str, str] = {
     # Next.js
     "next/server": "nextjs",
     "next/navigation": "nextjs",
@@ -2186,7 +2096,7 @@ SSR_FRAMEWORK_IMPORTS: Dict[str, str] = {
 
 # [20251214_FEATURE] v2.0.0 - Variable name patterns for detecting secret assignments
 # These match variable names that typically hold secrets
-SECRET_VARIABLE_PATTERNS: Dict[str, str] = {
+SECRET_VARIABLE_PATTERNS: dict[str, str] = {
     "password_var": r"(?i)^(password|passwd|pwd|pass|admin_password|default_password|db_password|user_password|root_password)$",
     "secret_var": r"(?i)^(secret|secret_key|jwt_secret|app_secret|session_secret|encryption_key|private_key|signing_key)$",
     "api_key_var": r"(?i)^(api_key|apikey|api_secret|access_key|access_token|auth_token|bearer_token)$",
@@ -2194,7 +2104,7 @@ SECRET_VARIABLE_PATTERNS: Dict[str, str] = {
     "credentials": r"(?i)^(credentials|creds|auth|authentication)$",
 }
 # Sanitizer function patterns
-SANITIZER_PATTERNS: Dict[str, str] = {
+SANITIZER_PATTERNS: dict[str, str] = {
     "html.escape": "html.escape",
     "markupsafe.escape": "markupsafe.escape",
     "bleach.clean": "bleach.clean",
@@ -2210,7 +2120,7 @@ SANITIZER_PATTERNS: Dict[str, str] = {
 # =============================================================================
 
 
-def detect_ssr_framework(tree: ast.AST) -> Optional[str]:
+def detect_ssr_framework(tree: ast.AST) -> str | None:
     """
     [20251216_FEATURE] v2.2.0 - Auto-detect SSR framework from imports.
 
@@ -2251,9 +2161,7 @@ def is_server_action(node: ast.AST) -> bool:
     # Check for 'use server' directive in function docstring or first statement
     if node.body:
         first_stmt = node.body[0]
-        if isinstance(first_stmt, ast.Expr) and isinstance(
-            first_stmt.value, ast.Constant
-        ):
+        if isinstance(first_stmt, ast.Expr) and isinstance(first_stmt.value, ast.Constant):
             if isinstance(first_stmt.value.value, str):
                 # Check for 'use server' or "use server" (without quotes)
                 content = first_stmt.value.value.strip()
@@ -2351,9 +2259,9 @@ def is_dangerous_html(node: ast.AST) -> bool:
 
 def detect_ssr_vulnerabilities(
     tree: ast.AST,
-    framework: Optional[str] = None,
-    taint_tracker: Optional[TaintTracker] = None,
-) -> List[Vulnerability]:
+    framework: str | None = None,
+    taint_tracker: TaintTracker | None = None,
+) -> list[Vulnerability]:
     """
     [20251216_FEATURE] v2.2.0 - Detect SSR-specific vulnerabilities.
 
@@ -2368,7 +2276,7 @@ def detect_ssr_vulnerabilities(
     Returns:
         List of detected vulnerabilities
     """
-    vulnerabilities: List[Vulnerability] = []
+    vulnerabilities: list[Vulnerability] = []
 
     # Auto-detect framework if not provided
     if framework is None:
@@ -2393,16 +2301,8 @@ def detect_ssr_vulnerabilities(
                         sink_type=SecuritySink.SSTI,
                         taint_source=TaintSource.USER_INPUT,
                         taint_path=["Server Action", node.name],
-                        sink_location=(
-                            (node.lineno, node.col_offset)
-                            if hasattr(node, "lineno")
-                            else None
-                        ),
-                        source_location=(
-                            (node.lineno, node.col_offset)
-                            if hasattr(node, "lineno")
-                            else None
-                        ),
+                        sink_location=((node.lineno, node.col_offset) if hasattr(node, "lineno") else None),
+                        source_location=((node.lineno, node.col_offset) if hasattr(node, "lineno") else None),
                     )
                 )
 
@@ -2418,11 +2318,7 @@ def detect_ssr_vulnerabilities(
                                     sink_type=SecuritySink.DOM_XSS,
                                     taint_source=TaintSource.USER_INPUT,
                                     taint_path=["dangerouslySetInnerHTML", arg.id],
-                                    sink_location=(
-                                        (node.lineno, node.col_offset)
-                                        if hasattr(node, "lineno")
-                                        else None
-                                    ),
+                                    sink_location=((node.lineno, node.col_offset) if hasattr(node, "lineno") else None),
                                 )
                             )
 
@@ -2434,11 +2330,7 @@ def detect_ssr_vulnerabilities(
                         sink_type=SecuritySink.SSTI,
                         taint_source=TaintSource.USER_INPUT,
                         taint_path=["Remix", node.name],
-                        sink_location=(
-                            (node.lineno, node.col_offset)
-                            if hasattr(node, "lineno")
-                            else None
-                        ),
+                        sink_location=((node.lineno, node.col_offset) if hasattr(node, "lineno") else None),
                     )
                 )
 
@@ -2454,11 +2346,7 @@ def detect_ssr_vulnerabilities(
                                     sink_type=SecuritySink.SSTI,
                                     taint_source=TaintSource.USER_INPUT,
                                     taint_path=["Nuxt", "defineEventHandler"],
-                                    sink_location=(
-                                        (node.lineno, node.col_offset)
-                                        if hasattr(node, "lineno")
-                                        else None
-                                    ),
+                                    sink_location=((node.lineno, node.col_offset) if hasattr(node, "lineno") else None),
                                 )
                             )
 

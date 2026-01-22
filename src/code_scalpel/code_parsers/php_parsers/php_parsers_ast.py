@@ -15,7 +15,7 @@ PHP-Parser provides:
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -23,12 +23,12 @@ class PHPClass:
     """Represents a PHP class definition."""
 
     name: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    namespace: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    namespace: str | None = None
     methods: list[str] = field(default_factory=list)
     properties: list[str] = field(default_factory=list)
-    parent_class: Optional[str] = None
+    parent_class: str | None = None
     interfaces: list[str] = field(default_factory=list)
     is_abstract: bool = False
     is_final: bool = False
@@ -39,11 +39,11 @@ class PHPFunction:
     """Represents a PHP function definition."""
 
     name: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    namespace: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    namespace: str | None = None
     parameters: list[str] = field(default_factory=list)
-    return_type: Optional[str] = None
+    return_type: str | None = None
 
 
 class PHPParserAST:

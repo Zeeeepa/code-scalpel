@@ -23,9 +23,10 @@ Usage:
 from __future__ import annotations
 
 import re
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Union
+from typing import Any
 
 
 class QueryOperator(Enum):
@@ -51,7 +52,7 @@ class NodePredicate:
     operator: QueryOperator
     value: Any
 
-    def matches(self, node_data: Dict[str, Any]) -> bool:
+    def matches(self, node_data: dict[str, Any]) -> bool:
         """Check if a node matches this predicate."""
         actual = node_data.get(self.field)
 
@@ -86,11 +87,11 @@ class NodePredicate:
 class EdgePredicate:
     """A predicate to filter edges."""
 
-    edge_types: Set[str]  # Empty = any type
+    edge_types: set[str]  # Empty = any type
     min_confidence: float = 0.0
     max_confidence: float = 1.0
 
-    def matches(self, edge_data: Dict[str, Any]) -> bool:
+    def matches(self, edge_data: dict[str, Any]) -> bool:
         """Check if an edge matches this predicate."""
         if self.edge_types:
             edge_type = edge_data.get("type", edge_data.get("edge_type", ""))
@@ -105,9 +106,9 @@ class EdgePredicate:
 class PathPattern:
     """A pattern for matching paths in the graph."""
 
-    source_predicate: Optional[NodePredicate] = None
-    edge_predicate: Optional[EdgePredicate] = None
-    target_predicate: Optional[NodePredicate] = None
+    source_predicate: NodePredicate | None = None
+    edge_predicate: EdgePredicate | None = None
+    target_predicate: NodePredicate | None = None
     min_length: int = 1
     max_length: int = 1
     direction: str = "outgoing"  # outgoing, incoming, both
@@ -118,25 +119,25 @@ class QueryResult:
     """Result of a graph query."""
 
     success: bool
-    nodes: List[Dict[str, Any]]
-    edges: List[Dict[str, Any]]
-    paths: List[List[str]]
-    aggregations: Dict[str, Any]
+    nodes: list[dict[str, Any]]
+    edges: list[dict[str, Any]]
+    paths: list[list[str]]
+    aggregations: dict[str, Any]
     execution_time_ms: float
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
 class GraphQuery:
     """A parsed graph query."""
 
-    node_predicates: List[NodePredicate] = field(default_factory=list)
-    edge_predicates: List[EdgePredicate] = field(default_factory=list)
-    path_patterns: List[PathPattern] = field(default_factory=list)
-    return_fields: List[str] = field(default_factory=list)
-    limit: Optional[int] = None
+    node_predicates: list[NodePredicate] = field(default_factory=list)
+    edge_predicates: list[EdgePredicate] = field(default_factory=list)
+    path_patterns: list[PathPattern] = field(default_factory=list)
+    return_fields: list[str] = field(default_factory=list)
+    limit: int | None = None
     skip: int = 0
-    order_by: Optional[str] = None
+    order_by: str | None = None
     order_desc: bool = False
 
 
@@ -151,10 +152,10 @@ class GraphQueryEngine:
             graph: A graph object with nodes and edges
         """
         self.graph = graph
-        self._nodes: Dict[str, Dict[str, Any]] = {}
-        self._edges: List[Dict[str, Any]] = []
-        self._adjacency: Dict[str, List[str]] = {}  # outgoing
-        self._reverse_adjacency: Dict[str, List[str]] = {}  # incoming
+        self._nodes: dict[str, dict[str, Any]] = {}
+        self._edges: list[dict[str, Any]] = []
+        self._adjacency: dict[str, list[str]] = {}  # outgoing
+        self._reverse_adjacency: dict[str, list[str]] = {}  # incoming
 
         if graph:
             self._build_index(graph)
@@ -207,8 +208,8 @@ class GraphQueryEngine:
 
     def load_graph_data(
         self,
-        nodes: List[Dict[str, Any]],
-        edges: List[Dict[str, Any]],
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
     ) -> None:
         """Load graph data directly."""
         self._nodes.clear()
@@ -232,9 +233,7 @@ class GraphQueryEngine:
             if to_id in self._reverse_adjacency:
                 self._reverse_adjacency[to_id].append(from_id)
 
-    def load_graph(
-        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]
-    ) -> None:
+    def load_graph(self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]) -> None:
         """Backwards-compatible alias for loading raw graph data.
 
         Some internal tier tests and older callers expect `load_graph(nodes, edges)`.
@@ -242,7 +241,7 @@ class GraphQueryEngine:
         """
         self.load_graph_data(nodes, edges)
 
-    def execute(self, query: Union[str, GraphQuery]) -> QueryResult:
+    def execute(self, query: str | GraphQuery) -> QueryResult:
         """
         Execute a graph query.
 
@@ -320,9 +319,7 @@ class GraphQueryEngine:
         query_str = query_str.strip()
 
         # Parse WHERE clauses
-        where_match = re.search(
-            r"WHERE\s+(.+?)(?:RETURN|LIMIT|ORDER|$)", query_str, re.IGNORECASE
-        )
+        where_match = re.search(r"WHERE\s+(.+?)(?:RETURN|LIMIT|ORDER|$)", query_str, re.IGNORECASE)
         if where_match:
             conditions = where_match.group(1).strip()
             parsed.node_predicates = self._parse_conditions(conditions)
@@ -333,16 +330,14 @@ class GraphQueryEngine:
             parsed.limit = int(limit_match.group(1))
 
         # Parse ORDER BY
-        order_match = re.search(
-            r"ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?", query_str, re.IGNORECASE
-        )
+        order_match = re.search(r"ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?", query_str, re.IGNORECASE)
         if order_match:
             parsed.order_by = order_match.group(1)
             parsed.order_desc = (order_match.group(2) or "").upper() == "DESC"
 
         return parsed
 
-    def _parse_conditions(self, conditions: str) -> List[NodePredicate]:
+    def _parse_conditions(self, conditions: str) -> list[NodePredicate]:
         """Parse WHERE conditions into predicates."""
         predicates = []
 
@@ -393,7 +388,7 @@ class GraphQueryEngine:
 
         return predicates
 
-    def _filter_nodes(self, predicates: List[NodePredicate]) -> List[Dict[str, Any]]:
+    def _filter_nodes(self, predicates: list[NodePredicate]) -> list[dict[str, Any]]:
         """Filter nodes by predicates."""
         if not predicates:
             return list(self._nodes.values())
@@ -405,7 +400,7 @@ class GraphQueryEngine:
 
         return matching
 
-    def _filter_edges(self, predicates: List[EdgePredicate]) -> List[Dict[str, Any]]:
+    def _filter_edges(self, predicates: list[EdgePredicate]) -> list[dict[str, Any]]:
         """Filter edges by predicates."""
         if not predicates:
             return list(self._edges)
@@ -420,8 +415,8 @@ class GraphQueryEngine:
     def _find_paths(
         self,
         pattern: PathPattern,
-        source_nodes: List[Dict[str, Any]],
-    ) -> List[List[str]]:
+        source_nodes: list[dict[str, Any]],
+    ) -> list[list[str]]:
         """Find paths matching a pattern."""
         paths = []
 
@@ -442,18 +437,18 @@ class GraphQueryEngine:
     def _bfs_paths(
         self,
         start_id: str,
-        target_pred: Optional[NodePredicate],
-        edge_pred: Optional[EdgePredicate],
+        target_pred: NodePredicate | None,
+        edge_pred: EdgePredicate | None,
         min_length: int,
         max_length: int,
         direction: str,
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         """BFS to find paths matching constraints."""
         from collections import deque
 
         paths = []
         # Queue entries: (current_id, path_so_far)
-        queue: deque[tuple[str, List[str]]] = deque([(start_id, [start_id])])
+        queue: deque[tuple[str, list[str]]] = deque([(start_id, [start_id])])
         visited = {start_id}
 
         while queue:
@@ -478,9 +473,9 @@ class GraphQueryEngine:
                     # Find the edge
                     edge_match = False
                     for edge in self._edges:
-                        if (
-                            edge["from_id"] == current and edge["to_id"] == neighbor
-                        ) or (edge["to_id"] == current and edge["from_id"] == neighbor):
+                        if (edge["from_id"] == current and edge["to_id"] == neighbor) or (
+                            edge["to_id"] == current and edge["from_id"] == neighbor
+                        ):
                             if edge_pred.matches(edge):
                                 edge_match = True
                                 break
@@ -507,9 +502,9 @@ class GraphQueryEngine:
 
     def select_nodes(
         self,
-        predicate: Optional[Callable[[Dict[str, Any]], bool]] = None,
+        predicate: Callable[[dict[str, Any]], bool] | None = None,
         **kwargs,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Select nodes matching criteria.
 
@@ -544,8 +539,8 @@ class GraphQueryEngine:
         start_id: str,
         direction: str = "outgoing",
         max_depth: int = 3,
-        edge_filter: Optional[Callable[[Dict[str, Any]], bool]] = None,
-    ) -> Iterator[Dict[str, Any]]:
+        edge_filter: Callable[[dict[str, Any]], bool] | None = None,
+    ) -> Iterator[dict[str, Any]]:
         """
         Traverse the graph from a starting node.
 
@@ -586,12 +581,8 @@ class GraphQueryEngine:
                 if edge_filter:
                     edge_ok = False
                     for edge in self._edges:
-                        if (
-                            edge["from_id"] == current_id
-                            and edge["to_id"] == neighbor_id
-                        ) or (
-                            edge["to_id"] == current_id
-                            and edge["from_id"] == neighbor_id
+                        if (edge["from_id"] == current_id and edge["to_id"] == neighbor_id) or (
+                            edge["to_id"] == current_id and edge["from_id"] == neighbor_id
                         ):
                             if edge_filter(edge):
                                 edge_ok = True

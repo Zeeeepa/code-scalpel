@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from code_scalpel.licensing import tier_detector
 from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.mcp.helpers.analyze_helpers import _get_cache, _validate_code
 from code_scalpel.mcp.models.core import (
@@ -17,7 +18,6 @@ from code_scalpel.mcp.models.core import (
     SymbolicResult,
     TestGenerationResult,
 )
-from code_scalpel.licensing import tier_detector
 from code_scalpel.parsing import ParsingError, parse_python_code
 
 logger = logging.getLogger(__name__)
@@ -82,19 +82,13 @@ def _detect_requested_constraint_types(code: str) -> set[str]:
                         requested.add(t)
 
         if isinstance(node, ast.Call):
-            if (
-                isinstance(node.func, ast.Name)
-                and node.func.id == "symbolic"
-                and len(node.args) >= 2
-            ):
+            if isinstance(node.func, ast.Name) and node.func.id == "symbolic" and len(node.args) >= 2:
                 type_arg = node.args[1]
                 if isinstance(type_arg, ast.Name):
                     t = _norm_type_name(type_arg.id)
                     if t:
                         requested.add(t)
-                elif isinstance(type_arg, ast.Constant) and isinstance(
-                    type_arg.value, str
-                ):
+                elif isinstance(type_arg, ast.Constant) and isinstance(type_arg.value, str):
                     t = _norm_type_name(type_arg.value)
                     if t:
                         requested.add(t)
@@ -165,9 +159,7 @@ def _basic_symbolic_analysis(code: str, max_paths: int) -> SymbolicResult:
 
 
 # [20251230_FEATURE] v1.0 roadmap Pro/Enterprise tier helper functions
-def _build_path_prioritization(
-    paths: list[ExecutionPath], code: str, smart: bool = False
-) -> dict[str, Any]:
+def _build_path_prioritization(paths: list[ExecutionPath], code: str, smart: bool = False) -> dict[str, Any]:
     """Build path prioritization metadata for Pro/Enterprise tier.
 
     Smart prioritization (Pro) uses heuristics to rank paths by:
@@ -183,8 +175,7 @@ def _build_path_prioritization(
         # Calculate priority score based on conditions
         complexity = len(path.conditions)
         has_error_patterns = any(
-            keyword in str(path.conditions)
-            for keyword in ["None", "null", "0", "empty", "negative"]
+            keyword in str(path.conditions) for keyword in ["None", "null", "0", "empty", "negative"]
         )
 
         priority_score = complexity * 10
@@ -242,9 +233,7 @@ def _build_concolic_results(paths: list[ExecutionPath], code: str) -> dict[str, 
     }
 
 
-def _build_state_space_analysis(
-    paths: list[ExecutionPath], constraints: list[str]
-) -> dict[str, Any]:
+def _build_state_space_analysis(paths: list[ExecutionPath], constraints: list[str]) -> dict[str, Any]:
     """Build state space reduction analysis for Enterprise tier.
 
     Analyzes the symbolic state space for reduction opportunities.
@@ -259,9 +248,7 @@ def _build_state_space_analysis(
             constraint_types["equality"] += 1
         elif any(op in constraint for op in ["<", ">", "<=", ">="]):
             constraint_types["inequality"] += 1
-        elif any(
-            kw in constraint_lower for kw in ["and", "or", "not", "true", "false"]
-        ):
+        elif any(kw in constraint_lower for kw in ["and", "or", "not", "true", "false"]):
             constraint_types["boolean"] += 1
         else:
             constraint_types["other"] += 1
@@ -374,14 +361,10 @@ def _symbolic_execute_sync(
         return SymbolicResult(success=False, paths_explored=0, error=error)
 
     if max_paths is not None and max_paths < 1:
-        return SymbolicResult(
-            success=False, paths_explored=0, error="max_paths must be >= 1"
-        )
+        return SymbolicResult(success=False, paths_explored=0, error="max_paths must be >= 1")
 
     if max_depth is not None and max_depth < 1:
-        return SymbolicResult(
-            success=False, paths_explored=0, error="max_depth must be >= 1"
-        )
+        return SymbolicResult(success=False, paths_explored=0, error="max_depth must be >= 1")
 
     fallback_max_paths = 10 if max_paths is None else int(max_paths)
     effective_max_depth = 10 if max_depth is None else int(max_depth)
@@ -396,12 +379,9 @@ def _symbolic_execute_sync(
             requested_types = _detect_requested_constraint_types(code)
             disallowed = {t for t in requested_types if t not in allowed_types}
             if disallowed:
-                basic_result = _basic_symbolic_analysis(
-                    code, max_paths=fallback_max_paths
-                )
+                basic_result = _basic_symbolic_analysis(code, max_paths=fallback_max_paths)
                 basic_result.error = (
-                    f"[LIMIT] Symbolic constraint types not enabled ({sorted(disallowed)}); "
-                    "using AST-only analysis"
+                    f"[LIMIT] Symbolic constraint types not enabled ({sorted(disallowed)}); " "using AST-only analysis"
                 )
                 return basic_result
 
@@ -458,14 +438,10 @@ def _symbolic_execute_sync(
         truncation_warning: str | None = None
         if max_paths is not None and total_paths > max_paths:
             truncated = True
-            truncation_warning = (
-                f"Result limited to {max_paths} paths by current configuration."
-            )
+            truncation_warning = f"Result limited to {max_paths} paths by current configuration."
             paths = paths[:max_paths]
 
-        symbolic_vars = (
-            list(result.all_variables.keys()) if result.all_variables else []
-        )
+        symbolic_vars = list(result.all_variables.keys()) if result.all_variables else []
         constraints_list = list(set(all_constraints))
 
         if not symbolic_vars or not constraints_list:
@@ -476,9 +452,7 @@ def _symbolic_execute_sync(
                 constraints_list = basic.constraints
             if not paths and basic.paths:
                 paths = basic.paths
-                total_paths = (
-                    basic.total_paths if basic.total_paths is not None else total_paths
-                )
+                total_paths = basic.total_paths if basic.total_paths is not None else total_paths
 
         # [20251230_FEATURE] v1.0 roadmap Pro/Enterprise tier features
         path_prioritization: dict[str, Any] | None = None
@@ -519,13 +493,9 @@ def _symbolic_execute_sync(
         return symbolic_result
 
     except ImportError as e:
-        logger.warning(
-            f"Symbolic execution not available (ImportError: {e}), using basic analysis"
-        )
+        logger.warning(f"Symbolic execution not available (ImportError: {e}), using basic analysis")
         basic_result = _basic_symbolic_analysis(code, max_paths=fallback_max_paths)
-        basic_result.error = (
-            f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
-        )
+        basic_result.error = f"[FALLBACK] Symbolic engine not available, using AST analysis: {e}"
         # Add tier-aware features even in fallback
         basic_result = _add_tier_features_to_result(basic_result, code, caps_set)
         return basic_result
@@ -538,22 +508,16 @@ def _symbolic_execute_sync(
         return basic_result
 
 
-def _add_tier_features_to_result(
-    result: SymbolicResult, code: str, caps_set: set
-) -> SymbolicResult:
+def _add_tier_features_to_result(result: SymbolicResult, code: str, caps_set: set) -> SymbolicResult:
     """Add tier-aware features to a SymbolicResult (including fallback results)."""
     if "smart_path_prioritization" in caps_set:
-        result.path_prioritization = _build_path_prioritization(
-            result.paths, code, smart=True
-        )
+        result.path_prioritization = _build_path_prioritization(result.paths, code, smart=True)
 
     if "concolic_execution" in caps_set:
         result.concolic_results = _build_concolic_results(result.paths, code)
 
     if "state_space_reduction" in caps_set:
-        result.state_space_analysis = _build_state_space_analysis(
-            result.paths, result.constraints
-        )
+        result.state_space_analysis = _build_state_space_analysis(result.paths, result.constraints)
 
     if "memory_modeling" in caps_set:
         result.memory_model = _build_memory_model(code)
@@ -642,13 +606,11 @@ def _generate_tests_sync(
         total_cases = len(result.test_cases)
         truncated = False
         truncation_warning: str | None = None
-        if (
-            max_test_cases is not None
-            and max_test_cases >= 0
-            and total_cases > max_test_cases
-        ):
+        if max_test_cases is not None and max_test_cases >= 0 and total_cases > max_test_cases:
             truncated = True
-            truncation_warning = f"Generated {total_cases} test cases; returned {max_test_cases} due to configured limits."
+            truncation_warning = (
+                f"Generated {total_cases} test cases; returned {max_test_cases} due to configured limits."
+            )
             result.test_cases = result.test_cases[:max_test_cases]
 
         # [20251230_FIX][unit-tests] Ensure GeneratedTestCase is JSON-serializable.
@@ -692,9 +654,7 @@ def _generate_tests_sync(
                 function_name=tc.function_name,
                 inputs=_json_safe(getattr(tc, "inputs", {}) or {}),
                 description=tc.description,
-                path_conditions=[
-                    str(c) for c in (getattr(tc, "path_conditions", []) or [])
-                ],
+                path_conditions=[str(c) for c in (getattr(tc, "path_conditions", []) or [])],
             )
             for tc in result.test_cases
         ]
@@ -766,9 +726,7 @@ def _simulate_refactor_sync(
                     success=False,
                     is_safe=False,
                     status="error",
-                    error=(
-                        f"Input '{label}' exceeds configured size limit of {max_file_size_mb} MB."
-                    ),
+                    error=(f"Input '{label}' exceeds configured size limit of {max_file_size_mb} MB."),
                 )
 
     valid, error = _validate_code(original_code)
@@ -868,9 +826,7 @@ def _simulate_refactor_sync(
                     old_funcs = _collect_python_functions(original_code)
                     new_funcs = _collect_python_functions(new_text)
                     modified = sorted(
-                        name
-                        for name in (set(old_funcs) & set(new_funcs))
-                        if old_funcs[name] != new_funcs[name]
+                        name for name in (set(old_funcs) & set(new_funcs)) if old_funcs[name] != new_funcs[name]
                     )
                     if modified:
                         structural_changes["functions_modified"] = modified
@@ -883,9 +839,7 @@ def _simulate_refactor_sync(
             removed_funcs = structural_changes.get("functions_removed") or []
             removed_classes = structural_changes.get("classes_removed") or []
             if removed_funcs or removed_classes:
-                result.warnings.append(
-                    "Compliance validation: detected removed functions/classes."
-                )
+                result.warnings.append("Compliance validation: detected removed functions/classes.")
 
         return RefactorSimulationResult(
             success=True,

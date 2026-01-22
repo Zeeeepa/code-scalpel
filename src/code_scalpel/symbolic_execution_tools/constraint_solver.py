@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import z3
 from z3 import BoolRef, ExprRef, Not, Solver, sat, simplify, unsat
@@ -31,8 +31,8 @@ class SolverResult:
     """
 
     status: SolverStatus
-    model: Optional[Dict[str, Any]] = None
-    counterexample: Optional[Dict[str, Any]] = None
+    model: dict[str, Any] | None = None
+    counterexample: dict[str, Any] | None = None
     time_ms: float = 0.0
 
     def is_sat(self) -> bool:
@@ -93,9 +93,9 @@ class ConstraintSolver:
 
     def solve(
         self,
-        constraints: List[BoolRef],
-        variables: List[ExprRef],
-        variable_names: Optional[List[str]] = None,
+        constraints: list[BoolRef],
+        variables: list[ExprRef],
+        variable_names: list[str] | None = None,
     ) -> SolverResult:
         """
         Find a model satisfying all constraints.
@@ -128,7 +128,7 @@ class ConstraintSolver:
             # unknown - timeout or undecidable
             return SolverResult(status=SolverStatus.UNKNOWN, model=None)
 
-    def prove(self, preconditions: List[BoolRef], assertion: BoolRef) -> SolverResult:
+    def prove(self, preconditions: list[BoolRef], assertion: BoolRef) -> SolverResult:
         """
         Prove an assertion is valid under preconditions.
 
@@ -164,9 +164,7 @@ class ConstraintSolver:
             # Found a counterexample
             z3_model = solver.model()
             counterexample = self._model_to_dict(z3_model)
-            return SolverResult(
-                status=SolverStatus.INVALID, counterexample=counterexample
-            )
+            return SolverResult(status=SolverStatus.INVALID, counterexample=counterexample)
         else:
             return SolverResult(status=SolverStatus.UNKNOWN, counterexample=None)
 
@@ -177,9 +175,9 @@ class ConstraintSolver:
     def _extract_model(
         self,
         z3_model: z3.ModelRef,
-        variables: List[ExprRef],
-        variable_names: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        variables: list[ExprRef],
+        variable_names: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Extract variable values from Z3 model as Python-native types.
 
@@ -190,7 +188,7 @@ class ConstraintSolver:
         Returns:
             Dictionary of variable name → Python value
         """
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         for idx, var in enumerate(variables):
             if variable_names and idx < len(variable_names):
@@ -207,7 +205,7 @@ class ConstraintSolver:
 
         return result
 
-    def _model_to_dict(self, z3_model: z3.ModelRef) -> Dict[str, Any]:
+    def _model_to_dict(self, z3_model: z3.ModelRef) -> dict[str, Any]:
         """
         Convert entire Z3 model to Python dictionary.
 
@@ -217,7 +215,7 @@ class ConstraintSolver:
         Returns:
             Dictionary of all variable assignments
         """
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         for decl in z3_model.decls():
             name = decl.name()
@@ -264,9 +262,7 @@ class ConstraintSolver:
             try:
                 return float(z3_value.as_decimal(10).rstrip("?"))
             except Exception:
-                return float(z3_value.numerator_as_long()) / float(
-                    z3_value.denominator_as_long()
-                )
+                return float(z3_value.numerator_as_long()) / float(z3_value.denominator_as_long())
 
         # BitVector
         if z3.is_bv_value(z3_value):
@@ -305,8 +301,8 @@ class SolverConfig:
     """Configuration for the constraint solver."""
 
     solver_type: SolverType = SolverType.Z3
-    timeout: Optional[int] = None
-    memory_limit: Optional[int] = None
+    timeout: int | None = None
+    memory_limit: int | None = None
     use_incremental: bool = True
     simplify_constraints: bool = True
     parallel_solving: bool = False
@@ -354,10 +350,10 @@ def create_solver(
 
 
 def solve_constraints(
-    constraints: List[BoolRef],
-    variables: List[ExprRef],
+    constraints: list[BoolRef],
+    variables: list[ExprRef],
     timeout_ms: int = ConstraintSolver.DEFAULT_TIMEOUT_MS,
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """
     Solve a list of constraints.
 
@@ -374,7 +370,7 @@ def solve_constraints(
     return result.model if result.is_sat() else None
 
 
-def is_satisfiable(constraints: List[BoolRef]) -> bool:
+def is_satisfiable(constraints: list[BoolRef]) -> bool:
     """Check if a list of constraints is satisfiable."""
     solver = ConstraintSolver()
     result = solver.solve(constraints, [])

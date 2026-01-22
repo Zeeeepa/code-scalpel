@@ -410,7 +410,7 @@ class TestEnterpriseIncludesProFeatures:
         """Enterprise tier should include code smell detection."""
         smelly_code = """
 def bad(x, y, z, a, b):
-    if x: 
+    if x:
         if y:
             if z:
                 if a:

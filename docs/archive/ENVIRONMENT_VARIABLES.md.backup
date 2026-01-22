@@ -317,22 +317,13 @@ SCALPEL_MCP_OUTPUT=DEBUG python -m code_scalpel.mcp.server
 
 ## Caching
 
-### `SCALPEL_CACHE_ENABLED`
+### `CODE_SCALPEL_CACHE_ENABLED`
 
 | Property | Value |
 |----------|-------|
 | **Purpose** | Enable/disable analysis caching |
 | **Valid Values** | `1` (enable), `0` (disable) |
 | **Default** | `1` (enabled) |
-| **Applies To** | All tiers |
-
-### `SCALPEL_NO_CACHE`
-
-| Property | Value |
-|----------|-------|
-| **Purpose** | Alternative to disable caching |
-| **Valid Values** | `1` (disable), `0` (enable) |
-| **Default** | `0` (caching enabled) |
 | **Applies To** | All tiers |
 
 ### `CODE_SCALPEL_CACHE_PERSIST`
@@ -730,7 +721,7 @@ These are standard system environment variables used by Code Scalpel:
 ```bash
 # Minimal configuration
 SCALPEL_MCP_OUTPUT=INFO
-SCALPEL_CACHE_ENABLED=1
+CODE_SCALPEL_CACHE_ENABLED=1
 ```
 
 ### Pro Tier
@@ -738,7 +729,7 @@ SCALPEL_CACHE_ENABLED=1
 # Standard Pro configuration
 CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
 SCALPEL_MCP_OUTPUT=INFO
-SCALPEL_CACHE_ENABLED=1
+CODE_SCALPEL_CACHE_ENABLED=1
 SCALPEL_GOVERNANCE_ENFORCEMENT=advisory
 ```
 

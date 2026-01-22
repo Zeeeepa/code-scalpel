@@ -25,7 +25,7 @@ import ast
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -71,12 +71,12 @@ class RefactoringOpportunity:
     name: str
     type: RefactoringType
     description: str
-    location: Tuple[int, int]  # (start_line, end_line)
+    location: tuple[int, int]  # (start_line, end_line)
     effort: str  # "easy", "medium", "hard"
     impact: str  # "low", "medium", "high"
-    affected_symbols: List[str] = field(default_factory=list)
-    suggested_actions: List[str] = field(default_factory=list)
-    risks: List[str] = field(default_factory=list)
+    affected_symbols: list[str] = field(default_factory=list)
+    suggested_actions: list[str] = field(default_factory=list)
+    risks: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -85,79 +85,75 @@ class CodeSmell:
 
     type: CodeSmellType
     severity: str  # "info", "warning", "error"
-    location: Tuple[int, int]  # (start_line, end_line)
+    location: tuple[int, int]  # (start_line, end_line)
     description: str
-    affected_symbols: List[str] = field(default_factory=list)
-    suggested_refactorings: List[RefactoringType] = field(default_factory=list)
+    affected_symbols: list[str] = field(default_factory=list)
+    suggested_refactorings: list[RefactoringType] = field(default_factory=list)
 
 
 class RefactoringAnalyzer:
     """Analyzes code for refactoring opportunities and code smells."""
 
     def __init__(self):
-        self.opportunities: List[RefactoringOpportunity] = []
-        self.code_smells: List[CodeSmell] = []
+        self.opportunities: list[RefactoringOpportunity] = []
+        self.code_smells: list[CodeSmell] = []
 
-    def analyze(self, file_path: str) -> Dict[str, List]:
+    def analyze(self, file_path: str) -> dict[str, list]:
         """Analyze a file and return detected opportunities and smells."""
         return {
             "opportunities": [],
             "code_smells": [],
         }
 
-    def analyze_function(self, node: ast.FunctionDef) -> List[RefactoringOpportunity]:
+    def analyze_function(self, node: ast.FunctionDef) -> list[RefactoringOpportunity]:
         """Analyze a function for refactoring opportunities."""
         return []
 
-    def analyze_class(self, node: ast.ClassDef) -> List[RefactoringOpportunity]:
+    def analyze_class(self, node: ast.ClassDef) -> list[RefactoringOpportunity]:
         """Analyze a class for refactoring opportunities."""
         return []
 
-    def detect_god_class(self, node: ast.ClassDef) -> Optional[CodeSmell]:
+    def detect_god_class(self, node: ast.ClassDef) -> CodeSmell | None:
         """Detect God Class code smell."""
         return None
 
-    def detect_god_function(self, node: ast.FunctionDef) -> Optional[CodeSmell]:
+    def detect_god_function(self, node: ast.FunctionDef) -> CodeSmell | None:
         """Detect God Function code smell."""
         return None
 
-    def detect_feature_envy(self, node: ast.FunctionDef) -> Optional[CodeSmell]:
+    def detect_feature_envy(self, node: ast.FunctionDef) -> CodeSmell | None:
         """Detect Feature Envy code smell."""
         return None
 
-    def detect_data_clump(self, node: ast.ClassDef) -> Optional[CodeSmell]:
+    def detect_data_clump(self, node: ast.ClassDef) -> CodeSmell | None:
         """Detect Data Clump code smell."""
         return None
 
-    def detect_long_parameter_list(self, node: ast.FunctionDef) -> Optional[CodeSmell]:
+    def detect_long_parameter_list(self, node: ast.FunctionDef) -> CodeSmell | None:
         """Detect Long Parameter List code smell."""
         return None
 
-    def detect_duplicated_code(self, file_path: str) -> List[CodeSmell]:
+    def detect_duplicated_code(self, file_path: str) -> list[CodeSmell]:
         """Detect duplicated code blocks."""
         return []
 
-    def detect_dead_code(self, file_path: str) -> List[CodeSmell]:
+    def detect_dead_code(self, file_path: str) -> list[CodeSmell]:
         """Detect dead code (unreachable or unused)."""
         return []
 
-    def suggest_modernization(self, node: ast.AST) -> List[RefactoringOpportunity]:
+    def suggest_modernization(self, node: ast.AST) -> list[RefactoringOpportunity]:
         """Suggest code modernization (Python version specific)."""
         return []
 
-    def suggest_design_patterns(self, node: ast.AST) -> List[str]:
+    def suggest_design_patterns(self, node: ast.AST) -> list[str]:
         """Suggest applicable design patterns."""
         return []
 
-    def calculate_refactoring_impact(
-        self, opportunity: RefactoringOpportunity
-    ) -> Dict[str, Any]:
+    def calculate_refactoring_impact(self, opportunity: RefactoringOpportunity) -> dict[str, Any]:
         """Calculate estimated impact of a refactoring."""
         return {}
 
-    def prioritize_refactorings(
-        self, opportunities: List[RefactoringOpportunity]
-    ) -> List[RefactoringOpportunity]:
+    def prioritize_refactorings(self, opportunities: list[RefactoringOpportunity]) -> list[RefactoringOpportunity]:
         """Prioritize refactoring opportunities."""
         return sorted(
             opportunities,
@@ -168,15 +164,15 @@ class RefactoringAnalyzer:
             reverse=True,
         )
 
-    def _calculate_class_metrics(self, node: ast.ClassDef) -> Dict[str, float]:
+    def _calculate_class_metrics(self, node: ast.ClassDef) -> dict[str, float]:
         """Calculate metrics for a class (size, complexity, cohesion)."""
         return {}
 
-    def _calculate_function_metrics(self, node: ast.FunctionDef) -> Dict[str, float]:
+    def _calculate_function_metrics(self, node: ast.FunctionDef) -> dict[str, float]:
         """Calculate metrics for a function."""
         return {}
 
-    def _find_similar_code(self, file_path: str) -> List[Tuple[int, int]]:
+    def _find_similar_code(self, file_path: str) -> list[tuple[int, int]]:
         """Find similar code blocks."""
         # Implementation placeholder
         return []

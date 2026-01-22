@@ -10,7 +10,7 @@ It is an **MCP (Model Context Protocol) server** designed to be the primary tool
 
 **New to Code Scalpel?** Start here:
 
-1. **[📖 Beginner's Guide](docs/BEGINNER_GUIDE.md)** — Plain English explanation of what Code Scalpel is and how to use it.
+1. **[📖 Beginner's Guide](docs/getting_started/getting_started.md)** — Plain English explanation of what Code Scalpel is and how to use it.
 2. **[✅ Setup Checklist](docs/SETUP_CHECKLIST.md)** — Step-by-step setup in 5 minutes.
 3. **Start using it** — Integrate with Claude, Copilot, or Cursor, then ask your AI assistant to help with your code.
 

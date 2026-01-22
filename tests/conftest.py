@@ -8,11 +8,11 @@ Pytest configuration and fixtures for Code Scalpel tests.
 
 import json
 import os
-from pathlib import Path
 import sys
 import time
 import urllib.error
 import warnings
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -223,9 +223,7 @@ def mock_osv_error():
         if error_type == "URLError":
             return urllib.error.URLError("Connection failed")
         elif error_type == "HTTPError":
-            return urllib.error.HTTPError(
-                "https://api.osv.dev/v1/query", 503, "Service Unavailable", {}, None
-            )
+            return urllib.error.HTTPError("https://api.osv.dev/v1/query", 503, "Service Unavailable", {}, None)
         elif error_type == "Timeout":
             return TimeoutError("Request timeout")
         else:

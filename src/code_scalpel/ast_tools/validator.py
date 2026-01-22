@@ -2,7 +2,6 @@ import ast
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class Severity(Enum):
@@ -19,9 +18,9 @@ class ValidationIssue:
 
     message: str
     severity: Severity
-    line: Optional[int] = None
-    column: Optional[int] = None
-    code: Optional[str] = None
+    line: int | None = None
+    column: int | None = None
+    code: str | None = None
 
 
 class ASTValidator:
@@ -29,7 +28,7 @@ class ASTValidator:
     Advanced AST validator with configurable rules and detailed reporting.
     """
 
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = {
             "max_line_length": 80,
             "max_function_length": 50,
@@ -106,8 +105,7 @@ class ASTValidator:
                 if complexity > self.max_complexity:
                     self.issues.append(
                         ValidationIssue(
-                            f"Function '{node.name}' has too high cognitive "
-                            f"complexity ({complexity})",
+                            f"Function '{node.name}' has too high cognitive " f"complexity ({complexity})",
                             Severity.WARNING,
                             node.lineno,
                         )
@@ -149,8 +147,7 @@ class ASTValidator:
                 if not node.name.islower() and "_" not in node.name:
                     self.issues.append(
                         ValidationIssue(
-                            f"Function name '{node.name}' should use "
-                            "lowercase_with_underscores convention",
+                            f"Function name '{node.name}' should use " "lowercase_with_underscores convention",
                             Severity.WARNING,
                             node.lineno,
                         )
@@ -162,8 +159,7 @@ class ASTValidator:
                     if not re.match(r"^[a-z_][a-z0-9_]*$", node.id):
                         self.issues.append(
                             ValidationIssue(
-                                f"Variable name '{node.id}' should use "
-                                "lowercase_with_underscores convention",
+                                f"Variable name '{node.id}' should use " "lowercase_with_underscores convention",
                                 Severity.INFO,
                                 getattr(node, "lineno", None),
                             )
@@ -206,9 +202,7 @@ class ASTValidator:
                     )
                 self.generic_visit(node)
 
-        validator = SizeValidator(
-            self.config["max_function_length"], self.config["max_class_length"]
-        )
+        validator = SizeValidator(self.config["max_function_length"], self.config["max_class_length"])
         validator.visit(tree)
         self.issues.extend(validator.issues)
 
@@ -268,10 +262,7 @@ class ASTValidator:
                 if isinstance(node.func, ast.Attribute):
                     if node.func.attr in {"execute", "executemany"}:
                         # Check if string formatting or concatenation is used
-                        if any(
-                            isinstance(arg, (ast.BinOp, ast.JoinedStr))
-                            for arg in node.args
-                        ):
+                        if any(isinstance(arg, (ast.BinOp, ast.JoinedStr)) for arg in node.args):
                             self.issues.append(
                                 ValidationIssue(
                                     "Possible SQL injection vulnerability",

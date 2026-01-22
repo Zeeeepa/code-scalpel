@@ -10,17 +10,17 @@ from __future__ import annotations
 
 # Re-export everything from the SSOT
 from code_scalpel.mcp.helpers.session import (
+    _SESSION_AUDIT_TRAIL,
     # Module-level state (same objects, not copies!)
     _SESSION_UPDATE_COUNTS,
-    _SESSION_AUDIT_TRAIL,
+    # SessionManager class
+    SessionManager,
+    _get_audit_trail,
+    add_audit_entry,
+    get_audit_trail,
     # Public functions
     get_session_update_count,
     increment_session_update_count,
-    add_audit_entry,
-    get_audit_trail,
-    _get_audit_trail,
-    # SessionManager class
-    SessionManager,
 )
 
 __all__ = [

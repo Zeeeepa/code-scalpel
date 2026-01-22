@@ -49,7 +49,7 @@ policies:
     description: "Prevent agents from introducing raw SQL queries"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         contains(input.code, "SELECT")
@@ -74,7 +74,7 @@ policies:
     description: "Policy with invalid Rego"
     rule: |
       package scalpel.security
-      
+
       deny[msg {  # Missing closing bracket
         input.operation == "code_edit"
         msg = "Invalid syntax"
@@ -230,7 +230,7 @@ policies:
     description: "Test policy"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         msg = "Test"
@@ -344,9 +344,7 @@ class TestSemanticAnalyzer:
 
     def test_invalid_syntax_falls_back_to_text_search(self, semantic_analyzer):
         """[20251216_TEST] Syntax errors should still detect SQL via text search."""
-        code = (
-            "query = SELECT * FROM users WHERE id="  # invalid Python but contains SQL
-        )
+        code = "query = SELECT * FROM users WHERE id="  # invalid Python but contains SQL
         assert semantic_analyzer.contains_sql_sink(code, "python")
 
     def test_tainted_path_false_when_no_user_input(self, semantic_analyzer):
@@ -587,7 +585,7 @@ policies:
     description: "Block all forms of SQL injection"
     rule: |
       package scalpel.security
-      
+
       deny[msg] {
         input.operation == "code_edit"
         contains(input.code, "SELECT")
@@ -785,9 +783,7 @@ class TestPolicyEngineFailurePaths:
 
         class Result:
             returncode = 0
-            stdout = json.dumps(
-                {"result": [{"expressions": [{"value": ["deny message"]}]}]}
-            )
+            stdout = json.dumps({"result": [{"expressions": [{"value": ["deny message"]}]}]})
             stderr = ""
 
         def _fake_run(*_args, **_kwargs):
@@ -824,9 +820,7 @@ class TestPolicyEngineFailurePaths:
         loaded = engine._load_used_override_codes()
         assert "abc123" in loaded
 
-    def test_evaluate_exception_in_parse_returns_fail_closed(
-        self, monkeypatch, tmp_path
-    ):
+    def test_evaluate_exception_in_parse_returns_fail_closed(self, monkeypatch, tmp_path):
         """[20251217_TEST] Exception during JSON parsing fails closed."""
 
         class Result:

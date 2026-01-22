@@ -200,8 +200,8 @@ class TestFixLoopTermination:
 
         error_engine = Mock(spec=ErrorToDiffEngine)
         error_engine.analyze_error.return_value = ErrorAnalysis(
-            message="Error", error_type="runtime", fixes=[]  # No fixes available
-        )
+            message="Error", error_type="runtime", fixes=[]
+        )  # No fixes available
 
         # Execute
         fix_loop = FixLoop(max_attempts=5)
@@ -265,9 +265,7 @@ class TestFixLoopTermination:
 
         sandbox = Mock(spec=SandboxExecutor)
         error_engine = Mock(spec=ErrorToDiffEngine)
-        error_engine.analyze_error.return_value = ErrorAnalysis(
-            message="Error", error_type="runtime", fixes=[]
-        )
+        error_engine.analyze_error.return_value = ErrorAnalysis(message="Error", error_type="runtime", fixes=[])
 
         # Execute
         fix_loop = FixLoop(max_attempts=3, on_escalate=on_escalate)

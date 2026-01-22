@@ -10,40 +10,23 @@ full server and to keep ``server.py`` slim.
 
 from __future__ import annotations
 
-from code_scalpel.mcp.tools.analyze import analyze_code
-from code_scalpel.mcp.tools.security import (
-    scan_dependencies,
-    security_scan,
-    type_evaporation_scan,
-    unified_sink_detect,
-)
-from code_scalpel.mcp.tools.symbolic import (
-    generate_unit_tests,
-    simulate_refactor,
-    symbolic_execute,
-)
-from code_scalpel.mcp.tools.extraction import extract_code, rename_symbol, update_symbol
-from code_scalpel.mcp.tools.context import (
-    crawl_project,
-    get_file_context,
-    get_symbol_references,
-)
-from code_scalpel.mcp.tools.graph import (
-    cross_file_security_scan,
-    get_call_graph,
-    get_cross_file_dependencies,
-    get_graph_neighborhood,
-    get_project_map,
-)
-from code_scalpel.mcp.tools.policy import (
-    code_policy_check,
-    validate_paths,
-    verify_policy_integrity,
-)
-
 from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
+from code_scalpel.mcp.helpers.context_helpers import (
+    _crawl_project_sync,
+    _get_file_context_sync,
+    _get_symbol_references_sync,
+)
+from code_scalpel.mcp.helpers.extraction_helpers import _perform_extraction
+from code_scalpel.mcp.helpers.graph_helpers import (
+    _cross_file_security_scan_sync,
+    _get_call_graph_sync,
+    _get_cross_file_dependencies_sync,
+    _get_project_map_sync,
+)
 from code_scalpel.mcp.helpers.security_helpers import (
     _get_current_tier as _get_current_tier_security,
+)
+from code_scalpel.mcp.helpers.security_helpers import (
     _scan_dependencies_sync,
     _security_scan_sync,
     _type_evaporation_scan_sync,
@@ -54,33 +37,10 @@ from code_scalpel.mcp.helpers.symbolic_helpers import (
     _simulate_refactor_sync,
     _symbolic_execute_sync,
 )
-from code_scalpel.mcp.helpers.extraction_helpers import _perform_extraction
-from code_scalpel.mcp.helpers.context_helpers import (
-    _crawl_project_sync,
-    _get_file_context_sync,
-    _get_symbol_references_sync,
-)
-from code_scalpel.mcp.helpers.graph_helpers import (
-    _cross_file_security_scan_sync,
-    _get_call_graph_sync,
-    _get_cross_file_dependencies_sync,
-    _get_project_map_sync,
-)
-
 from code_scalpel.mcp.models.core import (
     AnalysisResult,
     SecurityResult,
     VulnerabilityInfo,
-)
-from code_scalpel.mcp.models.security import (
-    DependencyInfo,
-    DependencyScanResult,
-    DependencyScanResultModel,
-)
-from code_scalpel.mcp.models.policy import (
-    CodePolicyCheckResult,
-    PathValidationResult,
-    PolicyVerificationResult,
 )
 from code_scalpel.mcp.models.graph import (
     BoundaryAlertModel,
@@ -101,6 +61,46 @@ from code_scalpel.mcp.models.graph import (
     ProjectMapResult,
     SymbolDefinitionModel,
     TaintFlowModel,
+)
+from code_scalpel.mcp.models.policy import (
+    CodePolicyCheckResult,
+    PathValidationResult,
+    PolicyVerificationResult,
+)
+from code_scalpel.mcp.models.security import (
+    DependencyInfo,
+    DependencyScanResult,
+    DependencyScanResultModel,
+)
+from code_scalpel.mcp.tools.analyze import analyze_code
+from code_scalpel.mcp.tools.context import (
+    crawl_project,
+    get_file_context,
+    get_symbol_references,
+)
+from code_scalpel.mcp.tools.extraction import extract_code, rename_symbol, update_symbol
+from code_scalpel.mcp.tools.graph import (
+    cross_file_security_scan,
+    get_call_graph,
+    get_cross_file_dependencies,
+    get_graph_neighborhood,
+    get_project_map,
+)
+from code_scalpel.mcp.tools.policy import (
+    code_policy_check,
+    validate_paths,
+    verify_policy_integrity,
+)
+from code_scalpel.mcp.tools.security import (
+    scan_dependencies,
+    security_scan,
+    type_evaporation_scan,
+    unified_sink_detect,
+)
+from code_scalpel.mcp.tools.symbolic import (
+    generate_unit_tests,
+    simulate_refactor,
+    symbolic_execute,
 )
 
 # Choose a single tier helper alias

@@ -67,7 +67,7 @@ async def test_license_invalid_signature_fallback_to_community(
     )
 
     # Read and corrupt the signature (change last 10 chars)
-    with open(license_path, "r") as f:
+    with open(license_path) as f:
         jwt_token = f.read().strip()
 
     # Corrupt the signature portion (after last dot)
@@ -157,7 +157,7 @@ async def test_license_missing_required_claim_fallback_to_community(
     # Create a JWT with missing 'tier' claim
     payload = {
         "jti": "lic-missing-tier",
-        "exp": int((datetime.now(timezone.utc).timestamp())) + 86400,
+        "exp": int(datetime.now(timezone.utc).timestamp()) + 86400,
         # Missing 'tier' claim - REQUIRED
     }
     malformed_jwt = jwt.encode(payload, hs256_test_secret, algorithm="HS256")
@@ -204,7 +204,7 @@ async def test_license_invalid_tier_value_fallback_to_community(
     payload = {
         "jti": "lic-invalid-tier",
         "tier": "invalid_tier_value",  # Not community/pro/enterprise
-        "exp": int((datetime.now(timezone.utc).timestamp())) + 86400,
+        "exp": int(datetime.now(timezone.utc).timestamp()) + 86400,
     }
     malformed_jwt = jwt.encode(payload, hs256_test_secret, algorithm="HS256")
 
@@ -312,9 +312,7 @@ async def test_tier_transition_community_to_pro_fields_appear(
 
     # Core fields should be the same
     assert data_comm.get("success") == data_pro.get("success")
-    assert data_comm.get("frontend_vulnerabilities") == data_pro.get(
-        "frontend_vulnerabilities"
-    )
+    assert data_comm.get("frontend_vulnerabilities") == data_pro.get("frontend_vulnerabilities")
 
 
 async def test_tier_transition_pro_to_enterprise_fields_appear(
@@ -397,10 +395,7 @@ async def test_tier_transition_pro_to_enterprise_fields_appear(
 
     # Enterprise should have fields that Pro doesn't
     # At minimum, api_contract or compliance_report should be present in Enterprise
-    assert (
-        data_ent.get("api_contract") is not None
-        or data_ent.get("compliance_report") is not None
-    )
+    assert data_ent.get("api_contract") is not None or data_ent.get("compliance_report") is not None
 
     # Pro-level fields should still be present
     assert "implicit_any_count" in data_ent
@@ -453,14 +448,10 @@ async def test_tier_capability_consistency_across_tiers(
     enterprise_caps = tiers_and_caps["enterprise"]
 
     # Pro should have at least community's capabilities (plus more)
-    assert community_caps.issubset(
-        pro_caps
-    ), f"Pro tier missing Community caps: {community_caps - pro_caps}"
+    assert community_caps.issubset(pro_caps), f"Pro tier missing Community caps: {community_caps - pro_caps}"
 
     # Enterprise should have at least pro's capabilities (plus more)
-    assert pro_caps.issubset(
-        enterprise_caps
-    ), f"Enterprise tier missing Pro caps: {pro_caps - enterprise_caps}"
+    assert pro_caps.issubset(enterprise_caps), f"Enterprise tier missing Pro caps: {pro_caps - enterprise_caps}"
 
     # Verify specific capabilities exist where expected
     # assert "envelope-v1" in community_caps

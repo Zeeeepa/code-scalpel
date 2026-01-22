@@ -51,10 +51,11 @@ Example:
 """
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 
 class ApprovalStatus(Enum):
@@ -86,9 +87,9 @@ class ApprovalRequest:
     operation: str
     title: str
     description: str
-    requester: Optional[str] = None
-    reviewers: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    requester: str | None = None
+    reviewers: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     require_all_reviewers: bool = False
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -111,12 +112,12 @@ class ApprovalResponse:
 
     approval_id: str
     status: ApprovalStatus
-    approvers: List[str] = field(default_factory=list)
-    rejectors: List[str] = field(default_factory=list)
-    comments: List[str] = field(default_factory=list)
-    approved_at: Optional[datetime] = None
-    rejected_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    approvers: list[str] = field(default_factory=list)
+    rejectors: list[str] = field(default_factory=list)
+    comments: list[str] = field(default_factory=list)
+    approved_at: datetime | None = None
+    rejected_at: datetime | None = None
+    expires_at: datetime | None = None
 
 
 class ApprovalWorkflow:
@@ -128,9 +129,9 @@ class ApprovalWorkflow:
 
     def __init__(
         self,
-        approval_callback: Optional[Callable[[ApprovalRequest], str]] = None,
-        status_callback: Optional[Callable[[str], ApprovalStatus]] = None,
-        timeout_seconds: Optional[int] = None,
+        approval_callback: Callable[[ApprovalRequest], str] | None = None,
+        status_callback: Callable[[str], ApprovalStatus] | None = None,
+        timeout_seconds: int | None = None,
         auto_approve: bool = False,
     ):
         """
@@ -150,7 +151,7 @@ class ApprovalWorkflow:
         self.auto_approve = auto_approve
 
         # Internal tracking
-        self._pending_approvals: Dict[str, ApprovalResponse] = {}
+        self._pending_approvals: dict[str, ApprovalResponse] = {}
         self._approval_counter = 0
 
     def _generate_approval_id(self) -> str:
@@ -238,9 +239,7 @@ class ApprovalWorkflow:
 
         return response.status
 
-    def approve(
-        self, approval_id: str, approver: str, comment: Optional[str] = None
-    ) -> bool:
+    def approve(self, approval_id: str, approver: str, comment: str | None = None) -> bool:
         """
         Manually approve a request (for internal/testing use).
 
@@ -278,9 +277,7 @@ class ApprovalWorkflow:
 
         return True
 
-    def reject(
-        self, approval_id: str, rejector: str, reason: Optional[str] = None
-    ) -> bool:
+    def reject(self, approval_id: str, rejector: str, reason: str | None = None) -> bool:
         """
         Manually reject a request (for internal/testing use).
 
@@ -335,7 +332,7 @@ class ApprovalWorkflow:
         response.status = ApprovalStatus.CANCELLED
         return True
 
-    def get_approval_details(self, approval_id: str) -> Optional[ApprovalResponse]:
+    def get_approval_details(self, approval_id: str) -> ApprovalResponse | None:
         """
         Get detailed approval information.
 
@@ -351,7 +348,7 @@ class ApprovalWorkflow:
         self,
         approval_id: str,
         poll_interval: float = 5.0,
-        max_wait: Optional[float] = None,
+        max_wait: float | None = None,
     ) -> ApprovalStatus:
         """
         Block until approval is resolved (for synchronous workflows).

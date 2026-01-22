@@ -17,7 +17,7 @@ import ast
 import fnmatch
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, cast
+from typing import Any, BinaryIO, cast
 
 try:
     import tomli as tomllib
@@ -38,8 +38,8 @@ class FileChange:
     """
 
     file_path: str
-    added_lines: List[str] = field(default_factory=list)
-    removed_lines: List[str] = field(default_factory=list)
+    added_lines: list[str] = field(default_factory=list)
+    removed_lines: list[str] = field(default_factory=list)
     original_code: str = ""
     modified_code: str = ""
 
@@ -58,11 +58,11 @@ class Operation:
 
     """
 
-    changes: List[FileChange] = field(default_factory=list)
+    changes: list[FileChange] = field(default_factory=list)
     description: str = ""
 
     @property
-    def affected_files(self) -> List[str]:
+    def affected_files(self) -> list[str]:
         """List of all files affected by this operation."""
         return [change.file_path for change in self.changes]
 
@@ -85,9 +85,9 @@ class BudgetViolation:
     rule: str
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     message: str
-    limit: Optional[int] = None
-    actual: Optional[int] = None
-    file: Optional[str] = None
+    limit: int | None = None
+    actual: int | None = None
+    file: str | None = None
 
     def __str__(self) -> str:
         """Format violation for display."""
@@ -110,7 +110,7 @@ class BudgetDecision:
 
     allowed: bool
     reason: str
-    violations: List[BudgetViolation] = field(default_factory=list)
+    violations: list[BudgetViolation] = field(default_factory=list)
     requires_review: bool = False
 
     @property
@@ -144,9 +144,7 @@ class BudgetDecision:
             msg += "  - Simplify changes to avoid adding control flow complexity\n"
             msg += "  - Consider extracting methods instead of adding nested logic\n"
         if any(v.rule == "allowed_file_patterns" for v in self.violations):
-            msg += (
-                "  - Ensure files match allowed patterns (e.g., *.py, *.ts, *.java)\n"
-            )
+            msg += "  - Ensure files match allowed patterns (e.g., *.py, *.ts, *.java)\n"
         if any(v.rule == "forbidden_paths" for v in self.violations):
             msg += "  - Avoid modifying system/generated files (e.g., .git/, node_modules/)\n"
 
@@ -162,7 +160,7 @@ class ChangeBudget:
 
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         """
         Initialize budget with configuration.
 
@@ -179,12 +177,8 @@ class ChangeBudget:
         self.max_lines_per_file = config.get("max_lines_per_file", 100)
         self.max_total_lines = config.get("max_total_lines", 300)
         self.max_complexity_increase = config.get("max_complexity_increase", 10)
-        self.allowed_file_patterns = config.get(
-            "allowed_file_patterns", ["*.py", "*.ts", "*.java"]
-        )
-        self.forbidden_paths = config.get(
-            "forbidden_paths", [".git/", "node_modules/", "__pycache__/"]
-        )
+        self.allowed_file_patterns = config.get("allowed_file_patterns", ["*.py", "*.ts", "*.java"])
+        self.forbidden_paths = config.get("forbidden_paths", [".git/", "node_modules/", "__pycache__/"])
 
     def validate_operation(self, operation: Operation) -> BudgetDecision:
         """
@@ -285,9 +279,7 @@ class ChangeBudget:
                 requires_review=True,
             )
 
-        return BudgetDecision(
-            allowed=True, reason="Within budget constraints", violations=[]
-        )
+        return BudgetDecision(allowed=True, reason="Within budget constraints", violations=[])
 
     def _calculate_complexity_delta(self, operation: Operation) -> int:
         """
@@ -310,11 +302,7 @@ class ChangeBudget:
             # Treat empty or None original_code (new file) as zero complexity.
             if change.modified_code is not None:
                 try:
-                    before_complexity = (
-                        self._measure_complexity(change.original_code)
-                        if change.original_code
-                        else 0
-                    )
+                    before_complexity = self._measure_complexity(change.original_code) if change.original_code else 0
                     after_complexity = self._measure_complexity(change.modified_code)
                     total_delta += after_complexity - before_complexity
                 except SyntaxError:
@@ -375,9 +363,7 @@ class ChangeBudget:
 
         for pattern in self.allowed_file_patterns:
             # Check both full path and filename
-            if fnmatch.fnmatch(normalized_path, pattern) or fnmatch.fnmatch(
-                filename, pattern
-            ):
+            if fnmatch.fnmatch(normalized_path, pattern) or fnmatch.fnmatch(filename, pattern):
                 return True
 
         return False
@@ -400,24 +386,20 @@ class ChangeBudget:
 
         for forbidden in self.forbidden_paths:
             # Check if path starts with or contains forbidden segment
-            if (
-                normalized_path.startswith(forbidden)
-                or f"/{forbidden}" in normalized_path
-            ):
+            if normalized_path.startswith(forbidden) or f"/{forbidden}" in normalized_path:
                 return True
 
         return False
 
 
-def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+def load_budget_config(config_path: str | None = None) -> dict[str, Any]:
     """
     Load budget configuration from YAML file.
 
-    [20251216_FEATURE] Configuration loader for .code-scalpel/budget.yaml.
-
+    [20251216_FEATURE] Configuration loader for .code-scalpel/agent_limits.yaml.
 
     Args:
-        config_path: Path to budget.yaml file (optional)
+        config_path: Path to agent_limits.yaml file (optional)
 
     Returns:
         Dictionary with budget configuration
@@ -426,20 +408,15 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
         Returns default configuration if file not found.
     """
     if config_path is None:
-        config_path = ".code-scalpel/budget.yaml"
+        config_path = ".code-scalpel/agent_limits.yaml"
 
     config_file = Path(config_path)
 
     # Default configuration structure
     default_config = {
-        "default": {
-            "max_files": 5,
-            "max_lines_per_file": 100,
-            "max_total_lines": 300,
-            "max_complexity_increase": 10,
-            "allowed_file_patterns": ["*.py", "*.ts", "*.java"],
-            "forbidden_paths": [".git/", "node_modules/", "__pycache__/"],
-        }
+        "max_files_read": 100,
+        "max_tokens_per_session": 50000,
+        "max_api_calls_per_hour": 1000,
     }
 
     if not config_file.exists():
@@ -455,8 +432,8 @@ def load_budget_config(config_path: Optional[str] = None) -> Dict[str, Any]:
             config = tomllib.load(cast(BinaryIO, f))
 
     # [20251227_BUGFIX] Return default if file doesn't have expected structure
-    budgets = config.get("budgets", {}) if config else {}
-    if not budgets or "default" not in budgets:
+    limits = config.get("limits", {}) if config else {}
+    if not limits:
         return default_config
 
-    return budgets
+    return limits

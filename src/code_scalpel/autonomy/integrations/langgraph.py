@@ -15,10 +15,7 @@ from typing import TypedDict
 try:
     from langgraph.graph import END, StateGraph
 except ImportError as e:
-    raise ImportError(
-        "LangGraph is required for this integration. "
-        "Install it with: pip install langgraph"
-    ) from e
+    raise ImportError("LangGraph is required for this integration. " "Install it with: pip install langgraph") from e
 
 
 class ScalpelState(TypedDict):
@@ -114,8 +111,7 @@ def generate_fix_node(state: ScalpelState) -> ScalpelState:
             fix = {
                 "step": "generate_fix",
                 "fix_type": "syntax_fix",
-                "suggestion": "Fix syntax error at line "
-                + str(last_analysis.get("line", "unknown")),
+                "suggestion": "Fix syntax error at line " + str(last_analysis.get("line", "unknown")),
                 "has_fix": True,
             }
         else:
@@ -183,9 +179,7 @@ def validate_fix_node(state: ScalpelState) -> ScalpelState:
 
         validation = {
             "step": "validate_fix",
-            "validation": (
-                "passed" if not result.has_vulnerabilities else "failed_security"
-            ),
+            "validation": ("passed" if not result.has_vulnerabilities else "failed_security"),
             "vulnerabilities": result.vulnerability_count,
         }
 

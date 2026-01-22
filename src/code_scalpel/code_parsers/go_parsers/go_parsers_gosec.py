@@ -7,7 +7,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class VulnerabilityType(Enum):
@@ -38,7 +37,7 @@ class SecurityIssue:
     file_path: str
     line: int
     column: int
-    cwe_id: Optional[str] = None
+    cwe_id: str | None = None
 
 
 @dataclass
@@ -46,9 +45,9 @@ class GosecConfig:
     """Gosec configuration for analysis."""
 
     gosec_version: str = "2.18.0"
-    config_file: Optional[Path] = None
-    exclude_rules: List[str] = field(default_factory=list)
-    include_rules: List[str] = field(default_factory=list)
+    config_file: Path | None = None
+    exclude_rules: list[str] = field(default_factory=list)
+    include_rules: list[str] = field(default_factory=list)
 
 
 class GosecParser:
@@ -62,31 +61,25 @@ class GosecParser:
     def __init__(self):
         """Initialize Gosec parser."""
         self.config = GosecConfig()
-        self.issues: List[SecurityIssue] = []
+        self.issues: list[SecurityIssue] = []
 
-    def execute_gosec(
-        self, paths: List[Path], config: Optional[GosecConfig] = None
-    ) -> List[SecurityIssue]:
+    def execute_gosec(self, paths: list[Path], config: GosecConfig | None = None) -> list[SecurityIssue]:
         raise NotImplementedError("Phase 2: Gosec execution")
 
-    def parse_json_report(self, report_path: Path) -> List[SecurityIssue]:
+    def parse_json_report(self, report_path: Path) -> list[SecurityIssue]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GosecConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_vulnerabilities(
-        self, issues: List[SecurityIssue]
-    ) -> Dict[VulnerabilityType, List[SecurityIssue]]:
+    def categorize_vulnerabilities(self, issues: list[SecurityIssue]) -> dict[VulnerabilityType, list[SecurityIssue]]:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def filter_by_severity(
-        self, issues: List[SecurityIssue], min_severity: str
-    ) -> List[SecurityIssue]:
+    def filter_by_severity(self, issues: list[SecurityIssue], min_severity: str) -> list[SecurityIssue]:
         raise NotImplementedError("Phase 2: Severity filtering")
 
-    def map_to_cwe(self, issues: List[SecurityIssue]) -> Dict[str, List[SecurityIssue]]:
+    def map_to_cwe(self, issues: list[SecurityIssue]) -> dict[str, list[SecurityIssue]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def generate_report(self, issues: List[SecurityIssue], format: str = "json") -> str:
+    def generate_report(self, issues: list[SecurityIssue], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

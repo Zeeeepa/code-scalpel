@@ -3,7 +3,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -15,7 +14,7 @@ class FormattingIssue:
     file_path: str
     line_number: int
     column: int
-    suggested_fix: Optional[str] = None
+    suggested_fix: str | None = None
 
 
 class SwiftFormatParser:
@@ -27,21 +26,19 @@ class SwiftFormatParser:
 
     def __init__(self):
         """Initialize SwiftFormat parser."""
-        self.issues: List[FormattingIssue] = []
+        self.issues: list[FormattingIssue] = []
 
-    def parse_format_config(self, config_path: Path) -> Dict:
+    def parse_format_config(self, config_path: Path) -> dict:
         raise NotImplementedError("Phase 2: Config parsing")
 
-    def execute_swiftformat(self, paths: List[Path]) -> List[FormattingIssue]:
+    def execute_swiftformat(self, paths: list[Path]) -> list[FormattingIssue]:
         raise NotImplementedError("Phase 2: SwiftFormat execution")
 
-    def apply_formatting(self, paths: List[Path]) -> Dict[str, int]:
+    def apply_formatting(self, paths: list[Path]) -> dict[str, int]:
         raise NotImplementedError("Phase 2: Format application")
 
-    def detect_formatting_violations(
-        self, issues: List[FormattingIssue]
-    ) -> List[FormattingIssue]:
+    def detect_formatting_violations(self, issues: list[FormattingIssue]) -> list[FormattingIssue]:
         raise NotImplementedError("Phase 2: Violation detection")
 
-    def generate_format_report(self, issues: List[FormattingIssue]) -> str:
+    def generate_format_report(self, issues: list[FormattingIssue]) -> str:
         raise NotImplementedError("Phase 2: Report generation")

@@ -26,7 +26,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 
 @dataclass
@@ -34,7 +34,7 @@ class ExternalDependency:
     """An external package dependency."""
 
     name: str
-    version: Optional[str]
+    version: str | None
     source: str  # "npm", "pypi", "maven", "cargo", etc.
     repo_name: str
     declared_in: str  # File path where declared
@@ -56,11 +56,11 @@ class InternalLink:
 class CrossRepoAnalysis:
     """Complete cross-repository analysis."""
 
-    repos: List[str]
-    external_deps: List[ExternalDependency]
-    internal_links: List[InternalLink]
-    shared_deps: Dict[str, List[str]]  # dep_name -> [repos using it]
-    conflict_versions: List[Dict[str, Any]]  # Dependencies with version conflicts
+    repos: list[str]
+    external_deps: list[ExternalDependency]
+    internal_links: list[InternalLink]
+    shared_deps: dict[str, list[str]]  # dep_name -> [repos using it]
+    conflict_versions: list[dict[str, Any]]  # Dependencies with version conflicts
     mermaid_diagram: str
 
 
@@ -69,11 +69,11 @@ class CrossRepoLinker:
 
     def __init__(self):
         """Initialize the cross-repo linker."""
-        self.repos: Dict[str, Path] = {}  # name -> path
-        self._external_deps: Dict[str, List[ExternalDependency]] = {}
-        self._internal_packages: Dict[str, Set[str]] = {}  # repo -> packages
+        self.repos: dict[str, Path] = {}  # name -> path
+        self._external_deps: dict[str, list[ExternalDependency]] = {}
+        self._internal_packages: dict[str, set[str]] = {}  # repo -> packages
 
-    def add_repo(self, repo_path: str | Path, name: Optional[str] = None) -> None:
+    def add_repo(self, repo_path: str | Path, name: str | None = None) -> None:
         """
         Add a repository to analyze.
 
@@ -93,9 +93,9 @@ class CrossRepoLinker:
         self,
         repo_path: Path,
         repo_name: str,
-    ) -> List[ExternalDependency]:
+    ) -> list[ExternalDependency]:
         """Scan repository for external dependencies."""
-        deps: List[ExternalDependency] = []
+        deps: list[ExternalDependency] = []
 
         # Python dependencies
         deps.extend(self._scan_python_deps(repo_path, repo_name))
@@ -112,9 +112,9 @@ class CrossRepoLinker:
         self,
         repo_path: Path,
         repo_name: str,
-    ) -> List[ExternalDependency]:
+    ) -> list[ExternalDependency]:
         """Scan Python dependency files."""
-        deps: List[ExternalDependency] = []
+        deps: list[ExternalDependency] = []
 
         # requirements.txt
         req_file = repo_path / "requirements.txt"
@@ -146,10 +146,7 @@ class CrossRepoLinker:
                 # Simple TOML parsing for dependencies
                 in_deps = False
                 for line in content.splitlines():
-                    if (
-                        "[project.dependencies]" in line
-                        or "[tool.poetry.dependencies]" in line
-                    ):
+                    if "[project.dependencies]" in line or "[tool.poetry.dependencies]" in line:
                         in_deps = True
                     elif line.startswith("[") and in_deps:
                         in_deps = False
@@ -160,11 +157,7 @@ class CrossRepoLinker:
                             deps.append(
                                 ExternalDependency(
                                     name=pkg_name,
-                                    version=(
-                                        parts[1].strip().strip('"')
-                                        if len(parts) > 1
-                                        else None
-                                    ),
+                                    version=(parts[1].strip().strip('"') if len(parts) > 1 else None),
                                     source="pypi",
                                     repo_name=repo_name,
                                     declared_in=str(pyproject.relative_to(repo_path)),
@@ -179,9 +172,9 @@ class CrossRepoLinker:
         self,
         repo_path: Path,
         repo_name: str,
-    ) -> List[ExternalDependency]:
+    ) -> list[ExternalDependency]:
         """Scan npm package.json for dependencies."""
-        deps: List[ExternalDependency] = []
+        deps: list[ExternalDependency] = []
 
         pkg_json = repo_path / "package.json"
         if pkg_json.exists():
@@ -207,9 +200,9 @@ class CrossRepoLinker:
         self,
         repo_path: Path,
         repo_name: str,
-    ) -> List[ExternalDependency]:
+    ) -> list[ExternalDependency]:
         """Scan Maven pom.xml for dependencies."""
-        deps: List[ExternalDependency] = []
+        deps: list[ExternalDependency] = []
 
         pom_xml = repo_path / "pom.xml"
         if pom_xml.exists():
@@ -237,9 +230,9 @@ class CrossRepoLinker:
 
         return deps
 
-    def _scan_internal_packages(self, repo_path: Path) -> Set[str]:
+    def _scan_internal_packages(self, repo_path: Path) -> set[str]:
         """Scan for internally defined packages/modules."""
-        packages: Set[str] = set()
+        packages: set[str] = set()
 
         # Python packages
         for init_file in repo_path.rglob("__init__.py"):
@@ -270,15 +263,15 @@ class CrossRepoLinker:
         Returns:
             CrossRepoAnalysis with complete dependency information
         """
-        all_external_deps: List[ExternalDependency] = []
-        internal_links: List[InternalLink] = []
+        all_external_deps: list[ExternalDependency] = []
+        internal_links: list[InternalLink] = []
 
         # Collect all external dependencies
         for repo_name, deps in self._external_deps.items():
             all_external_deps.extend(deps)
 
         # Find shared dependencies
-        shared_deps: Dict[str, List[str]] = {}
+        shared_deps: dict[str, list[str]] = {}
         for dep in all_external_deps:
             if dep.name not in shared_deps:
                 shared_deps[dep.name] = []
@@ -325,13 +318,13 @@ class CrossRepoLinker:
 
     def _find_version_conflicts(
         self,
-        deps: List[ExternalDependency],
-    ) -> List[Dict[str, Any]]:
+        deps: list[ExternalDependency],
+    ) -> list[dict[str, Any]]:
         """Find dependencies with conflicting versions across repos."""
-        conflicts: List[Dict[str, Any]] = []
+        conflicts: list[dict[str, Any]] = []
 
         # Group by (name, source)
-        dep_versions: Dict[Tuple[str, str], Dict[str, str]] = {}
+        dep_versions: dict[tuple[str, str], dict[str, str]] = {}
         for dep in deps:
             key = (dep.name, dep.source)
             if key not in dep_versions:
@@ -357,10 +350,10 @@ class CrossRepoLinker:
         self,
         repo_path: Path,
         repo_name: str,
-        other_packages: Dict[str, str],
-    ) -> List[InternalLink]:
+        other_packages: dict[str, str],
+    ) -> list[InternalLink]:
         """Find imports of other repo packages."""
-        links: List[InternalLink] = []
+        links: list[InternalLink] = []
 
         for py_file in repo_path.rglob("*.py"):
             if ".venv" in str(py_file) or "node_modules" in str(py_file):
@@ -406,9 +399,9 @@ class CrossRepoLinker:
 
     def _generate_mermaid(
         self,
-        repos: List[str],
-        shared_deps: Dict[str, List[str]],
-        internal_links: List[InternalLink],
+        repos: list[str],
+        shared_deps: dict[str, list[str]],
+        internal_links: list[InternalLink],
     ) -> str:
         """Generate Mermaid diagram of cross-repo dependencies."""
         lines = ["graph LR"]
@@ -418,9 +411,7 @@ class CrossRepoLinker:
             lines.append(f'    {repo}["{repo}"]')
 
         # Add shared dependency edges
-        for dep_name, using_repos in list(shared_deps.items())[
-            :10
-        ]:  # Limit for readability
+        for dep_name, using_repos in list(shared_deps.items())[:10]:  # Limit for readability
             safe_name = dep_name.replace("-", "_").replace("@", "").replace("/", "_")
             lines.append(f'    {safe_name}(("{dep_name}"))')
             for repo in using_repos:
@@ -428,16 +419,14 @@ class CrossRepoLinker:
 
         # Add internal links
         for link in internal_links[:20]:  # Limit for readability
-            lines.append(
-                f"    {link.from_repo} -.-> |{link.to_package}| {link.to_repo}"
-            )
+            lines.append(f"    {link.from_repo} -.-> |{link.to_package}| {link.to_repo}")
 
         return "\n".join(lines)
 
 
 def analyze_cross_repo_deps(
-    repo_paths: List[str | Path],
-    repo_names: Optional[List[str]] = None,
+    repo_paths: list[str | Path],
+    repo_names: list[str] | None = None,
 ) -> CrossRepoAnalysis:
     """
     Convenience function to analyze cross-repository dependencies.
@@ -452,7 +441,7 @@ def analyze_cross_repo_deps(
     linker = CrossRepoLinker()
 
     names = repo_names or [None] * len(repo_paths)
-    for path, name in zip(repo_paths, names):
+    for path, name in zip(repo_paths, names, strict=False):
         linker.add_repo(path, name)
 
     return linker.find_cross_repo_links()

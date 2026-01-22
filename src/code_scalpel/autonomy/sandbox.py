@@ -18,7 +18,6 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 try:
     import docker  # type: ignore[import-untyped]
@@ -34,8 +33,8 @@ class LintResult:
     """Individual lint result."""
 
     file: str
-    line: Optional[int]
-    column: Optional[int]
+    line: int | None
+    column: int | None
     message: str
     severity: str  # "error", "warning", "info"
 
@@ -47,7 +46,7 @@ class ExecutionTestResult:
     name: str
     passed: bool
     duration_ms: int
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 # Aliases for backward compatibility and naming
@@ -61,7 +60,7 @@ class FileChange:
 
     relative_path: str
     operation: str  # "create", "modify", "delete"
-    new_content: Optional[str] = None
+    new_content: str | None = None
 
 
 @dataclass
@@ -116,15 +115,9 @@ class SandboxExecutor:
         # [20251217_FEATURE] Initialize Docker client if container isolation requested
         if isolation_level == "container":
             if not DOCKER_AVAILABLE:
-                raise ImportError(
-                    "Docker support requires 'docker' package. "
-                    "Install with: pip install docker"
-                )
+                raise ImportError("Docker support requires 'docker' package. " "Install with: pip install docker")
             if docker is None:
-                raise ImportError(
-                    "Docker support requires 'docker' package. "
-                    "Install with: pip install docker"
-                )
+                raise ImportError("Docker support requires 'docker' package. " "Install with: pip install docker")
 
             self.docker_client = docker.from_env()
 
@@ -134,7 +127,7 @@ class SandboxExecutor:
         changes: list[FileChange],
         test_command: str = "pytest",
         lint_command: str = "ruff check",
-        build_command: Optional[str] = None,
+        build_command: str | None = None,
     ) -> SandboxResult:
         """
         Apply changes and run tests in sandbox.
@@ -158,13 +151,9 @@ class SandboxExecutor:
 
             # Run in isolated environment
             if self.isolation_level == "container":
-                return self._execute_in_container(
-                    sandbox_path, test_command, lint_command, build_command
-                )
+                return self._execute_in_container(sandbox_path, test_command, lint_command, build_command)
             else:
-                return self._execute_in_process(
-                    sandbox_path, test_command, lint_command, build_command
-                )
+                return self._execute_in_process(sandbox_path, test_command, lint_command, build_command)
 
         finally:
             # Clean up sandbox
@@ -233,7 +222,7 @@ class SandboxExecutor:
         sandbox_path: Path,
         test_command: str,
         lint_command: str,
-        build_command: Optional[str],
+        build_command: str | None,
     ) -> SandboxResult:
         """
         Execute in Docker container for full isolation.
@@ -302,7 +291,7 @@ class SandboxExecutor:
         sandbox_path: Path,
         test_command: str,
         lint_command: str,
-        build_command: Optional[str],
+        build_command: str | None,
     ) -> SandboxResult:
         """
         Execute in subprocess with resource limits.
@@ -335,9 +324,7 @@ class SandboxExecutor:
 
             # [20251217_SECURITY] CPU time limit
             try:
-                resource.setrlimit(
-                    resource.RLIMIT_CPU, (self.max_cpu_seconds, self.max_cpu_seconds)
-                )
+                resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_seconds, self.max_cpu_seconds))
             except (ValueError, OSError):
                 pass
 
@@ -426,8 +413,8 @@ class SandboxExecutor:
 
     def _parse_subprocess_results(
         self,
-        lint_result: Optional[subprocess.CompletedProcess],
-        test_result: Optional[subprocess.CompletedProcess],
+        lint_result: subprocess.CompletedProcess | None,
+        test_result: subprocess.CompletedProcess | None,
         build_success: bool,
         execution_time_ms: int,
     ) -> SandboxResult:
@@ -478,31 +465,21 @@ class SandboxExecutor:
                         lint_results.append(
                             LintResult(
                                 file=parts[0] if len(parts) > 0 else "",
-                                line=(
-                                    int(parts[1])
-                                    if len(parts) > 1 and parts[1].isdigit()
-                                    else None
-                                ),
+                                line=(int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None),
                                 column=None,
                                 message=parts[-1].strip() if parts else line,
-                                severity=(
-                                    "error" if "error" in line.lower() else "warning"
-                                ),
+                                severity=("error" if "error" in line.lower() else "warning"),
                             )
                         )
 
-        success = build_success and (
-            test_result.returncode == 0 if test_result else True
-        )
+        success = build_success and (test_result.returncode == 0 if test_result else True)
 
         return SandboxResult(
             success=success,
             test_results=test_results,
             lint_results=lint_results,
             build_success=build_success,
-            side_effects_detected=self._detect_side_effects(
-                Path(tempfile.gettempdir())
-            ),
+            side_effects_detected=self._detect_side_effects(Path(tempfile.gettempdir())),
             execution_time_ms=execution_time_ms,
             stdout=stdout,
             stderr=stderr,

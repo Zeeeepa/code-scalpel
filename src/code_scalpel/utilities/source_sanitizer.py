@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Tuple
 
 # [20260116_BUGFIX] Pre-sanitize malformed source before ast.parse.
 _CONFLICT_MARKERS = ("<<<<<<<", "=======", ">>>>>>>")
@@ -11,7 +10,7 @@ _JINJA_BLOCK_PATTERN = re.compile(r"\{[%#].*?[%#]\}")
 _JINJA_EXPR_PATTERN = re.compile(r"\{\{.*?\}\}")
 
 
-def sanitize_python_source(code: str) -> Tuple[str, bool]:
+def sanitize_python_source(code: str) -> tuple[str, bool]:
     """Sanitize Python source for permissive parsing.
 
     Replaces merge conflict markers and Jinja template syntax with safe

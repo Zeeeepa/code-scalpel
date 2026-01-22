@@ -6,7 +6,6 @@ SimpleCov Parser - Ruby Code Coverage Analysis
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -43,28 +42,26 @@ class SimpleCovParser:
 
     def __init__(self):
         """Initialize SimpleCov parser."""
-        self.file_coverage: List[FileCoverage] = []
-        self.metrics: Optional[CoverageMetrics] = None
+        self.file_coverage: list[FileCoverage] = []
+        self.metrics: CoverageMetrics | None = None
 
     def parse_resultset_json(self, resultset_path: Path) -> CoverageMetrics:
         raise NotImplementedError("Phase 2: JSON parsing")
 
-    def parse_coverage_data(self, coverage_data: Dict) -> List[FileCoverage]:
+    def parse_coverage_data(self, coverage_data: dict) -> list[FileCoverage]:
         raise NotImplementedError("Phase 2: Coverage data parsing")
 
-    def calculate_coverage_metrics(self, files: List[FileCoverage]) -> CoverageMetrics:
+    def calculate_coverage_metrics(self, files: list[FileCoverage]) -> CoverageMetrics:
         raise NotImplementedError("Phase 2: Metrics calculation")
 
-    def identify_uncovered_lines(self, file_coverage: FileCoverage) -> List[int]:
+    def identify_uncovered_lines(self, file_coverage: FileCoverage) -> list[int]:
         raise NotImplementedError("Phase 2: Uncovered line identification")
 
-    def analyze_coverage_trends(self, historical_data: List[CoverageMetrics]) -> Dict:
+    def analyze_coverage_trends(self, historical_data: list[CoverageMetrics]) -> dict:
         raise NotImplementedError("Phase 2: Trend analysis")
 
     def generate_coverage_report(self, metrics: CoverageMetrics) -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
-    def identify_coverage_hotspots(
-        self, files: List[FileCoverage]
-    ) -> List[FileCoverage]:
+    def identify_coverage_hotspots(self, files: list[FileCoverage]) -> list[FileCoverage]:
         raise NotImplementedError("Phase 2: Hotspot identification")

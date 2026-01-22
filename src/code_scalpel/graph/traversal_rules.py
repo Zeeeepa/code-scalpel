@@ -24,9 +24,10 @@ from __future__ import annotations
 
 import heapq
 from collections import deque
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 
 class RuleType(Enum):
@@ -45,7 +46,7 @@ class TraversalRule:
 
     name: str
     rule_type: RuleType
-    condition: Callable[[Dict[str, Any]], Any]
+    condition: Callable[[dict[str, Any]], Any]
     description: str = ""
     priority: int = 0  # Higher = applied first
     enabled: bool = True
@@ -55,11 +56,11 @@ class TraversalRule:
 class TraversalPath:
     """A path found during traversal."""
 
-    nodes: List[str]
-    edges: List[Dict[str, Any]]
+    nodes: list[str]
+    edges: list[dict[str, Any]]
     total_weight: float
     depth: int
-    stopped_by_rule: Optional[str] = None
+    stopped_by_rule: str | None = None
 
 
 @dataclass
@@ -68,12 +69,12 @@ class TraversalResult:
 
     success: bool
     start_node: str
-    visited_nodes: List[Dict[str, Any]]
-    visited_edges: List[Dict[str, Any]]
-    paths: List[TraversalPath]
-    rule_activations: Dict[str, int]  # rule_name -> times activated
-    stats: Dict[str, Any]
-    error: Optional[str] = None
+    visited_nodes: list[dict[str, Any]]
+    visited_edges: list[dict[str, Any]]
+    paths: list[TraversalPath]
+    rule_activations: dict[str, int]  # rule_name -> times activated
+    stats: dict[str, Any]
+    error: str | None = None
 
 
 class TraversalRuleEngine:
@@ -93,8 +94,7 @@ class TraversalRuleEngine:
         },
         "skip_private": {
             "type": RuleType.FILTER,
-            "condition": lambda e: "::_" in e.get("to_id", "")
-            and "::__" not in e.get("to_id", ""),
+            "condition": lambda e: "::_" in e.get("to_id", "") and "::__" not in e.get("to_id", ""),
             "description": "Skip edges to private functions",
         },
         "complexity_weight": {
@@ -111,17 +111,17 @@ class TraversalRuleEngine:
 
     def __init__(self):
         """Initialize the rule engine."""
-        self._rules: Dict[str, TraversalRule] = {}
-        self._nodes: Dict[str, Dict[str, Any]] = {}
-        self._edges: List[Dict[str, Any]] = []
-        self._adjacency: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {}
-        self._reverse_adjacency: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {}
+        self._rules: dict[str, TraversalRule] = {}
+        self._nodes: dict[str, dict[str, Any]] = {}
+        self._edges: list[dict[str, Any]] = []
+        self._adjacency: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+        self._reverse_adjacency: dict[str, list[tuple[str, dict[str, Any]]]] = {}
 
     def add_rule(
         self,
         name: str,
         rule_type: RuleType,
-        condition: Callable[[Dict[str, Any]], Any],
+        condition: Callable[[dict[str, Any]], Any],
         description: str = "",
         priority: int = 0,
     ) -> None:
@@ -179,14 +179,14 @@ class TraversalRuleEngine:
             return True
         return False
 
-    def get_rules(self) -> List[TraversalRule]:
+    def get_rules(self) -> list[TraversalRule]:
         """Get all registered rules."""
         return sorted(self._rules.values(), key=lambda r: -r.priority)
 
     def load_graph(
         self,
-        nodes: List[Dict[str, Any]],
-        edges: List[Dict[str, Any]],
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
     ) -> None:
         """Load graph data for traversal."""
         self._nodes.clear()
@@ -215,7 +215,7 @@ class TraversalRuleEngine:
         start_id: str,
         max_depth: int = 5,
         direction: str = "both",
-        active_rules: Optional[Set[str]] = None,
+        active_rules: set[str] | None = None,
         use_weights: bool = False,
         max_nodes: int = 100,
     ) -> TraversalResult:
@@ -252,7 +252,7 @@ class TraversalRuleEngine:
             filter_rules = [r for r in rules if r.rule_type == RuleType.FILTER]
             weight_rules = [r for r in rules if r.rule_type == RuleType.WEIGHT]
 
-            rule_activations: Dict[str, int] = {r.name: 0 for r in rules}
+            rule_activations: dict[str, int] = {r.name: 0 for r in rules}
 
             if use_weights and weight_rules:
                 return self._weighted_traverse(
@@ -288,9 +288,7 @@ class TraversalRuleEngine:
                 error=str(e),
             )
 
-    def _get_active_rules(
-        self, active_rules: Optional[Set[str]]
-    ) -> List[TraversalRule]:
+    def _get_active_rules(self, active_rules: set[str] | None) -> list[TraversalRule]:
         """Get list of active rules sorted by priority."""
         rules = []
         for rule in self._rules.values():
@@ -306,17 +304,17 @@ class TraversalRuleEngine:
         start_id: str,
         max_depth: int,
         direction: str,
-        boundary_rules: List[TraversalRule],
-        filter_rules: List[TraversalRule],
-        rule_activations: Dict[str, int],
+        boundary_rules: list[TraversalRule],
+        filter_rules: list[TraversalRule],
+        rule_activations: dict[str, int],
         max_nodes: int,
     ) -> TraversalResult:
         """BFS traversal with rules."""
-        visited_nodes: List[Dict[str, Any]] = []
-        visited_edges: List[Dict[str, Any]] = []
-        visited_ids: Set[str] = {start_id}
+        visited_nodes: list[dict[str, Any]] = []
+        visited_edges: list[dict[str, Any]] = []
+        visited_ids: set[str] = {start_id}
 
-        queue: deque[Tuple[str, int]] = deque([(start_id, 0)])
+        queue: deque[tuple[str, int]] = deque([(start_id, 0)])
 
         while queue and len(visited_nodes) < max_nodes:
             current_id, depth = queue.popleft()
@@ -376,19 +374,19 @@ class TraversalRuleEngine:
         start_id: str,
         max_depth: int,
         direction: str,
-        boundary_rules: List[TraversalRule],
-        filter_rules: List[TraversalRule],
-        weight_rules: List[TraversalRule],
-        rule_activations: Dict[str, int],
+        boundary_rules: list[TraversalRule],
+        filter_rules: list[TraversalRule],
+        weight_rules: list[TraversalRule],
+        rule_activations: dict[str, int],
         max_nodes: int,
     ) -> TraversalResult:
         """Weighted traversal (Dijkstra-like) with rules."""
-        visited_nodes: List[Dict[str, Any]] = []
-        visited_edges: List[Dict[str, Any]] = []
-        visited_ids: Set[str] = set()
+        visited_nodes: list[dict[str, Any]] = []
+        visited_edges: list[dict[str, Any]] = []
+        visited_ids: set[str] = set()
 
         # Priority queue: (weight, depth, node_id)
-        heap: List[Tuple[float, int, str]] = [(0.0, 0, start_id)]
+        heap: list[tuple[float, int, str]] = [(0.0, 0, start_id)]
 
         while heap and len(visited_nodes) < max_nodes:
             weight, depth, current_id = heapq.heappop(heap)
@@ -468,7 +466,7 @@ class TraversalRuleEngine:
         self,
         node_id: str,
         direction: str,
-    ) -> List[Tuple[str, Dict[str, Any]]]:
+    ) -> list[tuple[str, dict[str, Any]]]:
         """Get neighbors based on direction."""
         neighbors = []
 
@@ -484,8 +482,8 @@ class TraversalRuleEngine:
         start_id: str,
         end_id: str,
         max_depth: int = 10,
-        active_rules: Optional[Set[str]] = None,
-    ) -> List[TraversalPath]:
+        active_rules: set[str] | None = None,
+    ) -> list[TraversalPath]:
         """
         Find all paths between two nodes respecting rules.
 
@@ -503,12 +501,10 @@ class TraversalRuleEngine:
         filter_rules = [r for r in rules if r.rule_type == RuleType.FILTER]
         weight_rules = [r for r in rules if r.rule_type == RuleType.WEIGHT]
 
-        paths: List[TraversalPath] = []
+        paths: list[TraversalPath] = []
 
         # DFS for path finding
-        stack: List[Tuple[str, List[str], List[Dict[str, Any]], float]] = [
-            (start_id, [start_id], [], 0.0)
-        ]
+        stack: list[tuple[str, list[str], list[dict[str, Any]], float]] = [(start_id, [start_id], [], 0.0)]
 
         while stack:
             current_id, path, edges, weight = stack.pop()

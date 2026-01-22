@@ -151,9 +151,7 @@ def calculateSum(numbers):
         """Test that analysis detects deep nesting issues."""
         result = self.scalpel.analyze(self.sample_code)
         # Check for deep nesting in issues
-        has_nesting_issue = any(
-            issue.get("category") == "deep_nesting" for issue in result.issues
-        )
+        has_nesting_issue = any(issue.get("category") == "deep_nesting" for issue in result.issues)
         self.assertTrue(has_nesting_issue)
 
     def test_analyze_security_async(self):
@@ -277,9 +275,7 @@ def BadFunc():
 
     def test_refactor_endpoint_success(self):
         """Test refactor endpoint with valid code."""
-        response = self.client.post(
-            "/refactor", json={"code": self.sample_code, "task": "improve naming"}
-        )
+        response = self.client.post("/refactor", json={"code": self.sample_code, "task": "improve naming"})
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
         self.assertTrue(data["success"])
@@ -294,11 +290,7 @@ def BadFunc():
         self.assertIn("risk_level", data)
         # New taint-based API returns different fields
         # Check for new format (vulnerabilities) or old format (recommendations)
-        has_security_info = (
-            "vulnerabilities" in data
-            or "recommendations" in data
-            or "vulnerability_count" in data
-        )
+        has_security_info = "vulnerabilities" in data or "recommendations" in data or "vulnerability_count" in data
         self.assertTrue(has_security_info)
 
     def test_response_time_under_2s(self):
@@ -332,9 +324,7 @@ def BadFunc():
 
     def test_refactor_endpoint_missing_body(self):
         """Test refactor endpoint with no request body."""
-        response = self.client.post(
-            "/refactor", content_type="application/json", data=""
-        )
+        response = self.client.post("/refactor", content_type="application/json", data="")
         self.assertIn(response.status_code, [400, 415])
 
     def test_refactor_code_not_string(self):
@@ -363,9 +353,7 @@ def BadFunc():
 
     def test_security_endpoint_missing_body(self):
         """Test security endpoint with no request body."""
-        response = self.client.post(
-            "/security", content_type="application/json", data=""
-        )
+        response = self.client.post("/security", content_type="application/json", data="")
         self.assertIn(response.status_code, [400, 415])
 
     def test_security_code_not_string(self):
@@ -446,9 +434,7 @@ class TestMCPServerConfig(unittest.TestCase):
         # Code exceeding limit should be rejected
         # Flask's MAX_CONTENT_LENGTH returns 413 (Request Entity Too Large)
         # Our custom check returns 400
-        response = client.post(
-            "/analyze", json={"code": "x = 1\ny = 2\nz = 3\nprint('hello world')"}
-        )
+        response = client.post("/analyze", json={"code": "x = 1\ny = 2\nz = 3\nprint('hello world')"})
         # Could be 413 from Flask or 400 from our handler
         self.assertIn(response.status_code, [400, 413])
         if response.status_code == 400:

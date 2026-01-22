@@ -12,7 +12,6 @@ Command: spotbugs -pluginList findsecbugs-plugin.jar -xml -output results.xml cl
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from defusedxml import ElementTree as ET
 
@@ -27,9 +26,9 @@ class SecurityBug:
     category: str  # e.g., "SECURITY", "MALICIOUS_CODE"
     priority: int  # 1=High, 2=Medium, 3=Low
     message: str
-    cwe_id: Optional[int] = None  # Common Weakness Enumeration ID
-    class_name: Optional[str] = None
-    method_name: Optional[str] = None
+    cwe_id: int | None = None  # Common Weakness Enumeration ID
+    class_name: str | None = None
+    method_name: str | None = None
 
 
 class FindSecBugsParser:
@@ -104,12 +103,8 @@ class FindSecBugsParser:
                 # Get class and method
                 class_elem = bug_instance.find(".//Class")
                 method_elem = bug_instance.find(".//Method")
-                class_name = (
-                    class_elem.get("classname") if class_elem is not None else None
-                )
-                method_name = (
-                    method_elem.get("name") if method_elem is not None else None
-                )
+                class_name = class_elem.get("classname") if class_elem is not None else None
+                method_name = method_elem.get("name") if method_elem is not None else None
 
                 # Get message
                 long_message = bug_instance.find("LongMessage")
@@ -147,9 +142,7 @@ class FindSecBugsParser:
         """
         return [b for b in bugs if b.priority == 1]
 
-    def get_bugs_by_cwe(
-        self, bugs: list[SecurityBug], cwe_id: int
-    ) -> list[SecurityBug]:
+    def get_bugs_by_cwe(self, bugs: list[SecurityBug], cwe_id: int) -> list[SecurityBug]:
         """
         Filter bugs by CWE ID.
 

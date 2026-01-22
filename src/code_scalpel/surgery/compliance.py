@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 try:
     from code_scalpel.governance.unified_governance import (
@@ -40,8 +39,8 @@ class ComplianceCheckResult:
     """Result of a compliance check."""
 
     allowed: bool
-    reason: Optional[str] = None
-    violations: Optional[list[dict]] = None
+    reason: str | None = None
+    violations: list[dict] | None = None
 
     def __post_init__(self):
         if self.violations is None:
@@ -53,8 +52,8 @@ def check_rename_compliance(
     target_type: str,
     target_name: str,
     new_name: str,
-    project_root: Optional[Path] = None,
-    governance_dir: Optional[str] = None,
+    project_root: Path | None = None,
+    governance_dir: str | None = None,
 ) -> ComplianceCheckResult:
     """
     Check if a rename operation complies with governance policies.
@@ -72,9 +71,7 @@ def check_rename_compliance(
     """
     if not GOVERNANCE_AVAILABLE:
         # If governance not available, allow by default (graceful degradation)
-        return ComplianceCheckResult(
-            allowed=True, reason="Governance system not available, allowing by default"
-        )
+        return ComplianceCheckResult(allowed=True, reason="Governance system not available, allowing by default")
 
     try:
         # Initialize governance system
@@ -122,16 +119,12 @@ def check_rename_compliance(
                     "rule": v.rule,
                     "message": v.message,
                     "severity": v.severity,
-                    "source": (
-                        v.source.value if hasattr(v.source, "value") else str(v.source)
-                    ),
+                    "source": (v.source.value if hasattr(v.source, "value") else str(v.source)),
                 }
                 for v in decision.violations
             ]
 
-            return ComplianceCheckResult(
-                allowed=False, reason=decision.reason, violations=violations
-            )
+            return ComplianceCheckResult(allowed=False, reason=decision.reason, violations=violations)
 
     except Exception as e:
         # Fail closed: if governance check fails, deny the operation

@@ -35,7 +35,6 @@ import ast
 import copy
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
 
 from code_scalpel.autonomy.stubs import SandboxExecutor
 
@@ -66,8 +65,8 @@ class MutationResult:
     original_code: str
     mutated_code: str
     tests_failed: bool  # True = good (mutation was caught)
-    tests_that_failed: List[str]
-    tests_that_passed: List[str]  # These tests are weak
+    tests_that_failed: list[str]
+    tests_that_passed: list[str]  # These tests are weak
 
 
 @dataclass
@@ -83,8 +82,8 @@ class MutationGateResult:
     mutations_caught: int  # Tests failed (good)
     mutations_survived: int  # Tests passed (bad - weak tests)
     hollow_fix_detected: bool
-    weak_tests: List[str]
-    recommendations: List[str]
+    weak_tests: list[str]
+    recommendations: list[str]
 
 
 @dataclass
@@ -145,7 +144,7 @@ class MutationTestGate:
         self,
         original_code: str,
         fixed_code: str,
-        test_files: List[str],
+        test_files: list[str],
         language: str = "python",
     ) -> MutationGateResult:
         """
@@ -168,7 +167,7 @@ class MutationTestGate:
             3. Apply additional mutations, verify tests catch them
             4. Calculate mutation score, gate on threshold
         """
-        results: List[MutationResult] = []
+        results: list[MutationResult] = []
 
         # [20251217_FEATURE] Step 1: Sanity check - fixed code should pass
         fixed_result = self.sandbox.run_tests(fixed_code, test_files)
@@ -180,9 +179,7 @@ class MutationTestGate:
                 mutations_survived=0,
                 hollow_fix_detected=False,
                 weak_tests=[],
-                recommendations=[
-                    "Fix does not pass tests - not ready for mutation testing"
-                ],
+                recommendations=["Fix does not pass tests - not ready for mutation testing"],
             )
 
         # [20251217_FEATURE] P0: Step 2: Critical - revert fix, tests MUST fail
@@ -233,11 +230,9 @@ class MutationTestGate:
                 weak_tests.update(r.tests_that_passed)
 
         # [20251217_FEATURE] P1: Provide actionable recommendations
-        recommendations: List[str] = []
+        recommendations: list[str] = []
         if survived > 0:
-            recommendations.append(
-                f"{survived} mutations survived. Consider strengthening these tests: {weak_tests}"
-            )
+            recommendations.append(f"{survived} mutations survived. Consider strengthening these tests: {weak_tests}")
 
         return MutationGateResult(
             passed=score >= self.min_mutation_score,
@@ -249,9 +244,7 @@ class MutationTestGate:
             recommendations=recommendations,
         )
 
-    def _test_mutation(
-        self, mutated_code: str, test_files: List[str], mutation_type: MutationType
-    ) -> MutationResult:
+    def _test_mutation(self, mutated_code: str, test_files: list[str], mutation_type: MutationType) -> MutationResult:
         """
         Run tests against mutated code.
 
@@ -268,7 +261,7 @@ class MutationTestGate:
             tests_that_passed=[t.name for t in result.tests if t.passed],
         )
 
-    def _generate_mutations(self, code: str, language: str) -> List[Mutation]:
+    def _generate_mutations(self, code: str, language: str) -> list[Mutation]:
         """
         Generate additional mutations for the code.
 
@@ -277,7 +270,7 @@ class MutationTestGate:
         Currently supports Python only. Future versions will support
         additional languages.
         """
-        mutations: List[Mutation] = []
+        mutations: list[Mutation] = []
 
         if language == "python":
             try:

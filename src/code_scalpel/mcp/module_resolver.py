@@ -8,12 +8,9 @@ programming languages, enabling parameterized URI access to code symbols.
 """
 
 from pathlib import Path
-from typing import Optional
 
 
-def resolve_module_path(
-    language: str, module: str, project_root: Path
-) -> Optional[Path]:
+def resolve_module_path(language: str, module: str, project_root: Path) -> Path | None:
     """
     Resolve a module name to a file path for a given language.
 
@@ -51,7 +48,7 @@ def resolve_module_path(
         return None
 
 
-def _resolve_python_module(module: str, project_root: Path) -> Optional[Path]:
+def _resolve_python_module(module: str, project_root: Path) -> Path | None:
     """
     Resolve Python module name to file path.
 
@@ -85,7 +82,7 @@ def _resolve_python_module(module: str, project_root: Path) -> Optional[Path]:
     return None
 
 
-def _resolve_javascript_module(module: str, project_root: Path) -> Optional[Path]:
+def _resolve_javascript_module(module: str, project_root: Path) -> Path | None:
     """
     Resolve JavaScript module name to file path.
 
@@ -133,7 +130,7 @@ def _resolve_javascript_module(module: str, project_root: Path) -> Optional[Path
     return None
 
 
-def _resolve_typescript_module(module: str, project_root: Path) -> Optional[Path]:
+def _resolve_typescript_module(module: str, project_root: Path) -> Path | None:
     """
     Resolve TypeScript module name to file path.
 
@@ -185,7 +182,7 @@ def _resolve_typescript_module(module: str, project_root: Path) -> Optional[Path
     return None
 
 
-def _resolve_java_module(module: str, project_root: Path) -> Optional[Path]:
+def _resolve_java_module(module: str, project_root: Path) -> Path | None:
     """
     Resolve Java module name (fully qualified class name) to file path.
 

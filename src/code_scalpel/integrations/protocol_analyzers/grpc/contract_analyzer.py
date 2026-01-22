@@ -34,7 +34,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 # [20251225_REFACTOR] Updated import path after protocol_analyzers reorganization
 from ..schema.drift_detector import (
@@ -73,7 +73,7 @@ class RpcMethod:
     client_streaming: bool = False
     server_streaming: bool = False
     deprecated: bool = False
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
 
     @property
     def streaming_type(self) -> StreamingType:
@@ -90,16 +90,8 @@ class RpcMethod:
     @property
     def full_signature(self) -> str:
         """Get the full RPC signature."""
-        req = (
-            f"stream {self.request_type}"
-            if self.client_streaming
-            else self.request_type
-        )
-        resp = (
-            f"stream {self.response_type}"
-            if self.server_streaming
-            else self.response_type
-        )
+        req = f"stream {self.request_type}" if self.client_streaming else self.request_type
+        resp = f"stream {self.response_type}" if self.server_streaming else self.response_type
         return f"rpc {self.name}({req}) returns ({resp})"
 
 
@@ -108,8 +100,8 @@ class GrpcService:
     """Represents a gRPC service definition."""
 
     name: str
-    methods: Dict[str, RpcMethod] = field(default_factory=dict)
-    options: Dict[str, Any] = field(default_factory=dict)
+    methods: dict[str, RpcMethod] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
     deprecated: bool = False
 
     @property
@@ -118,18 +110,14 @@ class GrpcService:
         return len(self.methods)
 
     @property
-    def streaming_methods(self) -> List[RpcMethod]:
+    def streaming_methods(self) -> list[RpcMethod]:
         """Get all streaming methods."""
-        return [
-            m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY
-        ]
+        return [m for m in self.methods.values() if m.streaming_type != StreamingType.UNARY]
 
     @property
-    def unary_methods(self) -> List[RpcMethod]:
+    def unary_methods(self) -> list[RpcMethod]:
         """Get all unary methods."""
-        return [
-            m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY
-        ]
+        return [m for m in self.methods.values() if m.streaming_type == StreamingType.UNARY]
 
 
 @dataclass
@@ -143,20 +131,20 @@ class GrpcContract:
     # File metadata
     syntax: str = "proto3"
     package: str = ""
-    imports: List[str] = field(default_factory=list)
-    options: Dict[str, Any] = field(default_factory=dict)
+    imports: list[str] = field(default_factory=list)
+    options: dict[str, Any] = field(default_factory=dict)
 
     # Service definitions
-    services: List[GrpcService] = field(default_factory=list)
+    services: list[GrpcService] = field(default_factory=list)
 
     # Message definitions
-    messages: Dict[str, ProtobufMessage] = field(default_factory=dict)
+    messages: dict[str, ProtobufMessage] = field(default_factory=dict)
 
     # Enum definitions
-    enums: Dict[str, ProtobufEnum] = field(default_factory=dict)
+    enums: dict[str, ProtobufEnum] = field(default_factory=dict)
 
     # Source file (if known)
-    source_file: Optional[str] = None
+    source_file: str | None = None
 
     @property
     def service_count(self) -> int:
@@ -169,7 +157,7 @@ class GrpcContract:
         return sum(s.method_count for s in self.services)
 
     @property
-    def all_message_types(self) -> Set[str]:
+    def all_message_types(self) -> set[str]:
         """Get all message type names used in the contract."""
         types = set(self.messages.keys())
         for service in self.services:
@@ -178,14 +166,14 @@ class GrpcContract:
                 types.add(method.response_type)
         return types
 
-    def get_service(self, name: str) -> Optional[GrpcService]:
+    def get_service(self, name: str) -> GrpcService | None:
         """Get a service by name."""
         for service in self.services:
             if service.name == name:
                 return service
         return None
 
-    def get_message(self, name: str) -> Optional[ProtobufMessage]:
+    def get_message(self, name: str) -> ProtobufMessage | None:
         """Get a message by name."""
         return self.messages.get(name)
 
@@ -206,13 +194,9 @@ class GrpcContract:
                 lines.append(f"  {service.name}:")
                 for method in service.methods.values():
                     streaming = (
-                        f" [{method.streaming_type.value}]"
-                        if method.streaming_type != StreamingType.UNARY
-                        else ""
+                        f" [{method.streaming_type.value}]" if method.streaming_type != StreamingType.UNARY else ""
                     )
-                    lines.append(
-                        f"    - {method.name}({method.request_type}) → {method.response_type}{streaming}"
-                    )
+                    lines.append(f"    - {method.name}({method.request_type}) → {method.response_type}{streaming}")
 
         return "\n".join(lines)
 
@@ -265,9 +249,7 @@ class GrpcContractAnalyzer:
     IMPORT_PATTERN = re.compile(r'import\s+["\']([^"\']+)["\']')
     OPTION_PATTERN = re.compile(r'option\s+(\w+)\s*=\s*["\']?([^"\';\s]+)["\']?\s*;')
     SERVICE_PATTERN = re.compile(r"service\s+(\w+)\s*\{")
-    RPC_PATTERN = re.compile(
-        r"rpc\s+(\w+)\s*\(\s*(stream\s+)?([\w.]+)\s*\)\s*returns\s*\(\s*(stream\s+)?([\w.]+)\s*\)"
-    )
+    RPC_PATTERN = re.compile(r"rpc\s+(\w+)\s*\(\s*(stream\s+)?([\w.]+)\s*\)\s*returns\s*\(\s*(stream\s+)?([\w.]+)\s*\)")
     DEPRECATED_PATTERN = re.compile(r"\[deprecated\s*=\s*true\]", re.IGNORECASE)
 
     def __init__(self) -> None:
@@ -275,9 +257,7 @@ class GrpcContractAnalyzer:
         self._proto_parser = ProtobufParser()
         self._drift_detector = SchemaDriftDetector()
 
-    def analyze(
-        self, proto_content: str, source_file: Optional[str] = None
-    ) -> GrpcContract:
+    def analyze(self, proto_content: str, source_file: str | None = None) -> GrpcContract:
         """
         Analyze a .proto file and extract the gRPC contract.
 
@@ -314,7 +294,7 @@ class GrpcContractAnalyzer:
 
         return contract
 
-    def analyze_file(self, proto_path: Union[str, Path]) -> GrpcContract:
+    def analyze_file(self, proto_path: str | Path) -> GrpcContract:
         """
         Analyze a .proto file from disk.
 
@@ -328,7 +308,7 @@ class GrpcContractAnalyzer:
         content = path.read_text()
         return self.analyze(content, source_file=str(path))
 
-    def validate(self, contract: GrpcContract) -> List[ContractIssue]:
+    def validate(self, contract: GrpcContract) -> list[ContractIssue]:
         """
         Validate a contract for common issues and best practices.
 
@@ -338,7 +318,7 @@ class GrpcContractAnalyzer:
         Returns:
             List of ContractIssue objects
         """
-        issues: List[ContractIssue] = []
+        issues: list[ContractIssue] = []
 
         # Check for missing package
         if not contract.package:
@@ -393,11 +373,9 @@ class GrpcContractAnalyzer:
 
         return issues
 
-    def _validate_service(
-        self, service: GrpcService, contract: GrpcContract
-    ) -> List[ContractIssue]:
+    def _validate_service(self, service: GrpcService, contract: GrpcContract) -> list[ContractIssue]:
         """Validate a single service."""
-        issues: List[ContractIssue] = []
+        issues: list[ContractIssue] = []
 
         # Check for empty service
         if not service.methods:
@@ -560,9 +538,7 @@ class GrpcContractAnalyzer:
         for msg in contract.messages.values():
             lines.append(f"message {msg.name} {{")
             for msg_field in msg.fields.values():
-                lines.append(
-                    f"  {msg_field.type} {msg_field.name} = {msg_field.number};"
-                )
+                lines.append(f"  {msg_field.type} {msg_field.name} = {msg_field.number};")
             lines.append("}")
             lines.append("")
 
@@ -570,16 +546,8 @@ class GrpcContractAnalyzer:
         for service in contract.services:
             lines.append(f"service {service.name} {{")
             for method in service.methods.values():
-                req = (
-                    f"stream {method.request_type}"
-                    if method.client_streaming
-                    else method.request_type
-                )
-                resp = (
-                    f"stream {method.response_type}"
-                    if method.server_streaming
-                    else method.response_type
-                )
+                req = f"stream {method.request_type}" if method.client_streaming else method.request_type
+                resp = f"stream {method.response_type}" if method.server_streaming else method.response_type
                 lines.append(f"  rpc {method.name}({req}) returns ({resp});")
             lines.append("}")
 
@@ -591,11 +559,11 @@ class GrpcContractAnalyzer:
         content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
         return content
 
-    def _parse_imports(self, content: str) -> List[str]:
+    def _parse_imports(self, content: str) -> list[str]:
         """Parse import statements."""
         return self.IMPORT_PATTERN.findall(content)
 
-    def _parse_options(self, content: str) -> Dict[str, Any]:
+    def _parse_options(self, content: str) -> dict[str, Any]:
         """Parse file-level options."""
         options = {}
         for match in self.OPTION_PATTERN.finditer(content):
@@ -604,9 +572,9 @@ class GrpcContractAnalyzer:
             options[name] = value
         return options
 
-    def _parse_services(self, content: str) -> List[GrpcService]:
+    def _parse_services(self, content: str) -> list[GrpcService]:
         """Parse all service definitions with full RPC details."""
-        services: List[GrpcService] = []
+        services: list[GrpcService] = []
 
         for match in self.SERVICE_PATTERN.finditer(content):
             service_name = match.group(1)
@@ -663,7 +631,7 @@ class GrpcContractAnalyzer:
 
         return service
 
-    def get_streaming_stats(self, contract: GrpcContract) -> Dict[str, int]:
+    def get_streaming_stats(self, contract: GrpcContract) -> dict[str, int]:
         """
         Get statistics about streaming patterns in a contract.
 
@@ -683,14 +651,14 @@ class GrpcContractAnalyzer:
 
         return stats
 
-    def extract_dependencies(self, contract: GrpcContract) -> Dict[str, Set[str]]:
+    def extract_dependencies(self, contract: GrpcContract) -> dict[str, set[str]]:
         """
         Extract message dependencies for each RPC method.
 
         Returns:
             Dict mapping RPC names to their dependent message types
         """
-        dependencies: Dict[str, Set[str]] = {}
+        dependencies: dict[str, set[str]] = {}
 
         for service in contract.services:
             for method in service.methods.values():
@@ -709,7 +677,7 @@ class GrpcContractAnalyzer:
         self,
         msg_name: str,
         contract: GrpcContract,
-        deps: Set[str],
+        deps: set[str],
     ) -> None:
         """Recursively collect message dependencies."""
         if msg_name not in contract.messages:
@@ -736,7 +704,7 @@ def analyze_grpc_contract(proto_content: str) -> GrpcContract:
     return analyzer.analyze(proto_content)
 
 
-def validate_grpc_contract(proto_content: str) -> List[ContractIssue]:
+def validate_grpc_contract(proto_content: str) -> list[ContractIssue]:
     """
     Convenience function to validate a .proto file.
 
@@ -751,7 +719,7 @@ def validate_grpc_contract(proto_content: str) -> List[ContractIssue]:
     return analyzer.validate(contract)
 
 
-def analyze_grpc_file(proto_path: Union[str, Path]) -> GrpcContract:
+def analyze_grpc_file(proto_path: str | Path) -> GrpcContract:
     """
     Convenience function to analyze a .proto file from disk.
 

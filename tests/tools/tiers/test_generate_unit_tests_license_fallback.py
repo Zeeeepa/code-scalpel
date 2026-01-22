@@ -18,8 +18,8 @@ import pytest
 @pytest.mark.asyncio
 async def test_invalid_license_falls_back_to_community(community_tier, monkeypatch):
     """Invalid license should fallback to Community tier with warning."""
-    from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
 
@@ -71,8 +71,8 @@ async def test_invalid_license_falls_back_to_community(community_tier, monkeypat
 @pytest.mark.asyncio
 async def test_expired_license_falls_back_to_community(community_tier, monkeypatch):
     """Expired license should fallback to Community tier."""
-    from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
 
@@ -116,8 +116,8 @@ async def test_expired_license_falls_back_to_community(community_tier, monkeypat
 @pytest.mark.asyncio
 async def test_missing_license_defaults_to_community(community_tier, monkeypatch):
     """Missing license should default to Community tier."""
-    from code_scalpel.mcp import server
     import code_scalpel.mcp.helpers.symbolic_helpers as sym_helpers
+    from code_scalpel.mcp import server
 
     calls: list[dict[str, Any]] = []
 
@@ -185,9 +185,7 @@ async def test_pro_feature_rejected_without_valid_license(community_tier, monkey
 
 
 @pytest.mark.asyncio
-async def test_enterprise_feature_rejected_without_valid_license(
-    community_tier, monkeypatch
-):
+async def test_enterprise_feature_rejected_without_valid_license(community_tier, monkeypatch):
     """Enterprise tier features (crash_log) should be rejected without valid license."""
     from code_scalpel.mcp import server
 
@@ -207,9 +205,7 @@ async def test_enterprise_feature_rejected_without_valid_license(
 
 
 @pytest.mark.asyncio
-async def test_license_fallback_preserves_community_features(
-    community_tier, monkeypatch
-):
+async def test_license_fallback_preserves_community_features(community_tier, monkeypatch):
     """License fallback should preserve all Community features."""
     from code_scalpel.mcp import server
 

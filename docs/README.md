@@ -124,7 +124,7 @@ Welcome to the Code Scalpel documentation! This directory contains comprehensive
 ### Configuration
 
 - **[Testing Configurations](configuration/TESTING_CONFIGURATIONS.md)** - Test environment setup
-- **[Governance Config Schema](configuration/governance_config_schema.md)** - Configuration reference
+- **[Configuration Guide](Configuration_Guide.md)** - Complete configuration reference
 
 ### Testing & Quality
 

@@ -27,7 +27,7 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 try:
     import tomllib  # type: ignore[import]  # Python 3.11+
@@ -79,8 +79,8 @@ class ArchitecturalViolation:
     to_module: str
     severity: ViolationSeverity
     action: ViolationAction
-    from_layer: Optional[str] = None
-    to_layer: Optional[str] = None
+    from_layer: str | None = None
+    to_layer: str | None = None
 
 
 @dataclass
@@ -121,17 +121,17 @@ class ArchitectureConfig:
         exempt_modules: Module names exempt from rules
     """
 
-    layers: List[str] = field(default_factory=list)
-    layer_mapping: Dict[str, List[str]] = field(default_factory=dict)
+    layers: list[str] = field(default_factory=list)
+    layer_mapping: dict[str, list[str]] = field(default_factory=dict)
     layer_direction: str = "downward_only"
     allow_same_layer: bool = True
     enable_layer_rules: bool = True
     enable_custom_rules: bool = True
     enable_coupling_rules: bool = True
-    custom_rules: List[CustomRule] = field(default_factory=list)
+    custom_rules: list[CustomRule] = field(default_factory=list)
     coupling_limits: CouplingLimits = field(default_factory=CouplingLimits)
-    exemptions: List[str] = field(default_factory=list)
-    exempt_modules: List[str] = field(default_factory=list)
+    exemptions: list[str] = field(default_factory=list)
+    exempt_modules: list[str] = field(default_factory=list)
 
 
 class ArchitecturalRuleEngine:
@@ -160,7 +160,7 @@ class ArchitecturalRuleEngine:
         ".code-scalpel/architecture.local.toml",  # Local overrides
     ]
 
-    def __init__(self, project_root: Union[str, Path]):
+    def __init__(self, project_root: str | Path):
         """
         Initialize the rule engine.
 
@@ -170,9 +170,9 @@ class ArchitecturalRuleEngine:
         self.project_root = Path(project_root).resolve()
         self.config = ArchitectureConfig()
         self._loaded = False
-        self._warnings: List[str] = []
+        self._warnings: list[str] = []
 
-    def load_config(self, config_path: Optional[str] = None) -> bool:
+    def load_config(self, config_path: str | None = None) -> bool:
         """
         Load architecture configuration from TOML file.
 
@@ -197,9 +197,7 @@ class ArchitecturalRuleEngine:
             if env_path:
                 paths_to_try = [Path(env_path)]
             else:
-                paths_to_try = [
-                    self.project_root / p for p in self.DEFAULT_CONFIG_PATHS
-                ]
+                paths_to_try = [self.project_root / p for p in self.DEFAULT_CONFIG_PATHS]
 
         config_data = None
         for path in paths_to_try:
@@ -238,11 +236,11 @@ class ArchitecturalRuleEngine:
         )
 
     @property
-    def layers(self) -> List[str]:
+    def layers(self) -> list[str]:
         """Expose configured layers for compatibility with older helpers."""
         return self.config.layers
 
-    def _parse_config(self, data: Dict) -> None:
+    def _parse_config(self, data: dict) -> None:
         """Parse TOML configuration data."""
         # Parse layers
         layers_section = data.get("layers", {})
@@ -253,12 +251,8 @@ class ArchitecturalRuleEngine:
         rules_section = data.get("rules", {})
         self.config.enable_layer_rules = rules_section.get("enable_layer_rules", True)
         self.config.enable_custom_rules = rules_section.get("enable_custom_rules", True)
-        self.config.enable_coupling_rules = rules_section.get(
-            "enable_coupling_rules", True
-        )
-        self.config.layer_direction = rules_section.get(
-            "layer_direction", "downward_only"
-        )
+        self.config.enable_coupling_rules = rules_section.get("enable_coupling_rules", True)
+        self.config.layer_direction = rules_section.get("layer_direction", "downward_only")
         self.config.allow_same_layer = rules_section.get("allow_same_layer", True)
 
         # Parse custom rules
@@ -315,7 +309,7 @@ class ArchitecturalRuleEngine:
 
         return False
 
-    def get_layer(self, module_path: str) -> Optional[str]:
+    def get_layer(self, module_path: str) -> str | None:
         """
         Determine which architectural layer a module belongs to.
 
@@ -352,9 +346,7 @@ class ArchitecturalRuleEngine:
         except ValueError:
             return -1
 
-    def check_dependency(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def check_dependency(self, from_module: str, to_module: str) -> list[ArchitecturalViolation]:
         """
         Check a single dependency for architectural violations.
 
@@ -386,9 +378,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def _check_layer_rules(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def _check_layer_rules(self, from_module: str, to_module: str) -> list[ArchitecturalViolation]:
         """Check layer boundary rules."""
         violations = []
 
@@ -460,9 +450,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def _check_custom_rules(
-        self, from_module: str, to_module: str
-    ) -> List[ArchitecturalViolation]:
+    def _check_custom_rules(self, from_module: str, to_module: str) -> list[ArchitecturalViolation]:
         """Check custom dependency rules."""
         violations = []
 
@@ -471,12 +459,10 @@ class ArchitecturalRuleEngine:
         to_path = to_module.replace(".", "/")
 
         for rule in self.config.custom_rules:
-            from_matches = fnmatch.fnmatch(
-                from_path, rule.from_pattern
-            ) or fnmatch.fnmatch(from_module, rule.from_pattern)
-            to_matches = fnmatch.fnmatch(to_path, rule.to_pattern) or fnmatch.fnmatch(
-                to_module, rule.to_pattern
+            from_matches = fnmatch.fnmatch(from_path, rule.from_pattern) or fnmatch.fnmatch(
+                from_module, rule.from_pattern
             )
+            to_matches = fnmatch.fnmatch(to_path, rule.to_pattern) or fnmatch.fnmatch(to_module, rule.to_pattern)
 
             # Both "deny" and "warn" actions trigger violations
             if from_matches and to_matches and rule.action in ("deny", "warn"):
@@ -503,9 +489,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def check_module_dependencies(
-        self, module: str, dependencies: List[str]
-    ) -> List[ArchitecturalViolation]:
+    def check_module_dependencies(self, module: str, dependencies: list[str]) -> list[ArchitecturalViolation]:
         """
         Check all dependencies of a module.
 
@@ -528,7 +512,7 @@ class ArchitecturalRuleEngine:
         fan_in: int,
         fan_out: int,
         max_depth: int = 0,
-    ) -> List[ArchitecturalViolation]:
+    ) -> list[ArchitecturalViolation]:
         """
         Check coupling metrics against limits.
 
@@ -596,7 +580,7 @@ class ArchitecturalRuleEngine:
 
         return violations
 
-    def get_all_rules(self) -> Dict[str, Any]:
+    def get_all_rules(self) -> dict[str, Any]:
         """
         Get all configured rules for reporting.
 
@@ -634,7 +618,7 @@ class ArchitecturalRuleEngine:
         }
 
     @property
-    def warnings(self) -> List[str]:
+    def warnings(self) -> list[str]:
         """Get warnings generated during config loading."""
         return self._warnings.copy()
 

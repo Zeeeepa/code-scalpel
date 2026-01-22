@@ -13,7 +13,6 @@ Command: java -jar checkstyle.jar -c /config.xml -f xml src/
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from defusedxml import ElementTree as ET
 
@@ -24,7 +23,7 @@ class CheckstyleViolation:
 
     file: str
     line: int
-    column: Optional[int]
+    column: int | None
     severity: str  # "error", "warning", "info"
     message: str
     source: str  # Checkstyle rule name
@@ -40,8 +39,8 @@ class CheckstyleParser:
 
     def __init__(
         self,
-        checkstyle_jar: Optional[str] = None,
-        config_file: Optional[str] = None,
+        checkstyle_jar: str | None = None,
+        config_file: str | None = None,
     ):
         """
         Initialize Checkstyle parser.
@@ -69,7 +68,7 @@ class CheckstyleParser:
             return self.parse_xml(xml_output)
         return []
 
-    def run_checkstyle(self, source_path: str) -> Optional[str]:
+    def run_checkstyle(self, source_path: str) -> str | None:
         """
         Run Checkstyle on source path.
 
@@ -120,11 +119,7 @@ class CheckstyleParser:
                         CheckstyleViolation(
                             file=filename,
                             line=int(error.get("line", 0)),
-                            column=(
-                                int(error.get("column", 0))
-                                if error.get("column")
-                                else None
-                            ),
+                            column=(int(error.get("column", 0)) if error.get("column") else None),
                             severity=error.get("severity", "warning"),
                             message=error.get("message", ""),
                             source=error.get("source", ""),

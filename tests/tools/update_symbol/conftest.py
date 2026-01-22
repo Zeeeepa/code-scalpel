@@ -16,7 +16,6 @@ fixtures from tests/tools/tiers/conftest.py which use real JWT licenses.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
@@ -68,10 +67,7 @@ PRO_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/pro.license.jwt"
 ENTERPRISE_LICENSE_PATH = PROJECT_ROOT / "tests/licenses/enterprise.license.jwt"
 
 # Fallback to archive if tests/licenses doesn't have valid ones
-ARCHIVE_PRO_LICENSE = (
-    PROJECT_ROOT
-    / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
-)
+ARCHIVE_PRO_LICENSE = PROJECT_ROOT / ".code-scalpel/archive/code_scalpel_license_pro_final_test_pro_1766982522.jwt"
 
 
 def _find_valid_license(tier: str) -> Path | None:
@@ -84,15 +80,13 @@ def _find_valid_license(tier: str) -> Path | None:
     if tier == "pro":
         candidates = [
             PRO_LICENSE_PATH,
-            PROJECT_ROOT
-            / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
+            PROJECT_ROOT / "tests/licenses/code_scalpel_license_pro_20260101_170435.jwt",
             ARCHIVE_PRO_LICENSE,
         ]
     elif tier == "enterprise":
         candidates = [
             ENTERPRISE_LICENSE_PATH,
-            PROJECT_ROOT
-            / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
+            PROJECT_ROOT / "tests/licenses/code_scalpel_license_enterprise_20260101_170506.jwt",
         ]
     else:
         return None
@@ -193,7 +187,7 @@ def calculate_tax(amount, rate=0.1):
 
 class Calculator:
     '''Simple calculator.'''
-    
+
     def multiply(self, x, y):
         '''Multiply two numbers.'''
         return x * y
@@ -218,7 +212,7 @@ function calculateTax(amount, rate = 0.1) {
 
 class Calculator {
     // Simple calculator
-    
+
     multiply(x, y) {
         // Multiply two numbers
         return x * y;
@@ -615,9 +609,7 @@ def assert_result_has_community_fields():
         ]
         for field_name in pro_fields:
             if field_name in result:
-                assert (
-                    result[field_name] is None
-                ), f"Community tier should not expose {field_name}"
+                assert result[field_name] is None, f"Community tier should not expose {field_name}"
 
         return True
 
@@ -652,9 +644,7 @@ def assert_result_has_pro_fields():
         ]
         for field_name in enterprise_fields:
             if field_name in result:
-                assert (
-                    result[field_name] is None
-                ), f"Pro tier should not expose {field_name}"
+                assert result[field_name] is None, f"Pro tier should not expose {field_name}"
 
         return True
 
@@ -686,9 +676,7 @@ def assert_result_has_enterprise_fields():
             "error",
         ]
         for field_name in all_fields:
-            assert (
-                field_name in result
-            ), f"Enterprise result missing field: {field_name}"
+            assert field_name in result, f"Enterprise result missing field: {field_name}"
 
         return True
 
@@ -704,7 +692,6 @@ import time  # noqa: E402
 # import psutil  # [20260103_TEST] Not needed for Phase 1 simplified tests
 from contextlib import contextmanager  # noqa: E402
 from dataclasses import dataclass, field  # noqa: E402
-from typing import List  # noqa: E402
 
 # Simple memory tracking fallback when psutil is not available
 try:
@@ -723,10 +710,10 @@ class PerformanceMetrics:
     memory_delta_mb: float
     success: bool
     iterations: int
-    durations: List[float] = field(default_factory=list)
-    median_ms: Optional[float] = None
-    p95_ms: Optional[float] = None
-    p99_ms: Optional[float] = None
+    durations: list[float] = field(default_factory=list)
+    median_ms: float | None = None
+    p95_ms: float | None = None
+    p99_ms: float | None = None
 
     def __post_init__(self):
         """Calculate percentiles if multiple iterations."""
@@ -757,7 +744,7 @@ def measure_performance(iterations: int = 1):
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
     else:
         mem_before = 0.0
-    durations: List[float] = []
+    durations: list[float] = []
 
     overall_start = time.perf_counter()
     try:

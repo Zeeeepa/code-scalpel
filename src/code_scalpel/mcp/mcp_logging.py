@@ -18,7 +18,7 @@ import logging
 import traceback
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 
 class ToolUsageStatsDict(TypedDict, total=False):
@@ -106,10 +106,10 @@ class ToolInvocation:
     timestamp: datetime
     duration_ms: float
     success: bool
-    error_type: Optional[str] = None
-    error_message: Optional[str] = None
-    params: Dict[str, Any] = field(default_factory=dict)
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    error_type: str | None = None
+    error_message: str | None = None
+    params: dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
 
 
 class MCPAnalytics:
@@ -122,7 +122,7 @@ class MCPAnalytics:
 
     def __init__(self):
         """Initialize the analytics engine."""
-        self._invocations: List[ToolInvocation] = []
+        self._invocations: list[ToolInvocation] = []
         self._start_time = datetime.now()
 
     def record_invocation(self, invocation: ToolInvocation) -> None:
@@ -133,9 +133,7 @@ class MCPAnalytics:
         """
         self._invocations.append(invocation)
 
-    def get_tool_usage_stats(
-        self, time_range: Optional[str] = None
-    ) -> ToolUsageStatsDict:
+    def get_tool_usage_stats(self, time_range: str | None = None) -> ToolUsageStatsDict:
         """Get usage statistics for MCP tools.
 
         Args:
@@ -154,7 +152,7 @@ class MCPAnalytics:
             }
 
         # Count tool usage
-        tool_counts: Dict[str, int] = {}
+        tool_counts: dict[str, int] = {}
         for inv in self._invocations:
             tool_counts[inv.tool_name] = tool_counts.get(inv.tool_name, 0) + 1
 
@@ -166,14 +164,10 @@ class MCPAnalytics:
         success_rate = successful / len(self._invocations)
 
         # Calculate average duration
-        avg_duration = sum(inv.duration_ms for inv in self._invocations) / len(
-            self._invocations
-        )
+        avg_duration = sum(inv.duration_ms for inv in self._invocations) / len(self._invocations)
 
         # Calculate tokens saved
-        tokens_saved = sum(
-            inv.metrics.get("tokens_saved", 0) for inv in self._invocations
-        )
+        tokens_saved = sum(inv.metrics.get("tokens_saved", 0) for inv in self._invocations)
 
         return {
             "total_invocations": len(self._invocations),
@@ -193,9 +187,7 @@ class MCPAnalytics:
         Returns:
             Dictionary with tool-specific statistics
         """
-        tool_invocations = [
-            inv for inv in self._invocations if inv.tool_name == tool_name
-        ]
+        tool_invocations = [inv for inv in self._invocations if inv.tool_name == tool_name]
 
         if not tool_invocations:
             return {
@@ -207,9 +199,7 @@ class MCPAnalytics:
 
         successful = sum(1 for inv in tool_invocations if inv.success)
         success_rate = successful / len(tool_invocations)
-        avg_duration = sum(inv.duration_ms for inv in tool_invocations) / len(
-            tool_invocations
-        )
+        avg_duration = sum(inv.duration_ms for inv in tool_invocations) / len(tool_invocations)
 
         return {
             "tool_name": tool_name,
@@ -227,7 +217,7 @@ class MCPAnalytics:
             ][:10],
         }
 
-    def get_error_summary(self) -> Dict[str, Any]:
+    def get_error_summary(self) -> dict[str, Any]:
         """Get summary of errors encountered."""
         errors = [inv for inv in self._invocations if not inv.success]
 
@@ -239,7 +229,7 @@ class MCPAnalytics:
             }
 
         # Count error types
-        error_counts: Dict[str, int] = {}
+        error_counts: dict[str, int] = {}
         for inv in errors:
             if inv.error_type:
                 error_counts[inv.error_type] = error_counts.get(inv.error_type, 0) + 1
@@ -271,9 +261,7 @@ def get_analytics() -> MCPAnalytics:
     return _analytics
 
 
-def log_tool_invocation(
-    tool_name: str, params: Optional[Dict[str, Any]] = None, **kwargs
-) -> None:
+def log_tool_invocation(tool_name: str, params: dict[str, Any] | None = None, **kwargs) -> None:
     """[20251216_FEATURE] v2.2.0 - Log MCP tool invocation start."""
     safe_params = _sanitize_params(params or {})
 
@@ -289,7 +277,7 @@ def log_tool_invocation(
 def log_tool_success(
     tool_name: str,
     duration_ms: float,
-    metrics: Optional[Dict[str, Any]] = None,
+    metrics: dict[str, Any] | None = None,
     **kwargs,
 ) -> None:
     """[20251216_FEATURE] v2.2.0 - Log successful MCP tool execution."""
@@ -316,8 +304,8 @@ def log_tool_success(
 def log_tool_error(
     tool_name: str,
     error: Exception,
-    duration_ms: Optional[float] = None,
-    params: Optional[Dict[str, Any]] = None,
+    duration_ms: float | None = None,
+    params: dict[str, Any] | None = None,
     **kwargs,
 ) -> None:
     """[20251216_FEATURE] v2.2.0 - Log MCP tool execution error."""
@@ -361,7 +349,7 @@ def log_tool_error(
         )
 
 
-def _sanitize_params(params: Dict[str, Any]) -> Dict[str, Any]:
+def _sanitize_params(params: dict[str, Any]) -> dict[str, Any]:
     """Sanitize parameters to remove sensitive data."""
     sensitive_keys = {
         "password",
@@ -375,7 +363,7 @@ def _sanitize_params(params: Dict[str, Any]) -> Dict[str, Any]:
         "private_key",
     }
 
-    sanitized: Dict[str, Any] = {}
+    sanitized: dict[str, Any] = {}
     for key, value in params.items():
         key_lower = key.lower()
         if any(sensitive in key_lower for sensitive in sensitive_keys):

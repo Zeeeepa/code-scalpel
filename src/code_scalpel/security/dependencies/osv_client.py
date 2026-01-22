@@ -20,7 +20,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 
 class OSVVulnerabilityDict(TypedDict):
@@ -53,9 +53,9 @@ class Vulnerability:
     severity: str  # "CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"
     package: str
     vulnerable_version: str
-    fixed_version: Optional[str]
-    aliases: List[str] = field(default_factory=list)
-    references: List[str] = field(default_factory=list)
+    fixed_version: str | None
+    aliases: list[str] = field(default_factory=list)
+    references: list[str] = field(default_factory=list)
 
     def to_dict(self) -> OSVVulnerabilityDict:
         """Convert to dictionary for JSON serialization."""
@@ -108,13 +108,13 @@ class OSVClient:
         """
         self.timeout = timeout
         self.cache_enabled = cache_enabled
-        self._cache: Dict[str, List[Vulnerability]] = {}
+        self._cache: dict[str, list[Vulnerability]] = {}
 
     def _normalize_ecosystem(self, ecosystem: str) -> str:
         """Normalize ecosystem name to OSV format."""
         return self.ECOSYSTEM_MAP.get(ecosystem.lower(), ecosystem)
 
-    def _make_request(self, url: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _make_request(self, url: str, data: dict[str, Any]) -> dict[str, Any]:
         """
         Make HTTP POST request to OSV API with retry logic.
 
@@ -139,9 +139,7 @@ class OSVClient:
         for attempt in range(MAX_RETRIES):
             try:
                 req = urllib.request.Request(url, data=payload, headers=headers)
-                with urllib.request.urlopen(
-                    req, timeout=self.timeout
-                ) as response:  # nosec B310
+                with urllib.request.urlopen(req, timeout=self.timeout) as response:  # nosec B310
                     return json.loads(response.read().decode("utf-8"))
             except urllib.error.HTTPError as e:
                 if e.code == 429:  # Rate limited
@@ -163,7 +161,7 @@ class OSVClient:
 
         raise OSVError(f"Request failed after {MAX_RETRIES} retries: {last_error}")
 
-    def _parse_severity(self, vuln_data: Dict[str, Any]) -> str:
+    def _parse_severity(self, vuln_data: dict[str, Any]) -> str:
         """
         Extract severity from OSV vulnerability data.
 
@@ -240,9 +238,7 @@ class OSVClient:
 
         return "UNKNOWN"
 
-    def _parse_fixed_version(
-        self, affected: List[Dict[str, Any]], package_name: str
-    ) -> Optional[str]:
+    def _parse_fixed_version(self, affected: list[dict[str, Any]], package_name: str) -> str | None:
         """Extract the fixed version from affected ranges."""
         # [20251213_FEATURE] Parse fixed version from OSV affected ranges
         for aff in affected:
@@ -258,9 +254,7 @@ class OSVClient:
                 # but we might find it in database_specific
         return None
 
-    def query_package(
-        self, package: str, version: str, ecosystem: str = "PyPI"
-    ) -> List[Vulnerability]:
+    def query_package(self, package: str, version: str, ecosystem: str = "PyPI") -> list[Vulnerability]:
         """
         Query OSV for vulnerabilities affecting a specific package version.
 
@@ -303,15 +297,9 @@ class OSVClient:
                 severity=self._parse_severity(vuln),
                 package=package,
                 vulnerable_version=version,
-                fixed_version=self._parse_fixed_version(
-                    vuln.get("affected", []), package
-                ),
+                fixed_version=self._parse_fixed_version(vuln.get("affected", []), package),
                 aliases=vuln.get("aliases", []),
-                references=[
-                    ref.get("url", "")
-                    for ref in vuln.get("references", [])
-                    if ref.get("url")
-                ][
+                references=[ref.get("url", "") for ref in vuln.get("references", []) if ref.get("url")][
                     :5
                 ],  # Limit to 5 references
             )
@@ -323,9 +311,7 @@ class OSVClient:
 
         return vulnerabilities
 
-    def query_batch(
-        self, packages: List[Dict[str, str]]
-    ) -> Dict[str, List[Vulnerability]]:
+    def query_batch(self, packages: list[dict[str, str]]) -> dict[str, list[Vulnerability]]:
         """
         Query OSV for vulnerabilities in multiple packages at once.
 
@@ -378,15 +364,9 @@ class OSVClient:
                     severity=self._parse_severity(vuln),
                     package=pkg["name"],
                     vulnerable_version=pkg["version"],
-                    fixed_version=self._parse_fixed_version(
-                        vuln.get("affected", []), pkg["name"]
-                    ),
+                    fixed_version=self._parse_fixed_version(vuln.get("affected", []), pkg["name"]),
                     aliases=vuln.get("aliases", []),
-                    references=[
-                        ref.get("url", "")
-                        for ref in vuln.get("references", [])
-                        if ref.get("url")
-                    ][:5],
+                    references=[ref.get("url", "") for ref in vuln.get("references", []) if ref.get("url")][:5],
                 )
                 vulnerabilities.append(v)
 

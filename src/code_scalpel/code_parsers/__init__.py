@@ -26,16 +26,14 @@ from .base_parser import BaseParser, Language, ParseResult, PreprocessorConfig
 # [20251224_FEATURE] Import from polyglot extractor (migrated from polyglot/)
 from .extractor import (
     EXTENSION_MAP,
-)
-from .extractor import (
-    Language as PolyglotLanguage,  # Alias to avoid conflict with base_parser.Language
-)
-from .extractor import (
     PolyglotExtractionResult,
     PolyglotExtractor,
     detect_language,
     extract_from_code,
     extract_from_file,
+)
+from .extractor import (
+    Language as PolyglotLanguage,  # Alias to avoid conflict with base_parser.Language
 )
 from .factory import ParserFactory
 from .interface import IParser

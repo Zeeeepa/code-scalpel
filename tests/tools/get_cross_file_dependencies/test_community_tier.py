@@ -16,9 +16,7 @@ class TestCommunityTierBasics:
     """Community Tier should enforce max_depth=1."""
 
     @pytest.mark.asyncio
-    async def test_community_simple_import(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_community_simple_import(self, community_server, simple_two_file_project):
         """Test basic symbol extraction with direct import."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -31,9 +29,7 @@ class TestCommunityTierBasics:
         assert result.total_dependencies >= 1
 
     @pytest.mark.asyncio
-    async def test_community_max_depth_enforcement(
-        self, community_server, deep_chain_project
-    ):
+    async def test_community_max_depth_enforcement(self, community_server, deep_chain_project):
         """Community tier should enforce max_depth=1."""
         result = await community_server.get_cross_file_dependencies(
             target_file=deep_chain_project["target_file"],
@@ -51,9 +47,7 @@ class TestCommunityCircularDetection:
     """Community tier should detect circular imports."""
 
     @pytest.mark.asyncio
-    async def test_circular_imports_detected(
-        self, community_server, circular_import_project
-    ):
+    async def test_circular_imports_detected(self, community_server, circular_import_project):
         """Should detect circular import cycles."""
         result = await community_server.get_cross_file_dependencies(
             target_file=circular_import_project["target_file"],
@@ -70,9 +64,7 @@ class TestCommunityImportGraph:
     """Community tier import graph generation."""
 
     @pytest.mark.asyncio
-    async def test_import_graph_generated(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_import_graph_generated(self, community_server, simple_two_file_project):
         """Should generate import graph."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -88,9 +80,7 @@ class TestCommunityMermaidDiagram:
     """Community tier Mermaid diagram generation."""
 
     @pytest.mark.asyncio
-    async def test_mermaid_diagram_generated(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_mermaid_diagram_generated(self, community_server, simple_two_file_project):
         """Should generate Mermaid diagram."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],
@@ -134,9 +124,7 @@ class TestCommunityFeatureGating:
         assert hasattr(result, "alias_resolutions")
 
     @pytest.mark.asyncio
-    async def test_no_wildcard_expansions(
-        self, community_server, wildcard_import_project
-    ):
+    async def test_no_wildcard_expansions(self, community_server, wildcard_import_project):
         """Community should have empty wildcard_expansions (Pro+ feature)."""
         result = await community_server.get_cross_file_dependencies(
             target_file=wildcard_import_project["target_file"],
@@ -149,9 +137,7 @@ class TestCommunityFeatureGating:
         assert hasattr(result, "wildcard_expansions")
 
     @pytest.mark.asyncio
-    async def test_no_architectural_violations(
-        self, community_server, simple_two_file_project
-    ):
+    async def test_no_architectural_violations(self, community_server, simple_two_file_project):
         """Community should not have architectural violation detection."""
         result = await community_server.get_cross_file_dependencies(
             target_file=simple_two_file_project["target_file"],

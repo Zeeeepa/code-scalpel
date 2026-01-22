@@ -22,7 +22,6 @@ Example:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
 
 
 class SanitizerType(Enum):
@@ -44,7 +43,7 @@ class BypassTechnique:
     name: str
     payload: str
     description: str
-    cve_reference: Optional[str] = None
+    cve_reference: str | None = None
 
 
 @dataclass
@@ -54,8 +53,8 @@ class SanitizerEffectiveness:
     score: float  # 0.0-1.0 (1.0 = fully effective)
     sanitizer_type: SanitizerType
     correct_context: bool
-    bypasses: List[BypassTechnique]
-    recommendations: List[str]
+    bypasses: list[BypassTechnique]
+    recommendations: list[str]
     is_sufficient: bool
 
 
@@ -72,10 +71,10 @@ class SanitizerAnalyzer:
         - Load path traversal bypasses
         - Setup symbolic executor for testing
         """
-        self.bypass_database: List[BypassTechnique] = []
+        self.bypass_database: list[BypassTechnique] = []
 
     def check_sanitizer(
-        self, sanitizer_code: str, sink_type: str, context: Optional[str] = None
+        self, sanitizer_code: str, sink_type: str, context: str | None = None
     ) -> SanitizerEffectiveness:
         """
         - Parse sanitizer code
@@ -86,7 +85,7 @@ class SanitizerAnalyzer:
         """
         raise NotImplementedError("Sanitizer checking not yet implemented")
 
-    def generate_bypasses(self, sanitizer_code: str) -> List[str]:
+    def generate_bypasses(self, sanitizer_code: str) -> list[str]:
         """
         - Use symbolic execution
         - Use fuzzing techniques

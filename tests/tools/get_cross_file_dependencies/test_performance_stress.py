@@ -36,19 +36,13 @@ class TestLargeProjectAnalysis:
         for i in range(num_files - 1):
             next_i = i + 1
             mod_file = tmp_path / f"mod_{i}.py"
-            import_stmt = (
-                f"from mod_{next_i} import func_{next_i}"
-                if next_i < num_files - 1
-                else ""
-            )
+            import_stmt = f"from mod_{next_i} import func_{next_i}" if next_i < num_files - 1 else ""
             mod_file.write_text(f"{import_stmt}\n" f"def func_{i}(): return {i}\n")
 
         return main_file
 
     @pytest.mark.asyncio
-    async def test_community_tier_handles_large_project_within_limits(
-        self, tmp_path, community_server
-    ):
+    async def test_community_tier_handles_large_project_within_limits(self, tmp_path, community_server):
         """Community should limit analysis to 500 files max.
 
         The Community tier has a 500-file scope limit. Projects exceeding this
@@ -87,9 +81,7 @@ class TestLargeProjectAnalysis:
         assert result.transitive_depth <= 1
 
     @pytest.mark.asyncio
-    async def test_pro_tier_handles_large_project_within_limits(
-        self, tmp_path, pro_server
-    ):
+    async def test_pro_tier_handles_large_project_within_limits(self, tmp_path, pro_server):
         """Pro should limit analysis to 500 files max."""
         main_file = self.create_large_project(tmp_path, num_files=600)
 
@@ -104,18 +96,14 @@ class TestLargeProjectAnalysis:
 
         assert result.success is True
         # Should clamp to 500 files
-        assert (
-            result.files_analyzed <= 500
-        ), f"Pro should limit to 500 files, analyzed {result.files_analyzed}"
+        assert result.files_analyzed <= 500, f"Pro should limit to 500 files, analyzed {result.files_analyzed}"
         # Pro should complete within reasonable time
         assert elapsed < 30.0, f"Pro tier took {elapsed:.2f}s, expected <30s"
         # Depth should be clamped to 5
         assert result.transitive_depth <= 5
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_handles_large_project_no_file_limit(
-        self, tmp_path, enterprise_server
-    ):
+    async def test_enterprise_tier_handles_large_project_no_file_limit(self, tmp_path, enterprise_server):
         """Enterprise should analyze all files without limit."""
         main_file = self.create_large_project(tmp_path, num_files=600)
 
@@ -146,9 +134,7 @@ class TestDepthLimitEnforcement:
             mod_file = tmp_path / f"mod_{i}.py"
             if i < depth - 1:
                 next_i = i + 1
-                mod_file.write_text(
-                    f"from mod_{next_i} import func_{next_i}\ndef func_{i}(): return func_{next_i}()"
-                )
+                mod_file.write_text(f"from mod_{next_i} import func_{next_i}\ndef func_{i}(): return func_{next_i}()")
             else:
                 mod_file.write_text(f"def func_{i}(): return {i}")
 
@@ -170,9 +156,7 @@ class TestDepthLimitEnforcement:
         )
 
         assert result.success is True
-        assert (
-            result.transitive_depth <= 1
-        ), f"Community should clamp depth to 1, got {result.transitive_depth}"
+        assert result.transitive_depth <= 1, f"Community should clamp depth to 1, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
     async def test_pro_depth_clamped_to_5(self, tmp_path, pro_server):
@@ -187,14 +171,10 @@ class TestDepthLimitEnforcement:
         )
 
         assert result.success is True
-        assert (
-            result.transitive_depth <= 5
-        ), f"Pro should clamp depth to 5, got {result.transitive_depth}"
+        assert result.transitive_depth <= 5, f"Pro should clamp depth to 5, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
-    async def test_enterprise_respects_requested_depth(
-        self, tmp_path, enterprise_server
-    ):
+    async def test_enterprise_respects_requested_depth(self, tmp_path, enterprise_server):
         """Enterprise should respect max_depth parameter up to full graph."""
         main_file = self.create_deep_chain(tmp_path, depth=10)
 
@@ -280,12 +260,8 @@ class TestTimeoutProtection:
 
         # Should either succeed quickly or indicate timeout in error message
         # [20260111_FIX] Check error field for TIMEOUT instead of hasattr
-        is_timeout = (
-            result.error and "TIMEOUT" in result.error if result.error else False
-        )
-        assert (
-            result.success is True or is_timeout
-        ), f"Expected success or timeout, got error: {result.error}"
+        is_timeout = result.error and "TIMEOUT" in result.error if result.error else False
+        assert result.success is True or is_timeout, f"Expected success or timeout, got error: {result.error}"
 
 
 class TestMemoryEfficiency:
@@ -304,9 +280,7 @@ class TestMemoryEfficiency:
         return main_file
 
     @pytest.mark.asyncio
-    async def test_no_memory_explosion_on_large_project(
-        self, tmp_path, enterprise_server
-    ):
+    async def test_no_memory_explosion_on_large_project(self, tmp_path, enterprise_server):
         """Large project analysis should not cause memory explosion."""
         main_file = self.create_moderately_large_project(tmp_path, num_files=200)
 
@@ -331,9 +305,7 @@ class TestMemoryEfficiency:
 
         assert result.success is True
         # Memory increase should be reasonable (<500MB for 200 files)
-        assert (
-            memory_increase < 500
-        ), f"Memory increase {memory_increase:.1f}MB exceeds 500MB threshold"
+        assert memory_increase < 500, f"Memory increase {memory_increase:.1f}MB exceeds 500MB threshold"
 
 
 class TestConcurrentAnalysis:
@@ -399,9 +371,7 @@ class TestPerformanceRegression:
 
         assert result.success is True
         # Community should complete in <5 seconds for 100 files
-        assert (
-            elapsed < 5.0
-        ), f"Community tier took {elapsed:.2f}s for 100 files, expected <5s"
+        assert elapsed < 5.0, f"Community tier took {elapsed:.2f}s for 100 files, expected <5s"
 
         # Provide feedback on actual performance
         print(f"\nCommunity tier performance: {elapsed:.3f}s for 100 files")

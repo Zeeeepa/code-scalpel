@@ -20,15 +20,11 @@ class TestGitignoreBehavior:
     def test_with_respect_gitignore_parameter_accepted(self, project_with_gitignore):
         """Verify respect_gitignore parameter is accepted by ProjectCrawler."""
         try:
-            crawler = ProjectCrawler(
-                str(project_with_gitignore), respect_gitignore=True
-            )
+            crawler = ProjectCrawler(str(project_with_gitignore), respect_gitignore=True)
             result = crawler.crawl()
             assert result is not None
         except TypeError as e:
-            pytest.fail(
-                f"ProjectCrawler should accept respect_gitignore parameter: {e}"
-            )
+            pytest.fail(f"ProjectCrawler should accept respect_gitignore parameter: {e}")
 
     def test_respect_gitignore_produces_results(self, project_with_gitignore):
         """Verify crawl with respect_gitignore=True still produces results."""
@@ -39,9 +35,7 @@ class TestGitignoreBehavior:
         assert result.total_files > 0
         assert result.files_analyzed
 
-    def test_python_files_detected_regardless_of_gitignore(
-        self, project_with_gitignore
-    ):
+    def test_python_files_detected_regardless_of_gitignore(self, project_with_gitignore):
         """Verify Python files are detected in gitignore projects."""
         crawler = ProjectCrawler(str(project_with_gitignore), respect_gitignore=False)
         result = crawler.crawl()

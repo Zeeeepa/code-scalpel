@@ -4,12 +4,11 @@
 """
 
 import pytest
+
 from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] ImportType.FRAMEWORK not implemented - feature incomplete"
-)
+@pytest.mark.skip(reason="[20260117_TEST] ImportType.FRAMEWORK not implemented - feature incomplete")
 def test_dynamic_and_framework_imports(tmp_path):
     project = tmp_path
     # Project files
@@ -44,12 +43,8 @@ def build(app):
     assert ImportType.FRAMEWORK in kinds
     assert ImportType.LAZY in kinds  # unknown dynamic_name
 
-    dynamic_targets = [
-        info.module for info in imports if info.import_type == ImportType.DYNAMIC
-    ]
+    dynamic_targets = [info.module for info in imports if info.import_type == ImportType.DYNAMIC]
     assert "pkg.mod" in dynamic_targets
 
-    framework_targets = [
-        info.module for info in imports if info.import_type == ImportType.FRAMEWORK
-    ]
+    framework_targets = [info.module for info in imports if info.import_type == ImportType.FRAMEWORK]
     assert "pkg.mod" in framework_targets

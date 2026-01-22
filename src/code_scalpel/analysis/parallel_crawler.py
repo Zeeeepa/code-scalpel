@@ -23,10 +23,11 @@ from __future__ import annotations
 import hashlib
 import os
 import time
+from collections.abc import Callable, Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, Set
+from typing import Any
 
 from .gitignore import GitignoreParser
 
@@ -38,7 +39,7 @@ class FileInfo:
     path: str
     size: int
     mtime: float
-    content_hash: Optional[str] = None
+    content_hash: str | None = None
 
 
 @dataclass
@@ -46,11 +47,11 @@ class CrawlChunk:
     """A chunk of crawled files with analysis results."""
 
     chunk_id: int
-    files: List[FileInfo]
+    files: list[FileInfo]
     files_processed: int
     total_discovered: int
     elapsed_seconds: float
-    analysis_results: Dict[str, Any] = field(default_factory=dict)
+    analysis_results: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -62,8 +63,8 @@ class ParallelCrawlResult:
     files_analyzed: int
     elapsed_seconds: float
     chunks_processed: int
-    errors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ParallelCrawler:
@@ -120,8 +121,8 @@ class ParallelCrawler:
     def __init__(
         self,
         project_root: str | Path,
-        max_workers: Optional[int] = None,
-        exclude_patterns: Optional[Set[str]] = None,
+        max_workers: int | None = None,
+        exclude_patterns: set[str] | None = None,
         respect_gitignore: bool = True,
         max_file_size_mb: float = 10.0,
     ):
@@ -142,7 +143,7 @@ class ParallelCrawler:
         self.max_file_size = int(max_file_size_mb * 1024 * 1024)
 
         # Initialize gitignore parser if needed
-        self.gitignore: Optional[GitignoreParser] = None
+        self.gitignore: GitignoreParser | None = None
         if respect_gitignore:
             gitignore_path = self.root / ".gitignore"
             if gitignore_path.exists():
@@ -152,11 +153,11 @@ class ParallelCrawler:
         self._files_discovered = 0
         self._files_analyzed = 0
         self._total_size = 0
-        self._errors: List[str] = []
+        self._errors: list[str] = []
 
     def discover_files(
         self,
-        extensions: Optional[Set[str]] = None,
+        extensions: set[str] | None = None,
     ) -> Generator[FileInfo, None, None]:
         """
         Discover all files in the repository.
@@ -185,9 +186,9 @@ class ParallelCrawler:
 
             return False
 
-        def scan_directory(dir_path: Path) -> List[FileInfo]:
+        def scan_directory(dir_path: Path) -> list[FileInfo]:
             """Scan a single directory."""
-            files: List[FileInfo] = []
+            files: list[FileInfo] = []
 
             try:
                 for entry in os.scandir(dir_path):
@@ -238,7 +239,7 @@ class ParallelCrawler:
     def crawl_chunked(
         self,
         chunk_size: int = 1000,
-        analyzer: Optional[Callable[[Path], Dict[str, Any]]] = None,
+        analyzer: Callable[[Path], dict[str, Any]] | None = None,
     ) -> Generator[CrawlChunk, None, None]:
         """
         Crawl repository in chunks with parallel analysis.
@@ -252,7 +253,7 @@ class ParallelCrawler:
         """
         start_time = time.time()
         chunk_id = 0
-        current_chunk: List[FileInfo] = []
+        current_chunk: list[FileInfo] = []
 
         for file_info in self.discover_files():
             current_chunk.append(file_info)
@@ -281,19 +282,16 @@ class ParallelCrawler:
     def _process_chunk(
         self,
         chunk_id: int,
-        files: List[FileInfo],
-        analyzer: Optional[Callable[[Path], Dict[str, Any]]],
+        files: list[FileInfo],
+        analyzer: Callable[[Path], dict[str, Any]] | None,
         start_time: float,
     ) -> CrawlChunk:
         """Process a chunk of files in parallel."""
-        analysis_results: Dict[str, Any] = {}
+        analysis_results: dict[str, Any] = {}
 
         if analyzer:
             with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-                future_to_file = {
-                    executor.submit(self._safe_analyze, Path(f.path), analyzer): f
-                    for f in files
-                }
+                future_to_file = {executor.submit(self._safe_analyze, Path(f.path), analyzer): f for f in files}
 
                 for future in as_completed(future_to_file):
                     file_info = future_to_file[future]
@@ -320,8 +318,8 @@ class ParallelCrawler:
     def _safe_analyze(
         self,
         file_path: Path,
-        analyzer: Callable[[Path], Dict[str, Any]],
-    ) -> Optional[Dict[str, Any]]:
+        analyzer: Callable[[Path], dict[str, Any]],
+    ) -> dict[str, Any] | None:
         """Safely analyze a file, catching exceptions."""
         try:
             return analyzer(file_path)
@@ -331,7 +329,7 @@ class ParallelCrawler:
 
     def crawl_all(
         self,
-        analyzer: Optional[Callable[[Path], Dict[str, Any]]] = None,
+        analyzer: Callable[[Path], dict[str, Any]] | None = None,
     ) -> ParallelCrawlResult:
         """
         Crawl entire repository and return final result.
@@ -345,7 +343,7 @@ class ParallelCrawler:
         start_time = time.time()
         chunks_processed = 0
 
-        for chunk in self.crawl_chunked(chunk_size=1000, analyzer=analyzer):
+        for _chunk in self.crawl_chunked(chunk_size=1000, analyzer=analyzer):
             chunks_processed += 1
 
         return ParallelCrawlResult(
@@ -375,7 +373,7 @@ class ParallelCrawler:
 
 def parallel_crawl(
     project_root: str | Path,
-    max_workers: Optional[int] = None,
+    max_workers: int | None = None,
     chunk_size: int = 1000,
 ) -> Generator[CrawlChunk, None, None]:
     """

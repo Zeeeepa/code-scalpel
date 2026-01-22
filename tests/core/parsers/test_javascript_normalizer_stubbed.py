@@ -57,7 +57,7 @@ def test_normalize_reports_syntax_error_when_root_has_error(monkeypatch):
         except SyntaxError as exc:
             assert "Parse error" in str(exc)
         else:  # pragma: no cover - defensive guard
-            assert False, "Expected SyntaxError"
+            raise AssertionError("Expected SyntaxError")
 
 
 def test_normalize_node_skips_noise_and_warns_unknown(monkeypatch):

@@ -9,8 +9,9 @@ v0.3.1: Now includes taint-based SecurityAnalyzer and SymbolicAnalyzer.
 
 import asyncio
 import warnings
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Optional, Sequence, TypedDict
+from typing import Any, TypedDict
 
 
 class RefactorResultDict(TypedDict, total=False):
@@ -33,9 +34,9 @@ class RefactorResult:
     analysis: dict[str, Any] = field(default_factory=dict)
     issues: list[dict[str, Any]] = field(default_factory=list)
     suggestions: list[str] = field(default_factory=list)
-    refactored_code: Optional[str] = None
+    refactored_code: str | None = None
     success: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
     def to_dict(self) -> RefactorResultDict:
         """Convert result to dictionary."""
@@ -132,19 +133,11 @@ class CrewAIScalpel:
             security_issues = self.analyzer.find_security_issues(tree)
 
             # Combine all issues
-            result.issues = [
-                {"type": "style", "category": k, "details": v}
-                for k, v in style_issues.items()
-                if v
-            ]
-            result.issues.extend(
-                [{"type": "security", **issue} for issue in security_issues]
-            )
+            result.issues = [{"type": "style", "category": k, "details": v} for k, v in style_issues.items() if v]
+            result.issues.extend([{"type": "security", **issue} for issue in security_issues])
 
             # Generate suggestions
-            result.suggestions = self._generate_suggestions(
-                style_issues, security_issues
-            )
+            result.suggestions = self._generate_suggestions(style_issues, security_issues)
 
             # Store analysis metadata
             result.analysis = {
@@ -165,9 +158,7 @@ class CrewAIScalpel:
 
         return result
 
-    async def refactor_async(
-        self, code: str, task_description: str = "improve code quality"
-    ) -> RefactorResult:
+    async def refactor_async(self, code: str, task_description: str = "improve code quality") -> RefactorResult:
         """
         Perform async code refactoring based on analysis.
 
@@ -179,13 +170,9 @@ class CrewAIScalpel:
             RefactorResult with refactored code.
         """
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, self._refactor_sync, code, task_description
-        )
+        return await loop.run_in_executor(None, self._refactor_sync, code, task_description)
 
-    def refactor(
-        self, code: str, task_description: str = "improve code quality"
-    ) -> RefactorResult:
+    def refactor(self, code: str, task_description: str = "improve code quality") -> RefactorResult:
         """
         Synchronous code refactoring (for non-async contexts).
 
@@ -278,15 +265,11 @@ class CrewAIScalpel:
                 }
                 # Try to get variables from path
                 if hasattr(path, "variables"):
-                    path_data["variables"] = {
-                        k: str(v) for k, v in path.variables.items()
-                    }
+                    path_data["variables"] = {k: str(v) for k, v in path.variables.items()}
                 else:
                     state = getattr(path, "state", None)
                     if state and hasattr(state, "get_all_variables"):
-                        path_data["variables"] = {
-                            k: str(v) for k, v in state.get_all_variables().items()
-                        }
+                        path_data["variables"] = {k: str(v) for k, v in state.get_all_variables().items()}
                 paths_info.append(path_data)
 
             return {
@@ -295,11 +278,7 @@ class CrewAIScalpel:
                 "feasible_paths": result.feasible_count,
                 "infeasible_paths": result.infeasible_count,
                 "paths": paths_info,
-                "all_variables": (
-                    {k: str(v) for k, v in result.all_variables.items()}
-                    if result.all_variables
-                    else {}
-                ),
+                "all_variables": ({k: str(v) for k, v in result.all_variables.items()} if result.all_variables else {}),
                 "analyzer": "z3-symbolic",
             }
         except ImportError as e:
@@ -367,11 +346,7 @@ class CrewAIScalpel:
                     "command_injections": len(result.get_command_injections()),
                     "path_traversals": len(result.get_path_traversals()),
                     "risk_level": self._calculate_risk_from_vulns(vulnerabilities),
-                    "summary": (
-                        result.summary()
-                        if result.has_vulnerabilities
-                        else "No vulnerabilities detected"
-                    ),
+                    "summary": (result.summary() if result.has_vulnerabilities else "No vulnerabilities detected"),
                 }
             except ImportError:
                 # Fallback to AST-based analysis if symbolic tools not available
@@ -382,9 +357,7 @@ class CrewAIScalpel:
                     "success": True,
                     "issues": security_issues,
                     "risk_level": self._calculate_risk_level(security_issues),
-                    "recommendations": self._get_security_recommendations(
-                        security_issues
-                    ),
+                    "recommendations": self._get_security_recommendations(security_issues),
                     "analyzer": "ast-based (fallback)",
                 }
         except Exception as e:
@@ -395,9 +368,7 @@ class CrewAIScalpel:
                 "risk_level": "unknown",
             }
 
-    def _calculate_risk_from_vulns(
-        self, vulnerabilities: Sequence[Mapping[str, Any]]
-    ) -> str:
+    def _calculate_risk_from_vulns(self, vulnerabilities: Sequence[Mapping[str, Any]]) -> str:
         """Calculate risk level from vulnerability list."""
         if not vulnerabilities:
             return "low"
@@ -446,39 +417,23 @@ class CrewAIScalpel:
 
         # Style-based suggestions
         if style_issues.get("long_functions"):
-            suggestions.append(
-                "Break down long functions into smaller, single-purpose functions."
-            )
+            suggestions.append("Break down long functions into smaller, single-purpose functions.")
 
         if style_issues.get("deep_nesting"):
-            suggestions.append(
-                "Reduce nesting depth using early returns or extracting methods."
-            )
+            suggestions.append("Reduce nesting depth using early returns or extracting methods.")
 
         if style_issues.get("naming_conventions"):
-            suggestions.append(
-                "Follow PEP 8 naming conventions for better code readability."
-            )
+            suggestions.append("Follow PEP 8 naming conventions for better code readability.")
 
         # Security-based suggestions
-        dangerous_funcs = [
-            issue
-            for issue in security_issues
-            if issue.get("type") == "dangerous_function"
-        ]
+        dangerous_funcs = [issue for issue in security_issues if issue.get("type") == "dangerous_function"]
         if dangerous_funcs:
             funcs = ", ".join({i.get("function", "") for i in dangerous_funcs})
-            suggestions.append(
-                f"Replace dangerous functions ({funcs}) with safer alternatives."
-            )
+            suggestions.append(f"Replace dangerous functions ({funcs}) with safer alternatives.")
 
-        sql_issues = [
-            issue for issue in security_issues if issue.get("type") == "sql_injection"
-        ]
+        sql_issues = [issue for issue in security_issues if issue.get("type") == "sql_injection"]
         if sql_issues:
-            suggestions.append(
-                "Use parameterized queries instead of string formatting for SQL."
-            )
+            suggestions.append("Use parameterized queries instead of string formatting for SQL.")
 
         return suggestions
 
@@ -496,9 +451,7 @@ class CrewAIScalpel:
             return "low"
 
         # Count issue types
-        dangerous_count = sum(
-            1 for i in security_issues if i.get("type") == "dangerous_function"
-        )
+        dangerous_count = sum(1 for i in security_issues if i.get("type") == "dangerous_function")
         sql_count = sum(1 for i in security_issues if i.get("type") == "sql_injection")
 
         total_critical = dangerous_count + sql_count
@@ -511,9 +464,7 @@ class CrewAIScalpel:
             return "medium"
         return "low"
 
-    def _get_security_recommendations(
-        self, security_issues: list[dict[str, Any]]
-    ) -> list[str]:
+    def _get_security_recommendations(self, security_issues: list[dict[str, Any]]) -> list[str]:
         """
         Get specific security recommendations.
 
@@ -530,21 +481,13 @@ class CrewAIScalpel:
             if issue_type == "dangerous_function":
                 func = issue.get("function", "unknown")
                 if "eval" in func or "exec" in func:
-                    recommendations.append(
-                        f"Replace '{func}' with ast.literal_eval or a safer parser."
-                    )
+                    recommendations.append(f"Replace '{func}' with ast.literal_eval or a safer parser.")
                 elif "os.system" in func or "subprocess" in func:
-                    recommendations.append(
-                        f"Replace '{func}' with subprocess.run with shell=False."
-                    )
+                    recommendations.append(f"Replace '{func}' with subprocess.run with shell=False.")
                 elif "pickle" in func:
-                    recommendations.append(
-                        "Use json or other safe serialization instead of pickle."
-                    )
+                    recommendations.append("Use json or other safe serialization instead of pickle.")
             elif issue_type == "sql_injection":
-                recommendations.append(
-                    "Use parameterized queries (?, %s) instead of string formatting."
-                )
+                recommendations.append("Use parameterized queries (?, %s) instead of string formatting.")
 
         return list(set(recommendations))  # Remove duplicates
 
@@ -567,8 +510,7 @@ class CrewAIScalpel:
             {
                 "name": "refactor_code",
                 "description": (
-                    "Refactors Python code based on analysis to improve quality "
-                    "and fix identified issues."
+                    "Refactors Python code based on analysis to improve quality " "and fix identified issues."
                 ),
                 "func": self.refactor,
             },

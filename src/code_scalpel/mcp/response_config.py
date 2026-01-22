@@ -11,7 +11,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, TypedDict, cast
+from typing import Any, TypedDict, cast
 
 
 class FilteredResponseDict(TypedDict, total=False):
@@ -77,23 +77,23 @@ class ResponseConfig:
     Supports hot-reloading when the configuration file changes.
     """
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         """
         Initialize response configuration.
 
         Args:
             config_path: Path to response_config.json. If None, searches common locations.
         """
-        self._config_path: Optional[Path] = None
+        self._config_path: Path | None = None
         self._last_mtime: float = 0.0
         self._last_check_time: float = 0.0
         self.config = self._load_config(config_path)
 
-    def _load_config(self, config_path: Optional[Path] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Path | None = None) -> dict[str, Any]:
         """Load configuration from file or use defaults."""
         if config_path and config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config = json.load(f)
                     logger.info(f"Loaded response config from {config_path}")
 
@@ -102,23 +102,19 @@ class ResponseConfig:
                     self._last_mtime = config_path.stat().st_mtime
                     return config
             except Exception as e:
-                logger.warning(
-                    f"Failed to load response config from {config_path}: {e}"
-                )
+                logger.warning(f"Failed to load response config from {config_path}: {e}")
 
         # Search common locations
         search_paths = [
             Path.cwd() / ".code-scalpel" / "response_config.json",
             Path.home() / ".config" / "code-scalpel" / "response_config.json",
-            Path(__file__).parent.parent.parent
-            / ".code-scalpel"
-            / "response_config.json",
+            Path(__file__).parent.parent.parent / ".code-scalpel" / "response_config.json",
         ]
 
         for path in search_paths:
             if path.exists():
                 try:
-                    with open(path, "r") as f:
+                    with open(path) as f:
                         config = json.load(f)
                         logger.info(f"Loaded response config from {path}")
 
@@ -157,23 +153,19 @@ class ResponseConfig:
             except Exception as e:
                 logger.warning(f"Error checking config reload: {e}")
 
-    def get_profile(self, tool_name: Optional[str] = None) -> str:
+    def get_profile(self, tool_name: str | None = None) -> str:
         """Get the profile to use for a tool."""
         if tool_name and tool_name in self.config.get("tool_overrides", {}):
-            return self.config["tool_overrides"][tool_name].get(
-                "profile", self.config["global"]["profile"]
-            )
+            return self.config["tool_overrides"][tool_name].get("profile", self.config["global"]["profile"])
         return self.config["global"]["profile"]
 
-    def get_envelope_fields(self, tool_name: Optional[str] = None) -> Set[str]:
+    def get_envelope_fields(self, tool_name: str | None = None) -> set[str]:
         """Get which envelope fields to include."""
         profile = self.get_profile(tool_name)
         profile_config = self.config["profiles"].get(profile, {})
         return set(profile_config.get("envelope", {}).get("include", []))
 
-    def get_exclusions(
-        self, tool_name: Optional[str] = None, tier: Optional[str] = None
-    ) -> Set[str]:
+    def get_exclusions(self, tool_name: str | None = None, tier: str | None = None) -> set[str]:
         """Get fields to exclude from response."""
         exclusions = set()
 
@@ -194,7 +186,7 @@ class ResponseConfig:
 
         return exclusions
 
-    def get_inclusions(self, tool_name: Optional[str] = None) -> Optional[Set[str]]:
+    def get_inclusions(self, tool_name: str | None = None) -> set[str] | None:
         """Get whitelist of fields to include (if specified)."""
         if tool_name and tool_name in self.config.get("tool_overrides", {}):
             tool_config = self.config["tool_overrides"][tool_name]
@@ -203,7 +195,7 @@ class ResponseConfig:
                 return set(include_only)
         return None
 
-    def get_error_inclusions(self, tool_name: Optional[str] = None) -> Set[str]:
+    def get_error_inclusions(self, tool_name: str | None = None) -> set[str]:
         """
         Get fields to include only when response indicates an error.
 
@@ -242,9 +234,9 @@ class ResponseConfig:
 
     def filter_response(
         self,
-        data: Dict[str, Any],
-        tool_name: Optional[str] = None,
-        tier: Optional[str] = None,
+        data: dict[str, Any],
+        tool_name: str | None = None,
+        tier: str | None = None,
         is_error: bool = False,
     ) -> FilteredResponseDict:
         """
@@ -294,17 +286,9 @@ class ResponseConfig:
                 # Still apply null/empty filtering to error fields
                 if self.should_exclude_null_values() and value is None:
                     continue
-                if (
-                    self.should_exclude_empty_arrays()
-                    and isinstance(value, list)
-                    and len(value) == 0
-                ):
+                if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
                     continue
-                if (
-                    self.should_exclude_empty_objects()
-                    and isinstance(value, dict)
-                    and len(value) == 0
-                ):
+                if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
                     continue
                 filtered[key] = value
                 continue
@@ -318,19 +302,11 @@ class ResponseConfig:
                 continue
 
             # Skip empty arrays
-            if (
-                self.should_exclude_empty_arrays()
-                and isinstance(value, list)
-                and len(value) == 0
-            ):
+            if self.should_exclude_empty_arrays() and isinstance(value, list) and len(value) == 0:
                 continue
 
             # Skip empty objects
-            if (
-                self.should_exclude_empty_objects()
-                and isinstance(value, dict)
-                and len(value) == 0
-            ):
+            if self.should_exclude_empty_objects() and isinstance(value, dict) and len(value) == 0:
                 continue
 
             # Skip null values
@@ -349,7 +325,7 @@ class ResponseConfig:
 
 
 # Global instance
-_response_config: Optional[ResponseConfig] = None
+_response_config: ResponseConfig | None = None
 
 
 def get_response_config() -> ResponseConfig:
@@ -361,9 +337,9 @@ def get_response_config() -> ResponseConfig:
 
 
 def filter_tool_response(
-    data: Dict[str, Any],
-    tool_name: Optional[str] = None,
-    tier: Optional[str] = None,
+    data: dict[str, Any],
+    tool_name: str | None = None,
+    tier: str | None = None,
     is_error: bool = False,
 ) -> FilteredResponseDict:
     """

@@ -115,9 +115,7 @@ class CodePolicyChecker:
 
         # Defaults matching v1.0 doc claims
         self.include_extensions: list[str] = (
-            [str(x) for x in include_ext]
-            if isinstance(include_ext, list) and include_ext
-            else [".py", ".js", ".jsx"]
+            [str(x) for x in include_ext] if isinstance(include_ext, list) and include_ext else [".py", ".js", ".jsx"]
         )
         self.exclude_dirs: tuple[str, ...] = (
             tuple(str(x) for x in exclude_dirs)
@@ -172,10 +170,7 @@ class CodePolicyChecker:
                         pattern=pattern,
                         pattern_type=str(r.get("pattern_type") or "regex"),
                         severity=severity,
-                        message_template=str(
-                            r.get("message_template")
-                            or "Matched pattern: {pattern_name}"
-                        ),
+                        message_template=str(r.get("message_template") or "Matched pattern: {pattern_name}"),
                         enabled=bool(r.get("enabled", True)),
                     )
 
@@ -255,9 +250,7 @@ class CodePolicyChecker:
                 logger.warning(f"Error checking {file_path}: {e}")
 
         # Determine success (no errors or critical violations)
-        critical_count = sum(
-            1 for v in violations if v.severity == ViolationSeverity.CRITICAL
-        )
+        critical_count = sum(1 for v in violations if v.severity == ViolationSeverity.CRITICAL)
         success = critical_count == 0
 
         # Build summary
@@ -308,11 +301,7 @@ class CodePolicyChecker:
                 metadata={
                     "policy_file": self.policy_file,
                     "policy_hash": self.policy_hash,
-                    "policy_extends": (
-                        self.policy.get("extends")
-                        if isinstance(self.policy, dict)
-                        else None
-                    ),
+                    "policy_extends": (self.policy.get("extends") if isinstance(self.policy, dict) else None),
                 },
             )
             result.audit_trail = [audit_entry]
@@ -326,9 +315,7 @@ class CodePolicyChecker:
                 result.pdf_report = pdf_content
 
                 # Generate certifications for passing standards
-                result.certifications = self._generate_certifications(
-                    compliance_reports
-                )
+                result.certifications = self._generate_certifications(compliance_reports)
 
         return result
 
@@ -360,9 +347,7 @@ class CodePolicyChecker:
         }
         return limits.get(self.tier, {}).get(limit_name)
 
-    def _check_file(
-        self, file_path: str, rules: list[str] | None
-    ) -> tuple[list[PolicyViolation], int]:
+    def _check_file(self, file_path: str, rules: list[str] | None) -> tuple[list[PolicyViolation], int]:
         """
         Check a single file for violations.
 
@@ -379,7 +364,7 @@ class CodePolicyChecker:
         suffix = Path(file_path).suffix.lower()
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             if suffix == ".py":
@@ -421,15 +406,11 @@ class CodePolicyChecker:
                     rules_checked += 1
 
                     if pattern.regex_pattern:
-                        regex_violations = self._check_regex_pattern(
-                            file_path, content, pattern
-                        )
+                        regex_violations = self._check_regex_pattern(file_path, content, pattern)
                         violations.extend(regex_violations)
 
                     if pattern.ast_node_types:
-                        ast_violations = self._check_ast_pattern(
-                            file_path, tree, pattern
-                        )
+                        ast_violations = self._check_ast_pattern(file_path, tree, pattern)
                         violations.extend(ast_violations)
 
             elif suffix in (".js", ".jsx", ".ts", ".tsx"):
@@ -438,16 +419,12 @@ class CodePolicyChecker:
                     eslint_violations = self._check_eslint(file_path)
                     # Optional rule filtering
                     if rules:
-                        eslint_violations = [
-                            v for v in eslint_violations if v.rule_id in rules
-                        ]
+                        eslint_violations = [v for v in eslint_violations if v.rule_id in rules]
                     violations.extend(eslint_violations)
                     rules_checked += 1
 
                 if _can_check_more() and (not rules or "CPLX001" in rules):
-                    violations.extend(
-                        self._check_complexity_javascript(file_path, content)
-                    )
+                    violations.extend(self._check_complexity_javascript(file_path, content))
                     rules_checked += 1
 
         except Exception as e:
@@ -487,9 +464,7 @@ class CodePolicyChecker:
                             rule_id=match.group(4),
                             message=match.group(5),
                             severity=(
-                                ViolationSeverity.WARNING
-                                if match.group(4).startswith("W")
-                                else ViolationSeverity.ERROR
+                                ViolationSeverity.WARNING if match.group(4).startswith("W") else ViolationSeverity.ERROR
                             ),
                             category="style",
                         )
@@ -551,9 +526,7 @@ class CodePolicyChecker:
         result = _run(eslint_cmd)
         if result is None:
             # Try npx fallback (no network assumed; uses local node_modules)
-            result = _run(
-                ["npx", "eslint"] + [str(a) for a in eslint_args] + [file_path]
-            )
+            result = _run(["npx", "eslint"] + [str(a) for a in eslint_args] + [file_path])
 
         if result is None:
             # ESLint not available; record informational marker for transparency.
@@ -608,11 +581,7 @@ class CodePolicyChecker:
                 rule_id = msg.get("ruleId") or "ESLINT"
                 message = msg.get("message") or "ESLint issue"
                 severity_num = msg.get("severity")
-                severity = (
-                    ViolationSeverity.ERROR
-                    if severity_num == 2
-                    else ViolationSeverity.WARNING
-                )
+                severity = ViolationSeverity.ERROR if severity_num == 2 else ViolationSeverity.WARNING
                 violations.append(
                     PolicyViolation(
                         file=file_path,
@@ -627,9 +596,7 @@ class CodePolicyChecker:
 
         return violations
 
-    def _check_complexity_python(
-        self, file_path: str, tree: ast.AST
-    ) -> list[PolicyViolation]:
+    def _check_complexity_python(self, file_path: str, tree: ast.AST) -> list[PolicyViolation]:
         """Simple cyclomatic-ish complexity threshold check for Python."""
         threshold = self.complexity_thresholds.get("python")
         if not isinstance(threshold, int) or threshold <= 0:
@@ -651,9 +618,7 @@ class CodePolicyChecker:
                 ),
             ):
                 complexity += 1
-            elif isinstance(node, ast.BoolOp) and isinstance(
-                node.op, (ast.And, ast.Or)
-            ):
+            elif isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
                 # Count boolean chaining as additional branches
                 complexity += max(0, len(node.values) - 1)
 
@@ -673,18 +638,14 @@ class CodePolicyChecker:
             )
         ]
 
-    def _check_complexity_javascript(
-        self, file_path: str, content: str
-    ) -> list[PolicyViolation]:
+    def _check_complexity_javascript(self, file_path: str, content: str) -> list[PolicyViolation]:
         """Simple keyword-based complexity threshold check for JavaScript/TypeScript."""
         threshold = self.complexity_thresholds.get("javascript")
         if not isinstance(threshold, int) or threshold <= 0:
             return []
 
         # Heuristic: count common branching/looping tokens.
-        tokens = re.findall(
-            r"\b(if|else\s+if|for|while|case|catch)\b|\?|&&|\|\|", content
-        )
+        tokens = re.findall(r"\b(if|else\s+if|for|while|case|catch)\b|\?|&&|\|\|", content)
         complexity = 1 + len(tokens)
         if complexity <= threshold:
             return []
@@ -702,9 +663,7 @@ class CodePolicyChecker:
             )
         ]
 
-    def _check_regex_pattern(
-        self, file_path: str, content: str, pattern: PatternDefinition
-    ) -> list[PolicyViolation]:
+    def _check_regex_pattern(self, file_path: str, content: str, pattern: PatternDefinition) -> list[PolicyViolation]:
         """Check content against regex pattern."""
         violations: list[PolicyViolation] = []
 
@@ -738,9 +697,7 @@ class CodePolicyChecker:
 
         return violations
 
-    def _check_ast_pattern(
-        self, file_path: str, tree: ast.AST, pattern: PatternDefinition
-    ) -> list[PolicyViolation]:
+    def _check_ast_pattern(self, file_path: str, tree: ast.AST, pattern: PatternDefinition) -> list[PolicyViolation]:
         """Check AST against pattern."""
         violations: list[PolicyViolation] = []
 
@@ -781,16 +738,14 @@ class CodePolicyChecker:
         violations: list[BestPracticeViolation] = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             tree = ast.parse(content)
 
             for pattern in BEST_PRACTICE_PATTERNS:
                 if pattern.regex_pattern:
-                    for match in re.finditer(
-                        pattern.regex_pattern, content, re.MULTILINE
-                    ):
+                    for match in re.finditer(pattern.regex_pattern, content, re.MULTILINE):
                         line_num = content[: match.start()].count("\n") + 1
                         violations.append(
                             BestPracticeViolation(
@@ -840,16 +795,14 @@ class CodePolicyChecker:
         warnings: list[SecurityWarning] = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             tree = ast.parse(content)
 
             for pattern in SECURITY_PATTERNS:
                 if pattern.regex_pattern:
-                    for match in re.finditer(
-                        pattern.regex_pattern, content, re.MULTILINE | re.IGNORECASE
-                    ):
+                    for match in re.finditer(pattern.regex_pattern, content, re.MULTILINE | re.IGNORECASE):
                         line_num = content[: match.start()].count("\n") + 1
                         warnings.append(
                             SecurityWarning(
@@ -899,7 +852,7 @@ class CodePolicyChecker:
         violations: list[BestPracticeViolation] = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Only check files that use async
@@ -910,9 +863,7 @@ class CodePolicyChecker:
 
             for pattern in ASYNC_PATTERNS:
                 if pattern.regex_pattern:
-                    for match in re.finditer(
-                        pattern.regex_pattern, content, re.MULTILINE
-                    ):
+                    for match in re.finditer(pattern.regex_pattern, content, re.MULTILINE):
                         line_num = content[: match.start()].count("\n") + 1
                         violations.append(
                             BestPracticeViolation(
@@ -931,9 +882,7 @@ class CodePolicyChecker:
 
         return violations
 
-    def _apply_custom_rule(
-        self, file_path: str, rule: CustomRule
-    ) -> list[dict[str, Any]]:
+    def _apply_custom_rule(self, file_path: str, rule: CustomRule) -> list[dict[str, Any]]:
         """
         Apply a custom rule to a file (Pro tier).
 
@@ -945,7 +894,7 @@ class CodePolicyChecker:
             return matches
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             if rule.pattern_type == "regex":
@@ -991,7 +940,7 @@ class CodePolicyChecker:
 
             for file_path in files:
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         content = f.read()
 
                     for pattern in patterns:
@@ -1019,9 +968,7 @@ class CodePolicyChecker:
             # Calculate compliance score
             if len(files) > 0:
                 # Score based on critical findings per file
-                critical_findings = sum(
-                    1 for f in findings if f.get("severity") in ("critical", "error")
-                )
+                critical_findings = sum(1 for f in findings if f.get("severity") in ("critical", "error"))
                 score = max(0, 100 - (critical_findings / len(files)) * 20)
             else:
                 score = 100.0
@@ -1039,8 +986,7 @@ class CodePolicyChecker:
                 set(
                     pattern.suggestion
                     for pattern in patterns
-                    if pattern.suggestion
-                    and any(f.get("rule_id") == pattern.id for f in findings)
+                    if pattern.suggestion and any(f.get("rule_id") == pattern.id for f in findings)
                 )
             )
 
@@ -1083,7 +1029,7 @@ class CodePolicyChecker:
         <body>
             <h1>Code Policy Compliance Report</h1>
             <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-            
+
             <div class="summary">
                 <h2>Executive Summary</h2>
                 <p class="score">{result.compliance_score:.1f}%</p>
@@ -1091,7 +1037,7 @@ class CodePolicyChecker:
                 <p>Rules Applied: {result.rules_applied}</p>
                 <p>Violations Found: {len(result.violations)}</p>
             </div>
-            
+
             <h2>Compliance Status by Standard</h2>
             <table>
                 <tr>
@@ -1114,20 +1060,16 @@ class CodePolicyChecker:
 
         html_content += """
             </table>
-            
+
             <h2>Critical Findings</h2>
         """
 
-        critical = [
-            v for v in result.violations if v.severity == ViolationSeverity.CRITICAL
-        ]
+        critical = [v for v in result.violations if v.severity == ViolationSeverity.CRITICAL]
 
         if critical:
             html_content += "<ul>"
             for v in critical[:20]:  # Limit to 20
-                html_content += (
-                    f"<li class='critical'>{v.file}:{v.line} - {v.message}</li>"
-                )
+                html_content += f"<li class='critical'>{v.file}:{v.line} - {v.message}</li>"
             html_content += "</ul>"
         else:
             html_content += "<p>No critical findings.</p>"
@@ -1144,9 +1086,7 @@ class CodePolicyChecker:
         # In production, use weasyprint to convert to PDF
         return base64.b64encode(html_content.encode()).decode()
 
-    def _generate_certifications(
-        self, reports: dict[str, ComplianceReport]
-    ) -> list[Certification]:
+    def _generate_certifications(self, reports: dict[str, ComplianceReport]) -> list[Certification]:
         """
         Generate certifications for passing standards (Enterprise tier).
 
@@ -1157,9 +1097,7 @@ class CodePolicyChecker:
         for standard, report in reports.items():
             if report.status == "compliant":
                 cert_id = (
-                    hashlib.sha256(
-                        f"{standard}:{datetime.now().isoformat()}:{uuid.uuid4()}".encode()
-                    )
+                    hashlib.sha256(f"{standard}:{datetime.now().isoformat()}:{uuid.uuid4()}".encode())
                     .hexdigest()[:16]
                     .upper()
                 )

@@ -17,7 +17,7 @@ Konsist provides:
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class KonsistSeverity(Enum):
@@ -45,10 +45,10 @@ class KonsistViolation:
     rule_id: str
     rule_type: str
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    severity: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    severity: str | None = None
 
 
 @dataclass

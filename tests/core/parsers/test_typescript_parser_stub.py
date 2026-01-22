@@ -10,21 +10,21 @@ def _ts_sample_code() -> str:
     return textwrap.dedent("""
         import { Router, Request } from 'express';
         import type { User } from './models';
-        
+
         export async function fetchUser(id: string) {
             if (id) {
                 return `user-${id}`;
             }
         }
-        
+
         export const arrowFetch = async (id) => {
             return id ?? 'missing';
         };
-        
+
         export class UserController {
             constructor() {}
         }
-        
+
         export default function defaultHelper(name: string) {
             return name;
         }

@@ -30,8 +30,8 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_cross_file_deps_python(self, monkeypatch, tmp_path: Path):
         """Pro tier extracts cross-file dependencies for Python."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -42,9 +42,7 @@ class TestProTierFeatures:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
         (tmp_path / "lib.py").write_text("def helper():\n    pass\n")
-        (tmp_path / "main.py").write_text(
-            "from lib import helper\n\ndef process():\n    helper()\n"
-        )
+        (tmp_path / "main.py").write_text("from lib import helper\n\ndef process():\n    helper()\n")
 
         result = await extraction.extract_code(
             target_type="function",
@@ -56,15 +54,13 @@ class TestProTierFeatures:
         assert result.success is True
         # Pro tier should have confidence metadata (either as field or in context_items)
         assert hasattr(result, "confidence_scores") or hasattr(result, "context_items")
-        assert len(result.context_items) > 0 or hasattr(
-            result, "cross_file_dependencies"
-        )
+        assert len(result.context_items) > 0 or hasattr(result, "cross_file_dependencies")
 
     @pytest.mark.asyncio
     async def test_pro_tier_react_component_metadata(self, monkeypatch, tmp_path: Path):
         """Pro tier detects React component metadata for JSX/TSX."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -96,8 +92,8 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_decorators_preserved(self, monkeypatch, tmp_path: Path):
         """Pro tier preserves decorators in extracted code."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -108,9 +104,7 @@ class TestProTierFeatures:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
         (tmp_path / "service.py").write_text(
-            "def cache(func):\n    return func\n\n"
-            "@cache\n"
-            "def get_user(id):\n    return {'id': id}\n"
+            "def cache(func):\n    return func\n\n" "@cache\n" "def get_user(id):\n    return {'id': id}\n"
         )
 
         result = await extraction.extract_code(
@@ -126,8 +120,8 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_type_hints_preserved(self, monkeypatch, tmp_path: Path):
         """Pro tier preserves type hints in extracted code."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -157,8 +151,8 @@ class TestProTierFeatures:
     @pytest.mark.asyncio
     async def test_pro_tier_depth_clamping(self, monkeypatch, tmp_path: Path):
         """Pro tier clamps context_depth to max_depth=10."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -202,12 +196,10 @@ class TestEnterpriseTierFeatures:
         yield
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_org_wide_resolution(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_enterprise_tier_org_wide_resolution(self, monkeypatch, tmp_path: Path):
         """Enterprise tier performs org-wide resolution across multiple files."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -219,9 +211,7 @@ class TestEnterpriseTierFeatures:
         # Create multi-module structure
         (tmp_path / "services").mkdir()
         (tmp_path / "services" / "__init__.py").write_text("")
-        (tmp_path / "services" / "user.py").write_text(
-            "def get_user(id):\n    return {'id': id}\n"
-        )
+        (tmp_path / "services" / "user.py").write_text("def get_user(id):\n    return {'id': id}\n")
 
         (tmp_path / "handlers").mkdir()
         (tmp_path / "handlers" / "__init__.py").write_text("")
@@ -241,12 +231,10 @@ class TestEnterpriseTierFeatures:
         assert len(result.context_items) > 0
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_custom_extraction_patterns(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_enterprise_tier_custom_extraction_patterns(self, monkeypatch, tmp_path: Path):
         """Enterprise tier supports custom extraction patterns."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -257,11 +245,7 @@ class TestEnterpriseTierFeatures:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
         (tmp_path / "app.py").write_text(
-            "class Controller:\n"
-            "    def handle(self):\n"
-            "        pass\n"
-            "    def process(self):\n"
-            "        pass\n"
+            "class Controller:\n" "    def handle(self):\n" "        pass\n" "    def process(self):\n" "        pass\n"
         )
 
         # Request extraction of method from class using proper format
@@ -276,12 +260,10 @@ class TestEnterpriseTierFeatures:
         assert "handle" in result.target_code
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_service_boundary_detection(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_enterprise_tier_service_boundary_detection(self, monkeypatch, tmp_path: Path):
         """Enterprise tier detects service boundaries in microservice projects."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -293,14 +275,11 @@ class TestEnterpriseTierFeatures:
 
         # Create microservice structure
         (tmp_path / "user-service").mkdir()
-        (tmp_path / "user-service" / "service.py").write_text(
-            "def get_user():\n    pass\n"
-        )
+        (tmp_path / "user-service" / "service.py").write_text("def get_user():\n    pass\n")
 
         (tmp_path / "order-service").mkdir()
         (tmp_path / "order-service" / "service.py").write_text(
-            "import requests\n\ndef get_orders():\n"
-            "    return requests.get('http://user-service/users')\n"
+            "import requests\n\ndef get_orders():\n" "    return requests.get('http://user-service/users')\n"
         )
 
         result = await extraction.extract_code(
@@ -312,16 +291,13 @@ class TestEnterpriseTierFeatures:
 
         assert result.success is True
         # Enterprise should detect HTTP service boundaries
-        assert (
-            hasattr(result, "service_boundaries")
-            or "requests.get" in result.target_code
-        )
+        assert hasattr(result, "service_boundaries") or "requests.get" in result.target_code
 
     @pytest.mark.asyncio
     async def test_enterprise_tier_unlimited_depth(self, monkeypatch, tmp_path: Path):
         """Enterprise tier has unlimited context depth."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -335,9 +311,7 @@ class TestEnterpriseTierFeatures:
         prev = "a"
         for i in range(1, 16):
             name = chr(ord("a") + i)
-            (tmp_path / f"{name}.py").write_text(
-                f"from {prev} import {prev}\n\ndef {name}():\n    {prev}()\n"
-            )
+            (tmp_path / f"{name}.py").write_text(f"from {prev} import {prev}\n\ndef {name}():\n    {prev}()\n")
             prev = name
 
         result = await extraction.extract_code(
@@ -353,12 +327,10 @@ class TestEnterpriseTierFeatures:
         assert len(result.context_items) >= 5
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_large_file_support(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_enterprise_tier_large_file_support(self, monkeypatch, tmp_path: Path):
         """Enterprise tier supports large files (up to 100MB)."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -399,12 +371,10 @@ class TestFeatureGating:
         yield
 
     @pytest.mark.asyncio
-    async def test_community_tier_blocks_cross_file_deps(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_community_tier_blocks_cross_file_deps(self, monkeypatch, tmp_path: Path):
         """Community tier blocks cross-file dependency extraction."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -430,17 +400,13 @@ class TestFeatureGating:
             assert "PRO" in (result.error or "") or "cross_file" in (result.error or "")
         else:
             # If somehow succeeds, cross-file context should be empty
-            assert len(result.context_items) == 0 or "a" not in " ".join(
-                result.context_items
-            )
+            assert len(result.context_items) == 0 or "a" not in " ".join(result.context_items)
 
     @pytest.mark.asyncio
-    async def test_pro_tier_blocks_enterprise_features(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_pro_tier_blocks_enterprise_features(self, monkeypatch, tmp_path: Path):
         """Pro tier blocks Enterprise-only features."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -463,20 +429,14 @@ class TestFeatureGating:
 
         assert result.success is True
         # Pro tier should work but not expose Enterprise features
-        assert (
-            not hasattr(result, "service_boundaries")
-            or result.service_boundaries is None
-        )
-        assert (
-            not hasattr(result, "org_wide_references")
-            or result.org_wide_references is None
-        )
+        assert not hasattr(result, "service_boundaries") or result.service_boundaries is None
+        assert not hasattr(result, "org_wide_references") or result.org_wide_references is None
 
     @pytest.mark.asyncio
     async def test_community_tier_file_size_limit(self, monkeypatch, tmp_path: Path):
         """Community tier enforces 1MB file size limit."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -502,8 +462,8 @@ class TestFeatureGating:
     @pytest.mark.asyncio
     async def test_pro_tier_file_size_limit(self, monkeypatch, tmp_path: Path):
         """Pro tier enforces 10MB file size limit."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -514,9 +474,7 @@ class TestFeatureGating:
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
         # Create file at Pro limit (10MB)
-        large_code = (
-            "# " + "x" * (1024 * 1024 * 10 - 100) + "\ndef target():\n    pass\n"
-        )
+        large_code = "# " + "x" * (1024 * 1024 * 10 - 100) + "\ndef target():\n    pass\n"
         (tmp_path / "large.py").write_text(large_code)
 
         result = await extraction.extract_code(
@@ -542,12 +500,10 @@ class TestLicenseInvalidation:
         yield
 
     @pytest.mark.asyncio
-    async def test_invalid_license_fallback_to_community(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_invalid_license_fallback_to_community(self, monkeypatch, tmp_path: Path):
         """Invalid/expired license gracefully falls back to Community tier."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,
@@ -569,12 +525,10 @@ class TestLicenseInvalidation:
         assert result.success is True
 
     @pytest.mark.asyncio
-    async def test_missing_license_defaults_to_community(
-        self, monkeypatch, tmp_path: Path
-    ):
+    async def test_missing_license_defaults_to_community(self, monkeypatch, tmp_path: Path):
         """Missing license defaults to Community tier."""
-        from code_scalpel.mcp.tools import extraction
         import code_scalpel.mcp.path_resolver
+        from code_scalpel.mcp.tools import extraction
 
         monkeypatch.setattr(
             code_scalpel.mcp.path_resolver,

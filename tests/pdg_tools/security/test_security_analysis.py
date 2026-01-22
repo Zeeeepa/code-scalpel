@@ -15,8 +15,11 @@ import z3  # noqa: E402
 from code_scalpel.ir.normalizers.python_normalizer import PythonNormalizer  # noqa: E402
 
 # [20251225_BUGFIX] Imports after backward compat stub removal
-from code_scalpel.security.analyzers import TaintInfo  # noqa: E402
-from code_scalpel.security.analyzers import TaintLevel, TaintTracker
+from code_scalpel.security.analyzers import (
+    TaintInfo,  # noqa: E402
+    TaintLevel,
+    TaintTracker,
+)
 from code_scalpel.security.analyzers.security_analyzer import (  # noqa: E402
     analyze_security,
     find_command_injections,
@@ -352,10 +355,7 @@ cursor.execute("SELECT * FROM users WHERE id=" + user_id)
         result = analyze_security(code)
 
         summary = result.summary()
-        assert (
-            "vulnerability" in summary.lower()
-            or "no vulnerabilities" in summary.lower()
-        )
+        assert "vulnerability" in summary.lower() or "no vulnerabilities" in summary.lower()
 
     def test_result_to_dict(self):
         """Result should serialize to dict."""
@@ -479,7 +479,7 @@ class TestEdgeCases:
 def vulnerable_function():
     user_id = request.args.get("id")
     cursor.execute("SELECT * WHERE id=" + user_id)
-    
+
 def safe_function():
     x = 1 + 2
 """
@@ -615,9 +615,7 @@ class TestSanitizerRegistry:
         # Clean up after test
         test_name = "_test_custom_sanitizer_123"
         try:
-            register_sanitizer(
-                test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False
-            )
+            register_sanitizer(test_name, clears_sinks={SecuritySink.SQL_QUERY}, full_clear=False)
 
             assert test_name in SANITIZER_REGISTRY
             sanitizer = SANITIZER_REGISTRY[test_name]
@@ -1632,14 +1630,8 @@ class TestTaintTrackerConfigEdgeCases:
 
         # Config with invalid sanitizer format (not a list)
         fake_config = {
-            "tool": {
-                "code-scalpel": {
-                    "sanitizers": {
-                        "bad_sanitizer": "not_a_list"
-                    }  # Invalid - should be list
-                }
-            }
-        }
+            "tool": {"code-scalpel": {"sanitizers": {"bad_sanitizer": "not_a_list"}}}
+        }  # Invalid - should be list
 
         with (
             patch("os.path.exists", return_value=True),
@@ -1797,7 +1789,7 @@ result2 = escape_string(b)
         # Need to add this to SANITIZER_PATTERNS for test
         code = """
 a = "val1"
-b = "val2"  
+b = "val2"
 c = "val3"
 # Simulating a sanitizer with multiple args where first is BinOp
 # Since html.escape takes 1 arg, we test the loop logic differently

@@ -63,16 +63,14 @@ class FalsePositiveAnalyzer:
             return False
 
         # Look for test frameworks
-        test_imports = {"pytest", "unittest", "mock", "pytest", "nose"}
+        test_imports = {"pytest", "unittest", "mock", "nose"}
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if any(test_pkg in alias.name for test_pkg in test_imports):
                         return True
             elif isinstance(node, ast.ImportFrom):
-                if node.module and any(
-                    test_pkg in node.module for test_pkg in test_imports
-                ):
+                if node.module and any(test_pkg in node.module for test_pkg in test_imports):
                     return True
 
         # Look for test function patterns
@@ -169,9 +167,7 @@ class FalsePositiveAnalyzer:
             filtered = []  # Remove all from test code
         elif is_example:
             false_positive_count = len(vulnerabilities)
-            reasons.append(
-                f"Example code: All {len(vulnerabilities)} findings suppressed"
-            )
+            reasons.append(f"Example code: All {len(vulnerabilities)} findings suppressed")
             filtered = []  # Remove all from example code
         else:
             # Keep all findings for production code
@@ -187,9 +183,7 @@ class FalsePositiveAnalyzer:
             "is_example_code": is_example,
         }
 
-    def filter_by_pattern(
-        self, vulnerabilities: list[dict[str, Any]], code: str
-    ) -> list[dict[str, Any]]:
+    def filter_by_pattern(self, vulnerabilities: list[dict[str, Any]], code: str) -> list[dict[str, Any]]:
         """
         Filter vulnerabilities by known false positive patterns.
 
@@ -236,10 +230,7 @@ class FalsePositiveAnalyzer:
 
                 # Pattern 3: Weak crypto in test/example context
                 if vuln_type == "Weak Cryptography":
-                    if (
-                        "test" in line_content.lower()
-                        or "example" in line_content.lower()
-                    ):
+                    if "test" in line_content.lower() or "example" in line_content.lower():
                         is_false_positive = True
 
                 if not is_false_positive:

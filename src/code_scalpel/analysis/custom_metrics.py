@@ -26,11 +26,12 @@ import csv
 import json
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any
 
 
 @dataclass
@@ -38,11 +39,11 @@ class MetricValue:
     """A single metric measurement."""
 
     name: str
-    value: Union[int, float, str, bool]
-    unit: Optional[str] = None
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    details: Dict[str, Any] = field(default_factory=dict)
+    value: int | float | str | bool
+    unit: str | None = None
+    file_path: str | None = None
+    line_number: int | None = None
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -50,12 +51,12 @@ class MetricSummary:
     """Summary of a metric across all files."""
 
     name: str
-    total: Union[int, float]
+    total: int | float
     average: float
-    min_value: Union[int, float]
-    max_value: Union[int, float]
+    min_value: int | float
+    max_value: int | float
     count: int
-    unit: Optional[str] = None
+    unit: str | None = None
 
 
 @dataclass
@@ -64,10 +65,10 @@ class MetricsReport:
 
     project_path: str
     collected_at: str
-    metrics: List[MetricValue]
-    summaries: Dict[str, MetricSummary]
-    file_metrics: Dict[str, List[MetricValue]]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metrics: list[MetricValue]
+    summaries: dict[str, MetricSummary]
+    file_metrics: dict[str, list[MetricValue]]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_json(self) -> str:
         """Export report to JSON."""
@@ -99,7 +100,7 @@ class MetricsReport:
         writer = csv.writer(output)
 
         # Get all metric names
-        metric_names: Set[str] = set()
+        metric_names: set[str] = set()
         for file_metrics in self.file_metrics.values():
             for m in file_metrics:
                 metric_names.add(m.name)
@@ -110,7 +111,7 @@ class MetricsReport:
 
         # Write file rows
         for file_path, metrics in self.file_metrics.items():
-            row: List[str] = [file_path]
+            row: list[str] = [file_path]
             metric_dict = {m.name: m.value for m in metrics}
             for name in sorted(metric_names):
                 # CSV writer expects strings; coerce numeric/bool metrics to str
@@ -130,12 +131,12 @@ class MetricCollector(ABC):
         pass
 
     @property
-    def unit(self) -> Optional[str]:
+    def unit(self) -> str | None:
         """Unit of measurement (e.g., 'lines', 'score')."""
         return None
 
     @abstractmethod
-    def collect(self, file_path: Path, content: str) -> Optional[MetricValue]:
+    def collect(self, file_path: Path, content: str) -> MetricValue | None:
         """
         Collect metric from a file.
 
@@ -164,9 +165,7 @@ class LinesOfCodeCollector(MetricCollector):
         lines = content.splitlines()
         total = len(lines)
         blank = sum(1 for line in lines if not line.strip())
-        comment = sum(
-            1 for line in lines if line.strip().startswith(("#", "//", "/*", "*"))
-        )
+        comment = sum(1 for line in lines if line.strip().startswith(("#", "//", "/*", "*")))
         code = total - blank - comment
 
         return MetricValue(
@@ -194,7 +193,7 @@ class CyclomaticComplexityCollector(MetricCollector):
     def unit(self) -> str:
         return "score"
 
-    def collect(self, file_path: Path, content: str) -> Optional[MetricValue]:
+    def collect(self, file_path: Path, content: str) -> MetricValue | None:
         if file_path.suffix != ".py":
             return None
 
@@ -236,7 +235,7 @@ class FunctionCountCollector(MetricCollector):
     def unit(self) -> str:
         return "functions"
 
-    def collect(self, file_path: Path, content: str) -> Optional[MetricValue]:
+    def collect(self, file_path: Path, content: str) -> MetricValue | None:
         count = 0
 
         if file_path.suffix == ".py":
@@ -276,7 +275,7 @@ class ClassCountCollector(MetricCollector):
     def unit(self) -> str:
         return "classes"
 
-    def collect(self, file_path: Path, content: str) -> Optional[MetricValue]:
+    def collect(self, file_path: Path, content: str) -> MetricValue | None:
         count = 0
 
         if file_path.suffix == ".py":
@@ -312,7 +311,7 @@ class ImportCountCollector(MetricCollector):
     def unit(self) -> str:
         return "imports"
 
-    def collect(self, file_path: Path, content: str) -> Optional[MetricValue]:
+    def collect(self, file_path: Path, content: str) -> MetricValue | None:
         count = 0
 
         if file_path.suffix == ".py":
@@ -399,10 +398,8 @@ class MetricsCollector:
 
     def __init__(self):
         """Initialize with built-in collectors."""
-        self._collectors: Dict[str, MetricCollector] = {}
-        self._custom_fns: Dict[
-            str, tuple[Callable[[Path, str], Union[int, float, None]], Optional[str]]
-        ] = {}
+        self._collectors: dict[str, MetricCollector] = {}
+        self._custom_fns: dict[str, tuple[Callable[[Path, str], int | float | None], str | None]] = {}
 
         # Register built-in collectors
         for collector_cls in [
@@ -423,8 +420,8 @@ class MetricsCollector:
     def register_metric(
         self,
         name: str,
-        fn: Callable[[Path, str], Union[int, float, None]],
-        unit: Optional[str] = None,
+        fn: Callable[[Path, str], int | float | None],
+        unit: str | None = None,
     ) -> None:
         """
         Register a simple metric function.
@@ -439,8 +436,8 @@ class MetricsCollector:
     def collect(
         self,
         project_path: str | Path,
-        extensions: Optional[Set[str]] = None,
-        exclude_dirs: Optional[Set[str]] = None,
+        extensions: set[str] | None = None,
+        exclude_dirs: set[str] | None = None,
     ) -> MetricsReport:
         """
         Collect all metrics for a project.
@@ -463,8 +460,8 @@ class MetricsCollector:
             "venv",
         }
 
-        all_metrics: List[MetricValue] = []
-        file_metrics: Dict[str, List[MetricValue]] = {}
+        all_metrics: list[MetricValue] = []
+        file_metrics: dict[str, list[MetricValue]] = {}
 
         for file_path in root.rglob("*"):
             if not file_path.is_file():
@@ -525,22 +522,20 @@ class MetricsCollector:
 
     def _calculate_summaries(
         self,
-        metrics: List[MetricValue],
-    ) -> Dict[str, MetricSummary]:
+        metrics: list[MetricValue],
+    ) -> dict[str, MetricSummary]:
         """Calculate summary statistics for each metric."""
-        summaries: Dict[str, MetricSummary] = {}
+        summaries: dict[str, MetricSummary] = {}
 
         # Group by metric name
-        by_name: Dict[str, List[MetricValue]] = {}
+        by_name: dict[str, list[MetricValue]] = {}
         for m in metrics:
             if m.name not in by_name:
                 by_name[m.name] = []
             by_name[m.name].append(m)
 
         for name, values in by_name.items():
-            numeric_values = [
-                v.value for v in values if isinstance(v.value, (int, float))
-            ]
+            numeric_values = [v.value for v in values if isinstance(v.value, (int, float))]
 
             if numeric_values:
                 summaries[name] = MetricSummary(
@@ -558,7 +553,7 @@ class MetricsCollector:
 
 def collect_metrics(
     project_path: str | Path,
-    custom_metrics: Optional[Dict[str, Callable]] = None,
+    custom_metrics: dict[str, Callable] | None = None,
 ) -> MetricsReport:
     """
     Convenience function to collect project metrics.

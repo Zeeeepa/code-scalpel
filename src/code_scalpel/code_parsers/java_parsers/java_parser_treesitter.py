@@ -27,7 +27,6 @@ Implemented Features:
 
 import hashlib
 from dataclasses import dataclass, field
-from typing import Optional
 
 import tree_sitter_java
 from tree_sitter import Language, Parser
@@ -38,7 +37,7 @@ class JavaAnnotation:
     """Represents a Java annotation."""
 
     name: str
-    arguments: Optional[str] = None
+    arguments: str | None = None
     line: int = 0
 
 
@@ -50,9 +49,9 @@ class JavaField:
     field_type: str
     modifiers: list[str] = field(default_factory=list)
     annotations: list[JavaAnnotation] = field(default_factory=list)
-    initial_value: Optional[str] = None
+    initial_value: str | None = None
     line: int = 0
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
 
 
 @dataclass
@@ -70,7 +69,7 @@ class JavaMethod:
     """Represents a Java method declaration."""
 
     name: str
-    return_type: Optional[str] = None
+    return_type: str | None = None
     parameters: list[JavaParameter] = field(default_factory=list)
     modifiers: list[str] = field(default_factory=list)
     annotations: list[JavaAnnotation] = field(default_factory=list)
@@ -79,7 +78,7 @@ class JavaMethod:
     line: int = 0
     end_line: int = 0
     complexity: int = 1
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
     is_constructor: bool = False
     lambda_count: int = 0
     method_reference_count: int = 0
@@ -90,7 +89,7 @@ class JavaEnumConstant:
     """Represents an enum constant."""
 
     name: str
-    arguments: Optional[str] = None
+    arguments: str | None = None
     line: int = 0
 
 
@@ -104,7 +103,7 @@ class JavaEnum:
     annotations: list[JavaAnnotation] = field(default_factory=list)
     interfaces: list[str] = field(default_factory=list)
     line: int = 0
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
 
 
 @dataclass
@@ -117,7 +116,7 @@ class JavaInterface:
     annotations: list[JavaAnnotation] = field(default_factory=list)
     type_parameters: list[str] = field(default_factory=list)
     line: int = 0
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
 
 
 @dataclass
@@ -150,7 +149,7 @@ class JavaRecord:
     type_parameters: list[str] = field(default_factory=list)
     methods: list[JavaMethod] = field(default_factory=list)
     line: int = 0
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
 
 
 @dataclass
@@ -160,12 +159,8 @@ class JavaModuleDirective:
     directive_type: str  # "requires", "exports", "opens", "uses", "provides"
     module_or_package: str
     modifiers: list[str] = field(default_factory=list)  # "transitive", "static"
-    to_modules: list[str] = field(
-        default_factory=list
-    )  # for "exports...to" or "opens...to"
-    with_implementations: list[str] = field(
-        default_factory=list
-    )  # for "provides...with"
+    to_modules: list[str] = field(default_factory=list)  # for "exports...to" or "opens...to"
+    with_implementations: list[str] = field(default_factory=list)  # for "provides...with"
 
 
 @dataclass
@@ -184,7 +179,7 @@ class JavaClass:
     """Represents a Java class declaration."""
 
     name: str
-    superclass: Optional[str] = None
+    superclass: str | None = None
     interfaces: list[str] = field(default_factory=list)
     modifiers: list[str] = field(default_factory=list)
     annotations: list[JavaAnnotation] = field(default_factory=list)
@@ -196,7 +191,7 @@ class JavaClass:
     inner_records: list["JavaRecord"] = field(default_factory=list)
     inner_enums: list[JavaEnum] = field(default_factory=list)
     line: int = 0
-    javadoc: Optional[str] = None
+    javadoc: str | None = None
     is_inner: bool = False
     is_static: bool = False
     is_abstract: bool = False
@@ -211,14 +206,14 @@ class JavaClass:
 class JavaParseResult:
     """Complete parse result for a Java file."""
 
-    package: Optional[str] = None
+    package: str | None = None
     imports: list[str] = field(default_factory=list)
     static_imports: list[str] = field(default_factory=list)
     classes: list[JavaClass] = field(default_factory=list)
     interfaces: list[JavaInterface] = field(default_factory=list)
     enums: list[JavaEnum] = field(default_factory=list)
     records: list[JavaRecord] = field(default_factory=list)
-    module: Optional[JavaModule] = None  # For module-info.java
+    module: JavaModule | None = None  # For module-info.java
     total_complexity: int = 1
     lines_of_code: int = 0
     comment_lines: int = 0
@@ -227,7 +222,7 @@ class JavaParseResult:
     method_reference_count: int = 0
     static_initializer_count: int = 0
     # Incremental parsing support
-    _source_hash: Optional[str] = field(default=None, repr=False)
+    _source_hash: str | None = field(default=None, repr=False)
 
 
 class JavaParser:
@@ -311,7 +306,7 @@ class JavaParser:
             stack.extend(current.children)
         return results
 
-    def _get_preceding_javadoc(self, node) -> Optional[str]:
+    def _get_preceding_javadoc(self, node) -> str | None:
         """Extract Javadoc comment immediately preceding a node."""
         # Look for block_comment that starts with /** before this node
         if node.prev_sibling and node.prev_sibling.type == "block_comment":
@@ -355,15 +350,11 @@ class JavaParser:
                     if mod.type in ("annotation", "marker_annotation"):
                         name_node = self._find_child_by_type(mod, "identifier")
                         if not name_node:
-                            name_node = self._find_child_by_type(
-                                mod, "scoped_identifier"
-                            )
+                            name_node = self._find_child_by_type(mod, "scoped_identifier")
                         name = self._get_text(name_node) if name_node else ""
 
                         # Get annotation arguments if present
-                        args_node = self._find_child_by_type(
-                            mod, "annotation_argument_list"
-                        )
+                        args_node = self._find_child_by_type(mod, "annotation_argument_list")
                         args = self._get_text(args_node) if args_node else None
 
                         annotations.append(
@@ -380,9 +371,7 @@ class JavaParser:
         type_params = []
         type_params_node = self._find_child_by_type(node, "type_parameters")
         if type_params_node:
-            for param in self._find_children_by_type(
-                type_params_node, "type_parameter"
-            ):
+            for param in self._find_children_by_type(type_params_node, "type_parameter"):
                 type_params.append(self._get_text(param))
         return type_params
 
@@ -412,7 +401,7 @@ class JavaParser:
                         interfaces.append(self._get_text(child))
         return interfaces
 
-    def _extract_superclass(self, node) -> Optional[str]:
+    def _extract_superclass(self, node) -> str | None:
         """Extract superclass from class declaration."""
         superclass_node = self._find_child_by_type(node, "superclass")
         if superclass_node:
@@ -494,18 +483,14 @@ class JavaParser:
                 param_annotations = []
                 for child in param.children:
                     if child.type in ("annotation", "marker_annotation"):
-                        name = self._get_text(
-                            self._find_child_by_type(child, "identifier")
-                        )
+                        name = self._get_text(self._find_child_by_type(child, "identifier"))
                         param_annotations.append(JavaAnnotation(name=name.lstrip("@")))
 
                 if name_node:
                     parameters.append(
                         JavaParameter(
                             name=self._get_text(name_node),
-                            param_type=(
-                                self._get_text(type_node) if type_node else "Object"
-                            ),
+                            param_type=(self._get_text(type_node) if type_node else "Object"),
                             annotations=param_annotations,
                             is_varargs=is_varargs,
                         )
@@ -527,9 +512,7 @@ class JavaParser:
                     parameters.append(
                         JavaParameter(
                             name=self._get_text(name_node),
-                            param_type=(
-                                self._get_text(type_node) if type_node else "Object"
-                            ),
+                            param_type=(self._get_text(type_node) if type_node else "Object"),
                             is_varargs=True,
                         )
                     )
@@ -639,11 +622,7 @@ class JavaParser:
                     constants.append(
                         JavaEnumConstant(
                             name=self._get_text(const_name_node),
-                            arguments=(
-                                self._get_text(const_args_node)
-                                if const_args_node
-                                else None
-                            ),
+                            arguments=(self._get_text(const_args_node) if const_args_node else None),
                             line=self._get_line(const),
                         )
                     )
@@ -729,15 +708,11 @@ class JavaParser:
                 if child.type == "method_declaration":
                     java_class.methods.append(self._extract_method(child))
                 elif child.type == "constructor_declaration":
-                    java_class.methods.append(
-                        self._extract_method(child, is_constructor=True)
-                    )
+                    java_class.methods.append(self._extract_method(child, is_constructor=True))
                 elif child.type == "field_declaration":
                     java_class.fields.extend(self._extract_field(child))
                 elif child.type == "class_declaration":
-                    java_class.inner_classes.append(
-                        self._extract_class(child, is_inner=True)
-                    )
+                    java_class.inner_classes.append(self._extract_class(child, is_inner=True))
                 elif child.type == "static_initializer":
                     # Static initializer block
                     block = self._find_child_by_type(child, "block")
@@ -789,20 +764,14 @@ class JavaParser:
                 comp_annotations = []
                 for child in param.children:
                     if child.type in ("annotation", "marker_annotation"):
-                        ann_name = self._get_text(
-                            self._find_child_by_type(child, "identifier")
-                        )
-                        comp_annotations.append(
-                            JavaAnnotation(name=ann_name.lstrip("@"))
-                        )
+                        ann_name = self._get_text(self._find_child_by_type(child, "identifier"))
+                        comp_annotations.append(JavaAnnotation(name=ann_name.lstrip("@")))
 
                 if name_node:
                     components.append(
                         JavaRecordComponent(
                             name=self._get_text(name_node),
-                            component_type=(
-                                self._get_text(type_node) if type_node else "Object"
-                            ),
+                            component_type=(self._get_text(type_node) if type_node else "Object"),
                             annotations=comp_annotations,
                         )
                     )
@@ -860,7 +829,7 @@ class JavaParser:
             line=self._get_line(node),
         )
 
-    def _extract_module_directive(self, node) -> Optional[JavaModuleDirective]:
+    def _extract_module_directive(self, node) -> JavaModuleDirective | None:
         """Extract a single module directive."""
         directive_type = None
         module_or_package = ""
@@ -997,9 +966,7 @@ class JavaParser:
         """Compute a hash of the source code for incremental parsing."""
         return hashlib.sha256(code.encode()).hexdigest()
 
-    def parse_incremental(
-        self, code: str, previous_result: Optional[JavaParseResult] = None
-    ) -> JavaParseResult:
+    def parse_incremental(self, code: str, previous_result: JavaParseResult | None = None) -> JavaParseResult:
         """
         Parse Java source code with incremental parsing support.
 
@@ -1042,9 +1009,7 @@ class JavaParser:
         result._source_hash = self._compute_hash(code)
 
         # Count lines
-        result.lines_of_code, result.comment_lines, result.blank_lines = (
-            self._count_lines(code)
-        )
+        result.lines_of_code, result.comment_lines, result.blank_lines = self._count_lines(code)
 
         # Process top-level nodes
         for child in root_node.children:
@@ -1053,15 +1018,11 @@ class JavaParser:
                 pkg_name_node = self._find_child_by_type(child, "scoped_identifier")
                 if not pkg_name_node:
                     pkg_name_node = self._find_child_by_type(child, "identifier")
-                result.package = (
-                    self._get_text(pkg_name_node) if pkg_name_node else None
-                )
+                result.package = self._get_text(pkg_name_node) if pkg_name_node else None
 
             elif child.type == "import_declaration":
                 import_text = self._get_text(child)
-                import_text = (
-                    import_text.replace("import ", "").replace(";", "").strip()
-                )
+                import_text = import_text.replace("import ", "").replace(";", "").strip()
 
                 if import_text.startswith("static "):
                     result.static_imports.append(import_text.replace("static ", ""))
@@ -1074,9 +1035,7 @@ class JavaParser:
 
                 # Aggregate complexity and counts
                 for method in java_class.methods:
-                    result.total_complexity += (
-                        method.complexity - 1
-                    )  # Don't double-count base
+                    result.total_complexity += method.complexity - 1  # Don't double-count base
                     result.lambda_count += method.lambda_count
                     result.method_reference_count += method.method_reference_count
 

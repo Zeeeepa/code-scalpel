@@ -18,3 +18,94 @@ policies:
     rule: |
       package code_scalpel.test
       default allow = true
+
+  - name: no-secrets-in-code
+    category: security
+    severity: CRITICAL
+    action: DENY
+    description: |
+      Never commit secrets, API keys, passwords, or tokens to version control.
+    rule: |
+      package code_scalpel.security
+      
+      default allow = true
+      
+      # Patterns that indicate secrets
+      contains_secret {
+        regex.match(`(password|token|api[_-]?key|secret)["\s]*[:=]`, input.operation.code)
+      }
+      
+      contains_secret {
+        regex.match(`[A-Za-z0-9]{32,}`, input.operation.code)  # Long random strings
+      }
+      
+      # Exceptions for test fixtures
+      is_test_fixture {
+        contains(input.operation.file_path, "test_")
+        contains(input.operation.code, "FAKE_")
+      }
+      
+      # Deny code with secrets
+      allow {
+        not contains_secret
+      }
+      
+      allow {
+        contains_secret
+        is_test_fixture
+      }
+    
+    remediation: |
+      Use environment variables or secret managers:
+      - os.environ.get("API_KEY")
+      - AWS Secrets Manager
+      - HashiCorp Vault
+      - .env files (with .gitignore)
+  
+  - name: require-security-review-for-auth-changes
+    category: security
+    severity: CRITICAL
+    action: DENY
+    description: |
+      Changes to authentication, authorization, or cryptographic code require
+      explicit security review and approval.
+    rule: |
+      package code_scalpel.security
+      
+      default allow = false
+      
+      # Detect security-sensitive changes
+      touches_security_code {
+        contains(input.operation.file_path, "auth")
+      }
+      
+      touches_security_code {
+        contains(input.operation.file_path, "crypto")
+      }
+      
+      touches_security_code {
+        contains(input.operation.file_path, "security")
+      }
+      
+      # Check for security review approval
+      has_security_approval {
+        input.operation.security_review.approved == true
+        input.operation.security_review.reviewer != null
+      }
+      
+      # Deny security changes without approval
+      allow {
+        not touches_security_code
+      }
+      
+      allow {
+        touches_security_code
+        has_security_approval
+      }
+    
+    remediation: |
+      For security-sensitive changes:
+      1. Document the change rationale
+      2. Request security team review
+      3. Wait for approval before proceeding
+      4. Include reviewer name in commit message

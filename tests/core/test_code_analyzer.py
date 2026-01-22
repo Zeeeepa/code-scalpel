@@ -156,9 +156,7 @@ def example():
 """
         result = self.analyzer.analyze(code)
 
-        unreachable = [
-            item for item in result.dead_code if item.code_type == "statement"
-        ]
+        unreachable = [item for item in result.dead_code if item.code_type == "statement"]
         self.assertGreater(len(unreachable), 0)
 
     def test_detect_unused_import(self):
@@ -218,9 +216,7 @@ old_name = 10
 result = old_name + 5
 print(old_name)
 """
-        result = self.analyzer.apply_refactor(
-            code, "rename_variable", target="old_name", new_name="new_name"
-        )
+        result = self.analyzer.apply_refactor(code, "rename_variable", target="old_name", new_name="new_name")
 
         self.assertIn("new_name", result)
         self.assertNotIn("old_name", result)
@@ -246,11 +242,7 @@ x = used()
         import ast
 
         result_tree = ast.parse(new_code)
-        function_names = [
-            node.name
-            for node in ast.walk(result_tree)
-            if isinstance(node, ast.FunctionDef)
-        ]
+        function_names = [node.name for node in ast.walk(result_tree) if isinstance(node, ast.FunctionDef)]
 
         # The 'unused' function should be removed
         self.assertNotIn("unused", function_names)
@@ -264,9 +256,7 @@ CONST_VALUE = 42
 result = CONST_VALUE + 10
 print(CONST_VALUE)
 """
-        result = self.analyzer.apply_refactor(
-            code, "inline_constant", target="CONST_VALUE"
-        )
+        result = self.analyzer.apply_refactor(code, "inline_constant", target="CONST_VALUE")
 
         # The constant should be inlined - the value 42 should appear directly
         self.assertIn("42", result)
@@ -319,9 +309,7 @@ result = eval(user_input)
         result = self.analyzer.analyze(code)
 
         security_funcs = [
-            issue["function"]
-            for issue in result.security_issues
-            if issue["type"] == "dangerous_function"
+            issue["function"] for issue in result.security_issues if issue["type"] == "dangerous_function"
         ]
         self.assertIn("eval", security_funcs)
 
@@ -333,9 +321,7 @@ exec("print('hello')")
         result = self.analyzer.analyze(code)
 
         security_funcs = [
-            issue["function"]
-            for issue in result.security_issues
-            if issue["type"] == "dangerous_function"
+            issue["function"] for issue in result.security_issues if issue["type"] == "dangerous_function"
         ]
         self.assertIn("exec", security_funcs)
 
@@ -402,9 +388,7 @@ def heavily_nested(x):
         return 0
 """
         result = analyzer.analyze(code)
-        suggestions = analyzer._generate_refactor_suggestions(
-            result.ast_tree, result.pdg, result.dead_code
-        )
+        suggestions = analyzer._generate_refactor_suggestions(result.ast_tree, result.pdg, result.dead_code)
 
         types = {s.refactor_type for s in suggestions}
         self.assertIn("reduce_nesting", types)

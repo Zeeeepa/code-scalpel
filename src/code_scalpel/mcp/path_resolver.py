@@ -25,7 +25,7 @@ import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple, cast
+from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -36,11 +36,11 @@ logger = logging.getLogger(__name__)
 class PathResolutionResult:
     """Result of path resolution attempt."""
 
-    resolved_path: Optional[str]
+    resolved_path: str | None
     success: bool
-    attempted_paths: List[str]
-    suggestion: Optional[str] = None
-    error_message: Optional[str] = None
+    attempted_paths: list[str]
+    suggestion: str | None = None
+    error_message: str | None = None
 
 
 class PathResolver:
@@ -58,7 +58,7 @@ class PathResolver:
 
     def __init__(
         self,
-        workspace_roots: Optional[List[str]] = None,
+        workspace_roots: list[str] | None = None,
         enable_docker_detection: bool = True,
     ):
         """
@@ -75,7 +75,7 @@ class PathResolver:
         self.is_docker = self._is_running_in_docker()
         self.path_cache = {}  # Cache for resolved paths
 
-    def _detect_workspace_roots(self) -> List[str]:
+    def _detect_workspace_roots(self) -> list[str]:
         """
         Detect potential workspace root directories.
 
@@ -136,14 +136,14 @@ class PathResolver:
 
         # Check cgroup for docker
         try:
-            with open("/proc/1/cgroup", "r") as f:
+            with open("/proc/1/cgroup") as f:
                 return "docker" in f.read() or "containerd" in f.read()
         except (FileNotFoundError, PermissionError):
             pass
 
         return False
 
-    def _parse_windows_path(self, path: str) -> Optional[Tuple[str, str]]:
+    def _parse_windows_path(self, path: str) -> tuple[str, str] | None:
         r"""
         Parse a Windows-style path and extract drive letter and relative path.
 
@@ -168,7 +168,7 @@ class PathResolver:
             return (drive, rel_path)
         return None
 
-    def _translate_windows_path(self, path: str) -> List[str]:
+    def _translate_windows_path(self, path: str) -> list[str]:
         """
         Translate a Windows path to potential Linux/Docker equivalents.
 
@@ -217,7 +217,7 @@ class PathResolver:
         logger.debug(f"Windows path '{path}' translated to candidates: {candidates}")
         return candidates
 
-    def resolve(self, path: str, project_root: Optional[str] = None) -> str:
+    def resolve(self, path: str, project_root: str | None = None) -> str:
         """
         Resolve a path to its accessible location.
 
@@ -255,9 +255,7 @@ class PathResolver:
             # Raise with helpful error message
             raise FileNotFoundError(self._format_error_message(path, result))
 
-    def _attempt_resolution(
-        self, path: str, project_root: Optional[str]
-    ) -> PathResolutionResult:
+    def _attempt_resolution(self, path: str, project_root: str | None) -> PathResolutionResult:
         """
         Attempt to resolve path with multiple strategies.
 
@@ -379,9 +377,7 @@ class PathResolver:
             suggestion=self._generate_suggestion(path, attempted_paths),
         )
 
-    def _find_file_in_tree(
-        self, root: str, filename: str, max_depth: int = 5
-    ) -> Optional[str]:
+    def _find_file_in_tree(self, root: str, filename: str, max_depth: int = 5) -> str | None:
         """
         Search for a file in directory tree.
 
@@ -412,7 +408,7 @@ class PathResolver:
 
         return None
 
-    def _generate_suggestion(self, path: str, attempted_paths: List[str]) -> str:
+    def _generate_suggestion(self, path: str, attempted_paths: list[str]) -> str:
         """
         Generate helpful suggestion for failed path resolution.
 
@@ -468,19 +464,13 @@ class PathResolver:
                     drive, rel_path = parsed
                     suggestions.append(f"  /mnt/{drive}/{rel_path}")
             else:
-                suggestions.append(
-                    "Ensure the file exists and use an absolute path, or place it in:\n"
-                )
+                suggestions.append("Ensure the file exists and use an absolute path, or place it in:\n")
                 for root in self.workspace_roots[:3]:  # Top 3 roots
                     suggestions.append(f"  - {root}")
 
         # Add workspace root hint
-        suggestions.append(
-            f"\nCurrent workspace roots: {', '.join(self.workspace_roots)}"
-        )
-        suggestions.append(
-            "Set WORKSPACE_ROOT environment variable to specify custom root."
-        )
+        suggestions.append(f"\nCurrent workspace roots: {', '.join(self.workspace_roots)}")
+        suggestions.append("Set WORKSPACE_ROOT environment variable to specify custom root.")
 
         return "\n".join(suggestions)
 
@@ -518,9 +508,7 @@ class PathResolver:
 
         return "\n".join(lines)
 
-    def validate_paths(
-        self, paths: List[str], project_root: Optional[str] = None
-    ) -> Tuple[List[str], List[str]]:
+    def validate_paths(self, paths: list[str], project_root: str | None = None) -> tuple[list[str], list[str]]:
         """
         Validate multiple paths and return accessible/inaccessible lists.
 
@@ -552,7 +540,7 @@ class PathResolver:
 
 
 # Global singleton instance for convenience
-_default_resolver: Optional[PathResolver] = None
+_default_resolver: PathResolver | None = None
 
 
 def get_default_resolver() -> PathResolver:
@@ -570,7 +558,7 @@ def get_default_resolver() -> PathResolver:
     return _default_resolver
 
 
-def resolve_path(path: str, project_root: Optional[str] = None) -> str:
+def resolve_path(path: str, project_root: str | None = None) -> str:
     """
     Convenience function for path resolution using default resolver.
 

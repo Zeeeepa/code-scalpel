@@ -6,7 +6,7 @@ All normalizers must implement this interface.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, List, Union
+from typing import Any
 
 from ..nodes import IRModule, IRNode
 
@@ -61,7 +61,7 @@ class BaseNormalizer(ABC):
         pass
 
     @abstractmethod
-    def normalize_node(self, node: Any) -> Union[IRNode, List[IRNode], None]:
+    def normalize_node(self, node: Any) -> IRNode | list[IRNode] | None:
         """
         Normalize a single native AST/CST node to IR.
 

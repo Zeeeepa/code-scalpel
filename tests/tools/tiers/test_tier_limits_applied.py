@@ -4,6 +4,7 @@ Test to verify enterprise tier has unlimited k and max_nodes in practice.
 """
 
 import pytest
+
 from code_scalpel.licensing.features import get_tool_capabilities
 
 
@@ -21,12 +22,8 @@ def test_tier_limits(tier: str, expected_max_k, expected_max_nodes):
     max_k = limits.get("max_k")
     max_nodes = limits.get("max_nodes")
 
-    assert (
-        max_k == expected_max_k
-    ), f"{tier} expected max_k={expected_max_k}, got {max_k}"
-    assert (
-        max_nodes == expected_max_nodes
-    ), f"{tier} expected max_nodes={expected_max_nodes}, got {max_nodes}"
+    assert max_k == expected_max_k, f"{tier} expected max_k={expected_max_k}, got {max_k}"
+    assert max_nodes == expected_max_nodes, f"{tier} expected max_nodes={expected_max_nodes}, got {max_nodes}"
 
 
 print("  Enterprise: Unlimited (None) - should allow k=100, max_nodes=5000")

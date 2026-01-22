@@ -43,7 +43,6 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 
 class JSHintSeverity(Enum):
@@ -117,11 +116,11 @@ class JSHintConfig:
     futurehostile: bool = False  # Warn about future reserved words
     latedef: bool = False  # Prohibit variable use before definition
     leanswitch: bool = False  # Prohibit unnecessary switch case fall-through
-    maxcomplexity: Optional[int] = None  # Max cyclomatic complexity
-    maxdepth: Optional[int] = None  # Max block nesting
+    maxcomplexity: int | None = None  # Max cyclomatic complexity
+    maxdepth: int | None = None  # Max block nesting
     maxerr: int = 50  # Max errors before stopping
-    maxparams: Optional[int] = None  # Max function parameters
-    maxstatements: Optional[int] = None  # Max statements per function
+    maxparams: int | None = None  # Max function parameters
+    maxstatements: int | None = None  # Max statements per function
     noarg: bool = False  # Prohibit arguments.caller/callee
     nocomma: bool = False  # Prohibit comma operator
     nonbsp: bool = False  # Warn about non-breaking spaces
@@ -205,7 +204,7 @@ class JSHintParser:
         config = parser.parse_config('.jshintrc')
     """
 
-    def __init__(self, jshint_path: Optional[str] = None):
+    def __init__(self, jshint_path: str | None = None):
         """
         Initialize JSHint parser.
 
@@ -213,7 +212,7 @@ class JSHintParser:
         """
         self._jshint_path = jshint_path or self._find_jshint()
 
-    def _find_jshint(self) -> Optional[str]:
+    def _find_jshint(self) -> str | None:
         """Find JSHint executable."""
         jshint = shutil.which("jshint")
         if jshint:
@@ -266,9 +265,7 @@ class JSHintParser:
                 files[file_path] = []
             files[file_path].append(jshint_error)
 
-        return [
-            JSHintFileResult(file_path=fp, errors=errs) for fp, errs in files.items()
-        ]
+        return [JSHintFileResult(file_path=fp, errors=errs) for fp, errs in files.items()]
 
     def parse_config(self, config_path: str) -> JSHintConfig:
         """
@@ -312,9 +309,7 @@ class JSHintParser:
 
         return config
 
-    def analyze_file(
-        self, file_path: str, config_path: Optional[str] = None
-    ) -> JSHintFileResult:
+    def analyze_file(self, file_path: str, config_path: str | None = None) -> JSHintFileResult:
         """
         Run JSHint on a file.
 
@@ -325,11 +320,7 @@ class JSHintParser:
         if not self._jshint_path:
             raise RuntimeError("JSHint not found. Install with: npm install jshint")
 
-        cmd = (
-            self._jshint_path.split()
-            if " " in self._jshint_path
-            else [self._jshint_path]
-        )
+        cmd = self._jshint_path.split() if " " in self._jshint_path else [self._jshint_path]
         cmd.extend(["--reporter=json", file_path])
         if config_path:
             cmd.extend(["--config", config_path])
@@ -346,9 +337,7 @@ class JSHintParser:
         except subprocess.SubprocessError as e:
             raise RuntimeError(f"JSHint failed: {e}")
 
-    def analyze_code(
-        self, code: str, filename: str = "input.js", config_path: Optional[str] = None
-    ) -> JSHintFileResult:
+    def analyze_code(self, code: str, filename: str = "input.js", config_path: str | None = None) -> JSHintFileResult:
         """
         Run JSHint on source code string.
 
@@ -371,9 +360,7 @@ class JSHintParser:
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
-    def get_by_severity(
-        self, result: JSHintFileResult, severity: JSHintSeverity
-    ) -> list[JSHintError]:
+    def get_by_severity(self, result: JSHintFileResult, severity: JSHintSeverity) -> list[JSHintError]:
         """
         Get errors of a specific severity.
 

@@ -6,7 +6,7 @@ Coverity Parser - Deep Security and Quality Analysis
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class DefectSeverity(Enum):
@@ -38,9 +38,9 @@ class CoverityDefect:
     message: str
     file_path: str
     line_number: int
-    cwe_id: Optional[str] = None
-    impact: Optional[str] = None
-    evidence_chain: Optional[List[str]] = None
+    cwe_id: str | None = None
+    impact: str | None = None
+    evidence_chain: list[str] | None = None
 
 
 @dataclass
@@ -48,10 +48,10 @@ class CoverityConfig:
     """Coverity configuration for analysis."""
 
     coverity_version: str = "2024.12"
-    api_endpoint: Optional[str] = None
-    auth_token: Optional[str] = None
-    project_name: Optional[str] = None
-    stream_name: Optional[str] = None
+    api_endpoint: str | None = None
+    auth_token: str | None = None
+    project_name: str | None = None
+    stream_name: str | None = None
 
 
 class CoverityParser:
@@ -65,36 +65,28 @@ class CoverityParser:
     def __init__(self):
         """Initialize Coverity parser."""
         self.config = CoverityConfig()
-        self.defects: List[CoverityDefect] = []
+        self.defects: list[CoverityDefect] = []
 
-    def execute_coverity(
-        self, paths: List[Path], config: Optional[CoverityConfig] = None
-    ) -> List[CoverityDefect]:
+    def execute_coverity(self, paths: list[Path], config: CoverityConfig | None = None) -> list[CoverityDefect]:
         raise NotImplementedError("Phase 2: Coverity execution")
 
-    def parse_coverity_json(self, json_data: Dict[str, Any]) -> List[CoverityDefect]:
+    def parse_coverity_json(self, json_data: dict[str, Any]) -> list[CoverityDefect]:
         raise NotImplementedError("Phase 2: JSON parsing")
 
     def load_config(self, config_file: Path) -> CoverityConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_defects(
-        self, defects: List[CoverityDefect]
-    ) -> Dict[DefectType, List[CoverityDefect]]:
+    def categorize_defects(self, defects: list[CoverityDefect]) -> dict[DefectType, list[CoverityDefect]]:
         raise NotImplementedError("Phase 2: Defect categorization")
 
-    def analyze_security_risks(self, defects: List[CoverityDefect]) -> Dict[str, Any]:
+    def analyze_security_risks(self, defects: list[CoverityDefect]) -> dict[str, Any]:
         raise NotImplementedError("Phase 2: Security analysis")
 
-    def map_to_cwe(
-        self, defects: List[CoverityDefect]
-    ) -> Dict[str, List[CoverityDefect]]:
+    def map_to_cwe(self, defects: list[CoverityDefect]) -> dict[str, list[CoverityDefect]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def generate_report(
-        self, defects: List[CoverityDefect], format: str = "json"
-    ) -> str:
+    def generate_report(self, defects: list[CoverityDefect], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
-    def track_defect_trends(self, historical_data: List[Dict]) -> Dict[str, Any]:
+    def track_defect_trends(self, historical_data: list[dict]) -> dict[str, Any]:
         raise NotImplementedError("Phase 2: Trend analysis")

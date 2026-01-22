@@ -27,9 +27,9 @@ Usage:
 from __future__ import annotations
 
 import ast
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, TypedDict, cast
 import logging
+from dataclasses import dataclass, field
+from typing import Any, TypedDict, cast
 
 # [20260114_FEATURE] Symbolic execution moved to local import to avoid cycle
 # from ...symbolic_execution_tools.engine import SymbolicAnalyzer, PathStatus
@@ -60,7 +60,6 @@ class SecurityAnalysisResultDict(TypedDict):
 # ruff: noqa: E402
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from ..secrets.secret_scanner import SecretScanner
-from .taint_tracker import detect_ssr_vulnerabilities  # [20251216_FEATURE] v2.2.0
 from .taint_tracker import (
     SANITIZER_PATTERNS,
     SANITIZER_REGISTRY,
@@ -72,6 +71,7 @@ from .taint_tracker import (
     TaintSource,
     TaintTracker,
     Vulnerability,
+    detect_ssr_vulnerabilities,  # [20251216_FEATURE] v2.2.0
     load_sanitizers_from_config,
 )
 
@@ -99,10 +99,10 @@ class SecurityAnalysisResult:
         functions_analyzed: Names of functions that were analyzed
     """
 
-    vulnerabilities: List[Vulnerability] = field(default_factory=list)
-    taint_flows: Dict[str, TaintInfo] = field(default_factory=dict)
+    vulnerabilities: list[Vulnerability] = field(default_factory=list)
+    taint_flows: dict[str, TaintInfo] = field(default_factory=dict)
     analyzed_lines: int = 0
-    functions_analyzed: List[str] = field(default_factory=list)
+    functions_analyzed: list[str] = field(default_factory=list)
 
     @property
     def has_vulnerabilities(self) -> bool:
@@ -114,33 +114,25 @@ class SecurityAnalysisResult:
         """Get total number of vulnerabilities."""
         return len(self.vulnerabilities)
 
-    def get_by_type(self, vuln_type: str) -> List[Vulnerability]:
+    def get_by_type(self, vuln_type: str) -> list[Vulnerability]:
         """Get vulnerabilities of a specific type."""
         return [v for v in self.vulnerabilities if v.vulnerability_type == vuln_type]
 
-    def get_sql_injections(self) -> List[Vulnerability]:
+    def get_sql_injections(self) -> list[Vulnerability]:
         """Get SQL injection vulnerabilities."""
-        return [
-            v for v in self.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY
-        ]
+        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.SQL_QUERY]
 
-    def get_xss(self) -> List[Vulnerability]:
+    def get_xss(self) -> list[Vulnerability]:
         """Get XSS vulnerabilities."""
-        return [
-            v for v in self.vulnerabilities if v.sink_type == SecuritySink.HTML_OUTPUT
-        ]
+        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.HTML_OUTPUT]
 
-    def get_path_traversals(self) -> List[Vulnerability]:
+    def get_path_traversals(self) -> list[Vulnerability]:
         """Get path traversal vulnerabilities."""
-        return [
-            v for v in self.vulnerabilities if v.sink_type == SecuritySink.FILE_PATH
-        ]
+        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.FILE_PATH]
 
-    def get_command_injections(self) -> List[Vulnerability]:
+    def get_command_injections(self) -> list[Vulnerability]:
         """Get command injection vulnerabilities."""
-        return [
-            v for v in self.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND
-        ]
+        return [v for v in self.vulnerabilities if v.sink_type == SecuritySink.SHELL_COMMAND]
 
     def to_dict(self) -> SecurityAnalysisResultDict:
         """Convert to dictionary for JSON serialization."""
@@ -231,8 +223,8 @@ class SecurityAnalyzer:
 
     def __init__(self):
         """Initialize the security analyzer."""
-        self._taint_tracker: Optional[TaintTracker] = None
-        self._current_taint_map: Dict[str, TaintInfo] = {}
+        self._taint_tracker: TaintTracker | None = None
+        self._current_taint_map: dict[str, TaintInfo] = {}
         self._secret_scanner = SecretScanner()
 
     def _is_web_framework_route(self, func_node: ast.FunctionDef) -> bool:
@@ -262,7 +254,7 @@ class SecurityAnalyzer:
                         return True
         return False
 
-    def _get_decorator_name(self, decorator: ast.expr) -> Optional[str]:
+    def _get_decorator_name(self, decorator: ast.expr) -> str | None:
         """
         Extract the name of a decorator.
 
@@ -409,9 +401,7 @@ class SecurityAnalyzer:
             else:
                 # vuln.sink_location can be None in some cases
                 if vuln.sink_location:
-                    logger.info(
-                        f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution"
-                    )
+                    logger.info(f"Pruned vulnerability at line {vuln.sink_location[0]} using symbolic execution")
                 else:
                     logger.info("Pruned vulnerability using symbolic execution")
 
@@ -419,9 +409,7 @@ class SecurityAnalyzer:
 
         secret_vulns = self._secret_scanner.scan(tree)
         # [20251216_FEATURE] v2.2.0 - SSR vulnerability detection
-        ssr_vulns = detect_ssr_vulnerabilities(
-            tree, framework=None, taint_tracker=self._taint_tracker
-        )
+        ssr_vulns = detect_ssr_vulnerabilities(tree, framework=None, taint_tracker=self._taint_tracker)
         result.vulnerabilities = taint_vulns + secret_vulns + ssr_vulns
 
         result.taint_flows = {
@@ -485,9 +473,7 @@ class SecurityAnalyzer:
             for item in node.items:
                 # First, analyze the context expression as a potential sink
                 if isinstance(item.context_expr, ast.Call):
-                    self._analyze_call(
-                        item.context_expr, (node.lineno, node.col_offset)
-                    )
+                    self._analyze_call(item.context_expr, (node.lineno, node.col_offset))
 
                 # Then propagate taint to the bound variable
                 if item.optional_vars and isinstance(item.optional_vars, ast.Name):
@@ -497,9 +483,7 @@ class SecurityAnalyzer:
                     # Propagate taint from source variables to the target
                     # signature: propagate_assignment(target, source_names: List[str])
                     if source_vars and self._taint_tracker:
-                        self._taint_tracker.propagate_assignment(
-                            target_var, source_vars
-                        )
+                        self._taint_tracker.propagate_assignment(target_var, source_vars)
 
             for child in node.body:
                 self._analyze_node(child, result)
@@ -543,9 +527,7 @@ class SecurityAnalyzer:
         elif isinstance(node.value, ast.BinOp):
             self._check_concat_html_xss(node.value, location)
 
-    def _check_fstring_html_xss(
-        self, fstring: ast.JoinedStr, location: Tuple[int, int]
-    ) -> None:
+    def _check_fstring_html_xss(self, fstring: ast.JoinedStr, location: tuple[int, int]) -> None:
         """
         Check f-string return for XSS vulnerability.
 
@@ -581,9 +563,7 @@ class SecurityAnalyzer:
                 )
                 self._taint_tracker._vulnerabilities.append(vuln)
 
-    def _check_concat_html_xss(
-        self, binop: ast.BinOp, location: Tuple[int, int]
-    ) -> None:
+    def _check_concat_html_xss(self, binop: ast.BinOp, location: tuple[int, int]) -> None:
         """
         Check string concatenation return for XSS vulnerability.
 
@@ -620,7 +600,7 @@ class SecurityAnalyzer:
                 )
                 self._taint_tracker._vulnerabilities.append(vuln)
 
-    def _collect_concat_parts(self, node: ast.expr, parts: List[ast.expr]) -> None:
+    def _collect_concat_parts(self, node: ast.expr, parts: list[ast.expr]) -> None:
         """Recursively collect parts of string concatenation."""
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
             self._collect_concat_parts(node.left, parts)
@@ -649,9 +629,7 @@ class SecurityAnalyzer:
             self._analyze_call(node.value, (node.lineno, node.col_offset))
 
         # Check if RHS introduces taint
-        source_info = self._check_taint_source(
-            node.value, (node.lineno, node.col_offset)
-        )
+        source_info = self._check_taint_source(node.value, (node.lineno, node.col_offset))
 
         if source_info is not None:
             # RHS is a taint source
@@ -673,13 +651,11 @@ class SecurityAnalyzer:
                 # Check if RHS propagates taint (no sanitizer)
                 source_vars = self._extract_variable_names(node.value)
                 for target in targets:
-                    propagated = self._taint_tracker.propagate_assignment(
-                        target, source_vars
-                    )
+                    propagated = self._taint_tracker.propagate_assignment(target, source_vars)
                     if propagated is not None:
                         self._current_taint_map[target] = propagated
 
-    def _check_sanitizer_call(self, node: ast.expr) -> Optional[Tuple[str, TaintInfo]]:
+    def _check_sanitizer_call(self, node: ast.expr) -> tuple[str, TaintInfo] | None:
         """
         Check if an expression is a sanitizer call wrapping tainted data.
 
@@ -716,16 +692,14 @@ class SecurityAnalyzer:
 
         return None
 
-    def _analyze_call(self, node: ast.Call, location: Tuple[int, int]) -> None:
+    def _analyze_call(self, node: ast.Call, location: tuple[int, int]) -> None:
         """Analyze a function call for sink detection."""
         if not self._taint_tracker:
             return
 
         # Recursively analyze chained calls like hashlib.md5(...).hexdigest()
         # The inner call (hashlib.md5) is in node.func.value when node.func is Attribute
-        if isinstance(node.func, ast.Attribute) and isinstance(
-            node.func.value, ast.Call
-        ):
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Call):
             self._analyze_call(node.func.value, location)
 
         # Also check args that are calls
@@ -789,9 +763,7 @@ class SecurityAnalyzer:
                 if isinstance(arg, ast.Name):
                     self._taint_tracker.apply_sanitizer(arg.id, sanitizer)
 
-    def _check_taint_source(
-        self, node: ast.expr, location: Tuple[int, int]
-    ) -> Optional[TaintInfo]:
+    def _check_taint_source(self, node: ast.expr, location: tuple[int, int]) -> TaintInfo | None:
         """Check if an expression is a taint source."""
 
         if isinstance(node, ast.Call):
@@ -834,7 +806,7 @@ class SecurityAnalyzer:
 
         return None
 
-    def _get_call_name(self, node: ast.Call) -> Optional[str]:
+    def _get_call_name(self, node: ast.Call) -> str | None:
         """Get the full dotted name of a function call."""
         if isinstance(node.func, ast.Name):
             return node.func.id
@@ -852,7 +824,7 @@ class SecurityAnalyzer:
 
         return None
 
-    def _get_subscript_base(self, node: ast.Subscript) -> Optional[str]:
+    def _get_subscript_base(self, node: ast.Subscript) -> str | None:
         """Get the base name for a subscript like request.args["id"]."""
         if isinstance(node.value, ast.Attribute):
             parts = []
@@ -868,9 +840,7 @@ class SecurityAnalyzer:
 
         return None
 
-    def _check_dangerous_patterns(
-        self, func_name: str, node: ast.Call, location: Tuple[int, int]
-    ) -> None:
+    def _check_dangerous_patterns(self, func_name: str, node: ast.Call, location: tuple[int, int]) -> None:
         """
         [20251214_FEATURE] v2.0.0 - Check for dangerous patterns regardless of taint.
 
@@ -891,10 +861,7 @@ class SecurityAnalyzer:
             for keyword in node.keywords:
                 if keyword.arg == "shell":
                     # Check if shell=True
-                    if (
-                        isinstance(keyword.value, ast.Constant)
-                        and keyword.value.value is True
-                    ):
+                    if isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
                         self._add_dangerous_pattern_vuln(
                             sink_type=SecuritySink.SHELL_COMMAND,
                             description=f"{func_name}(shell=True) is dangerous - command injection risk",
@@ -965,9 +932,7 @@ class SecurityAnalyzer:
                 location=location,
             )
 
-    def _add_dangerous_pattern_vuln(
-        self, sink_type: SecuritySink, description: str, location: Tuple[int, int]
-    ) -> None:
+    def _add_dangerous_pattern_vuln(self, sink_type: SecuritySink, description: str, location: tuple[int, int]) -> None:
         """
         Add a vulnerability for a dangerous pattern (without taint tracking).
 
@@ -994,7 +959,7 @@ class SecurityAnalyzer:
         )
         self._taint_tracker._vulnerabilities.append(vuln)
 
-    def _extract_variable_names(self, node: ast.expr) -> List[str]:
+    def _extract_variable_names(self, node: ast.expr) -> list[str]:
         """Extract all variable names referenced in an expression."""
         names = []
 
@@ -1048,7 +1013,7 @@ def analyze_security(code: str) -> SecurityAnalysisResult:
     return analyzer.analyze(code)
 
 
-def find_sql_injections(code: str) -> List[Vulnerability]:
+def find_sql_injections(code: str) -> list[Vulnerability]:
     """
     Find SQL injection vulnerabilities in code.
 
@@ -1062,7 +1027,7 @@ def find_sql_injections(code: str) -> List[Vulnerability]:
     return result.get_sql_injections()
 
 
-def find_xss(code: str) -> List[Vulnerability]:
+def find_xss(code: str) -> list[Vulnerability]:
     """
     Find XSS vulnerabilities in code.
 
@@ -1076,7 +1041,7 @@ def find_xss(code: str) -> List[Vulnerability]:
     return result.get_xss()
 
 
-def find_command_injections(code: str) -> List[Vulnerability]:
+def find_command_injections(code: str) -> list[Vulnerability]:
     """
     Find command injection vulnerabilities in code.
 
@@ -1090,7 +1055,7 @@ def find_command_injections(code: str) -> List[Vulnerability]:
     return result.get_command_injections()
 
 
-def find_path_traversals(code: str) -> List[Vulnerability]:
+def find_path_traversals(code: str) -> list[Vulnerability]:
     """
     Find path traversal vulnerabilities in code.
 

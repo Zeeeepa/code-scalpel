@@ -7,8 +7,6 @@ StyleCop C# Parser - C# coding style enforcement.
 # Rules: SA0001-SA1649 for documentation, spacing, ordering, naming, etc.
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class StyleCopParser:
         """Parse StyleCop analyzer output from build."""
         raise NotImplementedError("StyleCop parser not yet implemented")
 
-    def parse_violations(self, build_output: str) -> Optional[list]:
+    def parse_violations(self, build_output: str) -> list | None:
         """Extract SA rule violations from build output."""
         raise NotImplementedError("StyleCop parser not yet implemented")

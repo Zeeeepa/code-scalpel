@@ -52,9 +52,7 @@ def _write_manifest(policy_dir: Path, secret: str) -> Path:
         signed_by="test@example.com",
         policy_dir=str(policy_dir),
     )
-    return CryptographicPolicyVerifier.save_manifest(
-        manifest, policy_dir=str(policy_dir)
-    )
+    return CryptographicPolicyVerifier.save_manifest(manifest, policy_dir=str(policy_dir))
 
 
 def test_verify_policy_integrity_community_basic_passes_without_secret_or_manifest(

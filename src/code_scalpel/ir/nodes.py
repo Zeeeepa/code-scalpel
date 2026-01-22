@@ -19,7 +19,7 @@ Node Categories:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Union
 
 from .operators import (
     AugAssignOperator,
@@ -45,9 +45,9 @@ class SourceLocation:
 
     line: int
     column: int
-    end_line: Optional[int] = None
-    end_column: Optional[int] = None
-    filename: Optional[str] = None
+    end_line: int | None = None
+    end_column: int | None = None
+    filename: str | None = None
 
     def __str__(self) -> str:
         if self.filename:
@@ -88,11 +88,11 @@ class IRNode:
         - error_handling_context for try/catch tracking
     """
 
-    loc: Optional[SourceLocation] = None
+    loc: SourceLocation | None = None
     source_language: str = "unknown"
-    _metadata: Dict[str, Any] = field(default_factory=dict)
+    _metadata: dict[str, Any] = field(default_factory=dict)
 
-    def with_metadata(self, key: str, value: Any) -> "IRNode":
+    def with_metadata(self, key: str, value: Any) -> IRNode:
         """Add metadata and return self for chaining."""
         self._metadata[key] = value
         return self
@@ -113,8 +113,8 @@ class IRModule(IRNode):
         docstring: Module docstring if present
     """
 
-    body: List[IRNode] = field(default_factory=list)
-    docstring: Optional[str] = None
+    body: list[IRNode] = field(default_factory=list)
+    docstring: str | None = None
 
 
 @dataclass
@@ -137,13 +137,13 @@ class IRFunctionDef(IRNode):
     """
 
     name: str = ""
-    params: List["IRParameter"] = field(default_factory=list)
-    body: List[IRNode] = field(default_factory=list)
-    return_type: Optional[str] = None
+    params: list[IRParameter] = field(default_factory=list)
+    body: list[IRNode] = field(default_factory=list)
+    return_type: str | None = None
     is_async: bool = False
     is_generator: bool = False
-    decorators: List["IRExpr"] = field(default_factory=list)
-    docstring: Optional[str] = None
+    decorators: list[IRExpr] = field(default_factory=list)
+    docstring: str | None = None
 
 
 @dataclass
@@ -163,10 +163,10 @@ class IRClassDef(IRNode):
     """
 
     name: str = ""
-    bases: List["IRExpr"] = field(default_factory=list)
-    body: List[IRNode] = field(default_factory=list)
-    decorators: List["IRExpr"] = field(default_factory=list)
-    docstring: Optional[str] = None
+    bases: list[IRExpr] = field(default_factory=list)
+    body: list[IRNode] = field(default_factory=list)
+    decorators: list[IRExpr] = field(default_factory=list)
+    docstring: str | None = None
 
 
 @dataclass
@@ -186,9 +186,9 @@ class IRIf(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - test can be None in some contexts
-    test: Optional["IRExpr"] = None
-    body: List[IRNode] = field(default_factory=list)
-    orelse: List[IRNode] = field(default_factory=list)
+    test: IRExpr | None = None
+    body: list[IRNode] = field(default_factory=list)
+    orelse: list[IRNode] = field(default_factory=list)
 
 
 @dataclass
@@ -209,10 +209,10 @@ class IRFor(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - target and iter can be None in some contexts
-    target: Optional["IRExpr"] = None
-    iter: Optional["IRExpr"] = None
-    body: List[IRNode] = field(default_factory=list)
-    orelse: List[IRNode] = field(default_factory=list)
+    target: IRExpr | None = None
+    iter: IRExpr | None = None
+    body: list[IRNode] = field(default_factory=list)
+    orelse: list[IRNode] = field(default_factory=list)
     is_for_in: bool = False  # JS for-in vs for-of
 
 
@@ -228,9 +228,9 @@ class IRWhile(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - test can be None in some contexts
-    test: Optional["IRExpr"] = None
-    body: List[IRNode] = field(default_factory=list)
-    orelse: List[IRNode] = field(default_factory=list)
+    test: IRExpr | None = None
+    body: list[IRNode] = field(default_factory=list)
+    orelse: list[IRNode] = field(default_factory=list)
 
 
 @dataclass
@@ -243,7 +243,7 @@ class IRReturn(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - value can be None for bare return
-    value: Optional["IRExpr"] = None
+    value: IRExpr | None = None
 
 
 @dataclass
@@ -261,10 +261,10 @@ class IRAssign(IRNode):
         declaration_kind: "let", "const", "var" for JS; None for Python
     """
 
-    targets: List["IRExpr"] = field(default_factory=list)
+    targets: list[IRExpr] = field(default_factory=list)
     # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
-    value: Optional["IRExpr"] = None
-    declaration_kind: Optional[str] = None  # "let", "const", "var" for JS
+    value: IRExpr | None = None
+    declaration_kind: str | None = None  # "let", "const", "var" for JS
 
 
 @dataclass
@@ -279,9 +279,9 @@ class IRAugAssign(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - target, op, and value can be None in some contexts
-    target: Optional["IRExpr"] = None
-    op: Optional[AugAssignOperator] = None
-    value: Optional["IRExpr"] = None
+    target: IRExpr | None = None
+    op: AugAssignOperator | None = None
+    value: IRExpr | None = None
 
 
 @dataclass
@@ -296,7 +296,7 @@ class IRExprStmt(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
-    value: Optional["IRExpr"] = None
+    value: IRExpr | None = None
 
 
 @dataclass
@@ -345,8 +345,8 @@ class IRImport(IRNode):
     """
 
     module: str = ""
-    names: List[str] = field(default_factory=list)
-    alias: Optional[str] = None
+    names: list[str] = field(default_factory=list)
+    alias: str | None = None
     is_default: bool = False
     is_star: bool = False
 
@@ -368,10 +368,10 @@ class IRExport(IRNode):
         source: Re-export source module (export { x } from 'y')
     """
 
-    names: List[str] = field(default_factory=list)
-    declaration: Optional["IRNode"] = None
+    names: list[str] = field(default_factory=list)
+    declaration: IRNode | None = None
     is_default: bool = False
-    source: Optional[str] = None
+    source: str | None = None
 
 
 @dataclass
@@ -385,8 +385,8 @@ class IRSwitch(IRNode):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - discriminant can be None in some contexts
-    discriminant: Optional["IRExpr"] = None
-    cases: List[tuple] = field(default_factory=list)  # [(test, [body]), ...]
+    discriminant: IRExpr | None = None
+    cases: list[tuple] = field(default_factory=list)  # [(test, [body]), ...]
 
 
 @dataclass
@@ -401,10 +401,10 @@ class IRTry(IRNode):
         finalbody: Finally block statements
     """
 
-    body: List["IRNode"] = field(default_factory=list)
-    handlers: List[tuple] = field(default_factory=list)  # [(type, name, body), ...]
-    orelse: List["IRNode"] = field(default_factory=list)
-    finalbody: List["IRNode"] = field(default_factory=list)
+    body: list[IRNode] = field(default_factory=list)
+    handlers: list[tuple] = field(default_factory=list)  # [(type, name, body), ...]
+    orelse: list[IRNode] = field(default_factory=list)
+    finalbody: list[IRNode] = field(default_factory=list)
 
 
 @dataclass
@@ -417,8 +417,8 @@ class IRRaise(IRNode):
         cause: Exception cause (Python 'from' clause)
     """
 
-    exc: Optional["IRExpr"] = None
-    cause: Optional["IRExpr"] = None
+    exc: IRExpr | None = None
+    cause: IRExpr | None = None
 
 
 # =============================================================================
@@ -461,9 +461,9 @@ class IRBinaryOp(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - left, op, and right can be None in some contexts
-    left: Optional[IRExpr] = None
-    op: Optional[BinaryOperator] = None
-    right: Optional[IRExpr] = None
+    left: IRExpr | None = None
+    op: BinaryOperator | None = None
+    right: IRExpr | None = None
 
 
 @dataclass
@@ -477,8 +477,8 @@ class IRUnaryOp(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - op and operand can be None in some contexts
-    op: Optional[UnaryOperator] = None
-    operand: Optional[IRExpr] = None
+    op: UnaryOperator | None = None
+    operand: IRExpr | None = None
 
 
 @dataclass
@@ -500,9 +500,9 @@ class IRCompare(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - left can be None in some contexts
-    left: Optional[IRExpr] = None
-    ops: List[CompareOperator] = field(default_factory=list)
-    comparators: List[IRExpr] = field(default_factory=list)
+    left: IRExpr | None = None
+    ops: list[CompareOperator] = field(default_factory=list)
+    comparators: list[IRExpr] = field(default_factory=list)
 
 
 @dataclass
@@ -518,8 +518,8 @@ class IRBoolOp(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - op can be None in some contexts
-    op: Optional[BoolOperator] = None
-    values: List[IRExpr] = field(default_factory=list)
+    op: BoolOperator | None = None
+    values: list[IRExpr] = field(default_factory=list)
 
 
 # [20251215_FEATURE] v2.0.0 - Ternary/conditional expression for polyglot support
@@ -538,9 +538,9 @@ class IRTernary(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - test, body, and orelse can be None in some contexts
-    test: Optional[IRExpr] = None
-    body: Optional[IRExpr] = None
-    orelse: Optional[IRExpr] = None
+    test: IRExpr | None = None
+    body: IRExpr | None = None
+    orelse: IRExpr | None = None
 
 
 @dataclass
@@ -566,9 +566,9 @@ class IRCall(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - func can be None in some contexts
-    func: Optional[IRExpr] = None
-    args: List[IRExpr] = field(default_factory=list)
-    kwargs: Dict[str, IRExpr] = field(default_factory=dict)
+    func: IRExpr | None = None
+    args: list[IRExpr] = field(default_factory=list)
+    kwargs: dict[str, IRExpr] = field(default_factory=dict)
 
 
 @dataclass
@@ -582,7 +582,7 @@ class IRAttribute(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field type - value can be None in some contexts
-    value: Optional[IRExpr] = None
+    value: IRExpr | None = None
     attr: str = ""
 
 
@@ -597,8 +597,8 @@ class IRSubscript(IRExpr):
     """
 
     # [20251220_BUGFIX] Fixed optional field types - value and slice can be None in some contexts
-    value: Optional[IRExpr] = None
-    slice: Optional[IRExpr] = None
+    value: IRExpr | None = None
+    slice: IRExpr | None = None
 
 
 @dataclass
@@ -630,7 +630,7 @@ class IRConstant(IRExpr):
     """
 
     value: Any = None
-    raw: Optional[str] = None  # Preserves "undefined" vs "null" distinction
+    raw: str | None = None  # Preserves "undefined" vs "null" distinction
 
 
 @dataclass
@@ -642,7 +642,7 @@ class IRList(IRExpr):
         elements: List of element expressions
     """
 
-    elements: List[IRExpr] = field(default_factory=list)
+    elements: list[IRExpr] = field(default_factory=list)
 
 
 @dataclass
@@ -655,8 +655,8 @@ class IRDict(IRExpr):
         values: List of value expressions
     """
 
-    keys: List[Optional[IRExpr]] = field(default_factory=list)
-    values: List[IRExpr] = field(default_factory=list)
+    keys: list[IRExpr | None] = field(default_factory=list)
+    values: list[IRExpr] = field(default_factory=list)
 
 
 @dataclass
@@ -673,8 +673,8 @@ class IRParameter(IRNode):
     """
 
     name: str = ""
-    type_annotation: Optional[str] = None
-    default: Optional[IRExpr] = None
+    type_annotation: str | None = None
+    default: IRExpr | None = None
     is_rest: bool = False
     is_keyword_only: bool = False
 

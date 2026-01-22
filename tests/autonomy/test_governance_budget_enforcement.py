@@ -17,11 +17,9 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-def _write_budget_yaml(
-    policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1
-) -> None:
+def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 1, max_files: int = 1) -> None:
     (policy_dir / "budget.yaml").write_text(
-        """budgets:
+        f"""budgets:
   default:
     max_files: {max_files}
     max_lines_per_file: 100
@@ -29,7 +27,7 @@ def _write_budget_yaml(
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(max_total_lines=max_total_lines, max_files=max_files),
+""",
         encoding="utf-8",
     )
 
@@ -116,9 +114,7 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
                 return_value={
                     "tool_id": "update_symbol",
                     "error": {"error_code": "forbidden", "message": "Budget exceeded"},
-                    "warnings": [
-                        "Governance BLOCK: budget exceeded (max_total_lines=1)"
-                    ],
+                    "warnings": ["Governance BLOCK: budget exceeded (max_total_lines=1)"],
                 }
             ),
         )
@@ -150,9 +146,7 @@ async def test_pro_block_mode_denies_update_symbol_when_budget_exceeded(
         object.__setattr__(tool, "run", original_run)
 
 
-@pytest.mark.skip(
-    reason="[20250112_TEST] Response format changed - governance tests need audit file integration"
-)
+@pytest.mark.skip(reason="[20250112_TEST] Response format changed - governance tests need audit file integration")
 @pytest.mark.anyio
 async def test_pro_block_mode_emits_audit_event_on_budget_deny(
     tmp_path: Path,
@@ -205,9 +199,7 @@ async def test_pro_block_mode_emits_audit_event_on_budget_deny(
     audit_path = policy_dir / "audit.jsonl"
     assert audit_path.exists()
 
-    lines = [
-        ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()
-    ]
+    lines = [ln for ln in audit_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
     assert lines
     last = json.loads(lines[-1])
     assert last["tool_id"] == "update_symbol"
@@ -216,9 +208,7 @@ async def test_pro_block_mode_emits_audit_event_on_budget_deny(
     assert last["decision"] == "deny"
 
 
-@pytest.mark.skip(
-    reason="Scoped to temp project to avoid repo-wide reference scans during warn-mode budget test"
-)
+@pytest.mark.skip(reason="Scoped to temp project to avoid repo-wide reference scans during warn-mode budget test")
 @pytest.mark.anyio
 async def test_pro_warn_mode_allows_update_symbol_with_break_glass_and_warning(
     tmp_path: Path,
@@ -272,9 +262,7 @@ async def test_pro_warn_mode_allows_update_symbol_with_break_glass_and_warning(
     assert "return x + y" in target_file.read_text(encoding="utf-8")
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance budget not yet integrated with rename_symbol helper"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance budget not yet integrated with rename_symbol helper")
 @pytest.mark.anyio
 async def test_pro_block_mode_denies_rename_symbol_when_budget_exceeded(
     tmp_path: Path,
@@ -328,9 +316,7 @@ async def test_pro_block_mode_denies_rename_symbol_when_budget_exceeded(
     assert "def f" in target_file.read_text(encoding="utf-8")
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance budget not yet integrated with rename_symbol helper"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance budget not yet integrated with rename_symbol helper")
 @pytest.mark.anyio
 async def test_pro_block_mode_denies_cross_file_rename_when_budget_max_files_one(
     tmp_path: Path,

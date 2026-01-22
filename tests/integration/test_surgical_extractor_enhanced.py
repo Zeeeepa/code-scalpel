@@ -72,10 +72,7 @@ class TestEnhancedMetadata:
         result = extractor.get_function("calculate_tax")
 
         assert result.success
-        assert (
-            "def calculate_tax(amount: float, rate: float = 0.1) -> float:"
-            in result.signature
-        )
+        assert "def calculate_tax(amount: float, rate: float = 0.1) -> float:" in result.signature
 
     def test_extract_decorators(self):
         """Test decorator extraction."""
@@ -239,7 +236,7 @@ class TestFindCallers:
         callers = extractor.find_callers("calculate_tax")
 
         assert len(callers) > 0
-        for name, typ, line in callers:
+        for _name, _typ, line in callers:
             assert isinstance(line, int)
             assert line > 0
 

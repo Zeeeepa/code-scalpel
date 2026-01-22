@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -15,7 +15,7 @@ class SwiftSymbol:
     file_path: str
     line_number: int
     column: int
-    documentation: Optional[str] = None
+    documentation: str | None = None
     accessibility: str = "internal"
 
 
@@ -39,23 +39,23 @@ class SourceKittenParser:
 
     def __init__(self):
         """Initialize SourceKitten parser."""
-        self.symbols: List[SwiftSymbol] = []
-        self.complexity_metrics: List[SwiftComplexity] = []
+        self.symbols: list[SwiftSymbol] = []
+        self.complexity_metrics: list[SwiftComplexity] = []
 
-    def parse_sourcekitten_output(self, output_path: Path) -> List[SwiftSymbol]:
+    def parse_sourcekitten_output(self, output_path: Path) -> list[SwiftSymbol]:
         raise NotImplementedError("Phase 2: JSON parsing")
 
-    def execute_sourcekitten(self, paths: List[Path]) -> List[SwiftSymbol]:
+    def execute_sourcekitten(self, paths: list[Path]) -> list[SwiftSymbol]:
         raise NotImplementedError("Phase 2: SourceKitten execution")
 
-    def extract_symbols(self, output: Dict[str, Any]) -> List[SwiftSymbol]:
+    def extract_symbols(self, output: dict[str, Any]) -> list[SwiftSymbol]:
         raise NotImplementedError("Phase 2: Symbol extraction")
 
-    def analyze_complexity(self, symbols: List[SwiftSymbol]) -> List[SwiftComplexity]:
+    def analyze_complexity(self, symbols: list[SwiftSymbol]) -> list[SwiftComplexity]:
         raise NotImplementedError("Phase 2: Complexity analysis")
 
-    def extract_documentation(self, symbols: List[SwiftSymbol]) -> Dict[str, str]:
+    def extract_documentation(self, symbols: list[SwiftSymbol]) -> dict[str, str]:
         raise NotImplementedError("Phase 2: Documentation extraction")
 
-    def generate_ast_report(self, symbols: List[SwiftSymbol]) -> str:
+    def generate_ast_report(self, symbols: list[SwiftSymbol]) -> str:
         raise NotImplementedError("Phase 2: Report generation")

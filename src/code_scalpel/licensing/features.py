@@ -25,13 +25,13 @@ Usage:
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 # [20251225_FEATURE] Comprehensive tool capability matrix
 # Every tool has capabilities and limits defined for each tier
-TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
+TOOL_CAPABILITIES: dict[str, dict[str, dict[str, Any]]] = {
     "analyze_code": {
         "community": {
             "enabled": True,
@@ -1474,7 +1474,7 @@ TOOL_CAPABILITIES: Dict[str, Dict[str, Dict[str, Any]]] = {
 }
 
 
-def get_tool_capabilities(tool_id: str, tier: str) -> Dict[str, Any]:
+def get_tool_capabilities(tool_id: str, tier: str) -> dict[str, Any]:
     """
     Get capabilities and limits for a tool at a specific tier.
 
@@ -1511,9 +1511,7 @@ def get_tool_capabilities(tool_id: str, tier: str) -> Dict[str, Any]:
     try:
         from .config_loader import get_cached_limits, get_tool_limits, merge_limits
 
-        overrides = get_tool_limits(
-            tool_id, normalized_tier, config=get_cached_limits()
-        )
+        overrides = get_tool_limits(tool_id, normalized_tier, config=get_cached_limits())
         if overrides:
             merged_caps = dict(tier_caps)
             merged_caps["limits"] = merge_limits(tier_caps.get("limits", {}), overrides)
@@ -1540,9 +1538,7 @@ def has_capability(tool_id: str, capability: str, tier: str) -> bool:
     return capability in caps.get("capabilities", set())
 
 
-def get_upgrade_hint(
-    tool_id: str, missing_capability: str, current_tier: str
-) -> Optional[str]:
+def get_upgrade_hint(tool_id: str, missing_capability: str, current_tier: str) -> str | None:
     """
     Generate upgrade hint for a missing capability.
 
@@ -1569,7 +1565,7 @@ def get_upgrade_hint(
     return None
 
 
-def get_all_tools_for_tier(tier: str) -> List[str]:
+def get_all_tools_for_tier(tier: str) -> list[str]:
     """
     Get all tool IDs available at a tier.
 
@@ -1585,9 +1581,7 @@ def get_all_tools_for_tier(tier: str) -> List[str]:
     return list(TOOL_CAPABILITIES.keys())
 
 
-def get_missing_capabilities(
-    tool_id: str, current_tier: str, target_tier: str
-) -> Set[str]:
+def get_missing_capabilities(tool_id: str, current_tier: str, target_tier: str) -> set[str]:
     """
     Get capabilities available in target tier but not in current tier.
 

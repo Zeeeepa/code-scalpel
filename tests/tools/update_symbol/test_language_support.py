@@ -16,9 +16,7 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src")))
 
 from code_scalpel.surgery.surgical_patcher import UnifiedPatcher
 
@@ -60,7 +58,7 @@ def farewell(name):
         python_code = """class Calculator:
     def add(self, a, b):
         return a + b
-    
+
     def subtract(self, a, b):
         return a - b
 
@@ -73,7 +71,7 @@ class StringUtils:
         result = a + b
         print(f"Added {a} + {b} = {result}")
         return result
-    
+
     def subtract(self, a, b):
         result = a - b
         print(f"Subtracted {a} - {b} = {result}")
@@ -100,7 +98,7 @@ class StringUtils:
         python_code = """class DataProcessor:
     def process(self, data):
         return data.upper()
-    
+
     def validate(self, data):
         return len(data) > 0
 """
@@ -165,7 +163,7 @@ const farewell = (name) => {
     add(a, b) {
         return a + b;
     }
-    
+
     subtract(a, b) {
         return a - b;
     }
@@ -181,13 +179,13 @@ class Logger {
     constructor() {
         this.operations = 0;
     }
-    
+
     add(a, b) {
         this.operations++;
         console.log(`Operation #${this.operations}`);
         return a + b;
     }
-    
+
     subtract(a, b) {
         this.operations++;
         return a - b;
@@ -215,7 +213,7 @@ class Logger {
     process(data) {
         return data.toUpperCase();
     }
-    
+
     validate(data) {
         return data.length > 0;
     }
@@ -288,7 +286,7 @@ class Calculator implements Operation {
     add(a: number, b: number): number {
         return a + b;
     }
-    
+
     execute(): number {
         return this.add(1, 1);
     }
@@ -296,13 +294,13 @@ class Calculator implements Operation {
 """
         new_class = """class Calculator implements Operation {
     private operationCount: number = 0;
-    
+
     add(a: number, b: number): number {
         this.operationCount++;
         console.log(`Operation #${this.operationCount}`);
         return a + b;
     }
-    
+
     execute(): number {
         return this.add(1, 1);
     }
@@ -329,7 +327,7 @@ class Calculator implements Operation {
     process(data: string): string {
         return data.toUpperCase();
     }
-    
+
     validate(data: string): boolean {
         return data.length > 0;
     }
@@ -368,7 +366,7 @@ class TestJavaLanguageSupport:
     public String process(String data) {
         return data.toUpperCase();
     }
-    
+
     public boolean validate(String data) {
         return data.length() > 0;
     }
@@ -403,7 +401,7 @@ class TestJavaLanguageSupport:
     public int add(int a, int b) {
         return a + b;
     }
-    
+
     public int subtract(int a, int b) {
         return a - b;
     }
@@ -417,17 +415,17 @@ public class Logger {
 """
         new_class = """public class Calculator {
     private int operationCount = 0;
-    
+
     public Calculator() {
         this.operationCount = 0;
     }
-    
+
     public int add(int a, int b) {
         this.operationCount++;
         System.out.println("Operation #" + this.operationCount);
         return a + b;
     }
-    
+
     public int subtract(int a, int b) {
         this.operationCount++;
         return a - b;
@@ -457,12 +455,12 @@ public class Logger {
     public String toString() {
         return "DataService";
     }
-    
+
     @Deprecated
     public void oldMethod() {
         System.out.println("Old");
     }
-    
+
     @SuppressWarnings("unchecked")
     public void process() {
         System.out.println("Processing");

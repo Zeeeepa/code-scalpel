@@ -8,7 +8,6 @@ Reference: https://docs.npmjs.com/cli/v10/configuring-npm/package-json
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
 
 
 @dataclass
@@ -17,11 +16,11 @@ class PackageInfo:
 
     name: str
     version: str
-    description: Optional[str]
-    scripts: Dict[str, str]
-    dependencies: Dict[str, str]
-    dev_dependencies: Dict[str, str]
-    peer_dependencies: Dict[str, str]
+    description: str | None
+    scripts: dict[str, str]
+    dependencies: dict[str, str]
+    dev_dependencies: dict[str, str]
+    peer_dependencies: dict[str, str]
 
 
 class PackageJsonParser:

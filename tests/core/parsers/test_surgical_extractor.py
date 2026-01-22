@@ -40,22 +40,22 @@ def standalone():
 
 class Calculator:
     """A calculator class."""
-    
+
     def __init__(self, value=0):
         self.value = value
-    
+
     def add(self, x):
         """Add to value."""
         self.value += x
         return self.value
-    
+
     def compute(self, x, y):
         """Use external function."""
         return calculate(x, y)
 
 class AdvancedCalculator(Calculator):
     """Extended calculator."""
-    
+
     def multiply(self, x):
         self.value *= x
         return self.value
@@ -375,7 +375,7 @@ def decorated():
 class Outer:
     class Inner:
         pass
-    
+
     def method(self):
         pass
 """
@@ -491,13 +491,13 @@ def target_function():
 class UnrelatedClass:
     def __init__(self):
         self.value = 0
-    
+
     def method_1(self):
         return self.value
-    
+
     def method_2(self):
         return self.value * 2
-    
+
     def method_3(self):
         return self.value * 3
 '''
@@ -512,9 +512,7 @@ class UnrelatedClass:
         savings_percent = (1 - extracted_chars / total_chars) * 100
 
         # We expect at least 50% token savings
-        assert (
-            savings_percent > 50
-        ), f"Expected >50% savings, got {savings_percent:.1f}%"
+        assert savings_percent > 50, f"Expected >50% savings, got {savings_percent:.1f}%"
 
         # But the extraction should include the dependencies
         assert "utility_1" in result.context_items

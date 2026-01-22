@@ -40,7 +40,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ else:
         tomllib = None  # type: ignore
 
 
-def _find_config_file() -> Optional[Path]:
+def _find_config_file() -> Path | None:
     """
     Find the configuration file using priority search order.
 
@@ -74,9 +74,7 @@ def _find_config_file() -> Optional[Path]:
             logger.info(f"Using limits from CODE_SCALPEL_LIMITS_FILE: {path}")
             return path
         else:
-            logger.warning(
-                f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}"
-            )
+            logger.warning(f"CODE_SCALPEL_LIMITS_FILE points to non-existent file: {path}")
 
     # Priority 2-6: Standard search locations
     candidates = [
@@ -109,8 +107,8 @@ def _find_config_file() -> Optional[Path]:
 
 
 def load_limits(
-    config_path: Optional[Path] = None,
-) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    config_path: Path | None = None,
+) -> dict[str, dict[str, dict[str, Any]]]:
     """
     Load tier limits from TOML configuration file.
 
@@ -148,8 +146,8 @@ def load_limits(
 def get_tool_limits(
     tool_id: str,
     tier: str,
-    config: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None,
-) -> Dict[str, Any]:
+    config: dict[str, dict[str, dict[str, Any]]] | None = None,
+) -> dict[str, Any]:
     """
     Get limits for a specific tool at a specific tier.
 
@@ -174,7 +172,7 @@ def get_tool_limits(
     return tool_limits
 
 
-def merge_limits(defaults: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:
+def merge_limits(defaults: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
     """
     Merge config overrides into default limits.
 
@@ -193,13 +191,13 @@ def merge_limits(defaults: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[st
 # Cache the loaded config to avoid repeated file I/O.
 # IMPORTANT: The resolved config path depends on env vars + CWD.
 # To avoid stale overrides (especially in tests), we track the source file.
-_config_cache: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None
-_config_cache_path: Optional[str] = None
+_config_cache: dict[str, dict[str, dict[str, Any]]] | None = None
+_config_cache_path: str | None = None
 _config_cache_mtime_ns: int = -1
 _config_cache_size: int = -1
 
 
-def get_cached_limits() -> Dict[str, Dict[str, Dict[str, Any]]]:
+def get_cached_limits() -> dict[str, dict[str, dict[str, Any]]]:
     """
     Get cached limits config, loading if not already cached.
 
@@ -246,7 +244,7 @@ def clear_cache() -> None:
     _config_cache_size = -1
 
 
-def reload_config() -> Dict[str, Dict[str, Dict[str, Any]]]:
+def reload_config() -> dict[str, dict[str, dict[str, Any]]]:
     """
     Force reload of configuration from disk.
 
@@ -263,12 +261,12 @@ def reload_config() -> Dict[str, Dict[str, Dict[str, Any]]]:
 
 # [20251231_FEATURE] v3.3.1 - Response config loader for output filtering
 
-_response_config_cache: Optional[Dict[str, Any]] = None
-_response_config_path: Optional[str] = None
+_response_config_cache: dict[str, Any] | None = None
+_response_config_path: str | None = None
 _response_config_mtime_ns: int = -1
 
 
-def _find_response_config_file() -> Optional[Path]:
+def _find_response_config_file() -> Path | None:
     """
     Find the response_config.json file using priority search order.
 
@@ -280,9 +278,7 @@ def _find_response_config_file() -> Optional[Path]:
     if env_path:
         path = Path(env_path).expanduser()
         if path.exists():
-            logger.info(
-                f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}"
-            )
+            logger.info(f"Using response config from CODE_SCALPEL_RESPONSE_CONFIG: {path}")
             return path
 
     # Priority 2-5: Standard search locations
@@ -314,8 +310,8 @@ def _find_response_config_file() -> Optional[Path]:
 
 
 def load_response_config(
-    config_path: Optional[Path] = None,
-) -> Dict[str, Any]:
+    config_path: Path | None = None,
+) -> dict[str, Any]:
     """
     Load response configuration from JSON file.
 
@@ -335,18 +331,16 @@ def load_response_config(
         return _get_default_response_config()
 
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             config = json.load(f)
-            logger.debug(
-                f"Loaded response config with {len(config.get('tool_overrides', {}))} tool overrides"
-            )
+            logger.debug(f"Loaded response config with {len(config.get('tool_overrides', {}))} tool overrides")
             return config
     except Exception as e:
         logger.warning(f"Failed to load response config from {config_path}: {e}")
         return _get_default_response_config()
 
 
-def _get_default_response_config() -> Dict[str, Any]:
+def _get_default_response_config() -> dict[str, Any]:
     """Return default response configuration."""
     return {
         "global": {
@@ -373,7 +367,7 @@ def _get_default_response_config() -> Dict[str, Any]:
     }
 
 
-def get_cached_response_config() -> Dict[str, Any]:
+def get_cached_response_config() -> dict[str, Any]:
     """
     Get cached response config, loading if not already cached.
 
@@ -393,11 +387,7 @@ def get_cached_response_config() -> Dict[str, Any]:
         except Exception:
             mtime_ns = -2
 
-    if (
-        _response_config_cache is None
-        or _response_config_path != cache_path
-        or _response_config_mtime_ns != mtime_ns
-    ):
+    if _response_config_cache is None or _response_config_path != cache_path or _response_config_mtime_ns != mtime_ns:
         _response_config_cache = load_response_config(config_path=config_path)
         _response_config_path = cache_path
         _response_config_mtime_ns = mtime_ns
@@ -406,10 +396,10 @@ def get_cached_response_config() -> Dict[str, Any]:
 
 
 def filter_response(
-    result: Dict[str, Any],
+    result: dict[str, Any],
     tool_id: str,
-    config: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Filter response dict based on response_config.json settings.
 
@@ -452,19 +442,11 @@ def filter_response(
             continue
 
         # Skip empty arrays if configured
-        if (
-            global_settings.get("exclude_empty_arrays", False)
-            and isinstance(value, list)
-            and len(value) == 0
-        ):
+        if global_settings.get("exclude_empty_arrays", False) and isinstance(value, list) and len(value) == 0:
             continue
 
         # Skip empty objects if configured
-        if (
-            global_settings.get("exclude_empty_objects", False)
-            and isinstance(value, dict)
-            and len(value) == 0
-        ):
+        if global_settings.get("exclude_empty_objects", False) and isinstance(value, dict) and len(value) == 0:
             continue
 
         # Skip null values if configured

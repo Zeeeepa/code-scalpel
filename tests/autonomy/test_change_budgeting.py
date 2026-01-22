@@ -22,10 +22,7 @@ class TestBudgetValidation:
 
         # Operation with 4 files exceeds limit
         operation = Operation(
-            changes=[
-                FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"])
-                for i in range(4)
-            ]
+            changes=[FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"]) for i in range(4)]
         )
 
         decision = budget.validate_operation(operation)
@@ -42,10 +39,7 @@ class TestBudgetValidation:
         budget = ChangeBudget({"max_files": 5})
 
         operation = Operation(
-            changes=[
-                FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"])
-                for i in range(3)
-            ]
+            changes=[FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"]) for i in range(3)]
         )
 
         decision = budget.validate_operation(operation)
@@ -158,9 +152,7 @@ def complex():
 
         assert not decision.allowed
         assert any(v.rule == "max_complexity_increase" for v in decision.violations)
-        complexity_violation = next(
-            v for v in decision.violations if v.rule == "max_complexity_increase"
-        )
+        complexity_violation = next(v for v in decision.violations if v.rule == "max_complexity_increase")
         assert complexity_violation.severity == "MEDIUM"
         assert complexity_violation.limit == 5
         # Complexity delta = 8 - 1 = 7
@@ -192,9 +184,7 @@ def fixed():
         decision = budget.validate_operation(operation)
 
         # Should not have complexity violation (treats unparseable as 0 complexity)
-        complexity_violations = [
-            v for v in decision.violations if v.rule == "max_complexity_increase"
-        ]
+        complexity_violations = [v for v in decision.violations if v.rule == "max_complexity_increase"]
         assert len(complexity_violations) == 0
 
     def test_allowed_file_patterns_enforced(self):
@@ -202,21 +192,13 @@ def fixed():
         budget = ChangeBudget({"allowed_file_patterns": ["*.py", "*.ts"]})
 
         # Java file not in allowed patterns
-        operation = Operation(
-            changes=[
-                FileChange(
-                    file_path="src/Main.java", added_lines=["System.out.println();"]
-                )
-            ]
-        )
+        operation = Operation(changes=[FileChange(file_path="src/Main.java", added_lines=["System.out.println();"])])
 
         decision = budget.validate_operation(operation)
 
         assert not decision.allowed
         assert any(v.rule == "allowed_file_patterns" for v in decision.violations)
-        pattern_violation = next(
-            v for v in decision.violations if v.rule == "allowed_file_patterns"
-        )
+        pattern_violation = next(v for v in decision.violations if v.rule == "allowed_file_patterns")
         assert pattern_violation.severity == "HIGH"
         assert pattern_violation.file == "src/Main.java"
 
@@ -225,16 +207,12 @@ def fixed():
         budget = ChangeBudget({"allowed_file_patterns": ["*.py"]})
 
         # Match nested path (checks filename)
-        operation1 = Operation(
-            changes=[FileChange(file_path="src/utils/helper.py", added_lines=["x = 1"])]
-        )
+        operation1 = Operation(changes=[FileChange(file_path="src/utils/helper.py", added_lines=["x = 1"])])
         decision1 = budget.validate_operation(operation1)
         assert decision1.allowed
 
         # Match tests path
-        operation2 = Operation(
-            changes=[FileChange(file_path="tests/test_foo.py", added_lines=["x = 1"])]
-        )
+        operation2 = Operation(changes=[FileChange(file_path="tests/test_foo.py", added_lines=["x = 1"])])
         decision2 = budget.validate_operation(operation2)
         assert decision2.allowed
 
@@ -243,17 +221,13 @@ def fixed():
         budget = ChangeBudget({"forbidden_paths": [".git/", "node_modules/"]})
 
         # Attempt to modify .git file
-        operation = Operation(
-            changes=[FileChange(file_path=".git/config", added_lines=["[core]"])]
-        )
+        operation = Operation(changes=[FileChange(file_path=".git/config", added_lines=["[core]"])])
 
         decision = budget.validate_operation(operation)
 
         assert not decision.allowed
         assert any(v.rule == "forbidden_paths" for v in decision.violations)
-        forbidden_violation = next(
-            v for v in decision.violations if v.rule == "forbidden_paths"
-        )
+        forbidden_violation = next(v for v in decision.violations if v.rule == "forbidden_paths")
         assert forbidden_violation.severity == "CRITICAL"
         assert forbidden_violation.file == ".git/config"
 
@@ -262,13 +236,7 @@ def fixed():
         budget = ChangeBudget({"forbidden_paths": ["node_modules/"]})
 
         # Nested in node_modules
-        operation = Operation(
-            changes=[
-                FileChange(
-                    file_path="node_modules/lodash/index.js", added_lines=["// bad"]
-                )
-            ]
-        )
+        operation = Operation(changes=[FileChange(file_path="node_modules/lodash/index.js", added_lines=["// bad"])])
 
         decision = budget.validate_operation(operation)
 
@@ -400,10 +368,7 @@ class TestErrorMessages:
         budget = ChangeBudget({"max_files": 3})
 
         operation = Operation(
-            changes=[
-                FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"])
-                for i in range(5)
-            ]
+            changes=[FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"]) for i in range(5)]
         )
 
         decision = budget.validate_operation(operation)
@@ -482,32 +447,20 @@ def complex():
         """[20251216_TEST] Forbidden paths marked as CRITICAL."""
         budget = ChangeBudget({"forbidden_paths": [".git/"]})
 
-        operation = Operation(
-            changes=[
-                FileChange(
-                    file_path=".git/hooks/pre-commit", added_lines=["#!/bin/bash"]
-                )
-            ]
-        )
+        operation = Operation(changes=[FileChange(file_path=".git/hooks/pre-commit", added_lines=["#!/bin/bash"])])
 
         decision = budget.validate_operation(operation)
 
         assert not decision.allowed
         assert decision.has_critical_violations
-        forbidden_violation = next(
-            v for v in decision.violations if v.rule == "forbidden_paths"
-        )
+        forbidden_violation = next(v for v in decision.violations if v.rule == "forbidden_paths")
         assert forbidden_violation.severity == "CRITICAL"
 
     def test_pattern_mismatch_includes_patterns(self):
         """[20251216_TEST] Pattern violations show allowed patterns."""
         budget = ChangeBudget({"allowed_file_patterns": ["*.py", "*.ts"]})
 
-        operation = Operation(
-            changes=[
-                FileChange(file_path="src/Main.java", added_lines=["class Main {}"])
-            ]
-        )
+        operation = Operation(changes=[FileChange(file_path="src/Main.java", added_lines=["class Main {}"])])
 
         decision = budget.validate_operation(operation)
         error_msg = decision.get_error_message()
@@ -724,9 +677,7 @@ class TestEdgeCases:
         """[20251216_TEST] Error message for allowed operation just returns reason."""
         budget = ChangeBudget({})
 
-        operation = Operation(
-            changes=[FileChange(file_path="src/test.py", added_lines=["x = 1"])]
-        )
+        operation = Operation(changes=[FileChange(file_path="src/test.py", added_lines=["x = 1"])])
 
         decision = budget.validate_operation(operation)
 
@@ -738,11 +689,7 @@ class TestEdgeCases:
         """[20251216_TEST] File with no line changes is allowed."""
         budget = ChangeBudget({"max_lines_per_file": 10})
 
-        operation = Operation(
-            changes=[
-                FileChange(file_path="src/empty.py", added_lines=[], removed_lines=[])
-            ]
-        )
+        operation = Operation(changes=[FileChange(file_path="src/empty.py", added_lines=[], removed_lines=[])])
 
         decision = budget.validate_operation(operation)
 
@@ -778,9 +725,7 @@ def complex():
         decision = budget.validate_operation(operation)
 
         # Negative delta doesn't trigger violation
-        assert decision.allowed or not any(
-            v.rule == "max_complexity_increase" for v in decision.violations
-        )
+        assert decision.allowed or not any(v.rule == "max_complexity_increase" for v in decision.violations)
 
     def test_exactly_at_limit_allowed(self):
         """[20251216_TEST] Operations exactly at limits are allowed."""
@@ -812,10 +757,7 @@ def complex():
         budget = ChangeBudget({"max_files": 3})
 
         operation = Operation(
-            changes=[
-                FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"])
-                for i in range(4)
-            ]
+            changes=[FileChange(file_path=f"src/file{i}.py", added_lines=["x = 1"]) for i in range(4)]
         )
 
         decision = budget.validate_operation(operation)
@@ -840,9 +782,7 @@ def complex():
         decision = budget.validate_operation(operation)
 
         # Should not have complexity violation (both treated as 0)
-        complexity_violations = [
-            v for v in decision.violations if v.rule == "max_complexity_increase"
-        ]
+        complexity_violations = [v for v in decision.violations if v.rule == "max_complexity_increase"]
         assert len(complexity_violations) == 0
 
     def test_operation_missing_code_for_complexity(self):
@@ -859,7 +799,5 @@ def complex():
         decision = budget.validate_operation(operation)
 
         # Should not have complexity violation (no code to analyze)
-        complexity_violations = [
-            v for v in decision.violations if v.rule == "max_complexity_increase"
-        ]
+        complexity_violations = [v for v in decision.violations if v.rule == "max_complexity_increase"]
         assert len(complexity_violations) == 0

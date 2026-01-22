@@ -15,9 +15,7 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src")))
 
 from code_scalpel.surgery.unified_extractor import UnifiedExtractor
 
@@ -45,9 +43,7 @@ def farewell(name):
                 assert result.success, f"Extraction failed: {result.error}"
                 assert "def greet" in result.code, "Function definition not extracted"
                 assert "Hello" in result.code, "Function body not extracted"
-                assert (
-                    "farewell" not in result.code
-                ), "Other function incorrectly included"
+                assert "farewell" not in result.code, "Other function incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -56,7 +52,7 @@ def farewell(name):
         python_code = """class Calculator:
     def add(self, a, b):
         return a + b
-    
+
     def subtract(self, a, b):
         return a - b
 
@@ -72,13 +68,9 @@ class StringUtils:
                 result = extractor.extract("class", "Calculator")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "class Calculator" in result.code
-                ), "Class definition not extracted"
+                assert "class Calculator" in result.code, "Class definition not extracted"
                 assert "def add" in result.code, "Methods not extracted"
-                assert (
-                    "StringUtils" not in result.code
-                ), "Other class incorrectly included"
+                assert "StringUtils" not in result.code, "Other class incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -87,7 +79,7 @@ class StringUtils:
         python_code = """class DataProcessor:
     def process(self, data):
         return data.strip()
-    
+
     def validate(self, data):
         return len(data) > 0
 """
@@ -129,13 +121,9 @@ function farewell(name) {
                 result = extractor.extract("function", "greet")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "function greet" in result.code
-                ), "Function definition not extracted"
+                assert "function greet" in result.code, "Function definition not extracted"
                 assert "Hello" in result.code, "Function body not extracted"
-                assert (
-                    "farewell" not in result.code
-                ), "Other function incorrectly included"
+                assert "farewell" not in result.code, "Other function incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -145,7 +133,7 @@ function farewell(name) {
     add(a, b) {
         return a + b;
     }
-    
+
     subtract(a, b) {
         return a - b;
     }
@@ -166,13 +154,9 @@ class StringUtils {
                 result = extractor.extract("class", "Calculator")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "class Calculator" in result.code
-                ), "Class definition not extracted"
+                assert "class Calculator" in result.code, "Class definition not extracted"
                 assert "add" in result.code, "Methods not extracted"
-                assert (
-                    "StringUtils" not in result.code
-                ), "Other class incorrectly included"
+                assert "StringUtils" not in result.code, "Other class incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -182,7 +166,7 @@ class StringUtils {
     process(data) {
         return data.trim();
     }
-    
+
     validate(data) {
         return data.length > 0;
     }
@@ -225,13 +209,9 @@ function farewell(name: string): string {
                 result = extractor.extract("function", "greet")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "function greet" in result.code
-                ), "Function definition not extracted"
+                assert "function greet" in result.code, "Function definition not extracted"
                 assert "string" in result.code, "Type annotations not preserved"
-                assert (
-                    "farewell" not in result.code
-                ), "Other function incorrectly included"
+                assert "farewell" not in result.code, "Other function incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -241,7 +221,7 @@ function farewell(name: string): string {
     add(a: number, b: number): number {
         return a + b;
     }
-    
+
     subtract(a: number, b: number): number {
         return a - b;
     }
@@ -262,14 +242,10 @@ class StringUtils {
                 result = extractor.extract("class", "Calculator")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "class Calculator" in result.code
-                ), "Class definition not extracted"
+                assert "class Calculator" in result.code, "Class definition not extracted"
                 assert "add" in result.code, "Methods not extracted"
                 assert "number" in result.code, "Type annotations not preserved"
-                assert (
-                    "StringUtils" not in result.code
-                ), "Other class incorrectly included"
+                assert "StringUtils" not in result.code, "Other class incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -293,15 +269,11 @@ interface Product {
             try:
                 extractor = UnifiedExtractor.from_file(f.name)
                 # Note: May need to use "interface" as target_type or "class" depending on implementation
-                result = extractor.extract(
-                    "class", "User"
-                )  # Interfaces often treated as classes
+                result = extractor.extract("class", "User")  # Interfaces often treated as classes
 
                 assert result.success, f"Extraction failed: {result.error}"
                 assert "User" in result.code, "Interface not extracted"
-                assert (
-                    "Product" not in result.code
-                ), "Other interface incorrectly included"
+                assert "Product" not in result.code, "Other interface incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -315,7 +287,7 @@ class TestJavaLanguageSupport:
     public int add(int a, int b) {
         return a + b;
     }
-    
+
     public int subtract(int a, int b) {
         return a - b;
     }
@@ -331,9 +303,7 @@ class TestJavaLanguageSupport:
 
                 assert result.success, f"Extraction failed: {result.error}"
                 assert "add" in result.code, "Method not extracted"
-                assert (
-                    "int a" in result.code or "a + b" in result.code
-                ), "Method signature/body not extracted"
+                assert "int a" in result.code or "a + b" in result.code, "Method signature/body not extracted"
             finally:
                 os.unlink(f.name)
 
@@ -360,13 +330,9 @@ public class StringUtils {
                 result = extractor.extract("class", "Calculator")
 
                 assert result.success, f"Extraction failed: {result.error}"
-                assert (
-                    "class Calculator" in result.code
-                ), "Class definition not extracted"
+                assert "class Calculator" in result.code, "Class definition not extracted"
                 assert "add" in result.code, "Methods not extracted"
-                assert (
-                    "StringUtils" not in result.code
-                ), "Other class incorrectly included"
+                assert "StringUtils" not in result.code, "Other class incorrectly included"
             finally:
                 os.unlink(f.name)
 
@@ -377,7 +343,7 @@ public class StringUtils {
     public String toString() {
         return "Service";
     }
-    
+
     @Deprecated
     public void oldMethod() {
         // Legacy code
@@ -404,7 +370,7 @@ public class StringUtils {
     public static int max(int a, int b) {
         return a > b ? a : b;
     }
-    
+
     public int min(int a, int b) {
         return a < b ? a : b;
     }

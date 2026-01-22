@@ -24,10 +24,11 @@ from __future__ import annotations
 import json
 import logging
 import threading
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Set
+from typing import Any
 
 from .tier_detector import TierDetector
 from .validator import LicenseValidator, ValidationStatus
@@ -47,22 +48,22 @@ class LicenseInfo:
 
     tier: str
     is_valid: bool
-    expiration_date: Optional[datetime] = None
-    organization: Optional[str] = None
-    seats: Optional[int] = None
+    expiration_date: datetime | None = None
+    organization: str | None = None
+    seats: int | None = None
     seats_used: int = 0
     concurrent_users: int = 0
-    features: Set[str] = field(default_factory=set)
-    metadata: Dict[str, str] = field(default_factory=dict)
+    features: set[str] = field(default_factory=set)
+    metadata: dict[str, str] = field(default_factory=dict)
     grace_period_days: int = 0
     is_in_grace_period: bool = False
-    days_until_expiration: Optional[int] = None
+    days_until_expiration: int | None = None
     custom_terms: Mapping[str, str | bool] = field(default_factory=dict)
 
 
 # [20251225_FEATURE] Feature to tier mapping
 # Features are available at the specified tier and all higher tiers
-FEATURE_TIERS: Dict[str, str] = {
+FEATURE_TIERS: dict[str, str] = {
     # COMMUNITY features (always available)
     "analyze_code": "community",
     "extract_code": "community",
@@ -123,9 +124,9 @@ class LicenseManager:
 
     def __init__(
         self,
-        tier_detector: Optional[TierDetector] = None,
-        validator: Optional[LicenseValidator] = None,
-        persistence_path: Optional[Path] = None,
+        tier_detector: TierDetector | None = None,
+        validator: LicenseValidator | None = None,
+        persistence_path: Path | None = None,
     ):
         """
         Initialize the license manager.
@@ -137,15 +138,13 @@ class LicenseManager:
         """
         self._tier_detector = tier_detector or TierDetector()
         self._validator = validator or LicenseValidator()
-        self._license_info: Optional[LicenseInfo] = None
+        self._license_info: LicenseInfo | None = None
 
         # [20251225_FEATURE] P2_MEDIUM: License state persistence
-        self._persistence_path = persistence_path or Path(
-            ".code-scalpel/license/license_state.json"
-        )
+        self._persistence_path = persistence_path or Path(".code-scalpel/license/license_state.json")
 
         # [20251225_FEATURE] P2_MEDIUM: Seat tracking and concurrent usage
-        self._active_users: Set[str] = set()
+        self._active_users: set[str] = set()
         self._user_lock = threading.Lock()
 
         # [20251225_FEATURE] P2_MEDIUM: Grace period configuration
@@ -203,15 +202,11 @@ class LicenseManager:
 
                     # [20251225_FEATURE] P2_MEDIUM: Grace period support
                     if validation_result.status == ValidationStatus.EXPIRED:
-                        days_expired = (
-                            _utcnow_naive() - validation_result.expiration_date
-                        ).days
+                        days_expired = (_utcnow_naive() - validation_result.expiration_date).days
                         if days_expired <= self._default_grace_period_days:
                             is_valid = True
                             is_in_grace_period = True
-                            grace_period_days = (
-                                self._default_grace_period_days - days_expired
-                            )
+                            grace_period_days = self._default_grace_period_days - days_expired
                             logger.warning(
                                 f"License expired {days_expired} days ago, "
                                 f"in grace period ({grace_period_days} days remaining)"
@@ -225,17 +220,13 @@ class LicenseManager:
 
             # [20251225_FEATURE] P4_LOW: Custom license terms
             custom_terms: Mapping[str, str | bool] = (
-                dict(validation_result.custom_rules)
-                if validation_result and validation_result.custom_rules
-                else {}
+                dict(validation_result.custom_rules) if validation_result and validation_result.custom_rules else {}
             )
 
             self._license_info = LicenseInfo(
                 tier=tier,
                 is_valid=is_valid,
-                expiration_date=(
-                    validation_result.expiration_date if validation_result else None
-                ),
+                expiration_date=(validation_result.expiration_date if validation_result else None),
                 organization=organization,
                 seats=seats,
                 seats_used=seats_used,
@@ -270,7 +261,7 @@ class LicenseManager:
 
         return current_level >= required_level
 
-    def get_upgrade_message(self, feature_name: str) -> Optional[str]:
+    def get_upgrade_message(self, feature_name: str) -> str | None:
         """
         Get an upgrade message for a feature not available at current tier.
 
@@ -292,7 +283,7 @@ class LicenseManager:
             f"Upgrade at https://code-scalpel.dev/pricing"
         )
 
-    def get_available_features(self) -> List[str]:
+    def get_available_features(self) -> list[str]:
         """
         Get list of all features available at current tier.
 
@@ -302,7 +293,7 @@ class LicenseManager:
         tier = self.get_current_tier()
         return list(self._get_available_features(tier))
 
-    def get_unavailable_features(self) -> List[str]:
+    def get_unavailable_features(self) -> list[str]:
         """
         Get list of features NOT available at current tier.
 
@@ -313,7 +304,7 @@ class LicenseManager:
         all_features = set(FEATURE_TIERS.keys())
         return list(all_features - available)
 
-    def _get_available_features(self, tier: str) -> Set[str]:
+    def _get_available_features(self, tier: str) -> set[str]:
         """Get all features available at the specified tier."""
         tier_level = TIER_HIERARCHY.get(tier, 0)
         available = set()
@@ -330,7 +321,7 @@ class LicenseManager:
         self._tier_detector.detect(force_refresh=True)
         self._license_info = None
 
-    def check_expiration(self) -> Optional[Dict[str, Any]]:
+    def check_expiration(self) -> dict[str, Any] | None:
         """
         [20251225_FEATURE] P2_MEDIUM: Check license expiration status.
 
@@ -348,11 +339,10 @@ class LicenseManager:
             "is_expired": info.days_until_expiration == 0,
             "is_in_grace_period": info.is_in_grace_period,
             "grace_period_days_remaining": info.grace_period_days,
-            "needs_renewal": info.days_until_expiration is not None
-            and info.days_until_expiration <= 30,
+            "needs_renewal": info.days_until_expiration is not None and info.days_until_expiration <= 30,
         }
 
-    def get_renewal_reminder(self) -> Optional[str]:
+    def get_renewal_reminder(self) -> str | None:
         """
         [20251225_FEATURE] P3_LOW: Get license renewal reminder message.
 
@@ -402,15 +392,11 @@ class LicenseManager:
             # Check seat limit for ENTERPRISE tier
             if info.tier == "enterprise" and info.seats is not None:
                 if len(self._active_users) >= info.seats:
-                    logger.warning(
-                        f"Seat limit reached: {len(self._active_users)}/{info.seats}"
-                    )
+                    logger.warning(f"Seat limit reached: {len(self._active_users)}/{info.seats}")
                     return False
 
             self._active_users.add(user_id)
-            logger.info(
-                f"User {user_id} added. Active users: {len(self._active_users)}"
-            )
+            logger.info(f"User {user_id} added. Active users: {len(self._active_users)}")
 
             # Invalidate cached license info to reflect new seat count
             self._license_info = None
@@ -431,9 +417,7 @@ class LicenseManager:
         with self._user_lock:
             if user_id in self._active_users:
                 self._active_users.remove(user_id)
-                logger.info(
-                    f"User {user_id} removed. Active users: {len(self._active_users)}"
-                )
+                logger.info(f"User {user_id} removed. Active users: {len(self._active_users)}")
 
                 # Invalidate cached license info
                 self._license_info = None
@@ -442,7 +426,7 @@ class LicenseManager:
                 return True
             return False
 
-    def get_active_users(self) -> List[str]:
+    def get_active_users(self) -> list[str]:
         """
         [20251225_FEATURE] P3_LOW: Get list of currently active users.
 
@@ -452,7 +436,7 @@ class LicenseManager:
         with self._user_lock:
             return list(self._active_users)
 
-    def get_concurrent_usage(self) -> Dict[str, float | int]:
+    def get_concurrent_usage(self) -> dict[str, float | int]:
         """
         [20251225_FEATURE] P3_LOW: Get concurrent usage statistics.
 
@@ -465,15 +449,11 @@ class LicenseManager:
             return {
                 "active_users": len(self._active_users),
                 "seat_limit": info.seats if info.seats else -1,
-                "seats_available": (
-                    (info.seats - len(self._active_users)) if info.seats else -1
-                ),
-                "utilization_percent": (
-                    (len(self._active_users) / info.seats * 100) if info.seats else 0
-                ),
+                "seats_available": ((info.seats - len(self._active_users)) if info.seats else -1),
+                "utilization_percent": ((len(self._active_users) / info.seats * 100) if info.seats else 0),
             }
 
-    def get_organization_info(self) -> Optional[Dict[str, Any]]:
+    def get_organization_info(self) -> dict[str, Any] | None:
         """
         [20251225_FEATURE] P3_LOW: Get organization management information.
 
@@ -497,7 +477,7 @@ class LicenseManager:
             "features": list(info.features),
         }
 
-    def get_custom_terms(self) -> Dict[str, str | bool]:
+    def get_custom_terms(self) -> dict[str, str | bool]:
         """
         [20251225_FEATURE] P4_LOW: Get custom license terms.
 
@@ -536,9 +516,7 @@ class LicenseManager:
                 "tier": self._license_info.tier,
                 "is_valid": self._license_info.is_valid,
                 "expiration_date": (
-                    self._license_info.expiration_date.isoformat()
-                    if self._license_info.expiration_date
-                    else None
+                    self._license_info.expiration_date.isoformat() if self._license_info.expiration_date else None
                 ),
                 "organization": self._license_info.organization,
                 "seats": self._license_info.seats,
@@ -556,7 +534,7 @@ class LicenseManager:
 
             logger.debug(f"License state saved to {self._persistence_path}")
 
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.warning(f"Failed to save license state: {e}")
 
     def _load_state(self) -> None:
@@ -567,16 +545,15 @@ class LicenseManager:
             return
 
         try:
-            with open(self._persistence_path, "r") as f:
+            with open(self._persistence_path) as f:
                 state = json.load(f)
 
             # Restore active users
             self._active_users = set(state.get("active_users", []))
 
             logger.debug(
-                f"License state loaded from {self._persistence_path}. "
-                f"Active users: {len(self._active_users)}"
+                f"License state loaded from {self._persistence_path}. " f"Active users: {len(self._active_users)}"
             )
 
-        except (IOError, OSError, json.JSONDecodeError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to load license state: {e}")

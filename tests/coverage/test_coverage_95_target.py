@@ -8,8 +8,6 @@ import ast
 import tempfile
 from pathlib import Path
 
-import pytest
-
 
 class TestTaintTrackerExtra:
     """Cover more taint tracker branches."""
@@ -215,12 +213,10 @@ class TestPDGExtraBranches:
 
     def test_pdg_with_match_statement(self):
         """Cover match statement (Python 3.10+)."""
-        import sys
 
         from code_scalpel.pdg_tools.builder import PDGBuilder
 
-        if sys.version_info >= (3, 10):
-            code = """
+        code = """
 match command:
     case "quit":
         exit()
@@ -229,11 +225,9 @@ match command:
     case _:
         print("Unknown")
 """
-            builder = PDGBuilder()
-            pdg, cfg = builder.build(code)
-            assert pdg is not None
-        else:
-            pytest.skip("match statement requires Python 3.10+")
+        builder = PDGBuilder()
+        pdg, cfg = builder.build(code)
+        assert pdg is not None
 
     def test_pdg_with_async_for(self):
         """Cover async for loop."""

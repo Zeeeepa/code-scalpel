@@ -767,9 +767,7 @@ class TestAnalyzerDeepCoverage:
         # Create clear source -> sink path
         g.add_node("src", type="call", function="input", taint_type="user_input")
         g.add_node("mid", type="assign")
-        g.add_node(
-            "sink", type="call", function="cursor.execute", sink_type="sql_query"
-        )
+        g.add_node("sink", type="call", function="cursor.execute", sink_type="sql_query")
         g.add_edge("src", "mid", type="data")
         g.add_edge("mid", "sink", type="data")
 
@@ -911,9 +909,7 @@ class TestSlicerFinalCoverage:
         # Create a cycle in the graph
         pdg.add_node("a", lineno=1, defines=["x"])
         pdg.add_node("b", lineno=2, uses=["x"], defines=["y"])
-        pdg.add_node(
-            "c", lineno=3, uses=["y"], defines=["x"]
-        )  # x depends on y which depends on x
+        pdg.add_node("c", lineno=3, uses=["y"], defines=["x"])  # x depends on y which depends on x
 
         pdg.add_edge("a", "b", type="data_dependency")
         pdg.add_edge("b", "c", type="data_dependency")
@@ -977,9 +973,7 @@ class TestSlicerBranchPartials:
 
         slicer = ProgramSlicer(pdg)
         # Disable data dependencies
-        criteria = SlicingCriteria(
-            nodes={"b"}, variables=set(), include_data=False, include_control=True
-        )
+        criteria = SlicingCriteria(nodes={"b"}, variables=set(), include_data=False, include_control=True)
         sliced = slicer._compute_backward_slice(criteria)
         assert "a" in sliced.nodes()
 
@@ -992,9 +986,7 @@ class TestSlicerBranchPartials:
 
         slicer = ProgramSlicer(pdg)
         # Disable control dependencies
-        criteria = SlicingCriteria(
-            nodes={"b"}, variables=set(), include_data=True, include_control=False
-        )
+        criteria = SlicingCriteria(nodes={"b"}, variables=set(), include_data=True, include_control=False)
         sliced = slicer._compute_backward_slice(criteria)
         assert "a" in sliced.nodes()
 
@@ -1007,9 +999,7 @@ class TestSlicerBranchPartials:
 
         slicer = ProgramSlicer(pdg)
         # Disable data dependencies
-        criteria = SlicingCriteria(
-            nodes={"a"}, variables=set(), include_data=False, include_control=True
-        )
+        criteria = SlicingCriteria(nodes={"a"}, variables=set(), include_data=False, include_control=True)
         sliced = slicer._compute_forward_slice(criteria)
         assert "b" in sliced.nodes()
 
@@ -1022,8 +1012,6 @@ class TestSlicerBranchPartials:
 
         slicer = ProgramSlicer(pdg)
         # Disable control dependencies
-        criteria = SlicingCriteria(
-            nodes={"a"}, variables=set(), include_data=True, include_control=False
-        )
+        criteria = SlicingCriteria(nodes={"a"}, variables=set(), include_data=True, include_control=False)
         sliced = slicer._compute_forward_slice(criteria)
         assert "b" in sliced.nodes()

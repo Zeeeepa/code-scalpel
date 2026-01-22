@@ -195,27 +195,19 @@ class TestLanguageFeatureParity:
         from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
-        py_result = _get_file_context_sync(
-            str(temp_python_project / "good_code.py"), capabilities=[]
-        )
+        py_result = _get_file_context_sync(str(temp_python_project / "good_code.py"), capabilities=[])
         assert py_result.functions is not None
 
         # JavaScript
-        js_result = _get_file_context_sync(
-            str(temp_javascript_project / "processor.js"), capabilities=[]
-        )
+        js_result = _get_file_context_sync(str(temp_javascript_project / "processor.js"), capabilities=[])
         assert js_result.functions is not None
 
         # TypeScript
-        ts_result = _get_file_context_sync(
-            str(temp_typescript_project / "user.ts"), capabilities=[]
-        )
+        ts_result = _get_file_context_sync(str(temp_typescript_project / "user.ts"), capabilities=[])
         assert ts_result.functions is not None
 
         # Java
-        java_result = _get_file_context_sync(
-            str(temp_java_project / "DataProcessor.java"), capabilities=[]
-        )
+        java_result = _get_file_context_sync(str(temp_java_project / "DataProcessor.java"), capabilities=[])
         assert java_result.functions is not None
 
     def test_all_languages_extract_classes(
@@ -229,27 +221,19 @@ class TestLanguageFeatureParity:
         from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
-        py_result = _get_file_context_sync(
-            str(temp_python_project / "good_code.py"), capabilities=[]
-        )
+        py_result = _get_file_context_sync(str(temp_python_project / "good_code.py"), capabilities=[])
         assert py_result.classes is not None
 
         # JavaScript
-        js_result = _get_file_context_sync(
-            str(temp_javascript_project / "processor.js"), capabilities=[]
-        )
+        js_result = _get_file_context_sync(str(temp_javascript_project / "processor.js"), capabilities=[])
         assert js_result.classes is not None
 
         # TypeScript
-        ts_result = _get_file_context_sync(
-            str(temp_typescript_project / "user.ts"), capabilities=[]
-        )
+        ts_result = _get_file_context_sync(str(temp_typescript_project / "user.ts"), capabilities=[])
         assert ts_result.classes is not None
 
         # Java
-        java_result = _get_file_context_sync(
-            str(temp_java_project / "DataProcessor.java"), capabilities=[]
-        )
+        java_result = _get_file_context_sync(str(temp_java_project / "DataProcessor.java"), capabilities=[])
         assert java_result.classes is not None
 
     def test_all_languages_detect_imports(
@@ -263,27 +247,19 @@ class TestLanguageFeatureParity:
         from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
-        py_result = _get_file_context_sync(
-            str(temp_python_project / "good_code.py"), capabilities=[]
-        )
+        py_result = _get_file_context_sync(str(temp_python_project / "good_code.py"), capabilities=[])
         assert py_result.imports is not None
 
         # JavaScript
-        js_result = _get_file_context_sync(
-            str(temp_javascript_project / "processor.js"), capabilities=[]
-        )
+        js_result = _get_file_context_sync(str(temp_javascript_project / "processor.js"), capabilities=[])
         assert js_result.imports is not None
 
         # TypeScript
-        ts_result = _get_file_context_sync(
-            str(temp_typescript_project / "user.ts"), capabilities=[]
-        )
+        ts_result = _get_file_context_sync(str(temp_typescript_project / "user.ts"), capabilities=[])
         assert ts_result.imports is not None
 
         # Java
-        java_result = _get_file_context_sync(
-            str(temp_java_project / "DataProcessor.java"), capabilities=[]
-        )
+        java_result = _get_file_context_sync(str(temp_java_project / "DataProcessor.java"), capabilities=[])
         assert java_result.imports is not None
 
     def test_all_languages_calculate_complexity(
@@ -297,27 +273,19 @@ class TestLanguageFeatureParity:
         from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
         # Python
-        py_result = _get_file_context_sync(
-            str(temp_python_project / "good_code.py"), capabilities=[]
-        )
+        py_result = _get_file_context_sync(str(temp_python_project / "good_code.py"), capabilities=[])
         assert py_result.complexity_score is not None
 
         # JavaScript
-        js_result = _get_file_context_sync(
-            str(temp_javascript_project / "processor.js"), capabilities=[]
-        )
+        js_result = _get_file_context_sync(str(temp_javascript_project / "processor.js"), capabilities=[])
         assert js_result.complexity_score is not None
 
         # TypeScript
-        ts_result = _get_file_context_sync(
-            str(temp_typescript_project / "user.ts"), capabilities=[]
-        )
+        ts_result = _get_file_context_sync(str(temp_typescript_project / "user.ts"), capabilities=[])
         assert ts_result.complexity_score is not None
 
         # Java
-        java_result = _get_file_context_sync(
-            str(temp_java_project / "DataProcessor.java"), capabilities=[]
-        )
+        java_result = _get_file_context_sync(str(temp_java_project / "DataProcessor.java"), capabilities=[])
         assert java_result.complexity_score is not None
 
 

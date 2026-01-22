@@ -1595,7 +1595,7 @@ git commit -m "chore: update policy manifest"
 git push
 
 # 3. At runtime, verify against committed manifest
-# (See docs/configuration/governance_config_schema.md for implementation)
+# (See docs/Configuration_Guide.md for implementation)
 ```
 
 **Benefits:**
@@ -2182,7 +2182,7 @@ config = loader.load()
 
 ## Documentation
 
-- **Full specification:** `docs/configuration/governance_config_schema.md`
+- **Full specification:** `docs/Configuration_Guide.md`
 - **Development roadmap:** `DEVELOPMENT_ROADMAP.md` (v3.0.0 section)
 - **Policy engine docs:** `docs/policy_engine_guide.md`
 - **Autonomy guide:** `docs/autonomy_quickstart.md`

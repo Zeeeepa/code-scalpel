@@ -16,9 +16,7 @@ class TestCommunityTierLimits:
     """Test Community tier limits enforcement."""
 
     @pytest.mark.asyncio
-    async def test_community_tier_depth_limit(
-        self, community_server, deep_chain_project, monkeypatch
-    ):
+    async def test_community_tier_depth_limit(self, community_server, deep_chain_project, monkeypatch):
         """Community tier should clamp depth to 1."""
         # Force community tier
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
@@ -33,14 +31,10 @@ class TestCommunityTierLimits:
         # Should succeed but with Community limits
         assert result.success is True
         # Depth should be clamped to Community limit (1)
-        assert (
-            result.transitive_depth <= 1
-        ), f"Community tier should clamp depth to 1, got {result.transitive_depth}"
+        assert result.transitive_depth <= 1, f"Community tier should clamp depth to 1, got {result.transitive_depth}"
 
     @pytest.mark.asyncio
-    async def test_community_tier_file_limit(
-        self, community_server, simple_two_file_project, monkeypatch
-    ):
+    async def test_community_tier_file_limit(self, community_server, simple_two_file_project, monkeypatch):
         """Community tier should limit files analyzed to 50."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -53,18 +47,14 @@ class TestCommunityTierLimits:
 
         assert result.success is True
         # Files should be limited
-        assert (
-            result.files_analyzed <= 50
-        ), f"Community should limit to 50 files, analyzed {result.files_analyzed}"
+        assert result.files_analyzed <= 50, f"Community should limit to 50 files, analyzed {result.files_analyzed}"
 
 
 class TestProTierCapabilities:
     """Test Pro tier has enhanced capabilities vs Community."""
 
     @pytest.mark.asyncio
-    async def test_pro_tier_increased_depth(
-        self, pro_server, deep_chain_project, monkeypatch
-    ):
+    async def test_pro_tier_increased_depth(self, pro_server, deep_chain_project, monkeypatch):
         """Pro tier should support deeper depth analysis (up to 5)."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -80,9 +70,7 @@ class TestProTierCapabilities:
         assert result.transitive_depth <= 5
 
     @pytest.mark.asyncio
-    async def test_pro_tier_alias_resolution(
-        self, pro_server, alias_import_project, monkeypatch
-    ):
+    async def test_pro_tier_alias_resolution(self, pro_server, alias_import_project, monkeypatch):
         """Pro tier should resolve import aliases."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "pro")
 
@@ -101,9 +89,7 @@ class TestEnterpriseTierCapabilities:
     """Test Enterprise tier has full capabilities."""
 
     @pytest.mark.asyncio
-    async def test_enterprise_tier_unlimited_depth(
-        self, enterprise_server, deep_chain_project, monkeypatch
-    ):
+    async def test_enterprise_tier_unlimited_depth(self, enterprise_server, deep_chain_project, monkeypatch):
         """Enterprise tier should allow unlimited depth."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
 
@@ -142,9 +128,7 @@ class TestFeatureGatingByCommunityTier:
     """Test that Pro/Enterprise features are gated on Community tier."""
 
     @pytest.mark.asyncio
-    async def test_pro_features_empty_on_community(
-        self, community_server, alias_import_project, monkeypatch
-    ):
+    async def test_pro_features_empty_on_community(self, community_server, alias_import_project, monkeypatch):
         """Pro features should be empty when Community tier is forced."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -156,15 +140,11 @@ class TestFeatureGatingByCommunityTier:
 
         assert result.success is True
         # Pro features should not be populated
-        assert (
-            len(result.alias_resolutions) == 0
-        ), "alias_resolutions should be empty on Community tier"
+        assert len(result.alias_resolutions) == 0, "alias_resolutions should be empty on Community tier"
         assert len(result.wildcard_expansions) == 0
 
     @pytest.mark.asyncio
-    async def test_enterprise_features_empty_on_community(
-        self, community_server, simple_two_file_project, monkeypatch
-    ):
+    async def test_enterprise_features_empty_on_community(self, community_server, simple_two_file_project, monkeypatch):
         """Enterprise features should be empty when Community tier is forced."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 
@@ -185,9 +165,7 @@ class TestTierConsistency:
     """Test consistent behavior within a tier."""
 
     @pytest.mark.asyncio
-    async def test_repeated_community_calls_consistent(
-        self, community_server, simple_two_file_project, monkeypatch
-    ):
+    async def test_repeated_community_calls_consistent(self, community_server, simple_two_file_project, monkeypatch):
         """Multiple Community tier calls should behave consistently."""
         monkeypatch.setenv("CODE_SCALPEL_TIER", "community")
 

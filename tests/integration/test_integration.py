@@ -117,9 +117,7 @@ def compute(x, y):
         # Get slice for a specific criterion
         if len(pdg.nodes()) > 0:
             # Create slicing criteria
-            criteria = SlicingCriteria(
-                nodes=set(list(pdg.nodes())[:1]), variables=set()
-            )
+            criteria = SlicingCriteria(nodes=set(list(pdg.nodes())[:1]), variables=set())
 
             sliced_pdg = slicer.compute_slice(criteria, SliceType.BACKWARD)
             assert isinstance(sliced_pdg, nx.DiGraph)
@@ -256,9 +254,7 @@ class TestMockedExternalServices:
     def test_mocked_llm_response(self):
         """Test mocked LLM response in agent workflow."""
         mock_llm = Mock()
-        mock_llm.generate.return_value = (
-            "Suggested optimization: Move invariant code out of loop"
-        )
+        mock_llm.generate.return_value = "Suggested optimization: Move invariant code out of loop"
 
         # Simulate agent using LLM for code suggestions
         code = "for i in range(n):\n    x = 10\n    result += x * i"
@@ -334,7 +330,7 @@ def process_user_data(user_id, data):
     '''Process user data and return result.'''
     if not user_id:
         raise ValueError("User ID required")
-    
+
     result = {}
     for key, value in data.items():
         if isinstance(value, str):
@@ -343,7 +339,7 @@ def process_user_data(user_id, data):
             result[key] = round(value, 2)
         else:
             result[key] = value
-    
+
     return result
 """
         ast_analyzer = ASTAnalyzer()
@@ -364,12 +360,12 @@ class DataProcessor:
     def __init__(self, config):
         self.config = config
         self.processed = 0
-    
+
     def process(self, item):
         result = self._transform(item)
         self.processed += 1
         return result
-    
+
     def _transform(self, item):
         return item
 """
@@ -390,17 +386,17 @@ class DataProcessor:
 class Calculator:
     def __init__(self):
         self.history = []
-    
+
     def add(self, a, b):
         result = a + b
         self.history.append(('add', a, b, result))
         return result
-    
+
     def subtract(self, a, b):
         result = a - b
         self.history.append(('subtract', a, b, result))
         return result
-    
+
     def calculate(self, operation, a, b):
         if operation == 'add':
             return self.add(a, b)

@@ -20,7 +20,6 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 DEFAULT_CRL_URL = "http://codescalpel.dev/.well-known/license-crl.jwt"
 
@@ -79,9 +78,7 @@ def fetch_crl_token(url: str, timeout_seconds: float = 10.0) -> str:
         headers={"User-Agent": "code-scalpel/CRLFetcher"},
         method="GET",
     )
-    with urllib.request.urlopen(
-        req, timeout=timeout_seconds
-    ) as resp:  # nosec B310  # type: ignore
+    with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:  # nosec B310  # type: ignore
         body = resp.read().decode("utf-8", errors="replace")
     token = body.strip()
     if not token:
@@ -89,7 +86,7 @@ def fetch_crl_token(url: str, timeout_seconds: float = 10.0) -> str:
     return token
 
 
-def write_cache(token: str, paths: Optional[CRLCachePaths] = None) -> CRLCachePaths:
+def write_cache(token: str, paths: CRLCachePaths | None = None) -> CRLCachePaths:
     paths = paths or default_cache_paths()
     paths.token_path.parent.mkdir(parents=True, exist_ok=True)
     paths.token_path.write_text(token + "\n", encoding="utf-8")
@@ -101,8 +98,8 @@ def write_cache(token: str, paths: Optional[CRLCachePaths] = None) -> CRLCachePa
 
 
 def load_cache_if_fresh(
-    paths: Optional[CRLCachePaths] = None,
-) -> Optional[CRLCachePaths]:
+    paths: CRLCachePaths | None = None,
+) -> CRLCachePaths | None:
     paths = paths or default_cache_paths()
     if not (paths.token_path.exists() and paths.meta_path.exists()):
         return None
@@ -121,7 +118,7 @@ def load_cache_if_fresh(
     return None
 
 
-def ensure_crl_available() -> Optional[CRLCachePaths]:
+def ensure_crl_available() -> CRLCachePaths | None:
     """Ensure a CRL token is available via CODE_SCALPEL_LICENSE_CRL_PATH.
 
     Behavior:

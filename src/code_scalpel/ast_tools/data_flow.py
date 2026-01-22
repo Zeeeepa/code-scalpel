@@ -27,7 +27,6 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class Definition:
     variable: str
     line: int
     block_id: str
-    value: Optional[ast.expr] = None
+    value: ast.expr | None = None
     is_parameter: bool = False
     is_global: bool = False
     is_mutation: bool = False  # e.g., x[0] = 5
@@ -61,17 +60,17 @@ class Usage:
     variable: str
     line: int
     block_id: str
-    context: Optional[ast.expr] = None
+    context: ast.expr | None = None
 
 
 @dataclass
 class DataFlow:
     """Data flow information for a program."""
 
-    definitions: Dict[str, List[Definition]] = field(default_factory=dict)
-    usages: Dict[str, List[Usage]] = field(default_factory=dict)
-    def_use_chains: Dict[Definition, List[Usage]] = field(default_factory=dict)
-    use_def_chains: Dict[Usage, List[Definition]] = field(default_factory=dict)
+    definitions: dict[str, list[Definition]] = field(default_factory=dict)
+    usages: dict[str, list[Usage]] = field(default_factory=dict)
+    def_use_chains: dict[Definition, list[Usage]] = field(default_factory=dict)
+    use_def_chains: dict[Usage, list[Definition]] = field(default_factory=dict)
 
 
 class DataFlowAnalyzer:
@@ -89,7 +88,7 @@ class DataFlowAnalyzer:
     """
 
     def __init__(self):
-        self.data_flow: Optional[DataFlow] = None
+        self.data_flow: DataFlow | None = None
 
     def analyze(self, file_path: str) -> DataFlow:
         """
@@ -114,7 +113,7 @@ class DataFlowAnalyzer:
         data_flow = DataFlow()
         return data_flow
 
-    def get_reaching_definitions(self, variable: str, line: int) -> Set[Definition]:
+    def get_reaching_definitions(self, variable: str, line: int) -> set[Definition]:
         """
         Get definitions that reach a specific line.
 
@@ -122,7 +121,7 @@ class DataFlowAnalyzer:
         """
         return set()
 
-    def get_live_variables(self, line: int) -> Set[str]:
+    def get_live_variables(self, line: int) -> set[str]:
         """
         Get variables that are live at a specific line.
 
@@ -132,7 +131,7 @@ class DataFlowAnalyzer:
         """
         return set()
 
-    def get_def_use_chains(self) -> Dict[Definition, List[Usage]]:
+    def get_def_use_chains(self) -> dict[Definition, list[Usage]]:
         """
         Get def-use chains (all uses for each definition).
 
@@ -141,7 +140,7 @@ class DataFlowAnalyzer:
             return {}
         return self.data_flow.def_use_chains
 
-    def get_use_def_chains(self) -> Dict[Usage, List[Definition]]:
+    def get_use_def_chains(self) -> dict[Usage, list[Definition]]:
         """
         Get use-def chains (all definitions for each use).
 
@@ -150,7 +149,7 @@ class DataFlowAnalyzer:
             return {}
         return self.data_flow.use_def_chains
 
-    def find_dead_code(self) -> Set[Tuple[int, int]]:
+    def find_dead_code(self) -> set[tuple[int, int]]:
         """
         Find dead code (statements with unused variables).
 
@@ -161,14 +160,14 @@ class DataFlowAnalyzer:
         """
         return set()
 
-    def find_unused_variables(self) -> Set[str]:
+    def find_unused_variables(self) -> set[str]:
         """
         Find variables that are defined but never used.
 
         """
         return set()
 
-    def find_uninitialized_usage(self) -> Set[Tuple[str, int]]:
+    def find_uninitialized_usage(self) -> set[tuple[str, int]]:
         """
         Find usages of variables before initialization.
 
@@ -178,7 +177,7 @@ class DataFlowAnalyzer:
         """
         return set()
 
-    def taint_analysis(self, source: str, sink: str) -> List[List[Definition]]:
+    def taint_analysis(self, source: str, sink: str) -> list[list[Definition]]:
         """
         Perform taint analysis from source to sink.
 
@@ -190,7 +189,7 @@ class DataFlowAnalyzer:
         """
         return []
 
-    def compute_data_flow_facts(self, fact_type: DataFlowFact) -> Dict[int, Set[str]]:
+    def compute_data_flow_facts(self, fact_type: DataFlowFact) -> dict[int, set[str]]:
         """
         Compute specific data flow facts.
 
@@ -204,19 +203,17 @@ class DataFlowAnalyzer:
         """
         return {}
 
-    def _extract_definitions(
-        self, node: ast.FunctionDef
-    ) -> Dict[str, List[Definition]]:
+    def _extract_definitions(self, node: ast.FunctionDef) -> dict[str, list[Definition]]:
         """Extract all variable definitions."""
         # Implementation placeholder
         return defaultdict(list)
 
-    def _extract_usages(self, node: ast.FunctionDef) -> Dict[str, List[Usage]]:
+    def _extract_usages(self, node: ast.FunctionDef) -> dict[str, list[Usage]]:
         """Extract all variable usages."""
         # Implementation placeholder
         return defaultdict(list)
 
-    def _build_chains(self, definitions: Dict, usages: Dict) -> None:
+    def _build_chains(self, definitions: dict, usages: dict) -> None:
         """Build def-use and use-def chains."""
         # Implementation placeholder
         pass

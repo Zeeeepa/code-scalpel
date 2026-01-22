@@ -23,10 +23,11 @@ Example:
 
 import ast
 from collections import defaultdict, deque
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Optional, cast
 
 # [20251225_REFACTOR] Updated import path after security module reorganization
 from code_scalpel.ast_tools.import_resolver import ImportInfo, ImportResolver
@@ -74,7 +75,7 @@ class TaintedParameter:
     module: str
     file: str
     line: int
-    callers: Set[Tuple[str, int]] = field(default_factory=set)
+    callers: set[tuple[str, int]] = field(default_factory=set)
 
 
 @dataclass
@@ -101,7 +102,7 @@ class CrossFileTaintFlow:
     sink_function: str
     sink_line: int
     sink_type: CrossFileSink
-    flow_path: List[Tuple[str, str, int]] = field(default_factory=list)
+    flow_path: list[tuple[str, str, int]] = field(default_factory=list)
     tainted_data: str = ""
 
     def __hash__(self):
@@ -138,7 +139,7 @@ class CrossFileVulnerability:
     description: str
     recommendation: str
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         return {
             "vulnerability_type": self.vulnerability_type,
@@ -152,8 +153,7 @@ class CrossFileVulnerability:
             "recommendation": self.recommendation,
             # [20251214_BUGFIX] Use descriptive variable names to satisfy lint clarity rules
             "flow_path": [
-                {"module": module, "function": func, "line": line}
-                for module, func, line in self.flow.flow_path
+                {"module": module, "function": func, "line": line} for module, func, line in self.flow.flow_path
             ],
         }
 
@@ -177,11 +177,11 @@ class CrossFileTaintResult:
     success: bool = True
     modules_analyzed: int = 0
     functions_analyzed: int = 0
-    tainted_parameters: List[TaintedParameter] = field(default_factory=list)
-    taint_flows: List[CrossFileTaintFlow] = field(default_factory=list)
-    vulnerabilities: List[CrossFileVulnerability] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    tainted_parameters: list[TaintedParameter] = field(default_factory=list)
+    taint_flows: list[CrossFileTaintFlow] = field(default_factory=list)
+    vulnerabilities: list[CrossFileVulnerability] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 # Known taint sources (function calls that return tainted data)
@@ -323,7 +323,7 @@ class CrossFileTaintTracker:
     - Does not handle metaclasses or descriptors
     """
 
-    def __init__(self, project_root: Union[str, Path]):
+    def __init__(self, project_root: str | Path):
         """
         Initialize the cross-file taint tracker.
 
@@ -335,21 +335,21 @@ class CrossFileTaintTracker:
 
         # Analysis state
         self._built = False
-        self._file_cache: Dict[str, str] = {}
-        self._ast_cache: Dict[str, ast.AST] = {}
+        self._file_cache: dict[str, str] = {}
+        self._ast_cache: dict[str, ast.AST] = {}
 
         # Taint tracking data structures
-        self.function_taint_info: Dict[str, Dict[str, FunctionTaintInfo]] = {}
-        self.module_taint_sources: Dict[str, List[TaintSourceInfo]] = {}
-        self.call_graph: Dict[str, Set[CallInfo]] = defaultdict(set)
+        self.function_taint_info: dict[str, dict[str, FunctionTaintInfo]] = {}
+        self.module_taint_sources: dict[str, list[TaintSourceInfo]] = {}
+        self.call_graph: dict[str, set[CallInfo]] = defaultdict(set)
 
         # Cache of function spans per module for call-site attribution.
         # module -> list of (start_line, end_line, function_name)
-        self._module_function_spans: Dict[str, List[Tuple[int, int, str]]] = {}
+        self._module_function_spans: dict[str, list[tuple[int, int, str]]] = {}
 
         # Optional entry-point module filter. When provided, we allow reporting
         # of local-only vulnerabilities for those entry modules.
-        self._entry_modules: Optional[Set[str]] = None
+        self._entry_modules: set[str] | None = None
 
     def build(self) -> bool:
         """
@@ -364,10 +364,10 @@ class CrossFileTaintTracker:
 
     def analyze(
         self,
-        entry_points: Optional[List[str]] = None,
+        entry_points: list[str] | None = None,
         max_depth: int = 5,
-        timeout_seconds: Optional[float] = None,
-        max_modules: Optional[int] = None,
+        timeout_seconds: float | None = None,
+        max_modules: int | None = None,
     ) -> CrossFileTaintResult:
         """
         Perform cross-file taint analysis.
@@ -392,9 +392,7 @@ class CrossFileTaintTracker:
 
         if not self._built:
             if not self.build():
-                return CrossFileTaintResult(
-                    success=False, errors=["Failed to build import graph"]
-                )
+                return CrossFileTaintResult(success=False, errors=["Failed to build import graph"])
 
         result = CrossFileTaintResult()
 
@@ -403,13 +401,11 @@ class CrossFileTaintTracker:
         # entry points.
         self._entry_modules = None
         if entry_points:
-            entry_modules: Set[str] = set()
+            entry_modules: set[str] = set()
             for ep in entry_points:
                 try:
                     ep_path = (self.project_root / ep).resolve()
-                    entry_modules.add(
-                        self.resolver.file_to_module.get(str(ep_path), ep_path.stem)
-                    )
+                    entry_modules.add(self.resolver.file_to_module.get(str(ep_path), ep_path.stem))
                 except Exception:
                     continue
             self._entry_modules = entry_modules or None
@@ -418,9 +414,7 @@ class CrossFileTaintTracker:
             # Get modules to analyze (optionally limited)
             modules_to_analyze = list(self.resolver.module_to_file.items())
             if max_modules and len(modules_to_analyze) > max_modules:
-                result.warnings.append(
-                    f"Limiting analysis to {max_modules} of {len(modules_to_analyze)} modules"
-                )
+                result.warnings.append(f"Limiting analysis to {max_modules} of {len(modules_to_analyze)} modules")
                 modules_to_analyze = modules_to_analyze[:max_modules]
 
             # Phase 1: Analyze each module for local taint sources and sinks
@@ -431,9 +425,7 @@ class CrossFileTaintTracker:
             # [20251215_BUGFIX] v2.0.1 - Phase 1.5: Propagate returns_tainted through import chains
             # This handles multi-hop taint tracking (A->B->C) by iteratively re-analyzing
             # [20251220_PERF] Limit iterations and add timeout check
-            effective_iterations = min(
-                max_depth, 3
-            )  # Cap at 3 iterations for performance
+            effective_iterations = min(max_depth, 3)  # Cap at 3 iterations for performance
             self._propagate_taint_through_imports(
                 result, max_iterations=effective_iterations, timeout_check=check_timeout
             )
@@ -463,9 +455,7 @@ class CrossFileTaintTracker:
             result.success = False
             # Still report partial results
             self._identify_vulnerabilities(result)
-            result.warnings.append(
-                "Analysis incomplete due to timeout - partial results returned"
-            )
+            result.warnings.append("Analysis incomplete due to timeout - partial results returned")
         except Exception as e:
             result.errors.append(f"Analysis failed: {e}")
             result.success = False
@@ -483,9 +473,7 @@ class CrossFileTaintTracker:
             for func_name, func_info in func_infos.items():
                 for var_name, sink_info in func_info.local_sinks.items():
                     # Find the origin of the taint
-                    source_module, source_func, source_line = self._trace_taint_origin(
-                        module, func_name, var_name
-                    )
+                    source_module, source_func, source_line = self._trace_taint_origin(module, func_name, var_name)
 
                     flow = CrossFileTaintFlow(
                         source_module=source_module,
@@ -503,9 +491,7 @@ class CrossFileTaintTracker:
                     )
                     result.taint_flows.append(flow)
 
-    def _trace_taint_origin(
-        self, module: str, func_name: str, var_name: str
-    ) -> Tuple[str, str, int]:
+    def _trace_taint_origin(self, module: str, func_name: str, var_name: str) -> tuple[str, str, int]:
         """
         [20251215_BUGFIX] v2.0.1 - Trace back to find where the taint originated.
 
@@ -524,7 +510,7 @@ class CrossFileTaintTracker:
         self,
         result: CrossFileTaintResult,
         max_iterations: int = 5,
-        timeout_check: Optional[Callable[[], None]] = None,
+        timeout_check: Callable[[], None] | None = None,
     ) -> None:
         """
         [20251215_BUGFIX] v2.0.1 - Multi-pass propagation of returns_tainted through import chains.
@@ -538,20 +524,18 @@ class CrossFileTaintTracker:
         We iterate until no new taints are discovered (fixpoint).
         """
         # [20251220_PERF] Pre-cache function nodes to avoid repeated ast.walk()
-        module_func_nodes: Dict[
-            str, List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]
-        ] = {}
+        module_func_nodes: dict[str, list[ast.FunctionDef | ast.AsyncFunctionDef]] = {}
         for module, file_path in self.resolver.module_to_file.items():
             tree = self._get_file_ast(file_path)
             if tree:
                 func_nodes = [
-                    cast(Union[ast.FunctionDef, ast.AsyncFunctionDef], node)
+                    cast(ast.FunctionDef | ast.AsyncFunctionDef, node)
                     for node in ast.walk(tree)
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
                 ]
                 module_func_nodes[module] = func_nodes
 
-        for iteration in range(max_iterations):
+        for _iteration in range(max_iterations):
             if timeout_check:
                 timeout_check()
 
@@ -568,30 +552,27 @@ class CrossFileTaintTracker:
                         visitor.visit(node)
 
                         # Check if taint status changed
-                        if (
-                            func_info.returns_tainted
-                            or len(func_info.tainted_variables) > old_tainted_vars
-                        ):
+                        if func_info.returns_tainted or len(func_info.tainted_variables) > old_tainted_vars:
                             changed = True
 
             # Fixpoint reached - no new taints discovered
             if not changed:
                 break
 
-    def _get_file_source(self, file_path: str) -> Optional[str]:
+    def _get_file_source(self, file_path: str) -> str | None:
         """Get source code for a file with caching."""
         if file_path in self._file_cache:
             return self._file_cache[file_path]
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 source = f.read()
             self._file_cache[file_path] = source
             return source
         except Exception:
             return None
 
-    def _get_file_ast(self, file_path: str) -> Optional[ast.AST]:
+    def _get_file_ast(self, file_path: str) -> ast.AST | None:
         """Get parsed AST for a file with caching."""
         if file_path in self._ast_cache:
             return self._ast_cache[file_path]
@@ -607,9 +588,7 @@ class CrossFileTaintTracker:
         except SyntaxError:
             return None
 
-    def _analyze_module_taint(
-        self, module: str, file_path: str, result: CrossFileTaintResult
-    ) -> None:
+    def _analyze_module_taint(self, module: str, file_path: str, result: CrossFileTaintResult) -> None:
         """
         Analyze a single module for taint sources and sinks.
         """
@@ -630,7 +609,7 @@ class CrossFileTaintTracker:
 
     def _analyze_function_taint(
         self,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
         module: str,
         file_path: str,
     ) -> "FunctionTaintInfo":
@@ -681,7 +660,7 @@ class CrossFileTaintTracker:
         self,
         node: ast.Call,
         caller_module: str,
-        imports: List[ImportInfo],
+        imports: list[ImportInfo],
     ) -> Optional["CallInfo"]:
         """
         Analyze a function call to determine cross-module relationships.
@@ -693,9 +672,7 @@ class CrossFileTaintTracker:
 
         # Check if this is an imported function
         for imp in imports:
-            if imp.effective_name == callee_name or callee_name.startswith(
-                f"{imp.effective_name}."
-            ):
+            if imp.effective_name == callee_name or callee_name.startswith(f"{imp.effective_name}."):
                 # Found the import
                 target_module = imp.module
                 target_function = imp.name if imp.name != "*" else callee_name
@@ -710,7 +687,7 @@ class CrossFileTaintTracker:
 
         return None
 
-    def _get_callee_name(self, node: ast.Call) -> Optional[str]:
+    def _get_callee_name(self, node: ast.Call) -> str | None:
         """Extract the callee name from a Call node."""
         if isinstance(node.func, ast.Name):
             return node.func.id
@@ -725,7 +702,7 @@ class CrossFileTaintTracker:
             return ".".join(reversed(parts))
         return None
 
-    def _extract_argument_names(self, node: ast.Call) -> List[str]:
+    def _extract_argument_names(self, node: ast.Call) -> list[str]:
         """Extract argument names/values from a call."""
         args = []
         for arg in node.args:
@@ -757,17 +734,12 @@ class CrossFileTaintTracker:
                 if func_info.parameters_reaching_sinks:
                     # This function has parameters that reach sinks
                     # Check all callers
-                    for caller_module, calls in self.call_graph.items():
+                    for _caller_module, calls in self.call_graph.items():
                         for call in calls:
-                            if (
-                                call.target_module == module
-                                and call.target_function == func_name
-                            ):
+                            if call.target_module == module and call.target_function == func_name:
                                 # Found a call to this function
                                 # Check if caller passes tainted data
-                                self._check_caller_taint(
-                                    call, func_info, result, max_depth
-                                )
+                                self._check_caller_taint(call, func_info, result, max_depth)
 
         # Also record local taint flows where a tainted local variable (or parameter)
         # reaches a sink within the same function. These can be surfaced as
@@ -775,10 +747,7 @@ class CrossFileTaintTracker:
         for module, func_infos in self.function_taint_info.items():
             for func_name, func_info in func_infos.items():
                 for var_name, sink_info in func_info.local_sinks.items():
-                    if (
-                        var_name in func_info.tainted_variables
-                        or var_name in func_info.parameters
-                    ):
+                    if var_name in func_info.tainted_variables or var_name in func_info.parameters:
                         result.taint_flows.append(
                             CrossFileTaintFlow(
                                 source_module=module,
@@ -810,9 +779,7 @@ class CrossFileTaintTracker:
         queue = deque()
         visited = set()
 
-        queue.append(
-            (module, source.variable, 0, [(module, source.function, source.line)])
-        )
+        queue.append((module, source.variable, 0, [(module, source.function, source.line)]))
 
         while queue:
             current_module, current_var, depth, path = queue.popleft()
@@ -859,13 +826,9 @@ class CrossFileTaintTracker:
         # Attribute the call site to its enclosing function where possible.
         # Without this, we may incorrectly "borrow" tainted variables from other
         # functions in the same module (causing duplicates and false positives).
-        caller_func_name = self._get_enclosing_function_name(
-            call.caller_module, call.caller_line
-        )
+        caller_func_name = self._get_enclosing_function_name(call.caller_module, call.caller_line)
         if caller_func_name and caller_func_name in caller_funcs:
-            caller_funcs_to_check: Dict[str, FunctionTaintInfo] = {
-                caller_func_name: caller_funcs[caller_func_name]
-            }
+            caller_funcs_to_check: dict[str, FunctionTaintInfo] = {caller_func_name: caller_funcs[caller_func_name]}
         else:
             # Fallback: legacy behavior when we cannot determine the enclosing function.
             caller_funcs_to_check = caller_funcs
@@ -890,9 +853,7 @@ class CrossFileTaintTracker:
                                 file=func_info.file,
                                 line=func_info.line,
                             )
-                            taint_param.callers.add(
-                                (call.caller_module, call.caller_line)
-                            )
+                            taint_param.callers.add((call.caller_module, call.caller_line))
                             result.tainted_parameters.append(taint_param)
 
                             flow = CrossFileTaintFlow(
@@ -911,11 +872,11 @@ class CrossFileTaintTracker:
                             )
                             result.taint_flows.append(flow)
 
-    def _get_enclosing_function_name(self, module: str, line: int) -> Optional[str]:
+    def _get_enclosing_function_name(self, module: str, line: int) -> str | None:
         """Best-effort: return the function name in `module` that contains `line`."""
         if module not in self._module_function_spans:
             file_path = self.resolver.module_to_file.get(module)
-            spans: List[Tuple[int, int, str]] = []
+            spans: list[tuple[int, int, str]] = []
 
             if file_path:
                 fp = str(file_path)
@@ -932,8 +893,8 @@ class CrossFileTaintTracker:
 
             self._module_function_spans[module] = spans
 
-        best_name: Optional[str] = None
-        best_span: Optional[int] = None
+        best_name: str | None = None
+        best_span: int | None = None
 
         for start, end, name in self._module_function_spans.get(module, []):
             if start <= line <= end:
@@ -956,8 +917,7 @@ class CrossFileTaintTracker:
             # within one of those entry modules.
             if flow.source_module == flow.sink_module:
                 if not self._entry_modules or (
-                    flow.source_module not in self._entry_modules
-                    and flow.sink_module not in self._entry_modules
+                    flow.source_module not in self._entry_modules and flow.sink_module not in self._entry_modules
                 ):
                     continue
 
@@ -975,9 +935,7 @@ class CrossFileTaintTracker:
             seen.add(flow_key)
 
             # Get CWE info
-            cwe_id, vuln_name = SINK_TO_CWE.get(
-                flow.sink_type, ("CWE-Unknown", "Unknown Vulnerability")
-            )
+            cwe_id, vuln_name = SINK_TO_CWE.get(flow.sink_type, ("CWE-Unknown", "Unknown Vulnerability"))
 
             # Determine severity
             severity = self._determine_severity(flow)
@@ -1028,9 +986,7 @@ class CrossFileTaintTracker:
             CrossFileSink.NETWORK_REQUEST: "Validate and sanitize URLs, use allowlists for domains",
             CrossFileSink.TEMPLATE_RENDER: "Use auto-escaping templates, validate template names",
         }
-        return recommendations.get(
-            sink_type, "Review and sanitize user input before use"
-        )
+        return recommendations.get(sink_type, "Review and sanitize user input before use")
 
     def get_taint_graph_mermaid(self) -> str:
         """
@@ -1055,9 +1011,7 @@ class CrossFileTaintTracker:
                 continue
             for call in calls:
                 if call.target_module in node_ids:
-                    lines.append(
-                        f"    {node_ids[caller]} -->|{call.target_function}| {node_ids[call.target_module]}"
-                    )
+                    lines.append(f"    {node_ids[caller]} -->|{call.target_function}| {node_ids[call.target_module]}")
 
         return "\n".join(lines)
 
@@ -1070,13 +1024,13 @@ class FunctionTaintInfo:
     module: str
     file: str
     line: int
-    parameters: List[str] = field(default_factory=list)
-    tainted_variables: Set[str] = field(default_factory=set)
+    parameters: list[str] = field(default_factory=list)
+    tainted_variables: set[str] = field(default_factory=set)
     # Track how taint propagates through assignments (target_var -> source vars).
     # Used to attribute sink reachability back to function parameters.
-    taint_var_sources: Dict[str, Set[str]] = field(default_factory=dict)
-    parameters_reaching_sinks: Dict[str, "SinkInfo"] = field(default_factory=dict)
-    local_sinks: Dict[str, "SinkInfo"] = field(default_factory=dict)
+    taint_var_sources: dict[str, set[str]] = field(default_factory=dict)
+    parameters_reaching_sinks: dict[str, "SinkInfo"] = field(default_factory=dict)
+    local_sinks: dict[str, "SinkInfo"] = field(default_factory=dict)
     returns_tainted: bool = False
 
 
@@ -1107,7 +1061,7 @@ class CallInfo:
     caller_line: int
     target_module: str
     target_function: str
-    arguments: Tuple[str, ...] = field(default_factory=tuple)
+    arguments: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
         # Convert list to tuple for hashability
@@ -1133,7 +1087,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
     def __init__(self, func_info: FunctionTaintInfo, tracker: CrossFileTaintTracker):
         self.func_info = func_info
         self.tracker = tracker
-        self.current_var: Optional[str] = None
+        self.current_var: str | None = None
 
     def visit_Assign(self, node: ast.Assign) -> None:
         """Track variable assignments."""
@@ -1149,16 +1103,12 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                 rhs_is_sanitizer = True
 
         # Helper: collect all variable names referenced by an expression.
-        referenced_names = {
-            n.id for n in ast.walk(node.value) if isinstance(n, ast.Name)
-        }
+        referenced_names = {n.id for n in ast.walk(node.value) if isinstance(n, ast.Name)}
 
         # Treat assignments as tainted if the RHS is a known taint source OR
         # the RHS references tainted variables / function parameters.
         rhs_depends_on_taint = (not rhs_is_sanitizer) and any(
-            name in self.func_info.parameters
-            or name in self.func_info.tainted_variables
-            for name in referenced_names
+            name in self.func_info.parameters or name in self.func_info.tainted_variables for name in referenced_names
         )
 
         if (rhs_tainted and not rhs_is_sanitizer) or rhs_depends_on_taint:
@@ -1169,8 +1119,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         self.func_info.taint_var_sources[target.id] = {
                             n
                             for n in referenced_names
-                            if n in self.func_info.parameters
-                            or n in self.func_info.tainted_variables
+                            if n in self.func_info.parameters or n in self.func_info.tainted_variables
                         }
 
         # Check if assigning from a parameter
@@ -1193,10 +1142,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                             n.id
                             for n in ast.walk(node.value)
                             if isinstance(n, ast.Name)
-                            and (
-                                n.id in self.func_info.parameters
-                                or n.id in self.func_info.tainted_variables
-                            )
+                            and (n.id in self.func_info.parameters or n.id in self.func_info.tainted_variables)
                         }
                         if call_sources:
                             self.func_info.taint_var_sources[target.id] = call_sources
@@ -1270,12 +1216,10 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         # sink reachability back to those parameters.
                         for param in self.func_info.parameters:
                             if self._var_depends_on(param, arg_name):
-                                self.func_info.parameters_reaching_sinks[param] = (
-                                    SinkInfo(
-                                        sink_type=sink_type,
-                                        line=node.lineno,
-                                        function_call=callee or sink_lookup,
-                                    )
+                                self.func_info.parameters_reaching_sinks[param] = SinkInfo(
+                                    sink_type=sink_type,
+                                    line=node.lineno,
+                                    function_call=callee or sink_lookup,
                                 )
 
         # Propagate sink reachability through imported function calls.
@@ -1285,17 +1229,13 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             imported = self._resolve_imported_function(callee)
             if imported is not None and self.tracker is not None:
                 target_module, target_func = imported
-                target_info = self.tracker.function_taint_info.get(
-                    target_module, {}
-                ).get(target_func)
+                target_info = self.tracker.function_taint_info.get(target_module, {}).get(target_func)
 
                 # Determine a representative sink type from the callee (if known).
                 sink_info = None
                 if target_info:
                     if target_info.parameters_reaching_sinks:
-                        sink_info = next(
-                            iter(target_info.parameters_reaching_sinks.values())
-                        )
+                        sink_info = next(iter(target_info.parameters_reaching_sinks.values()))
                     elif target_info.local_sinks:
                         sink_info = next(iter(target_info.local_sinks.values()))
 
@@ -1307,12 +1247,10 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                         arg_names = self._extract_tainted_vars_from_arg(arg)
                         for arg_name in arg_names:
                             if arg_name in self.func_info.parameters:
-                                self.func_info.parameters_reaching_sinks[arg_name] = (
-                                    SinkInfo(
-                                        sink_type=sink_info.sink_type,
-                                        line=node.lineno,
-                                        function_call=f"{callee} -> {sink_info.function_call}",
-                                    )
+                                self.func_info.parameters_reaching_sinks[arg_name] = SinkInfo(
+                                    sink_type=sink_info.sink_type,
+                                    line=node.lineno,
+                                    function_call=f"{callee} -> {sink_info.function_call}",
                                 )
                             if arg_name in self.func_info.tainted_variables:
                                 self.func_info.local_sinks[arg_name] = SinkInfo(
@@ -1323,9 +1261,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                                 # Attribute back to caller params if applicable.
                                 for param in self.func_info.parameters:
                                     if self._var_depends_on(param, arg_name):
-                                        self.func_info.parameters_reaching_sinks[
-                                            param
-                                        ] = SinkInfo(
+                                        self.func_info.parameters_reaching_sinks[param] = SinkInfo(
                                             sink_type=sink_info.sink_type,
                                             line=node.lineno,
                                             function_call=f"{callee} -> {sink_info.function_call}",
@@ -1343,7 +1279,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         if var_name == param_name:
             return True
 
-        seen: Set[str] = set()
+        seen: set[str] = set()
 
         def walk(v: str) -> bool:
             if v in seen:
@@ -1361,7 +1297,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
 
         return walk(var_name)
 
-    def _resolve_imported_function(self, callee: str) -> Optional[Tuple[str, str]]:
+    def _resolve_imported_function(self, callee: str) -> tuple[str, str] | None:
         """Resolve an imported function call name to (module, function)."""
         if not self.tracker:
             return None
@@ -1370,9 +1306,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         imports = self.tracker.resolver.imports.get(module, [])
 
         for imp in imports:
-            if imp.effective_name == callee or callee.startswith(
-                f"{imp.effective_name}."
-            ):
+            if imp.effective_name == callee or callee.startswith(f"{imp.effective_name}."):
                 target_module = imp.module
                 target_function = imp.name if imp.name != "*" else callee
                 return (target_module, target_function)
@@ -1402,10 +1336,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         for i, arg in enumerate(node.args):
             if isinstance(arg, ast.Name):
                 # Check if this is a tainted variable
-                if (
-                    arg.id in self.func_info.tainted_variables
-                    or arg.id in self.func_info.parameters
-                ):
+                if arg.id in self.func_info.tainted_variables or arg.id in self.func_info.parameters:
                     tainted_args.append((i, arg.id))
                 # Check if this is a function name with dangerous sinks
                 func_info = self._get_function_info_by_name(arg.id)
@@ -1417,7 +1348,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             for _, tainted_var in tainted_args:
                 for _, callback_name, callback_info in callback_funcs:
                     for (
-                        param,
+                        _param,
                         sink_info,
                     ) in callback_info.parameters_reaching_sinks.items():
                         # The tainted data flows through the callback to the sink
@@ -1427,9 +1358,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
                             function_call=f"{callback_name} (callback)",
                         )
 
-    def _get_function_info_by_name(
-        self, func_name: str
-    ) -> Optional["FunctionTaintInfo"]:
+    def _get_function_info_by_name(self, func_name: str) -> Optional["FunctionTaintInfo"]:
         """
         [20251215_BUGFIX] v2.0.1 - Look up function taint info by name.
 
@@ -1452,7 +1381,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
 
         return None
 
-    def _extract_tainted_vars_from_arg(self, arg: ast.expr) -> List[str]:
+    def _extract_tainted_vars_from_arg(self, arg: ast.expr) -> list[str]:
         """
         [20251215_BUGFIX] v2.0.1 - Extract variable names from an argument expression.
 
@@ -1519,10 +1448,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             # Get the object the method is called on
             value = call_node.func.value
             if isinstance(value, ast.Name):
-                return (
-                    value.id in self.func_info.tainted_variables
-                    or value.id in self.func_info.parameters
-                )
+                return value.id in self.func_info.tainted_variables or value.id in self.func_info.parameters
         return False
 
     def _is_taint_source(self, node: ast.expr) -> bool:
@@ -1530,7 +1456,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
         callee = self._get_callee_name_from_expr(node)
         return callee in TAINT_SOURCES
 
-    def _get_callee_name(self, node: ast.Call) -> Optional[str]:
+    def _get_callee_name(self, node: ast.Call) -> str | None:
         """Get callee name from Call node."""
         if isinstance(node.func, ast.Name):
             return node.func.id
@@ -1545,7 +1471,7 @@ class FunctionTaintVisitor(ast.NodeVisitor):
             return ".".join(reversed(parts))
         return None
 
-    def _get_callee_name_from_expr(self, node: ast.expr) -> Optional[str]:
+    def _get_callee_name_from_expr(self, node: ast.expr) -> str | None:
         """Get callee name from expression (for detecting taint sources)."""
         if isinstance(node, ast.Call):
             return self._get_callee_name(node)

@@ -25,7 +25,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 # [20251216_FEATURE] Node types for universal identification
@@ -66,9 +65,9 @@ class UniversalNodeID:
     module: str
     node_type: NodeType
     name: str
-    method: Optional[str] = None
-    line: Optional[int] = None
-    file: Optional[str] = None
+    method: str | None = None
+    line: int | None = None
+    file: str | None = None
 
     def __str__(self) -> str:
         """Format as universal ID string."""
@@ -145,10 +144,7 @@ def parse_node_id(id_string: str) -> UniversalNodeID:
     # Split by :: for main components
     parts = id_string.split("::")
     if len(parts) != 4:
-        raise ValueError(
-            f"Invalid node ID format: {id_string}. "
-            f"Expected: language::module::type::name[:method]"
-        )
+        raise ValueError(f"Invalid node ID format: {id_string}. " f"Expected: language::module::type::name[:method]")
 
     language, module, type_str, name_part = parts
 
@@ -179,9 +175,9 @@ def create_node_id(
     module: str,
     node_type: str | NodeType,
     name: str,
-    method: Optional[str] = None,
-    line: Optional[int] = None,
-    file: Optional[str] = None,
+    method: str | None = None,
+    line: int | None = None,
+    file: str | None = None,
 ) -> UniversalNodeID:
     """
     Create a universal node ID.

@@ -3,9 +3,9 @@ from __future__ import annotations
 import ast
 import logging
 import tokenize
+from collections.abc import Callable
 from functools import lru_cache
 from io import StringIO
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,7 @@ class ASTBuilder:
         self.validation_hooks: list[Callable[[ast.AST], None]] = []
         self.ast_cache: dict[str, ast.AST] = {}
 
-    def build_ast(
-        self, code: str, preprocess: bool = True, validate: bool = True
-    ) -> Optional[ast.AST]:
+    def build_ast(self, code: str, preprocess: bool = True, validate: bool = True) -> ast.AST | None:
         """
         Build an AST from Python code with optional preprocessing and validation.
 
@@ -56,9 +54,7 @@ class ASTBuilder:
             return None
 
     @lru_cache(maxsize=100)
-    def build_ast_from_file(
-        self, filepath: str, preprocess: bool = True, validate: bool = True
-    ) -> Optional[ast.AST]:
+    def build_ast_from_file(self, filepath: str, preprocess: bool = True, validate: bool = True) -> ast.AST | None:
         """
         Build an AST from a Python source file with caching.
 

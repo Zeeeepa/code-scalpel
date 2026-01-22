@@ -13,8 +13,9 @@ This module allows organizations to define custom security rules:
 import ast
 import logging
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

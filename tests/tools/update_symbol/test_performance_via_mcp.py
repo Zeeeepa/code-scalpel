@@ -20,9 +20,7 @@ from pathlib import Path
 from statistics import median
 
 # Add src directory to path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../src")))
 
 from code_scalpel.surgery.surgical_patcher import SurgicalPatcher
 from tests.tools.update_symbol.fixtures.performance_fixtures import (
@@ -62,7 +60,7 @@ def test_small_function_perf():
         test_file.write_text(generate_small_function("process_data", "branching"))
 
         durations = []
-        for i in range(20):
+        for _i in range(20):
             test_file.write_text(generate_small_function("process_data", "branching"))
 
             patcher = SurgicalPatcher.from_file(str(test_file))
@@ -81,12 +79,8 @@ def test_small_function_perf():
         p95 = sorted_durations[int(len(sorted_durations) * 0.95)]
         p99 = sorted_durations[int(len(sorted_durations) * 0.99)]
 
-        assert (
-            med < 50
-        ), f"Small function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
-        print(
-            f"✅ Small function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms"
-        )
+        assert med < 50, f"Small function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
+        print(f"✅ Small function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms")
     finally:
         cleanup_test_dir(test_dir)
 
@@ -99,7 +93,7 @@ def test_medium_function_perf():
         test_file.write_text(generate_medium_function("process_batch", 150))
 
         durations = []
-        for i in range(20):
+        for _i in range(20):
             # Create fresh file each iteration to avoid corruption
             test_file.write_text(generate_medium_function("process_batch", 150))
 
@@ -126,12 +120,8 @@ def test_medium_function_perf():
         p95 = sorted_durations[int(len(sorted_durations) * 0.95)]
         p99 = sorted_durations[int(len(sorted_durations) * 0.99)]
 
-        assert (
-            med < 100
-        ), f"Medium function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
-        print(
-            f"✅ Medium function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms"
-        )
+        assert med < 100, f"Medium function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
+        print(f"✅ Medium function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms")
     finally:
         cleanup_test_dir(test_dir)
 
@@ -144,7 +134,7 @@ def test_large_function_perf():
         test_file.write_text(generate_large_function("process_large", 350))
 
         durations = []
-        for i in range(10):
+        for _i in range(10):
             test_file.write_text(generate_large_function("process_large", 350))
 
             patcher = SurgicalPatcher.from_file(str(test_file))
@@ -163,12 +153,8 @@ def test_large_function_perf():
         p95 = sorted_durations[int(len(sorted_durations) * 0.95)]
         p99 = sorted_durations[int(len(sorted_durations) * 0.99)]
 
-        assert (
-            med < 200
-        ), f"Large function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
-        print(
-            f"✅ Large function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms"
-        )
+        assert med < 200, f"Large function too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
+        print(f"✅ Large function: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms")
     finally:
         cleanup_test_dir(test_dir)
 
@@ -181,7 +167,7 @@ def test_very_large_class_perf():
         test_file.write_text(generate_very_large_class("DataProcessor", 800))
 
         durations = []
-        for i in range(5):
+        for _i in range(5):
             test_file.write_text(generate_very_large_class("DataProcessor", 800))
 
             patcher = SurgicalPatcher.from_file(str(test_file))
@@ -200,12 +186,8 @@ def test_very_large_class_perf():
         p95 = sorted_durations[int(len(sorted_durations) * 0.95)]
         p99 = sorted_durations[int(len(sorted_durations) * 0.99)]
 
-        assert (
-            med < 1000
-        ), f"Very large class too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
-        print(
-            f"✅ Very large class: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms"
-        )
+        assert med < 1000, f"Very large class too slow: {med:.2f}ms (P95={p95:.2f}, P99={p99:.2f})"
+        print(f"✅ Very large class: median={med:.2f}ms, P95={p95:.2f}ms, P99={p99:.2f}ms")
     finally:
         cleanup_test_dir(test_dir)
 
@@ -225,7 +207,7 @@ def test_syntax_error_perf():
         bad_code = "def broken_function(x):\n  return x +  # Missing operand"
 
         durations = []
-        for i in range(10):
+        for _i in range(10):
             patcher = SurgicalPatcher.from_file(str(test_file))
             start = time.perf_counter()
             result = patcher.update_function("test_func", bad_code)
@@ -243,7 +225,7 @@ def test_syntax_error_perf():
 def test_file_not_found_perf():
     """File not found detection: target <10ms median."""
     durations = []
-    for i in range(10):
+    for _i in range(10):
         start = time.perf_counter()
         try:
             # [20260117_TEST] Trigger FileNotFoundError without assigning to a variable
@@ -286,9 +268,7 @@ def test_success_rate_normal():
 
         rate = successes / (successes + failures) * 100
         assert rate >= 99.0, f"Success rate too low: {rate:.1f}% (failures: {failures})"
-        print(
-            f"✅ Normal operations success rate: {rate:.1f}% ({successes}/{successes + failures})"
-        )
+        print(f"✅ Normal operations success rate: {rate:.1f}% ({successes}/{successes + failures})")
     finally:
         cleanup_test_dir(test_dir)
 
@@ -318,14 +298,8 @@ def test_success_rate_edge_cases():
             else:
                 failures += 1
 
-        rate = (
-            successes / (successes + failures) * 100
-            if (successes + failures) > 0
-            else 0
-        )
+        rate = successes / (successes + failures) * 100 if (successes + failures) > 0 else 0
         assert rate >= 95.0, f"Edge case success rate too low: {rate:.1f}%"
-        print(
-            f"✅ Edge cases success rate: {rate:.1f}% ({successes}/{successes + failures})"
-        )
+        print(f"✅ Edge cases success rate: {rate:.1f}% ({successes}/{successes + failures})")
     finally:
         cleanup_test_dir(test_dir)

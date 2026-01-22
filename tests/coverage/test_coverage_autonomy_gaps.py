@@ -62,9 +62,7 @@ SyntaxError: invalid syntax"""
         """[20251217_TEST] Cover JavaScript TypeError path."""
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
-        error_output = (
-            """TypeError: Cannot read property 'foo' of undefined at main.js:10:5"""
-        )
+        error_output = """TypeError: Cannot read property 'foo' of undefined at main.js:10:5"""
         source_code = """obj.foo();"""
 
         analysis = engine.analyze_error(error_output, "javascript", source_code)
@@ -85,9 +83,7 @@ SyntaxError: invalid syntax"""
         """[20251217_TEST] Cover TypeScript 'Cannot find' import error path."""
         engine = ErrorToDiffEngine(project_root=SAFE_TMP)
 
-        error_output = (
-            """file.ts(5,10): error TS2307: Cannot find module 'missing-module'"""
-        )
+        error_output = """file.ts(5,10): error TS2307: Cannot find module 'missing-module'"""
         source_code = """import { foo } from 'missing-module';"""
 
         analysis = engine.analyze_error(error_output, "typescript", source_code)
@@ -194,11 +190,7 @@ print("hello")"""
         analysis = engine.analyze_error(error_output, "python", source_code)
         assert analysis.error_type == ErrorType.IMPORT_ERROR
         # Should suggest import fix
-        import_fixes = [
-            f
-            for f in analysis.fixes
-            if "import" in f.diff.lower() or "import" in f.explanation.lower()
-        ]
+        import_fixes = [f for f in analysis.fixes if "import" in f.diff.lower() or "import" in f.explanation.lower()]
         assert len(import_fixes) > 0
 
     def test_assertion_fix_line_match(self):
@@ -214,11 +206,7 @@ AssertionError: assert 100 == 99"""
 
         # Should suggest updating 99 to 100
         assert analysis is not None
-        update_fixes = [
-            f
-            for f in analysis.fixes
-            if "99" in str(f.diff) and "100" in str(f.explanation)
-        ]
+        update_fixes = [f for f in analysis.fixes if "99" in str(f.diff) and "100" in str(f.explanation)]
         assert len(update_fixes) > 0
 
     def test_non_python_language_ast_skip(self):
@@ -261,9 +249,7 @@ class TestCrewAICoverageGaps:
         tool = ScalpelErrorToDiffTool()
 
         # Error with explicit "line N" in message
-        result = tool._run(
-            code="def foo():\n    pass\n", error="Error on line 2: undefined variable"
-        )
+        result = tool._run(code="def foo():\n    pass\n", error="Error on line 2: undefined variable")
 
         assert "line" in result
 
@@ -277,21 +263,15 @@ class TestCrewAICoverageGaps:
         tool = ScalpelErrorToDiffTool()
 
         # SyntaxError path
-        result = tool._run(
-            code="def foo(\n    pass", error="SyntaxError: invalid syntax at line 1"
-        )
+        result = tool._run(code="def foo(\n    pass", error="SyntaxError: invalid syntax at line 1")
         assert "syntax" in result.lower()
 
         # NameError path
-        result = tool._run(
-            code="print(undefined)", error="NameError: name 'undefined' is not defined"
-        )
+        result = tool._run(code="print(undefined)", error="NameError: name 'undefined' is not defined")
         assert "name" in result.lower()
 
         # TypeError path
-        result = tool._run(
-            code="x = 1 + 'str'", error="TypeError: unsupported operand type"
-        )
+        result = tool._run(code="x = 1 + 'str'", error="TypeError: unsupported operand type")
         assert "type" in result.lower()
 
     def test_sandbox_tool_execution(self):
@@ -420,9 +400,7 @@ class TestSandboxCoverageGaps:
     """Tests targeting uncovered lines in sandbox.py."""
 
     @pytest.mark.skipif(
-        not hasattr(
-            sys.modules.get("code_scalpel.autonomy.sandbox", None), "SandboxExecutor"
-        ),
+        not hasattr(sys.modules.get("code_scalpel.autonomy.sandbox", None), "SandboxExecutor"),
         reason="SandboxExecutor not available",
     )
     def test_sandbox_executor_docker_mode(self):
@@ -460,9 +438,7 @@ class TestSandboxCoverageGaps:
                 assert result is not None
 
     @pytest.mark.skipif(
-        not hasattr(
-            sys.modules.get("code_scalpel.autonomy.sandbox", None), "SandboxExecutor"
-        ),
+        not hasattr(sys.modules.get("code_scalpel.autonomy.sandbox", None), "SandboxExecutor"),
         reason="SandboxExecutor not available",
     )
     def test_sandbox_executor_docker_failure(self):
@@ -498,11 +474,7 @@ class TestSandboxCoverageGaps:
 
                 assert result.success is False
             # Check for Docker/container error indicators
-            assert (
-                "Command" in result.stderr
-                or "Docker" in result.stderr
-                or "returned non-zero" in result.stderr
-            )
+            assert "Command" in result.stderr or "Docker" in result.stderr or "returned non-zero" in result.stderr
 
         changes = [
             FileChange(
@@ -578,9 +550,7 @@ class TestStubsCoverageGaps:
 
         executor = SandboxExecutor()
 
-        changes = [
-            FileChange(relative_path="test.py", operation="create", new_content="x=1")
-        ]
+        changes = [FileChange(relative_path="test.py", operation="create", new_content="x=1")]
 
         # Test execute_with_changes
         result = executor.execute_with_changes(

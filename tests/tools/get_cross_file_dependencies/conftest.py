@@ -53,14 +53,10 @@ def community_server():
         def __init__(self):
             self._tier = "community"
 
-        async def get_cross_file_dependencies(
-            self, target_file, target_symbol, **kwargs
-        ):
+        async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
             """Symbol-level API with Community tier limits enforced."""
             _cleanup_tier_state()
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="community"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="community"):
                 result = await get_cross_file_dependencies(
                     target_file=target_file, target_symbol=target_symbol, **kwargs
                 )
@@ -84,9 +80,7 @@ def pro_server():
         def __init__(self):
             self._tier = "pro"
 
-        async def get_cross_file_dependencies(
-            self, target_file, target_symbol, **kwargs
-        ):
+        async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
             """Symbol-level API with Pro tier features and limits enforced."""
             _cleanup_tier_state()
             with patch("code_scalpel.mcp.server._get_current_tier", return_value="pro"):
@@ -113,14 +107,10 @@ def enterprise_server():
         def __init__(self):
             self._tier = "enterprise"
 
-        async def get_cross_file_dependencies(
-            self, target_file, target_symbol, **kwargs
-        ):
+        async def get_cross_file_dependencies(self, target_file, target_symbol, **kwargs):
             """Symbol-level API with Enterprise tier features (unlimited)."""
             _cleanup_tier_state()
-            with patch(
-                "code_scalpel.mcp.server._get_current_tier", return_value="enterprise"
-            ):
+            with patch("code_scalpel.mcp.server._get_current_tier", return_value="enterprise"):
                 result = await get_cross_file_dependencies(
                     target_file=target_file, target_symbol=target_symbol, **kwargs
                 )
@@ -205,9 +195,7 @@ def wildcard_import_project(tmp_path):
     )
 
     main = tmp_path / "main.py"
-    main.write_text(
-        "from utils import *\n\ndef use_all(): return helper1() + helper2()"
-    )
+    main.write_text("from utils import *\n\ndef use_all(): return helper1() + helper2()")
 
     return {
         "root": str(tmp_path),
@@ -255,9 +243,7 @@ def reexport_project(tmp_path):
     )
 
     main = tmp_path / "main.py"
-    main.write_text(
-        "from mypackage import core_func, util_func\n\ndef use(): return core_func()"
-    )
+    main.write_text("from mypackage import core_func, util_func\n\ndef use(): return core_func()")
 
     return {
         "root": str(tmp_path),
@@ -284,21 +270,15 @@ def validate_tier_limits(result, tier, max_depth=None):
 
     # Check transitive depth based on tier
     if tier == "community":
-        assert (
-            result.transitive_depth <= 1
-        ), f"Community tier exceeded max_depth=1: got {result.transitive_depth}"
+        assert result.transitive_depth <= 1, f"Community tier exceeded max_depth=1: got {result.transitive_depth}"
     elif tier == "pro":
-        assert (
-            result.transitive_depth <= 5
-        ), f"Pro tier exceeded max_depth=5: got {result.transitive_depth}"
+        assert result.transitive_depth <= 5, f"Pro tier exceeded max_depth=5: got {result.transitive_depth}"
     elif tier == "enterprise":
         # Enterprise has unlimited depth
         pass
 
     if max_depth is not None:
-        assert (
-            result.transitive_depth <= max_depth
-        ), f"Expected max_depth={max_depth}, got {result.transitive_depth}"
+        assert result.transitive_depth <= max_depth, f"Expected max_depth={max_depth}, got {result.transitive_depth}"
 
 
 def get_max_dependency_depth(result):

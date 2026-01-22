@@ -17,7 +17,7 @@ diktat provides:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class DiktatSeverity(Enum):
@@ -46,10 +46,10 @@ class DiktatViolation:
     rule_id: str
     rule_set: str
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    severity: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    severity: str | None = None
     fix_available: bool = False
 
 
@@ -57,7 +57,7 @@ class DiktatViolation:
 class DiktatConfig:
     """diktat configuration settings."""
 
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     rules_enabled: list[str] = field(default_factory=list)
     rules_disabled: list[str] = field(default_factory=list)
     warnings_as_errors: bool = False
@@ -69,7 +69,7 @@ class DiktatParser:
     def __init__(self):
         """Initialize diktat parser."""
         self.violations: list[DiktatViolation] = []
-        self.config: Optional[DiktatConfig] = None
+        self.config: DiktatConfig | None = None
 
     def parse_json_report(self, json_data: str) -> list[DiktatViolation]:
         """
@@ -93,9 +93,7 @@ class DiktatParser:
         """
         raise NotImplementedError("Phase 2: diktat config parsing")
 
-    def execute_diktat(
-        self, project_path: Path, format_code: bool = False
-    ) -> dict[str, Any]:
+    def execute_diktat(self, project_path: Path, format_code: bool = False) -> dict[str, Any]:
         """
 
         Args:

@@ -121,10 +121,7 @@ def divide(a, b):
 
         assert result.success is True
         # Should include error case
-        assert (
-            "ValueError" in result.pytest_code
-            or "ZeroDivisionError" in result.pytest_code
-        )
+        assert "ValueError" in result.pytest_code or "ZeroDivisionError" in result.pytest_code
 
     def test_loop_function_handling(self):
         """Should handle functions with loops."""
@@ -293,9 +290,7 @@ def subtract(a, b):
     return a - b
 """
         # Test first function
-        result = _generate_tests_sync(
-            code=code, function_name="add", framework="pytest"
-        )
+        result = _generate_tests_sync(code=code, function_name="add", framework="pytest")
 
         assert result.success is True
         assert "add" in result.pytest_code

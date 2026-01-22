@@ -3,8 +3,9 @@ from __future__ import annotations
 import ast
 import tokenize
 from collections import defaultdict
+from collections.abc import Callable
 from io import StringIO
-from typing import Any, Callable, Union
+from typing import Any
 
 
 class ASTUtils:
@@ -86,9 +87,7 @@ class ASTUtils:
         return ast.unparse(tree)
 
     @classmethod
-    def find_similar_nodes(
-        cls, tree: ast.AST, pattern: Union[str, ast.AST], threshold: float = 0.8
-    ) -> list[ast.AST]:
+    def find_similar_nodes(cls, tree: ast.AST, pattern: str | ast.AST, threshold: float = 0.8) -> list[ast.AST]:
         """Find nodes similar to a pattern."""
         if isinstance(pattern, str):
             pattern = ast.parse(pattern).body[0]
@@ -159,7 +158,7 @@ class ASTUtils:
             if isinstance(val1, list):
                 if not isinstance(val2, list) or len(val1) != len(val2):
                     return False
-                for v1, v2 in zip(val1, val2):
+                for v1, v2 in zip(val1, val2, strict=False):
                     if not ASTUtils.compare_nodes(v1, v2):
                         return False
             elif isinstance(val1, ast.AST):
@@ -188,7 +187,7 @@ class ASTUtils:
         args = [arg.arg for arg in node.args.args]
         defaults = [ast.unparse(d) for d in node.args.defaults]
         args_with_defaults = args[: len(args) - len(defaults)] + [
-            f"{a}={d}" for a, d in zip(args[len(args) - len(defaults) :], defaults)
+            f"{a}={d}" for a, d in zip(args[len(args) - len(defaults) :], defaults, strict=False)
         ]
         return f"def {node.name}({', '.join(args_with_defaults)})"
 
@@ -196,9 +195,7 @@ class ASTUtils:
 # Standalone utility functions for convenience
 def is_constant(node: ast.AST) -> bool:
     """Check if a node represents a constant value."""
-    return isinstance(
-        node, (ast.Constant, ast.Num, ast.Str, ast.Bytes, ast.NameConstant)
-    )
+    return isinstance(node, (ast.Constant, ast.Num, ast.Str, ast.Bytes, ast.NameConstant))
 
 
 def get_node_type(node: ast.AST) -> str:

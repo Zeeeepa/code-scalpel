@@ -36,11 +36,11 @@ def greet(name):
 class Calculator:
     def __init__(self):
         self.value = 0
-    
+
     def add(self, x):
         self.value += x
         return self.value
-    
+
     def subtract(self, x):
         self.value -= x
         return self.value
@@ -90,7 +90,7 @@ class User {
     constructor(name) {
         this.name = name;
     }
-    
+
     greet() {
         return `Hello, ${this.name}`;
     }
@@ -129,7 +129,7 @@ public class Calculator {
     public int add(int a, int b) {
         return a + b;
     }
-    
+
     public int subtract(int a, int b) {
         return a - b;
     }
@@ -277,10 +277,10 @@ class Third:
 class MyClass:
     def method_one(self):
         pass
-    
+
     def method_two(self):
         pass
-    
+
     def method_three(self):
         pass
 """

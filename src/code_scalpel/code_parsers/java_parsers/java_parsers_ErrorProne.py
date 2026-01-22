@@ -14,7 +14,6 @@ Command: javac -XDcompilePolicy=simple -processorpath error_prone.jar \
 import re
 import subprocess
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -23,11 +22,11 @@ class ErrorProneIssue:
 
     file: str
     line: int
-    column: Optional[int]
+    column: int | None
     bug_pattern: str  # e.g., "NullAway", "StringSplitter"
     severity: str  # "ERROR", "WARNING"
     message: str
-    suggested_fix: Optional[str] = None
+    suggested_fix: str | None = None
 
 
 class ErrorProneParser:
@@ -40,8 +39,8 @@ class ErrorProneParser:
 
     def __init__(
         self,
-        error_prone_jar: Optional[str] = None,
-        additional_checks: Optional[list[str]] = None,
+        error_prone_jar: str | None = None,
+        additional_checks: list[str] | None = None,
     ):
         """
         Initialize Error Prone parser.
@@ -55,9 +54,7 @@ class ErrorProneParser:
         self.language = "java"
 
         # Pattern: file:line: [BugPattern] message
-        self.output_pattern = re.compile(
-            r"^(.+):(\d+):\s*(?:error|warning):\s*\[([^\]]+)\]\s*(.+)$"
-        )
+        self.output_pattern = re.compile(r"^(.+):(\d+):\s*(?:error|warning):\s*\[([^\]]+)\]\s*(.+)$")
 
     def parse(self, source_path: str) -> list[ErrorProneIssue]:
         """
@@ -74,7 +71,7 @@ class ErrorProneParser:
             return self.parse_output(output)
         return []
 
-    def run_error_prone(self, source_path: str) -> Optional[str]:
+    def run_error_prone(self, source_path: str) -> str | None:
         """
         Run Error Prone compilation.
 

@@ -57,9 +57,9 @@ State Machine:
 
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Callable, List, Optional
 
 from code_scalpel.autonomy.stubs import (
     ErrorAnalysis,
@@ -97,8 +97,8 @@ class FixLoopResult:
     """
 
     success: bool
-    final_fix: Optional[FixHint]
-    attempts: List[FixAttempt]
+    final_fix: FixHint | None
+    attempts: list[FixAttempt]
     termination_reason: str  # "success", "max_attempts", "timeout", "no_fixes", "human_escalation"  # [20251217_BUGFIX] Normalize annotation layout for parser compatibility
     escalated_to_human: bool
     total_duration_ms: int
@@ -134,7 +134,7 @@ class FixLoop:
         max_attempts: int = 5,
         max_duration_seconds: int = 300,
         min_confidence_threshold: float = 0.5,
-        on_escalate: Optional[Callable[[str, List[FixAttempt]], None]] = None,
+        on_escalate: Callable[[str, list[FixAttempt]], None] | None = None,
     ):
         """
         Initialize fix loop.
@@ -177,7 +177,7 @@ class FixLoop:
         Returns:
             FixLoopResult with success/failure and full history
         """
-        attempts: List[FixAttempt] = []
+        attempts: list[FixAttempt] = []
         start_monotonic = time.monotonic()
         current_code = source_code
         current_error = initial_error
@@ -186,9 +186,7 @@ class FixLoop:
         for attempt_num in range(1, self.max_attempts + 1):
             # [20251217_FEATURE] P0: Check timeout
             if (time.monotonic() - start_monotonic) > self.max_duration_seconds:
-                self.logger.warning(
-                    f"Fix loop timeout after {attempt_num - 1} attempts"
-                )
+                self.logger.warning(f"Fix loop timeout after {attempt_num - 1} attempts")
                 return self._create_result(
                     attempts=attempts,
                     success=False,
@@ -215,9 +213,7 @@ class FixLoop:
             )
 
             # [20251217_FEATURE] P0: Check for fix availability
-            valid_fixes = [
-                f for f in analysis.fixes if f.confidence >= self.min_confidence
-            ]
+            valid_fixes = [f for f in analysis.fixes if f.confidence >= self.min_confidence]
             if not valid_fixes:
                 self.logger.warning(f"No valid fixes available (attempt {attempt_num})")
                 return self._create_result(
@@ -229,19 +225,14 @@ class FixLoop:
 
             # Try best fix
             best_fix = valid_fixes[0]
-            self.logger.info(
-                f"Attempt {attempt_num}: Applying fix "
-                f"(confidence={best_fix.confidence:.2f})"
-            )
+            self.logger.info(f"Attempt {attempt_num}: Applying fix " f"(confidence={best_fix.confidence:.2f})")
 
             # [20251217_FEATURE] Apply fix and test in sandbox
             patched_code = self._apply_fix(current_code, best_fix)
 
             # Timeout guard before launching potentially expensive sandbox execution
             if (time.monotonic() - start_monotonic) > self.max_duration_seconds:
-                self.logger.warning(
-                    f"Fix loop timeout before sandbox execution (attempt {attempt_num})"
-                )
+                self.logger.warning(f"Fix loop timeout before sandbox execution (attempt {attempt_num})")
                 return self._create_result(
                     attempts=attempts,
                     success=False,
@@ -278,9 +269,7 @@ class FixLoop:
             attempts.append(attempt)
 
             if timed_out:
-                self.logger.warning(
-                    f"Fix loop timeout during sandbox execution (attempt {attempt_num})"
-                )
+                self.logger.warning(f"Fix loop timeout during sandbox execution (attempt {attempt_num})")
                 return self._create_result(
                     attempts=attempts,
                     success=False,
@@ -311,7 +300,7 @@ class FixLoop:
             escalated=self._escalate("Max attempts exceeded", attempts),
         )
 
-    def _escalate(self, reason: str, attempts: List[FixAttempt]) -> bool:
+    def _escalate(self, reason: str, attempts: list[FixAttempt]) -> bool:
         """
         Escalate to human when loop fails.
 
@@ -330,10 +319,10 @@ class FixLoop:
 
     def _create_result(
         self,
-        attempts: List[FixAttempt],
+        attempts: list[FixAttempt],
         success: bool,
         reason: str,
-        final_fix: Optional[FixHint] = None,
+        final_fix: FixHint | None = None,
         escalated: bool = False,
     ) -> FixLoopResult:
         """

@@ -17,7 +17,7 @@ import shutil
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class KtlintSeverity(Enum):
@@ -47,7 +47,7 @@ class KtlintViolation:
     line: int
     column: int
     can_be_auto_corrected: bool = False
-    detail: Optional[str] = None
+    detail: str | None = None
 
     @property
     def location(self) -> str:
@@ -101,10 +101,10 @@ class KtlintReport:
     """Complete ktlint analysis report."""
 
     violations: list[KtlintViolation] = field(default_factory=list)
-    config: Optional[KtlintConfig] = None
+    config: KtlintConfig | None = None
     files_checked: int = 0
-    execution_time_ms: Optional[float] = None
-    ktlint_version: Optional[str] = None
+    execution_time_ms: float | None = None
+    ktlint_version: str | None = None
 
     @property
     def error_count(self) -> int:
@@ -170,7 +170,7 @@ class KtlintParser:
 
     """
 
-    def __init__(self, ktlint_path: Optional[str] = None):
+    def __init__(self, ktlint_path: str | None = None):
         """
         Initialize ktlint parser.
 
@@ -178,7 +178,7 @@ class KtlintParser:
         """
         self._ktlint_path = ktlint_path or self._find_ktlint()
 
-    def _find_ktlint(self) -> Optional[str]:
+    def _find_ktlint(self) -> str | None:
         """Find ktlint executable."""
         # Check for ktlint in PATH
         ktlint = shutil.which("ktlint")
@@ -239,7 +239,7 @@ class KtlintParser:
     def check_file(
         self,
         file_path: str,
-        config_path: Optional[str] = None,
+        config_path: str | None = None,
     ) -> KtlintReport:
         """
         Run ktlint on a single file.
@@ -269,7 +269,7 @@ class KtlintParser:
     def check_directory(
         self,
         directory: str,
-        patterns: Optional[list[str]] = None,
+        patterns: list[str] | None = None,
     ) -> KtlintReport:
         """
         Run ktlint on a directory.

@@ -1,0 +1,16 @@
+
+# Agent Operation Limits
+# [20251227_FEATURE] Limits for AI agent operations to prevent runaway usage
+
+version: "1.0"
+
+# Global limits per session
+limits:
+  max_files_read: 100
+  max_tokens_per_session: 50000
+  max_api_calls_per_hour: 1000
+
+# Relationships:
+# - These limits are checked by the MCP governance layer before tool execution
+# - They complement change budgeting (autonomy.governance.change_budgeting in governance.yaml)
+# - Change budgeting limits code modifications, these limit agent resource usage

@@ -27,7 +27,6 @@ import ast
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -50,31 +49,31 @@ class BasicBlock:
 
     id: str
     type: BlockType
-    statements: List[ast.stmt] = field(default_factory=list)
-    successors: List[str] = field(default_factory=list)
-    predecessors: List[str] = field(default_factory=list)
-    branch_condition: Optional[ast.expr] = None
-    exception_handlers: List[str] = field(default_factory=list)
+    statements: list[ast.stmt] = field(default_factory=list)
+    successors: list[str] = field(default_factory=list)
+    predecessors: list[str] = field(default_factory=list)
+    branch_condition: ast.expr | None = None
+    exception_handlers: list[str] = field(default_factory=list)
 
 
 @dataclass
 class ControlFlowGraph:
     """Represents a control flow graph."""
 
-    blocks: Dict[str, BasicBlock] = field(default_factory=dict)
-    entry_block: Optional[str] = None
-    exit_block: Optional[str] = None
-    loops: List[Tuple[str, str]] = field(default_factory=list)  # (header, tail) pairs
+    blocks: dict[str, BasicBlock] = field(default_factory=dict)
+    entry_block: str | None = None
+    exit_block: str | None = None
+    loops: list[tuple[str, str]] = field(default_factory=list)  # (header, tail) pairs
 
 
 class ControlFlowBuilder:
     """Build and analyze control flow graphs."""
 
     def __init__(self):
-        self.cfg: Optional[ControlFlowGraph] = None
+        self.cfg: ControlFlowGraph | None = None
         self.block_counter = 0
 
-    def build(self, file_path: str, function_name: str) -> Optional[ControlFlowGraph]:
+    def build(self, file_path: str, function_name: str) -> ControlFlowGraph | None:
         """
         Build control flow graph for a function.
 
@@ -95,13 +94,13 @@ class ControlFlowBuilder:
         cfg = ControlFlowGraph()
         return cfg
 
-    def get_all_paths(self, cfg: ControlFlowGraph) -> List[List[str]]:
+    def get_all_paths(self, cfg: ControlFlowGraph) -> list[list[str]]:
         """
         Get all execution paths from entry to exit.
         """
         return []
 
-    def find_loops(self, cfg: ControlFlowGraph) -> List[Tuple[str, Set[str]]]:
+    def find_loops(self, cfg: ControlFlowGraph) -> list[tuple[str, set[str]]]:
         """
         Find all loops in the CFG.
 
@@ -110,7 +109,7 @@ class ControlFlowBuilder:
         """
         return []
 
-    def find_dominators(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+    def find_dominators(self, cfg: ControlFlowGraph) -> dict[str, set[str]]:
         """
         Find dominator relationships in CFG.
 
@@ -119,7 +118,7 @@ class ControlFlowBuilder:
         """
         return {}
 
-    def compute_reachability(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+    def compute_reachability(self, cfg: ControlFlowGraph) -> dict[str, set[str]]:
         """
         Compute which blocks are reachable from entry.
 
@@ -128,7 +127,7 @@ class ControlFlowBuilder:
         """
         return {}
 
-    def analyze_loop_invariants(self, cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+    def analyze_loop_invariants(self, cfg: ControlFlowGraph) -> dict[str, set[str]]:
         """
         Identify loop invariant statements.
         """
@@ -146,9 +145,7 @@ class ControlFlowBuilder:
         self.block_counter += 1
         return block_id
 
-    def _process_if_statement(
-        self, node: ast.If, current_block: str
-    ) -> Tuple[str, str]:
+    def _process_if_statement(self, node: ast.If, current_block: str) -> tuple[str, str]:
         """Process if/elif/else statement and return merge block."""
         # Implementation placeholder
         return current_block, ""

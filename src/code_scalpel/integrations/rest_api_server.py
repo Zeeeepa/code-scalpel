@@ -18,7 +18,6 @@ Endpoints:
 
 import time
 from dataclasses import dataclass
-from typing import Optional, Union
 
 from flask import Flask, Response, jsonify, request
 
@@ -38,7 +37,7 @@ class MCPServerConfig:
     max_code_size: int = 100000  # Maximum code size in characters
 
 
-def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
+def create_app(config: MCPServerConfig | None = None) -> Flask:
     """
     Create and configure the Flask MCP server application.
 
@@ -62,20 +61,16 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
         try:
             from .crewai import CrewAIScalpel
         except ImportError as e:
-            raise ImportError(
-                "Could not import CrewAIScalpel. Ensure code_scalpel is properly installed."
-            ) from e
+            raise ImportError("Could not import CrewAIScalpel. Ensure code_scalpel is properly installed.") from e
     scalpel = CrewAIScalpel(cache_enabled=config.cache_enabled)
 
     @app.route("/health", methods=["GET"])
     def health_check() -> Response:
         """Health check endpoint."""
-        return jsonify(
-            {"status": "healthy", "service": "code-scalpel-mcp", "version": __version__}
-        )
+        return jsonify({"status": "healthy", "service": "code-scalpel-mcp", "version": __version__})
 
     @app.route("/analyze", methods=["POST"])
-    def analyze_code() -> Union[Response, tuple[Response, int]]:
+    def analyze_code() -> Response | tuple[Response, int]:
         """
         Analyze Python code and return analysis results.
 
@@ -181,7 +176,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/refactor", methods=["POST"])
-    def refactor_code() -> Union[Response, tuple[Response, int]]:
+    def refactor_code() -> Response | tuple[Response, int]:
         """
         Refactor Python code based on analysis.
 
@@ -274,7 +269,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/security", methods=["POST"])
-    def security_scan() -> Union[Response, tuple[Response, int]]:
+    def security_scan() -> Response | tuple[Response, int]:
         """
         Perform security-focused analysis on Python code.
 
@@ -351,7 +346,7 @@ def create_app(config: Optional[MCPServerConfig] = None) -> Flask:
             )
 
     @app.route("/symbolic", methods=["POST"])
-    def symbolic_analysis() -> Union[Response, tuple[Response, int]]:
+    def symbolic_analysis() -> Response | tuple[Response, int]:
         """
         Perform symbolic execution analysis on Python code.
 
@@ -494,8 +489,7 @@ def run_server(host: str = "127.0.0.1", port: int = 8080, debug: bool = False) -
     # Warn if debug mode is enabled in production
     if debug and os.environ.get("FLASK_ENV") == "production":
         warnings.warn(
-            "Debug mode should not be enabled in production. "
-            "Set FLASK_ENV to 'development' or disable debug mode.",
+            "Debug mode should not be enabled in production. " "Set FLASK_ENV to 'development' or disable debug mode.",
             RuntimeWarning,
             stacklevel=2,
         )
@@ -512,15 +506,9 @@ if __name__ == "__main__":
     import os
 
     parser = argparse.ArgumentParser(description="Code Scalpel MCP Server")
-    parser.add_argument(
-        "--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)"
-    )
-    parser.add_argument(
-        "--port", type=int, default=8080, help="Port to bind to (default: 8080)"
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug mode (development only)"
-    )
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=8080, help="Port to bind to (default: 8080)")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode (development only)")
 
     args = parser.parse_args()
 

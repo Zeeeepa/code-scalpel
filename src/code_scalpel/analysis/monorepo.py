@@ -27,7 +27,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -37,8 +37,8 @@ class MonorepoProject:
     name: str
     path: str  # Relative path from repo root
     project_type: str  # "nodejs", "python", "go", etc.
-    dependencies: List[str]  # Internal dependencies (other projects in monorepo)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str]  # Internal dependencies (other projects in monorepo)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -46,11 +46,11 @@ class MonorepoDetectionResult:
     """Result of monorepo detection."""
 
     is_monorepo: bool
-    workspace_type: Optional[str]  # "lerna", "nx", "turborepo", "bazel", etc.
-    projects: List[MonorepoProject]
-    root_config: Dict[str, Any]
-    cross_project_deps: Dict[str, List[str]]  # project -> [dependencies]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    workspace_type: str | None  # "lerna", "nx", "turborepo", "bazel", etc.
+    projects: list[MonorepoProject]
+    root_config: dict[str, Any]
+    cross_project_deps: dict[str, list[str]]  # project -> [dependencies]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class MonorepoDetector:
@@ -87,7 +87,7 @@ class MonorepoDetector:
             cross_project_deps={},
         )
 
-    def _detect_nx(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_nx(self) -> MonorepoDetectionResult | None:
         """Detect Nx monorepo."""
         nx_json = self.root / "nx.json"
         workspace_json = self.root / "workspace.json"
@@ -95,8 +95,8 @@ class MonorepoDetector:
         if not (nx_json.exists() or workspace_json.exists()):
             return None
 
-        projects: List[MonorepoProject] = []
-        root_config: Dict[str, Any] = {}
+        projects: list[MonorepoProject] = []
+        root_config: dict[str, Any] = {}
 
         # Read nx.json if exists
         if nx_json.exists():
@@ -129,17 +129,13 @@ class MonorepoDetector:
                 for app in apps_dir.iterdir():
                     if app.is_dir() and (app / "package.json").exists():
                         pkg = self._read_package_json(app / "package.json")
-                        if not any(
-                            p.path == str(app.relative_to(self.root)) for p in projects
-                        ):
+                        if not any(p.path == str(app.relative_to(self.root)) for p in projects):
                             projects.append(
                                 MonorepoProject(
                                     name=pkg.get("name", app.name),
                                     path=str(app.relative_to(self.root)),
                                     project_type="nodejs",
-                                    dependencies=list(
-                                        pkg.get("dependencies", {}).keys()
-                                    ),
+                                    dependencies=list(pkg.get("dependencies", {}).keys()),
                                 )
                             )
 
@@ -157,7 +153,7 @@ class MonorepoDetector:
             cross_project_deps=cross_deps,
         )
 
-    def _detect_turborepo(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_turborepo(self) -> MonorepoDetectionResult | None:
         """Detect Turborepo monorepo."""
         turbo_json = self.root / "turbo.json"
 
@@ -185,7 +181,7 @@ class MonorepoDetector:
             cross_project_deps=cross_deps,
         )
 
-    def _detect_lerna(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_lerna(self) -> MonorepoDetectionResult | None:
         """Detect Lerna monorepo."""
         lerna_json = self.root / "lerna.json"
 
@@ -214,7 +210,7 @@ class MonorepoDetector:
             cross_project_deps=cross_deps,
         )
 
-    def _detect_yarn_workspaces(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_yarn_workspaces(self) -> MonorepoDetectionResult | None:
         """Detect Yarn Workspaces."""
         pkg_json = self.root / "package.json"
 
@@ -251,7 +247,7 @@ class MonorepoDetector:
             cross_project_deps=cross_deps,
         )
 
-    def _detect_pnpm_workspaces(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_pnpm_workspaces(self) -> MonorepoDetectionResult | None:
         """Detect pnpm Workspaces."""
         pnpm_workspace = self.root / "pnpm-workspace.yaml"
 
@@ -289,7 +285,7 @@ class MonorepoDetector:
             cross_project_deps=cross_deps,
         )
 
-    def _detect_bazel(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_bazel(self) -> MonorepoDetectionResult | None:
         """Detect Bazel monorepo."""
         workspace_file = self.root / "WORKSPACE"
         workspace_bazel = self.root / "WORKSPACE.bazel"
@@ -297,7 +293,7 @@ class MonorepoDetector:
         if not (workspace_file.exists() or workspace_bazel.exists()):
             return None
 
-        projects: List[MonorepoProject] = []
+        projects: list[MonorepoProject] = []
 
         # Scan for BUILD files
         for build_file in self.root.rglob("BUILD*"):
@@ -325,18 +321,15 @@ class MonorepoDetector:
             cross_project_deps={},
         )
 
-    def _detect_python_monorepo(self) -> Optional[MonorepoDetectionResult]:
+    def _detect_python_monorepo(self) -> MonorepoDetectionResult | None:
         """Detect Python monorepo (Poetry workspaces or packages/ structure)."""
         packages_dir = self.root / "packages"
 
         # Check for packages/ directory with multiple Python packages
         if packages_dir.exists():
-            projects: List[MonorepoProject] = []
+            projects: list[MonorepoProject] = []
             for pkg_dir in packages_dir.iterdir():
-                if pkg_dir.is_dir() and (
-                    (pkg_dir / "setup.py").exists()
-                    or (pkg_dir / "pyproject.toml").exists()
-                ):
+                if pkg_dir.is_dir() and ((pkg_dir / "setup.py").exists() or (pkg_dir / "pyproject.toml").exists()):
                     projects.append(
                         MonorepoProject(
                             name=pkg_dir.name,
@@ -357,7 +350,7 @@ class MonorepoDetector:
 
         return None
 
-    def _scan_npm_workspaces(self) -> List[MonorepoProject]:
+    def _scan_npm_workspaces(self) -> list[MonorepoProject]:
         """Scan for npm workspace packages."""
         pkg_json = self.root / "package.json"
         if not pkg_json.exists():
@@ -372,9 +365,9 @@ class MonorepoDetector:
         except Exception:
             return []
 
-    def _scan_package_patterns(self, patterns: List[str]) -> List[MonorepoProject]:
+    def _scan_package_patterns(self, patterns: list[str]) -> list[MonorepoProject]:
         """Scan glob patterns for packages."""
-        projects: List[MonorepoProject] = []
+        projects: list[MonorepoProject] = []
 
         for pattern in patterns:
             # Convert npm glob to Python glob
@@ -392,15 +385,13 @@ class MonorepoDetector:
                                     name=pkg.get("name", pkg_dir.name),
                                     path=str(pkg_dir.relative_to(self.root)),
                                     project_type="nodejs",
-                                    dependencies=list(
-                                        pkg.get("dependencies", {}).keys()
-                                    ),
+                                    dependencies=list(pkg.get("dependencies", {}).keys()),
                                 )
                             )
 
         return projects
 
-    def _read_package_json(self, path: Path) -> Dict[str, Any]:
+    def _read_package_json(self, path: Path) -> dict[str, Any]:
         """Read and parse a package.json file."""
         try:
             return json.loads(path.read_text())
@@ -411,26 +402,20 @@ class MonorepoDetector:
         """Detect the type of a project directory."""
         if (project_path / "package.json").exists():
             return "nodejs"
-        if (project_path / "pyproject.toml").exists() or (
-            project_path / "setup.py"
-        ).exists():
+        if (project_path / "pyproject.toml").exists() or (project_path / "setup.py").exists():
             return "python"
         if (project_path / "go.mod").exists():
             return "go"
         if (project_path / "Cargo.toml").exists():
             return "rust"
-        if (project_path / "pom.xml").exists() or (
-            project_path / "build.gradle"
-        ).exists():
+        if (project_path / "pom.xml").exists() or (project_path / "build.gradle").exists():
             return "java"
         return "unknown"
 
-    def _build_cross_deps(
-        self, projects: List[MonorepoProject]
-    ) -> Dict[str, List[str]]:
+    def _build_cross_deps(self, projects: list[MonorepoProject]) -> dict[str, list[str]]:
         """Build cross-project dependency graph."""
         project_names = {p.name for p in projects}
-        cross_deps: Dict[str, List[str]] = {}
+        cross_deps: dict[str, list[str]] = {}
 
         for project in projects:
             internal_deps = [d for d in project.dependencies if d in project_names]

@@ -5,7 +5,6 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import zip_longest
-from typing import Optional
 
 import networkx as nx
 from graphviz import Digraph
@@ -17,10 +16,10 @@ logger = logging.getLogger(__name__)
 class VisualizationConfig:
     """Configuration for AST visualization."""
 
-    node_colors: Optional[dict[str, str]] = None
-    edge_colors: Optional[dict[str, str]] = None
-    node_shapes: Optional[dict[str, str]] = None
-    highlight_nodes: Optional[set[int]] = None
+    node_colors: dict[str, str] | None = None
+    edge_colors: dict[str, str] | None = None
+    node_shapes: dict[str, str] | None = None
+    highlight_nodes: set[int] | None = None
     show_attributes: bool = True
     show_line_numbers: bool = True
     show_source_code: bool = True
@@ -32,7 +31,7 @@ class ASTVisualizer:
     Advanced AST visualization with customizable styling and multiple output formats.
     """
 
-    def __init__(self, config: Optional[VisualizationConfig] = None):
+    def __init__(self, config: VisualizationConfig | None = None):
         self.config = config or VisualizationConfig()
         self._default_colors = {
             "ast.FunctionDef": "#a8d5e5",
@@ -87,9 +86,7 @@ class ASTVisualizer:
             logger.error(f"Error visualizing AST: {str(e)}")
             raise
 
-    def visualize_diff(
-        self, tree1: ast.AST, tree2: ast.AST, output_file: str = "ast_diff"
-    ) -> None:
+    def visualize_diff(self, tree1: ast.AST, tree2: ast.AST, output_file: str = "ast_diff") -> None:
         """Visualize differences between two ASTs."""
         try:
             dot = self._create_digraph()
@@ -105,9 +102,7 @@ class ASTVisualizer:
             logger.error(f"Error visualizing AST differences: {str(e)}")
             raise
 
-    def create_interactive_visualization(
-        self, tree: ast.AST, output_file: str = "interactive_ast.html"
-    ) -> None:
+    def create_interactive_visualization(self, tree: ast.AST, output_file: str = "interactive_ast.html") -> None:
         """Create an interactive HTML visualization using d3.js."""
         try:
             # Convert AST to networkx graph
@@ -137,8 +132,8 @@ class ASTVisualizer:
         self,
         node: ast.AST,
         dot: Digraph,
-        parent_id: Optional[str] = None,
-        edge_label: Optional[str] = None,
+        parent_id: str | None = None,
+        edge_label: str | None = None,
     ) -> str:
         """Recursively build the visualization."""
         node_id = str(id(node))
@@ -242,22 +237,16 @@ class ASTVisualizer:
 
         return style
 
-    def _analyze_differences(
-        self, tree1: ast.AST, tree2: ast.AST
-    ) -> dict[str, set[int]]:
+    def _analyze_differences(self, tree1: ast.AST, tree2: ast.AST) -> dict[str, set[int]]:
         """Analyze differences between two ASTs."""
         changes = {"added": set(), "removed": set(), "modified": set()}
 
-        def compare_nodes(node1: Optional[ast.AST], node2: Optional[ast.AST]) -> None:
+        def compare_nodes(node1: ast.AST | None, node2: ast.AST | None) -> None:
             if node1 is None and node2 is not None:
                 changes["added"].add(id(node2))
             elif node1 is not None and node2 is None:
                 changes["removed"].add(id(node1))
-            elif (
-                node1 is not None
-                and node2 is not None
-                and not self._nodes_equal(node1, node2)
-            ):
+            elif node1 is not None and node2 is not None and not self._nodes_equal(node1, node2):
                 changes["modified"].add(id(node1))
                 changes["modified"].add(id(node2))
 
@@ -345,7 +334,7 @@ class ASTVisualizer:
         """Convert AST to networkx graph."""
         G = nx.DiGraph()
 
-        def add_edges(node: ast.AST, parent: Optional[ast.AST] = None):
+        def add_edges(node: ast.AST, parent: ast.AST | None = None):
             node_id = id(node)
             G.add_node(node_id, label=self._create_node_label(node))
             if parent:

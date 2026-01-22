@@ -14,7 +14,7 @@ import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .exceptions import TamperDetectedError
 
@@ -32,7 +32,7 @@ class AuditLog:
     - Tamper detection
     """
 
-    def __init__(self, log_path: Optional[str] = None):
+    def __init__(self, log_path: str | None = None):
         """
         Initialize audit log.
 
@@ -56,8 +56,8 @@ class AuditLog:
         self,
         event_type: str,
         severity: str,
-        details: Dict[str, Any],
-        timestamp: Optional[datetime] = None,
+        details: dict[str, Any],
+        timestamp: datetime | None = None,
     ) -> None:
         """
         Record security event to tamper-resistant log.
@@ -92,8 +92,8 @@ class AuditLog:
     def log_event(
         self,
         event_type: str,
-        details: Dict[str, Any],
-        timestamp: Optional[datetime] = None,
+        details: dict[str, Any],
+        timestamp: datetime | None = None,
         severity: str = "MEDIUM",
     ) -> None:
         """Backward compatibility wrapper for log_event.
@@ -109,7 +109,7 @@ class AuditLog:
         """
         self.record_event(event_type, severity, details, timestamp=timestamp)
 
-    def _sign_event(self, event: Dict[str, Any]) -> str:
+    def _sign_event(self, event: dict[str, Any]) -> str:
         """
         Sign event with HMAC-SHA256.
 
@@ -125,9 +125,7 @@ class AuditLog:
         secret = os.environ.get("SCALPEL_AUDIT_SECRET", "default-secret")
 
         message = json.dumps(event, sort_keys=True)
-        signature = hmac.new(
-            secret.encode(), message.encode(), hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).hexdigest()
 
         return signature
 
@@ -146,16 +144,14 @@ class AuditLog:
         if not self.log_path.exists():
             return True
 
-        with open(self.log_path, "r") as f:
+        with open(self.log_path) as f:
             for line_num, line in enumerate(f, 1):
                 try:
                     event = json.loads(line)
                     signature = event.pop("signature", None)
 
                     if signature is None:
-                        raise TamperDetectedError(
-                            f"Audit log entry missing signature at line {line_num}"
-                        )
+                        raise TamperDetectedError(f"Audit log entry missing signature at line {line_num}")
 
                     # Verify signature
                     expected_signature = self._sign_event(event)
@@ -164,17 +160,15 @@ class AuditLog:
                             f"Audit log tampering detected at timestamp: {event.get('timestamp', 'unknown')}, line {line_num}"
                         )
                 except json.JSONDecodeError:
-                    raise TamperDetectedError(
-                        f"Audit log corrupted at line {line_num}: invalid JSON"
-                    )
+                    raise TamperDetectedError(f"Audit log corrupted at line {line_num}: invalid JSON")
 
         return True
 
     def get_events(
         self,
-        event_type: Optional[str] = None,
-        severity: Optional[str] = None,
-        limit: Optional[int] = None,
+        event_type: str | None = None,
+        severity: str | None = None,
+        limit: int | None = None,
     ) -> list:
         """
         Retrieve events from audit log.
@@ -191,7 +185,7 @@ class AuditLog:
             return []
 
         events = []
-        with open(self.log_path, "r") as f:
+        with open(self.log_path) as f:
             for line in f:
                 try:
                     event = json.loads(line)

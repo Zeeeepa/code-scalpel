@@ -65,9 +65,7 @@ async def get_project_dependencies() -> str:
     from code_scalpel.ast_tools.dependency_parser import DependencyParser
 
     server = _server()
-    deps = await _run_in_thread(
-        DependencyParser(str(server.PROJECT_ROOT)).get_dependencies
-    )
+    deps = await _run_in_thread(DependencyParser(str(server.PROJECT_ROOT)).get_dependencies)
     return json.dumps(deps, indent=2)
 
 
@@ -76,7 +74,7 @@ async def get_project_structure() -> str:
     """Return the project directory structure as JSON."""
     import json
 
-    def build_tree(path: Path) -> "TreeNodeDict":
+    def build_tree(path: Path) -> TreeNodeDict:
         tree: TreeNodeDict = {"name": path.name, "type": "directory", "children": []}
         try:
             items = sorted(path.iterdir(), key=lambda p: (not p.is_dir(), p.name))
@@ -271,22 +269,16 @@ def _extract_code_sync(
     code: str | None = None,
     include_context: bool = True,
     include_token_estimate: bool = True,
-) -> "ContextualExtractionResult":
+) -> ContextualExtractionResult:
     # [20251228_BUGFIX] Avoid deprecated shim imports.
     from code_scalpel.surgery.surgical_extractor import SurgicalExtractor
 
     server = _server()
 
     if not file_path and not code:
-        return server._extraction_error(
-            target_name, "Must provide either 'file_path' or 'code' argument"
-        )
+        return server._extraction_error(target_name, "Must provide either 'file_path' or 'code' argument")
 
-    extractor = (
-        SurgicalExtractor.from_file(file_path)
-        if file_path is not None
-        else SurgicalExtractor(code or "")
-    )
+    extractor = SurgicalExtractor.from_file(file_path) if file_path is not None else SurgicalExtractor(code or "")
 
     context = None
     if target_type == "class":
@@ -295,9 +287,7 @@ def _extract_code_sync(
             context = extractor.get_class_with_context(target_name)
     elif target_type == "method":
         if "." not in target_name:
-            return server._extraction_error(
-                target_name, "Method targets must use Class.method format"
-            )
+            return server._extraction_error(target_name, "Method targets must use Class.method format")
         class_name, method_name = target_name.split(".", 1)
         target = extractor.get_method(class_name, method_name)
         if include_context:
@@ -313,9 +303,7 @@ def _extract_code_sync(
             context = extractor.get_function_with_context(target_name)
 
     if not target.success:
-        return server._extraction_error(
-            target_name, target.error or "Extraction failed"
-        )
+        return server._extraction_error(target_name, target.error or "Extraction failed")
 
     context_code = context.context_code if context else ""
     context_items = context.context_items if context else (target.dependencies or [])

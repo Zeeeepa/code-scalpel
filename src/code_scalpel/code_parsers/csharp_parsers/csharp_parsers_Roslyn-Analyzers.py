@@ -7,8 +7,6 @@ Roslyn Analyzers C# Parser - .NET Compiler Platform analysis integration.
 # Command: dotnet build /p:RunAnalyzersDuringBuild=true
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class RoslynAnalyzersParser:
         """Parse Roslyn analyzer diagnostics from build output."""
         raise NotImplementedError("Roslyn Analyzers parser not yet implemented")
 
-    def parse_sarif(self, sarif_path: str) -> Optional[list]:
+    def parse_sarif(self, sarif_path: str) -> list | None:
         """Parse SARIF format output from analyzers."""
         raise NotImplementedError("Roslyn Analyzers parser not yet implemented")

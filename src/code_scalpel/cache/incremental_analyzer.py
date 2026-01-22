@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict, Generic, Set, TypeVar
+from typing import Generic, TypeVar
 
 # [20251223_CONSOLIDATION] Import from unified_cache
 from .unified_cache import AnalysisCache
@@ -17,7 +18,7 @@ class IncrementalAnalyzer(Generic[T]):
 
     def __init__(self, cache: AnalysisCache[T]) -> None:
         self.cache = cache
-        self.dependency_graph: Dict[str, Set[str]] = {}
+        self.dependency_graph: dict[str, set[str]] = {}
         # # TODO Phase 2: Add reverse graph for faster lookups
 
     def record_dependency(self, source: Path | str, depends_on: Path | str) -> None:
@@ -25,12 +26,10 @@ class IncrementalAnalyzer(Generic[T]):
         target_key = str(Path(depends_on).resolve())
         self.dependency_graph.setdefault(target_key, set()).add(source_key)
 
-    def get_dependents(self, file_path: Path | str) -> Set[str]:
+    def get_dependents(self, file_path: Path | str) -> set[str]:
         return set(self.dependency_graph.get(str(Path(file_path).resolve()), set()))
 
-    def update_file(
-        self, file_path: Path | str, recompute_fn: Callable[[Path], T]
-    ) -> Set[str]:
+    def update_file(self, file_path: Path | str, recompute_fn: Callable[[Path], T]) -> set[str]:
         """Update a file and return affected dependents."""
         path = Path(file_path).resolve()
         key = str(path)

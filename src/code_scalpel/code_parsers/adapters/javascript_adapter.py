@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..interface import IParser, Language, ParseResult
 
@@ -32,15 +32,13 @@ class JavaScriptParserAdapter(IParser):
     def __init__(self):
         """Initialize the JavaScript parser adapter."""
         if not JAVASCRIPT_PARSER_AVAILABLE or EsprimaParser is None:
-            raise ImportError(
-                "JavaScriptParser not available. Install esprima: pip install esprima"
-            )
+            raise ImportError("JavaScriptParser not available. Install esprima: pip install esprima")
         # Note: JavaScriptParser has an abstract method (parse_code) but we only use
         # its internal _parse_javascript method, so this is safe at runtime
         self._parser: Any = EsprimaParser()  # type: ignore[abstract]
-        self._last_ast: Optional[Any] = None
-        self._last_functions: List[str] = []
-        self._last_classes: List[str] = []
+        self._last_ast: Any | None = None
+        self._last_functions: list[str] = []
+        self._last_classes: list[str] = []
 
     def parse(self, code: str) -> ParseResult:
         """
@@ -79,7 +77,7 @@ class JavaScriptParserAdapter(IParser):
                 language=Language.JAVASCRIPT,
             )
 
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         """
         Get list of function names from the AST.
 
@@ -95,7 +93,7 @@ class JavaScriptParserAdapter(IParser):
         self._extract_names_from_ast(ast_tree)
         return self._last_functions
 
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         """
         Get list of class names from the AST.
 
@@ -123,9 +121,7 @@ class JavaScriptParserAdapter(IParser):
         if hasattr(self._parser, "extract_functions"):
             try:
                 funcs = self._parser.extract_functions(ast)
-                self._last_functions = [
-                    f.name for f in funcs if f.name and f.name != "<anonymous>"
-                ]
+                self._last_functions = [f.name for f in funcs if f.name and f.name != "<anonymous>"]
             except Exception:
                 pass
 
@@ -189,7 +185,7 @@ class JavaScriptParserAdapter(IParser):
 
         return None
 
-    def _convert_errors(self, errors: Any) -> List[Dict[str, Any]]:
+    def _convert_errors(self, errors: Any) -> list[dict[str, Any]]:
         """Convert parser errors to standard format."""
         if errors is None:
             return []
@@ -213,7 +209,7 @@ class JavaScriptParserAdapter(IParser):
 
         return [{"message": str(errors), "line": 0, "column": 0}]
 
-    def _extract_metrics(self, result: Any) -> Dict[str, Any]:
+    def _extract_metrics(self, result: Any) -> dict[str, Any]:
         """Extract metrics from parse result."""
         metrics = {}
 
@@ -276,14 +272,10 @@ class TypeScriptParserAdapter(JavaScriptParserAdapter):
             code,
             flags=re.MULTILINE,
         )
-        code = re.sub(
-            r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE
-        )
+        code = re.sub(r"^\s*(?:export\s+)?type\s+\w+\s*=\s*[^;]+;", "", code, flags=re.MULTILINE)
 
         # Remove : Type from parameters and return types (very basic)
-        code = re.sub(
-            r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code
-        )
+        code = re.sub(r":\s*\w+(?:\[\])?(?:\s*\|\s*\w+(?:\[\])?)*(?=\s*[,)=\{])", "", code)
 
         # Remove <T> generics (basic)
         code = re.sub(r"<\w+(?:\s*,\s*\w+)*>", "", code)

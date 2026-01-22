@@ -113,11 +113,7 @@ class SupplyChainRiskScorer:
                 low_risk.append(score)
 
         # Calculate metrics
-        avg_score = (
-            sum(s.overall_score for s in risk_scores) / len(risk_scores)
-            if risk_scores
-            else 0.0
-        )
+        avg_score = sum(s.overall_score for s in risk_scores) / len(risk_scores) if risk_scores else 0.0
 
         # Estimate transitive dependencies (simplified)
         total_transitive = self._estimate_transitive_deps(dependencies)
@@ -126,9 +122,7 @@ class SupplyChainRiskScorer:
         deepest_chain = self._find_deepest_chain(dependencies)
 
         # Generate recommendations
-        recommendations = self._generate_supply_chain_recommendations(
-            high_risk, avg_score, total_transitive
-        )
+        recommendations = self._generate_supply_chain_recommendations(high_risk, avg_score, total_transitive)
 
         return SupplyChainReport(
             success=True,
@@ -142,9 +136,7 @@ class SupplyChainRiskScorer:
             recommendations=recommendations,
         )
 
-    def _calculate_risk_score(
-        self, dependency: dict[str, Any], vulnerabilities: list[Any]
-    ) -> RiskScore:
+    def _calculate_risk_score(self, dependency: dict[str, Any], vulnerabilities: list[Any]) -> RiskScore:
         """Calculate comprehensive risk score for a dependency."""
         name = dependency.get("name", "unknown")
         version = dependency.get("version", "*")
@@ -184,14 +176,10 @@ class SupplyChainRiskScorer:
             risk_level = "LOW"
 
         # Identify risk factors and strengths
-        risk_factors, strengths = self._identify_factors(
-            maturity, maintenance, popularity, security, dependency_depth
-        )
+        risk_factors, strengths = self._identify_factors(maturity, maintenance, popularity, security, dependency_depth)
 
         # Generate recommendation
-        recommendation = self._generate_package_recommendation(
-            name, risk_level, risk_factors
-        )
+        recommendation = self._generate_package_recommendation(name, risk_level, risk_factors)
 
         return RiskScore(
             package_name=name,
@@ -381,9 +369,7 @@ class SupplyChainRiskScorer:
         # In production, would parse dependency trees
         return 5  # Reasonable default
 
-    def _generate_package_recommendation(
-        self, name: str, risk_level: str, factors: list[str]
-    ) -> str:
+    def _generate_package_recommendation(self, name: str, risk_level: str, factors: list[str]) -> str:
         """Generate recommendation for a package."""
         if risk_level == "CRITICAL":
             return f"⚠️ HIGH RISK: Consider replacing {name} with alternative"
@@ -401,27 +387,17 @@ class SupplyChainRiskScorer:
         recommendations = []
 
         if high_risk:
-            recommendations.append(
-                f"⚠️ {len(high_risk)} high-risk dependencies found - review supply chain"
-            )
-            recommendations.append(
-                "Consider dependency pruning to reduce attack surface"
-            )
+            recommendations.append(f"⚠️ {len(high_risk)} high-risk dependencies found - review supply chain")
+            recommendations.append("Consider dependency pruning to reduce attack surface")
 
         if avg_score > 50:
-            recommendations.append(
-                f"Average risk score {avg_score:.1f}/100 is elevated - improve dependency hygiene"
-            )
+            recommendations.append(f"Average risk score {avg_score:.1f}/100 is elevated - improve dependency hygiene")
 
         if total_transitive > 100:
-            recommendations.append(
-                f"{total_transitive} transitive dependencies detected - large attack surface"
-            )
+            recommendations.append(f"{total_transitive} transitive dependencies detected - large attack surface")
 
         if not high_risk and avg_score < 30:
-            recommendations.append(
-                "✅ Supply chain appears healthy - continue monitoring"
-            )
+            recommendations.append("✅ Supply chain appears healthy - continue monitoring")
 
         recommendations.append("Regularly audit dependencies with `scan_dependencies`")
 

@@ -593,7 +593,7 @@ class TestCoverageGaps:
             from unittest.mock import mock_open, patch
 
             m = mock_open()
-            m.return_value.read.side_effect = IOError("Read error")
+            m.return_value.read.side_effect = OSError("Read error")
             m.return_value.__iter__ = lambda self: iter([])
 
             # The exception handler at line 57-58 should catch this
@@ -602,9 +602,7 @@ class TestCoverageGaps:
             with patch("builtins.open", side_effect=PermissionError("denied")):
                 with patch(
                     "os.path.exists",
-                    side_effect=lambda p: (
-                        True if "requirements" in p else original_exists(p)
-                    ),
+                    side_effect=lambda p: (True if "requirements" in p else original_exists(p)),
                 ):
                     result = parser._parse_python_deps()
                     # Should not crash, just return empty or partial

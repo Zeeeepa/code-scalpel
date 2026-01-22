@@ -12,13 +12,13 @@ import time
 from importlib import import_module
 
 import code_scalpel.licensing.features as feature_caps
-from code_scalpel.mcp.helpers import symbolic_helpers as sym_helpers
-from code_scalpel.mcp.models.core import TestGenerationResult
+from code_scalpel import __version__ as _pkg_version
 from code_scalpel.licensing import tier_detector
 
 # [20260121_BUGFIX] Move contract imports before variable assignments to satisfy E402
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
+from code_scalpel.mcp.helpers import symbolic_helpers as sym_helpers
+from code_scalpel.mcp.models.core import TestGenerationResult
 from code_scalpel.mcp.protocol import _get_current_tier
 
 _ORIG_SYM_GENERATE_TESTS = sym_helpers._generate_tests_sync
@@ -53,27 +53,19 @@ async def symbolic_execute(
 
         effective_max_paths: int | None
         if max_paths is None:
-            effective_max_paths = (
-                None if configured_max_paths is None else int(configured_max_paths)
-            )
+            effective_max_paths = None if configured_max_paths is None else int(configured_max_paths)
         else:
             effective_max_paths = int(max_paths)
             if configured_max_paths is not None:
-                effective_max_paths = min(
-                    effective_max_paths, int(configured_max_paths)
-                )
+                effective_max_paths = min(effective_max_paths, int(configured_max_paths))
 
         effective_max_depth: int | None
         if max_depth is None:
-            effective_max_depth = (
-                None if configured_max_depth is None else int(configured_max_depth)
-            )
+            effective_max_depth = None if configured_max_depth is None else int(configured_max_depth)
         else:
             effective_max_depth = int(max_depth)
             if configured_max_depth is not None:
-                effective_max_depth = min(
-                    effective_max_depth, int(configured_max_depth)
-                )
+                effective_max_depth = min(effective_max_depth, int(configured_max_depth))
 
         # [20260121_BUGFIX] Resolve helper at runtime; prefer sym_helpers to honor monkeypatches
         helper = sym_helpers._symbolic_execute_sync
@@ -215,7 +207,7 @@ async def generate_unit_tests(
                     server_mod = None
 
             if server_mod and hasattr(server_mod, "_generate_tests_sync"):
-                candidate = getattr(server_mod, "_generate_tests_sync")
+                candidate = server_mod._generate_tests_sync
                 try:
                     sig = inspect.signature(candidate)
                     if len(sig.parameters) >= 7:

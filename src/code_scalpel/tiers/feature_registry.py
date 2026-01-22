@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +24,12 @@ class Feature:
     category: str = "general"
     deprecated: bool = False
     beta: bool = False
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 # [20251225_FEATURE] Default feature registry
 # All features and their minimum required tiers
-DEFAULT_FEATURES: Dict[str, Feature] = {
+DEFAULT_FEATURES: dict[str, Feature] = {
     # COMMUNITY features (always available)
     "analyze_code": Feature(
         name="analyze_code",
@@ -189,7 +188,7 @@ class FeatureRegistry:
         features = registry.get_available_features()
     """
 
-    def __init__(self, features: Optional[Dict[str, Feature]] = None):
+    def __init__(self, features: dict[str, Feature] | None = None):
         """
         Initialize the registry.
 
@@ -237,11 +236,11 @@ class FeatureRegistry:
             return "unknown"
         return feature.tier
 
-    def get_feature(self, feature_name: str) -> Optional[Feature]:
+    def get_feature(self, feature_name: str) -> Feature | None:
         """Get feature definition by name."""
         return self._features.get(feature_name)
 
-    def get_available_features(self) -> List[Feature]:
+    def get_available_features(self) -> list[Feature]:
         """Get all features available at the current tier."""
         from code_scalpel.licensing import get_current_tier
 
@@ -256,7 +255,7 @@ class FeatureRegistry:
 
         return sorted(available, key=lambda f: f.name)
 
-    def get_unavailable_features(self) -> List[Feature]:
+    def get_unavailable_features(self) -> list[Feature]:
         """Get features NOT available at the current tier."""
         from code_scalpel.licensing import get_current_tier
 
@@ -271,11 +270,11 @@ class FeatureRegistry:
 
         return sorted(unavailable, key=lambda f: (f.tier, f.name))
 
-    def get_features_by_tier(self, tier: str) -> List[Feature]:
+    def get_features_by_tier(self, tier: str) -> list[Feature]:
         """Get all features that require exactly the specified tier."""
         return [f for f in self._features.values() if f.tier == tier]
 
-    def get_features_by_category(self, category: str) -> List[Feature]:
+    def get_features_by_category(self, category: str) -> list[Feature]:
         """Get all features in a category."""
         return [f for f in self._features.values() if f.category == category]
 
@@ -284,13 +283,13 @@ class FeatureRegistry:
         self._features[feature.name] = feature
         logger.debug(f"Registered feature: {feature.name}")
 
-    def list_all(self) -> List[str]:
+    def list_all(self) -> list[str]:
         """List all feature names."""
         return sorted(self._features.keys())
 
 
 # [20251225_FEATURE] Global registry instance
-_registry: Optional[FeatureRegistry] = None
+_registry: FeatureRegistry | None = None
 
 
 def get_registry() -> FeatureRegistry:

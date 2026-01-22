@@ -9,7 +9,6 @@ Command: npm audit --json
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -17,7 +16,7 @@ class Vulnerability:
     """NPM audit vulnerability finding."""
 
     id: str
-    cve_id: Optional[str]
+    cve_id: str | None
     package_name: str
     version: str
     severity: str  # CRITICAL, HIGH, MODERATE, LOW

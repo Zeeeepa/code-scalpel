@@ -81,9 +81,7 @@ class TestSafeRefactorPrompt:
         """Test that the prompt accepts file_path, symbol_name, and goal parameters."""
         from code_scalpel.mcp.prompts import safe_refactor
 
-        result = safe_refactor(
-            "/path/to/file.py", "my_function", "optimize performance"
-        )
+        result = safe_refactor("/path/to/file.py", "my_function", "optimize performance")
 
         assert isinstance(result, list)
         assert len(result) > 0
@@ -243,9 +241,7 @@ class TestPromptDiscoverability:
         ]
 
         for prompt_name in expected_prompts:
-            assert hasattr(
-                prompts, prompt_name
-            ), f"{prompt_name} not found in prompts module"
+            assert hasattr(prompts, prompt_name), f"{prompt_name} not found in prompts module"
             func = getattr(prompts, prompt_name)
             assert callable(func), f"{prompt_name} is not callable"
 

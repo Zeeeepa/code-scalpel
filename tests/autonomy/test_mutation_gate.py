@@ -124,9 +124,7 @@ class TestMutationGateHollowFixDetection:
         sandbox = Mock(spec=SandboxExecutor)
 
         # [20251217_REFACTOR] Use helper to reduce verbosity
-        sandbox.run_tests.side_effect = create_responses(
-            fixed_passes=True, revert_fails=True, additional_caught=5
-        )
+        sandbox.run_tests.side_effect = create_responses(fixed_passes=True, revert_fails=True, additional_caught=5)
 
         # Execute
         gate = MutationTestGate(sandbox=sandbox, min_mutation_score=1.0)
@@ -154,9 +152,7 @@ class TestMutationGateHollowFixDetection:
             stdout="",
             stderr="Test failed",
             execution_time_ms=100,
-            tests=[
-                ExecutionTestResult(name="test_feature", passed=False, duration_ms=50)
-            ],
+            tests=[ExecutionTestResult(name="test_feature", passed=False, duration_ms=50)],
         )
 
         # Execute
@@ -292,11 +288,7 @@ def multi_function(x):
         )
 
         # Assert - score should be at least 0.75
-        score = (
-            result.mutations_caught / result.mutations_tested
-            if result.mutations_tested > 0
-            else 0
-        )
+        score = result.mutations_caught / result.mutations_tested if result.mutations_tested > 0 else 0
         assert score >= 0.75  # Meets threshold
         assert result.mutations_survived >= 1  # At least one survives
         assert result.passed  # Meets 0.75 threshold
@@ -311,9 +303,7 @@ def multi_function(x):
             create_passing_result(),  # Mutation 1 survives
             create_passing_result(),  # Mutation 2 survives
         ]
-        responses.extend(
-            [create_passing_result() for _ in range(5)]
-        )  # More mutations survive
+        responses.extend([create_passing_result() for _ in range(5)])  # More mutations survive
         sandbox.run_tests.side_effect = responses
 
         code = """
@@ -335,15 +325,9 @@ def weak_tests(x):
         )
 
         # Assert - score below 80% threshold (only revert caught, rest survive)
-        score = (
-            result.mutations_caught / result.mutations_tested
-            if result.mutations_tested > 0
-            else 0
-        )
+        score = result.mutations_caught / result.mutations_tested if result.mutations_tested > 0 else 0
         assert score < 0.8  # Below threshold
-        assert (
-            result.mutations_survived > result.mutations_caught
-        )  # More survive than caught
+        assert result.mutations_survived > result.mutations_caught  # More survive than caught
         assert not result.passed  # Failed gate
 
     def test_passes_with_perfect_score(self):
@@ -351,9 +335,7 @@ def weak_tests(x):
         # Setup - all mutations caught
         sandbox = Mock(spec=SandboxExecutor)
         responses = [create_passing_result()]  # Fixed passes
-        responses.extend(
-            [create_failing_result() for _ in range(10)]
-        )  # All mutations caught
+        responses.extend([create_failing_result() for _ in range(10)])  # All mutations caught
         sandbox.run_tests.side_effect = responses
 
         code = "def func(x):\n    if x > 0:\n        return x\n    return 0"
@@ -401,12 +383,8 @@ class TestWeakTestIdentification:
                 stderr="",
                 execution_time_ms=100,
                 tests=[
-                    ExecutionTestResult(
-                        name="test_basic", passed=False, duration_ms=50
-                    ),
-                    ExecutionTestResult(
-                        name="test_edge", passed=True, duration_ms=50
-                    ),  # Weak!
+                    ExecutionTestResult(name="test_basic", passed=False, duration_ms=50),
+                    ExecutionTestResult(name="test_edge", passed=True, duration_ms=50),  # Weak!
                 ],
             ),
             # Mutation 1 survives - test_edge doesn't catch
@@ -418,9 +396,7 @@ class TestWeakTestIdentification:
                 execution_time_ms=100,
                 tests=[
                     ExecutionTestResult(name="test_basic", passed=True, duration_ms=50),
-                    ExecutionTestResult(
-                        name="test_edge", passed=True, duration_ms=50
-                    ),  # Weak!
+                    ExecutionTestResult(name="test_edge", passed=True, duration_ms=50),  # Weak!
                 ],
             ),
         ]
@@ -473,14 +449,10 @@ class TestWeakTestIdentification:
                 stdout="",
                 stderr="",
                 execution_time_ms=100,
-                tests=[
-                    ExecutionTestResult(name="test_weak", passed=True, duration_ms=50)
-                ],
+                tests=[ExecutionTestResult(name="test_weak", passed=True, duration_ms=50)],
             ),
         ]
-        responses.extend(
-            [create_passing_result() for _ in range(5)]
-        )  # More mutations survive
+        responses.extend([create_passing_result() for _ in range(5)])  # More mutations survive
         sandbox.run_tests.side_effect = responses
 
         code = "def func(x):\n    if x > 0:\n        return x\n    return 0"
@@ -519,12 +491,8 @@ class TestMutationGateIntegration:
                 stderr="",
                 execution_time_ms=200,
                 tests=[
-                    ExecutionTestResult(
-                        name="test_positive", passed=True, duration_ms=50
-                    ),
-                    ExecutionTestResult(
-                        name="test_negative", passed=True, duration_ms=50
-                    ),
+                    ExecutionTestResult(name="test_positive", passed=True, duration_ms=50),
+                    ExecutionTestResult(name="test_negative", passed=True, duration_ms=50),
                     ExecutionTestResult(name="test_zero", passed=True, duration_ms=50),
                     ExecutionTestResult(name="test_edge", passed=True, duration_ms=50),
                 ],
@@ -537,12 +505,8 @@ class TestMutationGateIntegration:
                 stderr="2 failed",
                 execution_time_ms=150,
                 tests=[
-                    ExecutionTestResult(
-                        name="test_positive", passed=False, duration_ms=50
-                    ),
-                    ExecutionTestResult(
-                        name="test_negative", passed=False, duration_ms=50
-                    ),
+                    ExecutionTestResult(name="test_positive", passed=False, duration_ms=50),
+                    ExecutionTestResult(name="test_negative", passed=False, duration_ms=50),
                     ExecutionTestResult(name="test_zero", passed=True, duration_ms=25),
                     ExecutionTestResult(name="test_edge", passed=True, duration_ms=25),
                 ],
@@ -555,20 +519,14 @@ class TestMutationGateIntegration:
                 stderr="1 failed",
                 execution_time_ms=150,
                 tests=[
-                    ExecutionTestResult(
-                        name="test_positive", passed=False, duration_ms=50
-                    ),
-                    ExecutionTestResult(
-                        name="test_negative", passed=True, duration_ms=50
-                    ),
+                    ExecutionTestResult(name="test_positive", passed=False, duration_ms=50),
+                    ExecutionTestResult(name="test_negative", passed=True, duration_ms=50),
                     ExecutionTestResult(name="test_zero", passed=True, duration_ms=25),
                     ExecutionTestResult(name="test_edge", passed=True, duration_ms=25),
                 ],
             ),
         ]
-        responses.extend(
-            [create_failing_result() for _ in range(5)]
-        )  # Additional mutations caught
+        responses.extend([create_failing_result() for _ in range(5)])  # Additional mutations caught
         sandbox.run_tests.side_effect = responses
 
         original_buggy = """

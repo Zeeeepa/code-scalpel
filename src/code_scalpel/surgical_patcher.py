@@ -17,8 +17,7 @@ Migration:
 import warnings
 
 warnings.warn(
-    "code_scalpel.surgical_patcher is deprecated. "
-    "Import from code_scalpel.surgery instead.",
+    "code_scalpel.surgical_patcher is deprecated. " "Import from code_scalpel.surgery instead.",
     DeprecationWarning,
     stacklevel=2,
 )

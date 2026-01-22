@@ -193,7 +193,7 @@ if x > 10:
     a = 1
 else:
     a = 0
-    
+
 if y > 5:
     b = 1
 else:

@@ -17,51 +17,50 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from tests.tool_exercise.test_fixtures import (
-    PYTHON_CODE_BASIC,
-    PYTHON_CODE_COMPLEX,
-    PYTHON_CODE_VULNERABLE,
-    JAVASCRIPT_CODE,
-    TYPESCRIPT_CODE_FRONTEND,
-    TYPESCRIPT_CODE_BACKEND,
-    JAVA_CODE,
-    SYMBOLIC_EXECUTION_CODE,
-)
-
 # Import MCP tool implementations
 from code_scalpel.mcp.tools.analyze import analyze_code
-from code_scalpel.mcp.tools.security import (
-    security_scan,
-    unified_sink_detect,
-    type_evaporation_scan,
-    scan_dependencies,
+from code_scalpel.mcp.tools.context import (
+    crawl_project,
+    get_file_context,
+    get_symbol_references,
 )
 from code_scalpel.mcp.tools.extraction import (
     extract_code,
     rename_symbol,
     update_symbol,
 )
-from code_scalpel.mcp.tools.symbolic import (
-    symbolic_execute,
-    generate_unit_tests,
-    simulate_refactor,
-)
-from code_scalpel.mcp.tools.context import (
-    crawl_project,
-    get_file_context,
-    get_symbol_references,
-)
 from code_scalpel.mcp.tools.graph import (
+    cross_file_security_scan,
     get_call_graph,
+    get_cross_file_dependencies,
     get_graph_neighborhood,
     get_project_map,
-    get_cross_file_dependencies,
-    cross_file_security_scan,
 )
 from code_scalpel.mcp.tools.policy import (
+    code_policy_check,
     validate_paths,
     verify_policy_integrity,
-    code_policy_check,
+)
+from code_scalpel.mcp.tools.security import (
+    scan_dependencies,
+    security_scan,
+    type_evaporation_scan,
+    unified_sink_detect,
+)
+from code_scalpel.mcp.tools.symbolic import (
+    generate_unit_tests,
+    simulate_refactor,
+    symbolic_execute,
+)
+from tests.tool_exercise.test_fixtures import (
+    JAVA_CODE,
+    JAVASCRIPT_CODE,
+    PYTHON_CODE_BASIC,
+    PYTHON_CODE_COMPLEX,
+    PYTHON_CODE_VULNERABLE,
+    SYMBOLIC_EXECUTION_CODE,
+    TYPESCRIPT_CODE_BACKEND,
+    TYPESCRIPT_CODE_FRONTEND,
 )
 
 
@@ -81,11 +80,7 @@ class ToolExerciser:
         if hasattr(obj, "dict"):
             return obj.dict()
         if hasattr(obj, "__dict__"):
-            return {
-                k: self.to_serializable(v)
-                for k, v in obj.__dict__.items()
-                if not k.startswith("_")
-            }
+            return {k: self.to_serializable(v) for k, v in obj.__dict__.items() if not k.startswith("_")}
         if isinstance(obj, dict):
             return {k: self.to_serializable(v) for k, v in obj.items()}
         if isinstance(obj, (list, tuple)):
@@ -129,13 +124,9 @@ class ToolExerciser:
             if hasattr(output, "vulnerability_count"):
                 print(f"  Vulnerabilities: {output.vulnerability_count}")
             if hasattr(output, "functions"):
-                print(
-                    f"  Functions found: {len(output.functions) if output.functions else 0}"
-                )
+                print(f"  Functions found: {len(output.functions) if output.functions else 0}")
             if hasattr(output, "classes"):
-                print(
-                    f"  Classes found: {len(output.classes) if output.classes else 0}"
-                )
+                print(f"  Classes found: {len(output.classes) if output.classes else 0}")
 
         except Exception as e:
             end = datetime.now()
@@ -165,9 +156,7 @@ class ToolExerciser:
         print("#" * 80)
 
         # 1. analyze_code
-        await self.exercise_tool(
-            "analyze_code", analyze_code, code=PYTHON_CODE_COMPLEX, language="python"
-        )
+        await self.exercise_tool("analyze_code", analyze_code, code=PYTHON_CODE_COMPLEX, language="python")
 
         # Test polyglot support
         await self.exercise_tool(
@@ -177,9 +166,7 @@ class ToolExerciser:
             language="javascript",
         )
 
-        await self.exercise_tool(
-            "analyze_code_java", analyze_code, code=JAVA_CODE, language="java"
-        )
+        await self.exercise_tool("analyze_code_java", analyze_code, code=JAVA_CODE, language="java")
 
         # 2. extract_code
         await self.exercise_tool(
@@ -202,9 +189,7 @@ class ToolExerciser:
 
         # 3. update_symbol - skip actual file modification, test with in-memory
         # Note: This tool requires a real file, so we'll create a temp file
-        temp_file = (
-            self.project_root / "tests" / "tool_exercise" / "temp_update_test.py"
-        )
+        temp_file = self.project_root / "tests" / "tool_exercise" / "temp_update_test.py"
         temp_file.write_text(PYTHON_CODE_BASIC)
         try:
             await self.exercise_tool(
@@ -224,9 +209,7 @@ class ToolExerciser:
                 temp_file.unlink()
 
         # 4. rename_symbol - test with temp file
-        temp_file = (
-            self.project_root / "tests" / "tool_exercise" / "temp_rename_test.py"
-        )
+        temp_file = self.project_root / "tests" / "tool_exercise" / "temp_rename_test.py"
         temp_file.write_text(PYTHON_CODE_BASIC)
         try:
             await self.exercise_tool(
@@ -288,12 +271,8 @@ class ToolExerciser:
         print("#" * 80)
 
         # 9. get_file_context
-        test_file = (
-            self.project_root / "src" / "code_scalpel" / "mcp" / "tools" / "analyze.py"
-        )
-        await self.exercise_tool(
-            "get_file_context", get_file_context, file_path=str(test_file)
-        )
+        test_file = self.project_root / "src" / "code_scalpel" / "mcp" / "tools" / "analyze.py"
+        await self.exercise_tool("get_file_context", get_file_context, file_path=str(test_file))
 
         # 10. get_symbol_references
         await self.exercise_tool(
@@ -359,14 +338,10 @@ class ToolExerciser:
         print("#" * 80)
 
         # 16. security_scan
-        await self.exercise_tool(
-            "security_scan", security_scan, code=PYTHON_CODE_VULNERABLE
-        )
+        await self.exercise_tool("security_scan", security_scan, code=PYTHON_CODE_VULNERABLE)
 
         # Test with clean code too
-        await self.exercise_tool(
-            "security_scan_clean", security_scan, code=PYTHON_CODE_BASIC
-        )
+        await self.exercise_tool("security_scan_clean", security_scan, code=PYTHON_CODE_BASIC)
 
         # 17. unified_sink_detect
         await self.exercise_tool(
@@ -437,16 +412,7 @@ class ToolExerciser:
         await self.exercise_tool(
             "code_policy_check",
             code_policy_check,
-            paths=[
-                str(
-                    self.project_root
-                    / "src"
-                    / "code_scalpel"
-                    / "mcp"
-                    / "tools"
-                    / "analyze.py"
-                )
-            ],
+            paths=[str(self.project_root / "src" / "code_scalpel" / "mcp" / "tools" / "analyze.py")],
             rules=["naming_conventions", "docstrings"],
             compliance_standards=None,
             generate_report=False,
@@ -462,9 +428,7 @@ class ToolExerciser:
         print("EXERCISE COMPLETE - SUMMARY")
         print("=" * 80)
 
-        success_count = sum(
-            1 for r in self.results.values() if r["status"] == "success"
-        )
+        success_count = sum(1 for r in self.results.values() if r["status"] == "success")
         error_count = sum(1 for r in self.results.values() if r["status"] == "error")
 
         print(f"\nTotal tools tested: {len(self.results)}")
@@ -485,12 +449,8 @@ class ToolExerciser:
         output = {
             "timestamp": self.start_time.isoformat() if self.start_time else None,
             "tools_tested": len(self.results),
-            "success_count": sum(
-                1 for r in self.results.values() if r["status"] == "success"
-            ),
-            "error_count": sum(
-                1 for r in self.results.values() if r["status"] == "error"
-            ),
+            "success_count": sum(1 for r in self.results.values() if r["status"] == "success"),
+            "error_count": sum(1 for r in self.results.values() if r["status"] == "error"),
             "results": self.results,
         }
 

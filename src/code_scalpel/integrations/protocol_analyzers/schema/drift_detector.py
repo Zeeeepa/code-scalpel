@@ -44,7 +44,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, cast
 
 
 class ChangeType(Enum):
@@ -84,8 +84,8 @@ class SchemaChange:
     path: str  # JSON path to the changed element
     field_name: str
     message: str
-    old_value: Optional[Any] = None
-    new_value: Optional[Any] = None
+    old_value: Any | None = None
+    new_value: Any | None = None
 
     def __str__(self) -> str:
         return f"[{self.severity.value}] {self.path}: {self.message}"
@@ -98,24 +98,24 @@ class SchemaDriftResult:
     old_version: str = ""
     new_version: str = ""
     schema_type: str = ""  # "protobuf", "json_schema", "openapi"
-    changes: List[SchemaChange] = field(default_factory=list)
+    changes: list[SchemaChange] = field(default_factory=list)
 
     def has_breaking_changes(self) -> bool:
         """Check if any breaking changes were detected."""
         return any(c.severity == ChangeSeverity.BREAKING for c in self.changes)
 
     @property
-    def breaking_changes(self) -> List[SchemaChange]:
+    def breaking_changes(self) -> list[SchemaChange]:
         """Get only breaking changes."""
         return [c for c in self.changes if c.severity == ChangeSeverity.BREAKING]
 
     @property
-    def warnings(self) -> List[SchemaChange]:
+    def warnings(self) -> list[SchemaChange]:
         """Get warning-level changes."""
         return [c for c in self.changes if c.severity == ChangeSeverity.WARNING]
 
     @property
-    def info_changes(self) -> List[SchemaChange]:
+    def info_changes(self) -> list[SchemaChange]:
         """Get info-level changes."""
         return [c for c in self.changes if c.severity == ChangeSeverity.INFO]
 
@@ -152,9 +152,9 @@ class ProtobufField:
     number: int
     type: str
     label: str = "optional"  # optional, required, repeated
-    default: Optional[str] = None
+    default: str | None = None
     deprecated: bool = False
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -162,7 +162,7 @@ class ProtobufEnum:
     """Represents a Protobuf enum."""
 
     name: str
-    values: Dict[str, int] = field(default_factory=dict)  # name -> number
+    values: dict[str, int] = field(default_factory=dict)  # name -> number
 
 
 @dataclass
@@ -170,9 +170,9 @@ class ProtobufMessage:
     """Represents a Protobuf message."""
 
     name: str
-    fields: Dict[str, ProtobufField] = field(default_factory=dict)
-    nested_messages: Dict[str, "ProtobufMessage"] = field(default_factory=dict)
-    nested_enums: Dict[str, ProtobufEnum] = field(default_factory=dict)
+    fields: dict[str, ProtobufField] = field(default_factory=dict)
+    nested_messages: dict[str, ProtobufMessage] = field(default_factory=dict)
+    nested_enums: dict[str, ProtobufEnum] = field(default_factory=dict)
 
 
 @dataclass
@@ -181,9 +181,9 @@ class ProtobufSchema:
 
     syntax: str = "proto3"
     package: str = ""
-    messages: Dict[str, ProtobufMessage] = field(default_factory=dict)
-    enums: Dict[str, ProtobufEnum] = field(default_factory=dict)
-    services: Dict[str, Dict[str, Tuple[str, str]]] = field(
+    messages: dict[str, ProtobufMessage] = field(default_factory=dict)
+    enums: dict[str, ProtobufEnum] = field(default_factory=dict)
+    services: dict[str, dict[str, tuple[str, str]]] = field(
         default_factory=dict
     )  # service -> {rpc_name: (request, response)}
 
@@ -204,17 +204,11 @@ class ProtobufParser:
     MESSAGE_PATTERN = re.compile(r"message\s+(\w+)\s*\{")
     ENUM_PATTERN = re.compile(r"enum\s+(\w+)\s*\{")
     FIELD_PATTERN = re.compile(
-        r"(optional|required|repeated)?\s*"
-        r"(\w+)\s+"
-        r"(\w+)\s*=\s*"
-        r"(\d+)\s*"
-        r"(?:\[(.*?)\])?\s*;"
+        r"(optional|required|repeated)?\s*" r"(\w+)\s+" r"(\w+)\s*=\s*" r"(\d+)\s*" r"(?:\[(.*?)\])?\s*;"
     )
     ENUM_VALUE_PATTERN = re.compile(r"(\w+)\s*=\s*(-?\d+)\s*;")
     SERVICE_PATTERN = re.compile(r"service\s+(\w+)\s*\{")
-    RPC_PATTERN = re.compile(
-        r"rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)"
-    )
+    RPC_PATTERN = re.compile(r"rpc\s+(\w+)\s*\(\s*(\w+)\s*\)\s*returns\s*\(\s*(\w+)\s*\)")
 
     def parse(self, proto_content: str) -> ProtobufSchema:
         """
@@ -260,9 +254,9 @@ class ProtobufParser:
         content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
         return content
 
-    def _parse_messages(self, content: str) -> Dict[str, ProtobufMessage]:
+    def _parse_messages(self, content: str) -> dict[str, ProtobufMessage]:
         """Parse all message definitions."""
-        messages: Dict[str, ProtobufMessage] = {}
+        messages: dict[str, ProtobufMessage] = {}
 
         # Find all message blocks
         for match in self.MESSAGE_PATTERN.finditer(content):
@@ -347,9 +341,9 @@ class ProtobufParser:
 
         return enum
 
-    def _parse_top_level_enums(self, content: str) -> Dict[str, ProtobufEnum]:
+    def _parse_top_level_enums(self, content: str) -> dict[str, ProtobufEnum]:
         """Parse top-level enum definitions (not nested in messages)."""
-        enums: Dict[str, ProtobufEnum] = {}
+        enums: dict[str, ProtobufEnum] = {}
 
         # This is simplified - would need to exclude enums inside messages
         for match in self.ENUM_PATTERN.finditer(content):
@@ -371,9 +365,9 @@ class ProtobufParser:
 
         return enums
 
-    def _parse_services(self, content: str) -> Dict[str, Dict[str, Tuple[str, str]]]:
+    def _parse_services(self, content: str) -> dict[str, dict[str, tuple[str, str]]]:
         """Parse service definitions."""
-        services: Dict[str, Dict[str, Tuple[str, str]]] = {}
+        services: dict[str, dict[str, tuple[str, str]]] = {}
 
         for match in self.SERVICE_PATTERN.finditer(content):
             service_name = match.group(1)
@@ -389,7 +383,7 @@ class ProtobufParser:
                 end += 1
 
             service_body = content[start : end - 1]
-            rpcs: Dict[str, Tuple[str, str]] = {}
+            rpcs: dict[str, tuple[str, str]] = {}
 
             for rpc_match in self.RPC_PATTERN.finditer(service_body):
                 rpc_name = rpc_match.group(1)
@@ -503,9 +497,7 @@ class SchemaDriftDetector:
             old_msg = old_schema.messages[name]
             new_msg = new_schema.messages[name]
             self._compare_protobuf_fields(old_msg, new_msg, name, result)
-            self._compare_protobuf_enums(
-                old_msg.nested_enums, new_msg.nested_enums, name, result
-            )
+            self._compare_protobuf_enums(old_msg.nested_enums, new_msg.nested_enums, name, result)
 
     def _compare_protobuf_fields(
         self,
@@ -628,8 +620,8 @@ class SchemaDriftDetector:
 
     def _compare_protobuf_enums(
         self,
-        old_enums: Dict[str, ProtobufEnum],
-        new_enums: Dict[str, ProtobufEnum],
+        old_enums: dict[str, ProtobufEnum],
+        new_enums: dict[str, ProtobufEnum],
         parent_path: str,
         result: SchemaDriftResult,
     ) -> None:
@@ -784,8 +776,8 @@ class SchemaDriftDetector:
 
     def compare_json_schema(
         self,
-        old_schema: Union[str, Dict],
-        new_schema: Union[str, Dict],
+        old_schema: str | dict,
+        new_schema: str | dict,
         old_version: str = "",
         new_version: str = "",
     ) -> SchemaDriftResult:
@@ -814,8 +806,8 @@ class SchemaDriftDetector:
             new_schema = json.loads(new_schema)
 
         # Cast to Dict after parsing to satisfy type checker
-        old_schema = cast(Dict[str, Any], old_schema)
-        new_schema = cast(Dict[str, Any], new_schema)
+        old_schema = cast(dict[str, Any], old_schema)
+        new_schema = cast(dict[str, Any], new_schema)
 
         # Compare schemas
         self._compare_json_schema_recursive(old_schema, new_schema, "#", result)
@@ -824,8 +816,8 @@ class SchemaDriftDetector:
 
     def _compare_json_schema_recursive(
         self,
-        old: Dict[str, Any],
-        new: Dict[str, Any],
+        old: dict[str, Any],
+        new: dict[str, Any],
         path: str,
         result: SchemaDriftResult,
     ) -> None:
@@ -873,11 +865,7 @@ class SchemaDriftDetector:
         for prop in new_prop_names - old_prop_names:
             is_required = prop in new_required
             severity = ChangeSeverity.BREAKING if is_required else ChangeSeverity.INFO
-            change_type = (
-                ChangeType.REQUIRED_FIELD_ADDED
-                if is_required
-                else ChangeType.OPTIONAL_FIELD_ADDED
-            )
+            change_type = ChangeType.REQUIRED_FIELD_ADDED if is_required else ChangeType.OPTIONAL_FIELD_ADDED
 
             result.changes.append(
                 SchemaChange(
@@ -957,8 +945,8 @@ class SchemaDriftDetector:
 
 
 def compare_protobuf_files(
-    old_path: Union[str, Path],
-    new_path: Union[str, Path],
+    old_path: str | Path,
+    new_path: str | Path,
 ) -> SchemaDriftResult:
     """
     Convenience function to compare two .proto files.
@@ -986,8 +974,8 @@ def compare_protobuf_files(
 
 
 def compare_json_schema_files(
-    old_path: Union[str, Path],
-    new_path: Union[str, Path],
+    old_path: str | Path,
+    new_path: str | Path,
 ) -> SchemaDriftResult:
     """
     Convenience function to compare two JSON Schema files.

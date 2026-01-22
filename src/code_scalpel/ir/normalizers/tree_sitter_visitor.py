@@ -40,8 +40,9 @@ Node Field Access:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 from ..nodes import IRNode, SourceLocation
 
@@ -64,8 +65,8 @@ class VisitorContext:
     filename: str = "<string>"
     source: str = ""
     # [20251220_BUGFIX] Wrap None-defaulting fields with Optional
-    parent_chain: Optional[List[Any]] = None
-    scope_stack: Optional[List[str]] = None
+    parent_chain: list[Any] | None = None
+    scope_stack: list[str] | None = None
 
     def __post_init__(self):
         if self.parent_chain is None:
@@ -106,7 +107,7 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
 
     def __init__(self):
         self.ctx: VisitorContext = VisitorContext()
-        self._handlers: Dict[str, Callable] = {}
+        self._handlers: dict[str, Callable] = {}
         self._register_handlers()
 
     @property
@@ -121,12 +122,12 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         pass
 
     @abstractmethod
-    def _get_children(self, node: TSNode) -> List[TSNode]:
+    def _get_children(self, node: TSNode) -> list[TSNode]:
         """Get list of child nodes."""
         pass
 
     @abstractmethod
-    def _get_named_children(self, node: TSNode) -> List[TSNode]:
+    def _get_named_children(self, node: TSNode) -> list[TSNode]:
         """Get list of named (non-anonymous) child nodes."""
         pass
 
@@ -141,12 +142,12 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         pass
 
     @abstractmethod
-    def _get_child_by_field(self, node: TSNode, field_name: str) -> Optional[TSNode]:
+    def _get_child_by_field(self, node: TSNode, field_name: str) -> TSNode | None:
         """Get a child node by its field name."""
         pass
 
     @abstractmethod
-    def _get_children_by_field(self, node: TSNode, field_name: str) -> List[TSNode]:
+    def _get_children_by_field(self, node: TSNode, field_name: str) -> list[TSNode]:
         """Get all children with a given field name."""
         pass
 
@@ -181,7 +182,7 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
     # Core Visitor Logic
     # =========================================================================
 
-    def visit(self, node: TSNode) -> Union[IRNode, List[IRNode], None]:
+    def visit(self, node: TSNode) -> IRNode | list[IRNode] | None:
         """
         Visit a node and return its IR representation.
 
@@ -217,7 +218,7 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
             if self.ctx.parent_chain is not None:
                 self.ctx.parent_chain.pop()
 
-    def generic_visit(self, node: TSNode) -> Union[IRNode, List[IRNode], None]:
+    def generic_visit(self, node: TSNode) -> IRNode | list[IRNode] | None:
         """
         Default visitor for unhandled node types.
 
@@ -238,7 +239,7 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
 
         return results if results else None
 
-    def visit_children(self, node: TSNode) -> List[IRNode]:
+    def visit_children(self, node: TSNode) -> list[IRNode]:
         """
         Visit all children and collect non-None results.
 
@@ -345,28 +346,24 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         """Get source text for a node."""
         return self._get_text(node)
 
-    def get_child_by_field(self, node: TSNode, field: str) -> Optional[TSNode]:
+    def get_child_by_field(self, node: TSNode, field: str) -> TSNode | None:
         """Get child by field name."""
         return self._get_child_by_field(node, field)
 
-    def get_children_by_field(self, node: TSNode, field: str) -> List[TSNode]:
+    def get_children_by_field(self, node: TSNode, field: str) -> list[TSNode]:
         """Get all children with field name."""
         return self._get_children_by_field(node, field)
 
-    def find_child_by_type(self, node: TSNode, node_type: str) -> Optional[TSNode]:
+    def find_child_by_type(self, node: TSNode, node_type: str) -> TSNode | None:
         """Find first child of a specific type."""
         for child in self._get_children(node):
             if self._get_node_type(child) == node_type:
                 return child
         return None
 
-    def find_children_by_type(self, node: TSNode, node_type: str) -> List[TSNode]:
+    def find_children_by_type(self, node: TSNode, node_type: str) -> list[TSNode]:
         """Find all children of a specific type."""
-        return [
-            child
-            for child in self._get_children(node)
-            if self._get_node_type(child) == node_type
-        ]
+        return [child for child in self._get_children(node) if self._get_node_type(child) == node_type]
 
     def error(self, message: str, node: TSNode) -> None:
         """
@@ -390,7 +387,7 @@ class TreeSitterVisitor(ABC, Generic[TSNode]):
         import warnings
 
         loc = self._get_location(node)
-        warnings.warn(f"{loc}: {message}")
+        warnings.warn(f"{loc}: {message}", stacklevel=2)
 
     def debug_node(self, node: TSNode, indent: int = 0) -> str:
         """

@@ -8,6 +8,7 @@ Tests verify that security scanning features are correctly gated by tier:
 """
 
 import pytest
+
 from code_scalpel.mcp.helpers.security_helpers import _security_scan_sync
 
 # Sample vulnerable code snippets for testing
@@ -80,13 +81,13 @@ def process_user_input(user_id, query_text):
     conn = sqlite3.connect(':memory:')
     cursor = conn.cursor()
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
-    
+
     # Command injection
     os.system(f"echo {query_text}")
-    
+
     # Code injection
     result = eval(query_text)
-    
+
     # XSS vulnerability
     return render_template_string(f"<p>Result: {result}</p>")
 

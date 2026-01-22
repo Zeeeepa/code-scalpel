@@ -133,9 +133,7 @@ class SemanticAnalyzer:
 
             # Check binary operations with % (old-style formatting)
             if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Mod):
-                if isinstance(node.left, ast.Constant) and isinstance(
-                    node.left.value, str
-                ):
+                if isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
                     if any(kw in node.left.value.upper() for kw in self.SQL_KEYWORDS):
                         return True
 
@@ -435,10 +433,7 @@ class SemanticAnalyzer:
         # Java servlet response writing
         elif language_lower == "java":
             if "response.getWriter()" in code or "PrintWriter" in code:
-                if any(
-                    req_access in code
-                    for req_access in ["request.getParameter", "getQueryString"]
-                ):
+                if any(req_access in code for req_access in ["request.getParameter", "getQueryString"]):
                     return True
 
         return False
@@ -701,11 +696,7 @@ class SemanticAnalyzer:
 
         # Java XXE
         elif language.lower() == "java":
-            if (
-                "DocumentBuilder" in code
-                or "SAXParser" in code
-                or "XMLInputFactory" in code
-            ):
+            if "DocumentBuilder" in code or "SAXParser" in code or "XMLInputFactory" in code:
                 # Check for XXE prevention patterns
                 safe_patterns = [
                     "XMLConstants.ACCESS_EXTERNAL",

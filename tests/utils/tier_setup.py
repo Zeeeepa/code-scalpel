@@ -25,7 +25,7 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 # [20260120_TEST] Candidate license locations (ordered)
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -45,18 +45,14 @@ ENTERPRISE_CANDIDATES = [
 Tier = Literal["community", "pro", "enterprise"]
 
 
-def _find_license_for_tier(tier: Tier) -> Optional[Path]:
+def _find_license_for_tier(tier: Tier) -> Path | None:
     """Find a valid license file for the requested tier.
 
     Returns first existing path from candidates; does not validate cryptographically here
     to allow early env var setup before server import. Validation will occur in the product
     code at runtime.
     """
-    candidates = (
-        PRO_CANDIDATES
-        if tier == "pro"
-        else (ENTERPRISE_CANDIDATES if tier == "enterprise" else [])
-    )
+    candidates = PRO_CANDIDATES if tier == "pro" else (ENTERPRISE_CANDIDATES if tier == "enterprise" else [])
     for path in candidates:
         if path.exists() and path.is_file():
             # Defer token validation to app code
@@ -70,7 +66,7 @@ def clear_tier_caches() -> None:
     Safe to call before and after tests. Avoids cross-test leakage.
     """
     try:
-        from code_scalpel.licensing import jwt_validator, config_loader  # type: ignore
+        from code_scalpel.licensing import config_loader, jwt_validator  # type: ignore
 
         jwt_validator._LICENSE_VALIDATION_CACHE = None  # type: ignore[attr-defined]
         config_loader.clear_cache()  # type: ignore[attr-defined]
@@ -82,12 +78,12 @@ def clear_tier_caches() -> None:
         from code_scalpel.mcp import server  # type: ignore
 
         if hasattr(server, "_cached_tier"):
-            setattr(server, "_cached_tier", None)
+            server._cached_tier = None
     except Exception:
         pass
 
 
-def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Optional[Path]:
+def activate_tier(tier: Tier, *, skip_if_missing: bool = False) -> Path | None:
     """Activate a tier by setting environment variables before imports.
 
     - community: disables license discovery and removes LICENSE_PATH

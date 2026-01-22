@@ -16,10 +16,11 @@ This module provides a unified interface for:
 import ast
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import astor
 import networkx as nx
@@ -28,9 +29,9 @@ import networkx as nx
 CODE_PARSERS_AVAILABLE = False
 ParserFactory: Any = None
 ParserLanguage: Any = None
-_detect_language_func: Optional[Callable[..., Any]] = None
+_detect_language_func: Callable[..., Any] | None = None
 PolyglotExtractor: Any = None
-_extract_from_code: Optional[Callable[..., Any]] = None
+_extract_from_code: Callable[..., Any] | None = None
 
 try:
     from code_scalpel.code_parsers.base_parser import (
@@ -127,9 +128,9 @@ class AnalysisResult:
     """Complete result of code analysis."""
 
     code: str
-    ast_tree: Optional[ast.AST] = None
-    pdg: Optional[nx.DiGraph] = None
-    call_graph: Optional[nx.DiGraph] = None
+    ast_tree: ast.AST | None = None
+    pdg: nx.DiGraph | None = None
+    call_graph: nx.DiGraph | None = None
     dead_code: list[DeadCodeItem] = field(default_factory=list)
     metrics: AnalysisMetrics = field(default_factory=AnalysisMetrics)
     security_issues: list[dict[str, Any]] = field(default_factory=list)
@@ -138,7 +139,7 @@ class AnalysisResult:
     symbolic_paths: list[dict[str, Any]] = field(default_factory=list)
     # Multi-language support
     language: str = "python"
-    parser_result: Optional[Any] = None  # Raw ParseResult from code_parsers
+    parser_result: Any | None = None  # Raw ParseResult from code_parsers
     functions: list[str] = field(default_factory=list)  # Extracted function names
     classes: list[str] = field(default_factory=list)  # Extracted class names
 
@@ -163,7 +164,7 @@ class CodeAnalyzer:
         self,
         level: AnalysisLevel = AnalysisLevel.STANDARD,
         language: AnalysisLanguage = AnalysisLanguage.AUTO,
-        parser_backend: Optional[str] = None,
+        parser_backend: str | None = None,
         cache_enabled: bool = True,
         max_symbolic_depth: int = 50,
         max_loop_iterations: int = 10,
@@ -208,9 +209,9 @@ class CodeAnalyzer:
     def analyze(
         self,
         code: str,
-        level: Optional[AnalysisLevel] = None,
-        language: Optional[AnalysisLanguage] = None,
-        filepath: Optional[str] = None,
+        level: AnalysisLevel | None = None,
+        language: AnalysisLanguage | None = None,
+        filepath: str | None = None,
     ) -> AnalysisResult:
         """
         Perform comprehensive code analysis.
@@ -253,15 +254,10 @@ class CodeAnalyzer:
                 return result
 
             # Compute basic metrics
-            result.metrics = self._compute_metrics(
-                result.ast_tree, code, detected_lang, parse_result
-            )
+            result.metrics = self._compute_metrics(result.ast_tree, code, detected_lang, parse_result)
 
             # Step 2: Build PDG (if STANDARD or FULL level) - Python only for now
-            if (
-                analysis_level in (AnalysisLevel.STANDARD, AnalysisLevel.FULL)
-                and detected_lang == "python"
-            ):
+            if analysis_level in (AnalysisLevel.STANDARD, AnalysisLevel.FULL) and detected_lang == "python":
                 result.pdg, result.call_graph = self._build_pdg(code)
 
             # Step 3: Symbolic Execution (if FULL level) - Python only for now
@@ -270,9 +266,7 @@ class CodeAnalyzer:
 
             # Step 4: Dead code detection (requires Python AST)
             if result.ast_tree is not None:
-                result.dead_code = self._detect_dead_code(
-                    result.ast_tree, result.pdg, result.call_graph
-                )
+                result.dead_code = self._detect_dead_code(result.ast_tree, result.pdg, result.call_graph)
 
                 # Step 5: Security analysis (requires Python AST)
                 result.security_issues = self._analyze_security(result.ast_tree)
@@ -297,7 +291,7 @@ class CodeAnalyzer:
 
         return result
 
-    def _parse_to_ast(self, code: str) -> Optional[ast.AST]:
+    def _parse_to_ast(self, code: str) -> ast.AST | None:
         """Parse code to AST with caching."""
         if self.cache_enabled and code in self._ast_cache:
             return self._ast_cache[code]
@@ -314,7 +308,7 @@ class CodeAnalyzer:
     def _detect_language(
         self,
         code: str,
-        filepath: Optional[str],
+        filepath: str | None,
         language: AnalysisLanguage,
     ) -> str:
         """
@@ -395,7 +389,7 @@ class CodeAnalyzer:
         self,
         code: str,
         language: str,
-        filepath: Optional[str] = None,
+        filepath: str | None = None,
     ) -> dict[str, Any]:
         """
         Parse code using PolyglotExtractor for multi-language support.
@@ -438,9 +432,7 @@ class CodeAnalyzer:
                     lang_enum = Language[lang_enum_name]
 
                 # Create extractor with language detection
-                extractor = PolyglotExtractor(
-                    code, file_path=filepath, language=lang_enum
-                )
+                extractor = PolyglotExtractor(code, file_path=filepath, language=lang_enum)
 
                 # For Python, also populate AST for backward compatibility
                 if language == "python":
@@ -450,9 +442,7 @@ class CodeAnalyzer:
                     # Extract functions and classes from Python AST
                     if result["ast"]:
                         for node in ast.walk(result["ast"]):
-                            if isinstance(
-                                node, (ast.FunctionDef, ast.AsyncFunctionDef)
-                            ):
+                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                                 result["functions"].append(node.name)
                             elif isinstance(node, ast.ClassDef):
                                 result["classes"].append(node.name)
@@ -481,13 +471,8 @@ class CodeAnalyzer:
                                     result["classes"].append(node.name)
                                 # Also extract methods from class body
                                 for method in node.body:
-                                    if (
-                                        isinstance(method, IRFunctionDef)
-                                        and method.name
-                                    ):
-                                        result["functions"].append(
-                                            f"{node.name}.{method.name}"
-                                        )
+                                    if isinstance(method, IRFunctionDef) and method.name:
+                                        result["functions"].append(f"{node.name}.{method.name}")
 
                         # Store the IR module as parser_result
                         result["parser_result"] = ir_module
@@ -515,9 +500,7 @@ class CodeAnalyzer:
         result["errors"].append(f"No parser available for language: {language}")
         return result
 
-    def _extract_symbols_from_js_ast(
-        self, ast_data: Any
-    ) -> tuple[list[str], list[str]]:
+    def _extract_symbols_from_js_ast(self, ast_data: Any) -> tuple[list[str], list[str]]:
         """
         Extract function and class names from JavaScript/TypeScript AST.
 
@@ -545,9 +528,7 @@ class CodeAnalyzer:
 
         return functions, classes
 
-    def _walk_js_ast_dict(
-        self, node: dict, functions: list[str], classes: list[str]
-    ) -> None:
+    def _walk_js_ast_dict(self, node: dict, functions: list[str], classes: list[str]) -> None:
         """Walk a dictionary-based JavaScript AST."""
         if not isinstance(node, dict):
             return
@@ -574,8 +555,7 @@ class CodeAnalyzer:
             if (
                 "init" in node
                 and node["init"]
-                and node["init"].get("type")
-                in ("FunctionExpression", "ArrowFunctionExpression")
+                and node["init"].get("type") in ("FunctionExpression", "ArrowFunctionExpression")
                 and "id" in node
                 and node["id"]
                 and "name" in node["id"]
@@ -591,9 +571,7 @@ class CodeAnalyzer:
                     if isinstance(item, dict):
                         self._walk_js_ast_dict(item, functions, classes)
 
-    def _walk_js_ast_node(
-        self, node: Any, functions: list[str], classes: list[str]
-    ) -> None:
+    def _walk_js_ast_node(self, node: Any, functions: list[str], classes: list[str]) -> None:
         """Walk an object-based JavaScript AST (esprima Node objects)."""
         try:
             node_type = getattr(node, "type", None)
@@ -627,8 +605,8 @@ class CodeAnalyzer:
 
     def analyze_file(
         self,
-        filepath: Union[str, Path],
-        level: Optional[AnalysisLevel] = None,
+        filepath: str | Path,
+        level: AnalysisLevel | None = None,
     ) -> AnalysisResult:
         """
         Analyze a source file with automatic language detection.
@@ -677,10 +655,10 @@ class CodeAnalyzer:
 
     def _compute_metrics(
         self,
-        tree: Optional[ast.AST],
+        tree: ast.AST | None,
         code: str,
         language: str = "python",
-        parse_result: Optional[dict[str, Any]] = None,
+        parse_result: dict[str, Any] | None = None,
     ) -> AnalysisMetrics:
         """
         Compute code metrics from AST or IR.
@@ -690,9 +668,7 @@ class CodeAnalyzer:
         """
         metrics = AnalysisMetrics()
         metrics.language = language
-        metrics.parser_backend = (
-            parse_result.get("parser_backend", "ast") if parse_result else "ast"
-        )
+        metrics.parser_backend = parse_result.get("parser_backend", "ast") if parse_result else "ast"
 
         # Count lines of code (non-empty, non-comment)
         comment_chars = {
@@ -702,11 +678,7 @@ class CodeAnalyzer:
             "java": "//",
         }
         comment_char = comment_chars.get(language, "#")
-        lines = [
-            line
-            for line in code.split("\n")
-            if line.strip() and not line.strip().startswith(comment_char)
-        ]
+        lines = [line for line in code.split("\n") if line.strip() and not line.strip().startswith(comment_char)]
         metrics.lines_of_code = len(lines)
 
         # Extract metrics from parse_result if available
@@ -716,11 +688,7 @@ class CodeAnalyzer:
 
             # [20260105_BUGFIX] Calculate metrics from IR for non-Python languages
             parser_result = parse_result.get("parser_result")
-            if (
-                parser_result
-                and hasattr(parser_result, "body")
-                and language != "python"
-            ):
+            if parser_result and hasattr(parser_result, "body") and language != "python":
                 # Calculate metrics from IR nodes
                 ir_metrics = self._calculate_metrics_from_ir(parser_result, language)
                 metrics.cyclomatic_complexity = ir_metrics["cyclomatic_complexity"]
@@ -730,12 +698,8 @@ class CodeAnalyzer:
                 pr_metrics = parser_result.metrics
                 if isinstance(pr_metrics, dict):
                     metrics.halstead_volume = pr_metrics.get("halstead_volume", 0.0)
-                    metrics.halstead_difficulty = pr_metrics.get(
-                        "halstead_difficulty", 0.0
-                    )
-                    metrics.cognitive_complexity = pr_metrics.get(
-                        "cognitive_complexity", 0
-                    )
+                    metrics.halstead_difficulty = pr_metrics.get("halstead_difficulty", 0.0)
+                    metrics.cognitive_complexity = pr_metrics.get("cognitive_complexity", 0)
 
         # For Python AST, compute metrics directly
         if tree and language == "python":
@@ -772,18 +736,13 @@ class CodeAnalyzer:
                 # Simplified maintainability calculation
                 mi = max(
                     0,
-                    171
-                    - 5.2 * math.log(loc * 10 + 1)
-                    - 0.23 * cc
-                    - 16.2 * math.log(loc + 1),
+                    171 - 5.2 * math.log(loc * 10 + 1) - 0.23 * cc - 16.2 * math.log(loc + 1),
                 )
                 metrics.maintainability_index = min(100, mi)
 
         return metrics
 
-    def _calculate_metrics_from_ir(
-        self, ir_module: Any, language: str
-    ) -> dict[str, Any]:
+    def _calculate_metrics_from_ir(self, ir_module: Any, language: str) -> dict[str, Any]:
         """
         Calculate metrics from IR nodes for non-Python languages.
 
@@ -870,9 +829,7 @@ class CodeAnalyzer:
                                 cognitive += child_cogn
 
             # Walk generic nodes that might have body attributes
-            if hasattr(node, "body") and not isinstance(
-                node, (IRFunctionDef, IRClassDef, IRIf, IRWhile, IRFor, IRTry)
-            ):
+            if hasattr(node, "body") and not isinstance(node, (IRFunctionDef, IRClassDef, IRIf, IRWhile, IRFor, IRTry)):
                 if isinstance(node.body, list):
                     for child in node.body:
                         child_cyclo, child_cogn = walk_ir(child, nesting)
@@ -937,7 +894,7 @@ class CodeAnalyzer:
         return paths
 
     def _detect_dead_code(
-        self, tree: ast.AST, pdg: Optional[nx.DiGraph], call_graph: Optional[nx.DiGraph]
+        self, tree: ast.AST, pdg: nx.DiGraph | None, call_graph: nx.DiGraph | None
     ) -> list[DeadCodeItem]:
         """
         Detect dead code in the AST.
@@ -1033,9 +990,7 @@ class CodeAnalyzer:
                     name = alias.asname or alias.name
                     definitions["imports"][name] = {
                         "line": node.lineno,
-                        "module": (
-                            f"{node.module}.{alias.name}" if node.module else alias.name
-                        ),
+                        "module": (f"{node.module}.{alias.name}" if node.module else alias.name),
                     }
 
         return definitions
@@ -1102,9 +1057,7 @@ class CodeAnalyzer:
 
         return dead_code
 
-    def _find_unused_imports(
-        self, tree: ast.AST, uses: dict[str, set[str]]
-    ) -> list[DeadCodeItem]:
+    def _find_unused_imports(self, tree: ast.AST, uses: dict[str, set[str]]) -> list[DeadCodeItem]:
         """Find imports that are never used."""
         dead_code = []
         used_names = uses.get("imports", set())
@@ -1130,11 +1083,7 @@ class CodeAnalyzer:
                     if name not in used_names and alias.name != "*":
                         dead_code.append(
                             DeadCodeItem(
-                                name=(
-                                    f"{node.module}.{alias.name}"
-                                    if node.module
-                                    else alias.name
-                                ),
+                                name=(f"{node.module}.{alias.name}" if node.module else alias.name),
                                 code_type="import",
                                 line_start=node.lineno,
                                 line_end=node.lineno,
@@ -1156,9 +1105,7 @@ class CodeAnalyzer:
 
             # Check if this is a computation with no uses
             if node_data.get("type") == "assign":
-                has_data_dep = any(
-                    edge[2].get("type") == "data_dependency" for edge in out_edges
-                )
+                has_data_dep = any(edge[2].get("type") == "data_dependency" for edge in out_edges)
                 if not has_data_dep and "lineno" in node_data:
                     dead_code.append(
                         DeadCodeItem(
@@ -1226,7 +1173,7 @@ class CodeAnalyzer:
         return issues
 
     def _generate_refactor_suggestions(
-        self, tree: ast.AST, pdg: Optional[nx.DiGraph], dead_code: list[DeadCodeItem]
+        self, tree: ast.AST, pdg: nx.DiGraph | None, dead_code: list[DeadCodeItem]
     ) -> list[RefactorSuggestion]:
         """Generate refactoring suggestions based on analysis."""
         suggestions = []
@@ -1288,9 +1235,7 @@ class CodeAnalyzer:
 
         return max_depth
 
-    def apply_refactor(
-        self, code: str, refactor_type: str, target: Optional[str] = None, **options
-    ) -> str:
+    def apply_refactor(self, code: str, refactor_type: str, target: str | None = None, **options) -> str:
         """
         Apply a PDG-guided refactoring to the code.
 
@@ -1394,9 +1339,7 @@ class CodeAnalyzer:
             self.logger.debug(f"Failed to convert AST to source: {e}")
             return code
 
-    def _rename_variable(
-        self, code: str, tree: ast.AST, old_name: str, new_name: str
-    ) -> str:
+    def _rename_variable(self, code: str, tree: ast.AST, old_name: str, new_name: str) -> str:
         """Rename a variable throughout the code."""
 
         class VariableRenamer(ast.NodeTransformer):
@@ -1476,9 +1419,7 @@ class CodeAnalyzer:
             lines.append(f"\n{code_type.title()}s ({len(items)}):")
             for item in items:
                 confidence_pct = int(item.confidence * 100)
-                lines.append(
-                    f"  - {item.name} (line {item.line_start}, {confidence_pct}% confidence)"
-                )
+                lines.append(f"  - {item.name} (line {item.line_start}, {confidence_pct}% confidence)")
                 lines.append(f"    Reason: {item.reason}")
 
         return "\n".join(lines)
@@ -1491,7 +1432,7 @@ class CodeAnalyzer:
             self.call_graph = nx.DiGraph()
             self.var_defs: dict[str, str] = {}
             self.control_deps: list[str] = []
-            self.current_function: Optional[str] = None
+            self.current_function: str | None = None
             self.node_counter = 0
 
         def _get_node_id(self, prefix: str) -> str:
@@ -1550,9 +1491,7 @@ class CodeAnalyzer:
             # Add data dependencies
             for var in self._extract_variables(node.value):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Add control dependencies
             for ctrl_node in self.control_deps:
@@ -1572,9 +1511,7 @@ class CodeAnalyzer:
             # Add data dependencies for condition
             for var in self._extract_variables(node.test):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Add control dependencies
             for ctrl_node in self.control_deps:
@@ -1603,9 +1540,7 @@ class CodeAnalyzer:
             # Add data dependencies for iterator
             for var in self._extract_variables(node.iter):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Process body
             self.control_deps.append(node_id)
@@ -1621,9 +1556,7 @@ class CodeAnalyzer:
             # Add data dependencies for condition
             for var in self._extract_variables(node.test):
                 if var in self.var_defs:
-                    self.graph.add_edge(
-                        self.var_defs[var], node_id, type="data_dependency"
-                    )
+                    self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             # Process body
             self.control_deps.append(node_id)
@@ -1640,9 +1573,7 @@ class CodeAnalyzer:
             elif isinstance(node.func, ast.Attribute):
                 func_name = node.func.attr
 
-            self.graph.add_node(
-                node_id, type="call", function=func_name, lineno=node.lineno
-            )
+            self.graph.add_node(node_id, type="call", function=func_name, lineno=node.lineno)
 
             # Add to call graph
             if self.current_function and func_name:
@@ -1652,9 +1583,7 @@ class CodeAnalyzer:
             for arg in node.args:
                 for var in self._extract_variables(arg):
                     if var in self.var_defs:
-                        self.graph.add_edge(
-                            self.var_defs[var], node_id, type="data_dependency"
-                        )
+                        self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             self.generic_visit(node)
 
@@ -1666,9 +1595,7 @@ class CodeAnalyzer:
             if node.value:
                 for var in self._extract_variables(node.value):
                     if var in self.var_defs:
-                        self.graph.add_edge(
-                            self.var_defs[var], node_id, type="data_dependency"
-                        )
+                        self.graph.add_edge(self.var_defs[var], node_id, type="data_dependency")
 
             for ctrl_node in self.control_deps:
                 self.graph.add_edge(ctrl_node, node_id, type="control_dependency")

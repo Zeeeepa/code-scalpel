@@ -236,9 +236,7 @@ def test_analyze_security_ast_fallback(monkeypatch):
 
     scalpel.analyzer = SimpleNamespace(
         parse_to_ast=lambda code: "tree",
-        find_security_issues=lambda tree: [
-            {"type": "dangerous_function", "function": "eval"}
-        ],
+        find_security_issues=lambda tree: [{"type": "dangerous_function", "function": "eval"}],
     )
 
     result = scalpel.analyze_security("print('x')")

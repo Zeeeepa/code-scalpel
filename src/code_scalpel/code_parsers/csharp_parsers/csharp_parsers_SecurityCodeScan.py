@@ -7,7 +7,6 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class VulnerabilityType(Enum):
@@ -36,9 +35,9 @@ class SecurityVulnerability:
     file_path: str
     line_number: int
     column: int
-    cwe_id: Optional[str] = None
-    owasp_category: Optional[str] = None
-    remediation: Optional[str] = None
+    cwe_id: str | None = None
+    owasp_category: str | None = None
+    remediation: str | None = None
 
 
 @dataclass
@@ -46,8 +45,8 @@ class SecurityCodeScanConfig:
     """Security Code Scan configuration."""
 
     scs_version: str = "5.6.0"
-    config_file: Optional[Path] = None
-    rules_file: Optional[Path] = None
+    config_file: Path | None = None
+    rules_file: Path | None = None
     severity_level: str = "warning"
 
 
@@ -62,35 +61,29 @@ class SecurityCodeScanParser:
     def __init__(self):
         """Initialize Security Code Scan parser."""
         self.config = SecurityCodeScanConfig()
-        self.vulnerabilities: List[SecurityVulnerability] = []
+        self.vulnerabilities: list[SecurityVulnerability] = []
 
     def execute_security_scan(
-        self, paths: List[Path], config: Optional[SecurityCodeScanConfig] = None
-    ) -> List[SecurityVulnerability]:
+        self, paths: list[Path], config: SecurityCodeScanConfig | None = None
+    ) -> list[SecurityVulnerability]:
         raise NotImplementedError("Phase 2: Security Code Scan execution")
 
-    def parse_xml_report(self, report_path: Path) -> List[SecurityVulnerability]:
+    def parse_xml_report(self, report_path: Path) -> list[SecurityVulnerability]:
         raise NotImplementedError("Phase 2: XML report parsing")
 
     def load_config(self, config_file: Path) -> SecurityCodeScanConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
     def categorize_vulnerabilities(
-        self, vulns: List[SecurityVulnerability]
-    ) -> Dict[VulnerabilityType, List[SecurityVulnerability]]:
+        self, vulns: list[SecurityVulnerability]
+    ) -> dict[VulnerabilityType, list[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def map_to_cwe(
-        self, vulns: List[SecurityVulnerability]
-    ) -> Dict[str, List[SecurityVulnerability]]:
+    def map_to_cwe(self, vulns: list[SecurityVulnerability]) -> dict[str, list[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: CWE mapping")
 
-    def map_to_owasp(
-        self, vulns: List[SecurityVulnerability]
-    ) -> Dict[str, List[SecurityVulnerability]]:
+    def map_to_owasp(self, vulns: list[SecurityVulnerability]) -> dict[str, list[SecurityVulnerability]]:
         raise NotImplementedError("Phase 2: OWASP mapping")
 
-    def generate_report(
-        self, vulns: List[SecurityVulnerability], format: str = "json"
-    ) -> str:
+    def generate_report(self, vulns: list[SecurityVulnerability], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

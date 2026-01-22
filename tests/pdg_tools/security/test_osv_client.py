@@ -242,9 +242,7 @@ class TestQueryPackage:
     for mock isolation instead of @patch decorators.
     """
 
-    def test_query_package_success(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_package_success(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test successful package query."""
         # Set up mock response
         mock_response = mock_osv_response(
@@ -277,9 +275,7 @@ class TestQueryPackage:
         assert vulns[0].fixed_version == "2.31.0"
         assert "GHSA-j8r2-6x86-q33q" in vulns[0].aliases
 
-    def test_query_package_no_vulns(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_package_no_vulns(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test query returning no vulnerabilities."""
         mock_response = mock_osv_response({"vulns": []})
         osv_mock_urlopen.return_value = mock_response
@@ -288,9 +284,7 @@ class TestQueryPackage:
 
         assert vulns == []
 
-    def test_query_package_empty_response(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_package_empty_response(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test query with empty response body."""
         mock_response = mock_osv_response({})
         osv_mock_urlopen.return_value = mock_response
@@ -299,13 +293,9 @@ class TestQueryPackage:
 
         assert vulns == []
 
-    def test_query_package_caching(
-        self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_package_caching(self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response):
         """Test that results are cached."""
-        mock_response = mock_osv_response(
-            {"vulns": [{"id": "CVE-123", "summary": "Test"}]}
-        )
+        mock_response = mock_osv_response({"vulns": [{"id": "CVE-123", "summary": "Test"}]})
         osv_mock_urlopen.return_value = mock_response
 
         # First call
@@ -317,9 +307,7 @@ class TestQueryPackage:
         assert osv_mock_urlopen.call_count == 1
         assert len(vulns1) == len(vulns2)
 
-    def test_query_package_error_returns_empty(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error
-    ):
+    def test_query_package_error_returns_empty(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error):
         """Test that errors return empty list (fail open)."""
         osv_mock_urlopen.side_effect = mock_osv_error("URLError")
 
@@ -335,9 +323,7 @@ class TestQueryBatch:
     for mock isolation instead of @patch decorators.
     """
 
-    def test_query_batch_success(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_batch_success(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test successful batch query."""
         mock_response = mock_osv_response(
             {
@@ -366,9 +352,7 @@ class TestQueryBatch:
         results = client.query_batch([])
         assert results == {}
 
-    def test_query_batch_with_ecosystem(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_query_batch_with_ecosystem(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test batch query with explicit ecosystems."""
         mock_response = mock_osv_response(
             {
@@ -386,9 +370,7 @@ class TestQueryBatch:
 
         assert "lodash:4.17.0" in results
 
-    def test_query_batch_error_returns_empty(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error
-    ):
+    def test_query_batch_error_returns_empty(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_error):
         """Test batch query error returns empty dict."""
         osv_mock_urlopen.side_effect = mock_osv_error("URLError")
 
@@ -419,9 +401,7 @@ class TestMakeRequest:
     def test_retry_on_rate_limit(self, mock_sleep, osv_mock_urlopen, mock_osv_response):
         """Test retry on 429 rate limit."""
         # First call: rate limited, second call: success
-        mock_rate_limit = urllib.error.HTTPError(
-            url="", code=429, msg="Too Many Requests", hdrs={}, fp=None
-        )
+        mock_rate_limit = urllib.error.HTTPError(url="", code=429, msg="Too Many Requests", hdrs={}, fp=None)
         mock_success = mock_osv_response({"vulns": []})
 
         osv_mock_urlopen.side_effect = [mock_rate_limit, mock_success]
@@ -433,13 +413,9 @@ class TestMakeRequest:
         assert mock_sleep.called
 
     @patch("code_scalpel.ast_tools.osv_client.time.sleep")
-    def test_retry_on_server_error(
-        self, mock_sleep, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_retry_on_server_error(self, mock_sleep, osv_mock_urlopen, mock_osv_response):
         """Test retry on 5xx server errors."""
-        mock_error = urllib.error.HTTPError(
-            url="", code=500, msg="Internal Server Error", hdrs={}, fp=None
-        )
+        mock_error = urllib.error.HTTPError(url="", code=500, msg="Internal Server Error", hdrs={}, fp=None)
         mock_success = mock_osv_response({"vulns": []})
 
         osv_mock_urlopen.side_effect = [mock_error, mock_success]
@@ -451,9 +427,7 @@ class TestMakeRequest:
 
     def test_raise_on_client_error(self, osv_mock_urlopen):
         """Test OSVError raised on 4xx errors (except 429)."""
-        mock_error = urllib.error.HTTPError(
-            url="", code=400, msg="Bad Request", hdrs={}, fp=None
-        )
+        mock_error = urllib.error.HTTPError(url="", code=400, msg="Bad Request", hdrs={}, fp=None)
         osv_mock_urlopen.side_effect = mock_error
 
         client = OSVClient()
@@ -494,9 +468,7 @@ class TestClearCache:
     [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures.
     """
 
-    def test_clear_cache(
-        self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_clear_cache(self, osv_client_with_cache, osv_mock_urlopen, mock_osv_response):
         """Test clearing the cache."""
         mock_response = mock_osv_response({"vulns": []})
         osv_mock_urlopen.return_value = mock_response
@@ -516,9 +488,7 @@ class TestIntegrationScenarios:
     [20251213_FEATURE] v1.5.2 - Refactored to use proper pytest fixtures.
     """
 
-    def test_multiple_vulns_in_package(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_multiple_vulns_in_package(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test handling multiple vulnerabilities in one package."""
         mock_response = mock_osv_response(
             {
@@ -545,9 +515,7 @@ class TestIntegrationScenarios:
         assert "HIGH" in severities
         assert "CRITICAL" in severities
 
-    def test_references_limited_to_five(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_references_limited_to_five(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test that references are limited to 5."""
         mock_response = mock_osv_response(
             {
@@ -555,9 +523,7 @@ class TestIntegrationScenarios:
                     {
                         "id": "CVE-123",
                         "summary": "Test",
-                        "references": [
-                            {"url": f"https://example.com/{i}"} for i in range(10)
-                        ],
+                        "references": [{"url": f"https://example.com/{i}"} for i in range(10)],
                     }
                 ]
             }
@@ -568,9 +534,7 @@ class TestIntegrationScenarios:
 
         assert len(vulns[0].references) == 5
 
-    def test_missing_fields_handled_gracefully(
-        self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response
-    ):
+    def test_missing_fields_handled_gracefully(self, osv_client_no_cache, osv_mock_urlopen, mock_osv_response):
         """Test handling of vulnerabilities with missing fields."""
         mock_response = mock_osv_response(
             {

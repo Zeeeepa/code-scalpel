@@ -4,7 +4,7 @@
 
 """
 
-from typing import Any, List
+from typing import Any
 
 from ..interface import IParser, ParseResult
 
@@ -26,18 +26,17 @@ class PHPParserAdapter(IParser):
     def __init__(self):
         """Initialize the PHP parser adapter (stub)."""
         raise NotImplementedError(
-            "PHPParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "PHPParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:
         """Parse PHP code (stub)."""
         raise NotImplementedError("PHP parsing not yet implemented")
 
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         """Get function names from PHP AST (stub)."""
         raise NotImplementedError("PHP function extraction not yet implemented")
 
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         """Get class names from PHP AST (stub)."""
         raise NotImplementedError("PHP class extraction not yet implemented")

@@ -25,9 +25,7 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv(
-                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
-                )
+                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
@@ -60,9 +58,7 @@ async def test_large_file_5000_loc(monkeypatch: pytest.MonkeyPatch):
     assert duration < 10.0, f"Scan took {duration:.2f}s for 5000 LOC (target: <10s)"
 
     # Should find ~100 vulnerabilities (5000 / 50)
-    assert (
-        result.vulnerability_count >= 90
-    ), f"Expected >=90 vulns, got {result.vulnerability_count}"
+    assert result.vulnerability_count >= 90, f"Expected >=90 vulns, got {result.vulnerability_count}"
 
 
 @pytest.mark.asyncio
@@ -84,9 +80,7 @@ async def test_speed_benchmark_1000_loc(monkeypatch: pytest.MonkeyPatch):
     # Roadmap promises <500ms per 1000 LOC for clean code
     # Note: This is a soft target - may vary based on system load
     if duration >= 0.5:
-        pytest.skip(
-            f"Performance test skipped: took {duration*1000:.0f}ms (target <500ms) - system may be under load"
-        )
+        pytest.skip(f"Performance test skipped: took {duration*1000:.0f}ms (target <500ms) - system may be under load")
 
 
 @pytest.mark.asyncio
@@ -104,17 +98,13 @@ async def test_100_findings_performance(monkeypatch: pytest.MonkeyPatch):
     duration = time.perf_counter() - start
 
     assert result.success is True
-    assert (
-        result.vulnerability_count >= 100
-    ), f"Expected >=100 vulns, got {result.vulnerability_count}"
+    assert result.vulnerability_count >= 100, f"Expected >=100 vulns, got {result.vulnerability_count}"
 
     # Should complete within 2 seconds even with 100+ findings
     assert duration < 2.0, f"Scan took {duration:.2f}s for 150 vulns (target: <2s)"
 
 
-@pytest.mark.skip(
-    reason="Code exceeds current 100K character limit - limit can be adjusted in future"
-)
+@pytest.mark.skip(reason="Code exceeds current 100K character limit - limit can be adjusted in future")
 @pytest.mark.asyncio
 async def test_memory_usage_large_file(monkeypatch: pytest.MonkeyPatch):
     """Verify memory usage stays reasonable for large files (<100MB peak)."""
@@ -136,6 +126,4 @@ async def test_memory_usage_large_file(monkeypatch: pytest.MonkeyPatch):
     peak_mb = peak / 1024 / 1024
     # Note: This is a soft limit - depends on Python interpreter and system
     if peak_mb >= 100:
-        pytest.skip(
-            f"Memory test skipped: peak {peak_mb:.1f}MB exceeds 100MB - interpreter overhead may vary"
-        )
+        pytest.skip(f"Memory test skipped: peak {peak_mb:.1f}MB exceeds 100MB - interpreter overhead may vary")

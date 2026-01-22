@@ -10,14 +10,18 @@ import time
 
 from mcp.server.fastmcp import Context
 
+from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
 from code_scalpel.mcp.helpers.context_helpers import (
     crawl_project as _crawl_project,
+)
+from code_scalpel.mcp.helpers.context_helpers import (
     get_file_context as _get_file_context,
+)
+from code_scalpel.mcp.helpers.context_helpers import (
     get_symbol_references as _get_symbol_references,
 )
-from code_scalpel.mcp.protocol import mcp, _get_current_tier
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.protocol import _get_current_tier, mcp
 
 
 @mcp.tool()

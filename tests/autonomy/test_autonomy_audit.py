@@ -518,9 +518,7 @@ class TestFiltering:
         )
 
         # Filter to only include second operation
-        json_output = audit_trail.export(
-            format="json", time_range=(mid_time, datetime.now() + timedelta(seconds=1))
-        )
+        json_output = audit_trail.export(format="json", time_range=(mid_time, datetime.now() + timedelta(seconds=1)))
 
         data = json.loads(json_output)
         operations = data["operations"]
@@ -699,7 +697,7 @@ class TestEdgeCases:
         session_dir = audit_trail.storage_path / audit_trail.current_session_id
         data_dir = session_dir / "data"
 
-        with open(data_dir / f"{entry_id}_input.json", "r") as f:
+        with open(data_dir / f"{entry_id}_input.json") as f:
             stored_data = json.load(f)
             assert stored_data["truncated"] is True
             assert len(stored_data["data"]) <= 10000
@@ -850,7 +848,7 @@ class TestImmutability:
         entry_file = session_dir / f"{entry_id}.json"
 
         # Read original content
-        with open(entry_file, "r") as f:
+        with open(entry_file) as f:
             original_content = f.read()
 
         # Verify we can't modify it without explicit file write
@@ -868,7 +866,7 @@ class TestImmutability:
         )
 
         # Original entry should still be unchanged
-        with open(entry_file, "r") as f:
+        with open(entry_file) as f:
             current_content = f.read()
 
         assert current_content == original_content

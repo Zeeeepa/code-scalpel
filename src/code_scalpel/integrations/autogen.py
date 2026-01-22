@@ -5,7 +5,7 @@
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
 
 class AnalysisResultDict(TypedDict, total=False):
@@ -29,8 +29,8 @@ class AnalysisResult:
     security_issues: list[dict[str, Any]] = field(default_factory=list)
     style_issues: dict[str, list[str]] = field(default_factory=dict)
     suggestions: list[str] = field(default_factory=list)
-    refactored_code: Optional[str] = None
-    error: Optional[str] = None
+    refactored_code: str | None = None
+    error: str | None = None
 
     def to_dict(self) -> AnalysisResultDict:
         """Convert result to dictionary."""
@@ -134,9 +134,7 @@ class AutogenScalpel:
 
         return result
 
-    async def refactor_async(
-        self, code: str, refactor_type: str = "auto"
-    ) -> AnalysisResult:
+    async def refactor_async(self, code: str, refactor_type: str = "auto") -> AnalysisResult:
         """
         Perform async code refactoring based on analysis.
 
@@ -148,9 +146,7 @@ class AutogenScalpel:
             AnalysisResult with refactored code.
         """
         loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, self._refactor_sync, code, refactor_type
-        )
+        return await loop.run_in_executor(None, self._refactor_sync, code, refactor_type)
 
     def _refactor_sync(self, code: str, refactor_type: str) -> AnalysisResult:
         """
@@ -193,17 +189,11 @@ class AutogenScalpel:
         # Add suggestions based on style issues
         for issue_type, _issues in result.style_issues.items():
             if issue_type == "long_functions":
-                suggestions.append(
-                    "Consider breaking down long functions into smaller, focused functions."
-                )
+                suggestions.append("Consider breaking down long functions into smaller, focused functions.")
             elif issue_type == "deep_nesting":
-                suggestions.append(
-                    "Consider reducing nesting depth using early returns or guard clauses."
-                )
+                suggestions.append("Consider reducing nesting depth using early returns or guard clauses.")
             elif issue_type == "naming_conventions":
-                suggestions.append(
-                    "Follow PEP 8 naming conventions: snake_case for functions, CamelCase for classes."
-                )
+                suggestions.append("Follow PEP 8 naming conventions: snake_case for functions, CamelCase for classes.")
 
         # Add suggestions based on security issues
         if result.security_issues:
@@ -213,9 +203,7 @@ class AutogenScalpel:
                         f"Avoid using dangerous function '{issue.get('function')}' - consider safer alternatives."
                     )
                 elif issue.get("type") == "sql_injection":
-                    suggestions.append(
-                        "Use parameterized queries to prevent SQL injection vulnerabilities."
-                    )
+                    suggestions.append("Use parameterized queries to prevent SQL injection vulnerabilities.")
 
         return suggestions
 

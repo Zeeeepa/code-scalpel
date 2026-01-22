@@ -29,11 +29,11 @@ This is a flow-insensitive analysis: we track the LAST assignment to each variab
 
 import ast
 from enum import Enum, auto
-from typing import Any, Dict
+from typing import Any
 
 from z3 import BoolSort, IntSort, RealSort, StringSort
 
-from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
+from code_scalpel.parsing.unified_parser import ParsingError, parse_python_code
 
 
 class InferredType(Enum):
@@ -85,9 +85,9 @@ class TypeInferenceEngine:
     """
 
     def __init__(self):
-        self._types: Dict[str, InferredType] = {}
+        self._types: dict[str, InferredType] = {}
 
-    def infer(self, code: str) -> Dict[str, InferredType]:
+    def infer(self, code: str) -> dict[str, InferredType]:
         """
         Infer types for all variables in the code.
 
@@ -142,9 +142,7 @@ class TypeInferenceEngine:
             value_type = self._infer_expr_type(node.value)
 
             # Result type depends on operation and operands
-            result_type = self._combine_types_for_binop(
-                current_type, node.op, value_type
-            )
+            result_type = self._combine_types_for_binop(current_type, node.op, value_type)
             self._types[var_name] = result_type
 
     def _infer_expr_type(self, node: ast.expr) -> InferredType:
@@ -239,9 +237,7 @@ class TypeInferenceEngine:
 
         return self._combine_types_for_binop(left_type, node.op, right_type)
 
-    def _combine_types_for_binop(
-        self, left: InferredType, op: ast.operator, right: InferredType
-    ) -> InferredType:
+    def _combine_types_for_binop(self, left: InferredType, op: ast.operator, right: InferredType) -> InferredType:
         """Determine result type of binary operation."""
 
         # UNKNOWN taints everything

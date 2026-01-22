@@ -35,18 +35,11 @@ class TestResolveOrganizationWideBasic:
 
         # Create a simple module
         (repo_path / "models.py").write_text(
-            "class User:\n"
-            "    def __init__(self, name: str):\n"
-            "        self.name = name\n"
+            "class User:\n" "    def __init__(self, name: str):\n" "        self.name = name\n"
         )
 
         # Create code with function
-        code = (
-            "from models import User\n"
-            "\n"
-            "def create_user(name: str):\n"
-            "    return User(name)\n"
-        )
+        code = "from models import User\n" "\n" "def create_user(name: str):\n" "    return User(name)\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -99,9 +92,7 @@ class TestResolveOrganizationWideBasic:
         backend_repo.mkdir()
         (backend_repo / ".git").mkdir()
         (backend_repo / "models.py").write_text(
-            "class User:\n"
-            "    def __init__(self, name):\n"
-            "        self.name = name\n"
+            "class User:\n" "    def __init__(self, name):\n" "        self.name = name\n"
         )
 
         # Create frontend repo
@@ -109,12 +100,7 @@ class TestResolveOrganizationWideBasic:
         frontend_repo.mkdir()
         (frontend_repo / ".git").mkdir()
 
-        code = (
-            "from models import User\n"
-            "\n"
-            "def display_user(user):\n"
-            "    return user.name\n"
-        )
+        code = "from models import User\n" "\n" "def display_user(user):\n" "    return user.name\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -150,12 +136,7 @@ class TestResolveOrganizationWideBasic:
             "        return a * b\n"
         )
 
-        code = (
-            "from helpers import add\n"
-            "\n"
-            "def compute(x, y):\n"
-            "    return add(x, y)\n"
-        )
+        code = "from helpers import add\n" "\n" "def compute(x, y):\n" "    return add(x, y)\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -181,9 +162,7 @@ class TestResolveOrganizationWideMultipleFiles:
         (repo / ".git").mkdir()
 
         # Create a chain: a.py -> b.py -> c.py
-        (repo / "c.py").write_text(
-            "class Logger:\n" "    def log(self, msg):\n" "        print(msg)\n"
-        )
+        (repo / "c.py").write_text("class Logger:\n" "    def log(self, msg):\n" "        print(msg)\n")
 
         (repo / "b.py").write_text(
             "from c import Logger\n"
@@ -195,19 +174,9 @@ class TestResolveOrganizationWideMultipleFiles:
             "    return data\n"
         )
 
-        (repo / "a.py").write_text(
-            "from b import process\n"
-            "\n"
-            "def execute(data):\n"
-            "    return process(data)\n"
-        )
+        (repo / "a.py").write_text("from b import process\n" "\n" "def execute(data):\n" "    return process(data)\n")
 
-        code = (
-            "from a import execute\n"
-            "\n"
-            "def main():\n"
-            "    return execute('test')\n"
-        )
+        code = "from a import execute\n" "\n" "def main():\n" "    return execute('test')\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -443,9 +412,7 @@ class TestResolveOrganizationWideComplexStructures:
         (repo / ".git").mkdir()
 
         # Create file with many symbols
-        many_symbols_code = "\n".join(
-            [f"def func_{i}():\n    pass\n" for i in range(50)]
-        )
+        many_symbols_code = "\n".join([f"def func_{i}():\n    pass\n" for i in range(50)])
         (repo / "many_funcs.py").write_text(many_symbols_code)
 
         code = "from many_funcs import func_0\n" "\n" "def main():\n" "    pass\n"
@@ -471,21 +438,11 @@ class TestResolveOrganizationWideComplexStructures:
         (repo / ".git").mkdir()
 
         # Create circular import: a.py <-> b.py
-        (repo / "a.py").write_text(
-            "from b import FuncB\n" "\n" "class FuncA:\n" "    pass\n"
-        )
+        (repo / "a.py").write_text("from b import FuncB\n" "\n" "class FuncA:\n" "    pass\n")
 
-        (repo / "b.py").write_text(
-            "from a import FuncA\n" "\n" "class FuncB:\n" "    pass\n"
-        )
+        (repo / "b.py").write_text("from a import FuncA\n" "\n" "class FuncB:\n" "    pass\n")
 
-        code = (
-            "from a import FuncA\n"
-            "from b import FuncB\n"
-            "\n"
-            "def main():\n"
-            "    pass\n"
-        )
+        code = "from a import FuncA\n" "from b import FuncB\n" "\n" "def main():\n" "    pass\n"
 
         result = resolve_organization_wide(
             code=code,
@@ -570,9 +527,7 @@ class TestResolveOrganizationWideResolvedSymbols:
         repo.mkdir()
         (repo / ".git").mkdir()
 
-        (repo / "models.py").write_text(
-            "class User:\n" "    pass\n" "\n" "class Product:\n" "    pass\n"
-        )
+        (repo / "models.py").write_text("class User:\n" "    pass\n" "\n" "class Product:\n" "    pass\n")
 
         code = (
             "from models import User, Product\n"

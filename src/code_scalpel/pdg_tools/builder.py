@@ -31,7 +31,7 @@ class Scope:
     name: str
     node_id: str
     parent: Optional["Scope"] = None
-    variables: Optional[dict[str, str]] = None  # var_name -> defining_node_id
+    variables: dict[str, str] | None = None  # var_name -> defining_node_id
 
     def __post_init__(self):
         if self.variables is None:
@@ -50,7 +50,7 @@ class PDGBuilder(ast.NodeVisitor):
         self.call_graph: nx.DiGraph = nx.DiGraph()
         self.track_constants = track_constants
         self.interprocedural = interprocedural
-        self.current_function: Optional[str] = None
+        self.current_function: str | None = None
         self.node_counter = defaultdict(int)
 
     def build(self, code: str) -> tuple[nx.DiGraph, nx.DiGraph]:
@@ -82,7 +82,7 @@ class PDGBuilder(ast.NodeVisitor):
         """Exit the current scope."""
         return self.scopes.pop() if self.scopes else None
 
-    def get_current_scope(self) -> Optional[Scope]:
+    def get_current_scope(self) -> Scope | None:
         """Get the current scope."""
         return self.scopes[-1] if self.scopes else None
 
@@ -115,9 +115,7 @@ class PDGBuilder(ast.NodeVisitor):
         # Add parameter nodes
         for arg in node.args.args:
             arg_id = self._get_node_id("param")
-            self.graph.add_node(
-                arg_id, type="parameter", name=arg.arg, lineno=arg.lineno
-            )
+            self.graph.add_node(arg_id, type="parameter", name=arg.arg, lineno=arg.lineno)
             self.graph.add_edge(node_id, arg_id, type="parameter_dependency")
             if scope and scope.variables:
                 scope.variables[arg.arg] = arg_id
@@ -406,9 +404,7 @@ class PDGBuilder(ast.NodeVisitor):
             func_name = ast.unparse(node.func)
 
         # Add call node
-        self.graph.add_node(
-            node_id, type=NodeType.CALL.value, function=func_name, lineno=node.lineno
-        )
+        self.graph.add_node(node_id, type=NodeType.CALL.value, function=func_name, lineno=node.lineno)
 
         # Add to call graph if we're in a function
         if self.current_function:
@@ -429,17 +425,13 @@ class PDGBuilder(ast.NodeVisitor):
         # Add data dependencies for variables in argument
         for var in self._extract_variables(arg):
             if def_node := self._find_definition(var):
-                self.graph.add_edge(
-                    def_node, call_id, type="data_dependency", arg_index=index
-                )
+                self.graph.add_edge(def_node, call_id, type="data_dependency", arg_index=index)
 
     def _process_call_keyword(self, keyword: ast.keyword, call_id: str):
         """Process a function call keyword argument."""
         for var in self._extract_variables(keyword.value):
             if def_node := self._find_definition(var):
-                self.graph.add_edge(
-                    def_node, call_id, type="data_dependency", keyword=keyword.arg
-                )
+                self.graph.add_edge(def_node, call_id, type="data_dependency", keyword=keyword.arg)
 
     def _process_decorator(self, decorator: ast.AST, function_id: str):
         """Process a function decorator."""
@@ -459,7 +451,7 @@ class PDGBuilder(ast.NodeVisitor):
                 if isinstance(elt, ast.Name):
                     self._add_variable_definition(elt.id, loop_id)
 
-    def _find_definition(self, var_name: str) -> Optional[str]:
+    def _find_definition(self, var_name: str) -> str | None:
         """Find the most recent definition of a variable in the current scope chain."""
         for scope in reversed(self.scopes):
             if scope.variables and var_name in scope.variables:
@@ -487,9 +479,7 @@ class PDGBuilder(ast.NodeVisitor):
         return variables
 
 
-def build_pdg(
-    code: str, track_constants: bool = True, interprocedural: bool = True
-) -> tuple[nx.DiGraph, nx.DiGraph]:
+def build_pdg(code: str, track_constants: bool = True, interprocedural: bool = True) -> tuple[nx.DiGraph, nx.DiGraph]:
     """
     Build a Program Dependence Graph from Python code.
 

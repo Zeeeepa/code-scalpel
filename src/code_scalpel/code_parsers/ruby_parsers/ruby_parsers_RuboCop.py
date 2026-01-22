@@ -7,7 +7,7 @@ RuboCop Parser - Ruby Code Style and Linting Analysis
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class RuboCopSeverity(Enum):
@@ -38,10 +38,10 @@ class RuboCopConfig:
     """RuboCop configuration for analysis."""
 
     rubocop_version: str = "1.0.0"
-    config_file: Optional[Path] = None
-    excluded_dirs: List[str] = None
-    enabled_cops: List[str] = None
-    disabled_cops: List[str] = None
+    config_file: Path | None = None
+    excluded_dirs: list[str] = None
+    enabled_cops: list[str] = None
+    disabled_cops: list[str] = None
     autocorrect: bool = False
     parallel_jobs: int = 1
 
@@ -57,38 +57,28 @@ class RuboCopParser:
     def __init__(self):
         """Initialize RuboCop parser."""
         self.config = RuboCopConfig()
-        self.violations: List[RuboCopViolation] = []
+        self.violations: list[RuboCopViolation] = []
 
-    def parse_json_report(self, report_path: Path) -> List[RuboCopViolation]:
+    def parse_json_report(self, report_path: Path) -> list[RuboCopViolation]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
-    def execute_rubocop(
-        self, paths: List[Path], config: RuboCopConfig = None
-    ) -> List[RuboCopViolation]:
+    def execute_rubocop(self, paths: list[Path], config: RuboCopConfig = None) -> list[RuboCopViolation]:
         raise NotImplementedError("Phase 2: RuboCop execution")
 
     def load_config(self, config_file: Path) -> RuboCopConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_violations(
-        self, violations: List[RuboCopViolation]
-    ) -> Dict[str, List[RuboCopViolation]]:
+    def categorize_violations(self, violations: list[RuboCopViolation]) -> dict[str, list[RuboCopViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def apply_autocorrect(
-        self, paths: List[Path], config: RuboCopConfig = None
-    ) -> Dict[str, int]:
+    def apply_autocorrect(self, paths: list[Path], config: RuboCopConfig = None) -> dict[str, int]:
         raise NotImplementedError("Phase 2: Auto-correction")
 
-    def generate_report(
-        self, violations: List[RuboCopViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: list[RuboCopViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
-    def calculate_metrics(self, violations: List[RuboCopViolation]) -> Dict[str, Any]:
+    def calculate_metrics(self, violations: list[RuboCopViolation]) -> dict[str, Any]:
         raise NotImplementedError("Phase 2: Metrics calculation")
 
-    def detect_rails_specific_issues(
-        self, violations: List[RuboCopViolation]
-    ) -> List[RuboCopViolation]:
+    def detect_rails_specific_issues(self, violations: list[RuboCopViolation]) -> list[RuboCopViolation]:
         raise NotImplementedError("Phase 2: Rails-specific analysis")

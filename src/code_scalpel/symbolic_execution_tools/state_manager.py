@@ -27,7 +27,7 @@ need to be copied.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, cast
+from typing import cast
 
 from z3 import (
     And,
@@ -115,9 +115,9 @@ class SymbolicState:
         Args:
             depth: Fork depth (0 for root state, increments on fork)
         """
-        self._variables: Dict[str, ExprRef] = {}
-        self._constraints: List[BoolRef] = []
-        self._visited_lines: Set[int] = set()
+        self._variables: dict[str, ExprRef] = {}
+        self._constraints: list[BoolRef] = []
+        self._visited_lines: set[int] = set()
         self._depth: int = depth
 
     # =========================================================================
@@ -142,8 +142,7 @@ class SymbolicState:
             existing = self._variables[name]
             if existing.sort() != sort:
                 raise ValueError(
-                    f"Variable '{name}' already exists with sort {existing.sort()}, "
-                    f"cannot create with sort {sort}"
+                    f"Variable '{name}' already exists with sort {existing.sort()}, " f"cannot create with sort {sort}"
                 )
             return existing
 
@@ -158,15 +157,12 @@ class SymbolicState:
             # [20251226_FEATURE] v3.2.9 Pro tier - Float constraint support
             expr = Real(name)
         else:
-            raise ValueError(
-                f"Unsupported sort: {sort}. "
-                "Supported: IntSort, BoolSort, StringSort, RealSort."
-            )
+            raise ValueError(f"Unsupported sort: {sort}. " "Supported: IntSort, BoolSort, StringSort, RealSort.")
 
         self._variables[name] = expr
         return expr
 
-    def get_variable(self, name: str) -> Optional[ExprRef]:
+    def get_variable(self, name: str) -> ExprRef | None:
         """
         Get a variable by name.
 
@@ -203,7 +199,7 @@ class SymbolicState:
         """
         return name in self._variables
 
-    def variable_names(self) -> List[str]:
+    def variable_names(self) -> list[str]:
         """
         Get all variable names.
 
@@ -213,7 +209,7 @@ class SymbolicState:
         return list(self._variables.keys())
 
     @property
-    def variables(self) -> Dict[str, ExprRef]:
+    def variables(self) -> dict[str, ExprRef]:
         """
         Get a copy of the variables dictionary.
 
@@ -230,7 +226,7 @@ class SymbolicState:
     # =========================================================================
 
     @property
-    def constraints(self) -> List[BoolRef]:
+    def constraints(self) -> list[BoolRef]:
         """
         Get the list of path constraints.
 
@@ -300,7 +296,7 @@ class SymbolicState:
             self._visited_lines.add(lineno)
 
     @property
-    def visited_lines(self) -> Set[int]:
+    def visited_lines(self) -> set[int]:
         """
         Get the set of lines visited in this path.
 
@@ -360,13 +356,9 @@ class SymbolicState:
     def __repr__(self) -> str:
         """String representation for debugging."""
         var_str = ", ".join(f"{k}: {v.sort()}" for k, v in self._variables.items())
-        return (
-            f"SymbolicState(depth={self._depth}, "
-            f"vars=[{var_str}], "
-            f"constraints={len(self._constraints)})"
-        )
+        return f"SymbolicState(depth={self._depth}, " f"vars=[{var_str}], " f"constraints={len(self._constraints)})"
 
-    def summary(self) -> Dict:
+    def summary(self) -> dict:
         """
         Get a summary of the state for debugging.
 
@@ -375,9 +367,7 @@ class SymbolicState:
         """
         return {
             "depth": self._depth,
-            "variables": {
-                name: str(expr.sort()) for name, expr in self._variables.items()
-            },
+            "variables": {name: str(expr.sort()) for name, expr in self._variables.items()},
             "constraint_count": len(self._constraints),
             "is_feasible": self.is_feasible(),
         }

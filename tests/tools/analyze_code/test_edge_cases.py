@@ -240,10 +240,10 @@ class TestSpecialMethods:
 class MyClass:
     def __init__(self):
         self.value = 0
-    
+
     def __str__(self):
         return str(self.value)
-    
+
     def __repr__(self):
         return f"MyClass({self.value})"
 """
@@ -259,11 +259,11 @@ class MyClass:
 class Circle:
     def __init__(self, radius):
         self.radius = radius
-    
+
     @property
     def diameter(self):
         return self.radius * 2
-    
+
     @property
     def area(self):
         return 3.14 * self.radius ** 2
@@ -279,11 +279,11 @@ class Circle:
         code = """
 class Counter:
     count = 0
-    
+
     @staticmethod
     def static_method():
         return "static"
-    
+
     @classmethod
     def from_string(cls, value):
         return cls()
@@ -447,7 +447,7 @@ class MyClass {
     constructor(name) {
         this.name = name;
     }
-    
+
     greet() {
         return `Hello, ${this.name}`;
     }
@@ -474,9 +474,7 @@ public class Outer {
 
         result = _analyze_code_sync(code=code, language="java")
 
-        assert (
-            "Outer" in result.classes
-        )  # Java inner class extraction depends on parser
+        assert "Outer" in result.classes  # Java inner class extraction depends on parser
 
     def test_java_generics(self):
         """Java generics should not break extraction."""

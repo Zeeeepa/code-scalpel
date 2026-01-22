@@ -24,7 +24,7 @@ import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,21 +42,21 @@ class AuditEntry:
     target_file: str  # File being operated on
     target_type: str  # e.g., "function", "class", "method"
     target_name: str  # Original name
-    new_name: Optional[str] = None  # New name (for renames)
+    new_name: str | None = None  # New name (for renames)
 
     # Execution results
     success: bool = False
-    error: Optional[str] = None
+    error: str | None = None
     changed_files: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
     # Performance metrics
-    duration_ms: Optional[float] = None
+    duration_ms: float | None = None
 
     # User/environment context
-    user: Optional[str] = None
-    hostname: Optional[str] = None
-    tier: Optional[str] = None  # "community", "pro", "enterprise"
+    user: str | None = None
+    hostname: str | None = None
+    tier: str | None = None  # "community", "pro", "enterprise"
 
     # Additional metadata
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -93,7 +93,7 @@ class AuditTrail:
 
     def __init__(
         self,
-        log_dir: Optional[str | Path] = None,
+        log_dir: str | Path | None = None,
         enabled: bool = True,
         log_to_file: bool = True,
         log_to_stdout: bool = False,
@@ -117,9 +117,7 @@ class AuditTrail:
 
         if self.enabled and self.log_to_file:
             self.log_dir.mkdir(parents=True, exist_ok=True)
-            self.log_file = (
-                self.log_dir / f"audit_{datetime.now().strftime('%Y%m%d')}.jsonl"
-            )
+            self.log_file = self.log_dir / f"audit_{datetime.now().strftime('%Y%m%d')}.jsonl"
 
     def log(self, entry: AuditEntry) -> None:
         """
@@ -155,8 +153,8 @@ class AuditTrail:
         target_file: str,
         target_type: str,
         target_name: str,
-        new_name: Optional[str] = None,
-        tier: Optional[str] = None,
+        new_name: str | None = None,
+        tier: str | None = None,
         **kwargs,
     ) -> AuditEntry:
         """
@@ -191,11 +189,11 @@ class AuditTrail:
 
     def query(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        operation: Optional[str] = None,
-        target_file: Optional[str] = None,
-        success: Optional[bool] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        operation: str | None = None,
+        target_file: str | None = None,
+        success: bool | None = None,
     ) -> list[AuditEntry]:
         """
         Query audit log entries.
@@ -218,7 +216,7 @@ class AuditTrail:
         # Read all .jsonl files in log directory
         for log_file in sorted(self.log_dir.glob("audit_*.jsonl")):
             try:
-                with open(log_file, "r", encoding="utf-8") as f:
+                with open(log_file, encoding="utf-8") as f:
                     for line in f:
                         try:
                             entry_dict = json.loads(line)
@@ -246,7 +244,7 @@ class AuditTrail:
 
 
 # Global audit trail instance
-_global_audit_trail: Optional[AuditTrail] = None
+_global_audit_trail: AuditTrail | None = None
 
 
 def get_audit_trail() -> AuditTrail:
@@ -258,7 +256,7 @@ def get_audit_trail() -> AuditTrail:
 
 
 def configure_audit_trail(
-    log_dir: Optional[str | Path] = None,
+    log_dir: str | Path | None = None,
     enabled: bool = True,
     log_to_file: bool = True,
     log_to_stdout: bool = False,

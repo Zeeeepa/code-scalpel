@@ -57,9 +57,7 @@ class TestRoutePatternMatcher:
         """Test exact route matching."""
         matcher = RoutePatternMatcher()
 
-        matches, confidence, match_type = matcher.match_routes(
-            "/api/users", "/api/users"
-        )
+        matches, confidence, match_type = matcher.match_routes("/api/users", "/api/users")
 
         assert matches is True
         assert confidence == 0.95
@@ -69,9 +67,7 @@ class TestRoutePatternMatcher:
         """Test pattern matching with path parameters."""
         matcher = RoutePatternMatcher()
 
-        matches, confidence, match_type = matcher.match_routes(
-            "/api/users/123", "/api/users/{id}"
-        )
+        matches, confidence, match_type = matcher.match_routes("/api/users/123", "/api/users/{id}")
 
         assert matches is True
         assert confidence == 0.8
@@ -93,22 +89,16 @@ class TestRoutePatternMatcher:
         matcher = RoutePatternMatcher()
 
         # Dynamic route with concatenation (using literal string to represent dynamic route)
-        matches, confidence, match_type = matcher.match_routes(
-            "/api/v1/users", '"/api/" + version + "/users"'
-        )
+        matches, confidence, match_type = matcher.match_routes("/api/v1/users", '"/api/" + version + "/users"')
 
         # Should detect as dynamic match only
-        assert (
-            match_type == "dynamic"
-        )  # [20251216_BUGFIX] Test must require dynamic match type for dynamic routes
+        assert match_type == "dynamic"  # [20251216_BUGFIX] Test must require dynamic match type for dynamic routes
 
     def test_no_match_different_routes(self):
         """Test non-matching routes."""
         matcher = RoutePatternMatcher()
 
-        matches, confidence, match_type = matcher.match_routes(
-            "/api/users", "/api/posts"
-        )
+        matches, confidence, match_type = matcher.match_routes("/api/users", "/api/posts")
 
         assert matches is False
         assert confidence == 0.0

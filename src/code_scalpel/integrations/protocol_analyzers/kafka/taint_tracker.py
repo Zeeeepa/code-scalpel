@@ -53,7 +53,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
 class KafkaLibrary(Enum):
@@ -108,12 +108,12 @@ class KafkaProducer:
     column: int = 0
     file_path: str = ""
     library: KafkaLibrary = KafkaLibrary.UNKNOWN
-    data_variable: Optional[str] = None  # Variable being sent
+    data_variable: str | None = None  # Variable being sent
     is_tainted: bool = False
-    taint_source: Optional[str] = None  # Where taint originated
-    key_variable: Optional[str] = None
-    headers: Dict[str, str] = field(default_factory=dict)
-    serializer: Optional[str] = None  # json, avro, protobuf
+    taint_source: str | None = None  # Where taint originated
+    key_variable: str | None = None
+    headers: dict[str, str] = field(default_factory=dict)
+    serializer: str | None = None  # json, avro, protobuf
 
     @property
     def risk_level(self) -> KafkaRiskLevel:
@@ -131,19 +131,19 @@ class KafkaProducer:
 class KafkaConsumer:
     """Represents a Kafka consumer subscription/handler."""
 
-    topics: List[str] = field(default_factory=list)
-    handler_name: Optional[str] = None  # Function/method name
+    topics: list[str] = field(default_factory=list)
+    handler_name: str | None = None  # Function/method name
     line: int = 0
     column: int = 0
     file_path: str = ""
     library: KafkaLibrary = KafkaLibrary.UNKNOWN
     pattern_type: KafkaPatternType = KafkaPatternType.CONSUMER_POLL
-    group_id: Optional[str] = None
+    group_id: str | None = None
     is_taint_source: bool = True  # All consumed data is potentially tainted
-    deserializer: Optional[str] = None  # json, avro, protobuf
+    deserializer: str | None = None  # json, avro, protobuf
 
     @property
-    def taint_variables(self) -> List[str]:
+    def taint_variables(self) -> list[str]:
         """Variables that should be marked as tainted from this consumer."""
         # Common patterns: msg, message, record, event, data
         return ["msg", "message", "record", "event", "data", "value", "payload"]
@@ -161,9 +161,9 @@ class KafkaTaintBridge:
 
     topic: str
     producer: KafkaProducer
-    consumers: List[KafkaConsumer] = field(default_factory=list)
+    consumers: list[KafkaConsumer] = field(default_factory=list)
     taint_propagates: bool = True
-    original_taint_source: Optional[str] = None
+    original_taint_source: str | None = None
 
     @property
     def risk_summary(self) -> str:
@@ -183,8 +183,8 @@ class KafkaTopicInfo:
     """Information about a Kafka topic's usage in the codebase."""
 
     name: str
-    producers: List[KafkaProducer] = field(default_factory=list)
-    consumers: List[KafkaConsumer] = field(default_factory=list)
+    producers: list[KafkaProducer] = field(default_factory=list)
+    consumers: list[KafkaConsumer] = field(default_factory=list)
     is_tainted: bool = False  # Any producer sends tainted data
 
     @property
@@ -206,25 +206,21 @@ class KafkaAnalysisResult:
     """Result of analyzing a file/codebase for Kafka patterns."""
 
     file_path: str = ""
-    producers: List[KafkaProducer] = field(default_factory=list)
-    consumers: List[KafkaConsumer] = field(default_factory=list)
-    topics: Dict[str, KafkaTopicInfo] = field(default_factory=dict)
+    producers: list[KafkaProducer] = field(default_factory=list)
+    consumers: list[KafkaConsumer] = field(default_factory=list)
+    topics: dict[str, KafkaTopicInfo] = field(default_factory=dict)
     detected_library: KafkaLibrary = KafkaLibrary.UNKNOWN
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     @property
-    def tainted_producers(self) -> List[KafkaProducer]:
+    def tainted_producers(self) -> list[KafkaProducer]:
         """Get producers that send tainted data."""
         return [p for p in self.producers if p.is_tainted]
 
     @property
-    def consumer_handlers(self) -> List[KafkaConsumer]:
+    def consumer_handlers(self) -> list[KafkaConsumer]:
         """Get consumer handlers (decorated functions)."""
-        return [
-            c
-            for c in self.consumers
-            if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER
-        ]
+        return [c for c in self.consumers if c.pattern_type == KafkaPatternType.CONSUMER_HANDLER]
 
     @property
     def has_taint_risks(self) -> bool:
@@ -232,9 +228,9 @@ class KafkaAnalysisResult:
         return len(self.tainted_producers) > 0
 
     @property
-    def risk_count(self) -> Dict[KafkaRiskLevel, int]:
+    def risk_count(self) -> dict[KafkaRiskLevel, int]:
         """Count findings by risk level."""
-        counts: Dict[KafkaRiskLevel, int] = {level: 0 for level in KafkaRiskLevel}
+        counts: dict[KafkaRiskLevel, int] = {level: 0 for level in KafkaRiskLevel}
         for producer in self.producers:
             counts[producer.risk_level] += 1
         return counts
@@ -252,9 +248,7 @@ class KafkaAnalysisResult:
         if self.tainted_producers:
             lines.append("\n⚠️  TAINTED PRODUCERS:")
             for p in self.tainted_producers:
-                lines.append(
-                    f"  - Line {p.line}: {p.topic} <- {p.data_variable} (from {p.taint_source})"
-                )
+                lines.append(f"  - Line {p.line}: {p.topic} <- {p.data_variable} (from {p.taint_source})")
 
         if self.consumer_handlers:
             lines.append("\n🔍 CONSUMER HANDLERS (taint sources):")
@@ -327,7 +321,7 @@ class KafkaTaintTracker:
     3. Topic-to-handler mappings for cross-service analysis
     """
 
-    def __init__(self, tainted_variables: Optional[Set[str]] = None):
+    def __init__(self, tainted_variables: set[str] | None = None):
         """
         Initialize the Kafka taint tracker.
 
@@ -335,7 +329,7 @@ class KafkaTaintTracker:
             tainted_variables: Set of variable names known to be tainted
         """
         self.tainted_variables = tainted_variables or set()
-        self.topic_registry: Dict[str, KafkaTopicInfo] = {}
+        self.topic_registry: dict[str, KafkaTopicInfo] = {}
 
         # Common taint sources (from request/input)
         self.default_taint_sources = {
@@ -443,7 +437,7 @@ class KafkaTaintTracker:
 
         return KafkaLibrary.UNKNOWN
 
-    def _find_tainted_variables(self, source_code: str, language: str) -> Set[str]:
+    def _find_tainted_variables(self, source_code: str, language: str) -> set[str]:
         """Find variables that are assigned from taint sources."""
         tainted = set()
 
@@ -474,11 +468,11 @@ class KafkaTaintTracker:
             # Fall back to regex
             self._analyze_python_regex(source_code, result)
 
-    def _outer_extract_string_value(self, node: ast.AST) -> Optional[str]:
+    def _outer_extract_string_value(self, node: ast.AST) -> str | None:
         """Wrapper for nested class to call outer extract_string_value."""
         return self._extract_string_value(node)
 
-    def _outer_get_variable_name(self, node: ast.AST) -> Optional[str]:
+    def _outer_get_variable_name(self, node: ast.AST) -> str | None:
         """Wrapper for nested class to call outer get_variable_name."""
         return self._get_variable_name(node)
 
@@ -486,7 +480,7 @@ class KafkaTaintTracker:
         self,
         tree: ast.AST,
         result: KafkaAnalysisResult,
-        lines: List[str],
+        lines: list[str],
     ) -> None:
         """Analyze Python AST for Kafka patterns."""
 
@@ -509,9 +503,7 @@ class KafkaTaintTracker:
                             if decorator.func.attr == "agent":
                                 # Extract topic from decorator
                                 if decorator.args:
-                                    topic = outer_tracker._extract_string_value(
-                                        decorator.args[0]
-                                    )
+                                    topic = outer_tracker._extract_string_value(decorator.args[0])
                                     if topic:
                                         consumer = KafkaConsumer(
                                             topics=[topic],
@@ -543,10 +535,7 @@ class KafkaTaintTracker:
                         topic = outer_tracker._extract_string_value(node.args[0])
                         topic_is_dynamic = topic is None
                         if topic is None:
-                            topic = (
-                                outer_tracker._get_variable_name(node.args[0])
-                                or "dynamic"
-                            )
+                            topic = outer_tracker._get_variable_name(node.args[0]) or "dynamic"
 
                         data_var = None
                         is_tainted = False
@@ -562,10 +551,7 @@ class KafkaTaintTracker:
                         for kw in node.keywords:
                             if kw.arg == "value":
                                 data_var = outer_tracker._get_variable_name(kw.value)
-                                if (
-                                    data_var
-                                    and data_var in outer_tracker.tainted_variables
-                                ):
+                                if data_var and data_var in outer_tracker.tainted_variables:
                                     is_tainted = True
                                     taint_source = data_var
 
@@ -587,10 +573,7 @@ class KafkaTaintTracker:
                         topic = outer_tracker._extract_string_value(node.args[0])
                         topic_is_dynamic = topic is None
                         if topic is None:
-                            topic = (
-                                outer_tracker._get_variable_name(node.args[0])
-                                or "dynamic"
-                            )
+                            topic = outer_tracker._get_variable_name(node.args[0]) or "dynamic"
 
                         data_var = None
                         is_tainted = False
@@ -605,10 +588,7 @@ class KafkaTaintTracker:
                         for kw in node.keywords:
                             if kw.arg == "value":
                                 data_var = outer_tracker._get_variable_name(kw.value)
-                                if (
-                                    data_var
-                                    and data_var in outer_tracker.tainted_variables
-                                ):
+                                if data_var and data_var in outer_tracker.tainted_variables:
                                     is_tainted = True
                                     taint_source = data_var
 
@@ -683,7 +663,7 @@ class KafkaTaintTracker:
         visitor = KafkaVisitor()
         visitor.visit(tree)
 
-    def _extract_string_value(self, node: ast.AST) -> Optional[str]:
+    def _extract_string_value(self, node: ast.AST) -> str | None:
         """Extract string value from AST node."""
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
             return node.value
@@ -691,7 +671,7 @@ class KafkaTaintTracker:
             return str(node.value) if isinstance(node.value, str) else None
         return None
 
-    def _get_variable_name(self, node: ast.AST) -> Optional[str]:
+    def _get_variable_name(self, node: ast.AST) -> str | None:
         """Get variable name from AST node."""
         if isinstance(node, ast.Name):
             return node.id
@@ -699,9 +679,7 @@ class KafkaTaintTracker:
             return f"{self._get_variable_name(node.value)}.{node.attr}"
         return None
 
-    def _analyze_python_regex(
-        self, source_code: str, result: KafkaAnalysisResult
-    ) -> None:
+    def _analyze_python_regex(self, source_code: str, result: KafkaAnalysisResult) -> None:
         """Fallback regex-based analysis for Python."""
         lines = source_code.split("\n")
 
@@ -711,9 +689,7 @@ class KafkaTaintTracker:
                 match = re.search(pattern, line)
                 if match:
                     topic = match.group(1)
-                    topic_is_dynamic = not (
-                        topic.startswith('"') or topic.startswith("'")
-                    )
+                    topic_is_dynamic = not (topic.startswith('"') or topic.startswith("'"))
 
                     # Simple taint check - look for tainted vars in the line
                     is_tainted = any(var in line for var in self.tainted_variables)
@@ -800,9 +776,7 @@ class KafkaTaintTracker:
                         )
                         result.consumers.append(consumer)
 
-    def _analyze_javascript(
-        self, source_code: str, result: KafkaAnalysisResult
-    ) -> None:
+    def _analyze_javascript(self, source_code: str, result: KafkaAnalysisResult) -> None:
         """Analyze JavaScript/TypeScript code for Kafka patterns."""
         lines = source_code.split("\n")
 
@@ -816,10 +790,7 @@ class KafkaTaintTracker:
             topic = match.group(1)
             # Find line number
             line_num = source_code[: match.start()].count("\n") + 1
-            is_tainted = any(
-                var in source_code[match.start() : match.start() + 200]
-                for var in self.tainted_variables
-            )
+            is_tainted = any(var in source_code[match.start() : match.start() + 200] for var in self.tainted_variables)
 
             producer = KafkaProducer(
                 topic=topic,
@@ -877,7 +848,7 @@ class KafkaTaintTracker:
         self,
         producer_result: KafkaAnalysisResult,
         consumer_result: KafkaAnalysisResult,
-    ) -> List[KafkaTaintBridge]:
+    ) -> list[KafkaTaintBridge]:
         """
         Create taint bridges between producer and consumer results.
 
@@ -900,9 +871,7 @@ class KafkaTaintTracker:
                 continue
 
             # Find consumers of this topic
-            matching_consumers = [
-                c for c in consumer_result.consumers if producer.topic in c.topics
-            ]
+            matching_consumers = [c for c in consumer_result.consumers if producer.topic in c.topics]
 
             if matching_consumers:
                 bridge = KafkaTaintBridge(
@@ -919,8 +888,8 @@ class KafkaTaintTracker:
     def mark_consumer_as_taint_source(
         self,
         consumer: KafkaConsumer,
-        original_taint: Optional[str] = None,
-    ) -> Dict[str, str]:
+        original_taint: str | None = None,
+    ) -> dict[str, str]:
         """
         Generate taint source mappings for a consumer handler.
 
@@ -935,14 +904,12 @@ class KafkaTaintTracker:
         """
         taint_origin = original_taint or f"kafka:{','.join(consumer.topics)}"
 
-        return {
-            var: f"KAFKA_CONSUMER({taint_origin})" for var in consumer.taint_variables
-        }
+        return {var: f"KAFKA_CONSUMER({taint_origin})" for var in consumer.taint_variables}
 
     def get_security_findings(
         self,
         result: KafkaAnalysisResult,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Generate security findings from analysis result.
 
@@ -1001,7 +968,7 @@ class KafkaTaintTracker:
 
 def analyze_kafka_file(
     file_path: str,
-    tainted_variables: Optional[Set[str]] = None,
+    tainted_variables: set[str] | None = None,
 ) -> KafkaAnalysisResult:
     """
     Analyze a file for Kafka taint patterns.
@@ -1040,9 +1007,9 @@ def analyze_kafka_file(
 
 def analyze_kafka_codebase(
     directory: str,
-    tainted_variables: Optional[Set[str]] = None,
-    extensions: Optional[List[str]] = None,
-) -> List[KafkaAnalysisResult]:
+    tainted_variables: set[str] | None = None,
+    extensions: list[str] | None = None,
+) -> list[KafkaAnalysisResult]:
     """
     Analyze an entire codebase for Kafka taint patterns.
 
@@ -1065,10 +1032,7 @@ def analyze_kafka_codebase(
     for ext in extensions:
         for file_path in root.rglob(f"*{ext}"):
             # Skip common non-source directories
-            if any(
-                part in file_path.parts
-                for part in ["node_modules", ".venv", "venv", "__pycache__", ".git"]
-            ):
+            if any(part in file_path.parts for part in ["node_modules", ".venv", "venv", "__pycache__", ".git"]):
                 continue
 
             try:
@@ -1078,11 +1042,7 @@ def analyze_kafka_codebase(
                 if "kafka" not in source_code.lower():
                     continue
 
-                language = (
-                    "python"
-                    if ext == ".py"
-                    else "java" if ext == ".java" else "javascript"
-                )
+                language = "python" if ext == ".py" else "java" if ext == ".java" else "javascript"
                 result = tracker.analyze_file(source_code, str(file_path), language)
 
                 # Only include files with Kafka patterns
@@ -1098,8 +1058,8 @@ def analyze_kafka_codebase(
 
 
 def get_kafka_taint_bridges(
-    results: List[KafkaAnalysisResult],
-) -> List[KafkaTaintBridge]:
+    results: list[KafkaAnalysisResult],
+) -> list[KafkaTaintBridge]:
     """
     Find all taint bridges across multiple analysis results.
 
@@ -1126,9 +1086,7 @@ def get_kafka_taint_bridges(
             continue
 
         matching_consumers = [
-            c
-            for c in all_consumers
-            if producer.topic in c.topics and c.file_path != producer.file_path
+            c for c in all_consumers if producer.topic in c.topics and c.file_path != producer.file_path
         ]
 
         if matching_consumers:

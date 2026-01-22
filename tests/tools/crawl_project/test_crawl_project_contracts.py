@@ -8,14 +8,10 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
-async def test_community_enforces_limit_and_discovery_mode(
-    large_python_project: Path, community_env: None
-) -> None:
+async def test_community_enforces_limit_and_discovery_mode(large_python_project: Path, community_env: None) -> None:
     from code_scalpel.mcp.tools.context import crawl_project
 
-    result = await crawl_project(
-        root_path=str(large_python_project), include_report=False
-    )
+    result = await crawl_project(root_path=str(large_python_project), include_report=False)
     assert result.success is True
 
     # Community limit should cap analyzed files
@@ -29,9 +25,7 @@ async def test_community_enforces_limit_and_discovery_mode(
     assert all(len(f.classes) == 0 for f in result.files)
 
 
-async def test_community_blocks_enterprise_pattern_feature(
-    small_python_project: Path, community_env: None
-) -> None:
+async def test_community_blocks_enterprise_pattern_feature(small_python_project: Path, community_env: None) -> None:
     from code_scalpel.mcp.tools.context import crawl_project
 
     result = await crawl_project(
@@ -66,18 +60,14 @@ async def test_enterprise_creates_incremental_cache(
     clean_cache(small_python_project)
     cache_file = Path(small_python_project) / ".scalpel_cache" / "crawl_cache.json"
 
-    first = await crawl_project(
-        root_path=str(small_python_project), include_report=False
-    )
+    first = await crawl_project(root_path=str(small_python_project), include_report=False)
     assert first.success is True
     assert cache_file.exists()
 
     data = json.loads(cache_file.read_text(encoding="utf-8"))
     assert len(data) >= 1
 
-    second = await crawl_project(
-        root_path=str(small_python_project), include_report=False
-    )
+    second = await crawl_project(root_path=str(small_python_project), include_report=False)
     assert second.success is True
     assert cache_file.exists()
 
@@ -90,9 +80,7 @@ async def test_invalid_tier_env_falls_back_to_community_limits(
     monkeypatch.setenv("CODE_SCALPEL_TIER", "enterprise")
     monkeypatch.setenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", "1")
 
-    result = await crawl_project(
-        root_path=str(large_python_project), include_report=False
-    )
+    result = await crawl_project(root_path=str(large_python_project), include_report=False)
     assert result.success is True
 
     # Fallback should enforce community limits when license invalid/missing

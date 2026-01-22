@@ -20,9 +20,9 @@ Use cases:
 import ast
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
+from code_scalpel.parsing.unified_parser import ParsingError, parse_python_code
 
 from .state_manager import SymbolicState
 
@@ -30,9 +30,7 @@ from .state_manager import SymbolicState
 class PrioritizationStrategy(Enum):
     """Path prioritization strategies."""
 
-    CRASH_FOCUSED = (
-        "crash"  # [20251226_FEATURE] v3.2.9 Pro tier - Prioritize error paths
-    )
+    CRASH_FOCUSED = "crash"  # [20251226_FEATURE] v3.2.9 Pro tier - Prioritize error paths
     COVERAGE_GUIDED = "coverage"  # Future: Target uncovered code
     SECURITY_FOCUSED = "security"  # Future: Prioritize paths to sinks
     COMPLEXITY_BASED = "complexity"  # Future: Simple paths first
@@ -66,8 +64,8 @@ class PathScore:
     path_id: int
     priority_score: float = 1.0  # Base priority score
     strategy: PrioritizationStrategy = PrioritizationStrategy.CRASH_FOCUSED
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    error_patterns: List[ErrorPattern] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    error_patterns: list[ErrorPattern] = field(default_factory=list)
     depth: int = 0
     constraint_count: int = 0
 
@@ -97,7 +95,7 @@ class PathPrioritizer:
 
     def __init__(
         self,
-        code: Optional[str] = None,
+        code: str | None = None,
         strategy: PrioritizationStrategy = PrioritizationStrategy.CRASH_FOCUSED,
     ):
         """
@@ -109,8 +107,8 @@ class PathPrioritizer:
         """
         self.strategy = strategy
         self.code = code
-        self._error_prone_lines: List[int] = []
-        self._pattern_map: Dict[int, ErrorPattern] = {}
+        self._error_prone_lines: list[int] = []
+        self._pattern_map: dict[int, ErrorPattern] = {}
 
         if code:
             self._analyze_code()
@@ -205,9 +203,7 @@ class PathPrioritizer:
 
         return score
 
-    def prioritize_paths(
-        self, states: List[SymbolicState]
-    ) -> List[tuple[int, PathScore]]:
+    def prioritize_paths(self, states: list[SymbolicState]) -> list[tuple[int, PathScore]]:
         """
         Prioritize paths by crash likelihood or strategy.
 
@@ -223,7 +219,7 @@ class PathPrioritizer:
             >>> for idx, score in prioritized[:5]:  # Top 5 paths
             ...     print(f"Path {idx}: score={score.total_score}")
         """
-        scores: List[tuple[int, PathScore]] = []
+        scores: list[tuple[int, PathScore]] = []
 
         for i, state in enumerate(states):
             score = self.score_path(i, state)
@@ -233,7 +229,7 @@ class PathPrioritizer:
         scores.sort(key=lambda x: x[1].total_score, reverse=True)
         return scores
 
-    def select_next_path(self, pending_paths: List[Any]) -> Optional[int]:
+    def select_next_path(self, pending_paths: list[Any]) -> int | None:
         """
         Select next path to explore from pending paths.
 
@@ -253,7 +249,7 @@ class PathPrioritizer:
         prioritized = self.prioritize_paths(pending_paths)
         return prioritized[0][0] if prioritized else None
 
-    def update_strategy(self, exploration_stats: Dict[str, Any]) -> None:
+    def update_strategy(self, exploration_stats: dict[str, Any]) -> None:
         """
         Adaptively update strategy based on progress.
 
@@ -265,7 +261,7 @@ class PathPrioritizer:
         """
         pass
 
-    def get_error_patterns(self) -> Dict[int, ErrorPattern]:
+    def get_error_patterns(self) -> dict[int, ErrorPattern]:
         """
         Get detected error patterns mapped to line numbers.
 
@@ -278,14 +274,12 @@ class PathPrioritizer:
         """Check if code contains any error-prone patterns."""
         return len(self._error_prone_lines) > 0
 
-    def get_error_prone_lines(self) -> List[int]:
+    def get_error_prone_lines(self) -> list[int]:
         """Get list of line numbers with potential error patterns."""
         return self._error_prone_lines.copy()
 
 
-def prioritize_for_crashes(
-    code: str, states: List[SymbolicState]
-) -> List[tuple[int, PathScore]]:
+def prioritize_for_crashes(code: str, states: list[SymbolicState]) -> list[tuple[int, PathScore]]:
     """
     Convenience function to prioritize paths for crash discovery.
 

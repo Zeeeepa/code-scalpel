@@ -47,16 +47,8 @@ def _generate_test_mermaid(
         Mermaid diagram string
     """
     # Convert to Pydantic models
-    nodes = [
-        NeighborhoodNodeModel(
-            id=node_id, depth=node_depths.get(node_id, 0), metadata={}
-        )
-        for node_id in node_ids
-    ]
-    edge_models = [
-        NeighborhoodEdgeModel(from_id=f, to_id=t, edge_type="calls", confidence=c)
-        for f, t, c in edges
-    ]
+    nodes = [NeighborhoodNodeModel(id=node_id, depth=node_depths.get(node_id, 0), metadata={}) for node_id in node_ids]
+    edge_models = [NeighborhoodEdgeModel(from_id=f, to_id=t, edge_type="calls", confidence=c) for f, t, c in edges]
 
     # Generate Mermaid (same logic as server.py:15919-15952)
     lines = ["graph TD"]
@@ -174,9 +166,7 @@ def sample_call_graph():
     mock_graph.edges = edges
     mock_graph.nodes_by_depth = nodes_by_depth
 
-    def mock_get_neighborhood(
-        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
-    ):
+    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0):
         """Simulate neighborhood extraction with depth limiting."""
         result = MagicMock()
         result.success = True
@@ -193,18 +183,14 @@ def sample_call_graph():
         included_edges = [
             (src, dst, conf)
             for src, dst, conf in edges
-            if src in included_nodes
-            and dst in included_nodes
-            and conf >= min_confidence
+            if src in included_nodes and dst in included_nodes and conf >= min_confidence
         ]
 
         # Handle truncation
         if len(included_nodes) > max_nodes:
             included_nodes = included_nodes[:max_nodes]
             result.truncated = True
-            result.truncation_warning = (
-                f"Graph truncated from {len(all_nodes)} to {max_nodes} nodes"
-            )
+            result.truncation_warning = f"Graph truncated from {len(all_nodes)} to {max_nodes} nodes"
         else:
             result.truncated = False
             result.truncation_warning = None
@@ -213,10 +199,7 @@ def sample_call_graph():
         result.subgraph.nodes = included_nodes
         result.subgraph.edges = included_edges
         result.node_depths = {
-            node: depth
-            for depth, nodes in nodes_by_depth.items()
-            for node in nodes
-            if node in included_nodes
+            node: depth for depth, nodes in nodes_by_depth.items() for node in nodes if node in included_nodes
         }
         result.node_depths[center_id] = 0
 
@@ -257,9 +240,7 @@ def simple_graph():
     mock_graph.nodes = nodes
     mock_graph.edges = edges
 
-    def mock_get_neighborhood(
-        center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0
-    ):
+    def mock_get_neighborhood(center_id, k=1, max_nodes=100, direction="both", min_confidence=0.0):
         result = MagicMock()
         result.success = center_id in nodes
         result.subgraph = MagicMock()
@@ -277,9 +258,7 @@ def simple_graph():
             result.truncated = False
 
             # Build node depths dict (center=0, all neighbors=1)
-            node_depths_dict = {
-                node: 0 if node == center_id else 1 for node in result.subgraph.nodes
-            }
+            node_depths_dict = {node: 0 if node == center_id else 1 for node in result.subgraph.nodes}
             result.node_depths = node_depths_dict
 
             # Generate Mermaid diagram

@@ -8,6 +8,7 @@ Tests validate Community/Pro/Enterprise tier functionality per PRE_RELEASE_CHECK
 """
 
 import pytest
+
 from code_scalpel.mcp.helpers.security_helpers import _scan_dependencies_sync
 
 # ============================================================================
@@ -165,13 +166,9 @@ class TestScanDependenciesCommunityTier:
         )
         assert result.success is True
         # Should be limited to 50 dependencies
-        assert (
-            len(result.dependencies) <= 50
-        ), f"Expected ≤50, got {len(result.dependencies)}"
+        assert len(result.dependencies) <= 50, f"Expected ≤50, got {len(result.dependencies)}"
 
-    def test_cve_detection_via_osv_enabled(
-        self, community_tier, python_requirements_with_vulns
-    ):
+    def test_cve_detection_via_osv_enabled(self, community_tier, python_requirements_with_vulns):
         """Verify CVE detection via OSV API works for Community tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -185,9 +182,7 @@ class TestScanDependenciesCommunityTier:
         # Note: actual result depends on OSV API availability
         assert result.total_vulnerabilities >= 0
 
-    def test_severity_scoring_present(
-        self, community_tier, python_requirements_with_vulns
-    ):
+    def test_severity_scoring_present(self, community_tier, python_requirements_with_vulns):
         """Verify CVSS severity scoring is present for Community tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -202,9 +197,7 @@ class TestScanDependenciesCommunityTier:
             assert result.severity_summary is not None
             assert isinstance(result.severity_summary, dict)
 
-    def test_python_language_support(
-        self, community_tier, python_requirements_with_vulns
-    ):
+    def test_python_language_support(self, community_tier, python_requirements_with_vulns):
         """Verify Python language support (requirements.txt parsing)."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -218,9 +211,7 @@ class TestScanDependenciesCommunityTier:
         python_deps = [d for d in result.dependencies if d.ecosystem in ["PyPI", "pip"]]
         assert len(python_deps) > 0, "Should detect Python dependencies"
 
-    def test_javascript_language_support(
-        self, community_tier, javascript_package_json_with_vulns
-    ):
+    def test_javascript_language_support(self, community_tier, javascript_package_json_with_vulns):
         """Verify JavaScript language support (package.json parsing)."""
         result = _scan_dependencies_sync(
             project_root=str(javascript_package_json_with_vulns),
@@ -248,9 +239,7 @@ class TestScanDependenciesCommunityTier:
         java_deps = [d for d in result.dependencies if "maven" in d.ecosystem.lower()]
         assert len(java_deps) > 0, "Should detect Java dependencies"
 
-    def test_fixed_version_remediation(
-        self, community_tier, python_requirements_with_vulns
-    ):
+    def test_fixed_version_remediation(self, community_tier, python_requirements_with_vulns):
         """Verify fixed_version field is included for Community tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -265,9 +254,7 @@ class TestScanDependenciesCommunityTier:
             for dep_info in result.dependencies:
                 if dep_info.vulnerabilities:
                     for vuln in dep_info.vulnerabilities:
-                        assert hasattr(
-                            vuln, "fixed_version"
-                        ), "Should have fixed_version field"
+                        assert hasattr(vuln, "fixed_version"), "Should have fixed_version field"
 
 
 # ============================================================================
@@ -289,13 +276,9 @@ class TestScanDependenciesProTier:
         )
         assert result.success is True
         # Pro tier should scan all dependencies, not just first 50
-        assert (
-            len(result.dependencies) > 50
-        ), f"Expected >50, got {len(result.dependencies)}"
+        assert len(result.dependencies) > 50, f"Expected >50, got {len(result.dependencies)}"
 
-    def test_reachability_analysis_enabled(
-        self, pro_tier, python_requirements_with_vulns
-    ):
+    def test_reachability_analysis_enabled(self, pro_tier, python_requirements_with_vulns):
         """Verify reachability analysis is enabled for Pro tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -327,9 +310,7 @@ class TestScanDependenciesProTier:
             any(d.license is not None for d in result.dependencies)
             # May be None if license lookup fails, but capability should be enabled
 
-    def test_typosquatting_detection_enabled(
-        self, pro_tier, python_requirements_with_vulns
-    ):
+    def test_typosquatting_detection_enabled(self, pro_tier, python_requirements_with_vulns):
         """Verify typosquatting detection for Pro tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -345,9 +326,7 @@ class TestScanDependenciesProTier:
             any(hasattr(d, "typosquatting_risk") for d in result.dependencies)
             # Field should exist, even if all values are None
 
-    def test_supply_chain_risk_scoring_present(
-        self, pro_tier, python_requirements_with_vulns
-    ):
+    def test_supply_chain_risk_scoring_present(self, pro_tier, python_requirements_with_vulns):
         """Verify supply chain risk scoring for Pro tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -363,9 +342,7 @@ class TestScanDependenciesProTier:
             any(hasattr(d, "supply_chain_risk_score") for d in result.dependencies)
             # Field should exist, even if values are None
 
-    def test_false_positive_reduction_applied(
-        self, pro_tier, python_requirements_with_vulns
-    ):
+    def test_false_positive_reduction_applied(self, pro_tier, python_requirements_with_vulns):
         """Verify false positive reduction via reachability for Pro tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -390,9 +367,7 @@ class TestScanDependenciesProTier:
 class TestScanDependenciesEnterpriseTier:
     """Validate Enterprise tier capabilities."""
 
-    def test_unlimited_dependencies_with_pro_features(
-        self, enterprise_tier, large_dependency_list
-    ):
+    def test_unlimited_dependencies_with_pro_features(self, enterprise_tier, large_dependency_list):
         """Verify unlimited dependencies with all Pro features for Enterprise tier."""
         result = _scan_dependencies_sync(
             project_root=str(large_dependency_list),
@@ -405,9 +380,7 @@ class TestScanDependenciesEnterpriseTier:
         # Enterprise should scan all dependencies
         assert len(result.dependencies) > 50
 
-    def test_policy_based_blocking_enabled(
-        self, enterprise_tier, python_requirements_with_vulns
-    ):
+    def test_policy_based_blocking_enabled(self, enterprise_tier, python_requirements_with_vulns):
         """Verify policy-based blocking for Enterprise tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -421,9 +394,7 @@ class TestScanDependenciesEnterpriseTier:
         if hasattr(result, "policy_violations") or result.policy_violations is not None:
             assert isinstance(result.policy_violations, list)
 
-    def test_compliance_reporting_present(
-        self, enterprise_tier, python_requirements_with_vulns
-    ):
+    def test_compliance_reporting_present(self, enterprise_tier, python_requirements_with_vulns):
         """Verify compliance reporting (SOC2/ISO) for Enterprise tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -463,9 +434,7 @@ class TestScanDependenciesEnterpriseTier:
         ecosystems = set(d.ecosystem for d in result.dependencies)
         assert len(ecosystems) >= 2, f"Expected ≥2 ecosystems, got {ecosystems}"
 
-    def test_custom_vulnerability_database(
-        self, enterprise_tier, python_requirements_with_vulns
-    ):
+    def test_custom_vulnerability_database(self, enterprise_tier, python_requirements_with_vulns):
         """Verify custom vulnerability database support for Enterprise tier."""
         result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -487,9 +456,7 @@ class TestScanDependenciesEnterpriseTier:
 class TestScanDependenciesCrossTierComparison:
     """Compare behavior across tiers."""
 
-    def test_community_vs_pro_dependency_limit(
-        self, community_tier, pro_tier, large_dependency_list
-    ):
+    def test_community_vs_pro_dependency_limit(self, community_tier, pro_tier, large_dependency_list):
         """Verify Pro tier scans more dependencies than Community."""
         comm_result = _scan_dependencies_sync(
             project_root=str(large_dependency_list),
@@ -511,9 +478,7 @@ class TestScanDependenciesCrossTierComparison:
         assert len(comm_result.dependencies) <= 50
         assert len(pro_result.dependencies) > len(comm_result.dependencies)
 
-    def test_community_no_reachability_pro_has(
-        self, community_tier, pro_tier, python_requirements_with_vulns
-    ):
+    def test_community_no_reachability_pro_has(self, community_tier, pro_tier, python_requirements_with_vulns):
         """Verify Pro tier has reachability analysis that Community doesn't."""
         comm_result = _scan_dependencies_sync(
             project_root=str(python_requirements_with_vulns),
@@ -568,9 +533,7 @@ class TestScanDependenciesEdgeCases:
         # Should parse both main and dev dependencies
         assert len(result.dependencies) > 0
 
-    def test_exclude_dev_dependencies(
-        self, community_tier, python_pyproject_with_vulns
-    ):
+    def test_exclude_dev_dependencies(self, community_tier, python_pyproject_with_vulns):
         """Verify dev dependencies can be excluded."""
         result_with_dev = _scan_dependencies_sync(
             project_root=str(python_pyproject_with_vulns),

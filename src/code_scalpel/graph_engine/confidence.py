@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict
+from typing import Any
 
 
 # [20251216_FEATURE] Edge types for confidence scoring
@@ -71,7 +71,7 @@ class ConfidenceLevel(Enum):
 
 
 # [20251216_FEATURE] Confidence scoring rules as per problem statement
-CONFIDENCE_RULES: Dict[EdgeType, float] = {
+CONFIDENCE_RULES: dict[EdgeType, float] = {
     # Definite relationships
     EdgeType.IMPORT_STATEMENT: 1.0,
     EdgeType.TYPE_ANNOTATION: 1.0,
@@ -99,7 +99,7 @@ class ConfidenceEvidence:
 
     edge_type: EdgeType
     base_score: float
-    adjustments: Dict[str, float]  # reason -> adjustment
+    adjustments: dict[str, float]  # reason -> adjustment
     final_score: float
     explanation: str
 
@@ -140,9 +140,7 @@ class ConfidenceEngine:
         self.min_threshold = min_threshold
         self.rules = CONFIDENCE_RULES.copy()
 
-    def score_edge(
-        self, edge_type: EdgeType, context: Dict[str, Any]
-    ) -> ConfidenceEvidence:
+    def score_edge(self, edge_type: EdgeType, context: dict[str, Any]) -> ConfidenceEvidence:
         """
         Calculate confidence score for an edge.
 
@@ -154,7 +152,7 @@ class ConfidenceEngine:
             ConfidenceEvidence with score and explanation
         """
         base_score = self.rules.get(edge_type, 0.5)
-        adjustments: Dict[str, float] = {}
+        adjustments: dict[str, float] = {}
 
         # Apply context-specific adjustments
         if edge_type == EdgeType.HTTP_CALL:
@@ -177,9 +175,7 @@ class ConfidenceEngine:
             explanation=explanation,
         )
 
-    def _score_http_call(
-        self, context: Dict[str, Any], adjustments: Dict[str, float]
-    ) -> float:
+    def _score_http_call(self, context: dict[str, Any], adjustments: dict[str, float]) -> float:
         """Score HTTP call edges based on route matching."""
         base = 0.8
 
@@ -197,9 +193,7 @@ class ConfidenceEngine:
 
         return base
 
-    def _score_route_match(
-        self, context: Dict[str, Any], adjustments: Dict[str, float]
-    ) -> float:
+    def _score_route_match(self, context: dict[str, Any], adjustments: dict[str, float]) -> float:
         """Score route pattern matching."""
         base = 0.8
 
@@ -214,9 +208,7 @@ class ConfidenceEngine:
 
         return base
 
-    def _score_string_match(
-        self, context: Dict[str, Any], adjustments: Dict[str, float]
-    ) -> float:
+    def _score_string_match(self, context: dict[str, Any], adjustments: dict[str, float]) -> float:
         """Score string literal matching."""
         base = 0.7
 
@@ -231,9 +223,7 @@ class ConfidenceEngine:
 
         return base
 
-    def _build_explanation(
-        self, edge_type: EdgeType, score: float, adjustments: Dict[str, float]
-    ) -> str:
+    def _build_explanation(self, edge_type: EdgeType, score: float, adjustments: dict[str, float]) -> str:
         """Build human-readable explanation of confidence score."""
         parts = [f"Base: {edge_type.value}"]
 

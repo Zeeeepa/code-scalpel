@@ -45,7 +45,7 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class StandardSeverity(Enum):
@@ -64,9 +64,9 @@ class StandardViolation:
     severity: StandardSeverity
     line: int
     column: int
-    end_line: Optional[int] = None
-    end_column: Optional[int] = None
-    fix: Optional[dict[str, Any]] = None  # Auto-fix info if available
+    end_line: int | None = None
+    end_column: int | None = None
+    fix: dict[str, Any] | None = None  # Auto-fix info if available
 
     @property
     def is_fixable(self) -> bool:
@@ -128,9 +128,7 @@ class StandardConfig:
     ignore: list[str] = field(default_factory=list)
 
     # Extensions to check
-    extensions: list[str] = field(
-        default_factory=lambda: [".js", ".jsx", ".mjs", ".cjs"]
-    )
+    extensions: list[str] = field(default_factory=lambda: [".js", ".jsx", ".mjs", ".cjs"])
 
 
 class StandardJSParser:
@@ -161,7 +159,7 @@ class StandardJSParser:
         fixed = parser.fix_file('src/app.js')
     """
 
-    def __init__(self, standard_path: Optional[str] = None):
+    def __init__(self, standard_path: str | None = None):
         """
         Initialize StandardJS parser.
 
@@ -169,7 +167,7 @@ class StandardJSParser:
         """
         self._standard_path = standard_path or self._find_standard()
 
-    def _find_standard(self) -> Optional[str]:
+    def _find_standard(self) -> str | None:
         """Find StandardJS executable."""
         standard = shutil.which("standard")
         if standard:
@@ -232,15 +230,9 @@ class StandardJSParser:
         :return: StandardFileResult with violations.
         """
         if not self._standard_path:
-            raise RuntimeError(
-                "StandardJS not found. Install with: npm install standard"
-            )
+            raise RuntimeError("StandardJS not found. Install with: npm install standard")
 
-        cmd = (
-            self._standard_path.split()
-            if " " in self._standard_path
-            else [self._standard_path]
-        )
+        cmd = self._standard_path.split() if " " in self._standard_path else [self._standard_path]
         cmd.extend(["--reporter", "json", file_path])
 
         try:
@@ -282,18 +274,12 @@ class StandardJSParser:
         :return: True if file was modified.
         """
         if not self._standard_path:
-            raise RuntimeError(
-                "StandardJS not found. Install with: npm install standard"
-            )
+            raise RuntimeError("StandardJS not found. Install with: npm install standard")
 
         # Check original state
         original = Path(file_path).read_text()
 
-        cmd = (
-            self._standard_path.split()
-            if " " in self._standard_path
-            else [self._standard_path]
-        )
+        cmd = self._standard_path.split() if " " in self._standard_path else [self._standard_path]
         cmd.extend(["--fix", file_path])
 
         try:
@@ -323,9 +309,7 @@ class StandardJSParser:
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
-    def get_fixable_violations(
-        self, result: StandardFileResult
-    ) -> list[StandardViolation]:
+    def get_fixable_violations(self, result: StandardFileResult) -> list[StandardViolation]:
         """
         Get only auto-fixable violations.
 
@@ -334,9 +318,7 @@ class StandardJSParser:
         """
         return [v for v in result.violations if v.is_fixable]
 
-    def group_by_rule(
-        self, result: StandardFileResult
-    ) -> dict[str, list[StandardViolation]]:
+    def group_by_rule(self, result: StandardFileResult) -> dict[str, list[StandardViolation]]:
         """
         Group violations by rule ID.
 
@@ -350,9 +332,7 @@ class StandardJSParser:
             grouped[violation.rule_id].append(violation)
         return grouped
 
-    def get_violation_summary(
-        self, results: list[StandardFileResult]
-    ) -> dict[str, int]:
+    def get_violation_summary(self, results: list[StandardFileResult]) -> dict[str, int]:
         """
         Get summary of violations across multiple files.
 

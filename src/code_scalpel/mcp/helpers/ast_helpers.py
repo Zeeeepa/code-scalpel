@@ -3,19 +3,18 @@
 import ast
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Tuple
 
-from code_scalpel.parsing.unified_parser import parse_python_code, ParsingError
+from code_scalpel.parsing.unified_parser import ParsingError, parse_python_code
 
 logger = logging.getLogger("code_scalpel.mcp.ast")
 
 # [20251216_PERF] v2.5.0 - Simple in-memory AST cache
 # Key: file_path (str)
 # Value: (mtime, ast_tree)
-_AST_CACHE: Dict[str, Tuple[float, ast.AST]] = {}
+_AST_CACHE: dict[str, tuple[float, ast.AST]] = {}
 
 
-def get_cached_ast(file_path: Path) -> Optional[ast.Module]:
+def get_cached_ast(file_path: Path) -> ast.Module | None:
     """Retrieve cached AST if fresh, otherwise return None."""
     try:
         key = str(file_path.resolve())
@@ -41,7 +40,7 @@ def cache_ast(file_path: Path, tree: ast.AST) -> None:
         pass
 
 
-def parse_file_cached(file_path: Path) -> Optional[ast.Module]:
+def parse_file_cached(file_path: Path) -> ast.Module | None:
     """Parse a Python file with caching using unified parser."""
     # Check cache first
     cached = get_cached_ast(file_path)

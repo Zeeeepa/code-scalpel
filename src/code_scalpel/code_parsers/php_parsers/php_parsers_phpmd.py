@@ -20,7 +20,7 @@ PHPMD provides:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class PHPMDPriority(Enum):
@@ -50,9 +50,9 @@ class PHPMDViolation:
     message: str
     rule: str
     rule_set: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    priority: Optional[int] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    priority: int | None = None
 
 
 @dataclass
@@ -60,7 +60,7 @@ class PHPMDConfig:
     """PHPMD configuration settings."""
 
     ruleset: str = "cleancode,codesize,controversial,design,naming,unusedcode"
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     custom_rules: list[str] = field(default_factory=list)
 
 
@@ -70,7 +70,7 @@ class PHPMDParser:
     def __init__(self):
         """Initialize PHPMD parser."""
         self.violations: list[PHPMDViolation] = []
-        self.config: Optional[PHPMDConfig] = None
+        self.config: PHPMDConfig | None = None
 
     def parse_xml_report(self, xml_file: Path) -> list[PHPMDViolation]:
         """

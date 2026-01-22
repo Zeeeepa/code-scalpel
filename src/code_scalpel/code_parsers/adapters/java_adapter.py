@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..interface import IParser, Language, ParseResult
 
@@ -33,7 +33,7 @@ class JavaParserAdapter(IParser):
                 "pip install tree-sitter tree-sitter-java"
             )
         self._parser = TreeSitterJavaParser()
-        self._last_result: Optional[Any] = None
+        self._last_result: Any | None = None
 
     def parse(self, code: str) -> ParseResult:
         """
@@ -67,7 +67,7 @@ class JavaParserAdapter(IParser):
                 language=Language.JAVA,
             )
 
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         """
         Get list of method names from the AST.
 
@@ -108,7 +108,7 @@ class JavaParserAdapter(IParser):
 
         return methods
 
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         """
         Get list of class/interface/enum names from the AST.
 
@@ -139,7 +139,7 @@ class JavaParserAdapter(IParser):
 
         return names
 
-    def get_methods_for_class(self, class_name: str, ast_tree: Any = None) -> List[str]:
+    def get_methods_for_class(self, class_name: str, ast_tree: Any = None) -> list[str]:
         """
         Get method names for a specific class.
 
@@ -163,7 +163,7 @@ class JavaParserAdapter(IParser):
 
         return []
 
-    def get_fields_for_class(self, class_name: str, ast_tree: Any = None) -> List[str]:
+    def get_fields_for_class(self, class_name: str, ast_tree: Any = None) -> list[str]:
         """
         Get field names for a specific class.
 
@@ -187,7 +187,7 @@ class JavaParserAdapter(IParser):
 
         return []
 
-    def _convert_errors(self, result: Any) -> List[Dict[str, Any]]:
+    def _convert_errors(self, result: Any) -> list[dict[str, Any]]:
         """Convert parser errors to standard format."""
         errors = []
 
@@ -209,7 +209,7 @@ class JavaParserAdapter(IParser):
 
         return errors
 
-    def _extract_warnings(self, result: Any) -> List[str]:
+    def _extract_warnings(self, result: Any) -> list[str]:
         """Extract warnings from parse result."""
         warnings = []
 
@@ -218,7 +218,7 @@ class JavaParserAdapter(IParser):
 
         return warnings
 
-    def _extract_metrics(self, result: Any) -> Dict[str, Any]:
+    def _extract_metrics(self, result: Any) -> dict[str, Any]:
         """Extract metrics from parse result."""
         metrics = {}
 

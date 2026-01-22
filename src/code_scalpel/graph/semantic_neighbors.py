@@ -23,7 +23,7 @@ import re
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 
 @dataclass
@@ -35,8 +35,8 @@ class SemanticNeighbor:
     file_path: str
     line: int
     similarity_score: float  # 0.0 - 1.0
-    relationship_types: List[str]  # e.g., ["name_similar", "shared_params"]
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    relationship_types: list[str]  # e.g., ["name_similar", "shared_params"]
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -45,10 +45,10 @@ class SemanticNeighborResult:
 
     success: bool
     center_node: str
-    neighbors: List[SemanticNeighbor]
+    neighbors: list[SemanticNeighbor]
     total_candidates: int
     search_scope: int  # Number of files searched
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -58,10 +58,10 @@ class FunctionSignature:
     name: str
     file_path: str
     line: int
-    parameters: List[str]
-    return_annotation: Optional[str]
-    docstring: Optional[str]
-    decorators: List[str]
+    parameters: list[str]
+    return_annotation: str | None
+    docstring: str | None
+    decorators: list[str]
 
 
 class SemanticNeighborFinder:
@@ -70,14 +70,14 @@ class SemanticNeighborFinder:
     def __init__(self, project_root: str | Path):
         """Initialize finder with project root."""
         self.root = Path(project_root)
-        self._function_cache: Dict[str, FunctionSignature] = {}
+        self._function_cache: dict[str, FunctionSignature] = {}
 
     def find_semantic_neighbors(
         self,
         center_name: str,
         k: int = 10,
         min_similarity: float = 0.3,
-        relationship_types: Optional[Set[str]] = None,
+        relationship_types: set[str] | None = None,
     ) -> SemanticNeighborResult:
         """
         Find k most semantically similar functions to the center function.
@@ -127,15 +127,13 @@ class SemanticNeighborFinder:
                 )
 
             # Calculate similarities
-            candidates: List[Tuple[float, SemanticNeighbor]] = []
+            candidates: list[tuple[float, SemanticNeighbor]] = []
 
-            for key, sig in signatures.items():
+            for _key, sig in signatures.items():
                 if sig.name == center_name and sig.file_path == center_sig.file_path:
                     continue  # Skip self
 
-                score, rel_types = self._calculate_similarity(
-                    center_sig, sig, relationship_types
-                )
+                score, rel_types = self._calculate_similarity(center_sig, sig, relationship_types)
 
                 if score >= min_similarity and rel_types:
                     node_id = self._make_node_id(sig)
@@ -179,12 +177,12 @@ class SemanticNeighborFinder:
                 error=str(e),
             )
 
-    def _extract_all_signatures(self) -> Dict[str, FunctionSignature]:
+    def _extract_all_signatures(self) -> dict[str, FunctionSignature]:
         """Extract all function signatures from Python files."""
         if self._function_cache:
             return self._function_cache
 
-        signatures: Dict[str, FunctionSignature] = {}
+        signatures: dict[str, FunctionSignature] = {}
 
         # Exclude common non-source directories
         exclude_dirs = {
@@ -275,10 +273,10 @@ class SemanticNeighborFinder:
         self,
         center: FunctionSignature,
         candidate: FunctionSignature,
-        relationship_types: Set[str],
-    ) -> Tuple[float, List[str]]:
+        relationship_types: set[str],
+    ) -> tuple[float, list[str]]:
         """Calculate similarity between two function signatures."""
-        scores: List[Tuple[float, str]] = []
+        scores: list[tuple[float, str]] = []
 
         if "name_similar" in relationship_types:
             name_sim = self._name_similarity(center.name, candidate.name)
@@ -291,25 +289,17 @@ class SemanticNeighborFinder:
                 scores.append((prefix_sim * 0.3, "prefix_match"))
 
         if "shared_params" in relationship_types:
-            param_sim = self._parameter_similarity(
-                center.parameters, candidate.parameters
-            )
+            param_sim = self._parameter_similarity(center.parameters, candidate.parameters)
             if param_sim > 0.3:
                 scores.append((param_sim * 0.2, "shared_params"))
 
-        if (
-            "docstring_similar" in relationship_types
-            and center.docstring
-            and candidate.docstring
-        ):
+        if "docstring_similar" in relationship_types and center.docstring and candidate.docstring:
             doc_sim = self._text_similarity(center.docstring, candidate.docstring)
             if doc_sim > 0.3:
                 scores.append((doc_sim * 0.2, "docstring_similar"))
 
         if "decorator_similar" in relationship_types:
-            dec_sim = self._set_similarity(
-                set(center.decorators), set(candidate.decorators)
-            )
+            dec_sim = self._set_similarity(set(center.decorators), set(candidate.decorators))
             if dec_sim > 0.5:
                 scores.append((dec_sim * 0.2, "decorator_similar"))
 
@@ -342,7 +332,7 @@ class SemanticNeighborFinder:
         total = set(parts1) | set(parts2)
         return len(shared) / len(total)
 
-    def _split_name(self, name: str) -> List[str]:
+    def _split_name(self, name: str) -> list[str]:
         """Split a name into parts (snake_case and camelCase)."""
         # Handle snake_case
         if "_" in name:
@@ -353,7 +343,7 @@ class SemanticNeighborFinder:
             parts = [p.lower() for p in parts]
         return [p for p in parts if p]
 
-    def _parameter_similarity(self, params1: List[str], params2: List[str]) -> float:
+    def _parameter_similarity(self, params1: list[str], params2: list[str]) -> float:
         """Calculate similarity between parameter lists."""
         if not params1 or not params2:
             return 0.0
@@ -403,7 +393,7 @@ class SemanticNeighborFinder:
 
         return self._set_similarity(words1, words2)
 
-    def _set_similarity(self, set1: Set[str], set2: Set[str]) -> float:
+    def _set_similarity(self, set1: set[str], set2: set[str]) -> float:
         """Jaccard similarity between two sets."""
         if not set1 or not set2:
             return 0.0

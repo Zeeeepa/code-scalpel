@@ -10,7 +10,6 @@ Command: pmd check -d src -R rulesets/java/quickstart.xml -f xml -r report.xml
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from defusedxml import ElementTree as ET
 
@@ -28,7 +27,7 @@ class PMDViolation:
     ruleset: str  # Ruleset name (e.g., "Best Practices")
     priority: int  # 1-5, lower is more severe
     message: str
-    external_info_url: Optional[str] = None
+    external_info_url: str | None = None
 
 
 class PMDParser:
@@ -66,8 +65,8 @@ class PMDParser:
 
     def __init__(
         self,
-        pmd_bin: Optional[str] = None,
-        rulesets: Optional[list[str]] = None,
+        pmd_bin: str | None = None,
+        rulesets: list[str] | None = None,
     ):
         """
         Initialize PMD parser.
@@ -95,7 +94,7 @@ class PMDParser:
             return self.parse_xml(xml_output)
         return []
 
-    def run_pmd(self, source_path: str) -> Optional[str]:
+    def run_pmd(self, source_path: str) -> str | None:
         """
         Run PMD on source path.
 
@@ -174,9 +173,7 @@ class PMDParser:
         content = Path(xml_file).read_text()
         return self.parse_xml(content)
 
-    def get_by_priority(
-        self, violations: list[PMDViolation], max_priority: int = 2
-    ) -> list[PMDViolation]:
+    def get_by_priority(self, violations: list[PMDViolation], max_priority: int = 2) -> list[PMDViolation]:
         """
         Filter violations by priority.
 
@@ -189,9 +186,7 @@ class PMDParser:
         """
         return [v for v in violations if v.priority <= max_priority]
 
-    def get_by_ruleset(
-        self, violations: list[PMDViolation], ruleset: str
-    ) -> list[PMDViolation]:
+    def get_by_ruleset(self, violations: list[PMDViolation], ruleset: str) -> list[PMDViolation]:
         """
         Filter violations by ruleset.
 

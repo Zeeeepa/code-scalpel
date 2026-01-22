@@ -124,9 +124,7 @@ def clean_env():
     original_secret_key = os.environ.get("CODE_SCALPEL_SECRET_KEY")
     original_allow_hs256 = os.environ.get("CODE_SCALPEL_ALLOW_HS256")
     original_license_path = os.environ.get("CODE_SCALPEL_LICENSE_PATH")
-    original_disable_discovery = os.environ.get(
-        "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"
-    )
+    original_disable_discovery = os.environ.get("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY")
 
     # Clean environment
     os.environ.pop("CODE_SCALPEL_LICENSE_PATH", None)
@@ -157,9 +155,7 @@ def clean_env():
         os.environ.pop("CODE_SCALPEL_ALLOW_HS256", None)
 
     if original_disable_discovery is not None:
-        os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = (
-            original_disable_discovery
-        )
+        os.environ["CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY"] = original_disable_discovery
     else:
         os.environ.pop("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", None)
 
@@ -181,9 +177,7 @@ class TestJWTValidation:
         assert result.organization == TEST_ORGANIZATION
         assert len(result.features) > 0
 
-    def test_validate_valid_enterprise_token(
-        self, enterprise_license_token, validator_hs256
-    ):
+    def test_validate_valid_enterprise_token(self, enterprise_license_token, validator_hs256):
         """Test validating a valid Enterprise tier token."""
         result = validator_hs256.validate_token(enterprise_license_token)
 
@@ -200,9 +194,7 @@ class TestJWTValidation:
         assert result.error_message is not None
         assert "expired" in result.error_message.lower()
 
-    def test_validate_expired_token_grace_period(
-        self, expired_license_token, validator_hs256
-    ):
+    def test_validate_expired_token_grace_period(self, expired_license_token, validator_hs256):
         """Test that expired tokens are in grace period within 7 days."""
         result = validator_hs256.validate_token(expired_license_token)
 
@@ -215,9 +207,7 @@ class TestJWTValidation:
     def test_validate_invalid_signature(self, pro_license_token):
         """Test that modified tokens are rejected."""
         # Create validator with wrong secret key
-        wrong_validator = JWTLicenseValidator(
-            algorithm=JWTAlgorithm.HS256, secret_key="wrong_secret_key"
-        )
+        wrong_validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key="wrong_secret_key")
 
         result = wrong_validator.validate_token(pro_license_token)
 
@@ -249,9 +239,7 @@ class TestTierDetection:
             finally:
                 os.chdir(original_cwd)
 
-    def test_get_current_tier_from_license_path(
-        self, clean_env, pro_license_token, validator_hs256
-    ):
+    def test_get_current_tier_from_license_path(self, clean_env, pro_license_token, validator_hs256):
         """Test tier detection from CODE_SCALPEL_LICENSE_PATH."""
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
@@ -261,9 +249,7 @@ class TestTierDetection:
             tier = validator_hs256.get_current_tier()
             assert tier == "pro"
 
-    def test_get_current_tier_expired_grace_period(
-        self, clean_env, expired_license_token, validator_hs256
-    ):
+    def test_get_current_tier_expired_grace_period(self, clean_env, expired_license_token, validator_hs256):
         """Test that expired license within grace period returns licensed tier."""
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
@@ -278,9 +264,7 @@ class TestTierDetection:
 class TestLicenseRevalidationCache:
     """Tests for 24h runtime license revalidation cache."""
 
-    def test_validate_cached_within_24h_when_file_unchanged(
-        self, clean_env, pro_license_token, monkeypatch
-    ):
+    def test_validate_cached_within_24h_when_file_unchanged(self, clean_env, pro_license_token, monkeypatch):
         """Validation should happen once within the TTL for an unchanged file."""
 
         jwt_validator_module._LICENSE_VALIDATION_CACHE = None
@@ -295,26 +279,20 @@ class TestLicenseRevalidationCache:
             validate_calls["n"] += 1
             return original_validate_token(self, token)
 
-        monkeypatch.setattr(
-            JWTLicenseValidator, "validate_token", _wrapped_validate_token
-        )
+        monkeypatch.setattr(JWTLicenseValidator, "validate_token", _wrapped_validate_token)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
             license_path.write_text(pro_license_token)
             os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
-            v1 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v1 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r1 = v1.validate()
             assert r1.is_valid is True
             assert validate_calls["n"] == 1
 
             # New instance, same unchanged file, same time window.
-            v2 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v2 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r2 = v2.validate()
             assert r2.is_valid is True
             assert validate_calls["n"] == 1
@@ -331,9 +309,7 @@ class TestLicenseRevalidationCache:
             assert r4.is_valid is True
             assert validate_calls["n"] == 2
 
-    def test_validate_revalidates_when_license_file_changes(
-        self, clean_env, pro_license_token, monkeypatch
-    ):
+    def test_validate_revalidates_when_license_file_changes(self, clean_env, pro_license_token, monkeypatch):
         """Any license file change should force revalidation even within TTL."""
 
         jwt_validator_module._LICENSE_VALIDATION_CACHE = None
@@ -348,27 +324,21 @@ class TestLicenseRevalidationCache:
             validate_calls["n"] += 1
             return original_validate_token(self, token)
 
-        monkeypatch.setattr(
-            JWTLicenseValidator, "validate_token", _wrapped_validate_token
-        )
+        monkeypatch.setattr(JWTLicenseValidator, "validate_token", _wrapped_validate_token)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
             license_path.write_text(pro_license_token)
             os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
-            v1 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v1 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r1 = v1.validate()
             assert r1.is_valid is True
             assert validate_calls["n"] == 1
 
             # Change file contents/mtime; should force revalidation even within TTL.
             license_path.write_text(pro_license_token + "\n")
-            v2 = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            v2 = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             r2 = v2.validate()
             assert r2.is_valid is True
             assert validate_calls["n"] == 2
@@ -436,9 +406,7 @@ class TestLicenseFileHandling:
                 license_file = Path(".scalpel-license")
                 license_file.write_text(pro_license_token)
 
-                validator = JWTLicenseValidator(
-                    algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-                )
+                validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
 
                 token = validator.load_license_token()
 
@@ -454,9 +422,7 @@ class TestLicenseFileHandling:
 
             os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(license_path)
 
-            validator = JWTLicenseValidator(
-                algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-            )
+            validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
             token = validator.load_license_token()
             assert token == pro_license_token
 
@@ -474,9 +440,7 @@ class TestLicenseFileHandling:
                 explicit_path.write_text(pro_license_token)
                 os.environ["CODE_SCALPEL_LICENSE_PATH"] = str(explicit_path)
 
-                validator = JWTLicenseValidator(
-                    algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-                )
+                validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
                 token = validator.load_license_token()
                 assert token == pro_license_token
             finally:
@@ -486,9 +450,7 @@ class TestLicenseFileHandling:
 class TestLicenseInfo:
     """Tests for license info API."""
 
-    def test_get_license_info_valid_license(
-        self, clean_env, pro_license_token, validator_hs256
-    ):
+    def test_get_license_info_valid_license(self, clean_env, pro_license_token, validator_hs256):
         """Test getting license info for valid license."""
         with tempfile.TemporaryDirectory() as tmpdir:
             license_path = Path(tmpdir) / "license.jwt"
@@ -554,9 +516,7 @@ class TestGracePeriod:
 
         token = jwt.encode(claims, TEST_SECRET_KEY, algorithm="HS256")
 
-        validator = JWTLicenseValidator(
-            algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-        )
+        validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
         result = validator.validate_token(token)
 
         assert result.is_expired is True
@@ -580,9 +540,7 @@ class TestGracePeriod:
 
         token = jwt.encode(claims, TEST_SECRET_KEY, algorithm="HS256")
 
-        validator = JWTLicenseValidator(
-            algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY
-        )
+        validator = JWTLicenseValidator(algorithm=JWTAlgorithm.HS256, secret_key=TEST_SECRET_KEY)
         result = validator.validate_token(token)
 
         assert result.is_expired is True

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -6,16 +6,16 @@ from code_scalpel.agents.base_agent import BaseCodeAnalysisAgent
 
 
 class _DummyAgent(BaseCodeAnalysisAgent):
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         return {"success": True}
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         return {"success": True}
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         return {"success": True}
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         return {"success": True}
 
 
@@ -42,7 +42,7 @@ async def test_observe_file_failure_records_context(monkeypatch):
 async def test_execute_ooda_loop_handles_action_error(monkeypatch):
     agent = _DummyAgent()
 
-    async def _explode(decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def _explode(decisions: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError("oops")
 
     agent.act = _explode  # type: ignore[assignment]
@@ -84,7 +84,7 @@ async def test_wrapper_methods_capture_errors(monkeypatch):
 @pytest.mark.asyncio
 async def test_execute_ooda_loop_observe_failure():
     class _FailingAgent(_DummyAgent):
-        async def observe(self, target: str) -> Dict[str, Any]:
+        async def observe(self, target: str) -> dict[str, Any]:
             return {"success": False, "error": "nope"}
 
     agent = _FailingAgent()

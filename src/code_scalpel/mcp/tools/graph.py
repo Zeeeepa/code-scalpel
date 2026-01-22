@@ -9,11 +9,11 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
-
 from mcp.server.fastmcp import Context
 
+from code_scalpel import __version__ as _pkg_version
 from code_scalpel.licensing.features import get_tool_capabilities, has_capability
+from code_scalpel.mcp.contract import ToolResponseEnvelope, envelop_tool_function
 from code_scalpel.mcp.helpers.graph_helpers import (
     _cross_file_security_scan_sync,
     _get_call_graph_sync,
@@ -21,9 +21,8 @@ from code_scalpel.mcp.helpers.graph_helpers import (
     _get_graph_neighborhood_sync,
     _get_project_map_sync,
 )
-from code_scalpel.mcp.protocol import mcp
-from code_scalpel import __version__ as _pkg_version
 from code_scalpel.mcp.protocol import _get_current_tier as _tier_getter
+from code_scalpel.mcp.protocol import mcp
 
 
 def _get_current_tier() -> str:
@@ -115,8 +114,7 @@ async def _get_call_graph_tool(
     # [20260121_BUGFIX] Enable tier-driven advanced resolution and enterprise metrics
     advanced_resolution = "advanced_call_graph" in cap_set
     include_enterprise_metrics = bool(
-        {"hot_path_identification", "dead_code_detection", "custom_graph_analysis"}
-        & cap_set
+        {"hot_path_identification", "dead_code_detection", "custom_graph_analysis"} & cap_set
     )
 
     # [20260120_FEATURE] Call sync function with tier/capabilities for metadata transparency
@@ -575,9 +573,7 @@ async def _cross_file_security_scan_tool(
     # [20251215_FEATURE] v2.0.0 - Progress token support
     # [20251220_FEATURE] v3.0.5 - Enhanced progress messages
     if ctx:
-        await ctx.report_progress(
-            progress=0, total=100, message="Starting cross-file security scan..."
-        )
+        await ctx.report_progress(progress=0, total=100, message="Starting cross-file security scan...")
 
     tier = _get_current_tier()
     caps = get_tool_capabilities("cross_file_security_scan", tier)

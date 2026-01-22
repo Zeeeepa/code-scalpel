@@ -49,9 +49,7 @@ async def test_base_agent_ooda_success_and_context(monkeypatch, tmp_path):
     # [20251215_TEST] Stub MCP hooks to avoid network/file IO
     monkeypatch.setattr(
         "code_scalpel.agents.base_agent.get_file_context",
-        AsyncMock(
-            return_value=AsyncMock(success=True, model_dump=lambda: {"success": True})
-        ),
+        AsyncMock(return_value=AsyncMock(success=True, model_dump=lambda: {"success": True})),
     )
 
     result = await agent.execute_ooda_loop("demo.py")
@@ -94,14 +92,10 @@ async def test_code_review_agent_end_to_end(monkeypatch):
     agent.analyze_code_security = AsyncMock(
         return_value={
             "success": True,
-            "vulnerabilities": [
-                {"severity": "high", "description": "sql", "type": "security"}
-            ],
+            "vulnerabilities": [{"severity": "high", "description": "sql", "type": "security"}],
         }
     )
-    agent.find_symbol_usage = AsyncMock(
-        return_value={"success": True, "total_references": 0}
-    )
+    agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 0})
 
     observations = await agent.observe("sample.py")
     assert observations["success"] is True
@@ -135,9 +129,7 @@ async def test_optimization_agent_flow(monkeypatch):
             "complexity_score": 40,
         }
     )
-    agent.find_symbol_usage = AsyncMock(
-        return_value={"success": True, "total_references": 25}
-    )
+    agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 25})
 
     observations = await agent.observe("perf.py")
     assert observations["success"] is True
@@ -175,9 +167,7 @@ async def test_security_agent_flow(monkeypatch):
             ],
         }
     )
-    agent.find_symbol_usage = AsyncMock(
-        return_value={"success": True, "total_references": 12}
-    )
+    agent.find_symbol_usage = AsyncMock(return_value={"success": True, "total_references": 12})
 
     observations = await agent.observe("insecure.py")
     assert observations["success"] is True

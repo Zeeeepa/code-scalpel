@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .confidence import ConfidenceEngine, EdgeType
 from .node_id import UniversalNodeID
@@ -63,16 +63,16 @@ class NeighborhoodResult:
     """
 
     success: bool = True
-    subgraph: Optional["UniversalGraph"] = None
+    subgraph: UniversalGraph | None = None
     center_node_id: str = ""
     k: int = 0
     total_nodes: int = 0
     total_edges: int = 0
     max_depth_reached: int = 0
     truncated: bool = False
-    truncation_warning: Optional[str] = None
-    node_depths: Dict[str, int] = field(default_factory=dict)
-    error: Optional[str] = None
+    truncation_warning: str | None = None
+    node_depths: dict[str, int] = field(default_factory=dict)
+    error: str | None = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
@@ -103,7 +103,7 @@ class GraphNode:
     """
 
     id: UniversalNodeID
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
@@ -150,7 +150,7 @@ class GraphEdge:
     edge_type: EdgeType
     confidence: float
     evidence: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
@@ -204,9 +204,9 @@ class UniversalGraph:
         metadata: Graph-level metadata (project info, timestamps, etc.)
     """
 
-    nodes: List[GraphNode] = field(default_factory=list)
-    edges: List[GraphEdge] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    nodes: list[GraphNode] = field(default_factory=list)
+    edges: list[GraphEdge] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def add_node(self, node: GraphNode) -> None:
         """Add a node to the graph."""
@@ -219,24 +219,22 @@ class UniversalGraph:
         """Add an edge to the graph."""
         self.edges.append(edge)
 
-    def get_node(self, node_id: str) -> Optional[GraphNode]:
+    def get_node(self, node_id: str) -> GraphNode | None:
         """Get a node by its ID string."""
         for node in self.nodes:
             if str(node.id) == node_id:
                 return node
         return None
 
-    def get_edges_from(self, node_id: str) -> List[GraphEdge]:
+    def get_edges_from(self, node_id: str) -> list[GraphEdge]:
         """Get all edges originating from a node."""
         return [edge for edge in self.edges if edge.from_id == node_id]
 
-    def get_edges_to(self, node_id: str) -> List[GraphEdge]:
+    def get_edges_to(self, node_id: str) -> list[GraphEdge]:
         """Get all edges targeting a node."""
         return [edge for edge in self.edges if edge.to_id == node_id]
 
-    def get_dependencies(
-        self, node_id: str, min_confidence: float = 0.8
-    ) -> Dict[str, Any]:
+    def get_dependencies(self, node_id: str, min_confidence: float = 0.8) -> dict[str, Any]:
         """
         Get dependencies with confidence filtering.
 
@@ -270,7 +268,7 @@ class UniversalGraph:
         max_nodes: int = 100,
         direction: str = "both",
         min_confidence: float = 0.0,
-    ) -> "NeighborhoodResult":
+    ) -> NeighborhoodResult:
         """
         Extract k-hop neighborhood subgraph around a center node.
 
@@ -300,9 +298,9 @@ class UniversalGraph:
             )
 
         # BFS to collect nodes within k hops
-        visited_nodes: Dict[str, int] = {center_node_id: 0}  # node_id -> depth
+        visited_nodes: dict[str, int] = {center_node_id: 0}  # node_id -> depth
         queue = deque([(center_node_id, 0)])
-        collected_edges: List[GraphEdge] = []
+        collected_edges: list[GraphEdge] = []
         truncated = False
 
         while queue and len(visited_nodes) < max_nodes:
@@ -327,10 +325,7 @@ class UniversalGraph:
                 neighbor_id = edge.to_id if edge.from_id == current_id else edge.from_id
 
                 # Check if already visited at equal or shorter distance
-                if (
-                    neighbor_id in visited_nodes
-                    and visited_nodes[neighbor_id] <= depth + 1
-                ):
+                if neighbor_id in visited_nodes and visited_nodes[neighbor_id] <= depth + 1:
                     # Still add edge if both nodes are in our set
                     if edge not in collected_edges:
                         collected_edges.append(edge)
@@ -372,11 +367,7 @@ class UniversalGraph:
             total_edges=len(subgraph.edges),
             max_depth_reached=max(visited_nodes.values()) if visited_nodes else 0,
             truncated=truncated,
-            truncation_warning=(
-                f"Graph truncated at {max_nodes} nodes due to max_nodes limit."
-                if truncated
-                else None
-            ),
+            truncation_warning=(f"Graph truncated at {max_nodes} nodes due to max_nodes limit." if truncated else None),
             node_depths=visited_nodes,
         )
 
@@ -435,12 +426,12 @@ class GraphBuilder:
         """Initialize graph builder."""
         self.graph = UniversalGraph()
         self.confidence_engine = ConfidenceEngine()
-        self._node_registry: Dict[str, GraphNode] = {}
+        self._node_registry: dict[str, GraphNode] = {}
 
     def add_node(
         self,
         node_id: UniversalNodeID,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> GraphNode:
         """
         Add a node to the graph.
@@ -467,7 +458,7 @@ class GraphBuilder:
         from_id: str,
         to_id: str,
         edge_type: EdgeType,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> GraphEdge:
         """
         Add an edge with automatic confidence scoring.

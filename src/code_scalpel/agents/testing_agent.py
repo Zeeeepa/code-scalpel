@@ -8,7 +8,7 @@ This agent performs comprehensive test automation by:
 4. Identifying integration test opportunities
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseCodeAnalysisAgent
 
@@ -24,7 +24,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
     - Improve existing test quality and maintainability
     """
 
-    def __init__(self, workspace_root: Optional[str] = None):
+    def __init__(self, workspace_root: str | None = None):
         super().__init__(workspace_root)
         self.testing_thresholds = {
             "min_coverage": 80,
@@ -33,7 +33,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "min_test_per_function": 1,
         }
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         """
         Observe the target file and analyze coverage.
 
@@ -64,7 +64,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "target": target,
         }
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze observations to identify testing opportunities.
 
@@ -88,9 +88,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
         testing_ops.extend(edge_cases)
 
         # Detect integration test opportunities
-        integration_ops = self._identify_integration_tests(
-            observations.get("symbol_analysis", {})
-        )
+        integration_ops = self._identify_integration_tests(observations.get("symbol_analysis", {}))
         testing_ops.extend(integration_ops)
 
         # Prioritize by coverage impact
@@ -106,7 +104,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
             },
         }
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Decide which tests to generate.
 
@@ -122,9 +120,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
 
         # Filter for high-impact tests
         high_impact_tests = [
-            op
-            for op in opportunities
-            if op.get("coverage_impact", 0) > 5 and op.get("complexity", 0) < 10
+            op for op in opportunities if op.get("coverage_impact", 0) > 5 and op.get("complexity", 0) < 10
         ]
 
         # Create action plan
@@ -146,7 +142,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "scheduled_tests": len(actions),
         }
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         """
         Execute test generation and improvements.
 
@@ -173,27 +169,25 @@ class TestingAgent(BaseCodeAnalysisAgent):
             "results": results,
         }
 
-    def _analyze_coverage(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_coverage(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Analyze code coverage and identify gaps."""
         gaps = []
         # Implementation placeholder
         return gaps
 
-    def _identify_edge_cases(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _identify_edge_cases(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify edge cases and error paths."""
         cases = []
         # Implementation placeholder
         return cases
 
-    def _identify_integration_tests(
-        self, symbol_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _identify_integration_tests(self, symbol_analysis: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify opportunities for integration testing."""
         tests = []
         # Implementation placeholder
         return tests
 
-    def _prioritize_tests(self, tests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _prioritize_tests(self, tests: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prioritize tests by coverage impact and complexity."""
         return sorted(
             tests,
@@ -201,7 +195,7 @@ class TestingAgent(BaseCodeAnalysisAgent):
             reverse=True,
         )
 
-    async def _generate_test(self, test_plan: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_test(self, test_plan: dict[str, Any]) -> dict[str, Any]:
         """Generate a test case."""
         return {
             "success": True,

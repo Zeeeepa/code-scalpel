@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
 
 # pragma: no cover - Utility tested indirectly through surgical_extractor integration
 
@@ -22,7 +21,7 @@ class PathResolutionError(Exception):
 
 def resolve_file_path(
     file_path: str,
-    workspace_root: Optional[str] = None,
+    workspace_root: str | None = None,
     check_exists: bool = True,
 ) -> str:
     """
@@ -110,7 +109,7 @@ def resolve_file_path(
     )
 
 
-def get_workspace_root(start_path: Optional[str] = None) -> Optional[str]:
+def get_workspace_root(start_path: str | None = None) -> str | None:
     """
     Detect workspace root by looking for common markers.
 

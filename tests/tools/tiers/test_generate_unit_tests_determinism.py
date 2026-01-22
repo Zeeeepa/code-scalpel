@@ -53,7 +53,7 @@ def classify_number(n):
     assert len(result1.test_cases) == len(result2.test_cases)
 
     # Test case order should be identical
-    for tc1, tc2 in zip(result1.test_cases, result2.test_cases):
+    for tc1, tc2 in zip(result1.test_cases, result2.test_cases, strict=False):
         assert tc1.path_id == tc2.path_id
         assert tc1.inputs == tc2.inputs
         assert tc1.description == tc2.description
@@ -83,9 +83,7 @@ def is_even(n):
     for tc in result.test_cases:
         name = tc.description
         # Should not contain UUID-like patterns (8-4-4-4-12 hex)
-        assert "-" not in name or not all(
-            c in "0123456789abcdef-" for c in name.split("-")[0]
-        )
+        assert "-" not in name or not all(c in "0123456789abcdef-" for c in name.split("-")[0])
         # Should not contain timestamps (too many digits)
         assert not any(len(seg) > 8 and seg.isdigit() for seg in name.split("_"))
         # Should be descriptive

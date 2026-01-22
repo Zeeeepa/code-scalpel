@@ -24,7 +24,6 @@ import os
 from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 from .import_resolver import ImportInfo, ImportResolver
 
@@ -54,8 +53,8 @@ class ExtractedSymbol:
     file: str
     code: str
     line: int
-    end_line: Optional[int] = None
-    dependencies: Set[str] = field(default_factory=set)
+    end_line: int | None = None
+    dependencies: set[str] = field(default_factory=set)
     # [20251216_FEATURE] v2.5.0 - Confidence decay for deep dependency chains
     depth: int = 0
     confidence: float = 1.0
@@ -74,9 +73,7 @@ DEFAULT_CONFIDENCE_DECAY_FACTOR = 0.9
 DEFAULT_LOW_CONFIDENCE_THRESHOLD = 0.5
 
 
-def calculate_confidence(
-    depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR
-) -> float:
+def calculate_confidence(depth: int, decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR) -> float:
     """
     Calculate confidence score with exponential decay based on depth.
 
@@ -125,14 +122,14 @@ class ExtractionResult:
     """
 
     success: bool = True
-    target: Optional[ExtractedSymbol] = None
-    dependencies: List[ExtractedSymbol] = field(default_factory=list)
+    target: ExtractedSymbol | None = None
+    dependencies: list[ExtractedSymbol] = field(default_factory=list)
     combined_code: str = ""
-    module_imports: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    module_imports: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     depth_reached: int = 0
-    files_touched: Set[str] = field(default_factory=set)
+    files_touched: set[str] = field(default_factory=set)
     # [20251216_FEATURE] v2.5.0 - Confidence decay tracking
     confidence_decay_factor: float = DEFAULT_CONFIDENCE_DECAY_FACTOR
     low_confidence_count: int = 0
@@ -155,9 +152,7 @@ class ExtractionResult:
         """Check if any extracted symbols have low confidence."""
         return self.low_confidence_count > 0
 
-    def get_low_confidence_symbols(
-        self, threshold: float = DEFAULT_LOW_CONFIDENCE_THRESHOLD
-    ) -> List[ExtractedSymbol]:
+    def get_low_confidence_symbols(self, threshold: float = DEFAULT_LOW_CONFIDENCE_THRESHOLD) -> list[ExtractedSymbol]:
         """Get all symbols below the confidence threshold."""
         low_conf = []
         if self.target and self.target.confidence < threshold:
@@ -183,7 +178,7 @@ class DependencyNode:
     symbol_name: str
     module: str
     depth: int
-    import_info: Optional[ImportInfo] = None
+    import_info: ImportInfo | None = None
 
 
 class CrossFileExtractor:
@@ -214,7 +209,7 @@ class CrossFileExtractor:
     # Default maximum depth to prevent infinite loops
     MAX_DEPTH = 10
 
-    def __init__(self, project_root: Union[str, Path]):
+    def __init__(self, project_root: str | Path):
         """
         Initialize the cross-file extractor.
 
@@ -224,8 +219,8 @@ class CrossFileExtractor:
         self.project_root = Path(project_root).resolve()
         self.resolver = ImportResolver(project_root)
         self._built = False
-        self._file_cache: Dict[str, str] = {}  # file_path -> source code
-        self._ast_cache: Dict[str, ast.AST] = {}  # file_path -> parsed AST
+        self._file_cache: dict[str, str] = {}  # file_path -> source code
+        self._ast_cache: dict[str, ast.AST] = {}  # file_path -> parsed AST
 
     def build(self) -> bool:
         """
@@ -267,9 +262,7 @@ class CrossFileExtractor:
         """
         if not self._built:
             if not self.build():
-                return ExtractionResult(
-                    success=False, errors=["Failed to build import graph"]
-                )
+                return ExtractionResult(success=False, errors=["Failed to build import graph"])
 
         result = ExtractionResult()
         # [20251216_FEATURE] v2.5.0 - Store decay factor for confidence calculation
@@ -284,9 +277,7 @@ class CrossFileExtractor:
         abs_path = abs_path.resolve()
 
         if not abs_path.exists():
-            return ExtractionResult(
-                success=False, errors=[f"File not found: {file_path}"]
-            )
+            return ExtractionResult(success=False, errors=[f"File not found: {file_path}"])
 
         # Get module name for this file
         try:
@@ -339,8 +330,7 @@ class CrossFileExtractor:
             result.warnings.append(
                 f"⚠️ {result.low_confidence_count} symbol(s) have low confidence "
                 f"(below {DEFAULT_LOW_CONFIDENCE_THRESHOLD}): "
-                f"{', '.join(s.name for s in low_conf_symbols[:5])}"
-                + ("..." if len(low_conf_symbols) > 5 else "")
+                f"{', '.join(s.name for s in low_conf_symbols[:5])}" + ("..." if len(low_conf_symbols) > 5 else "")
             )
 
         result.success = len(result.errors) == 0
@@ -348,7 +338,7 @@ class CrossFileExtractor:
 
     def extract_multiple(
         self,
-        targets: List[Tuple[str, str]],
+        targets: list[tuple[str, str]],
         depth: int = 2,
         include_stdlib: bool = False,
     ) -> ExtractionResult:
@@ -365,13 +355,11 @@ class CrossFileExtractor:
         """
         if not self._built:
             if not self.build():
-                return ExtractionResult(
-                    success=False, errors=["Failed to build import graph"]
-                )
+                return ExtractionResult(success=False, errors=["Failed to build import graph"])
 
         combined_result = ExtractionResult()
-        all_dependencies: Set[ExtractedSymbol] = set()
-        primary_targets: List[ExtractedSymbol] = []
+        all_dependencies: set[ExtractedSymbol] = set()
+        primary_targets: list[ExtractedSymbol] = []
 
         for file_path, symbol_name in targets:
             single_result = self.extract(file_path, symbol_name, depth, include_stdlib)
@@ -387,9 +375,7 @@ class CrossFileExtractor:
                 all_dependencies.add(dep)
 
             combined_result.files_touched.update(single_result.files_touched)
-            combined_result.depth_reached = max(
-                combined_result.depth_reached, single_result.depth_reached
-            )
+            combined_result.depth_reached = max(combined_result.depth_reached, single_result.depth_reached)
 
         # Remove primary targets from dependencies
         for target in primary_targets:
@@ -424,20 +410,20 @@ class CrossFileExtractor:
 
         return ".".join(parts) if parts else "__root__"
 
-    def _get_file_source(self, file_path: str) -> Optional[str]:
+    def _get_file_source(self, file_path: str) -> str | None:
         """Get source code for a file, with caching."""
         if file_path in self._file_cache:
             return self._file_cache[file_path]
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 source = f.read()
             self._file_cache[file_path] = source
             return source
         except Exception:
             return None
 
-    def _get_file_ast(self, file_path: str) -> Optional[ast.AST]:
+    def _get_file_ast(self, file_path: str) -> ast.AST | None:
         """Get parsed AST for a file, with caching."""
         if file_path in self._ast_cache:
             return self._ast_cache[file_path]
@@ -453,9 +439,7 @@ class CrossFileExtractor:
         except SyntaxError:
             return None
 
-    def _find_symbol_in_file(
-        self, file_path: str, symbol_name: str
-    ) -> Optional[ExtractedSymbol]:
+    def _find_symbol_in_file(self, file_path: str, symbol_name: str) -> ExtractedSymbol | None:
         """
         Find and extract a symbol from a file.
 
@@ -477,9 +461,7 @@ class CrossFileExtractor:
         # Handle method names (ClassName.method_name)
         if "." in symbol_name:
             class_name, method_name = symbol_name.split(".", 1)
-            return self._extract_method(
-                file_path, source, tree, class_name, method_name
-            )
+            return self._extract_method(file_path, source, tree, class_name, method_name)
 
         # Look for function or class
         for node in ast.walk(tree):
@@ -497,7 +479,7 @@ class CrossFileExtractor:
         self,
         file_path: str,
         source: str,
-        node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+        node: ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> ExtractedSymbol:
         """Extract a function definition."""
         lines = source.split("\n")
@@ -517,11 +499,7 @@ class CrossFileExtractor:
 
         return ExtractedSymbol(
             name=node.name,
-            symbol_type=(
-                "async_function"
-                if isinstance(node, ast.AsyncFunctionDef)
-                else "function"
-            ),
+            symbol_type=("async_function" if isinstance(node, ast.AsyncFunctionDef) else "function"),
             module=module,
             file=file_path,
             code=code,
@@ -530,9 +508,7 @@ class CrossFileExtractor:
             dependencies=deps,
         )
 
-    def _extract_class(
-        self, file_path: str, source: str, node: ast.ClassDef
-    ) -> ExtractedSymbol:
+    def _extract_class(self, file_path: str, source: str, node: ast.ClassDef) -> ExtractedSymbol:
         """Extract a class definition."""
         lines = source.split("\n")
         start_line = node.lineno - 1
@@ -564,7 +540,7 @@ class CrossFileExtractor:
         tree: ast.AST,
         class_name: str,
         method_name: str,
-    ) -> Optional[ExtractedSymbol]:
+    ) -> ExtractedSymbol | None:
         """Extract a method from a class."""
         for node in ast.walk(tree):
             if isinstance(node, ast.ClassDef) and node.name == class_name:
@@ -578,9 +554,7 @@ class CrossFileExtractor:
                             if end_line:
                                 code = "\n".join(lines[start_line:end_line])
                             else:
-                                code = self._extract_to_next_definition(
-                                    lines, start_line
-                                )
+                                code = self._extract_to_next_definition(lines, start_line)
 
                             module = self._path_to_module(Path(file_path))
                             deps = self._analyze_symbol_dependencies(item)
@@ -597,7 +571,7 @@ class CrossFileExtractor:
                             )
         return None
 
-    def _extract_to_next_definition(self, lines: List[str], start_line: int) -> str:
+    def _extract_to_next_definition(self, lines: list[str], start_line: int) -> str:
         """Extract code from start_line until the next definition or end of file."""
         result_lines = [lines[start_line]]
         indent = len(lines[start_line]) - len(lines[start_line].lstrip())
@@ -614,9 +588,7 @@ class CrossFileExtractor:
             # Check if this is a new top-level definition
             line_indent = len(line) - len(stripped)
             if line_indent <= indent and (
-                stripped.startswith("def ")
-                or stripped.startswith("async def ")
-                or stripped.startswith("class ")
+                stripped.startswith("def ") or stripped.startswith("async def ") or stripped.startswith("class ")
             ):
                 break
 
@@ -624,7 +596,7 @@ class CrossFileExtractor:
 
         return "\n".join(result_lines)
 
-    def _analyze_symbol_dependencies(self, node: ast.AST) -> Set[str]:
+    def _analyze_symbol_dependencies(self, node: ast.AST) -> set[str]:
         """
         Analyze an AST node to find names it depends on.
 
@@ -661,7 +633,7 @@ class CrossFileExtractor:
 
         return dependencies
 
-    def _get_attribute_root(self, node: ast.Attribute) -> Optional[str]:
+    def _get_attribute_root(self, node: ast.Attribute) -> str | None:
         """Get the root name of an attribute chain."""
         current = node
         while isinstance(current, ast.Attribute):
@@ -670,7 +642,7 @@ class CrossFileExtractor:
             return current.id
         return None
 
-    def _get_builtins(self) -> Set[str]:
+    def _get_builtins(self) -> set[str]:
         """Get set of Python builtin names."""
         import builtins
 
@@ -689,7 +661,7 @@ class CrossFileExtractor:
         """
         # Queue: (symbol_name, module, depth)
         queue = deque()
-        visited: Set[Tuple[str, str]] = set()
+        visited: set[tuple[str, str]] = set()
 
         # Seed with target's dependencies
         for dep_name in target.dependencies:
@@ -712,9 +684,7 @@ class CrossFileExtractor:
             result.depth_reached = max(result.depth_reached, node.depth)
 
             # Try to resolve this dependency
-            resolved_module, symbol_def = self.resolver.resolve_symbol(
-                node.module, node.symbol_name
-            )
+            resolved_module, symbol_def = self.resolver.resolve_symbol(node.module, node.symbol_name)
 
             if not resolved_module or not symbol_def:
                 # Could be a stdlib or external dependency
@@ -743,9 +713,7 @@ class CrossFileExtractor:
             if extracted:
                 # [20251216_FEATURE] v2.5.0 - Set depth and calculate confidence with decay
                 extracted.depth = node.depth
-                extracted.confidence = calculate_confidence(
-                    node.depth, result.confidence_decay_factor
-                )
+                extracted.confidence = calculate_confidence(node.depth, result.confidence_decay_factor)
                 # Track low confidence symbols
                 if extracted.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD:
                     result.low_confidence_count += 1
@@ -850,15 +818,13 @@ class CrossFileExtractor:
         # Add a header comment
         code_parts.append("# ===== Cross-File Extraction =====")
         if result.target:
-            code_parts.append(
-                f"# Target: {result.target.name} from {result.target.module}"
-            )
+            code_parts.append(f"# Target: {result.target.name} from {result.target.module}")
         code_parts.append(f"# Dependencies: {len(result.dependencies)}")
         code_parts.append(f"# Files: {len(result.files_touched)}")
         code_parts.append("")
 
         # Group by module
-        by_module: Dict[str, List[ExtractedSymbol]] = {}
+        by_module: dict[str, list[ExtractedSymbol]] = {}
         for dep in sorted_deps:
             if dep.module not in by_module:
                 by_module[dep.module] = []
@@ -892,7 +858,7 @@ class CrossFileExtractor:
         self,
         file_path: str,
         symbol_name: str,
-    ) -> Set[str]:
+    ) -> set[str]:
         """
         Get the set of names a symbol depends on (without extraction).
 
@@ -920,7 +886,7 @@ class CrossFileExtractor:
         self,
         file_path: str,
         symbol_name: str,
-    ) -> List[Tuple[str, str]]:
+    ) -> list[tuple[str, str]]:
         """
         Find symbols that depend on the given symbol.
 
@@ -958,7 +924,7 @@ class CrossFileExtractor:
                 if imp.module == module_name and imp.name == symbol_name:
                     # Found a direct import - find what uses it
                     symbols = self.resolver.symbols.get(importer_module, {})
-                    for sym_name, sym_def in symbols.items():
+                    for sym_name, _sym_def in symbols.items():
                         # Check if this symbol uses the imported name
                         sym_obj = self._find_symbol_in_file(importer_file, sym_name)
                         if sym_obj and imp.effective_name in sym_obj.dependencies:

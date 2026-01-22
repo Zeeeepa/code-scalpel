@@ -17,8 +17,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "src"))
 
-from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 from code_scalpel.mcp import server
+from code_scalpel.mcp.helpers.context_helpers import _get_file_context_sync
 
 
 class TestGetFileContextCommunityTier:
@@ -162,10 +162,10 @@ from typing import Dict, List
 
 def process(data: Dict) -> List:
     """Process input data.
-    
+
     Args:
         data: Input dictionary
-    
+
     Returns:
         Processed list
     """

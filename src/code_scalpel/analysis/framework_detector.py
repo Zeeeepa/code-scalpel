@@ -25,7 +25,7 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any
 
 
 @dataclass
@@ -38,21 +38,21 @@ class FrameworkRoute:
     handler_name: str
     handler_type: str  # "function", "class_method", "component"
     line_number: int
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class FrameworkDetectionResult:
     """Result of framework detection."""
 
-    detected_frameworks: Set[str]
-    routes: List[FrameworkRoute]
-    nextjs_pages: List[str]
-    django_views: List[str]
-    flask_routes: List[str]
-    fastapi_routes: List[str]
-    generated_files: List[Dict[str, str]]  # .pb.py, migrations, etc.
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    detected_frameworks: set[str]
+    routes: list[FrameworkRoute]
+    nextjs_pages: list[str]
+    django_views: list[str]
+    flask_routes: list[str]
+    fastapi_routes: list[str]
+    generated_files: list[dict[str, str]]  # .pb.py, migrations, etc.
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class FrameworkDetector:
@@ -61,9 +61,9 @@ class FrameworkDetector:
     def __init__(self, project_root: str | Path):
         """Initialize detector with project root."""
         self.root = Path(project_root)
-        self.routes: List[FrameworkRoute] = []
-        self.detected_frameworks: Set[str] = set()
-        self.generated_files: List[Dict[str, str]] = []
+        self.routes: list[FrameworkRoute] = []
+        self.detected_frameworks: set[str] = set()
+        self.generated_files: list[dict[str, str]] = []
 
     def detect(self) -> FrameworkDetectionResult:
         """Run full framework detection across the project."""
@@ -75,14 +75,10 @@ class FrameworkDetector:
         self._detect_generated_code()
 
         # Organize results by type
-        nextjs_pages = [
-            r.route_pattern for r in self.routes if r.framework == "next.js"
-        ]
+        nextjs_pages = [r.route_pattern for r in self.routes if r.framework == "next.js"]
         django_views = [r.handler_name for r in self.routes if r.framework == "django"]
         flask_routes = [r.route_pattern for r in self.routes if r.framework == "flask"]
-        fastapi_routes = [
-            r.route_pattern for r in self.routes if r.framework == "fastapi"
-        ]
+        fastapi_routes = [r.route_pattern for r in self.routes if r.framework == "fastapi"]
 
         return FrameworkDetectionResult(
             detected_frameworks=self.detected_frameworks,
@@ -106,9 +102,7 @@ class FrameworkDetector:
             import json
 
             content = json.loads(pkg_file.read_text())
-            if "next" not in content.get(
-                "dependencies", {}
-            ) and "next" not in content.get("devDependencies", {}):
+            if "next" not in content.get("dependencies", {}) and "next" not in content.get("devDependencies", {}):
                 return
         except Exception:
             return
@@ -196,10 +190,7 @@ class FrameworkDetector:
         for py_file in self.root.rglob("*.py"):
             try:
                 content = py_file.read_text(encoding="utf-8", errors="ignore")
-                if (
-                    "from fastapi import" not in content
-                    and "import fastapi" not in content
-                ):
+                if "from fastapi import" not in content and "import fastapi" not in content:
                     continue
 
                 tree = ast.parse(content)
@@ -278,10 +269,7 @@ class FrameworkDetector:
                     )
             elif isinstance(node, ast.ClassDef):
                 # Class-based view
-                if any(
-                    isinstance(base, ast.Name) and "View" in base.id
-                    for base in node.bases
-                ):
+                if any(isinstance(base, ast.Name) and "View" in base.id for base in node.bases):
                     self.routes.append(
                         FrameworkRoute(
                             framework="django",
@@ -309,9 +297,7 @@ class FrameworkDetector:
                                         self.routes.append(
                                             FrameworkRoute(
                                                 framework="flask",
-                                                file_path=str(
-                                                    file_path.relative_to(self.root)
-                                                ),
+                                                file_path=str(file_path.relative_to(self.root)),
                                                 route_pattern=pattern,
                                                 handler_name=node.name,
                                                 handler_type="function",
@@ -343,9 +329,7 @@ class FrameworkDetector:
                                         self.routes.append(
                                             FrameworkRoute(
                                                 framework="fastapi",
-                                                file_path=str(
-                                                    file_path.relative_to(self.root)
-                                                ),
+                                                file_path=str(file_path.relative_to(self.root)),
                                                 route_pattern=pattern,
                                                 handler_name=node.name,
                                                 handler_type="function",
@@ -363,12 +347,7 @@ class FrameworkDetector:
         for part in parts:
             if part in ("pages", "app"):
                 continue
-            if (
-                part.endswith(".tsx")
-                or part.endswith(".ts")
-                or part.endswith(".jsx")
-                or part.endswith(".js")
-            ):
+            if part.endswith(".tsx") or part.endswith(".ts") or part.endswith(".jsx") or part.endswith(".js"):
                 part = part.rsplit(".", 1)[0]
 
             # Handle dynamic segments
@@ -391,7 +370,7 @@ class FrameworkDetector:
         else:
             return "unknown"
 
-    def _glob_pattern(self, pattern: str) -> List[Path]:
+    def _glob_pattern(self, pattern: str) -> list[Path]:
         """Glob pattern with wildcard expansion."""
         # Simple implementation - expand glob patterns
         # Convert pattern like "pages/**/*.js" to actual globs

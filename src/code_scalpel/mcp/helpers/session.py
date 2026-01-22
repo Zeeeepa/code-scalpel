@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from code_scalpel.policy_engine.audit_log import (
     AuditLog,
@@ -25,8 +25,8 @@ logger = logging.getLogger("code_scalpel.mcp.session")
 # MODULE-LEVEL STATE (Single Source of Truth)
 # =============================================================================
 # These are the CANONICAL instances. All code MUST use these exact objects.
-_SESSION_UPDATE_COUNTS: Dict[str, int] = {}
-_SESSION_AUDIT_TRAIL: List[Dict[str, Any]] = []
+_SESSION_UPDATE_COUNTS: dict[str, int] = {}
+_SESSION_AUDIT_TRAIL: list[dict[str, Any]] = []
 
 
 def _get_project_root() -> Path:
@@ -64,7 +64,7 @@ class SessionManager:
     they all operate on the same _SESSION_* variables.
     """
 
-    _instance: Optional["SessionManager"] = None
+    _instance: SessionManager | None = None
 
     def __init__(self) -> None:
         # SessionManager does NOT have its own state!
@@ -72,18 +72,18 @@ class SessionManager:
         pass
 
     @classmethod
-    def get_instance(cls) -> "SessionManager":
+    def get_instance(cls) -> SessionManager:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
     @property
-    def _update_counts(self) -> Dict[str, int]:
+    def _update_counts(self) -> dict[str, int]:
         """Return the module-level update counts dict (for backward compat)."""
         return _SESSION_UPDATE_COUNTS
 
     @property
-    def _audit_log(self) -> List[Dict[str, Any]]:
+    def _audit_log(self) -> list[dict[str, Any]]:
         """Return the module-level audit trail list (for backward compat)."""
         return _SESSION_AUDIT_TRAIL
 
@@ -95,7 +95,7 @@ class SessionManager:
         _SESSION_UPDATE_COUNTS[key] = current + 1
         return _SESSION_UPDATE_COUNTS[key]
 
-    def add_audit_entry(self, entry: Dict[str, Any]) -> None:
+    def add_audit_entry(self, entry: dict[str, Any]) -> None:
         """Add entry with timestamp."""
         if "timestamp" not in entry:
             entry["timestamp"] = datetime.now(timezone.utc).isoformat()
@@ -119,9 +119,7 @@ class SessionManager:
                     "user_id": entry.get("user_id"),
                 }
                 audit_log.record_event(
-                    event_type=entry.get("tool")
-                    or entry.get("operation")
-                    or "audit_event",
+                    event_type=entry.get("tool") or entry.get("operation") or "audit_event",
                     severity=severity,
                     details=details,
                 )
@@ -148,10 +146,10 @@ def increment_session_update_count(tool_name: str) -> int:
 
 def add_audit_entry(
     # Legacy positional API (operation, details, outcome, user_id)
-    operation: Optional[str] = None,
-    details: Optional[Dict[str, Any]] = None,
-    outcome: Optional[str] = None,
-    user_id: Optional[str] = None,
+    operation: str | None = None,
+    details: dict[str, Any] | None = None,
+    outcome: str | None = None,
+    user_id: str | None = None,
     # New keyword-only API (tool_name, file_path, etc.)
     *,
     tool_name: str = "",
@@ -159,7 +157,7 @@ def add_audit_entry(
     target_name: str = "",
     success: bool = True,
     tier: str = "community",
-    metadata: Optional[Dict[str, Any]] = None,
+    metadata: dict[str, Any] | None = None,
 ) -> None:
     """Add an audit trail entry.
 
@@ -183,7 +181,7 @@ def add_audit_entry(
             user_id="user123"
         )
     """
-    entry: Dict[str, Any] = {
+    entry: dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -227,12 +225,12 @@ def add_audit_entry(
     logger.info(f"AUDIT [{log_key}] {log_outcome}")
 
 
-def get_audit_trail() -> List[Dict[str, Any]]:
+def get_audit_trail() -> list[dict[str, Any]]:
     """Return a copy of the audit trail."""
     return _SESSION_AUDIT_TRAIL.copy()
 
 
-def _get_audit_trail() -> List[Dict[str, Any]]:
+def _get_audit_trail() -> list[dict[str, Any]]:
     """Internal: return the actual audit trail list (not a copy)."""
     return _SESSION_AUDIT_TRAIL
 

@@ -227,17 +227,17 @@ class TestAPIDocumentation:
     def test_rename_symbol_method_exists(self):
         """rename_symbol method exists and is callable."""
         assert hasattr(UnifiedPatcher, "rename_symbol")
-        assert callable(getattr(UnifiedPatcher, "rename_symbol"))
+        assert callable(UnifiedPatcher.rename_symbol)
 
     def test_rename_symbol_has_docstring(self):
         """rename_symbol method has docstring."""
-        method = getattr(UnifiedPatcher, "rename_symbol")
+        method = UnifiedPatcher.rename_symbol
         assert method.__doc__ is not None
 
     def test_from_file_method_documented(self):
         """from_file class method is documented."""
         assert hasattr(UnifiedPatcher, "from_file")
-        method = getattr(UnifiedPatcher, "from_file")
+        method = UnifiedPatcher.from_file
         assert method.__doc__ is not None
 
 

@@ -2,9 +2,7 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_decorator_and_annotation_references(
-    make_project, patch_tier, patch_capabilities
-):
+async def test_decorator_and_annotation_references(make_project, patch_tier, patch_capabilities):
     """[20260104_TEST] Decorators and annotations should be reported when categorization is enabled."""
     import code_scalpel.mcp.tools.context as server
 
@@ -90,9 +88,7 @@ def target():
 
 
 @pytest.mark.asyncio
-async def test_from_import_alias_references(
-    make_project, patch_tier, patch_capabilities
-):
+async def test_from_import_alias_references(make_project, patch_tier, patch_capabilities):
     """[20260109_TEST] From-import aliases (from X import Y as Z) should find both definitions and usages."""
     import code_scalpel.mcp.tools.context as server
 

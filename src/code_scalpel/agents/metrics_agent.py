@@ -8,7 +8,7 @@ This agent performs comprehensive code metrics collection by:
 4. Identifying hotspots and risky areas
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseCodeAnalysisAgent
 
@@ -24,7 +24,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
     - Identify complexity hotspots and technical debt areas
     """
 
-    def __init__(self, workspace_root: Optional[str] = None):
+    def __init__(self, workspace_root: str | None = None):
         super().__init__(workspace_root)
         self.metrics_thresholds = {
             "max_complexity": 10,
@@ -33,7 +33,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "max_technical_debt": 20,
         }
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         """
         Observe the project and collect metrics.
 
@@ -64,7 +64,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "target": target,
         }
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze observations to compute metrics.
 
@@ -84,9 +84,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         metrics.update(complexity_metrics)
 
         # Calculate coupling metrics
-        coupling_metrics = self._calculate_coupling_metrics(
-            observations.get("symbol_analysis", {})
-        )
+        coupling_metrics = self._calculate_coupling_metrics(observations.get("symbol_analysis", {}))
         metrics.update(coupling_metrics)
 
         # Calculate cohesion metrics
@@ -103,7 +101,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "analysis_timestamp": self._get_timestamp(),
         }
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Decide on metrics insights and recommendations.
 
@@ -146,7 +144,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "recommendations": recommendations,
         }
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         """
         Execute metrics reporting and storage.
 
@@ -178,9 +176,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "report_path": report.get("path"),
         }
 
-    def _calculate_complexity_metrics(
-        self, file_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_complexity_metrics(self, file_info: dict[str, Any]) -> dict[str, Any]:
         """Calculate cyclomatic and cognitive complexity metrics."""
         return {
             "cyclomatic_complexity": 5,
@@ -188,9 +184,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "max_nesting_depth": 3,
         }
 
-    def _calculate_coupling_metrics(
-        self, symbol_analysis: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_coupling_metrics(self, symbol_analysis: dict[str, Any]) -> dict[str, Any]:
         """Calculate coupling and dependency metrics."""
         return {
             "afferent_coupling": 3,
@@ -198,14 +192,14 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "instability": 0.625,
         }
 
-    def _calculate_cohesion_metrics(self, file_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_cohesion_metrics(self, file_info: dict[str, Any]) -> dict[str, Any]:
         """Calculate cohesion metrics for modules and classes."""
         return {
             "lcom": 0.3,
             "module_coherence": 0.85,
         }
 
-    def _identify_hotspots(self, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _identify_hotspots(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify complexity hotspots."""
         return []
 
@@ -219,7 +213,7 @@ class MetricsAgent(BaseCodeAnalysisAgent):
         else:
             return "medium"
 
-    def _generate_recommendation(self, concern: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_recommendation(self, concern: dict[str, Any]) -> dict[str, Any]:
         """Generate recommendation for a metric concern."""
         metric = concern.get("metric", "")
         return {
@@ -228,13 +222,12 @@ class MetricsAgent(BaseCodeAnalysisAgent):
             "priority": concern.get("severity", "medium"),
         }
 
-    def _summarize_metrics(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+    def _summarize_metrics(self, metrics: dict[str, Any]) -> dict[str, Any]:
         """Summarize metrics for reporting."""
         return {
             "total_metrics": len(metrics),
             "average_complexity": metrics.get("cyclomatic_complexity", 0),
-            "total_coupling": metrics.get("afferent_coupling", 0)
-            + metrics.get("efferent_coupling", 0),
+            "total_coupling": metrics.get("afferent_coupling", 0) + metrics.get("efferent_coupling", 0),
         }
 
     def _get_timestamp(self) -> str:
@@ -243,16 +236,16 @@ class MetricsAgent(BaseCodeAnalysisAgent):
 
         return datetime.now().isoformat()
 
-    async def _store_metrics(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+    async def _store_metrics(self, metrics: dict[str, Any]) -> dict[str, Any]:
         """Store metrics for historical tracking."""
         return {"success": True, "stored": True}
 
     def _generate_report(
         self,
-        metrics: Dict[str, Any],
-        concerns: List[Dict[str, Any]],
-        recommendations: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        metrics: dict[str, Any],
+        concerns: list[dict[str, Any]],
+        recommendations: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """Generate metrics report."""
         return {
             "success": True,

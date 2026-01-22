@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, TYPE_CHECKING, Set, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from code_scalpel.licensing.features import get_tool_capabilities
 from code_scalpel.licensing.tier_detector import (
     get_current_tier as _get_current_tier,
 )
-from code_scalpel.parsing import ParsingError, parse_python_code
 from code_scalpel.mcp.models.graph import (
     AliasResolutionModel,
     ArchitecturalViolationModel,
@@ -35,6 +34,7 @@ from code_scalpel.mcp.models.graph import (
     TaintFlowModel,
     WildcardExpansionModel,
 )
+from code_scalpel.parsing import ParsingError, parse_python_code
 
 if TYPE_CHECKING:
     from code_scalpel.graph_engine.graph import UniversalGraph
@@ -63,13 +63,11 @@ PROJECT_ROOT = Path.cwd()
 # Stores UniversalGraph objects keyed by project root path (+ variant)
 # Format: {cache_key: (UniversalGraph, timestamp)}
 # [20251220_PERF] v3.0.5 - Increased cache TTL from 60s to 300s for large codebases
-_GRAPH_CACHE: dict[str, tuple["UniversalGraph", float]] = {}  # type: ignore[name-defined]
+_GRAPH_CACHE: dict[str, tuple[UniversalGraph, float]] = {}  # type: ignore[name-defined]
 _GRAPH_CACHE_TTL = 300.0  # seconds (5 minutes for stable codebases)
 
 
-def _get_cached_graph(
-    project_root: Path, cache_variant: str = "default"
-) -> "UniversalGraph" | None:  # type: ignore[name-defined]
+def _get_cached_graph(project_root: Path, cache_variant: str = "default") -> UniversalGraph | None:  # type: ignore[name-defined]
     """Get cached UniversalGraph for project if still valid."""
     import time
 
@@ -88,9 +86,7 @@ def _get_cached_graph(
     return None
 
 
-def _cache_graph(
-    project_root: Path, graph: "UniversalGraph", cache_variant: str = "default"
-) -> None:  # type: ignore[name-defined]
+def _cache_graph(project_root: Path, graph: UniversalGraph, cache_variant: str = "default") -> None:  # type: ignore[name-defined]
     """Cache a UniversalGraph for a project."""
     import time
 
@@ -126,9 +122,7 @@ def _get_call_graph_sync(
 
     # [20251226_BUGFIX] Ensure deterministic truncation and advanced resolution enrichment.
     # [20260119_FEATURE] Uses unified parser for deterministic behavior.
-    def _infer_polymorphic_edges(
-        root: Path, graph_nodes: list[CallNodeModel]
-    ) -> set[tuple[str, str]]:
+    def _infer_polymorphic_edges(root: Path, graph_nodes: list[CallNodeModel]) -> set[tuple[str, str]]:
         """Best-effort inference of self.* call edges for class methods when advanced_resolution is enabled."""
         import ast
 
@@ -148,19 +142,11 @@ def _get_call_graph_sync(
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
                     class_name = node.name
-                if (
-                    isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    and class_name
-                ):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and class_name:
                     caller = f"{rel_path}:{class_name}.{node.name}"
                     for inner in ast.walk(node):
-                        if isinstance(inner, ast.Call) and isinstance(
-                            inner.func, ast.Attribute
-                        ):
-                            if (
-                                isinstance(inner.func.value, ast.Name)
-                                and inner.func.value.id == "self"
-                            ):
+                        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute):
+                            if isinstance(inner.func.value, ast.Name) and inner.func.value.id == "self":
                                 callee = f"{rel_path}:{class_name}.{inner.func.attr}"
                                 edges.add((caller, callee))
         return edges
@@ -250,11 +236,7 @@ def _get_call_graph_sync(
                 else:
                     kept_endpoints.add(n.name)
 
-            filtered_edges = [
-                e
-                for e in edges
-                if (e.caller in kept_endpoints and e.callee in kept_endpoints)
-            ]
+            filtered_edges = [e for e in edges if (e.caller in kept_endpoints and e.callee in kept_endpoints)]
             edges_truncated = edges_truncated or len(filtered_edges) < len(edges)
             edges = filtered_edges
 
@@ -278,11 +260,7 @@ def _get_call_graph_sync(
                 in_deg[edge.callee] = in_deg.get(edge.callee, 0) + 1
 
             for node in nodes:
-                full_name = (
-                    f"{node.file}:{node.name}"
-                    if node.file != "<external>"
-                    else node.name
-                )
+                full_name = f"{node.file}:{node.name}" if node.file != "<external>" else node.name
                 node.in_degree = in_deg.get(full_name, 0)
                 node.out_degree = out_deg.get(full_name, 0)
 
@@ -303,10 +281,7 @@ def _get_call_graph_sync(
                 f"{n.file}:{n.name}" if n.file != "<external>" else n.name
                 for n in nodes
                 if not n.is_entry_point
-                and in_deg.get(
-                    f"{n.file}:{n.name}" if n.file != "<external>" else n.name, 0
-                )
-                == 0
+                and in_deg.get(f"{n.file}:{n.name}" if n.file != "<external>" else n.name, 0) == 0
             ]
 
         # Optionally check for circular imports
@@ -329,9 +304,7 @@ def _get_call_graph_sync(
                 )
             else:
                 # Fallback: simple DFS path search within max depth
-                def _dfs_paths(
-                    start: str, goal: str, max_depth: int
-                ) -> list[list[str]]:
+                def _dfs_paths(start: str, goal: str, max_depth: int) -> list[list[str]]:
                     results: list[list[str]] = []
                     stack: list[tuple[str, list[str]]] = [(start, [start])]
                     while stack:
@@ -363,9 +336,7 @@ def _get_call_graph_sync(
                     related.add(e.callee)
 
             # Filter nodes and edges to only those in the related set
-            nodes = [
-                n for n in nodes if f"{n.file}:{n.name}" in related or n.name in related
-            ]
+            nodes = [n for n in nodes if f"{n.file}:{n.name}" in related or n.name in related]
             edges = [e for e in edges if e.caller in related or e.callee in related]
             actual_focus_functions = focus_functions
 
@@ -389,10 +360,8 @@ def _get_call_graph_sync(
             tier_applied=tier,
             max_depth_applied=capabilities.get("limits", {}).get("max_depth"),
             max_nodes_applied=capabilities.get("limits", {}).get("max_nodes"),
-            advanced_resolution_enabled="advanced_call_graph"
-            in capabilities.get("capabilities", []),
-            enterprise_metrics_enabled="hot_path_identification"
-            in capabilities.get("capabilities", []),
+            advanced_resolution_enabled="advanced_call_graph" in capabilities.get("capabilities", []),
+            enterprise_metrics_enabled="hot_path_identification" in capabilities.get("capabilities", []),
         )
 
     except Exception as e:
@@ -486,9 +455,7 @@ def _normalize_graph_center_node_id(center_node_id: str) -> str:
     return raw
 
 
-def _fast_validate_python_function_node_exists(
-    root_path: Path, center_node_id: str
-) -> tuple[bool, str | None]:
+def _fast_validate_python_function_node_exists(root_path: Path, center_node_id: str) -> tuple[bool, str | None]:
     """Best-effort fast validation for python::<module>::function::<name>.
 
     This avoids building the full call graph when the node ID points to a module
@@ -533,10 +500,7 @@ def _fast_validate_python_function_node_exists(
         code = candidate.read_text(encoding="utf-8")
         tree, _ = parse_python_code(code, filename=str(candidate))
         for node in ast.walk(tree):
-            if (
-                isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and node.name == name
-            ):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
                 return True, None
         return False, f"Center node function '{name}' not found in {candidate}"
     except (ParsingError, UnicodeDecodeError, OSError):
@@ -610,9 +574,7 @@ def _get_graph_neighborhood_sync(
     try:
         center_node_id = _normalize_graph_center_node_id(center_node_id)
 
-        ok, fast_err = _fast_validate_python_function_node_exists(
-            root_path, center_node_id
-        )
+        ok, fast_err = _fast_validate_python_function_node_exists(root_path, center_node_id)
         if not ok:
             return GraphNeighborhoodResult(
                 success=False,
@@ -674,9 +636,7 @@ def _get_graph_neighborhood_sync(
                 node_id = UniversalNodeID(
                     language="python",
                     module=(
-                        node.file.replace("/", ".").replace(".py", "")
-                        if node.file != "<external>"
-                        else "external"
+                        node.file.replace("/", ".").replace(".py", "") if node.file != "<external>" else "external"
                     ),
                     node_type=NodeType.FUNCTION,
                     name=node.name,
@@ -704,16 +664,8 @@ def _get_graph_neighborhood_sync(
                 callee_file = callee_parts[0] if len(callee_parts) > 1 else ""
                 callee_name = callee_parts[-1]
 
-                caller_module = (
-                    caller_file.replace("/", ".").replace(".py", "")
-                    if caller_file
-                    else "unknown"
-                )
-                callee_module = (
-                    callee_file.replace("/", ".").replace(".py", "")
-                    if callee_file
-                    else "external"
-                )
+                caller_module = caller_file.replace("/", ".").replace(".py", "") if caller_file else "unknown"
+                callee_module = callee_file.replace("/", ".").replace(".py", "") if callee_file else "external"
 
                 caller_id = f"python::{caller_module}::function::{caller_name}"
                 callee_id = f"python::{callee_module}::function::{callee_name}"
@@ -767,10 +719,7 @@ def _get_graph_neighborhood_sync(
                     to_id = str(edge_data.get("to_id", "") or "").strip()
                     if not from_id or not to_id:
                         continue
-                    if (
-                        from_id not in included_node_ids
-                        or to_id not in included_node_ids
-                    ):
+                    if from_id not in included_node_ids or to_id not in included_node_ids:
                         continue
                     # Find original edge in the graph
                     for edge in graph.edges:
@@ -791,9 +740,7 @@ def _get_graph_neighborhood_sync(
                     max_depth_reached=0,
                     truncated=truncated,
                     truncation_warning=(
-                        f"Query result truncated at {max_nodes} nodes due to max_nodes limit."
-                        if truncated
-                        else None
+                        f"Query result truncated at {max_nodes} nodes due to max_nodes limit." if truncated else None
                     ),
                     node_depths=node_depths,
                 )
@@ -820,7 +767,7 @@ def _get_graph_neighborhood_sync(
             )
 
         # [20251229_FEATURE] Pro tier: Add semantic neighbors
-        semantic_neighbor_ids: Set[str] = set()
+        semantic_neighbor_ids: set[str] = set()
         if "semantic_neighbors" in cap_set:
             from code_scalpel.graph.semantic_neighbors import SemanticNeighborFinder
 
@@ -871,9 +818,7 @@ def _get_graph_neighborhood_sync(
             try:
                 center_name = center_node_id.split("::")[-1]
                 detector = LogicalRelationshipDetector(root_path)
-                relationship_result = detector.find_relationships(
-                    center_name=center_name, max_relationships=20
-                )
+                relationship_result = detector.find_relationships(center_name=center_name, max_relationships=20)
 
                 if relationship_result.success:
                     for rel in relationship_result.relationships:
@@ -941,11 +886,7 @@ def _get_graph_neighborhood_sync(
             def _degree_key(n: NeighborhoodNodeModel) -> tuple[int, str]:
                 return (((n.in_degree or 0) + (n.out_degree or 0)), n.id)
 
-            hot_nodes = [
-                n.id
-                for n in sorted(nodes, key=_degree_key, reverse=True)[:10]
-                if _degree_key(n)[0] > 0
-            ]
+            hot_nodes = [n.id for n in sorted(nodes, key=_degree_key, reverse=True)[:10] if _degree_key(n)[0] > 0]
 
         return GraphNeighborhoodResult(
             success=True,
@@ -1142,7 +1083,7 @@ def _get_project_map_sync(
             rel_path = str(file_path.relative_to(root_path))
 
             try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(file_path, encoding="utf-8", errors="ignore") as f:
                     code = f.read()
 
                 lines = code.count("\n") + 1
@@ -1176,9 +1117,7 @@ def _get_project_map_sync(
                 if include_complexity:
                     complexity = calculate_complexity(tree)
                     if complexity >= complexity_threshold:
-                        complexity_hotspots.append(
-                            f"{rel_path} (complexity: {complexity})"
-                        )
+                        complexity_hotspots.append(f"{rel_path} (complexity: {complexity})")
 
                 all_entry_points.extend(entry_points)
 
@@ -1221,10 +1160,7 @@ def _get_project_map_sync(
         pkg_list = list(packages.values())
         for pkg in pkg_list:
             for other_pkg in pkg_list:
-                if (
-                    other_pkg.path.startswith(pkg.path + "/")
-                    and other_pkg.name not in pkg.subpackages
-                ):
+                if other_pkg.path.startswith(pkg.path + "/") and other_pkg.name not in pkg.subpackages:
                     pkg.subpackages.append(other_pkg.name)
 
         # Check for circular imports
@@ -1249,18 +1185,12 @@ def _get_project_map_sync(
         ]:
             len(list(root_path.rglob(f"*{ext}")))
             # Exclude common ignored dirs
-            actual_count = sum(
-                1
-                for f in root_path.rglob(f"*{ext}")
-                if not any(p in exclude_patterns for p in f.parts)
-            )
+            actual_count = sum(1 for f in root_path.rglob(f"*{ext}") if not any(p in exclude_patterns for p in f.parts))
             if actual_count > 0:
                 languages[lang] = languages.get(lang, 0) + actual_count
 
         modules_in_diagram = (
-            len(modules)
-            if effective_max_modules is None
-            else min(len(modules), int(effective_max_modules))
+            len(modules) if effective_max_modules is None else min(len(modules), int(effective_max_modules))
         )
         diagram_limit = modules_in_diagram
 
@@ -1304,40 +1234,20 @@ def _get_project_map_sync(
         enable_dependency_diagram = "import_dependency_diagram" in caps_set or (
             tier and tier.lower() in {"pro", "enterprise"}
         )
-        enable_layers = "architectural_layer_detection" in caps_set or (
-            tier and tier.lower() in {"pro", "enterprise"}
-        )
-        enable_coupling = "coupling_analysis" in caps_set or (
-            tier and tier.lower() in {"pro", "enterprise"}
-        )
-        enable_force_graph = "force_directed_graph" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
-        enable_city = "interactive_city_map" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
-        enable_churn = "code_churn_visualization" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
-        enable_bug_hotspots = "bug_hotspot_heatmap" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
-        enable_git_blame = "git_blame_integration" in caps_set or (
-            tier and tier.lower() in {"pro", "enterprise"}
-        )
+        enable_layers = "architectural_layer_detection" in caps_set or (tier and tier.lower() in {"pro", "enterprise"})
+        enable_coupling = "coupling_analysis" in caps_set or (tier and tier.lower() in {"pro", "enterprise"})
+        enable_force_graph = "force_directed_graph" in caps_set or (tier and tier.lower() == "enterprise")
+        enable_city = "interactive_city_map" in caps_set or (tier and tier.lower() == "enterprise")
+        enable_churn = "code_churn_visualization" in caps_set or (tier and tier.lower() == "enterprise")
+        enable_bug_hotspots = "bug_hotspot_heatmap" in caps_set or (tier and tier.lower() == "enterprise")
+        enable_git_blame = "git_blame_integration" in caps_set or (tier and tier.lower() in {"pro", "enterprise"})
         # [20251231_FEATURE] v3.3.1 - New Enterprise feature flags
-        enable_multi_repo = "multi_repository_maps" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
+        enable_multi_repo = "multi_repository_maps" in caps_set or (tier and tier.lower() == "enterprise")
         enable_historical_trends = "historical_architecture_trends" in caps_set or (
             tier and tier.lower() == "enterprise"
         )
-        enable_custom_metrics = "custom_map_metrics" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
-        enable_compliance_overlay = "compliance_overlay" in caps_set or (
-            tier and tier.lower() == "enterprise"
-        )
+        enable_custom_metrics = "custom_map_metrics" in caps_set or (tier and tier.lower() == "enterprise")
+        enable_compliance_overlay = "compliance_overlay" in caps_set or (tier and tier.lower() == "enterprise")
 
         edges: list[tuple[str, str]] = []
         if (
@@ -1355,9 +1265,7 @@ def _get_project_map_sync(
                         edges.append((mod.path, target_path))
 
         if enable_relationships:
-            module_relationships = [
-                {"source": src, "target": dst, "type": "import"} for src, dst in edges
-            ]
+            module_relationships = [{"source": src, "target": dst, "type": "import"} for src, dst in edges]
 
         if enable_dependency_diagram and edges:
             diagram_lines = ["graph TD"]
@@ -1365,10 +1273,7 @@ def _get_project_map_sync(
                 node_id = f"N{idx}"
                 label = mod.path.replace("/", "_").replace(".", "_")
                 diagram_lines.append(f'    {node_id}["{label}"]')
-            path_to_id = {
-                mod.path: f"N{idx}"
-                for idx, mod in enumerate(modules[:modules_in_diagram])
-            }
+            path_to_id = {mod.path: f"N{idx}" for idx, mod in enumerate(modules[:modules_in_diagram])}
             for src, dst in edges:
                 if src in path_to_id and dst in path_to_id:
                     diagram_lines.append(f"    {path_to_id[src]} --> {path_to_id[dst]}")
@@ -1382,9 +1287,7 @@ def _get_project_map_sync(
                     return "controller", "Matched controller/view keywords"
                 if any(k in lowered for k in ["service", "logic", "manager"]):
                     return "service", "Matched service/logic keywords"
-                if any(
-                    k in lowered for k in ["repo", "repository", "model", "dao", "db"]
-                ):
+                if any(k in lowered for k in ["repo", "repository", "model", "dao", "db"]):
                     return "repository", "Matched repository/model keywords"
                 if any(k in lowered for k in ["util", "helper", "common", "shared"]):
                     return "utility", "Matched utility keywords"
@@ -1393,9 +1296,7 @@ def _get_project_map_sync(
             architectural_layers = []
             for mod in modules:
                 layer, reason = classify_layer(mod.path)
-                architectural_layers.append(
-                    {"module": mod.path, "layer": layer, "reason": reason}
-                )
+                architectural_layers.append({"module": mod.path, "layer": layer, "reason": reason})
 
         if enable_coupling:
             outgoing: dict[str, set[str]] = {mod.path: set() for mod in modules}
@@ -1434,9 +1335,7 @@ def _get_project_map_sync(
                     }
                     for idx, mod in enumerate(modules)
                 ],
-                "links": [
-                    {"source": src, "target": dst, "value": 1} for src, dst in edges
-                ],
+                "links": [{"source": src, "target": dst, "value": 1} for src, dst in edges],
             }
 
         if enable_city:
@@ -1468,9 +1367,7 @@ def _get_project_map_sync(
                     level = "high"
                 elif churn_score > 10:
                     level = "medium"
-                churn_heatmap.append(
-                    {"module": mod.path, "churn_score": churn_score, "level": level}
-                )
+                churn_heatmap.append({"module": mod.path, "churn_score": churn_score, "level": level})
 
         if enable_bug_hotspots:
             bug_hotspots = []
@@ -1483,10 +1380,7 @@ def _get_project_map_sync(
                         }
                     )
             if not bug_hotspots:
-                bug_hotspots = [
-                    {"module": mod.path, "reason": "No hotspots detected"}
-                    for mod in modules[:1]
-                ]
+                bug_hotspots = [{"module": mod.path, "reason": "No hotspots detected"} for mod in modules[:1]]
 
         if enable_git_blame:
             # [20251229_FEATURE] Enterprise: Git blame integration
@@ -1522,17 +1416,13 @@ def _get_project_map_sync(
                                 authors: dict[str, int] = {}
                                 for line in blame_result.stdout.split("\n"):
                                     if line.startswith("author "):
-                                        author = line[
-                                            7:
-                                        ].strip()  # Remove "author " prefix
+                                        author = line[7:].strip()  # Remove "author " prefix
                                         authors[author] = authors.get(author, 0) + 1
 
                                 if authors:
                                     # Find primary owner (most lines authored)
                                     total_lines = sum(authors.values())
-                                    primary_owner = max(
-                                        authors.items(), key=lambda x: x[1]
-                                    )
+                                    primary_owner = max(authors.items(), key=lambda x: x[1])
                                     owner_name = primary_owner[0]
                                     owner_lines = primary_owner[1]
                                     confidence = round(owner_lines / total_lines, 2)
@@ -1670,35 +1560,24 @@ def _get_project_map_sync(
                                 parts = line.split("|")
                                 if len(parts) >= 2:
                                     current_date = parts[1]
-                                    date_activity[current_date] = (
-                                        date_activity.get(current_date, 0) + 1
-                                    )
+                                    date_activity[current_date] = date_activity.get(current_date, 0) + 1
                             elif line.endswith(".py"):
                                 # This is a Python file that was changed
-                                file_change_counts[line] = (
-                                    file_change_counts.get(line, 0) + 1
-                                )
+                                file_change_counts[line] = file_change_counts.get(line, 0) + 1
 
                         # Calculate architecture stability metrics
                         total_changes = sum(file_change_counts.values())
-                        hot_files = sorted(
-                            file_change_counts.items(), key=lambda x: x[1], reverse=True
-                        )[:10]
+                        hot_files = sorted(file_change_counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
                         historical_trends = [
                             {
                                 "period": "last_30_days",
                                 "total_commits": len(date_activity),
                                 "total_file_changes": total_changes,
-                                "most_changed_files": [
-                                    {"file": f, "changes": c} for f, c in hot_files
-                                ],
+                                "most_changed_files": [{"file": f, "changes": c} for f, c in hot_files],
                                 "activity_by_date": date_activity,
                                 "stability_score": round(
-                                    1.0
-                                    - min(
-                                        total_changes / max(len(modules) * 3, 1), 1.0
-                                    ),
+                                    1.0 - min(total_changes / max(len(modules) * 3, 1), 1.0),
                                     2,
                                 ),
                             }
@@ -1739,9 +1618,7 @@ def _get_project_map_sync(
                             "metrics": arch_config["custom_metrics"],
                         }
                     else:
-                        custom_metrics["note"] = (
-                            "No custom_metrics section in architecture.toml"
-                        )
+                        custom_metrics["note"] = "No custom_metrics section in architecture.toml"
                 else:
                     custom_metrics["note"] = "No .code-scalpel/architecture.toml found"
             except Exception as e:
@@ -1761,9 +1638,7 @@ def _get_project_map_sync(
                         # [20260101_BUGFIX] Dynamic import to avoid Pyright errors
                         from code_scalpel.ast_tools import architectural_rules
 
-                        ArchitecturalRulesEngine = getattr(
-                            architectural_rules, "ArchitecturalRulesEngine", None
-                        )
+                        ArchitecturalRulesEngine = getattr(architectural_rules, "ArchitecturalRulesEngine", None)
                         if ArchitecturalRulesEngine is None:
                             raise ImportError("ArchitecturalRulesEngine not found")
 
@@ -1788,9 +1663,7 @@ def _get_project_map_sync(
                         compliance_overlay = {
                             "violations": violations,
                             "violation_count": len(violations),
-                            "status": (
-                                "compliant" if len(violations) == 0 else "non_compliant"
-                            ),
+                            "status": ("compliant" if len(violations) == 0 else "non_compliant"),
                             "rules_source": str(arch_config_path),
                         }
                     except ImportError:
@@ -1830,21 +1703,15 @@ def _get_project_map_sync(
             mod_id = f"M{i}"
             label = mod.path.replace("/", "_").replace(".", "_")
             if mod.entry_points:
-                mermaid_lines.append(
-                    f'        {mod_id}[["{label}"]]'
-                )  # Stadium for entry
+                mermaid_lines.append(f'        {mod_id}[["{label}"]]')  # Stadium for entry
             else:
                 mermaid_lines.append(f'        {mod_id}["{label}"]')
         mermaid_lines.append("    end")
 
         # [20251220_FEATURE] v3.0.5 - Communicate truncation
-        diagram_truncated = (
-            effective_max_modules is not None and len(modules) > effective_max_modules
-        )
+        diagram_truncated = effective_max_modules is not None and len(modules) > effective_max_modules
         if diagram_truncated and effective_max_modules is not None:
-            mermaid_lines.append(
-                f"    Note[... and {len(modules) - int(effective_max_modules)} more modules]"
-            )
+            mermaid_lines.append(f"    Note[... and {len(modules) - int(effective_max_modules)} more modules]")
 
         return ProjectMapResult(
             project_root=str(root_path),
@@ -1916,9 +1783,10 @@ def _get_cross_file_dependencies_sync(
 
     [20251220_BUGFIX] v3.0.5 - Parameter order matches async function for consistency.
     """
+    import os
+
     from code_scalpel.ast_tools.cross_file_extractor import CrossFileExtractor
     from code_scalpel.licensing.features import get_tool_capabilities
-    import os
 
     root_path = Path(project_root) if project_root else _get_project_root()
 
@@ -1935,10 +1803,7 @@ def _get_cross_file_dependencies_sync(
                 target_path_obj = root_path / target_file
 
             # If target is inside root_path but deeper
-            if (
-                target_path_obj.exists()
-                and len(target_path_obj.parts) > len(root_path.parts) + 1
-            ):
+            if target_path_obj.exists() and len(target_path_obj.parts) > len(root_path.parts) + 1:
                 # Re-scope root to the parent of the target file
                 # e.g. /project/src/module/file.py -> /project/src/module
                 root_path = target_path_obj.parent
@@ -1986,9 +1851,7 @@ def _get_cross_file_dependencies_sync(
 
     allow_transitive = "transitive_dependency_mapping" in caps_set
     coupling_enabled = "deep_coupling_analysis" in caps_set
-    firewall_enabled = (
-        "architectural_firewall" in caps_set or "boundary_violation_alerts" in caps_set
-    )
+    firewall_enabled = "architectural_firewall" in caps_set or "boundary_violation_alerts" in caps_set
 
     # [20260104_BUGFIX] Initialize all variables that may be referenced in return statement
     # to avoid UnboundLocalError if exception occurs before assignment
@@ -2029,9 +1892,7 @@ def _get_cross_file_dependencies_sync(
                 return future.result(timeout=timeout_seconds)
             except FuturesTimeoutError:
                 future.cancel()
-                raise TimeoutError(
-                    f"Operation timed out after {timeout_seconds} seconds"
-                )
+                raise TimeoutError(f"Operation timed out after {timeout_seconds} seconds")
             finally:
                 # Do not wait for a potentially hung worker thread.
                 executor.shutdown(wait=False, cancel_futures=True)
@@ -2085,9 +1946,7 @@ def _get_cross_file_dependencies_sync(
         # [20251227_REFACTOR] Extraction timeout is 50% of build timeout
         extraction_timeout = build_timeout // 2
         try:
-            extraction_result = run_with_timeout(
-                extract_dependencies, extraction_timeout
-            )
+            extraction_result = run_with_timeout(extract_dependencies, extraction_timeout)
         except TimeoutError:
             # [20251227_FEATURE] Context-window aware error messaging for AI agents
             return CrossFileDependenciesResult(
@@ -2121,11 +1980,7 @@ def _get_cross_file_dependencies_sync(
         LOW_CONFIDENCE_THRESHOLD = 0.5
 
         for sym in all_symbols:
-            rel_file = (
-                str(Path(sym.file).relative_to(root_path))
-                if Path(sym.file).is_absolute()
-                else sym.file
-            )
+            rel_file = str(Path(sym.file).relative_to(root_path)) if Path(sym.file).is_absolute() else sym.file
             # [20251216_FEATURE] v2.5.0 - Include depth and confidence in symbol model
             extracted_symbols.append(
                 ExtractedSymbolModel(
@@ -2151,9 +2006,7 @@ def _get_cross_file_dependencies_sync(
             combined_code = extraction_result.combined_code
 
         # Get unresolved imports from extraction result
-        unresolved_imports = (
-            extraction_result.module_imports
-        )  # These are imports that couldn't be resolved
+        unresolved_imports = extraction_result.module_imports  # These are imports that couldn't be resolved
 
         # Build import graph dict (file -> list of imported files)
         # Use the extractor's resolver (avoid double-building) and keep this focused.
@@ -2173,9 +2026,7 @@ def _get_cross_file_dependencies_sync(
             files_truncated = files_scanned - max_files_limit
             allowed_files = set(file_order[:max_files_limit])
             truncation_warning = f"Truncated to {max_files_limit} files (of {files_scanned}) due to tier limits."
-            extracted_symbols = [
-                sym for sym in extracted_symbols if sym.file in allowed_files
-            ]
+            extracted_symbols = [sym for sym in extracted_symbols if sym.file in allowed_files]
             file_order = file_order[:max_files_limit]
 
             if include_code:
@@ -2223,11 +2074,7 @@ def _get_cross_file_dependencies_sync(
                 import_graph[rel_path] = imported_files
 
         # Make target file relative (used by diagram + returned fields)
-        target_rel = (
-            str(target_path.relative_to(root_path))
-            if target_path.is_absolute()
-            else target_file
-        )
+        target_rel = str(target_path.relative_to(root_path)) if target_path.is_absolute() else target_file
 
         transitive_depth = effective_max_depth
 
@@ -2271,9 +2118,7 @@ def _get_cross_file_dependencies_sync(
                 if chain_depths:
                     observed = max(chain_depths)
                     # But we enforce transitive_depth as the hard limit; if chains are longer, cap it.
-                    max_depth_reached = min(
-                        max(max_depth_reached, observed), transitive_depth
-                    )
+                    max_depth_reached = min(max(max_depth_reached, observed), transitive_depth)
 
         # [20251226_FEATURE] Enterprise architectural firewall outputs
         boundary_violations: list[dict[str, Any]] = []
@@ -2306,10 +2151,7 @@ def _get_cross_file_dependencies_sync(
                         }
                         boundary_violations.append(violation)
                         layer_violations.append(violation)
-                    elif (
-                        layer_rank.get(src_layer, 0) < layer_rank.get(dst_layer, 0)
-                        and dst_layer != "unknown"
-                    ):
+                    elif layer_rank.get(src_layer, 0) < layer_rank.get(dst_layer, 0) and dst_layer != "unknown":
                         violation = {
                             "type": "upward_dependency",
                             "source": src_file,
@@ -2330,16 +2172,10 @@ def _get_cross_file_dependencies_sync(
 
         # Detect circular imports using get_circular_imports()
         circular_import_objs = resolver.get_circular_imports()
-        circular_import_lists = [
-            ci.cycle for ci in circular_import_objs
-        ]  # CircularImport uses 'cycle'
+        circular_import_lists = [ci.cycle for ci in circular_import_objs]  # CircularImport uses 'cycle'
 
         # Make target file relative (used by diagram + returned fields)
-        target_rel = (
-            str(target_path.relative_to(root_path))
-            if target_path.is_absolute()
-            else target_file
-        )
+        target_rel = str(target_path.relative_to(root_path)) if target_path.is_absolute() else target_file
 
         # Generate Mermaid diagram
         mermaid = ""
@@ -2357,11 +2193,7 @@ def _get_cross_file_dependencies_sync(
             seen_nodes: set[str] = set()
             edges_out: list[tuple[str, str]] = []
 
-            while (
-                queue
-                and len(seen_nodes) < max_mermaid_nodes
-                and len(edges_out) < max_mermaid_edges
-            ):
+            while queue and len(seen_nodes) < max_mermaid_nodes and len(edges_out) < max_mermaid_edges:
                 cur, depth = queue.popleft()
                 if cur in seen_nodes:
                     continue
@@ -2390,13 +2222,8 @@ def _get_cross_file_dependencies_sync(
                     lines.append(f"    {node_ids[a]} --> {node_ids[b]}")
 
             # Truncation hint
-            if (
-                len(seen_nodes) >= max_mermaid_nodes
-                or len(edges_out) >= max_mermaid_edges
-            ):
-                lines.append(
-                    f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})"
-                )
+            if len(seen_nodes) >= max_mermaid_nodes or len(edges_out) >= max_mermaid_edges:
+                lines.append(f"    %% Diagram truncated (nodes<={max_mermaid_nodes}, edges<={max_mermaid_edges})")
 
             mermaid = "\n".join(lines)
 
@@ -2406,9 +2233,7 @@ def _get_cross_file_dependencies_sync(
         # [20251216_FEATURE] v2.5.0 - Build low confidence warning if needed
         low_confidence_warning = None
         if extraction_result.low_confidence_count > 0:
-            low_conf_names = [
-                s.name for s in extraction_result.get_low_confidence_symbols()[:5]
-            ]
+            low_conf_names = [s.name for s in extraction_result.get_low_confidence_symbols()[:5]]
             low_confidence_warning = (
                 f"⚠️ {extraction_result.low_confidence_count} symbol(s) have low confidence "
                 f"(below 0.5): {', '.join(low_conf_names)}"
@@ -2458,9 +2283,7 @@ def _get_cross_file_dependencies_sync(
                             )
                         )
                         try:
-                            resolved_mod, resolved_name, chain = (
-                                resolver.resolve_alias_chain(module_name, imp.alias)
-                            )
+                            resolved_mod, resolved_name, chain = resolver.resolve_alias_chain(module_name, imp.alias)
                             chained_alias_resolutions.append(
                                 ChainedAliasResolutionModel(
                                     symbol=imp.alias,
@@ -2484,9 +2307,7 @@ def _get_cross_file_dependencies_sync(
                 for src_module, symbols in wildcard_map.items():
                     if symbols:
                         wildcard_expansions.append(
-                            WildcardExpansionModel(
-                                from_module=src_module, expanded_symbols=symbols
-                            )
+                            WildcardExpansionModel(from_module=src_module, expanded_symbols=symbols)
                         )
 
             # Re-export chains (project-wide)
@@ -2528,9 +2349,7 @@ def _get_cross_file_dependencies_sync(
 
                     if engine.is_exempt(module_name):
                         try:
-                            exempted_files.append(
-                                str(Path(abs_file).relative_to(root_path))
-                            )
+                            exempted_files.append(str(Path(abs_file).relative_to(root_path)))
                         except Exception:
                             exempted_files.append(Path(abs_file).name)
 
@@ -2590,9 +2409,7 @@ def _get_cross_file_dependencies_sync(
                         continue
                     fan_in = len(resolver.reverse_edges.get(module_name, set()))
                     fan_out = len(resolver.edges.get(module_name, set()))
-                    coupling_viols = engine.check_coupling(
-                        module_name, fan_in, fan_out, max_depth_reached
-                    )
+                    coupling_viols = engine.check_coupling(module_name, fan_in, fan_out, max_depth_reached)
                     for v in coupling_viols:
                         metric = "fan_in"
                         limit = engine.config.coupling_limits.max_fan_in
@@ -2681,9 +2498,7 @@ def _cross_file_security_scan_sync(
     max_depth: int,
     include_diagram: bool,
     timeout_seconds: float | None = 120.0,  # [20251220_PERF] Default 2 minute timeout
-    max_modules: (
-        int | None
-    ) = 500,  # [20251220_PERF] Default module limit for large projects
+    max_modules: int | None = 500,  # [20251220_PERF] Default module limit for large projects
     tier: str | None = None,
     capabilities: dict | None = None,
     confidence_threshold: float = 0.7,
@@ -2698,21 +2513,13 @@ def _cross_file_security_scan_sync(
     limits = caps.get("limits", {}) or {}
 
     # Enforce limits (support both max_* keys from limits.toml and features.py)
-    max_modules_limit = (
-        limits.get("max_modules")
-        if "max_modules" in limits
-        else limits.get("max_files")
-    )
+    max_modules_limit = limits.get("max_modules") if "max_modules" in limits else limits.get("max_files")
     if max_modules_limit is not None and max_modules is not None:
         max_modules = min(max_modules, max_modules_limit)
     elif max_modules_limit is not None:
         max_modules = max_modules_limit
 
-    max_depth_limit = (
-        limits.get("max_depth")
-        if "max_depth" in limits
-        else limits.get("max_taint_depth")
-    )
+    max_depth_limit = limits.get("max_depth") if "max_depth" in limits else limits.get("max_taint_depth")
     if max_depth_limit is not None and max_depth is not None:
         max_depth = min(max_depth, max_depth_limit)
     elif max_depth_limit is not None:
@@ -2769,13 +2576,9 @@ def _cross_file_security_scan_sync(
                 sink_function=vuln.flow.sink_function,
                 sink_file=sink_file,
                 sink_line=vuln.flow.sink_line,
-                flow_path=[
-                    f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path
-                ],
+                flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in vuln.flow.flow_path],
                 taint_type=str(
-                    vuln.flow.sink_type.name
-                    if hasattr(vuln.flow.sink_type, "name")
-                    else vuln.flow.sink_type
+                    vuln.flow.sink_type.name if hasattr(vuln.flow.sink_type, "name") else vuln.flow.sink_type
                 ),
             )
             vulnerabilities.append(
@@ -2805,14 +2608,8 @@ def _cross_file_security_scan_sync(
                     sink_function=flow.sink_function,
                     sink_file=sink_file,
                     sink_line=flow.sink_line,
-                    flow_path=[
-                        f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path
-                    ],
-                    taint_type=str(
-                        flow.sink_type.name
-                        if hasattr(flow.sink_type, "name")
-                        else flow.sink_type
-                    ),
+                    flow_path=[f"{get_file_for_module(m)}:{f}" for m, f, _ in flow.flow_path],
+                    taint_type=str(flow.sink_type.name if hasattr(flow.sink_type, "name") else flow.sink_type),
                 )
             )
 
@@ -2856,9 +2653,7 @@ def _cross_file_security_scan_sync(
         microservice_boundaries: list[dict[str, Any]] | None = None
         distributed_trace: dict[str, Any] | None = None
 
-        def _detect_framework_contexts(
-            base_path: Path, limit: int | None
-        ) -> list[dict[str, Any]]:
+        def _detect_framework_contexts(base_path: Path, limit: int | None) -> list[dict[str, Any]]:
             contexts: list[dict[str, Any]] = []
             max_files = limit or 50
             scanned = 0
@@ -2923,9 +2718,7 @@ def _cross_file_security_scan_sync(
         def _detect_global_flows(flows: list[TaintFlowModel]) -> list[dict[str, Any]]:
             gflows: list[dict[str, Any]] = []
             for flow in flows[:100]:
-                if "frontend" in flow.source_file or "frontend" in "".join(
-                    flow.flow_path
-                ):
+                if "frontend" in flow.source_file or "frontend" in "".join(flow.flow_path):
                     gflows.append(
                         {
                             "source": flow.source_file,
@@ -2963,9 +2756,7 @@ def _cross_file_security_scan_sync(
             "react_context_tracking",
             "dependency_injection_resolution",
         } & caps_set:
-            framework_contexts = _detect_framework_contexts(
-                root_path, max_modules_limit
-            )
+            framework_contexts = _detect_framework_contexts(root_path, max_modules_limit)
             dependency_chains = _build_dependency_chains(taint_flows)
             confidence_scores = _build_confidence_scores(vulnerabilities)
 

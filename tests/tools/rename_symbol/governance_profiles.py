@@ -10,16 +10,14 @@ Each profile fixture:
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 
 
 @pytest.fixture
-def governance_permissive(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> Iterator[Path]:
+def governance_permissive(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
     """Permissive governance: No limits, no enforcement (solo/hobby devs)."""
     monkeypatch.chdir(tmp_path)
     policy_dir = tmp_path / ".code-scalpel"
@@ -33,9 +31,7 @@ def governance_permissive(
 
 
 @pytest.fixture
-def governance_minimal(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> Iterator[Path]:
+def governance_minimal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
     """Minimal governance: Basic audit, generous limits (1-5 devs, budget-constrained)."""
     monkeypatch.chdir(tmp_path)
     policy_dir = tmp_path / ".code-scalpel"
@@ -62,9 +58,7 @@ def governance_minimal(
 
 
 @pytest.fixture
-def governance_default(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> Iterator[Path]:
+def governance_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
     """Default governance: Balanced security/productivity (5-20 devs, standard teams)."""
     monkeypatch.chdir(tmp_path)
     policy_dir = tmp_path / ".code-scalpel"
@@ -91,9 +85,7 @@ def governance_default(
 
 
 @pytest.fixture
-def governance_restrictive(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> Iterator[Path]:
+def governance_restrictive(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
     """Restrictive governance: Strict controls (20+ devs, enterprise/SOC2/ISO)."""
     monkeypatch.chdir(tmp_path)
     policy_dir = tmp_path / ".code-scalpel"

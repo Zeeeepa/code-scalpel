@@ -350,9 +350,7 @@ class TestMultipleTiersSequence:
                 pro_caps = get_tool_capabilities("analyze_code", "pro")
 
                 # Pro has more capabilities
-                assert len(pro_caps.get("capabilities", [])) > len(
-                    community_caps.get("capabilities", [])
-                )
+                assert len(pro_caps.get("capabilities", [])) > len(community_caps.get("capabilities", []))
 
             finally:
                 os.chdir(original_cwd)

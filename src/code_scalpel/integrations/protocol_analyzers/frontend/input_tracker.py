@@ -49,7 +49,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 
 class FrontendFramework(Enum):
@@ -124,13 +124,13 @@ class InputSource:
 
     source_type: InputSourceType
     pattern: str  # The matched pattern
-    variable_name: Optional[str] = None  # Variable storing the input
+    variable_name: str | None = None  # Variable storing the input
     line: int = 0
     column: int = 0
     file_path: str = ""
     framework: FrontendFramework = FrontendFramework.VANILLA
     is_validated: bool = False  # Whether validation was detected
-    validation_function: Optional[str] = None
+    validation_function: str | None = None
 
     @property
     def risk_level(self) -> str:
@@ -176,9 +176,9 @@ class DataFlow:
 
     source: InputSource
     sink: DangerousSink
-    intermediate_variables: List[str] = field(default_factory=list)
+    intermediate_variables: list[str] = field(default_factory=list)
     is_sanitized: bool = False
-    sanitizer: Optional[str] = None
+    sanitizer: str | None = None
 
     @property
     def risk_level(self) -> str:
@@ -190,9 +190,7 @@ class DataFlow:
     @property
     def description(self) -> str:
         """Human-readable flow description."""
-        flow_str = " → ".join(
-            [self.source.pattern] + self.intermediate_variables + [self.sink.pattern]
-        )
+        flow_str = " → ".join([self.source.pattern] + self.intermediate_variables + [self.sink.pattern])
         return f"[{self.risk_level}] {flow_str}"
 
 
@@ -202,14 +200,14 @@ class FrontendAnalysisResult:
 
     file_path: str = ""
     framework: FrontendFramework = FrontendFramework.UNKNOWN
-    input_sources: List[InputSource] = field(default_factory=list)
-    dangerous_sinks: List[DangerousSink] = field(default_factory=list)
-    data_flows: List[DataFlow] = field(default_factory=list)
-    state_variables: Dict[str, InputSource] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
+    input_sources: list[InputSource] = field(default_factory=list)
+    dangerous_sinks: list[DangerousSink] = field(default_factory=list)
+    data_flows: list[DataFlow] = field(default_factory=list)
+    state_variables: dict[str, InputSource] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
     @property
-    def dangerous_flows(self) -> List[DataFlow]:
+    def dangerous_flows(self) -> list[DataFlow]:
         """Get only dangerous (unsanitized) flows."""
         return [f for f in self.data_flows if not f.is_sanitized]
 
@@ -219,7 +217,7 @@ class FrontendAnalysisResult:
         return len(self.dangerous_flows) > 0
 
     @property
-    def risk_count(self) -> Dict[str, int]:
+    def risk_count(self) -> dict[str, int]:
         """Count risks by level."""
         counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
         for flow in self.data_flows:
@@ -411,13 +409,13 @@ class FrontendInputTracker:
 
     def __init__(self):
         """Initialize the frontend input tracker."""
-        self.known_tainted_vars: Set[str] = set()
+        self.known_tainted_vars: set[str] = set()
 
     def analyze_file(
         self,
         source_code: str,
         file_path: str = "",
-        framework: Optional[str] = None,
+        framework: str | None = None,
     ) -> FrontendAnalysisResult:
         """
         Analyze frontend code for input sources and dangerous sinks.
@@ -560,9 +558,7 @@ class FrontendInputTracker:
                 FrontendFramework.REACT,
             )
         elif result.framework == FrontendFramework.VUE:
-            self._apply_patterns(
-                source_code, lines, VUE_INPUT_PATTERNS, result, FrontendFramework.VUE
-            )
+            self._apply_patterns(source_code, lines, VUE_INPUT_PATTERNS, result, FrontendFramework.VUE)
         elif result.framework == FrontendFramework.ANGULAR:
             self._apply_patterns(
                 source_code,
@@ -575,8 +571,8 @@ class FrontendInputTracker:
     def _apply_patterns(
         self,
         source_code: str,
-        lines: List[str],
-        patterns: List[Tuple],
+        lines: list[str],
+        patterns: list[tuple],
         result: FrontendAnalysisResult,
         framework: FrontendFramework,
     ) -> None:
@@ -646,9 +642,7 @@ class FrontendInputTracker:
         """Track which state variables are assigned from input."""
         # React useState pattern: const [value, setValue] = useState(...)
         # Look for setValue(e.target.value) pattern
-        state_pattern = re.compile(
-            r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE
-        )
+        state_pattern = re.compile(r"const\s+\[(\w+),\s*set(\w+)\]\s*=\s*useState", re.MULTILINE)
 
         for match in state_pattern.finditer(source_code):
             var_name = match.group(1)
@@ -700,10 +694,7 @@ class FrontendInputTracker:
 
                     # Indirect flow via variable
                     elif source.variable_name:
-                        if (
-                            source.variable_name in sink_line
-                            or source.variable_name in context
-                        ):
+                        if source.variable_name in sink_line or source.variable_name in context:
                             flow = DataFlow(
                                 source=source,
                                 sink=sink,
@@ -734,7 +725,7 @@ class FrontendInputTracker:
     def get_security_findings(
         self,
         result: FrontendAnalysisResult,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Generate security findings from analysis result.
 
@@ -801,8 +792,7 @@ class FrontendInputTracker:
                 "or refactor to avoid dynamic code execution"
             ),
             DangerousSinkType.LOCATION: (
-                "Validate URLs before redirect. Use allowlist of permitted domains "
-                "and validate with URL constructor"
+                "Validate URLs before redirect. Use allowlist of permitted domains " "and validate with URL constructor"
             ),
         }
         return recommendations.get(
@@ -818,7 +808,7 @@ class FrontendInputTracker:
 
 def analyze_frontend_file(
     file_path: str,
-    framework: Optional[str] = None,
+    framework: str | None = None,
 ) -> FrontendAnalysisResult:
     """
     Analyze a frontend file for input sources and XSS risks.
@@ -845,8 +835,8 @@ def analyze_frontend_file(
 
 def analyze_frontend_codebase(
     directory: str,
-    framework: Optional[str] = None,
-) -> List[FrontendAnalysisResult]:
+    framework: str | None = None,
+) -> list[FrontendAnalysisResult]:
     """
     Analyze a frontend codebase for input sources and XSS risks.
 
@@ -866,10 +856,7 @@ def analyze_frontend_codebase(
     for ext in extensions:
         for file_path in root.rglob(f"*{ext}"):
             # Skip node_modules and build directories
-            if any(
-                part in file_path.parts
-                for part in ["node_modules", "dist", "build", ".next", ".nuxt"]
-            ):
+            if any(part in file_path.parts for part in ["node_modules", "dist", "build", ".next", ".nuxt"]):
                 continue
 
             try:
@@ -888,7 +875,7 @@ def analyze_frontend_codebase(
     return results
 
 
-def get_xss_risks(results: List[FrontendAnalysisResult]) -> List[DataFlow]:
+def get_xss_risks(results: list[FrontendAnalysisResult]) -> list[DataFlow]:
     """
     Get all XSS risks from multiple analysis results.
 

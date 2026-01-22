@@ -43,9 +43,7 @@ def test_community_50_policy_files_allowed(
         tier="community",
     )
 
-    assert (
-        result.success is True
-    ), f"Expected success at 50 files, got error: {result.error}"
+    assert result.success is True, f"Expected success at 50 files, got error: {result.error}"
     assert result.tier == "community"
     assert result.files_verified == 50
     assert result.error is None
@@ -84,12 +82,8 @@ def test_community_51_policy_files_rejected(
     assert result.error is not None
     assert "51" in result.error, f"Error should mention 51 files: {result.error}"
     assert "50" in result.error, f"Error should mention 50 limit: {result.error}"
-    assert (
-        "community" in result.error.lower()
-    ), f"Error should mention tier: {result.error}"
-    assert (
-        "limit exceeded" in result.error.lower()
-    ), f"Error should be clear: {result.error}"
+    assert "community" in result.error.lower(), f"Error should mention tier: {result.error}"
+    assert "limit exceeded" in result.error.lower(), f"Error should be clear: {result.error}"
 
 
 def test_pro_200_policy_files_allowed(
@@ -124,9 +118,7 @@ def test_pro_200_policy_files_allowed(
         tier="pro",
     )
 
-    assert (
-        result.success is True
-    ), f"Expected success at 200 files on Pro, got error: {result.error}"
+    assert result.success is True, f"Expected success at 200 files on Pro, got error: {result.error}"
     assert result.tier == "pro"
     assert result.files_verified == 200
     assert result.signature_validated is True
@@ -164,9 +156,7 @@ def test_enterprise_unlimited_policy_files(
         tier="enterprise",
     )
 
-    assert (
-        result.success is True
-    ), f"Expected success with 250 files on Enterprise, got error: {result.error}"
+    assert result.success is True, f"Expected success with 250 files on Enterprise, got error: {result.error}"
     assert result.tier == "enterprise"
     assert result.files_verified == 250
     assert result.signature_validated is True

@@ -84,8 +84,7 @@ def commented_function(value):
 # Generator function
 def generate_numbers(n):
     """Generate numbers from 0 to n."""
-    for i in range(n):
-        yield i
+    yield from range(n)
 
 
 # Function with default arguments

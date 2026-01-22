@@ -12,9 +12,10 @@ v3.0.0 "Autonomy" Release - Config-driven governance integration.
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from code_scalpel.autonomy.audit import AutonomyAuditTrail
 from code_scalpel.autonomy.fix_loop import FixLoop, FixLoopResult
@@ -37,7 +38,7 @@ class ChangeValidationResult:
 
     allowed: bool
     reason: str
-    budget_decision: Optional[BudgetDecision] = None
+    budget_decision: BudgetDecision | None = None
     critical_path_violation: bool = False
     max_lines_allowed: int = 500
     max_files_allowed: int = 10
@@ -61,9 +62,7 @@ class BlastRadiusCalculator:
         self.config = config
         self.logger = logging.getLogger("scalpel.blast_radius")
 
-    def check_critical_path_impact(
-        self, files: List[str], lines_changed: Dict[str, int]
-    ) -> tuple[bool, str, int]:
+    def check_critical_path_impact(self, files: list[str], lines_changed: dict[str, int]) -> tuple[bool, str, int]:
         """
         Check if change impacts critical paths and apply limits.
 
@@ -75,9 +74,7 @@ class BlastRadiusCalculator:
             Tuple of (is_critical, reason, max_lines_allowed)
         """
         # Check if any file is in critical path
-        critical_files = [
-            f for f in files if self.config.blast_radius.is_critical_path(f)
-        ]
+        critical_files = [f for f in files if self.config.blast_radius.is_critical_path(f)]
 
         if not critical_files:
             # Standard limits apply
@@ -141,8 +138,8 @@ class AutonomyEngine:
     def __init__(
         self,
         project_root: Path,
-        config_path: Optional[Path] = None,
-        on_escalate: Optional[Callable] = None,
+        config_path: Path | None = None,
+        on_escalate: Callable | None = None,
     ):
         """
         Initialize autonomy engine.
@@ -198,9 +195,7 @@ class AutonomyEngine:
         else:
             self.audit_trail = None
 
-    def check_change_allowed(
-        self, files: List[str], lines_changed: Dict[str, int]
-    ) -> ChangeValidationResult:
+    def check_change_allowed(self, files: list[str], lines_changed: dict[str, int]) -> ChangeValidationResult:
         """
         Check if proposed change meets governance constraints.
 
@@ -214,9 +209,7 @@ class AutonomyEngine:
             ChangeValidationResult with detailed decision
         """
         # [20251218_FEATURE] Check critical path impact first
-        is_critical, crit_reason, max_lines = (
-            self.blast_radius.check_critical_path_impact(files, lines_changed)
-        )
+        is_critical, crit_reason, max_lines = self.blast_radius.check_critical_path_impact(files, lines_changed)
 
         if is_critical and "exceed" in crit_reason:
             # Critical path violation - block immediately
@@ -255,10 +248,7 @@ class AutonomyEngine:
             if self.config.autonomy_constraints.require_approval_for_security_changes:
                 return ChangeValidationResult(
                     allowed=False,
-                    reason=(
-                        f"Critical path changes require human approval. "
-                        f"Files: {files}"
-                    ),
+                    reason=(f"Critical path changes require human approval. " f"Files: {files}"),
                     critical_path_violation=True,
                     max_lines_allowed=max_lines,
                 )
@@ -328,7 +318,7 @@ class AutonomyEngine:
 
         return result
 
-    def get_config_summary(self) -> Dict[str, Any]:
+    def get_config_summary(self) -> dict[str, Any]:
         """
         Get summary of active configuration.
 

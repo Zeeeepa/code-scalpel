@@ -20,7 +20,7 @@ PHPCS Features:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class PHPCSSeverity(Enum):
@@ -48,10 +48,10 @@ class PHPCSViolation:
 
     sniff_id: str
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    severity: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    severity: str | None = None
     is_fixable: bool = False
 
 
@@ -60,7 +60,7 @@ class PHPCSConfig:
     """PHPCS configuration settings."""
 
     standard: str = "PSR12"
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     ignore_patterns: list[str] = field(default_factory=list)
     show_warnings: bool = True
     report_format: str = "json"
@@ -72,7 +72,7 @@ class PHPCSParser:
     def __init__(self):
         """Initialize PHPCS parser."""
         self.violations: list[PHPCSViolation] = []
-        self.config: Optional[PHPCSConfig] = None
+        self.config: PHPCSConfig | None = None
         self.fixed_count: int = 0
 
     def parse_json_report(self, json_data: str) -> list[PHPCSViolation]:

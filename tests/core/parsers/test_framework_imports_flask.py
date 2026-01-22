@@ -2,12 +2,11 @@ import textwrap
 from pathlib import Path
 
 import pytest
+
 from code_scalpel.ast_tools.import_resolver import ImportResolver, ImportType
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] ImportType.FRAMEWORK not implemented - feature incomplete"
-)
+@pytest.mark.skip(reason="[20260117_TEST] ImportType.FRAMEWORK not implemented - feature incomplete")
 def test_flask_blueprint_detection(tmp_path: Path) -> None:
     app_py = tmp_path / "app.py"
     app_py.write_text(

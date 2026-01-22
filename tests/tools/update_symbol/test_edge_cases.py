@@ -124,7 +124,7 @@ class Config:
     def value(self):
         '''Get value.'''
         return self._value
-    
+
     @value.setter
     def value(self, val):
         '''Set value.'''
@@ -349,16 +349,16 @@ class TestUpdateSymbolComplexDocstrings:
 def complex_function(data):
     """
     Process complex data.
-    
+
     Args:
         data: Input data dictionary
-        
+
     Returns:
         Processed result
-        
+
     Raises:
         ValueError: If data invalid
-        
+
     Example:
         >>> result = complex_function({"key": "value"})
         >>> result["status"]
@@ -425,11 +425,11 @@ class TestUpdateSymbolSpecialMethods:
 class MyClass:
     def __init__(self, value):
         self.value = value
-    
+
     def __str__(self):
         '''String representation.'''
         return f"MyClass({self.value})"
-    
+
     def __repr__(self):
         '''Developer representation.'''
         return f"MyClass(value={self.value!r})"

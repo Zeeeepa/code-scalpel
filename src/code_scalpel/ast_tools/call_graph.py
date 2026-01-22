@@ -5,7 +5,6 @@ import os
 from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
 # [20251213_FEATURE] v1.5.0 - Enhanced call graph with line numbers and Mermaid support
 
@@ -21,7 +20,7 @@ class CallContext:
     in_loop: bool = False
     in_try_block: bool = False
     in_conditional: bool = False
-    condition_summary: Optional[str] = None
+    condition_summary: str | None = None
     in_async: bool = False
     in_except_handler: bool = False
 
@@ -33,10 +32,10 @@ class CallNode:
     name: str
     file: str
     line: int
-    end_line: Optional[int] = None
+    end_line: int | None = None
     is_entry_point: bool = False
     # [20260111_BUGFIX] v3.3.0 - MCP server expects source_uri for serialization
-    source_uri: Optional[str] = None
+    source_uri: str | None = None
 
 
 @dataclass
@@ -47,18 +46,18 @@ class CallEdge:
     callee: str
     confidence: float = 1.0
     inference_source: str = "static"
-    call_line: Optional[int] = None
-    context: Optional[CallContext] = None
+    call_line: int | None = None
+    context: CallContext | None = None
 
 
 @dataclass
 class CallGraphResult:
     """Result of call graph analysis."""
 
-    nodes: List[CallNode] = field(default_factory=list)
-    edges: List[CallEdge] = field(default_factory=list)
-    entry_point: Optional[str] = None
-    depth_limit: Optional[int] = None
+    nodes: list[CallNode] = field(default_factory=list)
+    edges: list[CallEdge] = field(default_factory=list)
+    entry_point: str | None = None
+    depth_limit: int | None = None
     mermaid: str = ""
     # [20251225_FEATURE] Tier-friendly metadata for truncation and summaries
     total_nodes: int = 0
@@ -74,23 +73,17 @@ class CallGraphBuilder:
 
     def __init__(self, root_path: Path):
         self.root_path = root_path
-        self.definitions: Dict[str, Set[str]] = (
-            {}
-        )  # file_path -> set of defined functions/classes
-        self.calls: Dict[str, List[str]] = (
-            {}
-        )  # "file:function" -> list of called function names
-        self.imports: Dict[str, Dict[str, str]] = (
-            {}
-        )  # file_path -> { alias -> full_name }
+        self.definitions: dict[str, set[str]] = {}  # file_path -> set of defined functions/classes
+        self.calls: dict[str, list[str]] = {}  # "file:function" -> list of called function names
+        self.imports: dict[str, dict[str, str]] = {}  # file_path -> { alias -> full_name }
 
         # [20251231_FEATURE] v1.0 - JS/TS support for get_call_graph
         # Raw JS/TS import metadata: file -> local_name -> (module_spec, imported_name)
-        self._js_imports_raw: Dict[str, Dict[str, tuple[str, str]]] = {}
+        self._js_imports_raw: dict[str, dict[str, tuple[str, str]]] = {}
         # Export index: file -> exported symbol names
-        self._js_exports: Dict[str, Set[str]] = {}
+        self._js_exports: dict[str, set[str]] = {}
 
-    def build(self, advanced_resolution: bool = False) -> Dict[str, List[str]]:
+    def build(self, advanced_resolution: bool = False) -> dict[str, list[str]]:
         """Build the call graph.
 
         Returns an adjacency list: {"module:caller": ["module:callee", ...]}
@@ -102,7 +95,7 @@ class CallGraphBuilder:
 
             if suffix == ".py":
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         code = f.read()
                     tree = ast.parse(code)
                     self._analyze_definitions(tree, rel_path)
@@ -112,14 +105,14 @@ class CallGraphBuilder:
                 self._analyze_definitions_js_ts(file_path, rel_path)
 
         # 2. Second pass: Analyze calls and resolve them
-        graph: Dict[str, List[str]] = {}
+        graph: dict[str, list[str]] = {}
         for file_path in self._iter_source_files():
             rel_path = str(file_path.relative_to(self.root_path))
             suffix = file_path.suffix.lower()
 
             if suffix == ".py":
                 try:
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         code = f.read()
                     tree = ast.parse(code)
                     file_calls = self._analyze_calls(
@@ -308,13 +301,8 @@ class CallGraphBuilder:
                         if local:
                             self._js_imports_raw[rel_path][local] = (module, "*")
                     elif isinstance(spec, esprima.nodes.ImportSpecifier):
-                        imported = getattr(
-                            getattr(spec, "imported", None), "name", None
-                        )
-                        local = (
-                            getattr(getattr(spec, "local", None), "name", None)
-                            or imported
-                        )
+                        imported = getattr(getattr(spec, "imported", None), "name", None)
+                        local = getattr(getattr(spec, "local", None), "name", None) or imported
                         if imported and local:
                             self._js_imports_raw[rel_path][local] = (
                                 module,
@@ -356,24 +344,14 @@ class CallGraphBuilder:
         base_dir = (self.root_path / from_file).parent
         # Handle './x', './x.js', './x.ts', './x/index.js', etc.
         candidate_bases = [module_spec]
-        if not any(
-            module_spec.endswith(ext)
-            for ext in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
-        ):
-            candidate_bases.extend(
-                [
-                    module_spec + ext
-                    for ext in (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")
-                ]
-            )
+        if not any(module_spec.endswith(ext) for ext in (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")):
+            candidate_bases.extend([module_spec + ext for ext in (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")])
 
         candidates: list[Path] = []
         for base in candidate_bases:
             candidates.append((base_dir / base).resolve())
         # index.* fallback
-        if module_spec and not module_spec.endswith(
-            (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")
-        ):
+        if module_spec and not module_spec.endswith((".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs")):
             for ext in (".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"):
                 candidates.append((base_dir / module_spec / f"index{ext}").resolve())
 
@@ -390,7 +368,7 @@ class CallGraphBuilder:
         file_path: Path,
         rel_path: str,
         advanced_resolution: bool = False,
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Build per-file call graph for JS/TS.
 
         Prefers tree-sitter (when available) and falls back to Esprima.
@@ -463,9 +441,7 @@ class CallGraphBuilder:
                     callable_ranges.append((sym.line, end_line, sym.name, None))
                 elif sym.kind == "method" and sym.parent_name:
                     end_line = sym.end_line or sym.line
-                    callable_ranges.append(
-                        (sym.line, end_line, sym.name, sym.parent_name)
-                    )
+                    callable_ranges.append((sym.line, end_line, sym.name, sym.parent_name))
 
             def _caller_for_line(line: int) -> tuple[str, str | None] | None:
                 # Choose the smallest enclosing range (most specific)
@@ -496,7 +472,7 @@ class CallGraphBuilder:
                 return str(fn.text)
 
             # Walk tree to find call expressions
-            file_graph: Dict[str, List[str]] = {}
+            file_graph: dict[str, list[str]] = {}
 
             def visit(node) -> None:
                 if node.type in {"call_expression", "new_expression"}:
@@ -512,9 +488,7 @@ class CallGraphBuilder:
                             )
                             raw = _callee_from_call(node)
                             if raw:
-                                file_graph.setdefault(caller_key, []).append(
-                                    _resolve_callee(raw, caller_parent)
-                                )
+                                file_graph.setdefault(caller_key, []).append(_resolve_callee(raw, caller_parent))
 
                 for child in getattr(node, "named_children", []) or []:
                     visit(child)
@@ -569,15 +543,13 @@ class CallGraphBuilder:
             if isinstance(callee, esprima.nodes.MemberExpression):
                 obj = getattr(callee, "object", None)
                 prop = getattr(callee, "property", None)
-                if isinstance(
-                    obj, esprima.nodes.Identifier  # type: ignore[attr-defined]
-                ) and isinstance(
+                if isinstance(obj, esprima.nodes.Identifier) and isinstance(  # type: ignore[attr-defined]
                     prop, esprima.nodes.Identifier
                 ):  # type: ignore[attr-defined]
                     return f"{obj.name}.{prop.name}"
             return None
 
-        file_graph: Dict[str, List[str]] = {}
+        file_graph: dict[str, list[str]] = {}
 
         # Walk while tracking current function context.
         stack: list[tuple[object, str]] = [(ast_js, "<global>")]
@@ -590,15 +562,11 @@ class CallGraphBuilder:
                     stack.append((ch, name))
                 continue
 
-            if isinstance(
-                cur, (esprima.nodes.CallExpression, esprima.nodes.NewExpression)
-            ):
+            if isinstance(cur, (esprima.nodes.CallExpression, esprima.nodes.NewExpression)):
                 raw = _callee_name(cur)
                 if raw and current_fn not in {"<global>", "<anonymous>", "<arrow>"}:
                     caller_key = f"{rel_path}:{current_fn}"
-                    file_graph.setdefault(caller_key, []).append(
-                        _resolve_callee(raw, None)
-                    )
+                    file_graph.setdefault(caller_key, []).append(_resolve_callee(raw, None))
 
             for ch in _children(cur):
                 stack.append((ch, current_fn))
@@ -667,7 +635,7 @@ class CallGraphBuilder:
         tree: ast.AST,
         rel_path: str,
         advanced_resolution: bool = False,
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """
         Extract calls from functions and resolve them.
 
@@ -690,7 +658,7 @@ class CallGraphBuilder:
                 # [20251225_FEATURE] Pro+ scoped method resolution (best-effort)
                 self._advanced_resolution = advanced_resolution
                 self._current_class: str | None = None
-                self._var_types: Dict[str, str] = {}
+                self._var_types: dict[str, str] = {}
 
             def visit_ClassDef(self, node: ast.ClassDef) -> None:
                 if not self._advanced_resolution:
@@ -702,9 +670,7 @@ class CallGraphBuilder:
                 self.generic_visit(node)
                 self._current_class = old_class
 
-            def visit_FunctionDef(
-                self, node: ast.FunctionDef | ast.AsyncFunctionDef
-            ) -> None:
+            def visit_FunctionDef(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
                 old_scope = self.current_scope
 
                 if self._advanced_resolution and self._current_class:
@@ -826,9 +792,9 @@ class CallGraphBuilder:
 
     def build_with_details(
         self,
-        entry_point: Optional[str] = None,
+        entry_point: str | None = None,
         depth: int = 10,
-        max_nodes: Optional[int] = None,
+        max_nodes: int | None = None,
         advanced_resolution: bool = False,
     ) -> CallGraphResult:
         """
@@ -846,7 +812,7 @@ class CallGraphBuilder:
         base_graph = self.build(advanced_resolution=advanced_resolution)
 
         # Collect node information with line numbers
-        node_info: Dict[str, CallNode] = {}
+        node_info: dict[str, CallNode] = {}
 
         # Python nodes
         for file_path in self._iter_source_files():
@@ -855,7 +821,7 @@ class CallGraphBuilder:
             if suffix != ".py":
                 continue
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     code = f.read()
                 tree = ast.parse(code)
 
@@ -868,15 +834,11 @@ class CallGraphBuilder:
                                 file=rel_path,
                                 line=top.lineno,
                                 end_line=getattr(top, "end_lineno", None),
-                                is_entry_point=self._is_entry_point(
-                                    top, tree, rel_path=rel_path
-                                ),
+                                is_entry_point=self._is_entry_point(top, tree, rel_path=rel_path),
                             )
                         elif isinstance(top, ast.ClassDef):
                             for item in top.body:
-                                if isinstance(
-                                    item, (ast.FunctionDef, ast.AsyncFunctionDef)
-                                ):
+                                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                                     qualified = f"{top.name}.{item.name}"
                                     key = f"{rel_path}:{qualified}"
                                     node_info[key] = CallNode(
@@ -895,9 +857,7 @@ class CallGraphBuilder:
                                 file=rel_path,
                                 line=node.lineno,
                                 end_line=getattr(node, "end_lineno", None),
-                                is_entry_point=self._is_entry_point(
-                                    node, tree, rel_path=rel_path
-                                ),
+                                is_entry_point=self._is_entry_point(node, tree, rel_path=rel_path),
                             )
             except Exception:
                 continue
@@ -962,21 +922,17 @@ class CallGraphBuilder:
                 return None
 
             # Determine top-level called identifiers.
-            top_level_called: Set[str] = set()
+            top_level_called: set[str] = set()
             call_stack: list[tuple[esprima.nodes.Node, str]] = [(ast_js, "<global>")]
             while call_stack:
                 cur, current_fn = call_stack.pop()
                 if isinstance(cur, esprima.nodes.FunctionDeclaration):
-                    name = (
-                        getattr(getattr(cur, "id", None), "name", None) or "<anonymous>"
-                    )
+                    name = getattr(getattr(cur, "id", None), "name", None) or "<anonymous>"
                     for ch in _children(cur):
                         call_stack.append((ch, name))
                     continue
 
-                if current_fn == "<global>" and isinstance(
-                    cur, esprima.nodes.CallExpression
-                ):
+                if current_fn == "<global>" and isinstance(cur, esprima.nodes.CallExpression):
                     ident = _callee_ident(cur)
                     if ident:
                         top_level_called.add(ident)
@@ -1023,7 +979,7 @@ class CallGraphBuilder:
                     continue
 
                 # Best-effort JS entry-point detection: functions invoked as direct root statements.
-                top_level_called: Set[str] = set()
+                top_level_called: set[str] = set()
                 try:
                     for child in getattr(parsed.root_node, "named_children", []) or []:
                         if child.type != "expression_statement":
@@ -1047,9 +1003,7 @@ class CallGraphBuilder:
                             end_line=sym.end_line,
                             is_entry_point=is_entry,
                         )
-                    elif (
-                        sym.kind == "method" and sym.parent_name and advanced_resolution
-                    ):
+                    elif sym.kind == "method" and sym.parent_name and advanced_resolution:
                         qualified = f"{sym.parent_name}.{sym.name}"
                         key = f"{rel_path}:{qualified}"
                         node_info[key] = CallNode(
@@ -1083,7 +1037,7 @@ class CallGraphBuilder:
 
         included = set(reachable_list)
 
-        nodes: List[CallNode] = []
+        nodes: list[CallNode] = []
         seen_nodes = set()
         for key in reachable_list:
             if key in node_info:
@@ -1101,8 +1055,8 @@ class CallGraphBuilder:
                 seen_nodes.add(key)
 
         # Build edges list
-        edges_full: List[CallEdge] = []
-        edges: List[CallEdge] = []
+        edges_full: list[CallEdge] = []
+        edges: list[CallEdge] = []
         for caller, callees in base_graph.items():
             if caller not in reachable:
                 continue
@@ -1158,11 +1112,7 @@ class CallGraphBuilder:
         # Heuristic: pytest-style test functions in test files/dirs count as entry points
         if func_node.name.startswith("test_"):
             filename = (rel_path or "").lower()
-            if (
-                filename.startswith("test_")
-                or "/tests" in filename
-                or "/test_" in filename
-            ):
+            if filename.startswith("test_") or "/tests" in filename or "/test_" in filename:
                 return True
 
         # Detect calls in if __name__ == "__main__" blocks
@@ -1196,9 +1146,7 @@ class CallGraphBuilder:
 
                 for stmt in node.body:
                     for inner in ast.walk(stmt):
-                        if isinstance(inner, ast.Call) and isinstance(
-                            inner.func, ast.Name
-                        ):
+                        if isinstance(inner, ast.Call) and isinstance(inner.func, ast.Name):
                             if inner.func.id == func_node.name:
                                 return True
         except Exception:
@@ -1224,10 +1172,10 @@ class CallGraphBuilder:
 
     def _get_reachable_nodes(
         self,
-        graph: Dict[str, List[str]],
+        graph: dict[str, list[str]],
         entry_point: str,
         max_depth: int,
-    ) -> Set[str]:
+    ) -> set[str]:
         """
         Get all nodes reachable from entry point within depth limit using BFS.
         Handles recursive calls gracefully.
@@ -1271,9 +1219,9 @@ class CallGraphBuilder:
 
     def _generate_mermaid(
         self,
-        nodes: List[CallNode],
-        edges: List[CallEdge],
-        entry_point: Optional[str],
+        nodes: list[CallNode],
+        edges: list[CallEdge],
+        entry_point: str | None,
     ) -> str:
         """
         Generate Mermaid flowchart diagram from call graph.
@@ -1290,11 +1238,9 @@ class CallGraphBuilder:
         lines = ["graph TD"]
 
         # Create node ID mapping (Mermaid doesn't like special chars)
-        node_ids: Dict[str, str] = {}
+        node_ids: dict[str, str] = {}
         for i, node in enumerate(nodes):
-            full_name = (
-                f"{node.file}:{node.name}" if node.file != "<external>" else node.name
-            )
+            full_name = f"{node.file}:{node.name}" if node.file != "<external>" else node.name
             node_id = f"N{i}"
             node_ids[full_name] = node_id
             # Also map short names for external refs
@@ -1308,9 +1254,7 @@ class CallGraphBuilder:
                 label = f"{node.name}:L{node.line}"
 
             # Style entry points differently
-            if node.is_entry_point or (
-                entry_point and entry_point.endswith(f":{node.name}")
-            ):
+            if node.is_entry_point or (entry_point and entry_point.endswith(f":{node.name}")):
                 lines.append(f'    {node_id}[["{label}"]]')  # Stadium shape for entry
             elif node.file == "<external>":
                 lines.append(f"    {node_id}({label})")  # Round for external
@@ -1319,19 +1263,15 @@ class CallGraphBuilder:
 
         # Add edges
         for edge in edges:
-            caller_id = node_ids.get(edge.caller) or node_ids.get(
-                edge.caller.split(":")[-1]
-            )
-            callee_id = node_ids.get(edge.callee) or node_ids.get(
-                edge.callee.split(":")[-1]
-            )
+            caller_id = node_ids.get(edge.caller) or node_ids.get(edge.caller.split(":")[-1])
+            callee_id = node_ids.get(edge.callee) or node_ids.get(edge.callee.split(":")[-1])
 
             if caller_id and callee_id:
                 lines.append(f"    {caller_id} --> {callee_id}")
 
         return "\n".join(lines)
 
-    def detect_circular_imports(self) -> List[List[str]]:
+    def detect_circular_imports(self) -> list[list[str]]:
         """
         Detect circular import cycles in the project.
 
@@ -1343,14 +1283,14 @@ class CallGraphBuilder:
         """
 
         # Build import graph: module -> modules it imports
-        import_graph: Dict[str, Set[str]] = {}
+        import_graph: dict[str, set[str]] = {}
 
         for file_path in self._iter_source_files():
             rel_path = str(file_path.relative_to(self.root_path))
             suffix = file_path.suffix.lower()
             try:
                 if suffix == ".py":
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         code = f.read()
                     tree = ast.parse(code)
 

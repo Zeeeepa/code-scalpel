@@ -9,7 +9,7 @@ This module provides AutoGen agents with Code Scalpel tools that:
 - Validate fixes in Docker sandbox
 """
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from autogen import AssistantAgent, UserProxyAgent
@@ -17,10 +17,7 @@ else:
     try:
         from autogen import AssistantAgent, UserProxyAgent
     except ImportError as e:  # pragma: no cover - runtime dependency guard
-        raise ImportError(
-            "AutoGen is required for this integration. "
-            "Install it with: pip install pyautogen"
-        ) from e
+        raise ImportError("AutoGen is required for this integration. " "Install it with: pip install pyautogen") from e
 
 
 # ============================================================================

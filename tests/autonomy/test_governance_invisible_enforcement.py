@@ -14,7 +14,7 @@ import pytest
 def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 0) -> None:
     """Write a minimal budget.yaml for governance preflight tests."""
     (policy_dir / "budget.yaml").write_text(
-        """budgets:
+        f"""budgets:
   default:
     max_files: 10
     max_lines_per_file: 100
@@ -22,7 +22,7 @@ def _write_budget_yaml(policy_dir: Path, *, max_total_lines: int = 0) -> None:
     max_complexity_increase: 100
     allowed_file_patterns: ["*.py"]
     forbidden_paths: [".git/", "node_modules/", "__pycache__/"]
-""".format(max_total_lines=max_total_lines),
+""",
         encoding="utf-8",
     )
 
@@ -56,9 +56,7 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance policy_integrity not yet integrated with analyze_code"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance policy_integrity not yet integrated with analyze_code")
 @pytest.mark.anyio
 async def test_pro_auto_enforces_policy_integrity_before_other_tools(
     tmp_path: Path,
@@ -127,9 +125,7 @@ async def test_pro_allows_verify_policy_integrity_tool_even_when_broken(
     assert result.success is False  # Expected to fail without proper manifest
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance warn mode not yet integrated with analyze_code tool"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance warn mode not yet integrated with analyze_code tool")
 @pytest.mark.anyio
 async def test_pro_warn_mode_allows_tools_with_break_glass(
     tmp_path: Path,
@@ -172,9 +168,7 @@ async def test_pro_warn_mode_allows_tools_with_break_glass(
     assert any("Governance WARN" in w for w in warnings)
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance fail-closed mode not yet integrated with analyze_code tool"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance fail-closed mode not yet integrated with analyze_code tool")
 @pytest.mark.anyio
 async def test_pro_warn_mode_is_ignored_without_break_glass(
     tmp_path: Path,
@@ -248,9 +242,7 @@ async def test_write_tools_only_flag_skips_policy_integrity_for_read_tools(
     assert result.error is None
 
 
-@pytest.mark.skip(
-    reason="[20260117_TEST] Governance budget not yet integrated with update_symbol tool"
-)
+@pytest.mark.skip(reason="[20260117_TEST] Governance budget not yet integrated with update_symbol tool")
 @pytest.mark.anyio
 async def test_write_tools_only_flag_does_not_disable_budget_for_write_tools(
     tmp_path: Path,

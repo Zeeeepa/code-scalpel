@@ -20,7 +20,7 @@ Example:
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -29,8 +29,8 @@ class ConcolicResult:
 
     paths_explored: int
     coverage_percentage: float
-    generated_inputs: List[Dict[str, Any]]
-    vulnerabilities_found: List[Any]
+    generated_inputs: list[dict[str, Any]]
+    vulnerabilities_found: list[Any]
 
 
 class ConcolicEngine:
@@ -42,9 +42,7 @@ class ConcolicEngine:
     def __init__(self):
         pass
 
-    def execute(
-        self, code: str, initial_inputs: Dict[str, Any], max_iterations: int = 100
-    ) -> ConcolicResult:
+    def execute(self, code: str, initial_inputs: dict[str, Any], max_iterations: int = 100) -> ConcolicResult:
         """
         Execute code concolically.
 

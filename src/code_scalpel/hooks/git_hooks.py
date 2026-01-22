@@ -23,13 +23,11 @@ Usage:
 
 import hashlib
 import json
-
 import subprocess
 
 # [20260116_REFACTOR] Removed unused 'sys' import flagged by static analysis
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 # Code file extensions that require audit coverage
 CODE_EXTENSIONS = {
@@ -91,9 +89,7 @@ def _get_audit_log_path() -> Path:
     return Path(".code-scalpel") / "audit.jsonl"
 
 
-def _get_audit_entries_for_file(
-    file_path: str, audit_log_path: Optional[Path] = None
-) -> List[dict]:
+def _get_audit_entries_for_file(file_path: str, audit_log_path: Path | None = None) -> list[dict]:
     """Get all audit entries for a specific file.
 
     Args:
@@ -113,7 +109,7 @@ def _get_audit_entries_for_file(
     abs_path = str(Path(file_path).resolve())
     rel_path = file_path
 
-    with open(audit_log_path, "r") as f:
+    with open(audit_log_path) as f:
         for line in f:
             try:
                 entry = json.loads(line)
@@ -124,15 +120,10 @@ def _get_audit_entries_for_file(
                 file_in_entry = details.get("file")
 
                 # Match by absolute or relative path
-                if any(
-                    f == abs_path or f == rel_path or f.endswith(rel_path)
-                    for f in files_modified
-                ):
+                if any(f == abs_path or f == rel_path or f.endswith(rel_path) for f in files_modified):
                     entries.append(entry)
                 elif file_in_entry and (
-                    file_in_entry == abs_path
-                    or file_in_entry == rel_path
-                    or file_in_entry.endswith(rel_path)
+                    file_in_entry == abs_path or file_in_entry == rel_path or file_in_entry.endswith(rel_path)
                 ):
                     entries.append(entry)
             except json.JSONDecodeError:
@@ -202,7 +193,7 @@ def verify_audit_coverage(file_path: str, within_seconds: int = 3600) -> bool:
     return False
 
 
-def _get_staged_files() -> List[str]:
+def _get_staged_files() -> list[str]:
     """Get list of staged files from git.
 
     Returns:
@@ -255,12 +246,8 @@ def git_hook_pre_commit() -> int:
         print("")
         # [20260116_BUGFIX] Updated remediation guidance to avoid referencing non-existent CLI command.
         print("To fix this:")
-        print(
-            "  1. Make changes through Code Scalpel MCP tools so an audit entry is created, OR"
-        )
-        print(
-            "  2. Add an audit entry for these changes according to your governance workflow, OR"
-        )
+        print("  1. Make changes through Code Scalpel MCP tools so an audit entry is created, OR")
+        print("  2. Add an audit entry for these changes according to your governance workflow, OR")
         print("  3. Use 'git commit --no-verify' with justification (logged)")
         print("")
 
@@ -273,7 +260,7 @@ def git_hook_pre_commit() -> int:
     return 0
 
 
-def git_hook_commit_msg(msg_file: Optional[str] = None) -> int:
+def git_hook_commit_msg(msg_file: str | None = None) -> int:
     """Run commit-msg hook to log commit to audit trail.
 
     This hook is called by git after the commit message is entered.
@@ -313,7 +300,7 @@ def git_hook_commit_msg(msg_file: Optional[str] = None) -> int:
     return 0
 
 
-def _log_blocked_commit(uncovered_files: List[str]) -> None:
+def _log_blocked_commit(uncovered_files: list[str]) -> None:
     """Log a blocked commit attempt to the audit trail.
 
     Args:
@@ -342,9 +329,7 @@ def _log_blocked_commit(uncovered_files: List[str]) -> None:
         )
 
 
-def install_git_hooks(
-    repo_path: Optional[str] = None, force: bool = False
-) -> Tuple[bool, str]:
+def install_git_hooks(repo_path: str | None = None, force: bool = False) -> tuple[bool, str]:
     """Install Code Scalpel git hooks.
 
     This function installs pre-commit and commit-msg hooks that enforce
@@ -423,7 +408,7 @@ exec code-scalpel git-hook commit-msg "$@"
     return True, "; ".join(messages)
 
 
-def uninstall_git_hooks(repo_path: Optional[str] = None) -> Tuple[bool, str]:
+def uninstall_git_hooks(repo_path: str | None = None) -> tuple[bool, str]:
     """Uninstall Code Scalpel git hooks.
 
     Args:
@@ -499,7 +484,7 @@ def git_hook_pre_commit_cli() -> int:
     return git_hook_pre_commit()
 
 
-def git_hook_commit_msg_cli(msg_file: Optional[str] = None) -> int:
+def git_hook_commit_msg_cli(msg_file: str | None = None) -> int:
     """CLI entry point for commit-msg hook.
 
     Args:

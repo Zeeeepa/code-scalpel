@@ -24,18 +24,14 @@ def _use_pro_license(monkeypatch: pytest.MonkeyPatch) -> Path:
             data = validator.validate_token(token)
             if data.is_valid and data.tier == "pro":
                 monkeypatch.setenv("CODE_SCALPEL_LICENSE_PATH", str(candidate))
-                monkeypatch.delenv(
-                    "CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False
-                )
+                monkeypatch.delenv("CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TEST_FORCE_TIER", raising=False)
                 monkeypatch.delenv("CODE_SCALPEL_TIER", raising=False)
                 return candidate
     pytest.skip("Valid Pro license not found; generate a signed test license")
 
 
-@pytest.mark.skip(
-    reason="[v1.1 Enhancement] CSRF detection requires framework-specific pattern analysis"
-)
+@pytest.mark.skip(reason="[v1.1 Enhancement] CSRF detection requires framework-specific pattern analysis")
 async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
     """Detect missing CSRF protection in Flask forms.
 
@@ -65,13 +61,9 @@ async def test_csrf_detection_flask(monkeypatch: pytest.MonkeyPatch):
     # May be flagged as CSRF (CWE-352) or detected via pattern matching
     assert result.vulnerability_count >= 1
     # Check if CSRF is mentioned in any vulnerability
-    csrf_detected = any(
-        "csrf" in v.type.lower() or v.cwe == "CWE-352" for v in result.vulnerabilities
-    )
+    csrf_detected = any("csrf" in v.type.lower() or v.cwe == "CWE-352" for v in result.vulnerabilities)
     # If not detected by CSRF detector, at least form access should be flagged
-    assert csrf_detected or any(
-        "form" in v.description.lower() for v in result.vulnerabilities
-    )
+    assert csrf_detected or any("form" in v.description.lower() for v in result.vulnerabilities)
 
 
 async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
@@ -96,16 +88,12 @@ async def test_ssrf_detection_requests(monkeypatch: pytest.MonkeyPatch):
     assert result.vulnerability_count >= 1
 
     # Look for SSRF detection
-    ssrf_detected = any(
-        "ssrf" in v.type.lower() or v.cwe == "CWE-918" for v in result.vulnerabilities
-    )
+    ssrf_detected = any("ssrf" in v.type.lower() or v.cwe == "CWE-918" for v in result.vulnerabilities)
     # SSRF detection is pattern-based, should find it
     assert ssrf_detected
 
 
-@pytest.mark.skip(
-    reason="[v1.1 Enhancement] JWT API misuse detection requires argument analysis"
-)
+@pytest.mark.skip(reason="[v1.1 Enhancement] JWT API misuse detection requires argument analysis")
 async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     """Detect JWT decoded without signature verification.
 
@@ -133,21 +121,15 @@ async def test_jwt_insecure_decode(monkeypatch: pytest.MonkeyPatch):
     assert result.vulnerability_count >= 1
 
     # Look for JWT vulnerability detection
-    jwt_detected = any(
-        "jwt" in v.type.lower() or v.cwe == "CWE-347" for v in result.vulnerabilities
-    )
+    jwt_detected = any("jwt" in v.type.lower() or v.cwe == "CWE-347" for v in result.vulnerabilities)
     assert jwt_detected
 
     # Should be marked as critical severity
-    critical_vulns = [
-        v for v in result.vulnerabilities if v.severity.lower() == "critical"
-    ]
+    critical_vulns = [v for v in result.vulnerabilities if v.severity.lower() == "critical"]
     assert len(critical_vulns) >= 1
 
 
-@pytest.mark.skip(
-    reason="[v1.1 Enhancement] JWT 'none' algorithm detection requires argument analysis"
-)
+@pytest.mark.skip(reason="[v1.1 Enhancement] JWT 'none' algorithm detection requires argument analysis")
 async def test_jwt_none_algorithm(monkeypatch: pytest.MonkeyPatch):
     """Detect JWT with 'none' algorithm.
 
@@ -183,7 +165,5 @@ async def test_jwt_none_algorithm(monkeypatch: pytest.MonkeyPatch):
     assert jwt_none_detected
 
     # Should be marked as critical severity
-    critical_vulns = [
-        v for v in result.vulnerabilities if v.severity.lower() == "critical"
-    ]
+    critical_vulns = [v for v in result.vulnerabilities if v.severity.lower() == "critical"]
     assert len(critical_vulns) >= 1

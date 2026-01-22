@@ -8,7 +8,7 @@ This agent performs comprehensive documentation automation by:
 4. Improving existing documentation quality
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseCodeAnalysisAgent
 
@@ -24,7 +24,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
     - Improve existing documentation quality and consistency
     """
 
-    def __init__(self, workspace_root: Optional[str] = None):
+    def __init__(self, workspace_root: str | None = None):
         super().__init__(workspace_root)
         self.documentation_thresholds = {
             "min_docstring_coverage": 80,
@@ -33,7 +33,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "max_lines_per_function_undocumented": 20,
         }
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         """
         Observe the target file and analyze documentation.
 
@@ -64,7 +64,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "target": target,
         }
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze observations to identify documentation opportunities.
 
@@ -104,7 +104,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             },
         }
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Decide which documentation to generate.
 
@@ -119,11 +119,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         opportunities = analysis.get("documentation_opportunities", [])
 
         # Filter for critical documentation needs
-        critical_docs = [
-            op
-            for op in opportunities
-            if op.get("priority", "low") in ["critical", "high"]
-        ]
+        critical_docs = [op for op in opportunities if op.get("priority", "low") in ["critical", "high"]]
 
         # Create action plan
         actions = []
@@ -144,7 +140,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "scheduled_docs": len(actions),
         }
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         """
         Execute documentation generation and improvements.
 
@@ -171,15 +167,13 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             "results": results,
         }
 
-    def _analyze_docstring_coverage(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_docstring_coverage(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Analyze docstring coverage and identify gaps."""
         gaps = []
         # Implementation placeholder
         return gaps
 
-    def _analyze_type_hints(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_type_hints(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Analyze type hint coverage."""
         gaps = []
         # Implementation placeholder
@@ -188,9 +182,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return gaps
 
-    def _identify_api_docs(
-        self, symbol_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _identify_api_docs(self, symbol_analysis: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Identify API documentation needs.
         """
@@ -199,9 +191,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
         # Implementation placeholder
         return docs
 
-    def _prioritize_documentation(
-        self, docs: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _prioritize_documentation(self, docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prioritize documentation by priority and scope."""
         priority_map = {"critical": 3, "high": 2, "medium": 1, "low": 0}
         return sorted(
@@ -210,7 +200,7 @@ class DocumentationAgent(BaseCodeAnalysisAgent):
             reverse=True,
         )
 
-    async def _generate_documentation(self, doc_plan: Dict[str, Any]) -> Dict[str, Any]:
+    async def _generate_documentation(self, doc_plan: dict[str, Any]) -> dict[str, Any]:
         """
         Generate documentation for a target.
         """

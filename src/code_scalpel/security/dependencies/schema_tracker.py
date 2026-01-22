@@ -45,7 +45,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 
 class GraphQLChangeType(Enum):
@@ -101,8 +101,8 @@ class GraphQLArgument:
 
     name: str
     type: str
-    default_value: Optional[str] = None
-    description: Optional[str] = None
+    default_value: str | None = None
+    description: str | None = None
 
     @property
     def is_required(self) -> bool:
@@ -116,11 +116,11 @@ class GraphQLField:
 
     name: str
     type: str
-    arguments: Dict[str, GraphQLArgument] = field(default_factory=dict)
-    description: Optional[str] = None
+    arguments: dict[str, GraphQLArgument] = field(default_factory=dict)
+    description: str | None = None
     deprecated: bool = False
-    deprecation_reason: Optional[str] = None
-    directives: List[str] = field(default_factory=list)
+    deprecation_reason: str | None = None
+    directives: list[str] = field(default_factory=list)
 
     @property
     def is_nullable(self) -> bool:
@@ -138,9 +138,9 @@ class GraphQLEnumValue:
     """Represents a GraphQL enum value."""
 
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     deprecated: bool = False
-    deprecation_reason: Optional[str] = None
+    deprecation_reason: str | None = None
 
 
 @dataclass
@@ -149,13 +149,13 @@ class GraphQLType:
 
     name: str
     kind: GraphQLTypeKind
-    fields: Dict[str, GraphQLField] = field(default_factory=dict)
-    enum_values: Dict[str, GraphQLEnumValue] = field(default_factory=dict)
-    interfaces: List[str] = field(default_factory=list)
-    union_types: List[str] = field(default_factory=list)
-    input_fields: Dict[str, GraphQLField] = field(default_factory=dict)
-    description: Optional[str] = None
-    directives: List[str] = field(default_factory=list)
+    fields: dict[str, GraphQLField] = field(default_factory=dict)
+    enum_values: dict[str, GraphQLEnumValue] = field(default_factory=dict)
+    interfaces: list[str] = field(default_factory=list)
+    union_types: list[str] = field(default_factory=list)
+    input_fields: dict[str, GraphQLField] = field(default_factory=dict)
+    description: str | None = None
+    directives: list[str] = field(default_factory=list)
 
     @property
     def field_count(self) -> int:
@@ -170,9 +170,9 @@ class GraphQLDirective:
     """Represents a GraphQL directive definition."""
 
     name: str
-    locations: List[str] = field(default_factory=list)
-    arguments: Dict[str, GraphQLArgument] = field(default_factory=dict)
-    description: Optional[str] = None
+    locations: list[str] = field(default_factory=list)
+    arguments: dict[str, GraphQLArgument] = field(default_factory=dict)
+    description: str | None = None
     repeatable: bool = False
 
 
@@ -180,12 +180,12 @@ class GraphQLDirective:
 class GraphQLSchema:
     """Represents a complete GraphQL schema."""
 
-    types: Dict[str, GraphQLType] = field(default_factory=dict)
-    directives: Dict[str, GraphQLDirective] = field(default_factory=dict)
-    query_type: Optional[str] = "Query"
-    mutation_type: Optional[str] = "Mutation"
-    subscription_type: Optional[str] = "Subscription"
-    description: Optional[str] = None
+    types: dict[str, GraphQLType] = field(default_factory=dict)
+    directives: dict[str, GraphQLDirective] = field(default_factory=dict)
+    query_type: str | None = "Query"
+    mutation_type: str | None = "Mutation"
+    subscription_type: str | None = "Subscription"
+    description: str | None = None
 
     @property
     def type_count(self) -> int:
@@ -193,52 +193,50 @@ class GraphQLSchema:
         return len([t for t in self.types if not t.startswith("__")])
 
     @property
-    def object_types(self) -> List[GraphQLType]:
+    def object_types(self) -> list[GraphQLType]:
         """Get all object types."""
         return [t for t in self.types.values() if t.kind == GraphQLTypeKind.OBJECT]
 
     @property
-    def input_types(self) -> List[GraphQLType]:
+    def input_types(self) -> list[GraphQLType]:
         """Get all input types."""
-        return [
-            t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT
-        ]
+        return [t for t in self.types.values() if t.kind == GraphQLTypeKind.INPUT_OBJECT]
 
     @property
-    def enum_types(self) -> List[GraphQLType]:
+    def enum_types(self) -> list[GraphQLType]:
         """Get all enum types."""
         return [t for t in self.types.values() if t.kind == GraphQLTypeKind.ENUM]
 
     @property
-    def interface_types(self) -> List[GraphQLType]:
+    def interface_types(self) -> list[GraphQLType]:
         """Get all interface types."""
         return [t for t in self.types.values() if t.kind == GraphQLTypeKind.INTERFACE]
 
     @property
-    def union_types(self) -> List[GraphQLType]:
+    def union_types(self) -> list[GraphQLType]:
         """Get all union types."""
         return [t for t in self.types.values() if t.kind == GraphQLTypeKind.UNION]
 
-    def get_type(self, name: str) -> Optional[GraphQLType]:
+    def get_type(self, name: str) -> GraphQLType | None:
         """Get a type by name."""
         return self.types.get(name)
 
     @property
-    def queries(self) -> Dict[str, GraphQLField]:
+    def queries(self) -> dict[str, GraphQLField]:
         """Get all query fields."""
         if self.query_type and self.query_type in self.types:
             return self.types[self.query_type].fields
         return {}
 
     @property
-    def mutations(self) -> Dict[str, GraphQLField]:
+    def mutations(self) -> dict[str, GraphQLField]:
         """Get all mutation fields."""
         if self.mutation_type and self.mutation_type in self.types:
             return self.types[self.mutation_type].fields
         return {}
 
     @property
-    def subscriptions(self) -> Dict[str, GraphQLField]:
+    def subscriptions(self) -> dict[str, GraphQLField]:
         """Get all subscription fields."""
         if self.subscription_type and self.subscription_type in self.types:
             return self.types[self.subscription_type].fields
@@ -270,8 +268,8 @@ class GraphQLSchemaChange:
     severity: GraphQLChangeSeverity
     path: str  # e.g., "User.email" or "Query.getUser"
     message: str
-    old_value: Optional[Any] = None
-    new_value: Optional[Any] = None
+    old_value: Any | None = None
+    new_value: Any | None = None
 
     def __str__(self) -> str:
         return f"[{self.severity.value}] {self.path}: {self.message}"
@@ -283,26 +281,24 @@ class GraphQLSchemaDrift:
 
     old_version: str = ""
     new_version: str = ""
-    changes: List[GraphQLSchemaChange] = field(default_factory=list)
+    changes: list[GraphQLSchemaChange] = field(default_factory=list)
 
     def has_breaking_changes(self) -> bool:
         """Check if any breaking changes were detected."""
         return any(c.severity == GraphQLChangeSeverity.BREAKING for c in self.changes)
 
     @property
-    def breaking_changes(self) -> List[GraphQLSchemaChange]:
+    def breaking_changes(self) -> list[GraphQLSchemaChange]:
         """Get only breaking changes."""
         return [c for c in self.changes if c.severity == GraphQLChangeSeverity.BREAKING]
 
     @property
-    def dangerous_changes(self) -> List[GraphQLSchemaChange]:
+    def dangerous_changes(self) -> list[GraphQLSchemaChange]:
         """Get dangerous changes."""
-        return [
-            c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS
-        ]
+        return [c for c in self.changes if c.severity == GraphQLChangeSeverity.DANGEROUS]
 
     @property
-    def info_changes(self) -> List[GraphQLSchemaChange]:
+    def info_changes(self) -> list[GraphQLSchemaChange]:
         """Get info-level changes."""
         return [c for c in self.changes if c.severity == GraphQLChangeSeverity.INFO]
 
@@ -352,26 +348,17 @@ class GraphQLSchemaParser:
     )
 
     INTERFACE_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"interface\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"interface\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
     INPUT_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"input\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"input\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
     ENUM_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?'
-        r"enum\s+(\w+)\s*"
-        r'(?:@[\w\s()=",]+)?\s*'
-        r"\{([\s\S]*?)\}",
+        r'(?:"""[\s\S]*?"""\s*)?' r"enum\s+(\w+)\s*" r'(?:@[\w\s()=",]+)?\s*' r"\{([\s\S]*?)\}",
         re.MULTILINE,
     )
 
@@ -381,9 +368,7 @@ class GraphQLSchemaParser:
         re.MULTILINE,
     )
 
-    SCALAR_PATTERN = re.compile(
-        r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE
-    )
+    SCALAR_PATTERN = re.compile(r'(?:"""[\s\S]*?"""\s*)?' r"scalar\s+(\w+)", re.MULTILINE)
 
     DIRECTIVE_PATTERN = re.compile(
         r'(?:"""[\s\S]*?"""\s*)?'
@@ -603,9 +588,7 @@ class GraphQLSchemaParser:
 
             directive = GraphQLDirective(
                 name=name,
-                locations=[
-                    loc.strip() for loc in locations_str.split("|") if loc.strip()
-                ],
+                locations=[loc.strip() for loc in locations_str.split("|") if loc.strip()],
                 repeatable="repeatable" in content[match.start() : match.end()].lower(),
             )
 
@@ -615,9 +598,9 @@ class GraphQLSchemaParser:
 
             schema.directives[name] = directive
 
-    def _parse_fields(self, body: str) -> Dict[str, GraphQLField]:
+    def _parse_fields(self, body: str) -> dict[str, GraphQLField]:
         """Parse field definitions from a type body."""
-        fields: Dict[str, GraphQLField] = {}
+        fields: dict[str, GraphQLField] = {}
 
         for match in self.FIELD_PATTERN.finditer(body):
             name = match.group(1)
@@ -646,9 +629,9 @@ class GraphQLSchemaParser:
 
         return fields
 
-    def _parse_arguments(self, args_str: str) -> Dict[str, GraphQLArgument]:
+    def _parse_arguments(self, args_str: str) -> dict[str, GraphQLArgument]:
         """Parse argument definitions."""
-        arguments: Dict[str, GraphQLArgument] = {}
+        arguments: dict[str, GraphQLArgument] = {}
 
         for match in self.ARG_PATTERN.finditer(args_str):
             name = match.group(1)
@@ -705,7 +688,7 @@ class GraphQLSchemaTracker:
         """
         return self._parser.parse(sdl)
 
-    def parse_file(self, path: Union[str, Path]) -> GraphQLSchema:
+    def parse_file(self, path: str | Path) -> GraphQLSchema:
         """
         Parse a GraphQL SDL file.
 
@@ -920,11 +903,7 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=GraphQLChangeType.FIELD_TYPE_CHANGED,
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_breaking
-                        else GraphQLChangeSeverity.DANGEROUS
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_breaking else GraphQLChangeSeverity.DANGEROUS),
                     path=path,
                     message=f"Field '{old_field.name}' type changed from '{old_field.type}' to '{new_field.type}'",
                     old_value=old_field.type,
@@ -949,8 +928,8 @@ class GraphQLSchemaTracker:
     def _compare_arguments(
         self,
         path: str,
-        old_args: Dict[str, GraphQLArgument],
-        new_args: Dict[str, GraphQLArgument],
+        old_args: dict[str, GraphQLArgument],
+        new_args: dict[str, GraphQLArgument],
         drift: GraphQLSchemaDrift,
     ) -> None:
         """Compare field arguments."""
@@ -975,15 +954,9 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=(
-                        GraphQLChangeType.REQUIRED_ARG_ADDED
-                        if is_required
-                        else GraphQLChangeType.OPTIONAL_ARG_ADDED
+                        GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.OPTIONAL_ARG_ADDED
                     ),
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_required
-                        else GraphQLChangeSeverity.INFO
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO),
                     path=f"{path}({name})",
                     message=f"{'Required' if is_required else 'Optional'} argument '{name}' was added to '{path}'",
                 )
@@ -1034,15 +1007,9 @@ class GraphQLSchemaTracker:
             drift.changes.append(
                 GraphQLSchemaChange(
                     change_type=(
-                        GraphQLChangeType.REQUIRED_ARG_ADDED
-                        if is_required
-                        else GraphQLChangeType.FIELD_ADDED
+                        GraphQLChangeType.REQUIRED_ARG_ADDED if is_required else GraphQLChangeType.FIELD_ADDED
                     ),
-                    severity=(
-                        GraphQLChangeSeverity.BREAKING
-                        if is_required
-                        else GraphQLChangeSeverity.INFO
-                    ),
+                    severity=(GraphQLChangeSeverity.BREAKING if is_required else GraphQLChangeSeverity.INFO),
                     path=f"{new_type.name}.{name}",
                     message=f"{'Required' if is_required else 'Optional'} input field '{name}' was added to '{new_type.name}'",
                 )
@@ -1223,8 +1190,8 @@ def compare_graphql_schemas(
 
 
 def compare_graphql_files(
-    old_path: Union[str, Path],
-    new_path: Union[str, Path],
+    old_path: str | Path,
+    new_path: str | Path,
 ) -> GraphQLSchemaDrift:
     """
     Convenience function to compare two GraphQL schema files.

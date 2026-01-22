@@ -8,20 +8,20 @@ Configuration initialization module.
 import json
 import secrets
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
 from .templates import (
+    AGENT_LIMITS_YAML_TEMPLATE,
     ARCHITECTURE_README_TEMPLATE,
-    BUDGET_YAML_TEMPLATE,
     CONFIG_JSON_TEMPLATE,
-    DEV_GOVERNANCE_YAML_TEMPLATE,
     DEVOPS_README_TEMPLATE,
     DEVSECOPS_README_TEMPLATE,
     DOCKER_SECURITY_REGO_TEMPLATE,
     ENV_EXAMPLE_TEMPLATE,
     GITIGNORE_TEMPLATE,
+    GOVERNANCE_YAML_TEMPLATE,
     HOOKS_README_TEMPLATE,
     IDE_EXTENSION_CONFIG_TEMPLATE,
     LAYERED_ARCHITECTURE_REGO_TEMPLATE,
@@ -47,7 +47,7 @@ def generate_secret_key() -> str:
     return secrets.token_hex(32)
 
 
-def validate_config_files(config_dir: Path) -> Dict[str, Any]:
+def validate_config_files(config_dir: Path) -> dict[str, Any]:
     """
     Validate configuration file formats (JSON, YAML, Rego).
 
@@ -80,9 +80,7 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(json_file.name))
             except json.JSONDecodeError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(
-                    f"{json_file.name}: Invalid JSON - {e}"
-                )
+                validation_results["errors"].append(f"{json_file.name}: Invalid JSON - {e}")
 
     # Validate YAML files
     yaml_files = list(config_dir.glob("*.yaml")) + list(config_dir.glob("*.yml"))
@@ -94,9 +92,7 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                 validation_results["files_validated"].append(str(yaml_file.name))
             except yaml.YAMLError as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(
-                    f"{yaml_file.name}: Invalid YAML - {e}"
-                )
+                validation_results["errors"].append(f"{yaml_file.name}: Invalid YAML - {e}")
 
     # Validate Rego files (basic syntax check - just ensure they're readable)
     rego_files = list(config_dir.rglob("*.rego"))
@@ -110,14 +106,10 @@ def validate_config_files(config_dir: Path) -> Dict[str, Any]:
                         validation_results["warnings"].append(
                             f"{rego_file.relative_to(config_dir)}: Missing 'package' declaration"
                         )
-                validation_results["files_validated"].append(
-                    str(rego_file.relative_to(config_dir))
-                )
+                validation_results["files_validated"].append(str(rego_file.relative_to(config_dir)))
             except Exception as e:
                 validation_results["success"] = False
-                validation_results["errors"].append(
-                    f"{rego_file.relative_to(config_dir)}: Read error - {e}"
-                )
+                validation_results["errors"].append(f"{rego_file.relative_to(config_dir)}: Read error - {e}")
 
     return validation_results
 
@@ -167,10 +159,10 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     policy_file.write_text(POLICY_YAML_TEMPLATE)
     files_created.append("policy.yaml")
 
-    # Create budget.yaml
-    budget_file = config_dir / "budget.yaml"
-    budget_file.write_text(BUDGET_YAML_TEMPLATE)
-    files_created.append("budget.yaml")
+    # Create agent_limits.yaml
+    agent_limits_file = config_dir / "agent_limits.yaml"
+    agent_limits_file.write_text(AGENT_LIMITS_YAML_TEMPLATE)
+    files_created.append("agent_limits.yaml")
 
     # Create README.md
     readme_file = config_dir / "README.md"
@@ -203,10 +195,10 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     # v3.1.0+ Governance Structure
     # ========================================================================
 
-    # Create dev-governance.yaml
-    dev_governance_file = config_dir / "dev-governance.yaml"
-    dev_governance_file.write_text(DEV_GOVERNANCE_YAML_TEMPLATE)
-    files_created.append("dev-governance.yaml")
+    # Create governance.yaml
+    governance_file = config_dir / "governance.yaml"
+    governance_file.write_text(GOVERNANCE_YAML_TEMPLATE)
+    files_created.append("governance.yaml")
 
     # Create project-structure.yaml
     project_structure_file = config_dir / "project-structure.yaml"
@@ -226,9 +218,7 @@ def init_config_dir(target_dir: str = ".", mode: str = "full") -> dict:
     arch_dir = policies_dir / "architecture"
     arch_dir.mkdir(exist_ok=True)
     (arch_dir / "README.md").write_text(ARCHITECTURE_README_TEMPLATE)
-    (arch_dir / "layered_architecture.rego").write_text(
-        LAYERED_ARCHITECTURE_REGO_TEMPLATE
-    )
+    (arch_dir / "layered_architecture.rego").write_text(LAYERED_ARCHITECTURE_REGO_TEMPLATE)
     files_created.append("policies/architecture/README.md")
     files_created.append("policies/architecture/layered_architecture.rego")
 
@@ -307,7 +297,7 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
     # Get list of all policy files to include in manifest
     policy_files = [
         "policy.yaml",
-        "dev-governance.yaml",
+        "governance.yaml",
         "project-structure.yaml",
         "policies/architecture/layered_architecture.rego",
         "policies/devops/docker_security.rego",
@@ -328,9 +318,7 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
         )
 
         # Save manifest
-        manifest_path = CryptographicPolicyVerifier.save_manifest(
-            manifest, str(config_dir)
-        )
+        manifest_path = CryptographicPolicyVerifier.save_manifest(manifest, str(config_dir))
         # [20251230_BUGFIX] init creates policy.manifest.json (not policy_manifest.json)
         files_created.append("policy.manifest.json")
 
@@ -343,7 +331,7 @@ Do not commit `license.jwt` to version control if it contains sensitive informat
 # POLICY INTEGRITY VERIFICATION
 # ========================================================================
 # CRITICAL: This secret is required for verify_policy_integrity to work.
-# 
+#
 # The HMAC secret verifies that policy files haven't been tampered with.
 # If an agent modifies a policy file, the hash won't match the manifest.
 #
@@ -369,9 +357,7 @@ SCALPEL_MANIFEST_SECRET={secret_key}
         # Update .gitignore to exclude .env but include .env.example
         gitignore_content = gitignore_file.read_text()
         if ".env\n" not in gitignore_content:
-            gitignore_file.write_text(
-                gitignore_content + "\n# Environment variables with secrets\n.env\n"
-            )
+            gitignore_file.write_text(gitignore_content + "\n# Environment variables with secrets\n.env\n")
 
         # Validate all config files
         validation = validate_config_files(config_dir)

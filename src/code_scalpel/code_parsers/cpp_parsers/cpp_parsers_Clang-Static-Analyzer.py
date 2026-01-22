@@ -9,7 +9,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .. import base_parser
 
@@ -38,7 +38,7 @@ class AnalyzerFinding:
     line_number: int
     column: int
     severity: str
-    bug_path: Optional[List[Dict[str, Any]]] = None
+    bug_path: list[dict[str, Any]] | None = None
 
 
 @dataclass
@@ -46,9 +46,9 @@ class AnalyzerConfig:
     """Clang Static Analyzer configuration."""
 
     analyzer_version: str = "18.0.0"
-    config_file: Optional[Path] = None
-    checkers_enabled: Optional[List[str]] = None
-    checkers_disabled: Optional[List[str]] = None
+    config_file: Path | None = None
+    checkers_enabled: list[str] | None = None
+    checkers_disabled: list[str] | None = None
 
 
 class ClangStaticAnalyzerParser(base_parser.BaseParser):
@@ -64,7 +64,7 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
         self.file_path = file_path
         self.language = "cpp"
         self.config = AnalyzerConfig()
-        self.findings: List[AnalyzerFinding] = []
+        self.findings: list[AnalyzerFinding] = []
 
     # [20260120_BUGFIX] Implemented abstract method to satisfy BaseParser interface
     def parse_code(self, code: str) -> None:
@@ -102,27 +102,19 @@ class ClangStaticAnalyzerParser(base_parser.BaseParser):
     def handle_entity_line(self, line):
         pass
 
-    def execute_scan_build(
-        self, paths: List[Path], config: Optional[AnalyzerConfig] = None
-    ) -> List[AnalyzerFinding]:
+    def execute_scan_build(self, paths: list[Path], config: AnalyzerConfig | None = None) -> list[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: scan-build execution")
 
-    def parse_plist_report(self, report_path: Path) -> List[AnalyzerFinding]:
+    def parse_plist_report(self, report_path: Path) -> list[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: plist parsing")
 
-    def extract_bug_paths(
-        self, findings: List[AnalyzerFinding]
-    ) -> List[Dict[str, Any]]:
+    def extract_bug_paths(self, findings: list[AnalyzerFinding]) -> list[dict[str, Any]]:
         raise NotImplementedError("Phase 2: Bug path extraction")
 
-    def detect_memory_issues(
-        self, findings: List[AnalyzerFinding]
-    ) -> List[AnalyzerFinding]:
+    def detect_memory_issues(self, findings: list[AnalyzerFinding]) -> list[AnalyzerFinding]:
         raise NotImplementedError("Phase 2: Memory bug detection")
 
-    def generate_report(
-        self, findings: List[AnalyzerFinding], format: str = "json"
-    ) -> str:
+    def generate_report(self, findings: list[AnalyzerFinding], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")
 
 

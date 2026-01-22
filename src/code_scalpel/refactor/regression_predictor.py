@@ -147,7 +147,7 @@ class RegressionPredictor:
         total_statements = 0
         covered_statements = 0
 
-        for file_path, file_data in files.items():
+        for _file_path, file_data in files.items():
             # Check if any of our functions are in this file
             # This is a simplified heuristic
             summary = file_data.get("summary", {})
@@ -159,9 +159,7 @@ class RegressionPredictor:
 
         return (covered_statements / total_statements) * 100.0
 
-    def identify_low_coverage_functions(
-        self, functions: list[str], threshold: float = 80.0
-    ) -> list[str]:
+    def identify_low_coverage_functions(self, functions: list[str], threshold: float = 80.0) -> list[str]:
         """
         Identify functions with low test coverage.
 

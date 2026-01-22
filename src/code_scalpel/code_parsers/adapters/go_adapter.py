@@ -4,7 +4,8 @@
 
 """
 
-from typing import Any, List
+from typing import Any
+
 from ..interface import IParser, ParseResult
 
 
@@ -25,18 +26,17 @@ class GoParserAdapter(IParser):
     def __init__(self):
         """Initialize the Go parser adapter (stub)."""
         raise NotImplementedError(
-            "GoParserAdapter not yet implemented. "
-            "See TODO items in this file for implementation roadmap."
+            "GoParserAdapter not yet implemented. " "See TODO items in this file for implementation roadmap."
         )
 
     def parse(self, code: str) -> ParseResult:
         """Parse Go code (stub)."""
         raise NotImplementedError("Go parsing not yet implemented")
 
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         """Get function names from Go AST (stub)."""
         raise NotImplementedError("Go function extraction not yet implemented")
 
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         """Get struct/interface names from Go AST (stub)."""
         raise NotImplementedError("Go type extraction not yet implemented")

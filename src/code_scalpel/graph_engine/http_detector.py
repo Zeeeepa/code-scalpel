@@ -24,7 +24,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
 
 
 # [20251216_FEATURE] HTTP methods for route matching
@@ -109,9 +108,7 @@ class RoutePatternMatcher:
     - Dynamic routes: "/api/" + version + "/users" (confidence 0.5)
     """
 
-    def match_routes(
-        self, client_route: str, endpoint_route: str
-    ) -> tuple[bool, float, str]:
+    def match_routes(self, client_route: str, endpoint_route: str) -> tuple[bool, float, str]:
         """
         Match client route against endpoint route.
 
@@ -152,9 +149,7 @@ class RoutePatternMatcher:
 
         return False, 0.0, "none"
 
-    def _has_structural_similarity(
-        self, client_route: str, endpoint_route: str
-    ) -> bool:
+    def _has_structural_similarity(self, client_route: str, endpoint_route: str) -> bool:
         """Check if routes have structural similarity (common path segments)."""
 
         # Extract clean path segments from dynamic route
@@ -162,9 +157,7 @@ class RoutePatternMatcher:
             # Remove quotes, variables, and split by common delimiters
             clean = re.sub(r'["\'\s+]', "", route)
             clean = re.sub(r"\$\{[^}]+\}", "", clean)  # Remove template vars
-            clean = re.sub(
-                r"version|baseUrl|api_url", "", clean, flags=re.IGNORECASE
-            )  # Common vars
+            clean = re.sub(r"version|baseUrl|api_url", "", clean, flags=re.IGNORECASE)  # Common vars
             segments = set(clean.split("/"))
             return {s for s in segments if s and len(s) > 2}  # Non-empty, meaningful
 
@@ -227,8 +220,8 @@ class HTTPLinkDetector:
 
     def __init__(self):
         """Initialize HTTP link detector."""
-        self.client_calls: List[Dict] = []
-        self.endpoints: List[Dict] = []
+        self.client_calls: list[dict] = []
+        self.endpoints: list[dict] = []
         self.matcher = RoutePatternMatcher()
 
     def add_client_call(
@@ -236,7 +229,7 @@ class HTTPLinkDetector:
         node_id: str,
         method: str | HTTPMethod,
         route: str,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """
         Add a client-side HTTP call.
@@ -264,7 +257,7 @@ class HTTPLinkDetector:
         node_id: str,
         method: str | HTTPMethod,
         route: str,
-        metadata: Optional[Dict] = None,
+        metadata: dict | None = None,
     ) -> None:
         """
         Add a server-side endpoint.
@@ -287,14 +280,14 @@ class HTTPLinkDetector:
             }
         )
 
-    def detect_links(self) -> List[HTTPLink]:
+    def detect_links(self) -> list[HTTPLink]:
         """
         Detect all HTTP links between clients and endpoints.
 
         Returns:
             List of HTTPLink objects with confidence scores
         """
-        links: List[HTTPLink] = []
+        links: list[HTTPLink] = []
 
         for client in self.client_calls:
             for endpoint in self.endpoints:
@@ -303,14 +296,10 @@ class HTTPLinkDetector:
                     continue
 
                 # Try to match routes
-                matches, confidence, match_type = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, confidence, match_type = self.matcher.match_routes(client["route"], endpoint["route"])
 
                 if matches:
-                    evidence = self._build_evidence(
-                        client, endpoint, match_type, confidence
-                    )
+                    evidence = self._build_evidence(client, endpoint, match_type, confidence)
 
                     link = HTTPLink(
                         client_id=client["node_id"],
@@ -326,9 +315,7 @@ class HTTPLinkDetector:
 
         return links
 
-    def _build_evidence(
-        self, client: Dict, endpoint: Dict, match_type: str, confidence: float
-    ) -> str:
+    def _build_evidence(self, client: dict, endpoint: dict, match_type: str, confidence: float) -> str:
         """Build human-readable evidence string."""
         method = client["method"].value
         route = client["route"]
@@ -342,7 +329,7 @@ class HTTPLinkDetector:
         else:
             return f"Unknown match type: {match_type}"
 
-    def get_unmatched_clients(self) -> List[Dict]:
+    def get_unmatched_clients(self) -> list[dict]:
         """Get client calls that have no matching endpoints."""
         matched_clients = set()
 
@@ -351,16 +338,14 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_clients.add(client["node_id"])
                     break
 
         return [c for c in self.client_calls if c["node_id"] not in matched_clients]
 
-    def get_unmatched_endpoints(self) -> List[Dict]:
+    def get_unmatched_endpoints(self) -> list[dict]:
         """Get endpoints that have no matching client calls."""
         matched_endpoints = set()
 
@@ -369,9 +354,7 @@ class HTTPLinkDetector:
                 if client["method"] != endpoint["method"]:
                     continue
 
-                matches, _, _ = self.matcher.match_routes(
-                    client["route"], endpoint["route"]
-                )
+                matches, _, _ = self.matcher.match_routes(client["route"], endpoint["route"])
                 if matches:
                     matched_endpoints.add(endpoint["node_id"])
                     break

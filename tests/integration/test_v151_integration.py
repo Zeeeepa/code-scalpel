@@ -43,7 +43,7 @@ def register_routes(app):
         query = request.args.get("q")
         results = user_service.search_users(query)
         return jsonify(results)
-    
+
     @app.route("/users/<int:user_id>")
     def get_user(user_id):
         user = database.get_user(user_id)
@@ -74,13 +74,13 @@ import sqlite3
 class Database:
     def __init__(self):
         self.conn = sqlite3.connect(":memory:")
-    
+
     def execute_query(self, query):
         """Execute raw SQL - dangerous!"""
         cursor = self.conn.cursor()
         cursor.execute(query)  # SQL Injection sink
         return cursor.fetchall()
-    
+
     def get_user(self, user_id):
         """Get user by ID - safe."""
         cursor = self.conn.cursor()
@@ -127,10 +127,7 @@ database = Database()
         assert result.target.name == "search_users"
 
         # Should have the function code
-        assert (
-            "SELECT * FROM users" in result.target.code
-            or "execute_query" in result.target.code
-        )
+        assert "SELECT * FROM users" in result.target.code or "execute_query" in result.target.code
 
     def test_cross_file_taint_tracking(self, flask_project):
         """Test that CrossFileTaintTracker detects cross-file vulnerabilities."""
@@ -486,9 +483,7 @@ def func_5():
         # Confidence should decrease with depth
         prev_conf = 1.0
         for depth in sorted(by_depth.keys()):
-            assert (
-                by_depth[depth] < prev_conf
-            ), f"Confidence should decrease at depth {depth}"
+            assert by_depth[depth] < prev_conf, f"Confidence should decrease at depth {depth}"
             prev_conf = by_depth[depth]
 
     def test_low_confidence_count_tracked(self, deep_dependency_project):
@@ -513,13 +508,7 @@ def func_5():
         assert result.low_confidence_count >= 0
 
         # Verify count matches actual low-confidence symbols
-        actual_low_conf = len(
-            [
-                d
-                for d in result.dependencies
-                if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
-            ]
-        )
+        actual_low_conf = len([d for d in result.dependencies if d.confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD])
         assert result.low_confidence_count == actual_low_conf
 
     def test_low_confidence_warning_generated(self, deep_dependency_project):
@@ -570,14 +559,10 @@ def func_5():
             assert hasattr(sym, "low_confidence")
 
         # Target should have full confidence
-        target_sym = next(
-            (s for s in result.extracted_symbols if s.name == "entry_point"), None
-        )
+        target_sym = next((s for s in result.extracted_symbols if s.name == "entry_point"), None)
         if target_sym:
             assert target_sym.confidence == 1.0
-            assert (
-                not target_sym.low_confidence
-            )  # Target has confidence 1.0, should not be low
+            assert not target_sym.low_confidence  # Target has confidence 1.0, should not be low
 
     def test_mcp_tool_custom_decay_factor(self, deep_dependency_project):
         """Test MCP tool with custom confidence decay factor."""
@@ -672,9 +657,7 @@ def sample_graph():
             name=f"func_{letter}",
             line=10,
         )
-        graph.add_node(
-            GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"})
-        )
+        graph.add_node(GraphNode(id=node_id, metadata={"file": f"module_{letter.lower()}.py"}))
 
         # Edge from center to this node
         graph.add_edge(
@@ -691,11 +674,7 @@ def sample_graph():
     for letter in ["A", "B"]:
         for level in [1, 2]:
             parent_name = f"func_{letter}" if level == 1 else f"func_{letter}{level-1}"
-            parent_module = (
-                f"module_{letter.lower()}"
-                if level == 1
-                else f"module_{letter.lower()}{level-1}"
-            )
+            parent_module = f"module_{letter.lower()}" if level == 1 else f"module_{letter.lower()}{level-1}"
 
             node_id = UniversalNodeID(
                 language="python",
@@ -863,10 +842,10 @@ def test_mcp_tool_graph_neighborhood(tmp_path):
     (tmp_path / "main.py").write_text("""
 def entry_point():
     helper()
-    
+
 def helper():
     util()
-    
+
 def util():
     pass
 """)

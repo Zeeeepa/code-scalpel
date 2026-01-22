@@ -27,14 +27,13 @@ import os
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 from code_scalpel.cache import AnalysisCache, IncrementalAnalyzer, ParallelParser
 
 logger = logging.getLogger(__name__)
 
 
-def _parse_for_imports(file_path: Path) -> Tuple[str, ast.Module]:
+def _parse_for_imports(file_path: Path) -> tuple[str, ast.Module]:
     with file_path.open("r", encoding="utf-8") as f:
         source = f.read()
     tree = ast.parse(source)
@@ -74,12 +73,12 @@ class ImportInfo:
 
     module: str
     name: str
-    alias: Optional[str] = None
+    alias: str | None = None
     import_type: str = ImportType.DIRECT
     level: int = 0
     line: int = 0
     file: str = ""
-    original_module: Optional[str] = None
+    original_module: str | None = None
 
     @property
     def effective_name(self) -> str:
@@ -106,7 +105,7 @@ class DynamicImportVisitor(ast.NodeVisitor):
         self.resolver = resolver
         self.module_name = module_name
         self.file_path = file_path
-        self.local_vars: Dict[str, str] = {}  # var_name -> string_value
+        self.local_vars: dict[str, str] = {}  # var_name -> string_value
 
     def visit_Assign(self, node: ast.Assign) -> None:
         """Track string assignments: x = 'module'."""
@@ -144,11 +143,9 @@ class DynamicImportVisitor(ast.NodeVisitor):
             )
         else:
             # Variable or complex expression - mark as lazy/unknown
-            self.resolver._add_dynamic_import(
-                self.module_name, "?", node.lineno, self.file_path, ImportType.LAZY
-            )
+            self.resolver._add_dynamic_import(self.module_name, "?", node.lineno, self.file_path, ImportType.LAZY)
 
-    def _resolve_arg(self, node: ast.Call) -> Optional[str]:
+    def _resolve_arg(self, node: ast.Call) -> str | None:
         """Resolve the first argument to a string (literal or variable)."""
         if not node.args:
             return None
@@ -165,9 +162,9 @@ class DynamicImportVisitor(ast.NodeVisitor):
 
         return None
 
-    def _extract_string_iterable(self, node: ast.AST) -> List[str]:
+    def _extract_string_iterable(self, node: ast.AST) -> list[str]:
         """Extract string values from a list/tuple literal."""
-        strings: List[str] = []
+        strings: list[str] = []
         if isinstance(node, (ast.List, ast.Tuple)):
             for elt in node.elts:
                 if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
@@ -196,9 +193,9 @@ class SymbolDefinition:
     file: str
     module: str
     line: int
-    end_line: Optional[int] = None
-    docstring: Optional[str] = None
-    signature: Optional[str] = None
+    end_line: int | None = None
+    docstring: str | None = None
+    signature: str | None = None
 
 
 @dataclass
@@ -212,8 +209,8 @@ class CircularImport:
         severity: How problematic this cycle is ("warning" or "error")
     """
 
-    cycle: List[str]
-    files: List[str]
+    cycle: list[str]
+    files: list[str]
     severity: str = "warning"
 
     def __str__(self) -> str:
@@ -237,9 +234,9 @@ class ImportGraphResult:
     success: bool = True
     modules: int = 0
     imports: int = 0
-    circular_imports: List[CircularImport] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    circular_imports: list[CircularImport] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 class ImportResolver:
@@ -294,7 +291,7 @@ class ImportResolver:
         "site-packages",
     }
 
-    def __init__(self, project_root: Union[str, Path]):
+    def __init__(self, project_root: str | Path):
         """
         Initialize the import resolver.
 
@@ -303,35 +300,23 @@ class ImportResolver:
         """
         self.project_root = Path(project_root).resolve()
 
-        self._parse_cache: AnalysisCache[Tuple[str, ast.Module]] = AnalysisCache()
-        self._parallel_parser: ParallelParser[Tuple[str, ast.Module]] = ParallelParser(
-            cache=self._parse_cache
-        )
-        self._incremental: IncrementalAnalyzer[Tuple[str, ast.Module]] = (
-            IncrementalAnalyzer(self._parse_cache)
-        )
+        self._parse_cache: AnalysisCache[tuple[str, ast.Module]] = AnalysisCache()
+        self._parallel_parser: ParallelParser[tuple[str, ast.Module]] = ParallelParser(cache=self._parse_cache)
+        self._incremental: IncrementalAnalyzer[tuple[str, ast.Module]] = IncrementalAnalyzer(self._parse_cache)
 
         # Core data structures
-        self.edges: Dict[str, Set[str]] = defaultdict(
-            set
-        )  # module -> {imported_modules}
-        self.reverse_edges: Dict[str, Set[str]] = defaultdict(
-            set
-        )  # module -> {modules that import it}
-        self.imports: Dict[str, List[ImportInfo]] = defaultdict(
-            list
-        )  # module -> [ImportInfo]
-        self.symbols: Dict[str, Dict[str, SymbolDefinition]] = (
-            {}
-        )  # module -> {name: SymbolDefinition}
-        self.file_to_module: Dict[str, str] = {}  # file_path -> module_name
-        self.module_to_file: Dict[str, str] = {}  # module_name -> file_path
+        self.edges: dict[str, set[str]] = defaultdict(set)  # module -> {imported_modules}
+        self.reverse_edges: dict[str, set[str]] = defaultdict(set)  # module -> {modules that import it}
+        self.imports: dict[str, list[ImportInfo]] = defaultdict(list)  # module -> [ImportInfo]
+        self.symbols: dict[str, dict[str, SymbolDefinition]] = {}  # module -> {name: SymbolDefinition}
+        self.file_to_module: dict[str, str] = {}  # file_path -> module_name
+        self.module_to_file: dict[str, str] = {}  # module_name -> file_path
 
         # Analysis state
         self._built = False
-        self._circular_imports: List[CircularImport] = []
-        self._errors: List[str] = []
-        self._warnings: List[str] = []
+        self._circular_imports: list[CircularImport] = []
+        self._errors: list[str] = []
+        self._warnings: list[str] = []
 
     def build(self) -> ImportGraphResult:
         """
@@ -357,13 +342,9 @@ class ImportResolver:
                 self.module_to_file[module_name] = str(file_path)
 
             # Phase 2: Parse each file (parallel) for imports and definitions
-            parsed, parse_errors = self._parallel_parser.parse_files(
-                python_files, parse_fn=_parse_for_imports
-            )
+            parsed, parse_errors = self._parallel_parser.parse_files(python_files, parse_fn=_parse_for_imports)
             for err_path in parse_errors:
-                self._warnings.append(
-                    f"Error analyzing {err_path}: parallel parse failed"
-                )
+                self._warnings.append(f"Error analyzing {err_path}: parallel parse failed")
 
             for file_path in python_files:
                 parsed_entry = parsed.get(str(file_path.resolve()))
@@ -416,9 +397,7 @@ class ImportResolver:
         """
         for root, dirs, files in os.walk(self.project_root):
             # Filter out directories to skip
-            dirs[:] = [
-                d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")
-            ]
+            dirs[:] = [d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")]
 
             for file in files:
                 if file.endswith(".py"):
@@ -457,9 +436,7 @@ class ImportResolver:
 
         return ".".join(parts)
 
-    def _module_to_path(
-        self, module_name: str, from_file: Optional[str] = None
-    ) -> Optional[str]:
+    def _module_to_path(self, module_name: str, from_file: str | None = None) -> str | None:
         """
         Convert a module name to a file path.
 
@@ -489,9 +466,7 @@ class ImportResolver:
 
         return None
 
-    def _analyze_file(
-        self, file_path: Path, parsed: Optional[Tuple[str, ast.Module]] = None
-    ) -> None:
+    def _analyze_file(self, file_path: Path, parsed: tuple[str, ast.Module] | None = None) -> None:
         """
         Analyze a single Python file for imports and definitions.
 
@@ -506,7 +481,7 @@ class ImportResolver:
             if parsed:
                 source, tree = parsed
             else:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     source = f.read()
                 tree = ast.parse(source)
 
@@ -536,9 +511,7 @@ class ImportResolver:
                 if target_path:
                     self._incremental.record_dependency(source_path, target_path)
 
-    def _extract_imports(
-        self, tree: ast.Module, module_name: str, file_path: str
-    ) -> None:
+    def _extract_imports(self, tree: ast.Module, module_name: str, file_path: str) -> None:
         """
         Extract all imports from an AST.
 
@@ -555,9 +528,7 @@ class ImportResolver:
                         module=alias.name,
                         name=alias.name,
                         alias=alias.asname,
-                        import_type=(
-                            ImportType.ALIASED if alias.asname else ImportType.DIRECT
-                        ),
+                        import_type=(ImportType.ALIASED if alias.asname else ImportType.DIRECT),
                         level=0,
                         line=node.lineno,
                         file=file_path,
@@ -566,9 +537,7 @@ class ImportResolver:
 
                     # Add edge: this module imports that module
                     imported_module = alias.name.split(".")[0]
-                    if imported_module in self.module_to_file or self._is_local_module(
-                        imported_module
-                    ):
+                    if imported_module in self.module_to_file or self._is_local_module(imported_module):
                         self.edges[module_name].add(imported_module)
                         self.reverse_edges[imported_module].add(module_name)
 
@@ -579,9 +548,7 @@ class ImportResolver:
 
                 # Resolve relative imports
                 if level > 0:
-                    resolved_module = self._resolve_relative_import(
-                        module_name, base_module, level
-                    )
+                    resolved_module = self._resolve_relative_import(module_name, base_module, level)
                 else:
                     resolved_module = base_module
 
@@ -607,24 +574,18 @@ class ImportResolver:
                 # Add edge to graph
                 if resolved_module:
                     root_module = resolved_module.split(".")[0]
-                    if root_module in self.module_to_file or self._is_local_module(
-                        root_module
-                    ):
+                    if root_module in self.module_to_file or self._is_local_module(root_module):
                         self.edges[module_name].add(resolved_module)
                         self.reverse_edges[resolved_module].add(module_name)
 
-    def _extract_dynamic_imports(
-        self, tree: ast.Module, module_name: str, file_path: str
-    ) -> None:
+    def _extract_dynamic_imports(self, tree: ast.Module, module_name: str, file_path: str) -> None:
         """Extract dynamic imports (importlib, __import__) from an AST."""
         visitor = DynamicImportVisitor(self, module_name, file_path)
         visitor.visit(tree)
 
-    def _extract_framework_imports(
-        self, tree: ast.Module, module_name: str, file_path: str
-    ) -> None:
+    def _extract_framework_imports(self, tree: ast.Module, module_name: str, file_path: str) -> None:
         """Extract framework-derived imports such as Django INSTALLED_APPS and Flask blueprints."""
-        blueprint_vars: Set[str] = set()
+        blueprint_vars: set[str] = set()
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
@@ -632,9 +593,7 @@ class ImportResolver:
                     if isinstance(target, ast.Name) and target.id == "INSTALLED_APPS":
                         apps = self._extract_string_iterable(node.value)
                         for app in apps:
-                            self._add_framework_import(
-                                module_name, app, getattr(node, "lineno", 0), file_path
-                            )
+                            self._add_framework_import(module_name, app, getattr(node, "lineno", 0), file_path)
 
                 if self._is_blueprint_ctor(node):
                     for target in node.targets:
@@ -649,9 +608,7 @@ class ImportResolver:
                 elif isinstance(arg, ast.Name):
                     target = arg.id  # fallback: unknown blueprint var
                 if target:
-                    self._add_framework_import(
-                        module_name, target, getattr(node, "lineno", 0), file_path
-                    )
+                    self._add_framework_import(module_name, target, getattr(node, "lineno", 0), file_path)
 
     def _is_import_module_call(self, node: ast.Call) -> bool:
         """Check if this is importlib.import_module()."""
@@ -688,9 +645,9 @@ class ImportResolver:
             return node.func.attr == "register_blueprint"
         return False
 
-    def _extract_string_iterable(self, node: ast.AST) -> List[str]:
+    def _extract_string_iterable(self, node: ast.AST) -> list[str]:
         """Extract string values from a list/tuple literal."""
-        strings: List[str] = []
+        strings: list[str] = []
         if isinstance(node, (ast.List, ast.Tuple)):
             for elt in node.elts:
                 if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
@@ -724,9 +681,7 @@ class ImportResolver:
                 self.edges[source_module].add(target_module)
                 self.reverse_edges[target_module].add(source_module)
 
-    def _add_framework_import(
-        self, source_module: str, target_module: str, line: int, file_path: str
-    ) -> None:
+    def _add_framework_import(self, source_module: str, target_module: str, line: int, file_path: str) -> None:
         """Add a framework-derived import (e.g., Django INSTALLED_APPS)."""
         import_info = ImportInfo(
             module=target_module,
@@ -746,9 +701,7 @@ class ImportResolver:
                 self.edges[source_module].add(target_module)
                 self.reverse_edges[target_module].add(source_module)
 
-    def _resolve_relative_import(
-        self, from_module: str, import_module: str, level: int
-    ) -> str:
+    def _resolve_relative_import(self, from_module: str, import_module: str, level: int) -> str:
         """
         Resolve a relative import to an absolute module path.
 
@@ -767,17 +720,13 @@ class ImportResolver:
 
         # Go up 'level' directories
         if level > len(parts):
-            self._warnings.append(
-                f"Relative import level {level} exceeds package depth in {from_module}"
-            )
+            self._warnings.append(f"Relative import level {level} exceeds package depth in {from_module}")
             level = len(parts)
 
         base_parts = parts[:-level] if level > 0 else parts
 
         if import_module:
-            return (
-                ".".join(base_parts + [import_module]) if base_parts else import_module
-            )
+            return ".".join(base_parts + [import_module]) if base_parts else import_module
         else:
             return ".".join(base_parts) if base_parts else ""
 
@@ -785,15 +734,11 @@ class ImportResolver:
         """Check if a module name refers to a local (project) module."""
         # Check if any known module starts with this name
         for known_module in self.module_to_file.keys():
-            if known_module == module_name or known_module.startswith(
-                f"{module_name}."
-            ):
+            if known_module == module_name or known_module.startswith(f"{module_name}."):
                 return True
         return False
 
-    def _extract_definitions(
-        self, tree: ast.Module, module_name: str, file_path: str
-    ) -> None:
+    def _extract_definitions(self, tree: ast.Module, module_name: str, file_path: str) -> None:
         """
         Extract symbol definitions (functions, classes) from an AST.
 
@@ -810,11 +755,7 @@ class ImportResolver:
                 if self._is_top_level(node, tree):
                     symbol = SymbolDefinition(
                         name=node.name,
-                        symbol_type=(
-                            "async_function"
-                            if isinstance(node, ast.AsyncFunctionDef)
-                            else "function"
-                        ),
+                        symbol_type=("async_function" if isinstance(node, ast.AsyncFunctionDef) else "function"),
                         file=file_path,
                         module=module_name,
                         line=node.lineno,
@@ -857,9 +798,7 @@ class ImportResolver:
         """Check if a node is at the top level of a module."""
         return node in tree.body
 
-    def _get_function_signature(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-    ) -> str:
+    def _get_function_signature(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
         """Extract the function signature as a string."""
         args = []
 
@@ -918,9 +857,7 @@ class ImportResolver:
                     cycle = path[cycle_start:] + [neighbor]
 
                     # Get file paths for the cycle
-                    files = [
-                        self.module_to_file.get(m, f"<unknown:{m}>") for m in cycle
-                    ]
+                    files = [self.module_to_file.get(m, f"<unknown:{m}>") for m in cycle]
 
                     self._circular_imports.append(
                         CircularImport(
@@ -944,13 +881,11 @@ class ImportResolver:
         """Check if any circular imports were detected."""
         return len(self._circular_imports) > 0
 
-    def get_circular_imports(self) -> List[CircularImport]:
+    def get_circular_imports(self) -> list[CircularImport]:
         """Get all detected circular imports."""
         return self._circular_imports.copy()
 
-    def resolve_symbol(
-        self, from_module: str, symbol_name: str
-    ) -> Tuple[Optional[str], Optional[SymbolDefinition]]:
+    def resolve_symbol(self, from_module: str, symbol_name: str) -> tuple[str | None, SymbolDefinition | None]:
         """
         Resolve a symbol to its source module and definition.
 
@@ -985,9 +920,7 @@ class ImportResolver:
                         return target_module, self.symbols[target_module][search_name]
 
                 # Try submodule
-                full_module = (
-                    f"{target_module}.{search_name}" if target_module else search_name
-                )
+                full_module = f"{target_module}.{search_name}" if target_module else search_name
                 if full_module in self.symbols:
                     # The symbol might be a module itself
                     return full_module, None
@@ -996,15 +929,12 @@ class ImportResolver:
         for imp in self.imports.get(from_module, []):
             if imp.import_type == ImportType.WILDCARD:
                 target_module = imp.module
-                if (
-                    target_module in self.symbols
-                    and symbol_name in self.symbols[target_module]
-                ):
+                if target_module in self.symbols and symbol_name in self.symbols[target_module]:
                     return target_module, self.symbols[target_module][symbol_name]
 
         return None, None
 
-    def get_importers(self, module_name: str) -> Set[str]:
+    def get_importers(self, module_name: str) -> set[str]:
         """
         Get all modules that import the given module.
 
@@ -1016,7 +946,7 @@ class ImportResolver:
         """
         return self.reverse_edges.get(module_name, set()).copy()
 
-    def get_imports(self, module_name: str) -> Set[str]:
+    def get_imports(self, module_name: str) -> set[str]:
         """
         Get all modules imported by the given module.
 
@@ -1028,7 +958,7 @@ class ImportResolver:
         """
         return self.edges.get(module_name, set()).copy()
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """
         Return modules in topological order (dependencies first).
 
@@ -1046,9 +976,7 @@ class ImportResolver:
 
         if self._circular_imports:
             # Still try to provide an order, just warn
-            self._warnings.append(
-                "Topological sort may be incomplete due to circular imports"
-            )
+            self._warnings.append("Topological sort may be incomplete due to circular imports")
 
         # Kahn's algorithm for topological sort
         in_degree = defaultdict(int)
@@ -1082,7 +1010,7 @@ class ImportResolver:
 
         return result
 
-    def get_module_info(self, module_name: str) -> Optional[Dict]:
+    def get_module_info(self, module_name: str) -> dict | None:
         """
         Get detailed information about a module.
 
@@ -1104,18 +1032,16 @@ class ImportResolver:
             "import_count": len(self.imports.get(module_name, [])),
         }
 
-    def get_all_symbols(self) -> Dict[str, List[SymbolDefinition]]:
+    def get_all_symbols(self) -> dict[str, list[SymbolDefinition]]:
         """
         Get all symbols defined in the project.
 
         Returns:
             Dictionary mapping module names to lists of SymbolDefinitions
         """
-        return {
-            module: list(symbols.values()) for module, symbols in self.symbols.items()
-        }
+        return {module: list(symbols.values()) for module, symbols in self.symbols.items()}
 
-    def expand_wildcard_import(self, module_name: str) -> List[str]:
+    def expand_wildcard_import(self, module_name: str) -> list[str]:
         """
         Expand a wildcard import (`from module import *`) to its actual symbols.
 
@@ -1150,7 +1076,7 @@ class ImportResolver:
         # No __all__ defined - return all public symbols
         return self._get_public_symbols(module_name)
 
-    def _extract_dunder_all(self, file_path: str) -> Optional[List[str]]:
+    def _extract_dunder_all(self, file_path: str) -> list[str] | None:
         """
         Extract __all__ from a Python file.
 
@@ -1161,7 +1087,7 @@ class ImportResolver:
             List of symbol names if __all__ is defined, None otherwise
         """
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 source = f.read()
             tree = ast.parse(source)
         except (OSError, SyntaxError) as e:
@@ -1182,7 +1108,7 @@ class ImportResolver:
 
         return None  # __all__ not found
 
-    def _extract_all_value(self, node: ast.AST) -> Optional[List[str]]:
+    def _extract_all_value(self, node: ast.AST) -> list[str] | None:
         """
         Extract string values from an __all__ assignment.
 
@@ -1215,7 +1141,7 @@ class ImportResolver:
 
         return None
 
-    def _get_public_symbols(self, module_name: str) -> List[str]:
+    def _get_public_symbols(self, module_name: str) -> list[str]:
         """
         Get all public symbols (not starting with _) from a module.
 
@@ -1228,7 +1154,7 @@ class ImportResolver:
         module_symbols = self.symbols.get(module_name, {})
         return [name for name in module_symbols.keys() if not name.startswith("_")]
 
-    def get_wildcard_imports(self, module_name: str) -> List[ImportInfo]:
+    def get_wildcard_imports(self, module_name: str) -> list[ImportInfo]:
         """
         Get all wildcard imports in a module.
 
@@ -1238,13 +1164,9 @@ class ImportResolver:
         Returns:
             List of ImportInfo objects for wildcard imports
         """
-        return [
-            imp
-            for imp in self.imports.get(module_name, [])
-            if imp.import_type == ImportType.WILDCARD
-        ]
+        return [imp for imp in self.imports.get(module_name, []) if imp.import_type == ImportType.WILDCARD]
 
-    def expand_all_wildcards(self, module_name: str) -> Dict[str, List[str]]:
+    def expand_all_wildcards(self, module_name: str) -> dict[str, list[str]]:
         """
         Expand all wildcard imports in a module.
 
@@ -1267,7 +1189,7 @@ class ImportResolver:
                     result[imp.module] = expanded
         return result
 
-    def find_symbol(self, symbol_name: str) -> List[Tuple[str, SymbolDefinition]]:
+    def find_symbol(self, symbol_name: str) -> list[tuple[str, SymbolDefinition]]:
         """
         Find all definitions of a symbol across the project.
 
@@ -1316,13 +1238,11 @@ class ImportResolver:
                 to_mod = circular.cycle[i + 1]
                 if from_mod in node_ids and to_mod in node_ids:
                     # Style circular edges differently
-                    lines.append(
-                        f"    {node_ids[from_mod]} -.->|cycle| {node_ids[to_mod]}"
-                    )
+                    lines.append(f"    {node_ids[from_mod]} -.->|cycle| {node_ids[to_mod]}")
 
         return "\n".join(lines)
 
-    def detect_reexports(self, module_name: str) -> Dict[str, str]:
+    def detect_reexports(self, module_name: str) -> dict[str, str]:
         """
         Detect symbols that are re-exported from other modules.
 
@@ -1374,7 +1294,7 @@ class ImportResolver:
 
     def resolve_alias_chain(
         self, module_name: str, symbol_name: str, max_depth: int = 5
-    ) -> Tuple[Optional[str], Optional[str], List[str]]:
+    ) -> tuple[str | None, str | None, list[str]]:
         """
         Resolve an alias chain to find the original definition.
 
@@ -1405,10 +1325,7 @@ class ImportResolver:
 
         for _ in range(max_depth):
             # Check if symbol is defined locally
-            if (
-                current_module in self.symbols
-                and current_name in self.symbols[current_module]
-            ):
+            if current_module in self.symbols and current_name in self.symbols[current_module]:
                 return current_module, current_name, chain
 
             # Look for import that brings in this symbol
@@ -1430,9 +1347,7 @@ class ImportResolver:
 
             if not found_import:
                 # Symbol not found through imports
-                self._warnings.append(
-                    f"Could not resolve alias chain for {symbol_name} in {module_name}"
-                )
+                self._warnings.append(f"Could not resolve alias chain for {symbol_name} in {module_name}")
                 return None, None, chain
 
             # Move to the source module
@@ -1442,8 +1357,7 @@ class ImportResolver:
             # Detect cycles
             if (next_module, next_name) in visited:
                 self._warnings.append(
-                    f"Circular alias chain detected: {current_module}.{current_name} "
-                    f"-> {next_module}.{next_name}"
+                    f"Circular alias chain detected: {current_module}.{current_name} " f"-> {next_module}.{next_name}"
                 )
                 return None, None, chain
 
@@ -1452,14 +1366,10 @@ class ImportResolver:
             current_module = next_module
             current_name = next_name
 
-        self._warnings.append(
-            f"Alias chain exceeded max depth {max_depth} for {symbol_name} in {module_name}"
-        )
+        self._warnings.append(f"Alias chain exceeded max depth {max_depth} for {symbol_name} in {module_name}")
         return None, None, chain
 
-    def get_symbol_origin(
-        self, module_name: str, symbol_name: str
-    ) -> Optional[Tuple[str, str]]:
+    def get_symbol_origin(self, module_name: str, symbol_name: str) -> tuple[str, str] | None:
         """
         Get the original module and name for a symbol, resolving re-exports.
 
@@ -1477,7 +1387,7 @@ class ImportResolver:
             return orig_module, orig_name
         return None
 
-    def get_all_reexports(self) -> Dict[str, Dict[str, str]]:
+    def get_all_reexports(self) -> dict[str, dict[str, str]]:
         """
         Get all re-exports across the entire project.
 

@@ -7,7 +7,6 @@ independently.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -16,9 +15,9 @@ class ErrorAnalysis:
 
     message: str
     error_type: str  # "syntax", "runtime", "type", etc.
-    line_number: Optional[int] = None
-    column_number: Optional[int] = None
-    fixes: List["FixHint"] = field(default_factory=list)
+    line_number: int | None = None
+    column_number: int | None = None
+    fixes: list["FixHint"] = field(default_factory=list)
 
 
 @dataclass
@@ -37,7 +36,7 @@ class FileChange:
 
     relative_path: str
     operation: str  # "modify", "create", "delete"
-    new_content: Optional[str] = None
+    new_content: str | None = None
 
 
 @dataclass
@@ -49,7 +48,7 @@ class ExecutionTestResult:
     name: str
     passed: bool
     duration_ms: int
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -61,7 +60,7 @@ class SandboxResult:
     stdout: str
     stderr: str
     execution_time_ms: int
-    tests: List["ExecutionTestResult"] = field(default_factory=list)
+    tests: list["ExecutionTestResult"] = field(default_factory=list)
 
 
 class SandboxExecutor:
@@ -75,9 +74,9 @@ class SandboxExecutor:
     def execute_with_changes(
         self,
         project_path: str,
-        changes: List[FileChange],
+        changes: list[FileChange],
         test_command: str,
-        lint_command: Optional[str] = None,
+        lint_command: str | None = None,
     ) -> SandboxResult:
         """Execute tests with applied changes in isolated environment."""
         # Stub implementation - would actually run in container/sandbox
@@ -89,7 +88,7 @@ class SandboxExecutor:
             execution_time_ms=0,
         )
 
-    def run_tests(self, code: str, test_files: List[str]) -> SandboxResult:
+    def run_tests(self, code: str, test_files: list[str]) -> SandboxResult:
         """Run tests against code."""
         # Stub implementation
         return SandboxResult(
@@ -109,9 +108,7 @@ class ErrorToDiffEngine:
     fix suggestions using AI/ML techniques.
     """
 
-    def analyze_error(
-        self, error_output: str, language: str, source_code: str
-    ) -> ErrorAnalysis:
+    def analyze_error(self, error_output: str, language: str, source_code: str) -> ErrorAnalysis:
         """Analyze error and suggest fixes."""
         # Stub implementation
         return ErrorAnalysis(message=error_output, error_type="unknown", fixes=[])

@@ -13,9 +13,10 @@ This module defines patterns for detecting:
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, cast
+from typing import cast
 
 from .models import ViolationSeverity
 
@@ -123,8 +124,7 @@ PYTHON_ANTIPATTERNS: list[PatternDefinition] = [
         severity=ViolationSeverity.ERROR,
         ast_node_types=(ast.Call,),
         ast_validator=lambda node: (  # type: ignore[union-attr]
-            isinstance(cast(ast.Call, node).func, ast.Name)
-            and cast(ast.Name, cast(ast.Call, node).func).id == "exec"
+            isinstance(cast(ast.Call, node).func, ast.Name) and cast(ast.Name, cast(ast.Call, node).func).id == "exec"
         ),
         suggestion="Refactor to avoid dynamic code execution",
         cwe_id="CWE-94",
@@ -138,8 +138,7 @@ PYTHON_ANTIPATTERNS: list[PatternDefinition] = [
         severity=ViolationSeverity.ERROR,
         ast_node_types=(ast.Call,),
         ast_validator=lambda node: (  # type: ignore[union-attr]
-            isinstance(cast(ast.Call, node).func, ast.Name)
-            and cast(ast.Name, cast(ast.Call, node).func).id == "eval"
+            isinstance(cast(ast.Call, node).func, ast.Name) and cast(ast.Name, cast(ast.Call, node).func).id == "eval"
         ),
         suggestion="Use ast.literal_eval() for safe evaluation of literals",
         cwe_id="CWE-94",
@@ -163,8 +162,7 @@ PYTHON_ANTIPATTERNS: list[PatternDefinition] = [
         severity=ViolationSeverity.ERROR,
         ast_node_types=(ast.ExceptHandler,),
         ast_validator=lambda node: (  # type: ignore[union-attr]
-            len(cast(ast.ExceptHandler, node).body) == 1
-            and isinstance(cast(ast.ExceptHandler, node).body[0], ast.Pass)
+            len(cast(ast.ExceptHandler, node).body) == 1 and isinstance(cast(ast.ExceptHandler, node).body[0], ast.Pass)
         ),
         suggestion="At minimum, log the exception: 'except Exception as e: logger.error(e)'",
     ),
@@ -219,11 +217,8 @@ SECURITY_PATTERNS: list[PatternDefinition] = [
         ast_node_types=(ast.Call,),
         ast_validator=lambda node: (  # type: ignore[union-attr]
             isinstance(cast(ast.Call, node).func, ast.Attribute)
-            and isinstance(
-                cast(ast.Attribute, cast(ast.Call, node).func).value, ast.Name
-            )
-            and cast(ast.Name, cast(ast.Attribute, cast(ast.Call, node).func).value).id
-            == "os"
+            and isinstance(cast(ast.Attribute, cast(ast.Call, node).func).value, ast.Name)
+            and cast(ast.Name, cast(ast.Attribute, cast(ast.Call, node).func).value).id == "os"
             and cast(ast.Attribute, cast(ast.Call, node).func).attr == "system"
         ),
         suggestion="Use subprocess.run() with shell=False and a list of arguments",
@@ -404,9 +399,9 @@ BEST_PRACTICE_PATTERNS: list[PatternDefinition] = [
             not getattr(node, "name", "").startswith("_")
             and (
                 not getattr(node, "body", None)
-                or not isinstance(getattr(node, "body")[0], ast.Expr)
-                or not isinstance(getattr(node, "body")[0].value, ast.Constant)
-                or not isinstance(getattr(node, "body")[0].value.value, str)
+                or not isinstance(node.body[0], ast.Expr)
+                or not isinstance(node.body[0].value, ast.Constant)
+                or not isinstance(node.body[0].value.value, str)
             )
         ),
         suggestion="Add a docstring describing the function/class purpose",
@@ -419,9 +414,7 @@ BEST_PRACTICE_PATTERNS: list[PatternDefinition] = [
         category=PatternCategory.BEST_PRACTICE,
         severity=ViolationSeverity.WARNING,
         ast_node_types=(ast.FunctionDef, ast.AsyncFunctionDef),
-        ast_validator=lambda node: (
-            len(node.args.args) + len(node.args.kwonlyargs) > 7  # type: ignore[reportAttributeAccessIssue]
-        ),
+        ast_validator=lambda node: (len(node.args.args) + len(node.args.kwonlyargs) > 7),  # type: ignore[reportAttributeAccessIssue]
         suggestion="Consider using a dataclass or configuration object",
     ),
     # [20251226_FEATURE] Function too long

@@ -81,9 +81,7 @@ def test_scan_code_security_success(monkeypatch, capsys):
 
     dummy_module.analyze_security = fake_analyze_security
     # [20251214_TEST] Route cli.scan_code_security import to stubbed analyzer
-    monkeypatch.setitem(
-        sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module
-    )
+    monkeypatch.setitem(sys.modules, "code_scalpel.symbolic_execution_tools", dummy_module)
 
     exit_code = cli.scan_code_security("print('ok')", output_format="text")
 

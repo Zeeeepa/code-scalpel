@@ -10,7 +10,6 @@ Command: spotbugs -textui -xml -output results.xml classes/
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from defusedxml import ElementTree as ET
 
@@ -27,8 +26,8 @@ class SpotBug:
     priority: int  # 1=High, 2=Normal, 3=Low
     rank: int  # Bug rank (1-20, lower is more severe)
     message: str
-    class_name: Optional[str] = None
-    method_name: Optional[str] = None
+    class_name: str | None = None
+    method_name: str | None = None
 
 
 class SpotBugsParser:
@@ -58,9 +57,9 @@ class SpotBugsParser:
 
     def __init__(
         self,
-        spotbugs_bin: Optional[str] = None,
-        include_filter: Optional[str] = None,
-        exclude_filter: Optional[str] = None,
+        spotbugs_bin: str | None = None,
+        include_filter: str | None = None,
+        exclude_filter: str | None = None,
     ):
         """
         Initialize SpotBugs parser.
@@ -90,7 +89,7 @@ class SpotBugsParser:
             return self.parse_xml(xml_output)
         return []
 
-    def run_spotbugs(self, class_path: str) -> Optional[str]:
+    def run_spotbugs(self, class_path: str) -> str | None:
         """
         Run SpotBugs analysis.
 
@@ -161,12 +160,8 @@ class SpotBugsParser:
                 if method_elem is None:
                     method_elem = bug_instance.find(".//Method")
 
-                class_name = (
-                    class_elem.get("classname") if class_elem is not None else None
-                )
-                method_name = (
-                    method_elem.get("name") if method_elem is not None else None
-                )
+                class_name = class_elem.get("classname") if class_elem is not None else None
+                method_name = method_elem.get("name") if method_elem is not None else None
 
                 # Get message
                 long_message = bug_instance.find("LongMessage")
@@ -208,9 +203,7 @@ class SpotBugsParser:
         content = Path(xml_file).read_text()
         return self.parse_xml(content)
 
-    def get_high_rank_bugs(
-        self, bugs: list[SpotBug], max_rank: int = 9
-    ) -> list[SpotBug]:
+    def get_high_rank_bugs(self, bugs: list[SpotBug], max_rank: int = 9) -> list[SpotBug]:
         """
         Filter for high-rank (scariest) bugs.
 

@@ -253,9 +253,7 @@ def bar():
         assert hasattr(result, "truncation_warning")
 
     @pytest.mark.asyncio
-    async def test_truncation_flag_set_when_exceeding_limits(
-        self, tmp_path, community_tier
-    ):
+    async def test_truncation_flag_set_when_exceeding_limits(self, tmp_path, community_tier):
         """When node count exceeds Community limits, truncation flags should be set."""
         # Build more than 60 functions chained to exceed the 50-node cap
         chain = []
@@ -330,9 +328,7 @@ main();
         assert any(n.is_entry_point and n.name == "main" for n in result.nodes)
 
     @pytest.mark.asyncio
-    async def test_ts_entry_point_consistent_enterprise(
-        self, tmp_path, enterprise_tier
-    ):
+    async def test_ts_entry_point_consistent_enterprise(self, tmp_path, enterprise_tier):
         """[20260121_TEST] TS entry points remain entry points under Enterprise tier."""
         (tmp_path / "index.ts").write_text("""
 function main(): number {
@@ -406,8 +402,7 @@ def main():
         assert result.total_edges is not None
         assert all(0.0 <= edge.confidence <= 1.0 for edge in result.edges)
         assert all(
-            edge.inference_source
-            in {"static", "type_hint", "class_hierarchy", "pattern_match"}
+            edge.inference_source in {"static", "type_hint", "class_hierarchy", "pattern_match"}
             for edge in result.edges
         )
 
@@ -503,10 +498,10 @@ class Builder:
     def configure(self):
         self.setup()
         return self
-    
+
     def setup(self):
         self.initialize()
-    
+
     def initialize(self):
         pass
 
@@ -534,7 +529,7 @@ class TestProMermaidAndMetrics:
 class Service:
     def process(self):
         self.validate()
-    
+
     def validate(self):
         pass
 
@@ -550,12 +545,8 @@ svc.process()
         # Pro edges should have confidence and inference_source
         for edge in result.edges:
             assert hasattr(edge, "confidence"), "Pro edges must have confidence metric"
-            assert hasattr(
-                edge, "inference_source"
-            ), "Pro edges must have inference_source"
-            assert (
-                0.0 <= edge.confidence <= 1.0
-            ), f"Confidence must be in [0, 1], got {edge.confidence}"
+            assert hasattr(edge, "inference_source"), "Pro edges must have inference_source"
+            assert 0.0 <= edge.confidence <= 1.0, f"Confidence must be in [0, 1], got {edge.confidence}"
             assert edge.inference_source in {
                 "static",
                 "type_hint",
@@ -587,9 +578,7 @@ caller_two()
 
         # Pro should have multiple edges to utility
         edges_to_utility = [edge for edge in result.edges if "utility" in edge.callee]
-        assert (
-            len(edges_to_utility) >= 2
-        ), "Pro should track both call sites to utility()"
+        assert len(edges_to_utility) >= 2, "Pro should track both call sites to utility()"
 
 
 class TestEnterpriseAdvancedGraphAnalysis:
@@ -629,22 +618,16 @@ class TestEnterpriseAdvancedGraphAnalysis:
 
         assert result.success is True
         assert result.tier_applied == "enterprise"
-        assert (
-            result.max_nodes_applied is None
-        ), "Enterprise should have unlimited nodes"
+        assert result.max_nodes_applied is None, "Enterprise should have unlimited nodes"
         # Should capture all functions
-        assert (
-            len(result.edges) > 50
-        ), "Enterprise should include all edges without truncation"
+        assert len(result.edges) > 50, "Enterprise should include all edges without truncation"
 
 
 class TestEnterpriseComplexGraphPatterns:
     """Validate Enterprise tier detects complex graph patterns."""
 
     @pytest.mark.asyncio
-    async def test_enterprise_circular_dependency_detection(
-        self, tmp_path, enterprise_tier
-    ):
+    async def test_enterprise_circular_dependency_detection(self, tmp_path, enterprise_tier):
         """[20260121_TEST] Enterprise should detect and report circular dependencies."""
         (tmp_path / "app.py").write_text("""
 def func_a():
@@ -755,14 +738,10 @@ def unused_function():
 
         # Enterprise identifies hub nodes
         assert len(result.hot_nodes) > 0, "Enterprise should identify hub functions"
-        assert any(
-            "hub_function" in node for node in result.hot_nodes
-        ), "hub_function should be identified as hot node"
+        assert any("hub_function" in node for node in result.hot_nodes), "hub_function should be identified as hot node"
 
         # Enterprise identifies dead code
-        assert (
-            len(result.dead_code_candidates) > 0
-        ), "Enterprise should identify unused functions"
+        assert len(result.dead_code_candidates) > 0, "Enterprise should identify unused functions"
         assert any(
             "unused_function" in node for node in result.dead_code_candidates
         ), "unused_function should be in dead code candidates"

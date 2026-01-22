@@ -41,7 +41,7 @@ import sqlite3
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class CachedAnalysis:
 
     file_path: str
     file_hash: str
-    analysis_data: Dict[str, Any]
+    analysis_data: dict[str, Any]
     cached_at: float
     ttl_seconds: int = 86400  # 24 hours default
 
@@ -77,7 +77,7 @@ class IncrementalIndexResult:
     cache_hits: int
     cache_misses: int
     analysis_time_seconds: float
-    cache_data: Optional[Dict[str, Any]] = None
+    cache_data: dict[str, Any] | None = None
 
 
 class IncrementalIndexer:
@@ -86,7 +86,7 @@ class IncrementalIndexer:
     def __init__(
         self,
         project_root: str | Path,
-        cache_dir: Optional[str | Path] = None,
+        cache_dir: str | Path | None = None,
         ttl_seconds: int = 86400,
         use_redis: bool = False,
     ):
@@ -204,7 +204,7 @@ class IncrementalIndexer:
         file_changed = current_hash != cached_hash
         return True, file_changed
 
-    def cache_analysis(self, file_path: Path, analysis: Dict[str, Any]) -> None:
+    def cache_analysis(self, file_path: Path, analysis: dict[str, Any]) -> None:
         """Cache analysis result for a file."""
         file_hash = self.compute_file_hash(file_path)
         mtime = file_path.stat().st_mtime
@@ -252,7 +252,7 @@ class IncrementalIndexer:
 
             conn.commit()
 
-    def get_cached_analysis(self, file_path: Path) -> Optional[Dict[str, Any]]:
+    def get_cached_analysis(self, file_path: Path) -> dict[str, Any] | None:
         """Get cached analysis for a file (if not expired)."""
         file_hash = self.compute_file_hash(file_path)
 
@@ -293,7 +293,7 @@ class IncrementalIndexer:
 
         return json.loads(analysis_json)
 
-    def invalidate_cache(self, file_path: Optional[Path] = None) -> None:
+    def invalidate_cache(self, file_path: Path | None = None) -> None:
         """Invalidate cache for a specific file or entire cache."""
         with sqlite3.connect(self.db_path) as conn:
             if file_path is None:
@@ -301,12 +301,8 @@ class IncrementalIndexer:
                 conn.execute("DELETE FROM analyses")
                 conn.execute("DELETE FROM file_hashes")
             else:
-                conn.execute(
-                    "DELETE FROM analyses WHERE file_path = ?", (str(file_path),)
-                )
-                conn.execute(
-                    "DELETE FROM file_hashes WHERE file_path = ?", (str(file_path),)
-                )
+                conn.execute("DELETE FROM analyses WHERE file_path = ?", (str(file_path),))
+                conn.execute("DELETE FROM file_hashes WHERE file_path = ?", (str(file_path),))
             conn.commit()
 
     def _invalidate_analysis(self, file_path: Path) -> None:
@@ -315,15 +311,11 @@ class IncrementalIndexer:
             conn.execute("DELETE FROM analyses WHERE file_path = ?", (str(file_path),))
             conn.commit()
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         with sqlite3.connect(self.db_path) as conn:
-            cached_files = conn.execute("SELECT COUNT(*) FROM file_hashes").fetchone()[
-                0
-            ]
-            cached_analyses = conn.execute("SELECT COUNT(*) FROM analyses").fetchone()[
-                0
-            ]
+            cached_files = conn.execute("SELECT COUNT(*) FROM file_hashes").fetchone()[0]
+            cached_analyses = conn.execute("SELECT COUNT(*) FROM analyses").fetchone()[0]
             db_size = self.db_path.stat().st_size if self.db_path.exists() else 0
 
         return {

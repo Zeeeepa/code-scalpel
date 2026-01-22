@@ -28,10 +28,10 @@ class TestCrossFileResolution:
 
 class TaxRate:
     """Tax rate configuration."""
-    
+
     def __init__(self, rate: float):
         self.rate = rate
-    
+
     def calculate(self, amount: float) -> float:
         """Calculate tax for an amount."""
         return amount * self.rate
@@ -74,10 +74,10 @@ from models import TaxRate
 
 class OrderProcessor:
     """Process orders with tax."""
-    
+
     def __init__(self):
         self.tax_rate = TaxRate(0.08)
-    
+
     def process(self, amount: float) -> float:
         return amount + self.tax_rate.calculate(amount)
 ''')
@@ -103,9 +103,7 @@ class OrderProcessor:
         assert "TaxRate" in external_names
 
         # Check that TaxRate code was extracted
-        tax_rate_sym = next(
-            (s for s in result.external_symbols if s.name == "TaxRate"), None
-        )
+        tax_rate_sym = next((s for s in result.external_symbols if s.name == "TaxRate"), None)
         assert tax_rate_sym is not None
         assert "class TaxRate:" in tax_rate_sym.code
         assert "models.py" in tax_rate_sym.source_file
@@ -127,9 +125,7 @@ class OrderProcessor:
         assert "get_default_rate" in external_names
 
         # Check the function code
-        get_rate_sym = next(
-            (s for s in result.external_symbols if s.name == "get_default_rate"), None
-        )
+        get_rate_sym = next((s for s in result.external_symbols if s.name == "get_default_rate"), None)
         assert get_rate_sym is not None
         assert "def get_default_rate" in get_rate_sym.code
 
@@ -527,10 +523,10 @@ class TestTransitiveDependencies:
 
 class BaseClass:
     """Base class for all services."""
-    
+
     def __init__(self, name: str):
         self.name = name
-    
+
     def get_name(self) -> str:
         return self.name
 ''')
@@ -544,7 +540,7 @@ from base import BaseClass
 
 class UserModel(BaseClass):
     """User model extends BaseClass."""
-    
+
     def __init__(self, name: str, email: str):
         super().__init__(name)
         self.email = email
@@ -615,9 +611,7 @@ def create_user(name: str, email: str) -> UserModel:
         assert "UserModel" in symbol_names
         assert "BaseClass" in symbol_names
 
-    def test_resolve_function_with_transitive_class(
-        self, temp_project_transitive: Path
-    ):
+    def test_resolve_function_with_transitive_class(self, temp_project_transitive: Path):
         """Test resolving a function that uses a class with transitive deps."""
         services_path = temp_project_transitive / "services.py"
         extractor = SurgicalExtractor.from_file(str(services_path))
@@ -649,7 +643,7 @@ class TestModuleReexports:
 
 class _InternalHelper:
     """Internal helper class."""
-    
+
     def process(self, data: str) -> str:
         return data.upper()
 ''')

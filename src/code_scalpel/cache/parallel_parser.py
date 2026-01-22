@@ -3,9 +3,10 @@ from __future__ import annotations
 import logging
 import os
 import threading
+from collections.abc import Callable, Sequence
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Callable, Dict, Generic, List, Optional, Sequence, Tuple, TypeVar
+from typing import Generic, TypeVar
 
 # [20251223_CONSOLIDATION] Import from unified_cache
 from .unified_cache import AnalysisCache
@@ -16,9 +17,7 @@ T = TypeVar("T")
 
 
 # [20251214_PERF] Batch worker - parse multiple files per worker
-def _batch_parse_worker(
-    file_paths: List[str], parse_fn: Callable[[Path], T]
-) -> List[Tuple[str, T | None, str | None]]:
+def _batch_parse_worker(file_paths: list[str], parse_fn: Callable[[Path], T]) -> list[tuple[str, T | None, str | None]]:
     """Parse a batch of files, returning (path, result, error) tuples."""
     results = []
     for file_path in file_paths:
@@ -40,20 +39,18 @@ class ParallelParser(Generic[T]):
     def __init__(
         self,
         cache: AnalysisCache[T],
-        max_workers: Optional[int] = None,
-        batch_size: Optional[int] = None,
+        max_workers: int | None = None,
+        batch_size: int | None = None,
     ) -> None:
         self.cache = cache
         self.max_workers = max_workers or os.cpu_count() or 1
         self.batch_size = batch_size or self.DEFAULT_BATCH_SIZE
 
-    def parse_files(
-        self, files: Sequence[Path | str], parse_fn: Callable[[Path], T]
-    ) -> Tuple[Dict[str, T], List[str]]:
+    def parse_files(self, files: Sequence[Path | str], parse_fn: Callable[[Path], T]) -> tuple[dict[str, T], list[str]]:
         """Parse multiple files in parallel with caching."""
-        results: Dict[str, T] = {}
-        errors: List[str] = []
-        to_parse: List[str] = []
+        results: dict[str, T] = {}
+        errors: list[str] = []
+        to_parse: list[str] = []
 
         for file_path in files:
             path = Path(file_path).resolve()
@@ -65,26 +62,18 @@ class ParallelParser(Generic[T]):
 
         if to_parse:
             # [20251214_PERF] Batch files to reduce per-file pickle overhead
-            batches = [
-                to_parse[i : i + self.batch_size]
-                for i in range(0, len(to_parse), self.batch_size)
-            ]
+            batches = [to_parse[i : i + self.batch_size] for i in range(0, len(to_parse), self.batch_size)]
 
             # Spawning/forking processes from a non-main thread can hang on some
             # platforms/configs. Since this parser may be invoked from MCP tool
             # handlers running in worker threads (e.g., stdio/async transports),
             # fall back to threads when not on the main thread.
             executor_cls = (
-                ProcessPoolExecutor
-                if threading.current_thread() is threading.main_thread()
-                else ThreadPoolExecutor
+                ProcessPoolExecutor if threading.current_thread() is threading.main_thread() else ThreadPoolExecutor
             )
 
             with executor_cls(max_workers=self.max_workers) as executor:
-                futures = {
-                    executor.submit(_batch_parse_worker, batch, parse_fn): batch
-                    for batch in batches
-                }
+                futures = {executor.submit(_batch_parse_worker, batch, parse_fn): batch for batch in batches}
                 for future in as_completed(futures):
                     batch = futures[future]
                     try:
@@ -94,14 +83,10 @@ class ParallelParser(Generic[T]):
                                 results[file_path] = value
                                 self.cache.store(file_path, value)
                             else:
-                                logger.warning(
-                                    "Parse failed for %s: %s", file_path, error
-                                )
+                                logger.warning("Parse failed for %s: %s", file_path, error)
                                 errors.append(file_path)
                     except Exception as exc:
-                        logger.warning(
-                            "Batch parse failed for %d files: %s", len(batch), exc
-                        )
+                        logger.warning("Batch parse failed for %d files: %s", len(batch), exc)
                         errors.extend(batch)
 
         return results, errors

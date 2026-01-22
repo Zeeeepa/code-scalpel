@@ -16,7 +16,7 @@ Compose Linter features:
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class ComposeIssueType(Enum):
@@ -43,12 +43,12 @@ class ComposeIssue:
 
     issue_type: str
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    severity: Optional[str] = None
-    composable_name: Optional[str] = None
-    recomposition_count: Optional[int] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    severity: str | None = None
+    composable_name: str | None = None
+    recomposition_count: int | None = None
 
 
 @dataclass
@@ -68,7 +68,7 @@ class ComposeLinterParser:
     def __init__(self):
         """Initialize Compose linter parser."""
         self.issues: list[ComposeIssue] = []
-        self.metrics: Optional[ComposeMetrics] = None
+        self.metrics: ComposeMetrics | None = None
 
     def parse_compiler_output(self, output: str) -> list[ComposeIssue]:
         """

@@ -8,7 +8,6 @@ Reference: https://jestjs.io/docs/getting-started
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -18,7 +17,7 @@ class TestMetrics:
     framework: str  # Jest, Mocha, Vitest, etc.
     test_count: int
     describe_blocks: int
-    coverage_percentage: Optional[float]
+    coverage_percentage: float | None
     async_tests: int
 
 

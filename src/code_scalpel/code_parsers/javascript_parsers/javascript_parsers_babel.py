@@ -37,7 +37,7 @@ import tempfile
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class ECMAScriptVersion(Enum):
@@ -74,7 +74,7 @@ class BabelPlugin:
     name: str
     options: dict[str, Any] = field(default_factory=dict)
     is_official: bool = False  # @babel/* plugin
-    proposal_stage: Optional[ProposalStage] = None
+    proposal_stage: ProposalStage | None = None
 
 
 @dataclass
@@ -108,9 +108,9 @@ class SyntaxFeature:
     line: int
     column: int
     es_version: ECMAScriptVersion
-    requires_plugin: Optional[str] = None
-    proposal_stage: Optional[ProposalStage] = None
-    description: Optional[str] = None
+    requires_plugin: str | None = None
+    proposal_stage: ProposalStage | None = None
+    description: str | None = None
 
 
 @dataclass
@@ -119,7 +119,7 @@ class TransformationResult:
 
     original_code: str
     transformed_code: str
-    source_map: Optional[dict[str, Any]] = None
+    source_map: dict[str, Any] | None = None
     plugins_used: list[str] = field(default_factory=list)
     helpers_injected: list[str] = field(default_factory=list)
     polyfills_needed: list[str] = field(default_factory=list)
@@ -166,12 +166,12 @@ class ModernJSSyntax:
 class BabelAnalysis:
     """Complete Babel analysis results."""
 
-    config: Optional[BabelConfig] = None
+    config: BabelConfig | None = None
     syntax_features: list[SyntaxFeature] = field(default_factory=list)
     jsx_elements: list[JSXElement] = field(default_factory=list)
-    modern_syntax: Optional[ModernJSSyntax] = None
+    modern_syntax: ModernJSSyntax | None = None
     min_es_version: ECMAScriptVersion = ECMAScriptVersion.ES5
-    transformation: Optional[TransformationResult] = None
+    transformation: TransformationResult | None = None
     errors: list[str] = field(default_factory=list)
 
 
@@ -258,7 +258,7 @@ class BabelParser:
         "exponentiation": (re.compile(r"\*\*"), ECMAScriptVersion.ES2016),
     }
 
-    def __init__(self, babel_path: Optional[str] = None):
+    def __init__(self, babel_path: str | None = None):
         """
         Initialize Babel parser.
 
@@ -266,7 +266,7 @@ class BabelParser:
         """
         self._babel_path = babel_path or self._find_babel()
 
-    def _find_babel(self) -> Optional[str]:
+    def _find_babel(self) -> str | None:
         """Find Babel CLI."""
         babel = shutil.which("babel")
         if babel:
@@ -301,9 +301,7 @@ class BabelParser:
         analysis.modern_syntax = self._count_modern_syntax(code)
 
         # Determine minimum ES version needed
-        analysis.min_es_version = self._determine_min_es_version(
-            analysis.syntax_features
-        )
+        analysis.min_es_version = self._determine_min_es_version(analysis.syntax_features)
 
         return analysis
 
@@ -404,15 +402,11 @@ class BabelParser:
             private_fields=len(re.findall(r"#\w+", code)),
             static_blocks=len(re.findall(r"static\s*\{", code)),
             decorators=len(re.findall(r"@\w+", code)),
-            class_fields=len(
-                re.findall(r"(?:public|private|protected)?\s*\w+\s*=", code)
-            ),
+            class_fields=len(re.findall(r"(?:public|private|protected)?\s*\w+\s*=", code)),
             logical_assignment=len(re.findall(r"(?:\?\?|&&|\|\|)=", code)),
         )
 
-    def _determine_min_es_version(
-        self, features: list[SyntaxFeature]
-    ) -> ECMAScriptVersion:
+    def _determine_min_es_version(self, features: list[SyntaxFeature]) -> ECMAScriptVersion:
         """Determine minimum ECMAScript version needed for the features."""
         if not features:
             return ECMAScriptVersion.ES5
@@ -516,8 +510,8 @@ class BabelParser:
         self,
         code: str,
         target: ECMAScriptVersion = ECMAScriptVersion.ES5,
-        presets: Optional[list[str]] = None,
-        plugins: Optional[list[str]] = None,
+        presets: list[str] | None = None,
+        plugins: list[str] | None = None,
     ) -> TransformationResult:
         """
         Transform JavaScript code using Babel.
@@ -529,9 +523,7 @@ class BabelParser:
         :return: TransformationResult with transformed code.
         """
         if not self._babel_path:
-            raise RuntimeError(
-                "Babel CLI not found. Install with: npm install @babel/cli @babel/core"
-            )
+            raise RuntimeError("Babel CLI not found. Install with: npm install @babel/cli @babel/core")
 
         import time
 
@@ -541,11 +533,7 @@ class BabelParser:
             temp_path = f.name
 
         try:
-            cmd = (
-                self._babel_path.split()
-                if " " in self._babel_path
-                else [self._babel_path]
-            )
+            cmd = self._babel_path.split() if " " in self._babel_path else [self._babel_path]
             cmd.extend(["--source-maps", "inline"])
 
             # Add presets
@@ -581,9 +569,7 @@ class BabelParser:
                 # Extract inline source map
                 import base64
 
-                match = re.search(
-                    r"//# sourceMappingURL=data:[^;]+;base64,([^\s]+)", transformed
-                )
+                match = re.search(r"//# sourceMappingURL=data:[^;]+;base64,([^\s]+)", transformed)
                 if match:
                     try:
                         map_data = base64.b64decode(match.group(1))
@@ -591,9 +577,7 @@ class BabelParser:
                     except Exception:
                         pass
                     # Remove source map from output
-                    transformed = re.sub(
-                        r"\n?//# sourceMappingURL=[^\n]+", "", transformed
-                    )
+                    transformed = re.sub(r"\n?//# sourceMappingURL=[^\n]+", "", transformed)
 
             return TransformationResult(
                 original_code=code,
@@ -607,7 +591,7 @@ class BabelParser:
     def transform_file(
         self,
         file_path: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         target: ECMAScriptVersion = ECMAScriptVersion.ES5,
     ) -> TransformationResult:
         """

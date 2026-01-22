@@ -17,7 +17,7 @@ Kotlin Test Parser features:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class TestStatus(Enum):
@@ -47,9 +47,9 @@ class TestCase:
     class_name: str
     status: str
     duration_ms: float = 0.0
-    message: Optional[str] = None
-    stack_trace: Optional[str] = None
-    framework: Optional[str] = None
+    message: str | None = None
+    stack_trace: str | None = None
+    framework: str | None = None
 
 
 @dataclass
@@ -83,7 +83,7 @@ class KotlinTestParser:
     def __init__(self):
         """Initialize Kotlin test parser."""
         self.test_suites: list[TestSuite] = []
-        self.coverage: Optional[CoverageMetrics] = None
+        self.coverage: CoverageMetrics | None = None
 
     def parse_junit_report(self, xml_file: Path) -> list[TestSuite]:
         """

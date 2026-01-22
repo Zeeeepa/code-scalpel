@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class HookStatus(Enum):
@@ -42,10 +42,10 @@ class HookContext:
     """
 
     tool: str
-    input: Dict[str, Any] = field(default_factory=dict)
-    output: Optional[Dict[str, Any]] = None
-    session_id: Optional[str] = None
-    timestamp: Optional[str] = None
+    input: dict[str, Any] = field(default_factory=dict)
+    output: dict[str, Any] | None = None
+    session_id: str | None = None
+    timestamp: str | None = None
 
     @classmethod
     def from_stdin(cls) -> "HookContext":
@@ -70,7 +70,7 @@ class HookContext:
             raise ValueError(f"Invalid JSON in stdin: {e}")
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HookContext":
+    def from_dict(cls, data: dict[str, Any]) -> "HookContext":
         """Create HookContext from a dictionary.
 
         Args:
@@ -96,15 +96,15 @@ class HookResponse:
     """
 
     status: HookStatus
-    reason: Optional[str] = None
-    policy: Optional[str] = None
-    suggestion: Optional[str] = None
-    files_modified: Optional[List[str]] = None
-    audit_entry_id: Optional[str] = None
+    reason: str | None = None
+    policy: str | None = None
+    suggestion: str | None = None
+    files_modified: list[str] | None = None
+    audit_entry_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert response to dictionary for JSON output."""
-        result: Dict[str, Any] = {"status": self.status.value}
+        result: dict[str, Any] = {"status": self.status.value}
         if self.reason:
             result["reason"] = self.reason
         if self.policy:
@@ -258,7 +258,7 @@ def _compute_content_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def _extract_file_path(tool_name: str, tool_input: Dict[str, Any]) -> Optional[str]:
+def _extract_file_path(tool_name: str, tool_input: dict[str, Any]) -> str | None:
     """Extract file path from tool input based on tool type.
 
     Args:
@@ -273,7 +273,7 @@ def _extract_file_path(tool_name: str, tool_input: Dict[str, Any]) -> Optional[s
     return None
 
 
-def _extract_content(tool_name: str, tool_input: Dict[str, Any]) -> Optional[str]:
+def _extract_content(tool_name: str, tool_input: dict[str, Any]) -> str | None:
     """Extract content/changes from tool input.
 
     Args:
@@ -293,7 +293,7 @@ def _extract_content(tool_name: str, tool_input: Dict[str, Any]) -> Optional[str
     return None
 
 
-def _extract_modified_files(tool_name: str, tool_input: Dict[str, Any]) -> List[str]:
+def _extract_modified_files(tool_name: str, tool_input: dict[str, Any]) -> list[str]:
     """Extract list of files modified by a tool.
 
     Args:
@@ -317,7 +317,7 @@ def _extract_modified_files(tool_name: str, tool_input: Dict[str, Any]) -> List[
     return files
 
 
-def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
+def pre_tool_use(context: HookContext | None = None) -> HookResponse:
     """Run before a tool is used. Block if policy violated.
 
     This hook is called by Claude Code before executing Edit, Write,
@@ -356,10 +356,8 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
         engine = _get_governance_engine()
         if engine is not None:
             try:
-                from code_scalpel.governance import GovernanceContext, Operation
-
                 # [20260116_BUGFIX] Use correct Operation fields - create FileChange with operation details
-                from code_scalpel.governance import FileChange
+                from code_scalpel.governance import FileChange, GovernanceContext, Operation
 
                 file_change = FileChange(
                     file_path=file_path or "<unknown>",
@@ -381,16 +379,12 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
 
                 if not result.allowed:
                     # [20260116_BUGFIX] Derive blocked policy name from governance violations instead of non-existent `violated_policy`
-                    policy_name: Optional[str] = None
+                    policy_name: str | None = None
                     try:
-                        violations = getattr(
-                            result, "policy_violations", None
-                        ) or getattr(result, "violations", None)
+                        violations = getattr(result, "policy_violations", None) or getattr(result, "violations", None)
                         if violations:
                             first_violation = violations[0]
-                            rule = getattr(
-                                first_violation, "rule_name", None
-                            ) or getattr(first_violation, "rule", None)
+                            rule = getattr(first_violation, "rule_name", None) or getattr(first_violation, "rule", None)
                             if rule is not None:
                                 policy_name = getattr(rule, "name", rule)
                     except Exception:
@@ -398,8 +392,7 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
 
                     return HookResponse(
                         status=HookStatus.BLOCKED,
-                        reason=result.reason
-                        or "Operation blocked by governance policy",
+                        reason=result.reason or "Operation blocked by governance policy",
                         policy=policy_name,
                         suggestion="Use Code Scalpel MCP tools for governance-compliant modifications",
                     )
@@ -430,7 +423,7 @@ def pre_tool_use(context: Optional[HookContext] = None) -> HookResponse:
     return HookResponse(status=HookStatus.ALLOWED)
 
 
-def post_tool_use(context: Optional[HookContext] = None) -> HookResponse:
+def post_tool_use(context: HookContext | None = None) -> HookResponse:
     """Run after a tool is used. Log to audit trail.
 
     This hook is called by Claude Code after executing Edit, Write,
@@ -479,9 +472,7 @@ def post_tool_use(context: Optional[HookContext] = None) -> HookResponse:
             content_hash = _compute_content_hash(content)
 
     # Sanitize input for logging (remove large content)
-    sanitized_input = {
-        k: v for k, v in tool_input.items() if k not in ("content", "new_string")
-    }
+    sanitized_input = {k: v for k, v in tool_input.items() if k not in ("content", "new_string")}
     if "content" in tool_input:
         sanitized_input["content_length"] = len(tool_input["content"])
     if "new_string" in tool_input:

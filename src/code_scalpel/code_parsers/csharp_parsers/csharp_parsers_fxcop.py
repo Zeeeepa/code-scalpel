@@ -6,7 +6,6 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class FxCopSeverity(Enum):
@@ -43,8 +42,8 @@ class FxCopViolation:
     message: str
     file_path: str
     line_number: int
-    type_name: Optional[str] = None
-    member_name: Optional[str] = None
+    type_name: str | None = None
+    member_name: str | None = None
 
 
 @dataclass
@@ -52,9 +51,9 @@ class FxCopConfig:
     """FxCop configuration for analysis."""
 
     fxcop_version: str = "4.3.0"
-    config_file: Optional[Path] = None
-    rules_file: Optional[Path] = None
-    suppression_file: Optional[Path] = None
+    config_file: Path | None = None
+    rules_file: Path | None = None
+    suppression_file: Path | None = None
 
 
 class FxCopParser:
@@ -68,25 +67,19 @@ class FxCopParser:
     def __init__(self):
         """Initialize FxCop parser."""
         self.config = FxCopConfig()
-        self.violations: List[FxCopViolation] = []
+        self.violations: list[FxCopViolation] = []
 
-    def execute_fxcop(
-        self, paths: List[Path], config: Optional[FxCopConfig] = None
-    ) -> List[FxCopViolation]:
+    def execute_fxcop(self, paths: list[Path], config: FxCopConfig | None = None) -> list[FxCopViolation]:
         raise NotImplementedError("Phase 2: FxCop execution")
 
-    def parse_json_report(self, report_path: Path) -> List[FxCopViolation]:
+    def parse_json_report(self, report_path: Path) -> list[FxCopViolation]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> FxCopConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_violations(
-        self, violations: List[FxCopViolation]
-    ) -> Dict[RuleCategory, List[FxCopViolation]]:
+    def categorize_violations(self, violations: list[FxCopViolation]) -> dict[RuleCategory, list[FxCopViolation]]:
         raise NotImplementedError("Phase 2: Violation categorization")
 
-    def generate_report(
-        self, violations: List[FxCopViolation], format: str = "json"
-    ) -> str:
+    def generate_report(self, violations: list[FxCopViolation], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

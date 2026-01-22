@@ -17,8 +17,8 @@ class TestTruncationBasic:
         """No truncation should occur when actual nodes <= max_nodes."""
         # sample_call_graph has 12 nodes, request k=1 (5 nodes)
         result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, max_nodes=100  # More than we'll get
-        )
+            "python::main::function::center", k=1, max_nodes=100
+        )  # More than we'll get
 
         assert result.success
         assert not result.truncated
@@ -29,8 +29,8 @@ class TestTruncationBasic:
         """Truncation should occur when nodes exceed max_nodes."""
         # sample_call_graph k=2 gives 10 nodes
         result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5  # Less than we'll get
-        )
+            "python::main::function::center", k=2, max_nodes=5
+        )  # Less than we'll get
 
         assert result.success
         assert result.truncated  # Should be marked as truncated
@@ -39,18 +39,14 @@ class TestTruncationBasic:
 
     def test_truncation_preserves_center_node(self, sample_call_graph):
         """Center node should always be included even after truncation."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=3
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=3)
 
         # Center should be included
         assert "python::main::function::center" in result.subgraph.nodes
 
     def test_truncation_with_very_small_limit(self, sample_call_graph):
         """Truncation with very small max_nodes should still work."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=1  # Only center
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=1)  # Only center
 
         assert result.success
         assert len(result.subgraph.nodes) <= 1
@@ -64,9 +60,7 @@ class TestTruncationWarnings:
 
     def test_truncation_warning_generated(self, sample_call_graph):
         """Truncation should generate a warning message."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
 
         if result.truncated:
             assert result.truncation_warning is not None
@@ -75,9 +69,7 @@ class TestTruncationWarnings:
 
     def test_truncation_warning_contains_useful_info(self, sample_call_graph):
         """Warning should indicate why truncation occurred."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
 
         if result.truncated:
             warning = result.truncation_warning.lower()
@@ -86,9 +78,7 @@ class TestTruncationWarnings:
 
     def test_no_warning_without_truncation(self, sample_call_graph):
         """No truncation warning should appear when truncation doesn't occur."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1, max_nodes=100
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1, max_nodes=100)
 
         assert not result.truncated
         assert result.truncation_warning is None
@@ -99,9 +89,7 @@ class TestPartialGraphValidity:
 
     def test_truncated_graph_has_valid_structure(self, sample_call_graph):
         """Truncated graph should maintain valid structure."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
 
         assert result.success
         # Should have nodes and edges (or be empty, but typically has center at least)
@@ -119,21 +107,19 @@ class TestPartialGraphValidity:
         nodes_set = set(result.subgraph.nodes)
 
         # All edge endpoints should be in node set
-        for src, dst, conf in result.subgraph.edges:
+        for src, dst, _conf in result.subgraph.edges:
             assert src in nodes_set, f"Edge source {src} not in truncated graph"
             assert dst in nodes_set, f"Edge target {dst} not in truncated graph"
 
     def test_truncated_graph_depth_consistent(self, sample_call_graph):
         """Node depths in truncated graph should be consistent."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=6
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=6)
 
         # Center should be at depth 0
         assert result.node_depths["python::main::function::center"] == 0
 
         # No other node should have negative depth
-        for node, depth in result.node_depths.items():
+        for _node, depth in result.node_depths.items():
             assert depth >= 0
 
 
@@ -142,9 +128,7 @@ class TestTruncationDataStructures:
 
     def test_node_depths_only_includes_included_nodes(self, sample_call_graph):
         """node_depths dict should only include nodes in the truncated graph."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
 
         nodes_set = set(result.subgraph.nodes)
         depths_nodes = set(result.node_depths.keys())
@@ -154,9 +138,7 @@ class TestTruncationDataStructures:
 
     def test_mermaid_includes_truncated_nodes(self, sample_call_graph):
         """Mermaid diagram should represent only truncated nodes."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=5
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=5)
 
         # Verify that result has mermaid attribute or is handled gracefully
         assert hasattr(result, "mermaid")
@@ -243,9 +225,7 @@ class TestMaxNodesLimits:
 
     def test_max_nodes_one_returns_center(self, sample_call_graph):
         """max_nodes=1 should return only center node."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=1)
 
         assert len(result.subgraph.nodes) <= 1
         # If we get 1 node, it should be the center
@@ -254,9 +234,7 @@ class TestMaxNodesLimits:
 
     def test_max_nodes_very_large(self, sample_call_graph):
         """Very large max_nodes should not truncate."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=1000
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=1000)
 
         assert result.success
         # Should not truncate with huge limit
@@ -265,9 +243,7 @@ class TestMaxNodesLimits:
     def test_max_nodes_parameter_required(self, sample_call_graph):
         """max_nodes parameter should have a default value."""
         # When not specified, should use default (not crash)
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=1
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=1)
 
         assert result.success
 
@@ -277,9 +253,7 @@ class TestTruncationEdgePreservation:
 
     def test_truncated_graph_preserves_shortest_paths(self, sample_call_graph):
         """Truncation should preserve shortest paths where possible."""
-        result = sample_call_graph.get_neighborhood(
-            "python::main::function::center", k=2, max_nodes=6
-        )
+        result = sample_call_graph.get_neighborhood("python::main::function::center", k=2, max_nodes=6)
 
         # Included nodes should maintain depth relationships
         nodes_set = set(result.subgraph.nodes)

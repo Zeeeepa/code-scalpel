@@ -6,7 +6,6 @@ Reference: https://jsdoc.app/
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
 
 
 @dataclass
@@ -15,8 +14,8 @@ class JSDocComment:
 
     line_number: int
     description: str
-    parameters: List[dict]
-    return_type: Optional[str]
+    parameters: list[dict]
+    return_type: str | None
     tags: dict  # Custom tags like @deprecated, @beta
 
 

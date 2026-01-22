@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from code_scalpel.ir.nodes import IRClassDef, IRFunctionDef
@@ -22,7 +22,7 @@ class ReactComponentInfo:
     """Metadata about a React component."""
 
     name: str
-    component_type: Optional[str] = None  # "functional", "class", or None
+    component_type: str | None = None  # "functional", "class", or None
     is_server_component: bool = False  # async function component
     is_server_action: bool = False  # 'use server' directive
     has_jsx: bool = False  # Contains JSX syntax
@@ -86,9 +86,7 @@ def has_jsx_syntax(code: str) -> bool:
     return False
 
 
-def is_react_component(
-    node: IRFunctionDef | IRClassDef, code: str
-) -> ReactComponentInfo:
+def is_react_component(node: IRFunctionDef | IRClassDef, code: str) -> ReactComponentInfo:
     """
     Detect if a function or class is a React component.
 

@@ -180,9 +180,7 @@ budgets:
         decision = gov.evaluate(operation)
 
         # Should not have budget violations
-        budget_violations = [
-            v for v in decision.violations if v.source == ViolationSource.BUDGET
-        ]
+        budget_violations = [v for v in decision.violations if v.source == ViolationSource.BUDGET]
         assert len(budget_violations) == 0
 
 

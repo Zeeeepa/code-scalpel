@@ -59,8 +59,7 @@ def __getattr__(name: str) -> Any:
             from .crewai import CrewAIScalpel, RefactorResult
         except ImportError as e:  # pragma: no cover
             raise ImportError(
-                "CrewAI integration requires optional dependencies. "
-                'Install with: pip install "code-scalpel[agents]"'
+                "CrewAI integration requires optional dependencies. " 'Install with: pip install "code-scalpel[agents]"'
             ) from e
         return {"CrewAIScalpel": CrewAIScalpel, "RefactorResult": RefactorResult}[name]
 
@@ -70,8 +69,7 @@ def __getattr__(name: str) -> Any:
             from .rest_api_server import run_server as run_rest_server
         except ImportError as e:  # pragma: no cover
             raise ImportError(
-                "The legacy REST API server requires Flask. "
-                'Install with: pip install "code-scalpel[web]"'
+                "The legacy REST API server requires Flask. " 'Install with: pip install "code-scalpel[web]"'
             ) from e
         return {
             "MCPServerConfig": MCPServerConfig,

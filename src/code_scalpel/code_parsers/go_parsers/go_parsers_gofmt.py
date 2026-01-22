@@ -7,8 +7,6 @@ gofmt Go Parser - Go code formatting verification.
 # Command: gofmt -d . (shows diff of formatting changes needed)
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class GofmtParser:
         """Run gofmt and parse formatting differences."""
         raise NotImplementedError("gofmt parser not yet implemented")
 
-    def check_formatting(self, path: str) -> Optional[list]:
+    def check_formatting(self, path: str) -> list | None:
         """Check if Go files are properly formatted."""
         raise NotImplementedError("gofmt parser not yet implemented")

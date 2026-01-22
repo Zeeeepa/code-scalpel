@@ -173,16 +173,12 @@ def test_scan_security_text_branches(monkeypatch, tmp_path, capsys):
     import code_scalpel.symbolic_execution_tools as security_tools
 
     # First run: vulnerabilities present
-    monkeypatch.setattr(
-        security_tools, "analyze_security", lambda code: FakeResult(True)
-    )
+    monkeypatch.setattr(security_tools, "analyze_security", lambda code: FakeResult(True))
     exit_code_vuln = cli.scan_security(str(file_path), output_format="text")
     out_vuln = capsys.readouterr().out
 
     # Second run: no vulnerabilities
-    monkeypatch.setattr(
-        security_tools, "analyze_security", lambda code: FakeResult(False)
-    )
+    monkeypatch.setattr(security_tools, "analyze_security", lambda code: FakeResult(False))
     exit_code_clean = cli.scan_security(str(file_path), output_format="text")
     out_clean = capsys.readouterr().out
 
@@ -387,9 +383,7 @@ def test_main_scan_code_dispatch(monkeypatch):
         return 0
 
     monkeypatch.setattr(cli, "scan_code_security", _scan)
-    monkeypatch.setattr(
-        cli.sys, "argv", ["code-scalpel", "scan", "--code", "print('x')", "--json"]
-    )
+    monkeypatch.setattr(cli.sys, "argv", ["code-scalpel", "scan", "--code", "print('x')", "--json"])
 
     result = cli.main()
     assert result == 0

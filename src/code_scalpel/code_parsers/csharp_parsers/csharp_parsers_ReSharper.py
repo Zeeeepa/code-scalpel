@@ -7,8 +7,6 @@ ReSharper C# Parser - JetBrains code analysis integration.
 # Command: inspectcode.exe Solution.sln -o=results.xml
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class ReSharperParser:
         """Parse ReSharper InspectCode XML output."""
         raise NotImplementedError("ReSharper parser not yet implemented")
 
-    def run_inspectcode(self, solution_path: str) -> Optional[str]:
+    def run_inspectcode(self, solution_path: str) -> str | None:
         """Run InspectCode on a solution and return XML output path."""
         raise NotImplementedError("ReSharper parser not yet implemented")

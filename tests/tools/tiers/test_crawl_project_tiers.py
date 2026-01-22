@@ -11,12 +11,8 @@ def _write(p: Path, content: str) -> None:
 
 
 # [20260101_SKIP] Spec test for multi-language crawl - feature in progress
-@pytest.mark.skip(
-    reason="Multi-language crawl and language_breakdown not yet implemented"
-)
-async def test_crawl_project_community_multilanguage_and_limits(
-    tmp_path: Path, community_tier
-):
+@pytest.mark.skip(reason="Multi-language crawl and language_breakdown not yet implemented")
+async def test_crawl_project_community_multilanguage_and_limits(tmp_path: Path, community_tier):
     # Tier is enforced via community_tier fixture (license discovery disabled)
 
     root = tmp_path / "proj"
@@ -38,9 +34,9 @@ async def test_crawl_project_community_multilanguage_and_limits(
     assert result.summary.total_files == 3
 
     # Language breakdown should include these languages
-    assert getattr(result, "language_breakdown")["python"] == 1
-    assert getattr(result, "language_breakdown")["javascript"] == 1
-    assert getattr(result, "language_breakdown")["java"] == 1
+    assert result.language_breakdown["python"] == 1
+    assert result.language_breakdown["javascript"] == 1
+    assert result.language_breakdown["java"] == 1
 
     paths = {f.path for f in result.files}
     assert "a.py" in paths
@@ -60,20 +56,16 @@ async def test_crawl_project_pro_cache_hits(tmp_path: Path, pro_tier):
 
     r1 = await crawl_project(root_path=str(root), include_report=False)
     assert r1.success is True
-    assert getattr(r1, "cache_hits") == 0
+    assert r1.cache_hits == 0
 
     r2 = await crawl_project(root_path=str(root), include_report=False)
     assert r2.success is True
-    assert getattr(r2, "cache_hits") >= 1
+    assert r2.cache_hits >= 1
 
 
 # [20260101_SKIP] Spec test for Enterprise compliance - feature not implemented
-@pytest.mark.skip(
-    reason="compliance_summary field not implemented in ProjectCrawlResult"
-)
-async def test_crawl_project_enterprise_compliance_best_effort(
-    tmp_path: Path, enterprise_tier
-):
+@pytest.mark.skip(reason="compliance_summary field not implemented in ProjectCrawlResult")
+async def test_crawl_project_enterprise_compliance_best_effort(tmp_path: Path, enterprise_tier):
 
     root = tmp_path / "proj"
     root.mkdir()
@@ -88,13 +80,11 @@ async def test_crawl_project_enterprise_compliance_best_effort(
     result = await crawl_project(root_path=str(root), include_report=False)
     assert result.success is True
 
-    summary = getattr(result, "compliance_summary")
+    summary = result.compliance_summary
     assert summary is None or isinstance(summary, dict)
 
 
-async def test_crawl_project_enterprise_custom_rules_config(
-    tmp_path: Path, enterprise_tier
-):
+async def test_crawl_project_enterprise_custom_rules_config(tmp_path: Path, enterprise_tier):
 
     root = tmp_path / "proj"
     root.mkdir()

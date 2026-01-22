@@ -150,19 +150,13 @@ class TestSymbolicExecuteEnterpriseTier:
 
 class TestSymbolicExecuteCrossTierGating:
     def test_pro_features_absent_in_community(self) -> None:
-        community_caps = set(
-            get_tool_capabilities("symbolic_execute", "community").get(
-                "capabilities", set()
-            )
-        )
+        community_caps = set(get_tool_capabilities("symbolic_execute", "community").get("capabilities", set()))
         assert "smart_path_prioritization" not in community_caps
         assert "constraint_optimization" not in community_caps
         assert "concolic_execution" not in community_caps
 
     def test_enterprise_features_absent_in_pro(self) -> None:
-        pro_caps = set(
-            get_tool_capabilities("symbolic_execute", "pro").get("capabilities", set())
-        )
+        pro_caps = set(get_tool_capabilities("symbolic_execute", "pro").get("capabilities", set()))
         assert "custom_path_prioritization" not in pro_caps
         assert "distributed_execution" not in pro_caps
         assert "state_space_reduction" not in pro_caps

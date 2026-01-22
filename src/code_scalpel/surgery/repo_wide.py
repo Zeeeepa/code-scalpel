@@ -39,10 +39,10 @@ Example:
 import mmap
 import os
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, List, Optional, Set
 
 
 @dataclass
@@ -55,8 +55,8 @@ class RepoWideRenameResult:
     files_failed: int = 0
     total_replacements: int = 0
     duration_seconds: float = 0.0
-    errors: List[dict] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[dict] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 class RepoWideRename:
@@ -118,7 +118,7 @@ class RepoWideRename:
     def __init__(
         self,
         project_root: Path,
-        max_workers: Optional[int] = None,
+        max_workers: int | None = None,
         batch_size: int = 100,
         memory_limit_mb: int = 500,
     ):
@@ -136,7 +136,7 @@ class RepoWideRename:
         self.batch_size = batch_size
         self.memory_limit_bytes = memory_limit_mb * 1024 * 1024
 
-    def should_skip_file(self, file_path: Path) -> tuple[bool, Optional[str]]:
+    def should_skip_file(self, file_path: Path) -> tuple[bool, str | None]:
         """
         Determine if file should be skipped.
 
@@ -172,14 +172,14 @@ class RepoWideRename:
             with open(file_path, "rb") as f:
                 chunk = f.read(8192)
                 return b"\x00" not in chunk
-        except (IOError, OSError):
+        except OSError:
             return False
 
     def find_candidate_files(
         self,
-        file_extensions: Optional[Set[str]] = None,
-        progress_callback: Optional[Callable[[int], None]] = None,
-    ) -> List[Path]:
+        file_extensions: set[str] | None = None,
+        progress_callback: Callable[[int], None] | None = None,
+    ) -> list[Path]:
         """
         Find all candidate files for rename operation.
 
@@ -196,9 +196,7 @@ class RepoWideRename:
 
         for root, dirs, files in os.walk(self.project_root):
             # Skip excluded directories (modify in-place to prune walk)
-            dirs[:] = [
-                d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")
-            ]
+            dirs[:] = [d for d in dirs if d not in self.SKIP_DIRS and not d.startswith(".")]
 
             for filename in files:
                 file_path = Path(root) / filename
@@ -241,7 +239,7 @@ class RepoWideRename:
             # For small files (<1MB), read directly
             file_size = file_path.stat().st_size
             if file_size < 1024 * 1024:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(file_path, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
                     return symbol_name in content
 
@@ -250,10 +248,10 @@ class RepoWideRename:
                 with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mmapped:
                     return symbol_name.encode("utf-8") in mmapped
 
-        except (IOError, OSError, UnicodeDecodeError):
+        except (OSError, UnicodeDecodeError):
             return False
 
-    def process_file_batch(self, file_batch: List[Path], symbol_name: str) -> dict:
+    def process_file_batch(self, file_batch: list[Path], symbol_name: str) -> dict:
         """
         Process a batch of files in parallel.
 
@@ -279,9 +277,7 @@ class RepoWideRename:
                 batch_results["files_scanned"] += 1
             except Exception as e:
                 batch_results["files_failed"] += 1
-                batch_results["errors"].append(
-                    {"file": str(file_path), "error": str(e)}
-                )
+                batch_results["errors"].append({"file": str(file_path), "error": str(e)})
 
         return batch_results
 
@@ -290,9 +286,9 @@ class RepoWideRename:
         target_type: str,
         old_name: str,
         new_name: str,
-        file_extensions: Optional[Set[str]] = None,
+        file_extensions: set[str] | None = None,
         dry_run: bool = False,
-        progress_callback: Optional[Callable[[int, int], None]] = None,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> RepoWideRenameResult:
         """
         Perform repository-wide rename with optimizations.
@@ -320,9 +316,7 @@ class RepoWideRename:
             if progress_callback:
                 progress_callback(count, -1)  # -1 indicates scanning phase
 
-        candidate_files = self.find_candidate_files(
-            file_extensions=file_extensions, progress_callback=scan_progress
-        )
+        candidate_files = self.find_candidate_files(file_extensions=file_extensions, progress_callback=scan_progress)
 
         total_files = len(candidate_files)
         result.files_scanned = total_files
@@ -336,17 +330,11 @@ class RepoWideRename:
         files_with_symbol = []
 
         # Split into batches
-        batches = [
-            candidate_files[i : i + self.batch_size]
-            for i in range(0, total_files, self.batch_size)
-        ]
+        batches = [candidate_files[i : i + self.batch_size] for i in range(0, total_files, self.batch_size)]
 
         completed = 0
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {
-                executor.submit(self.process_file_batch, batch, old_name): batch
-                for batch in batches
-            }
+            futures = {executor.submit(self.process_file_batch, batch, old_name): batch for batch in batches}
 
             for future in as_completed(futures):
                 try:
@@ -367,9 +355,7 @@ class RepoWideRename:
             result.files_updated = len(files_with_symbol)
             # Note: Actual rename implementation would go here
             # For now, we just track which files would be updated
-            result.warnings.append(
-                f"Dry-run mode: would update {len(files_with_symbol)} files"
-            )
+            result.warnings.append(f"Dry-run mode: would update {len(files_with_symbol)} files")
         else:
             result.files_updated = 0
             result.files_skipped = total_files - len(files_with_symbol)

@@ -4,8 +4,6 @@
 
 """
 
-from typing import Dict, Optional, Type
-
 from .interface import IParser, Language
 from .python_parser import PythonParser
 
@@ -16,12 +14,12 @@ class ParserFactory:
     [20251221_FEATURE] Unified parser instantiation across all languages.
     """
 
-    _parsers: Dict[Language, Type[IParser]] = {
+    _parsers: dict[Language, type[IParser]] = {
         Language.PYTHON: PythonParser,
     }
 
     # Extended extension mapping for comprehensive language detection
-    _extension_map: Dict[str, Language] = {
+    _extension_map: dict[str, Language] = {
         # Python
         "py": Language.PYTHON,
         "pyw": Language.PYTHON,
@@ -49,7 +47,7 @@ class ParserFactory:
     }
 
     @classmethod
-    def get_parser(cls, language: Language, backend: Optional[str] = None) -> IParser:
+    def get_parser(cls, language: Language, backend: str | None = None) -> IParser:
         """Get a parser instance for the specified language.
 
         Args:
@@ -68,7 +66,7 @@ class ParserFactory:
         return parser_cls()
 
     @classmethod
-    def register_parser(cls, language: Language, parser_cls: Type[IParser]) -> None:
+    def register_parser(cls, language: Language, parser_cls: type[IParser]) -> None:
         """Register a new parser for a language.
 
         Args:
@@ -101,7 +99,7 @@ class ParserFactory:
         return cls._extension_map.get(ext, Language.UNKNOWN)
 
     @classmethod
-    def from_file(cls, filepath: str, backend: Optional[str] = None) -> IParser:
+    def from_file(cls, filepath: str, backend: str | None = None) -> IParser:
         """Create parser by detecting language from file path.
 
         [20251221_FEATURE] Convenience method for file-based parsing.

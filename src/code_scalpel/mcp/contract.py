@@ -21,8 +21,8 @@ from pydantic import BaseModel, Field
 
 # [20260121_FEATURE] Response config integration for token-efficient outputs
 from code_scalpel.mcp.response_config import (
-    get_response_config,
     filter_tool_response,
+    get_response_config,
 )
 
 
@@ -147,9 +147,7 @@ class ToolResponseEnvelope(BaseModel):
             return data[name]
 
         # Fall back to default behavior (raises AttributeError)
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
 
 def _classify_exception(exc: BaseException) -> ErrorCode:
@@ -270,9 +268,7 @@ def make_envelope(
     try:
         is_error = error is not None
         if isinstance(normalized_data, dict):
-            filtered_data = filter_tool_response(
-                normalized_data, tool_name=tool_id, tier=tier, is_error=is_error
-            )
+            filtered_data = filter_tool_response(normalized_data, tool_name=tool_id, tier=tier, is_error=is_error)
         else:
             filtered_data = normalized_data
     except Exception:
@@ -367,12 +363,8 @@ def envelop_tool_function(
     try:
         import inspect as _inspect
 
-        _clean_params = [
-            p.replace(annotation=_inspect._empty) for p in sig.parameters.values()
-        ]
-        _wrapped.__signature__ = sig.replace(
-            parameters=tuple(_clean_params), return_annotation=_inspect._empty
-        )  # type: ignore[attr-defined]
+        _clean_params = [p.replace(annotation=_inspect._empty) for p in sig.parameters.values()]
+        _wrapped.__signature__ = sig.replace(parameters=tuple(_clean_params), return_annotation=_inspect._empty)  # type: ignore[attr-defined]
     except Exception:
         _wrapped.__signature__ = sig  # type: ignore[attr-defined]
 
@@ -400,7 +392,9 @@ def envelop_tool_function(
 
     # Ensure common typing symbols exist in globals for safety
     try:
-        from typing import Optional as _Optional, Union as _Union, Any as _Any
+        from typing import Any as _Any
+        from typing import Optional as _Optional
+        from typing import Union as _Union
 
         _wrapped.__globals__.setdefault("Optional", _Optional)
         _wrapped.__globals__.setdefault("Union", _Union)

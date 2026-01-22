@@ -11,7 +11,7 @@ import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from code_scalpel.policy_engine import PolicyEngine
 
@@ -36,8 +36,8 @@ class SecurityPosture:
 
     score: int  # 0-100
     grade: str  # A-F
-    strengths: List[str]
-    weaknesses: List[str]
+    strengths: list[str]
+    weaknesses: list[str]
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
 
 
@@ -49,8 +49,8 @@ class OverrideAnalysis:
     total_approved: int
     total_denied: int
     approval_rate: float
-    by_policy: Dict[str, int]
-    by_reason: Dict[str, int]
+    by_policy: dict[str, int]
+    by_reason: dict[str, int]
 
 
 @dataclass
@@ -58,10 +58,10 @@ class ViolationAnalysis:
     """Detailed analysis of policy violations."""
 
     total: int
-    by_severity: Dict[str, List[Dict[str, Any]]]
-    by_policy: Dict[str, List[Dict[str, Any]]]
-    by_operation_type: Dict[str, List[Dict[str, Any]]]
-    critical_violations: List[Dict[str, Any]]
+    by_severity: dict[str, list[dict[str, Any]]]
+    by_policy: dict[str, list[dict[str, Any]]]
+    by_operation_type: dict[str, list[dict[str, Any]]]
+    critical_violations: list[dict[str, Any]]
 
 
 @dataclass
@@ -74,7 +74,7 @@ class ReportSummary:
     overrides_requested: int
     overrides_approved: int
     tamper_attempts: int
-    most_violated_policies: List[Tuple[str, int]]
+    most_violated_policies: list[tuple[str, int]]
 
 
 @dataclass
@@ -82,12 +82,12 @@ class ComplianceReport:
     """Complete compliance report with all analysis sections."""
 
     generated_at: datetime
-    time_range: Tuple[datetime, datetime]
+    time_range: tuple[datetime, datetime]
     summary: ReportSummary
     policy_violations: ViolationAnalysis
     override_analysis: OverrideAnalysis
     security_posture: SecurityPosture
-    recommendations: List[Recommendation]
+    recommendations: list[Recommendation]
 
 
 class ComplianceReporter:
@@ -125,7 +125,7 @@ class ComplianceReporter:
 
     def generate_report(
         self,
-        time_range: Tuple[datetime, datetime],
+        time_range: tuple[datetime, datetime],
         format: str = "json",
     ) -> ComplianceReport | str | bytes:
         """
@@ -159,9 +159,7 @@ class ComplianceReporter:
         else:
             return report
 
-    def _load_events(
-        self, time_range: Tuple[datetime, datetime]
-    ) -> List[Dict[str, Any]]:
+    def _load_events(self, time_range: tuple[datetime, datetime]) -> list[dict[str, Any]]:
         """
         Load events from audit log for the specified time range.
 
@@ -175,7 +173,7 @@ class ComplianceReporter:
 
         # Filter events within the time range
         start, end = time_range
-        filtered: List[Dict[str, Any]] = []
+        filtered: list[dict[str, Any]] = []
         for event in events:
             ts = self._coerce_event_timestamp(event.get("timestamp"))
             if start <= ts <= end:
@@ -185,7 +183,7 @@ class ComplianceReporter:
                 filtered.append(event)
         return filtered
 
-    def _generate_summary(self, events: List[Dict[str, Any]]) -> ReportSummary:
+    def _generate_summary(self, events: list[dict[str, Any]]) -> ReportSummary:
         """
         Generate executive summary statistics.
 
@@ -196,28 +194,16 @@ class ComplianceReporter:
             ReportSummary with key statistics
         """
         return ReportSummary(
-            total_operations=len(
-                [e for e in events if e["event_type"].startswith("OPERATION_")]
-            ),
-            blocked_operations=len(
-                [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
-            ),
-            allowed_operations=len(
-                [e for e in events if e["event_type"] == "OPERATION_ALLOWED"]
-            ),
-            overrides_requested=len(
-                [e for e in events if e["event_type"] == "OVERRIDE_REQUESTED"]
-            ),
-            overrides_approved=len(
-                [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
-            ),
+            total_operations=len([e for e in events if e["event_type"].startswith("OPERATION_")]),
+            blocked_operations=len([e for e in events if e["event_type"] == "POLICY_VIOLATION"]),
+            allowed_operations=len([e for e in events if e["event_type"] == "OPERATION_ALLOWED"]),
+            overrides_requested=len([e for e in events if e["event_type"] == "OVERRIDE_REQUESTED"]),
+            overrides_approved=len([e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]),
             tamper_attempts=len([e for e in events if "TAMPER" in e["event_type"]]),
             most_violated_policies=self._rank_violated_policies(events),
         )
 
-    def _rank_violated_policies(
-        self, events: List[Dict[str, Any]]
-    ) -> List[Tuple[str, int]]:
+    def _rank_violated_policies(self, events: list[dict[str, Any]]) -> list[tuple[str, int]]:
         """
         Rank policies by number of violations.
 
@@ -228,7 +214,7 @@ class ComplianceReporter:
             List of (policy_name, violation_count) tuples, sorted descending
         """
         violations = [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
-        policy_counts: Dict[str, int] = defaultdict(int)
+        policy_counts: dict[str, int] = defaultdict(int)
 
         for violation in violations:
             policy = violation["details"].get("policy_name", "unknown")
@@ -236,7 +222,7 @@ class ComplianceReporter:
 
         return sorted(policy_counts.items(), key=lambda x: x[1], reverse=True)
 
-    def _analyze_violations(self, events: List[Dict[str, Any]]) -> ViolationAnalysis:
+    def _analyze_violations(self, events: list[dict[str, Any]]) -> ViolationAnalysis:
         """
         Analyze policy violations in detail.
 
@@ -248,9 +234,9 @@ class ComplianceReporter:
         """
         violations = [e for e in events if e["event_type"] == "POLICY_VIOLATION"]
 
-        by_severity: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-        by_policy: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-        by_operation_type: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        by_severity: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        by_policy: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        by_operation_type: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
         for violation in violations:
             # [20251222_BUGFIX] Some call sites store severity inside details,
@@ -272,7 +258,7 @@ class ComplianceReporter:
             critical_violations=by_severity.get("CRITICAL", []),
         )
 
-    def _analyze_overrides(self, events: List[Dict[str, Any]]) -> OverrideAnalysis:
+    def _analyze_overrides(self, events: list[dict[str, Any]]) -> OverrideAnalysis:
         """
         Analyze policy override requests and approvals.
 
@@ -286,8 +272,8 @@ class ComplianceReporter:
         approved = [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
         denied = [e for e in events if e["event_type"] == "OVERRIDE_DENIED"]
 
-        by_policy: Dict[str, int] = defaultdict(int)
-        by_reason: Dict[str, int] = defaultdict(int)
+        by_policy: dict[str, int] = defaultdict(int)
+        by_reason: dict[str, int] = defaultdict(int)
 
         for override in requested:
             policy = override["details"].get("policy_name", "unknown")
@@ -308,7 +294,7 @@ class ComplianceReporter:
             by_reason=dict(by_reason),
         )
 
-    def _assess_security_posture(self, events: List[Dict[str, Any]]) -> SecurityPosture:
+    def _assess_security_posture(self, events: list[dict[str, Any]]) -> SecurityPosture:
         """
         Assess overall security posture.
 
@@ -383,7 +369,7 @@ class ComplianceReporter:
         else:
             return "CRITICAL"
 
-    def _identify_strengths(self, events: List[Dict[str, Any]]) -> List[str]:
+    def _identify_strengths(self, events: list[dict[str, Any]]) -> list[str]:
         """
         Identify security strengths from event patterns.
 
@@ -409,7 +395,7 @@ class ComplianceReporter:
 
         return strengths if strengths else ["No significant strengths identified"]
 
-    def _identify_weaknesses(self, events: List[Dict[str, Any]]) -> List[str]:
+    def _identify_weaknesses(self, events: list[dict[str, Any]]) -> list[str]:
         """
         Identify security weaknesses from event patterns.
 
@@ -427,23 +413,15 @@ class ComplianceReporter:
         if overrides and violations:
             override_rate = len(overrides) / len(violations)
             if override_rate > 0.3:
-                weaknesses.append(
-                    f"High override rate ({override_rate:.1%}) suggests policies may be too restrictive"
-                )
+                weaknesses.append(f"High override rate ({override_rate:.1%}) suggests policies may be too restrictive")
 
-        critical_violations = [
-            e for e in violations if e["details"].get("severity") == "CRITICAL"
-        ]
+        critical_violations = [e for e in violations if e["details"].get("severity") == "CRITICAL"]
         if critical_violations:
-            weaknesses.append(
-                f"{len(critical_violations)} critical violations detected"
-            )
+            weaknesses.append(f"{len(critical_violations)} critical violations detected")
 
         return weaknesses if weaknesses else ["No significant weaknesses identified"]
 
-    def _generate_recommendations(
-        self, events: List[Dict[str, Any]]
-    ) -> List[Recommendation]:
+    def _generate_recommendations(self, events: list[dict[str, Any]]) -> list[Recommendation]:
         """
         Generate actionable recommendations.
 
@@ -459,7 +437,7 @@ class ComplianceReporter:
         overrides = [e for e in events if e["event_type"] == "OVERRIDE_APPROVED"]
 
         # Frequent violations suggest policy needs tuning
-        policy_counts: Dict[str, int] = defaultdict(int)
+        policy_counts: dict[str, int] = defaultdict(int)
         for v in violations:
             policy = v["details"].get("policy_name")
             if policy:

@@ -101,9 +101,7 @@ class TestGetSymbolReferencesCommunityTier:
 
         assert result.max_files_applied == 10
 
-    def test_max_references_limit_applied(
-        self, community_tier, temp_project_with_symbol
-    ):
+    def test_max_references_limit_applied(self, community_tier, temp_project_with_symbol):
         """Community tier max_references=50 should be applied."""
         result = _get_symbol_references_sync(
             "process_data",
@@ -224,9 +222,7 @@ class TestGetSymbolReferencesProTier:
 class TestGetSymbolReferencesEnterpriseTier:
     """Enterprise tier: Unlimited files/references, risk scoring, CODEOWNERS integration."""
 
-    def test_tier_applied_is_enterprise(
-        self, enterprise_tier, temp_project_with_symbol
-    ):
+    def test_tier_applied_is_enterprise(self, enterprise_tier, temp_project_with_symbol):
         """Enterprise tier should be applied."""
         result = _get_symbol_references_sync(
             "process_data",
@@ -241,9 +237,7 @@ class TestGetSymbolReferencesEnterpriseTier:
 
         assert result.tier_applied == "enterprise"
 
-    def test_max_files_unlimited_enterprise(
-        self, enterprise_tier, temp_project_with_symbol
-    ):
+    def test_max_files_unlimited_enterprise(self, enterprise_tier, temp_project_with_symbol):
         """Enterprise tier has unlimited file search."""
         result = _get_symbol_references_sync(
             "process_data",
@@ -258,9 +252,7 @@ class TestGetSymbolReferencesEnterpriseTier:
 
         assert result.max_files_applied is None
 
-    def test_max_references_unlimited_enterprise(
-        self, enterprise_tier, temp_project_with_symbol
-    ):
+    def test_max_references_unlimited_enterprise(self, enterprise_tier, temp_project_with_symbol):
         """Enterprise tier has unlimited references."""
         result = _get_symbol_references_sync(
             "process_data",
@@ -275,9 +267,7 @@ class TestGetSymbolReferencesEnterpriseTier:
 
         assert result.max_references_applied is None
 
-    def test_category_counts_enterprise(
-        self, enterprise_tier, temp_project_with_symbol
-    ):
+    def test_category_counts_enterprise(self, enterprise_tier, temp_project_with_symbol):
         """Enterprise tier inherits Pro features including categorization."""
         result = _get_symbol_references_sync(
             "process_data",
@@ -379,9 +369,7 @@ class TestGetSymbolReferencesAsyncInterface:
             get_symbol_references,
         )
 
-        result = await get_symbol_references(
-            "process_data", str(temp_project_with_symbol)
-        )
+        result = await get_symbol_references("process_data", str(temp_project_with_symbol))
 
         # Verify we got a result with expected structure
         assert result is not None

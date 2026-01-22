@@ -206,9 +206,7 @@ class MyClass:
 """)
 
         extractor = SurgicalExtractor.from_file(str(main_file))
-        result = extractor.resolve_cross_file_dependencies(
-            "MyClass", target_type="class"
-        )
+        result = extractor.resolve_cross_file_dependencies("MyClass", target_type="class")
 
         assert result.success is True
         assert result.target.name == "MyClass"
@@ -226,7 +224,7 @@ class MyClass:
         models_file.write_text("""
 class TaxRate:
     RATE = 0.1
-    
+
     @staticmethod
     def get():
         return TaxRate.RATE
@@ -412,9 +410,7 @@ def use_func():
 
         with patch.object(SurgicalExtractor, "from_file", side_effect=mock_from_file):
             # Re-create extractor to use patched method
-            extractor = SurgicalExtractor(
-                main_file.read_text(), file_path=str(main_file)
-            )
+            extractor = SurgicalExtractor(main_file.read_text(), file_path=str(main_file))
             result = extractor.resolve_cross_file_dependencies("use_func")
 
         assert result.success is True
@@ -549,9 +545,7 @@ from .. import parent
 
     def test_resolve_module_not_found(self, tmp_path):
         """Test that None is returned when module not found."""
-        extractor = SurgicalExtractor(
-            "def f(): pass", file_path=str(tmp_path / "test.py")
-        )
+        extractor = SurgicalExtractor("def f(): pass", file_path=str(tmp_path / "test.py"))
         extractor._ensure_parsed()
 
         result = extractor._resolve_module_path("nonexistent_module", tmp_path, level=0)
@@ -703,7 +697,7 @@ class TestFileReadIOError:
         file_path = tmp_path / "test.py"
         file_path.write_text("def f(): pass")
 
-        with patch("builtins.open", side_effect=IOError("Permission denied")):
+        with patch("builtins.open", side_effect=OSError("Permission denied")):
             with pytest.raises(ValueError, match="Cannot read file"):
                 SurgicalExtractor.from_file(str(file_path))
 
@@ -904,7 +898,7 @@ class TestPatcherFileReadIOError:
         file_path = tmp_path / "test.py"
         file_path.write_text("def f(): pass")
 
-        with patch("builtins.open", side_effect=IOError("Permission denied")):
+        with patch("builtins.open", side_effect=OSError("Permission denied")):
             with pytest.raises(ValueError, match="Cannot read file"):
                 SurgicalPatcher.from_file(str(file_path))
 
@@ -1000,9 +994,7 @@ class EmptyClass:
 """
         patcher = SurgicalPatcher(code)
 
-        result = patcher.update_method(
-            "EmptyClass", "nonexistent", "def nonexistent(self): pass"
-        )
+        result = patcher.update_method("EmptyClass", "nonexistent", "def nonexistent(self): pass")
 
         assert result.success is False
         assert "not found" in result.error.lower()
@@ -1383,9 +1375,7 @@ class OuterClass:
 
         # Try to update a nested class as if it were a method
         # The inner class is not indexed as a method
-        result = patcher.update_method(
-            "OuterClass", "InnerClass", "def InnerClass(self): pass"
-        )
+        result = patcher.update_method("OuterClass", "InnerClass", "def InnerClass(self): pass")
 
         # Should fail because InnerClass is not a method
         assert result.success is False
@@ -1567,7 +1557,7 @@ class TestPatcherFromFileIOError:
 
         def mock_open_ioerror(path, *args, **kwargs):
             if "test.py" in str(path):
-                raise IOError("Disk read error")
+                raise OSError("Disk read error")
             return original_open(path, *args, **kwargs)
 
         with patch("builtins.open", side_effect=mock_open_ioerror):
@@ -1590,7 +1580,7 @@ class TestExtractorFromFileIOError:
 
         def mock_open_raises(path, *args, **kwargs):
             if "test.py" in str(path):
-                raise IOError("Permission denied")
+                raise OSError("Permission denied")
             return original_open(path, *args, **kwargs)
 
         with patch("builtins.open", side_effect=mock_open_raises):

@@ -1,10 +1,11 @@
 # Type stubs for javalang library
 # This file provides type hints for the javalang library which lacks native stubs
-from typing import Any, Iterator, Optional, Tuple
+from collections.abc import Iterator
+from typing import Any
 
 class ast:
     class Node:
-        position: Optional[Tuple[int, int]]
+        position: tuple[int, int] | None
         def __init__(self) -> None: ...
 
 class tree:
@@ -12,59 +13,59 @@ class tree:
         package: Any
         imports: list[Any]
         types: list[Any]
-        def filter(self, node_type: type) -> Iterator[Tuple[Tuple[Any, ...], Any]]: ...
+        def filter(self, node_type: type) -> Iterator[tuple[tuple[Any, ...], Any]]: ...
 
     class Identifier(ast.Node):
         value: str
 
     class ClassDeclaration(ast.Node):
         name: str
-        modifiers: Optional[list[str]]
-        extends: Optional[Any]
-        implements: Optional[list[Any]]
-        body: Optional[list[Any]]
-        fields: Optional[list[Any]]
-        methods: Optional[list[Any]]
-        constructors: Optional[list[Any]]
+        modifiers: list[str] | None
+        extends: Any | None
+        implements: list[Any] | None
+        body: list[Any] | None
+        fields: list[Any] | None
+        methods: list[Any] | None
+        constructors: list[Any] | None
 
     class InterfaceDeclaration(ast.Node):
         name: str
-        modifiers: Optional[list[str]]
-        extends: Optional[list[Any]]
-        body: Optional[list[Any]]
+        modifiers: list[str] | None
+        extends: list[Any] | None
+        body: list[Any] | None
 
     class MethodDeclaration(ast.Node):
         name: str
-        modifiers: Optional[list[str]]
-        return_type: Optional[Any]
-        parameters: Optional[list[Any]]
-        body: Optional[list[Any]]
-        throws: Optional[list[Any]]
+        modifiers: list[str] | None
+        return_type: Any | None
+        parameters: list[Any] | None
+        body: list[Any] | None
+        throws: list[Any] | None
 
     class FieldDeclaration(ast.Node):
-        modifiers: Optional[list[str]]
+        modifiers: list[str] | None
         type: Any
         declarators: list[Any]
 
     class VariableDeclarator(ast.Node):
         name: str
-        initializer: Optional[Any]
+        initializer: Any | None
 
     class FormalParameter(ast.Node):
         name: str
         type: Any
-        modifiers: Optional[list[str]]
+        modifiers: list[str] | None
 
     class ConstructorDeclaration(ast.Node):
         name: str
-        modifiers: Optional[list[str]]
-        parameters: Optional[list[Any]]
-        body: Optional[list[Any]]
+        modifiers: list[str] | None
+        parameters: list[Any] | None
+        body: list[Any] | None
 
     class IfStatement(ast.Node):
         condition: Any
         then_statement: Any
-        else_statement: Optional[Any]
+        else_statement: Any | None
 
     class ForStatement(ast.Node):
         control: Any
@@ -83,31 +84,31 @@ class tree:
         cases: list[Any]
 
     class TryStatement(ast.Node):
-        block: Optional[list[Any]]
-        catches: Optional[list[Any]]
-        finally_block: Optional[list[Any]]
-        resources: Optional[list[Any]]
+        block: list[Any] | None
+        catches: list[Any] | None
+        finally_block: list[Any] | None
+        resources: list[Any] | None
 
     class CatchClause(ast.Node):
         parameter: Any
-        block: Optional[list[Any]]
+        block: list[Any] | None
 
     class ReturnStatement(ast.Node):
-        expression: Optional[Any]
-        parent: Optional[ast.Node]
+        expression: Any | None
+        parent: ast.Node | None
 
     class BreakStatement(ast.Node):
-        label: Optional[str]
+        label: str | None
 
     class ContinueStatement(ast.Node):
-        label: Optional[str]
+        label: str | None
 
     class ThrowStatement(ast.Node):
         expression: Any
 
     class SynchronizedStatement(ast.Node):
         lock: Any
-        block: Optional[list[Any]]
+        block: list[Any] | None
 
     class BinaryOperation(ast.Node):
         operator: str
@@ -126,16 +127,16 @@ class tree:
 
     class MemberReference(ast.Node):
         member: str
-        qualifier: Optional[str]
+        qualifier: str | None
 
     class MethodInvocation(ast.Node):
         member: str
-        qualifier: Optional[str]
-        arguments: Optional[list[Any]]
+        qualifier: str | None
+        arguments: list[Any] | None
 
     class ClassCreator(ast.Node):
         type: Any
-        arguments: Optional[list[Any]]
+        arguments: list[Any] | None
 
     class ArraySelector(ast.Node):
         index: Any
@@ -144,7 +145,7 @@ class tree:
         value: Any
 
     class LambdaExpression(ast.Node):
-        parameters: Optional[list[Any]]
+        parameters: list[Any] | None
         body: Any
 
     class MethodReference(ast.Node):
@@ -158,7 +159,7 @@ class tree:
 
 class parser:
     class JavaSyntaxError(Exception):
-        position: Optional[Tuple[int, int]]
+        position: tuple[int, int] | None
         description: str
 
 class parse:

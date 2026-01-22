@@ -418,10 +418,11 @@ Test Cases:
 from __future__ import annotations
 
 import ast
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterator, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     pass
@@ -627,10 +628,7 @@ class TypeAnnotation:
     def _parse_union(cls, slice_node: ast.AST, raw: str) -> TypeAnnotation:
         """Parse Union type."""
         members = cls._parse_slice_elements(slice_node)
-        is_optional = any(
-            m.raw_annotation in ("None", "type(None)") or m.origin_type == "None"
-            for m in members
-        )
+        is_optional = any(m.raw_annotation in ("None", "type(None)") or m.origin_type == "None" for m in members)
         return cls(
             raw_annotation=raw,
             is_union=True,
@@ -657,9 +655,7 @@ class TypeAnnotation:
 
         collect_union_members(node)
 
-        is_optional = any(
-            m.raw_annotation == "None" or m.origin_type == "None" for m in members
-        )
+        is_optional = any(m.raw_annotation == "None" or m.origin_type == "None" for m in members)
 
         return cls(
             raw_annotation=raw,
@@ -670,9 +666,7 @@ class TypeAnnotation:
         )
 
     @classmethod
-    def _parse_callable(
-        cls, slice_node: ast.AST, raw: str, origin: str
-    ) -> TypeAnnotation:
+    def _parse_callable(cls, slice_node: ast.AST, raw: str, origin: str) -> TypeAnnotation:
         """Parse Callable type."""
         annotation = cls(
             raw_annotation=raw,
@@ -688,9 +682,7 @@ class TypeAnnotation:
             # Parse params (can be a list or ellipsis)
             if isinstance(params_node, ast.List):
                 annotation.callable_params = [
-                    p
-                    for p in (cls.from_node(elem) for elem in params_node.elts)
-                    if p is not None
+                    p for p in (cls.from_node(elem) for elem in params_node.elts) if p is not None
                 ]
             elif isinstance(params_node, ast.Constant) and params_node.value == ...:
                 annotation.callable_params = []  # Ellipsis means any params
@@ -750,9 +742,7 @@ class PythonSymbol:
     type_annotation: TypeAnnotation | None = None
     is_private: bool = False  # Starts with _
     is_dunder: bool = False  # Starts and ends with __
-    ast_node: ast.AST | None = field(
-        default=None, repr=False
-    )  # Store AST node for analysis
+    ast_node: ast.AST | None = field(default=None, repr=False)  # Store AST node for analysis
 
 
 @dataclass
@@ -856,9 +846,7 @@ class PythonModule:
     functions: list[PythonFunction] = field(default_factory=list)
     classes: list[PythonClass] = field(default_factory=list)
     variables: list[PythonSymbol] = field(default_factory=list)
-    type_aliases: list[PythonSymbol] = field(
-        default_factory=list
-    )  # TypeAlias definitions
+    type_aliases: list[PythonSymbol] = field(default_factory=list)  # TypeAlias definitions
 
     # Analysis results
     all_symbols: list[PythonSymbol] = field(default_factory=list)
@@ -1046,10 +1034,7 @@ class ControlFlowGraph:
             else:
                 # Find the dominator closest to block (dominated by all others)
                 for dom_id in strict_doms:
-                    if all(
-                        dom_id in dominators[other] or other == dom_id
-                        for other in strict_doms
-                    ):
+                    if all(dom_id in dominators[other] or other == dom_id for other in strict_doms):
                         idom[block_id] = dom_id
                         break
 
@@ -1124,20 +1109,12 @@ class CallGraph:
     def get_callers(self, func: PythonFunction) -> list[PythonFunction]:
         """Get all functions that call the given function."""
         func_id = id(func)
-        return [
-            edge.caller
-            for edge in self.edges
-            if edge.callee and id(edge.callee) == func_id
-        ]
+        return [edge.caller for edge in self.edges if edge.callee and id(edge.callee) == func_id]
 
     def get_callees(self, func: PythonFunction) -> list[PythonFunction]:
         """Get all functions called by the given function."""
         caller_id = id(func)
-        return [
-            edge.callee
-            for edge in self.edges
-            if id(edge.caller) == caller_id and edge.callee is not None
-        ]
+        return [edge.callee for edge in self.edges if id(edge.caller) == caller_id and edge.callee is not None]
 
 
 # =============================================================================
@@ -1173,14 +1150,10 @@ class Expression:
     variables: frozenset[str]  # Variables used in the expression
 
     @classmethod
-    def from_node(cls, node: ast.expr) -> "Expression":
+    def from_node(cls, node: ast.expr) -> Expression:
         """Create an Expression from an AST node."""
         expr_str = ast.unparse(node)
-        variables = frozenset(
-            n.id
-            for n in ast.walk(node)
-            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)
-        )
+        variables = frozenset(n.id for n in ast.walk(node) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load))
         return cls(expr_str=expr_str, variables=variables)
 
     def is_killed_by(self, defined_var: str) -> bool:
@@ -1203,27 +1176,23 @@ class ConstantValue:
         self._is_constant = is_constant
 
     @classmethod
-    def constant(cls, value: object) -> "ConstantValue":
+    def constant(cls, value: object) -> ConstantValue:
         """Create a constant value."""
         return cls(value, True)
 
     @classmethod
-    def not_constant(cls) -> "ConstantValue":
+    def not_constant(cls) -> ConstantValue:
         """Create a non-constant value (NAC)."""
         return cls(cls.NAC, False)
 
     @classmethod
-    def undefined(cls) -> "ConstantValue":
+    def undefined(cls) -> ConstantValue:
         """Create an undefined value."""
         return cls(cls.UNDEF, False)
 
     @property
     def is_constant(self) -> bool:
-        return (
-            self._is_constant
-            and self._value is not self.NAC
-            and self._value is not self.UNDEF
-        )
+        return self._is_constant and self._value is not self.NAC and self._value is not self.UNDEF
 
     @property
     def value(self) -> object:
@@ -1231,7 +1200,7 @@ class ConstantValue:
             raise ValueError("Value is not constant")
         return self._value
 
-    def meet(self, other: "ConstantValue") -> "ConstantValue":
+    def meet(self, other: ConstantValue) -> ConstantValue:
         """Lattice meet operation for constant propagation."""
         # UNDEF meet x = x
         if self._value is self.UNDEF:
@@ -1255,11 +1224,7 @@ class ConstantValue:
         return hash(
             (
                 self._is_constant,
-                (
-                    id(self._value)
-                    if self._value in (self.NAC, self.UNDEF)
-                    else self._value
-                ),
+                (id(self._value) if self._value in (self.NAC, self.UNDEF) else self._value),
             )
         )
 
@@ -1275,26 +1240,16 @@ class ConstantValue:
 class DataFlowInfo:
     """Data flow analysis results."""
 
-    reaching_definitions: dict[BasicBlock, set[Definition]] = field(
-        default_factory=dict
-    )
+    reaching_definitions: dict[BasicBlock, set[Definition]] = field(default_factory=dict)
     live_variables: dict[BasicBlock, set[str]] = field(default_factory=dict)
     def_use_chains: dict[Definition, set[ast.Name]] = field(default_factory=dict)
-    use_def_chains: dict[int, set[Definition]] = field(
-        default_factory=dict
-    )  # node id -> definitions
+    use_def_chains: dict[int, set[Definition]] = field(default_factory=dict)  # node id -> definitions
     dead_assignments: list[Definition] = field(default_factory=list)
     undefined_uses: list[ast.Name] = field(default_factory=list)
     # Optimization analyses
-    constant_values: dict[BasicBlock, dict[str, ConstantValue]] = field(
-        default_factory=dict
-    )
-    available_expressions: dict[BasicBlock, set[Expression]] = field(
-        default_factory=dict
-    )
-    very_busy_expressions: dict[BasicBlock, set[Expression]] = field(
-        default_factory=dict
-    )
+    constant_values: dict[BasicBlock, dict[str, ConstantValue]] = field(default_factory=dict)
+    available_expressions: dict[BasicBlock, set[Expression]] = field(default_factory=dict)
+    very_busy_expressions: dict[BasicBlock, set[Expression]] = field(default_factory=dict)
 
 
 # =============================================================================
@@ -1335,9 +1290,7 @@ class PythonASTParser:
         """
         self.include_type_comments = include_type_comments
         self._builtin_names: set[str] = (
-            set(dir(__builtins__))
-            if isinstance(__builtins__, dict)
-            else set(dir(__builtins__))
+            set(dir(__builtins__)) if isinstance(__builtins__, dict) else set(dir(__builtins__))
         )
 
     def parse_file(self, path: str | Path) -> PythonModule:
@@ -1414,7 +1367,7 @@ class PythonASTParser:
         lines = source.splitlines()
         recovered_source: list[str] = []
 
-        for i, line in enumerate(lines):
+        for _i, line in enumerate(lines):
             test_source = "\n".join(recovered_source + [line])
             try:
                 ast.parse(test_source, filename=filename)
@@ -1541,9 +1494,7 @@ class PythonASTParser:
         builder = CallGraphBuilder(module)
         return builder.build(module.ast_tree)
 
-    def build_cfg(
-        self, function: PythonFunction, source: str | None = None
-    ) -> ControlFlowGraph:
+    def build_cfg(self, function: PythonFunction, source: str | None = None) -> ControlFlowGraph:
         """
         Build a control flow graph for a function.
 
@@ -1569,9 +1520,7 @@ class PythonASTParser:
 
         # Type guard: ensure ast_node is a function definition
         if not isinstance(function.ast_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            raise ValueError(
-                f"Expected FunctionDef or AsyncFunctionDef, got {type(function.ast_node)}"
-            )
+            raise ValueError(f"Expected FunctionDef or AsyncFunctionDef, got {type(function.ast_node)}")
 
         builder = CFGBuilder(function)
         return builder.build(function.ast_node)
@@ -1599,9 +1548,7 @@ class PythonASTParser:
         analyzer = DataFlowAnalyzer(cfg, cfg.function)
         return analyzer.analyze()
 
-    def extract_type_annotations(
-        self, module: PythonModule
-    ) -> dict[str, TypeAnnotation]:
+    def extract_type_annotations(self, module: PythonModule) -> dict[str, TypeAnnotation]:
         """
         Extract all type annotations from a module.
 
@@ -1747,9 +1694,7 @@ class SymbolVisitor(ParentTrackingVisitor):
         parts.append(name)
         return ".".join(parts)
 
-    def _get_decorators(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
-    ) -> list[str]:
+    def _get_decorators(self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef) -> list[str]:
         """Extract decorator names from a node."""
         decorators = []
         for dec in node.decorator_list:
@@ -1774,9 +1719,7 @@ class SymbolVisitor(ParentTrackingVisitor):
 
         # Positional-only parameters (before /)
         for i, arg in enumerate(args.posonlyargs):
-            default_idx = i - (
-                len(args.posonlyargs) - len(args.defaults) + len(args.args)
-            )
+            default_idx = i - (len(args.posonlyargs) - len(args.defaults) + len(args.args))
             default = None
             if default_idx >= 0 and default_idx < len(args.defaults):
                 default = ast.unparse(args.defaults[default_idx])
@@ -1787,11 +1730,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                     kind="positional_only",
                     default=default,
                     annotation=TypeAnnotation.from_node(arg.annotation),
-                    location=(
-                        SourceLocation.from_node(arg)
-                        if hasattr(arg, "lineno")
-                        else None
-                    ),
+                    location=(SourceLocation.from_node(arg) if hasattr(arg, "lineno") else None),
                 )
             )
 
@@ -1808,11 +1747,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                     kind="positional_or_keyword",
                     default=default,
                     annotation=TypeAnnotation.from_node(arg.annotation),
-                    location=(
-                        SourceLocation.from_node(arg)
-                        if hasattr(arg, "lineno")
-                        else None
-                    ),
+                    location=(SourceLocation.from_node(arg) if hasattr(arg, "lineno") else None),
                 )
             )
 
@@ -1823,11 +1758,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                     name=args.vararg.arg,
                     kind="var_positional",
                     annotation=TypeAnnotation.from_node(args.vararg.annotation),
-                    location=(
-                        SourceLocation.from_node(args.vararg)
-                        if hasattr(args.vararg, "lineno")
-                        else None
-                    ),
+                    location=(SourceLocation.from_node(args.vararg) if hasattr(args.vararg, "lineno") else None),
                 )
             )
 
@@ -1845,11 +1776,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                     kind="keyword_only",
                     default=default,
                     annotation=TypeAnnotation.from_node(arg.annotation),
-                    location=(
-                        SourceLocation.from_node(arg)
-                        if hasattr(arg, "lineno")
-                        else None
-                    ),
+                    location=(SourceLocation.from_node(arg) if hasattr(arg, "lineno") else None),
                 )
             )
 
@@ -1860,19 +1787,13 @@ class SymbolVisitor(ParentTrackingVisitor):
                     name=args.kwarg.arg,
                     kind="var_keyword",
                     annotation=TypeAnnotation.from_node(args.kwarg.annotation),
-                    location=(
-                        SourceLocation.from_node(args.kwarg)
-                        if hasattr(args.kwarg, "lineno")
-                        else None
-                    ),
+                    location=(SourceLocation.from_node(args.kwarg) if hasattr(args.kwarg, "lineno") else None),
                 )
             )
 
         return params
 
-    def _check_function_properties(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> dict[str, bool]:
+    def _check_function_properties(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> dict[str, bool]:
         """Check function decorators for properties."""
         props = {
             "is_staticmethod": False,
@@ -1904,9 +1825,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                 return True
         return False
 
-    def _extract_raises(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> list[str]:
+    def _extract_raises(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
         """Extract exception types raised by function."""
         raises = []
         for child in ast.walk(node):
@@ -1922,11 +1841,7 @@ class SymbolVisitor(ParentTrackingVisitor):
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Visit a function definition."""
-        is_method = (
-            isinstance(self.scope_stack[-1], PythonClass)
-            if self.scope_stack[-1]
-            else False
-        )
+        is_method = isinstance(self.scope_stack[-1], PythonClass) if self.scope_stack[-1] else False
         props = self._check_function_properties(node)
 
         kind = SymbolKind.METHOD if is_method else SymbolKind.FUNCTION
@@ -1963,11 +1878,7 @@ class SymbolVisitor(ParentTrackingVisitor):
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         """Visit an async function definition."""
-        is_method = (
-            isinstance(self.scope_stack[-1], PythonClass)
-            if self.scope_stack[-1]
-            else False
-        )
+        is_method = isinstance(self.scope_stack[-1], PythonClass) if self.scope_stack[-1] else False
         props = self._check_function_properties(node)
 
         kind = SymbolKind.ASYNC_METHOD if is_method else SymbolKind.ASYNC_FUNCTION
@@ -2029,9 +1940,7 @@ class SymbolVisitor(ParentTrackingVisitor):
                         if isinstance(item.value, (ast.List, ast.Tuple)):
                             slots = []
                             for elt in item.value.elts:
-                                if isinstance(elt, ast.Constant) and isinstance(
-                                    elt.value, str
-                                ):
+                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
                                     slots.append(elt.value)
 
         cls = PythonClass(
@@ -2101,9 +2010,7 @@ class SymbolVisitor(ParentTrackingVisitor):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     # Check if it's a constant (ALL_CAPS)
-                    is_const = (
-                        target.id.isupper() and "_" in target.id or target.id.isupper()
-                    )
+                    is_const = target.id.isupper() and "_" in target.id or target.id.isupper()
                     kind = SymbolKind.CONSTANT if is_const else SymbolKind.VARIABLE
 
                     sym = PythonSymbol(
@@ -2165,9 +2072,7 @@ class ScopeAnalyzer(ParentTrackingVisitor):
         self.current_scope: PythonScope | None = None
         self.scope_stack: list[PythonScope] = []
 
-    def _push_scope(
-        self, scope_type: ScopeType, name: str, node: ast.AST
-    ) -> PythonScope:
+    def _push_scope(self, scope_type: ScopeType, name: str, node: ast.AST) -> PythonScope:
         """Create and push a new scope."""
         parent = self.scope_stack[-1] if self.scope_stack else None
         scope = PythonScope(
@@ -2428,19 +2333,13 @@ class NameResolver(ParentTrackingVisitor):
     """
 
     # Python built-in names
-    BUILTINS = (
-        set(dir(__builtins__))
-        if isinstance(__builtins__, dict)
-        else set(dir(__builtins__))
-    )
+    BUILTINS = set(dir(__builtins__)) if isinstance(__builtins__, dict) else set(dir(__builtins__))
 
     def __init__(self, scope_tree: PythonScope, symbols: list[PythonSymbol]):
         super().__init__()
         self.scope_tree = scope_tree
         self.symbols = symbols
-        self.symbol_by_qname: dict[str, PythonSymbol] = {
-            s.qualified_name: s for s in symbols
-        }
+        self.symbol_by_qname: dict[str, PythonSymbol] = {s.qualified_name: s for s in symbols}
         self.references: list[NameReference] = []
         self.current_scope: PythonScope | None = None
         self.scope_for_node: dict[int, PythonScope] = {}
@@ -2496,9 +2395,7 @@ class NameResolver(ParentTrackingVisitor):
         )
         self.references.append(ref)
 
-    def _resolve_name(
-        self, name: str, scope: PythonScope | None
-    ) -> PythonSymbol | None:
+    def _resolve_name(self, name: str, scope: PythonScope | None) -> PythonSymbol | None:
         """
         Resolve a name using LEGB rule.
 
@@ -2535,9 +2432,7 @@ class NameResolver(ParentTrackingVisitor):
         # Global scope
         return self._find_in_global_scope(name, scope)
 
-    def _find_in_global_scope(
-        self, name: str, scope: PythonScope
-    ) -> PythonSymbol | None:
+    def _find_in_global_scope(self, name: str, scope: PythonScope) -> PythonSymbol | None:
         """Find a name in the global (module) scope."""
         # Navigate to root
         root = scope
@@ -2545,9 +2440,7 @@ class NameResolver(ParentTrackingVisitor):
             root = root.parent
         return self._find_symbol_in_scope(name, root)
 
-    def _find_in_enclosing_scope(
-        self, name: str, scope: PythonScope | None
-    ) -> PythonSymbol | None:
+    def _find_in_enclosing_scope(self, name: str, scope: PythonScope | None) -> PythonSymbol | None:
         """Find a name in enclosing scopes."""
         while scope:
             if scope.type != ScopeType.CLASS and name in scope.local_names:
@@ -2555,9 +2448,7 @@ class NameResolver(ParentTrackingVisitor):
             scope = scope.parent
         return None
 
-    def _find_symbol_in_scope(
-        self, name: str, scope: PythonScope
-    ) -> PythonSymbol | None:
+    def _find_symbol_in_scope(self, name: str, scope: PythonScope) -> PythonSymbol | None:
         """Find a symbol definition in a scope."""
         # Try to find in our symbol table
         scope_prefix = self._get_scope_prefix(scope)
@@ -2657,11 +2548,7 @@ class CallGraphBuilder(ParentTrackingVisitor):
 
         # Direct recursion
         for edge in self.call_graph.edges:
-            if (
-                id(edge.caller) == func_id
-                and edge.callee
-                and id(edge.callee) == func_id
-            ):
+            if id(edge.caller) == func_id and edge.callee and id(edge.callee) == func_id:
                 return True
 
         # Indirect recursion (simple check: can we reach func from func?)
@@ -2683,9 +2570,7 @@ class CallGraphBuilder(ParentTrackingVisitor):
 
         return False
 
-    def _find_function_for_node(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> PythonFunction | None:
+    def _find_function_for_node(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> PythonFunction | None:
         """Find the PythonFunction object corresponding to an AST node."""
         for func in self.module.functions:
             if func.location.line == node.lineno and func.name == node.name:
@@ -2741,11 +2626,7 @@ class CallGraphBuilder(ParentTrackingVisitor):
         # Count arguments
         args_count = len(node.args)
         has_starargs = any(isinstance(arg, ast.Starred) for arg in node.args)
-        has_kwargs = (
-            bool(node.keywords) or any(kw.arg is None for kw in node.keywords)
-            if node.keywords
-            else False
-        )
+        has_kwargs = bool(node.keywords) or any(kw.arg is None for kw in node.keywords) if node.keywords else False
 
         # Create call site
         call_site = CallSite(
@@ -2792,9 +2673,7 @@ class CallGraphBuilder(ParentTrackingVisitor):
                 # Chained call: foo().bar()
                 receiver = "<call>"
             else:
-                receiver = (
-                    ast.unparse(func.value) if hasattr(ast, "unparse") else "<expr>"
-                )
+                receiver = ast.unparse(func.value) if hasattr(ast, "unparse") else "<expr>"
 
             return method_name, receiver, False
 
@@ -2867,9 +2746,7 @@ class CFGBuilder(ast.NodeVisitor):
         self.exit_block: BasicBlock | None = None
 
         # Track loop contexts for break/continue
-        self.loop_stack: list[tuple[BasicBlock, BasicBlock]] = (
-            []
-        )  # (loop_entry, loop_exit)
+        self.loop_stack: list[tuple[BasicBlock, BasicBlock]] = []  # (loop_entry, loop_exit)
 
         # Track finally blocks for proper control flow
         self.finally_stack: list[BasicBlock] = []
@@ -2895,9 +2772,7 @@ class CFGBuilder(ast.NodeVisitor):
         self.blocks.append(block)
         return block
 
-    def _add_edge(
-        self, from_block: BasicBlock | None, to_block: BasicBlock | None
-    ) -> None:
+    def _add_edge(self, from_block: BasicBlock | None, to_block: BasicBlock | None) -> None:
         """Add an edge between two blocks."""
         if from_block is None or to_block is None:
             return
@@ -2910,9 +2785,7 @@ class CFGBuilder(ast.NodeVisitor):
         """Set the current block for adding statements."""
         self.current_block = block
 
-    def build(
-        self, func_node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> ControlFlowGraph:
+    def build(self, func_node: ast.FunctionDef | ast.AsyncFunctionDef) -> ControlFlowGraph:
         """Build CFG from a function definition AST node."""
         # Create entry and exit blocks
         self.entry_block = self._new_block("entry", is_entry=True)
@@ -3009,9 +2882,7 @@ class CFGBuilder(ast.NodeVisitor):
         # Process else/elif
         if stmt.orelse:
             else_block = self._new_block("if_else")
-            self._add_edge(
-                self.blocks[self.block_counter - 3], else_block
-            )  # From test block
+            self._add_edge(self.blocks[self.block_counter - 3], else_block)  # From test block
 
             self._set_current_block(else_block)
             for s in stmt.orelse:
@@ -3021,9 +2892,7 @@ class CFGBuilder(ast.NodeVisitor):
                 self._add_edge(self.current_block, after_block)
         else:
             # No else: connect test directly to after
-            self._add_edge(
-                self.blocks[self.block_counter - 2], after_block
-            )  # From test block
+            self._add_edge(self.blocks[self.block_counter - 2], after_block)  # From test block
 
         self._set_current_block(after_block)
 
@@ -3147,11 +3016,7 @@ class CFGBuilder(ast.NodeVisitor):
             type_name = (
                 ast.unparse(exc_type)
                 if exc_type and hasattr(ast, "unparse")
-                else (
-                    (exc_type.id if isinstance(exc_type, ast.Name) else "Exception")
-                    if exc_type
-                    else "BaseException"
-                )
+                else ((exc_type.id if isinstance(exc_type, ast.Name) else "Exception") if exc_type else "BaseException")
             )
 
             handler_block = self._new_block(
@@ -3337,9 +3202,7 @@ class DataFlowAnalyzer:
         self.function = function
 
         # Block-level info
-        self.block_gen: dict[int, set[Definition]] = (
-            {}
-        )  # Definitions generated in block
+        self.block_gen: dict[int, set[Definition]] = {}  # Definitions generated in block
         self.block_kill: dict[int, set[Definition]] = {}  # Definitions killed in block
         self.block_use: dict[int, set[str]] = {}  # Variables used in block
         self.block_def: dict[int, set[str]] = {}  # Variables defined in block
@@ -3376,22 +3239,11 @@ class DataFlowAnalyzer:
         very_busy_expressions = self._compute_very_busy_expressions()
 
         # Convert block id keys to BasicBlock objects for the result
-        reaching_defs_by_block = {
-            self._get_block(bid): defs
-            for bid, defs in self.reaching_definitions.items()
-        }
-        live_vars_by_block = {
-            self._get_block(bid): vars for bid, vars in self.live_variables.items()
-        }
-        constants_by_block = {
-            self._get_block(bid): vals for bid, vals in constant_values.items()
-        }
-        available_by_block = {
-            self._get_block(bid): exprs for bid, exprs in available_expressions.items()
-        }
-        very_busy_by_block = {
-            self._get_block(bid): exprs for bid, exprs in very_busy_expressions.items()
-        }
+        reaching_defs_by_block = {self._get_block(bid): defs for bid, defs in self.reaching_definitions.items()}
+        live_vars_by_block = {self._get_block(bid): vars for bid, vars in self.live_variables.items()}
+        constants_by_block = {self._get_block(bid): vals for bid, vals in constant_values.items()}
+        available_by_block = {self._get_block(bid): exprs for bid, exprs in available_expressions.items()}
+        very_busy_by_block = {self._get_block(bid): exprs for bid, exprs in very_busy_expressions.items()}
 
         return DataFlowInfo(
             reaching_definitions=reaching_defs_by_block,
@@ -3500,9 +3352,7 @@ class DataFlowAnalyzer:
                 self.all_definitions.append(defn)
                 self.definitions_by_var.setdefault(name, []).append(defn)
 
-    def _collect_assignments(
-        self, target: ast.AST, stmt: ast.stmt, block: BasicBlock
-    ) -> None:
+    def _collect_assignments(self, target: ast.AST, stmt: ast.stmt, block: BasicBlock) -> None:
         """Collect assignments from a target (handles unpacking)."""
         if isinstance(target, ast.Name):
             self._add_definition(target.id, stmt, block)
@@ -3546,8 +3396,7 @@ class DataFlowAnalyzer:
                 in_set: set[Definition] = set()
                 for pred in block.predecessors:
                     out_set = (
-                        self.reaching_definitions[pred.id]
-                        - self.block_kill.get(pred.id, set())
+                        self.reaching_definitions[pred.id] - self.block_kill.get(pred.id, set())
                     ) | self.block_gen.get(pred.id, set())
                     in_set |= out_set
 
@@ -3576,15 +3425,12 @@ class DataFlowAnalyzer:
                 for succ in block.successors:
                     # IN[S] = USE[S] ∪ (OUT[S] - DEF[S])
                     succ_in = self.block_use.get(succ.id, set()) | (
-                        self.live_variables.get(succ.id, set())
-                        - self.block_def.get(succ.id, set())
+                        self.live_variables.get(succ.id, set()) - self.block_def.get(succ.id, set())
                     )
                     out_set |= succ_in
 
                 # LIVE[B] = USE[B] ∪ (OUT[B] - DEF[B])
-                new_live = self.block_use.get(block.id, set()) | (
-                    out_set - self.block_def.get(block.id, set())
-                )
+                new_live = self.block_use.get(block.id, set()) | (out_set - self.block_def.get(block.id, set()))
 
                 if new_live != self.live_variables[block.id]:
                     self.live_variables[block.id] = new_live
@@ -3619,18 +3465,11 @@ class DataFlowAnalyzer:
 
         return def_use_chains, use_def_chains
 
-    def _find_dead_assignments(
-        self, def_use_chains: dict[Definition, set[ast.Name]]
-    ) -> list[Definition]:
+    def _find_dead_assignments(self, def_use_chains: dict[Definition, set[ast.Name]]) -> list[Definition]:
         """Find definitions that are never used."""
         dead = []
         for defn, uses in def_use_chains.items():
-            if (
-                not uses
-                and not defn.is_parameter
-                and not defn.is_global
-                and not defn.is_nonlocal
-            ):
+            if not uses and not defn.is_parameter and not defn.is_global and not defn.is_nonlocal:
                 dead.append(defn)
         return dead
 
@@ -3682,9 +3521,7 @@ class DataFlowAnalyzer:
         # Parameters are not constant (could be any value)
         if self.cfg.entry_block:
             for param in self.function.parameters:
-                constant_in[self.cfg.entry_block.id][
-                    param.name
-                ] = ConstantValue.not_constant()
+                constant_in[self.cfg.entry_block.id][param.name] = ConstantValue.not_constant()
 
         # Iterate until fixed point
         changed = True
@@ -3694,9 +3531,7 @@ class DataFlowAnalyzer:
             for block in self.cfg.blocks:
                 # Meet of all predecessors
                 if block.predecessors:
-                    new_in: dict[str, ConstantValue] = {
-                        v: ConstantValue.undefined() for v in all_vars
-                    }
+                    new_in: dict[str, ConstantValue] = {v: ConstantValue.undefined() for v in all_vars}
                     for pred in block.predecessors:
                         for var in all_vars:
                             new_in[var] = new_in[var].meet(constant_out[pred.id][var])
@@ -3782,9 +3617,7 @@ class DataFlowAnalyzer:
                 right = self._evaluate_constant(node.comparators[0], constants)
                 if left.is_constant and right.is_constant:
                     try:
-                        result = self._eval_compare(
-                            node.ops[0], left.value, right.value
-                        )
+                        result = self._eval_compare(node.ops[0], left.value, right.value)
                         if result is not None:
                             return ConstantValue.constant(result)
                     except Exception:
@@ -3794,9 +3627,7 @@ class DataFlowAnalyzer:
         # Other expressions are not constant
         return ConstantValue.not_constant()
 
-    def _eval_binop(
-        self, op: ast.operator, left: object, right: object
-    ) -> object | None:
+    def _eval_binop(self, op: ast.operator, left: object, right: object) -> object | None:
         """Evaluate a binary operation on constants."""
         if isinstance(op, ast.Add):
             return left + right  # type: ignore
@@ -3867,10 +3698,7 @@ class DataFlowAnalyzer:
                         expr = Expression.from_node(node)
                         all_expressions.add(expr)
                         # Only add to gen if not killed in this block yet
-                        if not any(
-                            expr.is_killed_by(v)
-                            for v in self.block_def.get(block.id, set())
-                        ):
+                        if not any(expr.is_killed_by(v) for v in self.block_def.get(block.id, set())):
                             gen.add(expr)
 
                 # Find expressions killed by definitions in this statement
@@ -3908,9 +3736,7 @@ class DataFlowAnalyzer:
                         changed = True
 
                 # Transfer: out = gen ∪ (in - kill)
-                new_out = block_gen[block.id] | (
-                    avail_in[block.id] - block_kill[block.id]
-                )
+                new_out = block_gen[block.id] | (avail_in[block.id] - block_kill[block.id])
                 if new_out != avail_out[block.id]:
                     avail_out[block.id] = new_out
                     changed = True
@@ -3980,9 +3806,7 @@ class DataFlowAnalyzer:
                         changed = True
 
                 # Transfer: in = use ∪ (out - kill)
-                new_in = block_use[block.id] | (
-                    busy_out[block.id] - block_kill[block.id]
-                )
+                new_in = block_use[block.id] | (busy_out[block.id] - block_kill[block.id])
                 if new_in != busy_in[block.id]:
                     busy_in[block.id] = new_in
                     changed = True

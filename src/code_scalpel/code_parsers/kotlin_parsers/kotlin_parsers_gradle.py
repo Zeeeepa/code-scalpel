@@ -17,7 +17,7 @@ Gradle Build Parser features:
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class ConfigurationType(Enum):
@@ -56,21 +56,21 @@ class GradlePlugin:
     """Represents a Gradle plugin."""
 
     id: str
-    version: Optional[str] = None
-    plugin_type: Optional[str] = None
+    version: str | None = None
+    plugin_type: str | None = None
 
 
 @dataclass
 class BuildConfiguration:
     """Gradle build configuration."""
 
-    group: Optional[str] = None
-    version: Optional[str] = None
-    min_sdk: Optional[int] = None
-    target_sdk: Optional[int] = None
-    compile_sdk: Optional[int] = None
-    java_version: Optional[str] = None
-    kotlin_version: Optional[str] = None
+    group: str | None = None
+    version: str | None = None
+    min_sdk: int | None = None
+    target_sdk: int | None = None
+    compile_sdk: int | None = None
+    java_version: str | None = None
+    kotlin_version: str | None = None
 
 
 class GradleBuildParser:
@@ -80,7 +80,7 @@ class GradleBuildParser:
         """Initialize Gradle build parser."""
         self.dependencies: list[Dependency] = []
         self.plugins: list[GradlePlugin] = []
-        self.configuration: Optional[BuildConfiguration] = None
+        self.configuration: BuildConfiguration | None = None
 
     def parse_build_gradle_kts(self, build_file: Path) -> dict[str, Any]:
         """

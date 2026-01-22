@@ -50,10 +50,11 @@ Future Enhancements:
 
 from __future__ import annotations
 
+from collections.abc import Callable, Generator
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Generator, Optional
+from typing import Any
 
 try:
     from tree_sitter import Language, Node, Parser, Tree  # type: ignore[import-untyped]
@@ -102,9 +103,7 @@ class TreeSitterNode:
         """Node text content."""
         if not self.node:
             return ""
-        return self.source_code[self.node.start_byte : self.node.end_byte].decode(
-            "utf-8"
-        )
+        return self.source_code[self.node.start_byte : self.node.end_byte].decode("utf-8")
 
     @property
     def start_line(self) -> int:
@@ -127,20 +126,20 @@ class TreeSitterNode:
         return self.node.end_point[1] if self.node else 0
 
     @property
-    def children(self) -> list["TreeSitterNode"]:
+    def children(self) -> list[TreeSitterNode]:
         """Get all child nodes."""
         if not self.node:
             return []
         return [TreeSitterNode(c, self.source_code) for c in self.node.children]
 
     @property
-    def named_children(self) -> list["TreeSitterNode"]:
+    def named_children(self) -> list[TreeSitterNode]:
         """Get named child nodes (excludes punctuation, etc.)."""
         if not self.node:
             return []
         return [TreeSitterNode(c, self.source_code) for c in self.node.named_children]
 
-    def child_by_field(self, name: str) -> Optional["TreeSitterNode"]:
+    def child_by_field(self, name: str) -> TreeSitterNode | None:
         """Get child by field name."""
         if not self.node:
             return None
@@ -175,21 +174,19 @@ class JSSymbol:
     """A JavaScript/TypeScript symbol (function, class, variable, etc.)."""
 
     name: str
-    kind: (
-        str  # "function", "class", "variable", "const", "let", "import", "export", etc.
-    )
+    kind: str  # "function", "class", "variable", "const", "let", "import", "export", etc.
     line: int
     column: int
-    end_line: Optional[int] = None
-    end_column: Optional[int] = None
+    end_line: int | None = None
+    end_column: int | None = None
     is_exported: bool = False
     is_default_export: bool = False
     is_async: bool = False
     is_generator: bool = False
-    parent_name: Optional[str] = None  # For methods, the class name
+    parent_name: str | None = None  # For methods, the class name
     parameters: list[str] = field(default_factory=list)
-    return_type: Optional[str] = None  # TypeScript only
-    jsdoc: Optional[str] = None
+    return_type: str | None = None  # TypeScript only
+    jsdoc: str | None = None
 
 
 @dataclass
@@ -211,11 +208,9 @@ class ImportStatement:
     module: str
     line: int
     is_type_only: bool = False  # TypeScript: import type
-    default_import: Optional[str] = None
-    namespace_import: Optional[str] = None  # import * as name
-    named_imports: list[tuple[str, Optional[str]]] = field(
-        default_factory=list
-    )  # [(name, alias)]
+    default_import: str | None = None
+    namespace_import: str | None = None  # import * as name
+    named_imports: list[tuple[str, str | None]] = field(default_factory=list)  # [(name, alias)]
     is_dynamic: bool = False  # import()
 
 
@@ -226,7 +221,7 @@ class ExportStatement:
     name: str
     line: int
     kind: str  # "default", "named", "all", "declaration"
-    source_module: Optional[str] = None  # For re-exports
+    source_module: str | None = None  # For re-exports
     is_type_only: bool = False  # TypeScript: export type
 
 
@@ -271,16 +266,14 @@ class TreeSitterJSParser:
         imports = result.imports
     """
 
-    def __init__(self, language_path: Optional[str] = None) -> None:
+    def __init__(self, language_path: str | None = None) -> None:
         """
         Initialize tree-sitter parser.
 
         :param language_path: Optional path to compiled language .so file.
         """
         if not TREE_SITTER_AVAILABLE:
-            raise ImportError(
-                "tree-sitter not installed. Install with: pip install tree-sitter"
-            )
+            raise ImportError("tree-sitter not installed. Install with: pip install tree-sitter")
 
         self._parsers: dict[JSLanguageVariant, Any] = {}
         self._languages: dict[JSLanguageVariant, Any] = {}
@@ -321,9 +314,7 @@ class TreeSitterJSParser:
                 import tree_sitter_typescript  # type: ignore[import-untyped]
 
                 # JavaScript and JSX use the same parser
-                js_lang = Language(
-                    tree_sitter_javascript.language()  # type: ignore[operator]
-                )
+                js_lang = Language(tree_sitter_javascript.language())  # type: ignore[operator]
                 js_parser = Parser()
                 _set_parser_language(js_parser, js_lang)
                 self._languages[JSLanguageVariant.JAVASCRIPT] = js_lang
@@ -332,18 +323,14 @@ class TreeSitterJSParser:
                 self._parsers[JSLanguageVariant.JSX] = js_parser
 
                 # TypeScript
-                ts_lang = Language(
-                    tree_sitter_typescript.language_typescript()  # type: ignore[operator]
-                )
+                ts_lang = Language(tree_sitter_typescript.language_typescript())  # type: ignore[operator]
                 ts_parser = Parser()
                 _set_parser_language(ts_parser, ts_lang)
                 self._languages[JSLanguageVariant.TYPESCRIPT] = ts_lang
                 self._parsers[JSLanguageVariant.TYPESCRIPT] = ts_parser
 
                 # TSX
-                tsx_lang = Language(
-                    tree_sitter_typescript.language_tsx()  # type: ignore[operator]
-                )
+                tsx_lang = Language(tree_sitter_typescript.language_tsx())  # type: ignore[operator]
                 tsx_parser = Parser()
                 _set_parser_language(tsx_parser, tsx_lang)
                 self._languages[JSLanguageVariant.TSX] = tsx_lang
@@ -384,7 +371,7 @@ class TreeSitterJSParser:
         self,
         code: str,
         variant: JSLanguageVariant = JSLanguageVariant.JAVASCRIPT,
-        old_tree: Optional[Any] = None,
+        old_tree: Any | None = None,
     ) -> TreeSitterParseResult:
         """
         Parse JavaScript/TypeScript code.
@@ -421,9 +408,7 @@ class TreeSitterJSParser:
         imports = self._extract_imports(root)
         exports = self._extract_exports(root)
         jsx_components = (
-            self._extract_jsx_components(root)
-            if variant in (JSLanguageVariant.JSX, JSLanguageVariant.TSX)
-            else []
+            self._extract_jsx_components(root) if variant in (JSLanguageVariant.JSX, JSLanguageVariant.TSX) else []
         )
 
         parse_time = (time.time() - start_time) * 1000
@@ -443,7 +428,7 @@ class TreeSitterJSParser:
     def parse_file(
         self,
         file_path: str,
-        variant: Optional[JSLanguageVariant] = None,
+        variant: JSLanguageVariant | None = None,
     ) -> TreeSitterParseResult:
         """
         Parse a JavaScript/TypeScript file.
@@ -506,11 +491,9 @@ class TreeSitterJSParser:
     def _extract_symbols(self, root: TreeSitterNode) -> list[JSSymbol]:
         """Extract all symbols from the tree."""
         symbols: list[JSSymbol] = []
-        current_class: Optional[str] = None
+        current_class: str | None = None
 
-        def visit(
-            node: TreeSitterNode, is_exported: bool = False, is_default: bool = False
-        ) -> None:
+        def visit(node: TreeSitterNode, is_exported: bool = False, is_default: bool = False) -> None:
             nonlocal current_class
 
             node_type = node.type
@@ -537,13 +520,8 @@ class TreeSitterJSParser:
                 )
 
             # Arrow functions assigned to variables
-            elif (
-                node_type == "lexical_declaration"
-                or node_type == "variable_declaration"
-            ):
-                for declarator in [
-                    c for c in node.named_children if c.type == "variable_declarator"
-                ]:
+            elif node_type == "lexical_declaration" or node_type == "variable_declaration":
+                for declarator in [c for c in node.named_children if c.type == "variable_declarator"]:
                     name_node = declarator.child_by_field("name")
                     value_node = declarator.child_by_field("value")
 
@@ -564,8 +542,7 @@ class TreeSitterJSParser:
                     elif name_node:
                         kind = (
                             "const"
-                            if node_type == "lexical_declaration"
-                            and "const" in node.text[:10]
+                            if node_type == "lexical_declaration" and "const" in node.text[:10]
                             else "let" if "let" in node.text[:10] else "var"
                         )
                         symbols.append(
@@ -681,7 +658,7 @@ class TreeSitterJSParser:
         visit(root)
         return symbols
 
-    def _extract_params(self, params_node: Optional[TreeSitterNode]) -> list[str]:
+    def _extract_params(self, params_node: TreeSitterNode | None) -> list[str]:
         """Extract parameter names from a parameter list node."""
         if not params_node:
             return []
@@ -690,9 +667,7 @@ class TreeSitterJSParser:
         for child in params_node.named_children:
             if child.type == "identifier":
                 params.append(child.text)
-            elif (
-                child.type == "required_parameter" or child.type == "optional_parameter"
-            ):
+            elif child.type == "required_parameter" or child.type == "optional_parameter":
                 pattern = child.child_by_field("pattern")
                 if pattern:
                     params.append(pattern.text)
@@ -908,9 +883,7 @@ class TreeSitterJSParser:
         for child in root.children:
             yield from self.walk(child)
 
-    def find_nodes(
-        self, root: TreeSitterNode, predicate: Callable[[TreeSitterNode], bool]
-    ) -> list[TreeSitterNode]:
+    def find_nodes(self, root: TreeSitterNode, predicate: Callable[[TreeSitterNode], bool]) -> list[TreeSitterNode]:
         """
         Find all nodes matching a predicate.
 
@@ -920,9 +893,7 @@ class TreeSitterJSParser:
         """
         return [node for node in self.walk(root) if predicate(node)]
 
-    def find_by_type(
-        self, root: TreeSitterNode, node_type: str
-    ) -> list[TreeSitterNode]:
+    def find_by_type(self, root: TreeSitterNode, node_type: str) -> list[TreeSitterNode]:
         """
         Find all nodes of a specific type.
 

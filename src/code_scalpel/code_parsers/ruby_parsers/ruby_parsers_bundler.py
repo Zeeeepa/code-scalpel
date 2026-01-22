@@ -6,7 +6,6 @@ Bundler Parser - Ruby Dependency Management Analysis
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -15,11 +14,11 @@ class Gem:
 
     name: str
     version: str
-    version_constraint: Optional[str] = None
+    version_constraint: str | None = None
     source: str = "rubygems.org"
     is_direct_dependency: bool = True
     is_vulnerable: bool = False
-    vulnerability_info: Optional[str] = None
+    vulnerability_info: str | None = None
 
 
 @dataclass
@@ -28,8 +27,8 @@ class BundleConfig:
 
     gemfile_path: Path
     lockfile_path: Path
-    ruby_version: Optional[str] = None
-    bundler_version: Optional[str] = None
+    ruby_version: str | None = None
+    bundler_version: str | None = None
 
 
 class BundlerParser:
@@ -42,29 +41,29 @@ class BundlerParser:
 
     def __init__(self):
         """Initialize Bundler parser."""
-        self.gems: List[Gem] = []
+        self.gems: list[Gem] = []
         self.config = BundleConfig(Path("Gemfile"), Path("Gemfile.lock"))
 
-    def parse_gemfile(self, gemfile_path: Path) -> List[Gem]:
+    def parse_gemfile(self, gemfile_path: Path) -> list[Gem]:
         raise NotImplementedError("Phase 2: Gemfile parsing")
 
-    def parse_gemfile_lock(self, lockfile_path: Path) -> List[Gem]:
+    def parse_gemfile_lock(self, lockfile_path: Path) -> list[Gem]:
         raise NotImplementedError("Phase 2: Gemfile.lock parsing")
 
-    def extract_gems(self, gemfile_content: str) -> List[Gem]:
+    def extract_gems(self, gemfile_content: str) -> list[Gem]:
         raise NotImplementedError("Phase 2: Gem extraction")
 
-    def extract_locked_versions(self, lockfile_content: str) -> Dict[str, str]:
+    def extract_locked_versions(self, lockfile_content: str) -> dict[str, str]:
         raise NotImplementedError("Phase 2: Version extraction")
 
-    def scan_for_vulnerabilities(self, gems: List[Gem]) -> List[Gem]:
+    def scan_for_vulnerabilities(self, gems: list[Gem]) -> list[Gem]:
         raise NotImplementedError("Phase 2: Vulnerability scanning")
 
-    def detect_outdated_gems(self, gems: List[Gem]) -> List[Gem]:
+    def detect_outdated_gems(self, gems: list[Gem]) -> list[Gem]:
         raise NotImplementedError("Phase 2: Outdated gem detection")
 
-    def analyze_transitive_dependencies(self, gems: List[Gem]) -> Dict:
+    def analyze_transitive_dependencies(self, gems: list[Gem]) -> dict:
         raise NotImplementedError("Phase 2: Transitive dependency analysis")
 
-    def generate_dependency_report(self, gems: List[Gem]) -> str:
+    def generate_dependency_report(self, gems: list[Gem]) -> str:
         raise NotImplementedError("Phase 2: Report generation")

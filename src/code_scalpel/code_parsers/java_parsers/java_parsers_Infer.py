@@ -14,7 +14,6 @@ import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -67,7 +66,7 @@ class InferParser:
         },
     }
 
-    def __init__(self, infer_out_dir: Optional[str] = None):
+    def __init__(self, infer_out_dir: str | None = None):
         """
         Initialize Infer parser.
 
@@ -77,7 +76,7 @@ class InferParser:
         self.infer_out_dir = infer_out_dir or "infer-out"
         self.language = "java"
 
-    def parse(self, source_path: Optional[str] = None) -> list[InferIssue]:
+    def parse(self, source_path: str | None = None) -> list[InferIssue]:
         """
         Parse Infer results from report.json.
 
@@ -92,7 +91,7 @@ class InferParser:
             return self.parse_json(report_path.read_text())
         return []
 
-    def run_infer(self, compile_command: list[str]) -> Optional[str]:
+    def run_infer(self, compile_command: list[str]) -> str | None:
         """
         Run Infer analysis.
 

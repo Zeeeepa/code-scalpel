@@ -17,7 +17,7 @@ import shutil
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class DetektSeverity(Enum):
@@ -55,10 +55,10 @@ class DetektFinding:
     file_path: str
     line: int
     column: int
-    end_line: Optional[int] = None
-    end_column: Optional[int] = None
-    snippet: Optional[str] = None
-    documentation_url: Optional[str] = None
+    end_line: int | None = None
+    end_column: int | None = None
+    snippet: str | None = None
+    documentation_url: str | None = None
 
     @property
     def location(self) -> str:
@@ -100,10 +100,10 @@ class DetektReport:
     """Complete Detekt analysis report."""
 
     findings: list[DetektFinding] = field(default_factory=list)
-    config: Optional[DetektConfig] = None
-    execution_time_ms: Optional[float] = None
-    kotlin_version: Optional[str] = None
-    detekt_version: Optional[str] = None
+    config: DetektConfig | None = None
+    execution_time_ms: float | None = None
+    kotlin_version: str | None = None
+    detekt_version: str | None = None
 
     @property
     def error_count(self) -> int:
@@ -163,7 +163,7 @@ class DetektParser:
 
     """
 
-    def __init__(self, detekt_path: Optional[str] = None):
+    def __init__(self, detekt_path: str | None = None):
         """
         Initialize Detekt parser.
 
@@ -171,7 +171,7 @@ class DetektParser:
         """
         self._detekt_path = detekt_path or self._find_detekt()
 
-    def _find_detekt(self) -> Optional[str]:
+    def _find_detekt(self) -> str | None:
         """Find Detekt executable."""
         # Check for detekt CLI in PATH
         detekt = shutil.which("detekt")
@@ -227,7 +227,7 @@ class DetektParser:
     def analyze_project(
         self,
         project_path: str,
-        config_path: Optional[str] = None,
+        config_path: str | None = None,
     ) -> DetektReport:
         """
         Run Detekt on a Kotlin project.

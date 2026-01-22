@@ -22,7 +22,7 @@ Phase 2 Enhancement Areas:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class PsalmSeverity(Enum):
@@ -50,19 +50,19 @@ class PsalmError:
     """Represents a single Psalm analysis error."""
 
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    column: Optional[int] = None
-    severity: Optional[str] = None
-    error_type: Optional[str] = None
-    snippet: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    column: int | None = None
+    severity: str | None = None
+    error_type: str | None = None
+    snippet: str | None = None
 
 
 @dataclass
 class PsalmConfig:
     """Psalm configuration settings."""
 
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     level: int = 1
     analysis_type: str = "normal"
     paths: list[str] = field(default_factory=list)
@@ -76,7 +76,7 @@ class PsalmParser:
     def __init__(self):
         """Initialize Psalm parser."""
         self.errors: list[PsalmError] = []
-        self.config: Optional[PsalmConfig] = None
+        self.config: PsalmConfig | None = None
 
     def parse_json_report(self, json_data: str) -> list[PsalmError]:
         raise NotImplementedError("Phase 2: Psalm JSON parsing")

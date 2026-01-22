@@ -8,8 +8,6 @@ go vet Parser - Go static analysis for suspicious constructs.
 # Analyzers: printf, shadow, structtag, unreachable, etc.
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -24,6 +22,6 @@ class GovetParser:
         """Run go vet and parse diagnostic output."""
         raise NotImplementedError("go vet parser not yet implemented")
 
-    def run_vet(self, package_path: str) -> Optional[str]:
+    def run_vet(self, package_path: str) -> str | None:
         """Run go vet on a package and return output."""
         raise NotImplementedError("go vet parser not yet implemented")

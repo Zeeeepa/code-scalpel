@@ -7,7 +7,6 @@
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class IssueSeverity(Enum):
@@ -47,10 +46,10 @@ class LintIssue:
     file_path: str
     line: int
     column: int
-    from_line: Optional[int] = None
-    from_column: Optional[int] = None
-    to_line: Optional[int] = None
-    to_column: Optional[int] = None
+    from_line: int | None = None
+    from_column: int | None = None
+    to_line: int | None = None
+    to_column: int | None = None
 
 
 @dataclass
@@ -58,7 +57,7 @@ class GolangciLintConfig:
     """Golangci-lint configuration."""
 
     version: str = "1.55.0"
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     timeout: str = "5m"
     concurrency: int = 4
     fast_mode: bool = False
@@ -75,23 +74,19 @@ class GolangciLintParser:
     def __init__(self):
         """Initialize Golangci-Lint parser."""
         self.config = GolangciLintConfig()
-        self.issues: List[LintIssue] = []
+        self.issues: list[LintIssue] = []
 
-    def execute_golangci_lint(
-        self, paths: List[Path], config: Optional[GolangciLintConfig] = None
-    ) -> List[LintIssue]:
+    def execute_golangci_lint(self, paths: list[Path], config: GolangciLintConfig | None = None) -> list[LintIssue]:
         raise NotImplementedError("Phase 2: Golangci-lint execution")
 
-    def parse_json_report(self, report_path: Path) -> List[LintIssue]:
+    def parse_json_report(self, report_path: Path) -> list[LintIssue]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
     def load_config(self, config_file: Path) -> GolangciLintConfig:
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_by_linter(
-        self, issues: List[LintIssue]
-    ) -> Dict[LinterType, List[LintIssue]]:
+    def categorize_by_linter(self, issues: list[LintIssue]) -> dict[LinterType, list[LintIssue]]:
         raise NotImplementedError("Phase 2: Issue categorization by linter")
 
-    def generate_report(self, issues: List[LintIssue], format: str = "json") -> str:
+    def generate_report(self, issues: list[LintIssue], format: str = "json") -> str:
         raise NotImplementedError("Phase 2: Report generation")

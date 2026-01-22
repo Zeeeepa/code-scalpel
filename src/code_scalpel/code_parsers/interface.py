@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 
 
 class Language(Enum):
@@ -22,9 +22,9 @@ class ParseResult:
     """Result of code parsing."""
 
     ast: Any  # AST structure (language-dependent)
-    errors: List[Dict[str, Any]]
-    warnings: List[str]
-    metrics: Dict[str, Any]
+    errors: list[dict[str, Any]]
+    warnings: list[str]
+    metrics: dict[str, Any]
     language: Language
 
 
@@ -37,11 +37,11 @@ class IParser(ABC):
         pass
 
     @abstractmethod
-    def get_functions(self, ast_tree: Any) -> List[str]:
+    def get_functions(self, ast_tree: Any) -> list[str]:
         """Get list of function names."""
         pass
 
     @abstractmethod
-    def get_classes(self, ast_tree: Any) -> List[str]:
+    def get_classes(self, ast_tree: Any) -> list[str]:
         """Get list of class names."""
         pass

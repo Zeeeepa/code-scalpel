@@ -53,12 +53,8 @@ async def test_performance_small_input(tmp_path: Path):
 
 async def test_performance_medium_input(tmp_path: Path):
     """Test performance with medium input (100+ functions)."""
-    frontend_code = "\n".join(
-        [f"const func{i} = () => fetch('/api/users/{i}');" for i in range(100)]
-    )
-    backend_code = "\n".join(
-        [f"def func{i}(): return requests.get('/api/users/{i}')" for i in range(100)]
-    )
+    frontend_code = "\n".join([f"const func{i} = () => fetch('/api/users/{i}');" for i in range(100)])
+    backend_code = "\n".join([f"def func{i}(): return requests.get('/api/users/{i}')" for i in range(100)])
 
     async with _stdio_session(project_root=tmp_path) as session:
         start = time.time()
@@ -209,9 +205,7 @@ async def test_error_recovery_from_invalid_input(tmp_path: Path):
 async def test_graceful_oversized_input(tmp_path: Path):
     """Test graceful handling of very large input."""
     # Create input with 10000 properties
-    huge_code = (
-        "const obj = { " + ", ".join([f"key{i}: {i}" for i in range(5000)]) + " };"
-    )
+    huge_code = "const obj = { " + ", ".join([f"key{i}: {i}" for i in range(5000)]) + " };"
 
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(

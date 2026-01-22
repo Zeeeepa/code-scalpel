@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class ConstraintType(Enum):
@@ -63,30 +63,30 @@ class PathConstraint:
 class ConstraintSet:
     """A collection of path constraints."""
 
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    must_visit: List[str] = field(default_factory=list)
-    must_avoid: List[str] = field(default_factory=list)
-    edge_types: Optional[List[str]] = None  # Allowed edge types
-    node_types: Optional[List[str]] = None  # Allowed node types
+    min_length: int | None = None
+    max_length: int | None = None
+    must_visit: list[str] = field(default_factory=list)
+    must_avoid: list[str] = field(default_factory=list)
+    edge_types: list[str] | None = None  # Allowed edge types
+    node_types: list[str] | None = None  # Allowed node types
     min_confidence: float = 0.0
-    max_weight: Optional[float] = None
-    pattern: Optional[str] = None  # Node type pattern like "function->class->function"
-    custom_constraints: List[PathConstraint] = field(default_factory=list)
+    max_weight: float | None = None
+    pattern: str | None = None  # Node type pattern like "function->class->function"
+    custom_constraints: list[PathConstraint] = field(default_factory=list)
 
 
 @dataclass
 class ConstrainedPath:
     """A path that satisfies constraints."""
 
-    nodes: List[Dict[str, Any]]
-    node_ids: List[str]
-    edges: List[Dict[str, Any]]
+    nodes: list[dict[str, Any]]
+    node_ids: list[str]
+    edges: list[dict[str, Any]]
     length: int
     total_weight: float
     total_confidence: float
-    constraints_satisfied: List[str]
-    constraints_violated: List[str]  # For soft constraints
+    constraints_satisfied: list[str]
+    constraints_violated: list[str]  # For soft constraints
     score: float  # Overall score (higher is better)
 
 
@@ -95,12 +95,12 @@ class PathConstraintResult:
     """Result of constrained path finding."""
 
     success: bool
-    paths: List[ConstrainedPath]
+    paths: list[ConstrainedPath]
     total_paths_found: int
     paths_after_filtering: int
-    constraints_applied: List[str]
-    stats: Dict[str, Any]
-    error: Optional[str] = None
+    constraints_applied: list[str]
+    stats: dict[str, Any]
+    error: str | None = None
 
 
 class PathConstraintEngine:
@@ -108,14 +108,14 @@ class PathConstraintEngine:
 
     def __init__(self):
         """Initialize the path constraint engine."""
-        self._nodes: Dict[str, Dict[str, Any]] = {}
-        self._edges: List[Dict[str, Any]] = []
-        self._adjacency: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {}
+        self._nodes: dict[str, dict[str, Any]] = {}
+        self._edges: list[dict[str, Any]] = []
+        self._adjacency: dict[str, list[tuple[str, dict[str, Any]]]] = {}
 
     def load_graph(
         self,
-        nodes: List[Dict[str, Any]],
-        edges: List[Dict[str, Any]],
+        nodes: list[dict[str, Any]],
+        edges: list[dict[str, Any]],
     ) -> None:
         """Load graph data for path queries."""
         self._nodes.clear()
@@ -182,9 +182,7 @@ class PathConstraintEngine:
             # Determine effective max depth
             effective_max_depth = max_search_depth
             if constraints.max_length is not None:
-                effective_max_depth = min(
-                    effective_max_depth, constraints.max_length + 1
-                )
+                effective_max_depth = min(effective_max_depth, constraints.max_length + 1)
 
             # Find all paths
             all_paths = self._find_all_paths(start, end, effective_max_depth)
@@ -193,7 +191,7 @@ class PathConstraintEngine:
             constraints_applied = self._get_constraint_names(constraints)
 
             # Filter and score paths
-            valid_paths: List[ConstrainedPath] = []
+            valid_paths: list[ConstrainedPath] = []
 
             for path_nodes, path_edges in all_paths:
                 result = self._evaluate_path(path_nodes, path_edges, constraints)
@@ -235,14 +233,12 @@ class PathConstraintEngine:
         start: str,
         end: str,
         max_depth: int,
-    ) -> List[Tuple[List[str], List[Dict[str, Any]]]]:
+    ) -> list[tuple[list[str], list[dict[str, Any]]]]:
         """Find all paths between start and end using DFS."""
-        paths: List[Tuple[List[str], List[Dict[str, Any]]]] = []
+        paths: list[tuple[list[str], list[dict[str, Any]]]] = []
 
         # DFS stack: (current_node, path, edges)
-        stack: List[Tuple[str, List[str], List[Dict[str, Any]]]] = [
-            (start, [start], [])
-        ]
+        stack: list[tuple[str, list[str], list[dict[str, Any]]]] = [(start, [start], [])]
 
         while stack:
             current, path, edges = stack.pop()
@@ -262,14 +258,14 @@ class PathConstraintEngine:
 
     def _evaluate_path(
         self,
-        path_node_ids: List[str],
-        path_edges: List[Dict[str, Any]],
+        path_node_ids: list[str],
+        path_edges: list[dict[str, Any]],
         constraints: ConstraintSet,
-    ) -> Optional[ConstrainedPath]:
+    ) -> ConstrainedPath | None:
         """Evaluate a path against constraints."""
         path_length = len(path_node_ids) - 1
-        satisfied: List[str] = []
-        violated: List[str] = []
+        satisfied: list[str] = []
+        violated: list[str] = []
 
         # Length constraints
         if constraints.min_length is not None:
@@ -363,14 +359,10 @@ class PathConstraintEngine:
                 violated.append(custom.name)
 
         # Calculate score
-        score = self._calculate_path_score(
-            path_length, avg_confidence, total_weight, len(satisfied), len(violated)
-        )
+        score = self._calculate_path_score(path_length, avg_confidence, total_weight, len(satisfied), len(violated))
 
         # Build node list with full data
-        path_nodes = [
-            self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids
-        ]
+        path_nodes = [self._nodes.get(node_id, {"id": node_id}) for node_id in path_node_ids]
 
         return ConstrainedPath(
             nodes=path_nodes,
@@ -384,7 +376,7 @@ class PathConstraintEngine:
             score=score,
         )
 
-    def _check_pattern(self, path_node_ids: List[str], pattern: str) -> bool:
+    def _check_pattern(self, path_node_ids: list[str], pattern: str) -> bool:
         """
         Check if path matches a node type pattern.
 
@@ -415,8 +407,8 @@ class PathConstraintEngine:
 
     def _evaluate_custom_constraint(
         self,
-        path_node_ids: List[str],
-        path_edges: List[Dict[str, Any]],
+        path_node_ids: list[str],
+        path_edges: list[dict[str, Any]],
         constraint: PathConstraint,
     ) -> bool:
         """Evaluate a custom constraint."""
@@ -449,14 +441,9 @@ class PathConstraintEngine:
         constraint_score = satisfied_count / max(satisfied_count + violated_count, 1)
 
         # Combine scores
-        return (
-            0.3 * length_score
-            + 0.3 * confidence_score
-            + 0.2 * weight_score
-            + 0.2 * constraint_score
-        )
+        return 0.3 * length_score + 0.3 * confidence_score + 0.2 * weight_score + 0.2 * constraint_score
 
-    def _get_constraint_names(self, constraints: ConstraintSet) -> List[str]:
+    def _get_constraint_names(self, constraints: ConstraintSet) -> list[str]:
         """Get list of constraint names being applied."""
         names = []
 
@@ -488,7 +475,7 @@ class PathConstraintEngine:
         start: str,
         end: str,
         max_depth: int = 10,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Get statistics about paths between two nodes.
 
@@ -517,9 +504,9 @@ class PathConstraintEngine:
             "length_distribution": self._count_distribution(lengths),
         }
 
-    def _count_distribution(self, values: List[int]) -> Dict[int, int]:
+    def _count_distribution(self, values: list[int]) -> dict[int, int]:
         """Count distribution of values."""
-        dist: Dict[int, int] = {}
+        dist: dict[int, int] = {}
         for v in values:
             dist[v] = dist.get(v, 0) + 1
         return dict(sorted(dist.items()))

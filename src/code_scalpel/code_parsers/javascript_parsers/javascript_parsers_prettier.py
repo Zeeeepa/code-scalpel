@@ -45,7 +45,7 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class PrettierParser(Enum):
@@ -147,9 +147,7 @@ class PrettierConfig:
     prose_wrap: ProseWrap = ProseWrap.PRESERVE
 
     # HTML
-    html_whitespace_sensitivity: HTMLWhitespaceSensitivity = (
-        HTMLWhitespaceSensitivity.CSS
-    )
+    html_whitespace_sensitivity: HTMLWhitespaceSensitivity = HTMLWhitespaceSensitivity.CSS
 
     # Vue
     vue_indent_script_and_style: bool = False
@@ -161,7 +159,7 @@ class PrettierConfig:
     single_attribute_per_line: bool = False
 
     # Parser
-    parser: Optional[str] = None
+    parser: str | None = None
 
     # Plugins
     plugins: list[str] = field(default_factory=list)
@@ -197,9 +195,9 @@ class FormatResult:
     success: bool
     original_code: str
     formatted_code: str
-    diff: Optional[FormatDiff] = None
-    error: Optional[str] = None
-    format_time_ms: Optional[float] = None
+    diff: FormatDiff | None = None
+    error: str | None = None
+    format_time_ms: float | None = None
 
 
 class PrettierFormatter:
@@ -225,7 +223,7 @@ class PrettierFormatter:
         is_formatted = formatter.check_format(source_code)
     """
 
-    def __init__(self, prettier_path: Optional[str] = None):
+    def __init__(self, prettier_path: str | None = None):
         """
         Initialize Prettier formatter.
 
@@ -233,7 +231,7 @@ class PrettierFormatter:
         """
         self._prettier_path = prettier_path or self._find_prettier()
 
-    def _find_prettier(self) -> Optional[str]:
+    def _find_prettier(self) -> str | None:
         """Find Prettier executable."""
         prettier = shutil.which("prettier")
         if prettier:
@@ -279,9 +277,7 @@ class PrettierFormatter:
 
                     config_data = yaml.safe_load(content)
                 except ImportError:
-                    raise ValueError(
-                        "Cannot parse config - install PyYAML for YAML support"
-                    )
+                    raise ValueError("Cannot parse config - install PyYAML for YAML support")
         elif path.suffix == ".js":
             # For JS configs, need to run through Node
             raise NotImplementedError("JS config files require Node.js evaluation")
@@ -324,17 +320,13 @@ class PrettierFormatter:
                     value = EndOfLine(value)
                 elif attr_name == "prose_wrap" and isinstance(value, str):
                     value = ProseWrap(value)
-                elif attr_name == "html_whitespace_sensitivity" and isinstance(
-                    value, str
-                ):
+                elif attr_name == "html_whitespace_sensitivity" and isinstance(value, str):
                     value = HTMLWhitespaceSensitivity(value)
                 setattr(config, attr_name, value)
 
         return config
 
-    def format_code(
-        self, code: str, config: Optional[PrettierConfig] = None, parser: str = "babel"
-    ) -> FormatResult:
+    def format_code(self, code: str, config: PrettierConfig | None = None, parser: str = "babel") -> FormatResult:
         """
         Format JavaScript code using Prettier.
 
@@ -354,11 +346,7 @@ class PrettierFormatter:
             temp_path = f.name
 
         try:
-            cmd = (
-                self._prettier_path.split()
-                if " " in self._prettier_path
-                else [self._prettier_path]
-            )
+            cmd = self._prettier_path.split() if " " in self._prettier_path else [self._prettier_path]
             cmd.extend(["--parser", parser, temp_path])
 
             start_time = time.time()
@@ -413,9 +401,7 @@ class PrettierFormatter:
         formatted_lines = formatted.splitlines(keepends=True)
 
         unified = "".join(
-            difflib.unified_diff(
-                original_lines, formatted_lines, fromfile="original", tofile="formatted"
-            )
+            difflib.unified_diff(original_lines, formatted_lines, fromfile="original", tofile="formatted")
         )
 
         # Find changed line numbers
@@ -423,7 +409,7 @@ class PrettierFormatter:
         additions = 0
         deletions = 0
 
-        for i, (orig, fmt) in enumerate(zip(original_lines, formatted_lines)):
+        for i, (orig, fmt) in enumerate(zip(original_lines, formatted_lines, strict=False)):
             if orig != fmt:
                 changed_lines.append(i + 1)
 
@@ -461,11 +447,7 @@ class PrettierFormatter:
 
         original_code = path.read_text()
 
-        cmd = (
-            self._prettier_path.split()
-            if " " in self._prettier_path
-            else [self._prettier_path]
-        )
+        cmd = self._prettier_path.split() if " " in self._prettier_path else [self._prettier_path]
         if write:
             cmd.extend(["--write", file_path])
         else:

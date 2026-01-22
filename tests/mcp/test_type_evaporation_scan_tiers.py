@@ -460,10 +460,7 @@ async def shape(req: Request):
     assert data.get("success") is True
     schemas = data.get("generated_schemas") or []
     assert len(schemas) >= 1
-    assert any(
-        "z.enum" in (s.get("schema") or "") or "z.object" in (s.get("schema") or "")
-        for s in schemas
-    )
+    assert any("z.enum" in (s.get("schema") or "") or "z.object" in (s.get("schema") or "") for s in schemas)
     assert data.get("pydantic_models") is not None
     assert data.get("schema_coverage") is not None
     assert env_json.get("duration_ms", 0) < 5000

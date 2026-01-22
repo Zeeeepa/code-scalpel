@@ -208,7 +208,7 @@ class AnotherClass:
 class MyClass:
     def method_one(self):
         pass
-    
+
     def method_two(self, x):
         return x
 
@@ -527,7 +527,7 @@ def outer():
 class MyClass:
     def method_a(self):
         self.method_b()
-    
+
     def method_b(self):
         pass
 """)
@@ -672,7 +672,7 @@ def func():
     # Call on subscript result: handlers[0].process()
     # The value of the Attribute is a Subscript, not Name or Attribute
     handlers[0].process()
-    
+
     # Call on call result: get_handler().execute()
     # The value of the Attribute is a Call, not Name or Attribute
     get_handler().execute()

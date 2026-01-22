@@ -108,7 +108,7 @@ code-scalpel mcp --stdio --root /path/to/project
 ```
 
 **Stdout:** MCP protocol messages (to client)  
-**Stderr:** Debug logs (optional, set `SCALPEL_MCP_DEBUG=1`)
+**Stderr:** Debug logs (optional, set `SCALPEL_MCP_INFO=WARN`)
 
 **mcp.json Configuration Example:**
 ```json
@@ -119,7 +119,7 @@ code-scalpel mcp --stdio --root /path/to/project
       "args": ["mcp", "--stdio"],
       "env": {
         "CODE_SCALPEL_PROJECT_ROOT": "/path/to/project",
-        "SCALPEL_MCP_DEBUG": "0"
+        "SCALPEL_MCP_INFO": "WARN"
       }
     }
   }
@@ -208,14 +208,12 @@ Control MCP server behavior with environment variables:
 | `CODE_SCALPEL_PROJECT_ROOT` | Project root for code analysis | `.` | `/path/to/project` |
 | `CODE_SCALPEL_LICENSE_PATH` | Path to license JWT file | Auto-detect | `/path/to/license.jwt` |
 | `CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY` | Disable license auto-detection | `false` | `1` |
-| `SCALPEL_MCP_DEBUG` | Enable MCP debug logging | `0` | `1` |
 | `PYTHONPATH` | Python module search path | System default | `/path/to/src` |
 
 **Example with environment variables:**
 ```bash
 export CODE_SCALPEL_PROJECT_ROOT=/path/to/project
 export CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
-export SCALPEL_MCP_DEBUG=1
 code-scalpel mcp --stdio
 ```
 
@@ -232,8 +230,7 @@ Add Code Scalpel to Claude Desktop by editing `~/Library/Application Support/Cla
       "command": "code-scalpel",
       "args": ["mcp", "--stdio"],
       "env": {
-        "CODE_SCALPEL_PROJECT_ROOT": "${PROJECT_ROOT}",
-        "SCALPEL_MCP_DEBUG": "0"
+        "CODE_SCALPEL_PROJECT_ROOT": "${PROJECT_ROOT}"
       }
     }
   }

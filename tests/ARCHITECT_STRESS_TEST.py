@@ -85,8 +85,8 @@ print("\n[TEST 3] Tree-Sitter JavaScript Parser with Missing Semicolon")
 print("-" * 80)
 
 try:
-    from tree_sitter import Parser, Language
     import tree_sitter_javascript as ts_js
+    from tree_sitter import Language, Parser
 
     dirty_js_missing_semicolon = """
 function calculateTotal(items) {
@@ -136,9 +136,7 @@ print("\nResult: ", end="")
 try:
     tree = ast.parse(dirty_python_incomplete)
     print("✅ SILENT SUCCESS: ast.parse accepted incomplete code!")
-    print(
-        f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}"
-    )
+    print(f"   Functions: {[n.name for n in tree.body if isinstance(n, ast.FunctionDef)]}")
 except SyntaxError as e:
     print(f"⚠️  Failed: {e}")
 
@@ -149,25 +147,25 @@ print("\n" + "=" * 80)
 print("THE ARCHITECT'S VERDICT")
 print("=" * 80)
 print("""
-1. PDG Builder (pdg_tools/builder.py): 
+1. PDG Builder (pdg_tools/builder.py):
    ❌ NO sanitization - CRASHES on merge conflicts
    ❌ NO fallback - ast.parse() called directly (line 82)
-   
+
 2. Surgical Extractor (surgery/surgical_extractor.py):
    ⚠️  Has try/catch for SyntaxError but NO sanitization in constructor
    ⚠️  Converts SyntaxError to ValueError (line 563)
-   
+
 3. JavaScript Parser (mcp/helpers/analyze_helpers.py):
    ✅ Tree-sitter can parse partial/broken syntax
    ⚠️  But reports success=True even with ERROR nodes
-   
+
 4. Main Analyze Helper (analyze_helpers.py):
    ✅ HAS sanitization via ast_helpers.parse_cached_ast()
    ⚠️  Silently "fixes" Jinja2/conflicts - user unaware code was modified
-   
+
 5. Java Parser:
    ✅ Tree-sitter error recovery - continues on syntax errors
-   
+
 CONCLUSION:
 -----------
 This tool is NOT "deterministic" because:

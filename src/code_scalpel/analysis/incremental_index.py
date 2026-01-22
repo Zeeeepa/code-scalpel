@@ -27,10 +27,11 @@ import hashlib
 import json
 import sqlite3
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -41,11 +42,11 @@ class CachedFileAnalysis:
     content_hash: str
     analysis_timestamp: float
     lines_of_code: int
-    functions: List[Dict[str, Any]]
-    classes: List[Dict[str, Any]]
-    imports: List[str]
-    complexity_warnings: List[Dict[str, Any]]
-    error: Optional[str] = None
+    functions: list[dict[str, Any]]
+    classes: list[dict[str, Any]]
+    imports: list[str]
+    complexity_warnings: list[dict[str, Any]]
+    error: str | None = None
 
 
 @dataclass
@@ -56,7 +57,7 @@ class IndexStats:
     cached_files: int
     stale_files: int  # Files that need re-analysis
     cache_hit_rate: float
-    last_full_crawl: Optional[float]
+    last_full_crawl: float | None
     database_size_bytes: int
 
 
@@ -68,7 +69,7 @@ class IncrementalIndex:
     def __init__(
         self,
         project_root: str | Path,
-        cache_dir: Optional[str | Path] = None,
+        cache_dir: str | Path | None = None,
         database_name: str = ".scalpel_index.db",
     ):
         """
@@ -82,7 +83,7 @@ class IncrementalIndex:
         self.root = Path(project_root)
         self.cache_dir = Path(cache_dir) if cache_dir else self.root
         self.db_path = self.cache_dir / database_name
-        self._connection: Optional[sqlite3.Connection] = None
+        self._connection: sqlite3.Connection | None = None
 
         # Initialize database
         self._init_database()
@@ -94,7 +95,7 @@ class IncrementalIndex:
                 CREATE TABLE IF NOT EXISTS schema_version (
                     version INTEGER PRIMARY KEY
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS file_analysis (
                     path TEXT PRIMARY KEY,
                     content_hash TEXT NOT NULL,
@@ -106,12 +107,12 @@ class IncrementalIndex:
                     complexity_warnings_json TEXT,
                     error TEXT
                 );
-                
+
                 CREATE TABLE IF NOT EXISTS crawl_metadata (
                     key TEXT PRIMARY KEY,
                     value TEXT
                 );
-                
+
                 CREATE INDEX IF NOT EXISTS idx_content_hash ON file_analysis(content_hash);
                 CREATE INDEX IF NOT EXISTS idx_timestamp ON file_analysis(analysis_timestamp);
             """)
@@ -128,9 +129,7 @@ class IncrementalIndex:
                 # Handle schema migration if needed
                 self._migrate_schema(conn, row[0], self.SCHEMA_VERSION)
 
-    def _migrate_schema(
-        self, conn: sqlite3.Connection, from_ver: int, to_ver: int
-    ) -> None:
+    def _migrate_schema(self, conn: sqlite3.Connection, from_ver: int, to_ver: int) -> None:
         """Migrate database schema between versions."""
         # For now, just update the version - add migrations as needed
         conn.execute("UPDATE schema_version SET version = ?", (to_ver,))
@@ -151,11 +150,7 @@ class IncrementalIndex:
 
     def compute_file_hash(self, file_path: str | Path) -> str:
         """Compute content hash for a file."""
-        full_path = (
-            self.root / file_path
-            if not Path(file_path).is_absolute()
-            else Path(file_path)
-        )
+        full_path = self.root / file_path if not Path(file_path).is_absolute() else Path(file_path)
 
         hasher = hashlib.sha256()
         try:
@@ -173,16 +168,14 @@ class IncrementalIndex:
             return True  # File doesn't exist or can't be read
 
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "SELECT content_hash FROM file_analysis WHERE path = ?", (file_path,)
-            )
+            cursor = conn.execute("SELECT content_hash FROM file_analysis WHERE path = ?", (file_path,))
             row = cursor.fetchone()
 
             if row is None:
                 return True  # Not in cache
             return row["content_hash"] != current_hash
 
-    def get_cached_analysis(self, file_path: str) -> Optional[CachedFileAnalysis]:
+    def get_cached_analysis(self, file_path: str) -> CachedFileAnalysis | None:
         """Get cached analysis for a file if available and valid."""
         if self.needs_reanalysis(file_path):
             return None
@@ -190,7 +183,7 @@ class IncrementalIndex:
         with self._get_connection() as conn:
             cursor = conn.execute(
                 """SELECT path, content_hash, analysis_timestamp, lines_of_code,
-                          functions_json, classes_json, imports_json, 
+                          functions_json, classes_json, imports_json,
                           complexity_warnings_json, error
                    FROM file_analysis WHERE path = ?""",
                 (file_path,),
@@ -216,11 +209,11 @@ class IncrementalIndex:
         self,
         file_path: str,
         lines_of_code: int,
-        functions: List[Dict[str, Any]],
-        classes: List[Dict[str, Any]],
-        imports: List[str],
-        complexity_warnings: List[Dict[str, Any]],
-        error: Optional[str] = None,
+        functions: list[dict[str, Any]],
+        classes: list[dict[str, Any]],
+        imports: list[str],
+        complexity_warnings: list[dict[str, Any]],
+        error: str | None = None,
     ) -> None:
         """Store analysis result for a file."""
         content_hash = self.compute_file_hash(file_path)
@@ -228,9 +221,9 @@ class IncrementalIndex:
         with self._get_connection() as conn:
             conn.execute(
                 """
-                INSERT OR REPLACE INTO file_analysis 
+                INSERT OR REPLACE INTO file_analysis
                 (path, content_hash, analysis_timestamp, lines_of_code,
-                 functions_json, classes_json, imports_json, 
+                 functions_json, classes_json, imports_json,
                  complexity_warnings_json, error)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -247,13 +240,13 @@ class IncrementalIndex:
                 ),
             )
 
-    def get_all_cached_paths(self) -> List[str]:
+    def get_all_cached_paths(self) -> list[str]:
         """Get all file paths in the cache."""
         with self._get_connection() as conn:
             cursor = conn.execute("SELECT path FROM file_analysis")
             return [row["path"] for row in cursor.fetchall()]
 
-    def get_stale_files(self) -> List[str]:
+    def get_stale_files(self) -> list[str]:
         """Get list of files that need re-analysis."""
         cached_paths = self.get_all_cached_paths()
         return [p for p in cached_paths if self.needs_reanalysis(p)]
@@ -274,9 +267,7 @@ class IncrementalIndex:
             cursor = conn.execute("SELECT COUNT(*) FROM file_analysis")
             total_cached = cursor.fetchone()[0]
 
-            cursor = conn.execute(
-                "SELECT value FROM crawl_metadata WHERE key = 'last_full_crawl'"
-            )
+            cursor = conn.execute("SELECT value FROM crawl_metadata WHERE key = 'last_full_crawl'")
             row = cursor.fetchone()
             last_crawl = float(row["value"]) if row else None
 
@@ -306,11 +297,9 @@ class IncrementalIndex:
                 (key, value),
             )
 
-    def get_metadata(self, key: str) -> Optional[str]:
+    def get_metadata(self, key: str) -> str | None:
         """Get stored metadata."""
         with self._get_connection() as conn:
-            cursor = conn.execute(
-                "SELECT value FROM crawl_metadata WHERE key = ?", (key,)
-            )
+            cursor = conn.execute("SELECT value FROM crawl_metadata WHERE key = ?", (key,))
             row = cursor.fetchone()
             return row["value"] if row else None

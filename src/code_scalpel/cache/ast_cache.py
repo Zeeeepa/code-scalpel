@@ -15,7 +15,7 @@ import logging
 import pickle
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class CacheMetadata:
     """
 
     file_hash: str
-    dependencies: Set[str] = field(default_factory=set)
+    dependencies: set[str] = field(default_factory=set)
     timestamp: float = 0.0
     language: str = "python"
 
@@ -68,7 +68,7 @@ class IncrementalASTCache:
         # In-memory caches
         self.file_hashes: dict[str, str] = {}  # file -> hash
         self.ast_cache: dict[str, Any] = {}  # file -> AST
-        self.dependency_graph: dict[str, Set[str]] = {}  # file -> dependencies
+        self.dependency_graph: dict[str, set[str]] = {}  # file -> dependencies
         # # TODO Phase 2: Add reverse dependency graph for faster lookups
         # # TODO Phase 2: Add LRU tracking for memory management
 
@@ -131,7 +131,7 @@ class IncrementalASTCache:
             return
 
         try:
-            with open(metadata_path, "r", encoding="utf-8") as f:
+            with open(metadata_path, encoding="utf-8") as f:
                 metadata = json.load(f)
 
             self.file_hashes = metadata.get("file_hashes", {})
@@ -167,9 +167,7 @@ class IncrementalASTCache:
             # [20240613_BUGFIX] Log full stack trace for cache metadata save failures
             logger.exception(f"Failed to save cache metadata: {e}")
 
-    def get_or_parse(
-        self, file_path: str | Path, language: str, parse_fn: Optional[Any] = None
-    ) -> Any:
+    def get_or_parse(self, file_path: str | Path, language: str, parse_fn: Any | None = None) -> Any:
         """
         Get cached AST or parse fresh.
 
@@ -236,7 +234,7 @@ class IncrementalASTCache:
         if language == "python":
             import ast
 
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 return ast.parse(f.read(), filename=str(file_path))
         else:
             # For other languages, return a placeholder
@@ -276,7 +274,7 @@ class IncrementalASTCache:
             # [20240613_BUGFIX] Restrict exception handler to expected pickle/file errors and log full traceback
             logger.exception(f"Failed to save AST to {cache_path}: {e}")
 
-    def invalidate(self, file_path: str | Path) -> Set[str]:
+    def invalidate(self, file_path: str | Path) -> set[str]:
         """
         Invalidate cache and return affected files.
 
@@ -307,7 +305,7 @@ class IncrementalASTCache:
 
         return affected
 
-    def _find_dependents(self, file_path: str) -> Set[str]:
+    def _find_dependents(self, file_path: str) -> set[str]:
         """
         Find all files that depend on the given file.
 
@@ -319,7 +317,7 @@ class IncrementalASTCache:
 
         [20251216_FEATURE] Dependency graph traversal
         """
-        dependents: Set[str] = set()
+        dependents: set[str] = set()
 
         # Find direct dependents
         for source, deps in self.dependency_graph.items():
@@ -375,9 +373,7 @@ class IncrementalASTCache:
             "total_tracked_files": total_files,
             "memory_cached_asts": memory_cached,
             "disk_cached_files": disk_files,
-            "dependency_edges": sum(
-                len(deps) for deps in self.dependency_graph.values()
-            ),
+            "dependency_edges": sum(len(deps) for deps in self.dependency_graph.values()),
             "cache_dir": str(self.cache_dir),
         }
 
@@ -402,7 +398,7 @@ class IncrementalASTCache:
 
 
 # [20251216_FEATURE] Global cache instance
-_global_ast_cache: Optional[IncrementalASTCache] = None
+_global_ast_cache: IncrementalASTCache | None = None
 
 
 def get_ast_cache(cache_dir: str | Path = ".scalpel_ast_cache") -> IncrementalASTCache:

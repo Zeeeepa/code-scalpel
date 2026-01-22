@@ -10,7 +10,6 @@ Command: sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=src
 import base64
 import json
 from dataclasses import dataclass, field
-from typing import Optional
 from urllib.error import URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -24,7 +23,7 @@ class SonarIssue:
     rule: str  # Rule key (e.g., "java:S1234")
     severity: str  # BLOCKER, CRITICAL, MAJOR, MINOR, INFO
     component: str  # File path
-    line: Optional[int]
+    line: int | None
     message: str
     effort: str  # Remediation effort (e.g., "5min")
     debt: str  # Technical debt
@@ -68,7 +67,7 @@ class SonarQubeParser:
     def __init__(
         self,
         server_url: str = "http://localhost:9000",
-        token: Optional[str] = None,
+        token: str | None = None,
     ):
         """
         Initialize SonarQube parser.
@@ -81,7 +80,7 @@ class SonarQubeParser:
         self.token = token
         self.language = "java"
 
-    def _make_request(self, endpoint: str) -> Optional[dict]:
+    def _make_request(self, endpoint: str) -> dict | None:
         """
         Make authenticated request to SonarQube API.
 
@@ -93,9 +92,7 @@ class SonarQubeParser:
         """
         parsed_base = urlparse(self.server_url)
         if parsed_base.scheme not in {"http", "https"} or not parsed_base.netloc:
-            print(
-                "SonarQube API error: server_url must be http(s) with a host (e.g., https://sonar.local:9000)"
-            )
+            print("SonarQube API error: server_url must be http(s) with a host (e.g., https://sonar.local:9000)")
             return None
 
         url = f"{self.server_url}/api/{endpoint}"
@@ -127,9 +124,7 @@ class SonarQubeParser:
         page_size = 100
 
         while True:
-            endpoint = (
-                f"issues/search?componentKeys={project_key}&ps={page_size}&p={page}"
-            )
+            endpoint = f"issues/search?componentKeys={project_key}&ps={page_size}&p={page}"
             data = self._make_request(endpoint)
             if not data or "issues" not in data:
                 break
@@ -175,9 +170,7 @@ class SonarQubeParser:
             "reliability_rating,security_rating"
         )
 
-        endpoint = (
-            f"measures/component?component={project_key}&metricKeys={metric_keys}"
-        )
+        endpoint = f"measures/component?component={project_key}&metricKeys={metric_keys}"
         data = self._make_request(endpoint)
         if not data or "component" not in data:
             return metrics
@@ -236,9 +229,7 @@ class SonarQubeParser:
         """
         return [i for i in issues if i.issue_type == "BUG"]
 
-    def get_by_severity(
-        self, issues: list[SonarIssue], severity: str
-    ) -> list[SonarIssue]:
+    def get_by_severity(self, issues: list[SonarIssue], severity: str) -> list[SonarIssue]:
         """
         Filter issues by severity.
 

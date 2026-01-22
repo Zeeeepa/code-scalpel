@@ -588,7 +588,7 @@ class TestAcceptanceCriteria:
         assert len(result.branch_states) >= 1
 
         # Check that narrowing is tracked
-        for line, state in result.branch_states.items():
+        for _line, state in result.branch_states.items():
             if "value" in state.variable_types:
                 assert NarrowedType.NUMBER in state.get_types("value")
                 break

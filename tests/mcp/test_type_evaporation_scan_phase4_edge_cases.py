@@ -97,12 +97,12 @@ async def test_edge_case_special_methods(tmp_path: Path):
 class User {
     private _name: string;
     static readonly DEFAULT_ROLE = 'user';
-    
+
     constructor(name: string) { this._name = name; }
-    
+
     get name(): string { return this._name; }
     set name(value: string) { this._name = value; }
-    
+
     static fromJson(json: Record<string, unknown>): User {
         return new User(json.name as string);
     }
@@ -111,18 +111,18 @@ class User {
     backend_code = """
 class User:
     DEFAULT_ROLE = 'user'
-    
+
     def __init__(self, name: str):
         self._name = name
-    
+
     @property
     def name(self) -> str:
         return self._name
-    
+
     @name.setter
     def name(self, value: str):
         self._name = value
-    
+
     @classmethod
     def from_json(cls, data: dict):
         return cls(data.get('name'))
@@ -268,7 +268,7 @@ async def test_edge_case_decorators_typescript(tmp_path: Path):
 class MyComponent {
     @Input() title: string;
     @Output() click = new EventEmitter();
-    
+
     @Memoize
     compute(): number {
         return 42;
@@ -288,7 +288,7 @@ def memoize(func):
 class MyComponent:
     def __init__(self, title: str):
         self.title = title
-    
+
     @lru_cache(maxsize=128)
     def compute(self) -> int:
         return 42
@@ -417,12 +417,8 @@ query = sorted(
 async def test_edge_case_many_small_functions(tmp_path: Path):
     """Test handling of code with many small functions."""
     # Create code with 50 small functions
-    funcs_ts = "\n".join(
-        [f"const func{i} = () => fetch('/api/{i}');" for i in range(50)]
-    )
-    funcs_py = "\n".join(
-        [f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)]
-    )
+    funcs_ts = "\n".join([f"const func{i} = () => fetch('/api/{i}');" for i in range(50)])
+    funcs_py = "\n".join([f"def func{i}(): return requests.get('/api/{i}')" for i in range(50)])
 
     async with _stdio_session(project_root=tmp_path) as session:
         payload = await session.call_tool(

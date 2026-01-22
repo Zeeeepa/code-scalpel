@@ -104,10 +104,10 @@ def temp_python_project():
 def calculate_sum(numbers: list[int]) -> int:
     """
     Calculate sum of a list of numbers.
-    
+
     Args:
         numbers: List of integers to sum
-        
+
     Returns:
         Sum of all numbers in the list
     """
@@ -116,11 +116,11 @@ def calculate_sum(numbers: list[int]) -> int:
 
 class DataProcessor:
     """Process and transform data."""
-    
+
     def __init__(self, name: str):
         """Initialize processor with a name."""
         self.name = name
-    
+
     def process(self, data: dict) -> dict:
         """Process input data and return result."""
         return {k: v * 2 for k, v in data.items()}
@@ -153,34 +153,34 @@ def process_user_data(u, p, e, a, ph, c, z):
 
 class GodClass:
     """Class that does too many things."""
-    
+
     def calculate_tax(self):
         pass
-    
+
     def send_email(self):
         pass
-    
+
     def process_payment(self):
         pass
-    
+
     def generate_report(self):
         pass
-    
+
     def authenticate_user(self):
         pass
-    
+
     def validate_address(self):
         pass
-    
+
     def calculate_shipping(self):
         pass
-    
+
     def manage_inventory(self):
         pass
-    
+
     def track_analytics(self):
         pass
-    
+
     def notify_customer(self):
         pass
 
@@ -238,7 +238,7 @@ class DataProcessor {
   constructor(name) {
     this.name = name;
   }
-  
+
   process(data) {
     return Object.entries(data).map(([k, v]) => ({[k]: v * 2}));
   }
@@ -289,7 +289,7 @@ export function processUser(user: UserData): UserData {
 
 export class UserProcessor {
   constructor(private name: string) {}
-  
+
   process(data: UserData): UserData {
     return { ...data, name: this.name };
   }
@@ -324,7 +324,7 @@ import java.util.Map;
 
 public class DataProcessor {
     private String name;
-    
+
     /**
      * Initialize processor with name
      * @param name Processor name
@@ -332,7 +332,7 @@ public class DataProcessor {
     public DataProcessor(String name) {
         this.name = name;
     }
-    
+
     /**
      * Process data map
      * @param data Input data

@@ -506,7 +506,7 @@ class TestCoverageReport:
 
         report = detector.get_coverage_report()
 
-        for category, stats in report["owasp_coverage"].items():
+        for _category, stats in report["owasp_coverage"].items():
             assert "total" in stats
             assert "covered" in stats
             assert "percentage" in stats
@@ -525,7 +525,7 @@ class TestFalsePositiveRate:
                 for item in items:
                     total += item.price
                 return total
-            
+
             def format_name(first, last):
                 return f"{first} {last}"
         """)

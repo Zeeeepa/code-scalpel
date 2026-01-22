@@ -44,7 +44,6 @@ import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Optional
 
 try:
     import jwt
@@ -97,17 +96,17 @@ ENTERPRISE_FEATURES = PRO_FEATURES + [
 def generate_license(
     tier: str,
     customer_id: str,
-    organization: Optional[str] = None,
-    features: Optional[List[str]] = None,
+    organization: str | None = None,
+    features: list[str] | None = None,
     duration_days: int = 365,
-    seats: Optional[int] = None,
+    seats: int | None = None,
     algorithm: str = "RS256",
-    private_key: Optional[str] = None,
-    secret_key: Optional[str] = None,
+    private_key: str | None = None,
+    secret_key: str | None = None,
     issuer: str = DEFAULT_LICENSE_ISSUER,
     audience: str = DEFAULT_LICENSE_AUDIENCE,
-    jti: Optional[str] = None,
-    kid: Optional[str] = None,
+    jti: str | None = None,
+    kid: str | None = None,
     backdate_seconds: int = 10,
 ) -> str:
     """
@@ -200,9 +199,7 @@ def generate_license(
 
 def main():
     """CLI entry point for license generation."""
-    parser = argparse.ArgumentParser(
-        description="Generate JWT license keys for Code Scalpel"
-    )
+    parser = argparse.ArgumentParser(description="Generate JWT license keys for Code Scalpel")
 
     parser.add_argument(
         "--tier",
@@ -211,9 +208,7 @@ def main():
         help="License tier",
     )
 
-    parser.add_argument(
-        "--customer", required=True, help="Customer ID (unique identifier)"
-    )
+    parser.add_argument("--customer", required=True, help="Customer ID (unique identifier)")
 
     parser.add_argument("--organization", help="Organization name")
 
@@ -230,18 +225,13 @@ def main():
         help="License duration in days (default: 365)",
     )
 
-    parser.add_argument(
-        "--seats", type=int, help="Number of seats (for enterprise tier)"
-    )
+    parser.add_argument("--seats", type=int, help="Number of seats (for enterprise tier)")
 
     parser.add_argument(
         "--backdate-seconds",
         type=int,
         default=10,
-        help=(
-            "Backdate iat/nbf by this many seconds to tolerate clock skew "
-            "(default: 10)"
-        ),
+        help=("Backdate iat/nbf by this many seconds to tolerate clock skew " "(default: 10)"),
     )
 
     parser.add_argument(
@@ -251,9 +241,7 @@ def main():
         help="JWT signing algorithm (default: RS256)",
     )
 
-    parser.add_argument(
-        "--secret", help="Secret key for HS256 algorithm (required for HS256)"
-    )
+    parser.add_argument("--secret", help="Secret key for HS256 algorithm (required for HS256)")
 
     parser.add_argument(
         "--private-key",
@@ -349,9 +337,7 @@ def main():
             # Decode and show expiration
             claims = jwt.decode(token, options={"verify_signature": False})
             # [20251228_BUGFIX] Avoid deprecated datetime.utcfromtimestamp().
-            exp_date = datetime.fromtimestamp(claims["exp"], tz=timezone.utc).replace(
-                tzinfo=None
-            )
+            exp_date = datetime.fromtimestamp(claims["exp"], tz=timezone.utc).replace(tzinfo=None)
             print(f"  Expires: {exp_date.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
     except Exception as e:

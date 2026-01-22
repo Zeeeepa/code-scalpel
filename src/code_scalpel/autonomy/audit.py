@@ -13,7 +13,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -39,7 +39,7 @@ class AuditEntry:
     success: bool
     duration_ms: int
     metadata: dict[str, Any] = field(default_factory=dict)
-    parent_id: Optional[str] = None  # For nested operations
+    parent_id: str | None = None  # For nested operations
 
 
 @dataclass
@@ -58,9 +58,7 @@ class AutonomyAuditTrail:
     [20251217_FEATURE] v3.0.0 Autonomy P0 - Audit trail manager
     """
 
-    storage_path: Path = field(
-        default_factory=lambda: Path(".code-scalpel/autonomy_audit")
-    )
+    storage_path: Path = field(default_factory=lambda: Path(".code-scalpel/autonomy_audit"))
     current_session_id: str = field(default="")
 
     def __post_init__(self):
@@ -81,8 +79,8 @@ class AutonomyAuditTrail:
         output_data: Any,
         success: bool,
         duration_ms: int,
-        metadata: Optional[dict] = None,
-        parent_id: Optional[str] = None,
+        metadata: dict | None = None,
+        parent_id: str | None = None,
     ) -> str:
         """
         Record an audit entry.
@@ -125,8 +123,8 @@ class AutonomyAuditTrail:
     def export(
         self,
         format: str = "json",
-        time_range: Optional[tuple[datetime, datetime]] = None,
-        event_types: Optional[list[str]] = None,
+        time_range: tuple[datetime, datetime] | None = None,
+        event_types: list[str] | None = None,
         success_only: bool = False,
     ) -> str:
         """
@@ -236,9 +234,7 @@ class AutonomyAuditTrail:
         Format: YYYYMMDD_HHMMSS_<short_hash>
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        hash_suffix = hashlib.sha256(
-            str(datetime.now().timestamp()).encode()
-        ).hexdigest()[:6]
+        hash_suffix = hashlib.sha256(str(datetime.now().timestamp()).encode()).hexdigest()[:6]
         return f"{timestamp}_{hash_suffix}"
 
     def _generate_entry_id(self) -> str:
@@ -310,9 +306,7 @@ class AutonomyAuditTrail:
             json.dump({"data": input_str, "truncated": len(str(input_data)) > 10000}, f)
 
         with open(data_dir / f"{entry.id}_output.json", "w") as f:
-            json.dump(
-                {"data": output_str, "truncated": len(str(output_data)) > 10000}, f
-            )
+            json.dump({"data": output_str, "truncated": len(str(output_data)) > 10000}, f)
 
     def _load_entries(self) -> list[AuditEntry]:
         """
@@ -330,7 +324,7 @@ class AutonomyAuditTrail:
         entries = []
         for entry_file in session_dir.glob("*.json"):
             if entry_file.name.startswith("op_"):
-                with open(entry_file, "r") as f:
+                with open(entry_file) as f:
                     data = json.load(f)
                     entry = self._dict_to_entry(data)
                     entries.append(entry)

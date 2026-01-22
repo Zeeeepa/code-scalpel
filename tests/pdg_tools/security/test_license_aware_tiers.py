@@ -325,12 +325,8 @@ class TestLicenseExpiration:
 
         # These globals may be None (no valid license since startup) or set (mid-session)
         # Just validate they exist and are of correct type if set
-        assert _LAST_VALID_LICENSE_TIER is None or isinstance(
-            _LAST_VALID_LICENSE_TIER, str
-        )
-        assert _LAST_VALID_LICENSE_AT is None or isinstance(
-            _LAST_VALID_LICENSE_AT, float
-        )
+        assert _LAST_VALID_LICENSE_TIER is None or isinstance(_LAST_VALID_LICENSE_TIER, str)
+        assert _LAST_VALID_LICENSE_AT is None or isinstance(_LAST_VALID_LICENSE_AT, float)
 
     def test_license_validation_returns_metadata(self):
         """License validation returns structured data with is_valid, is_expired flags."""

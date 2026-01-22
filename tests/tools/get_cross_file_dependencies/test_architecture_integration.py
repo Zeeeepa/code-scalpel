@@ -78,9 +78,7 @@ modules = ["__init__", "utils"]
         assert config_file.exists()
 
     @pytest.mark.asyncio
-    async def test_missing_architecture_config_uses_defaults(
-        self, tmp_path, enterprise_server
-    ):
+    async def test_missing_architecture_config_uses_defaults(self, tmp_path, enterprise_server):
         """Should use default configuration if architecture.toml is missing."""
         # [20260104_BUGFIX] Use ArchitecturalRuleEngine.load_config, not load_architecture_config
         from code_scalpel.ast_tools.architectural_rules import ArchitecturalRuleEngine
@@ -177,9 +175,7 @@ def get_users():
         _write(tmp_path / "db" / "queries.py", "def fetch_users(): pass")
 
     @pytest.mark.asyncio
-    async def test_detects_upward_dependency_violation(
-        self, tmp_path, enterprise_server
-    ):
+    async def test_detects_upward_dependency_violation(self, tmp_path, enterprise_server):
         """Should detect when presentation layer imports infrastructure directly."""
         self.create_violating_project(tmp_path)
 

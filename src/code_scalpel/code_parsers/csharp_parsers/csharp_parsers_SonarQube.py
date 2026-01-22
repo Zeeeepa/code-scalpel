@@ -7,8 +7,6 @@ SonarQube C# Parser - SonarQube/SonarCloud analysis integration.
 # Command: dotnet sonarscanner begin /k:"project-key" && dotnet build && dotnet sonarscanner end
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class SonarQubeCSharpParser:
         """Parse SonarQube analysis results."""
         raise NotImplementedError("SonarQube C# parser not yet implemented")
 
-    def query_api(self, project_key: str, server_url: str) -> Optional[dict]:
+    def query_api(self, project_key: str, server_url: str) -> dict | None:
         """Query SonarQube API for project issues."""
         raise NotImplementedError("SonarQube C# parser not yet implemented")

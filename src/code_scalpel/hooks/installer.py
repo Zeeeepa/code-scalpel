@@ -18,7 +18,7 @@ Usage:
 import json
 import platform
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 # Default hook configuration for Claude Code
 DEFAULT_HOOK_CONFIG = {
@@ -70,7 +70,7 @@ ENTERPRISE_MANAGED_CONFIG = {
 }
 
 
-def get_claude_settings_path(project_path: Optional[str] = None) -> Path:
+def get_claude_settings_path(project_path: str | None = None) -> Path:
     """Get the path to Claude Code settings.json.
 
     Claude Code looks for settings in:
@@ -113,7 +113,7 @@ def get_managed_settings_path() -> Path:
         return Path("/etc/claude-code/managed-settings.json")
 
 
-def _read_settings(settings_path: Path) -> Dict[str, Any]:
+def _read_settings(settings_path: Path) -> dict[str, Any]:
     """Read existing settings from file.
 
     Args:
@@ -126,13 +126,13 @@ def _read_settings(settings_path: Path) -> Dict[str, Any]:
         return {}
 
     try:
-        with open(settings_path, "r") as f:
+        with open(settings_path) as f:
             return json.load(f)
-    except (json.JSONDecodeError, IOError):
+    except (OSError, json.JSONDecodeError):
         return {}
 
 
-def _write_settings(settings_path: Path, settings: Dict[str, Any]) -> None:
+def _write_settings(settings_path: Path, settings: dict[str, Any]) -> None:
     """Write settings to file.
 
     Args:
@@ -146,7 +146,7 @@ def _write_settings(settings_path: Path, settings: Dict[str, Any]) -> None:
         f.write("\n")
 
 
-def _merge_hooks(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
+def _merge_hooks(existing: dict[str, Any], new: dict[str, Any]) -> dict[str, Any]:
     """Merge hook configurations, avoiding duplicates.
 
     Args:
@@ -172,11 +172,11 @@ def _merge_hooks(existing: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any
 
 
 def install_claude_hooks(
-    project_path: Optional[str] = None,
+    project_path: str | None = None,
     user_level: bool = False,
     enterprise: bool = False,
     force: bool = False,
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """Install Claude Code hooks for Code Scalpel governance.
 
     This function adds PreToolUse and PostToolUse hooks to the Claude Code
@@ -223,12 +223,8 @@ def install_claude_hooks(
         pre_hooks = existing_hooks.get("PreToolUse", [])
         post_hooks = existing_hooks.get("PostToolUse", [])
 
-        our_pre_hooks = [
-            h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
-        our_post_hooks = [
-            h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()
-        ]
+        our_pre_hooks = [h for h in pre_hooks if "code-scalpel" in h.get("name", "").lower()]
+        our_post_hooks = [h for h in post_hooks if "code-scalpel" in h.get("name", "").lower()]
 
         if our_pre_hooks or our_post_hooks:
             return True, f"Code Scalpel hooks already installed in {settings_path}"
@@ -244,8 +240,7 @@ def install_claude_hooks(
                 settings["hooks"][hook_type] = [
                     h
                     for h in settings["hooks"][hook_type]
-                    if "code-scalpel" not in h.get("name", "").lower()
-                    and "governance" not in h.get("name", "").lower()
+                    if "code-scalpel" not in h.get("name", "").lower() and "governance" not in h.get("name", "").lower()
                 ]
 
     settings["hooks"] = _merge_hooks(settings["hooks"], hook_config["hooks"])
@@ -259,17 +254,17 @@ def install_claude_hooks(
         _write_settings(settings_path, settings)
     except PermissionError:
         return False, f"Permission denied writing to {settings_path}"
-    except IOError as e:
+    except OSError as e:
         return False, f"Error writing settings: {e}"
 
     return True, f"Claude Code hooks installed to {settings_path}"
 
 
 def uninstall_claude_hooks(
-    project_path: Optional[str] = None,
+    project_path: str | None = None,
     user_level: bool = False,
     enterprise: bool = False,
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """Uninstall Claude Code hooks for Code Scalpel.
 
     Args:
@@ -305,8 +300,7 @@ def uninstall_claude_hooks(
             settings["hooks"][hook_type] = [
                 h
                 for h in settings["hooks"][hook_type]
-                if "code-scalpel" not in h.get("name", "").lower()
-                and "governance" not in h.get("name", "").lower()
+                if "code-scalpel" not in h.get("name", "").lower() and "governance" not in h.get("name", "").lower()
             ]
             removed_count += original_count - len(settings["hooks"][hook_type])
 
@@ -322,13 +316,13 @@ def uninstall_claude_hooks(
         _write_settings(settings_path, settings)
     except PermissionError:
         return False, f"Permission denied writing to {settings_path}"
-    except IOError as e:
+    except OSError as e:
         return False, f"Error writing settings: {e}"
 
     return True, f"Removed {removed_count} Code Scalpel hooks from {settings_path}"
 
 
-def check_hooks_installed(project_path: Optional[str] = None) -> Tuple[bool, str]:
+def check_hooks_installed(project_path: str | None = None) -> tuple[bool, str]:
     """Check if Claude Code hooks are installed.
 
     Args:
@@ -369,7 +363,7 @@ def get_settings_template() -> str:
 
 
 def install_claude_hooks_cli(
-    project_path: Optional[str] = None,
+    project_path: str | None = None,
     user_level: bool = False,
     enterprise: bool = False,
     force: bool = False,
@@ -396,7 +390,7 @@ def install_claude_hooks_cli(
 
 
 def uninstall_claude_hooks_cli(
-    project_path: Optional[str] = None,
+    project_path: str | None = None,
     user_level: bool = False,
     enterprise: bool = False,
 ) -> int:

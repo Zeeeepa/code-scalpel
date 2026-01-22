@@ -79,7 +79,7 @@ DEFAULT_EXCLUDE_DIRS: frozenset[str] = frozenset(
 DEFAULT_COMPLEXITY_THRESHOLD: int = 10
 
 
-def _analyze_file_worker(file_path: str) -> "FileAnalysisResult":
+def _analyze_file_worker(file_path: str) -> FileAnalysisResult:
     """ProcessPool worker entrypoint for analyzing a single file."""
     crawler = ProjectCrawler(
         root_path=Path(file_path).parent,
@@ -233,11 +233,7 @@ class CodeAnalyzerVisitor(ast.NodeVisitor):
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Handle class definitions."""
-        bases: list[str] = [
-            base_name
-            for base in node.bases
-            if (base_name := self._get_base_name(base)) is not None
-        ]
+        bases: list[str] = [base_name for base in node.bases if (base_name := self._get_base_name(base)) is not None]
         class_info = ClassInfo(
             name=node.name,
             lineno=node.lineno,
@@ -384,9 +380,7 @@ class ProjectCrawler:
         if self.respect_gitignore:
             gitignore_file = self.root_path / ".gitignore"
             if gitignore_file.exists() and gitignore_file.is_file():
-                for raw in gitignore_file.read_text(
-                    encoding="utf-8", errors="ignore"
-                ).splitlines():
+                for raw in gitignore_file.read_text(encoding="utf-8", errors="ignore").splitlines():
                     line = raw.strip()
                     if not line or line.startswith("#"):
                         continue
@@ -464,9 +458,7 @@ class ProjectCrawler:
         # Stable key regardless of OS path separators
         return rel_path.replace("\\", "/")
 
-    def _try_load_cached(
-        self, file_path: Path, rel_path: str
-    ) -> FileAnalysisResult | None:
+    def _try_load_cached(self, file_path: Path, rel_path: str) -> FileAnalysisResult | None:
         if not self.enable_cache:
             return None
 
@@ -538,9 +530,7 @@ class ProjectCrawler:
 
         return None
 
-    def _store_cache_entry(
-        self, file_path: Path, rel_path: str, result: FileAnalysisResult
-    ) -> None:
+    def _store_cache_entry(self, file_path: Path, rel_path: str, result: FileAnalysisResult) -> None:
         if not self.enable_cache:
             return
         try:
@@ -583,8 +573,7 @@ class ProjectCrawler:
                     for c in result.classes
                 ],
                 "complexity_warnings": [
-                    {"name": w.name, "lineno": w.lineno, "complexity": w.complexity}
-                    for w in result.complexity_warnings
+                    {"name": w.name, "lineno": w.lineno, "complexity": w.complexity} for w in result.complexity_warnings
                 ],
                 "error": result.error,
             }
@@ -653,9 +642,7 @@ class ProjectCrawler:
                         break
                     analyzed_files += 1
                     file_path = Path(root) / filename
-                    rel_path = str(
-                        (Path(root) / filename).resolve().relative_to(self.root_path)
-                    )
+                    rel_path = str((Path(root) / filename).resolve().relative_to(self.root_path))
                     files_to_analyze.append((file_path, rel_path))
 
             if reached_limit:
@@ -676,12 +663,8 @@ class ProjectCrawler:
 
         parallelism = self.parallelism
         if parallelism == "threads":
-            with ThreadPoolExecutor(
-                max_workers=min(32, (os.cpu_count() or 4) + 4)
-            ) as ex:
-                futs = {
-                    ex.submit(_analyze_one, item): item for item in files_to_analyze
-                }
+            with ThreadPoolExecutor(max_workers=min(32, (os.cpu_count() or 4) + 4)) as ex:
+                futs = {ex.submit(_analyze_one, item): item for item in files_to_analyze}
                 for fut in as_completed(futs):
                     analyzed_results.append(fut.result())
         elif parallelism == "processes":
@@ -705,10 +688,7 @@ class ProjectCrawler:
                     max_workers=max(2, os.cpu_count() or 2),
                     mp_context=ctx,
                 ) as ex:
-                    futs = {
-                        ex.submit(_analyze_file_worker, str(fp)): (fp, relp)
-                        for fp, relp in misses
-                    }
+                    futs = {ex.submit(_analyze_file_worker, str(fp)): (fp, relp) for fp, relp in misses}
                     for fut in as_completed(futs):
                         fp, relp = futs[fut]
                         res = fut.result()
@@ -743,7 +723,7 @@ class ProjectCrawler:
             path_obj = Path(file_path)
             language = self._detect_language(path_obj)
 
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 code = f.read()
 
             loc = len(code.splitlines())
@@ -774,9 +754,7 @@ class ProjectCrawler:
             imports: list[str] = []
             if language in ("javascript", "typescript"):
                 # import x from 'y';  import {a} from "b";  require('x')
-                import_re = re.compile(
-                    r"\bfrom\s+['\"]([^'\"]+)['\"]|\brequire\(\s*['\"]([^'\"]+)['\"]\s*\)"
-                )
+                import_re = re.compile(r"\bfrom\s+['\"]([^'\"]+)['\"]|\brequire\(\s*['\"]([^'\"]+)['\"]\s*\)")
                 for m in import_re.finditer(code):
                     mod = m.group(1) or m.group(2)
                     if mod:
@@ -790,9 +768,7 @@ class ProjectCrawler:
             complexity = self._estimate_complexity_text(code, language)
             warnings: list[FunctionInfo] = []
             if complexity > self.complexity_threshold:
-                warnings.append(
-                    FunctionInfo(name=path_obj.name, lineno=1, complexity=complexity)
-                )
+                warnings.append(FunctionInfo(name=path_obj.name, lineno=1, complexity=complexity))
 
             return FileAnalysisResult(
                 path=file_path,
@@ -821,9 +797,7 @@ class ProjectCrawler:
                 error=str(e),
             )
 
-    def generate_report(
-        self, result: CrawlResult | None = None, output_path: str | None = None
-    ) -> str:
+    def generate_report(self, result: CrawlResult | None = None, output_path: str | None = None) -> str:
         """
         Generate a Markdown report of the crawl results.
 
@@ -867,13 +841,9 @@ class ProjectCrawler:
         else:
             md_lines.append("| File | Function | Complexity | Line |")
             md_lines.append("|------|----------|------------|------|")
-            for file_path, func in sorted(
-                warnings, key=lambda x: x[1].complexity, reverse=True
-            ):
+            for file_path, func in sorted(warnings, key=lambda x: x[1].complexity, reverse=True):
                 rel_path = os.path.relpath(file_path, result.root_path)
-                md_lines.append(
-                    f"| `{rel_path}` | `{func.qualified_name}` | **{func.complexity}** | {func.lineno} |"
-                )
+                md_lines.append(f"| `{rel_path}` | `{func.qualified_name}` | **{func.complexity}** | {func.lineno} |")
         md_lines.append("")
 
         # File statistics section
@@ -882,9 +852,7 @@ class ProjectCrawler:
         md_lines.append("| File | LOC | Classes | Functions | Imports |")
         md_lines.append("|------|-----|---------|-----------|---------|")
 
-        for file_result in sorted(
-            result.files_analyzed, key=lambda x: x.lines_of_code, reverse=True
-        ):
+        for file_result in sorted(result.files_analyzed, key=lambda x: x.lines_of_code, reverse=True):
             rel_path = os.path.relpath(file_result.path, result.root_path)
             md_lines.append(
                 f"| `{rel_path}` | {file_result.lines_of_code} | "

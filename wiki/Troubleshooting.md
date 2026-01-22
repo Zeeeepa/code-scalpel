@@ -460,7 +460,7 @@ TimeoutError: Symbolic execution exceeded 30 seconds
 
 1. **Enable caching:**
    ```bash
-   export SCALPEL_CACHE_ENABLED=true
+   export CODE_SCALPEL_CACHE_ENABLED=true
    ```
 
 2. **Reduce max_depth:**

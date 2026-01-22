@@ -156,9 +156,7 @@ class TestMoreBranchCoverage:
 
         sim = RefactorSimulator()
         original = '\ndef documented():\n    """This is a docstring."""\n    pass\n'
-        modified = (
-            '\ndef documented():\n    """Updated docstring."""\n    return None\n'
-        )
+        modified = '\ndef documented():\n    """Updated docstring."""\n    return None\n'
         result = sim.simulate(original, modified)
         assert result is not None
 
@@ -262,9 +260,7 @@ class TestFinalBranchCoverage:
         )
 
         graph = UnifiedGraph()
-        java_node = Node(
-            node_id="java::UserService::getUser", node_type="method", language="java"
-        )
+        java_node = Node(node_id="java::UserService::getUser", node_type="method", language="java")
         graph.add_node(java_node)
         ts_node = Node(
             node_id="typescript::api::fetchUser",

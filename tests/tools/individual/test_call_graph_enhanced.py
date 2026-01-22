@@ -209,9 +209,7 @@ def format_output(data):
         result = builder.build_with_details()
 
         # Find edge from main to helper
-        main_to_helper = [
-            e for e in result.edges if "main" in e.caller and "helper" in e.callee
-        ]
+        main_to_helper = [e for e in result.edges if "main" in e.caller and "helper" in e.callee]
         assert len(main_to_helper) > 0
 
     def test_entry_point_filtering(self, simple_project):
@@ -226,9 +224,7 @@ def format_output(data):
 
         # helper -> utility, so we should have at least 2 nodes
         assert len(result_filtered.nodes) >= 1
-        assert result_filtered.entry_point == "helper" or "helper" in (
-            result_filtered.entry_point or ""
-        )
+        assert result_filtered.entry_point == "helper" or "helper" in (result_filtered.entry_point or "")
 
     def test_depth_limiting(self, simple_project):
         """Test depth limiting."""
@@ -606,11 +602,7 @@ def factorial(n):
         assert isinstance(result, CallGraphResult)
 
         # Should have edge from factorial to itself
-        factorial_edges = [
-            e
-            for e in result.edges
-            if "factorial" in e.caller and "factorial" in e.callee
-        ]
+        factorial_edges = [e for e in result.edges if "factorial" in e.caller and "factorial" in e.callee]
         assert len(factorial_edges) > 0
 
     def test_nested_functions(self, tmp_path):
@@ -653,7 +645,7 @@ async def async_helper():
 class MyClass:
     def method_a(self):
         self.method_b()
-    
+
     def method_b(self):
         pass
 """

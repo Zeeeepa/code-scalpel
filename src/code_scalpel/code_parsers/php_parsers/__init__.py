@@ -127,9 +127,9 @@ def __getattr__(name: str):
         "PHPCSStandard",
         "PHPCSConfig",
     ):
-        from .php_parsers_PHPCS import PHPCSParser  # noqa: F401
         from .php_parsers_PHPCS import (
             PHPCSConfig,
+            PHPCSParser,  # noqa: F401
             PHPCSSeverity,
             PHPCSStandard,
             PHPCSViolation,
@@ -143,8 +143,8 @@ def __getattr__(name: str):
         "PHPStanErrorType",
         "PHPStanConfig",
     ):
-        from .php_parsers_PHPStan import PHPStanConfig  # noqa: F401
         from .php_parsers_PHPStan import (
+            PHPStanConfig,  # noqa: F401
             PHPStanError,
             PHPStanErrorType,
             PHPStanLevel,
@@ -159,9 +159,9 @@ def __getattr__(name: str):
         "PsalmErrorType",
         "PsalmConfig",
     ):
-        from .php_parsers_Psalm import PsalmError  # noqa: F401
         from .php_parsers_Psalm import (
             PsalmConfig,
+            PsalmError,  # noqa: F401
             PsalmErrorType,
             PsalmParser,
             PsalmSeverity,

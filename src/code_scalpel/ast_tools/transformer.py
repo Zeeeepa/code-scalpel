@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional, Union
 
 import astor
 
@@ -11,9 +11,9 @@ import astor
 class TransformationRule:
     """Defines a transformation rule."""
 
-    pattern: Union[str, ast.AST]  # Code pattern to match
-    replacement: Union[str, ast.AST]  # Replacement pattern
-    condition: Optional[Callable] = None  # Optional condition for applying the rule
+    pattern: str | ast.AST  # Code pattern to match
+    replacement: str | ast.AST  # Replacement pattern
+    condition: Callable | None = None  # Optional condition for applying the rule
 
 
 class ASTTransformer(ast.NodeTransformer):
@@ -31,9 +31,7 @@ class ASTTransformer(ast.NodeTransformer):
         """Add a new transformation rule."""
         self.transformation_rules.append(rule)
 
-    def rename_variable(
-        self, old_name: str, new_name: str, scope: Optional[str] = None
-    ) -> None:
+    def rename_variable(self, old_name: str, new_name: str, scope: str | None = None) -> None:
         """Register a variable rename transformation."""
         self.var_mapping[(old_name, scope if scope else "")] = new_name
 
@@ -41,7 +39,7 @@ class ASTTransformer(ast.NodeTransformer):
         """Register a function rename transformation."""
         self.func_mapping[old_name] = new_name
 
-    def visit(self, node: ast.AST) -> Optional[ast.AST]:
+    def visit(self, node: ast.AST) -> ast.AST | None:
         """Enhanced visit method with context tracking."""
         self.context.append(node)
         result = super().visit(node)
@@ -53,9 +51,7 @@ class ASTTransformer(ast.NodeTransformer):
         current_scope = self._get_current_scope()
 
         # Check scoped mapping first, then global mapping
-        new_name = self.var_mapping.get(
-            (node.id, current_scope)
-        ) or self.var_mapping.get((node.id, ""))
+        new_name = self.var_mapping.get((node.id, current_scope)) or self.var_mapping.get((node.id, ""))
 
         if new_name:
             self.modified = True
@@ -119,7 +115,7 @@ class ASTTransformer(ast.NodeTransformer):
         return node
 
     def extract_method(
-        self, node: ast.AST, new_func_name: str, args: Optional[list[str]] = None
+        self, node: ast.AST, new_func_name: str, args: list[str] | None = None
     ) -> tuple[ast.FunctionDef, ast.Call]:
         """Extract a code block into a new method."""
         # Analyze used variables
@@ -208,7 +204,7 @@ class ASTTransformer(ast.NodeTransformer):
 
         return new_func, call
 
-    def inline_variable(self, node: ast.Name) -> Optional[ast.AST]:
+    def inline_variable(self, node: ast.Name) -> ast.AST | None:
         """Inline a variable's value at its use sites."""
         # Find variable definition
         assignment = self._find_variable_definition(node.id)
@@ -216,7 +212,7 @@ class ASTTransformer(ast.NodeTransformer):
             return self.visit(assignment.value)
         return None
 
-    def _find_variable_definition(self, var_name: str) -> Optional[ast.AST]:
+    def _find_variable_definition(self, var_name: str) -> ast.AST | None:
         """Find the assignment statement that defines a variable."""
         # This is a complex method that would need to traverse the AST
         # to find variable definitions, considering scope and control flow.
@@ -237,7 +233,7 @@ class ASTTransformer(ast.NodeTransformer):
 
         return astor.to_source(transformed)
 
-    def _matches_pattern(self, node: ast.AST, pattern: Union[str, ast.AST]) -> bool:
+    def _matches_pattern(self, node: ast.AST, pattern: str | ast.AST) -> bool:
         """Check if a node matches a pattern."""
         if isinstance(pattern, str):
             parsed: ast.Module = ast.parse(pattern)
@@ -264,7 +260,7 @@ class ASTTransformer(ast.NodeTransformer):
             if isinstance(val1, list):
                 if not isinstance(val2, list) or len(val1) != len(val2):
                     return False
-                for v1, v2 in zip(val1, val2):
+                for v1, v2 in zip(val1, val2, strict=False):
                     if not self._compare_nodes(v1, v2):
                         return False
             elif isinstance(val1, ast.AST):
@@ -275,9 +271,7 @@ class ASTTransformer(ast.NodeTransformer):
 
         return True
 
-    def _apply_replacement(
-        self, node: ast.AST, replacement: Union[str, ast.AST]
-    ) -> ast.AST:
+    def _apply_replacement(self, node: ast.AST, replacement: str | ast.AST) -> ast.AST:
         """Apply a replacement pattern."""
         if isinstance(replacement, str):
             parsed: ast.Module = ast.parse(replacement)

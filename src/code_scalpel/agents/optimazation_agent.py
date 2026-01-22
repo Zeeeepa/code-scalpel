@@ -5,7 +5,7 @@ This agent demonstrates how AI agents can use Code Scalpel's analysis tools
 to identify performance bottlenecks and suggest optimizations.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseCodeAnalysisAgent
 
@@ -21,7 +21,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
     - Verify optimizations don't break functionality
     """
 
-    def __init__(self, workspace_root: Optional[str] = None):
+    def __init__(self, workspace_root: str | None = None):
         super().__init__(workspace_root)
         self.performance_thresholds = {
             "max_complexity": 15,
@@ -36,7 +36,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "computation": ["Memoization", "Vectorization", "Early termination"],
         }
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         """Observe the target for performance analysis."""
         self.logger.info(f"Performing performance analysis on: {target}")
 
@@ -65,7 +65,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "target": target,
         }
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         """Analyze performance observations and identify bottlenecks."""
         self.logger.info("Analyzing performance observations")
 
@@ -80,9 +80,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         opportunities = self._analyze_optimization_opportunities(bottlenecks, file_info)
 
         # Calculate performance metrics
-        performance_score = self._calculate_performance_score(
-            bottlenecks, opportunities
-        )
+        performance_score = self._calculate_performance_score(bottlenecks, opportunities)
 
         # Generate optimization recommendations
         recommendations = self._generate_optimization_recommendations(opportunities)
@@ -97,7 +95,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "recommendations": recommendations,
         }
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """Decide on optimization actions to implement."""
         self.logger.info("Deciding on performance optimizations")
 
@@ -138,7 +136,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "risk_assessment": self._assess_optimization_risks(detailed_actions),
         }
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         """Execute optimization actions safely."""
         self.logger.info("Executing performance optimizations")
 
@@ -179,8 +177,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         total_count = len(results)
 
         return {
-            "success": success_count > 0
-            or total_count == 0,  # Success if actions succeeded or no actions needed
+            "success": success_count > 0 or total_count == 0,  # Success if actions succeeded or no actions needed
             "results": results,
             "success_rate": success_count / total_count if total_count > 0 else 1.0,
             "summary": f"Successfully implemented {success_count}/{total_count} optimizations",
@@ -188,7 +185,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
 
     # Performance Analysis Methods
 
-    def _analyze_complexity(self, file_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_complexity(self, file_info: dict[str, Any]) -> dict[str, Any]:
         """Analyze code complexity metrics."""
         complexity_score = file_info.get("complexity_score", 0)
         function_count = len(file_info.get("functions", []))
@@ -223,8 +220,8 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         return complexity_analysis
 
     def _identify_bottlenecks(
-        self, complexity_analysis: Dict[str, Any], symbol_analysis: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, complexity_analysis: dict[str, Any], symbol_analysis: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Identify performance bottlenecks."""
         bottlenecks = []
 
@@ -236,9 +233,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
                     "location": "file",
                     "severity": issue.get("severity"),
                     "description": issue.get("description"),
-                    "estimated_impact": (
-                        "high" if issue.get("severity") == "high" else "medium"
-                    ),
+                    "estimated_impact": ("high" if issue.get("severity") == "high" else "medium"),
                 }
             )
 
@@ -259,8 +254,8 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         return bottlenecks
 
     def _analyze_optimization_opportunities(
-        self, bottlenecks: List[Dict[str, Any]], file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, bottlenecks: list[dict[str, Any]], file_info: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Analyze potential optimization opportunities."""
         opportunities = []
 
@@ -289,7 +284,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
         return opportunities
 
     def _calculate_performance_score(
-        self, bottlenecks: List[Dict[str, Any]], opportunities: List[Dict[str, Any]]
+        self, bottlenecks: list[dict[str, Any]], opportunities: list[dict[str, Any]]
     ) -> float:
         """Calculate overall performance score (0-100)."""
         base_score = 100
@@ -309,9 +304,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
 
         return max(0, min(100, base_score))
 
-    def _generate_optimization_recommendations(
-        self, opportunities: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _generate_optimization_recommendations(self, opportunities: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Generate specific optimization recommendations."""
         recommendations = []
 
@@ -341,7 +334,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
 
         return recommendations
 
-    def _create_optimization_plan(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_optimization_plan(self, action: dict[str, Any]) -> dict[str, Any]:
         """Create detailed optimization implementation plan."""
         category = action.get("category")
 
@@ -376,7 +369,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "estimated_time": "1-2 hours",
         }
 
-    def _create_performance_verification(self, action: Dict[str, Any]) -> List[str]:
+    def _create_performance_verification(self, action: dict[str, Any]) -> list[str]:
         """Create performance verification steps."""
         category = action.get("category")
 
@@ -401,7 +394,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "Test edge cases",
         ]
 
-    def _estimate_performance_impact(self, action: Dict[str, Any]) -> Dict[str, Any]:
+    def _estimate_performance_impact(self, action: dict[str, Any]) -> dict[str, Any]:
         """Estimate the performance impact of an optimization."""
         impact = action.get("impact", "medium")
 
@@ -424,9 +417,7 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
                 "scalability_improvement": "minimal",
             }
 
-    def _estimate_total_benefit(
-        self, detailed_actions: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _estimate_total_benefit(self, detailed_actions: list[dict[str, Any]]) -> dict[str, Any]:
         """Estimate total benefit from all optimizations."""
         total_time_improvement = 0
         total_memory_improvement = 0
@@ -468,19 +459,11 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             "actions_count": len(detailed_actions),
         }
 
-    def _assess_optimization_risks(
-        self, detailed_actions: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _assess_optimization_risks(self, detailed_actions: list[dict[str, Any]]) -> dict[str, Any]:
         """Assess risks of implementing optimizations."""
-        high_risk_count = sum(
-            1 for a in detailed_actions if a.get("action", {}).get("risk") == "high"
-        )
-        medium_risk_count = sum(
-            1 for a in detailed_actions if a.get("action", {}).get("risk") == "medium"
-        )
-        low_risk_count = sum(
-            1 for a in detailed_actions if a.get("action", {}).get("risk") == "low"
-        )
+        high_risk_count = sum(1 for a in detailed_actions if a.get("action", {}).get("risk") == "high")
+        medium_risk_count = sum(1 for a in detailed_actions if a.get("action", {}).get("risk") == "medium")
+        low_risk_count = sum(1 for a in detailed_actions if a.get("action", {}).get("risk") == "low")
 
         if high_risk_count > 0:
             overall_risk = "high"
@@ -505,24 +488,18 @@ class OptimizationAgent(BaseCodeAnalysisAgent):
             ),
         }
 
-    async def _verify_optimization(
-        self, action: Dict[str, Any], implementation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _verify_optimization(self, action: dict[str, Any], implementation: dict[str, Any]) -> dict[str, Any]:
         """Verify that an optimization is safe to implement."""
         # This would use simulate_refactor to test the change
         # For demo purposes, assume it's safe
         return {
             "safe": True,
             "confidence": 0.8,
-            "potential_issues": [
-                "May affect functionality if not implemented correctly"
-            ],
+            "potential_issues": ["May affect functionality if not implemented correctly"],
             "recommendations": ["Test with comprehensive test suite"],
         }
 
-    async def _execute_optimization(
-        self, action: Dict[str, Any], implementation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _execute_optimization(self, action: dict[str, Any], implementation: dict[str, Any]) -> dict[str, Any]:
         """Execute a performance optimization."""
         # This would use update_symbol to apply the optimization
         # For demo purposes, return success

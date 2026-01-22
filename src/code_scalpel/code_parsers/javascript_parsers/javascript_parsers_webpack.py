@@ -9,7 +9,6 @@ Command: webpack build --profile --json=stats.json
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 
 @dataclass
@@ -20,7 +19,7 @@ class BundleMetrics:
     gzip_size: int
     chunks_count: int
     modules_count: int
-    entry_points: List[str]
+    entry_points: list[str]
 
 
 class WebpackParser:

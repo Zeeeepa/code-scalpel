@@ -9,7 +9,6 @@ Note: JArchitect is a commercial tool with GUI-based analysis.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from defusedxml import ElementTree as ET
 
@@ -20,7 +19,7 @@ class QualityMetric:
 
     name: str
     value: float
-    threshold: Optional[float] = None
+    threshold: float | None = None
     status: str = "OK"  # "OK", "WARNING", "VIOLATION"
 
 
@@ -157,9 +156,7 @@ class JArchitectParser:
         """
         return [m for m in report.metrics if m.status == "VIOLATION"]
 
-    def get_cyclic_dependencies(
-        self, report: JArchitectReport
-    ) -> list[DependencyIssue]:
+    def get_cyclic_dependencies(self, report: JArchitectReport) -> list[DependencyIssue]:
         """
         Get cyclic dependency issues.
 
@@ -169,6 +166,4 @@ class JArchitectParser:
         Returns:
             List of cyclic dependency issues
         """
-        return [
-            d for d in report.dependency_issues if d.issue_type == "CYCLIC_DEPENDENCY"
-        ]
+        return [d for d in report.dependency_issues if d.issue_type == "CYCLIC_DEPENDENCY"]

@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Dict, List
 
 from defusedxml import ElementTree as ET
 
@@ -19,7 +18,7 @@ class DependencyParser:
     def __init__(self, root_path: str):
         self.root_path = root_path
 
-    def get_dependencies(self) -> Dict[str, List[Dict[str, str]]]:
+    def get_dependencies(self) -> dict[str, list[dict[str, str]]]:
         """Returns dependencies grouped by ecosystem."""
         deps = {
             "python": self._parse_python_deps(),
@@ -28,7 +27,7 @@ class DependencyParser:
         }
         return {k: v for k, v in deps.items() if v}
 
-    def _parse_python_deps(self) -> List[Dict[str, str]]:
+    def _parse_python_deps(self) -> list[dict[str, str]]:
         deps = []
 
         # 1. pyproject.toml (PEP 621 & Poetry)
@@ -44,11 +43,7 @@ class DependencyParser:
                         deps.append(self._parse_pep508(d))
 
                 # Poetry
-                if (
-                    "tool" in data
-                    and "poetry" in data["tool"]
-                    and "dependencies" in data["tool"]["poetry"]
-                ):
+                if "tool" in data and "poetry" in data["tool"] and "dependencies" in data["tool"]["poetry"]:
                     for k, v in data["tool"]["poetry"]["dependencies"].items():
                         if k.lower() != "python":
                             deps.append({"name": k, "version": str(v)})
@@ -59,26 +54,22 @@ class DependencyParser:
         req_path = os.path.join(self.root_path, "requirements.txt")
         if os.path.exists(req_path):
             try:
-                with open(req_path, "r", encoding="utf-8") as f:
+                with open(req_path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
-                        if (
-                            line
-                            and not line.startswith("#")
-                            and not line.startswith("-")
-                        ):
+                        if line and not line.startswith("#") and not line.startswith("-"):
                             deps.append(self._parse_pep508(line))
             except Exception:
                 pass
 
         return self._deduplicate(deps)
 
-    def _parse_javascript_deps(self) -> List[Dict[str, str]]:
+    def _parse_javascript_deps(self) -> list[dict[str, str]]:
         deps = []
         pj_path = os.path.join(self.root_path, "package.json")
         if os.path.exists(pj_path):
             try:
-                with open(pj_path, "r", encoding="utf-8") as f:
+                with open(pj_path, encoding="utf-8") as f:
                     data = json.load(f)
                 for k, v in data.get("dependencies", {}).items():
                     deps.append({"name": k, "version": v})
@@ -88,8 +79,8 @@ class DependencyParser:
                 pass
         return deps
 
-    def _parse_maven_deps(self) -> List[Dict[str, str]]:
-        deps: List[Dict[str, str]] = []
+    def _parse_maven_deps(self) -> list[dict[str, str]]:
+        deps: list[dict[str, str]] = []
 
         # Minimal pom.xml parsing for groupId/artifactId/version triples
         pom_path = os.path.join(self.root_path, "pom.xml")
@@ -121,22 +112,17 @@ class DependencyParser:
             g_path = os.path.join(self.root_path, gradle_file)
             if os.path.exists(g_path):
                 try:
-                    with open(g_path, "r", encoding="utf-8") as f:
+                    with open(g_path, encoding="utf-8") as f:
                         for line in f:
                             line = line.strip()
                             if not line or line.startswith("//"):
                                 continue
-                            match = re.search(
-                                r"['\"]([\w\-.]+:[\w\-.]+):([\w\-.]+)['\"]", line
-                            )
+                            match = re.search(r"['\"]([\w\-.]+:[\w\-.]+):([\w\-.]+)['\"]", line)
                             if match:
                                 coords = match.group(1)
                                 ver = match.group(2)
                                 entry = {"name": coords, "version": ver}
-                                if any(
-                                    k in line
-                                    for k in ("testImplementation", "testCompile")
-                                ):
+                                if any(k in line for k in ("testImplementation", "testCompile")):
                                     entry["type"] = "dev"
                                 deps.append(entry)
                 except Exception:
@@ -144,7 +130,7 @@ class DependencyParser:
 
         return self._deduplicate(deps)
 
-    def _parse_pep508(self, s: str) -> Dict[str, str]:
+    def _parse_pep508(self, s: str) -> dict[str, str]:
         # Basic parsing: "requests>=2.0" -> name="requests", version=">=2.0"
         s = s.split(";")[0].split("#")[0].strip()
         match = re.match(r"^([a-zA-Z0-9_\-\.]+)(.*)$", s)
@@ -152,7 +138,7 @@ class DependencyParser:
             return {"name": match.group(1), "version": match.group(2).strip() or "*"}
         return {"name": s, "version": "*"}
 
-    def _deduplicate(self, deps: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def _deduplicate(self, deps: list[dict[str, str]]) -> list[dict[str, str]]:
         seen = set()
         unique = []
         for d in deps:

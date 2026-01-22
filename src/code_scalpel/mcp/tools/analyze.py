@@ -10,9 +10,9 @@ import asyncio
 import time
 from importlib import import_module
 
-from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
 from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
+from code_scalpel.mcp.helpers.analyze_helpers import _analyze_code_sync
 from code_scalpel.mcp.protocol import _get_current_tier
 
 # Avoid static import resolution issues in some type checkers
@@ -20,9 +20,7 @@ mcp = import_module("code_scalpel.mcp.protocol").mcp
 
 
 @mcp.tool()
-async def analyze_code(
-    code: str, language: str = "auto", file_path: str | None = None
-) -> ToolResponseEnvelope:
+async def analyze_code(code: str, language: str = "auto", file_path: str | None = None) -> ToolResponseEnvelope:
     """
     Analyze source code structure.
 

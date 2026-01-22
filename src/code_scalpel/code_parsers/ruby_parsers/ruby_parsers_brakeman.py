@@ -7,7 +7,6 @@ Brakeman Parser - Ruby Security Vulnerability Scanning
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List
 
 
 class VulnerabilityType(Enum):
@@ -44,34 +43,28 @@ class BrakemanParser:
 
     def __init__(self):
         """Initialize Brakeman parser."""
-        self.vulnerabilities: List[BrakemanVulnerability] = []
+        self.vulnerabilities: list[BrakemanVulnerability] = []
 
-    def parse_json_report(self, report_path: Path) -> List[BrakemanVulnerability]:
+    def parse_json_report(self, report_path: Path) -> list[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: JSON report parsing")
 
-    def execute_brakeman(self, paths: List[Path]) -> List[BrakemanVulnerability]:
+    def execute_brakeman(self, paths: list[Path]) -> list[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: Brakeman execution")
 
     def load_config(self, config_file: Path):
         raise NotImplementedError("Phase 2: Config loading")
 
-    def categorize_vulnerabilities(self, vulns: List[BrakemanVulnerability]) -> Dict:
+    def categorize_vulnerabilities(self, vulns: list[BrakemanVulnerability]) -> dict:
         raise NotImplementedError("Phase 2: Vulnerability categorization")
 
-    def detect_sql_injection(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_sql_injection(self, vulns: list[BrakemanVulnerability]) -> list[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: SQL injection detection")
 
-    def detect_mass_assignment(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_mass_assignment(self, vulns: list[BrakemanVulnerability]) -> list[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: Mass assignment detection")
 
-    def detect_xss_vulnerabilities(
-        self, vulns: List[BrakemanVulnerability]
-    ) -> List[BrakemanVulnerability]:
+    def detect_xss_vulnerabilities(self, vulns: list[BrakemanVulnerability]) -> list[BrakemanVulnerability]:
         raise NotImplementedError("Phase 2: XSS detection")
 
-    def generate_security_report(self, vulns: List[BrakemanVulnerability]) -> str:
+    def generate_security_report(self, vulns: list[BrakemanVulnerability]) -> str:
         raise NotImplementedError("Phase 2: Report generation")

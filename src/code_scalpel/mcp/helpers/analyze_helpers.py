@@ -23,10 +23,7 @@ logger = logging.getLogger(__name__)
 MAX_CODE_SIZE = 110 * 1024 * 1024
 
 # Caching enabled by default
-CACHE_ENABLED = (
-    os.environ.get("SCALPEL_CACHE_ENABLED", "1") != "0"
-    and os.environ.get("SCALPEL_NO_CACHE", "0") != "1"
-)
+CACHE_ENABLED = os.environ.get("CODE_SCALPEL_CACHE_ENABLED", "1") != "0"
 
 # [20251231_FEATURE] v3.3.x - Best-effort enrichments for analyze_code
 _ANALYZE_CODE_COMPLEXITY_HISTORY: dict[str, list[dict[str, Any]]] = {}
@@ -187,9 +184,7 @@ def _detect_code_smells_python(tree: ast.AST, code: str) -> list[str]:
             # Deep nesting and high complexity hints
             depth = _max_nesting(node, 0)
             if depth > 4:
-                smells.append(
-                    f"Method '{node.name}' has deep nesting (>{depth} levels) at line {node.lineno}."
-                )
+                smells.append(f"Method '{node.name}' has deep nesting (>{depth} levels) at line {node.lineno}.")
             try:
                 func_tree = ast.Module(body=node.body, type_ignores=[])
                 func_complexity = _count_complexity(func_tree)
@@ -202,11 +197,7 @@ def _detect_code_smells_python(tree: ast.AST, code: str) -> list[str]:
 
         # God class detection
         elif isinstance(node, ast.ClassDef):
-            methods = [
-                n
-                for n in node.body
-                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-            ]
+            methods = [n for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
             if len(methods) > 10:
                 smells.append(
                     f"God class '{node.name}' with {len(methods)} methods "
@@ -248,11 +239,7 @@ def _compute_halstead_metrics_python(tree: ast.AST) -> dict[str, float]:
     vocabulary = distinct_operators + distinct_operands
     length = total_operators + total_operands
     volume = length * math.log2(vocabulary) if vocabulary > 0 else 0.0
-    difficulty = (
-        (distinct_operators / 2) * (total_operands / distinct_operands)
-        if distinct_operands > 0
-        else 0.0
-    )
+    difficulty = (distinct_operators / 2) * (total_operands / distinct_operands) if distinct_operands > 0 else 0.0
     effort = difficulty * volume
 
     return {
@@ -268,15 +255,9 @@ def _compute_halstead_metrics_python(tree: ast.AST) -> dict[str, float]:
     }
 
 
-def _detect_duplicate_code_blocks(
-    code: str, min_lines: int = 5
-) -> list[dict[str, Any]]:
+def _detect_duplicate_code_blocks(code: str, min_lines: int = 5) -> list[dict[str, Any]]:
     """Detect duplicate code blocks using line-hash sliding windows."""
-    lines = [
-        ln.strip()
-        for ln in code.splitlines()
-        if ln.strip() and not ln.strip().startswith("#")
-    ]
+    lines = [ln.strip() for ln in code.splitlines() if ln.strip() and not ln.strip().startswith("#")]
     if len(lines) < min_lines:
         return []
 
@@ -319,16 +300,10 @@ def _detect_naming_issues_python(tree: ast.AST) -> list[str]:
     pascal = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 
     for node in ast.walk(tree):
-        if isinstance(
-            node, (ast.FunctionDef, ast.AsyncFunctionDef)
-        ) and not snake.match(node.name):
-            issues.append(
-                f"Function '{node.name}' should be snake_case at line {node.lineno}."
-            )
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and not snake.match(node.name):
+            issues.append(f"Function '{node.name}' should be snake_case at line {node.lineno}.")
         if isinstance(node, ast.ClassDef) and not pascal.match(node.name):
-            issues.append(
-                f"Class '{node.name}' should be PascalCase at line {node.lineno}."
-            )
+            issues.append(f"Class '{node.name}' should be PascalCase at line {node.lineno}.")
     return issues
 
 
@@ -362,13 +337,9 @@ def _detect_compliance_issues_python(tree: ast.AST, code: str) -> list[str]:
     issues: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ExceptHandler) and node.type is None:
-            issues.append(
-                f"Bare except detected at line {node.lineno}. Specify exception types."
-            )
+            issues.append(f"Bare except detected at line {node.lineno}. Specify exception types.")
     if "password" in code.lower() and "hashlib" not in code.lower():
-        issues.append(
-            "Potential plaintext password handling detected. Ensure hashing/encryption."
-        )
+        issues.append("Potential plaintext password handling detected. Ensure hashing/encryption.")
     return issues
 
 
@@ -477,29 +448,20 @@ def _analyze_javascript_code(code: str, is_typescript: bool = False) -> Analysis
                 )
 
             # Arrow functions with variable declaration
-            elif (
-                node_type == "lexical_declaration"
-                or node_type == "variable_declaration"
-            ):
+            elif node_type == "lexical_declaration" or node_type == "variable_declaration":
                 for child in node.children:
                     if child.type == "variable_declarator":
                         name_node = child.child_by_field_name("name")
                         value_node = child.child_by_field_name("value")
                         if value_node and value_node.type == "arrow_function":
-                            name = (
-                                name_node.text.decode("utf-8")
-                                if name_node
-                                else "<anonymous>"
-                            )
+                            name = name_node.text.decode("utf-8") if name_node else "<anonymous>"
                             functions.append(name)
                             function_details.append(
                                 FunctionInfo(
                                     name=name,
                                     lineno=child.start_point[0] + 1,
                                     end_lineno=child.end_point[0] + 1,
-                                    is_async=any(
-                                        c.type == "async" for c in value_node.children
-                                    ),
+                                    is_async=any(c.type == "async" for c in value_node.children),
                                 )
                             )
 
@@ -635,30 +597,14 @@ def _detect_frameworks_from_code(
         frameworks.add("fastapi")
 
     # Java / Spring
-    if (
-        lang == "java"
-        or "org.springframework" in code_lower
-        or "@component" in code_lower
-    ):
-        if (
-            "springframework" in code_lower
-            or "@autowired" in code_lower
-            or "@component" in code_lower
-        ):
+    if lang == "java" or "org.springframework" in code_lower or "@component" in code_lower:
+        if "springframework" in code_lower or "@autowired" in code_lower or "@component" in code_lower:
             frameworks.add("spring")
 
     # React / Next.js style patterns (JS/TS)
     if lang in {"javascript", "typescript"} or "tsx" in lang:
-        if (
-            "from 'react'" in code_lower
-            or 'from "react"' in code_lower
-            or "react" in code_lower
-        ):
-            if (
-                "usestate(" in code_lower
-                or "useeffect(" in code_lower
-                or "usecontext(" in code_lower
-            ):
+        if "from 'react'" in code_lower or 'from "react"' in code_lower or "react" in code_lower:
+            if "usestate(" in code_lower or "useeffect(" in code_lower or "usecontext(" in code_lower:
                 frameworks.add("react")
             # Even without hooks, a React import is a strong signal.
             elif "react" in code_lower:
@@ -699,9 +645,7 @@ def _detect_dead_code_hints_python(tree: ast.AST, code: str) -> list[str]:
             for st in stmts:
                 if terminated:
                     ln = getattr(st, "lineno", None)
-                    hints.append(
-                        f"Unreachable statement after terminator in {scope} (L{ln})"
-                    )
+                    hints.append(f"Unreachable statement after terminator in {scope} (L{ln})")
                     continue
                 if isinstance(st, (ast.Return, ast.Raise)):  # simple terminators
                     terminated = True
@@ -714,16 +658,10 @@ def _detect_dead_code_hints_python(tree: ast.AST, code: str) -> list[str]:
                         getattr(st, "body", []) or [],
                         f"{scope} (loop/with/try)",
                     )
-                    _scan_block_for_unreachable(
-                        getattr(st, "orelse", []) or [], f"{scope} (orelse)"
-                    )
-                    _scan_block_for_unreachable(
-                        getattr(st, "finalbody", []) or [], f"{scope} (finally)"
-                    )
+                    _scan_block_for_unreachable(getattr(st, "orelse", []) or [], f"{scope} (orelse)")
+                    _scan_block_for_unreachable(getattr(st, "finalbody", []) or [], f"{scope} (finally)")
                     for h in getattr(st, "handlers", []) or []:
-                        _scan_block_for_unreachable(
-                            getattr(h, "body", []) or [], f"{scope} (except)"
-                        )
+                        _scan_block_for_unreachable(getattr(h, "body", []) or [], f"{scope} (except)")
 
         for node in tree.body if isinstance(tree, ast.Module) else []:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -812,9 +750,7 @@ def _summarize_types_python(tree: ast.AST) -> dict[str, Any]:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             total_funcs += 1
             has_ann = False
-            for a in list(getattr(node.args, "args", []) or []) + list(
-                getattr(node.args, "kwonlyargs", []) or []
-            ):
+            for a in list(getattr(node.args, "args", []) or []) + list(getattr(node.args, "kwonlyargs", []) or []):
                 if getattr(a, "annotation", None) is not None:
                     annotated_params += 1
                     has_ann = True
@@ -849,9 +785,7 @@ def _summarize_types_python(tree: ast.AST) -> dict[str, Any]:
     }
 
 
-def _compute_api_surface_from_symbols(
-    functions: list[str], classes: list[str]
-) -> dict[str, Any]:
+def _compute_api_surface_from_symbols(functions: list[str], classes: list[str]) -> dict[str, Any]:
     def _is_public(name: str) -> bool:
         # Treat async prefix as implementation detail in inventory
         norm = name.replace("async ", "")
@@ -902,9 +836,7 @@ def _update_and_get_complexity_trends(
         return None
     key = str(file_path)
     history = _ANALYZE_CODE_COMPLEXITY_HISTORY.setdefault(key, [])
-    history.append(
-        {"cyclomatic": cyclomatic, "cognitive": cognitive, "ts": time.time()}
-    )
+    history.append({"cyclomatic": cyclomatic, "cognitive": cognitive, "ts": time.time()})
     if len(history) > max_points:
         history[:] = history[-max_points:]
 
@@ -924,9 +856,7 @@ def _update_and_get_complexity_trends(
     }
 
 
-def _analyze_code_sync(
-    code: str, language: str = "auto", file_path: str | None = None
-) -> AnalysisResult:
+def _analyze_code_sync(code: str, language: str = "auto", file_path: str | None = None) -> AnalysisResult:
     """Synchronous implementation of analyze_code.
 
     [20251219_BUGFIX] v3.0.4 - Auto-detect language from content if not specified.
@@ -963,9 +893,7 @@ def _analyze_code_sync(
                 imports=[],
                 complexity=0,
                 lines_of_code=0,
-                error=(
-                    f"Input exceeds configured size limit of {limit_mb} MB for analyze_code"
-                ),
+                error=(f"Input exceeds configured size limit of {limit_mb} MB for analyze_code"),
             )
 
     # [20251221_FEATURE] v3.1.0 - Use unified_extractor for language detection
@@ -1035,14 +963,10 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(
-                    code, "java", result.imports
-                )
+                result.frameworks = _detect_frameworks_from_code(code, "java", result.imports)
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
-                result.api_surface = _compute_api_surface_from_symbols(
-                    result.functions, result.classes
-                )
+                result.api_surface = _compute_api_surface_from_symbols(result.functions, result.classes)
 
             if has_capability("analyze_code", "priority_ordering", tier):
                 result.issues = _priority_sort(result.issues)
@@ -1069,14 +993,10 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(
-                    code, "javascript", result.imports
-                )
+                result.frameworks = _detect_frameworks_from_code(code, "javascript", result.imports)
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
-                result.api_surface = _compute_api_surface_from_symbols(
-                    result.functions, result.classes
-                )
+                result.api_surface = _compute_api_surface_from_symbols(result.functions, result.classes)
 
             if has_capability("analyze_code", "priority_ordering", tier):
                 result.issues = _priority_sort(result.issues)
@@ -1102,14 +1022,10 @@ def _analyze_code_sync(
             result.tier_applied = tier
 
             if has_capability("analyze_code", "framework_detection", tier):
-                result.frameworks = _detect_frameworks_from_code(
-                    code, "typescript", result.imports
-                )
+                result.frameworks = _detect_frameworks_from_code(code, "typescript", result.imports)
 
             if has_capability("analyze_code", "api_surface_analysis", tier):
-                result.api_surface = _compute_api_surface_from_symbols(
-                    result.functions, result.classes
-                )
+                result.api_surface = _compute_api_surface_from_symbols(result.functions, result.classes)
 
             if has_capability("analyze_code", "priority_ordering", tier):
                 result.issues = _priority_sort(result.issues)
@@ -1136,9 +1052,7 @@ def _analyze_code_sync(
         parser_warnings: list[str] = []
         sanitization_dict: dict[str, Any] | None = None
         if sanitization_report.was_sanitized:
-            parser_warnings.append(
-                f"Code was auto-sanitized: {'; '.join(sanitization_report.changes)}"
-            )
+            parser_warnings.append(f"Code was auto-sanitized: {'; '.join(sanitization_report.changes)}")
             sanitization_dict = {
                 "was_sanitized": True,
                 "changes": sanitization_report.changes,
@@ -1178,11 +1092,7 @@ def _analyze_code_sync(
             elif isinstance(node, ast.ClassDef):
                 classes.append(node.name)
                 # Extract method names
-                methods = [
-                    n.name
-                    for n in node.body
-                    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-                ]
+                methods = [n.name for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
                 class_details.append(
                     ClassInfo(
                         name=node.name,
@@ -1246,9 +1156,7 @@ def _analyze_code_sync(
 
             if has_capability("analyze_code", "duplicate_code_detection", tier):
                 duplicate_code_blocks = _detect_duplicate_code_blocks(code)
-                logger.debug(
-                    f"Detected {len(duplicate_code_blocks)} duplicate code block(s)"
-                )
+                logger.debug(f"Detected {len(duplicate_code_blocks)} duplicate code block(s)")
 
             if has_capability("analyze_code", "dependency_graph", tier):
                 dependency_graph = _build_dependency_graph_python(tree)

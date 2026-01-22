@@ -40,6 +40,24 @@ audit:
   log_file: ".code-scalpel/audit.log"
 """
 
+# Agent Limits YAML template - v3.4.0+
+AGENT_LIMITS_YAML_TEMPLATE = """# Agent Operation Limits
+# [20251227_FEATURE] Limits for AI agent operations to prevent runaway usage
+
+version: "1.0"
+
+# Global limits per session
+limits:
+  max_files_read: 100
+  max_tokens_per_session: 50000
+  max_api_calls_per_hour: 1000
+
+# Relationships:
+# - These limits are checked by the MCP governance layer before tool execution
+# - They complement change budgeting (autonomy.governance.change_budgeting in governance.yaml)
+# - Change budgeting limits code modifications, these limit agent resource usage
+"""
+
 # Template for budget.yaml
 BUDGET_YAML_TEMPLATE = """# Code Scalpel Change Budget Configuration
 # Learn more: https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/guides/change_budgeting.md
@@ -72,6 +90,115 @@ exemptions:
   - "docs/**/*.md"
 """
 
+# Governance YAML template - v3.5.0+ (replaces dev-governance.yaml)
+GOVERNANCE_YAML_TEMPLATE = """# Code Scalpel Governance Configuration
+# Learn more: https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/governance_guide.md
+
+version: "1.0.0"
+
+# Autonomy governance - controls AI agent behavior and blast radius
+autonomy:
+  governance:
+    change_budgeting:
+      enabled: true
+      limits:
+        max_files_per_session: 10
+        max_lines_per_file: 500
+        max_total_changes: 1000
+      reset:
+        mode: "session"  # Options: "session", "daily", "manual"
+
+    blast_radius:
+      max_files_per_operation: 10
+      max_lines_changed: 500
+      max_functions_modified: 5
+      max_classes_modified: 3
+
+    enforcement:
+      mode: "warn"  # Options: "warn", "block", "disabled"
+      fail_on_violation: false
+      log_violations: true
+
+# Protected paths - cannot be modified by AI agents
+protected_paths:
+  - "src/security/**"
+  - "src/auth/**"
+  - "*.key"
+  - "*.pem"
+  - ".env"
+
+# Allowed operations - whitelist of permitted AI actions
+allowed_operations:
+  - "analyze"
+  - "extract"
+  - "security_scan"
+  - "get_file_context"
+  - "get_symbol_references"
+
+# Denied operations - blacklist of prohibited AI actions
+denied_operations:
+  - "delete_file"
+  - "bulk_replace"
+
+# Development governance policies - meta-policies for AI development behavior
+policies:
+  # ============================================================================
+  # DOCUMENTATION POLICIES
+  # ============================================================================
+
+  - name: mandatory-readme-for-new-modules
+    category: documentation
+    severity: HIGH
+    action: DENY
+    description: |
+      Every new module directory must have a README.md file explaining its purpose,
+      architecture, and usage patterns. READMEs must be placed IN the module directory,
+      not in a separate docs folder.
+    rule: |
+      package code_scalpel.dev_governance
+
+      default allow = false
+
+      # Check if operation creates a new module directory
+      creates_new_module {
+        input.operation.type == "create_directory"
+        input.operation.path contains "src/"
+        contains(input.operation.path, "__init__.py")
+      }
+
+      # Check if README.md is included in the same operation
+      includes_readme {
+        some i
+        input.operation.files[i].path == concat("/", [input.operation.path, "README.md"])
+      }
+
+      # Deny if creating module without README
+      allow {
+        not creates_new_module
+      }
+
+      allow {
+        creates_new_module
+        includes_readme
+      }
+
+    remediation: |
+      When creating a new module directory, always include a README.md that contains:
+      1. Overview - What this module does
+      2. Architecture - Key components and their relationships
+      3. Integration - How it connects to the rest of the system
+      4. Usage Examples - Common patterns with code samples
+      5. Configuration - Required setup or config files
+      6. Best Practices - Do's and don'ts
+
+# Audit configuration
+audit:
+  enabled: true
+  log_file: ".code-scalpel/audit.log"
+  include_diffs: true
+  cryptographic_signing: false
+"""
+
 # Template for README.md in .code-scalpel/
 README_TEMPLATE = """# Code Scalpel Configuration Directory
 
@@ -79,9 +206,10 @@ This directory contains configuration files for Code Scalpel policy engine and g
 
 ## Files
 
-- `policy.yaml` - Main policy configuration (security rules, enforcement mode)
-- `budget.yaml` - Change budget limits (blast radius control)
-- `config.json` - Governance and enforcement settings
+- `governance.yaml` - Governance and autonomy settings (change budgeting, blast radius, enforcement)
+- `policy.yaml` - Security policies (SQL injection, command injection, etc.)
+- `agent_limits.yaml` - Agent operation budgets (max files, tokens, API calls)
+- `config.json` - Minimal metadata (version/profile only)
 - `policy.manifest.json` - Signed manifest for tamper detection (optional)
 - `audit.log` - Audit trail of policy decisions (auto-generated)
 - `autonomy_audit/` - Autonomy engine audit logs (auto-generated)
@@ -97,14 +225,16 @@ Copy `.env.example` to `.env` and update with your actual secrets.
 
 ## Getting Started
 
-1. **Review `policy.yaml`** - Configure security rules and enforcement mode
-2. **Review `budget.yaml`** - Set change budget limits (optional)
-3. **Set environment variables** - Copy `.env.example` to `.env` and configure secrets
-4. **Enable audit logging** - Track all policy decisions
+1. **Review `governance.yaml`** - Configure autonomy limits and blast radius controls
+2. **Review `policy.yaml`** - Configure security rules and enforcement mode
+3. **Review `agent_limits.yaml`** - Set agent operation limits (optional)
+4. **Set environment variables** - Copy `.env.example` to `.env` and configure secrets
+5. **Enable audit logging** - Track all policy decisions
 
 ## Documentation
 
 - [Policy Engine Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/policy_engine_guide.md)
+- [Governance Configuration](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/governance_guide.md)
 - [Change Budgeting Guide](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/guides/change_budgeting.md)
 - [Tamper Resistance](https://github.com/3D-Tech-Solutions/code-scalpel/blob/main/docs/security/tamper_resistance.md)
 
@@ -126,47 +256,8 @@ Learn more: https://github.com/3D-Tech-Solutions/code-scalpel
 # Template for config.json (main governance configuration)
 CONFIG_JSON_TEMPLATE = """{
   "version": "1.0.0",
-  "governance": {
-    "blast_radius": {
-      "max_files_per_operation": 10,
-      "max_lines_changed": 500,
-      "max_functions_modified": 5,
-      "max_classes_modified": 3
-    },
-    "protected_paths": [
-      "src/security/**",
-      "src/auth/**",
-      "*.key",
-      "*.pem",
-      ".env"
-    ],
-    "allowed_operations": [
-      "analyze",
-      "extract",
-      "security_scan",
-      "get_file_context",
-      "get_symbol_references"
-    ],
-    "denied_operations": [
-      "delete_file",
-      "bulk_replace"
-    ]
-  },
-  "enforcement": {
-    "mode": "warn",
-    "fail_on_violation": false,
-    "log_violations": true
-  },
-  "audit": {
-    "enabled": true,
-    "log_file": ".code-scalpel/audit.log",
-    "include_diffs": true,
-    "cryptographic_signing": false
-  },
-  "integrity": {
-    "verify_on_startup": true,
-    "hash_algorithm": "sha256"
-  }
+  "profile": "default",
+  "description": "Default balanced configuration"
 }
 """
 
@@ -228,7 +319,7 @@ policies:
   # ============================================================================
   # DOCUMENTATION POLICIES
   # ============================================================================
-  
+
   - name: mandatory-readme-for-new-modules
     category: documentation
     severity: HIGH
@@ -239,32 +330,32 @@ policies:
       not in a separate docs folder.
     rule: |
       package code_scalpel.dev_governance
-      
+
       default allow = false
-      
+
       # Check if operation creates a new module directory
       creates_new_module {
         input.operation.type == "create_directory"
         input.operation.path contains "src/"
         contains(input.operation.path, "__init__.py")
       }
-      
+
       # Check if README.md is included in the same operation
       includes_readme {
         some i
         input.operation.files[i].path == concat("/", [input.operation.path, "README.md"])
       }
-      
+
       # Deny if creating module without README
       allow {
         not creates_new_module
       }
-      
+
       allow {
         creates_new_module
         includes_readme
       }
-    
+
     remediation: |
       When creating a new module directory, always include a README.md that contains:
       1. Overview - What this module does
@@ -284,53 +375,53 @@ project_config:
   type: "python-library"
   strictness: high
   auto_fix: false  # Require manual review for production library
-  
+
   # File location rules - where different file types belong
   file_locations:
     # Core modules
     core_module: "src/code_scalpel/"
     submodule: "src/code_scalpel/*/"
-    
+
     # Specific component types
     policy_file: ".code-scalpel/policies/"
     rego_policy: ".code-scalpel/policies/"
-    
+
     # Analysis engines
     pdg_tool: "src/code_scalpel/pdg_tools/"
     graph_engine: "src/code_scalpel/graph_engine/"
     ir_component: "src/code_scalpel/ir/"
     symbolic_execution: "src/code_scalpel/symbolic_execution_tools/"
-    
+
     # Integrations
     ai_integration: "src/code_scalpel/integrations/"
     mcp_server: "src/code_scalpel/mcp/"
-    
+
     # Language support
     parser: "src/code_scalpel/code_parsers/"
     polyglot_analyzer: "src/code_scalpel/polyglot/"
-    
+
     # Governance & security
     policy_engine: "src/code_scalpel/policy_engine/"
     governance: "src/code_scalpel/governance/"
     security_tool: "src/code_scalpel/security/"
-    
+
     # Testing
     unit_test: "tests/unit/"
     integration_test: "tests/integration/"
     e2e_test: "tests/e2e/"
     benchmark: "benchmarks/"
-    
+
     # Documentation
     api_docs: "docs/api/"
     guide: "docs/guides/"
     feature_doc: "docs/features/"
     testing_doc: "docs/testing/"
     summary: "docs/summaries/"
-    
+
     # Examples
     example_code: "examples/"
     example_policy: "examples/policy_examples/"
-    
+
     # Configuration
     config_file: "config/"
     docker_file: "./"  # Dockerfile in root
@@ -379,13 +470,13 @@ policies:
       file: policies/architecture/layered_architecture.rego
       severity: HIGH
       action: DENY
-  
+
   devops:
     - name: docker-security
       file: policies/devops/docker_security.rego
       severity: HIGH
       action: DENY
-  
+
   devsecops:
     - name: secret-detection
       file: policies/devsecops/secret_detection.rego
@@ -441,7 +532,7 @@ policies:
       file: policies/architecture/layered_architecture.rego
       severity: HIGH
       action: DENY
-    
+
     - name: module-boundaries
       file: policies/architecture/module_boundaries.rego
       severity: CRITICAL
@@ -487,7 +578,7 @@ policies:
       file: policies/devops/docker_security.rego
       severity: HIGH
       action: WARN
-    
+
     - name: kubernetes-security
       file: policies/devops/kubernetes_manifests.rego
       severity: CRITICAL
@@ -534,7 +625,7 @@ policies:
       file: policies/devsecops/secret_detection.rego
       severity: CRITICAL
       action: DENY
-    
+
     - name: sbom-validation
       file: policies/devsecops/sbom_validation.rego
       severity: HIGH
@@ -648,7 +739,7 @@ violation[{"msg": msg, "severity": "HIGH"}] if {
     some imp in input.imports
     file_layer(input.file) == "presentation"
     file_layer(imp.target) == "infrastructure"
-    msg := sprintf("Presentation layer (%s) cannot import Infrastructure layer (%s)", 
+    msg := sprintf("Presentation layer (%s) cannot import Infrastructure layer (%s)",
                    [input.file, imp.target])
 }
 
@@ -657,7 +748,7 @@ violation[{"msg": msg, "severity": "CRITICAL"}] if {
     some imp in input.imports
     file_layer(input.file) == "domain"
     file_layer(imp.target) != "domain"
-    msg := sprintf("Domain layer (%s) must not import other layers (%s)", 
+    msg := sprintf("Domain layer (%s) must not import other layers (%s)",
                    [input.file, imp.target])
 }
 """
@@ -678,7 +769,7 @@ has_secrets(content) if {
 
 # Check for root user
 uses_root_user(lines) if {
-    not any([line | 
+    not any([line |
         line := lines[_]
         startswith(line, "USER ")
     ])
@@ -787,7 +878,7 @@ violation[{"msg": msg, "severity": "HIGH", "file": file.path}] if {
     expected_dir := config.file_locations[file_type]
     expected_dir != null
     not path_matches(file.path, expected_dir)
-    msg := sprintf("File type '%s' must be in '%s/', found in '%s'", 
+    msg := sprintf("File type '%s' must be in '%s/', found in '%s'",
                    [file_type, expected_dir, file.path])
 }
 

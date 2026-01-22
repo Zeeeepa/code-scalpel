@@ -313,7 +313,7 @@ class TestCacheIntegration:
         """Test that analyze_code uses cache."""
         import os
 
-        os.environ["SCALPEL_CACHE_ENABLED"] = "1"
+        os.environ["CODE_SCALPEL_CACHE_ENABLED"] = "1"
 
         from code_scalpel.mcp.server import analyze_code
 
@@ -333,7 +333,7 @@ class TestCacheIntegration:
         """Test that security_scan uses cache."""
         import os
 
-        os.environ["SCALPEL_CACHE_ENABLED"] = "1"
+        os.environ["CODE_SCALPEL_CACHE_ENABLED"] = "1"
 
         from code_scalpel.mcp.server import security_scan
 
@@ -405,9 +405,7 @@ else:
 
                 # Verify cache hit is faster (at least 2x faster)
                 # Note: This can be flaky on slow systems, so we're generous
-                assert (
-                    time2 < time1
-                ), f"Cache hit ({time2:.4f}s) should be faster than miss ({time1:.4f}s)"
+                assert time2 < time1, f"Cache hit ({time2:.4f}s) should be faster than miss ({time1:.4f}s)"
 
                 # Verify from_cache flag
                 assert result2.from_cache is True

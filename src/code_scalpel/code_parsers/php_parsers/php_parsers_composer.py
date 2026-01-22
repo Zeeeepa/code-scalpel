@@ -16,7 +16,7 @@ Composer provides:
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -25,18 +25,18 @@ class ComposerPackage:
 
     name: str
     version: str
-    constraint: Optional[str] = None
+    constraint: str | None = None
     is_dev: bool = False
-    description: Optional[str] = None
-    license: Optional[str] = None
+    description: str | None = None
+    license: str | None = None
 
 
 @dataclass
 class ComposerConfig:
     """Composer project configuration."""
 
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
     requires: list[ComposerPackage] = field(default_factory=list)
     requires_dev: list[ComposerPackage] = field(default_factory=list)
     autoload: dict[str, Any] = field(default_factory=dict)
@@ -48,7 +48,7 @@ class ComposerParser:
 
     def __init__(self):
         """Initialize Composer parser."""
-        self.config: Optional[ComposerConfig] = None
+        self.config: ComposerConfig | None = None
         self.installed: list[ComposerPackage] = []
 
     def parse_composer_json(self, json_file: Path) -> ComposerConfig:

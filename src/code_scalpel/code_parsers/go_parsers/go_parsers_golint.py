@@ -7,8 +7,6 @@ golint Go Parser - Go style linter (deprecated, use staticcheck).
 # Command: golint ./...
 """
 
-from typing import Optional
-
 # from . import base_parser
 
 
@@ -23,6 +21,6 @@ class GolintParser:
         """Run golint and parse style suggestions."""
         raise NotImplementedError("golint parser not yet implemented")
 
-    def parse_output(self, output: str) -> Optional[list]:
+    def parse_output(self, output: str) -> list | None:
         """Parse golint text output format."""
         raise NotImplementedError("golint parser not yet implemented")

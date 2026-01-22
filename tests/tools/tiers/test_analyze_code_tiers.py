@@ -50,9 +50,7 @@ def _java_sample():
 class TestAnalyzeCodeCommunityTier:
     @pytest.fixture(autouse=True)
     def _tier(self, monkeypatch):
-        monkeypatch.setattr(
-            analyze_helpers, "get_current_tier_from_license", lambda: "community"
-        )
+        monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda: "community")
         self.caps = get_tool_capabilities("analyze_code", "community")
         self.cap_set = set(self.caps.get("capabilities", set()))
         self.limit_mb = self.caps.get("limits", {}).get("max_file_size_mb")
@@ -121,9 +119,7 @@ class TestAnalyzeCodeCommunityTier:
 class TestAnalyzeCodeProTier:
     @pytest.fixture(autouse=True)
     def _tier(self, monkeypatch):
-        monkeypatch.setattr(
-            analyze_helpers, "get_current_tier_from_license", lambda: "pro"
-        )
+        monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda: "pro")
         self.caps = get_tool_capabilities("analyze_code", "pro")
         self.cap_set = set(self.caps.get("capabilities", set()))
         self.limit_mb = self.caps.get("limits", {}).get("max_file_size_mb")
@@ -180,9 +176,7 @@ class TestAnalyzeCodeProTier:
 class TestAnalyzeCodeEnterpriseTier:
     @pytest.fixture(autouse=True)
     def _tier(self, monkeypatch):
-        monkeypatch.setattr(
-            analyze_helpers, "get_current_tier_from_license", lambda: "enterprise"
-        )
+        monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda: "enterprise")
         self.caps = get_tool_capabilities("analyze_code", "enterprise")
         self.cap_set = set(self.caps.get("capabilities", set()))
 
@@ -228,19 +222,13 @@ class TestAnalyzeCodeEnterpriseTier:
 
 class TestAnalyzeCodeCrossTierGating:
     def test_pro_features_absent_in_community(self):
-        comm = set(
-            get_tool_capabilities("analyze_code", "community").get(
-                "capabilities", set()
-            )
-        )
+        comm = set(get_tool_capabilities("analyze_code", "community").get("capabilities", set()))
         assert "cognitive_complexity" not in comm
         assert "code_smells" not in comm
         assert "halstead_metrics" not in comm
 
     def test_enterprise_features_absent_in_pro(self):
-        pro = set(
-            get_tool_capabilities("analyze_code", "pro").get("capabilities", set())
-        )
+        pro = set(get_tool_capabilities("analyze_code", "pro").get("capabilities", set()))
         assert "custom_rules" not in pro
         assert "compliance_checks" not in pro
         assert "architecture_patterns" not in pro
@@ -258,9 +246,7 @@ class TestAnalyzeCodeLanguageConsistency:
     )
     def test_languages_all_tiers(self, lang, sample, monkeypatch):
         for tier in ["community", "pro", "enterprise"]:
-            monkeypatch.setattr(
-                analyze_helpers, "get_current_tier_from_license", lambda t=tier: t
-            )
+            monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda t=tier: t)
             result = _analyze_code_sync(sample, language=lang)
             assert result.success
             assert result.language_detected == lang
@@ -269,17 +255,13 @@ class TestAnalyzeCodeLanguageConsistency:
 
 class TestAnalyzeCodeErrorHandling:
     def test_unsupported_languages_listed(self, monkeypatch):
-        monkeypatch.setattr(
-            analyze_helpers, "get_current_tier_from_license", lambda: "community"
-        )
+        monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda: "community")
         result = _analyze_code_sync("fn main(){}", language="go")
         assert not result.success
         assert "supported" in result.error.lower()
 
     def test_graceful_rejection(self, monkeypatch):
-        monkeypatch.setattr(
-            analyze_helpers, "get_current_tier_from_license", lambda: "community"
-        )
+        monkeypatch.setattr(analyze_helpers, "get_current_tier_from_license", lambda: "community")
         result = _analyze_code_sync("bad", language="rust")
         assert not result.success
         assert result.functions == []

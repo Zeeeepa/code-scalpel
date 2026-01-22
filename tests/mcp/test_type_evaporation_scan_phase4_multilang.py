@@ -68,7 +68,7 @@ class User(TypedDict):
     id: int
     name: str
     email: str
-    
+
 def get_user(user_id: int) -> User:
     response = requests.get(f'/api/users/{user_id}')
     return response.json()

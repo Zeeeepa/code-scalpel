@@ -9,25 +9,23 @@ from __future__ import annotations
 import asyncio
 import time
 from importlib import import_module
-from typing import Optional
 
 from mcp.server.fastmcp import Context
+
+from code_scalpel import __version__ as _pkg_version
 from code_scalpel.licensing.features import get_tool_capabilities
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
 from code_scalpel.mcp.helpers.security_helpers import (
-    _unified_sink_detect_sync,
-    _type_evaporation_scan_sync,
     _scan_dependencies_sync,
     _security_scan_sync,
+    _type_evaporation_scan_sync,
+    _unified_sink_detect_sync,
 )
-from code_scalpel.mcp.protocol import mcp, _get_current_tier
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.protocol import _get_current_tier, mcp
 
 
 @mcp.tool()
-async def unified_sink_detect(
-    code: str, language: str, confidence_threshold: float = 0.7
-) -> ToolResponseEnvelope:
+async def unified_sink_detect(code: str, language: str, confidence_threshold: float = 0.7) -> ToolResponseEnvelope:
     """Unified polyglot sink detection with confidence thresholds."""
     started = time.perf_counter()
     try:
@@ -153,9 +151,7 @@ async def scan_dependencies(
         caps = get_tool_capabilities("scan_dependencies", tier)
 
         if ctx:
-            await ctx.report_progress(
-                0, 100, f"Scanning dependencies in {resolved_path}..."
-            )
+            await ctx.report_progress(0, 100, f"Scanning dependencies in {resolved_path}...")
 
         result = await asyncio.to_thread(
             _scan_dependencies_sync,
@@ -170,9 +166,7 @@ async def scan_dependencies(
 
         if ctx:
             vuln_count = result.total_vulnerabilities
-            await ctx.report_progress(
-                100, 100, f"Scan complete: {vuln_count} vulnerabilities found"
-            )
+            await ctx.report_progress(100, 100, f"Scan complete: {vuln_count} vulnerabilities found")
 
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
@@ -198,8 +192,8 @@ async def scan_dependencies(
 
 @mcp.tool()
 async def security_scan(
-    code: Optional[str] = None,
-    file_path: Optional[str] = None,
+    code: str | None = None,
+    file_path: str | None = None,
     confidence_threshold: float = 0.7,
 ) -> ToolResponseEnvelope:
     """Scan code for security vulnerabilities using taint analysis."""
@@ -207,9 +201,7 @@ async def security_scan(
     try:
         tier = _get_current_tier()
         caps = get_tool_capabilities("security_scan", tier)
-        result = await asyncio.to_thread(
-            _security_scan_sync, code, file_path, tier, caps, confidence_threshold
-        )
+        result = await asyncio.to_thread(_security_scan_sync, code, file_path, tier, caps, confidence_threshold)
         duration_ms = int((time.perf_counter() - started) * 1000)
         return make_envelope(
             data=result,

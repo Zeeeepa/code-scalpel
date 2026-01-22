@@ -33,9 +33,7 @@ def test_memory_cache_hits_without_reparsing(sample_file: Path, tmp_path: Path) 
     assert len(calls) == 1  # parse_fn invoked once due to memory cache
 
 
-def test_disk_cache_persists_across_instances(
-    sample_file: Path, tmp_path: Path
-) -> None:
+def test_disk_cache_persists_across_instances(sample_file: Path, tmp_path: Path) -> None:
     cache_dir = tmp_path / "cache"
 
     def parse_fn(path: Path) -> str:
@@ -160,9 +158,7 @@ def test_cache_stats_to_dict(tmp_path: Path) -> None:
     assert result["disk_hit_rate"] == 0.25  # 5/20
 
 
-def test_cache_stats_stores_and_invalidations(
-    sample_file: Path, tmp_path: Path
-) -> None:
+def test_cache_stats_stores_and_invalidations(sample_file: Path, tmp_path: Path) -> None:
     """Test that store and invalidate operations are tracked."""
     cache = AnalysisCache(cache_dir=tmp_path / "cache")
 

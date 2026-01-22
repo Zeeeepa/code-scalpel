@@ -26,7 +26,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
 @dataclass
@@ -37,11 +37,11 @@ class IndexedFile:
     file_path: str
     content_hash: str
     language: str
-    symbols: List[str]
-    imports: List[str]
+    symbols: list[str]
+    imports: list[str]
     indexed_at: str
     line_count: int
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -53,9 +53,9 @@ class IndexedSymbol:
     repo_name: str
     file_path: str
     line_number: int
-    signature: Optional[str] = None
-    docstring: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    signature: str | None = None
+    docstring: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,10 +64,10 @@ class SearchResult:
 
     repo_name: str
     file_path: str
-    line_number: Optional[int]
+    line_number: int | None
     content_snippet: str
     score: float
-    symbol_name: Optional[str] = None
+    symbol_name: str | None = None
     match_type: str = "content"  # "content", "symbol", "file_name"
 
 
@@ -80,7 +80,7 @@ class IndexStats:
     total_symbols: int
     total_lines: int
     last_updated: str
-    repos: Dict[str, int]  # repo -> file count
+    repos: dict[str, int]  # repo -> file count
 
 
 class SearchBackend(ABC):
@@ -100,10 +100,10 @@ class SearchBackend(ABC):
     def search(
         self,
         query: str,
-        repos: Optional[List[str]] = None,
-        languages: Optional[List[str]] = None,
+        repos: list[str] | None = None,
+        languages: list[str] | None = None,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Search the index."""
         pass
 
@@ -111,9 +111,9 @@ class SearchBackend(ABC):
     def search_symbols(
         self,
         query: str,
-        symbol_type: Optional[str] = None,
+        symbol_type: str | None = None,
         limit: int = 20,
-    ) -> List[IndexedSymbol]:
+    ) -> list[IndexedSymbol]:
         """Search for symbols by name."""
         pass
 
@@ -133,8 +133,8 @@ class InMemoryBackend(SearchBackend):
 
     def __init__(self):
         """Initialize in-memory storage."""
-        self._files: Dict[str, IndexedFile] = {}  # key = repo:path
-        self._symbols: Dict[str, IndexedSymbol] = {}  # key = repo:path:name
+        self._files: dict[str, IndexedFile] = {}  # key = repo:path
+        self._symbols: dict[str, IndexedSymbol] = {}  # key = repo:path:name
 
     def index_file(self, file: IndexedFile) -> bool:
         """Index a file."""
@@ -151,12 +151,12 @@ class InMemoryBackend(SearchBackend):
     def search(
         self,
         query: str,
-        repos: Optional[List[str]] = None,
-        languages: Optional[List[str]] = None,
+        repos: list[str] | None = None,
+        languages: list[str] | None = None,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Search the index using simple string matching."""
-        results: List[SearchResult] = []
+        results: list[SearchResult] = []
         query_lower = query.lower()
 
         for file in self._files.values():
@@ -202,11 +202,11 @@ class InMemoryBackend(SearchBackend):
     def search_symbols(
         self,
         query: str,
-        symbol_type: Optional[str] = None,
+        symbol_type: str | None = None,
         limit: int = 20,
-    ) -> List[IndexedSymbol]:
+    ) -> list[IndexedSymbol]:
         """Search for symbols by name."""
-        results: List[IndexedSymbol] = []
+        results: list[IndexedSymbol] = []
         query_lower = query.lower()
 
         for symbol in self._symbols.values():
@@ -237,7 +237,7 @@ class InMemoryBackend(SearchBackend):
 
     def get_stats(self) -> IndexStats:
         """Get index statistics."""
-        repos: Dict[str, int] = {}
+        repos: dict[str, int] = {}
         total_lines = 0
 
         for file in self._files.values():
@@ -263,8 +263,8 @@ class ElasticsearchBackend(SearchBackend):
         self,
         host: str = "http://localhost:9200",
         index_prefix: str = "code_scalpel_",
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        username: str | None = None,
+        password: str | None = None,
     ):
         """
         Initialize Elasticsearch backend.
@@ -287,8 +287,8 @@ class ElasticsearchBackend(SearchBackend):
         self,
         method: str,
         path: str,
-        body: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        body: dict | None = None,
+    ) -> dict[str, Any]:
         """Make HTTP request to Elasticsearch."""
         import urllib.error
         import urllib.parse
@@ -298,9 +298,7 @@ class ElasticsearchBackend(SearchBackend):
         parsed = urllib.parse.urlparse(url)
         # [20260102_BUGFIX] Enforce network URL schemes to block file:// access.
         if parsed.scheme not in {"http", "https"}:
-            raise ValueError(
-                f"Unsupported URL scheme for Elasticsearch host: {parsed.scheme}"
-            )
+            raise ValueError(f"Unsupported URL scheme for Elasticsearch host: {parsed.scheme}")
         headers = {"Content-Type": "application/json"}
 
         data = json.dumps(body).encode() if body else None
@@ -310,9 +308,7 @@ class ElasticsearchBackend(SearchBackend):
         if self.auth:
             import base64
 
-            credentials = base64.b64encode(
-                f"{self.auth[0]}:{self.auth[1]}".encode()
-            ).decode()
+            credentials = base64.b64encode(f"{self.auth[0]}:{self.auth[1]}".encode()).decode()
             req.add_header("Authorization", f"Basic {credentials}")
 
         try:
@@ -373,9 +369,7 @@ class ElasticsearchBackend(SearchBackend):
         """Index a file in Elasticsearch."""
         self._ensure_indices()
 
-        doc_id = hashlib.sha256(
-            f"{file.repo_name}:{file.file_path}".encode()
-        ).hexdigest()
+        doc_id = hashlib.sha256(f"{file.repo_name}:{file.file_path}".encode()).hexdigest()
 
         doc = {
             "repo_name": file.repo_name,
@@ -421,14 +415,12 @@ class ElasticsearchBackend(SearchBackend):
     def search(
         self,
         query: str,
-        repos: Optional[List[str]] = None,
-        languages: Optional[List[str]] = None,
+        repos: list[str] | None = None,
+        languages: list[str] | None = None,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """Search the index using Elasticsearch."""
-        must_clauses = [
-            {"multi_match": {"query": query, "fields": ["file_path", "symbols"]}}
-        ]
+        must_clauses = [{"multi_match": {"query": query, "fields": ["file_path", "symbols"]}}]
 
         if repos:
             must_clauses.append({"terms": {"repo_name": repos}})
@@ -443,7 +435,7 @@ class ElasticsearchBackend(SearchBackend):
         try:
             response = self._request("POST", f"{self.files_index}/_search", search_body)
 
-            results: List[SearchResult] = []
+            results: list[SearchResult] = []
             for hit in response.get("hits", {}).get("hits", []):
                 source = hit["_source"]
                 results.append(
@@ -464,9 +456,9 @@ class ElasticsearchBackend(SearchBackend):
     def search_symbols(
         self,
         query: str,
-        symbol_type: Optional[str] = None,
+        symbol_type: str | None = None,
         limit: int = 20,
-    ) -> List[IndexedSymbol]:
+    ) -> list[IndexedSymbol]:
         """Search for symbols by name."""
         must_clauses = [{"match": {"name": query}}]
 
@@ -479,11 +471,9 @@ class ElasticsearchBackend(SearchBackend):
         }
 
         try:
-            response = self._request(
-                "POST", f"{self.symbols_index}/_search", search_body
-            )
+            response = self._request("POST", f"{self.symbols_index}/_search", search_body)
 
-            results: List[IndexedSymbol] = []
+            results: list[IndexedSymbol] = []
             for hit in response.get("hits", {}).get("hits", []):
                 source = hit["_source"]
                 results.append(
@@ -556,9 +546,7 @@ class ElasticsearchBackend(SearchBackend):
             }
             response = self._request("POST", f"{self.files_index}/_search", agg_query)
 
-            for bucket in (
-                response.get("aggregations", {}).get("repos", {}).get("buckets", [])
-            ):
+            for bucket in response.get("aggregations", {}).get("repos", {}).get("buckets", []):
                 stats.repos[bucket["key"]] = bucket["doc_count"]
 
             stats.total_repos = len(stats.repos)
@@ -587,8 +575,8 @@ class OrganizationIndex:
 
     def __init__(
         self,
-        backend: Optional[SearchBackend] = None,
-        elasticsearch_host: Optional[str] = None,
+        backend: SearchBackend | None = None,
+        elasticsearch_host: str | None = None,
     ):
         """
         Initialize organization index.
@@ -607,8 +595,8 @@ class OrganizationIndex:
     def add_project(
         self,
         project_path: str | Path,
-        repo_name: Optional[str] = None,
-        exclude_dirs: Optional[Set[str]] = None,
+        repo_name: str | None = None,
+        exclude_dirs: set[str] | None = None,
     ) -> int:
         """
         Add a project to the organization index.
@@ -654,7 +642,7 @@ class OrganizationIndex:
         repo_name: str,
         language: str,
         root: Path,
-    ) -> Optional[IndexedFile]:
+    ) -> IndexedFile | None:
         """Index a single file."""
         try:
             content = file_path.read_text(errors="replace")
@@ -665,8 +653,8 @@ class OrganizationIndex:
         content_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
 
         # Extract symbols
-        symbols: List[str] = []
-        imports: List[str] = []
+        symbols: list[str] = []
+        imports: list[str] = []
 
         if language == "python":
             symbols, imports = self._extract_python_info(content)
@@ -700,12 +688,12 @@ class OrganizationIndex:
 
         return indexed_file
 
-    def _extract_python_info(self, content: str) -> tuple[List[str], List[str]]:
+    def _extract_python_info(self, content: str) -> tuple[list[str], list[str]]:
         """Extract symbols and imports from Python code."""
         import ast
 
-        symbols: List[str] = []
-        imports: List[str] = []
+        symbols: list[str] = []
+        imports: list[str] = []
 
         try:
             tree = ast.parse(content)
@@ -726,21 +714,19 @@ class OrganizationIndex:
 
         return symbols, imports
 
-    def _extract_js_info(self, content: str) -> tuple[List[str], List[str]]:
+    def _extract_js_info(self, content: str) -> tuple[list[str], list[str]]:
         """Extract symbols and imports from JavaScript/TypeScript code."""
         import re
 
-        symbols: List[str] = []
-        imports: List[str] = []
+        symbols: list[str] = []
+        imports: list[str] = []
 
         # Functions
         for match in re.finditer(r"function\s+(\w+)", content):
             symbols.append(match.group(1))
 
         # Arrow functions assigned to const/let/var
-        for match in re.finditer(
-            r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(", content
-        ):
+        for match in re.finditer(r"(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(", content):
             symbols.append(match.group(1))
 
         # Classes
@@ -758,10 +744,10 @@ class OrganizationIndex:
     def search(
         self,
         query: str,
-        repos: Optional[List[str]] = None,
-        languages: Optional[List[str]] = None,
+        repos: list[str] | None = None,
+        languages: list[str] | None = None,
         limit: int = 20,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         Search across all indexed repositories.
 
@@ -779,9 +765,9 @@ class OrganizationIndex:
     def search_symbols(
         self,
         query: str,
-        symbol_type: Optional[str] = None,
+        symbol_type: str | None = None,
         limit: int = 20,
-    ) -> List[IndexedSymbol]:
+    ) -> list[IndexedSymbol]:
         """
         Search for symbols by name.
 
@@ -813,7 +799,7 @@ class OrganizationIndex:
 
 
 def create_org_index(
-    elasticsearch_host: Optional[str] = None,
+    elasticsearch_host: str | None = None,
 ) -> OrganizationIndex:
     """
     Create an organization index.

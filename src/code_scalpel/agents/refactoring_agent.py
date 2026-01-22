@@ -8,7 +8,7 @@ This agent performs comprehensive refactoring by:
 4. Executing refactorings with safety verification
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .base_agent import BaseCodeAnalysisAgent
 
@@ -24,7 +24,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
     - Safe refactoring with automatic test verification
     """
 
-    def __init__(self, workspace_root: Optional[str] = None):
+    def __init__(self, workspace_root: str | None = None):
         super().__init__(workspace_root)
         self.refactoring_thresholds = {
             "max_function_length": 25,
@@ -33,7 +33,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "max_nesting_depth": 3,
         }
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         """
         Observe the target file and identify refactoring opportunities.
 
@@ -64,7 +64,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "target": target,
         }
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         """
         Analyze observations to identify refactoring opportunities.
 
@@ -104,7 +104,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             },
         }
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Decide which refactorings to execute.
 
@@ -120,9 +120,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
 
         # Filter for safe, high-impact refactorings
         safe_refactorings = [
-            op
-            for op in opportunities
-            if op.get("safety_score", 0) > 0.7 and op.get("impact_score", 0) > 0.6
+            op for op in opportunities if op.get("safety_score", 0) > 0.7 and op.get("impact_score", 0) > 0.6
         ]
 
         # Create action plan
@@ -144,7 +142,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "scheduled_refactorings": len(actions),
         }
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         """
         Execute planned refactorings safely.
 
@@ -170,31 +168,25 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "results": results,
         }
 
-    def _analyze_structure(self, file_info: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_structure(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Analyze file structure for extraction opportunities."""
         opportunities = []
         # Implementation placeholder
         return opportunities
 
-    def _detect_pattern_violations(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _detect_pattern_violations(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Detect design pattern violations and anti-patterns."""
         violations = []
         # Implementation placeholder
         return violations
 
-    def _identify_modularization(
-        self, file_info: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _identify_modularization(self, file_info: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify opportunities for better modularization."""
         opportunities = []
         # Implementation placeholder
         return opportunities
 
-    def _prioritize_refactorings(
-        self, refactorings: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def _prioritize_refactorings(self, refactorings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prioritize refactorings by safety and impact."""
         return sorted(
             refactorings,
@@ -202,7 +194,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             reverse=True,
         )
 
-    def _create_verification_steps(self, refactoring: Dict[str, Any]) -> List[str]:
+    def _create_verification_steps(self, refactoring: dict[str, Any]) -> list[str]:
         """Create verification steps for a refactoring."""
         return [
             "Run existing test suite",
@@ -210,7 +202,7 @@ class RefactoringAgent(BaseCodeAnalysisAgent):
             "Check performance impact",
         ]
 
-    async def _execute_refactoring(self, refactoring: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_refactoring(self, refactoring: dict[str, Any]) -> dict[str, Any]:
         """Execute a specific refactoring safely."""
         return {
             "success": True,

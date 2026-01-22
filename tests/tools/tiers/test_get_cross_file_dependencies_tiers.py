@@ -8,6 +8,7 @@ Tests verify that dependency depth is correctly enforced by tier:
 """
 
 import pytest
+
 from code_scalpel.mcp.helpers.graph_helpers import _get_cross_file_dependencies_sync
 
 
@@ -132,9 +133,7 @@ class TestGetCrossFileDependenciesCommunityTier:
         # Files analyzed should be within community limit
         assert result.files_analyzed <= 50
 
-    def test_confidence_decay_applied(
-        self, temp_project_with_dependencies, community_tier
-    ):
+    def test_confidence_decay_applied(self, temp_project_with_dependencies, community_tier):
         """Verify confidence score decays with depth."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -277,9 +276,7 @@ class TestGetCrossFileDependenciesEnterpriseTier:
         # Enterprise should not truncate files
         assert result.truncated is False or result.files_truncated == 0
 
-    def test_all_dependencies_traversed(
-        self, temp_project_with_dependencies, enterprise_tier
-    ):
+    def test_all_dependencies_traversed(self, temp_project_with_dependencies, enterprise_tier):
         """Verify all dependencies are analyzed including deep nested ones."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -295,9 +292,7 @@ class TestGetCrossFileDependenciesEnterpriseTier:
         # Enterprise should find all modules (at least 6: a-f)
         assert result.total_dependencies >= 5
 
-    def test_confidence_decay_deep_analysis(
-        self, temp_project_with_dependencies, enterprise_tier
-    ):
+    def test_confidence_decay_deep_analysis(self, temp_project_with_dependencies, enterprise_tier):
         """Verify confidence_score still decays even with unlimited depth."""
         result = _get_cross_file_dependencies_sync(
             target_file="main.py",
@@ -364,9 +359,7 @@ class TestGetCrossFileDependenciesAsyncInterface:
     """Test async interface integration."""
 
     @pytest.mark.asyncio
-    async def test_async_interface_works(
-        self, temp_project_with_dependencies, pro_tier
-    ):
+    async def test_async_interface_works(self, temp_project_with_dependencies, pro_tier):
         """Verify async wrapper correctly calls sync implementation."""
         from code_scalpel.mcp.tools.graph import get_cross_file_dependencies
 

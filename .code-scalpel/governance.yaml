@@ -421,101 +421,6 @@ policies:
       
       Fix all errors before committing.
 
-  # ============================================================================
-  # SECURITY POLICIES
-  # ============================================================================
-  
-  - name: no-secrets-in-code
-    category: security
-    severity: CRITICAL
-    action: DENY
-    description: |
-      Never commit secrets, API keys, passwords, or tokens to version control.
-    rule: |
-      package code_scalpel.dev_governance
-      
-      default allow = true
-      
-      # Patterns that indicate secrets
-      contains_secret {
-        regex.match(`(password|token|api[_-]?key|secret)["\s]*[:=]`, input.operation.code)
-      }
-      
-      contains_secret {
-        regex.match(`[A-Za-z0-9]{32,}`, input.operation.code)  # Long random strings
-      }
-      
-      # Exceptions for test fixtures
-      is_test_fixture {
-        contains(input.operation.file_path, "test_")
-        contains(input.operation.code, "FAKE_")
-      }
-      
-      # Deny code with secrets
-      allow {
-        not contains_secret
-      }
-      
-      allow {
-        contains_secret
-        is_test_fixture
-      }
-    
-    remediation: |
-      Use environment variables or secret managers:
-      - os.environ.get("API_KEY")
-      - AWS Secrets Manager
-      - HashiCorp Vault
-      - .env files (with .gitignore)
-
-  - name: require-security-review-for-auth-changes
-    category: security
-    severity: CRITICAL
-    action: DENY
-    description: |
-      Changes to authentication, authorization, or cryptographic code require
-      explicit security review and approval.
-    rule: |
-      package code_scalpel.dev_governance
-      
-      default allow = false
-      
-      # Detect security-sensitive changes
-      touches_security_code {
-        contains(input.operation.file_path, "auth")
-      }
-      
-      touches_security_code {
-        contains(input.operation.file_path, "crypto")
-      }
-      
-      touches_security_code {
-        contains(input.operation.file_path, "security")
-      }
-      
-      # Check for security review approval
-      has_security_approval {
-        input.operation.security_review.approved == true
-        input.operation.security_review.reviewer != null
-      }
-      
-      # Deny security changes without approval
-      allow {
-        not touches_security_code
-      }
-      
-      allow {
-        touches_security_code
-        has_security_approval
-      }
-    
-    remediation: |
-      For security-sensitive changes:
-      1. Document the change rationale
-      2. Request security team review
-      3. Wait for approval before proceeding
-      4. Include reviewer name in commit message
-
 # ============================================================================
 # ENFORCEMENT CONFIGURATION
 # ============================================================================
@@ -528,8 +433,6 @@ enforcement:
     - mandatory-readme-for-new-modules
     - respect-module-boundaries
     - require-tests-for-new-features
-    - no-secrets-in-code
-    - require-security-review-for-auth-changes
     - run-linting-before-commit
   
   pre_push:
@@ -546,7 +449,6 @@ enforcement:
       - mandatory-readme-for-new-modules
       - respect-module-boundaries
       - require-tests-for-new-features
-      - no-secrets-in-code
     
     warn_on_violation:
       - update-readme-on-major-changes
@@ -660,10 +562,47 @@ metrics:
     max_architectural_debt_items: 10
 
 # ============================================================================
-# INTEGRATION WITH EXISTING POLICY ENGINE
+# AUTONOMY GOVERNANCE SETTINGS
 # ============================================================================
 
-integration:
+autonomy:
+  version: "3.0.0"
+  profile: "default"
+  description: "Default balanced configuration for Code Scalpel autonomy"
+  governance:
+    change_budgeting:
+      enabled: true
+      max_lines_per_change: 500
+      max_files_per_change: 10
+      max_complexity_delta: 50
+      require_justification: true
+      budget_refresh_interval_hours: 24
+    blast_radius:
+      enabled: true
+      max_affected_functions: 20
+      max_affected_classes: 5
+      max_call_graph_depth: 3
+      warn_on_public_api_changes: true
+      block_on_critical_paths: true
+      critical_paths:
+        - "src/core/"
+        - "src/security/"
+        - "src/symbolic_execution_tools/security_analyzer.py"
+        - "src/mcp/server.py"
+        - "src/policy_engine/"
+      critical_path_max_lines: 50
+      critical_path_max_complexity_delta: 10
+    autonomy_constraints:
+      max_autonomous_iterations: 10
+      require_approval_for_breaking_changes: true
+      require_approval_for_security_changes: true
+      sandbox_execution_required: true
+    audit:
+      log_all_changes: true
+      log_rejected_changes: true
+      retention_days: 90
+
+# ============================================================================
   # How dev governance relates to code governance
   relationship: "complementary"
   

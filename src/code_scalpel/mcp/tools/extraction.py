@@ -10,15 +10,13 @@ import time
 
 from mcp.server.fastmcp import Context
 
+from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
 from code_scalpel.mcp.helpers import extraction_helpers as _helpers
 from code_scalpel.mcp.models.core import PatchResultModel
-from code_scalpel.mcp.protocol import mcp, _get_current_tier
-from code_scalpel.mcp.contract import ToolResponseEnvelope, ToolError, make_envelope
-from code_scalpel import __version__ as _pkg_version
+from code_scalpel.mcp.protocol import _get_current_tier, mcp
 
-_extract_code = getattr(_helpers, "extract_code", None) or getattr(
-    _helpers, "_extract_code_impl", None
-)
+_extract_code = getattr(_helpers, "extract_code", None) or getattr(_helpers, "_extract_code_impl", None)
 _rename_symbol = getattr(_helpers, "rename_symbol", None)
 _update_symbol = getattr(_helpers, "update_symbol", None)
 

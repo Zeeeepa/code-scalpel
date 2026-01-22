@@ -71,9 +71,7 @@ class TestCommunityTierLimits:
         assert result.tier == "community", f"Expected community tier, got {result.tier}"
 
         # Should only check 100 files (Community limit)
-        assert (
-            result.files_checked <= 100
-        ), f"Community tier should check max 100 files, checked {result.files_checked}"
+        assert result.files_checked <= 100, f"Community tier should check max 100 files, checked {result.files_checked}"
 
     @pytest.mark.asyncio
     async def test_community_enforces_50_rule_limit(self, tmp_path, community_license):
@@ -92,9 +90,7 @@ except:
         assert result.tier == "community", f"Expected community tier, got {result.tier}"
 
         # Should apply max 50 rules (Community limit)
-        assert (
-            result.rules_applied <= 50
-        ), f"Community tier should apply max 50 rules, applied {result.rules_applied}"
+        assert result.rules_applied <= 50, f"Community tier should apply max 50 rules, applied {result.rules_applied}"
 
 
 class TestProTierLimits:
@@ -114,9 +110,7 @@ class TestProTierLimits:
         assert result.tier == "pro", f"Expected pro tier, got {result.tier}"
 
         # Should check all 50 files (under Pro limit)
-        assert (
-            result.files_checked == 50
-        ), f"Pro tier should check all 50 files, checked {result.files_checked}"
+        assert result.files_checked == 50, f"Pro tier should check all 50 files, checked {result.files_checked}"
 
     @pytest.mark.asyncio
     async def test_pro_enforces_200_rule_limit(self, tmp_path, pro_license):
@@ -135,13 +129,9 @@ except:
         assert result.tier == "pro", f"Expected pro tier, got {result.tier}"
 
         # Pro tier should apply rules (actual count depends on implementation)
-        assert (
-            result.rules_applied > 0
-        ), f"Pro tier should apply rules, applied {result.rules_applied}"
+        assert result.rules_applied > 0, f"Pro tier should apply rules, applied {result.rules_applied}"
         # Should not exceed Pro limit of 200 rules
-        assert (
-            result.rules_applied <= 200
-        ), f"Pro tier should apply max 200 rules, applied {result.rules_applied}"
+        assert result.rules_applied <= 200, f"Pro tier should apply max 200 rules, applied {result.rules_applied}"
 
 
 class TestEnterpriseTierLimits:
@@ -158,14 +148,10 @@ class TestEnterpriseTierLimits:
         result = await code_policy_check(paths=[str(tmp_path)])
 
         # Verify tier is Enterprise
-        assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
 
         # Should check all files (no limit)
-        assert (
-            result.files_checked == 50
-        ), f"Enterprise tier should check all 50 files, checked {result.files_checked}"
+        assert result.files_checked == 50, f"Enterprise tier should check all 50 files, checked {result.files_checked}"
 
     @pytest.mark.asyncio
     async def test_enterprise_has_unlimited_rules(self, tmp_path, enterprise_license):
@@ -181,15 +167,11 @@ except:
         result = await code_policy_check(paths=[str(test_file)])
 
         # Verify tier is Enterprise
-        assert (
-            result.tier == "enterprise"
-        ), f"Expected enterprise tier, got {result.tier}"
+        assert result.tier == "enterprise", f"Expected enterprise tier, got {result.tier}"
 
         # Should apply more than 200 rules (Pro limit) - Enterprise has no limit
         # Note: Current implementation may apply all rules regardless of tier
-        assert (
-            result.rules_applied > 0
-        ), f"Enterprise tier should apply rules, applied {result.rules_applied}"
+        assert result.rules_applied > 0, f"Enterprise tier should apply rules, applied {result.rules_applied}"
 
 
 class TestTierFeatureGating:
@@ -208,9 +190,7 @@ def func(x):
 
         assert result.tier == "community"
         # Community tier: best_practices_violations should be empty or None
-        assert (
-            not result.best_practices_violations
-        ), "Community tier should not provide best_practices_violations"
+        assert not result.best_practices_violations, "Community tier should not provide best_practices_violations"
 
     @pytest.mark.asyncio
     async def test_pro_has_best_practices(self, tmp_path, pro_license):
@@ -230,9 +210,7 @@ def func(x):
         ), "Pro tier should provide best_practices_violations attribute"
 
     @pytest.mark.asyncio
-    async def test_enterprise_has_compliance_reports(
-        self, tmp_path, enterprise_license
-    ):
+    async def test_enterprise_has_compliance_reports(self, tmp_path, enterprise_license):
         """Enterprise tier should include compliance_reports."""
         test_file = tmp_path / "test.py"
         test_file.write_text("""
@@ -244,14 +222,10 @@ def func(x):
 
         assert result.tier == "enterprise"
         # Enterprise tier: compliance_reports should be available
-        assert hasattr(
-            result, "compliance_reports"
-        ), "Enterprise tier should provide compliance_reports attribute"
+        assert hasattr(result, "compliance_reports"), "Enterprise tier should provide compliance_reports attribute"
 
     @pytest.mark.asyncio
-    async def test_community_custom_rules_not_exposed(
-        self, tmp_path, community_license
-    ):
+    async def test_community_custom_rules_not_exposed(self, tmp_path, community_license):
         """Community tier should not expose custom rule results."""
         # [20260105_TEST] Strengthen feature gating expectations.
         test_file = tmp_path / "test.py"
@@ -262,9 +236,7 @@ value = 1
         result = await code_policy_check(paths=[str(test_file)], rules=["CUSTOM001"])
 
         assert result.tier == "community"
-        assert not getattr(
-            result, "custom_rule_results", {}
-        ), "Community tier should not provide custom rule results"
+        assert not getattr(result, "custom_rule_results", {}), "Community tier should not provide custom rule results"
 
     @pytest.mark.asyncio
     async def test_pro_blocks_compliance_outputs(self, tmp_path, pro_license):
@@ -282,17 +254,11 @@ def handler(request):
         )
 
         assert result.tier == "pro"
-        assert not getattr(
-            result, "compliance_reports", None
-        ), "Pro tier should ignore compliance_reports field"
-        assert not getattr(
-            result, "pdf_report", None
-        ), "Pro tier should not generate PDF reports"
+        assert not getattr(result, "compliance_reports", None), "Pro tier should ignore compliance_reports field"
+        assert not getattr(result, "pdf_report", None), "Pro tier should not generate PDF reports"
 
     @pytest.mark.asyncio
-    async def test_enterprise_includes_audit_trail_and_score(
-        self, tmp_path, enterprise_license
-    ):
+    async def test_enterprise_includes_audit_trail_and_score(self, tmp_path, enterprise_license):
         """Enterprise tier should populate compliance score and audit trail."""
         test_file = tmp_path / "test.py"
         test_file.write_text("""
@@ -308,9 +274,5 @@ def log_patient(patient_id):
 
         assert result.tier == "enterprise"
         assert getattr(result, "compliance_score", 0) >= 0
-        assert getattr(
-            result, "audit_trail", []
-        ), "Enterprise tier should include audit trail"
-        assert (
-            getattr(result, "pdf_report", None) is not None
-        ), "Enterprise tier should generate PDF when requested"
+        assert getattr(result, "audit_trail", []), "Enterprise tier should include audit trail"
+        assert getattr(result, "pdf_report", None) is not None, "Enterprise tier should generate PDF when requested"

@@ -1,5 +1,5 @@
 import tempfile
-from typing import Any, Dict
+from typing import Any
 
 # [20251214_REFACTOR] Remove unused test imports flagged by ruff.
 import pytest
@@ -9,11 +9,11 @@ from code_scalpel.agents.base_agent import BaseCodeAnalysisAgent
 
 
 class DummyResult:
-    def __init__(self, success: bool, payload: Dict[str, Any] | None = None):
+    def __init__(self, success: bool, payload: dict[str, Any] | None = None):
         self.success = success
         self._payload = payload or {"success": success}
 
-    def model_dump(self) -> Dict[str, Any]:
+    def model_dump(self) -> dict[str, Any]:
         return dict(self._payload, success=self.success)
 
 
@@ -23,19 +23,19 @@ class DummyAgent(BaseCodeAnalysisAgent):
         super().__init__(workspace_root=root)
         self.calls: list[str] = []
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         self.calls.append("observe")
         return {"success": True, "target": target}
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         self.calls.append("orient")
         return {"success": True, "observations": observations}
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         self.calls.append("decide")
         return {"success": True, "analysis": analysis}
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         self.calls.append("act")
         return {"success": True, "decisions": decisions}
 
@@ -45,22 +45,22 @@ class FailingAgent(DummyAgent):
         super().__init__()
         self.fail_phase = fail_phase
 
-    async def observe(self, target: str) -> Dict[str, Any]:
+    async def observe(self, target: str) -> dict[str, Any]:
         if self.fail_phase == "observe":
             return {"success": False, "error": "observe failed"}
         return await super().observe(target)
 
-    async def orient(self, observations: Dict[str, Any]) -> Dict[str, Any]:
+    async def orient(self, observations: dict[str, Any]) -> dict[str, Any]:
         if self.fail_phase == "orient":
             return {"success": False, "error": "orient failed"}
         return await super().orient(observations)
 
-    async def decide(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    async def decide(self, analysis: dict[str, Any]) -> dict[str, Any]:
         if self.fail_phase == "decide":
             return {"success": False, "error": "decide failed"}
         return await super().decide(analysis)
 
-    async def act(self, decisions: Dict[str, Any]) -> Dict[str, Any]:
+    async def act(self, decisions: dict[str, Any]) -> dict[str, Any]:
         if self.fail_phase == "act":
             return {"success": False, "error": "act failed"}
         return await super().act(decisions)
@@ -120,9 +120,7 @@ async def test_tool_wrappers_success(monkeypatch):
     assert (await agent.analyze_code_security("print('hi')"))["success"] is True
     assert (await agent.extract_function("file.py", "foo"))["success"] is True
     assert (await agent.simulate_code_change("old", "new"))["success"] is True
-    assert (await agent.apply_safe_change("f.py", "function", "foo", "code"))[
-        "success"
-    ] is True
+    assert (await agent.apply_safe_change("f.py", "function", "foo", "code"))["success"] is True
 
 
 # [20251214_TEST] Cover wrapper error path to capture exceptions.

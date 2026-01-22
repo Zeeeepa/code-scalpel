@@ -76,15 +76,15 @@ class TestJavaExtraction:
     JAVA_CODE = """
 public class Calculator {
     private int result;
-    
+
     public int add(int a, int b) {
         return a + b;
     }
-    
+
     public int multiply(int x, int y) {
         return x * y;
     }
-    
+
     public void reset() {
         this.result = 0;
     }
@@ -144,7 +144,7 @@ class Calculator {
     constructor() {
         this.result = 0;
     }
-    
+
     subtract(a, b) {
         return a - b;
     }

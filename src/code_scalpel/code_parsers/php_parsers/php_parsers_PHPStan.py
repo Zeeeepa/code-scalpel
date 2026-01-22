@@ -22,7 +22,7 @@ Phase 2 Enhancement Areas:
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class PHPStanLevel(Enum):
@@ -56,18 +56,18 @@ class PHPStanError:
     """Represents a single PHPStan analysis error."""
 
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    error_type: Optional[str] = None
-    level: Optional[int] = None
-    rule: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    error_type: str | None = None
+    level: int | None = None
+    rule: str | None = None
 
 
 @dataclass
 class PHPStanConfig:
     """PHPStan configuration settings."""
 
-    config_file: Optional[Path] = None
+    config_file: Path | None = None
     analysis_level: int = 5
     paths: list[str] = field(default_factory=list)
     excluded_paths: list[str] = field(default_factory=list)
@@ -80,7 +80,7 @@ class PHPStanParser:
     def __init__(self):
         """Initialize PHPStan parser."""
         self.errors: list[PHPStanError] = []
-        self.config: Optional[PHPStanConfig] = None
+        self.config: PHPStanConfig | None = None
 
     def parse_json_report(self, json_data: str) -> list[PHPStanError]:
         raise NotImplementedError("Phase 2: PHPStan JSON parsing")
