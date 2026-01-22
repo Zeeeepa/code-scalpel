@@ -287,7 +287,9 @@ class ScalpelSecurityScanTool(BaseTool):
 # ============================================================================
 
 
-def create_scalpel_fix_crew() -> Any:  # [20260121_BUGFIX] Avoid module-as-type pyright errors
+def create_scalpel_fix_crew() -> (
+    Any
+):  # [20260121_BUGFIX] Avoid module-as-type pyright errors
     """
     Create CrewAI crew for Code Scalpel operations.
 
