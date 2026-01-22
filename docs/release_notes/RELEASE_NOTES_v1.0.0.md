@@ -64,33 +64,266 @@ This is the **first production release**, featuring 22 mature MCP tools for code
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Setup
 
-### PyPI
+### 1. Install from PyPI
 ```bash
 pip install code-scalpel
 ```
 
-### Quick Start with MCP
+### 2. Initialize Configuration (Optional)
 ```bash
-# Start the MCP server (stdio transport)
-code-scalpel mcp --stdio
+# Creates .code-scalpel directory with default configuration
+code-scalpel init
 
-# Or HTTP (port 8080)
-code-scalpel mcp --http --port 8080
+# Or specify a custom project root
+code-scalpel init --root /path/to/project
 ```
 
-### Claude Desktop Integration
+This creates:
+```
+.code-scalpel/
+├── limits.toml          # Tier-based resource limits
+├── config.json          # Tool behavior configuration
+├── mcp.json             # MCP client configuration
+└── license/
+    └── license.jwt      # License file (if applicable)
+```
+
+---
+
+## 🔌 Running the MCP Server
+
+The primary way to use Code Scalpel is through the **MCP server**, which exposes all 22 tools via the Model Context Protocol. Choose your transport based on your use case:
+
+### Option A: Stdio Transport (Recommended)
+Recommended for local development and most integrations. Minimal overhead, works everywhere.
+
+```bash
+# Start the MCP server on stdio (default)
+code-scalpel mcp --stdio
+
+# With custom project root
+code-scalpel mcp --stdio --root /path/to/project
+```
+
+**Stdout:** MCP protocol messages (to client)  
+**Stderr:** Debug logs (optional, set `SCALPEL_MCP_DEBUG=1`)
+
+**mcp.json Configuration Example:**
 ```json
 {
   "mcpServers": {
     "code-scalpel": {
       "command": "code-scalpel",
-      "args": ["mcp", "--stdio"]
+      "args": ["mcp", "--stdio"],
+      "env": {
+        "CODE_SCALPEL_PROJECT_ROOT": "/path/to/project",
+        "SCALPEL_MCP_DEBUG": "0"
+      }
     }
   }
 }
 ```
+
+### Option B: HTTPS Transport
+For remote access, REST clients, or distributed systems.
+
+```bash
+# Start HTTP server (default port 8080)
+code-scalpel mcp --http --host 127.0.0.1 --port 8080
+
+# Listen on all interfaces
+code-scalpel mcp --http --host 0.0.0.0 --port 8080
+
+# With custom project root
+code-scalpel mcp --http --root /path/to/project --port 8080
+```
+
+**Health Check:**
+```bash
+curl http://127.0.0.1:8080/health
+# Response: {"status": "healthy"}
+```
+
+**mcp.json Configuration Example:**
+```json
+{
+  "mcpServers": {
+    "code-scalpel": {
+      "command": "curl",
+      "args": ["http://127.0.0.1:8080/mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+### Option C: Docker Container
+For containerized deployments and CI/CD pipelines.
+
+```bash
+# Run as Docker container
+docker run -d \
+  --name code-scalpel \
+  -p 8080:8080 \
+  -e CODE_SCALPEL_PROJECT_ROOT=/workspace \
+  -v /path/to/project:/workspace \
+  code-scalpel:latest mcp --http --host 0.0.0.0 --port 8080
+
+# Or use docker-compose
+docker-compose up -d
+```
+
+**docker-compose.yml Example:**
+```yaml
+version: '3.8'
+services:
+  code-scalpel:
+    image: code-scalpel:latest
+    command: ["mcp", "--http", "--host", "0.0.0.0", "--port", "8080"]
+    ports:
+      - "8080:8080"
+    environment:
+      CODE_SCALPEL_PROJECT_ROOT: /workspace
+      CODE_SCALPEL_LICENSE_PATH: /workspace/.code-scalpel/license/license.jwt
+    volumes:
+      - /path/to/project:/workspace
+      - /path/to/licenses:/workspace/.code-scalpel/license
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+```
+
+---
+
+## 🔐 Environment Configuration
+
+Control MCP server behavior with environment variables:
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `CODE_SCALPEL_PROJECT_ROOT` | Project root for code analysis | `.` | `/path/to/project` |
+| `CODE_SCALPEL_LICENSE_PATH` | Path to license JWT file | Auto-detect | `/path/to/license.jwt` |
+| `CODE_SCALPEL_DISABLE_LICENSE_DISCOVERY` | Disable license auto-detection | `false` | `1` |
+| `SCALPEL_MCP_DEBUG` | Enable MCP debug logging | `0` | `1` |
+| `PYTHONPATH` | Python module search path | System default | `/path/to/src` |
+
+**Example with environment variables:**
+```bash
+export CODE_SCALPEL_PROJECT_ROOT=/path/to/project
+export CODE_SCALPEL_LICENSE_PATH=/path/to/license.jwt
+export SCALPEL_MCP_DEBUG=1
+code-scalpel mcp --stdio
+```
+
+---
+
+## 🎯 Claude Desktop Integration
+
+Add Code Scalpel to Claude Desktop by editing `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or equivalent on Linux/Windows:
+
+```json
+{
+  "mcpServers": {
+    "code-scalpel": {
+      "command": "code-scalpel",
+      "args": ["mcp", "--stdio"],
+      "env": {
+        "CODE_SCALPEL_PROJECT_ROOT": "${PROJECT_ROOT}",
+        "SCALPEL_MCP_DEBUG": "0"
+      }
+    }
+  }
+}
+```
+
+Then use Code Scalpel's tools directly in Claude:
+```
+@claude
+Analyze the security vulnerabilities in /src/app.py using the security_scan tool.
+```
+
+---
+
+## ⚙️ Configuration Details
+
+### .code-scalpel Directory
+
+When you run `code-scalpel init`, it creates a `.code-scalpel` directory with configuration files:
+
+#### limits.toml - Tier-Based Resource Limits
+Controls maximum analysis scope based on your license tier:
+
+```toml
+[community.get_call_graph]
+max_depth = 3
+max_nodes = 50
+
+[pro.get_call_graph]
+max_depth = 50
+max_nodes = 500
+
+[enterprise.get_call_graph]
+max_depth = ~        # Unlimited
+max_nodes = ~        # Unlimited
+```
+
+#### config.json - Tool Behavior
+Configure default behavior for MCP tools:
+
+```json
+{
+  "analysis": {
+    "timeout_seconds": 120,
+    "max_file_size_mb": 10,
+    "follow_imports": true
+  },
+  "security": {
+    "confidence_threshold": 0.7,
+    "include_low_severity": true
+  },
+  "parsing": {
+    "languages": ["python", "javascript", "typescript", "java"],
+    "detect_all_languages": true
+  }
+}
+```
+
+#### license/ Directory
+Store your license JWT file here:
+
+```bash
+.code-scalpel/
+└── license/
+    └── license.jwt          # Your license file (auto-discovered here)
+```
+
+---
+
+## 📋 Tier Access Control
+
+Code Scalpel supports three access tiers:
+
+### Community (Free)
+- 22 core MCP tools with limitations
+- `get_call_graph`: max_depth=3, max_nodes=50
+- Perfect for individual developers and small projects
+
+### Pro
+- Extended analysis with higher limits
+- `get_call_graph`: max_depth=50, max_nodes=500
+- Includes advanced dependency analysis
+
+### Enterprise
+- Unlimited analysis scope
+- `get_call_graph`: max_depth=unlimited, max_nodes=unlimited
+- Compliance reporting, custom governance
+- Support for large monorepos
+
+Your tier is determined by the license file in `.code-scalpel/license/license.jwt`. If no license is found, you default to Community tier.
 
 ---
 
