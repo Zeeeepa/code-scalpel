@@ -21,7 +21,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 _docker_module: Any | None = None
 
 
@@ -99,7 +98,7 @@ class LintResult:
 @dataclass
 class _CodeExecutionRecord:
     """Record of a code execution test from sandbox.
-    
+
     [20260122_BUGFIX] Prefixed with underscore to prevent pytest from collecting as test class.
     """
 

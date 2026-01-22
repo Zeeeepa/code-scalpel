@@ -407,6 +407,14 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    # [20260122_BUGFIX] Materialize enterprise license from repo secret for docs generation
+    - name: Setup license for docs (enterprise)
+      env:
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
+      run: |
+        mkdir -p tests/licenses
+        echo "$TEST_ENTERPRISE_LICENSE_JWT" > tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
+
     - name: Regenerate MCP tools reference
       env:
         CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/mcp-tools-docgen
@@ -463,9 +471,18 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    # [20260122_BUGFIX] Materialize enterprise license from repo secret for docs generation
+    - name: Setup license for docs (enterprise)
+      env:
+        TEST_ENTERPRISE_LICENSE_JWT: ${{ secrets.TEST_ENTERPRISE_LICENSE_JWT }}
+      run: |
+        mkdir -p tests/licenses
+        echo "$TEST_ENTERPRISE_LICENSE_JWT" > tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
+
     - name: Regenerate MCP tools tier matrix
       env:
         CODE_SCALPEL_DOC_PROJECT_ROOT: ${{ runner.temp }}/mcp-tools-docgen
+        CODE_SCALPEL_LICENSE_PATH: ${{ github.workspace }}/tests/licenses/code_scalpel_license_enterprise_20260101_190754.jwt
       run: |
         mkdir -p "$CODE_SCALPEL_DOC_PROJECT_ROOT"
         python scripts/generate_mcp_tier_matrix.py

@@ -837,6 +837,7 @@ async def rename_symbol(
             try:
                 import asyncio
                 from functools import partial
+
                 from code_scalpel.surgery.rename_symbol_refactor import (
                     rename_references_across_project,
                 )

@@ -13,10 +13,10 @@ from code_scalpel.mcp.helpers.analyze_helpers import _get_cache, _validate_code
 from code_scalpel.mcp.models.core import (
     ExecutionPath,
     GeneratedTestCase,
+    GenerationResult,
     RefactorSecurityIssue,
     RefactorSimulationResult,
     SymbolicResult,
-    GenerationResult,
 )
 from code_scalpel.parsing import ParsingError, parse_python_code
 

@@ -4,12 +4,10 @@
 This is needed because dataclasses with __init__ match pytest's Test* pattern.
 """
 
-import pytest
-
 
 def pytest_pycollect_makeitem(collector, name, obj):
     """Skip collection of dataclass instances that look like test classes.
-    
+
     [20260122_BUGFIX] Dataclasses in this module have names that match pytest's
     test class heuristic (contain 'Result', 'Execution', etc.) but are not tests.
     This hook prevents them from being collected.
@@ -18,5 +16,5 @@ def pytest_pycollect_makeitem(collector, name, obj):
     if hasattr(obj, "__dataclass_fields__") and hasattr(obj, "__init__"):
         # Don't try to collect it as a test
         return None
-    
+
     return None  # Let pytest handle normal collection
