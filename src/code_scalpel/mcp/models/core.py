@@ -369,7 +369,7 @@ class GeneratedTestCase(BaseModel):
     path_conditions: list[str] = Field(default_factory=list, description="Conditions that define this path")
 
 
-class TestGenerationResult(BaseModel):
+class GenerationResult(BaseModel):
     """Result of test generation."""
 
     success: bool = Field(description="Whether generation succeeded")

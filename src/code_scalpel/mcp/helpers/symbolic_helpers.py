@@ -16,7 +16,7 @@ from code_scalpel.mcp.models.core import (
     RefactorSecurityIssue,
     RefactorSimulationResult,
     SymbolicResult,
-    TestGenerationResult,
+    GenerationResult,
 )
 from code_scalpel.parsing import ParsingError, parse_python_code
 
@@ -538,7 +538,7 @@ def _generate_tests_sync(
     max_test_cases: int | None = None,
     data_driven: bool = False,
     crash_log: str | None = None,
-) -> TestGenerationResult:
+) -> GenerationResult:
     """Synchronous implementation of generate_unit_tests.
 
     [20251220_FIX] v3.0.5 - Added file_path parameter for consistency with other tools.
@@ -552,7 +552,7 @@ def _generate_tests_sync(
             if not resolved.is_absolute():
                 resolved = _get_server().PROJECT_ROOT / file_path
             if not resolved.exists():
-                return TestGenerationResult(
+                return GenerationResult(
                     success=False,
                     function_name=function_name or "unknown",
                     test_count=0,
@@ -561,7 +561,7 @@ def _generate_tests_sync(
                 )
             code = resolved.read_text(encoding="utf-8")
         except Exception as e:
-            return TestGenerationResult(
+            return GenerationResult(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,
@@ -570,7 +570,7 @@ def _generate_tests_sync(
             )
 
     if not code:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
@@ -580,7 +580,7 @@ def _generate_tests_sync(
 
     valid, error = _validate_code(code)
     if not valid:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
@@ -675,7 +675,7 @@ def _generate_tests_sync(
             pytest_code = result.pytest_code
             unittest_code = result.unittest_code
 
-        return TestGenerationResult(
+        return GenerationResult(
             success=True,
             function_name=result.function_name,
             test_count=len(test_cases),
@@ -688,7 +688,7 @@ def _generate_tests_sync(
         )
 
     except Exception as e:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,

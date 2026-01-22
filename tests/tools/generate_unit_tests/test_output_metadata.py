@@ -7,7 +7,7 @@ for transparency about tier, framework, and feature settings.
 
 import pytest
 
-from src.code_scalpel.mcp.server import TestGenerationResult, generate_unit_tests
+from src.code_scalpel.mcp.server import GenerationResult, generate_unit_tests
 
 
 class TestOutputMetadataFields:
@@ -84,8 +84,8 @@ class TestMetadataFieldTypes:
     """Test the data types of metadata fields in the model."""
 
     def test_test_generation_result_has_metadata_fields(self):
-        """TestGenerationResult model should define all metadata fields."""
-        fields = TestGenerationResult.model_fields
+        """GenerationResult model should define all metadata fields."""
+        fields = GenerationResult.model_fields
 
         # Check all metadata fields exist
         assert "tier_applied" in fields
@@ -97,7 +97,7 @@ class TestMetadataFieldTypes:
     def test_metadata_fields_have_defaults(self):
         """Metadata fields should have sensible defaults."""
         # Create a minimal result with only required fields
-        result = TestGenerationResult(
+        result = GenerationResult(
             success=True,
             function_name="test_func",
             test_count=1,
@@ -112,7 +112,7 @@ class TestMetadataFieldTypes:
 
     def test_metadata_fields_can_be_set(self):
         """Metadata fields should accept valid values."""
-        result = TestGenerationResult(
+        result = GenerationResult(
             success=True,
             function_name="test_func",
             test_count=5,

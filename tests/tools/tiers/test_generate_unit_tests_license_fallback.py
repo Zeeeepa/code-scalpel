@@ -40,7 +40,7 @@ async def test_invalid_license_falls_back_to_community(community_tier, monkeypat
                 "crash_log": crash_log,
             }
         )
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,
@@ -86,7 +86,7 @@ async def test_expired_license_falls_back_to_community(community_tier, monkeypat
         crash_log,
     ):
         calls.append({"max_test_cases": max_test_cases})
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,
@@ -131,7 +131,7 @@ async def test_missing_license_defaults_to_community(community_tier, monkeypatch
         crash_log,
     ):
         calls.append({"max_test_cases": max_test_cases, "framework": framework})
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,
@@ -227,7 +227,7 @@ async def test_license_fallback_preserves_community_features(community_tier, mon
                 "function_name": function_name,
             }
         )
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "calculate",
             test_count=3,

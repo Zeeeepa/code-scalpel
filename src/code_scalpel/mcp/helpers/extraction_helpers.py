@@ -835,19 +835,29 @@ async def rename_symbol(
         # If configured as definition-only, skip cross-file updates.
         if tier in {"pro", "enterprise"} and not ((max_files_searched == 0) and (max_files_updated == 0)):
             try:
+                import asyncio
+                from functools import partial
                 from code_scalpel.surgery.rename_symbol_refactor import (
                     rename_references_across_project,
                 )
 
-                xres = rename_references_across_project(
-                    project_root=_get_project_root(),
-                    target_file=Path(file_path),
-                    target_type=target_type,
-                    target_name=target_name,
-                    new_name=new_name,
-                    create_backup=create_backup,
-                    max_files_searched=max_files_searched,
-                    max_files_updated=max_files_updated,
+                # [20260122_BUGFIX] Run cross-file rename in thread pool to prevent blocking event loop
+                # The function iterates through many files (up to max_files_searched=500 for Pro),
+                # which can appear to hang if run synchronously in async context
+                loop = asyncio.get_event_loop()
+                xres = await loop.run_in_executor(
+                    None,
+                    partial(
+                        rename_references_across_project,
+                        project_root=_get_project_root(),
+                        target_file=Path(file_path),
+                        target_type=target_type,
+                        target_name=target_name,
+                        new_name=new_name,
+                        create_backup=create_backup,
+                        max_files_searched=max_files_searched,
+                        max_files_updated=max_files_updated,
+                    ),
                 )
 
                 if not xres.success:

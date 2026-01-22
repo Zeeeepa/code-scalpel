@@ -38,7 +38,7 @@ async def test_generate_unit_tests_community_limits_and_framework(community_tier
                 "crash_log": crash_log,
             }
         )
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,
@@ -98,7 +98,7 @@ async def test_generate_unit_tests_pro_allows_data_driven_and_unittest(pro_tier,
                 "data_driven": data_driven,
             }
         )
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,
@@ -144,7 +144,7 @@ async def test_generate_unit_tests_enterprise_allows_bug_repro(enterprise_tier, 
         crash_log,
     ):
         calls.append({"max_test_cases": max_test_cases, "crash_log": crash_log})
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "divide",
             test_count=0,
@@ -191,7 +191,7 @@ async def test_generate_unit_tests_limits_toml_override(community_tier, monkeypa
         crash_log,
     ):
         calls.append({"max_test_cases": max_test_cases})
-        return server.TestGenerationResult(
+        return server.GenerationResult(
             success=True,
             function_name=function_name or "f",
             test_count=0,

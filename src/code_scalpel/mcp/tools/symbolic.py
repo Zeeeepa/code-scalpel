@@ -18,7 +18,7 @@ from code_scalpel.licensing import tier_detector
 # [20260121_BUGFIX] Move contract imports before variable assignments to satisfy E402
 from code_scalpel.mcp.contract import ToolError, ToolResponseEnvelope, make_envelope
 from code_scalpel.mcp.helpers import symbolic_helpers as sym_helpers
-from code_scalpel.mcp.models.core import TestGenerationResult
+from code_scalpel.mcp.models.core import GenerationResult
 from code_scalpel.mcp.protocol import _get_current_tier
 
 _ORIG_SYM_GENERATE_TESTS = sym_helpers._generate_tests_sync
@@ -127,7 +127,7 @@ async def generate_unit_tests(
 
         # [20251229_FEATURE] v3.3.0 - Pro tier enforcement for data-driven tests
         if data_driven and not data_driven_supported:
-            result = TestGenerationResult(
+            result = GenerationResult(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,
@@ -150,7 +150,7 @@ async def generate_unit_tests(
 
         # [20251229_FEATURE] v3.3.0 - Enterprise tier enforcement for bug reproduction
         if crash_log and not bug_reproduction_supported:
-            result = TestGenerationResult(
+            result = GenerationResult(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,
@@ -172,7 +172,7 @@ async def generate_unit_tests(
             )
 
         if isinstance(allowed_frameworks, list) and framework not in allowed_frameworks:
-            result = TestGenerationResult(
+            result = GenerationResult(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,

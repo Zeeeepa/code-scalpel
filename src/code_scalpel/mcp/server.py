@@ -692,7 +692,7 @@ class GeneratedTestCase(BaseModel):
     path_conditions: list[str] = Field(default_factory=list, description="Conditions that define this path")
 
 
-class TestGenerationResult(BaseModel):
+class GenerationResult(BaseModel):
     """Result of test generation."""
 
     success: bool = Field(description="Whether generation succeeded")
@@ -713,7 +713,7 @@ class TestGenerationResult(BaseModel):
     related_imports: list[str] = Field(default_factory=list, description="Related imports from other files (Pro)")
     pii_redacted: bool = Field(default=False, description="Whether PII was redacted (Enterprise)")
     access_controlled: bool = Field(default=False, description="Whether access control was applied (Enterprise)")
-    # [20260120_BUGFIX] Output metadata (mirrors mcp.models.core.TestGenerationResult)
+    # [20260120_BUGFIX] Output metadata (mirrors mcp.models.core.GenerationResult)
     tier_applied: str = Field(
         default="community",
         description="Tier used for this generation (community/pro/enterprise)",
@@ -2212,7 +2212,7 @@ def _generate_tests_sync(
     file_path: str | None = None,
     function_name: str | None = None,
     framework: str = "pytest",
-) -> TestGenerationResult:
+) -> GenerationResult:
     """Synchronous implementation of generate_unit_tests.
 
     [20251220_FIX] v3.0.5 - Added file_path parameter for consistency with other tools.
@@ -2224,7 +2224,7 @@ def _generate_tests_sync(
             if not resolved.is_absolute():
                 resolved = PROJECT_ROOT / file_path
             if not resolved.exists():
-                return TestGenerationResult(
+                return GenerationResult(
                     success=False,
                     function_name=function_name or "unknown",
                     test_count=0,
@@ -2232,7 +2232,7 @@ def _generate_tests_sync(
                 )
             code = resolved.read_text(encoding="utf-8")
         except Exception as e:
-            return TestGenerationResult(
+            return GenerationResult(
                 success=False,
                 function_name=function_name or "unknown",
                 test_count=0,
@@ -2240,7 +2240,7 @@ def _generate_tests_sync(
             )
 
     if not code:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
@@ -2249,7 +2249,7 @@ def _generate_tests_sync(
 
     valid, error = _validate_code(code)
     if not valid:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
@@ -2273,7 +2273,7 @@ def _generate_tests_sync(
             for tc in result.test_cases
         ]
 
-        return TestGenerationResult(
+        return GenerationResult(
             success=True,
             function_name=result.function_name,
             test_count=len(test_cases),
@@ -2283,7 +2283,7 @@ def _generate_tests_sync(
         )
 
     except Exception as e:
-        return TestGenerationResult(
+        return GenerationResult(
             success=False,
             function_name=function_name or "unknown",
             test_count=0,
