@@ -4,8 +4,24 @@
 
 **Current State**: `server.py` now imports shared tools/resources/prompts modules; legacy `@mcp.tool`, `@mcp.resource`, and `@mcp.prompt` handlers have been removed from server.py; duplicate registration warnings are resolved.
 
-**Target Architecture**:
+
+Looking at the refactoring checklist, the tool definitions in `tools/*.py` **are explicitly async**. Each tool follows this pattern:
+
+```python
+@mcp.tool()
+async def tool_name(...) -> ResultModel:
+    """Docstring."""
+    return await asyncio.to_thread(_tool_name_sync, ...)
 ```
+
+The wrapper is `async`, and it uses `await asyncio.to_thread()` to call the sync implementation. This is documented in the "Pattern for each tool extraction" section (lines near end of checklist).
+
+However, the checklist could be **more explicit** about this async requirement. The pattern section only shows one example. Consider adding a note like:
+
+> **Critical Async Pattern:** All 22 tools in `tools/*.py` MUST be async functions decorated with `@mcp.tool()`. Each calls a sync helper via `await asyncio.to_thread()`. Never make tool definitions sync-only.
+
+This prevents future contributors from accidentally creating sync tools that would block the MCP server.
+
 mcp/
 ├── protocol.py          # Single shared FastMCP instance (mcp)
 ├── server.py            # Server entrypoint, helpers, models (~5000 lines target)
@@ -30,7 +46,6 @@ mcp/
     ├── analyze_helpers.py
     ├── security_helpers.py
     └── ...
-```
 
 ---
 

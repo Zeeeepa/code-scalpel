@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+
 _docker_module: Any | None = None
 
 
@@ -96,8 +97,11 @@ class LintResult:
 
 
 @dataclass
-class ExecutionTestResult:
-    """Individual test result from sandbox execution."""
+class _CodeExecutionRecord:
+    """Record of a code execution test from sandbox.
+    
+    [20260122_BUGFIX] Prefixed with underscore to prevent pytest from collecting as test class.
+    """
 
     name: str
     passed: bool
@@ -105,9 +109,16 @@ class ExecutionTestResult:
     error_message: str | None = None
 
 
-# Aliases for backward compatibility and naming
-SandboxTestResult = ExecutionTestResult
-TestResult = ExecutionTestResult
+# Tell pytest this is not a test class
+_CodeExecutionRecord.__test__ = False
+
+
+# Public aliases for backward compatibility (deprecated)
+ExecutionResult = _CodeExecutionRecord
+ExecutionTestResult = _CodeExecutionRecord
+SandboxTestResult = _CodeExecutionRecord
+TestResult = _CodeExecutionRecord
+CodeExecutionRecord = _CodeExecutionRecord
 
 
 @dataclass
